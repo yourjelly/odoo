@@ -64,7 +64,6 @@ from inspect import currentframe, getargspec
 from collections import defaultdict, MutableMapping
 from contextlib import contextmanager
 from pprint import pformat
-from weakref import WeakSet
 from werkzeug.local import Local, release_local
 
 from openerp.tools import frozendict
@@ -685,7 +684,7 @@ class Environment(object):
             yield
         else:
             try:
-                cls._local.environments = WeakSet()
+                cls._local.environments = set()
                 yield
             finally:
                 release_local(cls._local)
