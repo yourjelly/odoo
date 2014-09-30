@@ -931,7 +931,9 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             var self = this;
 
             this.refresh();
-            this.print();
+            if (!this.pos.get_order()._printed) {
+                this.print();
+            }
 
             //
             // The problem is that in chrome the print() is asynchronous and doesn't
@@ -964,6 +966,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             }
         },
         print: function() {
+            this.pos.get_order()._printed = true;
             window.print();
         },
         finish_order: function() {
