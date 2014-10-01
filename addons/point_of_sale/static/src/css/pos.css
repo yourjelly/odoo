@@ -539,6 +539,7 @@ td {
 
 .pos .control-buttons {
     display: flex;
+    flex-flow: row wrap;
     padding: 8px 13px 0px 11px;
 }
 .pos .control-button {
@@ -554,6 +555,7 @@ td {
     font-size: 18px;
     margin-left: 6px;
     cursor: pointer;
+    overflow: hidden;
 }
 .pos .control-button .fa{
     margin-right: 4px;
@@ -1938,6 +1940,17 @@ td {
     box-sizing: border-box;
     width: 80%;
 }
+.pos .popup.popup-selection .selection {
+    overflow-y: auto;
+    max-height: 270px;
+}
+.pos .popup.popup-selection .selection .button {
+    float: none;
+    display: block;
+    width: auto;
+    margin: 8px;
+}
+
 /*  ********* The Webkit Scrollbar  ********* */
 
 .pos *::-webkit-scrollbar{
