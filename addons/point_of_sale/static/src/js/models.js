@@ -1034,7 +1034,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
         addPaymentline: function(cashregister) {
             var paymentLines = this.get('paymentLines');
             var newPaymentline = new module.Paymentline({},{cashregister:cashregister});
-            if(cashregister.journal.type !== 'cash'){
+            if(cashregister.journal.type !== 'cash' || this.pos.config.iface_precompute_cash){
                 newPaymentline.set_amount( Math.max(this.getDueLeft(),0) );
             }
             paymentLines.add(newPaymentline);
