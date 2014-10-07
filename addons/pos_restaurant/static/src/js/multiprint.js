@@ -54,57 +54,80 @@ function openerp_restaurant_multiprint(instance,module){
         },
     });
 
+    module.Orderline = module.Orderline.extend({
+        get_line_diff_hash: function(){
+            if (this.get_note()) {
+                return this.get_product().id + '|' + this.get_note();
+            } else {
+                return '' + this.get_product().id;
+            }
+        },
+    });
+
     module.Order = module.Order.extend({
-        lineResume: function(){
+        build_line_resume: function(){
             var resume = {};
-            this.get('orderLines').each(function(item){
-                var line = item.export_as_JSON();
-                if( typeof resume[line.product_id] === 'undefined'){
-                    resume[line.product_id] = line.qty;
-                }else{
-                    resume[line.product_id] += line.qty;
+            this.get('orderLines').each(function(line){
+                var line_hash = line.get_line_diff_hash();
+                var qty  = Number(line.get_quantity());
+                var note = line.get_note();
+                var product_id = line.get_product().id;
+
+                if (typeof resume[line_hash] === 'undefined') {
+                    resume[line_hash] = { qty: qty, note: note, product_id: product_id };
+                } else {
+                    resume[line_hash].qty += qty;
                 }
+
             });
             return resume;
         },
         saveChanges: function(){
-            this.old_resume = this.lineResume();
+            this.old_resume = this.build_line_resume();
         },
         computeChanges: function(categories){
-            var current = this.lineResume();
-            var old     = this.old_resume || {};
-            var json    = this.export_as_JSON();
+            var current_res = this.build_line_resume();
+            var old_res     = this.old_resume || {};
+            var json        = this.export_as_JSON();
             var add = [];
             var rem = [];
 
-            for( product in current){
-                if (typeof old[product] === 'undefined'){
+            for ( line_hash in current_res) {
+                var curr = current_res[line_hash];
+                var old  = old_res[line_hash];
+
+                if (typeof old === 'undefined') {
                     add.push({
-                        'id': product,
-                        'name': this.pos.db.get_product_by_id(product).display_name,
-                        'quantity': current[product],
+                        'id':       curr.product_id,
+                        'name':     this.pos.db.get_product_by_id(curr.product_id).display_name,
+                        'note':     curr.note,
+                        'qty':      curr.qty,
                     });
-                }else if( old[product] < current[product]){
+                } else if (old.qty < curr.qty) {
                     add.push({
-                        'id': product,
-                        'name': this.pos.db.get_product_by_id(product).display_name,
-                        'quantity': current[product] - old[product],
+                        'id':       curr.product_id,
+                        'name':     this.pos.db.get_product_by_id(curr.product_id).display_name,
+                        'note':     curr.note,
+                        'qty':      curr.qty - old.qty,
                     });
-                }else if( old[product] > current[product]){
+                } else if (old.qty > curr.qty) {
                     rem.push({
-                        'id': product,
-                        'name': this.pos.db.get_product_by_id(product).display_name,
-                        'quantity': old[product] - current[product],
+                        'id':       curr.product_id,
+                        'name':     this.pos.db.get_product_by_id(curr.product_id).display_name,
+                        'note':     curr.note,
+                        'qty':      old.qty - curr.qty,
                     });
                 }
             }
 
-            for( product in old){
-                if(typeof current[product] === 'undefined'){
+            for (line_hash in old_res) {
+                if (typeof current_res[line_hash] === 'undefined') {
+                    var old = old_res[line_hash];
                     rem.push({
-                        'id': product,
-                        'name': this.pos.db.get_product_by_id(product).display_name,
-                        'quantity': old[product], 
+                        'id':       old.product_id,
+                        'name':     this.pos.db.get_product_by_id(old.product_id).display_name,
+                        'note':     old.note,
+                        'qty':      old.qty, 
                     });
                 }
             }
@@ -159,6 +182,7 @@ function openerp_restaurant_multiprint(instance,module){
             for(var i = 0; i < printers.length; i++){
                 var changes = this.computeChanges(printers[i].config.product_categories_ids);
                 if ( changes['new'].length > 0 || changes['cancelled'].length > 0){
+                    console.log('CHANGES FOR PRINTER',printers[i].name,':',changes);
                     var receipt = QWeb.render('OrderChangeReceipt',{changes:changes, widget:this});
                     printers[i].print(receipt);
                 }
