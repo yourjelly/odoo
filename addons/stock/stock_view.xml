@@ -1242,11 +1242,11 @@
             <field name="model">stock.incoterms</field>
             <field name="arch" type="xml">
                 <form string="Incoterms">
-                    <sheet>
+                     <group>
                         <field name="name"/>
-                        <field name="code"/>
                         <field name="active"/>
-                    </sheet>
+                        <field name="code"/>
+                    </group>
                 </form>
             </field>
         </record>
