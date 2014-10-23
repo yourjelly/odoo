@@ -35,7 +35,7 @@ import tempfile
 import lxml.html
 import os
 import subprocess
-from contextlib import closing
+from contextlib import closing, contextmanager
 from distutils.version import LooseVersion
 from functools import partial
 from pyPdf import PdfFileWriter, PdfFileReader
@@ -436,8 +436,14 @@ class Report(osv.Model):
                 wkhtmltopdf = [_get_wkhtmltopdf_bin()] + command_args + local_command_args
                 wkhtmltopdf += [content_file_path] + [pdfreport_path]
 
-                process = subprocess.Popen(wkhtmltopdf, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                out, err = process.communicate()
+                @contextmanager
+                def dummy_cm():
+                    yield
+                sub_request = getattr(cr, 'sub_request', dummy_cm)
+
+                with sub_request():
+                    process = subprocess.Popen(wkhtmltopdf, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    out, err = process.communicate()
 
                 if process.returncode not in [0, 1]:
                     raise osv.except_osv(_('Report (PDF)'),

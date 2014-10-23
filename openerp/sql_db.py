@@ -413,6 +413,19 @@ class TestCursor(Cursor):
         self.execute("SAVEPOINT test_cursor")
         # we use a lock to serialize concurrent requests
         self._lock = threading.RLock()
+        self._in_sr = False
+
+    @contextmanager
+    def sub_request(self):
+        if self._in_sr:
+            raise RuntimeError('recursing error')
+        self._in_sr = True
+        state = self._lock._release_save()
+        try:
+            yield
+        finally:
+            self._lock._acquire_restore(state)
+            self._in_sr = False
 
     def acquire(self):
         self._lock.acquire()
