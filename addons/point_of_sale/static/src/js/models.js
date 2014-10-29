@@ -291,6 +291,10 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                     }
                 }
                 self.cashregisters = bankstatements;
+                self.cashregisters_by_id = {};
+                for (var i = 0; i < self.cashregisters.length; i++) {
+                    self.cashregisters_by_id[self.cashregisters[i].id] = self.cashregisters[i];
+                }
             },
         },{
             label: 'fonts',
@@ -658,8 +662,12 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
     // An Order contains zero or more Orderlines.
     module.Orderline = Backbone.Model.extend({
         initialize: function(attr,options){
-            this.pos = options.pos;
+            this.pos   = options.pos;
             this.order = options.order;
+            if (options.json) {
+                this.init_from_JSON(options.json);
+                return;
+            }
             this.product = options.product;
             this.price   = options.product.price;
             this.quantity = 1;
@@ -669,6 +677,15 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             this.type = 'unit';
             this.selected = false;
             this.id       = orderline_id++; 
+        },
+        init_from_JSON: function(json) {
+            this.product = this.pos.db.get_product_by_id(json.product_id);
+            if (!this.product) {
+                console.error('ERROR: attempting to recover product not available in the point of sale');
+            }
+            this.price = json.price_unit;
+            this.set_discount(json.discount);
+            this.set_quantity(json.qty);
         },
         clone: function(){
             var orderline = new module.Orderline({},{
@@ -888,10 +905,20 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
     // Every Paymentline contains a cashregister and an amount of money.
     module.Paymentline = Backbone.Model.extend({
         initialize: function(attributes, options) {
+            this.pos = options.pos;
             this.amount = 0;
+            this.selected = false;
+            if (options.json) {
+                this.init_from_JSON(options.json);
+                return;
+            }
             this.cashregister = options.cashregister;
             this.name = this.cashregister.journal_id[1];
-            this.selected = false;
+        },
+        init_from_JSON: function(json){
+            this.amount = json.amount;
+            this.cashregister = this.pos.cashregisters_by_id[json.statement_id];
+            this.name = this.cashregister.journal_id[0];
         },
         //sets the amount of money on this payment line
         set_amount: function(value){
@@ -938,9 +965,14 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
     // there is always an active ('selected') order in the Pos, a new one is created
     // automaticaly once an order is completed and sent to the server.
     module.Order = Backbone.Model.extend({
-        initialize: function(attributes){
+        initialize: function(attributes,options){
             Backbone.Model.prototype.initialize.apply(this, arguments);
+            options  = options || {};
             this.pos = attributes.pos; 
+            if (options.json) {
+                this.init_from_JSON(options.json);
+                return this;
+            }
             this.sequence_number = this.pos.pos_session.sequence_number++;
             this.uid =     this.generateUniqueId();
             this.set({
@@ -956,6 +988,42 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             this.temporary = attributes.temporary || false;
             this.to_invoice = false;
             return this;
+        },
+        init_from_JSON: function(json) {
+            this.sequence_number = json.sequence_number;
+            this.uid = json.uid;
+            if (json.partner_id) {
+                var client = this.pos.db.get_partner_by_id(json.partner_id);
+                if (!client) {
+                    console.error('ERROR: trying to load a parner not available in the pos');
+                }
+            } else {
+                var client = null;
+            }
+            this.set({
+                creationDate: new Date(),
+                orderLines: new module.OrderlineCollection(),
+                paymentLines: new module.PaymentlineCollection(),
+                name: _t("Order ") + this.uid,
+                client: client,
+            });
+            this.selected_orderline = undefined;
+            this.selected_paymentline = undefined;
+            this.screen_data = {};
+            this.temporary = false;     // FIXME
+            this.to_invoice = false;    // FIXME
+
+            var orderlines = json.lines;
+            for (var i = 0; i < orderlines.length; i++) {
+                var orderline = orderlines[i][2];
+                this.addOrderline(new module.Orderline({}, {pos: this.pos, order: this, json: orderline}));
+            }
+
+            var paymentlines = json.statement_ids;
+            for (var i = 0; i < paymentlines.length; i++) {
+                var paymentline = paymentlines[i][2];
+                this.get('paymentLines').add(new module.Paymentline({},{pos: this.pos, json: paymentline}));
+            }
         },
         is_empty: function(){
             return (this.get('orderLines').models.length === 0);
@@ -978,7 +1046,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
         },
         addOrderline: function(line){
             if(line.order){
-                order.removeOrderline(line);
+                line.order.removeOrderline(line);
             }
             line.order = this;
             this.get('orderLines').add(line);
@@ -1033,7 +1101,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
         },
         addPaymentline: function(cashregister) {
             var paymentLines = this.get('paymentLines');
-            var newPaymentline = new module.Paymentline({},{cashregister:cashregister});
+            var newPaymentline = new module.Paymentline({},{cashregister:cashregister, pos: this.pos});
             if(cashregister.journal.type !== 'cash' || this.pos.config.iface_precompute_cash){
                 newPaymentline.set_amount( Math.max(this.getDueLeft(),0) );
             }
