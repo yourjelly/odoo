@@ -64,10 +64,11 @@ function openerp_restaurant_multiprint(instance,module){
         },
     });
 
+    var _super_order = module.Order.prototype;
     module.Order = module.Order.extend({
         build_line_resume: function(){
             var resume = {};
-            this.get('orderLines').each(function(line){
+            this.orderlines.each(function(line){
                 var line_hash = line.get_line_diff_hash();
                 var qty  = Number(line.get_quantity());
                 var note = line.get_note();
@@ -83,11 +84,12 @@ function openerp_restaurant_multiprint(instance,module){
             return resume;
         },
         saveChanges: function(){
-            this.old_resume = this.build_line_resume();
+            this.saved_resume = this.build_line_resume();
+            this.trigger('change',this);
         },
         computeChanges: function(categories){
             var current_res = this.build_line_resume();
-            var old_res     = this.old_resume || {};
+            var old_res     = this.saved_resume || {};
             var json        = this.export_as_JSON();
             var add = [];
             var rem = [];
@@ -182,7 +184,6 @@ function openerp_restaurant_multiprint(instance,module){
             for(var i = 0; i < printers.length; i++){
                 var changes = this.computeChanges(printers[i].config.product_categories_ids);
                 if ( changes['new'].length > 0 || changes['cancelled'].length > 0){
-                    console.log('CHANGES FOR PRINTER',printers[i].name,':',changes);
                     var receipt = QWeb.render('OrderChangeReceipt',{changes:changes, widget:this});
                     printers[i].print(receipt);
                 }
@@ -197,6 +198,15 @@ function openerp_restaurant_multiprint(instance,module){
                 }
             }
             return false;
+        },
+        export_as_JSON: function(){
+            var json = _super_order.export_as_JSON.apply(this,arguments);
+            json.multiprint_resume = this.saved_resume;
+            return json;
+        },
+        init_from_JSON: function(json){
+            _super_order.init_from_JSON.apply(this,arguments);
+            this.saved_resume = json.multiprint_resume;
         },
     });
 

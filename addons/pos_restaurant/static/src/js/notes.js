@@ -9,7 +9,7 @@ function openerp_restaurant_notes(instance,module){
     module.Orderline = module.Orderline.extend({
         initialize: function(attr, options) {
             _super_orderline.initialize.call(this,attr,options);
-            this.note = "";
+            this.note = this.note || "";
         },
         set_note: function(note){
             this.note = note;
@@ -35,12 +35,16 @@ function openerp_restaurant_notes(instance,module){
             json.note = this.note;
             return json;
         },
+        init_from_JSON: function(json){
+            _super_orderline.init_from_JSON.apply(this,arguments);
+            this.note = json.note;
+        },
     });
 
     module.PosWidget.include({
         orderline_note_click: function(){
             var self = this;
-            var line = this.pos.get_order().getSelectedLine();
+            var line = this.pos.get_order().get_selected_orderline();
 
             if (line) {
                 this.screen_selector.show_popup('textarea',{
