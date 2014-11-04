@@ -1338,6 +1338,16 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 return;
             }
 
+            // FIXME: This check is there because the backend is unable to 
+            // process empty orders. This is not the right place to fix it. 
+            if (order.get_orderlines().length === 0) {  
+                this.pos_widget.screen_selector.show_popup('error',{
+                    'message': _t('Empty Order'),
+                    'comment': _t('There must be at least one product in your order before it can be validated'),
+                });
+                return;
+            }
+
             if (!order.is_paid() || this.invoicing) {
                 return;
             }
