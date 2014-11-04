@@ -1,73 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 <data>
-<template id="report_check">
+<template id="report_middlecheck">
     <t t-call="report.html_container">
         <t t-foreach="docs" t-as="voucher">
             <div class="page">
-                <table width="100%" height="350px;">
+                
+                <table width="100%" height="288px;" style="margin-top:96px;">
                     <tr>
                         <td style="vertical-align:top;">
-                            <table width="100%" height="28px;">
-                                <tr>
-                                    <td>
-                                        <div class="row col-xs-12" style="margin-top:5px;">
-                                            <div class="text-right col-xs-1 col-xs-offset-10">
-                                                <t t-if="not voucher.journal_id.use_preprint_check">
-                                                     <strong> <span t-esc="voucher.number"/></strong>
-                                                </t>
-                                            </div>
-                                            <div class="text-right col-xs-1 col-xs-offset-10">
-                                                <t t-if="voucher.journal_id.use_preprint_check">
-                                                      <strong> <span t-value="   "/></strong>
-                                                 </t>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
-                            <div class="row col-xs-12" style="margin-top:35px;">
-                                <div class="text-center col-xs-1 col-xs-offset-10" style="padding-left:20px;">
-                                    <span t-field="voucher.date"/>
-                                </div>
-                            </div>
-                            <div class="row col-xs-12" style="margin-top:25px;">
-                                <div class="text-left col-xs-offset-1 col-xs-4">
-                                    <span t-field="voucher.partner_id.name"/>
-                                </div>
-                                <div class="text-center col-xs-1 col-xs-offset-5" style="padding-left:22px;">
-                                    <span t-esc="voucher.amount"/>
-                                </div>
-                            </div>
-                            <div class="row col-xs-12" style="margin-top:10px;">
-                                <div class="text-left col-xs-11">
-                                     <span t-esc="fill_stars(voucher.amount_in_word)"/>
-                                 </div>
-                            </div>
-                            <div class="row col-xs-12" style="margin-top:75px;">
-                                <div class="text-left col-xs-offset-1 col-xs-6">
-                                    <span t-field="voucher.name"/>
-                                </div>
-                                <div class="text-left col-xs-1 col-xs-offset-6">
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-                <table width="100%" height="280px;">
-                    <tr>
-                        <td style="vertical-align:top;">
-                            <div class="row">
+                            <div class="row col-xs-12">
                                 <div class="col-xs-5">
                                     <strong>
                                         <span t-field="voucher.partner_id.name"/>
                                     </strong>
                                 </div>
-                                <div class="col-xs-4 col-xs-offset-3">
+                                <div class="col-xs-3 col-xs-offset-4">
                                     <strong>
                                         <span t-esc="formatLang(voucher.date , date=True)"/>
-                                        <t t-if="not voucher.journal_id.use_preprint_check">
-                                            <span t-field="voucher.number"/>
+                                        <t t-if="voucher.journal_id.use_preprint_check">
+                                            <span t-esc="voucher.chk_seq"/>
                                         </t>
                                     </strong>
                                 </div>
@@ -123,12 +75,54 @@
                                     <td width="90%">
                                         <strong>Check Amount</strong>
                                     </td>
+                                    <td>
+                                        <strong><span t-field="voucher.amount"/></strong>
+                                        <t t-if="voucher.journal_id.use_preprint_check">
+                                            <span t-esc="voucher.chk_seq"/>
+                                        </t>
+                                    </td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
                 </table>
-                <table width="100%" height="374px;">
+                
+                <table width="100%" height="288px;">
+                    <tr>
+                        <td style="vertical-align:top;">
+                            <div class="row col-xs-12" >
+                                <div class="text-left col-xs-1 col-xs-offset-11">
+                                    <span t-field="voucher.date"/>
+                                    <t t-if="voucher.journal_id.use_preprint_check">
+                                        <span t-esc="voucher.chk_seq"/>
+                                    </t>
+                                </div>
+                            </div>
+                            <div class="row col-xs-12" style="margin-top:48px;">
+                                <div class="text-left col-xs-offset-1 col-xs-4">
+                                    <span t-field="voucher.partner_id.name"/>
+                                </div>
+                                <div class="text-left col-xs-1 col-xs-offset-6">
+                                    <span t-esc="voucher.amount"/>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top:11.34px;">
+                                <div class="text-left col-xs-12">
+                                     <span t-esc="fill_stars(voucher.amount_in_word)"/>
+                                 </div>
+                            </div>
+                            <table style="margin-top:57.6px;">
+                                <tr>
+                                    <td>
+                                        <span t-field="voucher.name"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+                
+                <table width="100%" height="384px;">
                     <tr>
                         <td style="vertical-align:top;">
                             <div class="row" style="margin-top:48px;">
@@ -137,12 +131,9 @@
                                         <span t-field="voucher.partner_id.name"/>
                                     </strong>
                                 </div>
-                                <div class="col-xs-4 col-xs-offset-3">
+                                <div class="col-xs-3 col-xs-offset-4">
                                     <strong>
                                         <span t-esc="formatLang(voucher.date , date=True)"/>
-                                        <t t-if="not voucher.journal_id.use_preprint_check">
-                                            <span t-field="voucher.number"/>
-                                        </t>
                                     </strong>
                                 </div>
                             </div>
