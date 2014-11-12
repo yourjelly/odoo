@@ -319,6 +319,7 @@ class Field(object):
         if attrs.get('related'):
             # by default, related fields are not stored
             attrs['store'] = attrs.get('store', False)
+            attrs['copy'] = attrs.get('copy', False)
 
         # fix for function fields overridden by regular columns
         if not isinstance(attrs.get('column'), (NoneType, fields.function)):
