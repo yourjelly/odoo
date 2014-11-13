@@ -918,12 +918,16 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                 return this.get_unit_price();
             }
         },
-        get_display_price: function(){
+        get_base_price:    function(){
             var rounding = this.pos.currency.rounding;
+            return  round_pr(round_pr(this.get_unit_price() * this.get_quantity(),rounding) * (1- this.get_discount()/100.0),rounding);
+        },
+        get_display_price: function(){
+            return this.get_base_price();
             if (this.pos.config.iface_tax_included) {
                 return this.get_all_prices().priceWithTax;
             } else {
-                return  round_pr(round_pr(this.get_unit_price() * this.get_quantity(),rounding) * (1- this.get_discount()/100.0),rounding);
+                return this.get_base_price();
             }
         },
         get_price_without_tax: function(){
@@ -949,7 +953,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
         get_all_prices: function(){
             var self = this;
             var currency_rounding = this.pos.currency.rounding;
-            var base = round_pr(this.get_quantity() * this.get_unit_price() * (1.0 - (this.get_discount() / 100.0)), currency_rounding);
+            var base = this.get_base_price();
             var totalTax = base;
             var totalNoTax = base;
             

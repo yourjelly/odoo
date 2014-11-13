@@ -1252,6 +1252,9 @@ td {
     body {
         margin: 0;
     }
+    * {
+        color: black !important;
+    }
     .ui-notify-message,
     .oe_leftbar,
     .pos .pos-topheader, 
