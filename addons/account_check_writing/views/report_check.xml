@@ -11,8 +11,8 @@
                             <table width="100%" height="28px;">
                                 <tr>
                                     <td>
-                                        <div class="row col-xs-12" style="margin-top:5px;">
-                                            <div class="text-right col-xs-1 col-xs-offset-10">
+                                        <div class="row col-xs-12" style="margin-top:5px; padding-right:0px;">
+                                            <div class="text-right col-xs-offset-12">
                                                 <t t-if="not voucher.journal_id.use_preprint_check">
                                                      <strong> <span t-esc="voucher.number"/></strong>
                                                 </t>
@@ -26,30 +26,36 @@
                                     </td>
                                 </tr>
                             </table>
-                            <div class="row col-xs-12" style="margin-top:35px;">
-                                <div class="text-center col-xs-1 col-xs-offset-10" style="padding-left:20px;">
+                            <div class="col-xs-12 mt32 text-left" >
+                                <div class="col-xs-offset-11 col-xs-1">
                                     <span t-field="voucher.date"/>
                                 </div>
                             </div>
-                            <div class="row col-xs-12" style="margin-top:25px;">
-                                <div class="text-left col-xs-offset-1 col-xs-4">
+                            <div class="col-xs-12" style="margin-top:25px;">
+                                <div class="text-left col-xs-offset-1 col-xs-7">
                                     <span t-field="voucher.partner_id.name"/>
                                 </div>
-                                <div class="text-center col-xs-1 col-xs-offset-5" style="padding-left:22px;">
-                                    <span t-esc="voucher.amount"/>
+                                <div class="text-left col-xs-offset-3 col-xs-1">
+                                    <span t-field-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: &quot;voucher.currency_id&quot;}" t-field="voucher.amount"/>
                                 </div>
                             </div>
-                            <div class="row col-xs-12" style="margin-top:10px;">
-                                <div class="text-left col-xs-11">
-                                     <span t-esc="fill_stars(voucher.amount_in_word)"/>
-                                 </div>
+                            <div class="col-xs-12" style="margin-top:10px; padding-left:0px;">
+                                <span t-esc="fill_stars(voucher.amount_in_word)"/>
                             </div>
-                            <div class="row col-xs-12" style="margin-top:75px;">
-                                <div class="text-left col-xs-offset-1 col-xs-6">
+
+                            <div class="col-xs-12" style="margin-top:75px;">
+                                <div class="text-left col-xs-offset-1 col-xs-4">
                                     <span t-field="voucher.name"/>
                                 </div>
-                                <div class="text-left col-xs-1 col-xs-offset-6">
-                                </div>
+                                <div class="text-left col-xs-1 col-xs-offset-6"/>
+                            </div>
+                            <div class="col-xs-12" style="margin-top:10px; padding-right:0px;">
+                                <div class="text-center col-xs-offset-7 col-xs-5" style="border-bottom:1px solid black;"/>
+                            </div>
+                            <div class="col-xs-12" style="margin-top:10px; padding-right:0px;">
+                                <div class="text-center col-xs-offset-7 col-xs-5">
+                                    <strong>Authorized Signature</strong>
+                               </div>
                             </div>
                         </td>
                     </tr>
