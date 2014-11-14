@@ -1324,6 +1324,9 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         click_set_customer: function(){
             this.pos_widget.screen_selector.set_current_screen('clientlist');
         },
+        click_open_cashbox: function(){
+            this.pos.proxy.open_cashbox();
+        },
         click_back: function(){
             this.pos_widget.screen_selector.set_current_screen('products');
         },
@@ -1352,6 +1355,9 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             });
             this.$('.js_invoice').click(function(){
                 self.click_invoice();
+            });
+            this.$('.js_cashdrawer').click(function(){
+                self.click_open_cashbox();
             });
 
         },
@@ -1451,7 +1457,6 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             }
 
             if (order.is_paid_with_cash() && this.pos.config.iface_cashdrawer) { 
-            
                     this.pos.proxy.open_cashbox();
             }
 
