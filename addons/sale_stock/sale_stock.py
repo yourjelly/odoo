@@ -391,9 +391,7 @@ class stock_move(osv.osv):
             else:
                 res['price_unit'] = sale_line.price_unit
             uos_coeff = move.product_uom_qty and move.product_uos_qty / move.product_uom_qty or 1.0
-            res['price_unit'] = round((res['price_unit'] / uos_coeff),
-                                      self.pool.get('decimal.precision')
-                                      .precision_get(cr, uid, 'Product Price'))
+            res['price_unit'] = res['price_unit'] / uos_coeff
         return res
 
 
