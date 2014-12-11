@@ -606,14 +606,44 @@ class groups_implied(osv.osv):
         return gid
 
     def write(self, cr, uid, ids, values, context=None):
+        if not isinstance(ids, list):
+            ids = [ids]
         res = super(groups_implied, self).write(cr, uid, ids, values, context)
-        if values.get('users') or values.get('implied_ids'):
-            # add all implied groups (to all users of each group)
-            for g in self.browse(cr, uid, ids, context=context):
-                gids = map(int, g.trans_implied_ids)
-                vals = {'users': [(4, u.id) for u in g.users]}
-                super(groups_implied, self).write(cr, uid, gids, vals, context)
+        if ids and values.get('users') or values.get('implied_ids'):
+            self._imply_users(cr, uid, ids, context=context)
         return res
+
+    def _imply_users(self, cr, uid, ids, context=None):
+        if not ids:
+            return
+        # add all implied groups (to all users of each group)
+        cr.execute("""
+            WITH RECURSIVE implied_groups(id, implied_id, level) AS (
+                SELECT gid, hid, 1
+                  FROM res_groups_implied_rel
+            UNION
+                SELECT ig.id, r.hid, ig.level+1
+                  FROM implied_groups ig
+                  JOIN res_groups_implied_rel r
+                    ON (ig.implied_id = r.gid)
+            )
+            SELECT id, array_agg(implied_id)
+              FROM implied_groups
+             WHERE id IN %s
+          GROUP BY id
+        """, [tuple(ids)])
+        for gid, implied_ids in cr.fetchall():
+            cr.execute("""INSERT INTO res_groups_users_rel(gid, uid)
+                               SELECT gid, uid
+                                 FROM (SELECT unnest(%s) gid, uid
+                                         FROM res_groups_users_rel
+                                        WHERE gid = %s) r
+                                WHERE NOT EXISTS(SELECT 1
+                                                   FROM res_groups_users_rel e
+                                                  WHERE e.uid = r.uid
+                                                    AND e.gid = r.gid)
+                             GROUP BY gid, uid
+            """, [implied_ids, gid])
 
 class users_implied(osv.osv):
     _inherit = 'res.users'
@@ -628,15 +658,14 @@ class users_implied(osv.osv):
         return user_id
 
     def write(self, cr, uid, ids, values, context=None):
-        if not isinstance(ids,list):
+        if not isinstance(ids, list):
             ids = [ids]
         res = super(users_implied, self).write(cr, uid, ids, values, context)
         if values.get('groups_id'):
             # add implied groups for all users
+            G = self.pool['res.groups']
             for user in self.browse(cr, uid, ids):
-                gs = set(concat(g.trans_implied_ids for g in user.groups_id))
-                vals = {'groups_id': [(4, g.id) for g in gs]}
-                super(users_implied, self).write(cr, uid, [user.id], vals, context)
+                G._imply_users(cr, uid, map(int, user.groups_id), context=context)
             self.pool['ir.ui.view'].clear_cache()
         return res
 
