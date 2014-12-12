@@ -77,6 +77,12 @@ Example: 10% for retailers, promotion of 5 EUR on this product, etc."""),
         'group_sale_delivery_address': fields.boolean("Allow a different address for delivery and invoicing ",
             implied_group='sale.group_delivery_invoice_address',
             help="Allows you to specify different delivery and invoice addresses on a sales order."),
+        'module_sale_layout': fields.boolean("Manage your sales reports"),
+        'product_visible_discount': fields.boolean("Allow to you calculate discounts on Sale Order lines."),
+        'module_delivery': fields.boolean("Allows you to add delivery methods in sale orders and picking."),
+        'module_website_sale_options': fields.boolean("Allow to sale option Your Products Online."),
+        'module_website_sale': fields.boolean("Allow to Sale Your Products Online."),
+        'module_website_sale_delivery': fields.boolean("Add Delivery Costs to Online Sales."),
     }
 
     def set_sale_defaults(self, cr, uid, ids, context=None):

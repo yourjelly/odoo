@@ -97,6 +97,23 @@
                             <field name="cdn_url" attrs="{'invisible': [('cdn_activated', '=', False)] }"/>
                             <field name="cdn_filters" attrs="{'invisible': [('cdn_activated', '=', False)] }"/>
                         </group>
+                        <group string="Website">
+                            <label for="module_website_twitter" string="Website"/>
+                            <div name="module_website_twitter">
+                                <div class="oe_inline">
+                                    <field name="module_website_twitter" class="oe_inline"/>
+                                    <label for="module_website_twitter"/>
+                                </div>
+                                <div>
+                                    <field name="module_document" class="oe_inline"/>
+                                    <label for="module_document"/>
+                                </div>
+                                <div>
+                                    <field name="module_website_certification" class="oe_inline"/>
+                                    <label for="module_website_certification"/>
+                                </div>
+                            </div>
+                        </group>
                     </div>
                 </form>
             </field>
@@ -112,5 +129,20 @@
         <menuitem id="menu_website_configuration" parent="base.menu_config"
             sequence="90" action="action_website_configuration"/>
 
+    <record id="view_module_filter_website" model="ir.ui.view">
+        <field name="name">ir.module.module.list.select.inherit</field>
+        <field name="model">ir.module.module</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="base.view_module_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='app']" position="after">
+                <filter string='Website' icon="terp-stock_symbol-selection" domain="[('application', '=', 1)]"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="base.open_module_tree" model="ir.actions.act_window">
+        <field name="res_model">ir.module.module</field>
+        <field name="context">{'search_default_app':1}</field>
+    </record>
     </data>
 </openerp>

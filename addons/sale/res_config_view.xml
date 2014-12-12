@@ -35,6 +35,18 @@
                           <field name="group_sale_delivery_address" class="oe_inline"/>
                           <label for="group_sale_delivery_address"/>
                      </div>
+                     <div>
+                          <field name="module_sale_layout" class="oe_inline"/>
+                          <label for="module_sale_layout"/>
+                     </div>
+                     <div>
+                          <field name="module_delivery"/>
+                          <label for="module_delivery"/>
+                     </div>
+                     <div name="module_product_visible_discount" attrs="{'invisible':['|',('module_delivery','=',False), ('module_sale_layout','=',False)]}">
+                          <field name="product_visible_discount"/>
+                          <label for="product_visible_discount"/>
+                     </div>
                 </div>
                 <group name="Sale" position="before">
                     <group>
@@ -76,6 +88,25 @@
                         <label for="module_sale_margin"/>
                     </div>
                 </div>
+                <group name="Sale" position="before">
+                    <group>
+                        <label for="module_website_sale" string="E-Commerce Features"/>
+                        <div name="E-Commerce Features">
+                            <div name="module_website_sale">
+                                <field name="module_website_sale" class="oe_inline"/>
+                                <label for="module_website_sale"/>
+                            </div>
+                            <div name="module_website_sale_options">
+                                <field name="module_website_sale_options" class="oe_inline"/>
+                                <label for="module_website_sale_options"/>
+                            </div>
+                            <div name="module_website_sale_delivery">
+                                <field name="module_website_sale_delivery" class="oe_inline"/>
+                                <label for="module_website_sale_delivery"/>
+                            </div>
+                        </div>
+                    </group>
+                </group>
                 <div name="customer feature" position="after">
                     <separator string="Contracts Management"/>
                     <p>
