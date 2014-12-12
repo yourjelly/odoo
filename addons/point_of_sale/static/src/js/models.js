@@ -955,7 +955,6 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             return  round_pr(round_pr(this.get_unit_price() * this.get_quantity(),rounding) * (1- this.get_discount()/100.0),rounding);
         },
         get_display_price: function(){
-            return this.get_base_price();
             if (this.pos.config.iface_tax_included) {
                 return this.get_all_prices().priceWithTax;
             } else {
