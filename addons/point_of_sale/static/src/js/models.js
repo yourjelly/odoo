@@ -158,7 +158,10 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                 var units_by_id = {};
                 for(var i = 0, len = units.length; i < len; i++){
                     units_by_id[units[i].id] = units[i];
-                    units[i].groupable = ( units[i].category_id[0] === 1 );
+                    // lines can be grouped only when the unit category is 'Unit'
+                    // and when the rounding is an integer
+                    units[i].groupable = ( units[i].category_id[0] === 1  && 
+                                           units[i].rounding === Math.floor(units[i].rounding) );
                     units[i].is_unit   = ( units[i].id === 1 );
                 }
                 self.units_by_id = units_by_id;
