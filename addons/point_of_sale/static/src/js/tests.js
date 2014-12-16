@@ -1,89 +1,93 @@
-(function() {
-    'use strict';
+(function(){
+    "use strict";
 
-    openerp.Tour.register({
-        id: 'pos_basic_order',
-        name: 'Complete a basic order trough the Front-End',
-        path: '/web#model=pos.session.opening&action=point_of_sale.action_pos_session_opening',
-        mode: 'test',
-        steps: [
-            {
-                title:   'Wait fot the bloody screen to be ready',
-                wait: 200,
-            },
-            {
-                title:  'Load the Session',
-                waitNot: '.oe_loading:visible',
-                element: 'span:contains("Resume Session"),span:contains("Start Session")',
-            },
-            {
-                title: 'Loading the Loading Screen',
-                waitFor: '.loader'
-            },
-            {
-                title: 'Waiting for the end of loading...',
-                waitFor: '.loader:hidden',
-            },
-            {
-                title: 'Loading The Point of Sale',
-                waitFor: '.pos',
-            },
-            {
-                title: 'On va manger des CHIPS!',
-                element: '.product-list .product-name:contains("250g Lays Pickels")',
-            },
-            {
-                title: 'The chips have been added to the Order',
-                waitFor: '.order .product-name:contains("250g Lays Pickels")',
-            },
-            {
-                title: 'The order total has been updated to the correct value',
-                wait: 2000,
-                waitFor: '.order .total .value:contains("1.48 €")',
-            },
-            {
-                title: "Let's buy more chips",
-                element: '.product-list .product-name:contains("250g Lays Pickels")',
-            },
-            {
-                title: "Let's veryify we pay the correct price for two bags of chips",
-                waitFor: '.order .total .value:contains("2.96 €")',
-            },
-            {
-                title: "Let's pay with a debit card",
-                element: ".paypad-button:contains('Bank')",
-            },
-            {
-                title: "Let's accept the payment",
-                onload: function(){ 
-                    // The test cannot validate or cancel the print() ... so we replace it by a noop !.
-                    window._print = window.print;
-                    window.print  = function(){ console.log('Print!') };
-                },
-                element: ".button .iconlabel:contains('Validate'):visible",
-            },
-            {
-                title: "Let's finish the order",
-                element: ".button:not(.disabled) .iconlabel:contains('Next'):visible",
-            },
-            {
-                onload: function(){
-                    window.print  = window._print;
-                    window._print = undefined;
-                },
-                title: "Let's wait for the order posting",
-                waitFor: ".oe_status.js_synch .js_connected:visible",
-            },
-            {
-                title: "Let's close the Point of Sale",
-                element: ".header-button:contains('Close')",
-            },
-            {
-                title: "Wait for the backend to ready itself",
-                element: 'span:contains("Resume Session"),span:contains("Start Session")',
-            },
-        ],
-    });
+    window.pos_generate_random_orders = function(opts){
+        opts = opts || {};
+        opts.delay    = opts.delay || 1000;
+        opts.min_order_size = opts.min_order_size || 1;
+        opts.max_order_size = opts.max_order_size || 10;
+        opts.prob_many_unit = opts.prob_many_unit || 0.1;
+        opts.many_unit_max  = opts.many_unit_max  || 10;
+        opts.prob_many_quant = opts.prob_many_quant || 0.8;
+        opts.many_quant_max  = opts.many_quant_max  || 20;
+        
+        var module = openerp.point_of_sale;
+        var pos    = window.posmodel;
+
+        if (!pos){
+            console.error("cannot generate random orders outside of the point of sale");
+            return;
+        }
+
+        var products = [];
+        for (var id in pos.db.product_by_id) {
+            products.push(pos.db.product_by_id[id]);
+        }
+
+        var partners = [];
+        for (var id in pos.db.partner_by_id) {
+            partners.push(pos.db.partner_by_id[id]);
+        }
+
+        function proba(prob){
+            return Math.random() <= prob;
+        }
+
+        function range(a,b){
+            return a + Math.floor(Math.random()*(b-a));
+        }
+
+        function select(list){
+            var i = Math.floor(Math.random()*(list.length - 0.00001));
+            return list[i];
+        }
+        
+        function generate(){
+
+            var o = new module.Order({},{pos:pos});
+
+            var os = range(opts.min_order_size,opts.max_order_size);
+
+            while (os--) {
+                var product = select(products);
+                o.add_product(product);
+                var ol = o.get_last_orderline();
+                if (!ol.get_unit().rounding || ol.get_unit().rounding === 1) {
+                    console.log('unit',ol.get_unit());
+                    if (proba(opts.prob_many_unit)) {
+                        ol.set_quantity(Math.ceil(range(2,opts.many_unit_max)));
+                    }
+                } else {
+                    if (proba(opts.prob_many_quant)) {
+                        ol.set_quantity(range(0,opts.many_quant_max));
+                    }
+                }
+            }
+
+            var total = o.get_total_with_tax();
+            var min   = 1;
+            var max   = Math.max(5,total*2);
+
+            while (!o.is_paid()) {
+                o.add_paymentline(select(pos.cashregisters));
+                o.selected_paymentline.set_amount(range(min,max));
+            }
+
+            console.log('Pushing Order',o);
+            
+            pos.push_order(o);
+        }
+
+        function loop() {
+            generate();
+            if (window.STOP) {
+                console.log('Stop!');
+                return;
+            }
+            setTimeout(loop,opts.delay);
+        }
+
+        loop();
+    };
 
 })();
-
