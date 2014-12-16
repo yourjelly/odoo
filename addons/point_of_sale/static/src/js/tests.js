@@ -53,7 +53,6 @@
                 o.add_product(product);
                 var ol = o.get_last_orderline();
                 if (!ol.get_unit().rounding || ol.get_unit().rounding === 1) {
-                    console.log('unit',ol.get_unit());
                     if (proba(opts.prob_many_unit)) {
                         ol.set_quantity(Math.ceil(range(2,opts.many_unit_max)));
                     }
