@@ -154,24 +154,25 @@ function openerp_pos_db(instance, module){
             this.cache[store] = data;
         },
         _product_search_string: function(product){
-            var str = '' + product.id + ':' + product.display_name;
+            var str = product.display_name;
             if (product.ean13) {
                 str += '|' + product.ean13;
             }
             if (product.default_code) {
-                str += '|' + product.default_code.replace(':','');
+                str += '|' + product.default_code;
             }
             if (product.description) {
-                str += '|' + product.description.replace(':','');
+                str += '|' + product.description;
             }
             if (product.description_sale) {
-                str += '|' + product.description_sale.replace(':','');
+                str += '|' + product.description_sale;
             }
             var packagings = this.packagings_by_product_tmpl_id[product.product_tmpl_id] || [];
             for (var i = 0; i < packagings.length; i++) {
                 str += '|' + packagings[i].ean;
             }
-            return str + '\n';
+            str  = product.id + ':' + str.replace(':','') + '\n';
+            return str;
         },
         add_products: function(products){
             var stored_categories = this.product_by_category_id;
@@ -231,7 +232,7 @@ function openerp_pos_db(instance, module){
             }
         },
         _partner_search_string: function(partner){
-            var str = '' + partner.id + ':' + partner.name;
+            var str =  partner.name;
             if(partner.ean13){
                 str += '|' + partner.ean13;
             }
@@ -247,7 +248,8 @@ function openerp_pos_db(instance, module){
             if(partner.email){
                 str += '|' + partner.email;
             }
-            return str + '\n';
+            str = '' + partner.id + ':' + str.replace(':','') + '\n';
+            return str;
         },
         add_partners: function(partners){
             var updated_count = 0;

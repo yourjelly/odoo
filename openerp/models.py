@@ -211,7 +211,7 @@ class MetaModel(api.Meta):
     """ Metaclass for the models.
 
     This class is used as the metaclass for the class :class:`BaseModel` to
-    discover the models defined in a module (without instanciating them).
+    discover the models defined in a module (without instantiating them).
     If the automatic discovery is not needed, it is possible to set the model's
     ``_register`` attribute to False.
 
@@ -240,6 +240,11 @@ class MetaModel(api.Meta):
         # Remember which models to instanciate for this module.
         if not self._custom:
             self.module_to_models.setdefault(self._module, []).append(self)
+
+        # check for new-api conversion error: leave comma after field definition
+        for key, val in attrs.iteritems():
+            if type(val) is tuple and len(val) == 1 and isinstance(val[0], Field):
+                _logger.error("Trailing comma after field definition: %s.%s", self, key)
 
         # transform columns into new-style fields (enables field inheritance)
         for name, column in self._columns.iteritems():
@@ -271,7 +276,7 @@ class BaseModel(object):
     *   :class:`Model` for regular database-persisted models
 
     *   :class:`TransientModel` for temporary data, stored in the database but
-        automatically vaccuumed every so often
+        automatically vacuumed every so often
 
     *   :class:`AbstractModel` for abstract super classes meant to be shared by
         multiple inheriting model
@@ -554,14 +559,14 @@ class BaseModel(object):
             datetime.datetime.utcnow().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
     #
-    # Goal: try to apply inheritance at the instanciation level and
+    # Goal: try to apply inheritance at the instantiation level and
     #       put objects in the pool var
     #
     @classmethod
     def _build_model(cls, pool, cr):
-        """ Instanciate a given model.
+        """ Instantiate a given model.
 
-        This class method instanciates the class of some model (i.e. a class
+        This class method instantiates the class of some model (i.e. a class
         deriving from osv or osv_memory). The class might be the class passed
         in argument or, if it inherits from another class, a class constructed
         by combining the two classes.
@@ -1478,7 +1483,7 @@ class BaseModel(object):
         Get the detailed composition of the requested view like fields, model, view architecture
 
         :param view_id: id of the view or None
-        :param view_type: type of the view to return if view_id is None ('form', tree', ...)
+        :param view_type: type of the view to return if view_id is None ('form', 'tree', ...)
         :param toolbar: true to include contextual actions
         :param submenu: deprecated
         :return: dictionary describing the composition of the requested view (including inherited views and extensions)
@@ -1527,7 +1532,7 @@ class BaseModel(object):
             result['type'] = root_view['type']
             result['view_id'] = root_view['id']
             result['field_parent'] = root_view['field_parent']
-            # override context fro postprocessing
+            # override context from postprocessing
             if root_view.get('model') != self._name:
                 ctx = dict(context, base_model_name=root_view.get('model'))
         else:
@@ -1604,7 +1609,7 @@ class BaseModel(object):
         overridden in addons that want to give specific access to the document.
         By default it opens the formview of the document.
 
-        :paramt int id: id of the document to open
+        :param int id: id of the document to open
         """
         return self.get_formview_action(cr, uid, id, context=context)
 
@@ -1937,7 +1942,7 @@ class BaseModel(object):
     def _read_group_process_groupby(self, gb, query, context):
         """
             Helper method to collect important information about groupbys: raw
-            field name, type, time informations, qualified name, ...
+            field name, type, time information, qualified name, ...
         """
         split = gb.split(':')
         field_type = self._fields[split[0]].type
@@ -2020,7 +2025,7 @@ class BaseModel(object):
 
     def _read_group_format_result(self, data, annotated_groupbys, groupby, groupby_dict, domain, context):
         """
-            Helper method to format the data contained in the dictianary data by 
+            Helper method to format the data contained in the dictionary data by 
             adding the domain corresponding to its values, the groupbys in the 
             context and by properly formatting the date/datetime values. 
         """
@@ -2554,8 +2559,8 @@ class BaseModel(object):
                                     cr.execute('ALTER TABLE "%s" RENAME COLUMN "%s" TO "%s"' % (self._table, k, newname))
                                     cr.execute('ALTER TABLE "%s" ADD COLUMN "%s" %s' % (self._table, k, get_pg_type(f)[1]))
                                     cr.execute("COMMENT ON COLUMN %s.\"%s\" IS %%s" % (self._table, k), (f.string,))
-                                    _schema.debug("Table '%s': column '%s' has changed type (DB=%s, def=%s), data moved to column %s !",
-                                        self._table, k, f_pg_type, f._type, newname)
+                                    _schema.warning("Table `%s`: column `%s` has changed type (DB=%s, def=%s), data moved to column `%s`",
+                                                    self._table, k, f_pg_type, f._type, newname)
 
                             # if the field is required and hasn't got a NOT NULL constraint
                             if f.required and f_pg_notnull == 0:
@@ -4485,7 +4490,7 @@ class BaseModel(object):
 
     def _generate_order_by(self, order_spec, query):
         """
-        Attempt to consruct an appropriate ORDER BY clause based on order_spec, which must be
+        Attempt to construct an appropriate ORDER BY clause based on order_spec, which must be
         a comma-separated list of valid field names, optionally followed by an ASC or DESC direction.
 
         :raise" except_orm in case order_spec is malformed
@@ -4549,7 +4554,7 @@ class BaseModel(object):
             context = {}
         self.check_access_rights(cr, access_rights_uid or user, 'read')
 
-        # For transient models, restrict acces to the current user, except for the super-user
+        # For transient models, restrict access to the current user, except for the super-user
         if self.is_transient() and self._log_access and user != SUPERUSER_ID:
             args = expression.AND(([('create_uid', '=', user)], args or []))
 
@@ -4744,7 +4749,7 @@ class BaseModel(object):
         Duplicate record with given id updating it with default values
 
         :param dict default: dictionary of field values to override in the
-               original values of the copied record, e.g: ``{'field_name': overriden_value, ...}``
+               original values of the copied record, e.g: ``{'field_name': overridden_value, ...}``
         :returns: new record
 
         """
@@ -4769,14 +4774,15 @@ class BaseModel(object):
 
         By convention, new records are returned as existing.
         """
-        ids = filter(None, self._ids)           # ids to check in database
+        ids, new_ids = [], []
+        for i in self._ids:
+            (ids if isinstance(i, (int, long)) else new_ids).append(i)
         if not ids:
             return self
         query = """SELECT id FROM "%s" WHERE id IN %%s""" % self._table
-        self._cr.execute(query, (ids,))
-        ids = ([r[0] for r in self._cr.fetchall()] +    # ids in database
-               [id for id in self._ids if not id])      # new ids
-        existing = self.browse(ids)
+        self._cr.execute(query, [tuple(ids)])
+        ids = [r[0] for r in self._cr.fetchall()]
+        existing = self.browse(ids + new_ids)
         if len(existing) < len(self):
             # mark missing records in cache with a failed value
             exc = MissingError(_("Record does not exist or has been deleted."))
@@ -5260,7 +5266,7 @@ class BaseModel(object):
     def mapped(self, func):
         """ Apply `func` on all records in `self`, and return the result as a
             list or a recordset (if `func` return recordsets). In the latter
-            case, the order of the returned recordset is arbritrary.
+            case, the order of the returned recordset is arbitrary.
 
             :param func: a function or a dot-separated sequence of field names
         """
@@ -5343,22 +5349,24 @@ class BaseModel(object):
         return record
 
     #
-    # Dirty flag, to mark records modified (in draft mode)
+    # Dirty flags, to mark record fields modified (in draft mode)
     #
 
-    @property
-    def _dirty(self):
+    def _is_dirty(self):
         """ Return whether any record in `self` is dirty. """
         dirty = self.env.dirty
         return any(record in dirty for record in self)
 
-    @_dirty.setter
-    def _dirty(self, value):
-        """ Mark the records in `self` as dirty. """
-        if value:
-            map(self.env.dirty.add, self)
-        else:
-            map(self.env.dirty.discard, self)
+    def _get_dirty(self):
+        """ Return the list of field names for which `self` is dirty. """
+        dirty = self.env.dirty
+        return list(dirty.get(self, ()))
+
+    def _set_dirty(self, field_name):
+        """ Mark the records in `self` as dirty for the given `field_name`. """
+        dirty = self.env.dirty
+        for record in self:
+            dirty[record].add(field_name)
 
     #
     # "Dunder" methods
@@ -5760,7 +5768,7 @@ class BaseModel(object):
                     field = self._fields[name]
                     newval = record[name]
                     if field.type in ('one2many', 'many2many'):
-                        if newval != oldval or newval._dirty:
+                        if newval != oldval or newval._is_dirty():
                             # put new value in result
                             result['value'][name] = field.convert_to_write(
                                 newval, record._origin, subfields.get(name),
@@ -5873,7 +5881,7 @@ class Model(BaseModel):
 
 class TransientModel(BaseModel):
     """Model super-class for transient records, meant to be temporarily
-       persisted, and regularly vaccuum-cleaned.
+       persisted, and regularly vacuum-cleaned.
 
        A TransientModel has a simplified access rights management,
        all users can create new records, and may only access the
