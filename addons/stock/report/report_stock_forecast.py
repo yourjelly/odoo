@@ -8,7 +8,7 @@ class report_stock_forecast(models.Model):
     date = fields.Date(readonly=True)
     product_id = fields.Many2one('product.product', string='Product', readonly=True)
     cumulative_quantity = fields.Float(string='Cumulative Quantity', readonly=True)
-    quantity = fields.Integer(readonly=True)
+    quantity = fields.Float(readonly=True)
 
     def init(self, cr):
         tools.drop_view_if_exists(cr, 'report_stock_forecast')

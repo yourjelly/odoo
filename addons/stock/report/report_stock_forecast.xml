@@ -5,7 +5,7 @@
          <field name="model">report.stock.forecast</field>
          <field name="arch" type="xml">
              <graph string="Stock Level forecast" type="pivot">
-                <field name="product_id" type="row"/>
+                <field name="product_id" type="col"/>
                 <field name="cumulative_quantity" type="measure"/>
                 <field name="quantity" type="measure"/>
              </graph>
@@ -20,7 +20,6 @@
                 <field name="product_id"/>
                 <field name="date"/>
                 <group expand="1" string="Group By">
-                    <filter string="By Product" name="product" context="{'group_by':'product_id'}"/>
                     <filter string="By Dates" name="date_day" context="{'group_by':'date:day'}"/>
                 </group>
             </search>
