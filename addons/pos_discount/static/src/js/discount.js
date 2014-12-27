@@ -19,7 +19,7 @@ openerp.pos_discount = function(instance){
             discount.click(function(){
                 var order    = self.pos.get_order();
                 var product  = self.pos.db.get_product_by_id(self.pos.config.discount_product_id[0]);
-                var discount = - self.pos.config.discount_pc/ 100.0 * order.get_total_tax_included();
+                var discount = - self.pos.config.discount_pc/ 100.0 * order.get_total_with_tax();
                 if( discount < 0 ){
                     order.add_product(product, { price: discount });
                 }
