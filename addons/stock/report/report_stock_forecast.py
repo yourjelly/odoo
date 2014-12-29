@@ -30,6 +30,9 @@ class report_stock_forecast(models.Model):
                                product_product ON product_product.id = sq.product_id
                             LEFT JOIN
                                 stock_location location_id ON sq.location_id = location_id.id
+                            LEFT JOIN
+                                (SELECT product_id, MIN(date) AS date FROM stock_move WHERE stock_move.state IN ('confirmed','assigned','waiting') GROUP BY product_id) sm
+                                ON sm.product_id = sq.product_id
                             WHERE
                                 location_id.usage = 'internal'
                             GROUP BY
