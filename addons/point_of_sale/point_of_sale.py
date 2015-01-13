@@ -1354,13 +1354,15 @@ class pos_category(osv.osv):
     def name_get(self, cr, uid, ids, context=None):
         if not len(ids):
             return []
-        reads = self.read(cr, uid, ids, ['name','parent_id'], context=context)
+        reads = self.browse(cr, uid, ids, context=context)
         res = []
         for record in reads:
-            name = record['name']
-            if record['parent_id']:
-                name = record['parent_id'][1]+' / '+name
-            res.append((record['id'], name))
+            if record.parent_id:
+                name = '%s / %s' % (record.parent_id.name, record.name)
+            else:
+                name = record.name
+            res.append((record.id, name))
+        print res
         return res
 
     def _name_get_fnc(self, cr, uid, ids, prop, unknow_none, context=None):
@@ -1375,7 +1377,7 @@ class pos_category(osv.osv):
     
     def _set_image(self, cr, uid, id, name, value, args, context=None):
         return self.write(cr, uid, [id], {'image': tools.image_resize_image_big(value)}, context=context)
-
+        
     _columns = {
         'name': fields.char('Name', required=True, translate=True),
         'complete_name': fields.function(_name_get_fnc, type="char", string='Name'),
