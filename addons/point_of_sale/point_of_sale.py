@@ -1362,7 +1362,6 @@ class pos_category(osv.osv):
             else:
                 name = record.name
             res.append((record.id, name))
-        print res
         return res
 
     def _name_get_fnc(self, cr, uid, ids, prop, unknow_none, context=None):
