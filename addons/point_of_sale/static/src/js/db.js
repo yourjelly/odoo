@@ -151,56 +151,71 @@ function openerp_pos_db(instance, module){
         },
         add_products: function(products){
             var stored_categories = this.product_by_category_id;
+            var self=this;
             
             if(!products instanceof Array){
                 products = [products];
             }
             
-            //Store retrieved values in cache
-            for(var i = 0, len = products.length; i < len; i++){
-                var product = products[i];
-                var key = "product" + product[product.id];
-                
+            function toJquery(p) {
+                return $.Deferred(function (d) {
+                    p.then(function () {
+                        d.resolve.apply(d, arguments);
+                    }, function () {
+                        d.reject.apply(d, arguments);
+                    })
+                });
             }
             
-            //Build products list from cache
+            //Store retrieved values in cache
+            var storing_defs = [];
             for(var i = 0, len = products.length; i < len; i++){
                 var product = products[i];
-                var search_string = this._product_search_string(product);
-                var categ_id = product.pos_categ_id ? product.pos_categ_id[0] : this.root_category_id;
-                product.product_tmpl_id = product.product_tmpl_id[0];
-                if(!stored_categories[categ_id]){
-                    stored_categories[categ_id] = [];
-                }
-                stored_categories[categ_id].push(product.id);
-
-                if(this.category_search_string[categ_id] === undefined){
-                    this.category_search_string[categ_id] = '';
-                }
-                this.category_search_string[categ_id] += search_string;
-
-                var ancestors = this.get_category_ancestors_ids(categ_id) || [];
-
-                for(var j = 0, jlen = ancestors.length; j < jlen; j++){
-                    var ancestor = ancestors[j];
-                    if(! stored_categories[ancestor]){
-                        stored_categories[ancestor] = [];
-                    }
-                    stored_categories[ancestor].push(product.id);
-
-                    if( this.category_search_string[ancestor] === undefined){
-                        this.category_search_string[ancestor] = '';
-                    }
-                    this.category_search_string[ancestor] += search_string; 
-                }
-                this.product_by_id[product.id] = product;
-                if(product.ean13){
-                    this.product_by_ean13[product.ean13] = product;
-                }
-                if(product.default_code){
-                    this.product_by_reference[product.default_code] = product;
-                }
+                var key = "product" + product.id;
+                storing_defs.push(toJquery(localforage.setItem(key, product)));
             }
+            
+            //Pull cache in memory
+            
+            return $.when.apply(null, storing_defs).then( function() {
+                //Build products list from cache
+                return toJquery(localforage.iterate(function(product, key) {
+                    var search_string = self._product_search_string(product);
+                    var categ_id = product.pos_categ_id ? product.pos_categ_id[0] : self.root_category_id;
+                    product.product_tmpl_id = product.product_tmpl_id[0];
+                    if(!stored_categories[categ_id]){
+                        stored_categories[categ_id] = [];
+                    }
+                    stored_categories[categ_id].push(product.id);
+                    
+                    if(self.category_search_string[categ_id] === undefined){
+                        self.category_search_string[categ_id] = '';
+                    }
+                    self.category_search_string[categ_id] += search_string;
+                    
+                    var ancestors = self.get_category_ancestors_ids(categ_id) || [];
+                    
+                    for(var j = 0, jlen = ancestors.length; j < jlen; j++){
+                        var ancestor = ancestors[j];
+                        if(! stored_categories[ancestor]){
+                            stored_categories[ancestor] = [];
+                        }
+                        stored_categories[ancestor].push(product.id);
+                        
+                        if( self.category_search_string[ancestor] === undefined){
+                            self.category_search_string[ancestor] = '';
+                        }
+                        self.category_search_string[ancestor] += search_string; 
+                    }
+                    self.product_by_id[product.id] = product;
+                    if(product.ean13){
+                        self.product_by_ean13[product.ean13] = product;
+                    }
+                    if(product.default_code){
+                        self.product_by_reference[product.default_code] = product;
+                    }
+                }));
+            });
         },
         add_packagings: function(packagings){
             for(var i = 0, len = packagings.length; i < len; i++){

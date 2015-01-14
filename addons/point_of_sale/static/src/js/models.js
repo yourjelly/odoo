@@ -278,19 +278,18 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                      'product_tmpl_id'],
             domain: function(self){
                 var lastupdateLS = localStorage.getItem('odooPOSlastupdate_product.product');
-                // if (lastupdateLS)
-                // {
-                //     lastupdate = Date.parse(lastupdateLS);
-                //     return [['sale_ok', '=', true], ['available_in_pos', '=', true], ['write_date', '>=', lastupdate]];
-                // }
-                // else
-                //     return [['sale_ok', '=', true], ['available_in_pos', '=', true]];
-                return [['sale_ok', '=', true], ['available_in_pos', '=', true]];
+                if (lastupdateLS){
+                    lastupdate = Date.parse(lastupdateLS);
+                    return [['sale_ok', '=', true], ['available_in_pos', '=', true], ['write_date', '>=', lastupdate]];
+                }else{
+                    return [['sale_ok', '=', true], ['available_in_pos', '=', true]];
+                }
             },
             context: function(self){ return { pricelist: self.pricelist.id, display_default_code: false }; },
             loaded: function(self, products){
-                self.db.add_products(products);
-                localStorage.setItem('odooPOSlastupdate_product.product', new Date().toString());
+                return self.db.add_products(products).then(function() {
+                    return localStorage.setItem('odooPOSlastupdate_product.product', new Date().toString());
+                });
             },
         },{
             model:  'account.bank.statement',
