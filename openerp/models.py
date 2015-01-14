@@ -705,7 +705,7 @@ class BaseModel(object):
                     pool._store_function[model].sort(key=lambda x: x[4])
 
     @classmethod
-    def _init_manual_fields(cls, cr):
+    def _init_manual_fields(cls, cr, partial=False):
         # Check whether the query is already done
         if cls.pool.fields_by_model is not None:
             manual_fields = cls.pool.fields_by_model.get(cls._name, [])
@@ -729,14 +729,20 @@ class BaseModel(object):
             elif field['ttype'] in ('selection', 'reference'):
                 attrs['selection'] = eval(field['selection'])
             elif field['ttype'] == 'many2one':
+                if partial and field['relation'] not in cls.pool:
+                    continue
                 attrs['comodel_name'] = field['relation']
                 attrs['ondelete'] = field['on_delete']
                 attrs['domain'] = eval(field['domain']) if field['domain'] else None
             elif field['ttype'] == 'one2many':
+                if partial and field['relation'] not in cls.pool:
+                    continue
                 attrs['comodel_name'] = field['relation']
                 attrs['inverse_name'] = field['relation_field']
                 attrs['domain'] = eval(field['domain']) if field['domain'] else None
             elif field['ttype'] == 'many2many':
+                if partial and field['relation'] not in cls.pool:
+                    continue
                 attrs['comodel_name'] = field['relation']
                 _rel1 = field['relation'].replace('.', '_')
                 _rel2 = field['model'].replace('.', '_')
@@ -1671,7 +1677,7 @@ class BaseModel(object):
         if name in self._fields:
             convert = self._fields[name].convert_to_display_name
             for record in self:
-                result.append((record.id, convert(record[name])))
+                result.append((record.id, convert(record[name], record)))
         else:
             for record in self:
                 result.append((record.id, "%s,%s" % (record._name, record.id)))
@@ -2103,7 +2109,7 @@ class BaseModel(object):
             if f not in groupby_fields
             if f in self._fields
             if self._fields[f].type in ('integer', 'float')
-            if getattr(self._fields[f].base_field.column, '_classic_write')
+            if getattr(self._fields[f].base_field.column, '_classic_write', False)
         ]
 
         field_formatter = lambda f: (self._fields[f].group_operator or 'sum', self._inherits_join_calc(f, query), f)
@@ -2939,8 +2945,11 @@ class BaseModel(object):
                 field.reset()
 
     @api.model
-    def _setup_fields(self):
-        """ Setup the fields (dependency triggers, etc). """
+    def _setup_fields(self, partial=False):
+        """ Setup the fields (dependency triggers, etc).
+
+            :param partial: ``True`` if all models have not been loaded yet.
+        """
         cls = type(self)
         if cls._setup_done:
             return
@@ -2951,8 +2960,7 @@ class BaseModel(object):
             self.env[parent]._setup_fields()
 
         # retrieve custom fields
-        if not self._context.get('_setup_fields_partial'):
-            cls._init_manual_fields(self._cr)
+        cls._init_manual_fields(self._cr, partial=partial)
 
         # retrieve inherited fields
         cls._inherits_check()
@@ -4168,7 +4176,7 @@ class BaseModel(object):
         # invalidate and mark new-style fields to recompute; do this before
         # setting other fields, because it can require the value of computed
         # fields, e.g., a one2many checking constraints on records
-        recs.modified([u[0] for u in updates])
+        recs.modified(self._fields)
 
         # call the 'set' method of fields which are not classic_write
         upd_todo.sort(lambda x, y: self._columns[x].priority-self._columns[y].priority)

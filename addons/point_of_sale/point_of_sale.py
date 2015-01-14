@@ -1111,7 +1111,7 @@ class pos_order(osv.osv):
                 })
 
                 if data_type == 'product':
-                    key = ('product', values['partner_id'], values['product_id'], values['debit'] > 0)
+                    key = ('product', values['partner_id'], values['product_id'], values['analytic_account_id'], values['debit'] > 0)
                 elif data_type == 'tax':
                     key = ('tax', values['partner_id'], values['tax_code_id'], values['debit'] > 0)
                 elif data_type == 'counter_part':
@@ -1382,13 +1382,14 @@ class pos_category(osv.osv):
     def name_get(self, cr, uid, ids, context=None):
         if not len(ids):
             return []
-        reads = self.read(cr, uid, ids, ['name','parent_id'], context=context)
+        reads = self.browse(cr, uid, ids, context=context)
         res = []
         for record in reads:
-            name = record['name']
-            if record['parent_id']:
-                name = record['parent_id'][1]+' / '+name
-            res.append((record['id'], name))
+            if record.parent_id:
+                name = '%s / %s' % (record.parent_id.name, record.name)
+            else:
+                name = record.name
+            res.append((record.id, name))
         return res
 
     def _name_get_fnc(self, cr, uid, ids, prop, unknow_none, context=None):
