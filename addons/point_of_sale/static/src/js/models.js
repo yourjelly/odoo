@@ -276,10 +276,21 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             fields: ['display_name', 'list_price','price','pos_categ_id', 'taxes_id', 'ean13', 'default_code', 
                      'to_weight', 'uom_id', 'uos_id', 'uos_coeff', 'mes_type', 'description_sale', 'description',
                      'product_tmpl_id'],
-            domain: [['sale_ok','=',true],['available_in_pos','=',true]],
+            domain: function(self){
+                var lastupdateLS = localStorage.getItem('odooPOSlastupdate_product.product');
+                // if (lastupdateLS)
+                // {
+                //     lastupdate = Date.parse(lastupdateLS);
+                //     return [['sale_ok', '=', true], ['available_in_pos', '=', true], ['write_date', '>=', lastupdate]];
+                // }
+                // else
+                //     return [['sale_ok', '=', true], ['available_in_pos', '=', true]];
+                return [['sale_ok', '=', true], ['available_in_pos', '=', true]];
+            },
             context: function(self){ return { pricelist: self.pricelist.id, display_default_code: false }; },
             loaded: function(self, products){
                 self.db.add_products(products);
+                localStorage.setItem('odooPOSlastupdate_product.product', new Date().toString());
             },
         },{
             model:  'account.bank.statement',
@@ -391,6 +402,8 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                     
 
                     if( model.model ){
+                        //if (model.model=='pos.category')
+                        //    debugger;
                         if (model.ids) {
                             var records = new instance.web.Model(model.model).call('read',[ids,fields],context);
                         } else {

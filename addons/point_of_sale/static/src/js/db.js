@@ -151,10 +151,19 @@ function openerp_pos_db(instance, module){
         },
         add_products: function(products){
             var stored_categories = this.product_by_category_id;
-
+            
             if(!products instanceof Array){
                 products = [products];
             }
+            
+            //Store retrieved values in cache
+            for(var i = 0, len = products.length; i < len; i++){
+                var product = products[i];
+                var key = "product" + product[product.id];
+                
+            }
+            
+            //Build products list from cache
             for(var i = 0, len = products.length; i < len; i++){
                 var product = products[i];
                 var search_string = this._product_search_string(product);
