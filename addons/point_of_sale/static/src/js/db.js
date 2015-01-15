@@ -174,9 +174,7 @@ function openerp_pos_db(instance, module){
                 var key = "product" + product.id;
                 storing_defs.push(toJquery(localforage.setItem(key, product)));
             }
-            
-            //Pull cache in memory
-            
+            //Push products from cache to memory
             return $.when.apply(null, storing_defs).then( function() {
                 //Build products list from cache
                 return toJquery(localforage.iterate(function(product, key) {

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
-#    
+#
 #    OpenERP, Open Source Management Solution
 #    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
 #
@@ -15,17 +15,42 @@
 #    GNU Affero General Public License for more details.
 #
 #    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.     
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
 
-import account_bank_statement
-import controllers
-import point_of_sale
-import pos_cache
-import report
-import res_users
-import res_partner
-import wizard
+from datetime import datetime
 
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+from openerp import models, fields, api
+
+
+class pos_cache(models.Model):
+    _name = 'pos.cache'
+
+    name = fields.Datetime(string="Last cache invalidation")
+
+    @api.model
+    def invalidate(self):
+        new = self.create({'name': datetime.now()})
+        olds = self.search([('id', '<', new.id)])
+        if olds:
+            olds.unlink()
+        return new
+
+
+class product_product(models.Model):
+    _inherit = 'product.product'
+
+    @api.multi
+    def unlink(self):
+        self.env['pos.cache'].invalidate()
+        return super(product_product, self).unlink()
+
+
+class product_template(models.Model):
+    _inherit = 'product.template'
+
+    @api.multi
+    def unlink(self):
+        self.env['pos.cache'].invalidate()
+        return super(product_template, self).unlink()

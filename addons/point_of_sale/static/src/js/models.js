@@ -29,6 +29,9 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             this.db = new module.PosDB();                       // a local database used to search trough products and categories & store pending orders
             this.debug = jQuery.deparam(jQuery.param.querystring()).debug !== undefined;    //debug mode 
             
+            this.cacherelevant = false;
+            this.lastupdateLS = false;
+            
             // Business data; loaded from the server at launch
             this.accounting_precision = 2; //TODO
             this.company_logo = null;
@@ -80,7 +83,6 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                         return self.connect_to_proxy();
                     }
                 });
-            
         },
 
         // releases ressources holds by the model at the end of life of the posmodel
@@ -114,6 +116,37 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             return done;
         },
 
+        //Check if information in cache is still relevant or needs to be cleared
+        check_cache: function(){
+            var self = this;
+            return new instance.web.Model('pos.cache').call('search',[[]]).then(function(invalidation_ids){
+                if (invalidation_ids){
+                    return new instance.web.Model('pos.cache').call('read',[invalidation_ids, []]).then(function(invalidationdatestr){
+                        var invalidationdate = openerp.str_to_datetime(invalidationdatestr[0]['name']);
+                        var lastupdate = self.lastupdateLS = localStorage.getItem('odooPOSlastupdate_product.product');
+                        if (lastupdate){
+                            self.lastupdateLS = openerp.str_to_datetime(lastupdate);
+                        }else{
+                            self.lastupdateLS = null;
+                        }
+                        if (self.lastupdateLS<=invalidationdate){
+                            self.cacherelevant = false;
+                            return localforage.clear().then(function(){
+                                return false
+                            });
+                        }else{
+                            self.cacherelevant = true;
+                            return true;
+                        };
+                    });
+                }else{
+                    self.cacherelevant = true;
+                    self.lastupdateLS = false;
+                    return true
+                };
+            });
+        },
+        
         // helper function to load data from the server. Obsolete use the models loader below.
         fetch: function(model, fields, domain, ctx){
             this._load_progress = (this._load_progress || 0) + 0.05; 
@@ -255,7 +288,6 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                 } else {
                     self.currency.decimals = 0;
                 }
-
             },
         },{
             model: 'product.packaging',
@@ -277,18 +309,25 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                      'to_weight', 'uom_id', 'uos_id', 'uos_coeff', 'mes_type', 'description_sale', 'description',
                      'product_tmpl_id'],
             domain: function(self){
-                var lastupdateLS = localStorage.getItem('odooPOSlastupdate_product.product');
-                if (lastupdateLS){
-                    lastupdate = Date.parse(lastupdateLS);
-                    return [['sale_ok', '=', true], ['available_in_pos', '=', true], ['write_date', '>=', lastupdate]];
-                }else{
-                    return [['sale_ok', '=', true], ['available_in_pos', '=', true]];
+                var domain = [['sale_ok', '=', true], ['available_in_pos', '=', true], ['id', '<', 350]];
+                if (self.cacherelevant && self.lastupdateLS){
+                    debugger;
+                    domain = [['sale_ok', '=', true], ['available_in_pos', '=', true], ['write_date', '>=', openerp.datetime_to_str(self.lastupdateLS)], ['id', '<', 350]];
                 }
+                return domain
+            },
+            uncache_domain: function(self){
+                var domain = ['&', ['sale_ok', '=', true], ['sale_ok', '=', false]];
+                if (self.cacherelevant && self.lastupdateLS){
+                    return ['|', ['sale_ok', '=', false], ['available_in_pos', '=', false]];
+                    //return ['&', ['write_date', '>=', self.lastupdateLS], '|', ['sale_ok', '=', false], ['available_in_pos', '=', false]];
+                }
+                return domain
             },
             context: function(self){ return { pricelist: self.pricelist.id, display_default_code: false }; },
             loaded: function(self, products){
                 return self.db.add_products(products).then(function() {
-                    return localStorage.setItem('odooPOSlastupdate_product.product', new Date().toString());
+                    localStorage.setItem('odooPOSlastupdate_product.product', openerp.datetime_to_str(new Date()));
                 });
             },
         },{
@@ -387,6 +426,16 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             var progress_step = 1.0 / self.models.length;
             var tmp = {}; // this is used to share a temporary state between models loaders
 
+            function toJquery(p) {
+                return $.Deferred(function (d) {
+                    p.then(function () {
+                        d.resolve.apply(d, arguments);
+                    }, function () {
+                        d.reject.apply(d, arguments);
+                    })
+                });
+            }
+            
             function load_model(index){
                 if(index >= self.models.length){
                     loaded.resolve();
@@ -397,28 +446,43 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                     var domain =  typeof model.domain === 'function'  ? model.domain(self,tmp)  : model.domain;
                     var context = typeof model.context === 'function' ? model.context(self,tmp) : model.context; 
                     var ids     = typeof model.ids === 'function'     ? model.ids(self,tmp) : model.ids;
-                    progress += progress_step;
                     
+                    progress += progress_step;
 
                     if( model.model ){
-                        //if (model.model=='pos.category')
-                        //    debugger;
-                        if (model.ids) {
-                            var records = new instance.web.Model(model.model).call('read',[ids,fields],context);
-                        } else {
-                            var records = new instance.web.Model(model.model).query(fields).filter(domain).context(context).all()
-                        }
-                        records.then(function(result){
-                                try{    // catching exceptions in model.loaded(...)
-                                    $.when(model.loaded(self,result,tmp))
-                                        .then(function(){ load_model(index + 1); },
-                                              function(err){ loaded.reject(err); });
-                                }catch(err){
-                                    loaded.reject(err);
+                        if ('uncache_domain' in model) {
+                            var dom = model.uncache_domain(self,tmp);
+                            uncaching = new instance.web.Model(model.model).call('search',[dom]).then(function(prod_ids) {
+                                var storing_defs = [];
+                                for(var i = 0, len = prod_ids.length; i < len; i++){
+                                    var prod_id = prod_ids[i];
+                                    var key = "product" + prod_id;
+                                    storing_defs.push(toJquery(localforage.removeItem(key)));
                                 }
-                            },function(err){
-                                loaded.reject(err);
+                                return $.when.apply(null, storing_defs);
                             });
+                        }
+                        else {
+                            var uncaching = new $.Deferred().resolve();
+                        }
+                        uncaching.then(function(){
+                            if (model.ids) {
+                                var records = new instance.web.Model(model.model).call('read',[ids,fields],context);
+                            } else {
+                                var records = new instance.web.Model(model.model).query(fields).filter(domain).context(context).all()
+                            }
+                            records.then(function(result){
+                                    try{    // catching exceptions in model.loaded(...)
+                                        $.when(model.loaded(self,result,tmp))
+                                            .then(function(){ load_model(index + 1); },
+                                                  function(err){ loaded.reject(err); });
+                                    }catch(err){
+                                        loaded.reject(err);
+                                    }
+                                },function(err){
+                                    loaded.reject(err);
+                                });
+                        });
                     }else if( model.loaded ){
                         try{    // catching exceptions in model.loaded(...)
                             $.when(model.loaded(self,tmp))
@@ -434,7 +498,9 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             }
 
             try{
-                load_model(0);
+                self.check_cache().then(function(){
+                    load_model(0);
+                });
             }catch(err){
                 loaded.reject(err);
             }
