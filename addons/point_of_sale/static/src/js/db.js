@@ -168,14 +168,19 @@ function openerp_pos_db(instance, module){
             }
             
             //Store retrieved values in cache
+            console.log("data -> cache")
+            console.log(Date())
             var storing_defs = [];
             for(var i = 0, len = products.length; i < len; i++){
                 var product = products[i];
                 var key = "product" + product.id;
                 storing_defs.push(toJquery(localforage.setItem(key, product)));
             }
+            
             //Push products from cache to memory
             return $.when.apply(null, storing_defs).then( function() {
+                console.log("cache -> memory")
+                console.log(Date())
                 //Build products list from cache
                 return toJquery(localforage.iterate(function(product, key) {
                     var search_string = self._product_search_string(product);

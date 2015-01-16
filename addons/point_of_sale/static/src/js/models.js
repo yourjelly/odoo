@@ -131,7 +131,11 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                         }
                         if (self.lastupdateLS<=invalidationdate){
                             self.cacherelevant = false;
+                            console.log("Clearing cache")
+                            console.log(Date())
                             return localforage.clear().then(function(){
+                                console.log("Cache empty")
+                                console.log(Date())
                                 return false
                             });
                         }else{
@@ -309,24 +313,24 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                      'to_weight', 'uom_id', 'uos_id', 'uos_coeff', 'mes_type', 'description_sale', 'description',
                      'product_tmpl_id'],
             domain: function(self){
-                var domain = [['sale_ok', '=', true], ['available_in_pos', '=', true], ['id', '<', 350]];
+                var domain = [['sale_ok', '=', true], ['available_in_pos', '=', true]];
                 if (self.cacherelevant && self.lastupdateLS){
-                    debugger;
-                    domain = [['sale_ok', '=', true], ['available_in_pos', '=', true], ['write_date', '>=', openerp.datetime_to_str(self.lastupdateLS)], ['id', '<', 350]];
+                    domain = [['sale_ok', '=', true], ['available_in_pos', '=', true], '|', ['write_date', '>=', openerp.datetime_to_str(self.lastupdateLS)], ['product_tmpl_id.write_date', '>=', openerp.datetime_to_str(self.lastupdateLS)]];
                 }
                 return domain
             },
             uncache_domain: function(self){
                 var domain = ['&', ['sale_ok', '=', true], ['sale_ok', '=', false]];
                 if (self.cacherelevant && self.lastupdateLS){
-                    return ['|', ['sale_ok', '=', false], ['available_in_pos', '=', false]];
-                    //return ['&', ['write_date', '>=', self.lastupdateLS], '|', ['sale_ok', '=', false], ['available_in_pos', '=', false]];
+                    return ['|', ['write_date', '>=', self.lastupdateLS], ['product_tmpl_id.write_date', '>=', self.lastupdateLS], '|', ['sale_ok', '=', false], ['available_in_pos', '=', false]];
                 }
                 return domain
             },
             context: function(self){ return { pricelist: self.pricelist.id, display_default_code: false }; },
             loaded: function(self, products){
                 return self.db.add_products(products).then(function() {
+                    console.log("in memory")
+                    console.log(Date())
                     localStorage.setItem('odooPOSlastupdate_product.product', openerp.datetime_to_str(new Date()));
                 });
             },
@@ -451,6 +455,8 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
 
                     if( model.model ){
                         if ('uncache_domain' in model) {
+                            console.log("start uncaching")
+                            console.log(Date())
                             var dom = model.uncache_domain(self,tmp);
                             uncaching = new instance.web.Model(model.model).call('search',[dom]).then(function(prod_ids) {
                                 var storing_defs = [];
@@ -466,6 +472,8 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                             var uncaching = new $.Deferred().resolve();
                         }
                         uncaching.then(function(){
+                            console.log("Reading " + model.model)
+                            console.log(Date())
                             if (model.ids) {
                                 var records = new instance.web.Model(model.model).call('read',[ids,fields],context);
                             } else {
