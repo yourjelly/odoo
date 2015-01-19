@@ -1,0 +1,8 @@
+<template>
+    <t t-name="sale_stock.warning">
+        <div t-if="warnings.length" class="bg-danger container-fluid">
+            <p><strong>Not enough Stock!:</strong></p>
+            <p t-foreach="warnings" t-as="warning"><t t-esc="warning"/></p>
+        </div>
+    </t>
+</template>

@@ -83,6 +83,10 @@
                    <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="before">
                        <field name="route_id" groups="sale_stock.group_route_so_lines"/>
                    </xpath>
+                   <xpath expr="//group[@name='sale_total']" position="before">
+                        <span class="stock_alert"/>
+                   </xpath>
+
                 </data>
            </field>
         </record>

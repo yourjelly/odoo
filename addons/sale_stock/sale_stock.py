@@ -350,7 +350,7 @@ class sale_order_line(osv.osv):
                         (qty, uom_record.name,
                          max(0,product_obj.virtual_available), uom_record.name,
                          max(0,product_obj.qty_available), uom_record.name)
-                    warning_msgs += _("Not enough stock ! : ") + warn_msg + "\n\n"
+                    warning_msgs += warn_msg + "\n\n"
 
         #update of warning messages
         if warning_msgs:

@@ -55,6 +55,7 @@ You can choose flexible invoicing methods:
         'res_config_view.xml',
         'report/sale_report_view.xml',
         'account_invoice_view.xml',
+        'sale_stock.xml',
     ],
     'demo': ['sale_stock_demo.xml'],
     'test': [
@@ -64,6 +65,7 @@ You can choose flexible invoicing methods:
         'test/prepaid_order_policy.yml',
         'test/sale_order_onchange.yml',
     ],
+    'qweb': ['static/src/xml/sale_stock.xml'],
     'installable': True,
     'auto_install': True,
 }
