@@ -1453,7 +1453,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 }
             }
 
-            if(!this.is_paid()){
+            if (!order.is_paid() || this.invoicing) {
                 return;
             }
 
