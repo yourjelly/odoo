@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <template id="assets" inherit_id="point_of_sale.assets">
+          <xpath expr="." position="inside">
+              <script type="text/javascript" src="/pos_demo/static/src/js/data.js"></script>
+              <script type="text/javascript" src="/pos_demo/static/src/js/demo.js"></script>
+          </xpath>
+        </template>
+
+        <template id="index" inherit_id="point_of_sale.index" primary="True" >
+            <xpath expr="//*[@id='loading-script']" position="replace">
+                <script type="text/javascript" id="loading-script">
+                    $(function() {
+
+                    if(location.hash.indexOf('record') >= 0) {
+                        window.demo_mode = 'recording';
+                    } else {
+                        window.demo_mode = "playback";
+                    }
+
+                    var s = new openerp.init();
+                    var wc = new s.web.WebClient();
+
+                    wc.show_application = function() {
+                    wc.action_manager.do_action("pos.ui");
+                    };
+
+                    wc.setElement($(document.body));
+                    wc.start();
+                    });
+                </script>
+            </xpath>
+        </template>
+
+    </data>
+</openerp>
