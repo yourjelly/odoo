@@ -49,6 +49,7 @@ After installing this module, the Configuration wizard for accounting is launche
              'l10n_sg_chart.xml',
              'l10n_sg_chart_tax.xml',
              'l10n_sg_wizard.xml',
+             'account_view.xml'
     ],
     'installable': True,
 }

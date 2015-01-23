@@ -65,7 +65,7 @@ class tax_report(report_sxw.rml_parse, common_report_header):
     def _get_basedon(self, form):
         return form['form']['based_on']
 
-    def _get_lines(self, based_on, company_id=False, parent=False, level=0, context=None):
+    def _get_lines(self, based_on, company_id=False, parent=False, level=0, sequence=None, printable=False, context=None):
         period_list = self.period_ids
         res = self._get_codes(based_on, company_id, parent, level, period_list, context=context)
         if period_list:
