@@ -10,7 +10,6 @@ openerp.pos_demo = function(instance) {
 
     function message(msg, arg) {
         if (window.top && window.top !== window) {
-            console.log('sending:',msg,arg);
             window.top.postMessage(msg,'*');
         } else {
             console.log('not sending',msg,arg);
