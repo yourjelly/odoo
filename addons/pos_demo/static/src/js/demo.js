@@ -16,6 +16,15 @@ openerp.pos_demo = function(instance) {
         }
     }
 
+    function redraw(selector){
+        setTimeout(function(){
+            $(selector).css({'transform':'translateZ(0)'});
+            setTimeout(function(){
+                $(selector).css({'transform':'none'});
+            },25);
+        },0)
+    }
+
     // Some modifications that we want in playback mode
     // only, so that the regular pos is not broken when
     // this module is installed.
@@ -29,6 +38,20 @@ openerp.pos_demo = function(instance) {
         module.Gui.include({
             close: function() {
                 message('close');
+            },
+        });
+
+        module.PaymentScreenWidget.include({
+            show: function(arg) {
+                this._super(arg);
+                redraw('.pos-content');
+            },
+            click_paymentmethods: function(arg) {
+                this._super(arg);
+                redraw('.pos-content');
+                setTimeout(function(){
+                    redraw('.button.next');
+                },100);
             },
         });
 
