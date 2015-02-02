@@ -1445,6 +1445,46 @@ class res_partner(osv.osv):
         
         return partner_id
 
-
+class product_product(osv.osv):
+    _inherit = 'product.product'
+    
+    def read(self, cr, uid, ids, fields=None, context=None, load='_classic_read'):
+        from openerp.osv.orm import BaseModel
+        #Try to read values from template to improve loading time
+        fields_prod = []
+        fields_tmpl = []
+        for field in fields:
+            if field in ('list_price', 'pos_categ_id', 'categ_id', 'to_weight', 'uos_id', 'uos_coeff', 'mes_type', 'description_sale', 'description'):
+                fields_tmpl.append(field)
+            else:
+                fields_prod.append(field)
+        if fields_tmpl:
+            import cProfile, pstats, StringIO
+            pr = cProfile.Profile()
+            pr.enable()
+            
+            result = super(product_product, self).read(cr, uid, ids, fields=fields_prod, context=context, load=load)
+            tmpl_ids = [x['product_tmpl_id'][0] for x in result]
+            fields_tmpl.append('id')
+            self.pool['product.template'].browse(cr, uid, tmpl_ids, context=context)
+            flds_tmpl = [fld for fld in fields_tmpl if fld!="id"]
+            for res in result:
+                tmp = self.pool['product.template'].browse(cr, uid, x['product_tmpl_id'][0], context=context)
+                res2 = BaseModel.read(tmp, flds_tmpl, load=load)[0]
+                res2.pop('id', False)
+                res.update(res2)
+            # result = super(product_product, self).read(cr, uid, ids, fields=fields, context=context, load=load)
+            
+            pr.disable()
+            s = StringIO.StringIO()
+            sortby = 'cumulative'
+            ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+            ps.print_stats()
+            print s.getvalue()
+            
+        else:
+            result = super(product_product, self).read(cr, uid, ids, fields=fields, context=context, load=load)
+        return result
+        
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

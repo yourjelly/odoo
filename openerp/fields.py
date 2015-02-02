@@ -487,6 +487,8 @@ class Field(object):
         """ Compute the related field `self` on `records`. """
         # when related_sudo, bypass access rights checks when reading values
         others = records.sudo() if self.related_sudo else records
+        print self.name
+        print datetime.now()
         for record, other in zip(records, others):
             if not record.id:
                 # draft record, do not switch to another environment
@@ -495,7 +497,9 @@ class Field(object):
             for name in self.related[:-1]:
                 other = other[name][:1]
             record[self.name] = other[self.related[-1]]
-
+        print datetime.now()
+        print "----------------------------"
+        
     def _inverse_related(self, records):
         """ Inverse the related field `self` on `records`. """
         for record in records:
