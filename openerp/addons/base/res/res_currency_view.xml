@@ -53,15 +53,15 @@
                         </group>
 
                         <group string="Miscellaneous">
-                            <field name="base"/>
                             <field name="active"/>
                         </group>
                     </group>
 
-                    <field mode="tree" name="rate_ids" attrs="{'readonly':[('base','=',True)]}">
+                    <field mode="tree" name="rate_ids">
                         <tree string="Rates" editable="bottom">
                             <field name="name"/>
                             <field name="rate"/>
+                            <field name="company_id"/>
                         </tree>
                     </field>
                 </form>

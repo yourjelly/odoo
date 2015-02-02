@@ -18,27 +18,70 @@
 #
 ##############################################################################
 
-from openerp.osv import osv
+from openerp import api, models
+from openerp.exceptions import UserError
 
 """Inherit res.currency to handle accounting date values when converting currencies"""
 
-class res_currency_account(osv.osv):
+class res_currency_account(models.Model):
     _inherit = "res.currency"
 
-    def _get_conversion_rate(self, cr, uid, from_currency, to_currency, context=None):
-        if context is None:
-            context = {}
-        rate = super(res_currency_account, self)._get_conversion_rate(cr, uid, from_currency, to_currency, context=context)
+    @api.model
+    def _get_conversion_rate(self, from_currency, to_currency):
+        rate = super(res_currency_account, self)._get_conversion_rate(from_currency, to_currency)
         #process the case where the account doesn't work with an outgoing currency rate method 'at date' but 'average'
-        account = context.get('res.currency.compute.account')
-        account_invert = context.get('res.currency.compute.account_invert')
+        account = self._context.get('res.currency.compute.account')
+        account_invert = self._context.get('res.currency.compute.account_invert')
         if account and account.currency_mode == 'average' and account.currency_id:
-            query = self.pool.get('account.move.line')._query_get(cr, uid, context=context)
-            cr.execute('select sum(debit-credit),sum(amount_currency) from account_move_line l ' \
+            query = self.env['account.move.line']._query_get()
+            self._cr.execute('select sum(debit-credit),sum(amount_currency) from account_move_line l ' \
               'where l.currency_id=%s and l.account_id=%s and '+query, (account.currency_id.id,account.id,))
-            tot1,tot2 = cr.fetchone()
+            tot1,tot2 = self._cr.fetchone()
             if tot2 and not account_invert:
                 rate = float(tot1)/float(tot2)
             elif tot1 and account_invert:
                 rate = float(tot2)/float(tot1)
         return rate
+
+    @api.one
+    def _set_currency_company_rate(self, company_id):
+        """Generates the currency rate for the company"""
+        res_currency_rate = self.env['res.currency.rate']
+        if self.search_count([('company_id', '=', company_id)]):
+            # has already the currencies for this company
+            return True
+
+        if res_currency_rate.search_count([('company_id', '=', company_id)]):
+            # has already rates for this company configured
+            # TODO: should we check rate for for currency_id=self.id is 1?
+            return True
+
+        # eur = self.ref('base.EUR')
+
+        rates = {}
+        for base_rate in res_currency_rate.search([('company_id', '=', False)]):
+            # base data rates basic are (amount / rate = amount EUR)
+            # creates rate for each currency so that (amount / rate = amount in company's currency)
+            currency = base_rate.currency_id
+            if rates.get(currency,{}).get('name') > base_rate.name:
+                # has already a more rescent currency
+                continue
+
+            try:
+                rate = self.with_context({'date': base_rate.name}).compute(1.0, currency)
+            except UserError:
+                # no currency rate for this
+                continue
+
+            rates.setdefault(currency.id, {})
+            rates[currency.id].update({
+                'name': base_rate.name,
+                'currency_id': currency.id,
+                'company_id': company_id,
+                'rate': rate
+            })
+
+        for rate_data in rates.values():
+            res_currency_rate.create(rate_data)
+
+        return True

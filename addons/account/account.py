@@ -3404,6 +3404,8 @@ class wizard_multi_charts_accounts(osv.osv_memory):
                 except ValueError:
                     pass
 
+        self.pool['res.currency']._set_currency_company_rate(cr, uid, obj_wizard.currency_id.id, company_id, context=context)
+
         # If the floats for sale/purchase rates have been filled, create templates from them
         self._create_tax_templates_from_rates(cr, uid, obj_wizard, company_id, context=context)
 

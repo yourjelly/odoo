@@ -77,7 +77,6 @@ class res_currency(osv.osv):
         'rounding': fields.float('Rounding Factor', digits=(12,6)),
         'active': fields.boolean('Active'),
         'company_id':fields.many2one('res.company', 'Company'),
-        'base': fields.boolean('Base'),
         'position': fields.selection([('after','After Amount'),('before','Before Amount')], 'Symbol Position', help="Determines where the currency symbol should be placed after or before the amount.")
     }
     _defaults = {
@@ -296,6 +295,7 @@ class res_currency_rate(osv.osv):
         'name': fields.datetime('Date', required=True, select=True),
         'rate': fields.float('Rate', digits=(12, 6), help='The rate of the currency to the currency of rate 1'),
         'currency_id': fields.many2one('res.currency', 'Currency', readonly=True),
+        'company_id': fields.many2one('res.company', 'Company'),
     }
     _defaults = {
         'name': lambda *a: time.strftime('%Y-%m-%d 00:00:00'),
