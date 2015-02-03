@@ -489,6 +489,9 @@ class Field(object):
         others = records.sudo() if self.related_sudo else records
         print self.name
         print datetime.now()
+        if self.name=="uom_id":
+            import pdb
+            pdb.set_trace()
         for record, other in zip(records, others):
             if not record.id:
                 # draft record, do not switch to another environment

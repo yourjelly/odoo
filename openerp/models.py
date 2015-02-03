@@ -3110,22 +3110,26 @@ class BaseModel(object):
         fields = self.check_field_access_rights('read', fields)
 
         # split fields into stored and computed fields
-        stored, computed = [], []
+        stored, linked, computed = [], [], []
+        linkedcolu = [x for x in list(set(self._all_columns.keys()) - set(self._columns.keys())) if self._all_columns[x].column.selectable]
+            
         for name in fields:
             if name in self._columns:
                 stored.append(name)
+            elif name in linkedcolu and len(self._inherits)==1:
+                linked.append(name)
             elif name in self._fields:
                 computed.append(name)
             else:
                 _logger.warning("%s.read() with unknown field '%s'", self._name, name)
 
         # fetch stored fields from the database to the cache
-        self._read_from_database(stored)
+        self._read_from_database(stored, linked)
 
         # retrieve results from records; this takes values from the cache and
         # computes remaining fields
         result = []
-        name_fields = [(name, self._fields[name]) for name in (stored + computed)]
+        name_fields = [(name, self._fields[name]) for name in (stored + computed + linked)]
         use_name_get = (load == '_classic_read')
         for record in self:
             try:
@@ -3189,7 +3193,7 @@ class BaseModel(object):
                 self._cache[field] = FailedValue(e)
 
     @api.multi
-    def _read_from_database(self, field_names):
+    def _read_from_database(self, field_names, linked_field_names=None):
         """ Read the given fields of the records in `self` from the database,
             and store them in cache. Access errors are also stored in cache.
         """
@@ -3206,6 +3210,17 @@ class BaseModel(object):
         # the ir.rule clauses, and contains at least self._table.
         rule_clause, rule_params, tables = env['ir.rule'].domain_get(self._name, 'read')
 
+        linkedcolu = [x for x in list(set(self._all_columns.keys()) - set(self._columns.keys())) if self._all_columns[x].column.selectable]
+        if self._name=="product.product":
+            import pudb
+            pudb.set_trace()
+            
+        joins_clause = []
+        if linked_field_names:
+            for tbl in self._inherits:
+                tables.append('"%s"' % tbl.replace(".","_"))
+                joins_clause.append('"%s"."%s"="%s"."%s"' % (self._table, self._inherits[tbl], tbl.replace(".", "_"), 'id'))
+
         # determine the fields that are stored as columns in self._table
         fields_pre = [f for f in field_names if self._columns[f]._classic_write]
 
@@ -3220,13 +3235,14 @@ class BaseModel(object):
         qual_names = map(qualify, set(fields_pre + ['id']))
 
         query = """ SELECT %(qual_names)s FROM %(tables)s
-                    WHERE %(table)s.id IN %%s AND (%(extra)s)
+                    WHERE %(table)s.id IN %%s AND (%(extra)s) AND (%(joins)s)
                     ORDER BY %(order)s
                 """ % {
                     'qual_names': ",".join(qual_names),
                     'tables': ",".join(tables),
                     'table': self._table,
                     'extra': " OR ".join(rule_clause) if rule_clause else "TRUE",
+                    'joins': " AND ".join(joins_clause) if joins_clause else "TRUE",
                     'order': self._parent_order or self._order,
                 }
 
@@ -4565,7 +4581,7 @@ class BaseModel(object):
         # For transient models, restrict access to the current user, except for the super-user
         if self.is_transient() and self._log_access and user != SUPERUSER_ID:
             args = expression.AND(([('create_uid', '=', user)], args or []))
-
+            
         query = self._where_calc(cr, user, args, context=context)
         self._apply_ir_rules(cr, user, query, 'read', context=context)
         order_by = self._generate_order_by(order, query)
@@ -4583,6 +4599,8 @@ class BaseModel(object):
 
         limit_str = limit and ' limit %d' % limit or ''
         offset_str = offset and ' offset %d' % offset or ''
+        
+        
         query_str = 'SELECT "%s".id FROM ' % self._table + from_clause + where_str + order_by + limit_str + offset_str
         cr.execute(query_str, where_clause_params)
         res = cr.fetchall()
