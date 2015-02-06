@@ -16,6 +16,23 @@ openerp.pos_demo = function(instance) {
         }
     }
 
+    window.pos_weight = 0;
+
+    function receiveMessage(event){
+        if (event.data) {
+            var msg = event.data;
+            if (msg.name === 'scale_write') {
+                window.pos_weight = msg.value;
+                console.log('set_weight',msg.value);
+            }
+        } else {
+            console.log('message in pos',event.data);
+        }
+    }
+
+    window.addEventListener("message", receiveMessage, false);
+
+
     function redraw(selector){
         setTimeout(function(){
             $(selector).css({'transform':'translateZ(0)'});
@@ -31,7 +48,6 @@ openerp.pos_demo = function(instance) {
 
     if (demo_mode === 'playback') {
 
-        var weight = 0;
 
         /* --- Prevent access to the backend --- */
 
@@ -84,10 +100,12 @@ openerp.pos_demo = function(instance) {
             stop_searching: function(){},
             scale_read: function() {
                 message('scale_read');
-                return (new $.Deferred()).resolve(weight);
+                return (new $.Deferred()).resolve({weight:window.pos_weight});
             },
             print_receipt: function(receipt) { 
-                message('print');
+                if (receipt) {
+                    message('print');
+                }
             },
             open_cashbox: function() {
                 message('open_cashbox');
