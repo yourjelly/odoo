@@ -27,3 +27,6 @@ Pierre Gault pierre.gault@savoirfairelinux.com https://github.com/gaultp
 Pierre Lamarche pierre.lamarche@savoirfairelinux.com https://github.com/plamarche
 Sandy Carter sandy.carter@savoirfairelinux.com https://github.com/bwrsandman
 Vincent Vinet vincent.vinet@savoirfairelinux.com https://github.com/veloutin
+
+mathieu.benoit@savoirfairelinux.com
+jonatan.cloutier@savoirfairelinux.com

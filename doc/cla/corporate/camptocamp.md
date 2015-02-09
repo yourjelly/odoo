@@ -26,3 +26,8 @@ Leonardo Pistone leonardo.pistone@camptocamp.com https://github.com/lepistone
 Romain Deheele romain.deheele@camptocamp.com https://github.com/rdeheele
 Maxime Wiot maxime.wiot@camptocamp.com https://github.com/maxime-c2c
 
+
+ferdinand.gassauer@camptocamp.com
+vincent.renaville@camptocamp.com
+jean-baptiste.aubort@camptocamp.com
+
