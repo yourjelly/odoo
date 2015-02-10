@@ -35,6 +35,9 @@
     'version': '0.1',
     'depends': ['point_of_sale'],
     'data': [
+        'data/cron.xml',
+        'security/ir.model.access.csv',
+        'views/posconfig.xml',
         'views/templates.xml',
     ]
 }
