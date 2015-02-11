@@ -1459,10 +1459,10 @@ class product_product(osv.osv):
             else:
                 fields_prod.append(field)
         if fields_tmpl:
-            # import cProfile, pstats, StringIO
-            # pr = cProfile.Profile()
-            # pr.enable()
-            # 
+            import cProfile, pstats, StringIO
+            pr = cProfile.Profile()
+            pr.enable()
+             
             # result = super(product_product, self).read(cr, uid, ids, fields=fields_prod, context=context, load=load)
             # tmpl_ids = [x['product_tmpl_id'][0] for x in result]
             # fields_tmpl.append('id')

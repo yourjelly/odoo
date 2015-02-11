@@ -3111,8 +3111,14 @@ class BaseModel(object):
 
         # split fields into stored and computed fields
         stored, linked, computed = [], [], []
-        linkedcolu = [x for x in list(set(self._all_columns.keys()) - set(self._columns.keys())) if self._all_columns[x].column.selectable]
-            
+                
+        #if self._name=="product.product":
+        #    import pudb
+        #    pudb.set_trace()
+
+        linkedcolu = [x for x in list(set(self._all_columns.keys()) - set(self._columns.keys())) if type(self._all_columns[x].column) in (openerp.osv.fields.char,openerp.osv.fields.text,openerp.osv.fields.integer,openerp.osv.fields.float,openerp.osv.fields.many2one,openerp.osv.fields.boolean)]
+        #linkedcolu = []
+        
         for name in fields:
             if name in self._columns:
                 stored.append(name)
@@ -3211,9 +3217,6 @@ class BaseModel(object):
         rule_clause, rule_params, tables = env['ir.rule'].domain_get(self._name, 'read')
 
         linkedcolu = [x for x in list(set(self._all_columns.keys()) - set(self._columns.keys())) if self._all_columns[x].column.selectable]
-        if self._name=="product.product":
-            import pudb
-            pudb.set_trace()
             
         joins_clause = []
         if linked_field_names:
@@ -3233,6 +3236,10 @@ class BaseModel(object):
             else:
                 return '%s."%s"' % (self._table, f)
         qual_names = map(qualify, set(fields_pre + ['id']))
+            
+        if linked_field_names:
+            for fld in linked_field_names:
+                qual_names.append('"%s"."%s"' % (self._inherits.keys()[0].replace(".","_"), fld))
 
         query = """ SELECT %(qual_names)s FROM %(tables)s
                     WHERE %(table)s.id IN %%s AND (%(extra)s) AND (%(joins)s)
