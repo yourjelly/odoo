@@ -738,8 +738,8 @@ class product_template(osv.osv):
             for product in self.browse(cr, uid, ids, context=context):
                 old_uom = product.uom_id
                 if old_uom != new_uom:
-                    if self.pool.get('stock.move').search(cr, uid, [('product_id', 'in', [x.id for x in product.product_variant_ids]), ('state', '!=', 'cancel')], context=context):
-                        raise UserError(_('Unit of Measure can not be changed anymore!') + " " + _("As there are existing stock moves of this product, you can not change the Unit of Measurement anymore. "))
+                    raise UserError(_("Unit of Measure categories Mismatch! \nNew Unit of Measure '%s' must belong to same Unit of Measure category '%s' as of old Unit of Measure '%s'. If you need to change the unit of measure, you may deactivate this product from the 'Procurements' tab and create a new one.") % (new_uom.name, old_uom.category_id.name, old_uom.name,))
+
         if 'standard_price' in vals:
             for prod_template_id in ids:
                 self._set_standard_price(cr, uid, prod_template_id, vals['standard_price'], context=context)
