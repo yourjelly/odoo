@@ -2192,26 +2192,49 @@ class BaseModel(object):
         if not self._parent_store:
             return
         _logger.info('Computing parent left and right for table %s...', self._table)
-        def browse_rec(root, pos=0):
-            # TODO: set order
-            where = self._parent_name+'='+str(root)
-            if not root:
-                where = self._parent_name+' IS NULL'
-            if self._parent_order:
-                where += ' order by '+self._parent_order
-            cr.execute('SELECT id FROM '+self._table+' WHERE '+where)
-            pos2 = pos + 1
-            for id in cr.fetchall():
-                pos2 = browse_rec(id[0], pos2)
-            cr.execute('update '+self._table+' set parent_left=%s, parent_right=%s where id=%s', (pos, pos2, root))
-            return pos2 + 1
-        query = 'SELECT id FROM '+self._table+' WHERE '+self._parent_name+' IS NULL'
-        if self._parent_order:
-            query += ' order by ' + self._parent_order
-        pos = 0
-        cr.execute(query)
-        for (root,) in cr.fetchall():
-            pos = browse_rec(root, pos)
+        query = """
+            WITH RECURSIVE _tree (_id, _parent_id, _level, _order_path) AS (
+              SELECT id, %(parent_name)s, 1,
+                     ARRAY[row_number() OVER (ORDER BY %(parent_order)s)]
+                FROM %(table)s
+                WHERE %(parent_name)s IS NULL
+              UNION ALL
+              SELECT c.id, c.%(parent_name)s, p._level+1,
+                     (p._order_path ||
+                       ARRAY[row_number() over (ORDER BY %(parent_order)s)])
+                FROM %(table)s c
+                JOIN _tree p ON (c.%(parent_name)s = p._id)
+            ),
+            _tree_number (_id, _parent_id, _level, _order_path, _node_number, _child_count) AS (
+                 SELECT _id, _parent_id, _level, _order_path,
+                        row_number() OVER (ORDER BY _order_path),
+                        (SELECT count(*) FROM _tree t2
+                         WHERE array_length(t2._order_path, 1) > array_length(t._order_path, 1) AND
+                               t2._order_path[0:array_length(t._order_path, 1)] = t._order_path)
+                 FROM _tree t
+            ),
+            _tree_pleft (_id, _parent_id, _level, _order_path, _node_number,
+                         _child_count, _pleft) AS (
+                 SELECT _id, _parent_id, _level, _order_path, _node_number, _child_count,
+                        (2 * _node_number - _level - 1)
+                 FROM _tree_number
+            ),
+            _tree_pright (_id, _parent_id, _level, _order_path, _node_number, _child_count,
+                          _pleft, _pright) AS (
+                 SELECT _id, _parent_id, _level, _order_path, _node_number, _child_count, _pleft,
+                        (_child_count * 2 + _pleft + 1)
+                 FROM _tree_pleft
+            )
+            UPDATE %(table)s set parent_left = t._pleft, parent_right = t._pright
+            FROM _tree_pright t
+            WHERE t._id = %(table)s.id
+        """
+        query_meta = {
+            'table': self._table,
+            'parent_order': self._parent_order or self._order,
+            'parent_name': self._parent_name,
+        }
+        cr.execute(query % query_meta)
         self.invalidate_cache(cr, SUPERUSER_ID, ['parent_left', 'parent_right'])
         return True
 
