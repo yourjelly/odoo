@@ -54,6 +54,12 @@
                 content:   _t("Edit the price of this product by clicking on the amount."),
             },
             {
+                waitFor: function() {
+                    // When running in test mode, the tour engine is so fast, this step may be
+                    // reached before events are bound.
+                    var node = $('#wrap img.product_detail_img').parent()[0];
+                    return !_.isUndefined(($._data(node, 'events') || {}).mousedown);
+                },
                 waitNot:   '.product_price .oe_currency_value:visible:containsExact(1.00)',
                 element:   '#wrap img.product_detail_img',
                 placement: 'top',

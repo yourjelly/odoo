@@ -441,8 +441,8 @@ var Tour = {
     check: function (step) {
         return (step &&
             (!step.element || ($(step.element).size() && $(step.element).is(":visible") && !$(step.element).is(":hidden"))) &&
-            (!step.waitNot || !$(step.waitNot).size()) &&
-            (!step.waitFor || $(step.waitFor).size()));
+            (!step.waitNot || !(step.waitNot instanceof Function ? step.waitNot() : $(step.waitNot).size())) &&
+            (!step.waitFor ||  (step.waitFor instanceof Function ? step.waitFor() : $(step.waitFor).size())));
     },
     waitNextStep: function () {
         var state = Tour.getState();
