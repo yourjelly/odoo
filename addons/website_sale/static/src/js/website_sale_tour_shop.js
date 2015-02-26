@@ -58,7 +58,10 @@
                     // When running in test mode, the tour engine is so fast, this step may be
                     // reached before events are bound.
                     var node = $('#wrap img.product_detail_img').parent()[0];
-                    return !_.isUndefined(($._data(node, 'events') || {}).mousedown);
+                    var events = ($._data(node, 'events') || {});
+                    console.log('node', node);
+                    console.log('events', events);
+                    return !_.isUndefined(events.mousedown);
                 },
                 waitNot:   '.product_price .oe_currency_value:visible:containsExact(1.00)',
                 element:   '#wrap img.product_detail_img',
