@@ -59,9 +59,8 @@
                     // reached before events are bound.
                     var node = $('#wrap img.product_detail_img').parent()[0];
                     var events = ($._data(node, 'events') || {});
-                    console.log('node', node);
-                    console.log('events', events);
-                    return !_.isUndefined(events.mousedown);
+                    console.log('events', JSON.stringify(events));
+                    return !_.isUndefined(events.click);
                 },
                 waitNot:   '.product_price .oe_currency_value:visible:containsExact(1.00)',
                 element:   '#wrap img.product_detail_img',
