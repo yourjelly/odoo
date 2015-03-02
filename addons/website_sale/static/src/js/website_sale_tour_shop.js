@@ -54,7 +54,7 @@
                 content:   _t("Edit the price of this product by clicking on the amount."),
             },
             {
-                waitFor: function() {
+                waitFor_deactivated: function() {
                     // When running in test mode, the tour engine is so fast, this step may be
                     // reached before events are bound.
                     var node = $('#wrap img.product_detail_img').parent()[0];
