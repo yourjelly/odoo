@@ -500,6 +500,19 @@ class pos_session(osv.osv):
                     raise osv.except_osv(_('Error!'), 
                         _("The type of the journal for your payment method should be bank or cash "))
                 getattr(st, 'button_confirm_%s' % st.journal_id.type)(context=context)
+                generated_lines = {}
+                for line in st.move_line_ids:
+                    if line.credit:
+                        generated_lines.setdefault(line.partner_id.id, []).append(line.id)
+                for line in st.line_ids:
+                    move = line.pos_statement_id.account_move
+                    for line in move.line_id:
+                        if line.debit:
+                            generated_lines.setdefault(line.partner_id.id, []).append(line.id)
+                for partner_lines in generated_lines.values():
+                    self.pool['account.move.line'].reconcile(cr, uid, partner_lines, 'auto',
+                        st.account_id.id, st.period_id.id, st.journal_id.id, context=context)
+
         self._confirm_orders(cr, uid, ids, context=context)
         self.write(cr, uid, ids, {'state' : 'closed'}, context=context)
 
@@ -627,6 +640,7 @@ class pos_order(osv.osv):
                 self.action_invoice(cr, uid, [order_id], context)
                 order_obj = self.browse(cr, uid, order_id, context)
                 self.pool['account.invoice'].signal_workflow(cr, uid, [order_obj.invoice_id.id], 'invoice_open')
+                order_obj.write({'account_move': order_obj.invoice_id.move_id.id})
 
         return order_ids
 
