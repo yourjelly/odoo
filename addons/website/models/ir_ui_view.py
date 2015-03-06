@@ -250,7 +250,7 @@ class view(osv.osv):
                     'header': False,
                     'active': v.active,
                 })
-        return result
+        return sorted(result, key=lambda x: x.get('inherit_id'))
 
     def get_view_translations(self, cr, uid, xml_id, lang, field=['id', 'res_id', 'value', 'state', 'gengo_translation'], context=None):
         views = self.customize_template_get(cr, uid, xml_id, full=True, context=context)
