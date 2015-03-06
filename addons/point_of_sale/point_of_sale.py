@@ -502,12 +502,12 @@ class pos_session(osv.osv):
                 getattr(st, 'button_confirm_%s' % st.journal_id.type)(context=context)
                 generated_lines = {}
                 for line in st.move_line_ids:
-                    if line.credit:
+                    if not line.reconcile_id and line.account_id.type in ('payable', 'receivable'):
                         generated_lines.setdefault(line.partner_id.id, []).append(line.id)
                 for line in st.line_ids:
                     move = line.pos_statement_id.account_move
                     for line in move.line_id:
-                        if line.debit:
+                        if not line.reconcile_id and line.account_id.type in ('payable', 'receivable'):
                             generated_lines.setdefault(line.partner_id.id, []).append(line.id)
                 for partner_lines in generated_lines.values():
                     self.pool['account.move.line'].reconcile(cr, uid, partner_lines, 'auto',
