@@ -212,6 +212,7 @@
                             <t t-if="menu['children']"><span t-esc="menu['name']"/></t>
                             <t t-if="not menu['children']"><t t-call="web.menu_link"/></t>
                             <t t-call="web.menu_secondary_submenu"/>
+                            <hr t-if="not menu_last"/>
                         </t>
                     </div>
                 </t>
