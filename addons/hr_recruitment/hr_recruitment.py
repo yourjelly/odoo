@@ -600,11 +600,6 @@ class hr_job(osv.osv):
     _name = "hr.job"
     _inherits = {'mail.alias': 'alias_id'}
 
-    _track = {
-        'state': {
-            'hr_recruitment.mt_job_new': lambda self, cr, uid, obj, ctx=None: obj.state == 'open'
-        },
-    }
 
     def _get_attached_docs(self, cr, uid, ids, field_name, arg, context=None):
         res = {}
@@ -674,6 +669,12 @@ class hr_job(osv.osv):
         res = super(hr_job, self).unlink(cr, uid, ids, context=context)
         mail_alias.unlink(cr, uid, alias_ids, context=context)
         return res
+
+    def _track_subtype(self, cr, uid, ids, init_values, context=None):
+        record = self.browse(cr, uid, ids[0], context=context)
+        if 'state' in init_values and record.state == 'recruit':
+            return 'hr_recruitment.mt_job_new'
+        return super(hr_job, self)._track_subtype(cr, uid, ids, init_values, context=context)
 
     def action_print_survey(self, cr, uid, ids, context=None):
         job = self.browse(cr, uid, ids, context=context)[0]
