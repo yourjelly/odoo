@@ -84,6 +84,38 @@ ListView.include({
     }
 });
 
+var ImportInfo = Widget.extend({
+    template: 'infostat',
+    init: function(parent, result) {
+        this._super(parent, result);
+        this.result = result;
+    },
+    start: function() {
+        this.progress(this.result);
+    },
+    progress: function(result) {
+        var self = this;
+        if (result) {
+            var importedlist = result.updated + result.created;
+            self.$el.find('.progress-bar').css('width', ((importedlist)/result.total)*100 + "%");
+            self.$el.find('.progress_text').text("Importing... " + importedlist + " records out of " + result.total);
+        }
+    }
+});
+
+var RecordInfo = Widget.extend({
+    template: 'recordstat',
+    init: function(parent) {
+        this._super(parent);
+    },
+    stat: function(record) {
+        var self = this;
+        if (record) {
+            self.$el.find('.record').text(record);
+        }
+    }
+});
+
 var DataImport = Widget.extend({
     template: 'ImportView',
     opts: [
@@ -371,8 +403,29 @@ var DataImport = Widget.extend({
         });
     },
 
+    track_progress: function (context) {
+        var self = this;
+        self.created = 0;
+        self.updated = 0;
+        var importedlist;
+        this.Import.call('get_progress', [this.id], {'context':context})
+            .then(function (result) {
+                if(result){
+                    importedlist = result.created + result.updated;
+                    $('import_stat').remove();
+                    self.importInfo.progress(result);
+                    self.created = result.created;
+                    self.updated = result.updated;
+                }
+                if (!result || result.total != importedlist){
+                    self.track_progress(context)
+                }
+            });
+    },
+
     //- import itself
     call_import: function (kwargs) {
+        var self = this;
         var fields = this.$('.oe_import_fields input.oe_import_match_field').map(function (index, el) {
             return $(el).select2('val') || false;
         }).get();
@@ -380,11 +433,17 @@ var DataImport = Widget.extend({
             {}, this.parent_context,
             {tracking_disable: !this.$('#oe_import_tracking').prop('checked')}
         );
+        self.importInfo = new ImportInfo(this);
+        if(kwargs.dryrun == false){
+            self.importInfo.prependTo("body");
+            this.track_progress(kwargs.context);
+        }
         return this.Import.call('do', [this.id, fields, this.import_options()], kwargs)
             .then(undefined, function (error, event) {
                 // In case of unexpected exception, convert
                 // "JSON-RPC error" to an import failure, and
                 // prevent default handling (warning dialog)
+                if (kwargs.dryrun == false) { $('.import_stat').remove(); }
                 if (event) { event.preventDefault(); }
                 return $.when([{
                     type: 'error',
@@ -412,9 +471,19 @@ var DataImport = Widget.extend({
         this.exit();
     },
     exit: function () {
+        var self = this;
+        var is_imported = self.created ? self.created + " new ": "";
+        is_imported = self.updated ? (self.created ? is_imported + "and " + self.updated + " old ": is_imported + self.updated + " Old ") : is_imported
         this.do_action({
             type: 'ir.actions.client',
             tag: 'history_back'
+        }).then(function() {
+            if (is_imported) {
+                is_imported = is_imported + 'records successfully imported';
+                self.recordInfo = new RecordInfo(this);
+                self.recordInfo.prependTo("body");
+                self.recordInfo.stat(is_imported);
+            }
         });
     },
     onresults: function (event, from, to, message) {

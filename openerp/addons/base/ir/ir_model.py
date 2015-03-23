@@ -1013,6 +1013,7 @@ class ir_model_data(osv.osv):
 
     def _update(self,cr, uid, model, module, values, xml_id=False, store=True, noupdate=False, mode='init', res_id=False, context=None):
         model_obj = self.pool[model]
+        import_model = self.pool.get('base_import.import')
         if not context:
             context = {}
         # records created during module install should not display the messages of OpenChatter
@@ -1045,6 +1046,8 @@ class ir_model_data(osv.osv):
             self.write(cr, uid, [action_id], {
                 'date_update': time.strftime('%Y-%m-%d %H:%M:%S'),
                 },context=context)
+            if context.get('track_progress'):
+                import_model.set_progress(context.get('track_progress'), create=False)
         elif res_id:
             model_obj.write(cr, uid, [res_id], values, context=context)
             if xml_id:
@@ -1088,6 +1091,8 @@ class ir_model_data(osv.osv):
                         'res_id': res_id,
                         'noupdate': noupdate
                         },context=context)
+            if context.get('track_progress'):
+                import_model.set_progress(context.get('track_progress'), create=True)
         if xml_id and res_id:
             self.loads[(module, xml_id)] = (model, res_id)
             for table, inherit_field in model_obj._inherits.iteritems():

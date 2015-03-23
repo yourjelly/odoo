@@ -194,3 +194,50 @@
     font-family: "Lucida Grande", Helvetica, Verdana, Arial, sans-serif;
 }
 
+.import_stat {
+    position: absolute;
+    width: 100%;
+    display: block;
+    height: 100%;
+    background: rgba(44,44,44,0.4);
+    z-index: 1002000;
+}
+
+.statinfo {
+    margin: 10px auto;
+    width: 300px;
+    background: white;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.progress_info {
+    background-color: #C4C4C4;
+    height: 30px;
+    padding: 3px;
+    border-radius: 4px;
+}
+
+.progress_bar {
+     border-radius: 4px;
+     font-weight: 700;
+     text-shadow: 0 1px 0 #4E2443;
+     line-height: 25px;
+     height: 95%;
+     background: #428bca !important;
+     box-shadow: 0 1px 0 #7A3067;
+     width: 0%;
+}
+
+.progress_perc {
+    text-align: center;
+    font-weight: bold;
+    color: #7E7E7E;
+}
+
+.import_record {
+    position: absolute;
+    display: block;
+    margin: 11px 420px;
+    z-index: 1002000;
+}

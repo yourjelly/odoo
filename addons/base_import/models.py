@@ -20,6 +20,7 @@ class ir_import(orm.TransientModel):
     _name = 'base_import.import'
     # allow imports to survive for 12h in case user is slow
     _transient_max_hours = 12.0
+    _progress = {}
 
     _columns = {
         'res_model': fields.char('Model'),
@@ -28,6 +29,17 @@ class ir_import(orm.TransientModel):
         'file_name': fields.char('File Name'),
         'file_type': fields.char('File Type'),
     }
+
+    def get_progress(self, cr, uid, id, context=None):
+        if self._progress.get(id):
+            return self._progress[id]
+        return False
+
+    def set_progress(self, id, create=True):
+        if create:
+            self._progress[id]['created'] += 1
+        else:
+            self._progress[id]['updated'] += 1
 
     def get_fields(self, cr, uid, model, context=None,
                    depth=FIELDS_RECURSION_LIMIT):
@@ -323,8 +335,12 @@ class ir_import(orm.TransientModel):
             }]
 
         _logger.info('importing %d rows...', len(data))
+        context_copy = context.copy()
+        if not dryrun:
+            context_copy.update({'track_progress': id})
+            self._progress[id] = {'total': len(data), 'created': 0, 'updated': 0}
         import_result = self.pool[record.res_model].load(
-            cr, uid, import_fields, data, context=context)
+            cr, uid, import_fields, data, context=context_copy)
         _logger.info('done')
 
         # If transaction aborted, RELEASE SAVEPOINT is going to raise

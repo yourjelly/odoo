@@ -405,4 +405,23 @@
             <a href="#" class="oe_bold oe_list_button_import">Import</a>
         </t>
     </t>
+    <t t-name="infostat">
+        <div class="import_stat">
+            <div class="statinfo">
+                <div class="progress progress_info">
+                    <div class="progress-bar" role="progressbar">
+                    </div>
+                </div>
+                <div class="progress_text progress_perc"/>
+            </div>
+        </div>
+    </t>
+    <t t-name="recordstat">
+        <div class="alert alert-success alert-dismissible import_record" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">x</span>
+            </button>
+            <div class="record"/>
+        </div>
+    </t>
 </templates>
