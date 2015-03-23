@@ -312,6 +312,9 @@ var KanbanRecord = Widget.extend({
             'content': this.view.qweb.render('kanban-box', this.qweb_context)
         });
         this.replaceElement($el);
+        if (((this.qweb_context.record.name.value).indexOf(' ')) > 26) {
+            this.$el.find('div.oe_kanban_content').css( 'word-break', 'break-all');
+        }
         this.replace_fields();
     },
     replace_fields: function() {
