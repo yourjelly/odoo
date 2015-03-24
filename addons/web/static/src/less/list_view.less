@@ -1,0 +1,34 @@
+@odoo-list-grey: #c6c6c6;
+
+@table-bg-accent: #eef0f0;
+
+
+table.o-list-view {
+
+    cursor: pointer;
+
+    thead {
+        background-color: @odoo-list-grey;
+        color: @odoo-main-text-color;
+    }
+
+    .o-sortable:after {
+        font-family: FontAwesome;
+        margin-left: 5px;
+    }
+    .o-sort-up:after {
+        content: "\f0d7";
+    }
+    .o-sort-down:after {
+        content: "\f0d8";
+    }
+
+    tfoot {
+        background-color: @odoo-brand-primary;
+        color: white;
+    }
+
+    .o-list-record-selector input {
+        margin-left: 3px;
+    }
+}

@@ -55,7 +55,7 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
     },
     view_type: 'tree',
     events: {
-        'click thead th.oe_sortable[data-id]': 'sort_by_column'
+        'click thead th.o-sortable[data-id]': 'sort_by_column'
     },
     /**
      * Core class for list-type displays.
@@ -130,6 +130,7 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
                        80);
     },
     view_loading: function(r) {
+
         return this.load_list(r);
     },
     set_default_options: function (options) {
@@ -241,9 +242,9 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
 
         // Head hook
         // Selecting records
-        this.$el.find('.oe_list_record_selector').click(function(){
-            self.$el.find('.oe_list_record_selector input').prop('checked',
-                self.$el.find('.oe_list_record_selector').prop('checked')  || false);
+        this.$el.find('.o-list-record-selector').click(function(){
+            self.$el.find('.o-list-record-selector input').prop('checked',
+                self.$el.find('.o-list-record-selector').prop('checked')  || false);
             var selection = self.groups.get_selection();
             $(self.groups).trigger(
                 'selected', [selection.ids, selection.records]);
@@ -258,9 +259,9 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
 
         if(this.dataset._sort.length){
             if(this.dataset._sort[0].indexOf('-') == -1){
-                this.$el.find('th[data-id=' + this.dataset._sort[0] + ']').addClass("sortdown");
+                this.$el.find('th[data-id=' + this.dataset._sort[0] + ']').addClass("o-sort-down");
             }else {
-                this.$el.find('th[data-id=' + this.dataset._sort[0].split('-')[1] + ']').addClass("sortup");
+                this.$el.find('th[data-id=' + this.dataset._sort[0].split('-')[1] + ']').addClass("o-sort-up");
             }
         }
         this.trigger('list_view_loaded', data, this.grouped);
@@ -271,7 +272,7 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
      * Set this.$buttons with the produced jQuery element
      * @param {jQuery} [$node] a jQuery node where the rendered buttons should be inserted
      * $node may be undefined, in which case the ListView inserts them into this.options.$buttons
-     * or into a div of its template
+     * if it exists
      */
     render_buttons: function($node) {
         if (!this.$buttons) {
@@ -282,8 +283,6 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
             $node = $node || this.options.$buttons;
             if ($node) {
                 this.$buttons.appendTo($node);
-            } else {
-                this.$('.oe_list_buttons').replaceWith(this.$buttons);
             }
         }
     },
@@ -391,12 +390,12 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
             return false;
         }
         this.dataset.sort(col_name);
-        if($column.hasClass("sortdown") || $column.hasClass("sortup"))  {
-            $column.toggleClass("sortup sortdown");
+        if($column.hasClass("o-sort-down") || $column.hasClass("o-sort-up"))  {
+            $column.toggleClass("o-sort-up o-sort-down");
         } else {
-            $column.addClass("sortdown");
+            $column.addClass("o-sort-down");
         }
-        $column.siblings('.oe_sortable').removeClass("sortup sortdown");
+        $column.siblings('.o-sortable').removeClass("o-sort-up o-sort-down");
 
         this.reload_content();
     },
@@ -512,13 +511,13 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
      */
     reload_content: synchronized(function () {
         var self = this;
-        self.$el.find('.oe_list_record_selector').prop('checked', false);
+        this.$('.o-list-record-selector').prop('checked', false);
         this.records.reset();
         var reloaded = $.Deferred();
         reloaded.then(function () {
             self.configure_pager(self.dataset);
         });
-        this.$el.find('.oe_list_content').append(
+        this.$('.o-list-view').append(
             this.groups.render(function () {
                 if (self.dataset.index === null) {
                     if (self.records.length) {
@@ -644,7 +643,7 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
     do_select: function (ids, records, deselected) {
         // uncheck header hook if at least one row has been deselected
         if (deselected) {
-            this.$('.oe_list_record_selector').prop('checked', false);
+            this.$('.o-list-record-selector').prop('checked', false);
         }
 
         if (!ids.length) {
@@ -817,7 +816,7 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
         this.display_aggregates(aggregates);
     },
     display_aggregates: function (aggregation) {
-        var $footer_cells = this.$el.find('.oe_list_footer');
+        var $footer_cells = this.$('tfoot td');
         _(this.aggregate_columns).each(function (column) {
             if (!column['function']) {
                 return;
@@ -838,7 +837,7 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
      */
     get_active_domain: function () {
         var self = this;
-        if (this.$('.oe_list_record_selector').prop('checked')) {
+        if (this.$('.o-list-record-selector').prop('checked')) {
             var search_view = this.getParent().searchview;
             var search_data = search_view.build_search_data();
             return pyeval.eval_domains_and_contexts({
@@ -1016,7 +1015,7 @@ ListView.List = Class.extend( /** @lends instance.web.ListView.List# */{
                  */
                 e.preventDefault();
             })
-            .delegate('th.oe_list_record_selector', 'click', function (e) {
+            .delegate('td.o-list-record-selector', 'click', function (e) {
                 e.stopPropagation();
                 var selection = self.get_selection();
                 var checked = $(e.currentTarget).find('input').prop('checked');
@@ -1156,7 +1155,7 @@ ListView.List = Class.extend( /** @lends instance.web.ListView.List# */{
         }
         var cells = [];
         if (this.options.selectable) {
-            cells.push('<th class="oe_list_record_selector"></td>');
+            cells.push('<th class="o-list-record-selector"></td>');
         }
         _(this.columns).each(function(column) {
             if (column.invisible === '1') {
@@ -1185,7 +1184,7 @@ ListView.List = Class.extend( /** @lends instance.web.ListView.List# */{
             return result;
         }
         var records = this.records;
-        this.$current.find('th.oe_list_record_selector input:checked')
+        this.$current.find('td.o-list-record-selector input:checked')
                 .closest('tr').each(function () {
             var record = records.get($(this).data('id'));
             result.ids.push(record.get('id'));
