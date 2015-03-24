@@ -409,7 +409,7 @@
         <div class="import_stat">
             <div class="statinfo">
                 <div class="progress progress_info">
-                    <div class="progress-bar" role="progressbar">
+                    <div class="progress-bar progress_bar" role="progressbar">
                     </div>
                 </div>
                 <div class="progress_text progress_perc"/>

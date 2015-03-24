@@ -97,7 +97,7 @@ var ImportInfo = Widget.extend({
         var self = this;
         if (result) {
             var importedlist = result.updated + result.created;
-            self.$el.find('.progress-bar').css('width', ((importedlist)/result.total)*100 + "%");
+            self.$el.find('.progress_bar').css('width', ((importedlist)/result.total)*100 + "%");
             self.$el.find('.progress_text').text("Importing... " + importedlist + " records out of " + result.total);
         }
     }
@@ -405,27 +405,27 @@ var DataImport = Widget.extend({
 
     track_progress: function (context) {
         var self = this;
-        self.created = 0;
-        self.updated = 0;
-        var importedlist;
-        this.Import.call('get_progress', [this.id], {'context':context})
+        var timeinterval = setInterval(function(){
+        self.Import.call('get_progress', [self.id], {'context':context})
             .then(function (result) {
                 if(result){
-                    importedlist = result.created + result.updated;
-                    $('import_stat').remove();
+                    var importedlist = result.created + result.updated;
                     self.importInfo.progress(result);
                     self.created = result.created;
                     self.updated = result.updated;
                 }
-                if (!result || result.total != importedlist){
-                    self.track_progress(context)
+                if (result.total == importedlist){
+                    clearInterval(timeinterval);
                 }
             });
+        }, 1000);
     },
 
     //- import itself
     call_import: function (kwargs) {
         var self = this;
+        self.created = 0;
+        self.updated = 0;
         var fields = this.$('.oe_import_fields input.oe_import_match_field').map(function (index, el) {
             return $(el).select2('val') || false;
         }).get();
