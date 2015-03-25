@@ -96,8 +96,10 @@ var ImportInfo = Widget.extend({
     progress: function(result) {
         var self = this;
         if (result) {
+            console.log("In Progress-------", result);
             var importedlist = result.updated + result.created;
             self.$el.find('.progress_bar').css('width', ((importedlist)/result.total)*100 + "%");
+            console.log("Element-----------", self.$el.find('.progress_bar'));
             self.$el.find('.progress_text').text("Importing... " + importedlist + " records out of " + result.total);
         }
     }
@@ -404,8 +406,9 @@ var DataImport = Widget.extend({
     },
 
     track_progress: function (context) {
+        console.log("Continuing..........");
         var self = this;
-        var timeinterval = setInterval(function(){
+        self.timeinterval = setInterval(function(){
         self.Import.call('get_progress', [self.id], {'context':context})
             .then(function (result) {
                 if(result){
@@ -414,11 +417,11 @@ var DataImport = Widget.extend({
                     self.created = result.created;
                     self.updated = result.updated;
                 }
-                if (result.total == importedlist){
-                    clearInterval(timeinterval);
-                }
+                // if (result.total == importedlist){
+                //     clearInterval(timeinterval);
+                // }
             });
-        }, 1000);
+        }, 200);
     },
 
     //- import itself
@@ -439,11 +442,22 @@ var DataImport = Widget.extend({
             this.track_progress(kwargs.context);
         }
         return this.Import.call('do', [this.id, fields, this.import_options()], kwargs)
-            .then(undefined, function (error, event) {
+            .then(function(event) {
+                var t = 0;
+                var x = setInterval(function() {
+                    if (t==1) {
+                    clearInterval(self.timeinterval);
+                    if (kwargs.dryrun == false) { $('.import_stat').remove(); }
+                    clearInterval(x);
+                    }
+                    t = t + 1;
+                }, 5000);
+                console.log("Imported completed..........");
+                }, function (error, event) {
                 // In case of unexpected exception, convert
                 // "JSON-RPC error" to an import failure, and
                 // prevent default handling (warning dialog)
-                if (kwargs.dryrun == false) { $('.import_stat').remove(); }
+                // if (kwargs.dryrun == false) { $('.import_stat').remove(); }
                 if (event) { event.preventDefault(); }
                 return $.when([{
                     type: 'error',
