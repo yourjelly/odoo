@@ -4,17 +4,22 @@
     .oe_form_sheetbg, .oe_chatter {
         min-width: 650px;
         max-width: 860px;
+        margin-top: 8px;
         background-color: white;
         .center-block();
     }
 
     header {
-        background-color: @odoo-main-text-color;
+        background-color: white;
         width: 100%;
-
+        box-shadow: 8px 0px 8px @odoo-main-text-color;
     }
 
     header > * {
         display: inline-block;
+    }
+
+    .oe_form_invisible {
+        display: none
     }
 }
