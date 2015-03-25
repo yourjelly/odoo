@@ -10,6 +10,9 @@
 @o-secondary-menu-zindex: @zindex-tooltip + 2;
 @o-overlay-zindex: @zindex-tooltip + 1;
 
+@o-navbar-zindex: @zindex-tooltip + 4;
+@o-control-panel-zindex: 5;
+
 // Mixins
 .o-menu-boilerplate() {
     position: absolute;
@@ -25,6 +28,10 @@ html {
 
     body {
         height: 100%;
+
+        .navbar {
+            z-index: @o-navbar-zindex;
+        }
 
         .o-primary-menu {
             z-index: @o-primary-menu-zindex;
@@ -77,6 +84,7 @@ html {
             }
             .o-control-panel {
                 .o-flex(0, 0, auto);
+                z-index: @o-control-panel-zindex;
             }
             .o-content {
                 .o-flex(1, 1, auto);
