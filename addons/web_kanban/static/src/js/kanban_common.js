@@ -251,15 +251,15 @@ var KanbanRecord = Widget.extend({
     init: function (parent, record) {
         this._super(parent);
         this.group = parent;
-        this.view = parent.view;
         this.id = null;
+        this.view = parent;
         this.set_record(record);
-        if (!this.view.state.records[this.id]) {
-            this.view.state.records[this.id] = {
-                folded: false
-            };
-        }
-        this.state = this.view.state.records[this.id];
+        // if (!this.view.state.records[this.id]) {
+        //     this.view.state.records[this.id] = {
+        //         folded: false
+        //     };
+        // }
+        // this.state = this.view.state.records[this.id];
         this.fields = {};
         this.editable = this.view.is_action_enabled('edit');
         this.deletable = this.view.is_action_enabled('delete');
