@@ -4,6 +4,7 @@ odoo.define('web_kanban.KanbanView', function (require) {
 var core = require('web.core');
 var data = require('web.data');
 var Model = require('web.Model');
+var Pager = require('web.Pager');
 var pyeval = require('web.pyeval');
 var session = require('web.session');
 var utils = require('web.utils');
@@ -30,6 +31,7 @@ var KanbanView = View.extend({
         this.many2manys = [];
         this.fields_keys = [];
         this.records = [];
+        this.limit = options.limit || 40;
     },
 
     view_loading: function(fvg) {
@@ -43,7 +45,8 @@ var KanbanView = View.extend({
         this.search_context = context;
         this.search_group_by = group_by;
         return this.dataset.read_slice(this.fields_keys.concat(['__last_update']), { 'limit': this.limit })
-            .done(this.proxy('render'));
+            .then(this.proxy('render'))
+            .then(this.proxy('update_pager'));
     },
     /**
      * Render the buttons according to the KanbanView.buttons template and
@@ -68,6 +71,16 @@ var KanbanView = View.extend({
         } else {
             this.$('.oe_kanban_buttons').replaceWith(this.$buttons);
         }
+    },
+
+    render_pager: function($node) {
+        this.pager = new Pager(this, this.dataset.size(), 1, this.limit);
+        this.pager.appendTo($node);
+        this.pager.on('pager_changed', this, function (new_state) {
+            var limit = new_state.current_max - new_state.current_min + 1;
+            this.dataset.read_slice(this.fields_keys.concat(['__last_update']), { 'limit': limit, offset: new_state.current_min - 1 })
+                .done(this.proxy('render'));
+        });
     },
 
     add_qweb_template: function() {
@@ -166,11 +179,15 @@ var KanbanView = View.extend({
         var fragment = document.createDocumentFragment();
         for (var i = 0; i < records.length; i++) {
             kanban_record = new kanban_common.KanbanRecord(this, records[i]);
-            // kanban_record.appendTo(this.$el);
             kanban_record.appendTo(fragment);
             this.records.push(kanban_record);
         }
         this.$el.append(fragment);
+    },
+    update_pager: function(record) {
+        if (this.pager) {
+            this.pager.set_state({size: this.dataset.size(), current_min: 1});
+        }
     },
     do_show: function() {
         this.do_push_state({});
