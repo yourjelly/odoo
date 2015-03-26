@@ -235,9 +235,8 @@
     color: #7E7E7E;
 }
 
-.import_record {
-    position: absolute;
-    display: block;
-    margin: 11px 420px;
-    z-index: 1002000;
+.oe_indicator .close {
+    top: -4px;
+    font-size: 15px;
+    right: -11px;
 }

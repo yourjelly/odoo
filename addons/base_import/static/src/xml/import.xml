@@ -417,11 +417,19 @@
         </div>
     </t>
     <t t-name="recordstat">
-        <div class="alert alert-success alert-dismissible import_record" role="alert">
+        <div class="alert alert-dismissible oe_indicator" role="alert">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">x</span>
+                <span aria-hidden="true"><i class="fa fa-times"></i></span>
             </button>
-            <div class="record"/>
+            <div>
+                <b>Import Successful</b>
+                <div t-if="widget.progress.created">
+                    <t t-esc="widget.progress.created"/> New <t t-esc="widget.progress.title"/> Imported
+                </div>
+                <div t-if="widget.progress.updated">
+                    <t t-esc="widget.progress.updated"/> Old <t t-esc="widget.progress.title"/> Updated
+                </div>
+            </div>
         </div>
     </t>
 </templates>

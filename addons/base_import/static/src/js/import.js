@@ -86,20 +86,11 @@ ListView.include({
 
 var ImportInfo = Widget.extend({
     template: 'infostat',
-    init: function(parent, result) {
-        this._super(parent, result);
-        this.result = result;
-    },
-    start: function() {
-        this.progress(this.result);
-    },
     progress: function(result) {
         var self = this;
         if (result) {
-            console.log("In Progress-------", result);
             var importedlist = result.updated + result.created;
             self.$el.find('.progress_bar').css('width', ((importedlist)/result.total)*100 + "%");
-            console.log("Element-----------", self.$el.find('.progress_bar'));
             self.$el.find('.progress_text').text("Importing... " + importedlist + " records out of " + result.total);
         }
     }
@@ -107,15 +98,10 @@ var ImportInfo = Widget.extend({
 
 var RecordInfo = Widget.extend({
     template: 'recordstat',
-    init: function(parent) {
-        this._super(parent);
+    init: function(progress) {
+        this.progress = progress;
+        this._super.apply(this, arguments);
     },
-    stat: function(record) {
-        var self = this;
-        if (record) {
-            self.$el.find('.record').text(record);
-        }
-    }
 });
 
 var DataImport = Widget.extend({
@@ -183,6 +169,7 @@ var DataImport = Widget.extend({
         this.id = null;
         this.Import = new Model('base_import.import');
         this.session = session;
+        this.progress = {'created': 0, 'total': 0, 'updated': 0};
     },
     start: function () {
         var self = this;
@@ -408,27 +395,25 @@ var DataImport = Widget.extend({
     track_progress: function (context) {
         console.log("Continuing..........");
         var self = this;
-        self.timeinterval = setInterval(function(){
         self.Import.call('get_progress', [self.id], {'context':context})
             .then(function (result) {
+                console.log(result);
                 if(result){
                     var importedlist = result.created + result.updated;
                     self.importInfo.progress(result);
-                    self.created = result.created;
-                    self.updated = result.updated;
+                    self.progress = result;
                 }
-                // if (result.total == importedlist){
-                //     clearInterval(timeinterval);
-                // }
+                if(importedlist < result.total || !result){
+                    setTimeout(function(){
+                        self.track_progress(context);
+                    }, 500);
+                }
             });
-        }, 200);
     },
 
     //- import itself
     call_import: function (kwargs) {
         var self = this;
-        self.created = 0;
-        self.updated = 0;
         var fields = this.$('.oe_import_fields input.oe_import_match_field').map(function (index, el) {
             return $(el).select2('val') || false;
         }).get();
@@ -436,23 +421,14 @@ var DataImport = Widget.extend({
             {}, this.parent_context,
             {tracking_disable: !this.$('#oe_import_tracking').prop('checked')}
         );
-        self.importInfo = new ImportInfo(this);
         if(kwargs.dryrun == false){
-            self.importInfo.prependTo("body");
-            this.track_progress(kwargs.context);
+            self.importInfo = new ImportInfo();
+            self.importInfo.prependTo("body").then(function(){
+                self.track_progress(kwargs.context);
+            });
         }
         return this.Import.call('do', [this.id, fields, this.import_options()], kwargs)
             .then(function(event) {
-                var t = 0;
-                var x = setInterval(function() {
-                    if (t==1) {
-                    clearInterval(self.timeinterval);
-                    if (kwargs.dryrun == false) { $('.import_stat').remove(); }
-                    clearInterval(x);
-                    }
-                    t = t + 1;
-                }, 5000);
-                console.log("Imported completed..........");
                 }, function (error, event) {
                 // In case of unexpected exception, convert
                 // "JSON-RPC error" to an import failure, and
@@ -486,19 +462,16 @@ var DataImport = Widget.extend({
     },
     exit: function () {
         var self = this;
-        var is_imported = self.created ? self.created + " new ": "";
-        is_imported = self.updated ? (self.created ? is_imported + "and " + self.updated + " old ": is_imported + self.updated + " Old ") : is_imported
-        this.do_action({
-            type: 'ir.actions.client',
-            tag: 'history_back'
-        }).then(function() {
-            if (is_imported) {
-                is_imported = is_imported + 'records successfully imported';
-                self.recordInfo = new RecordInfo(this);
-                self.recordInfo.prependTo("body");
-                self.recordInfo.stat(is_imported);
-            }
-        });
+        setTimeout(function(){
+            self.do_action({
+                type: 'ir.actions.client',
+                tag: 'history_back'
+            }).then(function() {
+                $('.import_stat').remove();
+                self.progress['title'] = $('.oe-view-title .active').text();
+                self.recordInfo = new RecordInfo(self.progress).prependTo("body");
+            });
+        },1500);
     },
     onresults: function (event, from, to, message) {
         var no_messages = _.isEmpty(message);
