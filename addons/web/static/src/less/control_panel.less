@@ -146,6 +146,25 @@
 .o-control-panel-second-row {
     padding: 0px 0px 10px 0px;
 
+    // Dropdowns
+    li {
+        position: relative;
+        a {
+            padding: 3px 25px;
+        }
+        &.selected {
+            > a {
+                font-weight: bold;
+                &:before {
+                    font-family: FontAwesome;
+                    position: absolute;
+                    left: 6px;
+                    content: "\f00c";
+                }
+            }
+        }
+    }
+
     .o-buttons-col {
         height: 30px;
     }
@@ -203,14 +222,6 @@
         .open-menu a:before {
             .o-caret-up;
             margin-right: 5px;
-        }
-
-        .selected > a{
-            font-weight: bold;
-            &:before {
-                font-family: FontAwesome;
-                content: "\f00c";
-            }
         }
 
         // Filters
@@ -302,6 +313,7 @@
         .o-cp-switch-calendar:before {content: "\f073";}
         .o-cp-switch-gantt:before {content: "\f0ae";}
         .o-cp-switch-pivot:before {content: "\f0ce";}
+        .o-cp-switch-diagram:before {content: "";}
     }
 }
 
