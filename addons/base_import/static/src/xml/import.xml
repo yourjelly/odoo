@@ -406,13 +406,13 @@
         </t>
     </t>
     <t t-name="infostat">
-        <div class="import_stat">
-            <div class="statinfo">
+        <div class="o_import_progress">
+            <div class="oe_indicator">
                 <div class="progress progress_info">
                     <div class="progress-bar progress_bar" role="progressbar">
                     </div>
                 </div>
-                <div class="progress_text progress_perc"/>
+                <strong class="progress_text text-center"/>
             </div>
         </div>
     </t>

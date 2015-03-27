@@ -391,13 +391,10 @@ var DataImport = Widget.extend({
                 .join('/');
         });
     },
-
     track_progress: function (context) {
-        console.log("Continuing..........");
         var self = this;
         self.Import.call('get_progress', [self.id], {'context':context})
             .then(function (result) {
-                console.log(result);
                 if(result){
                     var importedlist = result.created + result.updated;
                     self.importInfo.progress(result);
@@ -410,7 +407,6 @@ var DataImport = Widget.extend({
                 }
             });
     },
-
     //- import itself
     call_import: function (kwargs) {
         var self = this;
@@ -428,8 +424,7 @@ var DataImport = Widget.extend({
             });
         }
         return this.Import.call('do', [this.id, fields, this.import_options()], kwargs)
-            .then(function(event) {
-                }, function (error, event) {
+            .then(undefined, function (error, event) {
                 // In case of unexpected exception, convert
                 // "JSON-RPC error" to an import failure, and
                 // prevent default handling (warning dialog)
@@ -467,7 +462,7 @@ var DataImport = Widget.extend({
                 type: 'ir.actions.client',
                 tag: 'history_back'
             }).then(function() {
-                $('.import_stat').remove();
+                $('.o_import_progress').remove();
                 self.progress['title'] = $('.oe-view-title .active').text();
                 self.recordInfo = new RecordInfo(self.progress).prependTo("body");
             });
