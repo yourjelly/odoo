@@ -65,6 +65,10 @@ var GanttView = View.extend({
             });
         });
     },
+    do_show: function () {
+        this.do_push_state({});
+        return this._super();
+    },
     reload: function() {
         if (this.last_domains !== undefined)
             return this.do_search(this.last_domains, this.last_contexts, this.last_group_bys);
@@ -81,7 +85,7 @@ var GanttView = View.extend({
     },
     on_data_loaded_2: function(tasks, group_bys) {
         var self = this;
-        $(".oe_gantt", this.$el).html("");
+        $(".o-gantt-view", this.$el).html("");
 
         //prevent more that 1 group by
         if (group_bys.length > 0) {
@@ -196,8 +200,16 @@ var GanttView = View.extend({
         gantt.attachEvent("onTaskEndResize", function(task) {
             self.on_task_changed(task);
         });
+        // horrible hack to make sure that something is in the dom with the required id.  The problem is that
+        // the view manager render the view in a document fragment.
+        var $div_with_id = $('<div>').attr('id', this.chart_id).css({
+            position:'absolute', 
+            top:16, bottom:16, right: 16, left: 16
+        });
+        $div_with_id.prependTo(document.body);
         gantt.create(this.chart_id);
-        
+        this.$el.append($div_with_id);
+
         // bind event to display task when we click the item in the tree
         $(".taskNameItem", self.$el).click(function(event) {
             var task_info = task_ids[event.target.id];
@@ -205,15 +217,8 @@ var GanttView = View.extend({
                 self.on_task_display(task_info.internal_task);
             }
         });
-        if (this.is_action_enabled('create')) {        
-            // insertion of create button
-            var td = $($("table td", self.$el)[0]);
-            var rendered = QWeb.render("GanttView-create-button");
-            $(rendered).prependTo(td);
-            $(".oe_gantt_button_create", this.$el).click(this.on_task_create);
-        }
         // Fix for IE to display the content of gantt view.
-        this.$el.find(".oe_gantt td:first > div, .oe_gantt td:eq(1) > div > div").css("overflow", "");
+        this.$el.find(".o-gantt-view td:first > div, .o-gantt-view td:eq(1) > div > div").css("overflow", "");
     },
     on_task_changed: function(task_obj) {
         var self = this;
@@ -259,6 +264,20 @@ var GanttView = View.extend({
                 initial_view: "form",
             }
         );
+    },
+    /**
+     * Render the buttons according to the GanttView.buttons template and add listeners on it.
+     * Set this.$buttons with the produced jQuery element
+     * @param {jQuery} [$node] a jQuery node where the rendered buttons should be inserted
+     * $node may be undefined, in which case they are inserted into this.options.$buttons
+     */
+    render_buttons: function($node) {
+        if ($node) {
+            var $buttons = $(QWeb.render("GanttView.buttons", {'widget': this}));
+            $buttons.click(this.on_task_create);
+
+            $buttons.appendTo($node);
+        }
     },
 });
 
