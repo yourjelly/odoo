@@ -6,9 +6,9 @@ var Dialog = require('web.Dialog');
 var formats = require('web.formats');
 var framework = require('web.framework');
 var session = require('web.session');
-var SystrayMenu = require('web.SystrayMenu');
 var utils = require('web.utils');
 var ViewManager = require('web.ViewManager');
+var WebClient = require('web.WebClient');
 var Widget = require('web.Widget');
 
 var QWeb = core.qweb;
@@ -18,58 +18,55 @@ if (core.debug) {
     var DebugManager = Widget.extend({
         template: "WebClient.DebugManager",
         events: {
-            "click .oe_debug_button": "render_dropdown",
-            "click .js_debug_dropdown li": "on_debug_click",
+            "click .o-debug-dropdown li": "perform_callback",
+            "click .o-debug-leave": "leave_debug",
         },
         start: function() {
             this._super();
-            this.$dropdown = this.$(".js_debug_dropdown");
+            this.$dropdowns = this.$(".o-debug-dropdowns");
         },
         /**
-         * Updates its attributes according to the inner_widget of the ActionManager
+         * Update the DebugManager according to the current widget
+         * Hide it if the widget isn't a ViewManager
+         * @param {web.Widget} [widget] the current widget
          */
-        _update: function() {
-            this.view_manager = odoo.__DEBUG__.services['web.web_client'].action_manager.get_inner_widget();
-            if (!this.view_manager instanceof ViewManager) { return; }
-            this.dataset = this.view_manager.dataset;
-            this.active_view = this.view_manager.active_view;
-            if (!this.active_view) { return; }
-            this.view = this.active_view.controller;
-            return true;
-        },
-        /**
-         * Renders the DebugManager dropdown
-         */
-        render_dropdown: function() {
-            var self = this;
+        update: function(widget) {
+            var available = false;
 
-            // Empty the previously rendered dropdown
-            this.$dropdown.empty();
+            if (widget instanceof ViewManager) {
+                available = true;
+                this.view_manager = widget;
+                this.dataset = this.view_manager.dataset;
+                this.active_view = this.view_manager.active_view;
+                this.view = this.active_view.controller;
 
-            // Attempt to retrieve the inner_widget of the ActionManager
-            if (!this._update()) {
-                // Disable the button when not available
-                console.warn("DebugManager is not available");
-                return;
+                // Update itself each time switch_mode is performed on the ViewManager
+                this.view_manager.on('switch_mode', this, function() {
+                    this.update(this.view_manager);
+                });
+
+                // Remove the previously rendered dropdowns
+                this.$dropdowns.empty();
+                this.session.user_has_group('base.group_system').then(function(is_admin) {
+                    // Render the new dropdowns and append them
+                    var new_dropdowns = QWeb.render('WebClient.DebugDropdowns', {
+                        widget: this,
+                        active_view: this.active_view,
+                        view: this.view,
+                        action: this.view_manager.action,
+                        searchview: this.view_manager.searchview,
+                        is_admin: is_admin,
+                    });
+                    $(new_dropdowns).appendTo(this.$dropdowns);
+                });
             }
 
-            this.session.user_has_group('base.group_system').then(function(is_admin) {
-                // Render the dropdown and append it
-                var dropdown_content = QWeb.render('WebClient.DebugDropdown', {
-                    widget: self,
-                    active_view: self.active_view,
-                    view: self.view,
-                    action: self.view_manager.action,
-                    searchview: self.view_manager.searchview,
-                    is_admin: is_admin,
-                });
-                $(dropdown_content).appendTo(self.$dropdown);
-            });
+            this.$el.toggle(available);
         },
         /**
          * Calls the appropriate callback when clicking on a Debug option
          */
-        on_debug_click: function (evt) {
+        perform_callback: function (evt) {
             evt.preventDefault();
 
             var params = $(evt.target).data();
@@ -194,6 +191,7 @@ if (core.debug) {
             });
         },
         print_workflow: function() {
+            debugger;
             if (this.view.get_selected_ids && this.view.get_selected_ids().length == 1) {
                 framework.blockUI();
                 var action = {
@@ -219,8 +217,27 @@ if (core.debug) {
         },
     });
 
-    SystrayMenu.Items.push(DebugManager);
-    
+    WebClient.include({
+        show_common: function() {
+            var self = this;
+            this._super();
+
+            // Instantiate the DebugManager and insert it into the DOM
+            this.debug_manager = new DebugManager(this);
+            this.debug_manager.prependTo(this.$('.o-web-client'));
+
+            // Override push_action so that it triggers an event each time a new action is pushed
+            // The DebugManager listens to this even to keep itself up-to-date
+            var push_action = this.action_manager.push_action;
+            this.action_manager.push_action = function() {
+                return push_action.apply(self.action_manager, arguments).then(function() {
+                    self.debug_manager.update(self.action_manager.get_inner_widget());
+                });
+            };
+
+        },
+    });
+
     return DebugManager;
 }
 

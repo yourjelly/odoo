@@ -376,7 +376,7 @@
 
         <div class="container-fluid">
             <div class="row">
-                <a class="oe_activate_debug_mode oe_right label label-primary" href="?debug" >Activate the developer mode</a>
+                <a class="oe_activate_debug_mode oe_right label label-primary" href="?debug" >Activate the developer tools</a>
             </div>
             <div class="row">
                 <div class="col-sm-offset-2 col-md-offset-2 col-sm-8 col-md-8 user-details">
@@ -491,37 +491,67 @@
 </t>
 
 <t t-name="WebClient.DebugManager">
-    <li class="oe_debug_manager">
-        <a href="#" t-att-title='_t("Open Debug Menu")' class="dropdown-toggle oe_debug_button" data-toggle="dropdown">
-            <span class="fa fa-bug"/>
-            <b class="caret"/>
-        </a>
-        <ul class="dropdown-menu js_debug_dropdown" role="menu"/>
-    </li>
+    <div class="row o-debug-manager">
+        <div class="col-md-12">
+            <span class="o-debug-title pull-left">
+                Developer Tools
+            </span>
+            <div class="o-debug-dropdowns pull-left"></div>
+            <button class="btn fa fa-close o-debug-leave pull-right" title="Leave Debug Mode"></button>
+        </div>
+    </div>
 </t>
-<t t-name="WebClient.DebugDropdown">
-    <t t-if="active_view.type === 'form'">
-        <li class="oe_metadata"><a href="#" data-action="get_metadata">View Metadata</a></li>
-        <li class="oe_layout"><a href="#" data-action="toggle_layout_outline">Toggle Form Layout Outline</a></li>
-        <li class="oe_defaults"><a href="#" data-action="set_defaults">Set Defaults</a></li>
-    </t>
-    <li class="oe_defaults"><a href="#" data-action="perform_js_tests">JS Tests</a></li>
-    <li class="oe_fields"><a href="#" data-action="get_view_fields">View Fields</a></li>
-    <li class="oe_fvg"><a href="#" data-action="fvg">Fields View Get</a></li>
-    <li class="oe_filters"><a href="#" data-action="manage_filters">Manage Filters</a></li>
-    <t t-if="is_admin">
-        <li class="oe_translate"><a href="#" data-action="translate">Technical Translation</a></li>
-        <li class="oe_edit_view"><a href="#" data-action="edit" data-model="ir.ui.view" t-att-data-id="active_view.controller.fields_view.view_id">Edit <t t-esc="_.str.capitalize(view.fields_view.type)"/> View</a></li>
-        <li class="oe_edit_searchview" t-if="searchview"><a href="#" data-action="edit" data-model="ir.ui.view" t-att-data-id="searchview.view_id">Edit SearchView</a></li> 
-        <li class="oe_edit_action" t-if="action"><a href="#" data-action="edit" t-att-data-model="action.type" t-att-data-id="action.id">Edit Action</a></li> 
-        <li class="oe_edit_workflow"><a href="#" data-action="edit_workflow">Edit Workflow</a></li>
-        <li class="oe_print_workflow"><a href="#" data-action="print_workflow">Print Workflow</a></li>
-        <li class="divider"/>
-        <li class="oe_leave"><a href="#" data-action="leave_debug">Leave Debug Mode</a></li>
-    </t>
+<t t-name="WebClient.DebugDropdowns">
+    <div class="btn-group">
+        <button class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" type="button">
+            <span>Views</span>
+            <b class="caret"/>
+        </button>
+        <ul class="dropdown-menu o-debug-dropdown o-debug-views" role="menu">
+            <t t-if="active_view.type === 'form'">
+                <li><a href="#" data-action="get_metadata">View Metadata</a></li>
+            </t>
+            <li><a href="#" data-action="get_view_fields">View Fields</a></li>
+            <li><a href="#" data-action="fvg">Fields View Get</a></li>
+            <t t-if="is_admin">
+                <li><a href="#" data-action="edit" data-model="ir.ui.view" t-att-data-id="active_view.controller.fields_view.view_id">Edit <t t-esc="_.str.capitalize(view.fields_view.type)"/> View</a></li>
+                <li t-if="searchview"><a href="#" data-action="edit" data-model="ir.ui.view" t-att-data-id="searchview.view_id">Edit SearchView</a></li> 
+            </t>
+        </ul>
+    </div>
+    <div class="btn-group">
+        <button class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" type="button">
+            <span>Workflow</span>
+            <b class="caret"/>
+        </button>
+        <ul class="dropdown-menu o-debug-dropdown" role="menu">
+            <t t-if="is_admin">
+                <li><a href="#" data-action="edit_workflow">Edit Workflow</a></li>
+                <li><a href="#" data-action="print_workflow">Print Workflow</a></li>
+            </t>
+        </ul>
+    </div>
+    <div class="btn-group">
+        <button class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" type="button">
+            <span>Others</span>
+            <b class="caret"/>
+        </button>
+        <ul class="dropdown-menu o-debug-dropdown" role="menu">
+            <t t-if="active_view.type === 'form'">
+                <li><a href="#" data-action="toggle_layout_outline">Toggle Form Layout Outline</a></li>
+                <li><a href="#" data-action="set_defaults">Set Defaults</a></li>
+            </t>
+            <li><a href="#" data-action="perform_js_tests">JS Tests</a></li>
+            <li><a href="#" data-action="manage_filters">Manage Filters</a></li>
+            <t t-if="uid === 1">
+                <li><a href="#" data-action="translate">Technical Translation</a></li>
+                <li t-if="action"><a href="#" data-action="edit" t-att-data-model="action.type" t-att-data-id="action.id">Edit Action</a></li>
+            </t>
+        </ul>
+    </div>
 </t>
 <t t-name="WebClient.DebugViewLog">
-    <div class="oe_debug_menu_log">
+    <div>
         <table class="table table-condensed table-striped">
             <tr>
                 <th>ID:</th>
