@@ -165,7 +165,7 @@ var ActionManager = Widget.extend({
         });
 
         // Insert the main control panel into the DOM
-        this.main_control_panel.insertBefore(this.$el);
+        return this.main_control_panel.insertBefore(this.$el);
     },
     dialog_stop: function (reason) {
         if (this.dialog) {
@@ -185,7 +185,6 @@ var ActionManager = Widget.extend({
     push_action: function(widget, action_descr, options) {
         var self = this;
         var to_destroy;
-        var old_widget = this.inner_widget;
         var old_action = this.inner_action;
         options = options || {};
 
