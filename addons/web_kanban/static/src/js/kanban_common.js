@@ -248,11 +248,11 @@ var KanbanRecord = Widget.extend({
         'click .o_kanban_manage_toogle_button': 'toogle_manage_pane',
     },
 
-    init: function (parent, record) {
+    init: function (parent, record, view) {
         this._super(parent);
         this.group = parent;
         this.id = null;
-        this.view = parent;
+        this.view = view;
         this.set_record(record);
         // if (!this.view.state.records[this.id]) {
         //     this.view.state.records[this.id] = {
@@ -569,8 +569,50 @@ var KanbanRecord = Widget.extend({
     }
 });
 
-
 var KanbanGroup = Widget.extend({
+    template: "KanbanView.Group",
+
+    init: function(parent, group_data) {
+        this._super(parent);
+        this.parent = parent;
+        this.group_data = group_data;
+        this.records = group_data.records;
+        this.title = group_data.title;
+    },
+    start: function() {
+        var self = this;
+        _.each(this.records, function (record) {
+            var kanban_record = new KanbanRecord(self, record, self.parent);
+            kanban_record.appendTo(self.$el);
+        });
+        this.$el.toggleClass('o_kanban_empty', this.records.length === 0);
+        this.$el[0].addEventListener('dragstart', function (e) {
+            var crt = self.$el.clone();
+            crt.css({
+                position: 'absolute',
+                top: 0,
+                'z-index': -1,
+                transform: 'rotate(3deg)',
+            });
+            self.$el.addClass('o_kanban_dragged');
+            document.body.appendChild(crt[0]);
+            console.log(e);
+            e.dataTransfer.setDragImage(crt[0], e.offsetX, e.offsetY);
+        });
+        this.$el[0].addEventListener('dragend', function () {
+            self.$el.removeClass('o_kanban_dragged');
+        });
+        this.$el[0].addEventListener('dragenter', function () {
+            var $other_col = self.getParent().$('.o_kanban_dragged');
+            var tmp = $('<span>').hide();
+            $other_col.before(tmp);
+            self.$el.before($other_col);
+            tmp.replaceWith(self.$el);
+        });
+    },
+});
+
+var OldKanbanGroup = Widget.extend({
     template: 'KanbanView.group_header',
     init: function (parent, records, group, dataset) {
         var self = this;
