@@ -53,7 +53,6 @@ class ir_ui_menu(osv.osv):
                 # but since we do not use it, set it by ourself.
                 self.pool._any_cache_cleared = True
             self._menu_cache.clear()
-        self.load_menus_root._orig.clear_cache(self)
         self.load_menus._orig.clear_cache(self)
 
     @api.multi
@@ -357,28 +356,13 @@ class ir_ui_menu(osv.osv):
 
     @api.cr_uid_context
     @tools.ormcache_context(accepted_keys=('lang',))
-    def load_menus_root(self, cr, uid, context=None):
-        fields = ['name', 'sequence', 'parent_id', 'action', 'icon']
-        menu_root_ids = self.get_user_roots(cr, uid, context=context)
-        menu_roots = self.read(cr, uid, menu_root_ids, fields, context=context) if menu_root_ids else []
-        return {
-            'id': False,
-            'name': 'root',
-            'parent_id': [-1, ''],
-            'children': menu_roots,
-            'all_menu_ids': menu_root_ids,
-        }
-
-
-    @api.cr_uid_context
-    @tools.ormcache_context(accepted_keys=('lang',))
     def load_menus(self, cr, uid, context=None):
         """ Loads all menu items (all applications and their sub-menus).
 
         :return: the menu root
         :rtype: dict('children': menu_nodes)
         """
-        fields = ['name', 'sequence', 'parent_id', 'action']
+        fields = ['name', 'sequence', 'parent_id', 'action', 'icon']
         menu_root_ids = self.get_user_roots(cr, uid, context=context)
         menu_roots = self.read(cr, uid, menu_root_ids, fields, context=context) if menu_root_ids else []
         menu_root = {

@@ -3,26 +3,9 @@
 // ------------------------------------------------------------------
 // Variables
 @navbar-height: 40px;
-@o-menu-width: 220px;
-@o-menu-width-mobile: 100%;
-// Note: tooltip's z-indexes are the highest z-indexes
-@o-primary-menu-zindex: @zindex-tooltip + 3;
-@o-secondary-menu-zindex: @zindex-tooltip + 2;
-@o-overlay-zindex: @zindex-tooltip + 1;
-
-@o-navbar-zindex: @zindex-tooltip + 4;
-@o-control-panel-first-zindex: 6;
-@o-control-panel-second-zindex: 5;
-@o-debug-manager-zindex: 7;
-
-// Mixins
-.o-menu-boilerplate() {
-    position: absolute;
-    top: @navbar-height + 1;
-    bottom: 0;
-    width: @o-menu-width;
-    overflow: auto;
-}
+@navbar-margin-bottom: 0px;
+@z-index-o-control-panel-second-row: 1;
+@z-index-o-application-switcher: 2;
 
 // Rules
 html {
@@ -31,90 +14,45 @@ html {
     body {
         height: 100%;
 
-        .navbar {
-            z-index: @o-navbar-zindex;
-        }
-
-        .o-primary-menu {
-            z-index: @o-primary-menu-zindex;
-            .o-menu-boilerplate;
-            left: -@o-menu-width;
-
-            &.slided {
-                left: 0;
-            }
-
-            @media (max-width: @screen-xs-max) {
-                width: @o-menu-width-mobile;
-                left: -2 * @o-menu-width-mobile;
-
-                &.slided {
-                    left: 0;
-                }
-            }
-        }
-
-        .o-secondary-menu {
-            z-index: @o-secondary-menu-zindex;
-            .o-menu-boilerplate;
+        .o-application-switcher {
+            z-index: @z-index-o-application-switcher + 1;
+            position: absolute;
+            top: @navbar-height + 1;  // Idiotic solution: when the navbar contains too many items the layout is fucked
+            right: 0;
+            bottom: 0;
             left: 0;
-
-            &.slided {
-                left: @o-menu-width;
-            }
-
-            @media (max-width: @screen-xs-max) {
-                width: @o-menu-width-mobile;
-                left: -@o-menu-width-mobile;
-
-                &.slided {
-                    left: 0;
-                }
-            }
+            background-color: @gray;
+            background-size:100%;
+            padding-top: 15px;
         }
 
         .o-web-client {
             height: 100%;
-            padding-top: @navbar-height;
-            margin-left: @o-menu-width;
+            padding-top: @navbar-height + 2;
             .o-flex-display();
             .o-flex-direction(column);
             @media (max-width: @grid-float-breakpoint) {
                 height: auto;
                 display: block;
-                margin-left: 0;
             }
             .o-debug-manager {
                 .o-flex(0, 0, auto);
-                z-index: @o-debug-manager-zindex;
             }
+
             .o-control-panel-first-row {
                 .o-flex(0, 0, auto);
-                z-index: @o-control-panel-first-zindex;
             }
+
             .o-control-panel-second-row {
                 .o-flex(0, 0, auto);
-                z-index: @o-control-panel-second-zindex;
+                // Set a z-index in this stacking context (so that directives like
+                // box-shadow are effective)
+                z-index: @z-index-o-control-panel-second-row;
             }
+
             .o-content {
                 .o-flex(1, 1, auto);
                 overflow: auto;
-                .o-view-manager-content > * {
-                    margin-left: -15px;  // views are supposed to take 100% of the
-                    margin-right: -15px; // available width.
-                }
-            }
-            // Pseudo-element used for the overlay
-            &.overlay:after {
-                content: "";
-                display: block;
-                position: absolute;
-                top: @navbar-height;
-                left: 0;
-                bottom: 0;
-                right: 0;
-                z-index: @o-overlay-zindex;
-                overflow: hidden;
             }
         }
     }

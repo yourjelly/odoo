@@ -10,7 +10,6 @@ var Menu = require('web.Menu');
 var Model = require('web.Model');
 var Notification = require('web.Notification');
 var session = require('web.session');
-var SystrayMenu = require('web.SystrayMenu');
 var UserMenu = require('web.UserMenu');
 var utils = require('web.utils');
 var Widget = require('web.Widget');
@@ -174,26 +173,15 @@ var WebClient = Widget.extend({
 
         this.update_logo();
 
-        // Menu is rendered server-side thus we don't want the widget to create any dom
         this.menu = new Menu(this);
-        this.menu.setElement(this.$('.oe_application_menu_placeholder'),
-            this.$('.oe_secondary_menus_container'), this.$('.o-menu-slide'), this.$('.o-menu-brand'));
-        this.menu.on('menu_click', this, this.on_menu_action);
+        this.menu.prependTo(this.$el);
+        core.bus.on('menu_click', this, this.on_menu_action);
 
         // Create the user menu (rendered client-side)
-        this.user_menu = new UserMenu(this);
-        var user_menu_loaded = this.user_menu.appendTo(this.$('.oe_user_menu_placeholder'));
-        this.user_menu.on('user_logout', this, this.on_logout);
-        this.user_menu.do_update();
-
-        // Create the systray menu (rendered server-side)
-        this.systray_menu = new SystrayMenu(this);
-        this.systray_menu.setElement(this.$('.oe_systray'));
-        var systray_menu_loaded = this.systray_menu.start();
-
-        // Start the menu once both systray and user menus are rendered
-        // to prevent overflows while loading
-        $.when(systray_menu_loaded, user_menu_loaded).done(this.menu.start.bind(this.menu));
+        // this.user_menu = new UserMenu(this);
+        // var user_menu_loaded = this.user_menu.appendTo(this.$('.oe_user_menu_placeholder'));
+        // this.user_menu.on('user_logout', this, this.on_logout);
+        // this.user_menu.do_update();
 
         this.bind_hashchange();
         this.set_title();

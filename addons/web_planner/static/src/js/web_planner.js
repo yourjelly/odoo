@@ -19,7 +19,7 @@ var PlannerLauncher = Widget.extend({
     init: function(parent) {
         this._super(parent);
         this.planner_by_menu = {};
-        this.webclient = parent.getParent();
+        this.webclient = parent.getParent().getParent();
         this.need_reflow = false;
     },
     start: function() {

@@ -401,33 +401,6 @@
             </script>
         </head>
         <body>
-            <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" groups="base.group_user,base.group_portal">
-                <div class="container-fluid">
-                    <div class="navbar-header">
-                        <ul class="nav navbar-nav">
-                            <li class="o-menu-slide">
-                                <a class="navbar-brand" href="#">
-                                    <i class="fa fa-bars"/>
-                                    <span class="o-menu-brand"/>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="collapse navbar-collapse">
-                        <ul class="nav navbar-nav navbar-right oe_systray"/>
-                    </div>
-                </div>
-            </nav>
-
-            <nav class="o-primary-menu" role="navigation" groups="base.group_user,base.group_portal">
-                <div class="oe_user_menu_placeholder"/>
-                <t t-call="web.menu"/>
-            </nav>
-
-            <nav class="o-secondary-menu" role="navigation" groups="base.group_user,base.group_portal">
-                <t t-call="web.menu_secondary"/>
-            </nav>
-
             <div class="container-fluid o-web-client">
                 <div class="row o-content"/>
             </div>

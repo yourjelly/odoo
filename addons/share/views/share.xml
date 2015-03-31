@@ -8,9 +8,9 @@
             </xpath>
         </template>
         <template id="webclient_bootstrap" name="Webclient Bootstrap - Share" inherit_id="web.webclient_bootstrap">
-            <xpath expr="//body/nav" position="attributes">
+<!--             <xpath expr="//body/nav" position="attributes">
                 <attribute name="groups">base.group_user,base.group_portal,share.group_shared</attribute>
-            </xpath>
+            </xpath> -->
 <!--             <xpath expr="//div[@class='col-xs-6 col-sm-2 o-secondary-menu']" position="attributes">
                 <attribute name="groups">base.group_user,base.group_portal,share.group_shared</attribute>
             </xpath> -->

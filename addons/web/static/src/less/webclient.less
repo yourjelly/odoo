@@ -33,27 +33,9 @@
 // ------------------------------------------------------------------
 // Layout
 // ------------------------------------------------------------------
-.o-primary-menu, .o-secondary-menu {
-    background-color: white;
-    border-right: 1px solid @gray-lighter;
-    border-bottom: 1px solid @gray-lighter;
-    .transition(left 0.15s);  // Slide animation
-}
-
-.o-secondary-menu {
-    box-shadow: 4px 0px 4px -3px @odoo-main-text-color;
-}
-
-
 .o-menu-slide {
     display: block;  // We use a `.navbar-toggle` for the menu toggler, keep it always visible. Hack.
     float: left;
-}
-
-.o-web-client.overlay:after {
-    background-color: @gray;
-    opacity: 0.6;
-    .transition(background-color 0.15s ease);
 }
 
 .o-debug-manager {
@@ -83,7 +65,7 @@
 }
 
 // Needed by the webclient
-.oe_systray, .oe_secondary_menu, .oe_user_menu_placeholder {
+.oe_user_menu_placeholder {
     display: none;
 }
 
@@ -91,7 +73,6 @@
     .oe_logo {
         img {
             .center-block;
-            width: @o-menu-width - 50px;
         }
 
         .oe_logo_edit {
