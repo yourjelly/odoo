@@ -344,31 +344,23 @@
     </span>
 </t>
 
-<div t-name="UserMenu">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-xs-12">
-                <img class="img-circle oe_topbar_avatar" t-att-data-default-src="_s + '/web/static/src/img/user_menu_avatar.png'"/>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-xs-12">
-                <div class="btn-group btn-block">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <span class="oe_topbar_name"/> <b class="caret"></b>
-                    </a>
-                    <ul class="dropdown-menu" role="menu">
-                        <li><a href="#" data-menu="settings">Preferences</a></li>
-                        <li><a href="#" data-menu="account">My Odoo.com account</a></li>
-                        <li><a href="#" data-menu="about">About Odoo</a></li>
-                        <li><a href="#" data-menu="help">Help</a></li>
-                        <li><a href="#" data-menu="logout">Log out</a></li>
-                    </ul>
-                </div>
-            </div>
+<t t-name="UserMenu">
+    <img class="img-circle oe_topbar_avatar" t-att-src="_s + '/web/static/src/img/user_menu_avatar.png'"/>
+    <div class="caption">
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                <span class="oe_topbar_name"/> <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li><a href="#" data-menu="settings">Preferences</a></li>
+                <li><a href="#" data-menu="account">My Odoo.com account</a></li>
+                <li><a href="#" data-menu="about">About Odoo</a></li>
+                <li><a href="#" data-menu="help">Help</a></li>
+                <li><a href="#" data-menu="logout">Log out</a></li>
+            </ul>
         </div>
     </div>
-</div>
+</t>
 
 <t t-name="UserMenu.about">
 
@@ -1967,6 +1959,8 @@
 
 <t t-name="AppSwitcher">
     <div class="row">
+        <div class="col-xs-6 col-md-4 col-lg-3 text-center o-company-logo-placeholder"></div>
+        <div class="col-xs-6 col-md-4 col-lg-3 text-center o-user-menu-placeholder"></div>
         <t t-foreach="menu_data.children" t-as="primary_menu">
             <div class="col-xs-6 col-md-4 col-lg-3 text-center">
                 <a class="thumbnail"
@@ -2013,24 +2007,42 @@
         <section t-att-class="primary_menu.id">
             <t t-foreach="primary_menu.children" t-as="section">
                 <li class="dropdown">
-
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-                    <t t-esc="section.name"/> <span class="caret"/></a>
-
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><t t-esc="section.name"/></a>
                     <ul class="dropdown-menu" role="menu">
-                        <li t-foreach="section.children" t-as="menu">
-                            <a t-attf-href="#menu_id=#{menu.id}&amp;action=#{menu.action ? menu.action.split(',')[1] : ''}"
-                                t-att-data-menu="menu.id"
-                                t-att-data-action-model="menu.action ? menu.action.split(',')[0] : ''"
-                                t-att-data-action-id="menu.action ? menu.action.split(',')[1] : ''">
-                                <span t-esc="menu.name"/>
-                            </a>
-                        </li>
+                        <t t-foreach="section.children" t-as="menu">
+                            <li t-if="!menu.children.length">
+                                <a t-attf-href="#menu_id=#{menu.id}&amp;action=#{menu.action ? menu.action.split(',')[1] : ''}"
+                                    t-att-data-menu="menu.id"
+                                    t-att-data-action-model="menu.action ? menu.action.split(',')[0] : ''"
+                                    t-att-data-action-id="menu.action ? menu.action.split(',')[1] : ''">
+                                    <span t-esc="menu.name"/>
+                                </a>
+                            </li>
+                            <t t-if="menu.children.length">
+                                <li role="presentation" class="dropdown-header"><span t-esc="menu.name"/></li>
+                                <li t-foreach="menu.children" t-as="child">
+                                    <a t-attf-href="#menu_id=#{child.id}&amp;action=#{child.action ? child.action.split(',')[1] : ''}"
+                                        t-att-data-menu="child.id"
+                                        t-att-data-action-model="child.action ? child.action.split(',')[0] : ''"
+                                        t-att-data-action-id="child.action ? child.action.split(',')[1] : ''">
+                                        <span t-esc="child.name"/>
+                                    </a>
+                                </li>
+                            </t>
+                        </t>
                     </ul>
                 </li>
             </t>
         </section>
     </t>
+</t>
+
+<t t-name="CompanyLogo">
+    <t t-set="debug" t-value="__debug__ ? '&amp;debug' : ''"/>
+    <a class="oe_logo" t-attf-href="/web?#{debug}">
+        <span class="oe_logo_edit">Edit Company data</span>
+        <img src='/web/binary/company_logo'/>
+    </a>
 </t>
 
 </templates>

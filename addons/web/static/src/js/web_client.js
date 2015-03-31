@@ -10,7 +10,6 @@ var Menu = require('web.Menu');
 var Model = require('web.Model');
 var Notification = require('web.Notification');
 var session = require('web.session');
-var UserMenu = require('web.UserMenu');
 var utils = require('web.utils');
 var Widget = require('web.Widget');
 
@@ -19,11 +18,6 @@ var _t = core._t;
 
 
 var WebClient = Widget.extend({
-    events: {
-        'click .oe_logo_edit_admin': 'logo_edit',
-        'click .oe_logo img': 'on_logo_click',
-    },
-
     init: function(parent, client_options) {
         this.client_options = {};
         this._super(parent);
@@ -40,16 +34,6 @@ var WebClient = Widget.extend({
         var self = this;
         this.on("change:title_part", this, this._title_changed);
         this._title_changed();
-
-        core.bus.on('web_client_toggle_bars', this, function () {
-            this.toggle_bars.apply(this, arguments);
-        });
-
-
-        this.$('[data-toggle="offcanvas"]').click(function () {
-            $('.o-web-client-row').toggleClass('js_o-secondary-menu-shown');
-        });
-
 
         return session.session_bind(this.origin).then(function() {
             self.bind_events();
@@ -102,13 +86,6 @@ var WebClient = Widget.extend({
             this.set_content_full_screen(full_screen);
         });
     },
-    on_logo_click: function(ev){
-        if (!this.has_uncommitted_changes()) {
-            return;
-        } else {
-            ev.preventDefault();
-        }
-    },
     show_common: function() {
         var self = this;
         session.on('error', crash_manager, crash_manager.rpc_error);
@@ -132,9 +109,6 @@ var WebClient = Widget.extend({
             });
         };
 
-    },
-    toggle_bars: function(value) {
-        this.$('tr:has(td.navbar),.oe_leftbar').toggle(value);
     },
     has_uncommitted_changes: function() {
         var $e = $.Event('clear_uncommitted_changes');
@@ -169,19 +143,9 @@ var WebClient = Widget.extend({
         document.title = tmp;
     },
     show_application: function() {
-        this.toggle_bars(true);
-
-        this.update_logo();
-
         this.menu = new Menu(this);
         this.menu.prependTo(this.$el);
         core.bus.on('menu_click', this, this.on_menu_action);
-
-        // Create the user menu (rendered client-side)
-        // this.user_menu = new UserMenu(this);
-        // var user_menu_loaded = this.user_menu.appendTo(this.$('.oe_user_menu_placeholder'));
-        // this.user_menu.on('user_logout', this, this.on_logout);
-        // this.user_menu.do_update();
 
         this.bind_hashchange();
         this.set_title();
@@ -189,35 +153,6 @@ var WebClient = Widget.extend({
             this.action_manager.do_action(this.client_options.action_post_login);
             delete(this.client_options.action_post_login);
         }
-    },
-    update_logo: function() {
-        var company = session.company_id;
-        var img = session.url('/web/binary/company_logo' + '?db=' + session.db + (company ? '&company=' + company : ''));
-        this.$('.oe_logo img').attr('src', '').attr('src', img);
-        this.$('.oe_logo_edit').toggleClass('oe_logo_edit_admin', session.uid === 1);
-    },
-    logo_edit: function(ev) {
-        var self = this;
-        ev.preventDefault();
-        self.alive(new Model("res.users").get_func("read")(session.uid, ["company_id"])).then(function(res) {
-            self.rpc("/web/action/load", { action_id: "base.action_res_company_form" }).done(function(result) {
-                result.res_id = res.company_id[0];
-                result.target = "new";
-                result.views = [[false, 'form']];
-                result.flags = {
-                    action_buttons: true,
-                    headless: true,
-                };
-                self.action_manager.do_action(result);
-                var form = self.action_manager.dialog_widget.views.form.controller;
-                form.on("on_button_cancel", self.action_manager, self.action_manager.dialog_stop);
-                form.on('record_saved', self, function() {
-                    self.action_manager.dialog_stop();
-                    self.update_logo();
-                });
-            });
-        });
-        return false;
     },
     /**
      * When do_action is performed on the WebClient, forward it to the main ActionManager
@@ -245,12 +180,6 @@ var WebClient = Widget.extend({
     do_warn: function() {
         var n = this.notification;
         return n.warn.apply(n, arguments);
-    },
-    on_logout: function() {
-        var self = this;
-        if (!this.has_uncommitted_changes()) {
-            self.action_manager.do_action('logout');
-        }
     },
     bind_hashchange: function() {
         var self = this;

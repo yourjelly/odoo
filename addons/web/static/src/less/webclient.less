@@ -33,11 +33,6 @@
 // ------------------------------------------------------------------
 // Layout
 // ------------------------------------------------------------------
-.o-menu-slide {
-    display: block;  // We use a `.navbar-toggle` for the menu toggler, keep it always visible. Hack.
-    float: left;
-}
-
 .o-debug-manager {
     background-color: @odoo-brand-secondary;
 }
@@ -64,12 +59,8 @@
     box-shadow: 8px 0px 8px @odoo-main-text-color;
 }
 
-// Needed by the webclient
-.oe_user_menu_placeholder {
-    display: none;
-}
 
-.o-primary-menu, .o-secondary-menu {
+.o-application-switcher {
     .oe_logo {
         img {
             .center-block;
@@ -95,11 +86,11 @@
         }
     }
 
-    .oe_user_menu_placeholder {
-        padding: 15px;
-
+    .o-user-menu-placeholder {
         .oe_topbar_avatar {
-            width: 35%;
+            width: 120px;
+            height: auto;
+            padding: 5px;
         }
     }
 
@@ -110,8 +101,6 @@
         margin-bottom: 5px;
     }
 
-    // Override Bootstrap's behavior: we don't want aligned nested navs.
-    .nav {.nav {padding-left: 6px;}}
 
     li a {
         color: @gray;

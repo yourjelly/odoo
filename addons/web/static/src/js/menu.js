@@ -6,6 +6,8 @@ var session = require('web.session');
 var Widget = require('web.Widget');
 var pyeval = require('web.pyeval');
 var SystrayMenu = require('web.SystrayMenu');
+var UserMenu = require('web.UserMenu');
+var CompanyLogo = require('web.CompanyLogo');
 
 var QWeb = core.qweb;
 
@@ -68,10 +70,28 @@ var Menu = Widget.extend({
             });
         });
 
-        // Systray Menu
+        // FIXME: Systray Menu
         this.systray_menu = new SystrayMenu(this);
         this.systray_menu.setElement(this.$('.oe_systray'));
         this.systray_menu.start();
+
+        // FIXME FIXME FIXME: Hack, see https://github.com/twbs/bootstrap/issues/12738
+        _.each(this.$menu_sections, function ($section, primary_menu_id) {
+            $section.find('.dropdown-menu').css({
+                maxHeight: $(window).height() - $(".navbar-header").height() + "px",
+                overflow: "auto",
+            });
+        });
+
+        // UserMenu
+        this.user_menu = new UserMenu(this);
+        this.user_menu.appendTo(this.$app_switcher.find('.o-user-menu-placeholder'));
+        this.user_menu.do_update();
+
+        // Company Logo
+        this.company_logo = new CompanyLogo(this);
+        this.company_logo.appendTo(this.$app_switcher.find('.o-company-logo-placeholder'));
+
 
         this.is_bound.resolve();
         return this._super.apply(this, arguments);
@@ -171,6 +191,7 @@ var Menu = Widget.extend({
             _.each(this.$menu_sections, function ($section, primary_menu_id) {
                 if ($section.find('a[data-menu=' + secondary_menu_id + ']').length) {
                     self.decorate_primary_menu(primary_menu_id);
+                    self.current_primary_menu = primary_menu_id;
                 }
             });
         }
