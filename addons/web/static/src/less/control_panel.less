@@ -34,84 +34,114 @@
     }
 
     .o-cp-searchview {
-        .oe_searchview {
-            display: none;  // Needed by the webclient
+
+        // Override bootstrap
+        .form-control {
+            border-top: none;
+            border-left: none;
+            border-right: none;
+            box-shadow: none;
+            border-radius: 0px;
+        }
+        .input-sm {
+            padding: 0px 0px 0px 0px;
+        }
+        // .label {
+        //     display: inline-block;
+        //     background-color: @odoo-brand-primary;
+        //     border-radius: 0;  // Override bootstrap's value
+        //     font-size: @font-size-small;
+        //     padding: 3px;
+        // }
+
+        .o-searchview {
             height: auto;  // Increase the height of the searchview input according to its content
+            padding-top: 5px;
 
             // Search icon
-            .oe_searchview_search {
+            .o-searchview-search-button {
+                cursor: pointer;
                 position: absolute;
                 top: 8px;
-                left: 25px;
+                left: 15px;
             }
             // Drawer icon
-            .oe_searchview_unfold_drawer {
+            .o-searchview-unfold-drawer {
+                cursor: pointer;
                 position: absolute;
                 top: 8px;
-                right: 25px;
+                right: 15px;
                 .user-select(none);  // Prevent text selection when toggling the search options
             }
 
-            .oe_searchview_facets {
+            .o-searchview-facets {
                 cursor: text;  // Text cursor, same as input box
                 font-size: @font-size-small;
 
-                .oe_searchview_input {
+                .o-searchview-input {
                     display: inline-block;
                     &:focus {outline: none;}
-                    &:first-child {margin-left: 10px;}
-                    padding-left: 10px;  // don't go behind the search icon
+                    &:first-child {margin-left: 17px;} // don't go behind the search icon
+                    padding-left: 3px;
                     .user-select(initial);
+
                 }
 
-                .oe_searchview_facet {
+                .o-searchview-facet {
                     display: inline-block;
-                    vertical-align: top;
-                    &:focus {box-shadow: 0 0 3px 1px #a6a6fe;}  // FIXME: use variable here
-                    font-size: @font-size-small;
-                    cursor: pointer;
-
-                    >.label {
-                        padding: 0 0 0 4px;  // Override bootstrap's value
+                    .o-searchview-facet-label {
+                        display: inline-block;
+                        background-color: @odoo-brand-primary;
                         border-radius: 0;  // Override bootstrap's value
                         font-size: @font-size-small;
+                        padding: 3px;
+                        border: 1px solid @odoo-brand-primary;
+                        cursor: pointer;
                     }
 
-                    .oe_facet_values {
-                        background: #f0f0fa;  // FIXME: expose
+                    .o-searchview-facet-content {
+                        display: inline-block;
+                        vertical-align: top;
+                        &:focus {box-shadow: 0 0 3px 1px @odoo-brand-secondary;}
+                        font-size: @font-size-small;
+                        cursor: pointer;
+                        border: 1px solid @odoo-brand-secondary;
+                        border-left: 0px;
+                        background: @gray-lighter;
 
-                        .oe_facet_value {
-                            padding: 0 0 0 4px;
-                            &:first-child {border-left: none;}
-                            &:last-child {padding-right: 16px;}
-                            border-left: 1px solid #afafb6;
-                            color: #4C4C4C;
+                        .o-facet-values {
+                            display: inline-block;
+                            .o-facet-value {
+                                padding: 0 0 0 4px;
+                                &:first-child {border-left: none;}
+                                border-left: 1px solid @odoo-brand-secondary;
+                                color: @odoo-brand-secondary;
+                            }
                         }
-                    }
-
-                    .oe_facet_remove {
-                        padding: 0 4px 0 4px;
-                        text-align: center;
-                        color: #8786b7;
-                        font-weight: bold;
-                        background: #f0f0fa;  // FIXME: expose
-                        &:hover {
-                            color: white;
-                            background: #8786b7;
+                        .o-facet-remove {
+                            display: inline-block;
+                            padding: 0 4px 0 4px;
+                            text-align: center;
+                            color: @odoo-brand-secondary;
+                            font-weight: bold;
+                            background: @gray-lighter;
+                            &:hover {
+                                color: @gray-light;
+                            }
                         }
                     }
                 }
             }
 
-            .oe-autocomplete {
+            .o-searchview-autocomplete {
                 display: none;
                 position: absolute;
                 z-index: @zindex-dropdown + 1;  // else, displayed behind the search options dropdowns
                 width: 400px;
                 background-color: white;
-                border: 1px solid #afafb6;
+                border: 1px solid @odoo-brand-secondary;
                 margin-top: 2px;
-                border-radius: 3px;
+                border-radius: 0px;
 
                 ul {
                     list-style-type: none;

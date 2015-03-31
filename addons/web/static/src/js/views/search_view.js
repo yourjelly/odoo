@@ -261,7 +261,7 @@ var FacetView = Widget.extend({
         'focus': function () { this.trigger('focused', this); },
         'blur': function () { this.trigger('blurred', this); },
         'click': function (e) {
-            if ($(e.target).is('.oe_facet_remove')) {
+            if ($(e.target).is('.o-facet-remove')) {
                 this.model.destroy();
                 return false;
             }
@@ -289,7 +289,7 @@ var FacetView = Widget.extend({
     },
     start: function () {
         var self = this;
-        var $e = this.$('.oe_facet_values').last();
+        var $e = this.$('.o-facet-values').last();
         return $.when(this._super()).then(function () {
             return $.when.apply(null, self.model.values.map(function (value) {
                 return new FacetValueView(self, value).appendTo($e);
@@ -322,22 +322,22 @@ var SearchView = Widget.extend(/** @lends instance.web.SearchView# */{
     events: {
         // focus last input if view itself is clicked
         'click': function (e) {
-            if (e.target === this.$('.oe_searchview_facets')[0]) {
-                this.$('.oe_searchview_input:last').focus();
+            if (e.target === this.$('.o-searchview-facets')[0]) {
+                this.$('.o-searchview-input:last').focus();
             }
         },
         // search button
-        'click div.oe_searchview_search': function (e) {
+        'click div.o-searchview-search-button': function (e) {
             e.stopImmediatePropagation();
             this.do_search();
         },
-        'click .oe_searchview_unfold_drawer': function (e) {
+        'click .o-searchview-unfold-drawer': function (e) {
             e.stopImmediatePropagation();
             $(e.target).toggleClass('fa-caret-down fa-caret-up');
             localStorage.visible_search_menu = (localStorage.visible_search_menu !== 'true');
             this.toggle_buttons();
         },
-        'keydown .oe_searchview_input, .oe_searchview_facet': function (e) {
+        'keydown .o-searchview-input, .o-searchview-facet': function (e) {
             switch(e.which) {
             case $.ui.keyCode.LEFT:
                 this.focusPreceding(e.target);
@@ -396,7 +396,7 @@ var SearchView = Widget.extend(/** @lends instance.web.SearchView# */{
             this.$el.hide();
         }
         this.toggle_visibility(false);
-        this.$facets_container = this.$('div.oe_searchview_facets');
+        this.$facets_container = this.$('div.o-searchview-facets');
         this.setup_global_completion();
         this.query = new SearchQuery()
                 .on('add change reset remove', this.proxy('do_search'))
@@ -407,9 +407,9 @@ var SearchView = Widget.extend(/** @lends instance.web.SearchView# */{
             view_type: 'search',
             context: this.dataset.get_context(),
         });
-        this.$('.oe_searchview_unfold_drawer')
-            .toggleClass('fa-caret-down', !this.visible_filters)
-            .toggleClass('fa-caret-up', this.visible_filters);
+        this.$('.o-searchview-unfold-drawer')
+            .toggleClass('fa-caret-up', !this.visible_filters)
+            .toggleClass('fa-caret-down', this.visible_filters);
         return this.alive($.when(this._super(), this.alive(load_view).then(this.view_loaded.bind(this))));
     },
     get_title: function() {
@@ -515,7 +515,7 @@ var SearchView = Widget.extend(/** @lends instance.web.SearchView# */{
             this.$buttons.toggle(!this.headless && is_visible && this.visible_filters);
         }
         if (!this.headless && is_visible) {
-            this.$('div.oe_searchview_input').last().focus();
+            this.$('div.o-searchview-input').last().focus();
         }
     },
     toggle_buttons: function (is_visible) {
@@ -533,7 +533,7 @@ var SearchView = Widget.extend(/** @lends instance.web.SearchView# */{
             source: this.proxy('complete_global_search'),
             select: this.proxy('select_completion'),
             get_search_string: function () {
-                return self.$('div.oe_searchview_input').text();
+                return self.$('div.o-searchview-input').text();
             },
         });
         this.autocomplete.appendTo(this.$el);
@@ -569,7 +569,7 @@ var SearchView = Widget.extend(/** @lends instance.web.SearchView# */{
         e.preventDefault();
         var input_index = _(this.input_subviews).indexOf(
             this.subviewForRoot(
-                this.$('div.oe_searchview_input:focus')[0]));
+                this.$('div.o-searchview-input:focus')[0]));
         this.query.add(ui.item.facet, {at: input_index / 2});
     },
     subviewForRoot: function (subview_root) {
