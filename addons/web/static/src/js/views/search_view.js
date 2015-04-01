@@ -326,11 +326,6 @@ var SearchView = Widget.extend(/** @lends instance.web.SearchView# */{
                 this.$('.o-searchview-input:last').focus();
             }
         },
-        // search button
-        'click div.o-searchview-search-button': function (e) {
-            e.stopImmediatePropagation();
-            this.do_search();
-        },
         'click .o-searchview-unfold-drawer': function (e) {
             e.stopImmediatePropagation();
             $(e.target).toggleClass('fa-caret-down fa-caret-up');
@@ -514,9 +509,6 @@ var SearchView = Widget.extend(/** @lends instance.web.SearchView# */{
         if (this.$buttons) {
             this.$buttons.toggle(!this.headless && is_visible && this.visible_filters);
         }
-        if (!this.headless && is_visible) {
-            this.$('div.o-searchview-input').last().focus();
-        }
     },
     toggle_buttons: function (is_visible) {
         this.visible_filters = is_visible || !this.visible_filters;
@@ -567,10 +559,7 @@ var SearchView = Widget.extend(/** @lends instance.web.SearchView# */{
      */
     select_completion: function (e, ui) {
         e.preventDefault();
-        var input_index = _(this.input_subviews).indexOf(
-            this.subviewForRoot(
-                this.$('div.o-searchview-input:focus')[0]));
-        this.query.add(ui.item.facet, {at: input_index / 2});
+        this.query.add(ui.item.facet);
     },
     subviewForRoot: function (subview_root) {
         return _(this.input_subviews).detect(function (subview) {
@@ -607,34 +596,21 @@ var SearchView = Widget.extend(/** @lends instance.web.SearchView# */{
         _.invoke(this.input_subviews, 'destroy');
         this.input_subviews = [];
 
-        var i = new InputView(this);
-        started.push(i.appendTo(this.$facets_container));
-        this.input_subviews.push(i);
         this.query.each(function (facet) {
             var f = new FacetView(this, facet);
             started.push(f.appendTo(self.$facets_container));
             self.input_subviews.push(f);
-
-            var i = new InputView(this);
-            started.push(i.appendTo(self.$facets_container));
-            self.input_subviews.push(i);
         }, this);
+        var i = new InputView(this);
+        started.push(i.appendTo(self.$facets_container));
+        self.input_subviews.push(i);
         _.each(this.input_subviews, function (childView) {
             childView.on('focused', self, self.proxy('childFocused'));
             childView.on('blurred', self, self.proxy('childBlurred'));
         });
 
-        $.when.apply(null, started).then(function () {
-            if (options && options.focus_input === false) return;
-            var input_to_focus;
-            // options.at: facet inserted at given index, focus next input
-            // otherwise just focus last input
-            if (!options || typeof options.at !== 'number') {
-                input_to_focus = _.last(self.input_subviews);
-            } else {
-                input_to_focus = self.input_subviews[(options.at + 1) * 2];
-            }
-            input_to_focus.$el.focus();
+         $.when.apply(null, started).then(function () {
+            _.last(self.input_subviews).$el.focus();
         });
     },
     childFocused: function () {
@@ -841,19 +817,11 @@ return Widget.extend({
     },
     render_search_results: function (results) {
         var self = this;
-        var $list = this.$('ul');
+        var $list = this.$el;
         $list.empty();
-        var render_separator = false;
         results.forEach(function (result) {
-            if (result.is_separator) {
-                if (render_separator)
-                    $list.append($('<li>').addClass('oe-separator'));
-                render_separator = false;
-            } else {
-                var $item = self.make_list_item(result).appendTo($list);
-                result.$el = $item;
-                render_separator = true;
-            }
+            var $item = self.make_list_item(result).appendTo($list);
+            result.$el = $item;
         });
         this.show();
     },
@@ -871,7 +839,7 @@ return Widget.extend({
             })
             .data('result', result);
         if (result.expand) {
-            var $expand = $('<span class="oe-expand">').text('▶').appendTo($li);
+            var $expand = $('<a class="o-expand" href="#">').appendTo($li);
             $expand.mousedown(function (ev) {
                 ev.preventDefault();
                 ev.stopPropagation();
@@ -882,8 +850,8 @@ return Widget.extend({
             });
             result.expanded = false;
         }
-        if (result.indent) $li.addClass('oe-indent');
-        $li.append($('<span>').html(result.label));
+        if (result.indent) $li.addClass('o-indent');
+        $li.append($('<a href="#">').html(result.label));
         return $li;
     },
     expand: function () {
@@ -895,21 +863,21 @@ return Widget.extend({
                 self.current_result.$el.after($li);
             });
             self.current_result.expanded = true;
-            self.current_result.$el.find('span.oe-expand').html('▼');
+            self.current_result.$el.find('a.o-expand').removeClass('o-expand').addClass('o-expanded');
         });
     },
     fold: function () {
         var $next = this.current_result.$el.next();
-        while ($next.hasClass('oe-indent')) {
+        while ($next.hasClass('o-indent')) {
             $next.remove();
             $next = this.current_result.$el.next();
         }
         this.current_result.expanded = false;
-        this.current_result.$el.find('span.oe-expand').html('▶');
+        this.current_result.$el.find('a.o-expanded').removeClass('o-expanded').addClass('o-expand');
     },
     focus_element: function ($li) {
-        this.$('li').removeClass('oe-selection-focus');
-        $li.addClass('oe-selection-focus');
+        this.$('li').removeClass('o-selection-focus');
+        $li.addClass('o-selection-focus');
         this.current_result = $li.data('result');
     },
     select_item: function (ev) {
@@ -930,16 +898,16 @@ return Widget.extend({
     move: function (direction) {
         var $next;
         if (direction === 'down') {
-            $next = this.$('li.oe-selection-focus').nextAll(':not(.oe-separator)').first();
-            if (!$next.length) $next = this.$('li:first-child');
+            $next = this.$('li.o-selection-focus').next();
+            if (!$next.length) $next = this.$('li').first();
         } else {
-            $next = this.$('li.oe-selection-focus').prevAll(':not(.oe-separator)').first();
-            if (!$next.length) $next = this.$('li:not(.oe-separator)').last();
+            $next = this.$('li.o-selection-focus').prev();
+            if (!$next.length) $next = this.$('li').last();
         }
         this.focus_element($next);
     },
     is_expandable: function () {
-        return !!this.$('.oe-selection-focus .oe-expand').length;
+        return !!this.$('.o-selection-focus .o-expand').length;
     },
 });
 });

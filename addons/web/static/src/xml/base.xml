@@ -1600,12 +1600,11 @@
 </t>
 
 <div t-name="SearchView" class="form-control input-sm o-searchview">
-    <div class="fa fa-lg fa-search o-searchview-search-button" title="Search Again"/>
     <div class="o-searchview-facets"/>
     <div class="fa fa-lg o-searchview-unfold-drawer" title="Advanced Search..."/>
 </div>
 <!-- InputView: tabindex makes div focusable -->
-<div t-name="SearchView.InputView" class="o-searchview-input" contenteditable="true" tabindex="0"/>
+<div t-name="SearchView.InputView" class="o-searchview-input" contenteditable="true" tabindex="0" data-ph="Search..."/>
 <div t-name="SearchView.FacetView" tabindex="0" class="o-searchview-facet">
     <span t-if="widget.model.has('icon')"
         t-att-class="'label label-default fa ' + widget.model.get('icon') + ' o-searchview-facet-label'">
@@ -1628,9 +1627,9 @@
 <span t-name="SearchView.FacetView.Value" class="o-facet-value">
     <t t-esc="widget.model.get('label')"/>
 </span>
-<div t-name="SearchView.autocomplete" class="o-searchview-autocomplete">
-    <ul></ul>
-</div>
+<t t-name="SearchView.autocomplete">
+    <ul class="dropdown-menu o-searchview-autocomplete" role="menu"></ul>
+</t>
 
 <t t-name="SearchView.filters">
     <li t-foreach="widget.filters" t-as="filter" t-if="!filter.visible || filter.visible()"
