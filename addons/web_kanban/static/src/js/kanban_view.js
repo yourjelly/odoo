@@ -28,6 +28,14 @@ var KanbanView = View.extend({
     className: "o-kanban-view",
     number_of_color_schemes: 10,
 
+    events: {
+        'dragstart': 'on_dragstart',
+        'dragend': 'on_dragend',
+        'dragenter': 'on_dragenter',
+        'dragover': 'on_dragover',
+        'drop': 'on_drop',
+    },
+
     init: function (parent, dataset, view_id, options) {
         this._super(parent, dataset, view_id, options);
         this.qweb = new QWeb2.Engine();
@@ -37,11 +45,21 @@ var KanbanView = View.extend({
         this.m2m_context = {};
         this.fields_keys = [];
         this.model = this.dataset.model;
-        this.record_widgets = [];
-        this.data = []
+        this.widgets = [];  // for either records (ungrouped) or columns (grouped)
+
+        this.data = undefined;
         this.limit = options.limit || 40;
         this.grouped = false;
         this.group_by_field = undefined;
+        this.column_dragged = undefined;
+        this.default_group_by = undefined;
+        this.grouped_by_m2ot = undefined;
+        this.relation = undefined;
+
+        this.dnd = {
+            $image: undefined,
+            column: undefined,
+        };
     },
 
     view_loading: function(fvg) {
@@ -82,74 +100,69 @@ var KanbanView = View.extend({
     },
 
     load_data: function () {
+        return this.grouped ? this.load_groups() : this.load_records();
+    },
+    load_records: function () {
         var self = this;
-        if (this.grouped) {
-            return this.load_groups()
-                .then(this.proxy('load_group_data'))
-                .then(this.proxy('load_group_records'));
-        } else {
-            // loading data in ungrouped case
-            return this.dataset
-                .read_slice(this.fields_keys.concat(['__last_update']), { 'limit': this.limit })
-                .then(function(records) {
-                    self.data = {
-                        grouped: false,
-                        records: records,
-                    };
-                });
-        }
+        return this.dataset
+            .read_slice(this.fields_keys.concat(['__last_update']), { 'limit': this.limit })
+            .then(function(records) {
+                self.data = records;
+            });
     },
     // fetch groups ids
     load_groups: function () {
         var self = this;
         var group_by_field = this.group_by_field || this.default_group_by;
         this.fields_keys = _.uniq(this.fields_keys.concat(group_by_field));
+
         return new Model(this.model, this.search_context, this.search_domain)
-            .query(this.fields_keys)
-            .group_by([group_by_field])
-            .then(function (groups) {self.groups = groups; });
+        .query(this.fields_keys)
+        .group_by([group_by_field])
+        .then(function (groups) {
+            self.data = groups;
 
-    },
-    // fetch group data (display informations, ...)
-    load_group_data: function () {
-        var self = this;
-        var group_ids = _.without(_.map(this.groups, function (elem) { return elem.attributes.value[0];}), undefined);
-        if (this.grouped_by_m2o && group_ids.length) {
-            return new data.DataSet(this, this.relation)
-                .read_ids(group_ids, ['display_name'])
-                .then(function(results) {
-                    _.each(self.groups, function (group) {
-                        var group_id = group.attributes.value[0];
-                        var result = _.find(results, function (data) {return group_id === data.id;});
-                        group.title = result ? result.display_name : _t("Undefined");
-                        group.values = result;
+            // fetch group data (display information)
+            var group_ids = _.without(_.map(groups, function (elem) { return elem.attributes.value[0];}), undefined);
+            if (self.grouped_by_m2o && group_ids.length) {
+                return new data.DataSet(self, self.relation)
+                    .read_ids(group_ids, ['display_name'])
+                    .then(function(results) {
+                        _.each(self.data, function (group) {
+                            var group_id = group.attributes.value[0];
+                            var result = _.find(results, function (data) {return group_id === data.id;});
+                            group.title = result ? result.display_name : _t("Undefined");
+                            group.values = result;
+                            group.id = group_id;
+                        });
                     });
+            } else {
+                _.each(self.data, function (group) {
+                    group.title = group.attributes.value[1] || _t("Undefined");
                 });
-        } else {
-            _.each(this.groups, function (group) {
-                group.title = group.attributes.value[1] || _t("Undefined");
-            });
-        }
+                return $.when();
+            }
+        })
+        .then(function () {
+            // load records for each group
+            return $.when.apply(null, _.map(self.data, function (group, index) {
+                var def = $.when([]);
+                var dataset = new data.DataSetSearch(self, self.dataset.model,
+                    new data.CompoundContext(self.dataset.get_context(), group.model.context()), group.model.domain());
+                if (self.dataset._sort) {
+                    dataset.set_sort(self.dataset._sort);
+                }
+                if (group.attributes.length >= 1) {
+                    def = dataset.read_slice(self.fields_keys.concat(['__last_update']), { 'limit': self.limit });
+                }
+                return def.then(function (records) {
+                    self.dataset.ids.push.apply(self.dataset.ids, dataset.ids);
+                    self.data[index].records = records;
+                });
+            }));
+        });
     },
-    load_group_records: function () {
-        var self = this;
-        return $.when.apply(null, _.map(this.groups, function (group, index) {
-            var def = $.when([]);
-            var dataset = new data.DataSetSearch(self, self.dataset.model,
-                new data.CompoundContext(self.dataset.get_context(), group.model.context()), group.model.domain());
-            if (self.dataset._sort) {
-                dataset.set_sort(self.dataset._sort);
-            }
-            if (group.attributes.length >= 1) {
-                def = dataset.read_slice(self.fields_keys.concat(['__last_update']), { 'limit': self.limit });
-            }
-            return def.then(function (records) {
-                self.dataset.ids.push.apply(self.dataset.ids, dataset.ids);
-                self.groups[index].records = records;
-            });
-        }));
 
-    },
     /**
      * Render the buttons according to the KanbanView.buttons template and
      * add listeners on it.
@@ -179,7 +192,7 @@ var KanbanView = View.extend({
             var limit = new_state.current_max - new_state.current_min + 1;
             this.dataset.read_slice(this.fields_keys.concat(['__last_update']), { 'limit': limit, 'offset': new_state.current_min - 1 })
                 .then(function (records) {
-                    self.data.records = records;
+                    self.data = records;
                 })
                 .done(this.proxy('render'));
         });
@@ -258,7 +271,7 @@ var KanbanView = View.extend({
             return;
         }
         var relations = {};
-        this.record_widgets.forEach(function(record) {
+        this.widgets.forEach(function(record) {
             self.many2manys.forEach(function(name) {
                 var field = record.record[name];
                 var $el = record.$('.oe_form_field.oe_tags[name=' + name + ']').empty();
@@ -302,31 +315,54 @@ var KanbanView = View.extend({
         var self = this;
 
         this.$el.css({display:'flex'});
-        _.invoke(this.record_widgets, 'destroy');
-        this.record_widgets = [];
-        var kanban_record;
-        var records = this.data.records;
+        _.invoke(this.widgets, 'destroy');
+        this.widgets = [];
         var fragment = document.createDocumentFragment();
 
         if (this.grouped) {
-            _.each(this.groups, function (group) {
-                var kanban_group = new kanban_common.KanbanGroup(self, group);
-                kanban_group.appendTo(fragment);
-                self.record_widgets.push(kanban_group);
+            var groups = this.data;
+            _.each(groups, function (group) {
+                var column = new kanban_common.KanbanColumn(self, group);
+                column.appendTo(fragment);
+                self.widgets.push(column);
+                window.col = window.col || column;
             });
 
         } else {
-            // ungrouped kanban view (basically a bunch o records)
+            // ungrouped kanban view (basically a bunch of records)
+            var kanban_record;
+            var records = this.data;
             for (var i = 0; i < records.length; i++) {
                 kanban_record = new kanban_common.KanbanRecord(this, records[i], this);
                 kanban_record.appendTo(fragment);
-                this.record_widgets.push(kanban_record);
+                this.widgets.push(kanban_record);
             }
             this.postprocess_m2m_tags();
         }
         this.$el.toggleClass('o_kanban_grouped', !!this.grouped);
         this.$el.toggleClass('o_kanban_ungrouped', !this.grouped);
         this.$el.append(fragment);
+        for (var i = 0; i < this.widgets.length; i++) {
+            this.widgets[i].$el.data('column', this.widgets[i]);
+        }
+    },
+
+    swap_column: function (col1, col2) {
+        var tmp = $('<span>').hide();
+        col2.$el.before(tmp);
+        col1.$el.before(col2.$el);
+        tmp.replaceWith(col1.$el);
+        utils.swap(this.widgets, col1, col2);
+    },
+
+    resequence: function () {
+        var new_sequence = _.pluck(this.widgets, 'id');
+        new data.DataSet(this, this.relation).resequence(new_sequence).done(function (r) {
+            if (!r) {
+                console.warn('Resequence could not be complete. ' +
+                    'Maybe the model does not have a "sequence" field?');
+            }
+        });
     },
 
     update_pager: function() {
@@ -348,6 +384,100 @@ var KanbanView = View.extend({
             this.do_warn("Kanban: could not find id#" + id);
         }
     },
+
+    on_dragstart: function (e) {
+        this.dnd.dragging_column = $(e.target).hasClass('o_kanban_header');
+        var event = e.originalEvent;
+
+        if (this.dnd.dragging_column) {
+            var column = $(e.target).parent().data('column');
+
+            this.dnd.$image = column.$el.clone();
+            this.dnd.$image.find('.o_kanban_record:gt(4)').remove();
+            this.dnd.$image.css({
+                position: 'absolute',
+                top: 0,
+                'max-height': '100vh',
+                overflow: 'hidden',
+                'z-index': -1,
+            });
+            column.$el.addClass('o_kanban_dragged');
+            this.dnd.$image.appendTo(document.body);
+
+            var offsetX = 'offsetX' in event ? event.offsetX : event.pageX - column.$el.offset().left;
+            var offsetY = 'offsetY' in event ? event.offsetY: event.pageY - column.$el.offset().top;
+
+            event.dataTransfer.setDragImage(this.dnd.$image[0], offsetX, offsetY);
+            event.dataTransfer.setData('text/plain', 'dummy');
+            this.dnd.column = column;
+        } else {
+            // dragging kanban record
+            var record = $(e.target).data('record');
+            console.log(record);
+            this.dnd.$image = record.$el.clone();
+            this.dnd.$image.css({
+                position: 'absolute',
+                top: 10,
+                left: 10,
+                'max-height': '100vh',
+                overflow: 'hidden',
+                'z-index': -1,
+                transform: 'rotate(2deg)',
+            });
+            this.dnd.$image.appendTo(document.body);
+            record.$el.addClass('o_record_dragged');
+            record.$el.children().css({visibility: 'hidden'});
+            var offsetX = 'offsetX' in event ? event.offsetX : event.pageX - record.$el.offset().left;
+            var offsetY = 'offsetY' in event ? event.offsetY: event.pageY - record.$el.offset().top;
+
+            event.dataTransfer.setDragImage(this.dnd.$image[0], offsetX, offsetY);
+            event.dataTransfer.setData('text/plain', 'dummy');
+            this.dnd.record = record;
+
+        }
+
+
+    },
+
+    on_dragend: function (e) {
+        var event = e.originalEvent;
+
+        if (this.dnd.dragging_column) {
+            var column = $(e.target).closest('.o_kanban_group').data('column');
+            column.$el.removeClass('o_kanban_dragged');
+            this.dnd.$image.remove();
+        } else {
+            this.dnd.$image.remove();
+            var record = $(e.target).data('record');
+            record.$el.removeClass('o_record_dragged');
+            record.$el.children().css({visibility: 'inherit'});
+        }
+    },
+
+    on_dragenter: function (e) {
+        var event = e.originalEvent;
+
+        if (this.dnd.dragging_column) {
+            var column = $(e.target).closest('.o_kanban_group').data('column');
+            e.preventDefault();
+            this.swap_column(this.dnd.column, column);
+        }
+    },
+
+    on_dragover: function (e) {
+        e.preventDefault();
+    },
+
+    on_drop: function (e) {
+        var event = e.originalEvent;
+
+        if (this.dnd.dragging_column) {
+            e.preventDefault();
+            this.$('.o_kanban_dragged').removeClass('.o_kanban_dragged');
+            this.resequence();
+        }
+    },
+
 });
 
 

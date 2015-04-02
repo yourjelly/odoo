@@ -483,15 +483,7 @@ var KanbanRecord = Widget.extend({
     },
     do_action_object: function ($action) {
         var button_attrs = $action.data();
-        var node_context = button_attrs.context || {};
-        var context = new data.CompoundContext(node_context);
-        context.set_eval_context({
-            active_id: this.id,
-            active_ids: [this.id],
-            active_model: this.view.dataset.model
-        });
-        var action_data = _.extend({}, button_attrs, {context: context});
-        this.view.do_execute_action(action_data, this.view.dataset, this.id, this.do_reload);
+        this.view.do_execute_action(button_attrs, this.view.dataset, this.id, this.do_reload);
     },
     do_action_url: function($action) {
         return framework.redirect($action.attr("href"));
@@ -569,7 +561,7 @@ var KanbanRecord = Widget.extend({
     }
 });
 
-var KanbanGroup = Widget.extend({
+var KanbanColumn = Widget.extend({
     template: "KanbanView.Group",
 
     init: function(parent, group_data) {
@@ -578,315 +570,20 @@ var KanbanGroup = Widget.extend({
         this.group_data = group_data;
         this.records = group_data.records;
         this.title = group_data.title;
+        this.id = group_data.id;
     },
+
     start: function() {
-        var self = this;
-        _.each(this.records, function (record) {
-            var kanban_record = new KanbanRecord(self, record, self.parent);
-            kanban_record.appendTo(self.$el);
-        });
-        this.$el.toggleClass('o_kanban_empty', this.records.length === 0);
-        this.$el[0].addEventListener('dragstart', function (e) {
-            var crt = self.$el.clone();
-            crt.css({
-                position: 'absolute',
-                top: 0,
-                'z-index': -1,
-                transform: 'rotate(3deg)',
-            });
-            self.$el.addClass('o_kanban_dragged');
-            document.body.appendChild(crt[0]);
-            console.log(e);
-            e.dataTransfer.setDragImage(crt[0], e.offsetX, e.offsetY);
-        });
-        this.$el[0].addEventListener('dragend', function () {
-            self.$el.removeClass('o_kanban_dragged');
-        });
-        this.$el[0].addEventListener('dragenter', function () {
-            var $other_col = self.getParent().$('.o_kanban_dragged');
-            var tmp = $('<span>').hide();
-            $other_col.before(tmp);
-            self.$el.before($other_col);
-            tmp.replaceWith(self.$el);
-        });
-    },
-});
-
-var OldKanbanGroup = Widget.extend({
-    template: 'KanbanView.group_header',
-    init: function (parent, records, group, dataset) {
-        var self = this;
-        this._super(parent);
-        this.$has_been_started = $.Deferred();
-        this.view = parent;
-        this.group = group;
-        this.dataset = dataset;
-        this.dataset_offset = 0;
-        this.value = this.title = this.values = null;
-        if (this.group) {
-            this.values = group.values;
-            this.value = group.get('value');
-            this.title = group.get('value');
-            if (this.value instanceof Array) {
-                this.title = this.value[1];
-                this.value = this.value[0];
-            }
-            var field = this.view.group_by_field;
-            if (!_.isEmpty(field)) {
-                try {
-                    this.title = formats.format_value(group.get('value'), field, false);
-                } catch(e) {}
-            }
-        }
-
-        if (this.title === false) {
-            this.title = _t('Undefined');
-            this.undefined_title = true;
-        }
-        var key = this.view.group_by + '-' + this.value;
-        if (!this.view.state.groups[key]) {
-            this.view.state.groups[key] = {
-                folded: group ? group.get('folded') : false
-            };
-        }
-        this.state = this.view.state.groups[key];
-        this.$records = null;
-
-        this.records = [];
-        this.$has_been_started.done(function() {
-            self.do_add_records(records);
-        });
-    },
-    start: function() {
-        var self = this,
-            def = this._super();
-        if (! self.view.group_by) {
-            self.$el.addClass("oe_kanban_no_group");
-            var QuickCreateClass = self.view.get_quick_create_class();
-            self.quick = (new QuickCreateClass(this, self.dataset, {}, false))
-                .on('added', self, self.proxy('quick_created'));
-            self.quick.replace($(".oe_kanban_no_group_qc_placeholder"));
-        }
-        this.$records = $(QWeb.render('KanbanView.group_records_container', { widget : this}));
-        this.$records.insertBefore(this.view.$el.find('.oe_kanban_groups_records td:last'));
-
-        this.$el.on('click', '.oe_kanban_group_dropdown li a', function(ev) {
-            var fn = 'do_action_' + $(ev.target).data().action;
-            if (typeof(self[fn]) === 'function') {
-                self[fn]($(ev.target));
-            }
-        });
-
-        this.$el.find('.oe_kanban_add').click(function () {
-            if (self.view.quick) {
-                self.view.quick.trigger('close');
-            }
-            if (self.quick) {
-                return false;
-            }
-            self.view.$el.find('.oe_view_nocontent').hide();
-            var ctx = {};
-            ctx['default_' + self.view.group_by] = self.value;
-            self.quick = new (self.view.get_quick_create_class())(this, self.dataset, ctx, true)
-                .on('added', self, self.proxy('quick_created'))
-                .on('close', self, function() {
-                    self.view.$el.find('.oe_view_nocontent').show();
-                    this.quick.destroy();
-                    delete self.view.quick;
-                    delete this.quick;
-                });
-            self.quick.appendTo($(".oe_kanban_group_list_header", self.$records));
-            self.quick.focus();
-            self.view.quick = self.quick;
-        });
-        // Add bounce effect on image '+' of kanban header when click on empty space of kanban grouped column.
-        this.$records.on('click', '.oe_kanban_show_more', this.do_show_more);
-        if (this.state.folded) {
-            this.do_toggle_fold();
-        }
-        this.$el.data('widget', this);
-        this.$records.data('widget', this);
-        this.$has_been_started.resolve();
-        var add_btn = this.$el.find('.oe_kanban_add');
-        add_btn.tooltip({delay: { show: 500, hide:1000 }});
-        this.$records.find(".oe_kanban_column_cards").click(function (ev) {
-            if (ev.target == ev.currentTarget) {
-                if (!self.state.folded) {
-                    add_btn.openerpBounce();
-                }
-            }
-        });
-        this.is_started = true;
-        this.fetch_tooltip();
-        return def;
-    },
-    /*
-     * Form the tooltip, based on optional group_by_tooltip on the grouping field.
-     * This function goes through the arch of the view, finding the declaration
-     * of the field used to group. If group_by_tooltip is defined, use the previously
-     * computed values of the group to form the tooltip. */
-    fetch_tooltip: function() {
-        var self = this;
-        if (! this.group)
-            return;
-        var options = null;
-        var recurse = function(node) {
-            if (node.tag === "field" && node.attrs.name == self.view.group_by) {
-                options = pyeval.py_eval(node.attrs.options || '{}');
-                return;
-            }
-            _.each(node.children, function(child) {
-                recurse(child);
-            });
-        };
-        recurse(this.view.fields_view.arch);
-        if (options && options.group_by_tooltip) {
-            this.tooltip = _.compact(
-                _.union(
-                    [this.title],
-                    _.map(
-                        options.group_by_tooltip,
-                        function (key, value, list) { return self.values && self.values[value] && (key + "\n" + self.values[value]) || ''; }))
-            ).join('\n\n');
-            this.$(".oe_kanban_group_title_text").attr("title", this.tooltip || this.title || "");
-        }
-    },
-    compute_cards_auto_height: function() {
-        // oe_kanban_no_auto_height is an empty class used to disable this feature
-        if (!this.view.group_by) {
-            var min_height = 0;
-            var els = [];
-            _.each(this.records, function(r) {
-                var $e = r.$el.children(':first:not(.oe_kanban_no_auto_height)').css('min-height', 0);
-                if ($e.length) {
-                    els.push($e[0]);
-                    min_height = Math.max(min_height, $e.outerHeight());
-                }
-            });
-            $(els).css('min-height', min_height);
-        }
-    },
-    destroy: function() {
-        this._super();
-        if (this.$records) {
-            this.$records.remove();
-        }
-    },
-    do_show_more: function(evt) {
-        var self = this;
-        var ids = self.view.dataset.ids.slice(0);
-        return this.dataset.read_slice(this.view.fields_keys.concat(['__last_update']), {
-            'limit': self.view.limit,
-            'offset': self.dataset_offset += self.view.limit
-        }).then(function(records) {
-            self.view.dataset.ids = ids.concat(_.difference(self.dataset.ids, ids));
-            self.do_add_records(records);
-            self.compute_cards_auto_height();
-            self.view.postprocess_m2m_tags();
-            return records;
-        });
-    },
-    do_add_records: function(records, prepend) {
-        var self = this;
-        var $list_header = this.$records.find('.oe_kanban_group_list_header');
-        var $show_more = this.$records.find('.oe_kanban_show_more');
-        var $cards = this.$records.find('.oe_kanban_column_cards');
-
-        _.each(records, function(record) {
-            var rec = new KanbanRecord(self, record);
-            if (!prepend) {
-                rec.appendTo($cards);
-                self.records.push(rec);
-            } else {
-                rec.prependTo($cards);
-                self.records.unshift(rec);
-            }
-        });
-        if ($show_more.length) {
-            var size = this.dataset.size();
-            $show_more.toggle(this.records.length < size).find('.oe_kanban_remaining').text(size - this.records.length);
-        }
-    },
-    remove_record: function(id, remove_from_dataset) {
+        var record;
         for (var i = 0; i < this.records.length; i++) {
-            if (this.records[i]['id'] === id) {
-                this.records.splice(i, 1);
-                i--;
-            }
+            record = new KanbanRecord(this, this.records[i], this.parent);
+            record.appendTo(this.$el);
+            record.$el.attr('draggable', true);
+            record.$el.data('record', record);
         }
+        this.$el.toggleClass('o_kanban_empty', this.records.length === 0);
     },
-    do_toggle_fold: function(compute_width) {
-        this.$el.add(this.$records).toggleClass('oe_kanban_group_folded');
-        this.state.folded = this.$el.is('.oe_kanban_group_folded');
-        this.$("ul.oe_kanban_group_dropdown li a[data-action=toggle_fold]").text((this.state.folded) ? _t("Unfold") : _t("Fold"));
-    },
-    do_action_toggle_fold: function() {
-        this.do_toggle_fold();
-    },
-    do_action_edit: function() {
-        var self = this;
-        self.do_action({
-            res_id: this.value,
-            name: _t("Edit column"),
-            res_model: self.view.group_by_field.relation,
-            views: [[false, 'form']],
-            type: 'ir.actions.act_window',
-            target: "new",
-            flags: {
-                action_buttons: true,
-                headless: true,
-            }
-        });
-        // to do : remove this horrible hack
-        var am = web_client.action_manager;
-        var form = am.dialog_widget.views.form.controller;
-        form.on("on_button_cancel", am.dialog, function() { return am.dialog.$dialog_box.modal('hide'); });
-        form.on('record_saved', self, function() {
-            am.dialog.$dialog_box.modal('hide');
-            self.view.do_reload();
-        });
-    },
-    do_action_delete: function() {
-        var self = this;
-        if (confirm(_t("Are you sure to remove this column ?"))) {
-            (new data.DataSet(self, self.view.group_by_field.relation)).unlink([self.value]).done(function(r) {
-                self.view.do_reload();
-            });
-        }
-    },
-    do_save_sequences: function() {
-        var self = this;
-        if (_.indexOf(this.view.fields_keys, 'sequence') > -1) {
-            var new_sequence = _.pluck(this.records, 'id');
-            self.view.dataset.resequence(new_sequence);
-        }
-    },
-    /**
-     * Handles a newly created record
-     *
-     * @param {id} id of the newly created record
-     */
-    quick_created: function (record) {
-        var id = record, self = this;
-        self.view.remove_no_result();
-        self.trigger("add_record");
-        this.dataset.read_ids([id], this.view.fields_keys)
-            .done(function (records) {
-                self.view.dataset.ids.push(id);
-                self.do_add_records(records, true);
-            });
-    },
-    highlight: function(show){
-        if(show){
-            this.$el.addClass('oe_kanban_column_higlight');
-            this.$records.addClass('oe_kanban_column_higlight');
-        }else{
-            this.$el.removeClass('oe_kanban_column_higlight');
-            this.$records.removeClass('oe_kanban_column_higlight');
-        }
-    }
 });
-
 
 /**
  * Kanban widgets: ProgressBar
@@ -965,7 +662,7 @@ return {
     registry: fields_registry,
     QuickCreate: QuickCreate,
     KanbanRecord: KanbanRecord,
-    KanbanGroup: KanbanGroup,
+    KanbanColumn: KanbanColumn,
 };
 
 });
