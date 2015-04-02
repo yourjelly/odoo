@@ -1,23 +1,12 @@
 .o-debug-manager {
-	color: white;
-	border-bottom: 1px solid @odoo-main-text-color;
+	background-color: @odoo-brand-secondary;
+	border-color: darken(@odoo-brand-secondary, 10%);
+	border-width: 1px 0px 0px 0px;
+	box-shadow: none;
 
-	.o-debug-title {
-		padding-top: 3px;
-		font-size: 18px;
-	}
-
-	.btn-default {
-		border-radius: 0px;
-        border-style: none;
-	}
-
-	.o-debug-dropdowns {
-		padding-top: 3px;
-		margin-left: 16px;
-	}
-
-	.o-debug-leave {
-		background-color: inherit;
+	// dropups instead of dropdowns
+	.o-debug-dropdowns > li > ul {
+		top: auto;
+		bottom: 100%;
 	}
 }

@@ -483,24 +483,26 @@
 </t>
 
 <t t-name="WebClient.DebugManager">
-    <div class="row o-debug-manager">
-        <div class="col-md-12">
-            <span class="o-debug-title pull-left">
-                Developer Tools
-            </span>
-            <div class="o-debug-dropdowns pull-left"></div>
-            <button class="btn fa fa-close o-debug-leave pull-right" title="Leave Debug Mode"></button>
+    <div class="row navbar navbar-inverse o-debug-manager">
+        <div class="navbar-header">
+            <span class="navbar-brand fa fa-bug"/>
+            <span class="navbar-brand">Developer Tools</span>
+        </div>
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav o-debug-dropdowns"></ul>
+            <ul class="nav navbar-nav navbar-right o-debug-leave">
+                <li>
+                    <a class="fa fa-close" href="#" title="Leave the Developer Tools"/>
+                </li>
+            </ul>
         </div>
     </div>
 </t>
 <t t-name="WebClient.DebugDropdowns">
-    <div class="btn-group">
-        <button class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" type="button">
-            <span>Views</span>
-            <b class="caret"/>
-        </button>
-        <ul class="dropdown-menu o-debug-dropdown o-debug-views" role="menu">
-            <t t-if="active_view.type === 'form'">
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Views</a>
+        <ul class="dropdown-menu" role="menu">
+            <t t-if="view_ids_length === 1">
                 <li><a href="#" data-action="get_metadata">View Metadata</a></li>
             </t>
             <li><a href="#" data-action="get_view_fields">View Fields</a></li>
@@ -510,37 +512,33 @@
                 <li t-if="searchview"><a href="#" data-action="edit" data-model="ir.ui.view" t-att-data-id="searchview.view_id">Edit SearchView</a></li> 
             </t>
         </ul>
-    </div>
-    <div class="btn-group">
-        <button class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" type="button">
-            <span>Workflow</span>
-            <b class="caret"/>
-        </button>
-        <ul class="dropdown-menu o-debug-dropdown" role="menu">
+    </li>
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Workflow</a>
+        <ul class="dropdown-menu" role="menu">
             <t t-if="is_admin">
                 <li><a href="#" data-action="edit_workflow">Edit Workflow</a></li>
                 <li><a href="#" data-action="print_workflow">Print Workflow</a></li>
             </t>
         </ul>
-    </div>
-    <div class="btn-group">
-        <button class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" type="button">
-            <span>Others</span>
-            <b class="caret"/>
-        </button>
-        <ul class="dropdown-menu o-debug-dropdown" role="menu">
-            <t t-if="active_view.type === 'form'">
-                <li><a href="#" data-action="toggle_layout_outline">Toggle Form Layout Outline</a></li>
-                <li><a href="#" data-action="set_defaults">Set Defaults</a></li>
-            </t>
-            <li><a href="#" data-action="perform_js_tests">JS Tests</a></li>
-            <li><a href="#" data-action="manage_filters">Manage Filters</a></li>
-            <t t-if="uid === 1">
-                <li><a href="#" data-action="translate">Technical Translation</a></li>
-                <li t-if="action"><a href="#" data-action="edit" t-att-data-model="action.type" t-att-data-id="action.id">Edit Action</a></li>
-            </t>
+    </li>
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Others</a>
+        <ul class="dropdown-menu" role="menu">
+            <li class="dropdown">
+                <t t-if="active_view.type === 'form'">
+                    <li><a href="#" data-action="toggle_layout_outline">Toggle Form Layout Outline</a></li>
+                    <li><a href="#" data-action="set_defaults">Set Defaults</a></li>
+                </t>
+                <li><a href="#" data-action="perform_js_tests">JS Tests</a></li>
+                <li><a href="#" data-action="manage_filters">Manage Filters</a></li>
+                <t t-if="uid === 1">
+                    <li><a href="#" data-action="translate">Technical Translation</a></li>
+                    <li t-if="action"><a href="#" data-action="edit" t-att-data-model="action.type" t-att-data-id="action.id">Edit Action</a></li>
+                </t>
+            </li>
         </ul>
-    </div>
+    </li>
 </t>
 <t t-name="WebClient.DebugViewLog">
     <div>

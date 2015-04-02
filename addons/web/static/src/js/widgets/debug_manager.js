@@ -18,7 +18,7 @@ if (core.debug) {
     var DebugManager = Widget.extend({
         template: "WebClient.DebugManager",
         events: {
-            "click .o-debug-dropdown li": "perform_callback",
+            "click .o-debug-dropdowns li>ul>li": "perform_callback",
             "click .o-debug-leave": "leave_debug",
         },
         start: function() {
@@ -32,18 +32,19 @@ if (core.debug) {
          */
         update: function(widget) {
             var available = false;
-
             if (widget instanceof ViewManager) {
                 available = true;
-                this.view_manager = widget;
+                if (widget !== this.view_manager) {
+                    this.view_manager = widget;
+
+                    // Update itself each time switch_mode is performed on the ViewManager
+                    this.view_manager.on('switch_mode', this, function() {
+                        this.update(this.view_manager);
+                    });
+                }
                 this.dataset = this.view_manager.dataset;
                 this.active_view = this.view_manager.active_view;
                 this.view = this.active_view.controller;
-
-                // Update itself each time switch_mode is performed on the ViewManager
-                this.view_manager.on('switch_mode', this, function() {
-                    this.update(this.view_manager);
-                });
 
                 // Remove the previously rendered dropdowns
                 this.$dropdowns.empty();
@@ -56,6 +57,7 @@ if (core.debug) {
                         action: this.view_manager.action,
                         searchview: this.view_manager.searchview,
                         is_admin: is_admin,
+                        view_ids_length: this.active_view.type === 'form' && this.view.get_selected_ids().length,
                     });
                     $(new_dropdowns).appendTo(this.$dropdowns);
                 });
@@ -68,7 +70,6 @@ if (core.debug) {
          */
         perform_callback: function (evt) {
             evt.preventDefault();
-
             var params = $(evt.target).data();
             var callback = params.action;
 
@@ -82,20 +83,18 @@ if (core.debug) {
         get_metadata: function() {
             var self = this;
             var ids = this.view.get_selected_ids();
-            if (ids.length === 1) {
-                self.dataset.call('get_metadata', [ids]).done(function(result) {
-                    new Dialog(this, {
-                        title: _.str.sprintf(_t("Metadata (%s)"), self.dataset.model),
-                        size: 'medium',
-                        buttons: {
-                            Ok: function() { this.parents('.modal').modal('hide');}
-                        },
-                    }, QWeb.render('WebClient.DebugViewLog', {
-                        perm : result[0],
-                        format : formats.format_value
-                    })).open();
-                });
-            }
+            self.dataset.call('get_metadata', [ids]).done(function(result) {
+                new Dialog(this, {
+                    title: _.str.sprintf(_t("Metadata (%s)"), self.dataset.model),
+                    size: 'medium',
+                    buttons: {
+                        Ok: function() { this.parents('.modal').modal('hide');}
+                    },
+                }, QWeb.render('WebClient.DebugViewLog', {
+                    perm : result[0],
+                    format : formats.format_value
+                })).open();
+            });
         },
         toggle_layout_outline: function() {
             this.view.rendering_engine.toggle_layout_debugging();
@@ -224,7 +223,7 @@ if (core.debug) {
 
             // Instantiate the DebugManager and insert it into the DOM
             this.debug_manager = new DebugManager(this);
-            this.debug_manager.prependTo(this.$('.o-web-client'));
+            this.debug_manager.appendTo(this.$('.o-web-client'));
 
             // Override push_action so that it triggers an event each time a new action is pushed
             // The DebugManager listens to this even to keep itself up-to-date
