@@ -243,6 +243,9 @@ var WebClient = Widget.extend({
                     })).fail(function() {
                         self.menu.open_menu(options.previous_menu_id);
                     }).always(function() {
+                        if (options.callback) {
+                            options.callback();
+                        }
                         completed.resolve();
                     });
                     setTimeout(function() {

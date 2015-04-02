@@ -196,12 +196,13 @@ var Menu = Widget.extend({
             });
         }
     },
-    _trigger_menu_click: function(menu_id, action_id, needaction) {
+    _trigger_menu_click: function(menu_id, action_id, needaction, callback) {
         core.bus.trigger('menu_click', {
             id: menu_id,
             action_id: action_id,
             needaction: needaction,
             previous_menu_id: this.current_secondary_menu || this.current_primary_menu,
+            callback: callback,
         });
     },
     _on_primary_menu_click: function(menu_id, action_id, needaction) {
@@ -210,12 +211,12 @@ var Menu = Widget.extend({
         action_id = action_id ? action_id : self._menu_id_to_action_id(menu_id).split(',')[1];
 
         if (action_id) {
-            self._trigger_menu_click(menu_id, action_id, needaction);
+            self._trigger_menu_click(menu_id, action_id, needaction, function() {
+                self.toggle_app_switcher();
+            });
             this.trigger('primary_menu_click', {id: menu_id});
             this.current_primary_menu = menu_id;
         }
-
-        self.toggle_app_switcher();
     },
     _on_secondary_menu_click: function(menu_id, action_id, needaction) {
         var self = this;
