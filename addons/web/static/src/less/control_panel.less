@@ -224,7 +224,33 @@
 
     // Sidebar
     .o-cp-sidebar {
-        text-align: right;
+        .o-sidebar-section li>a {
+            cursor: pointer;
+        }
+        .o-hidden-input-file {
+            position: relative;
+            input.o-form-input-file {
+                position: absolute;
+                top: 1px;
+                opacity: 0;
+                width: 100%;
+                height: 26px;
+            }
+            .o-form-binary-form span {
+                padding: 3px 25px;
+                color: @btn-default-color;
+                font-size: italic;
+            }
+            .o-form-binary-form:hover {
+                background-color: @table-bg-hover;
+            }
+        }
+        .o-sidebar-delete-attachment {
+            padding: 0px;
+            position: absolute;
+            top: 5px;
+            right: 10px;
+        }
     }
 
     // Searchview buttons

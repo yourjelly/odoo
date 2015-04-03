@@ -67,11 +67,9 @@ Sidebar.include({
         has_share(function() {
             self.add_items('other', [
                 {   label: _t('Share'),
-                    callback: self.on_click_share,
-                    classname: 'oe_share' },
+                    callback: self.on_click_share },
                 {   label: _t('Embed'),
-                    callback: self.on_click_share_link,
-                    classname: 'oe_share' },
+                    callback: self.on_click_share_link },
             ]);
         });
     },

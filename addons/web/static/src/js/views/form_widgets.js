@@ -1152,11 +1152,11 @@ var FieldBinary = common.AbstractField.extend(common.ReinitializeFieldMixin, {
     },
     initialize_content: function() {
         var self= this;
-        this.$el.find('input.oe_form_binary_file').change(this.on_file_change);
+        this.$el.find('input.o-form-input-file').change(this.on_file_change);
         this.$el.find('button.oe_form_binary_file_save').click(this.on_save_as);
         this.$el.find('.oe_form_binary_file_clear').click(this.on_clear);
         this.$el.find('.oe_form_binary_file_edit').click(function(event){
-            self.$el.find('input.oe_form_binary_file').click();
+            self.$el.find('input.o-form-input-file').click();
         });
     },
     on_file_change: function(e) {
@@ -1178,8 +1178,8 @@ var FieldBinary = common.AbstractField.extend(common.ReinitializeFieldMixin, {
                     self.on_file_uploaded(file.size, file.name, file.type, data);
                 };
             } else {
-                this.$el.find('form.oe_form_binary_form input[name=session_id]').val(this.session.session_id);
-                this.$el.find('form.oe_form_binary_form').submit();
+                this.$el.find('form.o-form-binary-form input[name=session_id]').val(this.session.session_id);
+                this.$el.find('form.o-form-binary-form').submit();
             }
             this.$el.find('.oe_form_binary_progress').show();
             this.$el.find('.oe_form_binary').hide();

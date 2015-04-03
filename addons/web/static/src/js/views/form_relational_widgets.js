@@ -1569,7 +1569,7 @@ var FieldMany2ManyBinaryMultiFiles = AbstractManyField.extend(common.Reinitializ
         $(window).on(this.fileupload_id, _.bind(this.on_file_loaded, this));
     },
     initialize_content: function() {
-        this.$el.on('change', 'input.oe_form_binary_file', this.on_file_change );
+        this.$el.on('change', 'input.o-form-input-file', this.on_file_change );
     },
     get_file_url: function (attachment) {
         return this.session.url('/web/binary/saveas', {model: 'ir.attachment', field: 'datas', filename_field: 'datas_fname', id: attachment.id});
@@ -1601,7 +1601,7 @@ var FieldMany2ManyBinaryMultiFiles = AbstractManyField.extend(common.Reinitializ
             self.$('.oe_placeholder_files, .oe_attachments').replaceWith( render );
 
             // reinit input type file
-            var $input = self.$('input.oe_form_binary_file');
+            var $input = self.$('input.o-form-input-file');
             $input.after($input.clone(true)).remove();
             self.$(".oe_fileupload").show();
 
@@ -1632,7 +1632,7 @@ var FieldMany2ManyBinaryMultiFiles = AbstractManyField.extend(common.Reinitializ
             // TODO : unactivate send on wizard and form
 
             // submit file
-            this.$('form.oe_form_binary_form').submit();
+            this.$('form.o-form-binary-form').submit();
             this.$(".oe_fileupload").hide();
             // add file on data result
             this.data[0] = {

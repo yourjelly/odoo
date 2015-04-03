@@ -54,7 +54,7 @@ var Sidebar = Widget.extend({
         self.$el.html(QWeb.render('Sidebar', {widget: self}));
 
         // Hides Sidebar sections when item list is empty
-        this.$('.oe_form_dropdown_section').each(function() {
+        this.$('.o-sidebar-section').each(function() {
             $(this).toggle(!!$(this).find('li').length);
         });
         self.$("[title]").tooltip({
@@ -101,7 +101,6 @@ var Sidebar = Widget.extend({
                     items[i] = {
                         label: items[i]['name'],
                         action: items[i],
-                        classname: 'oe_sidebar_' + type
                     };
                 }
                 self.add_items(type=='print' ? 'print' : 'other', items);
@@ -183,16 +182,16 @@ var Sidebar = Widget.extend({
         });
         self.items.files = attachments;
         self.redraw();
-        this.$('.oe_sidebar_add_attachment .oe_form_binary_file').change(this.on_attachment_changed);
-        this.$el.find('.oe_sidebar_delete_item').click(this.on_attachment_delete);
+        this.$('.o-sidebar-add-attachment .o-form-input-file').change(this.on_attachment_changed);
+        this.$el.find('.o-sidebar-delete-attachment').click(this.on_attachment_delete);
     },
     on_attachment_changed: function(e) {
         var $e = $(e.target);
         if ($e.val() !== '') {
-            this.$el.find('form.oe_form_binary_form').submit();
+            this.$el.find('form.o-form-binary-form').submit();
             $e.parent().find('input[type=file]').prop('disabled', true);
             $e.parent().find('button').prop('disabled', true).find('img, span').toggle();
-            this.$('.oe_sidebar_add_attachment a').text(_t('Uploading...'));
+            this.$('.o-sidebar-add-attachment a').text(_t('Uploading...'));
             framework.blockUI();
         }
     },

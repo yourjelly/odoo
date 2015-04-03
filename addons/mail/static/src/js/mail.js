@@ -316,7 +316,7 @@ var ThreadComposeMessage = MessageCommon.extend({
             this.attachment_ids = attachments;
 
             // submit file
-            this.$('form.oe_form_binary_form').submit();
+            this.$('form.o-form-binary-form').submit();
 
             this.$(".oe_attachment_file").hide();
 
@@ -351,7 +351,7 @@ var ThreadComposeMessage = MessageCommon.extend({
             }
         }
         this.display_attachments();
-        var $input = this.$('input.oe_form_binary_file');
+        var $input = this.$('input.o-form-input-file');
         $input.after($input.clone(true)).remove();
         this.$(".oe_attachment_file").show();
     },
@@ -381,7 +381,7 @@ var ThreadComposeMessage = MessageCommon.extend({
         this.$('.oe_compact_inbox').on('click', self.on_toggle_quick_composer);
         this.$('.oe_compose_post').on('click', self.on_toggle_quick_composer);
         this.$('.oe_compose_log').on('click', self.on_toggle_quick_composer);
-        this.$('input.oe_form_binary_file').on('change', _.bind( this.on_attachment_change, this));
+        this.$('input.o-form-input-file').on('change', _.bind( this.on_attachment_change, this));
         this.$('.oe_cancel').on('click', _.bind( this.on_cancel, this));
         this.$('.oe_post').on('click', self.on_message_post);
         this.$('.oe_full').on('click', _.bind( this.on_compose_fullmail, this, this.id ? 'reply' : 'comment'));
