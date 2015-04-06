@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
-    <data>
-        
-        
+<odoo>
+
 <!-- Contracts Button on Employee Form -->
 
         <record id="act_hr_employee_2_hr_contract" model="ir.actions.act_window">
@@ -92,7 +90,7 @@
                     </div>
                     <group>
                         <group>
-                            <field name="employee_id" on_change="onchange_employee_id(employee_id)"/>
+                            <field name="employee_id"/>
                             <field name="job_id"/>
                         </group>
                         <group>
@@ -211,5 +209,4 @@
         <menuitem action="action_hr_contract_type" id="hr_menu_contract_type" parent="hr.menu_hr_configuration_employees" sequence="3" groups="base.group_no_one"/>
         <menuitem action="action_hr_contract" id="hr_menu_contract" parent="hr.menu_hr_main" name="Contracts" sequence="4" groups="base.group_hr_manager"/>
 
-    </data>
-</openerp>
+</odoo>

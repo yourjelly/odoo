@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    OpenERP, Open Source Management Solution
+#    Odoo, Open Source Management Solution
 #    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -35,7 +35,7 @@ Add all information on the employee form to manage contracts.
 
 You can assign several contracts per employee.
     """,
-    'author': 'OpenERP SA',
+    'author': 'Odoo S.A.',
     'website': 'https://www.odoo.com/page/employees',
     'depends': ['base_action_rule', 'hr'],
     'data': [

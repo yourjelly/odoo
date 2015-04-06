@@ -27,6 +27,7 @@ import openerp
 from openerp import SUPERUSER_ID
 from openerp.osv import fields, osv
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
+from openerp import api
 
 _logger = logging.getLogger(__name__)
 
@@ -289,7 +290,9 @@ class base_action_rule(osv.osv):
             data.update({'model': model.model})
         return {'value': data}
 
+    @api.cr_uid_ids_context
     def _check_delay(self, cr, uid, action, record, record_dt, context=None):
+        action = self.browse(cr, uid, action, context=context)
         if action.trg_date_calendar_id and action.trg_date_range_type == 'day':
             start_dt = get_datetime(record_dt)
             action_dt = self.pool['resource.calendar'].schedule_days_get_date(
@@ -343,7 +346,7 @@ class base_action_rule(osv.osv):
                 record_dt = get_record_dt(record)
                 if not record_dt:
                     continue
-                action_dt = self._check_delay(cr, uid, action, record, record_dt, context=context)
+                action_dt = self._check_delay(cr, uid, action.id, record, record_dt, context=context)
                 if last_run <= action_dt < now:
                     try:
                         context = dict(context or {}, action=True)

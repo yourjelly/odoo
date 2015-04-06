@@ -29,6 +29,7 @@ from openerp import tools
 from openerp.osv import fields, osv
 from openerp.tools.float_utils import float_compare
 from openerp.tools.translate import _
+from openerp import api
 from openerp.exceptions import UserError
 
 class resource_calendar(osv.osv):
@@ -572,6 +573,7 @@ class resource_calendar(osv.osv):
 
         return intervals
 
+    @api.cr_uid_ids_context
     def schedule_days_get_date(self, cr, uid, id, days, day_date=None, compute_leaves=False,
                                resource_id=None, default_interval=None, context=None):
         """ Wrapper on _schedule_days: return the beginning/ending datetime of
