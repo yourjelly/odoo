@@ -458,7 +458,7 @@
             <div class="o-cp-sidebar pull-right"></div>
         </div>
         <div class="col-md-6">
-            <div class="btn-group o-search-options pull-left"/>
+            <div class="o-search-options pull-left"/>
             <div class="btn-group btn-group-sm o-cp-switch-buttons pull-right"></div>
             <div class="o-cp-pager pull-right"></div>
         </div>
@@ -1182,7 +1182,7 @@
             <input type="text"
                 t-att-name="widget.name"
                 t-att-placeholder="placeholder"
-                class="oe_datepicker_master"
+                class="form-control oe_datepicker_master"
             /><span class="fa fa-calendar datepickerbutton"/>
         </div>
     </span>
@@ -1600,15 +1600,6 @@
         <div class="o-facet-values"></div>
         <div class="fa fa-sm fa-remove o-facet-remove"></div>
     </div>
-<!-- 
-    <span t-if="widget.model.has('icon')"
-        t-att-class="'label label-default fa ' + widget.model.get('icon')">
-    </span>
-    <span t-if="!widget.model.has('icon')" class="label label-default">
-        <t t-esc="widget.model.get('category')"/>
-    </span >
-    <span class="o-facet-values"></span>
-    <span class="fa fa-sm fa-remove o-facet-remove"/> -->
 </div>
 <span t-name="SearchView.FacetView.Value" class="o-facet-value">
     <t t-esc="widget.model.get('label')"/>
@@ -1617,6 +1608,20 @@
     <ul class="dropdown-menu o-searchview-autocomplete" role="menu"></ul>
 </t>
 
+<div t-name="SearchView.FilterMenu">
+    <a class="dropdow-toggle" data-toggle="dropdown">
+        <span class="fa fa-filter"/> Filters <span class="caret"/>
+    </a>
+    <ul class="dropdown-menu o-filters-menu" role="menu">
+        <li class="o-add-filter o-closed-menu">
+            <a href="#">Add Custom Filter</a>
+        </li>
+        <li class="o-add-filter-menu">
+            <button class="btn btn-primary btn-sm o-apply-filter" type="button">Apply</button>
+            <button class="btn btn-default btn-sm fa fa-plus-circle o-add-condition" type="button"> Add a condition</button>
+        </li>
+    </ul>
+</div>
 <t t-name="SearchView.filters">
     <li t-foreach="widget.filters" t-as="filter" t-if="!filter.visible || filter.visible()"
             t-att-title="filter.attrs.string ? filter.attrs.help : undefined"
@@ -1682,56 +1687,11 @@
         <t t-if="filters.length" t-raw="filters.render(defaults)"/>
     </div>
 </t>
-<div t-name="SearchView.FilterMenu" class="btn-group btn-group-sm">
-    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-        <span class="fa fa-filter"/> Filters <span class="caret"/>
-    </button>
-    <ul class="dropdown-menu filters-menu" role="menu">
-        <li class="oe-add-filter closed-menu"><a href="#">Add Custom Filter</a></li>
-        <li class="oe-add-filter-menu"><button type="button" class="btn btn-default oe-apply-filter">Apply</button><a href="#" class="oe-add-condition"><span class="fa fa-plus-circle"/> Add a condition</a></li>
-    </ul>
-</div>
-
-<div t-name="SearchView.GroupByMenu" class="btn-group btn-group-sm oe-groupby-menu">
-    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-        <span class="fa fa-bars"/> Group By <span class="caret"/>
-    </button>
-    <ul class="dropdown-menu group-by-menu" role="menu">
-        <li class="divider"/>
-        <li class="add-custom-group closed-menu"><a href="#">Add custom group</a></li>
-    </ul>
-</div>
-
-<t t-name="GroupByMenuSelector">
-    <li><select class="form-control oe-add-group oe-group-selector">
-        <t t-foreach="groupable_fields" t-as="field">
-            <option t-att-data-name="field"><t t-esc="groupable_fields[field].string"/></option>
-        </t>
-    </select></li>
-    <li><button type="button" class="btn btn-default oe-add-group oe-select-group">Apply</button></li>
-</t>
-<div t-name="SearchView.FavoriteMenu" class="btn-group btn-group-sm">
-    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-        <span class="fa fa-star"/> Favorites <span class="caret"/>
-    </button>
-    <ul class="dropdown-menu favorites-menu" role="menu">
-        <li class="divider"/>
-        <li class="oe-save-search closed-menu"><a href="#">Save current search</a></li>
-        <li class="oe-save-name"><input type="text" class="form-control"></input></li>
-        <li class="oe-save-name">
-            <span><input type="checkbox"/>Use by default</span>
-        </li>
-        <li class="oe-save-name">
-            <span class="oe-share-filter"><input type="checkbox"/>Share with all users</span>
-        </li>
-        <li class="oe-save-name"><button type="button" class="btn btn-default">Save</button></li>
-    </ul>
-</div>
 <t t-name="SearchView.extended_search.proposition">
-    <li class="oe-filter-condition">
+    <li class="o-filter-condition">
         <span class="o-or-filter">or</span>
         <span>
-            <select class="searchview_extended_prop_field form-control">
+            <select class="o-searchview-extended-prop-field form-control">
                 <t t-foreach="widget.attrs.fields" t-as="field">
                     <option t-att="{'selected': field === widget.attrs.selected ? 'selected' : null}"
                             t-att-value="field.name">
@@ -1739,10 +1699,10 @@
                     </option>
                 </t>
             </select>
-            <span class="searchview_extended_delete_prop fa fa-trash-o"/>
+            <span class="o-searchview-extended-delete-prop fa fa-trash-o"/>
         </span>
-        <select class="searchview_extended_prop_op form-control"/>
-        <span class="searchview_extended_prop_value"/>
+        <select class="o-searchview-extended-prop-op form-control"/>
+        <span class="o-searchview-extended-prop-value"/>
     </li>
 </t>
 <t t-name="SearchView.extended_search.proposition.char">
@@ -1764,6 +1724,52 @@
         </t>
     </select>
 </t>
+
+<div t-name="SearchView.GroupByMenu">
+    <a class="dropdow-toggle" data-toggle="dropdown">
+        <span class="fa fa-bars"/> Group By <span class="caret"/>
+    </a>
+    <ul class="dropdown-menu o-group-by-menu" role="menu">
+        <li class="divider"/>
+        <li class="o-add-custom-group o-closed-menu">
+            <a href="#">Add custom group</a>
+        </li>
+    </ul>
+</div>
+<t t-name="GroupByMenuSelector">
+    <li><select class="form-control o-add-group o-group-selector">
+        <t t-foreach="groupable_fields" t-as="field">
+            <option t-att-data-name="field"><t t-esc="groupable_fields[field].string"/></option>
+        </t>
+    </select></li>
+    <li>
+        <button type="button" class="btn btn-primary btn-sm o-add-group o-select-group">Apply</button>
+    </li>
+</t>
+
+<div t-name="SearchView.FavoriteMenu">
+    <a class="dropdow-toggle" data-toggle="dropdown">
+        <span class="fa fa-star"/> Favorites <span class="caret"/>
+    </a>
+    <ul class="dropdown-menu o-favorites-menu" role="menu">
+        <li class="divider"/>
+        <li class="o-save-search o-closed-menu">
+            <a href="#">Save current search</a>
+        </li>
+        <li class="o-save-name">
+            <input type="text" class="form-control"></input>
+        </li>
+        <li class="o-save-name">
+            <span><input type="checkbox"/> Use by default</span>
+        </li>
+        <li class="o-save-name">
+            <span><input type="checkbox"/> Share with all users </span><span class="fa fa-users"/>
+        </li>
+        <li class="o-save-name">
+            <button type="button" class="btn btn-primary btn-sm">Save</button>
+        </li>
+    </ul>
+</div>
 
 <t t-name="ExportView">
     <a id="exportview" href="javascript: void(0)" style="text-decoration: none;color: #3D3D3D;">Export</a>

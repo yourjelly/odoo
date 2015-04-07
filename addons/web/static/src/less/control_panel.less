@@ -1,17 +1,23 @@
-@oe-search-options-dropdown-min-width: 250px;
-.oe-search-options-dropdown-boilerplate() {
-    overflow-y: auto;
+// @o-search-options-dropdown-min-width: 250px;
+.o-search-options-dropdown-boilerplate() {
+    overflow-y: auto; // doestn't work
     overflow-x: hidden;  // FIXME: not clean
-    min-width: @oe-search-options-dropdown-min-width;
+    // min-width: @o-search-options-dropdown-min-width; // do we really need that?
 }
 
-.o-control-panel-first-row, .o-control-panel-second-row {
-    // FIXME: override bootstrap
-    .btn {
-        border-radius: 0px;
-        border-style: none;
-        color: @odoo-main-text-color;
-    }
+.o-search-options-dropdown-custom-li() {
+    margin: 3px 25px;
+    width: auto;
+    max-width: 250px;
+}
+
+// FIXME: override bootstrap
+.btn {
+    border-radius: 0px;
+    border-style: none;
+}
+button.btn-primary, button.btn-default {
+    text-transform: uppercase;
 }
 
 .o-control-panel-first-row {
@@ -167,7 +173,7 @@
     // Dropdowns
     li {
         position: relative;
-        a {
+        >a {
             padding: 3px 25px;
         }
         &.selected {
@@ -183,31 +189,11 @@
         }
     }
 
-    .o-buttons-col {
-        height: 30px;
-    }
-
     // FIXME: move me to kanban.less
     .oe_bounce_container {
         display: inline-block;
     }
 
-    // Action buttons
-   .o-cp-buttons {
-        // Override bootstrap
-        button.btn-primary {
-            text-transform: uppercase;
-            color: white;
-            background-color: @odoo-brand-optional;
-            &:hover {
-                .o-darken-background(@odoo-brand-optional);
-            }
-        }
-        button.btn-default {
-            text-transform: uppercase;
-            color: @odoo-brand-optional;
-        }
-    }
     .o-list-buttons { // Needed by the webclient
         .o-list-button-save, .o-list-button-discard {
             display: none;
@@ -255,86 +241,126 @@
 
     // Searchview buttons
     .o-search-options {
-        .closed-menu a:before {
-            .o-caret-right;
-            margin-right: 5px;
+        >div {
+            display: inline-block;
+            padding-right: 10px; // gap between dropdown togglers
+            * {
+                font-size: @font-size-small;
+            }
+            a { // dropdown togglers
+                color: @odoo-main-text-color;
+                cursor: pointer;
+                &:hover {
+                    text-decoration: none;
+                    color: black;
+                }
+            }
+            .dropdown-menu { // dropdowns position
+                left: auto;
+                top: auto;
+            }
         }
 
-        .open-menu a:before {
-            .o-caret-up;
-            margin-right: 5px;
+        // Open and closed carets in dropdowns
+        .o-closed-menu {
+            position: relative;
+            a:before {
+                .o-caret-right;
+                position: absolute;
+                left: 12px;
+                top: 7px;
+            }
+        }
+        .o-open-menu {
+            position: relative;
+            a:before {
+                .o-caret-down;
+                position: absolute;
+                left: 12px;
+                top: 9px;
+            }
         }
 
         // Filters
-        .filters-menu {
-            .oe-search-options-dropdown-boilerplate;
+        .o-filters-menu {
+            .o-search-options-dropdown-boilerplate;
 
-            .oe-filter-condition {.o-or-filter {display: none;}}  // Needed by the webclient
-
-            .oe-add-filter-menu {
+            .o-filter-condition {
+                .o-search-options-dropdown-custom-li;
+                .o-or-filter { // or between conditions
+                    display: none;  // hidden for the first condition
+                    position: absolute;
+                    left: -18px;
+                    top: 10px;
+                }
+            }
+            .o-filter-condition + .o-filter-condition {
+                .o-or-filter {
+                    display: block; // displayed from second condition
+                }
+            }
+            .o-searchview-extended-prop-op {
+                margin: 3px 0px; // vertical gap between selects
+            }
+            .o-searchview-extended-prop-value { // date fields: datepicker position
+                .datepickerbutton {
+                    position: absolute;
+                    top: 11px;
+                    right: -20px;
+                    cursor: pointer;
+                }
+            }
+            .o-searchview-extended-delete-prop { // delete condition button position
+                position: absolute;
+                right: -18px;
+                top: 10px;
+                cursor: pointer;
+            }
+            .o-add-filter-menu { // apply and add buttons
                 display: none;  // Needed by the webclient
-
-                .oe-apply-filter {
-                    display: inline-block;
-                }
-
-                .oe-add-condition {
-                    display: inline-block;
-                }
-            }
-
-            .searchview_extended_prop_field {
-                display: inline-block;
-                width: @oe-search-options-dropdown-min-width - 40;
-                padding-right: 5px;
-            }
-
-            .searchview_extended_delete_prop {
-                display: inline-block;
-                marin-right: 5px;
-            }
-
-            .searchview_extended_prop_op {
-                width: @oe-search-options-dropdown-min-width - 40;
-            }
-
-            .searchview_extended_prop_value {
-                .oe_datepicker_master {
-                    width: @oe-search-options-dropdown-min-width - 40;
-                    margin-right: 5px;
+                .o-search-options-dropdown-custom-li;
+                .o-add-condition {
+                    float: right;
                 }
             }
         }
 
         // Group By
-        .group-by-menu {
-            .oe-search-options-dropdown-boilerplate;
+        .o-group-by-menu {
+            .o-search-options-dropdown-boilerplate;
 
-            .oe-add-group {display: none;}  // Needed by the webclient
+            .o-add-group { // add button
+                display: none;  // Needed by the webclient
+                .o-search-options-dropdown-custom-li;
+            }
         }
 
         // Favorites
-        .favorites-menu {
-            .oe-search-options-dropdown-boilerplate;
+        .o-favorites-menu {
+            .o-search-options-dropdown-boilerplate;
 
-            .oe_searchview_custom_private {
-                a {
-                    width: @oe-search-options-dropdown-min-width - 40;
-                    display: inline-block;
-                    margin-right: 5px;
-                }
-
-                .remove-filter {
-                    display: inline-block;
+            .divider {display: none;} // hide the divider by default (no favorite)
+            .o-searchview-custom-private, .o-searchview-custom-public {
+                .o-remove-filter {
+                    position: absolute;
+                    top: 6px;
+                    right: 12px;
+                    cursor: pointer;
                 }
             }
+            .o-searchview-custom-public a:after {
+                font-family: FontAwesome;
+                content: "\f0c0";
+                margin-left: 5px;
+            }
+            .o-save-name { // save button
+                display: none; // hidden by default
+                .o-search-options-dropdown-custom-li;
+            }
 
-            .oe-save-name {
-                display:none;
-
-                span {
-                    white-space: nowrap;
-                }
+            // FIXME: move this to dashboard.less
+            .o-add-to-dashboard {
+                .o-search-options-dropdown-custom-li;
             }
         }
     }
@@ -355,13 +381,19 @@
         .o-cp-switch-gantt:before {content: "\f0ae";}
         .o-cp-switch-pivot:before {content: "\f0ce";}
         .o-cp-switch-diagram:before {content: "";}
+        .btn {
+            outline: none;
+            &.active {
+                box-shadow: none;
+            }
+        }
     }
 }
 
 // FIXME: Move to web_dashboard after conversion
 .o-control-panel-second-row {
     .o-search-options {
-        .add-to-dashboard {
+        .o-add-to-dashboard {
             button {display: none;}
             input {display: none;}
         }

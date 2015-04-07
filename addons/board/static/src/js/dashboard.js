@@ -340,11 +340,11 @@ FavoriteMenu.include({
         if (am && am.get_inner_widget() instanceof ViewManager) {
             this.view_manager = am.get_inner_widget();
             this.add_to_dashboard_available = true;
-            this.$('.favorites-menu').append(QWeb.render('SearchView.addtodashboard'));
-            var $add_to_dashboard = this.$('.add-to-dashboard');
-            this.$add_dashboard_btn = $add_to_dashboard.eq(2).find('button');
-            this.$add_dashboard_input = $add_to_dashboard.eq(1).find('input');
-            this.$add_dashboard_link = $add_to_dashboard.first();
+            this.$('.o-favorites-menu').append(QWeb.render('SearchView.addtodashboard'));
+            var $add_to_dashboard = this.$('.o-add-to-dashboard');
+            this.$add_dashboard_btn = $add_to_dashboard.eq(1).find('button');
+            this.$add_dashboard_input = $add_to_dashboard.eq(0).find('input');
+            this.$add_dashboard_link = this.$('.o-add-to-dashboard-link');
             var title = this.searchview.get_title();
             this.$add_dashboard_input.val(title);
             this.$add_dashboard_link.click(function (event) {
@@ -356,11 +356,11 @@ FavoriteMenu.include({
     },
     toggle_dashboard_menu: function (is_open) {
         this.$add_dashboard_link
-            .toggleClass('closed-menu', !(_.isUndefined(is_open)) ? !is_open : undefined)
-            .toggleClass('open-menu', is_open);
+            .toggleClass('o-closed-menu', !(_.isUndefined(is_open)) ? !is_open : undefined)
+            .toggleClass('o-open-menu', is_open);
         this.$add_dashboard_btn.toggle(is_open);
         this.$add_dashboard_input.toggle(is_open);
-        if (this.$add_dashboard_link.hasClass('open-menu')) {
+        if (this.$add_dashboard_link.hasClass('o-open-menu')) {
             this.$add_dashboard_input.focus();
         }
     },
@@ -372,7 +372,6 @@ FavoriteMenu.include({
     },
     add_dashboard: function () {
         var self = this;
-
         var search_data = this.searchview.build_search_data(),
             context = new data.CompoundContext(this.searchview.dataset.get_context() || []),
             domain = new data.CompoundDomain(this.searchview.dataset.get_domain() || []);
