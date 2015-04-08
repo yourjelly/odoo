@@ -28,6 +28,7 @@ class Planner(models.Model):
     data = fields.Text(string='Data')
     tooltip_planner = fields.Html(string='Planner Tooltips', translate=True)
     planner_application = fields.Selection('_get_planner_application', string='Planner Application', required=True)
+    active = fields.Boolean(help="If the active field is set to False, it will allow you to hide the planner.", default=True)
 
     @api.model
     def render(self, template_id, planner_app):
