@@ -762,7 +762,7 @@
         <button type="button" class="btn btn-primary btn-sm o-list-button-save">
             Save
         </button>
-        <button type="button" class="btn btn-default btn-sm o-list-button-discard">
+        <button type="button" class="btn btn-secondary btn-sm o-list-button-discard">
             Discard
         </button>
     </t>
@@ -799,7 +799,7 @@
                 Edit
             </button>
             <button t-if="widget.is_action_enabled('create')" type="button" 
-                    class="btn btn-default btn-sm o-form-button-create" accesskey="C">
+                    class="btn btn-secondary btn-sm o-form-button-create" accesskey="C">
                 Create
             </button>
         </div>
@@ -809,7 +809,7 @@
                 Save
             </button>
             <button type="button"
-                    class="btn btn-default btn-sm o-form-button-cancel" accesskey="D">
+                    class="btn btn-secondary btn-sm o-form-button-cancel" accesskey="D">
                 Discard
             </button>
         </div>
@@ -929,9 +929,9 @@
         <li data-field="__count__"><a href="#">Quantity</a></li>
     </ul>
     <div class="btn-group btn-group-sm">
-        <button class="btn btn-default fa fa-bar-chart-o o-graph-bar-button" title="Bar Chart"/>
-        <button class="btn btn-default fa fa-line-chart o-graph-line-button" title="Line Chart"/>
-        <button class="btn btn-default fa fa-pie-chart o-graph-pie-button" title="Pie Chart"/>
+        <button class="btn btn-secondary fa fa-bar-chart-o o-graph-bar-button" title="Bar Chart"/>
+        <button class="btn btn-secondary fa fa-line-chart o-graph-line-button" title="Line Chart"/>
+        <button class="btn btn-secondary fa fa-pie-chart o-graph-pie-button" title="Pie Chart"/>
     </div>
 </t>
 
@@ -960,8 +960,8 @@
         <li data-field="__count__"><a href="#">Quantity</a></li>
     </ul>
     <div class="btn-group btn-group-sm">
-        <button class="btn btn-default fa fa-expand o-pivot-flip-button" title="Flip axis"/>
-        <button class="btn btn-default fa fa-arrows-alt o-pivot-expand-button" title="Expand all"/>
+        <button class="btn btn-secondary fa fa-expand o-pivot-flip-button" title="Flip axis"/>
+        <button class="btn btn-secondary fa fa-arrows-alt o-pivot-expand-button" title="Expand all"/>
     </div>
 </t>
 
@@ -1618,7 +1618,7 @@
         </li>
         <li class="o-add-filter-menu">
             <button class="btn btn-primary btn-sm o-apply-filter" type="button">Apply</button>
-            <button class="btn btn-default btn-sm fa fa-plus-circle o-add-condition" type="button"> Add a condition</button>
+            <button class="btn btn-secondary btn-sm fa fa-plus-circle o-add-condition" type="button"> Add a condition</button>
         </li>
     </ul>
 </div>

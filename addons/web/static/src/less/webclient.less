@@ -19,10 +19,6 @@
 @border-radius-base: 0;
 @brand-primary: @odoo-brand-primary;
 @breadcrumb-bg: white;
-@btn-default-bg: white;
-@btn-default-color: @odoo-brand-optional;
-@btn-primary-bg: @odoo-brand-optional;
-@btn-primary-color: white;
 @component-active-bg: @gray-lighter;
 @component-active-color: @odoo-brand-optional;
 @font-family-monospace: Roboto;
@@ -34,6 +30,19 @@
 @navbar-inverse-link-color: white;
 @navbar-inverse-link-hover-bg: darken(@odoo-brand-primary, 10%);
 @text-color: @odoo-main-text-color;
+
+@btn-default-bg: white;
+@btn-default-border: white;
+@btn-default-color: @odoo-main-text-color;
+@btn-primary-bg: @odoo-brand-optional;
+@btn-primary-border: @odoo-brand-optional;
+@btn-primary-color: white;
+@btn-secondary-bg: white;
+@btn-secondary-border: white;
+@btn-secondary-color: @odoo-brand-optional;
+.btn-secondary {
+  .button-variant(@btn-secondary-color; @btn-secondary-bg; @btn-secondary-border);
+}
 
 // ------------------------------------------------------------------
 // Layout

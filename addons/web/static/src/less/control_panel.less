@@ -11,12 +11,15 @@
     max-width: 250px;
 }
 
-// FIXME: override bootstrap
-.btn {
+// FIXME: override bootstrap?
+.btn, .btn-group>.btn {
     border-radius: 0px;
-    border-style: none;
+    border: none;
 }
-button.btn-primary, button.btn-default {
+.btn-default.active {
+    box-shadow: none;
+}
+button.btn-primary, button.btn-secondary {
     text-transform: uppercase;
 }
 
@@ -381,12 +384,6 @@ button.btn-primary, button.btn-default {
         .o-cp-switch-gantt:before {content: "\f0ae";}
         .o-cp-switch-pivot:before {content: "\f0ce";}
         .o-cp-switch-diagram:before {content: "";}
-        .btn {
-            outline: none;
-            &.active {
-                box-shadow: none;
-            }
-        }
     }
 }
 
