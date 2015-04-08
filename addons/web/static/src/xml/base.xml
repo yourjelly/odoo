@@ -585,20 +585,17 @@
     </div>
 </span>
 
-<div t-name="Sidebar" class="btn-group">
+<t t-name="Sidebar">
     <t t-foreach="widget.sections" t-as="section">
-        <div class="o-sidebar-section btn-group btn-group-sm">
-            <button type="button" class="btn btn-default dropdown-toggle"
-                    t-if="section.name != 'buttons'"
-                    data-toggle="dropdown">
+        <div class="o-dropdown">
+            <a t-if="section.name != 'buttons'" class="dropdow-toggle" data-toggle="dropdown">
                 <t t-if="section.name == 'files'" t-raw="widget.items[section.name].length || ''"/>
-                <t t-esc="section.label"/>
-                <span class="caret"></span>
-            </button>
+                <t t-esc="section.label"/> <span class="caret"/>
+            </a>
             <t t-if="section.name == 'buttons'" t-foreach="widget.items[section.name]" t-as="item" t-att-class="item.classname">
-                <button type="button" t-att-title="item.title or ''" t-att-data-section="section.name" t-att-data-index="item_index" t-att-href="item.url" target="_blank">
+                <a t-att-title="item.title or ''" t-att-data-section="section.name" t-att-data-index="item_index" t-att-href="item.url" target="_blank">
                     <t t-raw="item.label"/>
-                </button>
+                </a>
             </t>
             <ul class="dropdown-menu" role="menu">
                 <li t-foreach="widget.items[section.name]" t-as="item" t-att-class="item.classname">
@@ -636,7 +633,7 @@
             </ul>
         </div>
     </t>
-</div>
+</t>
 
 <t t-name="TreeView">
     <select t-if="toolbar" style="width: 30%">
@@ -918,16 +915,18 @@
 </t>
 
 <t t-name="GraphView.buttons">
-    <button class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">
-        Measures <span class="caret"/>
-    </button>
-    <ul class="dropdown-menu o-graph-measures-list">
-        <li t-foreach="measures" t-as="measure" t-att-data-field="measure[0]">
-            <a href="#"><t t-esc="measure[1].string"/></a>
-        </li>
-        <li class="divider"></li>
-        <li data-field="__count__"><a href="#">Quantity</a></li>
-    </ul>
+    <div class="btn-group btn-group-sm" role="group">
+        <button class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">
+            Measures <span class="caret"/>
+        </button>
+        <ul class="dropdown-menu o-graph-measures-list">
+            <li t-foreach="measures" t-as="measure" t-att-data-field="measure[0]">
+                <a href="#"><t t-esc="measure[1].string"/></a>
+            </li>
+            <li class="divider"></li>
+            <li data-field="__count__"><a href="#">Quantity</a></li>
+        </ul>
+    </div>
     <div class="btn-group btn-group-sm">
         <button class="btn btn-secondary fa fa-bar-chart-o o-graph-bar-button" title="Bar Chart"/>
         <button class="btn btn-secondary fa fa-line-chart o-graph-line-button" title="Line Chart"/>
@@ -949,16 +948,18 @@
 </div>
 
 <t t-name="PivotView.buttons">
-    <button class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">
-        Measures <span class="caret"/>
-    </button>
-    <ul class="dropdown-menu o-pivot-measures-list">
-        <li t-foreach="measures" t-as="measure" t-att-data-field="measure[0]">
-            <a href="#"><t t-esc="measure[1].string"/></a>
-        </li>
-        <li class="divider"></li>
-        <li data-field="__count__"><a href="#">Quantity</a></li>
-    </ul>
+    <div class="btn-group btn-group-sm" role="group">
+        <button class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">
+            Measures <span class="caret"/>
+        </button>
+        <ul class="dropdown-menu o-pivot-measures-list">
+            <li t-foreach="measures" t-as="measure" t-att-data-field="measure[0]">
+                <a href="#"><t t-esc="measure[1].string"/></a>
+            </li>
+            <li class="divider"></li>
+            <li data-field="__count__"><a href="#">Quantity</a></li>
+        </ul>
+    </div>
     <div class="btn-group btn-group-sm">
         <button class="btn btn-secondary fa fa-expand o-pivot-flip-button" title="Flip axis"/>
         <button class="btn btn-secondary fa fa-arrows-alt o-pivot-expand-button" title="Expand all"/>
@@ -1608,7 +1609,7 @@
     <ul class="dropdown-menu o-searchview-autocomplete" role="menu"></ul>
 </t>
 
-<div t-name="SearchView.FilterMenu">
+<div t-name="SearchView.FilterMenu" class="o-dropdown">
     <a class="dropdow-toggle" data-toggle="dropdown">
         <span class="fa fa-filter"/> Filters <span class="caret"/>
     </a>
@@ -1725,7 +1726,7 @@
     </select>
 </t>
 
-<div t-name="SearchView.GroupByMenu">
+<div t-name="SearchView.GroupByMenu" class="o-dropdown">
     <a class="dropdow-toggle" data-toggle="dropdown">
         <span class="fa fa-bars"/> Group By <span class="caret"/>
     </a>
@@ -1747,7 +1748,7 @@
     </li>
 </t>
 
-<div t-name="SearchView.FavoriteMenu">
+<div t-name="SearchView.FavoriteMenu" class="o-dropdown">
     <a class="dropdow-toggle" data-toggle="dropdown">
         <span class="fa fa-star"/> Favorites <span class="caret"/>
     </a>

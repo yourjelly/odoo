@@ -1,10 +1,7 @@
-// @o-search-options-dropdown-min-width: 250px;
 .o-search-options-dropdown-boilerplate() {
     overflow-y: auto; // doestn't work
     overflow-x: hidden;  // FIXME: not clean
-    // min-width: @o-search-options-dropdown-min-width; // do we really need that?
 }
-
 .o-search-options-dropdown-custom-li() {
     margin: 3px 25px;
     width: auto;
@@ -173,10 +170,27 @@ button.btn-primary, button.btn-secondary {
 .o-control-panel-second-row {
     padding: 0px 0px 10px 0px;
 
-    // Dropdowns
+    // Searchview and Sidebar dropdowns
+    .o-dropdown {
+        display: inline-block;
+        position: relative;
+        padding-right: 10px; // gap between dropdown togglers
+        * {
+            font-size: @font-size-small;
+        }
+        a { // dropdown togglers
+            color: @odoo-main-text-color;
+            cursor: pointer;
+            &:hover {
+                text-decoration: none;
+                color: black;
+            }
+        }
+    }
+    // Selected item in dropdowns (for action buttons and searchview)
     li {
         position: relative;
-        >a {
+        > a {
             padding: 3px 25px;
         }
         &.selected {
@@ -213,9 +227,6 @@ button.btn-primary, button.btn-secondary {
 
     // Sidebar
     .o-cp-sidebar {
-        .o-sidebar-section li>a {
-            cursor: pointer;
-        }
         .o-hidden-input-file {
             position: relative;
             input.o-form-input-file {
@@ -242,28 +253,8 @@ button.btn-primary, button.btn-secondary {
         }
     }
 
-    // Searchview buttons
+    // Searchview dropdowns
     .o-search-options {
-        >div {
-            display: inline-block;
-            padding-right: 10px; // gap between dropdown togglers
-            * {
-                font-size: @font-size-small;
-            }
-            a { // dropdown togglers
-                color: @odoo-main-text-color;
-                cursor: pointer;
-                &:hover {
-                    text-decoration: none;
-                    color: black;
-                }
-            }
-            .dropdown-menu { // dropdowns position
-                left: auto;
-                top: auto;
-            }
-        }
-
         // Open and closed carets in dropdowns
         .o-closed-menu {
             position: relative;

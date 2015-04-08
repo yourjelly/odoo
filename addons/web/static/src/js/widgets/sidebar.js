@@ -50,14 +50,15 @@ var Sidebar = Widget.extend({
         });
     },
     redraw: function() {
-        var self = this;
-        self.$el.html(QWeb.render('Sidebar', {widget: self}));
+        this.$el.html(QWeb.render('Sidebar', {widget: this}));
 
         // Hides Sidebar sections when item list is empty
-        this.$('.o-sidebar-section').each(function() {
-            $(this).toggle(!!$(this).find('li').length);
+        this.$('.o-dropdown').each(function() {
+            if (!$(this).find('li').length) {
+                $(this).hide();
+            }
         });
-        self.$("[title]").tooltip({
+        this.$("[title]").tooltip({
             delay: { show: 500, hide: 0}
         });
     },
