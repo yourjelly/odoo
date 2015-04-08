@@ -499,7 +499,6 @@ var KanbanRecord = Widget.extend({
                 self.set_record(records[0]);
                 self.renderElement();
                 self.init_content();
-                self.group.compute_cards_auto_height();
                 self.view.postprocess_m2m_tags();
             } else {
                 self.destroy();
@@ -567,21 +566,63 @@ var KanbanColumn = Widget.extend({
     init: function(parent, group_data) {
         this._super(parent);
         this.parent = parent;
+        this.view = parent;
         this.group_data = group_data;
-        this.records = group_data.records;
+        this.data_records = group_data.records;
+        this.records = [];
         this.title = group_data.title;
+        this.model = group_data.model;
         this.id = group_data.id;
     },
 
     start: function() {
         var record;
-        for (var i = 0; i < this.records.length; i++) {
-            record = new KanbanRecord(this, this.records[i], this.parent);
+        for (var i = 0; i < this.data_records.length; i++) {
+            record = new KanbanRecord(this, this.data_records[i], this.parent);
             record.appendTo(this.$el);
             record.$el.attr('draggable', true);
             record.$el.data('record', record);
+            this.records.push(record);
         }
-        this.$el.toggleClass('o_kanban_empty', this.records.length === 0);
+        this.$el.toggleClass('o_kanban_empty', this.data_records.length === 0);
+    },
+
+    swap_record: function (rec1, rec2) {
+        if (rec1 === rec2) {
+            return;
+        }
+        var tmp = $('<span>').hide();
+        rec2.$el.before(tmp);
+        rec1.$el.before(rec2.$el);
+        tmp.replaceWith(rec1.$el);
+        utils.swap(this.records, rec1, rec2);
+    },
+
+    resequence: function () {
+        if (_.indexOf(this.view.fields_keys, 'sequence') > -1) {
+            var new_sequence = _.pluck(this.records, 'id');
+            this.view.dataset.resequence(new_sequence);
+        }
+    },
+
+    remove: function (record) {
+        record.$el.detach();
+        var index = this.records.indexOf(record);
+        this.records.splice(index, 1);
+    },
+
+    insert_after: function (record, new_record) {
+        new_record.$el.insertAfter(record.$el);
+        var index = this.records.indexOf(record);
+        this.records.splice(index, 0, new_record);
+        new_record.setParent(this);
+    },
+
+    insert_before: function (record, new_record) {
+        new_record.$el.insertBefore(record.$el);
+        var index = this.records.indexOf(record);
+        this.records.splice(index, 1, new_record, record);
+        new_record.setParent(this);
     },
 });
 
