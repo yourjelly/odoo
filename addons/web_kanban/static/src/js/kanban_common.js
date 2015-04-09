@@ -248,12 +248,13 @@ var KanbanRecord = Widget.extend({
         'click .o_kanban_manage_toogle_button': 'toogle_manage_pane',
     },
 
-    init: function (parent, record, view) {
+    init: function (parent, record, view, options) {
         this._super(parent);
         this.group = parent;
         this.id = null;
         this.view = view;
         this.set_record(record);
+        this.options = options || {};
         // if (!this.view.state.records[this.id]) {
         //     this.view.state.records[this.id] = {
         //         folded: false
@@ -321,6 +322,10 @@ var KanbanRecord = Widget.extend({
         });
         this.replaceElement($el);
         this.replace_fields();
+        if (this.options.draggable) {
+            this.$el.attr('draggable', true);
+        }
+        this.$el.data('record', this);
     },
     replace_fields: function() {
         var self = this;
@@ -563,7 +568,7 @@ var KanbanRecord = Widget.extend({
 var KanbanColumn = Widget.extend({
     template: "KanbanView.Group",
 
-    init: function(parent, group_data) {
+    init: function(parent, group_data, draggable) {
         this._super(parent);
         this.parent = parent;
         this.view = parent;
@@ -574,18 +579,28 @@ var KanbanColumn = Widget.extend({
         this.model = group_data.model;
         this.id = group_data.id;
         this.value = group_data.attributes.value[0];
+        this.draggable = draggable;
     },
 
     start: function() {
         var record;
+        if (this.draggable) {
+            this.$('.o_kanban_header')
+                .prop('draggable', true)
+                .css({cursor: 'move'});
+        }
         for (var i = 0; i < this.data_records.length; i++) {
-            record = new KanbanRecord(this, this.data_records[i], this.parent);
+            record = new KanbanRecord(this, this.data_records[i], this.parent, {draggable: true});
             record.appendTo(this.$el);
-            record.$el.attr('draggable', true);
             record.$el.data('record', record);
             this.records.push(record);
         }
-        this.$el.toggleClass('o_kanban_empty', this.data_records.length === 0);
+        this.check_if_empty();
+        this.$el.data('column', this);
+    },
+
+    check_if_empty: function () {
+        this.$el.toggleClass('o_kanban_empty', this.records.length === 0);
     },
 
     swap_record: function (rec1, rec2) {
@@ -610,6 +625,7 @@ var KanbanColumn = Widget.extend({
         record.$el.detach();
         var index = this.records.indexOf(record);
         this.records.splice(index, 1);
+        this.check_if_empty();
     },
 
     insert_after: function (record, new_record) {
@@ -623,6 +639,13 @@ var KanbanColumn = Widget.extend({
         new_record.$el.insertBefore(record.$el);
         var index = this.records.indexOf(record);
         this.records.splice(index, 1, new_record, record);
+        new_record.setParent(this);
+    },
+
+    insert: function (new_record) {
+        new_record.$el.appendTo(this.$el);
+        this.$el.removeClass('o_kanban_empty');
+        this.records.push(new_record);
         new_record.setParent(this);
     },
 });

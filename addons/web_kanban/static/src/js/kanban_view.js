@@ -25,7 +25,7 @@ function qweb_add_if(node, condition) {
 var KanbanView = View.extend({
     display_name: _lt("Kanban"),
     view_type: "kanban",
-    className: "o-kanban-view",
+    className: "o_kanban_view",
     number_of_color_schemes: 10,
 
     events: {
@@ -110,7 +110,7 @@ var KanbanView = View.extend({
                 self.data = records;
             });
     },
-    // fetch groups ids
+
     load_groups: function () {
         var self = this;
         var group_by_field = this.group_by_field || this.default_group_by;
@@ -138,7 +138,8 @@ var KanbanView = View.extend({
                     });
             } else {
                 _.each(self.data, function (group) {
-                    group.title = group.attributes.value[1] || _t("Undefined");
+                    var value = group.attributes.value;
+                    group.title = (value instanceof Array ? value[1] : value) || _t("Undefined");
                 });
                 return $.when();
             }
@@ -188,14 +189,14 @@ var KanbanView = View.extend({
         var self = this;
         this.pager = new Pager(this, this.dataset.size(), 1, this.limit);
         this.pager.appendTo($node);
-        this.pager.on('pager_changed', this, function (new_state) {
-            var limit = new_state.current_max - new_state.current_min + 1;
-            this.dataset.read_slice(this.fields_keys.concat(['__last_update']), { 'limit': limit, 'offset': new_state.current_min - 1 })
+        this.pager.on('pager_changed', this, function (state) {
+            self.dataset.read_slice(self.fields_keys.concat(['__last_update']), { 'limit': state.limit, 'offset': state.current_min - 1 })
                 .then(function (records) {
                     self.data = records;
                 })
                 .done(this.proxy('render'));
         });
+        this.update_pager();
     },
 
     transform_qweb_template: function(node) {
@@ -327,10 +328,9 @@ var KanbanView = View.extend({
         if (this.grouped) {
             var groups = this.data;
             _.each(groups, function (group) {
-                var column = new kanban_common.KanbanColumn(self, group);
+                var column = new kanban_common.KanbanColumn(self, group, self.relation);
                 column.appendTo(fragment);
                 self.widgets.push(column);
-                window.col = window.col || column;
             });
             this.postprocess_m2m_tags();
 
@@ -359,12 +359,8 @@ var KanbanView = View.extend({
             }
             this.postprocess_m2m_tags();
         }
-        this.$el.toggleClass('o_kanban_grouped', !!this.grouped);
         this.$el.toggleClass('o_kanban_ungrouped', !this.grouped);
         this.$el.append(fragment);
-        for (var i = 0; i < this.widgets.length; i++) {
-            this.widgets[i].$el.data('column', this.widgets[i]);
-        }
     },
 
     swap_column: function (col1, col2) {
@@ -380,6 +376,10 @@ var KanbanView = View.extend({
 
     resequence: function () {
         var new_sequence = _.pluck(this.widgets, 'id');
+        if ((new_sequence.length <= 1) || !this.relation) {
+            return;
+        }
+
         new data.DataSet(this, this.relation).resequence(new_sequence).done(function (r) {
             if (!r) {
                 console.warn('Resequence could not be complete. ' +
@@ -418,15 +418,11 @@ var KanbanView = View.extend({
         if (this.dnd.dragging_column) {
             var column = $(e.target).parent().data('column');
 
-            this.dnd.$image = column.$el.clone();
+            this.dnd.$image = $('<div class="o_kanban_view"/>');
+            this.dnd.$image.append(column.$el.clone().wrap());
             this.dnd.$image.find('.o_kanban_record:gt(4)').remove();
-            this.dnd.$image.css({
-                position: 'absolute',
-                top: 0,
-                'max-height': '100vh',
-                overflow: 'hidden',
-                'z-index': -1,
-            });
+            this.dnd.$image.addClass('o_column_dnd');
+
             column.$el.addClass('o_kanban_dragged');
             this.dnd.$image.appendTo(document.body);
 
@@ -438,17 +434,10 @@ var KanbanView = View.extend({
             this.dnd.column = column;
         } else {
             // dragging kanban record
-            var record = $(e.target).data('record');
-            this.dnd.$image = record.$el.clone();
-            this.dnd.$image.css({
-                position: 'absolute',
-                top: 10,
-                left: 10,
-                'max-height': '100vh',
-                overflow: 'hidden',
-                'z-index': -1,
-                transform: 'rotate(2deg)',
-            });
+            var record = $(e.target).closest('.o_kanban_record').data('record');
+            this.dnd.$image = $('<div class="o_kanban_view"></div>');
+            this.dnd.$image.append(record.$el.clone().addClass('o_record_dnd'));
+
             this.dnd.$image.appendTo(document.body);
             record.$el.addClass('o_record_dragged');
             record.$el.children().css({visibility: 'hidden'});
@@ -469,22 +458,30 @@ var KanbanView = View.extend({
         if (this.dnd.dragging_column) {
             var column = $(e.target).closest('.o_kanban_group').data('column');
             column.$el.removeClass('o_kanban_dragged');
-            this.dnd.$image.remove();
         } else {
-            this.dnd.$image.remove();
-            // var record = $(e.target).data('record');
             this.dnd.record.$el.removeClass('o_record_dragged');
             this.dnd.record.$el.children().css({visibility: 'inherit'});
         }
+        this.dnd.$image.remove();
     },
 
     on_dragenter: function (e) {
         var event = e.originalEvent;
+        var current_column = $(e.target).closest('.o_kanban_group').data('column');
+        if (!current_column) {
+            return;
+        }
 
         if (this.dnd.dragging_column) {
-            var column = $(e.target).closest('.o_kanban_group').data('column');
             e.preventDefault();
-            this.swap_column(this.dnd.column, column);
+            this.swap_column(this.dnd.column, current_column);
+        } else {
+            var record_column = this.dnd.record.getParent();
+            if (current_column === record_column) {
+                return;
+            }
+            record_column.remove(this.dnd.record);
+            current_column.insert(this.dnd.record);
         }
     },
 
@@ -502,6 +499,7 @@ var KanbanView = View.extend({
             if (column !== origin) {
                 // record needs to be inserted in a different column
                 origin.remove(this.dnd.record);
+
                 if (event.pageY > record.$el.offset().top + record.$el.height() / 2) {
                     column.insert_after(record, this.dnd.record);
                 } else {
@@ -532,7 +530,8 @@ var KanbanView = View.extend({
             e.preventDefault();
             var record = this.dnd.record;
             var column = record.getParent();
-            if (column === this.dnd.origin) {
+            var origin = this.dnd.origin;
+            if (column === origin) {
                 column.resequence()
             } else {
                 var data = {};
@@ -546,7 +545,6 @@ var KanbanView = View.extend({
     },
 
 });
-
 
 core.view_registry.add('kanban', KanbanView);
 
