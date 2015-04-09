@@ -165,6 +165,7 @@ button.btn-primary, button.btn-secondary {
     .o-dropdown {
         display: inline-block;
         padding-right: 10px; // gap between dropdown togglers
+        .user-select(none);  // Prevent text selection when toggling the dropdowns
         a { // dropdown togglers
             color: @odoo-main-text-color;
             cursor: pointer;
