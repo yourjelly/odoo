@@ -1,7 +1,3 @@
-.o-search-options-dropdown-boilerplate() {
-    overflow-y: auto; // doestn't work
-    overflow-x: hidden;  // FIXME: not clean
-}
 .o-search-options-dropdown-custom-li() {
     margin: 3px 25px;
     width: auto;
@@ -268,8 +264,6 @@ button.btn-primary, button.btn-secondary {
 
         // Filters
         .o-filters-menu {
-            .o-search-options-dropdown-boilerplate;
-
             .o-filter-condition {
                 .o-search-options-dropdown-custom-li;
                 .o-or-filter { // or between conditions
@@ -312,8 +306,6 @@ button.btn-primary, button.btn-secondary {
 
         // Group By
         .o-group-by-menu {
-            .o-search-options-dropdown-boilerplate;
-
             .divider {display: none;} // hide the divider by default (no group)
             .o-add-group { // add button
                 display: none;  // Needed by the webclient
@@ -323,8 +315,6 @@ button.btn-primary, button.btn-secondary {
 
         // Favorites
         .o-favorites-menu {
-            .o-search-options-dropdown-boilerplate;
-
             .divider {display: none;} // hide the divider by default (no favorite)
             .o-searchview-custom-private, .o-searchview-custom-public {
                 .o-remove-filter {
