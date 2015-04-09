@@ -44,7 +44,7 @@ var GraphView = View.extend({
         if ($node) {
             var context = {measures: _.pairs(_.omit(this.measures, '__count__'))};
             this.$buttons = $(QWeb.render('GraphView.buttons', context));
-            this.$measure_list = this.$buttons.siblings('.o-graph-measures-list');
+            this.$measure_list = this.$buttons.find('.o-graph-measures-list');
             this.update_measure();
             this.$buttons.find('button').tooltip();
             this.$buttons.click(this.on_button_click.bind(this));

@@ -19,17 +19,18 @@
 button.btn-primary, button.btn-secondary {
     text-transform: uppercase;
 }
+.label {
+    border-radius: 0;
+    font-size: 100%; // Override 75% of .label
+}
 
 .o-control-panel-first-row {
     padding: 10px 0px 0px 0px;
 
     // Breadcrumbs
-    // FIXME: override default's bootstrap values, change variables?
     .o-cp-breadcrumbs {
-        font-size: 18px;
-        padding-left: 0px;
-        padding-top: 0px;
-        margin: 0;
+        font-size: @font-size-large;
+        margin-bottom: 10px;
         a {
             color: @odoo-brand-optional;
             cursor: pointer;
@@ -41,7 +42,7 @@ button.btn-primary, button.btn-secondary {
     }
 
     .o-cp-searchview {
-        // Override bootstrap
+        // FIXME: make these changes global? Probably required for FormViews
         .form-control {
             border-top: none;
             border-left: none;
@@ -55,7 +56,7 @@ button.btn-primary, button.btn-secondary {
 
         .o-searchview {
             height: auto;  // Increase the height of the searchview input according to its content
-            margin-bottom: 10px;
+            margin-bottom: 10px; // Needed when the searchview is displayed on several lines
 
             // Drawer icon
             .o-searchview-unfold-drawer {
@@ -67,14 +68,12 @@ button.btn-primary, button.btn-secondary {
             }
 
             .o-searchview-facets {
-                cursor: text;  // Text cursor, same as input box
                 min-height: 22px;
-                padding-right: 10px; // To prevent overlapping caret
+                padding-right: 10px; // To prevent overlapping the caret
 
                 .o-searchview-input {
-                    display: inline-block;
-                    margin-bottom: 2px;
-                    padding-left: 1px; // For the cursor to be displayed
+                    display: inline;
+                    cursor: text;  // Text cursor, same as input box
                     &:focus {outline: none;}
                     &[contentEditable=true]:empty:not(:focus):before {
                         content:attr(data-ph); // Display 'Search...'
@@ -84,47 +83,37 @@ button.btn-primary, button.btn-secondary {
 
                 .o-searchview-facet {
                     display: inline-block;
-                    margin-right: 3px;
-                    margin-bottom: 3px;
+                    margin: 1px 3px 1px 0px;
+                    cursor: pointer;
 
                     .o-searchview-facet-label {
                         display: inline-block;
-                        background-color: @odoo-brand-primary;
-                        border-radius: 0;  // Override bootstrap's value
-                        font-size: @font-size-small + 1;
                         padding: 3px;
+                        background-color: @odoo-brand-primary;
                         border: 1px solid @odoo-brand-primary;
-                        cursor: pointer;
                     }
 
                     .o-searchview-facet-content {
                         display: inline-block;
                         vertical-align: top;
                         &:focus {box-shadow: 0 0 3px 1px @odoo-brand-secondary;}
-                        font-size: @font-size-small + 1;
-                        cursor: pointer;
                         border: 1px solid @odoo-brand-secondary;
                         border-left: 0px;
-                        background: @gray-lighter;
+                        background: @gray-lighter; // FIXME: set adequate color
+                        color: @odoo-brand-secondary;
 
                         .o-facet-values {
                             display: inline-block;
                             .o-facet-value {
-                                padding: 0 0 0 4px;
+                                padding-left: 4px;
                                 &:first-child {border-left: none;}
                                 border-left: 1px solid @odoo-brand-secondary;
-                                color: @odoo-brand-secondary;
                             }
                         }
                         .o-facet-remove {
-                            display: inline-block;
                             padding: 0 4px 0 4px;
-                            text-align: center;
-                            color: @odoo-brand-secondary;
-                            font-weight: bold;
-                            background: @gray-lighter;
                             &:hover {
-                                color: @gray-light;
+                                color: @gray;
                             }
                         }
                     }
@@ -138,6 +127,7 @@ button.btn-primary, button.btn-secondary {
 
                 li {
                     padding-left: 20px;
+                    position: relative;
                     &.o-indent {
                         padding-left: 40px;
                     }
@@ -151,8 +141,9 @@ button.btn-primary, button.btn-secondary {
                         &:hover {
                             background-color: inherit;
                         }
-                        &:first-child {
-                            margin-right: 10px; // Gap between caret and text
+                        &.o-expand, &.o-expanded { // caret
+                            position: absolute;
+                            left: 8px;
                         }
                         &.o-expand:before {
                             .o-caret-right;
@@ -173,11 +164,7 @@ button.btn-primary, button.btn-secondary {
     // Searchview and Sidebar dropdowns
     .o-dropdown {
         display: inline-block;
-        position: relative;
         padding-right: 10px; // gap between dropdown togglers
-        * {
-            font-size: @font-size-small;
-        }
         a { // dropdown togglers
             color: @odoo-main-text-color;
             cursor: pointer;
@@ -185,6 +172,10 @@ button.btn-primary, button.btn-secondary {
                 text-decoration: none;
                 color: black;
             }
+        }
+        .dropdown-menu { // dropdowns position
+            left: auto;
+            top: auto;
         }
     }
     // Selected item in dropdowns (for action buttons and searchview)
@@ -206,11 +197,6 @@ button.btn-primary, button.btn-secondary {
         }
     }
 
-    // FIXME: move me to kanban.less
-    .oe_bounce_container {
-        display: inline-block;
-    }
-
     .o-list-buttons { // Needed by the webclient
         .o-list-button-save, .o-list-button-discard {
             display: none;
@@ -227,6 +213,8 @@ button.btn-primary, button.btn-secondary {
 
     // Sidebar
     .o-cp-sidebar {
+        padding-top: 5px;
+
         .o-hidden-input-file {
             position: relative;
             input.o-form-input-file {
@@ -255,6 +243,8 @@ button.btn-primary, button.btn-secondary {
 
     // Searchview dropdowns
     .o-search-options {
+        padding-top: 5px;
+
         // Open and closed carets in dropdowns
         .o-closed-menu {
             position: relative;
@@ -262,7 +252,7 @@ button.btn-primary, button.btn-secondary {
                 .o-caret-right;
                 position: absolute;
                 left: 12px;
-                top: 7px;
+                top: 9px;
             }
         }
         .o-open-menu {
@@ -271,7 +261,7 @@ button.btn-primary, button.btn-secondary {
                 .o-caret-down;
                 position: absolute;
                 left: 12px;
-                top: 9px;
+                top: 11px;
             }
         }
 
@@ -285,7 +275,7 @@ button.btn-primary, button.btn-secondary {
                     display: none;  // hidden for the first condition
                     position: absolute;
                     left: -18px;
-                    top: 10px;
+                    top: 7px;
                 }
             }
             .o-filter-condition + .o-filter-condition {
@@ -323,6 +313,7 @@ button.btn-primary, button.btn-secondary {
         .o-group-by-menu {
             .o-search-options-dropdown-boilerplate;
 
+            .divider {display: none;} // hide the divider by default (no group)
             .o-add-group { // add button
                 display: none;  // Needed by the webclient
                 .o-search-options-dropdown-custom-li;

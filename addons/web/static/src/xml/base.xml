@@ -1619,7 +1619,7 @@
         </li>
         <li class="o-add-filter-menu">
             <button class="btn btn-primary btn-sm o-apply-filter" type="button">Apply</button>
-            <button class="btn btn-secondary btn-sm fa fa-plus-circle o-add-condition" type="button"> Add a condition</button>
+            <button class="btn btn-secondary btn-sm o-add-condition" type="button"><span class="fa fa-plus-circle"/> Add a condition</button>
         </li>
     </ul>
 </div>
