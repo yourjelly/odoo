@@ -265,13 +265,17 @@ var KanbanView = View.extend({
     *  postprocessing of fields type many2many
     *  make the rpc request for all ids/model and insert value inside .oe_tags fields
     */
-    postprocess_m2m_tags: function() {
+    postprocess_m2m_tags: function(record) {
         var self = this;
         if (!this.many2manys.length) {
             return;
         }
         var relations = {};
-        this.widgets.forEach(function(record) {
+        var records = record ? [record] :
+                      this.grouped ? Array.prototype.concat.apply([], _.pluck(this.widgets, 'records')) :
+                      this.widgets;
+
+        records.forEach(function(record) {
             self.many2manys.forEach(function(name) {
                 var field = record.record[name];
                 var $el = record.$('.oe_form_field.oe_tags[name=' + name + ']').empty();
@@ -328,6 +332,7 @@ var KanbanView = View.extend({
                 self.widgets.push(column);
                 window.col = window.col || column;
             });
+            this.postprocess_m2m_tags();
 
         } else {
             // ungrouped kanban view (basically a bunch of records)
@@ -453,8 +458,8 @@ var KanbanView = View.extend({
             event.dataTransfer.setDragImage(this.dnd.$image[0], offsetX, offsetY);
             event.dataTransfer.setData('text/plain', 'dummy');
             this.dnd.record = record;
+            this.dnd.origin = record.getParent();
         }
-
 
     },
 
@@ -525,7 +530,18 @@ var KanbanView = View.extend({
             this.resequence();
         } else {
             e.preventDefault();
-            this.dnd.record.getParent().resequence()
+            var record = this.dnd.record;
+            var column = record.getParent();
+            if (column === this.dnd.origin) {
+                column.resequence()
+            } else {
+                var data = {};
+                data[this.group_by_field] = column.value;
+                this.dataset.write(record.id, data, {}).done(function () {
+                    record.do_reload();
+                    column.resequence();
+                });
+            }
         }
     },
 

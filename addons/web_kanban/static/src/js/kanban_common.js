@@ -499,7 +499,7 @@ var KanbanRecord = Widget.extend({
                 self.set_record(records[0]);
                 self.renderElement();
                 self.init_content();
-                self.view.postprocess_m2m_tags();
+                self.view.postprocess_m2m_tags(self);
             } else {
                 self.destroy();
             }
@@ -573,6 +573,7 @@ var KanbanColumn = Widget.extend({
         this.title = group_data.title;
         this.model = group_data.model;
         this.id = group_data.id;
+        this.value = group_data.attributes.value[0];
     },
 
     start: function() {
