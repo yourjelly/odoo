@@ -1990,7 +1990,7 @@
                     <span class="icon-bar"/>
                 </button>
                 <a class="navbar-brand o-menu-toggle" href="#"><i class="fa fa-th"/></a>
-                <a class="navbar-brand o-menu-brand" href="#"/>
+                <span class="navbar-brand o-menu-brand"/>
             </div>
 
             <div class="collapse navbar-collapse" id="o-navbar-collapse">

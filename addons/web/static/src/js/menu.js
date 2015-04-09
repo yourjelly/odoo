@@ -55,10 +55,6 @@ var Menu = Widget.extend({
             self.$menu_sections[Number(this.className)] = $(this).find('.dropdown');  // FIXME: gross implementation but the idea is ok imo
         });
         this.$menu_brand_placeholder = this.$('.o-menu-brand');
-        this.$menu_brand_placeholder.click(function (ev) {
-            ev.preventDefault();
-            self.toggle_app_switcher();
-        });
         this.$section_placeholder = this.$('.o-menu-sections');
         _.each(this.$menu_sections, function ($section, primary_menu_id) {
             $section.on('click', 'a[data-menu]', self, function (ev) {

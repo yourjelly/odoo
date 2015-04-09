@@ -50,6 +50,17 @@ html {
             .o-content {
                 .o-flex(1, 1, auto);
                 overflow: auto;
+                height: 100%;
+                position: relative;  // Allow to redistribute the 100% height to its child
+
+                .o-view-manager-content {
+                    position: absolute;  // Get the 100% height of its flex parent
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    left: 0;
+                    height: 100%;
+                }
             }
 
             .o-debug-manager {

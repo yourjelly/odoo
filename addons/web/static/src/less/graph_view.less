@@ -1,3 +1,8 @@
-.oe_graph > div {
-    background-color: white;
+.oe_graph {
+    height: 100%;
+
+    &> div {  // FIXME: useless div
+        height: 100%;
+        background-color: @odoo-view-background-color;
+    }
 }
