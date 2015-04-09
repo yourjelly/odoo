@@ -483,7 +483,7 @@
 </t>
 
 <t t-name="WebClient.DebugManager">
-    <div class="row navbar navbar-inverse o-debug-manager">
+    <div class="row navbar navbar-inverse o-debug-manager hidden-xs">
         <div class="navbar-header">
             <span class="navbar-brand fa fa-bug"/>
             <span class="navbar-brand">Developer Tools</span>
@@ -668,7 +668,7 @@
     </td>
 </tr>
 
-<table t-name="ListView" class="o-list-view table table-condensed table-striped">
+<table t-name="ListView" class="o-list-view table table-condensed table-striped table-responsive">
     <t t-set="columns_count" t-value="visible_columns.length + (options.selectable ? 1 : 0) + (options.deletable ? 1 : 0)"/>
     <thead>
         <tr t-if="options.header" class="o-list-header">

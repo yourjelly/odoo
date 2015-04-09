@@ -1,9 +1,9 @@
 // ------------------------------------------------------------------
-// Base layout
+// Base layout, including mobile behavior
 // ------------------------------------------------------------------
 // Variables
 @navbar-height: 40px;
-@navbar-margin-bottom: 0px;
+@navbar-margin-bottom: 0;
 @z-index-o-control-panel-second-row: 1;
 @z-index-o-application-switcher: 2;
 
@@ -32,8 +32,8 @@ html {
             .o-flex-display();
             .o-flex-direction(column);
             @media (max-width: @grid-float-breakpoint) {
-                height: auto;
-                display: block;
+                overflow-x: auto;  // horizontal scrollbar if necessary
+                height: auto;  // reset height inheritance
             }
 
             .o-control-panel-first-row {
@@ -52,6 +52,9 @@ html {
                 overflow: auto;
                 height: 100%;
                 position: relative;  // Allow to redistribute the 100% height to its child
+                @media (max-width: @grid-float-breakpoint) {
+                    position: static;  // reset the height 100% distribution on flex item
+                }
 
                 .o-view-manager-content {
                     position: absolute;  // Get the 100% height of its flex parent
@@ -60,6 +63,10 @@ html {
                     bottom: 0;
                     left: 0;
                     height: 100%;
+                    @media (max-width: @grid-float-breakpoint) {
+                        position: static;  // reset the height 100% distribution on flex item
+                        height: auto;  // reset height inheritance
+                    }
                 }
             }
 
@@ -67,17 +74,11 @@ html {
                 .o-flex(0, 0, auto);
             }
         }
-    }
-}
 
-
-// ------------------------------------------------------------------
-// Cross-browser compatibility fixes
-// ------------------------------------------------------------------
-// As Internet Explorer 8 and 9 do not handle flexbox, we chose to drop the .o-action-manager
-// logic with the inner scrollbar and leave all the page scrollbale (still with a fixed navbar).
-.ie9 {
-    .o-web-client-row {
-        height: auto !important;
+        .o-loading {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
     }
 }

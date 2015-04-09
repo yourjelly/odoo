@@ -1,36 +1,33 @@
-@odoo-list-grey: #c6c6c6;
-
-@table-bg-accent: #eef0f0;
-
-
-table.o-list-view {
-
+.o-list-view {
     cursor: pointer;
-
-    background-color: white;
+    background-color: @odoo-view-background-color;
 
     thead {
-        background-color: @odoo-list-grey;
         color: @odoo-main-text-color;
-    }
-
-    .o-sortable:after {
-        font-family: FontAwesome;
-        margin-left: 5px;
-    }
-    .o-sort-up:after {
-        content: "\f0d7";
-    }
-    .o-sort-down:after {
-        content: "\f0d8";
+        background-color: @odoo-list-grey;
     }
 
     tfoot {
-        background-color: @odoo-brand-primary;
         color: white;
+        background-color: @odoo-brand-primary;
     }
 
-    .o-list-record-selector input {
+    .o-sortable {
+        .user-select(none);  // Prevent unwanted selection while sorting
+
+        &.o-sort-up:after {
+            font-family: FontAwesome;
+            margin-left: 5px;
+            content: "\f0d7";
+        }
+        &.o-sort-down:after {
+            font-family: FontAwesome;
+            margin-left: 5px;
+            content: "\f0d8";
+        }
+    }
+
+    .o-list-record-selector > input {
         margin-left: 3px;
     }
 }

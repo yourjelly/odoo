@@ -1,12 +1,20 @@
 .o-debug-manager {
-	background-color: @odoo-brand-secondary;
-	border-color: darken(@odoo-brand-secondary, 10%);
-	border-width: 1px 0px 0px 0px;
-	box-shadow: none;
+    background-color: @odoo-brand-secondary;
+    border-color: darken(@odoo-brand-secondary, 10%);
+    border-width: 1px 0 0 0;
+    .box-shadow(none);
 
-	// dropups instead of dropdowns
-	.o-debug-dropdowns > li > ul {
-		top: auto;
-		bottom: 100%;
-	}
+    .navbar-brand {
+        padding-left: 16px;
+    }
+
+    .navbar-brand:nth-child(2) {
+        margin-right: 8px;
+    }
+
+    // dropups instead of dropdowns
+    .o-debug-dropdowns > li > ul {
+        top: auto;
+        bottom: 100%;
+    }
 }

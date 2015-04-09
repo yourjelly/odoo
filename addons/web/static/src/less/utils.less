@@ -52,7 +52,7 @@
 }
 
 // ------------------------------------------------------------------
-// Vendor prfixes
+// Vendor prefixes
 // ------------------------------------------------------------------
 // Flex
 .o-flex-display() {
@@ -62,13 +62,11 @@
     display: -webkit-flex;
     display: flex;
 }
-
 .o-flex-direction(@direction) {
     -ms-flex-direction: @direction;
     -webkit-flex-direction: @direction;
     flex-direction: @direction;
 }
-
 .o-flex(@flex-grow, @flex-schrink, @flex-basis) {
     -webkit-box-flex: @flex-grow;
     -webkit-flex: @flex-grow @flex-schrink @flex-basis;
@@ -76,6 +74,9 @@
     flex: @flex-grow @flex-schrink @flex-basis;
 }
 
+// ------------------------------------------------------------------
+// Color utils
+// ------------------------------------------------------------------
 .o-darken(@color) {
     color: darken(@color, 10%);
 }

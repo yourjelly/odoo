@@ -1,75 +1,9 @@
 // ------------------------------------------------------------------
-// Odoo
-// ------------------------------------------------------------------
-@odoo-brand-primary: #a24689;
-@odoo-brand-secondary: #8f8f8f;
-@odoo-brand-optional: #21b799;
-
-@odoo-main-text-color: #666666;
-@odoo-main-color-muted: #a8a8a8;
-
-@odoo-view-background-color: #ffffff;
-
-
-// ------------------------------------------------------------------
-// Bootstrap's variables
-// ------------------------------------------------------------------
-@badge-active-bg: @component-active-bg;
-@badge-active-color: black;
-@badge-bg: none;
-@badge-color: @gray-light;
-@border-radius-base: 0;
-@brand-primary: @odoo-brand-primary;
-@breadcrumb-bg: white;
-@component-active-bg: @gray-lighter;
-@component-active-color: @odoo-brand-optional;
-@font-family-monospace: Roboto;
-@font-family-sans-serif: Roboto;
-@font-family-serif: Roboto;
-@grid-gutter-width: 0;
-@nav-link-padding: 5px 20px 5px 20px;
-@navbar-inverse-bg: @odoo-brand-primary;
-@navbar-inverse-link-color: white;
-@navbar-inverse-link-hover-bg: darken(@odoo-brand-primary, 10%);
-@text-color: @odoo-main-text-color;
-
-@btn-default-bg: white;
-@btn-default-border: white;
-@btn-default-color: @odoo-main-text-color;
-@btn-primary-bg: @odoo-brand-optional;
-@btn-primary-border: @odoo-brand-optional;
-@btn-primary-color: white;
-@btn-secondary-bg: white;
-@btn-secondary-border: white;
-@btn-secondary-color: @odoo-brand-optional;
-.btn-secondary {
-  .button-variant(@btn-secondary-color; @btn-secondary-bg; @btn-secondary-border);
-}
-
-@breadcrumb-padding-vertical: 0;
-@breadcrumb-padding-horizontal: 0;
-@breadcrumb-color: @odoo-brand-secondary;
-@breadcrumb-active-color: @odoo-brand-secondary;
-
-// ------------------------------------------------------------------
-// Layout
-// ------------------------------------------------------------------
-.o-control-panel-first-row, .o-control-panel-second-row {
-    background-color: white;
-}
-
-.o-control-panel-second-row {
-    box-shadow: 0px 4px 4px -3px @odoo-main-text-color;
-}
-
-.o-web-client {
-    background-color: @odoo-main-color-muted;
-}
-
-// ------------------------------------------------------------------
-// Menus
+// Navbar
 // ------------------------------------------------------------------
 .navbar {
+    .box-shadow(8px 0px 8px @odoo-main-text-color);
+
     .o-menu-toggle {
         padding-left: 16px;
     }
@@ -78,11 +12,13 @@
         .user-select(none);
         cursor: default;
         padding-left: 16px;
+        margin-right: 8px;
     }
-    box-shadow: 8px 0px 8px @odoo-main-text-color;
 }
 
-
+// ------------------------------------------------------------------
+// Application switcher
+// ------------------------------------------------------------------
 .o-application-switcher {
     .oe_logo {
         img {
@@ -160,11 +96,26 @@
     }
 }
 
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+.o-web-client {
+    background-color: @odoo-main-color-muted;
+
+    .o-control-panel-first-row, .o-control-panel-second-row {
+        background-color: white;
+    }
+
+    .o-control-panel-second-row {
+        .box-shadow(0px 4px 4px -3px @odoo-main-text-color);
+    }
+}
+
+// ------------------------------------------------------------------
+// Misc.
+// ------------------------------------------------------------------
 .o-loading {
     background-color: @odoo-brand-primary;
     color: white;
-    position: absolute;
-    bottom: 0;
-    right: 0;
     padding: 4px;
 }

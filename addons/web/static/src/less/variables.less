@@ -1,0 +1,88 @@
+// ------------------------------------------------------------------
+// Odoo
+// ------------------------------------------------------------------
+@odoo-brand-primary: #a24689;
+@odoo-brand-secondary: #8f8f8f;
+@odoo-brand-optional: #21b799;
+@odoo-main-text-color: #666666;
+@odoo-main-color-muted: #a8a8a8;
+@odoo-view-background-color: #ffffff;
+@odoo-list-grey: #c6c6c6;  // FIXME: listview thead background color
+
+// ------------------------------------------------------------------
+// Bootstrap
+// ------------------------------------------------------------------
+//== Colors
+@brand-primary: @odoo-brand-primary;
+
+//== Scaffolding
+@body-bg: @odoo-main-color-muted;  // FIXME!!! variables mess
+@text-color: @odoo-main-text-color;
+
+//== Typography
+@font-family-monospace: Roboto;
+@font-family-sans-serif: Roboto;
+@font-family-serif: Roboto;
+
+//== Components
+@border-radius-base: 0;
+@component-active-bg: @gray-lighter;
+@component-active-color: @odoo-brand-optional;
+
+//== Badges
+@badge-active-bg: @component-active-bg;
+@badge-active-color: black;
+@badge-bg: none;
+@badge-color: @gray-light;
+
+//== Breadcrumbs
+@breadcrumb-active-color: @odoo-brand-secondary;
+@breadcrumb-bg: white;
+@breadcrumb-color: @odoo-brand-secondary;
+@breadcrumb-padding-horizontal: 0;
+@breadcrumb-padding-vertical: 0;
+
+//== Buttons
+@btn-default-bg: white;
+@btn-default-border: white;
+@btn-default-color: @odoo-main-text-color;
+@btn-primary-bg: @odoo-brand-optional;
+@btn-primary-border: @odoo-brand-optional;
+@btn-primary-color: white;
+@btn-secondary-bg: white;
+@btn-secondary-border: white;
+@btn-secondary-color: @odoo-brand-optional;
+.btn-secondary {
+  .button-variant(@btn-secondary-color; @btn-secondary-bg; @btn-secondary-border);
+}
+.btn, .btn-group>.btn {
+    border-radius: 0px;
+    border: none;
+}
+.btn-default.active {
+    .box-shadow(none);
+}
+button.btn-primary, button.btn-secondary {
+    text-transform: uppercase;
+}
+
+//== Grid system
+@grid-gutter-width: 0;
+
+//== Labels
+.label {
+    border-radius: 0;
+    font-size: 100%; // Override 75% of .label
+}
+
+//== Navs
+@nav-link-padding: 5px 20px 5px 20px;
+
+//== Navbar
+//note: navbar height is set in webclient_layout.less
+@navbar-inverse-bg: @odoo-brand-primary;
+@navbar-inverse-link-color: white;
+@navbar-inverse-link-hover-bg: darken(@odoo-brand-primary, 10%);
+
+//== Tables
+@table-bg-accent: #eef0f0;  // FIXME: expose
