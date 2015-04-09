@@ -504,7 +504,7 @@
     </t>
 
     <t t-name="XmlReceipt">
-        <receipt align='center' width='40' value-thousands-separator='' >
+        <receipt align='center' t-att-width='receipt.width' t-att-sheet='receipt.sheet' value-thousands-separator='' >
             <t t-if='receipt.company.logo'>
                 <img t-att-src='receipt.company.logo' />
                 <br/>
@@ -595,44 +595,62 @@
 
             <!-- Total -->
 
-            <line><right>--------</right></line>
-            <line size='double-height'>
-                <left><pre>        TOTAL</pre></left>
-                <right><value><t t-esc='receipt.total_with_tax' /></value></right>
-            </line>
-            <br/><br/>
+            <t t-if="!receipt.nototal">
+                <line><right>--------</right></line>
+                <line size='double-height'>
+                    <left><pre>        TOTAL</pre></left>
+                    <right><value><t t-esc='receipt.total_with_tax' /></value></right>
+                </line>
+                <br/><br/>
+            </t>
 
             <!-- Payment Lines -->
 
-            <t t-foreach='receipt.paymentlines' t-as='line'>
-                <line>
-                    <left><t t-esc='line.journal' /></left>
-                    <right><value><t t-esc='line.amount'/></value></right>
-                </line>
-            </t>
-            <br/> 
+            <t t-if='!receipt.nopayment'>
+                <t t-foreach='receipt.paymentlines' t-as='line'>
+                    <line>
+                        <left><t t-esc='line.journal' /></left>
+                        <right><value><t t-esc='line.amount'/></value></right>
+                    </line>
+                </t>
+                <br/> 
 
-            <line size='double-height'>
-                <left><pre>        CHANGE</pre></left>
-                <right><value><t t-esc='receipt.change' /></value></right>
-            </line>
-            <br/>
+                <line size='double-height'>
+                    <left><pre>        CHANGE</pre></left>
+                    <right><value><t t-esc='receipt.change' /></value></right>
+                </line>
+                <br/>
+            </t>
             
             <!-- Extra Payment Info -->
 
-            <t t-if='receipt.total_discount'>
-                <line>
-                    <left>Discounts</left>
-                    <right><value><t t-esc='receipt.total_discount'/></value></right>
-                </line>
-            </t>
-            <t t-if='taxincluded'>
-                <t t-foreach='receipt.tax_details' t-as='tax'>
+            <t t-if="!receipt.noinfo">
+                <t t-if='receipt.total_discount'>
                     <line>
-                        <left><t t-esc='tax.name' /></left>
-                        <right><value><t t-esc='tax.amount' /></value></right>
+                        <left>Discounts</left>
+                        <right><value><t t-esc='receipt.total_discount'/></value></right>
                     </line>
                 </t>
+
+                <t t-if='taxincluded'>
+                    <t t-foreach='receipt.tax_details' t-as='tax'>
+                        <line>
+                            <left><t t-esc='tax.name' /></left>
+                            <right><value><t t-esc='tax.amount' /></value></right>
+                        </line>
+                    </t>
+                </t>
+            </t>
+
+            <t t-if="receipt.emptylines">
+                <t t-foreach="receipt.emptylines">
+                    <br/>
+                </t>
+            </t>
+
+            <t t-if="receipt.pages and receipt.page">
+                <br />
+                <p>Page <t t-esc="receipt.page"/> of <t t-esc="receipt.pages"/> </p>
             </t>
 
             <!-- Footer -->

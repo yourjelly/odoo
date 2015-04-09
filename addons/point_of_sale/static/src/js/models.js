@@ -1168,7 +1168,8 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             return this.screen_data[key];
         },
         // exports a JSON for receipt printing
-        export_for_printing: function(){
+        export_for_printing: function(opts){
+                opts = opts || {};
             var orderlines = [];
             this.get('orderLines').each(function(orderline){
                 orderlines.push(orderline.export_for_printing());
@@ -1187,6 +1188,10 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             return {
                 orderlines: orderlines,
                 paymentlines: paymentlines,
+                nopayment:  opts.nopayment || false,
+                emptylines: 0,
+                width: opts.width || 40,
+                sheet: opts.sheet || 'paper-roll',
                 subtotal: this.getSubtotal(),
                 total_with_tax: this.getTotalTaxIncluded(),
                 total_without_tax: this.getTotalTaxExcluded(),

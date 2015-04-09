@@ -3,6 +3,18 @@ function openerp_restaurant_printbill(instance,module){
 	var _t = instance.web._t;
 
     module.PosWidget.include({
+        print_bill: function() {
+            var order = this.pos.get('selectedOrder');
+            if (order.get('orderLines').models.length > 0) {
+                var receipt = order.export_for_printing({
+                    'nopayment': true,
+                });
+
+                this.pos.proxy.print_receipt(QWeb.render('XmlReceipt',{
+                    receipt: receipt, widget: this,
+                }));
+            }
+        },
         build_widgets: function(){
             var self = this;
             this._super();
@@ -11,13 +23,7 @@ function openerp_restaurant_printbill(instance,module){
                 var printbill = $(QWeb.render('PrintBillButton'));
 
                 printbill.click(function(){
-                    var order = self.pos.get('selectedOrder');
-                    if(order.get('orderLines').models.length > 0){
-                        var receipt = order.export_for_printing();
-                        self.pos.proxy.print_receipt(QWeb.render('BillReceipt',{
-                            receipt: receipt, widget: self,
-                        }));
-                    }
+                    self.print_bill();
                 });
 
                 printbill.appendTo(this.$('.control-buttons'));
