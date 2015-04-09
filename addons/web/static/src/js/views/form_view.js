@@ -1,12 +1,13 @@
 odoo.define('web.FormView', function (require) {
 "use strict";
 
+var common = require('web.form_common');
 var core = require('web.core');
 var crash_manager = require('web.crash_manager');
 var data = require('web.data');
 var Dialog = require('web.Dialog');
-var common = require('web.form_common');
 var Model = require('web.Model');
+var Pager = require('web.Pager');
 var Sidebar = require('web.Sidebar');
 var utils = require('web.utils');
 var View = require('web.View');
@@ -86,7 +87,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
             self.on("change:actual_mode", self, self.check_actual_mode);
             self.on("change:actual_mode", self, self.toggle_buttons);
             self.on("change:actual_mode", self, self.toggle_sidebar);
-            self.on("change:actual_mode", self, self.do_update_pager);
         });
         self.on("load_record", self, self.load_record);
         core.bus.on('clear_uncommitted_changes', this, function(e) {
@@ -183,8 +183,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
      * Instantiate and render the sidebar if a sidebar is requested
      * Sets this.sidebar
      * @param {jQuery} [$node] a jQuery node where the sidebar should be inserted
-     * $node may be undefined, in which case the FormView inserts the sidebar in a
-     * div of its template
      **/
     render_sidebar: function($node) {
         if (!this.sidebar && this.options.sidebar) {
@@ -197,7 +195,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 this.is_action_enabled('create') && { label: _t('Duplicate'), callback: this.on_button_duplicate }
             ]));
 
-            $node = $node || this.$('.oe_form_sidebar');
             this.sidebar.appendTo($node);
 
             // Show or hide the sidebar according to the view mode
@@ -205,41 +202,30 @@ var FormView = View.extend(common.FieldManagerMixin, {
         }
     },
     /**
-     * Render the pager according to the FormView.pager template and add listeners on it.
-     * Set this.$pager with the produced jQuery element
-     * @param {jQuery} [$node] a jQuery node where the rendered pager should be inserted
+     * Instantiate and render the pager and add listeners on it.
+     * Set this.pager
+     * @param {jQuery} [$node] a jQuery node where the pager should be inserted
      * $node may be undefined, in which case the FormView inserts the pager into this.options.$pager
-     * or into a div of its template
      */
     render_pager: function($node) {
         if (this.options.pager) {
             var self = this;
-            if (this.$pager) {
-                this.$pager.remove();
-            }
-            if (this.get("actual_mode") === "create") {
-                return;
-            }
-            this.$pager = $(QWeb.render("FormView.pager", {'widget': self}));
-            this.$pager.on('click','a[data-pager-action]',function() {
-                var $el = $(this);
-                if ($el.attr("disabled")) {
-                    return;
-                }
-                var action = $el.data('pager-action');
-                var def = $.when(self.execute_pager_action(action));
-                $el.attr("disabled");
-                def.always(function() {
-                    $el.removeAttr("disabled");
+
+            this.pager = new Pager(this, this.dataset.ids.length, this.dataset.index + 1, 1);
+            this.pager.on('pager_changed', this, function (new_state) {
+                this.pager.disable();
+                this.dataset.index = new_state.current_min - 1;
+                this.trigger('pager_action_executed');
+                $.when(this.reload()).then(function () {
+                    self.pager.enable();
                 });
             });
-            this.do_update_pager();
 
-            $node = $node || this.options.$pager;
-            if ($node) {
-                this.$pager.appendTo($node);
-            } else {
-                this.$('.oe_form_pager').replaceWith(this.$pager);
+            this.pager.appendTo($node = $node || this.options.$pager);
+
+            // Hide the pager in create mode
+            if (this.get("actual_mode") === "create") {
+                this.pager.do_hide();
             }
         }
     },
@@ -260,6 +246,16 @@ var FormView = View.extend(common.FieldManagerMixin, {
         var view_mode = this.get("actual_mode") === "view";
         if (this.sidebar) {
             this.sidebar.$el.toggle(view_mode);
+        }
+    },
+    update_pager: function() {
+        if (this.pager) {
+            // Hide the pager in create mode
+            if (this.get("actual_mode") === "create") {
+                this.pager.do_hide();
+            } else {
+                this.pager.set_state({size: this.dataset.ids.length, current_min: this.dataset.index + 1});
+            }
         }
     },
     widgetFocused: function() {
@@ -345,6 +341,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         this.datarecord = record;
         this._actualize_mode();
         this.set({ 'title' : record.id ? record.display_name : _t("New") });
+        this.update_pager();
 
         _(this.fields).each(function (field, f) {
             field._dirty_flag = false;
@@ -361,7 +358,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
             self.on_form_changed();
             self.rendering_engine.init_fields();
             self.is_initialized.resolve();
-            self.do_update_pager(record.id === null || record.id === undefined);
             if (self.sidebar) {
                self.sidebar.do_attachement_update(self.dataset, self.datarecord.id);
             }
@@ -396,41 +392,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
     do_notify_change: function() {
         this.$el.addClass('oe_form_dirty');
     },
-    execute_pager_action: function(action) {
-        if (this.can_be_discarded()) {
-            switch (action) {
-                case 'first':
-                    this.dataset.index = 0;
-                    break;
-                case 'previous':
-                    this.dataset.previous();
-                    break;
-                case 'next':
-                    this.dataset.next();
-                    break;
-                case 'last':
-                    this.dataset.index = this.dataset.ids.length - 1;
-                    break;
-            }
-            var def = this.reload();
-            this.trigger('pager_action_executed');
-            return def;
-        }
-        return $.when();
-    },
-    do_update_pager: function(hide_index) {
-        if (this.$pager) {
-            // Hide the pager in create mode or when there is only one record
-            var pager_visible = (this.get("actual_mode") !== "create") && (this.dataset.ids.length > 1);
-            this.$pager.toggle(pager_visible);
-            if (hide_index === true) {
-                this.$pager.find(".oe_form_pager_state").html("");
-            } else {
-                this.$pager.find(".oe_form_pager_state").html(_.str.sprintf(_t("%d / %d"), this.dataset.index + 1, this.dataset.ids.length));
-            }
-        }
-    },
-
     _build_onchange_specs: function() {
         var self = this;
         var find = function(field_name, root) {
@@ -769,7 +730,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
             if (self.datarecord.id && confirm(_t("Do you really want to delete this record?"))) {
                 self.dataset.unlink([self.datarecord.id]).done(function() {
                     if (self.dataset.size()) {
-                        self.execute_pager_action('next');
+                        self.reload();
+                        self.update_pager();
                     } else {
                         self.do_action('history_back');
                     }
@@ -931,7 +893,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 this.dataset.alter_ids([this.datarecord.id].concat(this.dataset.ids));
                 this.dataset.index = 0;
             }
-            this.do_update_pager();
+            this.update_pager();
             if (this.sidebar) {
                 this.sidebar.do_attachement_update(this.dataset, this.datarecord.id);
             }

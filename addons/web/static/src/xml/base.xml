@@ -574,16 +574,6 @@
         </table>
     </div>
 </t>
-<span t-name="ViewPager">
-    <!-- it will not work -->
-    <div class="oe_pager_value" style="display: inline-block">
-        <t t-raw="0"/>
-    </div>
-    <div class="btn-group btn-group-sm oe-pager-buttons" style="display: inline-block">
-        <a class="fa fa-chevron-left btn btn-default oe-pager-button" accesskey="O" type="button" data-pager-action="previous"></a>
-        <a class="fa fa-chevron-right btn btn-default oe-pager-button" accesskey="P" type="button" data-pager-action="next"></a>
-    </div>
-</span>
 
 <t t-name="Sidebar">
     <t t-foreach="widget.sections" t-as="section">
@@ -719,10 +709,6 @@
     </t>
 </t>
 
-<t t-name="ListView.pager" t-if="!widget.no_leaf and widget.options.pager !== false" t-call="ViewPager">
-    <span class="oe_list_pager_state"></span>
-</t>
-
 <t t-name="ListView.rows" t-foreach="records.length" t-as="index">
     <t t-call="ListView.row">
         <t t-set="record" t-value="records.at(index)"/>
@@ -812,9 +798,6 @@
         </div>
     </t>
 </div>
-<t t-name="FormView.pager" t-if="widget.options.pager !== false" t-call="ViewPager">
-    <span class="oe_form_pager_state"></span>
-</t>
 <form t-name="FormView.set_default">
     <t t-set="args" t-value="widget.dialog_options.args"/>
     <table style="width: 100%">
@@ -1949,12 +1932,11 @@
     <img t-attf-src="#{_s}/web/static/src/img/icons/#{widget.icon}" t-att-alt="widget.string"/>
 </button>
 
-
 <div t-name="Pager">
-    <span class="o-pager-value"/>
+    <div class="o-pager-value"></div>
     <div class="btn-group btn-group-sm">
-        <button class="fa fa-chevron-left btn btn-default o-pager-previous"/>
-        <button class="fa fa-chevron-right btn btn-default o-pager-next"/>
+        <button type="button" class="fa fa-chevron-left btn btn-default o-pager-previous" accesskey="O"/>
+        <button type="button" class="fa fa-chevron-right btn btn-default o-pager-next" accesskey="P"/>
     </div>
 </div>
 

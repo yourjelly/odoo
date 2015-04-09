@@ -3,80 +3,105 @@ odoo.define('web.Pager', function (require) {
 
 var Widget = require('web.Widget');
 
+var direction = {
+    previous: -1,
+    next: 1,
+};
+
 var Pager = Widget.extend({
     template: "Pager",
+
+    events: {
+        'click .o-pager-previous': 'previous',
+        'click .o-pager-next': 'next',
+    },
+
     // pager goes from 1 to size (included).
     // current value is current_min (if limit === 1)
     //              or the interval [current_min, current_min + limit[ if limit > 1
     init: function (parent, size, current_min, limit) {
-        this.size = size;
-        this.current_min = current_min;
-        this.limit = limit;
+        this.state = {
+            size: size,
+            current_min: current_min,
+            limit: limit,
+        };
+        Object.defineProperty(this.state, 'current_max', {
+            get: function() {
+                return Math.min(this.current_min + this.limit - 1, this.size);
+            }
+        });
         this._super(parent);
     },
 
     start: function () {
         this.$content = this.$('.o-pager-value');
-        this.$previous = this.$('.o-pager-previous');
-        this.$next = this.$('.o-pager-next');
-
-        this.$previous.click(_.bind(this.change_selection, this, -1));
-        this.$next.click(_.bind(this.change_selection, this, 1));
-        this.render();
+        this._render();
+        return this._super();
     },
 
     set_state: function (options) {
-        this.size = ('size' in options) ? options.size : this.size;
-        this.current_min = ('current_min' in options) ? options.current_min : this.current_min;
-        this.limit = ('limit' in options) ? options.limit : this.limit;
-        if (this.current_min > this.limit) {
-            this.current_min = 1;
-        }
-        this.render();
+        _.extend(this.state, options);
+        this._render();
     },
 
-    render: function () {
-        var state;
-        var max = this.get_current_max();
+    previous: function() {
+        this._change_selection(direction.previous);
+    },
 
-        if (this.size === 0) {
+    next: function() {
+        this._change_selection(direction.next);
+    },
+
+    disable: function() {
+        this.$('button').prop("disabled", true);
+    },
+
+    enable: function() {
+        this.$('button').prop("disabled", false);
+    },
+
+    _render: function () {
+        var state;
+        var size = this.state.size;
+        var current_min = this.state.current_min;
+        var current_max = this.state.current_max;
+
+        if (size === 0) {
             this.$el.hide();
             return;
         } else {
             this.$el.show();
         }
 
-        if (this.limit === 1) {
-            state = "" + this.current_min + " / " + this.size;
+        if (this.state.limit === 1) {
+            state = "" + current_min + " / " + size;
         } else {
-            state = "" + this.current_min + "-" + max + " / " + this.size;
+            state = "" + current_min + "-" + current_max + " / " + size;
         }
-        var controls_shown = 1 < this.current_min || max < this.size;
-        this.$previous.toggle(controls_shown);
-        this.$next.toggle(controls_shown);
+        var controls_shown = 1 < current_min || current_max < size;
+        if (controls_shown) {
+            this.enable();
+        } else {
+            this.disable();
+        }
         this.$content.html(state);
     },
 
-    change_selection: function (direction) {
-        this.current_min = (this.current_min + this.limit*direction);
-        if (this.current_min > this.size) {
-            this.current_min = 1;
+    _change_selection: function (direction) {
+        var size = this.state.size;
+        var current_min = this.state.current_min;
+        var limit = this.state.limit;
+        current_min = (current_min + limit*direction);
+        if (current_min > size) {
+            current_min = 1;
+        } else if ((current_min < 1) && (limit === 1)) {
+            current_min = size;
+        } else if ((current_min < 1) && (limit > 1)) {
+            current_min = size - (size % limit) + 1;
         }
-        if ((this.current_min < 1) && (this.limit === 1)) {
-            this.current_min = this.size;
-        }
-        if ((this.current_min < 1) && (this.limit > 1)) {
-            this.current_min = this.size - (this.size % this.limit) + 1;
-        }
-        this.trigger('pager_changed', {
-            current_min: this.current_min,
-            current_max: this.get_current_max(),
-        });
-        this.render();
-    },
-
-    get_current_max: function () {
-        return  Math.min(this.current_min + this.limit - 1, this.size);
+        this.state.current_min = current_min;
+        this.trigger('pager_changed', _.clone(this.state));
+        this._render();
     },
 });
 

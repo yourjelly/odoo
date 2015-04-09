@@ -8,6 +8,7 @@ var DataExport = require('web.DataExport');
 var formats = require('web.formats');
 var common = require('web.list_common');
 var Model = require('web.Model');
+var Pager = require('web.Pager');
 var pyeval = require('web.pyeval');
 var session = require('web.session');
 var Sidebar = require('web.Sidebar');
@@ -310,71 +311,41 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
         }
     },
     /**
-     * Render the pager according to the ListView.pager template and add listeners on it.
-     * Set this.$pager with the produced jQuery element
-     * @param {jQuery} [$node] a jQuery node where the rendered pager should be inserted
+     * Instantiate and render the pager and add listeners on it.
+     * Set this.pager
+     * @param {jQuery} [$node] a jQuery node where the pager should be inserted
      * $node may be undefined, in which case the ListView inserts the pager into this.options.$pager
-     * or into a div of its template
      */
     render_pager: function($node) {
-        if (!this.$pager && this.options.pager) {
-            var self =  this;
+        if (!this.pager && this.options.pager) {
+            this.pager = new Pager(this, this.dataset.size(), 1, this._limit);
+            this.pager.appendTo($node || this.options.$pager);
 
-            this.$pager = $(QWeb.render("ListView.pager", {'widget': self}));
-            this.$pager
-                .on('click', 'a[data-pager-action]', function () {
-                    var $this = $(this);
-                    var max_page_index = Math.ceil(self.dataset.size() / self._limit) - 1;
-                    switch ($this.data('pager-action')) {
-                        case 'first':
-                            self.page = 0;
-                            break;
-                        case 'last':
-                            self.page = max_page_index;
-                            break;
-                        case 'next':
-                            self.page += 1;
-                            break;
-                        case 'previous':
-                            self.page -= 1;
-                            break;
-                    }
-                    if (self.page < 0) {
-                        self.page = max_page_index;
-                    } else if (self.page > max_page_index) {
-                        self.page = 0;
-                    }
-                    self.reload_content();
-                }).find('.oe_list_pager_state')
-                    .click(function (e) {
-                        e.stopPropagation();
-                        var $this = $(this);
-
-                        var $select = $('<select>')
-                            .appendTo($this.empty())
-                            .click(function (e) {e.stopPropagation();})
-                            .append('<option value="80">80</option>' +
-                                    '<option value="200">200</option>' +
-                                    '<option value="500">500</option>' +
-                                    '<option value="2000">2000</option>' +
-                                    '<option value="NaN">' + _t("Unlimited") + '</option>')
-                            .change(function () {
-                                var val = parseInt($select.val(), 10);
-                                self._limit = (isNaN(val) ? null : val);
-                                self.page = 0;
-                                self.reload_content();
-                            }).blur(function() {
-                                $(this).trigger('change');
-                            })
-                            .val(self._limit || 'NaN');
-                    });
-            this.configure_pager(this.dataset);
-
-            $node = $node || this.options.$pager;
-            if ($node) {
-                this.$pager.appendTo($node);
+            this.pager.on('pager_changed', this, function (new_state) {
+                this.page = Math.floor((new_state.current_min-1)/this._limit);
+                this.reload_content();
+            });
+        }
+    },
+    /**
+     * Updates the pager based on the provided dataset's information
+     *
+     * Horrifying side-effect: sets the dataset's data on this.dataset?
+     *
+     * @param {instance.web.DataSet} dataset
+     */
+    update_pager: function (dataset) {
+        this.dataset.ids = dataset.ids;
+        // Not exactly clean
+        if (dataset._length) {
+            this.dataset._length = dataset._length;
+        }
+        if (this.pager) {
+            // Hide the pager in grouped mode
+            if (this.grouped) {
+                this.pager.do_hide();
             } else {
-                this.$('.oe_list_pager').replaceWith(this.$pager);
+                this.pager.set_state({size: this.dataset.size(), limit: this._limit});
             }
         }
     },
@@ -396,46 +367,6 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
         $column.siblings('.o-sortable').removeClass("o-sort-up o-sort-down");
 
         this.reload_content();
-    },
-    /**
-     * Configures the ListView pager based on the provided dataset's information
-     *
-     * Horrifying side-effect: sets the dataset's data on this.dataset?
-     *
-     * @param {instance.web.DataSet} dataset
-     */
-    configure_pager: function (dataset) {
-        this.dataset.ids = dataset.ids;
-        // Not exactly clean
-        if (dataset._length) {
-            this.dataset._length = dataset._length;
-        }
-        if (this.$pager) {
-            if (this.grouped) {
-                // page count is irrelevant on grouped page, replace by limit
-                this.$pager.find('.oe-pager-buttons').hide();
-                this.$pager.find('.oe_list_pager_state').text(this._limit || '∞');
-            } else {
-                var total = dataset.size();
-                var limit = this._limit || total;
-                this.$pager.find('.oe-pager-buttons').toggle(total > limit);
-                this.$pager.find('.oe_pager_value').toggle(total !== 0);
-                var spager = '-';
-                if (total) {
-                    var range_start = this.page * limit + 1;
-                    var range_stop = range_start - 1 + limit;
-                    if (this.records.length) {
-                        range_stop = range_start - 1 + this.records.length;
-                    }
-                    if (range_stop > total) {
-                        range_stop = total;
-                    }
-                    spager = _.str.sprintf(_t("%d-%d of %d"), range_start, range_stop, total);
-                }
-
-                this.$pager.find('.oe_list_pager_state').text(spager);
-            }
-        }
     },
     /**
      * Sets up the listview's columns: merges view and fields data, move
@@ -513,7 +444,7 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
         this.records.reset();
         var reloaded = $.Deferred();
         reloaded.then(function () {
-            self.configure_pager(self.dataset);
+            self.update_pager(self.dataset);
         });
         this.$('.o-list-view').append(
             this.groups.render(function () {
@@ -524,7 +455,6 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
                 } else if (self.dataset.index >= self.records.length) {
                     self.dataset.index = self.records.length ? 0 : null;
                 }
-
                 self.compute_aggregates();
                 reloaded.resolve();
             }));
@@ -614,21 +544,21 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
             return;
         }
         var self = this;
+        var last_page_index = Math.ceil(this.dataset.size()/this._limit) - 1;
+
         return $.when(this.dataset.unlink(ids)).done(function () {
             _(ids).each(function (id) {
                 self.records.remove(self.records.get(id));
             });
+            // Load previous page if the current one is empty
             if (self.records.length === 0 && self.dataset.size() > 0) {
-                //Trigger previous manually to navigate to previous page, 
-                //If all records are deleted on current page.
-                self.$pager.find('ul li:first a').trigger('click');
-            } else if (self.dataset.size() == self._limit) {
-                //Reload listview to update current page with next page records 
-                //because pager going to be hidden if dataset.size == limit
-                self.reload();
-            } else {
-                self.configure_pager(self.dataset);
+                self.pager.previous();
             }
+            // Reload the list view if we are not on the last page
+            if (self.page !== last_page_index) {
+                self.reload();
+            }
+            self.update_pager(self.dataset);
             self.compute_aggregates();
         });
     },
@@ -1520,7 +1450,7 @@ ListView.Groups = Class.extend( /** @lends instance.web.ListView.Groups# */{
                     self.records.reset(null, {silent: true});
                 }
                 if (!self.datagroup.openable) {
-                    view.configure_pager(dataset);
+                    view.update_pager(dataset);
                 } else {
                     if (dataset.size() == records.length) {
                         // only one page

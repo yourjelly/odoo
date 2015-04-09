@@ -7,6 +7,7 @@ odoo.define('web_diagram.DiagramView', function (require) {
 var core = require('web.core');
 var data = require('web.data');
 var form_common = require('web.form_common');
+var Pager = require('web.Pager');
 var View = require('web.View');
 
 var _t = core._t;
@@ -19,7 +20,6 @@ var DiagramView = View.extend({
     searchable: false,
     multi_record: false,
     init: function(parent, dataset, view_id, options) {
-        var self = this;
         this._super(parent);
         this.set_default_options(options);
         this.view_manager = parent;
@@ -29,7 +29,6 @@ var DiagramView = View.extend({
         this.domain = this.dataset._domain || [];
         this.context = {};
         this.ids = this.dataset.ids;
-        this.on('pager_action_executed', self, self.pager_action_trigger);
     },
 
     view_loading: function(r) {
@@ -378,70 +377,42 @@ var DiagramView = View.extend({
         this.$buttons.appendTo($node);
     },
     
-    /**
-     * Render the pager according to the DiagramView.pager template and add listeners on it.
-     * Set this.$pager with the produced jQuery element
-     * @param {jQuery} [$node] a jQuery node where the rendered pager should be inserted
-     * $node may be undefined, in which case the DiagramView inserts the pager into this.options.$pager
-     * or into a div of its template
+     /**
+     * Instantiate and render the pager and add listeners on it.
+     * Set this.pager
+     * @param {jQuery} [$node] a jQuery node where the pager should be inserted
+     * $node may be undefined, in which case the FormView inserts the pager into this.options.$pager
      */
     render_pager: function($node) {
         var self = this;
 
-        this.$pager = $(QWeb.render("DiagramView.pager", {'widget': self}));
-        this.$pager.find('a[data-pager-action]').click(function() {
-            var action = $(this).data('pager-action');
-            self.execute_pager_action(action);
+        this.pager = new Pager(this, this.dataset.ids.length, this.dataset.index + 1, 1);
+        this.pager.appendTo($node || this.options.$pager);
+
+        this.pager.on('pager_changed', this, function (new_state) {
+            this.pager.disable();
+            this.dataset.index = new_state.current_min - 1;
+            $.when(this.reload()).then(function () {
+                self.pager.enable();
+            });
         });
-        this.execute_pager_action('reload');
-
-        $node = $node || this.options.$pager;
-        if ($node) {
-            this.$pager.appendTo($node);
-        } else {
-            this.$('.oe_diagram_pager').replaceWith(this.$pager);
-        }
-    },
-    
-    pager_action_trigger: function(){
-        var loaded = this.dataset.read_index(_.keys(this.fields_view.fields))
-                .then(this.on_diagram_loaded);
-        this.do_update_pager();
-        return loaded;
-    },
-    
-    execute_pager_action: function(action) {
-	    switch (action) {
-	        case 'first':
-	            this.dataset.index = 0;
-	            break;
-	        case 'previous':
-	            this.dataset.previous();
-	            break;
-	        case 'next':
-	            this.dataset.next();
-	            break;
-	        case 'last':
-	            this.dataset.index = this.dataset.ids.length - 1;
-	            break;
-	    }
-	    this.trigger('pager_action_executed');
     },
 
-    do_update_pager: function(hide_index) {
-        if (this.$pager) {
-            this.$pager.toggle(this.dataset.ids.length > 1);
-            if (hide_index) {
-                this.$pager.find(".oe_diagram_pager_state").html("");
-            } else {
-                this.$pager.find(".oe_diagram_pager_state").html(_.str.sprintf(_t("%d / %d"), this.dataset.index + 1, this.dataset.ids.length));
-            }
+    update_pager: function() {
+        if (this.pager) {
+            this.pager.set_state({size: this.dataset.ids.length, current_min: this.dataset.index + 1});
         }
+    },
+
+    reload: function() {
+        return this.dataset.read_index(_.keys(this.fields_view.fields))
+                .then(this.on_diagram_loaded)
+                .then(this.proxy('update_pager'));
     },
 
     do_show: function() {
         this.do_push_state({});
-        return $.when(this._super(), this.execute_pager_action('reload'));
+        return $.when(this._super(), this.reload());
     }
 });
 

@@ -1,9 +1,5 @@
 <template>
 
-<t t-name="DiagramView.pager" t-if="widget.options.pager !== false" t-call="ViewPager">
-    <span class="oe_diagram_pager_state"></span>
-</t>
-
 <t t-name="DiagramView.buttons">
     <div t-if="widget.is_action_enabled('create')">
         <button type="button" class="btn btn-primary btn-sm o-diagram-new-button">
