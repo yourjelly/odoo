@@ -189,9 +189,9 @@
                     <p class="mb32">
                       We wish you a fun time,
                     </p></i>
-                    <img src="/planner/static/src/img/fabien_pinckaers.jpg" class="pull-left mb32"/>
+                    <img src="/web_planner/static/src/img/fabien_pinckaers.jpg" class="pull-left mb32"/>
                     <div class="pull-left" style="margin-left: 10px">
-                        <img class="signature mb8" src="/planner/static/src/img/fabien_signature.png"/>
+                        <img class="signature mb8" src="/web_planner/static/src/img/fabien_signature.png"/>
                         <address>
                             For the Odoo Team,<br/>
                             Fabien Pinckaers, Founder
@@ -999,7 +999,7 @@
                         <h4 class="mb2">Don't hesitate to <a href="mailto:info@odoo.com?subject=Sales%20Planner" target="_blank">send us an email</a> to describe<br/> your experience or to suggest improvements !</h4>
 
                         <p>Happy Selling!<br/>- The Odoo Team</p>
-                        <img src="/planner/static/src/img/odoo_logo.png"/>
+                        <img src="/web_planner/static/src/img/odoo_logo.png"/>
                     </div>
                 </div>
             </div>
