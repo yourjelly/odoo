@@ -29,4 +29,4 @@ import wizard
 import res_partner
 import res_config
 import base_partner_merge
-import planner
+import web_planner

@@ -1,2 +1,2 @@
 # -*- coding: utf-8 -*-
-import planner
+import web_planner

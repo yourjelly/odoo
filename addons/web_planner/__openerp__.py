@@ -10,11 +10,11 @@
     'depends': ['web'],
     'data': [
         'security/ir.model.access.csv',
-        'views/planner.xml',
-        'views/planner_view.xml',
-        'security/planner_security.xml',
+        'views/web_planner.xml',
+        'views/web_planner_view.xml',
+        'security/web_planner_security.xml',
     ],
-    'qweb': ['static/src/xml/planner.xml'],
+    'qweb': ['static/src/xml/web_planner.xml'],
     'installable': True,
     'auto_install': True,
 }
