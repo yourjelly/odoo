@@ -44,7 +44,7 @@
                 cursor: pointer;
                 position: absolute;
                 top: 6px;
-                right: 15px;
+                right: 0;
                 .user-select(none);  // Prevent text selection when toggling the search options
             }
 
@@ -152,12 +152,17 @@
             cursor: pointer;
             &:hover {
                 text-decoration: none;
-                color: black;
+                font-weight: 600;
+                .o-darken(@odoo-main-text-color);
             }
         }
         .dropdown-menu { // dropdowns position
             left: auto;
             top: auto;
+        }
+        &.open > a {
+            font-weight: 600;
+            .o-darken(@odoo-main-text-color);
         }
     }
     // Selected item in dropdowns (for action buttons and searchview)
