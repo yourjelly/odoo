@@ -1995,6 +1995,36 @@ class stock_move(osv.osv):
                         self.write(cr, uid, [move.move_dest_id.id], propagated_changes_dict, context=context)
         return super(stock_move, self).write(cr, uid, ids, vals, context=context)
 
+    def update_reserve_qty(self, cr, uid, ids, product_qty, context=None):
+        """
+            change already reserved quantity on picking's move line when quantity changed
+            @param product_qty: quantity to change
+            return True
+        """
+        if context is None:
+            context = {}
+        quants = self.pool['stock.quant']
+        move = self.browse(cr, uid, ids, context=context)
+        qty = 0.00
+
+        context.update({'qty': product_qty})
+        self.do_unreserve(cr, uid, ids, context=context)
+        #Search for the unreserved quants
+        unreserved = quants.search(cr, uid, [('product_id', '=', move.product_id.id),('reservation_id', '=', False)])
+
+        if unreserved:
+            for quant in quants.browse(cr, uid, unreserved, context=context):
+                qty += quant.qty
+        if not unreserved or product_qty > qty:
+            raise UserError(_('Unsufficient Stock!'))
+
+        self.action_assign(cr, uid, ids, context=context)
+        self.write(cr, uid, ids, {'product_uom_qty': product_qty, 'product_uos_qty': product_qty})
+        return {'value': {
+                    'reserved_quant_ids': move.reserved_quant_ids,
+                }
+            }
+
     def onchange_quantity(self, cr, uid, ids, product_id, product_qty, product_uom, product_uos):
         """ On change of product quantity finds UoM and UoS quantities
         @param product_id: Product id
@@ -2014,10 +2044,12 @@ class stock_move(osv.osv):
 
         product_obj = self.pool.get('product.product')
         uos_coeff = product_obj.read(cr, uid, product_id, ['uos_coeff'])
-
         # Warn if the quantity was decreased
         if ids:
             for move in self.read(cr, uid, ids, ['product_qty']):
+                if product_qty and move['product_qty'] and product_qty != move['product_qty']:
+                    res = self.update_reserve_qty(cr, uid, ids, product_qty)
+                    result['reserved_quant_ids'] = res and res['value']['reserved_quant_ids']
                 if product_qty < move['product_qty']:
                     warning.update({
                         'title': _('Information'),
@@ -2026,11 +2058,12 @@ class stock_move(osv.osv):
                                 "automatically generate a back order.")})
                 break
 
+        if product_id:
+            result['product_tmpl_id'] = product_obj.browse(cr, uid, product_id).product_tmpl_id.id
         if product_uos and product_uom and (product_uom != product_uos):
             result['product_uos_qty'] = product_qty * uos_coeff['uos_coeff']
         else:
             result['product_uos_qty'] = product_qty
-
         return {'value': result, 'warning': warning}
 
     def onchange_uos_quantity(self, cr, uid, ids, product_id, product_uos_qty,
@@ -2209,7 +2242,6 @@ class stock_move(osv.osv):
         """ Checks if serial number is assigned to stock move or not and raise an error if it had to.
         """
         self.check_tracking_product(cr, uid, move.product_id, lot_id, move.location_id, move.location_dest_id, context=context)
-        
 
     def action_assign(self, cr, uid, ids, context=None):
         """ Checks the product type and accordingly writes the state.
@@ -2268,11 +2300,14 @@ class stock_move(osv.osv):
                 continue
             #then if the move isn't totally assigned, try to find quants without any specific domain
             if move.state != 'assigned':
+                if context.get('qty'):
+                    quantity = context['qty']
+                else:
+                    quantity= move.product_qty
                 qty_already_assigned = move.reserved_availability
-                qty = move.product_qty - qty_already_assigned
+                qty = quantity - qty_already_assigned
                 quants = quant_obj.quants_get_prefered_domain(cr, uid, move.location_id, move.product_id, qty, domain=main_domain[move.id], prefered_domain_list=[], restrict_lot_id=move.restrict_lot_id.id, restrict_partner_id=move.restrict_partner_id.id, context=context)
                 quant_obj.quants_reserve(cr, uid, quants, move, context=context)
-
         #force assignation of consumable products and incoming from supplier/inventory/production
         if to_assign_moves:
             self.force_assign(cr, uid, to_assign_moves, context=context)
