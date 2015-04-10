@@ -4,7 +4,7 @@ from openerp import api, models
 
 class PlannerCrm(models.Model):
 
-    _inherit = 'planner.planner'
+    _inherit = 'web.planner'
 
     @api.model
     def _get_planner_application(self):

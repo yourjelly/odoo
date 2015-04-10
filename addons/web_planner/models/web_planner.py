@@ -13,7 +13,7 @@ class Planner(models.Model):
     generate the values used to display in specific planner pages
     """
 
-    _name = 'planner.planner'
+    _name = 'web.planner'
     _description = 'Planner'
 
     @api.model
