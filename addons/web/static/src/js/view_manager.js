@@ -220,7 +220,9 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
      * @param {Array} [views] the array of views
      */
     render_switch_buttons: function() {
-        if (this.flags.views_switcher && this.view_order.length > 1) {
+        // Switch buttons are required if there are several views excluding form view
+        var switch_required = this.view_order.length - ('form' in this.views ? 1: 0) > 1;
+        if (this.flags.views_switcher && switch_required) {
             var self = this;
 
             // Render switch buttons but do not append them to the DOM as this will
@@ -229,7 +231,9 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
 
             // Create bootstrap tooltips
             _.each(this.views, function(view) {
-                self.control_elements.$switch_buttons.siblings('.o-cp-switch-' + view.type).tooltip();
+                if (view.type !== 'form') {
+                    self.control_elements.$switch_buttons.siblings('.o-cp-switch-' + view.type).tooltip();
+                }
             });
 
             // Add onclick event listener
