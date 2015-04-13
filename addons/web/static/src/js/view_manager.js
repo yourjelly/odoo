@@ -93,7 +93,6 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
             view.fragment = undefined;
         });
 
-        this.control_elements = {};
         if (this.flags.search_view) {
             this.search_view_loaded = this.setup_search_view();
         }
@@ -163,7 +162,7 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
             var cp_status = {
                 active_view_selector: '.o-cp-switch-' + self.active_view.type,
                 breadcrumbs: self.action_manager && self.action_manager.get_breadcrumbs(),
-                cp_content: _.extend({}, self.control_elements, self.render_view_control_elements()),
+                cp_content: _.extend({}, self.searchview_elements, self.render_view_control_elements()),
                 hidden: self.flags.headless,
                 searchview: self.searchview,
                 search_view_hidden: view_controller.searchable === false,
@@ -214,38 +213,47 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
         return this.switch_mode(view_type);
     },
     /**
-     * Renders the switch buttons and adds listeners on them but does not append them to the DOM
-     * Sets $switch_buttons in control_elements to send to the ControlPanel
-     * @param {Object} [src] the source requesting the switch_buttons
-     * @param {Array} [views] the array of views
+     * Renders the switch buttons for multi- and mono-record views and adds
+     * listeners on them, but does not append them to the DOM
+     * Sets switch_buttons.$mono and switch_buttons.$multi to send to the ControlPanel
      */
     render_switch_buttons: function() {
-        // Switch buttons are required if there are several views excluding form view
-        var switch_required = this.view_order.length - ('form' in this.views ? 1: 0) > 1;
-        if (this.flags.views_switcher && switch_required) {
-            var self = this;
+        var self = this;
 
-            // Render switch buttons but do not append them to the DOM as this will
-            // be done later, simultaneously to all other ControlPanel elements
-            this.control_elements.$switch_buttons = $(QWeb.render('ViewManager.switch-buttons', {views: self.view_order}));
+        // Partition the views according to their multi-/mono-record status
+        var views = _.partition(this.view_order, function(view) {
+            return view.multi_record === true;
+        });
+        var multi_record_views = views[0];
+        var mono_record_views = views[1];
 
-            // Create bootstrap tooltips
-            _.each(this.views, function(view) {
-                if (view.type !== 'form') {
-                    self.control_elements.$switch_buttons.siblings('.o-cp-switch-' + view.type).tooltip();
-                }
-            });
+        // Inner function to render and prepare switch_buttons
+        var _render_switch_buttons = function(views) {
+            if (views.length > 1) {
+                var $switch_buttons = $(QWeb.render('ViewManager.switch-buttons', {views: views}));
+                // Create bootstrap tooltips
+                _.each(views, function(view) {
+                    $switch_buttons.siblings('.o-cp-switch-' + view.type).tooltip();
+                });
+                // Add onclick event listener
+                $switch_buttons.siblings('button').click(function(event) {
+                    var view_type = $(event.target).data('view-type');
+                    self.switch_mode(view_type);
+                });
+                return $switch_buttons;
+            }
+        };
 
-            // Add onclick event listener
-            this.control_elements.$switch_buttons.siblings('button').click(function(event) {
-                var view_type = $(event.target).data('view-type');
-                self.switch_mode(view_type);
-            });
-        }
+        // Render switch buttons but do not append them to the DOM as this will
+        // be done later, simultaneously to all other ControlPanel elements
+        this.switch_buttons = {};
+        this.switch_buttons.$multi = _render_switch_buttons(multi_record_views);
+        this.switch_buttons.$mono = _render_switch_buttons(mono_record_views);
     },
     /**
      * Renders the control elements (buttons, sidebar, pager) of the current view
-     * Fills this.active_view.control_elements dictionnary with the rendered elements
+     * Fills this.active_view.control_elements dictionnary with the rendered
+     * elements and the adequate view switcher, to send to the ControlPanel
      */
     render_view_control_elements: function() {
         if (!this.active_view.control_elements) {
@@ -265,6 +273,15 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
             elements = _.mapObject(elements, function($node) {
                 return $node && $node.contents();
             });
+            // Use the adequate view switcher (mono- or multi-record)
+            if (this.switch_buttons) {
+                if (this.active_view.multi_record) {
+                    elements.$switch_buttons = this.switch_buttons.$multi;
+                } else {
+                    elements.$switch_buttons = this.switch_buttons.$mono;
+                }
+            }
+
             // Store the rendered elements in the active_view to allow restoring them later
             this.active_view.control_elements = elements;
         }
@@ -278,10 +295,7 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
     },
     /**
      * Sets up the current viewmanager's search view.
-     * Sets $searchview and $searchview_buttons in control_elements to send to the ControlPanel
-     *
-     * @param {Number|false} view_id the view to use or false for a default one
-     * @returns {jQuery.Deferred} search view startup deferred
+     * Sets $searchview and $searchview_buttons in searchview_elements to send to the ControlPanel
      */
     setup_search_view: function() {
         var self = this;
@@ -313,8 +327,9 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
 
         this.searchview.on('search_data', this, this.search.bind(this));
         return $.when(this.searchview.appendTo($("<div>"))).done(function() {
-            self.control_elements.$searchview = self.searchview.$el;
-            self.control_elements.$searchview_buttons = self.searchview.$buttons.contents();
+            self.searchview_elements = {};
+            self.searchview_elements.$searchview = self.searchview.$el;
+            self.searchview_elements.$searchview_buttons = self.searchview.$buttons.contents();
         });
     },
     /**
