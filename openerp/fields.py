@@ -761,7 +761,7 @@ class Field(object):
         """
         return False if value is None else value
 
-    def convert_to_write(self, value, target=None, fnames=None):
+    def convert_to_write(self, value):
         """ convert `value` from the cache to a valid value for method
             :meth:`BaseModel.write`.
 
@@ -775,7 +775,7 @@ class Field(object):
         """ convert `value` from the cache to a valid value for an onchange
             method v7.
         """
-        return self.convert_to_write(value)
+        return self.convert_to_read(value)
 
     def convert_to_export(self, value, env):
         """ convert `value` from the cache to a valid value for export. The
@@ -1561,11 +1561,11 @@ class Many2one(_Relational):
         else:
             return value.id
 
-    def convert_to_write(self, value, target=None, fnames=None):
+    def convert_to_write(self, value):
         return value.id
 
     def convert_to_onchange(self, value):
-        return value.id
+        return self.convert_to_read(value)
 
     def convert_to_export(self, value, env):
         return bool(value) and value.name_get()[0][1]
@@ -1642,7 +1642,7 @@ class _RelationalMulti(_Relational):
     def convert_to_read(self, value, use_name_get=True):
         return value.ids
 
-    def convert_to_write(self, value, target=None, fnames=None):
+    def convert_to_onchange(self, value, target=None, fnames=None):
         # remove/delete former records
         if target is None:
             set_ids = []
@@ -1663,11 +1663,63 @@ class _RelationalMulti(_Relational):
         for record in value:
             if not record.id:
                 values = {k: v for k, v in record._cache.iteritems() if k in fnames}
+                values = record._convert_to_onchange(values)
+                result.append((0, 0, values))
+            elif record._is_dirty():
+                values = {k: record._cache[k] for k in record._get_dirty() if k in fnames}
+                values = record._convert_to_onchange(values)
+                result.append((1, record.id, values))
+            else:
+                add_existing(record.id)
+
+        return result
+
+    def convert_to_write(self, value):
+        # remove/delete former records
+        set_ids = []
+        result = [(6, 0, set_ids)]
+        add_existing = lambda id: set_ids.append(id)
+
+        # take all fields in cache, except the inverses of self
+        fnames = set(value._fields) - set(MAGIC_COLUMNS)
+        for invf in self.inverse_fields:
+            fnames.discard(invf.name)
+
+        # add new and existing records
+        for record in value:
+            if not record.id:
+                values = {k: v for k, v in record._cache.iteritems() if k in fnames}
                 values = record._convert_to_write(values)
                 result.append((0, 0, values))
             elif record._is_dirty():
                 values = {k: record._cache[k] for k in record._get_dirty() if k in fnames}
                 values = record._convert_to_write(values)
+                result.append((1, record.id, values))
+            else:
+                add_existing(record.id)
+
+        return result
+
+    def convert_to_onchange(self, value, target, fnames):
+        tag = 2 if self.type == 'one2many' else 3
+        result = [(tag, record.id) for record in target[self.name] - value]
+        add_existing = lambda id: result.append((4, id))
+
+        if fnames is None:
+            # take all fields in cache, except the inverses of self
+            fnames = set(value._fields) - set(MAGIC_COLUMNS)
+            for invf in self.inverse_fields:
+                fnames.discard(invf.name)
+
+        # add new and existing records
+        for record in value:
+            if not record.id:
+                values = {k: v for k, v in record._cache.iteritems() if k in fnames}
+                values = record._convert_to_read(values)
+                result.append((0, 0, values))
+            elif record._is_dirty():
+                values = {k: record._cache[k] for k in record._get_dirty() if k in fnames}
+                values = record._convert_to_read(values)
                 result.append((1, record.id, values))
             else:
                 add_existing(record.id)

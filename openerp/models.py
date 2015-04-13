@@ -5308,6 +5308,18 @@ class BaseModel(object):
                     result[name] = value
         return result
 
+    def _convert_to_onchange(self, values):
+        """ Convert the `values` dictionary into the format of :meth:`write`. """
+        fields = self._fields
+        result = {}
+        for name, value in values.iteritems():
+            if name in fields:
+                value = fields[name].convert_to_onchange(value)
+                if not isinstance(value, NewId):
+                    result[name] = value
+        return result
+
+
     #
     # Record traversal and update
     #
@@ -5744,11 +5756,11 @@ class BaseModel(object):
                     def __getattr__(self, name):
                         field = self._record._fields[name]
                         value = self._record[name]
-                        return field.convert_to_onchange(value)
+                        return field.convert_to_write(value)
                 record = self[self._context['field_parent']]
                 global_vars['parent'] = RawRecord(record)
             field_vars = {
-                key: self._fields[key].convert_to_onchange(val)
+                key: self._fields[key].convert_to_write(val)
                 for key, val in self._cache.iteritems()
             }
             params = eval("[%s]" % params, global_vars, field_vars)
@@ -5853,7 +5865,7 @@ class BaseModel(object):
                     if field.type in ('one2many', 'many2many'):
                         if newval != oldval or newval._is_dirty():
                             # put new value in result
-                            result['value'][name] = field.convert_to_write(
+                            result['value'][name] = field.convert_to_onchange(
                                 newval, record._origin, subfields.get(name),
                             )
                             todo.append(name)
@@ -5863,9 +5875,7 @@ class BaseModel(object):
                     else:
                         if newval != oldval:
                             # put new value in result
-                            result['value'][name] = field.convert_to_write(
-                                newval, record._origin, subfields.get(name),
-                            )
+                            result['value'][name] = field.convert_to_onchange(newval)
                             todo.append(name)
                         else:
                             # clean up result to not return another value
