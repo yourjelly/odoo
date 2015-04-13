@@ -29,22 +29,24 @@ if (core.debug) {
          * Update the DebugManager according to the current widget
          * Hide it if the widget isn't a ViewManager
          * @param {web.Widget} [widget] the current widget
+         * @param {Boolean} [listen] whether or not the event switch_mode on the
+         * view_manager must be listened (to prevent adding multiple times the event handler)
          */
-        update: function(widget) {
+        update: function(widget, listen) {
             var available = false;
             if (widget instanceof ViewManager) {
                 available = true;
-                if (widget !== this.view_manager) {
-                    this.view_manager = widget;
-
-                    // Update itself each time switch_mode is performed on the ViewManager
-                    this.view_manager.on('switch_mode', this, function() {
-                        this.update(this.view_manager);
-                    });
-                }
+                this.view_manager = widget;
                 this.dataset = this.view_manager.dataset;
                 this.active_view = this.view_manager.active_view;
                 this.view = this.active_view.controller;
+                if (listen) {
+                    var vm = this.view_manager;
+                    // Update itself each time switch_mode is performed on the ViewManager
+                    this.view_manager.on('switch_mode', this, function() {
+                        this.update(vm, false);
+                    });
+                }
 
                 // Remove the previously rendered dropdowns
                 this.$dropdowns.empty();
@@ -226,14 +228,13 @@ if (core.debug) {
             this.debug_manager.appendTo(this.$('.o-web-client'));
 
             // Override push_action so that it triggers an event each time a new action is pushed
-            // The DebugManager listens to this even to keep itself up-to-date
+            // The DebugManager listens to this event to keep itself up-to-date
             var push_action = this.action_manager.push_action;
             this.action_manager.push_action = function() {
                 return push_action.apply(self.action_manager, arguments).then(function() {
-                    self.debug_manager.update(self.action_manager.get_inner_widget());
+                    self.debug_manager.update(self.action_manager.get_inner_widget(), true);
                 });
             };
-
         },
     });
 
