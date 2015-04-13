@@ -146,23 +146,23 @@
     .o-dropdown {
         display: inline-block;
         padding-right: 10px; // gap between dropdown togglers
+        cursor: pointer;
         .user-select(none);  // Prevent text selection when toggling the dropdowns
-        a { // dropdown togglers
+        > a { // dropdown togglers
             color: @odoo-main-text-color;
-            cursor: pointer;
             &:hover {
                 text-decoration: none;
-                font-weight: 600;
+                font-weight: bold;
                 .o-darken(@odoo-main-text-color);
             }
+        }
+        &.open > a {
+            font-weight: bold;
+            .o-darken(@odoo-main-text-color);
         }
         .dropdown-menu { // dropdowns position
             left: auto;
             top: auto;
-        }
-        &.open > a {
-            font-weight: 600;
-            .o-darken(@odoo-main-text-color);
         }
     }
     // Selected item in dropdowns (for action buttons and searchview)
@@ -170,9 +170,14 @@
         position: relative;
         > a {
             padding: 3px 25px;
+            color: @odoo-main-text-color;
+            &:hover {
+                .o-darken(@odoo-main-text-color);
+            }
         }
         &.selected {
             > a {
+                .o-darken(@odoo-main-text-color);
                 font-weight: bold;
                 &:before {
                     font-family: FontAwesome;

@@ -66,7 +66,7 @@ var ControlPanel = Widget.extend({
         };
 
         // By default, hide the ControlPanel and remove its contents from the DOM
-        this.toggle_visibility(true);
+        this.toggle_visibility(false);
 
         return this._super();
     },
@@ -80,12 +80,14 @@ var ControlPanel = Widget.extend({
      * Hides (or shows) the ControlPanel in headless (resp. non-headless) mode
      * Also detaches or attaches its contents to clean the DOM
      */
-    toggle_visibility: function(hidden) {
-        this.$el.toggle(!hidden);
-        if (hidden) {
+    toggle_visibility: function(visible) {
+        this.$el.toggle(visible);
+        if (!visible && !this.detached) {
+            this.detached = true;
             this.$first_row_content = this.$first_row.contents().detach();
             this.$second_row_content = this.$second_row.contents().detach();
         } else {
+            this.detached = false;
             this.$first_row_content.appendTo(this.$first_row);
             this.$second_row_content.appendTo(this.$second_row);
         }
@@ -121,7 +123,7 @@ var ControlPanel = Widget.extend({
      * @param {Boolean} [status.search_view_hidden] true if the searchview is hidden, false otherwise
      */
     update: function(status) {
-        this.toggle_visibility(status.hidden);
+        this.toggle_visibility(!status.hidden);
         if (!status.hidden) {
             // Don't update the ControlPanel in headless mode as the views have
             // inserted themselves the buttons where they want, so inserting them
