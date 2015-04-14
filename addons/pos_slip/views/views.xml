@@ -9,6 +9,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//group[@string='Receipt']" position="inside">
                     <field name='receipt_slip' />
+                    <field name='receipt_slip_heading' />
                     <field name="receipt_slip_lines" />
                     <field name="receipt_slip_width" />
                 </xpath>

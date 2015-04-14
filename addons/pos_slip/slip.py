@@ -28,14 +28,25 @@ from openerp.osv import fields, osv
 
 class pos_config(osv.osv):
     _inherit = 'pos.config' 
+
+    POS_PRINT_SLIP = [
+        ('never','Never'),
+        ('bill','Bill'),
+        ('receipt','Receipt'),
+        ('always','Always')
+    ]
+
     _columns = {
-        'receipt_slip': fields.boolean('Slip Receipts', help='This printer will print multi-page slip receipt instead of the regular roll receipts'),
-        'receipt_slip_lines': fields.integer('Slip Lines', help='The number of lines printed on slip receipts'),
-        'receipt_slip_width':  fields.integer('Slip Width', help='The width of the slip receipts (in characters)'),
+        'receipt_slip': fields.selection(POS_PRINT_SLIP, 'Slip Printing', help='Receipts and bills will be printed on multi-page slip receipts instead of the usual thermal roll paper'),
+        'receipt_slip_heading': fields.integer('Slip Heading', help='The number of lines before the content, used to vertically center the receipt'),
+        'receipt_slip_lines':   fields.integer('Slip Lines', help='The number of lines printed on slip receipts'),
+        'receipt_slip_width':   fields.integer('Slip Width', help='The width of the slip receipts (in characters)'),
     }
+
     _defaults = {
-        'receipt_slip': False,
-        'receipt_slip_lines': 100,
-        'receipt_slip_width':  40,
+        'receipt_slip': 'never',
+        'receipt_slip_heading': 2,
+        'receipt_slip_lines':   15,
+        'receipt_slip_width':   40,
     }
 

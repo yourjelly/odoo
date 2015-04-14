@@ -96,6 +96,7 @@ openerp.pos_slip = function(instance){
         print_slip: function(opts) {
             var self = this;
                 opts = opts || {};
+                opts.heading = this.pos.config.receipt_slip_heading;
                 opts.lines = this.pos.config.receipt_slip_lines;
                 opts.width = this.pos.config.receipt_slip_width;
                 opts.sheet = opts.sheet || 'slip';
@@ -107,12 +108,21 @@ openerp.pos_slip = function(instance){
 
             function slip_popup(slips) { 
                 if (!slips.length) {
-                    done.resolve();
+                    if (opts.endconfirm) {
+                        ss.show_popup('confirm',{
+                            'message': _t('All pages have been printed.'),
+                            'comment': _t('Please confirm to close this order.'),
+                            'cancel': function() {  done.reject();  },
+                            'confirm': function() { done.resolve(); },
+                        });
+                    } else { 
+                        done.resolve();
+                    }
                 } else {
                     var slip = slips.shift();
                     ss.show_popup('confirm',{
                         'message':_t('Print Page ')+slip.page+_t(' of ')+slip.pages,
-                        'comment':_t('Please make sure there is paper in the tray before printing'),
+                        'comment':_t('Please wait for the previous page to be printed before starting a new one.'),
                         'confirm': function() {
 
                             var xml = QWeb.render('XmlReceipt',{
@@ -123,7 +133,7 @@ openerp.pos_slip = function(instance){
 
                             setTimeout(function(){
                                 slip_popup(slips);
-                            },1000);
+                            }, 2000);
                         },
                         'cancel': function() {
                             done.reject();
@@ -142,8 +152,8 @@ openerp.pos_slip = function(instance){
     module.PaymentScreenWidget.include({
         print_xml_receipt: function() {
             var self = this;
-            if (this.pos.config.receipt_slip) {
-                this.print_slip().then(function() {
+            if (this.pos.config.receipt_slip in {'receipt':'','always':''}) {
+                this.print_slip({endconfirm:true}).then(function() {
                     self.pos.get('selectedOrder').destroy();
                 });
             } else {
@@ -156,7 +166,7 @@ openerp.pos_slip = function(instance){
 
     module.PosWidget.include({
         print_bill: function() { 
-            if (this.pos.config.receipt_slip) {
+            if (this.pos.config.receipt_slip in {'bill':'', 'always':''}) {
                 this.print_slip({nopayment:true});
             } else {
                 this._super();
