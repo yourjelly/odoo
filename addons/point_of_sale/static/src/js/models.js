@@ -1190,6 +1190,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                 paymentlines: paymentlines,
                 nopayment:  opts.nopayment || false,
                 emptylines: 0,
+                heading: opts.heading || 0,
                 width: opts.width || 40,
                 sheet: opts.sheet || 'paper-roll',
                 subtotal: this.getSubtotal(),
