@@ -10,7 +10,7 @@
     </xpath>
     <!-- Add report style -->
     <xpath expr="//head" position="inside">
-        <link href="/web/static/lib/bootstrap/css/bootstrap.css" rel="stylesheet"/>
+        <!-- FIXME: add bootstrap -->
         <link href="/website/static/src/css/website.css" rel="stylesheet"/>
         <link href="/web/static/lib/fontawesome/css/font-awesome.css" rel="stylesheet"/>
         <link href="/base/static/src/css/description.css" rel="stylesheet"/>

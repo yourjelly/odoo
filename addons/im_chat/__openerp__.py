@@ -25,5 +25,5 @@ chat in real time. It support several chats in parallel.
     'depends': ['base', 'web', 'bus'],
     'qweb': ['static/src/xml/*.xml'],
     'application': True,
-    'installable': True,
+    'installable': False,
 }

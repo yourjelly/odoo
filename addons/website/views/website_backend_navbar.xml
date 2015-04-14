@@ -19,7 +19,7 @@
                 <a href="#" class="dropdown-toggle hidden-xs" data-toggle="dropdown"><i class="fa fa-th-large"></i> Website<b class="caret"/></a>
                 <ul class="dropdown-menu">
                     <li t-foreach="menu_data['children']" t-as="menu">
-                        <t t-call="web.menu_link"/>
+                        <!-- <t t-call="web.menu_link"/> -->
                     </li>
                 </ul>
             </li>

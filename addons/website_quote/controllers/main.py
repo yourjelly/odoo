@@ -52,7 +52,8 @@ class sale_quote(http.Controller):
             days = (datetime.datetime.strptime(order.validity_date, '%Y-%m-%d') - datetime.datetime.now()).days + 1
         if pdf:
             report_obj = request.registry['report']
-            pdf = report_obj.get_pdf(request.cr, SUPERUSER_ID, [order_id], 'website_quote.report_quote', data=None, context=request.context)
+            # pdf = report_obj.get_pdf(request.cr, SUPERUSER_ID, [order_id], 'website_quote.report_quote', data=None, context=request.context)
+            pdf = report_obj.get_html(request.cr, SUPERUSER_ID, [order_id], 'website_quote.report_quote', data=None, context=request.context)
             pdfhttpheaders = [('Content-Type', 'application/pdf'), ('Content-Length', len(pdf))]
             return request.make_response(pdf, headers=pdfhttpheaders)
         values = {
