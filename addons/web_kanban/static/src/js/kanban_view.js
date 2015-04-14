@@ -305,7 +305,7 @@ var KanbanView = View.extend({
             var dataset = new data.DataSetSearch(self, rel_name, self.dataset.get_context(rel.context));
             dataset.name_get(_.uniq(rel.ids)).done(function(result) {
                 result.forEach(function(nameget) {
-                    $(rel.elements[nameget[0]]).append('<span class="oe_tag">' + _.str.escapeHTML(nameget[1]) + '</span>');
+                    $(rel.elements[nameget[0]]).append('<span class="badge">' + _.str.escapeHTML(nameget[1]) + '</span>');
                 });
             });
         });
@@ -359,6 +359,7 @@ var KanbanView = View.extend({
             }
             this.postprocess_m2m_tags();
         }
+        this.$el.toggleClass('o_kanban_grouped', !!this.grouped);
         this.$el.toggleClass('o_kanban_ungrouped', !this.grouped);
         this.$el.append(fragment);
     },

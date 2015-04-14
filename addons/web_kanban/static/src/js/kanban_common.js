@@ -584,8 +584,9 @@ var KanbanColumn = Widget.extend({
 
     start: function() {
         var record;
+        this.$header = this.$('.o_kanban_header');
         if (this.draggable) {
-            this.$('.o_kanban_header')
+            this.$header
                 .prop('draggable', true)
                 .css({cursor: 'move'});
         }
@@ -595,12 +596,13 @@ var KanbanColumn = Widget.extend({
             record.$el.data('record', record);
             this.records.push(record);
         }
-        this.check_if_empty();
+        this.check_column();
         this.$el.data('column', this);
     },
 
-    check_if_empty: function () {
+    check_column: function () {
         this.$el.toggleClass('o_kanban_empty', this.records.length === 0);
+        this.$header.find('.o-kanban-count').text(this.records.length);
     },
 
     swap_record: function (rec1, rec2) {
@@ -625,7 +627,7 @@ var KanbanColumn = Widget.extend({
         record.$el.detach();
         var index = this.records.indexOf(record);
         this.records.splice(index, 1);
-        this.check_if_empty();
+        this.check_column();
     },
 
     insert_after: function (record, new_record) {
@@ -633,6 +635,7 @@ var KanbanColumn = Widget.extend({
         var index = this.records.indexOf(record);
         this.records.splice(index, 0, new_record);
         new_record.setParent(this);
+        this.check_column();
     },
 
     insert_before: function (record, new_record) {
@@ -640,6 +643,7 @@ var KanbanColumn = Widget.extend({
         var index = this.records.indexOf(record);
         this.records.splice(index, 1, new_record, record);
         new_record.setParent(this);
+        this.check_column();
     },
 
     insert: function (new_record) {
@@ -647,6 +651,7 @@ var KanbanColumn = Widget.extend({
         this.$el.removeClass('o_kanban_empty');
         this.records.push(new_record);
         new_record.setParent(this);
+        this.check_column();
     },
 });
 

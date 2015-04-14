@@ -1260,7 +1260,7 @@
 <t t-name="FieldMany2ManyTag">
     <t t-set="i" t-value="0"/>
     <t t-foreach="elements" t-as="el">
-        <span class="oe_tag" t-att-data-index="i">
+        <span class="badge" t-att-data-index="i">
             <t t-esc="el[1]"/>
         </span>
         <t t-set="i" t-value="i + 1"/>
