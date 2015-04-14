@@ -925,9 +925,9 @@
 </div>
 
 
-<div t-name="PivotView" class="oe_pivot">
-    <div class="o-field-selection"/>
-    <div class="o-pivot-table"/>
+<div t-name="PivotView" class="o_pivot">
+    <div class="o_field_selection"/>
+    <div class="o_pivot_table"/>
 </div>
 
 <t t-name="PivotView.buttons">
@@ -935,7 +935,7 @@
         <button class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">
             Measures <span class="caret"/>
         </button>
-        <ul class="dropdown-menu o-pivot-measures-list">
+        <ul class="dropdown-menu o_pivot_measures_list">
             <li t-foreach="measures" t-as="measure" t-att-data-field="measure[0]">
                 <a href="#"><t t-esc="measure[1].string"/></a>
             </li>
@@ -944,17 +944,18 @@
         </ul>
     </div>
     <div class="btn-group btn-group-sm">
-        <button class="btn btn-secondary fa fa-expand o-pivot-flip-button" title="Flip axis"/>
-        <button class="btn btn-secondary fa fa-arrows-alt o-pivot-expand-button" title="Expand all"/>
+        <button class="btn btn-secondary fa fa-expand o_pivot_flip_button" title="Flip axis"/>
+        <button class="btn btn-secondary fa fa-arrows-alt o_pivot_expand_button" title="Expand all"/>
+        <button class="btn btn-secondary fa fa-download o_pivot_download" title="Download xls"/>
     </div>
 </t>
 
 <t t-name="PivotView.FieldSelection">
-    <ul class="dropdown-menu multi-level o-field-menu" role="menu">
+    <ul class="dropdown-menu multi-level o_field_menu" role="menu">
         <t t-foreach="fields" t-as="field">
             <t t-if="(field[1].type === 'date') || (field[1].type === 'datetime')">
-                <li class="pivot-dropdown-submenu" t-att-data-field="field[0]">
-                    <a class="field-selection">
+                <li class="pivot_dropdown_submenu" t-att-data-field="field[0]">
+                    <a class="field_selection">
                         <t t-esc="field[1].string"/>
                     </a>
                     <ul class="dropdown-menu">
