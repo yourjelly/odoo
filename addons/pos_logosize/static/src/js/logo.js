@@ -9,6 +9,12 @@ openerp.pos_logosize = function(instance){
             var loaded = model.loaded;
             model.loaded = function(self) { 
                 return loaded(self).then(function(){
+
+                    if (self.config.receipt_logo_size <= 0) {
+                        self.company_logo_base64 = null;
+                        return;
+                    }
+
                     var img = self.company_logo;
                     var ratio = 1;
                     var targetwidth = 300;
