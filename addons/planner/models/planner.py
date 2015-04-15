@@ -34,6 +34,7 @@ class Planner(models.Model):
         # prepare the planner data as per the planner application
         values = {
             'prepare_backend_url': self.prepare_backend_url,
+            'is_module_installed': self.is_module_installed,
         }
         planner_find_method_name = '_prepare_%s_data' % planner_app
         if hasattr(self, planner_find_method_name):
@@ -52,3 +53,10 @@ class Planner(models.Model):
             if module:
                 url += "&id=%s" % (module.id,)
         return url
+
+    @api.model
+    def is_module_installed(self, module_name=None):
+        res = self.env['ir.module.module'].search_count([('state', '=', 'installed'), ('name', '=', module_name)])
+        if res:
+            return True
+        return False

@@ -496,8 +496,7 @@
                         configuration will best fit your quotation process.
                     </p>
                     <h4>What <strong>kind of proposals</strong> do you usually send to your customers ?</h4>
-
-                    <strong>Note: To use those features, you need to install the <a t-att-href="prepare_backend_url('', 'form', 'sale')">Sales Management module</a></strong>
+                    <t t-if="not is_module_installed('sale')"><strong>Note: To use those features, you need to install the <a t-att-href="prepare_backend_url('', 'form', 'sale')">Sales Management module</a></strong></t>
                     <section>
                         <div class="row mb1">
                             <div class="col-xs-6">
@@ -523,8 +522,8 @@
                             <div class="col-xs-6">
                                 <h4 class="text-center"><b>Contracts</b></h4>
                                 <div class="well well-sm">
-                                    <span>To activate the Contracts, check 'Use contracts management' <a t-att-href="prepare_backend_url(
-                                            'base_setup.action_sale_config')">in the Sales Setting</a> </span>
+                                    <t t-if="not is_module_installed('account_analytic_analysis')"><span>To activate the Contracts, check 'Use contracts management' <a t-att-href="prepare_backend_url(
+                                            'base_setup.action_sale_config')">in the Sales Setting</a> </span></t>
                                     <h4><b>Fixed price</b> <span class="small">(ex: monthly subscription)</span></h4>
                                     <span>
                                         <li>Activate contracts: <a t-att-href="prepare_backend_url(
@@ -555,7 +554,7 @@
                     <h1>Import Products</h1>
                     <p>How do you want to <strong>import your products?</strong></p>
                     <br/>
-                    <strong>Note: To use those features, you need to install the <a t-att-href="prepare_backend_url('', 'form', 'product')">Product</a></strong>
+                    <t t-if="not is_module_installed('product')"><strong>Note: To use those features, you need to install the <a t-att-href="prepare_backend_url('', 'form', 'product')">Product</a></strong></t>
                     <div class="container-fluid">
                         <div class="row">
                             <div class="col-md-4 col-xs-12">
