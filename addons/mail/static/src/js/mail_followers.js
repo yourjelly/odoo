@@ -10,7 +10,7 @@ var session = require('web.session');
 var web_client = require('web.web_client');
 
 var _t = core._t;
-var qweb = core.qweb;
+var QWeb = core.qweb;
 
 /** 
  * ------------------------------------------------------------
@@ -69,28 +69,27 @@ var Followers = form_common.AbstractField.extend({
     bind_events: function() {
         var self = this;
         // event: click on '(Un)Follow' button, that toggles the follow for uid
-        this.$('.oe_follower').on('click', function (event) {
-            if($(this).hasClass('oe_notfollow'))
+        this.$('.o_follow_btn').on('click', function () {
+            if($(this).hasClass('o_not_following')) {
                 self.do_follow();
-            else
+            } else {
                 self.do_unfollow();
+            }
         });
         // event: click on a subtype, that (un)subscribe for this subtype
-        this.$el.on('click', '.oe_subtype_list input', function(event) {
+        this.$el.on('click', ".o_subtype_list > li:not('.divider')", function(event) {
+            self.on_item_clicked(event);
             self.do_update_subscription(event);
-            var $list = self.$('.oe_subtype_list');
-            if(!$list.hasClass('open')) {
-                $list.addClass('open');
-            }
-            if(self.$('.oe_subtype_list ul')[0].children.length < 1) {
-                $list.removeClass('open');
-            }
+            event.stopPropagation();
+        });
+        // event: do not close the drodown when clicking on a divider
+        this.$el.on('click', ".o_subtype_list", function(event) {
             event.stopPropagation();
         });
         // event: click on 'invite' button, that opens the invite wizard
-        this.$('.oe_invite').on('click', self.on_invite_follower);
+        this.$('.o_invite').on('click', self.on_invite_follower);
         // event: click on 'edit_subtype(pencil)' button to edit subscription
-        this.$el.on('click', '.oe_edit_subtype', self.on_edit_subtype);
+        this.$el.on('click', '.o_edit_subtype', self.on_edit_subtype);
         this.$el.on('click', '.oe_remove_follower', self.on_remove_follower);
         this.$el.on('click', '.oe_show_more', self.on_show_more_followers);
         this.$el.on('click', 'a[data-partner]', self.on_follower_clicked);
@@ -100,8 +99,7 @@ var Followers = form_common.AbstractField.extend({
         var self = this;
         var $currentTarget = $(event.currentTarget);
         var user_pid = $currentTarget.data('id');
-        $('div.oe_edit_actions').remove();
-        self.$dialog = new Dialog(this, {
+        this.dialog = new Dialog(this, {
                         size: 'small',
                         title: _t('Edit Subscription of ') + $currentTarget.siblings('a').text(),
                         buttons: [
@@ -111,11 +109,17 @@ var Followers = form_common.AbstractField.extend({
                                 }},
                                 { text: _t("Cancel"), click: function() { this.parents('.modal').modal('hide'); }}
                             ],
-                }, "<div class='oe_edit_actions'>").open();
+                }, "<ul class='o_edit_subtype_popup_list'>").open();
+        // event: click on a subtype in the edit subtype popup
+        this.dialog.$el.on('click', "li:not('.divider')", function(event) {
+            self.on_item_clicked(event);
+            event.stopPropagation();
+        });
+
         return self.fetch_subtypes(user_pid);
     },
 
-    on_invite_follower: function (event) {
+    on_invite_follower: function () {
         var self = this;
         var action = {
             type: 'ir.actions.act_window',
@@ -137,7 +141,7 @@ var Followers = form_common.AbstractField.extend({
         });
     },
 
-    on_show_more_followers: function (event) {
+    on_show_more_followers: function () {
         this.displayed_nb += this.displayed_limit;
         this.display_followers(false);
     },
@@ -172,6 +176,13 @@ var Followers = form_common.AbstractField.extend({
         this.do_action(action);
     },
 
+    on_item_clicked: function (event) {
+        var $item_clicked = $(event.target).parent('li');
+        if($item_clicked) {
+            $item_clicked.toggleClass("selected");
+        }
+    },
+
     read_value: function () {
         var self = this;
         this.displayed_nb = this.displayed_limit;
@@ -182,7 +193,6 @@ var Followers = form_common.AbstractField.extend({
     },
 
     render_value: function () {
-        this.reinit();
         return this.fetch_followers(this.value);
     },
 
@@ -221,7 +231,7 @@ var Followers = form_common.AbstractField.extend({
     /* Display generic info about follower, for people not having access to res_partner */
     display_generic: function () {
         this.$('.oe_follower_list').empty();
-        this.$('.oe_follower_title').html(this._format_followers(this.value.length));
+        this.$('.o_follower_title').html(this._format_followers(this.value.length));
     },
 
     /** Display the followers */
@@ -231,7 +241,7 @@ var Followers = form_common.AbstractField.extend({
         this.followers = records || this.followers;
         // clean and display title
         var node_user_list = this.$('.oe_follower_list').empty();
-        this.$('.oe_follower_title').html(this._format_followers(this.followers.length));
+        this.$('.o_follower_title').html(this._format_followers(this.followers.length));
         self.message_is_follower = _.indexOf(this.followers.map(function (rec) { return rec[2]['is_uid'];}), true) != -1;
         // truncate number of displayed followers
         var truncated = this.followers.slice(0, this.displayed_nb);
@@ -243,33 +253,35 @@ var Followers = form_common.AbstractField.extend({
                 'is_editable': record[2]['is_editable'],
                 'avatar_url': mail_utils.get_image(session, 'res.partner', 'image_small', record[0]),
             };
-            $(qweb.render('mail.followers.partner', {'record': partner, 'widget': self})).appendTo(node_user_list);
+            $(QWeb.render('mail.followers.partner', {'record': partner, 'widget': self})).appendTo(node_user_list);
             // On mouse-enter it will show the edit_subtype pencil.
             if (partner.is_editable) {
                 self.$('.oe_follower_list').on('mouseenter mouseleave', function(e) {
-                    self.$('.oe_edit_subtype').toggleClass('oe_hidden', e.type == 'mouseleave');
+                    self.$('.o_edit_subtype').toggleClass('o_hidden', e.type == 'mouseleave');
                     self.$('.oe_follower_list').find('.oe_partner').toggleClass('oe_partner_name', e.type == 'mouseenter');
                 });
             }
         });
         // FVA note: be sure it is correctly translated
         if (truncated.length < this.followers.length) {
-            $(qweb.render('mail.followers.show_more', {'number': (this.followers.length - truncated.length)} )).appendTo(node_user_list);
+            $(QWeb.render('mail.followers.show_more', {'number': (this.followers.length - truncated.length)} )).appendTo(node_user_list);
         }
     },
 
     display_buttons: function () {
         if (this.message_is_follower) {
-            this.$('button.oe_follower').removeClass('oe_notfollow').addClass('oe_following');
+            this.$('button.o_follow_btn').removeClass('o_not_following').addClass('o_following');
         }
         else {
-            this.$('button.oe_follower').removeClass('oe_following').addClass('oe_notfollow');
+            this.$('button.o_follow_btn').removeClass('o_following').addClass('o_not_following');
         }
 
-        if (this.view.is_action_enabled('edit'))
+        if (this.view.is_action_enabled('edit')) {
             this.$('span.oe_mail_invite_wrapper').hide();
-        else
+        }
+        else {
             this.$('span.oe_mail_invite_wrapper').show();
+        }
     },
 
     /** Fetch subtypes, only if current user is follower */
@@ -279,13 +291,12 @@ var Followers = form_common.AbstractField.extend({
         if (user_pid) {
             dialog = true;
         } else {
-            this.$('.oe_subtype_list ul').empty();
             if (! this.message_is_follower) {
-                this.$('.oe_subtype_list > .dropdown-toggle').attr('disabled', true);
+                this.$('.o_subtype_dropdown_btn').attr('disabled', 'disabled');
                 return;
             }
             else {
-                this.$('.oe_subtype_list > .dropdown-toggle').attr('disabled', false);
+                this.$('.o_subtype_dropdown_btn').removeAttr('disabled');
             }
         }
         var id = this.view.datarecord.id;
@@ -298,10 +309,10 @@ var Followers = form_common.AbstractField.extend({
         var self = this;
         var $list;
         if (dialog) {
-            $list = self.$dialog.$el;
-        }
-        else {
-            $list = this.$('.oe_subtype_list ul');
+            $list = self.dialog.$el;
+        } else {
+            $list = this.$('.o_subtype_list');
+            $list.empty();
         }
         var records = data[id].message_subtype_data;
         this.records_length = $.map(records, function(value, index) { return index; }).length;
@@ -309,27 +320,22 @@ var Followers = form_common.AbstractField.extend({
         var old_model = '';
         _(records).each(function (record, record_name) {
             if (old_model != record.parent_model){
-                if (old_model !== ''){
-                    var index = $($list).find('.oe_subtype').length;
-                    $($($list).find('.oe_subtype')[index-1]).addClass('subtype-border');
+                if (old_model !== '') {
+                    $list.append($('<li class="divider">'));
                 }
                 old_model = record.parent_model;
             }
             record.name = record_name;
             record.followed = record.followed || undefined;
-            $(qweb.render('mail.followers.subtype', {'record': record, 'dialog': dialog})).appendTo($list);
+            $(QWeb.render('mail.followers.subtype', {'record': record, 'dialog': dialog})).appendTo($list);
         });
     },
 
     do_follow: function () {
         var context = new data.CompoundContext(this.build_context(), {});
-        this.$('.oe_subtype_list > .dropdown-toggle').attr('disabled', false);
+        this.$('.o_subtype_dropdown_btn').removeAttr('disabled');
         this.ds_model.call('message_subscribe_users', [[this.view.datarecord.id], [session.uid], undefined, context])
             .then(this.proxy('read_value'));
-
-        _.each(this.$('.oe_subtype_list input'), function (record) {
-            $(record).attr('checked', 'checked');
-        });
     },
     
     do_unfollow: function (user_pid) {
@@ -337,13 +343,13 @@ var Followers = form_common.AbstractField.extend({
             _(this.$('.oe_msg_subtype_check')).each(function (record) {
                 $(record).attr('checked',false);
             });
-        var action_unsubscribe = 'message_unsubscribe_users';
-        this.$('.oe_subtype_list > .dropdown-toggle').attr('disabled', true);
-        var follower_ids = [session.uid];
-        if (user_pid) {
-            action_unsubscribe = 'message_unsubscribe';
-            follower_ids = [user_pid];
-        }
+            var action_unsubscribe = 'message_unsubscribe_users';
+            this.$('.o_subtype_dropdown_btn').attr('disabled', 'disabled');
+            var follower_ids = [session.uid];
+            if (user_pid) {
+                action_unsubscribe = 'message_unsubscribe';
+                follower_ids = [user_pid];
+            }
             var context = new data.CompoundContext(this.build_context(), {});
             return this.ds_model.call(action_unsubscribe, [[this.view.datarecord.id], follower_ids, context])
                  .then(this.proxy('read_value'));
@@ -352,28 +358,26 @@ var Followers = form_common.AbstractField.extend({
     },
 
     do_update_subscription: function (event, user_pid) {
-        var self = this;
-
         var action_subscribe = 'message_subscribe_users';
         var follower_ids = [session.uid];
-        var oe_action = this.$('.oe_actions input[type="checkbox"]');
+        var $subtype_items = this.$('.o_subtype_list li:not(.divider)');
         if (user_pid) {
             action_subscribe = 'message_subscribe';
             follower_ids = [user_pid];
-            oe_action = $('.oe_edit_actions input[type="checkbox"]');
+            $subtype_items = this.dialog.$('li:not(.divider)');
         }
         var checklist = [];
-        _(oe_action).each(function (record) {
-            if ($(record).is(':checked')) {
-                checklist.push(parseInt($(record).data('id')));
+        _($subtype_items).each(function (item) {
+            if ($(item).hasClass('selected')) {
+                checklist.push(parseInt($(item).data('id')));
             }
         });
 
         if (!checklist.length) {
             if (!this.do_unfollow(user_pid)) {
-                $(event.target).attr("checked", "checked");
+                this.on_item_clicked(event);
             } else {
-                  self.$('.oe_subtype_list ul').empty(); 
+                this.$('.o_subtype_dropdown_btn').parent().removeClass('open');
             }
         } else {
             var context = new data.CompoundContext(this.build_context(), {});

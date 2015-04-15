@@ -23,7 +23,7 @@
                             <field name="name"/>
                         </group>
                     </sheet>
-                    <div class="oe_chatter">
+                    <div class="o_chatter">
                         <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
                         <field name="message_ids" widget="mail_thread" options='{"thread_level": 1}'/>
                     </div>
@@ -75,7 +75,7 @@
                             <field name="write_date"/>
                         </group>
                     </sheet>
-                    <div class="oe_chatter">
+                    <div class="o_chatter">
                         <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
                         <field name="message_ids" widget="mail_thread" options='{"thread_level": 1}'/>
                     </div>

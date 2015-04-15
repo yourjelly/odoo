@@ -1,8 +1,3 @@
-.oe-view-manager-content {
-    display: flex;
-    justify-content: center;
-}
-
 .oe_mail {
     width: 700px;
     background-color: white;
@@ -15,4 +10,106 @@
     background-color: white;
     padding: 8px;
     margin: 16px;
+}
+
+// Edit substype popup
+.o_edit_subtype_popup_list {
+    .o-dropdown-ul();
+
+    list-style: none;
+    padding-left: 0px;
+    .divider {
+        height: 1px;
+        margin: 9px 0;
+        overflow: hidden;
+        background-color: #e5e5e5;
+    }
+}
+
+// Chatter below form views
+.o_chatter {
+    .o-flex-display();
+    .o-flex-direction(row-reverse);
+    justify-content: center;
+    background-color: white;
+
+    // Mail thread
+    .oe_mail {
+        width: 500px;
+    }
+
+    // Followers
+    .oe_followers{
+        padding-top: 10px;
+        width: 160px;
+
+        // Follow button
+        .o_follow_btn {
+            width:135px;
+        }
+        .o_follow_btn .o_follow,
+        .o_follow_btn .o_unfollow,
+        .o_follow_btn .o_following {
+            display: none;
+        }
+        // When following, show 'following'
+        .o_follow_btn.o_following .o_following{
+            display: inline;
+        }
+        // When following and hovering, show 'unfollow'
+        .o_follow_btn.o_following:hover .o_following{
+            display: none;
+        }
+        .o_follow_btn.o_following:hover .o_unfollow{
+            display: inline;
+        }
+        // When not following, show 'follow'
+        .o_follow_btn.o_not_following .o_follow{
+            display: inline;
+        }
+
+        // Subtype dropdown
+        .o_subtype_list {
+            .o-dropdown-ul();
+        }
+
+        .o_edit_subtype {
+            cursor: pointer;
+        }
+        .o_edit_subtype.o_hidden {
+            display: none;
+        }
+    }
+
+    /*  b) THE FOLLOWERS */
+    // .oe_followers .oe_follower_title{
+    //     display: inline;
+    // }
+    // .oe_followers .oe_invite{
+    //     padding-left: 5px;
+    // }
+    // .oe_followers .oe_partner {
+    //     height: 32px;
+    //     margin-right: 24px;
+    //     overflow: hidden;
+    //     white-space: nowrap;
+    //     text-overflow: ellipsis;
+    // }
+    // .oe_followers .oe_partner img{
+    //     width: 32px;
+    //     margin-right:4px;
+    //     border-radius: 2px;
+    // }
+    // .oe_followers .oe_remove_follower{
+    //     cursor: pointer;
+    //     position: absolute;
+    //     right: 0px;
+    //     line-height: 30px;
+    // }
+    // .oe_followers .oe_partner .oe_hidden{
+    //     display: none;
+    // }
+    // .oe_followers .oe_show_more{
+    //     cursor: pointer;
+    // }
 }

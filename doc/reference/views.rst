@@ -449,7 +449,7 @@ Technically, the new form views are structured as follows in XML::
     <form>
         <header> ... content of the status bar  ... </header>
         <sheet>  ... content of the sheet       ... </sheet>
-        <div class="oe_chatter"> ... content of the bottom part ... </div>
+        <div class="o_chatter"> ... content of the bottom part ... </div>
     </form>
 
 The Status Bar

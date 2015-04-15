@@ -105,7 +105,7 @@ var Tip = Class.extend({
         formView.on('view_content_has_changed', self, _.once(function() {
             self.eval_tip(null, model, mode, type);
         }));
-        if ($('.oe_chatter').length > 0) {
+        if ($('.o_chatter').length > 0) {
             core.bus.on('chatter_messages_fetched', this, _.once(function () {
                 self.eval_tip(null, model, mode, type);
             }));

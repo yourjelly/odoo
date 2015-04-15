@@ -177,7 +177,7 @@
                         </page>
                     </notebook>
                 </sheet>
-                <div class="oe_chatter">
+                <div class="o_chatter">
                     <field name="message_follower_ids" widget="mail_followers" help="Follow this project to automatically track the events associated to tasks and issues of this project." groups="base.group_user"/>
                     <field name="message_ids" widget="mail_thread"/>
                 </div>
@@ -332,7 +332,7 @@
                         </page>
                     </notebook>
                     </sheet>
-                    <div class="oe_chatter">
+                    <div class="o_chatter">
                         <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
                         <field name="message_ids" widget="mail_thread"/>
                     </div>
