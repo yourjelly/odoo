@@ -37,7 +37,7 @@ var Menu = Widget.extend({
         // App switcher
         this.$app_switcher = $(QWeb.render('AppSwitcher', {'menu_data': this.menu_data}));
         this.$app_switcher.appendTo(this.$el.siblings('.o-application-switcher'));
-        this.$app_switcher.on('click', '.thumbnail', this, function (ev) {
+        this.$app_switcher.on('click', '.o-app', this, function (ev) {
             ev.preventDefault();
             var menu_id = $(ev.currentTarget).data('menu');
             var action_id = $(ev.currentTarget).data('action-id');
@@ -94,6 +94,7 @@ var Menu = Widget.extend({
     },
     toggle_app_switcher: function () {
         this.$el.siblings('.o-application-switcher').toggleClass('hidden');
+        $('.o-menu-sections').toggle();  // fixme...
     },
     /**
      * Helper to find the action associated to a menu id, handling the special case of the primary

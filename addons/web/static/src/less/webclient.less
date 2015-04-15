@@ -20,6 +20,8 @@
 // Application switcher
 // ------------------------------------------------------------------
 .o-application-switcher {
+    color: white;
+
     .oe_logo {
         img {
             .center-block;
@@ -43,6 +45,24 @@
         .oe_logo_edit_admin:hover {
             .center-block;  // Note: class created by the webclient
         }
+
+    }
+
+    .o-app {
+        margin: 10px;
+    }
+    
+    .caption {
+        color: @gray-lighter;
+    }
+
+    .o-app-icon {
+        color: @odoo-brand-primary;
+        background-color: @gray-light;
+        padding: 8px;
+        border-radius: 8px;
+        margin: 8px;
+        box-shadow: 0 1px 4px @gray-light;
     }
 
     .o-user-menu-placeholder {

@@ -1942,22 +1942,25 @@
 
 <t t-name="AppSwitcher">
     <div class="row">
-        <div class="col-xs-6 col-md-4 col-lg-3 text-center o-company-logo-placeholder"></div>
-        <div class="col-xs-6 col-md-4 col-lg-3 text-center o-user-menu-placeholder"></div>
-        <t t-foreach="menu_data.children" t-as="primary_menu">
-            <div class="col-xs-6 col-md-4 col-lg-3 text-center">
-                <a class="thumbnail"
-                    href="#"
-                    t-att-data-menu="primary_menu.id"
-                    t-att-data-action-model="primary_menu.action ? primary_menu.action.split(',')[0] : ''"
-                    t-att-data-action-id="primary_menu.action ? primary_menu.action.split(',')[1] : ''">
-                    <i t-att-class="'fa fa-4x ' + primary_menu.icon"></i>
-                    <div class="caption">
-                        <h3><t t-esc="primary_menu.name"/></h3>
-                    </div>
-                </a>
-            </div>
-        </t>
+        <div class="col-md-8 col-md-offset-1 col-xs-12">
+            <t t-foreach="menu_data.children" t-as="primary_menu">
+                <div class="col-xs-4 col-md-3 col-lg-3 text-center o-app" t-att-data-menu="primary_menu.id">
+                    <a
+                        href="#"
+                        t-att-data-action-model="primary_menu.action ? primary_menu.action.split(',')[0] : ''"
+                        t-att-data-action-id="primary_menu.action ? primary_menu.action.split(',')[1] : ''">
+                        <i t-att-class="'fa fa-4x o-app-icon ' + primary_menu.icon"></i>
+                        <div class="caption">
+                            <t t-esc="primary_menu.name"/>
+                        </div>
+                    </a>
+                </div>
+            </t>
+        </div>
+        <div class="col-md-2 hidden-xs">
+            <div class="text-center o-company-logo-placeholder"></div>
+            <div class="text-center o-user-menu-placeholder"></div>
+        </div>
     </div>
 </t>
 
