@@ -927,7 +927,6 @@
 
 <div t-name="PivotView" class="o_pivot">
     <div class="o_field_selection"/>
-    <div class="o_pivot_table"/>
 </div>
 
 <t t-name="PivotView.buttons">
@@ -951,37 +950,35 @@
 </t>
 
 <t t-name="PivotView.FieldSelection">
-    <ul class="dropdown-menu multi-level o_field_menu" role="menu">
+    <ul class="dropdown-menu o_pivot_field_menu" role="menu">
         <t t-foreach="fields" t-as="field">
             <t t-if="(field[1].type === 'date') || (field[1].type === 'datetime')">
-                <li class="pivot_dropdown_submenu" t-att-data-field="field[0]">
-                    <a class="field_selection">
+                <li class="o_inline_dropdown" t-att-data-field="field[0]">
+                    <a href="#" class="o_pivot_field_selection">
                         <t t-esc="field[1].string"/>
                     </a>
                     <ul class="dropdown-menu">
-                        <li t-att-data-field="field[0]"><a t-att-data-interval="'day'">Day</a></li>
-                        <li t-att-data-field="field[0]"><a t-att-data-interval="'week'">Week</a></li>
-                        <li t-att-data-field="field[0]"><a t-att-data-interval="'month'">Month</a></li>
-                        <li t-att-data-field="field[0]"><a t-att-data-interval="'quarter'">Quarter</a></li>
-                        <li t-att-data-field="field[0]"><a t-att-data-interval="'year'">Year</a></li>
+                        <li t-att-data-field="field[0]"><a href="#" t-att-data-interval="'day'">Day</a></li>
+                        <li t-att-data-field="field[0]"><a href="#" t-att-data-interval="'week'">Week</a></li>
+                        <li t-att-data-field="field[0]"><a href="#" t-att-data-interval="'month'">Month</a></li>
+                        <li t-att-data-field="field[0]"><a href="#" t-att-data-interval="'quarter'">Quarter</a></li>
+                        <li t-att-data-field="field[0]"><a href="#" t-att-data-interval="'year'">Year</a></li>
                     </ul>
                 </li>
             </t>
             <t t-if="(field[1].type !== 'date') &amp;&amp; (field[1].type !== 'datetime')">
-                <li t-att-data-field="field[0]"><a><t t-esc="field[1].string"/></a></li>
+                <li t-att-data-field="field[0]"><a href="#"><t t-esc="field[1].string"/></a></li>
             </t>
         </t>
     </ul>
 </t>
 
 <div t-name="PivotView.nodata" class="oe_view_nocontent" >
-    <div class="oe_empty_custom_dashboard">
-        <p><b>No data to display.</b></p>
-        <p>
-                No data available for this pivot table.  Try to add some records, or make sure
-                that there is at least one measure and no active filter in the search bar.
-        </p>
-    </div>
+    <p><strong>No data to display.</strong></p>
+    <p>
+        No data available for this pivot table.  Try to add some records, or make sure
+        that there is at least one measure and no active filter in the search bar.
+    </p>
 </div>
 
 

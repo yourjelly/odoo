@@ -1,99 +1,68 @@
 .o_pivot {
     height: 100%;
+    overflow: auto;
+    background-color: @odoo-view-background-color;
 
-    &.o_enable_linking td:not(:first-child):not(.o_empty):hover {
-        color: @odoo-brand-optional;
-        cursor: pointer;
+    // Inform the user that he may click on a cell to be redirected to a list view of the
+    // items corresponding to the clicked cell
+    &.o_enable_linking {
+        .o_pivot_cell_value:hover {
+            color: @odoo-brand-optional;
+            cursor: pointer;
+        }
     }
 
-    .o_pivot_table {
-        min-height: 100%;
-        background-color: @odoo-view-background-color;
+    table {
+        width: auto;  // bootstrap override
 
-        table {
-            width: auto;
+        th {
+            font-weight: normal;  // bootstrap override
+        }
 
-            th {
-                font-weight: normal;
-                border: none;
-            }
-            td:not(:first-child) {
-                text-align: right;
-                border-right: 1px solid lighten(@odoo-brand-secondary, 30%);
-                border-bottom: 1px solid lighten(@odoo-brand-secondary, 30%);
-            }
-            .measure_row, .o_closed, .o_opened{
-                background-color: lighten(@odoo-brand-secondary, 30%);
-                border: 1px solid lighten(@odoo-brand-secondary, 15%);
-                cursor: pointer;
-                white-space: nowrap;
-            }
-            .o_closed::before {
+        .o-pivot-header-cell() {
+            background-color: lighten(@odoo-brand-secondary, 30%);
+            cursor: pointer;
+            white-space: nowrap;
+            .user-select(none);
+        }
+
+        .o_pivot_measure_row {
+            .o-pivot-header-cell;
+        }
+
+        .o_pivot_header_cell_closed {
+            .o-pivot-header-cell;
+            &::before {
                 font-family: FontAwesome;
                 content: "";
                 margin-right: 8px;
             }
-            .o_opened::before {
+        }
+
+        .o_pivot_header_cell_opened {
+            .o-pivot-header-cell;
+            &::before {
                 font-family: FontAwesome;
                 content: "";
                 margin-right: 8px;
             }
+        }
 
-            td:first-child {
-                padding-left: 185px;
-                background-color: lighten(@odoo-brand-secondary, 60%);
-            }
-            .o_pivot_level_loop(@index) when (@index < 6) {
-                .o_pivot_level@{index} {
-                    th when (@index > 0) {
-                        background-color: lighten(@odoo-brand-secondary, @index * 5 + 30%);
-                    }
-                    td:first-child {
-                        background-color: lighten(@odoo-brand-secondary, @index * 5 + 30%);
-                        padding-left: @index * 30 + 5px;
-                    }
-                }
-                .o_pivot_level_loop(@index + 1);
-            }
-            .o_pivot_level_loop(0);
+        .o_pivot_measure_row_sorted_asc::after {
+            .o-caret-down;
+            margin-left: 5px;
+        }
 
-            .o_sorted {
-                &::before {
-                    font-family: FontAwesome;
-                    margin-left: 5px;
-                    float: right;
-                }
-                &.o_sorted_asc::before {
-                    content: "";
-                }
-                &.o_sorted_desc::before {
-                    content: "";
-                }
-            }
+        .o_pivot_measure_row_sorted_desc::after {
+            .o-caret-up;
+            margin-left: 5px;
         }
     }
 
-    .dropdown-menu {
-        cursor: pointer;
-
-        .pivot_dropdown_submenu {
-            position: relative;
-
-            & > .dropdown-menu {
-                top: 0;
-                left: 100%;
-            }
-            .field_selection::before {
-                font-family: FontAwesome;
-                content: "";
-                width: 3px;
-                float: right;
-                margin-left: 10px;
-                margin-right: -10px;
-            }
-            &:hover > .dropdown-menu {
-                display: block;
-            }
-        }
+    .o_pivot_field_selection::after {
+        .o-caret-right;
+        position: absolute;
+        right: 6px;
+        top: 9px;
     }
 }
