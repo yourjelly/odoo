@@ -13,12 +13,24 @@
 <t t-name="KanbanView.Group">
     <div class="o_kanban_group">
         <div class="o_kanban_header">
-            <span><t t-esc="widget.title"/></span>
+            <span class="o_column_title"><t t-esc="widget.title"/></span>
             <!-- <span class="o-kanban-count pull-right"><t t-esc="widget.data_records.length"/></span> -->
+            <span class="o_column_unfold"><i class="fa fa-arrows-h"/></span>
+            <span class="o_kanban_config dropdown" title="Options">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-gear"/></a>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a class="o_kanban_toggle_fold" href="#">Fold</a></li>
+                    <t t-if="widget.view.grouped_by_m2o and widget.value">
+                        <li t-if="widget.view.is_action_enabled('group_edit')"><a data-action="edit" href="#">Edit</a></li>
+                        <li t-if="widget.view.is_action_enabled('group_delete')"><a data-action="delete" href="#">Delete</a></li>
+                    </t>
+                    <li class="divider"></li>
+                    <li class="o_kanban_number">Records: <t t-esc="widget.data_records.length"/></li>
+                </ul>
+            </span>
             <t t-if="widget.options.quick_create">
-                <span class="o_kanban_add pull-right" title="Quick create"><i class="fa fa-plus"/></span>
+                <span class="o_kanban_add" title="Quick create"><i class="fa fa-plus"/></span>
             </t>
-            <span class="o_kanban_config pull-right" title="Options"><i class="fa fa-gear"/></span>
         </div>
     </div>
 </t>

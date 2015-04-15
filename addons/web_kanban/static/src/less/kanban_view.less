@@ -2,7 +2,7 @@
 .o_kanban_view {
     .o-flex-display();
     align-content: stretch;
-    padding: 8px;
+    padding: 0 8px;
     @media (max-width: @grid-float-breakpoint) {
         padding: 0px;
     }
@@ -69,7 +69,7 @@
         padding: 5px;
 
         &.o_kanban_empty {
-            background-color: @odoo-main-text-color;
+            background-color: @gray-light;
             margin-left: 8px;
             margin-right: 8px;
         }
@@ -84,15 +84,32 @@
         .o_kanban_header {
             color: white;
             padding: 8px;
+            display:flex;
+            .o_column_unfold {
+                display: none;
+            }
+            .o_column_title {
+                font-size: 18px;
+                font-weight: lighter;
+                flex-grow: 1;
+                white-space: nowrap;
+            }
 
             .o_kanban_add i {
-                background-color: @odoo-brand-optional;
+                &:hover {
+                    background-color: @odoo-brand-optional;
+                }
                 padding: 5px;
                 cursor: pointer;
             }
             .o_kanban_config i {
                 padding: 5px;
-                cursor: pointer;
+                color: white;
+            }
+
+            .o_kanban_number {
+                color: @odoo-main-text-color;
+                text-align: center;
             }
         }
 
@@ -100,6 +117,27 @@
             &.o_kanban_dragged {
                 visibility: hidden;
             }
+        }
+
+        &.o_column_folded {
+            position: relative;
+            .o_column_title {
+                text-transform: uppercase;
+                transform-origin: left bottom;
+                transform: rotate(90deg);
+                top: 40px;
+                left: 15px;
+                position: absolute;
+            }
+            .o_kanban_record, .o_kanban_add, .o_kanban_config {
+                display: none;
+            }
+            .o_column_unfold {
+                display: block;
+                padding: 0 10px;
+                cursor: pointer;
+            }
+            background-color: @gray-light;
         }
     }
 }

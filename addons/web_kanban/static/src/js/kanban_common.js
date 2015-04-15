@@ -568,6 +568,15 @@ var KanbanRecord = Widget.extend({
 var KanbanColumn = Widget.extend({
     template: "KanbanView.Group",
 
+    events: {
+        'click .o_kanban_toggle_fold': 'toggle_fold',
+        'click .o_column_unfold': function (e) {
+            e.preventDefault();
+            this.folded = false;
+            this.update_column();
+        },
+    },
+
     init: function(parent, group_data, draggable, options) {
         this._super(parent);
         this.parent = parent;
@@ -581,6 +590,7 @@ var KanbanColumn = Widget.extend({
         this.value = group_data.attributes.value[0];
         this.draggable = draggable;
         this.options = options;
+        this.folded = group_data.attributes.folded;
     },
 
     start: function() {
@@ -597,13 +607,18 @@ var KanbanColumn = Widget.extend({
             record.$el.data('record', record);
             this.records.push(record);
         }
-        this.check_column();
+        this.update_column();
         this.$el.data('column', this);
     },
 
-    check_column: function () {
+    update_column: function () {
         this.$el.toggleClass('o_kanban_empty', this.records.length === 0);
+
+        var title = this.folded ? this.title + ' (' + this.records.length + ')' : this.title;
+        this.$header.find('.o_column_title').text(title);
         this.$header.find('.o-kanban-count').text(this.records.length);
+
+        this.$el.toggleClass('o_column_folded', this.folded);
     },
 
     swap_record: function (rec1, rec2) {
@@ -628,31 +643,34 @@ var KanbanColumn = Widget.extend({
         record.$el.detach();
         var index = this.records.indexOf(record);
         this.records.splice(index, 1);
-        this.check_column();
+        this.update_column();
     },
 
-    insert_after: function (record, new_record) {
-        new_record.$el.insertAfter(record.$el);
-        var index = this.records.indexOf(record);
-        this.records.splice(index, 0, new_record);
-        new_record.setParent(this);
-        this.check_column();
-    },
-
-    insert_before: function (record, new_record) {
-        new_record.$el.insertBefore(record.$el);
-        var index = this.records.indexOf(record);
-        this.records.splice(index, 1, new_record, record);
-        new_record.setParent(this);
-        this.check_column();
-    },
-
-    insert: function (new_record) {
-        new_record.$el.appendTo(this.$el);
+    insert: function (new_record, options) {
+        var index;
+        options = options || {};
+        if ('after' in options) {
+            index = this.records.indexOf(record);
+            new_record.$el.insertAfter(options.after.$el);
+            this.records.splice(index, 0, new_record);
+        } else if ('before' in options) {
+            index = this.records.indexOf(record);
+            new_record.$el.insertBefore(options.after.$el);
+            this.records.splice(index, 1, new_record);
+        } else {
+            new_record.$el.appendTo(this.$el);
+            this.records.push(new_record);
+        }
         this.$el.removeClass('o_kanban_empty');
-        this.records.push(new_record);
         new_record.setParent(this);
-        this.check_column();
+        this.folded = false;
+        this.update_column();
+    },
+
+    toggle_fold: function (e) {
+        e.preventDefault();
+        this.folded = !this.folded;
+        this.update_column();
     },
 });
 

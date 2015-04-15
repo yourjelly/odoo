@@ -61,7 +61,7 @@ var KanbanView = View.extend({
         this.group_by_field = undefined;
         this.column_dragged = undefined;
         this.default_group_by = undefined;
-        this.grouped_by_m2ot = undefined;
+        this.grouped_by_m2o = undefined;
         this.relation = undefined;
 
         this.dnd = {
@@ -527,9 +527,9 @@ var KanbanView = View.extend({
                 origin.remove(this.dnd.record);
 
                 if (event.pageY > record.$el.offset().top + record.$el.height() / 2) {
-                    column.insert_after(record, this.dnd.record);
+                    column.insert(record, {after: this.dnd.record});
                 } else {
-                    column.insert_before(record, this.dnd.record);
+                    column.insert(record, {before: this.dnd.record});
                 }
 
             } else {
