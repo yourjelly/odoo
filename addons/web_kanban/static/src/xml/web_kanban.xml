@@ -1,16 +1,5 @@
 <template>
-<t t-name="KanbanView">
-    <div class="oe_kanban_view">
-        <table class="oe_kanban_groups">
-        <tr class="oe_kanban_groups_headers">
-            <td class="oe_kanban_dummy_cell"><div/></td>
-        </tr>
-        <tr class="oe_kanban_groups_records">
-            <td class="oe_kanban_dummy_cell"><div/></td>
-        </tr>
-        </table>
-    </div>
-</t>
+
 <t t-name="KanbanView.buttons">
     <t t-if="display">
         <div>
@@ -20,11 +9,16 @@
         </div>
     </t>
 </t>
+
 <t t-name="KanbanView.Group">
     <div class="o_kanban_group">
         <div class="o_kanban_header">
             <span><t t-esc="widget.title"/></span>
-            <span class="o-kanban-count pull-right"><t t-esc="widget.data_records.length"/></span>
+            <!-- <span class="o-kanban-count pull-right"><t t-esc="widget.data_records.length"/></span> -->
+            <t t-if="widget.options.quick_create">
+                <span class="o_kanban_add pull-right" title="Quick create"><i class="fa fa-plus"/></span>
+            </t>
+            <span class="o_kanban_config pull-right" title="Options"><i class="fa fa-gear"/></span>
         </div>
     </div>
 </t>
@@ -70,16 +64,7 @@
         </t>
     </td>
 </t>
-<t t-name="KanbanView.group_records_container">
-    <td class="oe_kanban_column">
-        <div class="oe_kanban_group_list_header"/>
-        <div class="oe_kanban_column_cards"/>
-        <div class="oe_kanban_folded_column_cards"/>
-        <div class="oe_kanban_show_more">
-            <button class="oe_button">Show more... (<span class="oe_kanban_remaining"></span> remaining)</button>
-        </div>
-    </td>
-</t>
+
 <t t-name="KanbanView.record">
     <div class="o_kanban_record">
         <t t-raw="content"/>

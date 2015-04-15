@@ -568,7 +568,7 @@ var KanbanRecord = Widget.extend({
 var KanbanColumn = Widget.extend({
     template: "KanbanView.Group",
 
-    init: function(parent, group_data, draggable) {
+    init: function(parent, group_data, draggable, options) {
         this._super(parent);
         this.parent = parent;
         this.view = parent;
@@ -580,6 +580,7 @@ var KanbanColumn = Widget.extend({
         this.id = group_data.id;
         this.value = group_data.attributes.value[0];
         this.draggable = draggable;
+        this.options = options;
     },
 
     start: function() {

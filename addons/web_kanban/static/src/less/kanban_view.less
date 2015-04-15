@@ -32,11 +32,12 @@
 
         .oe_kanban_details {
             display: inline-block;
+            flex-shrink: 1;
         }
 
         .oe_kanban_vignette {
             display: flex;
-            > * {
+            .o_kanban_image {
                 flex-shrink: 0;
             }
         }
@@ -83,6 +84,16 @@
         .o_kanban_header {
             color: white;
             padding: 8px;
+
+            .o_kanban_add i {
+                background-color: @odoo-brand-optional;
+                padding: 5px;
+                cursor: pointer;
+            }
+            .o_kanban_config i {
+                padding: 5px;
+                cursor: pointer;
+            }
         }
 
         .o_kanban_record {
@@ -124,3 +135,8 @@
     display: none;
 }
 
+
+// fixme... this should this somewhere else
+.oe_partner_heading, .oe_kanban_partner_categories {
+    display: inline-block
+}

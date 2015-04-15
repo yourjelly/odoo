@@ -38,6 +38,14 @@ var KanbanView = View.extend({
 
     init: function (parent, dataset, view_id, options) {
         this._super(parent, dataset, view_id, options);
+        _.defaults(this.options, {
+            "quick_creatable": true,
+            "creatable": true,
+            "create_text": undefined,
+            "read_only_mode": false,
+            "confirm_on_delete": true,
+        });
+
         this.qweb = new QWeb2.Engine();
         this.qweb.debug = session.debug;
         this.qweb.default_dict = _.clone(QWeb.default_dict);
@@ -102,6 +110,7 @@ var KanbanView = View.extend({
     load_data: function () {
         return this.grouped ? this.load_groups() : this.load_records();
     },
+
     load_records: function () {
         var self = this;
         return this.dataset
@@ -197,6 +206,19 @@ var KanbanView = View.extend({
                 .done(this.proxy('render'));
         });
         this.update_pager();
+    },
+
+    _is_quick_create_enabled: function() {
+        if (!this.options.quick_creatable || !this.is_action_enabled('create'))
+            return false;
+        if (this.fields_view.arch.attrs.quick_create !== undefined)
+            return JSON.parse(this.fields_view.arch.attrs.quick_create);
+        return !! this.grouped;
+    },
+    is_action_enabled: function(action) {
+        if (action === 'create' && !this.options.creatable)
+            return false;
+        return this._super(action);
     },
 
     transform_qweb_template: function(node) {
@@ -327,8 +349,11 @@ var KanbanView = View.extend({
 
         if (this.grouped) {
             var groups = this.data;
+            var options = {
+                quick_create: this._is_quick_create_enabled(),
+            };
             _.each(groups, function (group) {
-                var column = new kanban_common.KanbanColumn(self, group, self.relation);
+                var column = new kanban_common.KanbanColumn(self, group, self.relation, options);
                 column.appendTo(fragment);
                 self.widgets.push(column);
             });
