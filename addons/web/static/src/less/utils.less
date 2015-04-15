@@ -74,6 +74,31 @@
     flex: @flex-grow @flex-schrink @flex-basis;
 }
 
+.o-dropdown-ul() {
+    li {
+        position: relative;
+        > a {
+            padding: 3px 25px;
+            color: @odoo-main-text-color;
+            &:hover {
+                .o-darken(@odoo-main-text-color);
+            }
+        }
+        &.selected {
+            > a {
+                .o-darken(@odoo-main-text-color);
+                font-weight: bold;
+                &:before {
+                    font-family: FontAwesome;
+                    position: absolute;
+                    left: 6px;
+                    content: "\f00c";
+                }
+            }
+        }
+    }
+}
+
 // ------------------------------------------------------------------
 // Color utils
 // ------------------------------------------------------------------

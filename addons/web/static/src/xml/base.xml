@@ -578,7 +578,7 @@
 <t t-name="Sidebar">
     <t t-foreach="widget.sections" t-as="section">
         <div class="o-dropdown">
-            <a t-if="section.name != 'buttons'" class="dropdow-toggle" data-toggle="dropdown">
+            <a t-if="section.name != 'buttons'" class="dropdown-toggle" data-toggle="dropdown">
                 <t t-if="section.name == 'files'" t-raw="widget.items[section.name].length || ''"/>
                 <t t-esc="section.label"/> <span class="caret"/>
             </a>
@@ -1593,7 +1593,7 @@
 </t>
 
 <div t-name="SearchView.FilterMenu" class="o-dropdown">
-    <a class="dropdow-toggle" data-toggle="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown">
         <span class="fa fa-filter"/> Filters <span class="caret"/>
     </a>
     <ul class="dropdown-menu o-filters-menu" role="menu">
@@ -1710,7 +1710,7 @@
 </t>
 
 <div t-name="SearchView.GroupByMenu" class="o-dropdown">
-    <a class="dropdow-toggle" data-toggle="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown">
         <span class="fa fa-bars"/> Group By <span class="caret"/>
     </a>
     <ul class="dropdown-menu o-group-by-menu" role="menu">
@@ -1732,7 +1732,7 @@
 </t>
 
 <div t-name="SearchView.FavoriteMenu" class="o-dropdown">
-    <a class="dropdow-toggle" data-toggle="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown">
         <span class="fa fa-star"/> Favorites <span class="caret"/>
     </a>
     <ul class="dropdown-menu o-favorites-menu" role="menu">

@@ -165,29 +165,6 @@
             top: auto;
         }
     }
-    // Selected item in dropdowns (for action buttons and searchview)
-    li {
-        position: relative;
-        > a {
-            padding: 3px 25px;
-            color: @odoo-main-text-color;
-            &:hover {
-                .o-darken(@odoo-main-text-color);
-            }
-        }
-        &.selected {
-            > a {
-                .o-darken(@odoo-main-text-color);
-                font-weight: bold;
-                &:before {
-                    font-family: FontAwesome;
-                    position: absolute;
-                    left: 6px;
-                    content: "\f00c";
-                }
-            }
-        }
-    }
 
     // Unfortunately needed for the bounce effect
     .o-form-buttons-view {
@@ -270,6 +247,8 @@
 
         // Filters
         .o-filters-menu {
+            .o-dropdown-ul();
+
             .o-filter-condition {
                 .o-search-options-dropdown-custom-li;
                 .o-or-filter { // or between conditions
@@ -312,6 +291,8 @@
 
         // Group By
         .o-group-by-menu {
+            .o-dropdown-ul();
+
             .divider {display: none;} // hide the divider by default (no group)
             .o-add-group { // add button
                 display: none;  // Needed by the webclient
@@ -321,6 +302,8 @@
 
         // Favorites
         .o-favorites-menu {
+            .o-dropdown-ul();
+
             .divider {display: none;} // hide the divider by default (no favorite)
             .o-searchview-custom-private, .o-searchview-custom-public {
                 .o-remove-filter {
