@@ -70,7 +70,6 @@ var View = Widget.extend({
         _.defaults(this.options, {
             // All possible views options should be defaulted here
             $sidebar: null,
-            sidebar_id: null,
             action: null,
             action_views_ids: {}
         });

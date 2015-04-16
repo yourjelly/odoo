@@ -131,7 +131,6 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
                        80);
     },
     view_loading: function(r) {
-
         return this.load_list(r);
     },
     set_default_options: function (options) {
