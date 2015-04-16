@@ -422,7 +422,7 @@
             <field name="context">{"search_default_customer":1}</field>
             <field name="search_view_id" ref="view_res_partner_filter"/>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to add a contact in your address book.
               </p><p>
                 Odoo helps you easily track all activities related to
@@ -462,7 +462,7 @@
             <field name="context">{'default_customer':1, 'search_default_customer':1}</field>
             <field name="filter" eval="True"/>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to add a contact in your address book.
               </p><p>
                 Odoo helps you easily track all activities related to
@@ -482,7 +482,7 @@
             <field name="context">{'search_default_supplier': 1,'default_customer': 0,'default_supplier': 1}</field>
             <field name="filter" eval="True"/>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to add a contact in your address book.
               </p><p>
                 Odoo helps you easily track all activities related to
@@ -581,7 +581,7 @@
             <field name="res_model">res.partner.category</field>
             <field name="view_type">form</field>
             <field name="help" type="html">
-                <p class="oe_view_nocontent_create">
+                <p class="o_view_nocontent_create">
                     Click to create a new partner category.
                 </p>
                 <p>

@@ -83,7 +83,7 @@
             <field name="context">{"search_default_in_progress" : True,}</field>
             <field name="search_view_id" ref="view_picking_wave_filter"/>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to create a Picking Wave. 
               </p><p>
                 The Goal of the picking waves is to group operations that may 

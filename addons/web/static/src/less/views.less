@@ -1,0 +1,15 @@
+.o-view-manager-content {
+    .o_view_nocontent {
+        margin: 10px @odoo-horizontal-padding;
+        padding: 15px 10px 10px 10px;
+        color: white;
+        background-color: darken(@odoo-main-color-muted, 10%);
+        max-width: 500px;
+        .o_view_nocontent_create {
+            font-weight: bold;
+        }
+    }
+    .o_cannot_create .o_view_nocontent_create {
+       display: none;
+    }
+}

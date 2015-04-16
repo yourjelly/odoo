@@ -52,7 +52,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to create a new bank.
               </p><p>
                 Manage bank records you want to be used in the system.
@@ -169,7 +169,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to create a bank account.
               </p><p>
                 Configure your company's bank accounts and select those that must appear on the report footer.

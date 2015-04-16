@@ -54,10 +54,9 @@ var View = Widget.extend({
         return this.alive(view_loaded_def).then(function(r) {
             self.fields_view = r;
             // add css classes that reflect the (absence of) access rights
-            self.$el.addClass('oe_view')
-                .toggleClass('oe_cannot_create', !self.is_action_enabled('create'))
-                .toggleClass('oe_cannot_edit', !self.is_action_enabled('edit'))
-                .toggleClass('oe_cannot_delete', !self.is_action_enabled('delete'));
+            self.$el.toggleClass('o_cannot_create', !self.is_action_enabled('create'));
+                    // .toggleClass('o_cannot_edit', !self.is_action_enabled('edit')) // FIXME
+                    // .toggleClass('o_cannot_delete', !self.is_action_enabled('delete')); // FIXME
             return $.when(self.view_loading(r)).then(function() {
                 self.trigger('view_loaded', r);
             });

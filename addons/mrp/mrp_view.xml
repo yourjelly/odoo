@@ -43,7 +43,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to create a group of properties.
               </p><p>
                 Define specific property groups that can be assigned to your
@@ -130,7 +130,7 @@
             <field name="view_mode">tree,form</field>
             <field name="search_view_id" ref="view_mrp_property_search"/>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to create a new property.
               </p><p>
                 The Properties in Odoo are used to select the right bill of
@@ -340,7 +340,7 @@
             <field name="view_id" ref="mrp_routing_tree_view"/>
             <field name="search_view_id" ref="mrp_routing_search_view"/>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to create a Work Order Operations.
               </p><p>
                 Work Order Operations allow you to create and manage the manufacturing
@@ -480,7 +480,7 @@
             <field name="view_type">form</field>
             <field name="search_view_id" ref="view_mrp_bom_filter"/>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to create a bill of material. 
               </p><p>
                 Bills of Materials allow you to define the list of required raw
@@ -921,7 +921,7 @@
             <field name="search_view_id" ref="view_mrp_production_filter"/>
             <field name="context">{}</field>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to create a manufacturing order. 
               </p><p>
                 A manufacturing order, based on a bill of materials, will
@@ -944,7 +944,7 @@
             <field name="view_mode">calendar,tree,form,pivot,graph</field>
             <field name="domain">[('state','in',('ready','confirmed','in_production'))]</field>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to start a new manufacturing order. 
               </p><p>
                 A manufacturing order, based on a bill of materials, will
@@ -1053,7 +1053,7 @@
             <field name="view_id" ref="mrp_workcenter_tree_view"/>
             <field name="search_view_id" ref="view_mrp_workcenter_search"/>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to add a work center.
               </p><p>
                 Work Centers allow you to create and manage manufacturing

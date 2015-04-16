@@ -62,7 +62,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to add a Restaurant Floor.
               </p><p>
                 A restaurant floor represents the place where customers are served, this is where you can
@@ -123,7 +123,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to add a Restaurant Order Printer.
               </p><p>
                 Order Printers are used by restaurants and bars to print the

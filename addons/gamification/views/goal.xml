@@ -9,7 +9,7 @@
             <field name="view_mode">tree,form,kanban</field>
             <field name="context">{'search_default_group_by_user': True, 'search_default_group_by_definition': True}</field>
             <field name="help" type="html">
-                <p class="oe_view_nocontent_create">
+                <p class="o_view_nocontent_create">
                     Click to create a goal. 
                 </p>
                 <p>
@@ -202,7 +202,7 @@
             <field name="res_model">gamification.goal.definition</field>
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
-                <p class="oe_view_nocontent_create">
+                <p class="o_view_nocontent_create">
                     Click to create a goal definition. 
                 </p>
                 <p>

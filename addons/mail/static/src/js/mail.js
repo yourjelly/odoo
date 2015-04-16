@@ -1352,7 +1352,7 @@ var Thread = Widget.extend({
         if (this.options.help) {
             no_message.html(this.options.help);
         }
-        if (!this.$el.find(".oe_view_nocontent").length)
+        if (!this.$el.find(".o_view_nocontent").length)
         {
             no_message.appendTo(this.$el);
         }
@@ -1454,7 +1454,7 @@ var Thread = Widget.extend({
             this.compose_message.do_show_compact();
         }
 
-        this.$('.oe_view_nocontent').remove();
+        this.$('.o_view_nocontent').remove();
         if (dom_insert_after && dom_insert_after.parent()[0] == self.$el[0]) {
             message.insertAfter(dom_insert_after);
         } else if (prepend) {

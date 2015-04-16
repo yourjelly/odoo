@@ -1410,19 +1410,19 @@
 .openerp .oe_pager_value {
   display: inline-block;
 }
-.openerp .oe_view_nocontent {
+.openerp .o_view_nocontent {
   padding: 15px;
   margin-top: 0;
   color: #777777;
   font-size: 125%;
   max-width: 700px;
 }
-.openerp .oe_view_nocontent .oe_view_nocontent_create {
+.openerp .o_view_nocontent .o_view_nocontent_create {
   margin-top: 0;
   padding-top: 35px;
   color: #4c4c4c;
 }
-.openerp .oe_view_nocontent .oe_view_nocontent_create:before {
+.openerp .o_view_nocontent .o_view_nocontent_create:before {
   content: "";
   display: inline-block;
   position: absolute;
@@ -1432,17 +1432,17 @@
   margin-top: -50px;
   background: transparent url(/web/static/src/img/view_empty_arrow.png) no-repeat 0px 0px;
 }
-.openerp .oe_view_nocontent > p {
+.openerp .o_view_nocontent > p {
   padding-left: 78px;
 }
-.openerp .oe_view_nocontent .oe_empty_custom_dashboard {
+.openerp .o_view_nocontent .oe_empty_custom_dashboard {
   background: transparent url(/web/static/src/img/graph_background.png) no-repeat 0 0;
   margin-top: -15px;
   padding: 100px 0 0 137px;
   min-height: 327px;
   margin-left: -15px;
 }
-.openerp .oe_view.oe_cannot_create .oe_view_nocontent_create {
+.openerp .oe_view.oe_cannot_create .o_view_nocontent_create {
   display: none;
 }
 .openerp .o-dashboard .oe_graph svg {

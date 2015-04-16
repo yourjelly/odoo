@@ -12,7 +12,7 @@
             <field name="search_view_id" ref="crm_claim.view_crm_case_claims_filter"/>
             <field name="target">current</field>
             <field name="help"  type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to register a new claim. 
               </p><p>
                 You can track your claims from this menu and the action we

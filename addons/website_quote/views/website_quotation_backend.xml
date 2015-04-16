@@ -149,7 +149,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
-                <p class="oe_view_nocontent_create">
+                <p class="o_view_nocontent_create">
                     Click here to create your template.
                 </p><p>
                     Use templates to create polished, professional quotes in minutes.
@@ -161,7 +161,7 @@
 
         <record id="sale.action_quotations" model="ir.actions.act_window">
             <field name="help" type="html">
-                <p class="oe_view_nocontent_create">
+                <p class="o_view_nocontent_create">
                     Click to create a quotation, the first step of a new sale.
                 </p><p>
                     Odoo will help you handling efficiently the complete sale flow:

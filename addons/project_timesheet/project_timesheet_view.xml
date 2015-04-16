@@ -134,7 +134,7 @@
             <field name="domain">[('type','=','normal')]</field>
             <field name="search_view_id" ref="account_analytic_analysis.view_account_analytic_account_overdue_search"/>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to add a customer contract.
               </p><p>
                 You will find here the contracts related to your customer

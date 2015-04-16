@@ -132,7 +132,7 @@
             <field name="search_view_id" ref="lunch_order_view_search"/>
             <field name="context">{"search_default_is_mine":1}</field>
             <field name="help" type="html">
-            <p class="oe_view_nocontent_create">
+            <p class="o_view_nocontent_create">
                 Click to create a lunch order.
             </p>
             <p>
@@ -223,14 +223,14 @@
             <field name="context">{"search_default_group_by_user":1}</field>
             <field name="view_id" ref="lunch_cashmove_view_tree"/>
             <field name="help" type="html">
-                <p class="oe_view_nocontent_create">
-                Click to create a new payment.
-            </p>
-              <p>
-                A cashmove can either be an expense or a payment.<br/>
-                An expense is automatically created at the order receipt.<br/>
-                A payment represents the employee reimbursement to the company.
-              </p>
+                <p class="o_view_nocontent_create">
+                    Click to create a new payment.
+                </p>
+                <p>
+                    A cashmove can either be an expense or a payment.<br/>
+                    An expense is automatically created at the order receipt.<br/>
+                    A payment represents the employee reimbursement to the company.
+                </p>
             </field>
         </record>
         <menuitem name="Control Accounts" parent="menu_lunch_admin" id="lunch_cashmove_menu_control_accounts" action="lunch_cashmove_action_control_accounts"/>
@@ -244,12 +244,12 @@
             <field name="context">{"search_default_is_payment":1}</field>
             <field name="view_id" ref="lunch_cashmove_view_tree"/>
             <field name="help" type="html">
-                <p class="oe_view_nocontent_create">
-                Click to create a payment.
-            </p>
-              <p>
-                Here you can see the employees' payment. A payment is a cash move from the employee to the company.
-              </p>
+                <p class="o_view_nocontent_create">
+                    Click to create a payment.
+                </p>
+                <p>
+                    Here you can see the employees' payment. A payment is a cash move from the employee to the company.
+                </p>
             </field>
         </record>
         <menuitem name="Employee Payments" parent="menu_lunch_admin" id="lunch_cashmove_menu_payment" action="lunch_cashmove_action_payment"/>
@@ -260,12 +260,12 @@
             <field name="res_model">lunch.product</field>
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
-                <p class="oe_view_nocontent_create">
-                Click to create a product for lunch.
-            </p>
-              <p>
-                A product is defined by its name, category, price and supplier.
-              </p>
+                <p class="o_view_nocontent_create">
+                    Click to create a product for lunch.
+                </p>
+                <p>
+                    A product is defined by its name, category, price and supplier.
+                </p>
             </field>
         </record>
         <menuitem name="Products" parent="menu_lunch_config" id="lunch_product_menu" action="lunch_product_action"/>
@@ -276,12 +276,12 @@
             <field name="res_model">lunch.product.category</field>
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
-                <p class="oe_view_nocontent_create">
-                Click to create a lunch category.
-            </p>
-              <p>
-                Here you can find every lunch categories for products.
-              </p>
+                <p class="o_view_nocontent_create">
+                    Click to create a lunch category.
+                </p>
+                <p>
+                    Here you can find every lunch categories for products.
+                </p>
             </field>
         </record>
 
@@ -306,19 +306,19 @@
             <field name="view_mode">tree,form</field>
             <field name="search_view_id" ref="lunch_alert_view_search"/>
             <field name="help" type="html">
-                <p class="oe_view_nocontent_create">
-                Click to create a lunch alert.
-            </p>
-              <p>
-                Alerts are used to warn employee from possible issues concerning the lunch orders.
-                To create a lunch alert you have to define its recurrency, the time interval during which the alert should be executed and the message to display.
-            </p>
-            <p>
-                Example: <br/>
-                - Recurency: Everyday<br/>
-                - Time interval: from 00h00 am to 11h59 pm<br/>
-                - Message: "You must order before 10h30 am"
-              </p>
+                <p class="o_view_nocontent_create">
+                    Click to create a lunch alert. 
+                </p>
+                <p>
+                    Alerts are used to warn employee from possible issues concerning the lunch orders.
+                    To create a lunch alert you have to define its recurrency, the time interval during which the alert should be executed and the message to display.
+                </p>
+                <p>
+                    Example: <br/>
+                    - Recurency: Everyday<br/>
+                    - Time interval: from 00h00 am to 11h59 pm<br/>
+                    - Message: "You must order before 10h30 am"
+                </p>
             </field>
         </record>
         <menuitem name="Alerts" parent="menu_lunch_config" id="lunch_alert_menu" action="lunch_alert_action" />

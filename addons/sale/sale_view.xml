@@ -339,7 +339,7 @@
             <field name="context">{}</field>
             <field name="domain">[('state', 'not in', ('draft', 'sent', 'cancel'))]</field>
             <field name="help" type="html">
-                <p class="oe_view_nocontent_create">
+                <p class="o_view_nocontent_create">
                     Click to create a quotation that can be converted into a sales
                     order.
                 </p><p>
@@ -384,7 +384,7 @@
             <field name="domain">[('state','in',('draft','sent','cancel'))]</field>
             <field name="search_view_id" ref="view_sales_order_filter"/>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to create a quotation, the first step of a new sale.
               </p><p>
                 Odoo will help you handling efficiently the complete sale flow:
@@ -654,7 +654,7 @@
                 }
             </field>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to create a quotation that can be converted into a sales
                 order.
               </p><p>
@@ -694,7 +694,7 @@
             <field name="domain">[('state','in',('draft','sent','cancel'))]</field>
             <field name="search_view_id" ref="sale.view_sales_order_filter"/>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to create a quotation, the first step of a new sale.
               </p><p>
                 Odoo will help you handling efficiently the complete sale flow:

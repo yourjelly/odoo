@@ -182,7 +182,7 @@
             <field name="search_view_id" ref="view_res_partner_member_filter"/>
             <field name="context">{"search_default_all_members": 1, "default_free_member": True}</field>
             <field name="help" type="html">
-                <p class="oe_view_nocontent_create">
+                <p class="o_view_nocontent_create">
                   Click to add a new Member
                 </p><p>
                  Odoo helps you easily track all activities related to a member: 

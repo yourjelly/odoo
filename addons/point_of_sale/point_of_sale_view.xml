@@ -109,7 +109,7 @@
             <field name="view_id" eval="False"/>
             <field name="domain">[]</field>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to create a new order.
               </p><p>
                 Use this menu to browse previous orders. To record new
@@ -173,7 +173,7 @@
             <field name="search_view_id" eval="False"/> <!-- Force empty -->
             <field name="view_id" eval="False"/> <!-- Force empty -->
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to add a new product.
               </p><p>
                 You must define a product for everything you sell through
@@ -510,7 +510,7 @@
             <field name="view_mode">tree,form</field>
             <field name="view_id" eval="False"/>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to define a new category.
               </p><p>
                 Categories are used to browse your products through the
@@ -594,7 +594,7 @@
             <field name="context" eval="{'default_journal_user': 1, 'default_type': 'cash'}"/>
             <field name="domain">[('journal_user','=', 1)]</field>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to add a payment method.
               </p><p>
                 Payment methods are defined by accounting journals having the
@@ -843,8 +843,8 @@
                                     <field name="cash_register_balance_end" nolabel="1" attrs="{'invisible' : [('state', '=', 'opening_control')]}" class="oe_bold oe_pos_total" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                 </group>
                                 <div class="oe_clear"/>
-                                <div attrs="{'invisible' : ['|', ('cash_journal_id', '=', False), ('state', '!=', 'opening_control')]}" class="oe_view_nocontent" groups="point_of_sale.group_pos_manager">
-                                    <p class="oe_view_nocontent_create">
+                                <div attrs="{'invisible' : ['|', ('cash_journal_id', '=', False), ('state', '!=', 'opening_control')]}" class="o_view_nocontent" groups="point_of_sale.group_pos_manager">
+                                    <p class="o_view_nocontent_create">
                                     You can define another list of available currencies on the
                                     <i>Cash Registers</i> tab of the <b><field name="cash_journal_id" class="oe_inline"/></b>
                                     payment method.
@@ -924,7 +924,7 @@
             <field name="view_mode">tree,form</field>
             <field name="search_view_id" ref="view_pos_session_search" />
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to start a new session.
               </p><p>
                 A session is a period of time, usually one day, during which

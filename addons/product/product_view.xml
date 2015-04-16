@@ -201,7 +201,7 @@
             <field name="search_view_id" ref="product_search_form_view"/>
             <field name="view_id" eval="False"/> <!-- Force empty -->
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to define a new product.
               </p><p>
                 You must define a product for everything you sell, whether it's
@@ -225,7 +225,7 @@
             <field name="view_id" eval="False"/> <!-- Force empty -->
             <field name="domain" eval="False"/> <!-- Force empty -->
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to define a new product.
               </p><p>
                 You must define a product for everything you sell, whether it's
@@ -326,7 +326,7 @@
             <field name="view_id" ref="product_template_kanban_view"/>
             <field name="context">{"search_default_filter_to_sell":1}</field>
             <field name="help" type="html">
-                <p class="oe_view_nocontent_create">
+                <p class="o_view_nocontent_create">
                     Click to define a new product.
                 </p><p>
                     You must define a product for everything you sell, whether it's a physical product, a consumable or a service you offer to  customers.               
@@ -483,7 +483,7 @@
             <field name="view_id" ref="product_product_tree_view"/>
             <field name="search_view_id" ref="product_search_form_view"/>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to define a new product.
               </p><p>
                 You must define a product for everything you sell, whether it's
@@ -646,7 +646,7 @@
             <field name="view_type">form</field>
             <field name="view_id" ref="product_uom_tree_view"/>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to add a new unit of measure.
               </p><p>
                 You must define a conversion rate between several Units of
@@ -675,7 +675,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to add a new unit of measure category.
               </p><p>
                 Units of measure belonging to the same category can be
@@ -724,7 +724,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to add a new Logistic Unit
               </p><p>
                 The logistic unit defines the container used for the package.  

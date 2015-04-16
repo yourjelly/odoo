@@ -549,13 +549,18 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
             _(ids).each(function (id) {
                 self.records.remove(self.records.get(id));
             });
-            // Load previous page if the current one is empty
-            if (self.records.length === 0 && self.dataset.size() > 0) {
-                self.pager.previous();
-            }
-            // Reload the list view if we are not on the last page
-            if (self.page !== last_page_index) {
-                self.reload();
+            // Hide the table if there is no more record in the dataset
+            if (self.dataset.size() === 0) {
+                self.no_result();
+            } else {
+                // Load previous page if the current one is empty
+                if (self.records.length === 0 && self.dataset.size() > 0) {
+                    self.pager.previous();
+                }
+                // Reload the list view if we are not on the last page
+                if (self.page !== last_page_index) {
+                    self.reload();
+                }
             }
             self.update_pager(self.dataset);
             self.compute_aggregates();
@@ -824,22 +829,23 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
         }
     },
     no_result: function () {
-        this.$el.find('.oe_view_nocontent').remove();
-        if (this.groups.group_by
-            || !this.options.action
-            || !this.options.action.help) {
+        this.$el.find('.o_view_nocontent').remove();
+        if (this.groups.group_by ||
+            !this.options.action ||
+            !this.options.action.help) {
             return;
         }
-        this.$el.find('table:first').hide();
+        this.$('table:first').hide();
         this.$el.prepend(
-            $('<div class="oe_view_nocontent">').html(this.options.action.help)
+            $('<div class="o_view_nocontent">').html(this.options.action.help)
         );
-        if (this.$buttons) {
-            var $buttons = this.$buttons;
-            this.$el.find('.oe_view_nocontent').click(function() {
-                $buttons.width($buttons.width() + 1).openerpBounce();
-            });
-        }
+
+        var self = this;
+        this.$('.o_view_nocontent').click(function() {
+            if (self.$buttons) {
+                self.$buttons.width(self.$buttons.width() + 1).openerpBounce();
+            }
+        });
     }
 });
 core.view_registry.add('list', ListView);

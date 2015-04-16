@@ -35,16 +35,16 @@
                         class="oe_highlight"
                     />
 
-                    <div attrs="{'invisible' : ['|', ('pos_state', '!=', False),('pos_config_id','=',False)]}" class="oe_view_nocontent">
-                        <p class="oe_view_nocontent_create">
+                    <div attrs="{'invisible' : ['|', ('pos_state', '!=', False),('pos_config_id','=',False)]}" class="o_view_nocontent">
+                        <p class="o_view_nocontent_create">
                           Click to start a session.
                         </p><p>
                           You may have to control your cash amount in your cash register, before
                           being able to start selling through the touchscreen interface.
                         </p>
                     </div>
-                    <div attrs="{'invisible' : [('pos_state', '!=', 'opened')]}" class="oe_view_nocontent">
-                        <p class="oe_view_nocontent_create">
+                    <div attrs="{'invisible' : [('pos_state', '!=', 'opened')]}" class="o_view_nocontent">
+                        <p class="o_view_nocontent_create">
                             Click to continue the session.
                         </p>
                         <p>

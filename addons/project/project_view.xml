@@ -65,7 +65,7 @@
             }</field>
             <field name="search_view_id" ref="view_task_search_form"/>
             <field name="help" type="html">
-                <p class="oe_view_nocontent_create">
+                <p class="o_view_nocontent_create">
                     Here, you can create new tasks
                 </p>
                 <p>
@@ -237,7 +237,7 @@
             <field name="search_view_id" ref="view_project_project_filter"/>
             <field name="context">{'search_default_Current': 1}</field>
             <field name="help" type="html">
-                <p class="oe_view_nocontent_create">
+                <p class="o_view_nocontent_create">
                     Create a new project.
                 </p><p>
                     Organize your activities (plan tasks, track issues, invoice timesheets) for internal, personal or customer projects.
@@ -602,7 +602,7 @@
             <field name="view_type">form</field>
             <field name="view_id" ref="task_type_tree"/>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to add a stage in the task pipeline.
               </p><p>
                 Define the steps that will be used in the project from the
@@ -677,7 +677,7 @@
             <field name="res_model">project.tags</field>
             <field name="view_type">form</field>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to add a new tag.
               </p>
             </field>

@@ -532,7 +532,7 @@ var PivotView = View.extend({
                 .find('table')
                     .remove()
                     .end()
-                .find('.oe_view_nocontent')
+                .find('.o_view_nocontent')
                     .remove()
                     .end();
     },

@@ -174,7 +174,7 @@
         <field name="context">{"search_default_user_id":uid}</field>
         <field name="search_view_id" ref="view_purchase_requisition_filter"/>
         <field name="help" type="html">
-          <p class="oe_view_nocontent_create">
+          <p class="o_view_nocontent_create">
             Click to start a new Call for Tenders process. 
           </p><p>
             A Call for Tenders is a procedure for generating competing offers from

@@ -267,7 +267,7 @@ ListView.include(/** @lends instance.web.ListView# */{
         var self = this;
         if (this.editable()) {
             this.$el.find('table:first').show();
-            this.$el.find('.oe_view_nocontent').remove();
+            this.$el.find('.o_view_nocontent').remove();
             this.start_edition();
         } else {
             this._super();

@@ -52,8 +52,8 @@
                 </tr>
             </table>
             <div t-if="widget.accounts.length == 0">
-                <div class="oe_view_nocontent">
-                    <p class="oe_view_nocontent_create">
+                <div class="o_view_nocontent">
+                    <p class="o_view_nocontent_create">
                         Click to add projects, contracts or analytic accounts.
                     </p><p>
                         You will be able to register your working hours and

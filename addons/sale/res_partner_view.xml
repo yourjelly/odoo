@@ -9,7 +9,7 @@
             <field name="context">{'search_default_partner_id': active_id}</field>
             <field name="groups_id" eval="[(4, ref('base.group_sale_salesman'))]"/>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to create a quotation or sales order for this customer.
               </p><p>
                 Odoo will help you efficiently handle the complete sale flow:

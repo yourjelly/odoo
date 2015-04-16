@@ -96,7 +96,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to define a new deliver method. 
               </p><p>
                 Each carrier (e.g. UPS) can have several delivery methods (e.g.
@@ -162,7 +162,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to create a delivery price list for a specific region.
               </p><p>
                 The delivery price list allows you to compute the cost and

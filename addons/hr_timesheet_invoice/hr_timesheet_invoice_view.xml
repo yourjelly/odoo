@@ -117,7 +117,7 @@
             <field name="view_id" ref="view_hr_timesheet_invoice_factor_tree"/>
             <field name="search_view_id" ref="view_hr_timesheet_invoice_factor_search"/>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to add a new type of invoicing.
             </p><p>
             Odoo allows you to create default invoicing types. You might

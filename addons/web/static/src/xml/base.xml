@@ -973,7 +973,7 @@
     </ul>
 </t>
 
-<div t-name="PivotView.nodata" class="oe_view_nocontent" >
+<div t-name="PivotView.nodata" class="o_view_nocontent" >
     <p><strong>No data to display.</strong></p>
     <p>
         No data available for this pivot table.  Try to add some records, or make sure

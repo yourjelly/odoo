@@ -13,7 +13,7 @@
             <field name="search_view_id" ref="project_issue.view_project_issue_filter"/>
             <field name="target">current</field>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to create an issue.
               </p><p>
                 You can track your issues from this menu and the action we

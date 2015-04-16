@@ -287,7 +287,7 @@ var DashBoard = form_common.FormWidget.extend({
     no_result: function() {
         if (this.view.options.action.help) {
             this.$el.append(
-                $('<div class="oe_view_nocontent">')
+                $('<div class="o_view_nocontent">')
                     .append($('<div>').html(this.view.options.action.help || " "))
             );
         }

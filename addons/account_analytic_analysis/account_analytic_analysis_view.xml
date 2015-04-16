@@ -6,7 +6,7 @@
             <field name="res_model">sale.order</field>
             <field name="src_model">account.analytic.account</field>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to create a quotation that can be converted into a sales
                 order.
               </p><p>
@@ -261,7 +261,7 @@
             <field name="domain">[('type','=','contract')]</field>
             <field name="search_view_id" ref="view_account_analytic_account_overdue_search"/>
             <field name="help" type="html">
-                <p class="oe_view_nocontent_create">
+                <p class="o_view_nocontent_create">
                     Click to create a new contract.
                 </p><p>
                     Use contracts to follow tasks, issues, timesheets or invoicing based on
@@ -324,7 +324,7 @@
             <field name="domain">[('type','=','contract')]</field>
             <field name="search_view_id" ref="view_account_analytic_account_overdue_search"/>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to define a new contract.
               </p><p>
                 You will find here the contracts to be renewed because the
@@ -349,7 +349,7 @@
             <field name="domain">[('type','=','template')]</field>
             <field name="context">{'search_default_type':'template','default_type' : 'template'}</field>
             <field name="help" type="html">
-                <p class="oe_view_nocontent_create">
+                <p class="o_view_nocontent_create">
                     Click here to create a template of contract.
                 </p><p>
                     Templates are used to prefigure contract/project that 

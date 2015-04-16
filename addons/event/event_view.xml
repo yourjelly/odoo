@@ -256,7 +256,7 @@
            <field name="view_mode">kanban,calendar,tree,form</field>
            <field name="context">{"search_default_upcoming":1}</field>
            <field name="search_view_id" ref="view_event_search"/>
-           <field name="help" type="html"><p class="oe_view_nocontent_create">
+           <field name="help" type="html"><p class="o_view_nocontent_create">
     Click to add a new event.
 </p><p>
     Odoo helps you schedule and efficiently organize your events:

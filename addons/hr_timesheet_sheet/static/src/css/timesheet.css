@@ -2,7 +2,7 @@
 .openerp .oe_form_readonly .oe_timesheet_weekly .oe_timesheet_button_add {
   display: none;
 }
-.openerp .oe_form_readonly .oe_timesheet_weekly div.oe_view_nocontent {
+.openerp .oe_form_readonly .oe_timesheet_weekly div.o_view_nocontent {
   display: none;
 }
 .openerp .oe_timesheet_weekly {

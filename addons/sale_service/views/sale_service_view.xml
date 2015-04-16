@@ -53,7 +53,7 @@
             <field name="view_id" ref="product.product_template_kanban_view"/>
             <field name="context">{'search_default_services': 1,'default_auto_create_task':True,'default_sale_ok':True,'default_purchase_ok':False,'default_type':'service'}</field>
             <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
+              <p class="o_view_nocontent_create">
                 Click to define a new service.
               </p><p>
                 Services can be sold on quotations or sales order.

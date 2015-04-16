@@ -158,7 +158,7 @@
             <field name="res_model">event.track</field>
             <field name="view_mode">kanban,tree,form,calendar,graph</field>
             <field name="help" type="html">
-<p class="oe_view_nocontent_create">
+<p class="o_view_nocontent_create">
 Click to add a track.
 </p><p>
     Tracks define the agenda of your event. These can bea talk, a round table, a meeting, etc.
@@ -172,7 +172,7 @@ Click to add a track.
             <field name="view_mode">kanban,tree,form,calendar,graph</field>
             <field name="context">{'search_default_event_id': active_id, 'default_event_id': active_id, 'group_by': 'state'}</field>
             <field name="help" type="html">
-<p class="oe_view_nocontent_create">
+<p class="o_view_nocontent_create">
 Click to add a track.
 </p><p>
 Tracks define the agenda of your event. These can be a talk, a round table, a meeting, etc.
