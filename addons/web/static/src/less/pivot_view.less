@@ -1,7 +1,6 @@
 .o_pivot {
     height: 100%;
     overflow: auto;
-    background-color: @odoo-view-background-color;
 
     // Inform the user that he may click on a cell to be redirected to a list view of the
     // items corresponding to the clicked cell
@@ -13,14 +12,16 @@
     }
 
     table {
+        background-color: @odoo-view-background-color;
         width: auto;  // bootstrap override
 
         th {
             font-weight: normal;  // bootstrap override
+            background-color: lighten(@odoo-brand-secondary, 40%);
         }
 
         .o-pivot-header-cell() {
-            background-color: lighten(@odoo-brand-secondary, 30%);
+            background-color: lighten(@odoo-brand-secondary, 40%);
             cursor: pointer;
             white-space: nowrap;
             .user-select(none);
@@ -65,4 +66,11 @@
         right: 6px;
         top: 9px;
     }
+}
+
+// ------------------------------------------------------------------
+// Control panel buttons
+// ------------------------------------------------------------------
+.o_pivot_measures_list {
+    .o-selected-li;
 }

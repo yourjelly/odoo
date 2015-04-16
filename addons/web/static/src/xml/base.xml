@@ -902,7 +902,7 @@
         <button class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">
             Measures <span class="caret"/>
         </button>
-        <ul class="dropdown-menu o-graph-measures-list">
+        <ul class="dropdown-menu o_graph_measures_list">
             <li t-foreach="measures" t-as="measure" t-att-data-field="measure[0]">
                 <a href="#"><t t-esc="measure[1].string"/></a>
             </li>
