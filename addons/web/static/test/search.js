@@ -1553,10 +1553,10 @@ odoo.define_section('search.advanced', ['web.search_inputs', 'web.SearchView', '
                       'dummy',
                       "only field should be dummy");
                 // operator should be "contains"/'ilike'
-                assert.equal($prop.find('.searchview_extended_prop_op').val(),
+                assert.equal($prop.find('.o-searchview-extended-prop-op').val(),
                       'ilike', "default char operator should be ilike");
                 // put value in
-                $prop.find('.searchview_extended_prop_value input')
+                $prop.find('.o-searchview-extended-prop-value input')
                      .val("stupid value");
                 // validate advanced search
                 $filter_menu.find('button.o-apply-filter').click();
@@ -1583,21 +1583,21 @@ odoo.define_section('search.advanced', ['web.search_inputs', 'web.SearchView', '
                 // open advanced search (not actually useful)
                 $filter_menu.find('.o-add-filter').click();
                 // open second condition
-                $filter_menu.find('a.o-add-condition').click();
+                $filter_menu.find('button.o-add-condition').click();
 
                 // select first proposition
                 var $prop1 = $filter_menu.find('.o-filter-condition:first');
-                $prop1.find('select.searchview_extended_prop_field').val("dummy").change();
-                $prop1.find('select.searchview_extended_prop_op').val('ilike');
-                $prop1.find('.searchview_extended_prop_value input')
+                $prop1.find('select.o-searchview-extended-prop-field').val("dummy").change();
+                $prop1.find('select.o-searchview-extended-prop-op').val('ilike');
+                $prop1.find('.o-searchview-extended-prop-value input')
                      .val("stupid value");
 
                 // select first proposition
                 var $prop2 = $filter_menu.find('.o-filter-condition:last');
                 // need to trigger event manually or op not changed
-                $prop2.find('select.searchview_extended_prop_field').val('id').change();
-                $prop2.find('select.searchview_extended_prop_op').val('=');
-                $prop2.find('.searchview_extended_prop_value input')
+                $prop2.find('select.o-searchview-extended-prop-field').val('id').change();
+                $prop2.find('select.o-searchview-extended-prop-op').val('=');
+                $prop2.find('.o-searchview-extended-prop-value input')
                      .val(42);
                 // validate advanced search
                 $filter_menu.find('button.o-apply-filter').click();
