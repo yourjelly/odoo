@@ -19,7 +19,7 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
      * @param {Array} [views] List of [view_id, view_type]
      * @param {Object} [flags] various boolean describing UI state
      */
-    init: function(parent, dataset, views, flags, action) {
+    init: function(parent, dataset, views, flags, action, options) {
         if (action) {
             flags = action.flags || {};
             if (!('auto_search' in flags)) {
@@ -64,6 +64,12 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
             self.views[view_type] = view_descr;
         });
 
+        if (options && options.state && options.state.view_type) {
+            var view_type = options.state.view_type;
+            var view_descr = this.views[view_type]
+            this.default_view = view_descr && view_descr.multi_record ? view_type : undefined;
+        }
+
         // Listen to event 'switch_view' indicating that the VM must now display view view_type
         this.on('switch_view', this, function(view_type) {
             if (view_type === 'form' && this.active_view && this.active_view.type === 'form') {
@@ -106,7 +112,7 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
         return $.when(main_view_loaded, this.search_view_loaded);
     },
     get_default_view: function() {
-        return this.flags.default_view || this.view_order[0].type;
+        return this.default_view || this.flags.default_view || this.view_order[0].type;
     },
     switch_mode: function(view_type, no_store, view_options) {
         var self = this;
