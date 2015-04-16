@@ -16,7 +16,7 @@
             color: @odoo-brand-optional;
             cursor: pointer;
             &:hover {
-                .o-darken(@odoo-brand-optional);
+                color: darken(@odoo-brand-optional, 10%);
                 text-decoration: none;
             }
         }
@@ -153,12 +153,12 @@
             &:hover {
                 text-decoration: none;
                 font-weight: bold;
-                .o-darken(@odoo-main-text-color);
+                color: darken(@odoo-main-text-color, 10%);
             }
         }
         &.open > a {
             font-weight: bold;
-            .o-darken(@odoo-main-text-color);
+            color: darken(@odoo-main-text-color, 10%);
         }
         .dropdown-menu { // dropdowns position
             left: auto;
@@ -247,7 +247,7 @@
 
         // Filters
         .o-filters-menu {
-            .o-dropdown-ul();
+            .o-selected-li();
 
             .o-filter-condition {
                 .o-search-options-dropdown-custom-li;
@@ -291,7 +291,7 @@
 
         // Group By
         .o-group-by-menu {
-            .o-dropdown-ul();
+            .o-selected-li();
 
             .divider {display: none;} // hide the divider by default (no group)
             .o-add-group { // add button
@@ -302,7 +302,7 @@
 
         // Favorites
         .o-favorites-menu {
-            .o-dropdown-ul();
+            .o-selected-li();
 
             .divider {display: none;} // hide the divider by default (no favorite)
             .o-searchview-custom-private, .o-searchview-custom-public {
