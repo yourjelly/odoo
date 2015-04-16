@@ -1320,15 +1320,15 @@ ListView.Groups = Class.extend( /** @lends instance.web.ListView.Groups# */{
                 $row.click(function (e) {
                     if (!$row.data('open')) {
                         $row.data('open', true)
-                            .find('span.ui-icon')
-                                .removeClass('ui-icon-triangle-1-e')
-                                .addClass('ui-icon-triangle-1-s');
+                            .find('span.fa')
+                                .removeClass('fa-caret-right')
+                                .addClass('fa-caret-down');
                         child.open(self.point_insertion(e.currentTarget));
                     } else {
                         $row.removeData('open')
-                            .find('span.ui-icon')
-                                .removeClass('ui-icon-triangle-1-s')
-                                .addClass('ui-icon-triangle-1-e');
+                            .find('span.fa')
+                                .removeClass('fa-caret-down')
+                                .addClass('fa-caret-right');
                         child.close();
                         // force recompute the selection as closing group reset properties
                         var selection = self.get_selection();
@@ -1373,12 +1373,9 @@ ListView.Groups = Class.extend( /** @lends instance.web.ListView.Groups# */{
 
                 if (group.length && group.openable) {
                     // Make openable if not terminal group & group_by_no_leaf
-                    $group_column.prepend('<span class="ui-icon ui-icon-triangle-1-e" style="float: left;">');
+                    $group_column.prepend('<span class="fa fa-caret-right" style="padding-right: 5px;">');
                 } else {
-                    // Kinda-ugly hack: jquery-ui has no "empty" icon, so set
-                    // wonky background position to ensure nothing is displayed
-                    // there but the rest of the behavior is ui-icon's
-                    $group_column.prepend('<span class="ui-icon" style="float: left; background-position: 150px 150px">');
+                    $group_column.prepend('<span class="fa">');
                 }
             }
             self.indent($group_column, group.level);

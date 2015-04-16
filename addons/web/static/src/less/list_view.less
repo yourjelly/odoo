@@ -1,6 +1,7 @@
 .o-list-view {
     cursor: pointer;
     background-color: @odoo-view-background-color;
+    margin-bottom: 0px;
 
     thead {
         color: @odoo-main-text-color;
@@ -29,5 +30,9 @@
 
     .o-list-record-selector > input {
         margin-left: 3px;
+    }
+
+    .oe_group_header {
+        background-color: lighten(@odoo-list-grey, 10%) !important;
     }
 }
