@@ -4,6 +4,11 @@ var website = openerp.website;
 
 website.if_dom_contains('div.o_website_quote', function () {
 
+    $("[href = '#discussion']").on('click', function(event) {
+        event.preventDefault();
+        $('[name="comment"]').focus();
+    });
+
     $('a.js_update_line_json').on('click', function (ev) {
         ev.preventDefault();
         var $link = $(ev.currentTarget);
