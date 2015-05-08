@@ -27,10 +27,11 @@ from dateutil.relativedelta import relativedelta
 
 
 class FormulaLine(object):
-    def __init__(self, obj, type='balance'):
+    def __init__(self, obj, type='balance', linesDict={}):
         fields = dict((fn, 0.0) for fn in ['debit', 'credit', 'balance'])
         if type == 'balance':
-            fields = obj.get_balance()[0]
+            fields = obj.get_balance(linesDict)[0]
+            linesDict[obj.code] = self
         elif type == 'sum':
             if obj._name == 'account.financial.report.line':
                 fields = obj.get_sum()
@@ -40,9 +41,6 @@ class FormulaLine(object):
                 field_names = ['debit', 'credit', 'balance', 'amount_residual']
                 res = obj.compute_fields(field_names)
                 if res.get(obj.id):
-                    if obj.currency_id != obj.env.user.company_id.currency_id:
-                        for n, v in fields.items():
-                            fields[n] = obj.company_currency_id.compute(v, obj.env.user.company_id.currency_id)
                     for field in field_names:
                         fields[field] = res[obj.id][field]
                     self.amount_residual = fields['amount_residual']
@@ -56,14 +54,17 @@ class FormulaLine(object):
 
 
 class FormulaContext(dict):
-    def __init__(self, reportLineObj, curObj=None, *data):
+    def __init__(self, reportLineObj, linesDict, curObj=None, *data):
         self.reportLineObj = reportLineObj
         self.curObj = curObj
+        self.linesDict = linesDict
         return super(FormulaContext, self).__init__(data)
 
     def __getitem__(self, item):
         if self.get(item):
             return super(FormulaContext, self).__getitem__(item)
+        if self.linesDict.get(item):
+            return self.linesDict[item]
         if item == 'sum':
             res = FormulaLine(self.curObj, type='sum')
             self['sum'] = res
@@ -76,8 +77,8 @@ class FormulaContext(dict):
             return res
         line_id = self.reportLineObj.search([('code', '=', item)], limit=1)
         if line_id:
-            res = FormulaLine(line_id)
-            self[item] = res
+            res = FormulaLine(line_id, linesDict=self.linesDict)
+            self.linesDict[item] = res
             return res
         return super(FormulaContext, self).__getitem__(item)
 
@@ -118,12 +119,18 @@ class ReportAccountFinancialReport(models.Model):
             line_obj = self.env['account.financial.report.line'].search([('id', '=', line_id)])
         if context_id.comparison:
             line_obj = line_obj.with_context(periods=context_id.get_cmp_periods())
+        used_currency = self.env.user.company_id.currency_id
+        currency_table = {}
+        for company in self.env['res.company'].search([]):
+            if company.currency_id != used_currency:
+                currency_table[company.currency_id.id] = used_currency.rate / company.currency_id.rate
+        linesDicts = [{} for k in context_id.get_periods()]
         res = line_obj.with_context(
             target_move=context_id.all_entries and 'all' or 'posted',
             cash_basis=self.report_type == 'date_range_cash' or context_id.cash_basis,
             strict_range=self.report_type == 'date_range_extended',
             aged_balance=self.report_type == 'date_range_extended',
-        ).get_lines(self, context_id)
+        ).get_lines(self, context_id, currency_table, linesDicts)
         return res
 
     def get_title(self):
@@ -155,19 +162,16 @@ class AccountFinancialReportLine(models.Model):
             compute = amls.compute_fields(field_names)
             for aml in amls:
                 if compute.get(aml.id):
-                    if aml.currency_id != self.env.user.company_id.currency_id:
-                        for n, v in compute[aml.id].items():
-                            compute[aml.id][n] = aml.company_currency_id.compute(v, self.env.user.company_id.currency_id)
                     for field in field_names:
                         res[field] += compute[aml.id][field]
         return res
 
     @api.one
-    def get_balance(self, field_names=None):
+    def get_balance(self, linesDict, field_names=None):
         if not field_names:
             field_names = ['debit', 'credit', 'balance']
         res = dict((fn, 0.0) for fn in field_names)
-        c = FormulaContext(self.env['account.financial.report.line'], self)
+        c = FormulaContext(self.env['account.financial.report.line'], linesDict, self)
         if self.formulas:
             for f in self.formulas.split(';'):
                 [field, formula] = f.split('=')
@@ -188,7 +192,7 @@ class AccountFinancialReportLine(models.Model):
         if self.figure_type == 'float':
             currency_id = self.env.user.company_id.currency_id
             if currency_id.is_zero(value):
-                #don't print -0.0 in reports
+                # don't print -0.0 in reports
                 value = abs(value)
             return formatLang(self.env, value, currency_obj=currency_id)
         if self.figure_type == 'percents':
@@ -230,40 +234,65 @@ class AccountFinancialReportLine(models.Model):
                 result.update({column: formula})
         return result
 
-    def eval_formula(self, financial_report, debit_credit, context):
+    def eval_formula(self, financial_report, debit_credit, context, currency_table, linesDict):
         debit_credit = debit_credit and financial_report.debit_credit
         formulas = self._split_formulas()
 
-        vals = self.get_balance(not debit_credit and ['balance'] or None)[0]
+        if self.code in linesDict:
+            res = linesDict[self.code]
+        else:
+            res = FormulaLine(self, linesDict=linesDict)
+        vals = {}
+        vals['balance'] = res.balance
+        if debit_credit:
+            vals['credit'] = res.credit
+            vals['debit'] = res.debit
 
         results = {}
         if self.domain and self.groupby and self.show_domain != 'never':
             aml_obj = self.env['account.move.line']
             where_clause, where_params = aml_obj._query_get(domain=self.domain)
 
-            groupby = self.groupby or 'id'
-            select = ',COALESCE(SUM(\"account_move_line\".debit-\"account_move_line\".credit), 0),SUM(\"account_move_line\".amount_residual),\"account_move_line\".company_currency_id'
-            if financial_report.debit_credit and debit_credit:
-                select = ',SUM(\"account_move_line\".debit),SUM(\"account_move_line\".credit)' + select
-            if self.env.context.get('cash_basis'):
-                select = select.replace('debit', 'debit_cash_basis').replace('credit', 'credit_cash_basis')
-            sql = "SELECT \"account_move_line\"." + groupby + "%s FROM \"account_move_line\" WHERE %s GROUP BY \"account_move_line\".company_currency_id,\"account_move_line\"." + groupby
+            if currency_table.keys():
+                groupby = self.groupby or 'id'
+                select = ',COALESCE(SUM(CASE '
+                for currency_id in currency_table.keys():
+                    select += 'WHEN \"account_move_line\".company_currency_id = %s THEN (\"account_move_line\".debit-\"account_move_line\".credit) * %s ' % (currency_id, currency_table[currency_id])
+                select += 'ELSE \"account_move_line\".debit-\"account_move_line\".credit END), 0),SUM(CASE '
+                for currency_id in currency_table.keys():
+                    select += 'WHEN \"account_move_line\".company_currency_id = %s THEN \"account_move_line\".amount_residual * %s ' % (currency_id, currency_table[currency_id])
+                select += 'ELSE \"account_move_line\".amount_residual END)'
+                if financial_report.debit_credit and debit_credit:
+                    select += ',SUM(CASE '
+                    for currency_id in currency_table.keys():
+                        select += 'WHEN \"account_move_line\".company_currency_id = %s THEN \"account_move_line\".debit * %s ' % (currency_id, currency_table[currency_id])
+                    select += 'ELSE \"account_move_line\".debit END),SUM(CASE '
+                    for currency_id in currency_table.keys():
+                        select += 'WHEN \"account_move_line\".company_currency_id = %s THEN \"account_move_line\".credit * %s ' % (currency_id, currency_table[currency_id])
+                    select += 'ELSE \"account_move_line\".credit END)'
+                if self.env.context.get('cash_basis'):
+                    select = select.replace('debit', 'debit_cash_basis').replace('credit', 'credit_cash_basis')
+                sql = "SELECT \"account_move_line\"." + groupby + "%s FROM \"account_move_line\" WHERE %s GROUP BY \"account_move_line\".company_currency_id,\"account_move_line\"." + groupby
+            else:
+                groupby = self.groupby or 'id'
+                select = ',COALESCE(SUM(\"account_move_line\".debit-\"account_move_line\".credit), 0),SUM(\"account_move_line\".amount_residual),\"account_move_line\".company_currency_id'
+                if financial_report.debit_credit and debit_credit:
+                    select += ',SUM(\"account_move_line\".debit),SUM(\"account_move_line\".credit)'
+                if self.env.context.get('cash_basis'):
+                    select = select.replace('debit', 'debit_cash_basis').replace('credit', 'credit_cash_basis')
+                sql = "SELECT \"account_move_line\"." + groupby + "%s FROM \"account_move_line\" WHERE %s GROUP BY \"account_move_line\".company_currency_id,\"account_move_line\"." + groupby
+
             where_clause, where_params = aml_obj._query_get(domain=self.domain)
             query = sql % (select, where_clause)
             self.env.cr.execute(query, where_params)
             results = self.env.cr.fetchall()
             if financial_report.debit_credit and debit_credit:
-                results = dict([(k[0], {'debit': k[1], 'credit': k[2], 'balance': k[3], 'amount_residual': k[4], 'currency_id': k[5]}) for k in results])
+                results = dict([(k[0], {'balance': k[1], 'amount_residual': k[2], 'debit': k[3], 'credit': k[4]}) for k in results])
             else:
-                results = dict([(k[0], {'balance': k[1], 'amount_residual': k[2], 'currency_id': k[3]}) for k in results])
-            c = FormulaContext(self.env['account.financial.report.line'])
+                results = dict([(k[0], {'balance': k[1], 'amount_residual': k[2]}) for k in results])
+            c = FormulaContext(self.env['account.financial.report.line'], linesDict)
             if formulas:
                 for key in results:
-                    if results[key]['currency_id'] != self.env.user.company_id.currency_id.id:
-                        currency_id = self.env['res.currency'].browse(results[key]['currency_id'])
-                        del results[key]['currency_id']
-                        for n, v in results[key].items():
-                            results[key][n] = currency_id.compute(v, self.env.user.company_id.currency_id)
                     c['sum'] = FormulaLine(results[key], type='not_computed')
                     for col, formula in formulas.items():
                         if col in results[key]:
@@ -292,15 +321,16 @@ class AccountFinancialReportLine(models.Model):
         return res
 
     @api.multi
-    def get_lines(self, financial_report, context):
+    def get_lines(self, financial_report, context, currency_table, linesDicts):
         final_result_table = []
         comparison_table = context.get_periods()
-        #build comparison table
+        # build comparison table
 
         for line in self:
             res = []
             debit_credit = len(comparison_table) == 1
             domain_ids = {'line'}
+            k = 0
             for period in comparison_table:
                 period_from = period[0]
                 period_to = period[1]
@@ -309,10 +339,11 @@ class AccountFinancialReportLine(models.Model):
                 if line.special_date_changer == 'to_beginning_of_period':
                     date_tmp = datetime.strptime(period[0], "%Y-%m-%d") - relativedelta(days=1)
                     period_to = date_tmp.strftime('%Y-%m-%d')
-                r = line.with_context(date_from=period_from, date_to=period_to).eval_formula(financial_report, debit_credit, context)
+                r = line.with_context(date_from=period_from, date_to=period_to).eval_formula(financial_report, debit_credit, context, currency_table, linesDicts[k])
                 debit_credit = False
                 res.append(r)
                 domain_ids.update(set(r.keys()))
+                k += 1
 
             res = self._put_columns_together(res, domain_ids)
             if line.hide_if_zero and sum([k == 0 and [True] or [] for k in res['line']], []):
@@ -358,7 +389,7 @@ class AccountFinancialReportLine(models.Model):
                 if not line.formulas:
                     vals['columns'] = ['' for k in vals['columns']]
 
-            new_lines = line.children_ids.get_lines(financial_report, context)
+            new_lines = line.children_ids.get_lines(financial_report, context, currency_table, linesDicts)
 
             result = []
             if line.level > 0:

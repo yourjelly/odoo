@@ -1,4 +1,4 @@
-from openerp import http, fields
+from openerp import http
 from openerp.http import request
 from hashlib import md5
 from openerp.tools.safe_eval import safe_eval
@@ -8,18 +8,10 @@ from datetime import datetime
 
 class FinancialReportController(http.Controller):
 
-    def get_report_obj_from_name(self, name, id=None):
+    def get_report_obj_from_name(self, name):
         uid = request.session.uid
-        if name == 'financial_report':
-            return request.env['account.financial.report'].sudo(uid)
-        if name == 'generic_tax_report':
-            return request.env['account.generic.tax.report'].sudo(uid)
-        if name == 'bank_reconciliation':
-            return request.env['account.bank.reconciliation.report'].sudo(uid)
-        if name == 'general_ledger':
-            return request.env['account.general.ledger'].sudo(uid)
-        if name == 'l10n_be_partner_vat_listing':
-            return request.env['l10n.be.report.partner.vat.listing'].sudo(uid)
+        report_model = request.env['account.report.context.common'].get_full_report_name_by_report_name(name)
+        return request.env[report_model].sudo(uid)
 
     @http.route('/account/<string:report_name>/<string:report_id>', type='http', auth='user')
     def report(self, report_name, report_id=None, **kw):
@@ -66,6 +58,8 @@ class FinancialReportController(http.Controller):
                 if context_id._fields.get(field) and kw[field] != 'undefined':
                     if kw[field] == 'false':
                         kw[field] = False
+                    if kw[field] == 'none':
+                        kw[field] = None
                     update[field] = kw[field]
             context_id.write(update)
         lines = report_obj.get_lines(context_id)
@@ -136,9 +130,7 @@ class FinancialReportController(http.Controller):
             'reports': reports,
             'report': report_obj,
             'mode': 'display',
-            'page': page,
             'emails_not_sent': emails_not_sent,
-            'last_page': (len(partners) - 1) / 15 == page - 1,
             'context_all': context_all_id,
             'all_partners_done': kw.get('partner_done') == 'all',
             'just_arrived': 'partner_done' not in kw and 'partner_skipped' not in kw,

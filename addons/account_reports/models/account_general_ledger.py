@@ -42,25 +42,33 @@ class report_account_general_ledger(models.AbstractModel):
         })
         return self.with_context(new_context)._lines(line_id)
 
-    def group_by_account_id(self, lines):
+    def group_by_account_id(self, line_id):
         accounts = {}
-        for line in lines:
-            if line.account_id not in accounts:
-                accounts[line.account_id] = {'lines': []}
-            accounts[line.account_id]['lines'].append(line)
         select = ',COALESCE(SUM(\"account_move_line\".debit-\"account_move_line\".credit), 0),SUM(\"account_move_line\".amount_currency),SUM(\"account_move_line\".debit),SUM(\"account_move_line\".credit)'
         if self.env.context.get('cash_basis'):
             select = select.replace('debit', 'debit_cash_basis').replace('credit', 'credit_cash_basis')
-        sql = "SELECT \"account_move_line\".account_id%s FROM \"account_move_line\" WHERE %s GROUP BY \"account_move_line\".account_id"
+        sql = "SELECT \"account_move_line\".account_id%s FROM \"account_move_line\" WHERE %s%s GROUP BY \"account_move_line\".account_id"
         where_clause, where_params = self.env['account.move.line']._query_get()
-        query = sql % (select, where_clause)
+        line_clause = line_id and ' AND \"account_move_line\".account_id = ' + str(line_id) or ''
+        query = sql % (select, where_clause, line_clause)
         self.env.cr.execute(query, where_params)
         results = self.env.cr.fetchall()
         results = dict([(k[0], {'balance': k[1], 'amount_currency': k[2], 'debit': k[3], 'credit': k[4]}) for k in results])
+        context = self.env.context
+        base_domain = [('date', '<=', context['date_to'])]
+        if context['date_from_aml']:
+            base_domain.append(('date', '>=', context['date_from_aml']))
+        if context['target_move'] == 'posted':
+            base_domain.append(('move_id.state', '=', 'posted'))
         for account_id, result in results.items():
+            domain = list(base_domain)  # copying the base domain
+            domain.append(('account_id', '=', account_id))
             account = self.env['account.account'].browse(account_id)
-            if account in accounts:
-                accounts[account].update(result)
+            accounts[account] = result
+            if not context.get('print_mode'):
+                accounts[account]['lines'] = self.env['account.move.line'].search(domain, order='date', limit=81)
+            else:
+                accounts[account]['lines'] = self.env['account.move.line'].search(domain, order='date')
         return accounts
 
     @api.model
@@ -68,14 +76,8 @@ class report_account_general_ledger(models.AbstractModel):
         currency_id = self.env.user.company_id.currency_id
         lines = []
         context = self.env.context
-        domain = [('date', '>=', context['date_from']), ('date', '<=', context['date_to'])]
-        if line_id:
-            domain.append(('account_id', '=', line_id))
-        if context['target_move'] == 'posted':
-            domain.append(('move_id.state', '=', 'posted'))
-        move_line_ids = self.env['account.move.line'].search(domain)
         company_id = context.get('company_id') or self.env.user.company_id
-        grouped_accounts = self.with_context({'date_from': company_id.compute_fiscalyear_dates(datetime.strptime(context['date_from'], "%Y-%m-%d"))['date_from']}).group_by_account_id(move_line_ids)
+        grouped_accounts = self.with_context(date_from_aml=context['date_from'], date_from=context['date_from'] and company_id.compute_fiscalyear_dates(datetime.strptime(context['date_from'], "%Y-%m-%d"))['date_from'] or None).group_by_account_id(line_id)  # Aml go back to the beginning of the user chosen range but the amount on the account line should go back to either the beginning of the fy or the beginning of times depending on the account
         sorted_accounts = sorted(grouped_accounts, key=lambda a: a.code)
         for account in sorted_accounts:
             debit = grouped_accounts[account]['debit']

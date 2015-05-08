@@ -11,6 +11,9 @@ div.page {
 div.oe-account-summary i.fa {
     visibility: hidden;
 }
+div.oe-account-summary {
+    padding-bottom: 0.8cm;
+}
 div.oe-account-summary:hover i.fa {
     visibility: visible;
 }

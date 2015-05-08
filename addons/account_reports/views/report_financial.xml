@@ -135,7 +135,7 @@
                     <tr>
                         <th></th>
                         <t t-foreach="context.get_columns_names()" t-as="column_name">
-                            <th class="text-center" t-raw="column_name" width='1%' style='padding-left: 15px;'/>
+                            <th class="text-left" t-raw="column_name" width='1%' style='padding-left: 15px;'/>
                         </t>
                     </tr>
                 </thead>

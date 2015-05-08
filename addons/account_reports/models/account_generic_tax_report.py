@@ -22,6 +22,7 @@
 from openerp import models, api
 from openerp.tools.translate import _
 
+
 class report_account_generic_tax_report(models.AbstractModel):
     _name = "account.generic.tax.report"
     _description = "Generic Tax Report"

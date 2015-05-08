@@ -25,7 +25,7 @@ from openerp.exceptions import Warning
 from datetime import timedelta, datetime
 import calendar
 import json
-import lxml.html
+
 
 class AccountReportFootnotesManager(models.TransientModel):
     _name = 'account.report.footnotes.manager'
@@ -57,45 +57,42 @@ class AccountReportContextCommon(models.TransientModel):
 
     @api.model
     def get_context_by_report_name(self, name):
-        report_match = json.loads(self.get_context_name_by_report_name())
-        return self.env[report_match.get(name)]
+        return self.env[self._report_name_to_report_context()[name]]
 
     @api.model
-    def get_context_name_by_report_name(self):
-        return json.dumps({
-            'financial_report': 'account.financial.report.context',
-            'generic_tax_report': 'account.report.context.tax',
-            'followup_report': 'account.report.context.followup',
-            'bank_reconciliation': 'account.report.context.bank.reconciliation',
-            'general_ledger': 'account.context.general.ledger',
-            'l10n_be_partner_vat_listing': 'l10n.be.partner.vat.listing.context',
-            })
+    def get_context_name_by_report_name_json(self):
+        return json.dumps(self._report_name_to_report_context())
 
     @api.model
-    def get_context_name_by_report_model(self):
-        return json.dumps({
+    def get_context_name_by_report_model_json(self):
+        return json.dumps(self._report_model_to_report_context())
+
+    def _report_name_to_report_model(self):
+        return {
+            'financial_report': 'account.financial.report',
+            'generic_tax_report': 'account.generic.tax.report',
+            'followup_report': 'account.followup.report',
+            'bank_reconciliation': 'account.bank.reconciliation.report',
+            'general_ledger': 'account.general.ledger',
+            'l10n_be_partner_vat_listing': 'l10n.be.report.partner.vat.listing',
+        }
+
+    def _report_model_to_report_context(self):
+        return {
             'account.financial.report': 'account.financial.report.context',
             'account.generic.tax.report': 'account.report.context.tax',
             'account.followup.report': 'account.report.context.followup',
             'account.bank.reconciliation.report': 'account.report.context.bank.reconciliation',
             'account.general.ledger': 'account.context.general.ledger',
             'l10n.be.report.partner.vat.listing': 'l10n.be.partner.vat.listing.context',
-            })
+        }
+
+    def _report_name_to_report_context(self):
+        return dict([(k[0], self._report_model_to_report_context()[k[1]]) for k in self._report_name_to_report_model().items()])
 
     @api.model
     def get_full_report_name_by_report_name(self, name):
-        if name == 'financial_report':
-            return 'account.financial.report'
-        if name == 'generic_tax_report':
-            return 'account.generic.tax.report'
-        if name == 'followup_report':
-            return 'account.followup.report'
-        if name == 'bank_reconciliation':
-            return 'account.bank.reconciliation.report'
-        if name == 'general_ledger':
-            return 'account.general.ledger'
-        if name == 'l10n_be_partner_vat_listing':
-            return 'l10n.be.report.partner.vat.listing'
+        return self._report_name_to_report_model()[name]
 
     def get_report_obj(self):
         raise Warning(_('get_report_obj not implemented'))

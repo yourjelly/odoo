@@ -1,6 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <templates>
+    <t t-name="accountReports.followupSearchView">
+        <div class="btn-group btn-group-sm oe-account-followup-filter">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                <span class="fa fa-filter"/> Partners <span class="caret"/>
+            </button>
+            <ul class="dropdown-menu filters-menu" role="menu">
+                <li title="In Need of Action" data-value="action" t-att-class="'oe-account-one-filter ' + (context.partner_filter == 'action' and 'selected' or '')"><a>In Need of Action</a></li>
+                <li title="With Overdue Invoices" data-value="all" t-att-class="'oe-account-one-filter ' + (context.partner_filter == 'all' and 'selected' or '')"><a>With Overdue Invoices</a></li>
+            </ul>
+        </div>
+    </t>
+    <t t-name="accountReports.followupPager">
+        <div class="oe-cp-pager">
+            <span style="display: inline;">
+                <div class="btn-group btn-group-sm oe-pager-buttons pull-right" style="display: inline-block">
+                    <a class="fa fa-chevron-left btn btn-default oe-pager-button" type="button" data-pager-action="previous"></a>
+                    <a class="fa fa-chevron-right btn btn-default oe-pager-button" type="button" data-pager-action="next"></a>
+                </div>
+            </span>
+        </div>
+    </t>
+    <div class="progress" t-name="accountReports.followupProgressbar" t-if="context.partner_filter == 'action'">
+        <div class="progress-bar" role="context" t-att-aria-valuenow="context.valuenow" aria-valuemin="0" t-att-aria-valuemax="context.valuemax" t-att-style="'width: ' + context.percentage + '%;'">
+            <span class="show text-center"><t t-esc="context.valuenow + '/' + context.valuemax" /></span>
+        </div>
+    </div>
     <div t-name="accountReports.buttons" class="oe_form_buttons">
         <div class="oe_form_buttons_view">
             <button class='btn btn-default btn-sm o_account-widget-pdf'>Print (PDF)</button>

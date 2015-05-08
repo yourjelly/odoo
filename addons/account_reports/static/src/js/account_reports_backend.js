@@ -45,8 +45,12 @@ var account_report_generic = IFrameWidget.extend(ControlPanelMixin, {
         var id = this.report_id ? [this.report_id] : [];
         return new Model(this.report_model).call('get_report_type', [id]).then(function (result) {
             self.report_type = result;
-            return new Model('account.report.context.common').call('get_context_name_by_report_model').then(function (result) {
+            return new Model('account.report.context.common').call('get_context_name_by_report_model_json').then(function (result) {
                 self.context_model = new Model(JSON.parse(result)[self.report_model]);
+                if (self.report_model == 'account.followup.report' && self.base_url.search('all') > -1) {
+                    self.context_model = new Model('account.report.context.followup.all');
+                    self.page = 1;
+                }
             });
         });
     },
@@ -54,12 +58,18 @@ var account_report_generic = IFrameWidget.extend(ControlPanelMixin, {
         if (!this.$buttons) {
             this.render_buttons();
         }
-        if (!this.$searchView) {
+        if (!this.$searchview_buttons) {
+            this.render_searchview_buttons();
+        }
+        if (!this.$pager) {
+            this.render_pager();
+        }
+        if (!this.$searchview) {
             this.render_searchview();
         }
         var status = {
             breadcrumbs: this.actionManager.get_breadcrumbs(),
-            cp_content: {$buttons: this.$buttons, $searchview_buttons: this.$searchView},
+            cp_content: {$buttons: this.$buttons, $searchview_buttons: this.$searchview_buttons, $pager: this.$pager, $searchview: this.$searchview},
         };
         this.update_control_panel(status);
     },
@@ -69,24 +79,32 @@ var account_report_generic = IFrameWidget.extend(ControlPanelMixin, {
         if (self.report_id) {
             domain.push(['report_id', '=', parseInt(self.report_id)]);
         }
-        return self.context_model.query(['id', 'date_filter', 'date_filter_cmp', 'company_id', 'date_from', 'date_to', 'periods_number', 'date_from_cmp', 'date_to_cmp', 'cash_basis', 'all_entries'])
+        var select = ['id', 'date_filter', 'date_filter_cmp', 'company_id', 'date_from', 'date_to', 'periods_number', 'date_from_cmp', 'date_to_cmp', 'cash_basis', 'all_entries']
+        if (this.report_model == 'account.followup.report' && this.base_url.search('all') > -1) {
+            select = ['id', 'valuenow', 'valuemax', 'percentage', 'partner_filter']
+        }
+        return self.context_model.query(select)
         .filter(domain).first().then(function (context) {
-            return new Model('res.company').query(['fiscalyear_last_day', 'fiscalyear_last_month'])
-            .filter([['id', '=', context.company_id[0]]]).first().then(function (fy) {
-                return new Model('account.financial.report.xml.export').call('is_xml_export_available', [self.report_model, self.report_id]).then(function (xml_export) {
-                    self.xml_export = xml_export
-                    self.fy = fy;
-                    self.context_id = context.id;
-                    self.context = context;
-                    self.render_buttons();
-                    self.render_searchview();
-                    self.update_cp();
+            return new Model('res.users').query(['company_id'])
+            .filter([['id', '=', self.session.uid]]).first().then(function (user) {
+                return new Model('res.company').query(['fiscalyear_last_day', 'fiscalyear_last_month'])
+                .filter([['id', '=', user.company_id[0]]]).first().then(function (fy) {
+                    return new Model('account.financial.report.xml.export').call('is_xml_export_available', [self.report_model, self.report_id]).then(function (xml_export) {
+                        self.xml_export = xml_export
+                        self.fy = fy;
+                        self.context_id = context.id;
+                        self.context = context;
+                        self.render_buttons();
+                        self.render_searchview_buttons()
+                        self.render_searchview()
+                        self.update_cp();
+                    });
                 });
             });
         });
     },
     start: function() {
-        if (this.report_model != 'account.followup.report') {
+        if (this.report_model != 'account.followup.report' || this.base_url.search('all') > -1) {
             this.$el.on("load", this.on_load);
         }
         else {
@@ -132,14 +150,59 @@ var account_report_generic = IFrameWidget.extend(ControlPanelMixin, {
             .toggleClass('open-menu', is_open);
         toggle.toggle(is_open);
     },
-    render_searchview: function() {
+    render_pager: function() {
         var self = this;
-        if (this.report_type == 'date_range_extended' || this.report_model == 'account.followup.report') {
+        if (this.report_model == 'account.followup.report') {
+            if (this.base_url.search('all') > -1) {
+                this.$pager = $(QWeb.render("accountReports.followupPager"));
+                this.$pager.find('.oe-pager-button').bind('click', function (event) {
+                    if (self.page > 1 && $(event.target).data('pager-action') == 'previous') {
+                        self.$el.attr({src: '/account/followup_report/all/page/' + (self.page - 1)});
+                        self.page--;
+                    }
+                    if ($(event.target).data('pager-action') == 'next') {
+                        self.$el.attr({src: '/account/followup_report/all/page/' + (self.page + 1)});
+                        self.page++;
+                    }
+                })
+                return this.$pager
+            }
+        }
+        this.$pager = '';
+        return ''
+    },
+    render_searchview: function() {
+        if (this.report_model == 'account.followup.report') {
+            if (this.base_url.search('all') > -1) {
+                this.$searchview = $(QWeb.render("accountReports.followupProgressbar", {context: this.context}));
+                return this.$searchview;
+            }
+        }
+        this.$searchview = '';
+        return this.$searchview;
+    },
+    render_searchview_buttons: function() {
+        var self = this;
+        if (this.report_model == 'account.followup.report') {
+            if (this.base_url.search('all') > -1) {
+                this.$searchview_buttons = $(QWeb.render("accountReports.followupSearchView", {context: this.context}));
+                this.$partnerFilter = this.$searchview_buttons.find('.oe-account-date-filter');
+                this.$searchview_buttons.find('.oe-account-one-filter').bind('click', function (event) {
+                    var url = self.base_url + '?partner_filter=' + $(event.target).parents('li').data('value');
+                    self.$el.attr({src: url});
+                });
+                return this.$searchview_buttons;
+            }
+            else {
+                return '';
+            }
+        }
+        if (this.report_type == 'date_range_extended') {
             return '';
         }
-        this.$searchView = $(QWeb.render("accountReports.searchView", {report_type: this.report_type, context: this.context}));
-        this.$dateFilter = this.$searchView.find('.oe-account-date-filter');
-        this.$dateFilterCmp = this.$searchView.find('.oe-account-date-filter-cmp');
+        this.$searchview_buttons = $(QWeb.render("accountReports.searchView", {report_type: this.report_type, context: this.context}));
+        this.$dateFilter = this.$searchview_buttons.find('.oe-account-date-filter');
+        this.$dateFilterCmp = this.$searchview_buttons.find('.oe-account-date-filter-cmp');
         this.$useCustomDates = this.$dateFilter.find('.oe-account-use-custom');
         this.$CustomDates = this.$dateFilter.find('.oe-account-custom-dates');
         this.$useCustomDates.bind('click', function () {self.toggle_filter(self.$useCustomDates, self.$CustomDates);});
@@ -152,35 +215,35 @@ var account_report_generic = IFrameWidget.extend(ControlPanelMixin, {
         this.$useCustomCmp = this.$dateFilterCmp.find('.oe-account-use-custom-cmp');
         this.$CustomCmp = this.$dateFilterCmp.find('.oe-account-custom-cmp');
         this.$useCustomCmp.bind('click', function () {self.toggle_filter(self.$useCustomCmp, self.$CustomCmp);});
-        this.$searchView.find('.oe-account-one-filter').bind('click', function (event) {
+        this.$searchview_buttons.find('.oe-account-one-filter').bind('click', function (event) {
             self.onChangeDateFilter(event);
             $('.oe-account-datetimepicker input').each(function () {
                 $(this).val(formats.parse_value($(this).val(), {type: 'date'}));
             })
-            var url = self.base_url + '?date_filter=' + $(event.target).parents('li').data('value') + '&date_from=' + self.$searchView.find("input[name='date_from']").val() + '&date_to=' + self.$searchView.find("input[name='date_to']").val();
+            var url = self.base_url + '?date_filter=' + $(event.target).parents('li').data('value') + '&date_from=' + self.$searchview_buttons.find("input[name='date_from']").val() + '&date_to=' + self.$searchview_buttons.find("input[name='date_to']").val();
             if (self.date_filter_cmp != 'no_comparison') {
-                url += '&date_from_cmp=' + self.$searchView.find("input[name='date_from_cmp']").val() + '&date_to_cmp=' + self.$searchView.find("input[name='date_to_cmp']").val();
+                url += '&date_from_cmp=' + self.$searchview_buttons.find("input[name='date_from_cmp']").val() + '&date_to_cmp=' + self.$searchview_buttons.find("input[name='date_to_cmp']").val();
             }
             self.$el.attr({src: url});
         });
-        this.$searchView.find('.oe-account-one-filter-cmp').bind('click', function (event) {
+        this.$searchview_buttons.find('.oe-account-one-filter-cmp').bind('click', function (event) {
             self.onChangeCmpDateFilter(event);
             $('.oe-account-datetimepicker input').each(function () {
                 $(this).val(formats.parse_value($(this).val(), {type: 'date'}));
             })
             var filter = $(event.target).parents('li').data('value');
-            var url = self.base_url + '?date_filter_cmp=' + filter + '&date_from_cmp=' + self.$searchView.find("input[name='date_from_cmp']").val() + '&date_to_cmp=' + self.$searchView.find("input[name='date_to_cmp']").val();
+            var url = self.base_url + '?date_filter_cmp=' + filter + '&date_from_cmp=' + self.$searchview_buttons.find("input[name='date_from_cmp']").val() + '&date_to_cmp=' + self.$searchview_buttons.find("input[name='date_to_cmp']").val();
             if (filter == 'previous_period' || filter == 'same_last_year') {
                 url += '&periods_number=' + $(event.target).siblings("input[name='periods_number']").val();
             }
             self.$el.attr({src: url});
         });
-        this.$searchView.find('.oe-account-one-filter-bool').bind('click', function (event) {
+        this.$searchview_buttons.find('.oe-account-one-filter-bool').bind('click', function (event) {
             self.$el.attr({src: self.base_url + '?' + $(event.target).parents('li').data('value') + '=' + !$(event.target).parents('li').hasClass('selected')});
         });
-        this.$searchView.find('li').bind('click', function (event) {event.stopImmediatePropagation();});
+        this.$searchview_buttons.find('li').bind('click', function (event) {event.stopImmediatePropagation();});
         var l10n = core._t.database.parameters;
-        var $datetimepickers = this.$searchView.find('.oe-account-datetimepicker');
+        var $datetimepickers = this.$searchview_buttons.find('.oe-account-datetimepicker');
         var options = {
             language : moment.locale(),
             format : time.strftime_to_moment_format(l10n.date_format),
@@ -211,7 +274,7 @@ var account_report_generic = IFrameWidget.extend(ControlPanelMixin, {
             this.toggle_filter(this.$useCustomCmp, this.$CustomCmp, false);
             this.$dateFilterCmp.bind('hidden.bs.dropdown', function () {self.toggle_filter(self.$useCustomCmp, self.$CustomCmp, false);});
         }
-        return this.$searchView;
+        return this.$searchview_buttons;
     },
     iframe_clicked: function(e) {
         if ($(e.target).is('.oe-account-web-action')) {
@@ -239,7 +302,7 @@ var account_report_generic = IFrameWidget.extend(ControlPanelMixin, {
                     var context = {
                         date_filter: this.context.date_filter,
                         date_filter_cmp: this.context.date_filter_cmp,
-                        date_from: this.context.date_from,
+                        date_from: self.report_type != 'no_date_range' ? this.context.date_from : 'none',
                         date_to: this.context.date_to,
                         periods_number: this.context.periods_number,
                         date_from_cmp: this.context.date_from_cmp,
@@ -264,10 +327,10 @@ var account_report_generic = IFrameWidget.extend(ControlPanelMixin, {
         var filter = !(_.isUndefined(fromDateFilter)) ? $(event.target).parents('li').data('value') : this.context.date_filter;
         var no_date_range = this.report_type == 'no_date_range';
         if (filter_cmp == 'previous_period' || filter_cmp == 'same_last_year') {
-            var dtTo = !(_.isUndefined(fromDateFilter)) ? this.$searchView.find("input[name='date_to']").val() : this.context.date_to;
+            var dtTo = !(_.isUndefined(fromDateFilter)) ? this.$searchview_buttons.find("input[name='date_to']").val() : this.context.date_to;
             dtTo = moment(dtTo).toDate();
             if (!no_date_range) {
-                var dtFrom = !(_.isUndefined(fromDateFilter)) ? this.$searchView.find("input[name='date_from']").val() : this.context.date_from;;
+                var dtFrom = !(_.isUndefined(fromDateFilter)) ? this.$searchview_buttons.find("input[name='date_from']").val() : this.context.date_from;;
                 dtFrom = moment(dtFrom).toDate();
             }   
             if (filter_cmp == 'previous_period') {
@@ -315,9 +378,9 @@ var account_report_generic = IFrameWidget.extend(ControlPanelMixin, {
                 }
             }
             if (!no_date_range) {
-                this.$searchView.find("input[name='date_from_cmp']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dtFrom));
+                this.$searchview_buttons.find("input[name='date_from_cmp']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dtFrom));
             }
-            this.$searchView.find("input[name='date_to_cmp']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dtTo));
+            this.$searchview_buttons.find("input[name='date_to_cmp']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dtTo));
         }
     },
     onChangeDateFilter: function(event) {
@@ -327,26 +390,26 @@ var account_report_generic = IFrameWidget.extend(ControlPanelMixin, {
         switch($(event.target).parents('li').data('value')) {
             case 'today':
                 var dt = new Date();
-                self.$searchView.find("input[name='date_to']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dt));
+                self.$searchview_buttons.find("input[name='date_to']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dt));
                 break;
             case 'last_month':
                 var dt = new Date();
                 dt.setDate(0); // Go to last day of last month (date to)
-                self.$searchView.find("input[name='date_to']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dt));
+                self.$searchview_buttons.find("input[name='date_to']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dt));
                 if (!no_date_range) {
                     dt.setDate(1); // and then first day of last month (date from)
-                    self.$searchView.find("input[name='date_from']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dt));
+                    self.$searchview_buttons.find("input[name='date_from']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dt));
                 }
                 break;
             case 'last_quarter':
                 var dt = new Date();
                 dt.setMonth((moment(dt).quarter() - 1) * 3); // Go to the first month of this quarter
                 dt.setDate(0); // Then last day of last month (= last day of last quarter)
-                self.$searchView.find("input[name='date_to']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dt));
+                self.$searchview_buttons.find("input[name='date_to']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dt));
                 if (!no_date_range) {
                     dt.setDate(1);
                     dt.setMonth(dt.getMonth() - 2);
-                    self.$searchView.find("input[name='date_from']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dt));
+                    self.$searchview_buttons.find("input[name='date_from']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dt));
                 }
                 break;
             case 'last_year':
@@ -360,16 +423,16 @@ var account_report_generic = IFrameWidget.extend(ControlPanelMixin, {
                 if (!no_date_range) {
                     dt.setDate(dt.getDate() + 1);
                     dt.setFullYear(dt.getFullYear() - 1)
-                    self.$searchView.find("input[name='date_from']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dt));
+                    self.$searchview_buttons.find("input[name='date_from']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dt));
                 }
                 break;
             case 'this_month':
                 var dt = new Date();
                 dt.setDate(1);
-                self.$searchView.find("input[name='date_from']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dt));
+                self.$searchview_buttons.find("input[name='date_from']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dt));
                 dt.setMonth(dt.getMonth() + 1);
                 dt.setDate(0);
-                self.$searchView.find("input[name='date_to']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dt));
+                self.$searchview_buttons.find("input[name='date_to']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dt));
                 break;
             case 'this_year':
                 if (today.getMonth() + 1 < self.fy.fiscalyear_last_month || (today.getMonth() + 1 == self.fy.fiscalyear_last_month && today.getDate() <= self.fy.fiscalyear_last_day)) {
@@ -378,11 +441,11 @@ var account_report_generic = IFrameWidget.extend(ControlPanelMixin, {
                 else {
                     var dt = new Date(today.getFullYear() + 1, self.fy.fiscalyear_last_month - 1, self.fy.fiscalyear_last_day, 12, 0, 0, 0)
                 }
-                self.$searchView.find("input[name='date_to']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dt));
+                self.$searchview_buttons.find("input[name='date_to']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dt));
                 if (!no_date_range) {
                     dt.setDate(dt.getDate() + 1);
                     dt.setFullYear(dt.getFullYear() - 1);
-                    self.$searchView.find("input[name='date_from']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dt));
+                    self.$searchview_buttons.find("input[name='date_from']").parents('.oe-account-datetimepicker').data("DateTimePicker").setValue(moment(dt));
                 }
                 break;
         }

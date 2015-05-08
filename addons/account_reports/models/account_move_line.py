@@ -17,7 +17,6 @@ class AccountMoveLine(models.Model):
             @param field_names: a list of the fields to compute
             @returns : a dictionnary that has for each aml in the domain a dictionnary of the values of the fields
         """
-        #TODO: do a regular read() instead
         if len(self) == 0:
             return []
         select = ','.join(['\"account_move_line\".' + k + ((self.env.context.get('cash_basis') and k in ['balance', 'credit', 'debit']) and '_cash_basis' or '') for k in field_names])
@@ -27,9 +26,7 @@ class AccountMoveLine(models.Model):
         where_params += [tuple(self.ids)]
         self.env.cr.execute(sql, where_params)
         results = self.env.cr.fetchall()
-        results = dict([(k[0], k[1:]) for k in results])
-        for id, l in results.items():
-            results[id] = dict([(field_names[i], k) for i, k in enumerate(l)])
+        results = dict([(k[0], dict([(field_names[i], k) for i, k in enumerate(k[1:])])) for k in results])
         return results
 
     @api.multi
