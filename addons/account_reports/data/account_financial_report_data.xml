@@ -700,7 +700,7 @@
             <field name="tag">account_report_generic</field>
             <field name="context" eval="{'url': '/account/general_ledger/1', 'addUrl': '?force_account=', 'addActiveId': True, 'model': 'account.general.ledger'}" />
         </record>
-        <menuitem id="menu_action_followups" name="Follow-ups" action="action_account_followup_all" parent="account.menu_finance_receivables" sequence="30" groups="account.group_account_user"/>
+        <menuitem id="menu_action_followups" name="Customers Statement" action="action_account_followup_all" parent="account.menu_finance_receivables" sequence="30" groups="account.group_account_user"/>
         <menuitem id="menu_action_account_report_gt" name="Tax Report" action="action_account_report_gt" parent="account.menu_finance_reports"/>
         <menuitem id="menu_action_account_report_general_ledger" name="General Ledger" action="action_account_report_general_ledger" parent="account.menu_finance_reports"/>
 
