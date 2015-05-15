@@ -31,7 +31,7 @@
                                     </div>
                                 </div><div class="o_kanban_card_manage_pane o_invisible">
                                     <div class="o_kanban_card_manage_section o_kanban_manage_view">
-                                        <div t-if="widget.view.is_action_enabled('edit')" groups="base.group_user">
+                                        <div t-if="widget.editable" groups="base.group_user">
                                             <a type="edit">Edit Project</a>
                                         </div>
                                     </div>

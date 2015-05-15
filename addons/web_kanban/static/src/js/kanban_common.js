@@ -261,6 +261,8 @@ var KanbanRecord = Widget.extend({
         }
         this.state = this.view.state.records[this.id];
         this.fields = {};
+        this.editable = this.view.is_action_enabled('edit');
+        this.deletable = this.view.is_action_enabled('delete');
     },
     set_record: function(record) {
         var self = this;
