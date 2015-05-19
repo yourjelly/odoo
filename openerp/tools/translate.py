@@ -53,7 +53,6 @@ SKIPPED_ELEMENTS = ('script', 'style')
 
 _LOCALE2WIN32 = {
     'af_ZA': 'Afrikaans_South Africa',
-    'sq_AL': 'Albanian_Albania',
     'ar_SA': 'Arabic_Saudi Arabia',
     'eu_ES': 'Basque_Spain',
     'be_BY': 'Belarusian_Belarus',

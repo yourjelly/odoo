@@ -546,7 +546,6 @@ ALL_LANGUAGES = {
         'si_LK': u'Sinhalese / සිංහල',
         'sl_SI': u'Slovenian / slovenščina',
         'sk_SK': u'Slovak / Slovenský jazyk',
-        'sq_AL': u'Albanian / Shqip',
         'sr_RS': u'Serbian (Cyrillic) / српски',
         'sr@latin': u'Serbian (Latin) / srpski',
         'sv_SE': u'Swedish / svenska',
