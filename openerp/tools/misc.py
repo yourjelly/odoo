@@ -554,7 +554,6 @@ ALL_LANGUAGES = {
         'tr_TR': u'Turkish / Türkçe',
         'vi_VN': u'Vietnamese / Tiếng Việt',
         'uk_UA': u'Ukrainian / українська',
-        'ur_PK': u'Urdu / اردو',
         'zh_CN': u'Chinese (CN) / 简体中文',
         'zh_HK': u'Chinese (HK)',
         'zh_TW': u'Chinese (TW) / 正體字',
