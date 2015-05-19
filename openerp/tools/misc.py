@@ -499,7 +499,6 @@ ALL_LANGUAGES = {
         'es_EC': u'Spanish (EC) / Español (EC)',
         'es_ES': u'Spanish / Español',
         'es_GT': u'Spanish (GT) / Español (GT)',
-        'es_HN': u'Spanish (HN) / Español (HN)',
         'es_MX': u'Spanish (MX) / Español (MX)',
         'es_NI': u'Spanish (NI) / Español (NI)',
         'es_PA': u'Spanish (PA) / Español (PA)',

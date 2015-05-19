@@ -117,7 +117,6 @@ _LOCALE2WIN32 = {
     'es_EC': 'Spanish_Spain',
     'es_ES': 'Spanish_Spain',
     'es_GT': 'Spanish_Spain',
-    'es_HN': 'Spanish_Spain',
     'es_MX': 'Spanish_Spain',
     'es_NI': 'Spanish_Spain',
     'es_PA': 'Spanish_Spain',
