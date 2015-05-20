@@ -92,7 +92,6 @@ _LOCALE2WIN32 = {
     'lo_LA': 'Lao_Laos',
     'lt_LT': 'Lithuanian_Lithuania',
     'lat': 'Latvian_Latvia',
-    'ml_IN': 'Malayalam_India',
     'mi_NZ': 'Maori',
     'mn': 'Cyrillic_Mongolian',
     'no_NO': 'Norwegian_Norway',
