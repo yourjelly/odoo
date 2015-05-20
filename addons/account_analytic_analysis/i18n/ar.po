@@ -1,21 +1,22 @@
-# Arabic translation for openobject-addons
-# Copyright (c) 2014 Rosetta Contributors and Canonical Ltd 2014
-# This file is distributed under the same license as the openobject-addons package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
-#
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * account_analytic_analysis
+# 
+# Translators:
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2014
 msgid ""
 msgstr ""
-"Project-Id-Version: openobject-addons\n"
-"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"Project-Id-Version: Odoo 8.0\n"
+"Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-01-21 14:07+0000\n"
-"PO-Revision-Date: 2015-03-21 09:42+0000\n"
-"Last-Translator: kifcaliph <Unknown>\n"
-"Language-Team: Arabic <ar@li.org>\n"
+"PO-Revision-Date: 2015-05-20 14:40+0000\n"
+"Last-Translator: Martin Trigaux\n"
+"Language-Team: Arabic (http://www.transifex.com/projects/p/odoo-80/language/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2015-03-22 05:32+0000\n"
-"X-Generator: Launchpad (build 17405)\n"
+"Content-Transfer-Encoding: \n"
+"Language: ar\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
 #. module: account_analytic_analysis
 #: model:email.template,body_html:account_analytic_analysis.account_analytic_cron_email_template
@@ -36,18 +37,14 @@ msgid ""
 "        % for account in accounts:\n"
 "        <tr>\n"
 "            <td>${partner.name}</td>\n"
-"            <td><a "
-"href=\"${ctx[\"base_url\"]}/#action=${ctx[\"action_id\"]}&id=${account.id}&vi"
-"ew_type=form\">${account.name}</a></td>\n"
-"            <td>${account.date_start} to ${account.date and account.date or "
-"'???'}</td>\n"
+"            <td><a href=\"${ctx[\"base_url\"]}/#action=${ctx[\"action_id\"]}&id=${account.id}&view_type=form\">${account.name}</a></td>\n"
+"            <td>${account.date_start} to ${account.date and account.date or '???'}</td>\n"
 "            <td>\n"
 "            % if account.quantity_max != 0.0:\n"
 "                ${account.remaining_hours}/${account.quantity_max} units\n"
 "            % endif\n"
 "            </td>\n"
-"            <td>${account.partner_id.phone or ''}, "
-"${account.partner_id.email or ''}</td>\n"
+"            <td>${account.partner_id.phone or ''}, ${account.partner_id.email or ''}</td>\n"
 "        </tr>\n"
 "        % endfor\n"
 "    % endfor\n"
@@ -99,20 +96,11 @@ msgid ""
 "                    Click here to create a template of contract.\n"
 "                </p><p>\n"
 "                    Templates are used to prefigure contract/project that \n"
-"                    can be selected by the salespeople to quickly configure "
-"the\n"
+"                    can be selected by the salespeople to quickly configure the\n"
 "                    terms and conditions of the contract.\n"
 "                </p>\n"
 "            "
-msgstr ""
-"<pفئة=\"oe_عرض_أى محتوى_إنشاء\">\n"
-"أنقر لإنشاء نموذج من العقد\n"
-"</p><p>\n"
-"تستخدم القوالب للتنبأ بالعقود/المشروعات التى \n"
-"يمكن أن تحدد من قبل مندوبى المبيعات لسرعة إعداد \n"
-"الشروط وبنود العقد .\n"
-"</p>\n"
-"            "
+msgstr "<pفئة=\"oe_عرض_أى محتوى_إنشاء\">\nأنقر لإنشاء نموذج من العقد\n</p><p>\nتستخدم القوالب للتنبأ بالعقود/المشروعات التى \nيمكن أن تحدد من قبل مندوبى المبيعات لسرعة إعداد \nالشروط وبنود العقد .\n</p>\n            "
 
 #. module: account_analytic_analysis
 #: model:ir.actions.act_window,help:account_analytic_analysis.action_account_analytic_overdue_all
@@ -120,12 +108,9 @@ msgid ""
 "<p class=\"oe_view_nocontent_create\">\n"
 "                    Click to create a new contract.\n"
 "                </p><p>\n"
-"                    Use contracts to follow tasks, issues, timesheets or "
-"invoicing based on\n"
-"                    work done, expenses and/or sales orders. Odoo will "
-"automatically manage\n"
-"                    the alerts for the renewal of the contracts to the right "
-"salesperson.\n"
+"                    Use contracts to follow tasks, issues, timesheets or invoicing based on\n"
+"                    work done, expenses and/or sales orders. Odoo will automatically manage\n"
+"                    the alerts for the renewal of the contracts to the right salesperson.\n"
 "                </p>\n"
 "            "
 msgstr ""
@@ -134,23 +119,14 @@ msgstr ""
 #: model:ir.actions.act_window,help:account_analytic_analysis.action_sales_order
 msgid ""
 "<p class=\"oe_view_nocontent_create\">\n"
-"                Click to create a quotation that can be converted into a "
-"sales\n"
+"                Click to create a quotation that can be converted into a sales\n"
 "                order.\n"
 "              </p><p>\n"
 "                Use sale orders to track everything that should be invoiced\n"
 "                at a fix price on a contract.\n"
 "              </p>\n"
 "            "
-msgstr ""
-"<pفئة=\"oe_عرض_أى محتوى_إنشاء\">\n"
-"انقر لإنشاء عرض السعر الذى يمكن تحويله إلى \n"
-"أمر بيع.\n"
-"</p><p>\n"
-"استخدام أوامر بيع لتتبع كل ما ينبغي أن يُفوتر \n"
-"بسعر الإصلاح على العقد.\n"
-"</p>\n"
-"            "
+msgstr "<pفئة=\"oe_عرض_أى محتوى_إنشاء\">\nانقر لإنشاء عرض السعر الذى يمكن تحويله إلى \nأمر بيع.\n</p><p>\nاستخدام أوامر بيع لتتبع كل ما ينبغي أن يُفوتر \nبسعر الإصلاح على العقد.\n</p>\n            "
 
 #. module: account_analytic_analysis
 #: model:ir.actions.act_window,help:account_analytic_analysis.action_account_analytic_overdue
@@ -162,10 +138,8 @@ msgid ""
 "                end date is passed or the working effort is higher than the\n"
 "                maximum authorized one.\n"
 "              </p><p>\n"
-"                Odoo automatically sets contracts to be renewed in a "
-"pending\n"
-"                state. After the negociation, the salesman should close or "
-"renew\n"
+"                Odoo automatically sets contracts to be renewed in a pending\n"
+"                state. After the negociation, the salesman should close or renew\n"
 "                pending contracts.\n"
 "              </p>\n"
 "            "
@@ -176,21 +150,12 @@ msgstr ""
 msgid ""
 "<p>\n"
 "                You will find here timesheets and purchases you did for\n"
-"                contracts that can be reinvoiced to the customer.  If you "
-"want\n"
-"                to record new activities to invoice, you should use the "
-"timesheet\n"
+"                contracts that can be reinvoiced to the customer.  If you want\n"
+"                to record new activities to invoice, you should use the timesheet\n"
 "                menu instead.\n"
 "              </p>\n"
 "            "
-msgstr ""
-"<p>\n"
-"سوف تجد هنا الجداول الزمنية و المشتريات التى قُمت بها \n"
-"بالنسبة للعقود التى تستطيع إعادة فوترتها للعميل . إذا كنت ترغب \n"
-"فى تسجيل الأنشطة الجديدة للفاتورة, يجب عليك إستخدام قائمة الجدول الزمنى \n"
-"بدلاً من ذلك .\n"
-"</p>\n"
-"            "
+msgstr "<p>\nسوف تجد هنا الجداول الزمنية و المشتريات التى قُمت بها \nبالنسبة للعقود التى تستطيع إعادة فوترتها للعميل . إذا كنت ترغب \nفى تسجيل الأنشطة الجديدة للفاتورة, يجب عليك إستخدام قائمة الجدول الزمنى \nبدلاً من ذلك .\n</p>\n            "
 
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.account_analytic_account_form_form
@@ -200,15 +165,14 @@ msgstr ""
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
 msgid "Account Manager"
-msgstr ""
+msgstr "مدير المحاسبة"
 
 #. module: account_analytic_analysis
 #: help:sale.config.settings,group_template_required:0
 msgid ""
 "Allows you to set the template field as required when creating an analytic "
 "account or a contract."
-msgstr ""
-"يسمح لك بتعيين حقل النوذج المطلوب عند إنشاء الحساب التحليلى أو العقد ."
+msgstr "يسمح لك بتعيين حقل النوذج المطلوب عند إنشاء الحساب التحليلى أو العقد ."
 
 #. module: account_analytic_analysis
 #: field:account.analytic.invoice.line,analytic_account_id:0
@@ -224,14 +188,12 @@ msgid ""
 "Based on the costs you had on the project, what would have been the revenue "
 "if all these costs have been invoiced at the normal sale price provided by "
 "the pricelist."
-msgstr ""
-"بناءًا على التكاليف المقضية على المشروع, فما هي الايرادات اذا تم عمل فاتورة "
-"لكل التكاليف بسعر البيع العادي الممنوحة من قائمة الاسعار."
+msgstr "بناءًا على التكاليف المقضية على المشروع, فما هي الايرادات اذا تم عمل فاتورة لكل التكاليف بسعر البيع العادي الممنوحة من قائمة الاسعار."
 
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
 msgid "Cancelled"
-msgstr ""
+msgstr "ملغي"
 
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
@@ -241,7 +203,7 @@ msgstr "العقود الملغاه"
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
 msgid "Closed"
-msgstr ""
+msgstr "مغلق"
 
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
@@ -337,12 +299,12 @@ msgstr "عقود للتجديد"
 #. module: account_analytic_analysis
 #: field:account.analytic.invoice.line,create_uid:0
 msgid "Created by"
-msgstr ""
+msgstr "أُنشئ بواسطة"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.invoice.line,create_date:0
 msgid "Created on"
-msgstr ""
+msgstr "إنشاؤه في"
 
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
@@ -372,12 +334,12 @@ msgstr "تاريخ اخر عمل تم انجازه في تلك المحاسبة.
 #. module: account_analytic_analysis
 #: selection:account.analytic.account,recurring_rule_type:0
 msgid "Day(s)"
-msgstr ""
+msgstr "يوم ( أيام )"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.invoice.line,name:0
 msgid "Description"
-msgstr ""
+msgstr "الوصف"
 
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
@@ -398,7 +360,7 @@ msgstr "تجاوز تاريخ الأنتهاء أو وحدة مستهلكة مس
 #: code:addons/account_analytic_analysis/account_analytic_analysis.py:681
 #, python-format
 msgid "Error!"
-msgstr ""
+msgstr "خطأ!"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.account,hours_qtt_est:0
@@ -411,10 +373,7 @@ msgid ""
 "Expectation of remaining income for this contract. Computed as the sum of "
 "remaining subtotals which, in turn, are computed as the maximum between "
 "'(Estimation - Invoiced)' and 'To Invoice' amounts"
-msgstr ""
-"توقع الدخل المتبقى للعقود. يتم حسابها كمجموع المجاميع الفرعية المتبقية "
-"والتي، بدورها، يتم حسابها مثل الحد الأقصى بين '(تقييم - مُفوترة)' و المبالغ "
-"للفواتير ."
+msgstr "توقع الدخل المتبقى للعقود. يتم حسابها كمجموع المجاميع الفرعية المتبقية والتي، بدورها، يتم حسابها مثل الحد الأقصى بين '(تقييم - مُفوترة)' و المبالغ للفواتير ."
 
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.account_analytic_account_form_form
@@ -444,7 +403,7 @@ msgstr ""
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
 msgid "Group By"
-msgstr ""
+msgstr "تجميع حسب"
 
 #. module: account_analytic_analysis
 #: model:ir.model,name:account_analytic_analysis.model_account_analytic_analysis_summary_user
@@ -461,16 +420,14 @@ msgstr "ملخص الساعات للشهر"
 #: field:account_analytic_analysis.summary.month,id:0
 #: field:account_analytic_analysis.summary.user,id:0
 msgid "ID"
-msgstr ""
+msgstr "المعرّف"
 
 #. module: account_analytic_analysis
 #: help:account.analytic.account,ca_to_invoice:0
 msgid ""
 "If invoice from analytic account, the remaining amount you can invoice to "
 "the customer based on the total costs."
-msgstr ""
-"اذا كانت الفاتورة من حساب تحليلي, يمكن عمل فاتورة للكمية المتبقية للعميل "
-"استنادًا الى التكاليف الكلية."
+msgstr "اذا كانت الفاتورة من حساب تحليلي, يمكن عمل فاتورة للكمية المتبقية للعميل استنادًا الى التكاليف الكلية."
 
 #. module: account_analytic_analysis
 #: help:account.analytic.account,last_invoice_date:0
@@ -482,19 +439,17 @@ msgstr "إذا كانت فاتورة من التكاليف، فهذا التار
 msgid ""
 "If invoice from the costs, this is the date of the latest work or cost that "
 "have been invoiced."
-msgstr ""
-"اذا كانت الفاتورة من التكاليف,فهي تكون بتاريخ لاخر عمل او تكلفة التي تم "
-"اضافتها للفاتورة."
+msgstr "اذا كانت الفاتورة من التكاليف,فهي تكون بتاريخ لاخر عمل او تكلفة التي تم اضافتها للفاتورة."
 
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
 msgid "In Progress"
-msgstr ""
+msgstr "قيد التقدم"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.account,recurring_invoice_line_ids:0
 msgid "Invoice Lines"
-msgstr ""
+msgstr "سطور الفاتورة"
 
 #. module: account_analytic_analysis
 #: help:account.analytic.account,recurring_rule_type:0
@@ -504,7 +459,7 @@ msgstr ""
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.account_analytic_account_form_form
 msgid "Invoiced"
-msgstr ""
+msgstr "مفوتر"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.account,ca_invoiced:0
@@ -519,7 +474,7 @@ msgstr "وقت مدفوع"
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.account_analytic_account_form_form
 msgid "Invoicing"
-msgstr ""
+msgstr "الفواتير"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.account,last_invoice_date:0
@@ -529,12 +484,12 @@ msgstr "تاريخ آخر فاتورة"
 #. module: account_analytic_analysis
 #: field:account.analytic.invoice.line,write_uid:0
 msgid "Last Updated by"
-msgstr ""
+msgstr "آخر تحديث بواسطة"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.invoice.line,write_date:0
 msgid "Last Updated on"
-msgstr ""
+msgstr "آخر تحديث فى"
 
 #. module: account_analytic_analysis
 #: model:res.groups,name:account_analytic_analysis.group_template_required
@@ -578,27 +533,21 @@ msgstr "لا يوجد شىء للفوترة , أنشأ"
 msgid ""
 "Number of time (hours/days) (from journal of type 'general') that can be "
 "invoiced if you invoice based on analytic account."
-msgstr ""
-"عدد الوقت (الساعات / الأيام) (من اليومية نوع ’عام’) للفواتير الصادرة و ذلك "
-"علي أساس الحساب التحليلي."
+msgstr "عدد الوقت (الساعات / الأيام) (من اليومية نوع ’عام’) للفواتير الصادرة و ذلك علي أساس الحساب التحليلي."
 
 #. module: account_analytic_analysis
 #: help:account.analytic.account,hours_qtt_invoiced:0
 msgid ""
 "Number of time (hours/days) that can be invoiced plus those that already "
 "have been invoiced."
-msgstr ""
-"عدد الوقت (ساعات /أيام) التي يمكن إضافتها للفواتير بالاضافة الى تلك التي سبق "
-"أن تم حسابها في الفاتورة."
+msgstr "عدد الوقت (ساعات /أيام) التي يمكن إضافتها للفواتير بالاضافة الى تلك التي سبق أن تم حسابها في الفاتورة."
 
 #. module: account_analytic_analysis
 #: help:account.analytic.account,hours_quantity:0
 msgid ""
 "Number of time you spent on the analytic account (from timesheet). It "
 "computes quantities on all journal of type 'general'."
-msgstr ""
-"عدد الوقت الذي قضيته على حساب تحليلي (من الجدول الزمني). كان يحسب كميات "
-"اليوميات من نوع \"عام\"."
+msgstr "عدد الوقت الذي قضيته على حساب تحليلي (من الجدول الزمني). كان يحسب كميات اليوميات من نوع \"عام\"."
 
 #. module: account_analytic_analysis
 #: field:account.analytic.account,invoice_on_timesheets:0
@@ -618,7 +567,7 @@ msgstr "الرئيسي"
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
 msgid "Partner"
-msgstr ""
+msgstr "الشريك"
 
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
@@ -634,17 +583,17 @@ msgstr ""
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
 msgid "Pricelist"
-msgstr ""
+msgstr "قائمة الأسعار"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.invoice.line,product_id:0
 msgid "Product"
-msgstr ""
+msgstr "منتج"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.invoice.line,quantity:0
 msgid "Quantity"
-msgstr ""
+msgstr "كمية"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.account,real_margin:0
@@ -659,7 +608,7 @@ msgstr "معدل الهامش الحقيقي (%)"
 #. module: account_analytic_analysis
 #: field:account.analytic.account,recurring_rule_type:0
 msgid "Recurrency"
-msgstr ""
+msgstr "إعادة العملة"
 
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.account_analytic_account_form_form
@@ -687,12 +636,12 @@ msgstr "الوقت المتبقي"
 #. module: account_analytic_analysis
 #: field:account.analytic.account,recurring_interval:0
 msgid "Repeat Every"
-msgstr ""
+msgstr "كرر لكل"
 
 #. module: account_analytic_analysis
 #: help:account.analytic.account,recurring_interval:0
 msgid "Repeat every (Days/Week/Month/Year)"
-msgstr ""
+msgstr "تكرار كل (يوم/أسبوع/شهر/سنة)"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.account,revenue_per_hour:0
@@ -709,7 +658,7 @@ msgstr ""
 #: view:account.analytic.account:account_analytic_analysis.account_analytic_account_form_form
 #: model:ir.actions.act_window,name:account_analytic_analysis.action_sales_order
 msgid "Sales Orders"
-msgstr ""
+msgstr "أوامر المبيعات"
 
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
@@ -719,7 +668,7 @@ msgstr ""
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
 msgid "Status"
-msgstr ""
+msgstr "الحالة"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.invoice.line,price_subtotal:0
@@ -739,7 +688,7 @@ msgstr "مجموع خطوط الجداول الزمنية المفوترة له�
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
 msgid "Template"
-msgstr ""
+msgstr "قالب"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.account,theorical_margin:0
@@ -760,7 +709,7 @@ msgstr "الوقت ومواد لفاتورة"
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.account_analytic_account_form_form
 msgid "Timesheets"
-msgstr ""
+msgstr "الجداول الزمنية"
 
 #. module: account_analytic_analysis
 #: code:addons/account_analytic_analysis/account_analytic_analysis.py:659
@@ -771,7 +720,7 @@ msgstr "الجداول الزمنية للفاتورة من  %s"
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.account_analytic_account_form_form
 msgid "To Invoice"
-msgstr ""
+msgstr "في انتظار الفوترة"
 
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
@@ -781,7 +730,7 @@ msgstr "للتجديد"
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.account_analytic_account_form_form
 msgid "Total"
-msgstr ""
+msgstr "الإجمالي"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.account,total_cost:0
@@ -824,9 +773,7 @@ msgstr "الكمية الكلية ماتم أضافته للعميل لهذا ا
 msgid ""
 "Total of costs for this account. It includes real costs (from invoices) and "
 "indirect costs, like time spent on timesheets."
-msgstr ""
-"المجموع الكلي للتكاليف لهذا الحساب. ويتضمن التكاليف الحقيقية(من الفواتير) "
-"والتكاليف الغير مباشرة, مثل الوقت المقضي في سجلات الدوام ."
+msgstr "المجموع الكلي للتكاليف لهذا الحساب. ويتضمن التكاليف الحقيقية(من الفواتير) والتكاليف الغير مباشرة, مثل الوقت المقضي في سجلات الدوام ."
 
 #. module: account_analytic_analysis
 #: field:account.analytic.account,toinvoice_total:0
@@ -846,12 +793,12 @@ msgstr "وقت غير مدفوع"
 #. module: account_analytic_analysis
 #: field:account.analytic.invoice.line,price_unit:0
 msgid "Unit Price"
-msgstr ""
+msgstr "سعر الوحدة"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.invoice.line,uom_id:0
 msgid "Unit of Measure"
-msgstr ""
+msgstr "وحدة القياس"
 
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.account_analytic_account_form_form
@@ -872,7 +819,7 @@ msgstr "المستخدم"
 #. module: account_analytic_analysis
 #: selection:account.analytic.account,recurring_rule_type:0
 msgid "Week(s)"
-msgstr ""
+msgstr "أسبوع (أسابيع)"
 
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.account_analytic_account_form_form
@@ -886,7 +833,7 @@ msgstr ""
 #. module: account_analytic_analysis
 #: selection:account.analytic.account,recurring_rule_type:0
 msgid "Year(s)"
-msgstr ""
+msgstr "سنة(سنين)"
 
 #. module: account_analytic_analysis
 #: code:addons/account_analytic_analysis/account_analytic_analysis.py:676
@@ -918,9 +865,7 @@ msgstr ""
 msgid ""
 "{'required': [('type','=','contract')], 'invisible': [('type','in',['view', "
 "'normal','template'])]}"
-msgstr ""
-"{'required': [('type','=','contract')], 'invisible': [('type','in',['view', "
-"'normal','template'])]}"
+msgstr "{'required': [('type','=','contract')], 'invisible': [('type','in',['view', 'normal','template'])]}"
 
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.account_analytic_account_form_form
