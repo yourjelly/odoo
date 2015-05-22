@@ -305,6 +305,9 @@ class MergePartnerAutomatic(osv.TransientModel):
 
         if dst_partner and dst_partner.id in partner_ids:
             src_partners = proxy.browse(cr, uid, [id for id in partner_ids if id != dst_partner.id], context=context)
+            for src_partner in src_partners:
+                if src_partner.id == dst_partner.parent_id.id:
+                    raise osv.except_osv(_('Error'), _("You can not merge child contact with parent contact."))
         else:
             ordered_partners = self._get_ordered_partner(cr, uid, partner_ids, context)
             dst_partner = ordered_partners[-1]
