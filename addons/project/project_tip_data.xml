@@ -37,8 +37,8 @@
          <field name="action_id" ref="action_view_task"/>
          <field name="model">project.task</field>
          <field name="mode">form</field>
-         <field name="trigger_selector">.oe_form_buttons_view:visible,ol.breadcrumb a,div.oe_msg_notification:visible</field>
-         <field name="highlight_selector">ol.breadcrumb:visible a:last</field>
+         <field name="trigger_selector">.oe_form_buttons_view:visible,ol.oe-view-title a</field>
+         <field name="highlight_selector">ol.oe-view-title:visible a:last</field>
          <field name="placement">bottom</field>
      </record>   
 </odoo>
