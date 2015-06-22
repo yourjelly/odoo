@@ -21,7 +21,6 @@ Plan contable argentino e impuestos de acuerdo a disposiciones vigentes
         'l10n_ar_chart.xml',
         'account_tax.xml',
         'account_chart_template.yml',
-        'report_vat_statement.xml'
     ],
     'demo': [],
     'active': False,
