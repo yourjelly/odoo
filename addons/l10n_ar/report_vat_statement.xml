@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="account_financial_report_l10n_ar_tva0" model="account.financial.report">
+        <field name="name">Argentina Impuestos</field>
+        <field name="report_type">date_range</field>
+        <field name="debit_credit" eval="True"/>
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line0" model="account.financial.report.line">
+        <field name="name">Base Imponible</field>
+        <field name="code">ARTAX00</field>
+        <field name="formulas">balance = ARTAX01.balance + ARTAX05.balance</field>
+        <field name="sequence" eval="1"/>
+        <field name="financial_report_id" ref="account_financial_report_l10n_ar_tva0"/>
+        <field name="level" eval="0" />
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line1" model="account.financial.report.line">
+        <field name="name">Base Imponible - Ventas</field>
+        <field name="code">ARTAX01</field>
+        <field name="formulas">balance = ARTAX02.balance + ARTAX03.balance + ARTAX04.balance</field>
+        <field name="parent_id" ref='account_financial_report_l10n_ar_tva_line0'/>
+        <field name="sequence" eval="1"/>
+        <field name="level" eval="1" />
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line2" model="account.financial.report.line">
+        <field name="name">Ventas Gravadas con IVA</field>
+        <field name="code">ARTAX02</field>
+        <field name="parent_id" ref='account_financial_report_l10n_ar_tva_line1'/>
+        <field name="sequence" eval="1"/>
+        <field name="level" eval="2" />
+        <field name="domain" eval="[('tax_ids.description', 'in', ['ITAX_105-OUT','ITAX_27-OUT','ITAX_21-OUT'])]" />
+        <field name="formulas">balance = sum.balance</field>
+        <field name="show_domain">never</field>
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line3" model="account.financial.report.line">
+        <field name="name">Ventas NO Gravadas (Exoneradas)</field>
+        <field name="code">ARTAX03</field>
+        <field name="parent_id" ref='account_financial_report_l10n_ar_tva_line1'/>
+        <field name="sequence" eval="2"/>
+        <field name="level" eval="2" />
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line4" model="account.financial.report.line">
+        <field name="name">Ventas Gravadas Fuera de Ámbito</field>
+        <field name="code">ARTAX04</field>
+        <field name="parent_id" ref='account_financial_report_l10n_ar_tva_line1'/>
+        <field name="sequence" eval="3"/>
+        <field name="level" eval="2" />
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line5" model="account.financial.report.line">
+        <field name="name">Base Imponible - Compras</field>
+        <field name="code">ARTAX05</field>
+        <field name="formulas">balance = ARTAX06.balance + ARTAX07.balance + ARTAX08.balance</field>
+        <field name="parent_id" ref='account_financial_report_l10n_ar_tva_line0'/>
+        <field name="sequence" eval="2"/>
+        <field name="level" eval="1" />
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line6" model="account.financial.report.line">
+        <field name="name">Compras Gravadas con IVA</field>
+        <field name="code">ARTAX06</field>
+        <field name="parent_id" ref='account_financial_report_l10n_ar_tva_line5'/>
+        <field name="sequence" eval="1"/>
+        <field name="level" eval="2" />
+        <field name="domain" eval="[('tax_ids.description', 'in', ['OTAX_105-IN','OTAX_27-IN','OTAX_21-IN'])]" />
+        <field name="formulas">balance = sum.balance</field>
+        <field name="show_domain">never</field>
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line7" model="account.financial.report.line">
+        <field name="name">Compras NO Gravadas (Exoneradas)</field>
+        <field name="code">ARTAX07</field>
+        <field name="parent_id" ref='account_financial_report_l10n_ar_tva_line5'/>
+        <field name="sequence" eval="2"/>
+        <field name="level" eval="2" />
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line8" model="account.financial.report.line">
+        <field name="name">Compras Gravadas Fuera de Ámbito</field>
+        <field name="code">ARTAX08</field>
+        <field name="parent_id" ref='account_financial_report_l10n_ar_tva_line5'/>
+        <field name="sequence" eval="3"/>
+        <field name="level" eval="2" />
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line9" model="account.financial.report.line">
+        <field name="name">Impuesto General a las Ventas (IVA) Total a Pagar</field>
+        <field name="code">ARTAX09</field>
+        <field name="formulas">balance = ARTAX10.balance + ARTAX14.balance</field>
+        <field name="financial_report_id" ref="account_financial_report_l10n_ar_tva0"/>
+        <field name="sequence" eval="2"/>
+        <field name="level" eval="0" />
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line10" model="account.financial.report.line">
+        <field name="name">Impuesto Pagado</field>
+        <field name="code">ARTAX10</field>
+        <field name="formulas">balance = ARTAX11.balance + ARTAX12.balance + ARTAX13.balance</field>
+        <field name="parent_id" ref="account_financial_report_l10n_ar_tva_line9"/>
+        <field name="sequence" eval="1"/>
+        <field name="level" eval="1" />
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line11" model="account.financial.report.line">
+        <field name="name">Impuesto Pagado IVA</field>
+        <field name="code">ARTAX11</field>
+        <field name="parent_id" ref="account_financial_report_l10n_ar_tva_line10"/>
+        <field name="sequence" eval="1"/>
+        <field name="level" eval="2" />
+        <field name="formulas">balance = sum.balance</field>
+        <field name="domain" eval="[('tax_line_id.description', 'in', ['OTAX_02-IN','OTAX_105-IN','OTAX_27-IN','OTAX_21-IN'])]" />
+        <field name="show_domain">never</field>
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line12" model="account.financial.report.line">
+        <field name="name">Impuesto Pagado de Exonerados al IVA</field>
+        <field name="code">ARTAX12</field>
+        <field name="parent_id" ref="account_financial_report_l10n_ar_tva_line10"/>
+        <field name="sequence" eval="2"/>
+        <field name="level" eval="2" />
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line13" model="account.financial.report.line">
+        <field name="name">Impuesto Pagado Fuera de Ámbito</field>
+        <field name="code">ARTAX13</field>
+        <field name="parent_id" ref="account_financial_report_l10n_ar_tva_line10"/>
+        <field name="sequence" eval="3"/>
+        <field name="level" eval="2" />
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line14" model="account.financial.report.line">
+        <field name="name">Impuesto Cobrado</field>
+        <field name="code">ARTAX14</field>
+        <field name="formulas">balance = ARTAX15.balance + ARTAX16.balance + ARTAX17.balance</field>
+        <field name="parent_id" ref="account_financial_report_l10n_ar_tva_line9"/>
+        <field name="sequence" eval="2"/>
+        <field name="level" eval="1" />
+    </record>
+    <record id="account_financial_report_l10n_ar_tva_line15" model="account.financial.report.line">
+        <field name="name">Impuesto Cobrado IVA</field>
+        <field name="code">ARTAX15</field>
+        <field name="parent_id" ref="account_financial_report_l10n_ar_tva_line14"/>
+        <field name="sequence" eval="1"/>
+        <field name="level" eval="2" />
+        <field name="formulas">balance = sum.balance</field>
+        <field name="domain" eval="[('tax_line_id.description', 'in', ['ITAX_105-OUT','ITAX_27-OUT','ITAX_21-OUT'])]" />
+        <field name="show_domain">never</field>
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line16" model="account.financial.report.line">
+        <field name="name">Impuesto Cobrado de Exonerados al IVA</field>
+        <field name="code">ARTAX16</field>
+        <field name="parent_id" ref="account_financial_report_l10n_ar_tva_line14"/>
+        <field name="sequence" eval="2"/>
+        <field name="level" eval="2" />
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line17" model="account.financial.report.line">
+        <field name="name">Impuesto Cobrado Fuera de Ámbito</field>
+        <field name="code">ARTAX17</field>
+        <field name="parent_id" ref="account_financial_report_l10n_ar_tva_line14"/>
+        <field name="sequence" eval="3"/>
+        <field name="level" eval="2" />
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line18" model="account.financial.report.line">
+        <field name="name">Impuesto Nacionales a Pagar</field>
+        <field name="code">ARTAX18</field>
+        <field name="formulas">balance = ARTAX19.balance + ARTAX20.balance + ARTAX21.balance + ARTAX22.balance</field>
+        <field name="sequence" eval="3"/>
+        <field name="financial_report_id" ref="account_financial_report_l10n_ar_tva0"/>
+        <field name="level" eval="0" />
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line19" model="account.financial.report.line">
+        <field name="name">Impuesto a las Ganancias a Pagar</field>
+        <field name="code">ARTAX19</field>
+        <field name="sequence" eval="1"/>
+        <field name="parent_id" ref="account_financial_report_l10n_ar_tva_line18"/>
+        <field name="level" eval="1" />
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line20" model="account.financial.report.line">
+        <field name="name">Impuesto a los Bienes Personales a Pagar</field>
+        <field name="code">ARTAX20</field>
+        <field name="sequence" eval="2"/>
+        <field name="parent_id" ref="account_financial_report_l10n_ar_tva_line18"/>
+        <field name="level" eval="1" />
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line21" model="account.financial.report.line">
+        <field name="name">Impuesto a la Ganancia Mínima Presunta a Pagar</field>
+        <field name="code">ARTAX21</field>
+        <field name="sequence" eval="3"/>
+        <field name="parent_id" ref="account_financial_report_l10n_ar_tva_line18"/>
+        <field name="level" eval="1" />
+    </record>
+
+    <record id="account_financial_report_l10n_ar_tva_line22" model="account.financial.report.line">
+        <field name="name">Monotributo a Pagar</field>
+        <field name="code">ARTAX22</field>
+        <field name="sequence" eval="4"/>
+        <field name="parent_id" ref="account_financial_report_l10n_ar_tva_line18"/>
+        <field name="level" eval="1" />
+    </record>
+</odoo>
