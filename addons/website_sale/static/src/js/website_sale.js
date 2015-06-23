@@ -236,6 +236,10 @@ $('.oe_website_sale').each(function () {
         $img.attr("src", "/website/image/product.product/" + $(this).val() + "/image");
     });
 
+    $.each( $('input[name=product_id]:checked'), function (key, value) {
+        $(value).trigger('change');
+    });
+
     $(oe_website_sale).on('change', 'input.js_variant_change, select.js_variant_change, ul[data-attribute_value_ids]', function (ev) {
         var $ul = $(ev.target).closest('ul.js_add_cart_variants');
         var $parent = $ul.closest('.js_product');
