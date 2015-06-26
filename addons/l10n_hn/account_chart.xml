@@ -244,6 +244,20 @@
             <field name="chart_template_id" ref="cuentas_plantilla"/>
         </record>
 
+        <record id="cta810101" model="account.account.template">
+            <field name="code">8.1.01.01</field>
+            <field name="name">ganar cuenta</field>
+            <field name="user_type_id" ref="account.data_account_type_other_income"/>
+            <field name="chart_template_id" ref="cuentas_plantilla"/>
+        </record>
+
+        <record id="cta810102" model="account.account.template">
+            <field name="code">8.1.01.02</field>
+            <field name="name">cuenta de pérdidas</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="cuentas_plantilla"/>
+        </record>
+
     </data>
 
 </openerp>
