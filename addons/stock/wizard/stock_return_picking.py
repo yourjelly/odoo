@@ -73,7 +73,7 @@ class stock_return_picking(osv.osv_memory):
                 res.update({'product_return_moves': result1})
             if 'move_dest_exists' in fields:
                 res.update({'move_dest_exists': chained_move_exist})
-            if 'parent_location_id' in fields:
+            if 'parent_location_id' in fields and pick.location_id.usage == 'internal':
                 res.update({'parent_location_id':pick.picking_type_id.warehouse_id and pick.picking_type_id.warehouse_id.view_location_id.id or False})
             if 'location_id' in fields:
                 res.update({'location_id': pick.location_id.id})
@@ -116,7 +116,7 @@ class stock_return_picking(osv.osv_memory):
             'state': 'draft',
             'origin': pick.name,
             'location_id': pick.location_dest_id.id,
-            'location_dest_id': pick.location_id.id,
+            'location_dest_id': data['location_id'] and data['location_id'][0] or pick.location_id.id,
         }, context=context)
 
         for data_get in data_obj.browse(cr, uid, data['product_return_moves'], context=context):
