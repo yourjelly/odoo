@@ -20,7 +20,7 @@ import odoo
 from .. import api, SUPERUSER_ID
 from odoo.tools import (assertion_report, config, existing_tables,
                         lazy_classproperty, lazy_property, table_exists,
-                        convert_file, ustr, load_language,
+                        convert_file, ustr,
                         topological_sort, OrderedSet, pycompat)
 from odoo.tools.lru import LRU
 
@@ -520,7 +520,7 @@ class Registry(Mapping):
 
             if load_lang:
                 for lang in load_lang.split(','):
-                    load_language(cr, lang)
+                    self.load_language(cr, lang)
 
             # STEP 2: Mark other modules to be loaded/updated
             if update_module:
@@ -864,6 +864,18 @@ class Registry(Mapping):
                 cr.execute("SELECT name FROM ir_module_module")
                 incorrect_names = mod_names.difference([x['name'] for x in cr.dictfetchall()])
                 _logger.warning('invalid module names, ignored: %s', ", ".join(incorrect_names))
+
+    def load_language(self, cr, lang):
+        """Loads a translation terms for a language.
+
+        Used mainly to automate language loading at db initialization.
+
+        :param str lang: language ISO code with optional _underscore_ and l10n
+                         flavor (ex: 'fr', 'fr_BE', but not 'fr-BE')
+        """
+        env = odoo.api.Environment(cr, SUPERUSER_ID, {})
+        installer = env['base.language.install'].create({'lang': lang})
+        installer.lang_install()
 
 
 class DummyRLock(object):
