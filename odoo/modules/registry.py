@@ -4,8 +4,8 @@
 """ Models registries.
 
 """
-from collections import Mapping, defaultdict, deque
-from contextlib import closing, contextmanager
+import collections
+import contextlib
 from functools import partial
 from operator import attrgetter
 from weakref import WeakValueDictionary
@@ -20,19 +20,16 @@ import odoo
 from .. import api, SUPERUSER_ID
 from odoo.tools import (assertion_report, config, existing_tables,
                         lazy_classproperty, lazy_property, table_exists,
-                        convert_file, ustr,
+                        convert_file, ustr, lru,
                         topological_sort, OrderedSet, pycompat)
-from odoo.tools.lru import LRU
 
-from . import migration
-from .module import (initialize_sys_path, runs_post_install, run_unit_tests,
-                     load_openerp_module, adapt_version)
+from . import db, graph as graphmod, migration, module
 
 _logger = logging.getLogger(__name__)
 _test_logger = logging.getLogger('odoo.tests')
 
 
-class Registry(Mapping):
+class Registry(collections.Mapping):
     """ Model registry for a particular database.
 
     The registry is essentially a mapping between model names and model classes.
@@ -59,7 +56,7 @@ class Registry(Mapping):
                 # 10Mb (registry) + 5Mb (working memory) per registry
                 avgsz = 15 * 1024 * 1024
                 size = int(config['limit_memory_soft'] / avgsz)
-        return LRU(size)
+        return lru.LRU(size)
 
     def __new__(cls, db_name):
         """ Return the registry for the given database name."""
@@ -102,7 +99,7 @@ class Registry(Mapping):
                 registry = cls.registries[db_name]
                 registry._init_parent.update(init_parent)
 
-                with closing(registry.cursor()) as cr:
+                with contextlib.closing(registry.cursor()) as cr:
                     registry.do_parent_store(cr)
                     cr.commit()
 
@@ -118,7 +115,7 @@ class Registry(Mapping):
         self._init_parent = {}
         self._assertion_report = assertion_report.assertion_report()
         self._fields_by_model = None
-        self._post_init_queue = deque()
+        self._post_init_queue = collections.deque()
 
         # modules fully loaded (maintained during init phase by `loading` module)
         self._init_modules = set()
@@ -146,8 +143,8 @@ class Registry(Mapping):
         self.registry_invalidated = False
         self.cache_invalidated = False
 
-        with closing(self.cursor()) as cr:
-            has_unaccent = odoo.modules.db.has_unaccent(cr)
+        with contextlib.closing(self.cursor()) as cr:
+            has_unaccent = db.has_unaccent(cr)
             if odoo.tools.config['unaccent'] and not has_unaccent:
                 _logger.warning("The option --unaccent was given but no unaccent() function was found in database.")
             self.has_unaccent = odoo.tools.config['unaccent'] and has_unaccent
@@ -226,7 +223,7 @@ class Registry(Mapping):
         funcs = [attrgetter(kind + '_children') for kind in kinds]
 
         models = OrderedSet()
-        queue = deque(model_names)
+        queue = collections.deque(model_names)
         while queue:
             model = self[queue.popleft()]
             models.add(model._name)
@@ -338,7 +335,7 @@ class Registry(Mapping):
     def cache(self):
         """ A cache for model methods. """
         # this lazy_property is automatically reset by lazy_property.reset_all()
-        return LRU(8192)
+        return lru.LRU(8192)
 
     def _clear_cache(self):
         """ Clear the cache and mark it as invalidated. """
@@ -383,7 +380,7 @@ class Registry(Mapping):
         if not odoo.multi_process:
             return self
 
-        with closing(self.cursor()) as cr:
+        with contextlib.closing(self.cursor()) as cr:
             cr.execute(""" SELECT base_registry_signaling.last_value,
                                   base_cache_signaling.last_value
                            FROM base_registry_signaling, base_cache_signaling""")
@@ -408,7 +405,7 @@ class Registry(Mapping):
         """ Notifies other processes if registry or cache has been invalidated. """
         if odoo.multi_process and self.registry_invalidated:
             _logger.info("Registry changed, signaling through the database")
-            with closing(self.cursor()) as cr:
+            with contextlib.closing(self.cursor()) as cr:
                 cr.execute("select nextval('base_registry_signaling')")
                 self.registry_sequence = cr.fetchone()[0]
 
@@ -416,7 +413,7 @@ class Registry(Mapping):
         # because reloading the registry implies starting with an empty cache
         elif odoo.multi_process and self.cache_invalidated:
             _logger.info("At least one model cache has been invalidated, signaling through the database.")
-            with closing(self.cursor()) as cr:
+            with contextlib.closing(self.cursor()) as cr:
                 cr.execute("select nextval('base_cache_signaling')")
                 self.cache_sequence = cr.fetchone()[0]
 
@@ -433,7 +430,7 @@ class Registry(Mapping):
             self.cache.clear()
             self.cache_invalidated = False
 
-    @contextmanager
+    @contextlib.contextmanager
     def manage_changes(self):
         """ Context manager to signal/discard registry and cache invalidations. """
         try:
@@ -480,16 +477,16 @@ class Registry(Mapping):
         return self._db.cursor()
 
     def load_modules(self, force_demo=False, status=None, update_module=False):
-        initialize_sys_path()
+        module.initialize_sys_path()
 
         force = []
         if force_demo:
             force.append('demo')
 
         with self.cursor() as cr:
-            if not odoo.modules.db.is_initialized(cr):
+            if not db.is_initialized(cr):
                 _logger.info("init db")
-                odoo.modules.db.initialize(cr)
+                db.initialize(cr)
                 update_module = True    # process auto-installed modules
                 config["init"]["all"] = 1
                 config['update']['all'] = 1
@@ -502,7 +499,7 @@ class Registry(Mapping):
                 cr.execute("update ir_module_module set state=%s where name=%s and state=%s", ('to upgrade', 'base', 'installed'))
 
             # STEP 1: LOAD BASE (must be done before module dependencies can be computed for later steps)
-            graph = odoo.modules.graph.Graph()
+            graph = graphmod.Graph()
             graph.add_module(cr, 'base', force)
             if not graph:
                 _logger.critical('module base cannot be loaded! (hint: verify addons-path)')
@@ -673,72 +670,77 @@ class Registry(Mapping):
                 break
         return processed_modules
 
+    def _load_test(self, cr, package, idref, mode, report):
+        cr.commit()
+        try:
+            self._load_data(cr, package, idref, mode=mode, kind='test', report=report)
+            return True
+        except Exception:
+            _test_logger.exception(
+                'module %s: an exception occurred in a test', package.name)
+            return False
+        finally:
+            cr.rollback()
+            # avoid keeping stale xml_id, etc. in cache
+            self.clear_caches()
+
+    def _get_files_of_kind(self, kind, package):
+        if kind == 'demo':
+            kind = ['demo_xml', 'demo']
+        elif kind == 'data':
+            kind = ['init_xml', 'update_xml', 'data']
+        if isinstance(kind, str):
+            kind = [kind]
+        files = []
+        for k in kind:
+            for f in package.data[k]:
+                files.append(f)
+                if not k.endswith('_xml'):
+                    continue
+
+                if k == 'init_xml' and not f.endswith('.xml'):
+                    continue
+
+                # init_xml, update_xml and demo_xml are deprecated except
+                # for the case of init_xml with yaml, csv and sql files as
+                # we can't specify noupdate for those file.
+                correct_key = 'demo' if 'demo' in k else 'data'
+                _logger.warning(
+                    "module %s: key '%s' is deprecated in favor of '%s' for file '%s'.",
+                    package.name, k, correct_key, f
+                )
+        return files
+
+    def _load_data(self, cr, package, idref, mode, kind, report):
+        """
+
+        kind: data, demo, test, init_xml, update_xml, demo_xml.
+
+        noupdate is False, unless it is demo data or it is csv data in
+        init mode.
+
+        """
+        if kind in ('demo', 'test'):
+            threading.currentThread().testing = True
+        try:
+            for filename in self._get_files_of_kind(kind, package):
+                _logger.info("loading %s/%s", package.name, filename)
+                noupdate = False
+                if kind in ('demo', 'demo_xml') or (filename.endswith('.csv') and kind in ('init', 'init_xml')):
+                    noupdate = True
+                convert_file(cr, package.name, filename, idref, mode, noupdate, kind, report)
+        finally:
+            if kind in ('demo', 'test'):
+                threading.currentThread().testing = False
+
     def load_module_graph(self, cr, graph, perform_checks=True, skip_modules=None, report=None):
         """Migrates+Updates or Installs all module nodes from ``graph``
            :param graph: graph of module nodes to load
-           :param status: deprecated parameter, unused, left to avoid changing signature in 8.0
            :param perform_checks: whether module descriptors should be checked for validity (prints warnings
                                   for same cases)
            :param skip_modules: optional list of module names (packages) which have previously been loaded and can be skipped
            :return: list of modules that were installed or updated
         """
-        def load_test(module_name, idref, mode):
-            cr.commit()
-            try:
-                _load_data(cr, module_name, idref, mode, 'test')
-                return True
-            except Exception:
-                _test_logger.exception(
-                    'module %s: an exception occurred in a test', module_name)
-                return False
-            finally:
-                cr.rollback()
-                # avoid keeping stale xml_id, etc. in cache
-                self.clear_caches()
-
-        def _get_files_of_kind(kind):
-            if kind == 'demo':
-                kind = ['demo_xml', 'demo']
-            elif kind == 'data':
-                kind = ['init_xml', 'update_xml', 'data']
-            if isinstance(kind, str):
-                kind = [kind]
-            files = []
-            for k in kind:
-                for f in package.data[k]:
-                    files.append(f)
-                    if k.endswith('_xml') and not (k == 'init_xml' and not f.endswith('.xml')):
-                        # init_xml, update_xml and demo_xml are deprecated except
-                        # for the case of init_xml with yaml, csv and sql files as
-                        # we can't specify noupdate for those file.
-                        correct_key = 'demo' if k.count('demo') else 'data'
-                        _logger.warning(
-                            "module %s: key '%s' is deprecated in favor of '%s' for file '%s'.",
-                            package.name, k, correct_key, f
-                        )
-            return files
-
-        def _load_data(cr, module_name, idref, mode, kind):
-            """
-
-            kind: data, demo, test, init_xml, update_xml, demo_xml.
-
-            noupdate is False, unless it is demo data or it is csv data in
-            init mode.
-
-            """
-            try:
-                if kind in ('demo', 'test'):
-                    threading.currentThread().testing = True
-                for filename in _get_files_of_kind(kind):
-                    _logger.info("loading %s/%s", module_name, filename)
-                    noupdate = False
-                    if kind in ('demo', 'demo_xml') or (filename.endswith('.csv') and kind in ('init', 'init_xml')):
-                        noupdate = True
-                    convert_file(cr, module_name, filename, idref, mode, noupdate, kind, report)
-            finally:
-                if kind in ('demo', 'test'):
-                    threading.currentThread().testing = False
 
         processed_modules = []
         loaded_modules = []
@@ -753,19 +755,16 @@ class Registry(Mapping):
         t0_sql = odoo.sql_db.sql_counter
 
         for index, package in enumerate(graph, 1):
-            module_name = package.name
-            module_id = package.id
-
-            if skip_modules and module_name in skip_modules:
+            if skip_modules and package.name in skip_modules:
                 continue
 
-            _logger.debug('loading module %s (%d/%d)', module_name, index, module_count)
+            _logger.debug('loading module %s (%d/%d)', package.name, index, module_count)
             migrations.migrate_module(package, 'pre')
-            load_openerp_module(package.name)
+            module.load_openerp_module(package.name)
 
             new_install = package.state == 'to install'
             if new_install:
-                py_module = sys.modules['odoo.addons.%s' % (module_name,)]
+                py_module = sys.modules['odoo.addons.%s' % (package.name,)]
                 pre_init = package.info.get('pre_init_hook')
                 if pre_init:
                     getattr(py_module, pre_init)(cr)
@@ -788,26 +787,25 @@ class Registry(Mapping):
                 env = api.Environment(cr, SUPERUSER_ID, {})
                 # Can't put this line out of the loop: ir.module.module will be
                 # registered by init_models() above.
-                module = env['ir.module.module'].browse(module_id)
+                modrec = env['ir.module.module'].browse(package.id)
 
                 if perform_checks:
-                    module.check()
+                    modrec.check()
 
                 if package.state == 'to upgrade':
                     # upgrading the module information
-                    module.write(module.get_values_from_terp(package.data))
-                _load_data(cr, module_name, idref, mode, kind='data')
+                    modrec.write(modrec.get_values_from_terp(package.data))
+                self._load_data(cr, package, idref, mode, kind='data', report=report)
                 has_demo = hasattr(package, 'demo') or (package.dbdemo and package.state != 'installed')
                 if has_demo:
-                    _load_data(cr, module_name, idref, mode, kind='demo')
-                    cr.execute('update ir_module_module set demo=%s where id=%s', (True, module_id))
-                    module.invalidate_cache(['demo'])
+                    self._load_data(cr, package, idref, mode, kind='demo', report=report)
+                    modrec.write({'demo': True})
 
                 migrations.migrate_module(package, 'post')
 
                 # Update translations for all installed languages
                 overwrite = odoo.tools.config["overwrite_existing_translations"]
-                module.with_context(overwrite=overwrite).update_translations()
+                modrec.with_context(overwrite=overwrite).update_translations()
 
                 self._init_modules.add(package.name)
 
@@ -817,22 +815,22 @@ class Registry(Mapping):
                         getattr(py_module, post_init)(cr, self)
 
                 # validate all the views at a whole
-                env['ir.ui.view']._validate_module_views(module_name)
+                env['ir.ui.view']._validate_module_views(package.name)
 
-                if has_demo:
-                    # launch tests only in demo mode, allowing tests to use demo data.
-                    if config.options['test_enable']:
-                        # Yamel test
-                        report.record_result(load_test(module_name, idref, mode))
-                        # Python tests
-                        env['ir.http']._clear_routing_map()     # force routing map to be rebuilt
-                        report.record_result(run_unit_tests(module_name, cr.dbname))
+                # launch tests only in demo mode, allowing tests to use demo data.
+                if has_demo and config.options['test_enable']:
+                    # YAML (&XML) tests
+                    report.record_result(self._load_test(cr, package, idref, mode, report))
+
+                    # Python tests
+                    env['ir.http']._clear_routing_map()     # force routing map to be rebuilt
+                    report.record_result(module.run_unit_tests(package.name, cr.dbname))
 
                 processed_modules.append(package.name)
 
-                ver = adapt_version(package.data['version'])
+                ver = module.adapt_version(package.data['version'])
                 # Set new modules and dependencies
-                module.write({'state': 'installed', 'latest_version': ver})
+                modrec.write({'state': 'installed', 'latest_version': ver})
 
                 package.load_state = package.state
                 package.load_version = package.installed_version
