@@ -86,7 +86,35 @@ class Registry(collections.Mapping):
                 cls.registries[db_name] = registry
                 try:
                     registry.setup_signaling()
-                    registry.load_modules(force_demo, status, update_module)
+                    for event, data in registry.load_modules(force_demo, status, update_module):
+                        # launch tests only in demo mode, allowing tests to use demo data.
+                        if event == 'module_processed':
+                            if not config['test_enable']:
+                                continue
+                            if not (hasattr(data, 'demo') or (data.dbdemo and data.state != 'installed')):
+                                continue
+
+                            mode = 'update'
+                            if hasattr(data, 'init') or data.state == 'to install':
+                                mode = 'init'
+
+                            # closing will rollback & close instead of commit & close
+                            with contextlib.closing(registry.cursor()) as cr:
+                                # FIXME: e tu idref?
+                                registry._assertion_report.record_result(
+                                    registry._load_test(cr, data, idref=None, mode=mode))
+
+                                env = api.Environment(cr, SUPERUSER_ID, {})
+                                # Python tests
+                                env['ir.http']._clear_routing_map()     # force routing map to be rebuilt
+
+                            registry._assertion_report.record_result(
+                                module.run_unit_tests(data.name, db_name))
+
+                    if registry._assertion_report.failures:
+                        _logger.error('At least one test failed when loading the modules.')
+                    _logger.info('Modules loaded, %s', registry._assertion_report)
+
                 except Exception:
                     _logger.exception('Failed to load registry')
                     del cls.registries[db_name]
@@ -507,10 +535,16 @@ class Registry(collections.Mapping):
                 _logger.critical('module base cannot be loaded! (hint: verify addons-path)')
                 raise ImportError('Module `base` cannot be loaded! (hint: verify addons-path)')
 
-            # processed_modules: for cleanup step after install
-            # loaded_modules: to avoid double loading
-            loaded_modules, processed_modules = self.load_module_graph(
-                cr, perform_checks=update_module)
+            # avoid double loading as load_module_graph is called multiple times
+            loaded_modules = set()
+            # modules which may need cleanup step
+            processed_modules = []
+            for event, data in self.load_module_graph(cr, perform_checks=update_module):
+                if event == 'module_loaded':
+                    loaded_modules.add(data.name)
+                elif event == 'module_processed':
+                    processed_modules.append(data.name)
+                yield event, data
 
             load_lang = config.pop('load_language')
             if load_lang or update_module:
@@ -562,13 +596,20 @@ class Registry(collections.Mapping):
             previously_processed = -1
             while previously_processed < len(processed_modules):
                 previously_processed = len(processed_modules)
-                processed_modules += self.load_marked_modules(
-                    cr, ['installed', 'to upgrade', 'to remove'],
-                    force, loaded_modules, update_module)
+                for event, data in self.load_marked_modules(cr, ['installed', 'to upgrade', 'to remove'], force, loaded_modules, update_module):
+                    if event == 'module_loaded':
+                        loaded_modules.add(data.name)
+                    elif event == 'module_processed':
+                        processed_modules.append(data.name)
+                    yield event, data
+
                 if update_module:
-                    processed_modules += self.load_marked_modules(
-                        cr, ['to install'], force,
-                        loaded_modules, update_module)
+                    for event, data in self.load_marked_modules(cr, ['to install'], force, loaded_modules, update_module):
+                        if event == 'module_loaded':
+                            loaded_modules.add(data.name)
+                        elif event == 'module_processed':
+                            processed_modules.append(data.name)
+                        yield event, data
 
             self.loaded = True
             self.setup_models(cr)
@@ -630,7 +671,8 @@ class Registry(collections.Mapping):
                     cr.commit()
                     _logger.info('Reloading registry once more after uninstalling modules')
                     api.Environment.reset()
-                    return odoo.modules.registry.Registry.new(cr.dbname, force_demo, status, update_module)
+                    self.new(cr.dbname, force_demo=force_demo, update_module=update_module)
+                    return
 
             # STEP 6: verify custom views on every model
             if update_module:
@@ -641,11 +683,6 @@ class Registry(collections.Mapping):
                     except Exception as e:
                         _logger.warning('invalid custom view(s) for model %s: %s', model, ustr(e))
 
-            if self._assertion_report.failures:
-                _logger.error('At least one test failed when loading the modules.')
-            else:
-                _logger.info('Modules loaded.')
-
             # STEP 8: call _register_hook on every model
             for model in pycompat.values(env):
                 model._register_hook()
@@ -653,27 +690,30 @@ class Registry(collections.Mapping):
             # STEP 9: save installed/updated modules for post-install tests
             self.updated_modules += processed_modules
             cr.commit()
-
     def load_marked_modules(self, cr, states, force, loaded_modules, perform_checks):
         """Loads modules marked with ``states``, adding them to ``graph`` and
            ``loaded_modules`` and returns a list of installed/upgraded modules."""
-        processed_modules = []
-        while True:
+        # loop until there's no module left to process
+        processed_any = True
+        loaded = set(loaded_modules)
+        while processed_any:
             cr.execute("SELECT name from ir_module_module WHERE state IN %s", (tuple(states),))
             module_list = [name for (name,) in cr.fetchall() if name not in self.graph]
             if not module_list:
                 break
+
             self.graph.add_modules(cr, module_list, force)
             _logger.debug('Updating graph with %d more modules', len(module_list))
-            loaded, processed = self.load_module_graph(cr, skip_modules=loaded_modules, perform_checks=perform_checks)
-            processed_modules.extend(processed)
-            loaded_modules.extend(loaded)
-            if not processed:
-                break
-        return processed_modules
+
+            processed_any = False
+            for event, data in self.load_module_graph(cr, skip_modules=loaded_modules, perform_checks=perform_checks):
+                if event == 'module_loaded':
+                    loaded.add(data.name)
+                elif event == 'module_processed':
+                    processed_any = True
+                yield event, data
 
     def _load_test(self, cr, package, idref, mode):
-        cr.commit()
         try:
             self._load_data(cr, package, idref, mode=mode, kind='test')
             return True
@@ -682,7 +722,6 @@ class Registry(collections.Mapping):
                 'module %s: an exception occurred in a test', package.name)
             return False
         finally:
-            cr.rollback()
             # avoid keeping stale xml_id, etc. in cache
             self.clear_caches()
 
@@ -741,8 +780,6 @@ class Registry(collections.Mapping):
            :param skip_modules: optional list of module names (packages) which have previously been loaded and can be skipped
            :return: list of modules that were installed or updated
         """
-        processed_modules = []
-        loaded_modules = []
         migrations = migration.MigrationManager(cr, self.graph)
         module_count = len(self.graph)
         _logger.info('loading %d modules...', module_count)
@@ -771,22 +808,20 @@ class Registry(collections.Mapping):
 
             model_names = self.load(cr, package)
 
-            loaded_modules.append(package.name)
-            if hasattr(package, 'init') or hasattr(package, 'update') or package.state in ('to install', 'to upgrade'):
-                self.setup_models(cr)
-                self.init_models(cr, model_names, {'module': package.name})
-                cr.commit()
-
             idref = {}
 
             mode = 'update'
             if hasattr(package, 'init') or package.state == 'to install':
                 mode = 'init'
 
+            # models loaded in python (ish), why not setup_models?
+            yield "module_loaded", package
             if hasattr(package, 'init') or hasattr(package, 'update') or package.state in ('to install', 'to upgrade'):
                 env = api.Environment(cr, SUPERUSER_ID, {})
-                # Can't put this line out of the loop: ir.module.module will be
-                # registered by init_models() above.
+                self.setup_models(cr)
+                # db alterations + possible DB hooks (init)
+                self.init_models(cr, model_names, {'module': package.name})
+                cr.commit()
                 modrec = env['ir.module.module'].browse(package.id)
 
                 if perform_checks:
@@ -817,16 +852,10 @@ class Registry(collections.Mapping):
                 # validate all the views at a whole
                 env['ir.ui.view']._validate_module_views(package.name)
 
-                # launch tests only in demo mode, allowing tests to use demo data.
-                if has_demo and config.options['test_enable']:
-                    # YAML (&XML) tests
-                    self._assertion_report.record_result(self._load_test(cr, package, idref, mode))
-
-                    # Python tests
-                    env['ir.http']._clear_routing_map()     # force routing map to be rebuilt
-                    self._assertion_report.record_result(module.run_unit_tests(package.name, cr.dbname))
-
-                processed_modules.append(package.name)
+                # necessary to make everything visible to module
+                # post-processing (e.g. tests) which use different cursors
+                cr.commit()
+                yield "module_processed", package
 
                 ver = module.adapt_version(package.data['version'])
                 # Set new modules and dependencies
@@ -847,8 +876,6 @@ class Registry(collections.Mapping):
         self.clear_caches()
 
         cr.commit()
-
-        return loaded_modules, processed_modules
 
     def _check_module_names(self, cr, module_names):
         mod_names = set(module_names)
