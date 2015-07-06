@@ -22,7 +22,7 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta
 from pprint import pformat
 
-import werkzeug
+import pytest
 
 import odoo
 from odoo import api
@@ -51,7 +51,6 @@ def get_db_name():
 # For backwards-compatibility - get_db_name() should be used instead
 DB = get_db_name()
 
-
 def at_install(flag):
     """ Sets the at-install state of a test, the flag is a boolean specifying
     whether the test should (``True``) or should not (``False``) run during
@@ -61,6 +60,7 @@ def at_install(flag):
     starting the installation of the next module.
     """
     def decorator(obj):
+        obj = pytest.mark.at_install(flag)(obj)
         obj.at_install = flag
         return obj
     return decorator
@@ -74,9 +74,30 @@ def post_install(flag):
     current installation set.
     """
     def decorator(obj):
+        obj = pytest.mark.post_install(flag)(obj)
         obj.post_install = flag
         return obj
     return decorator
+
+class CaseMeta(type):
+    def __init__(cls, name, bases, attrs):
+        super(CaseMeta, cls).__init__(name, bases, attrs)
+        # in pytest 2.7, class-level marks are stored on a pytestmark
+        # attribute but in case of inheritance if a parent class has a
+        # pytestmark (has been marked) then marks on a child class are going
+        # to be set on the parent instead, which is completely broken.
+        #
+        # Explicitly copy the parent's marks into the child instead.
+        #
+        # See pytest-dev/pytest#842.
+        cls_marks = []
+        for base in bases:
+            cls_marks.extend(getattr(base, 'pytestmark', []))
+        if 'at_install' in attrs:
+            cls_marks.append(pytest.mark.at_install(attrs['at_install']))
+        if 'post_install' in attrs:
+            cls_marks.append(pytest.mark.post_install(attrs['post_install']))
+        cls.pytestmark = cls_marks
 
 class BaseCase(unittest.TestCase):
     """
@@ -85,6 +106,7 @@ class BaseCase(unittest.TestCase):
     This class is abstract and expects self.registry, self.cr and self.uid to be
     initialized by subclasses.
     """
+    __metaclass__ = CaseMeta
 
     longMessage = True      # more verbose error message by default: https://www.odoo.com/r/Vmh
 
@@ -229,6 +251,7 @@ class RedirectHandler(urllib2.HTTPRedirectHandler):
 
     https_response = http_response
 
+@pytest.mark.http
 class HttpCase(TransactionCase):
     """ Transactional HTTP TestCase with url_open and phantomjs helpers.
     """
@@ -432,18 +455,3 @@ class HttpCase(TransactionCase):
         phantomtest = os.path.join(os.path.dirname(__file__), 'phantomtest.js')
         cmd = ['phantomjs', phantomtest, json.dumps(options)]
         self.phantom_run(cmd, timeout)
-
-def can_import(module):
-    """ Checks if <module> can be imported, returns ``True`` if it can be,
-    ``False`` otherwise.
-
-    To use with ``unittest.skipUnless`` for tests conditional on *optional*
-    dependencies, which may or may be present but must still be tested if
-    possible.
-    """
-    try:
-        importlib.import_module(module)
-    except ImportError:
-        return False
-    else:
-        return True

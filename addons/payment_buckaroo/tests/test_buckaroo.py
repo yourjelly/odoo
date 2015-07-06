@@ -9,9 +9,9 @@ from odoo.addons.payment.tests.common import PaymentAcquirerCommon
 from odoo.addons.payment_buckaroo.controllers.main import BuckarooController
 from odoo.tools import mute_logger
 
+import pytest
 
-@odoo.tests.common.at_install(False)
-@odoo.tests.common.post_install(False)
+@pytest.mark.skipif(reason="at_install(False) and post_install(False) => never run")
 class BuckarooCommon(PaymentAcquirerCommon):
 
     def setUp(self):
@@ -19,9 +19,6 @@ class BuckarooCommon(PaymentAcquirerCommon):
         # get the buckaroo account
         self.buckaroo = self.env.ref('payment.payment_acquirer_buckaroo')
 
-
-@odoo.tests.common.at_install(False)
-@odoo.tests.common.post_install(False)
 class BuckarooForm(BuckarooCommon):
 
     def test_10_Buckaroo_form_render(self):
