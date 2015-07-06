@@ -5,7 +5,9 @@ import csv
 import io
 import unittest
 
-from odoo.tests.common import TransactionCase, can_import
+import pytest
+
+from odoo.tests.common import TransactionCase
 from odoo.modules.module import get_module_resource
 from odoo.tools import mute_logger
 
@@ -261,8 +263,8 @@ class TestPreview(TransactionCase):
         # Ensure we only have the response fields we expect
         self.assertItemsEqual(list(result), ['matches', 'headers', 'fields', 'preview', 'headers_type', 'options', 'advanced_mode', 'debug'])
 
-    @unittest.skipUnless(can_import('xlrd'), "XLRD module not available")
     def test_xls_success(self):
+        pytest.importorskip('xlrd')
         xls_file_path = get_module_resource('base_import', 'tests', 'test.xls')
         file_content = open(xls_file_path, 'rb').read()
         import_wizard = self.env['base_import.import'].create({
@@ -291,8 +293,9 @@ class TestPreview(TransactionCase):
         # Ensure we only have the response fields we expect
         self.assertItemsEqual(list(result), ['matches', 'headers', 'fields', 'preview', 'headers_type', 'options', 'advanced_mode', 'debug'])
 
-    @unittest.skipUnless(can_import('xlrd.xlsx'), "XLRD/XLSX not available")
     def test_xlsx_success(self):
+        pytest.importorskip('xlrd.xlsx')
+
         xlsx_file_path = get_module_resource('base_import', 'tests', 'test.xlsx')
         file_content = open(xlsx_file_path, 'rb').read()
         import_wizard = self.env['base_import.import'].create({
@@ -321,8 +324,9 @@ class TestPreview(TransactionCase):
         # Ensure we only have the response fields we expect
         self.assertItemsEqual(list(result), ['matches', 'headers', 'fields', 'preview', 'headers_type', 'options','advanced_mode', 'debug'])
 
-    @unittest.skipUnless(can_import('odf'), "ODFPY not available")
     def test_ods_success(self):
+        pytest.importorskip("odf")
+
         ods_file_path = get_module_resource('base_import', 'tests', 'test.ods')
         file_content = open(ods_file_path, 'rb').read()
         import_wizard = self.env['base_import.import'].create({

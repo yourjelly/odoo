@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import pytest
 
 import odoo.tests
 
@@ -7,9 +8,11 @@ class TestUi(odoo.tests.HttpCase):
     post_install = True
     at_install = False
 
+    @pytest.mark.skipif(reason="Not previously imported -> not working and not run")
     def test_01_admin_forum_tour(self):
         self.phantom_js("/", "odoo.__DEBUG__.services['web_tour.tour'].run('question')", "odoo.__DEBUG__.services['web_tour.tour'].tours.question.ready", login="admin")
 
+    @pytest.mark.skipif(reason="Not previously imported -> not working and not run")
     def test_02_demo_question(self):
         with self.cursor() as test_cr:
             env = self.env(cr=test_cr)

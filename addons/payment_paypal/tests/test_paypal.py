@@ -9,7 +9,9 @@ from odoo.tools import mute_logger
 
 from lxml import objectify
 
+import pytest
 
+@pytest.mark.skipif(reason="never imported (thus run) by previous test runner")
 class PaypalCommon(PaymentAcquirerCommon):
 
     def setUp(self):

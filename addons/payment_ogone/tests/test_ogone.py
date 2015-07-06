@@ -10,7 +10,9 @@ from werkzeug import urls
 
 from odoo.tools import mute_logger
 
+import pytest
 
+@pytest.mark.skipif(reason="never imported (thus run) by previous runner")
 class OgonePayment(PaymentAcquirerCommon):
 
     def setUp(self):

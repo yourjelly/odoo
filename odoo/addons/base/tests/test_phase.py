@@ -3,6 +3,8 @@
 
 import unittest
 
+import pytest
+
 from odoo.tests import common
 
 
@@ -29,7 +31,7 @@ class TestPhaseInstall00(unittest.TestCase):
     def test_00_setup(self):
         type(self).state = 'init'
 
-    @common.at_install(False)
+    @pytest.mark.at_install(False)
     def test_01_no_install(self):
         type(self).state = 'error'
 
@@ -37,14 +39,13 @@ class TestPhaseInstall00(unittest.TestCase):
         self.assertEqual(self.state, 'init',
                          "Testcase state should not have been transitioned from 00")
 
-
+@pytest.mark.at_install(False)
 class TestPhaseInstall01(unittest.TestCase):
-    at_install = False
 
     def test_default_norun(self):
         self.fail("An unmarket test in a non-at-install case should not run")
 
-    @common.at_install(True)
+    @pytest.mark.at_install(True)
     def test_set_run(self):
         test_state['set_at_install'] = True
 
