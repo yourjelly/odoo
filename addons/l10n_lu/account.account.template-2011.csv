@@ -846,7 +846,7 @@ lu_2011_account_7646,7646,Prêts et créances immobilisés,account.data_account_
 lu_2011_account_7647,7647,Actions propres ou parts propres,account.data_account_type_other_income,f,lu_2011_chart_1
 lu_2011_account_7651,7651,Créances sur des entreprises liées et sur des entreprises avec lesquelles la société a un lien de participation,account.data_account_type_other_income,f,lu_2011_chart_1
 lu_2011_account_7652,7652,Autres créances,account.data_account_type_other_income,f,lu_2011_chart_1
-lu_2011_account_7681,7681,Pénalités sur marchés et dédits perçus sur achats et sur ventes,account.data_account_type_other_income,f,lu_2011_chart_1
+lu_2011_account_7681,7681,Pénalités sur marchés et dédits perçus sur achats et sur ventes,account.data_account_type_revenue,f,lu_2011_chart_1
 lu_2011_account_7682,7682,Libéralités reçues,account.data_account_type_other_income,f,lu_2011_chart_1
 lu_2011_account_7683,7683,Rentrées sur créances amorties,account.data_account_type_other_income,f,lu_2011_chart_1
 lu_2011_account_7684,7684,Subventions exceptionnelles,account.data_account_type_other_income,f,lu_2011_chart_1
