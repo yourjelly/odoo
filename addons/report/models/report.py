@@ -210,6 +210,7 @@ class Report(osv.Model):
         footerhtml = []
         irconfig_obj = self.pool['ir.config_parameter']
         base_url = irconfig_obj.get_param(cr, SUPERUSER_ID, 'report.url') or irconfig_obj.get_param(cr, SUPERUSER_ID, 'web.base.url')
+        show_last_page_number = True
 
         # Minimal page renderer
         view_obj = self.pool['ir.ui.view']
@@ -223,16 +224,6 @@ class Report(osv.Model):
 
             for node in root.xpath("//html/head/style"):
                 css += node.text
-
-            for node in root.xpath(match_klass.format('header')):
-                body = lxml.html.tostring(node)
-                header = render_minimal(dict(css=css, subst=True, body=body, base_url=base_url))
-                headerhtml.append(header)
-
-            for node in root.xpath(match_klass.format('footer')):
-                body = lxml.html.tostring(node)
-                footer = render_minimal(dict(css=css, subst=True, body=body, base_url=base_url))
-                footerhtml.append(footer)
 
             for node in root.xpath(match_klass.format('page')):
                 # Previously, we marked some reports to be saved in attachment via their ids, so we
@@ -267,6 +258,7 @@ class Report(osv.Model):
                     # documents (the goal is to make wkhtmltopdf produce multiples reports and merge
                     # them instead of generating a huge report and consume a lot of system resources
                     # because of things).
+                    show_last_page_number = False
 
                     # when we paginate, reportcontent is a list of html content instead of directly
                     # the html content
@@ -293,6 +285,16 @@ class Report(osv.Model):
                         body = lxml.html.tostring(root_tmp)
                         reportcontent.append(render_minimal(dict(css=css, subst=False, body=body, base_url=base_url)))
                 contenthtml.append(tuple([reportid, reportcontent]))
+
+            for node in root.xpath(match_klass.format('header')):
+                body = lxml.html.tostring(node)
+                header = render_minimal(dict(css=css, subst=True, body=body, base_url=base_url, show_last_page_number=show_last_page_number))
+                headerhtml.append(header)
+
+            for node in root.xpath(match_klass.format('footer')):
+                body = lxml.html.tostring(node)
+                footer = render_minimal(dict(css=css, subst=True, body=body, base_url=base_url, show_last_page_number=show_last_page_number))
+                footerhtml.append(footer)
 
         except lxml.etree.XMLSyntaxError:
             contenthtml = []
@@ -497,10 +499,12 @@ class Report(osv.Model):
 
             try:
                 wkhtmltopdf_base_command = [_get_wkhtmltopdf_bin()] + command_args + local_command_args
+                page_numbering_offset = 0
 
                 for index, content_file_path in enumerate(content_file_path_list):
                     pdfreport_path = pdfreport_path_list[index]
-                    wkhtmltopdf = wkhtmltopdf_base_command + [content_file_path] + [pdfreport_path]
+                    wkhtmltopdf = wkhtmltopdf_base_command + ['--page-offset'] + [str(page_numbering_offset)]
+                    wkhtmltopdf += [content_file_path] + [pdfreport_path]
 
                     process = subprocess.Popen(wkhtmltopdf, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     out, err = process.communicate()
@@ -509,6 +513,8 @@ class Report(osv.Model):
                         raise osv.except_osv(_('Report (PDF)'),
                                              _('Wkhtmltopdf failed (error code: %s). '
                                                'Message: %s') % (str(process.returncode), err))
+
+                    page_numbering_offset += self._get_number_of_pdf_pages(pdfreport_path)
 
                     # Save the pdf in attachment if marked
                     if reporthtml[0] is not False and save_in_attachment.get(reporthtml[0]):
@@ -629,3 +635,10 @@ class Report(osv.Model):
             stream.close()
 
         return merged_file_path
+
+    def _get_number_of_pdf_pages(self, document):
+        pdfreport = file(document, 'rb')
+        reader = PdfFileReader(pdfreport)
+        num_page = reader.getNumPages()
+        pdfreport.close()
+        return num_page
