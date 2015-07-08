@@ -21,7 +21,6 @@ Seddik au cours du troisième trimestre 2010.""",
     'depends' : ['base', 'account'],
     'data' : [
         'security/ir.model.access.csv',
-        'account_type.xml',
         'account_pcg_morocco.xml',
         'l10n_ma_tax.xml',
         'l10n_ma_journal.xml',

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="ISO-8859-15"?>
-<openerp>
-    <data>
-        <!-- account.account.type -->
-    <record id="cpt_type_tax" model="account.account.type">
-           <field name="name">Taxes</field>
-    </record>
-  </data>
-</openerp>
