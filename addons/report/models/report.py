@@ -24,7 +24,7 @@ from openerp import SUPERUSER_ID
 from openerp.exceptions import AccessError
 from openerp.osv import osv, fields
 from openerp.tools import config
-from openerp.tools.misc import find_in_path
+from openerp.tools.misc import find_in_path, split_every
 from openerp.tools.translate import _
 from openerp.addons.web.http import request
 from openerp.tools.safe_eval import safe_eval as eval
@@ -250,10 +250,48 @@ class Report(osv.Model):
                     else:
                         reportid = False
 
-                # Extract the body
-                body = lxml.html.tostring(node)
-                reportcontent = render_minimal(dict(css=css, subst=False, body=body, base_url=base_url))
+                # check if we have paginate the report
+                records_by_document = None
+                table_node = node.find(".//table")
+                if table_node is not None:
+                    records_by_document = table_node.get('data-records-by-document')
+                    if records_by_document:
+                        records_by_document = int(records_by_document)
 
+                if not records_by_document:
+                    # Extract the body
+                    body = lxml.html.tostring(node)
+                    reportcontent = render_minimal(dict(css=css, subst=False, body=body, base_url=base_url))
+                else:
+                    # Pagination logic: we have a reference to the table that will be split across
+                    # documents (the goal is to make wkhtmltopdf produce multiples reports and merge
+                    # them instead of generating a huge report and consume a lot of system resources
+                    # because of things).
+
+                    # when we paginate, reportcontent is a list of html content instead of directly
+                    # the html content
+                    reportcontent = []
+
+                    dom_before_table = table_node.getprevious()
+                    dom_after_table = table_node.getnext()
+                    table_lines = table_node.xpath('.//tr')
+
+                    paginated_table_lines = split_every(records_by_document, table_lines)
+
+                    for index, paginated_table_lines in enumerate(paginated_table_lines):
+                        root_tmp = lxml.html.Element('div')
+                        table_tmp = lxml.html.Element('table', attrib=table_node.attrib)
+                        root_tmp.append(table_tmp)
+                        for paginated_table_line in paginated_table_lines:
+                            table_tmp.append(paginated_table_line)
+
+                        if dom_before_table and index == 0:
+                            table_tmp.addprevious(dom_before_table)
+                        elif dom_after_table and index == len(paginated_table_lines) - 1:
+                            table_tmp.addnext(dom_after_table)
+
+                        body = lxml.html.tostring(root_tmp)
+                        reportcontent.append(render_minimal(dict(css=css, subst=False, body=body, base_url=base_url)))
                 contenthtml.append(tuple([reportid, reportcontent]))
 
         except lxml.etree.XMLSyntaxError:
@@ -410,6 +448,7 @@ class Report(osv.Model):
         temporary_files = []
 
         for index, reporthtml in enumerate(bodies):
+            pdfreport_path_list = []  # temporary files that will contain the pdf
             local_command_args = []
             pdfreport_fd, pdfreport_path = tempfile.mkstemp(suffix='.pdf', prefix='report.tmp.')
             temporary_files.append(pdfreport_path)
@@ -422,6 +461,7 @@ class Report(osv.Model):
                 continue
             else:
                 os.close(pdfreport_fd)
+                pdfreport_path_list.append(pdfreport_path)
 
             # Wkhtmltopdf handles header/footer as separate pages. Create them if necessary.
             if headers:
@@ -437,44 +477,59 @@ class Report(osv.Model):
                     foot_file.write(footers[index])
                 local_command_args.extend(['--footer-html', foot_file_path])
 
-            # Body stuff
-            content_file_fd, content_file_path = tempfile.mkstemp(suffix='.html', prefix='report.body.tmp.')
-            temporary_files.append(content_file_path)
-            with closing(os.fdopen(content_file_fd, 'w')) as content_file:
-                content_file.write(reporthtml[1])
+            # bodies can be a list of string in case of pagination or a string in regular caes
+            if isinstance(reporthtml[1], basestring):
+                reporthtml = (reporthtml[0], [reporthtml[1]])
+            content_file_path_list = []
+
+            for body in reporthtml[1]:
+                content_file_fd, content_file_path = tempfile.mkstemp(suffix='.html', prefix='report.body.tmp.')
+                temporary_files.append(content_file_path)
+                with closing(os.fdopen(content_file_fd, 'w')) as content_file:
+                    content_file.write(body)
+                    content_file_path_list.append(content_file_path)
+
+            for i in xrange(len(reporthtml[1]) - 1):
+                pdfreport_fd, pdfreport_path = tempfile.mkstemp(suffix='.pdf', prefix='report.tmp.')
+                pdfreport_path_list.append(pdfreport_path)
+                temporary_files.append(pdfreport_path)
+                os.close(pdfreport_fd)
 
             try:
-                wkhtmltopdf = [_get_wkhtmltopdf_bin()] + command_args + local_command_args
-                wkhtmltopdf += [content_file_path] + [pdfreport_path]
+                wkhtmltopdf_base_command = [_get_wkhtmltopdf_bin()] + command_args + local_command_args
 
-                process = subprocess.Popen(wkhtmltopdf, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                out, err = process.communicate()
+                for index, content_file_path in enumerate(content_file_path_list):
+                    pdfreport_path = pdfreport_path_list[index]
+                    wkhtmltopdf = wkhtmltopdf_base_command + [content_file_path] + [pdfreport_path]
 
-                if process.returncode not in [0, 1]:
-                    raise osv.except_osv(_('Report (PDF)'),
-                                         _('Wkhtmltopdf failed (error code: %s). '
-                                           'Message: %s') % (str(process.returncode), err))
+                    process = subprocess.Popen(wkhtmltopdf, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    out, err = process.communicate()
 
-                # Save the pdf in attachment if marked
-                if reporthtml[0] is not False and save_in_attachment.get(reporthtml[0]):
-                    with open(pdfreport_path, 'rb') as pdfreport:
-                        attachment = {
-                            'name': save_in_attachment.get(reporthtml[0]),
-                            'datas': base64.encodestring(pdfreport.read()),
-                            'datas_fname': save_in_attachment.get(reporthtml[0]),
-                            'res_model': save_in_attachment.get('model'),
-                            'res_id': reporthtml[0],
-                        }
-                        try:
-                            self.pool['ir.attachment'].create(cr, uid, attachment)
-                        except AccessError:
-                            _logger.warning("Cannot save PDF report %r as attachment",
-                                            attachment['name'])
-                        else:
-                            _logger.info('The PDF document %s is now saved in the database',
-                                         attachment['name'])
+                    if process.returncode not in [0, 1]:
+                        raise osv.except_osv(_('Report (PDF)'),
+                                             _('Wkhtmltopdf failed (error code: %s). '
+                                               'Message: %s') % (str(process.returncode), err))
 
-                pdfdocuments.append(pdfreport_path)
+                    # Save the pdf in attachment if marked
+                    if reporthtml[0] is not False and save_in_attachment.get(reporthtml[0]):
+                        with open(pdfreport_path, 'rb') as pdfreport:
+                            attachment = {
+                                'name': save_in_attachment.get(reporthtml[0]),
+                                'datas': base64.encodestring(pdfreport.read()),
+                                'datas_fname': save_in_attachment.get(reporthtml[0]),
+                                'res_model': save_in_attachment.get('model'),
+                                'res_id': reporthtml[0],
+                            }
+                            try:
+                                self.pool['ir.attachment'].create(cr, uid, attachment)
+                            except AccessError:
+                                _logger.warning("Cannot save PDF report %r as attachment",
+                                                attachment['name'])
+                            else:
+                                _logger.info('The PDF document %s is now saved in the database',
+                                             attachment['name'])
+
+                    pdfdocuments.append(pdfreport_path)
             except:
                 raise
 
