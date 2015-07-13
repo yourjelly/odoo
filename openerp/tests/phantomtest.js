@@ -59,43 +59,34 @@ function PhantomTest() {
     this.page.onConsoleMessage = function(message) {
         console.log(message);
     };
-    this.page.onLoadFinished = function(status) {
-        if (status === "success") {
-            for (var k in self.inject) {
-                var found = false;
-                var v = self.inject[k];
-                var need = v;
-                var src = v;
-                if (v[0]) {
-                    need = v[0];
-                    src = v[1];
-                    found = self.page.evaluate(function(code) {
-                        try {
-                            return !!eval(code);
-                        } catch (e) {
-                            return false;
-                        }
-                    }, need);
-                }
-                if(!found) {
-                    console.log('Injecting', src, 'needed for', need);
-                    if(!self.page.injectJs(src)) {
-                        console.log('error', "Cannot inject " + src);
-                        phantom.exit(1);
-                    }
-                }
-            }
-        }
-    };
-    setTimeout(function () {
-        self.page.evaluate(function () {
-            var message = ("Timeout\nhref: " + window.location.href +
-                           "\nreferrer: " + document.referrer +
-                           "\n\n" + (document.body && document.body.innerHTML)).replace(/[^a-z0-9\s~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, "*");
-            console.log('error', message);
-            phantom.exit(1);
-        });
-    }, self.timeout);
+    // this.page.onLoadFinished = function(status) {
+    //     if (status === "success") {
+    //         for (var k in self.inject) {
+    //             var found = false;
+    //             var v = self.inject[k];
+    //             var need = v;
+    //             var src = v;
+    //             if (v[0]) {
+    //                 need = v[0];
+    //                 src = v[1];
+    //                 found = self.page.evaluate(function(code) {
+    //                     try {
+    //                         return !!eval(code);
+    //                     } catch (e) {
+    //                         return false;
+    //                     }
+    //                 }, need);
+    //             }
+    //             if(!found) {
+    //                 console.log('Injecting', src, 'needed for', need);
+    //                 if(!self.page.injectJs(src)) {
+    //                     console.log('error', "Cannot inject " + src);
+    //                     phantom.exit(1);
+    //                 }
+    //             }
+    //         }
+    //     }
+    // };
 
     // ----------------------------------------------------
     // run test
@@ -135,10 +126,19 @@ function PhantomTest() {
                     }, ready);
                 // run test
                 }, function() {
+                    setTimeout(function () {
+                        self.page.evaluate(function () {
+                            var message = ("Timeout\nhref: " + window.location.href +
+                                           "\nreferrer: " + document.referrer +
+                                           "\n\n" + (document.body && document.body.innerHTML)).replace(/[^a-z0-9\s~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, "*");
+                            console.log('error', message);
+                            phantom.exit(1);
+                        });
+                    }, self.timeout);
                     console.log("PhantomTest.run: condition statified, executing: " + code);
                     self.page.evaluate(function (code) { return eval(code); }, code);
                     console.log("PhantomTest.run: execution launched, waiting for console.log('ok')...");
-                });
+                }, self.timeout);
             }
         });
     };
