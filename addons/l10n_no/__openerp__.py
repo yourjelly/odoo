@@ -10,7 +10,7 @@
     "depends" : ["account", "base_iban", "base_vat", "account_chart"],
     "demo_xml" : [],
     "data" : ["account_chart.xml",
-                    'account_tax.xml','l10n_chart_no_wizard.xml'],
+                    'account_tax.xml','account_chart_template.yml'],
     "active": False,
-    "installable": False
+    "installable": True
 }
