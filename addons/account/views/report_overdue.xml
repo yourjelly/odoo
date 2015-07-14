@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<template id="account.report_overdue_document">
+    <t t-call="report.external_layout">
+        <div class="page">
+            <div class="row">
+                <div class="col-xs-5 col-xs-offset-7">
+                    <span t-field="o.name"/><br/>
+                    <span t-raw="addresses[o.id].replace('\n\n', '\n').replace('\n', '&lt;br&gt;')"/>
+                    <span t-field="o.vat"/>
+                </div>
+                <p>
+                    Document: Customer account statement<br/>
+                    Date: <span t-esc="time.strftime('%Y-%m-%d')"/><br/>
+                    Customer ref: <span t-field="o.ref"/>
+                </p>
+
+                <p t-if="getLines">
+                    <span t-field="res_company.overdue_msg"/>
+                </p>
+
+                <table class="table table-condensed" t-if="getLines">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th class="text-center">Ref</th>
+                            <th class="text-center">Maturity Date</th>
+                            <th class="text-right">Due</th>
+                            <th class="text-right">Paid</th>
+                            <th class="text-right">Maturity</th>
+                            <th class="text-center">Li.</th>
+                        </tr>
+                    </thead>
+                    <tr t-foreach="getLines" t-as="line">
+                        <td>
+                            <span t-field="line.date"/>
+                        </td>
+                        <td>
+                            <span t-field="line.name"/>
+                        </td>
+                        <td>
+                            <span t-field="line.ref"/>
+                        </td>
+                        <td>
+                            <span t-field="line.date_maturity"/>
+                        </td>
+                        <td class="text-right">
+                            <t t-if="line.user_type_id.type == 'receivable'">
+                                <span t-field="line.debit"/>
+                            </t>
+                            <t t-if="line.user_type_id.type == 'payable'">
+                                <span t-esc="line['credit'] * -1"/>
+                            </t>
+                        </td>
+                        <td class="text-right">
+                            <t t-if="line.user_type_id.type == 'receivable'">
+                                <span t-field="line.credit"/>
+                            </t>
+                            <t t-if="line.user_type_id.type == 'payable'">
+                                <span t-esc="line.debit * -1"/>
+                            </t>
+                        </td>
+                        <td class="text-right">
+                            <t t-if="time.strftime('%Y-%m-%d') &gt; line['date_maturity']">
+                                <span t-esc="line.debit - line.credit" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
+                            </t>
+                        </td>
+                        <td>
+                            <span t-if="line.blocked">x</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3"></td>
+                        <td><strong>Sub-Total :</strong></td>
+                        <td class="text-right"><span t-esc="due[o.id]"/></td>
+                        <td class="text-right"><span t-esc="paid[o.id]"/></td>
+                        <td class="text-right"><span t-esc="mat[o.id]"/></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3"></td>
+                        <td><strong>Balance :</strong></td>
+                        <td class="text-right">
+                            <span t-esc="due[o.id] - paid[o.id]" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
+                        </td>
+
+                    </tr>
+                </table>
+                <p t-if="getLines">
+                    Total amount due:
+                    <span t-esc="reduce(lambda x, y: x + (y['debit'] - y['credit']), getLines, 0)" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
+                </p>
+
+                <p t-if="not getLines">
+                    <strong>There is nothing due with this customer.</strong>
+                </p>
+            </div>
+        </div>
+   </t>
+</template>
+
+<template id="report_overdue">
+    <t t-call="report.html_container">
+        <t t-foreach="doc_ids" t-as="doc_id">
+            <t t-raw="translate_doc(doc_id, doc_model, 'lang', 'account.report_overdue_document')"/>
+        </t>
+    </t>
+</template>
+</odoo>

@@ -20,10 +20,13 @@
         <menuitem id="account_management_menu" name="Management" parent="account.menu_finance_configuration" sequence="3" groups="group_account_manager"/>
         <menuitem id="menu_analytic_accounting" name="Analytic Accounting" parent="menu_finance_configuration" groups="analytic.group_analytic_accounting" sequence="5"/>
         <menuitem id="menu_config_multi_currency" name="Multi-Currencies" parent="menu_finance_configuration" sequence="9" groups="base.group_multi_currency"/>
+        <menuitem id="menu_finance_legal_statement" name="Legal Reports" parent="account.menu_finance_reports"/>
+        <menuitem id="final_accounting_reports" name="Accounting Reports" parent="account.menu_finance_legal_statement"/>
 
         <menuitem id="base.menu_action_currency_form" name="Currencies" parent="menu_config_multi_currency" sequence="20" groups="base.group_no_one"/>
 
-
+        <menuitem id="menu_account_reports" name="Financial Reports" parent="menu_finance_configuration" sequence="30" />
+        
     </data>
 </openerp>
 

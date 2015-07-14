@@ -8,6 +8,8 @@ from openerp.tools.float_utils import float_round as round
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from openerp.exceptions import UserError
 from openerp import api, fields, models, _
+import openerp.addons.decimal_precision as dp
+
 
 
 class AccountAccountType(models.Model):
@@ -26,7 +28,47 @@ class AccountAccountType(models.Model):
         "different types of accounts: liquidity type is for cash or bank accounts"\
         ", payable/receivable is for vendor/customer accounts.")
     note = fields.Text(string='Description')
+    report_type = fields.Selection([
+        ('none','/'),
+        ('income', _('Profit & Loss (Income account)')),
+        ('expense', _('Profit & Loss (Expense account)')),
+        ('asset', _('Balance Sheet (Asset account)')),
+        ('liability', _('Balance Sheet (Liability account)')),
+    ], compute='_get_current_report_type', inverse='_save_report_type', string='P&L / BS Category', store=True, default='none', help="This field is used to generate legal reports: profit and loss, balance sheet.", required=True)
 
+    def _get_financial_report_ref(self):
+        financial_report_ref = {}
+        for key, financial_report in [
+                    ('asset','account_financial_report_assets0'),
+                    ('liability','account_financial_report_liability0'),
+                    ('income','account_financial_report_income0'),
+                    ('expense','account_financial_report_expense0'),
+                ]:
+            financial_report_ref[key] = self.env['account.financial.report'].browse(self.env['ir.model.data'].xmlid_to_res_id('account.' + financial_report, raise_if_not_found=False))
+        return financial_report_ref
+
+    @api.multi
+    def _get_current_report_type(self):
+        res = {}
+        financial_report_ref = self._get_financial_report_ref()
+        for record in self.browse(cr, uid, ids, context=context):
+            res[record.id] = 'none'
+            for key, financial_report in financial_report_ref.items():
+                list_ids = [x.id for x in financial_report.account_type_ids]
+                if record.id in list_ids:
+                    res[record.id] = key
+        return res
+
+    @api.multi
+    def _save_report_type(self):
+        #unlink if it exists somewhere in the financial reports related to BS or PL
+        financial_report_ref = self._get_financial_report_ref()
+        for key, financial_report in financial_report_ref.items():
+            list_ids = [x.id for x in financial_report.account_type_ids]
+            if self.id in list_ids:
+                financial_report.write({'account_type_ids': [(3, self.id)]})
+        if self.report_type != 'none':
+            financial_report_ref[self.report_type].write({'account_type_ids': [(4, self.id)]})
 
 class AccountAccountTag(models.Model):
     _name = 'account.account.tag'
