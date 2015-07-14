@@ -5,7 +5,7 @@
     <record id="chart1919" model="account.account.template">
         <field name="name">Kasse i transfer</field>
         <field name="code">1919</field>
-        <field name="reconcile" eval="False"/>
+        <field name="reconcile" eval="True"/>
         <field name="user_type_id" ref="account.data_account_type_current_assets" />
     </record>
 
