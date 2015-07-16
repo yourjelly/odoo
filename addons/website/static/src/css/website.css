@@ -669,35 +669,13 @@ ul.nav-stacked > li > a {
 }
 .o_gallery.o_slideshow .carousel img, .modal-body.o_slideshow .carousel img {
   max-height: 100%;
-  max-width: 900px;
+  max-width: 100%;
   margin: auto;
   position: relative;
   top: 50%;
   -webkit-transform: translateY(-50%);
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
-}
-@media screen and (max-width: 1024px) {
-  .o_gallery.o_slideshow .carousel img, .modal-body.o_slideshow .carousel img {
-    max-width: 750px;
-  }
-}
-@media screen and (max-width: 768px) {
-  .o_gallery.o_slideshow .carousel img, .modal-body.o_slideshow .carousel img {
-    max-height: 370px;
-    max-width: 570px;
-    -webkit-transform: translateY(-50%) !important;
-    -ms-transform: translateY(-50%) !important;
-    transform: translateY(-50%) !important;
-  }
-}
-@media screen and (max-width: 360px) {
-  .o_gallery.o_slideshow .carousel img, .modal-body.o_slideshow .carousel img {
-    -webkit-transform: translateY(-50%) !important;
-    -ms-transform: translateY(-50%) !important;
-    transform: translateY(-50%) !important;
-    max-width: 240px;
-  }
 }
 .o_gallery.o_slideshow .carousel ul.carousel-indicators, .modal-body.o_slideshow .carousel ul.carousel-indicators {
   display: block;
@@ -706,17 +684,6 @@ ul.nav-stacked > li > a {
   border-width: 0;
   position: absolute;
   bottom: 0;
-}
-@media screen and (max-width: 360px) {
-  .o_gallery.o_slideshow .carousel ul.carousel-indicators, .modal-body.o_slideshow .carousel ul.carousel-indicators {
-    left: 0;
-    width: 100%;
-    margin-left: 0;
-    max-width: 300px;
-  }
-}
-.o_gallery.o_slideshow .carousel ul.carousel-indicators li.fa-chevron-left, .o_gallery.o_slideshow .carousel ul.carousel-indicators li.fa-chevron-right, .modal-body.o_slideshow .carousel ul.carousel-indicators li.fa-chevron-left, .modal-body.o_slideshow .carousel ul.carousel-indicators li.fa-chevron-right {
-  display: none;
 }
 .o_gallery.o_slideshow .carousel ul.carousel-indicators > *, .modal-body.o_slideshow .carousel ul.carousel-indicators > * {
   list-style-image: none;
@@ -744,16 +711,25 @@ ul.nav-stacked > li > a {
 }
 
 @media screen and (max-width: 768px) {
-  .s_image_gallery .container, .s_image_gallery .slide, .s_image_gallery .carousel-inner, .s_image_gallery .item {
-    height: 500px;
+  .o_slideshow .carousel-control, .o_slideshow ul.carousel-indicators {
+    display: none !important;
+  }
+  .o_slideshow .item, .o_slideshow .carousel-inner {
+    position: static;
+    height: auto;
+    margin: 0 auto;
+    padding: 0 !important;
+  }
+  .o_slideshow .item {
+    display: inline-block;
+    vertical-align: middle;
+    max-width: 100%;
+  }
+  .o_slideshow .carousel-inner {
+    overflow-x: auto;
+    white-space: nowrap;
   }
 }
-@media screen and (max-width: 360px) {
-  .s_image_gallery .container, .s_image_gallery .slide, .s_image_gallery .carousel-inner, .s_image_gallery .item {
-    height: 470px;
-  }
-}
-
 /* Parallax Theme */
 div.carousel .carousel-indicators li {
   border: 1px solid grey;

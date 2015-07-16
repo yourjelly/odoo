@@ -514,26 +514,13 @@ ul.nav-stacked > li > a
         padding-bottom: 64px
     img
         max-height: 100%
-        max-width: 900px
+        max-width: 100%
         margin: auto
         position: relative
         top: 50%
         -webkit-transform: translateY(-50%)
         -ms-transform: translateY(-50%)
         transform: translateY(-50%)
-        @media screen and (max-width: 1024px) 
-            max-width: 750px
-        @media screen and (max-width: 768px) 
-            max-height: 370px
-            max-width: 570px
-            -webkit-transform: translateY(-50%) !important
-            -ms-transform: translateY(-50%) !important
-            transform: translateY(-50%) !important
-        @media screen and (max-width: 360px)
-            -webkit-transform: translateY(-50%) !important
-            -ms-transform: translateY(-50%) !important
-            transform: translateY(-50%) !important
-            max-width: 240px
     ul.carousel-indicators
         display: block
         height: auto
@@ -541,13 +528,6 @@ ul.nav-stacked > li > a
         border-width: 0
         position: absolute
         bottom: 0
-        @media screen and (max-width: 360px) 
-            left: 0
-            width: 100%
-            margin-left: 0
-            max-width: 300px
-        li.fa-chevron-left, li.fa-chevron-right
-            display: none // because it has visibility hidden, it uses the first thumbnail's place and pushes the others to the right
         > *
             list-style-image: none
             display: inline-block
@@ -570,12 +550,22 @@ ul.nav-stacked > li > a
         background-image: none
         background-color: transparent
 
-.s_image_gallery
-    .container, .slide, .carousel-inner, .item
-        @media screen and (max-width: 768px) 
-            height: 500px // solves the big space issue above the image
-        @media screen and (max-width: 360px) 
-            height: 470px // solves the big space issue above the image
+@media screen and (max-width:768px) 
+    .o_slideshow
+        .carousel-control, ul.carousel-indicators
+            display: none !important
+        .item, .carousel-inner 
+            position: static
+            height: auto
+            margin: 0 auto
+            padding: 0 !important
+        .item
+            display: inline-block
+            vertical-align: middle
+            max-width: 100%
+        .carousel-inner
+            overflow-x: auto
+            white-space: nowrap    
 
 /* Parallax Theme */
 
