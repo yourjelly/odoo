@@ -2,6 +2,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import json
+from os.path import join
+from os.path import dirname
 import pkgutil
 import re
 
@@ -965,7 +967,8 @@ class test_o2m_multiple(ImporterCase):
 
 class test_realworld(common.TransactionCase):
     def test_bigfile(self):
-        data = json.loads(pkgutil.get_data(self.__module__, 'contacts_big.json'))
+        with open(join(dirname(__file__), 'contacts_big.json'), 'rb') as fp:
+            data = json.load(fp)
         result = self.env['res.partner'].load(['name', 'mobile', 'email', 'image'], data)
         self.assertFalse(result['messages'])
         self.assertEqual(len(result['ids']), len(data))
@@ -973,7 +976,8 @@ class test_realworld(common.TransactionCase):
     def test_backlink(self):
         fnames = ["name", "type", "street", "city", "country_id", "category_id",
                   "supplier", "customer", "is_company", "parent_id"]
-        data = json.loads(pkgutil.get_data(self.__module__, 'contacts.json'))
+        with open(join(dirname(__file__), 'contacts.json'), 'rb') as fp:
+            data = json.load(fp)
         result = self.env['res.partner'].load(fnames, data)
         self.assertFalse(result['messages'])
         self.assertEqual(len(result['ids']), len(data))
