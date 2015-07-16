@@ -17,32 +17,24 @@
 <!--
 Cuentas del plan
 -->
-	<record id="cuenta1129003000" model="account.account.template">
-		<field name="name">TRANSFERENCIAS BANCARIAS</field>
-		<field name="code">1129003000</field>
+	<record id="cuenta1116" model="account.account.template">
+		<field name="name">cuenta de Transferencia</field>
+		<field name="code">1116</field>
 		<field name="reconcile" eval="True"/>
 		<field name="user_type_id" ref="account.data_account_type_current_assets"/>
 	</record>
 	<record id="vauxoo_mx_chart_template" model="account.chart.template">
 		<field name="name">Plan de Cuentas para Mexico</field>
-		<field name="bank_account_code_prefix">2111002000</field>
-		<field name="cash_account_code_prefix"></field>
+		<field name="bank_account_code_prefix">1113001000</field>
+		<field name="cash_account_code_prefix">1111001000</field>
 		<field name="code_digits">6</field>
 		<field name="currency_id" ref="base.MXN"/>
-		<field name="transfer_account_id" ref="cuenta1129003000"/>
+		<field name="transfer_account_id" ref="cuenta1116"/>
 	</record>
 
-	<record id="cuenta1129003000" model="account.account.template">
+	<record id="cuenta1116" model="account.account.template">
 		<field name="chart_template_id" ref="vauxoo_mx_chart_template"/>
 	</record>
-
-<record id="cuenta1111001000" model="account.account.template">
-		<field name="code">1111001000</field>
-		<field name="reconcile" eval="False"/>
-		<field name="user_type_id" ref="account_type_other"/>
-		<field name="name">CAJA CHICA</field>
-		<field name="chart_template_id" ref="vauxoo_mx_chart_template"/>
-</record>
 
 <record id="cuenta1111002000" model="account.account.template">
 		<field name="code">1111002000</field>
@@ -57,14 +49,6 @@ Cuentas del plan
 		<field name="reconcile" eval="False"/>
 		<field name="user_type_id" ref="account_type_other"/>
 		<field name="name">FONDO A DEPOSITAR</field>
-		<field name="chart_template_id" ref="vauxoo_mx_chart_template"/>
-</record>
-
-<record id="cuenta1113001000" model="account.account.template">
-		<field name="code">1113001000</field>
-		<field name="reconcile" eval="False"/>
-		<field name="user_type_id" ref="account.data_account_type_liquidity"/>
-		<field name="name">BANCO X MXN</field>
 		<field name="chart_template_id" ref="vauxoo_mx_chart_template"/>
 </record>
 
@@ -260,6 +244,14 @@ Cuentas del plan
 		<field name="chart_template_id" ref="vauxoo_mx_chart_template"/>
 </record>
 
+<record id="cuenta1129003000" model="account.account.template">
+		<field name="code">1129003000</field>
+		<field name="reconcile" eval="False"/>
+		<field name="user_type_id" ref="account_type_other"/>
+		<field name="name">TRANSFERENCIAS BANCARIAS</field>
+		<field name="chart_template_id" ref="vauxoo_mx_chart_template"/>
+</record>
+
 <record id="cuenta1129004000" model="account.account.template">
 		<field name="code">1129004000</field>
 		<field name="reconcile" eval="False"/>
@@ -391,7 +383,7 @@ Cuentas del plan
 <record id="cuenta1151003000" model="account.account.template">
 		<field name="code">1151003000</field>
 		<field name="reconcile" eval="False"/>
-		<field name="user_type_id" ref="account_type_tax"/>
+		<field name="user_type_id" ref="account.data_account_type_current_assets"/>
 		<field name="name">IVA EFECTIVAMENTE PAGADO</field>
 		<field name="chart_template_id" ref="vauxoo_mx_chart_template"/>
 </record>
@@ -423,7 +415,7 @@ Cuentas del plan
 <record id="cuenta1151008000" model="account.account.template">
 		<field name="code">1151008000</field>
 		<field name="reconcile" eval="False"/>
-		<field name="user_type_id" ref="account_type_tax"/>
+		<field name="user_type_id" ref="account.data_account_type_current_assets"/>
 		<field name="name">IETU PAGADO</field>
 		<field name="chart_template_id" ref="vauxoo_mx_chart_template"/>
 </record>
@@ -431,7 +423,7 @@ Cuentas del plan
 <record id="cuenta1151009000" model="account.account.template">
 		<field name="code">1151009000</field>
 		<field name="reconcile" eval="False"/>
-		<field name="user_type_id" ref="account_type_tax"/>
+		<field name="user_type_id" ref="account.data_account_type_current_assets"/>
 		<field name="name">ISR PAGADO</field>
 		<field name="chart_template_id" ref="vauxoo_mx_chart_template"/>
 </record>
@@ -617,6 +609,14 @@ Cuentas del plan
 		<field name="reconcile" eval="False"/>
 		<field name="user_type_id" ref="account_type_other"/>
 		<field name="name">DEPOSITOS GARANTIA BANCOS</field>
+		<field name="chart_template_id" ref="vauxoo_mx_chart_template"/>
+</record>
+
+<record id="cuenta2111002000" model="account.account.template">
+		<field name="code">2111002000</field>
+		<field name="reconcile" eval="False"/>
+		<field name="user_type_id" ref="account.data_account_type_liquidity"/>
+		<field name="name">BANCO X</field>
 		<field name="chart_template_id" ref="vauxoo_mx_chart_template"/>
 </record>
 
@@ -999,7 +999,7 @@ Cuentas del plan
 <record id="cuenta2201113000" model="account.account.template">
 		<field name="code">2201113000</field>
 		<field name="reconcile" eval="False"/>
-		<field name="user_type_id" ref="account_type_tax"/>
+		<field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
 		<field name="name">ISR RETENIDO SALARIOS</field>
 		<field name="chart_template_id" ref="vauxoo_mx_chart_template"/>
 </record>
@@ -1007,7 +1007,7 @@ Cuentas del plan
 <record id="cuenta2201114000" model="account.account.template">
 		<field name="code">2201114000</field>
 		<field name="reconcile" eval="False"/>
-		<field name="user_type_id" ref="account_type_tax"/>
+		<field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
 		<field name="name">ISR RETENIDO ASIMILABLES</field>
 		<field name="chart_template_id" ref="vauxoo_mx_chart_template"/>
 </record>
@@ -1047,7 +1047,7 @@ Cuentas del plan
 <record id="cuenta2201119000" model="account.account.template">
 		<field name="code">2201119000</field>
 		<field name="reconcile" eval="False"/>
-		<field name="user_type_id" ref="account_type_tax"/>
+		<field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
 		<field name="name">1% DE RET CEDULAR ARRENDAMIETOS (GUANAJUATO)</field>
 		<field name="chart_template_id" ref="vauxoo_mx_chart_template"/>
 </record>
@@ -2199,7 +2199,7 @@ Cuentas del plan
         <field name="property_account_expense_categ_id" ref="cuenta6111001000"/>
         <field name="property_account_income_categ_id" ref="cuenta5111001000"/>
         <field name="income_currency_exchange_account_id" ref="cuenta9212003000"/>
-        <field name="expense_currency_exchange_account_id"/>
+        <field name="expense_currency_exchange_account_id" ref="cuenta9212003000"/>
 	</record>
    
   
