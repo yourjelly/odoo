@@ -12,5 +12,5 @@
     "data" : ["account_chart.xml",
                     'account_tax.xml','account_chart_template.yml'],
     "active": False,
-    "installable": False
+    "installable": True
 }
