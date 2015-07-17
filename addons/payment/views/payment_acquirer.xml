@@ -27,6 +27,7 @@
                                 <field name="environment"/>
                                 <field name="validation"/>
                                 <field name="auto_confirm"/>
+                                <field name="payment_process"/>
                             </group>
                             <group>
                                 <field name="fees_active"/>

@@ -1,5 +1,5 @@
 # -*- coding: utf-'8' "-*-"
-
+from authorize_request import AuthhorizeRequest
 import hashlib
 import hmac
 import logging
@@ -81,6 +81,29 @@ class PaymentAcquirerAuthorize(models.Model):
         self.ensure_one()
         return self._get_authorize_urls(self.environment)['authorize_form_url']
 
+    @api.model
+    def authorize_s2s_form_process(self, data):
+        values = {
+            'cc_number': data.get('cc_number'),
+            'cc_holder_name': data.get('cc_holder_name'),
+            'cc_expiry': data.get('cc_expiry'),
+            'cc_cvv': data.get('cc_cvv'),
+            'cc_brand': data.get('cc_brand'),
+            'acquirer_id': int(data.get('acquirer_id')),
+            'partner_id': int(data.get('partner_id'))
+        }
+        pm = self.env['payment.method'].sudo().create(values)
+        return pm.id
+
+    @api.multi
+    def authorize_s2s_form_validate(self, data):
+        error = dict()
+        mandatory_fields = ["cc_number", "cc_cvc", "cc_holder_name", "cc_expiry", "cc_brand"]
+        # Validation
+        for field_name in mandatory_fields:
+            if not data.get(field_name):
+                error[field_name] = 'missing'
+        return False if error else True
 
 class TxAuthorize(models.Model):
     _inherit = 'payment.transaction'
@@ -163,3 +186,67 @@ class TxAuthorize(models.Model):
                 'acquirer_reference': data['x_invoice_num'],
             })
             return False
+
+    @api.multi
+    def authorize_s2s_do_transaction(self, data):
+        self.ensure_one()
+        payement_method = self.env['payment.method'].search([('partner_id', '=', self.partner_id.id), ('acquirer_id', '=', self.acquirer_id.id)], limit=1)
+        transaction = AuthhorizeRequest(self.acquirer_id.environment, self.acquirer_id.authorize_login, self.acquirer_id.authorize_transaction_key)
+        return transaction.create_authorize_s2s_transaction(payement_method.acquirer_ref, payement_method.authorize_payment_id, data['x_amount'], data['x_invoice_num'])
+
+    @api.multi
+    def _authorize_s2s_validate(self):
+        self.ensure_one()
+        tree = self._authorize_s2s_get_tx_status()
+        return self.authorize_s2s_validate(tree)
+
+    @api.model
+    def _authorize_s2s_validate(self, tx, data):
+        return self._authorize_form_validate(tx, data)
+
+    @api.model
+    def _authorize_s2s_get_tx_from_data(self, data):
+        """ Given a data dict coming from authorize, verify it and find the related
+        transaction record. """
+        reference, trans_id = data.get('x_invoice_num'), data.get('x_trans_id')
+        if not reference or not trans_id:
+            error_msg = 'Authorize: received data with missing reference (%s) or trans_id (%s)' % (reference, trans_id)
+            _logger.error(error_msg)
+            raise ValidationError(error_msg)
+        tx = self.search([('reference', '=', reference)])
+        if not tx or len(tx) > 1:
+            error_msg = 'Authorize: received data for reference %s' % (reference)
+            if not tx:
+                error_msg += '; no order found'
+            else:
+                error_msg += '; multiple order found'
+            _logger.error(error_msg)
+            raise ValidationError(error_msg)
+        return tx[0]
+
+    @api.model
+    def _authorize_s2s_get_invalid_parameters(self, tx, data):
+        return self._authorize_form_get_invalid_parameters(tx, data)
+
+
+class PaymentMethod(models.Model):
+    _inherit = 'payment.method'
+
+    authorize_payment_id = fields.Char(string='Authorize Payment Reference')
+
+    @api.model
+    def authorize_create(self, values):
+        if values.get('cc_number'):
+            values['cc_number'] = values['cc_number'].replace(' ', '')
+            acquirer = self.env['payment.acquirer'].browse(values['acquirer_id'])
+            expiry = str(values['cc_expiry'][:2]) + str(values['cc_expiry'][-2:])
+            self.customer = AuthhorizeRequest(acquirer.environment, acquirer.authorize_login, acquirer.authorize_transaction_key)
+            payments = self.customer.create_authorize_s2s_payment(values['cc_number'], expiry)
+            profile_id, payment_ids = self.customer.create_authorize_s2s_profile([payments], self.env.user.partner_id.email)
+
+            return {
+                'acquirer_ref': profile_id,
+                'name': 'XXXXXXXXXXXX%s - %s' % (values['cc_number'][-4:], values['cc_holder_name']),
+                'authorize_payment_id': payment_ids[0]
+            }
+        return {}

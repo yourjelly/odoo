@@ -2,7 +2,7 @@
 import pprint
 import logging
 import urlparse
-
+import werkzeug
 from openerp import http
 from openerp.http import request
 
@@ -30,3 +30,28 @@ class AuthorizeController(http.Controller):
         return request.render('payment_authorize.payment_authorize_redirect', {
             'return_url': '%s' % urlparse.urljoin(base_url, return_url)
         })
+
+    @http.route(['/payment/authorize/s2s/create_json'], type='json', auth='public')
+    def authorize_s2s_create_json(self, **kwargs):
+        data = kwargs['params']
+        acquirer_id = int(data.get('acquirer_id'))
+        acquirer = request.env['payment.acquirer'].browse(acquirer_id)
+        new_id = acquirer.s2s_process(data)
+        return new_id
+
+    @http.route(['/payment/authorize/s2s/create'], type='http', auth='public')
+    def authorize_s2s_create(self, **post):
+        acquirer_id = int(post.get('acquirer_id'))
+        acquirer = request.env['payment.acquirer'].browse(acquirer_id)
+        acquirer.s2s_process(post)
+        return werkzeug.utils.redirect(post.get('return_url', '/'))
+
+    @http.route(['/payment/authorize/s2s/feedback'])
+    def feedback(self, **post):
+        return_url = '/'
+        tx = request.env['payment.transaction'].search([('reference', '=', str(post.get('x_invoice_num')))], limit=1)
+        if post:
+            response = tx.authorize_s2s_do_transaction(post)
+            if response:
+                tx.s2s_feedback(response, 'authorize')
+        return werkzeug.utils.redirect(post.get('return_url', '/'))

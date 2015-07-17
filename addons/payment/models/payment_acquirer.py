@@ -95,6 +95,11 @@ class PaymentAcquirer(osv.Model):
         'fees_int_fixed': fields.float('Fixed international fees'),
         'fees_int_var': fields.float('Variable international fees (in percents)'),
         'sequence': fields.integer('Sequence', help="Determine the display order"),
+        'payment_process': fields.selection(
+            [('redirect', 'External gateways'),
+            ('transparent', 'Direct gateways')],
+            string='Payment Process', help="External gateways send your customers to another website to process the payment. Direct gateways do the processing within your site, keeping the customer on your site", required=True, default="redirect")
+
     }
 
     _defaults = {
@@ -285,7 +290,8 @@ class PaymentAcquirer(osv.Model):
             'context': context,
             'type': tx_values.get('type') or 'form',
         }
-
+        if acquirer.payment_process == 'transparent':
+            qweb_context['tx_url'] = '/payment/%s/s2s/feedback' % acquirer.provider
         # because render accepts view ids but not qweb -> need to use the xml_id
         return self.pool['ir.ui.view'].render(cr, uid, acquirer.view_template_id.xml_id, qweb_context, engine='ir.qweb', context=context)
 
@@ -512,6 +518,28 @@ class PaymentTransaction(osv.Model):
     # --------------------------------------------------
     # SERVER2SERVER RELATED METHODS
     # --------------------------------------------------
+    def s2s_feedback(self, cr, uid, data, acquirer_name, context=None):
+        invalid_parameters, tx = None, None
+        tx_find_method_name = '_%s_s2s_get_tx_from_data' % acquirer_name
+        if hasattr(self, tx_find_method_name):
+            tx = getattr(self, tx_find_method_name)(cr, uid, data, context=context)
+
+        invalid_param_method_name = '_%s_s2s_get_invalid_parameters' % acquirer_name
+        if hasattr(self, invalid_param_method_name):
+            invalid_parameters = getattr(self, invalid_param_method_name)(cr, uid, tx, data, context=context)
+
+        if invalid_parameters:
+            _error_message = '%s: incorrect tx data:\n' % (acquirer_name)
+            for item in invalid_parameters:
+                _error_message += '\t%s: received %s instead of %s\n' % (item[0], item[1], item[2])
+            _logger.error(_error_message)
+            return False
+
+        feedback_method_name = '_%s_s2s_validate' % acquirer_name
+        if hasattr(self, feedback_method_name):
+            return getattr(self, feedback_method_name)(cr, uid, tx, data, context=context)
+        return True
+
     def s2s_create(self, cr, uid, values, cc_values, context=None):
         tx_id, tx_result = self.s2s_send(cr, uid, values, cc_values, context=context)
         self.s2s_feedback(cr, uid, tx_id, tx_result, context=context)
