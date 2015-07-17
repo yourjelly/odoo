@@ -1299,7 +1299,7 @@ Cuentas del plan
 <record id="cuenta6111001000" model="account.account.template">
 		<field name="code">6111001000</field>
 		<field name="reconcile" eval="False"/>
-		<field name="user_type_id" ref="account_type_other"/>
+		<field name="user_type_id" ref="account.data_account_type_expenses"/>
 		<field name="name">COSTO DE VENTAS</field>
 		<field name="chart_template_id" ref="vauxoo_mx_chart_template"/>
 </record>
