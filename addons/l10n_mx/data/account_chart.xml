@@ -5,10 +5,6 @@
 
 <!-- Account Types -->
 
-    <record model="account.account.type" id="account_type_tax">
-      <field name="name">other</field>
-    </record>
-
     <record model="account.account.type" id="account_type_other">
       <field name="name">other</field>
     </record>
@@ -1247,7 +1243,7 @@ Cuentas del plan
 <record id="cuenta5111001000" model="account.account.template">
 		<field name="code">5111001000</field>
 		<field name="reconcile" eval="False"/>
-		<field name="user_type_id" ref="account_type_other"/>
+		<field name="user_type_id" ref="account.data_account_type_revenue"/>
 		<field name="name">VENTAS NACIONALES</field>
 		<field name="chart_template_id" ref="vauxoo_mx_chart_template"/>
 </record>
