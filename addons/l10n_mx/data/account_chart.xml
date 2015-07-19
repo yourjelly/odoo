@@ -15,14 +15,14 @@ Cuentas del plan
 -->
 	<record id="cuenta1116" model="account.account.template">
 		<field name="name">cuenta de Transferencia</field>
-		<field name="code">1116</field>
+		<field name="code">1116000000</field>
 		<field name="reconcile" eval="True"/>
 		<field name="user_type_id" ref="account.data_account_type_current_assets"/>
 	</record>
 	<record id="vauxoo_mx_chart_template" model="account.chart.template">
 		<field name="name">Plan de Cuentas para Mexico</field>
-		<field name="bank_account_code_prefix">1113001000</field>
-		<field name="cash_account_code_prefix">1111001000</field>
+		<field name="bank_account_code_prefix">111300100</field>
+		<field name="cash_account_code_prefix">111100100</field>
 		<field name="code_digits">6</field>
 		<field name="currency_id" ref="base.MXN"/>
 		<field name="transfer_account_id" ref="cuenta1116"/>
