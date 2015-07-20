@@ -161,21 +161,12 @@ class TransactionCase(BaseCase):
     is closed after each test.
     """
 
-    def setUp(self):
-        self.registry = odoo.registry(get_db_name())
-        #: current transaction's cursor
-        self.cr = self.cursor()
-        self.uid = odoo.SUPERUSER_ID
-        #: :class:`~odoo.api.Environment` for the current test case
-        self.env = api.Environment(self.cr, self.uid, {})
-
-        @self.addCleanup
-        def reset():
-            # rollback and close the cursor, and reset the environments
-            self.registry.clear_caches()
-            self.env.reset()
-            self.cr.rollback()
-            self.cr.close()
+    @pytest.fixture(autouse=True)
+    def _setup(self, registry, cr, uid, env):
+        self.registry = registry
+        self.cr = cr
+        self.uid = uid
+        self.env = env
 
     def patch(self, obj, key, val):
         """ Do the patch ``setattr(obj, key, val)``, and prepare cleanup. """
@@ -186,7 +177,6 @@ class TransactionCase(BaseCase):
     def patch_order(self, model, order):
         """ Patch the order of the given model (name), and prepare cleanup. """
         self.patch(type(self.env[model]), '_order', order)
-
 
 class SingleTransactionCase(BaseCase):
     """ TestCase in which all test methods are run in the same transaction,
@@ -204,10 +194,10 @@ class SingleTransactionCase(BaseCase):
     @classmethod
     def tearDownClass(cls):
         # rollback and close the cursor, and reset the environments
-        cls.registry.clear_caches()
         cls.env.reset()
         cls.cr.rollback()
         cls.cr.close()
+        cls.registry.clear_caches()
 
 
 savepoint_seq = itertools.count()
@@ -252,11 +242,11 @@ class RedirectHandler(urllib2.HTTPRedirectHandler):
     https_response = http_response
 
 @pytest.mark.http
+@pytest.mark.usefixtures('http')
 class HttpCase(TransactionCase):
     """ Transactional HTTP TestCase with url_open and phantomjs helpers.
     """
     registry_test_mode = True
-
     def __init__(self, methodName='runTest'):
         super(HttpCase, self).__init__(methodName)
         # v8 api with correct xmlrpc exception handling.
