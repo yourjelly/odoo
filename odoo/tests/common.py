@@ -41,10 +41,7 @@ from odoo import api
 
 _logger = logging.getLogger(__name__)
 
-# The odoo library is supposed already configured.
-ADDONS_PATH = odoo.tools.config['addons_path']
 HOST = '127.0.0.1'
-PORT = odoo.tools.config['xmlrpc_port']
 # Useless constant, tests are aware of the content of demo data
 ADMIN_USER_ID = odoo.SUPERUSER_ID
 
@@ -266,7 +263,7 @@ class HttpCase(TransactionCase):
     def __init__(self, methodName='runTest'):
         super(HttpCase, self).__init__(methodName)
         # v8 api with correct xmlrpc exception handling.
-        self.xmlrpc_url = url_8 = 'http://%s:%d/xmlrpc/2/' % (HOST, PORT)
+        self.xmlrpc_url = url_8 = 'http://%s:%d/xmlrpc/2/' % (HOST, odoo.tools.config['xmlrpc_port'])
         self.xmlrpc_common = xmlrpclib.ServerProxy(url_8 + 'common')
         self.xmlrpc_db = xmlrpclib.ServerProxy(url_8 + 'db')
         self.xmlrpc_object = xmlrpclib.ServerProxy(url_8 + 'object')
@@ -287,7 +284,7 @@ class HttpCase(TransactionCase):
 
     def url_open(self, url, data=None, timeout=10):
         if url.startswith('/'):
-            url = "http://%s:%s%s" % (HOST, PORT, url)
+            url = "http://localhost:%s%s" % (odoo.tools.config['xmlrpc_port'], url)
         if data:
             return self.opener.post(url, data=data, timeout=timeout)
         return self.opener.get(url, timeout=timeout)
@@ -387,8 +384,9 @@ class HttpCase(TransactionCase):
     def phantom_run(self, cmd, timeout):
         _logger.info('phantom_run executing %s', ' '.join(cmd))
 
-        ls_glob = os.path.expanduser('~/.qws/share/data/Ofi Labs/PhantomJS/http_%s_%s.*' % (HOST, PORT))
-        ls_glob2 = os.path.expanduser('~/.local/share/Ofi Labs/PhantomJS/http_%s_%s.*' % (HOST, PORT))
+        port = odoo.tools.config['xmlrpc_port']
+        ls_glob = os.path.expanduser('~/.qws/share/data/Ofi Labs/PhantomJS/http_%s_%s.*' % (HOST, port))
+        ls_glob2 = os.path.expanduser('~/.local/share/Ofi Labs/PhantomJS/http_%s_%s.*' % (HOST, port))
         for i in (glob.glob(ls_glob) + glob.glob(ls_glob2)):
             _logger.info('phantomjs unlink localstorage %s', i)
             os.unlink(i)
@@ -450,7 +448,7 @@ class HttpCase(TransactionCase):
         If neither are done before timeout test fails.
         """
         options = {
-            'port': PORT,
+            'port': odoo.tools.config['xmlrpc_port'],
             'db': get_db_name(),
             'url_path': url_path,
             'code': code,
