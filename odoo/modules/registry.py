@@ -17,7 +17,7 @@ import threading
 import time
 
 import odoo
-from .. import api, SUPERUSER_ID
+from .. import api, tests, SUPERUSER_ID
 from odoo.tools import (assertion_report, config, existing_tables,
                         lazy_classproperty, lazy_property, table_exists,
                         convert_file, ustr, lru,
@@ -177,6 +177,7 @@ class DataItem(pytest.Item):
         self.package = package
         self.registry = registry
         self.paths = paths
+        self.current = None
 
     def runtest(self, report=DataReporter()):
         mode = 'update'
@@ -188,6 +189,7 @@ class DataItem(pytest.Item):
             with contextlib.closing(self.registry.cursor()) as cr:
                 idrefs = {}
                 for p in self.paths:
+                    self.current = p
                     convert_file(cr, self.package.name, p,
                                  idrefs, mode=mode, noupdate=False, kind='test',
                                  report=report, pathname=p)
@@ -199,7 +201,7 @@ class DataItem(pytest.Item):
         return self.fspath, 0, ""
 
     def repr_failure(self, exc_info):
-        return str(exc_info)
+        return "Test failed in %s" % self.current
 
 
 class Registry(collections.Mapping):
@@ -280,16 +282,15 @@ class Registry(collections.Mapping):
                         # run after that's been done but before thingy has
                         # been thingied
                         module.current_test = data.name
-                        threading.currentThread().testing = True
 
                         retcode = pytest.main(test_args, plugins=[
                             ModuleTest('at_install', [data.name]),
-                            DataTests(registry, data)
+                            DataTests(registry, data),
+                            tests.fixtures,
                         ])
                         if retcode in FAILURES:
                             registry.test_failures += 1
 
-                        threading.currentThread().testing = False
                         module.current_test = None
 
                 except Exception:
