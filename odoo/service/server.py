@@ -934,7 +934,8 @@ def preload_registries(dbnames):
                 _logger.error('At least one test failed when loading the modules.')
                 rc += 1
 
-            _logger.info("Modules loaded...")
+            # match runbot's check that build is done
+            _logger.getChild('modules.loading').info("Modules loaded...")
 
         except Exception:
             _logger.critical('Failed to initialize database `%s`.', dbname, exc_info=True)
