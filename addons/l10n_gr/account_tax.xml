@@ -9,8 +9,8 @@
         <field name="property_account_payable_id" ref="chartgr_50_00"/>
         <field name="property_account_expense_categ_id" ref="chartgr_64_98"/>
         <field name="property_account_income_categ_id" ref="chartgr_71_00"/>
-        <field name="income_currency_exchange_account_id"/>
-        <field name="expense_currency_exchange_account_id"/>
+        <field name="income_currency_exchange_account_id" ref="chartgr_94_28_98"/>
+        <field name="expense_currency_exchange_account_id" ref="chartgr_94_28_99"/>
     </record>
 
 </data>

@@ -10675,6 +10675,23 @@
             <field name="note"></field>
             <field name="chart_template_id" ref="l10n_gr_chart_template"/>
         </record>
+        <!-- Gain Loss Account -->
+        <record id="chartgr_94_28_98" model="account.account.template">
+            <field name="code">94.28.98</field>
+            <field name="name">Συνάλλαγμα Κέρδος</field>
+            <field name="nocreate" eval="True"/>
+            <field name="user_type_id" ref="account.data_account_type_other_income"/>
+            <field name="note"></field>
+            <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        </record>
+        <record id="chartgr_94_28_99" model="account.account.template">
+            <field name="code">94.28.99</field>
+            <field name="name">Απώλεια Συναλλάγματος</field>
+            <field name="nocreate" eval="True"/>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="note"></field>
+            <field name="chart_template_id" ref="l10n_gr_chart_template"/>
+        </record>
 
     </data>
 </openerp>
