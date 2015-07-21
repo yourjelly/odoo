@@ -424,7 +424,6 @@ lu_2011_account_511,511,Chèques à encaisser,account.data_account_type_current_
 lu_2011_account_512,512,Valeurs à l'encaissement,account.data_account_type_current_assets,f,lu_2011_chart_1
 lu_2011_account_514,514,Compte chèque postal,account.data_account_type_current_assets,f,lu_2011_chart_1
 lu_2011_account_516,516,Caisse,account.data_account_type_current_assets,f,lu_2011_chart_1
-lu_2011_account_517,517,Virements internes,account.data_account_type_current_assets,t,lu_2011_chart_1
 lu_2011_account_518,518,Autres avoirs,account.data_account_type_current_assets,f,lu_2011_chart_1
 lu_2011_account_60311,60311,Solides,account.data_account_type_expenses,f,lu_2011_chart_1
 lu_2011_account_60312,60312,Liquides,account.data_account_type_expenses,f,lu_2011_chart_1
