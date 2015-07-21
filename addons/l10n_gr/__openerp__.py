@@ -22,7 +22,7 @@ Greek accounting chart and localization.
                'account_full_chart.xml',
                'account_tax.xml',
                'account_tax_vat.xml',
-               'l10n_gr_wizard.xml'
+               'account_chart_template.yml'
     ],
-    'installable': False,
+    'installable': True,
 }
