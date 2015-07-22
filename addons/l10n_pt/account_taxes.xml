@@ -6,32 +6,68 @@
             <field name="chart_template_id" ref="pt_chart_template"/>
             <field name="name">IVA23</field>
             <field name="description">IVA23</field>
-            <field name="amount">0.230000</field>
-            <field name="type">percent</field>
+            <field name="amount">23</field>
+            <field name="amount_type">percent</field>
         </record>
 
         <record id="iva13" model="account.tax.template">
             <field name="chart_template_id" ref="pt_chart_template"/>
             <field name="name">IVA13</field>
             <field name="description">IVA13</field>
-            <field name="amount">0.130000</field>
-            <field name="type">percent</field>
+            <field name="amount">13</field>
+            <field name="amount_type">percent</field>
         </record>
 
         <record id="iva6" model="account.tax.template">
             <field name="chart_template_id" ref="pt_chart_template"/>
             <field name="name">IVA6</field>
             <field name="description">IVA6</field>
-            <field name="amount">0.060000</field>
-            <field name="type">percent</field>
+            <field name="amount">6</field>
+            <field name="amount_type">percent</field>
         </record>
 
         <record id="iva0" model="account.tax.template">
             <field name="chart_template_id" ref="pt_chart_template"/>
             <field name="name">IVA0</field>
             <field name="description">IVA0</field>
-            <field name="amount">0.000000</field>
-            <field name="type">percent</field>
+            <field name="amount">0</field>
+            <field name="amount_type">percent</field>
+        </record>
+
+        <record id="compiva23" model="account.tax.template">
+            <field name="chart_template_id" ref="pt_chart_template"/>
+            <field name="name">IVA23 compra</field>
+            <field name="description">IVA23 compra</field>
+            <field name="amount">23</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">purchase</field>
+        </record>
+
+        <record id="compiva13" model="account.tax.template">
+            <field name="chart_template_id" ref="pt_chart_template"/>
+            <field name="name">IVA13 compra</field>
+            <field name="description">IVA13 compra</field>
+            <field name="amount">13</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">purchase</field>
+        </record>
+
+        <record id="compiva6" model="account.tax.template">
+            <field name="chart_template_id" ref="pt_chart_template"/>
+            <field name="name">IVA6 compra</field>
+            <field name="description">IVA6 compra</field>
+            <field name="amount">6</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">purchase</field>
+        </record>
+
+        <record id="compiva0" model="account.tax.template">
+            <field name="chart_template_id" ref="pt_chart_template"/>
+            <field name="name">IVA0 compra</field>
+            <field name="description">IVA0 compra</field>
+            <field name="amount">0</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">purchase</field>
         </record>
 
     </data>
