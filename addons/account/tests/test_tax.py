@@ -49,11 +49,11 @@ class TestTax(AccountTestUsers):
 
     def test_tax_group(self):
         res = self.group_tax.compute_all(200.0)
-        self.assertEquals(res['total_excluded'], 200.0)
-        self.assertEquals(res['total_included'], 230.0)
+        self.assertEquals(float_compare(res['total_excluded'], 200.0, 0), 0)
+        self.assertEquals(float_compare(res['total_included'], 230.0, 0), 0)
         self.assertEquals(len(res['taxes']), 2)
-        self.assertEquals(res['taxes'][0]['amount'], 10.0)
-        self.assertEquals(res['taxes'][1]['amount'], 20.0)
+        self.assertEquals(float_compare(res['taxes'][0]['amount'], 10.0, 0), 0)
+        self.assertEquals(float_compare(res['taxes'][1]['amount'], 20.0, 0), 0)
 
     def test_tax_percent_division(self):
         self.division_tax.price_include = True
@@ -62,16 +62,16 @@ class TestTax(AccountTestUsers):
         self.percent_tax.include_base_amount = False
         res_division = self.division_tax.compute_all(200.0)
         res_percent = self.percent_tax.compute_all(200.0)
-        self.assertEquals(res_division['taxes'][0]['amount'], 20.0)
-        self.assertEquals(res_percent['taxes'][0]['amount'], 20.0)
+        self.assertEquals(float_compare(res_division['taxes'][0]['amount'], 20.0, 0), 0)
+        self.assertEquals(float_compare(res_percent['taxes'][0]['amount'], 20.0, 0), 0)
         self.division_tax.price_include = False
         self.division_tax.include_base_amount = False
         self.percent_tax.price_include = True
         self.percent_tax.include_base_amount = True
         res_division = self.division_tax.compute_all(200.0)
         res_percent = self.percent_tax.compute_all(200.0)
-        self.assertEquals(res_division['taxes'][0]['amount'], 22.22)
-        self.assertEquals(res_percent['taxes'][0]['amount'], 18.18)
+        self.assertEquals(float_compare(res_division['taxes'][0]['amount'], 22.22, 2), 0)
+        self.assertEquals(float_compare(res_percent['taxes'][0]['amount'], 18.18, 2), 0)
 
     def test_tax_sequence_normalized_set(self):
         self.division_tax.sequence = 1
@@ -79,19 +79,19 @@ class TestTax(AccountTestUsers):
         self.percent_tax.sequence = 3
         taxes_set = (self.group_tax | self.division_tax)
         res = taxes_set.compute_all(200.0)
-        self.assertEquals(res['taxes'][0]['amount'], 22.22)
-        self.assertEquals(res['taxes'][1]['amount'], 10.0)
-        self.assertEquals(res['taxes'][2]['amount'], 20.0)
+        self.assertEquals(float_compare(res['taxes'][0]['amount'], 22.22, 2), 0)
+        self.assertEquals(float_compare(res['taxes'][1]['amount'], 10.0, 0), 0)
+        self.assertEquals(float_compare(res['taxes'][2]['amount'], 20.0, 0), 0)
 
     def test_tax_include_base_amount(self):
         self.fixed_tax.include_base_amount = True
         res = self.group_tax.compute_all(200.0)
-        self.assertEquals(res['total_included'], 231.0)
+        self.assertEquals(float_compare(res['total_included'], 231.0, 0), 0)
 
     def test_tax_currency(self):
         self.division_tax.amount = 15.0
         res = self.division_tax.compute_all(200.0, currency=self.env.ref('base.VEF'))
-        self.assertEquals(res['total_included'], 235.2941)
+        self.assertEquals(float_compare(res['total_included'], 235.2941, 4), 0)
 
     def test_tax_move_lines_creation(self):
         """ Test that creating a move.line with tax_ids generates the tax move lines and adjust line amount when a tax is price_include """
@@ -127,12 +127,12 @@ class TestTax(AccountTestUsers):
         aml_percent_tax = move.line_ids.filtered(lambda l: l.tax_line_id.id == self.percent_tax.id)
         aml_fixed_tax_bis = move.line_ids.filtered(lambda l: l.tax_line_id.id == self.fixed_tax_bis.id)
         self.assertEquals(len(aml_fixed_tax), 1)
-        self.assertEquals(aml_fixed_tax.credit, 10)
+        self.assertEquals(float_compare(aml_fixed_tax.credit, 10, 0), 0)
         self.assertEquals(len(aml_percent_tax), 1)
-        self.assertEquals(aml_percent_tax.credit, 20)
+        self.assertEquals(float_compare(aml_percent_tax.credit, 20, 0), 0)
         self.assertEquals(len(aml_fixed_tax_bis), 1)
-        self.assertEquals(aml_fixed_tax_bis.credit, 15)
-        
+        self.assertEquals(float_compare(aml_fixed_tax_bis.credit, 15, 0), 0)
+
         aml_with_taxes = move.line_ids.filtered(lambda l: set(l.tax_ids.ids) == set([self.group_tax.id, self.fixed_tax_bis.id]))
         self.assertEquals(len(aml_with_taxes), 1)
-        self.assertEquals(aml_with_taxes.credit, 190)
+        self.assertEquals(float_compare(aml_with_taxes.credit, 190, 0), 0)
