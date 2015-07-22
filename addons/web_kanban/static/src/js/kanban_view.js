@@ -122,7 +122,7 @@ var KanbanView = View.extend({
     do_show: function() {
         this.do_push_state({});
         core.bus.on('fragment_shown', this, function() {
-            core.bus.trigger('kanban_view_shown', this);
+            this.trigger('kanban_view_shown', this);
         });
         return this._super();
     },

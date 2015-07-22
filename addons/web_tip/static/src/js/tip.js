@@ -51,10 +51,6 @@ var Tip = Class.extend({
             self.on_form_view(formView);
         });
 
-        bus.on('kanban_view_shown', this, function(kanbanView) {
-            self.on_kanban_view(kanbanView);
-        });
-
         bus.on('form_view_saved', this, function(formView) {
             self.on_form_view(formView);
         });
@@ -73,7 +69,11 @@ var Tip = Class.extend({
         var action_id = view.ViewManager.action ? view.ViewManager.action.id : null;
         var model = fields_view.model;
 
-        if (fields_view.type === 'tree') {
+        if (fields_view.type === 'kanban') {
+            view.on('kanban_view_shown', self, function() {
+                self.eval_tip(action_id, model, fields_view.type);
+            });
+        } else if (fields_view.type === 'tree') {
             view.on('view_list_rendered', self, function() {
                 self.eval_tip(action_id, model, fields_view.type);
             });
@@ -99,14 +99,6 @@ var Tip = Class.extend({
         } else {
             self.eval_tip(null, model, mode, type);
         }
-    },
-
-    // kanban
-    on_kanban_view: function(view) {
-        var fields_view = view.fields_view;
-        var action_id = view.ViewManager.action ? view.ViewManager.action.id : null;
-        var model = fields_view.model;
-        this.eval_tip(action_id, model, fields_view.type);
     },
 
     // stub
