@@ -161,6 +161,7 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
             self._display_view(view_options, old_view).done(function() {
                 self.trigger('switch_mode', view_type, no_store, view_options);
                 switched.resolve();
+                core.bus.trigger('fragment_shown');
             });
         });
         return switched;

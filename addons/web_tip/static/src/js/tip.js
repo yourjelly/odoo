@@ -51,6 +51,10 @@ var Tip = Class.extend({
             self.on_form_view(formView);
         });
 
+        bus.on('kanban_view_shown', this, function(kanbanView) {
+            self.on_kanban_view(kanbanView);
+        });
+
         bus.on('form_view_saved', this, function(formView) {
             self.on_form_view(formView);
         });
@@ -69,24 +73,7 @@ var Tip = Class.extend({
         var action_id = view.ViewManager.action ? view.ViewManager.action.id : null;
         var model = fields_view.model;
 
-        // kanban
-        if(fields_view.type === 'kanban') {
-            var dataset_def = $.Deferred();
-            var groups_def = $.Deferred();
-            view.on("kanban_dataset_processed", self, function() {
-                var length = view.dataset.ids.length;
-                dataset_def.resolve(length);
-            });
-            view.on('kanban_groups_processed', self, function() {
-                groups_def.resolve();
-            });
-            dataset_def.done(function(length) {
-                self.eval_tip(action_id, model, fields_view.type);
-            });
-            groups_def.done(function() {
-                self.eval_tip(action_id, model, fields_view.type);
-            });
-        } else if (fields_view.type === 'tree') {
+        if (fields_view.type === 'tree') {
             view.on('view_list_rendered', self, function() {
                 self.eval_tip(action_id, model, fields_view.type);
             });
@@ -112,6 +99,14 @@ var Tip = Class.extend({
         } else {
             self.eval_tip(null, model, mode, type);
         }
+    },
+
+    // kanban
+    on_kanban_view: function(view) {
+        var fields_view = view.fields_view;
+        var action_id = view.ViewManager.action ? view.ViewManager.action.id : null;
+        var model = fields_view.model;
+        this.eval_tip(action_id, model, fields_view.type);
     },
 
     // stub
@@ -170,7 +165,6 @@ var Tip = Class.extend({
         var highlight_selector = tip.highlight_selector;
         var triggers = tip.trigger_selector ? tip.trigger_selector.split(',') : [];
         var trigger_tip = true;
-
         if(!$(highlight_selector).length > 0 || !$(highlight_selector).is(":visible")) {
             return def.reject();
         }
