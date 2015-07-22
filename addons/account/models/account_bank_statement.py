@@ -584,7 +584,7 @@ class AccountBankStatementLine(models.Model):
         total = 0
         for line in mv_lines:
             total += line.currency_id and line.amount_residual_currency or line.amount_residual
-            if float_compare(total, abs(amount), precision_digits=st_line_currency.rounding) != -1:
+            if float_compare(total, abs(amount), precision_digits=st_line_currency.rounding) != 0:
                 break
             ret = (ret | line)
         return ret
