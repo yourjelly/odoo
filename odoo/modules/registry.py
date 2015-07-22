@@ -18,6 +18,7 @@ import time
 
 import odoo
 from .. import api, tests, SUPERUSER_ID
+from ..module import MANIFEST_NAMES
 from odoo.tools import (assertion_report, config, existing_tables,
                         lazy_classproperty, lazy_property, table_exists,
                         convert_file, ustr, lru,
@@ -110,16 +111,8 @@ class ModuleTest(object):
         'at_install': True,
         'post_install': False
     }
-    def __init__(self, phase, modnames):
-        self.roots = map(lambda n: py.path.local(module.get_module_path(n)), modnames)
+    def __init__(self, phase):
         self.phase = phase
-
-    def pytest_ignore_collect(self, path, config):
-        # only allow files from inside the selected module(s)
-        return not any(
-            root.common(path) == root
-            for root in self.roots
-        )
 
     def pytest_collection_modifyitems(self, session, config, items):
         items[:] = filter(self._filter_phase, items)
@@ -138,7 +131,8 @@ class ModuleTest(object):
         ``openerp.addons.<module>.foo.bar``
         """
         # if path to collect is in addons_path, create an OdooTestModule
-        if any(root.common(path) == root for root in self.roots):
+        p = str(path)   # work with strings because cheap. TODO: check that it works on windows
+        if any(p.startswith(root) for root in module.ad_paths):
             return OdooTestModule(path, parent)
         # otherwise create a normal test module
         return None
@@ -147,15 +141,16 @@ class DataTests(object):
     def __init__(self, registry, package):
         self.package = package
         self.registry = registry
-        self.paths = [
-            module.get_resource_path(self.package.name, p)
-            for p in self.registry._get_files_of_kind('test', self.package)
-        ]
     def pytest_collect_file(self, parent, path):
-        if self.paths and path in self.paths:
-            d = self.paths
-            self.paths = []
-            return DataFile(path, parent, self.registry, self.package, d)
+        if path.basename not in MANIFEST_NAMES:
+            return
+
+        testfiles = [module.get_resource_path(self.package.name, p) for p in
+                     self.registry._get_files_of_kind('test', self.package)]
+        if not testfiles:
+            return
+
+        return DataFile(path, parent, self.registry, self.package, testfiles)
 
 class DataFile(pytest.File):
     def __init__(self, path, parent, registry, package, paths):
@@ -262,7 +257,7 @@ class Registry(collections.Mapping):
                 try:
                     registry.test_failures = 0
                     registry.setup_signaling()
-                    test_args = ['-r', 'fEs', '-s'] + module.ad_paths
+                    test_args = ['-r', 'fEs', '-s']
                     for event, data in registry.load_modules(force_demo, status, update_module):
                         # launch tests only in demo mode, allowing tests to use demo data.
                         if event == 'module_processed':
@@ -283,8 +278,8 @@ class Registry(collections.Mapping):
                         # been thingied
                         module.current_test = data.name
 
-                        retcode = pytest.main(test_args, plugins=[
-                            ModuleTest('at_install', [data.name]),
+                        retcode = pytest.main(test_args + [module.get_module_path(data.name)], plugins=[
+                            ModuleTest('at_install'),
                             DataTests(registry, data),
                             tests.fixtures,
                         ])

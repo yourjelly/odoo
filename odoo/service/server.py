@@ -918,12 +918,12 @@ def preload_registries(dbnames):
                 t0 = time.time()
                 t0_sql = odoo.sql_db.sql_counter
 
-                test_args = ['-r', 'fEs', '-s'] + odoo.modules.module.ad_paths
+                test_args = ['-r', 'fEs', '-s']
 
-                retcode = pytest.main(test_args, plugins=[
-                    ModuleTest('post_install', installed),
-                    odoo.modules.tests.fixtures,
-                ])
+                retcode = pytest.main(
+                    test_args + map(odoo.modules.module.get_module_path, installed),
+                    plugins=[ModuleTest('post_install'),
+                             odoo.modules.tests.fixtures])
                 if retcode in odoo.modules.registry.FAILURES:
                     registry.test_failures += 1
 
