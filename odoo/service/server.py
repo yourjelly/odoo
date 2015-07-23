@@ -918,19 +918,18 @@ def preload_registries(dbnames):
                 t0 = time.time()
                 t0_sql = odoo.sql_db.sql_counter
 
-                test_args = ['-r', 'fEs', '-s']
-
-                retcode = pytest.main(
-                    test_args + map(odoo.modules.module.get_module_path, installed),
+                reporter = registry.test_reporter
+                pytest.main(
+                    reporter.test_args + map(odoo.modules.module.get_module_path, installed),
                     plugins=[ModuleTest('post_install'),
-                             odoo.modules.tests.fixtures])
-                if retcode in odoo.modules.registry.FAILURES:
-                    registry.test_failures += 1
+                             odoo.modules.tests.fixtures,
+                             reporter])
 
                 _logger.log(25, "All post-tested in %.2fs, %d queries",
                             time.time() - t0, odoo.sql_db.sql_counter - t0_sql)
 
-            if registry.test_failures:
+            reporter.log_results(logging.getLogger('odoo.tests'))
+            if reporter.failures:
                 _logger.error('At least one test failed when loading the modules.')
                 rc += 1
 

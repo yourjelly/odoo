@@ -44,6 +44,50 @@ _logger = logging.getLogger(__name__)
 _test_logger = logging.getLogger('odoo.tests')
 
 
+class TestReporter(object):
+    def __init__(self, test_args=None):
+        self.test_args = test_args or []
+        self.tests = 0
+        self.successes = 0
+        self.skipped = []
+        self.failures = []
+    def pytest_collectreport(self, report):
+        if report.failed:
+            self.failures.append(report)
+        elif report.skipped:
+            self.skipped.append(report)
+
+    def pytest_runtest_logreport(self, report):
+        if report.passed:
+            if report.when != 'call':
+                return
+            self.successes += 1
+        elif report.skipped:
+            self.skipped.append(report)
+        elif report.failed:
+            self.failures.append(report)
+        self.tests += 1
+
+    def log_results(self, logger):
+        logger.info(
+            "%d tests, %d successes, %d skipped, %d failed",
+            self.tests, self.successes, len(self.skipped), len(self.failures))
+        if self.failures:
+            logger.error("%d failure(s) while loading modules", len(self.failures))
+
+        for skipped in self.skipped:
+            logger.debug(
+                "%s %s",
+                getattr(skipped, 'nodeid', None) or skipped.fspath,
+                skipped.longrepr[2]
+            )
+        for failure in self.failures:
+            logger.error(
+                "%s %s",
+                getattr(failure, 'nodeid', None) or failure.fspath,
+                failure.longrepr
+            )
+
 class OdooTestModule(_pytest.python.Module):
     """ Should only be invoked for paths inside Odoo addons
     """
@@ -255,9 +299,9 @@ class Registry(collections.Mapping):
                 cls.delete(db_name)
                 cls.registries[db_name] = registry
                 try:
-                    registry.test_failures = 0
                     registry.setup_signaling()
-                    test_args = ['-r', 'fEs', '-s']
+                    registry.test_reporter = reporter = TestReporter(['-p', 'no:terminal', '-p', 'no:terminalreporter'])
+
                     for event, data in registry.load_modules(force_demo, status, update_module):
                         # launch tests only in demo mode, allowing tests to use demo data.
                         if event == 'module_processed':
@@ -278,13 +322,12 @@ class Registry(collections.Mapping):
                         # been thingied
                         module.current_test = data.name
 
-                        retcode = pytest.main(test_args + [module.get_module_path(data.name)], plugins=[
+                        pytest.main(reporter.test_args + [module.get_module_path(data.name)], plugins=[
                             ModuleTest('at_install'),
                             DataTests(registry, data),
                             tests.fixtures,
+                            reporter,
                         ])
-                        if retcode in FAILURES:
-                            registry.test_failures += 1
 
                         module.current_test = None
 
