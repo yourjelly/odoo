@@ -18,237 +18,16 @@ import time
 
 import odoo
 from .. import api, tests, SUPERUSER_ID
-from ..module import MANIFEST_NAMES
 from odoo.tools import (assertion_report, config, existing_tables,
                         lazy_classproperty, lazy_property, table_exists,
                         convert_file, ustr, lru,
                         topological_sort, OrderedSet, pycompat)
 from . import db, graph, migration, module
 
-import pytest
-import _pytest.main
-import _pytest.python
-import py.code
-import py.error
-import py.path
-# pytest treats no tests found as a failure, if a module has no tests there's
-# no tests collected so that's no failure for us. Cf pytest-dev/pytest#812
-FAILURES = (
-    _pytest.main.EXIT_TESTSFAILED,
-    _pytest.main.EXIT_INTERNALERROR,
-    _pytest.main.EXIT_USAGEERROR,
-)
-
 
 _logger = logging.getLogger(__name__)
 _test_logger = logging.getLogger('odoo.tests')
 
-
-class TestReporter(object):
-    def __init__(self, test_args=None):
-        self.test_args = test_args or []
-        self.tests = 0
-        self.successes = 0
-        self.skipped = []
-        self.failures = []
-
-    def pytest_collectreport(self, report):
-        if report.failed:
-            self.failures.append(report)
-        elif report.skipped:
-            self.skipped.append(report)
-
-    def pytest_runtest_logreport(self, report):
-        testpath = getattr(report, 'nodeid', '')
-        logger = _test_logger.getChild('test')
-
-        if report.passed:
-            if report.when != 'call':
-                return
-            self.successes += 1
-            logger.info("%s %s %s", 'pass', testpath, report.longrepr or '')
-        elif report.skipped:
-            self.skipped.append(report)
-            # maybe should be logged as a warning?
-            logger.info("%s %s %s", 'skip', testpath, report.longrepr[2])
-        elif report.failed:
-            self.failures.append(report)
-            logger.error("%s %s %s", 'fail', testpath, report.longrepr)
-        self.tests += 1
-
-    def log_results(self):
-        _test_logger.info(
-            "%d tests, %d successes, %d skipped, %d failed",
-            self.tests, self.successes, len(self.skipped), len(self.failures))
-        if self.failures:
-            _test_logger.error("%d failure(s) while loading modules", len(self.failures))
-
-        for skipped in self.skipped:
-            _test_logger.debug(
-                "%s %s",
-                getattr(skipped, 'nodeid', None) or skipped.fspath,
-                skipped.longrepr[2]
-            )
-        for failure in self.failures:
-            _test_logger.error(
-                "%s %s",
-                getattr(failure, 'nodeid', None) or failure.fspath,
-                failure.longrepr
-            )
-
-class OdooTestModule(_pytest.python.Module):
-    """ Should only be invoked for paths inside Odoo addons
-    """
-    def _importtestmodule(self):
-        # copy/paste/modified from original: removed sys.path injection &
-        # added Odoo module prefixing so import within modules is correct
-        try:
-            pypkgpath = self.fspath.pypkgpath()
-            pkgroot = pypkgpath.dirpath()
-            names = self.fspath.new(ext="").relto(pkgroot).split(self.fspath.sep)
-            if names[-1] == "__init__":
-                names.pop()
-            modname = ".".join(names)
-            # for modules in openerp/addons, since there is a __init__ the
-            # module name is already fully qualified (maybe?)
-            if not modname.startswith('odoo.addons.'):
-                modname = 'odoo.addons.' + modname
-
-            __import__(modname)
-            mod = sys.modules[modname]
-            if self.fspath.basename == "__init__.py":
-                # we don't check anything as we might
-                # we in a namespace package ... too icky to check
-                return mod
-
-            modfile = mod.__file__
-            if modfile[-4:] in ('.pyc', '.pyo'):
-                modfile = modfile[:-1]
-            elif modfile.endswith('$py.class'):
-                modfile = modfile[:-9] + '.py'
-            if modfile.endswith(os.path.sep + "__init__.py"):
-                if self.fspath.basename != "__init__.py":
-                    modfile = modfile[:-12]
-            try:
-                issame = self.fspath.samefile(modfile)
-            except py.error.ENOENT:
-                issame = False
-            if not issame:
-                raise self.fspath.ImportMismatchError(modname, modfile, self)
-        except SyntaxError:
-            raise self.CollectError(
-                py.code.ExceptionInfo().getrepr(style="short"))
-        except self.fspath.ImportMismatchError:
-            e = sys.exc_info()[1]
-            raise self.CollectError(
-                "import file mismatch:\n"
-                "imported module %r has this __file__ attribute:\n"
-                "  %s\n"
-                "which is not the same as the test file we want to collect:\n"
-                "  %s\n"
-                "HINT: remove __pycache__ / .pyc files and/or use a "
-                "unique basename for your test file modules"
-                 % e.args
-            )
-        #print "imported test module", mod
-        self.config.pluginmanager.consider_module(mod)
-        return mod
-
-class ModuleTest(object):
-    """ Performs filtering for in-module test run:
-    * only collects test files contained within the specified module
-    * only collects tests enabled for the specified phase
-    """
-    defaults = {
-        'at_install': True,
-        'post_install': False
-    }
-    def __init__(self, phase):
-        self.phase = phase
-
-    def pytest_collection_modifyitems(self, session, config, items):
-        items[:] = filter(self._filter_phase, items)
-
-    def _filter_phase(self, item):
-        marker = item.get_marker(self.phase)
-        if marker and marker.args:
-            return marker.args[0]
-        return self.defaults[self.phase]
-
-    @pytest.mark.tryfirst
-    def pytest_pycollect_makemodule(self, path, parent):
-        """ override collect with own test module thing to alter generated
-        module name when tests are found within an Odoo module: rather than
-        import ``<module>.foo.bar`` it should be
-        ``openerp.addons.<module>.foo.bar``
-        """
-        # if path to collect is in addons_path, create an OdooTestModule
-        p = str(path)   # work with strings because cheap. TODO: check that it works on windows
-        if any(p.startswith(root) for root in module.ad_paths):
-            return OdooTestModule(path, parent)
-        # otherwise create a normal test module
-        return None
-
-class DataTests(object):
-    def __init__(self, registry, package):
-        self.package = package
-        self.registry = registry
-    def pytest_collect_file(self, parent, path):
-        if path.basename not in MANIFEST_NAMES:
-            return
-
-        testfiles = [module.get_resource_path(self.package.name, p) for p in
-                     self.registry._get_files_of_kind('test', self.package)]
-        if not testfiles:
-            return
-
-        return DataFile(path, parent, self.registry, self.package, testfiles)
-
-class DataFile(pytest.File):
-    def __init__(self, path, parent, registry, package, paths):
-        super(DataFile, self).__init__(path, parent)
-        self.registry = registry
-        self.package = package
-        self.paths = paths
-    def collect(self):
-        return [DataItem(self, self.registry, self.package, self.paths)]
-
-class DataException(AssertionError): pass
-class DataReporter(assertion_report.assertion_report):
-    def record_failure(self):
-        raise DataException()
-
-class DataItem(pytest.Item):
-    def __init__(self, parent, registry, package, paths):
-        super(DataItem, self).__init__(package.name, parent)
-        self.package = package
-        self.registry = registry
-        self.paths = paths
-        self.current = None
-
-    def runtest(self, report=DataReporter()):
-        mode = 'update'
-        if hasattr(self.package, 'init') or self.package.state == 'to_install':
-            mode = 'init'
-
-        try:
-            threading.currentThread().testing = True
-            with contextlib.closing(self.registry.cursor()) as cr:
-                idrefs = {}
-                for p in self.paths:
-                    self.current = p
-                    convert_file(cr, self.package.name, p,
-                                 idrefs, mode=mode, noupdate=False, kind='test',
-                                 report=report, pathname=p)
-        finally:
-            self.registry.clear_caches()
-            threading.currentThread().testing = False
-
-    def reportinfo(self):
-        return self.fspath, 0, ""
-
-    def repr_failure(self, exc_info):
-        return "Test failed in %s" % self.current
 
 
 class Registry(collections.Mapping):
@@ -295,6 +74,12 @@ class Registry(collections.Mapping):
     @classmethod
     def new(cls, db_name, force_demo=False, status=None, update_module=False):
         """ Create and return a new registry for the given database name. """
+        # don't require pytest when not running tests.
+        if config['test_enable']:
+            import pytest
+            from ..tests import fixtures, support
+            reporter = support.TestReporter()
+
         with cls._lock:
             with odoo.api.Environment.manage():
                 registry = object.__new__(cls)
@@ -308,7 +93,8 @@ class Registry(collections.Mapping):
                 cls.registries[db_name] = registry
                 try:
                     registry.setup_signaling()
-                    registry.test_reporter = reporter = TestReporter(['-p', 'no:terminal', '-p', 'no:terminalreporter'])
+                    if config['test_enable']:
+                        registry.test_reporter = reporter
 
                     for event, data in registry.load_modules(force_demo, status, update_module):
                         # launch tests only in demo mode, allowing tests to use demo data.
@@ -330,10 +116,10 @@ class Registry(collections.Mapping):
                         # been thingied
                         module.current_test = data.name
 
-                        pytest.main(reporter.test_args + [module.get_module_path(data.name)], plugins=[
-                            ModuleTest('at_install'),
-                            DataTests(registry, data),
-                            tests.fixtures,
+                        pytest.main(support.test_args + [module.get_module_path(data.name)], plugins=[
+                            support.ModuleTest('at_install'),
+                            support.DataTests(registry, data),
+                            fixtures,
                             reporter,
                         ])
 

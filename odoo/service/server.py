@@ -16,7 +16,6 @@ import subprocess
 import sys
 import threading
 import time
-import unittest
 
 import pytest
 
@@ -39,7 +38,8 @@ except ImportError:
     setproctitle = lambda x: None
 
 import odoo
-from odoo.modules.registry import Registry, ModuleTest
+from odoo import tests
+from odoo.modules.registry import Registry
 from odoo.release import nt_service_name
 from odoo.tools import config
 from odoo.tools import stripped_sys_argv, dumpstacks, log_ormcache_stats, pycompat
@@ -876,29 +876,6 @@ def _reexec(updated_modules=None):
         args.insert(0, exe)
     os.execv(sys.executable, args)
 
-def load_test_file_yml(registry, test_file):
-    with contextlib.closing(registry.cursor()) as cr, open(test_file, 'rb') as f:
-        odoo.tools.convert_yaml_import(cr, 'base', f, 'test', {}, 'init')
-
-def load_test_file_py(registry, test_file):
-    # Locate python module based on its filename and run the tests
-    test_path, _ = os.path.splitext(os.path.abspath(test_file))
-    for mod_name, mod_mod in list(pycompat.items(sys.modules)):
-        if mod_mod:
-            mod_path, _ = os.path.splitext(getattr(mod_mod, '__file__', ''))
-            if test_path == mod_path:
-                suite = unittest.TestSuite()
-                for t in unittest.TestLoader().loadTestsFromModule(mod_mod):
-                    suite.addTest(t)
-                _logger.log(logging.INFO, 'running tests %s.', mod_mod.__name__)
-                stream = odoo.modules.module.TestStream()
-                result = unittest.TextTestRunner(verbosity=2, stream=stream).run(suite)
-                success = result.wasSuccessful()
-                if hasattr(registry._assertion_report,'report_result'):
-                    registry._assertion_report.report_result(success)
-                if not success:
-                    _logger.error('%s: at least one error occurred in a test', test_file)
-
 def preload_registries(dbnames):
     """ Preload a registries, possibly run a test file."""
     # TODO: move all config checks to args dont check tools.config here
@@ -908,9 +885,10 @@ def preload_registries(dbnames):
         try:
             update_module = config['init'] or config['update']
             registry = Registry.new(dbname, update_module=update_module)
-
             # run post-install tests
             if config['test_enable']:
+                _logger.info("Running post-install tests...")
+
                 with contextlib.closing(registry.cursor()) as cr:
                     cr.execute("SELECT name FROM ir_module_module WHERE state='installed'")
                     installed = [module_name for [module_name] in cr.fetchall()]
@@ -920,9 +898,9 @@ def preload_registries(dbnames):
 
                 reporter = registry.test_reporter
                 pytest.main(
-                    reporter.test_args + map(odoo.modules.module.get_module_path, installed),
-                    plugins=[ModuleTest('post_install'),
-                             odoo.modules.tests.fixtures,
+                    tests.support.test_args + map(odoo.modules.module.get_module_path, installed),
+                    plugins=[tests.support.ModuleTest('post_install'),
+                             tests.fixtures,
                              reporter])
 
                 _logger.log(25, "All post-tested in %.2fs, %d queries",
