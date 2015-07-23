@@ -928,7 +928,7 @@ def preload_registries(dbnames):
                 _logger.log(25, "All post-tested in %.2fs, %d queries",
                             time.time() - t0, odoo.sql_db.sql_counter - t0_sql)
 
-            reporter.log_results(logging.getLogger('odoo.tests'))
+            reporter.log_results()
             if reporter.failures:
                 _logger.error('At least one test failed when loading the modules.')
                 rc += 1
