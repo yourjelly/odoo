@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo.addons.stock.tests.common import TestStockCommon
+from .common import TestStockCommon
 from odoo.tools import mute_logger, float_round
 
 

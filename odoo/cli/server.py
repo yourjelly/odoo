@@ -15,17 +15,13 @@ import atexit
 import csv
 import logging
 import os
-import signal
 import sys
-import threading
-import traceback
-import time
 
 from psycopg2 import ProgrammingError, errorcodes
 
 import odoo
 
-from . import Command
+from .command import Command
 
 __author__ = odoo.release.author
 __version__ = odoo.release.version

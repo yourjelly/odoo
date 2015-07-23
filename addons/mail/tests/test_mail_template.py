@@ -4,7 +4,7 @@
 import base64
 import datetime
 
-from odoo.addons.mail.tests.common import TestMail
+from .common import TestMail
 from odoo.tools import mute_logger
 
 

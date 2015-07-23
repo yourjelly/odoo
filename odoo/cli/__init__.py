@@ -1,10 +1,4 @@
-import logging
-import sys
-import os
-
-import odoo
-
-from .command import Command, main
+from .command import main
 
 from . import deploy
 from . import scaffold

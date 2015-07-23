@@ -8,7 +8,7 @@ import sys
 import tempfile
 import zipfile
 
-from . import Command
+from .command import Command
 
 class Deploy(Command):
     """Deploy a module on an Odoo instance"""

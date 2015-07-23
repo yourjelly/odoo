@@ -8,7 +8,7 @@ import sys
 
 import jinja2
 
-from . import Command
+from .command import Command
 
 class Scaffold(Command):
     """ Generates an Odoo module skeleton. """

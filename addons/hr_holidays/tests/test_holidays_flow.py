@@ -3,10 +3,10 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
+from .common import TestHrHolidaysBase
+
 from odoo.exceptions import AccessError, ValidationError, UserError
 from odoo.tools import mute_logger, test_reports
-
-from odoo.addons.hr_holidays.tests.common import TestHrHolidaysBase
 
 
 class TestHolidaysFlow(TestHrHolidaysBase):

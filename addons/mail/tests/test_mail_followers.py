@@ -2,8 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from psycopg2 import IntegrityError
-
-from odoo.addons.mail.tests.common import TestMail
+from .common import TestMail
 from odoo.tools.misc import mute_logger
 
 

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime, timedelta
-
 from odoo import fields
 from odoo.tests import common
 
@@ -18,9 +17,9 @@ class TestEventCommon(common.TransactionCase):
         self.EventMail = self.env['event.mail']
 
         # User groups
-        self.group_employee_id = self.env['ir.model.data'].xmlid_to_res_id('base.group_user')
-        self.group_event_user_id = self.env['ir.model.data'].xmlid_to_res_id('event.group_event_user')
-        self.group_event_manager_id = self.env['ir.model.data'].xmlid_to_res_id('event.group_event_manager')
+        self.group_employee_id = self.ref('base.group_user')
+        self.group_event_user_id = self.ref('event.group_event_user')
+        self.group_event_manager_id = self.ref('event.group_event_manager')
         group_system = self.env.ref('base.group_system')
 
         # Test users to use through the various tests

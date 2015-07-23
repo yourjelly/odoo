@@ -7,7 +7,7 @@ import itertools
 import os
 import sys
 
-from . import Command
+from .command import Command
 from .server import main
 from odoo.modules.module import get_module_root, MANIFEST_NAMES
 from odoo.service.db import _create_empty_database, DatabaseExists
