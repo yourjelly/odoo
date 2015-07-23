@@ -13,9 +13,9 @@
 <!--
 Cuentas del plan
 -->
-	<record id="cuenta1116" model="account.account.template">
-		<field name="name">cuenta de Transferencia</field>
-		<field name="code">1116000000</field>
+	<record id="cuenta1129003000" model="account.account.template">
+		<field name="name">TRANSFERENCIAS BANCARIAS</field>
+		<field name="code">1129003000</field>
 		<field name="reconcile" eval="True"/>
 		<field name="user_type_id" ref="account.data_account_type_current_assets"/>
 	</record>
@@ -25,10 +25,10 @@ Cuentas del plan
 		<field name="cash_account_code_prefix">111100100</field>
 		<field name="code_digits">6</field>
 		<field name="currency_id" ref="base.MXN"/>
-		<field name="transfer_account_id" ref="cuenta1116"/>
+		<field name="transfer_account_id" ref="cuenta1129003000"/>
 	</record>
 
-	<record id="cuenta1116" model="account.account.template">
+	<record id="cuenta1129003000" model="account.account.template">
 		<field name="chart_template_id" ref="vauxoo_mx_chart_template"/>
 	</record>
 
@@ -237,14 +237,6 @@ Cuentas del plan
 		<field name="reconcile" eval="False"/>
 		<field name="user_type_id" ref="account_type_other"/>
 		<field name="name">ENTES GUBERNAMENTALES</field>
-		<field name="chart_template_id" ref="vauxoo_mx_chart_template"/>
-</record>
-
-<record id="cuenta1129003000" model="account.account.template">
-		<field name="code">1129003000</field>
-		<field name="reconcile" eval="False"/>
-		<field name="user_type_id" ref="account_type_other"/>
-		<field name="name">TRANSFERENCIAS BANCARIAS</field>
 		<field name="chart_template_id" ref="vauxoo_mx_chart_template"/>
 </record>
 
