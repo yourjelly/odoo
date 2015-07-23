@@ -7,7 +7,7 @@ import itertools
 import logging
 
 import odoo
-import odoo.tools as tools
+from odoo import tools
 from odoo.tools import pycompat
 
 _logger = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ class Graph(dict):
             return Node(name, self, info)
 
     def update_from_db(self, cr):
-        if not len(self):
+        if not self:
             return
         # update the graph with values from the database (if exist)
         ## First, we set the default values for each package in graph
@@ -57,45 +57,43 @@ class Graph(dict):
         if force is None:
             force = []
         packages = []
-        len_graph = len(self)
+        len_before = len(self)
         for module in module_list:
             # This will raise an exception if no/unreadable descriptor file.
             # NOTE The call to load_information_from_description_file is already
             # done by db.initialize, so it is possible to not do it again here.
             info = odoo.modules.module.load_information_from_description_file(module)
-            if info and info['installable']:
+            if info.get('installable'):
                 packages.append((module, info)) # TODO directly a dict, like in get_modules_with_version
             elif module != 'studio_customization':
                 _logger.warning('module %s: not installable, skipped', module)
 
-        dependencies = dict([(p, info['depends']) for p, info in packages])
-        current, later = set([p for p, info in packages]), set()
+        dependencies = {p: info['depends'] for p, info in packages}
+        current, later = {p for p, info in packages}, set()
 
         while packages and current > later:
-            package, info = packages[0]
-            deps = info['depends']
+            module, info = packages.pop(0)
 
             # if all dependencies of 'package' are already in the graph, add 'package' in the graph
-            if all(dep in self for dep in deps):
-                if not package in current:
-                    packages.pop(0)
+            if all(dep in self for dep in info['depends']):
+                if module not in current:
                     continue
+
                 later.clear()
-                current.remove(package)
-                node = self.add_node(package, info)
+                current.remove(module)
+                node = self.add_node(module, info)
                 for kind in ('init', 'demo', 'update'):
-                    if package in tools.config[kind] or 'all' in tools.config[kind] or kind in force:
+                    if module in tools.config[kind] or 'all' in tools.config[kind] or kind in force:
                         setattr(node, kind, True)
             else:
-                later.add(package)
-                packages.append((package, info))
-            packages.pop(0)
+                later.add(module)
+                packages.append((module, info))
 
         self.update_from_db(cr)
 
-        for package in later:
-            unmet_deps = [p for p in dependencies[package] if p not in self]
-            _logger.error('module %s: Unmet dependencies: %s', package, ', '.join(unmet_deps))
+        for module in later:
+            unmet_deps = [p for p in dependencies[module] if p not in self]
+            _logger.error('module %s: Unmet dependencies: %s', module, ', '.join(unmet_deps))
 
         return len(self) - len_graph
 
