@@ -15,15 +15,11 @@ import atexit
 import csv
 import logging
 import os
-import signal
 import sys
-import threading
-import traceback
-import time
 
 import odoo
 
-from . import Command
+from .command import Command
 
 __author__ = odoo.release.author
 __version__ = odoo.release.version

@@ -9,7 +9,7 @@ import sys
 
 import odoo
 from odoo.tools import config
-from . import Command
+from .command import Command
 
 _logger = logging.getLogger(__name__)
 
