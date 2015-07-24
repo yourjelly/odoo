@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<odoo>
+    <data noupdate="0">
+        <!-- example 1 page 12 -->
+        <record id="product_soda_light" model="product.product">
+            <field name="name">Soda LIGHT 33 CL.</field>
+            <field name="categ_id" ref="product.product_category_1"/>
+            <field name="standard_price">2.20</field>
+            <field name="list_price">2.20</field>
+            <field name="type">consu</field>
+        </record>
+        <record id="product_spaghetti" model="product.product">
+            <field name="name">Spaghetti Bolognaise (KLEIN)</field>
+            <field name="categ_id" ref="product.product_category_1"/>
+            <field name="standard_price">5.00</field>
+            <field name="list_price">5.00</field>
+            <field name="type">consu</field>
+        </record>
+        <record id="product_salad" model="product.product">
+            <field name="name">Salad Bar (kg)</field>
+            <field name="categ_id" ref="product.product_category_1"/>
+            <field name="standard_price">16.186</field>
+            <field name="list_price">16.186</field>
+            <field name="type">consu</field>
+        </record>
+        <record id="product_steak" model="product.product">
+            <field name="name">Steak Haché</field>
+            <field name="categ_id" ref="product.product_category_1"/>
+            <field name="standard_price">14.50</field>
+            <field name="list_price">14.50</field>
+            <field name="type">consu</field>
+        </record>
+        <record id="product_coffee" model="product.product">
+            <field name="name">Koffie verkeerd medium</field>
+            <field name="categ_id" ref="product.product_category_1"/>
+            <field name="standard_price">6.00</field>
+            <field name="list_price">6.00</field>
+            <field name="type">consu</field>
+        </record>
+        <record id="product_dame_blanche" model="product.product">
+            <field name="name">Dame Blanche</field>
+            <field name="categ_id" ref="product.product_category_1"/>
+            <field name="standard_price">7.00</field>
+            <field name="list_price">7.00</field>
+            <field name="type">consu</field>
+        </record>
+        <record id="product_wine" model="product.product">
+            <field name="name">Huiswijn (liter)</field>
+            <field name="categ_id" ref="product.product_category_1"/>
+            <field name="standard_price">10.00</field>
+            <field name="list_price">10.00</field>
+            <field name="type">consu</field>
+        </record>
+    </data>
+</odoo>

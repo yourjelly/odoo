@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import res_users
-import pos_order
+from . import test_res_users
+from . import test_pos_order

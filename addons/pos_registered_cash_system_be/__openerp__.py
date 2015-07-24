@@ -20,6 +20,7 @@ add some stuff here
         'views/res_users.xml'
     ],
     'demo': [
+        'data/pos_registered_cash_system_be_demo.xml'
     ],
     'qweb': [
     ],
