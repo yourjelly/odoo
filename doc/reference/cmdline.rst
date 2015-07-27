@@ -327,12 +327,60 @@ emails
     Password to connect to the SMTP server
 
 
+.. _reference/cmdline/testing:
+
+Testing
+=======
+
+.. program:: odoo.py test <test specs...>
+
+.. describe:: odoo.py test <test specs...>
+
+Runs all the tests it can find, installing modules as needed.
+
+Any number of test specs can be provided. With no test spec, will look for and
+run all the tests it can find in the current working directory. Otherwise
+
+* if a module name is passed as test spec, will discover and run all tests in
+  the module
+* if a directory is passed as test spec, will discover and run all tests in
+  that directory
+* if a file is passed as test spec, will run all tests in that file
+
+.. danger:: for directories and files inside modules, the module *must* be in
+            the addons path or they will be imported incorrectly.
+
+            Likewise when passing a module name as test spec, the module
+            *must* be in the addons path or it will not be matched.
+
+.. option:: -d <database>
+
+    rather than automatically create and delete a randomly-named database,
+    run the tests in a specified database. If the specified database does not
+    exist it is created but it will not be deleted, which allows reusing the
+    database for subsequent test runs
+
+.. option:: -m <mark spec>
+
+    pytest option, can be used to `select or deselect test cases based on
+    their markers
+    <http://pytest.org/latest/example/markers.html#mark-examples>`_. Currently
+    the only useful marker is ``http`` which is set on tests needing a running
+    HTTP server (UI tests, XML-RPC tests, ...). These tests can be
+    bulk-deselected with ``-m 'not http'``.
+
+.. note:: Most other pytest invocation options can be passed to
+          ``odoo.py test`` and will be forwarded as-is to Pytest, see
+          ``odoo.py test --help`` for an exhaustive list.
+
 .. _reference/cmdline/scaffold:
 
 Scaffolding
 ===========
 
 .. program:: odoo-bin scaffold
+
+.. describe:: odoo.py scaffold
 
 Scaffolding is the automated creation of a skeleton structure to simplify
 bootstrapping (of new modules, in the case of Odoo). While not necessary it

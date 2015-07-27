@@ -364,7 +364,7 @@ class WebRequest(object):
 
         .. deprecated:: 8.0
 
-            use :attr:`.env`
+            use :attr:`~openerp.http.WebRequest.env`
         """
         return odoo.registry(self.db)
 
