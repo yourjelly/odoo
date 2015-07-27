@@ -7,7 +7,7 @@ from contextlib import contextmanager
 import unittest
 import pytest
 
-from odoo import api, registry, SUPERUSER_ID
+from odoo import api, registry, SUPERUSER_ID, tools
 from odoo.tests import common
 from odoo.modules.registry import Registry
 
@@ -26,15 +26,24 @@ def environment():
 MODULE = 'test_uninstall'
 MODEL = 'test_uninstall.model'
 
-@pytest.mark.skipif(reason="uninstall test hangs")
+@pytest.mark.at_install(False)
+@pytest.mark.post_install(True)
 class TestUninstall(unittest.TestCase):
     """
     Test the install/uninstall of a test module. The module is available in
     `odoo.tests` which should be present in the addons-path.
     """
 
+    @pytest.fixture(autouse=True, scope='class')
+    def _disable_tests(self, request):
+        tools.config['test_enable'] = False
+
+        @request.addfinalizer
+        def reenable():
+            tools.config['test_enable'] = True
+
     def test_01_install(self):
-        """ Check a few things showing the module is installed. """
+        # Check a few things showing the module is installed.
         with environment() as env:
             module = env['ir.module.module'].search([('name', '=', MODULE)])
             assert len(module) == 1
@@ -47,7 +56,7 @@ class TestUninstall(unittest.TestCase):
             self.assertTrue(env['ir.model.fields'].search([('model', '=', MODEL)]))
 
     def test_02_uninstall(self):
-        """ Check a few things showing the module is uninstalled. """
+        # Check a few things showing the module is uninstalled.
         with environment() as env:
             module = env['ir.module.module'].search([('name', '=', MODULE)])
             assert len(module) == 1
