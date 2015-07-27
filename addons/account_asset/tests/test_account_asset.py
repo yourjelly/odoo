@@ -11,7 +11,7 @@ class TestAccountAsset(common.TransactionCase):
     def _load(self, module, *args):
         tools.convert_file(self.cr, 'account_asset',
                            get_resource_path(module, *args),
-                           {}, 'init', False, 'test', self.registry._assertion_report)
+                           idref={}, mode='init', kind='test')
 
     def test_00_account_asset_asset(self):
         self._load('account', 'test', 'account_minimal_test.xml')

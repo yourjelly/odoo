@@ -18,7 +18,7 @@ import time
 
 import odoo
 from .. import api, tests, SUPERUSER_ID
-from odoo.tools import (assertion_report, config, existing_tables,
+from odoo.tools import (config, existing_tables,
                         lazy_classproperty, lazy_property, table_exists,
                         convert_file, ustr, lru,
                         topological_sort, OrderedSet, pycompat)
@@ -152,7 +152,6 @@ class Registry(collections.Mapping):
         self._sql_error = {}
         self._init = True
         self._init_parent = {}
-        self._assertion_report = assertion_report.assertion_report()
         self._fields_by_model = None
         self._post_init_queue = collections.deque()
 
@@ -778,7 +777,7 @@ class Registry(collections.Mapping):
                 noupdate = False
                 if kind in ('demo', 'demo_xml') or (filename.endswith('.csv') and kind in ('init', 'init_xml')):
                     noupdate = True
-                convert_file(cr, package.name, filename, idref, mode, noupdate, kind, self._assertion_report)
+                convert_file(cr, package.name, filename, idref, mode, noupdate, kind)
         finally:
             if kind in ('demo', 'test'):
                 threading.currentThread().testing = False
