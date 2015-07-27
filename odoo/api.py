@@ -682,15 +682,26 @@ def call_kw(model, name, args, kwargs):
 
 
 class Environment(Mapping):
-    """ An environment wraps data for ORM records:
+    """ An environment wraps data for ORM records and provides access to 
+    registry objects by implementing a mapping of model names to new api
+    model objects.
 
-         - :attr:`cr`, the current database cursor;
-         - :attr:`uid`, the current user id;
-         - :attr:`context`, the current context dictionary.
+    .. attribute:: cr
 
-        It provides access to the registry by implementing a mapping from model
-        names to new api models. It also holds a cache for records, and a data
-        structure to manage recomputations.
+        the current database cursor
+
+    .. attribute:: uid
+
+        the current user id
+
+    .. attribute:: context
+
+        the current context dictionary.
+
+    .. attribute:: registry
+
+        the :class:`~odoo.modules.registry.Registry` backing this
+        Environment
     """
     _local = Local()
 
