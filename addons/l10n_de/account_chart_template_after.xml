@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Chart Template -->
+
+        <record id="l10n_de_chart_template" model="account.chart.template">
+            <field name="cash_account_code_prefix">1000</field>
+            <field name="bank_account_code_prefix">1200</field>
+            <field name="property_account_receivable_id" ref="account_1410"/>
+            <field name="property_account_payable_id" ref="account_1610"/>
+            <field name="property_account_expense_categ_id" ref="account_3400"/>
+            <field name="property_account_income_categ_id" ref="account_8400"/>
+            <field name="income_currency_exchange_account_id" ref="account_2660"/>
+            <field name="expense_currency_exchange_account_id" ref="account_2150"/>
+        </record>
+
+        <record id="l10n_chart_de_skr04" model="account.chart.template">
+            <field name="cash_account_code_prefix">1600</field>
+            <field name="bank_account_code_prefix">1800</field>
+            <field name="property_account_receivable_id" ref="chart_skr04_1206"/>
+            <field name="property_account_payable_id" ref="chart_skr04_3301"/>
+            <field name="property_account_expense_categ_id" ref="chart_skr04_5400"/>
+            <field name="property_account_income_categ_id" ref="chart_skr04_4400"/>
+            <field name="income_currency_exchange_account_id" ref="chart_skr04_4840"/>
+            <field name="expense_currency_exchange_account_id" ref="chart_skr04_6880"/>
+        </record>
+
+   </data>
+</odoo>

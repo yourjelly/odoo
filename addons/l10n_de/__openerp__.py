@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 # SKR03
@@ -114,18 +114,18 @@ Dieses  Modul beinhaltet einen deutschen Kontenrahmen basierend auf dem SKR03.
 
 German accounting chart and localization.
     """,
-    'depends': ['base', 'account', 'base_iban', 'base_vat'],
+    'depends': ['account', 'base_iban', 'base_vat'],
     'demo': [ ],
     'data': [
-        'account_types_skr03.xml',
+        'account_account_types.xml',
+        'account_chart_template.xml',
         'account_chart_skr03.xml',
-        'account_chart_template_skr03.xml',
-        'account_tax_fiscal_position_skr03.xml',
-        'account_types_skr04.xml',
         'account_chart_skr04.xml',
-        'account_chart_template_skr04.xml',
+        'account_chart_template_after.xml',
+        'account_account_tags.xml',
+        'account_tax_fiscal_position_skr03.xml',
         'account_tax_fiscal_position_skr04.xml',
-        'l10n_de_wizard.xml',
+        'account.chart.template.yml',
     ],
-    'installable': False,
+    'installable': True,
 }
