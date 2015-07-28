@@ -82,21 +82,21 @@ class TestPosOrder(common.TransactionCase):
 
         order_lines = []
 
-        order_lines.append(self._create_pos_order_line('pos_registered_cash_system_be.product_soda_light', 3))
-        order_lines.append(self._create_pos_order_line('pos_registered_cash_system_be.product_spaghetti', 2))
+        order_lines.append(self._create_pos_order_line('pos_blackbox_be.product_soda_light', 3))
+        order_lines.append(self._create_pos_order_line('pos_blackbox_be.product_spaghetti', 2))
 
         # todo jov
         # the salad in the example isn't great, because for 0.527 to
         # cost 8.53 price needs to be 16.186 which requires changing
         # of precision. So just set the price_subtotal manually.
-        salad = self._create_pos_order_line('pos_registered_cash_system_be.product_salad', 0.527)
+        salad = self._create_pos_order_line('pos_blackbox_be.product_salad', 0.527)
         order_lines.append(salad)
 
-        order_lines.append(self._create_pos_order_line('pos_registered_cash_system_be.product_steak', 1))
-        order_lines.append(self._create_pos_order_line('pos_registered_cash_system_be.product_coffee', 2))
-        order_lines.append(self._create_pos_order_line('pos_registered_cash_system_be.product_dame_blanche', 1))
-        order_lines.append(self._create_pos_order_line('pos_registered_cash_system_be.product_soda_light', -1))
-        order_lines.append(self._create_pos_order_line('pos_registered_cash_system_be.product_wine', 1.25))
+        order_lines.append(self._create_pos_order_line('pos_blackbox_be.product_steak', 1))
+        order_lines.append(self._create_pos_order_line('pos_blackbox_be.product_coffee', 2))
+        order_lines.append(self._create_pos_order_line('pos_blackbox_be.product_dame_blanche', 1))
+        order_lines.append(self._create_pos_order_line('pos_blackbox_be.product_soda_light', -1))
+        order_lines.append(self._create_pos_order_line('pos_blackbox_be.product_wine', 1.25))
 
         pos_order.write({'lines': [(4, line.id) for line in order_lines]})
 
