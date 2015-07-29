@@ -19,6 +19,7 @@
         'base_vat',
     ],
     'data': [
+        'data/account.account.tag.csv',
         'data/account_chart_template_before.xml',
         'data/account.account.template.csv',
         'data/account_chart_template.xml',
