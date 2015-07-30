@@ -63,7 +63,9 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         // for hash and sign the allowed range for DATA is:
         //   - A-Z
         //   - 0-9
-        //   - SPACE
+        // and SPACE as well. We filter SPACE out here though, because
+        // SPACE will only be used in DATA of hash and sign as description
+        // padding
         _filter_allowed_hash_and_sign_chars: function(str) {
             if (typeof str !== 'string') {
                 throw "Can only handle strings";
@@ -73,8 +75,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                 var ascii_code = char.charCodeAt(0);
 
                 if ((ascii_code >= "A".charCodeAt(0) && ascii_code <= "Z".charCodeAt(0)) ||
-                    (ascii_code >= "0".charCodeAt(0) && ascii_code <= "9".charCodeAt(0)) ||
-                    (ascii_code === " ".charCodeAt(0))) {
+                    (ascii_code >= "0".charCodeAt(0) && ascii_code <= "9".charCodeAt(0))) {
                     return true;
                 } else {
                     return false;
