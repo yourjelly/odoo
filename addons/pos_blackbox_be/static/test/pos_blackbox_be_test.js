@@ -167,7 +167,8 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
         add_order_line(order, "Koffie verkeerd medium", 3.00, 2, 1);
         add_order_line(order, "Dame Blanche", 7.00, 1, 2);
         add_order_line(order, "Soda LIGHT 33 CL.", -2.20, -1, 1);
-        add_order_line(order, "Huiswijn (liter)", 10.00, 1.25, 1);
+        // add_order_line(order, "Huiswijn (liter)", 10.00, 1.25, 1);
+        add_order_line(order, "Huiswijn (liter)", 10.00, 1250, 1); // todo jov: we need to always use milliliter as a unit
 
         assert.strictEqual(order._string_to_hash(),
 "0003SODALIGHT33CL       00000660A\

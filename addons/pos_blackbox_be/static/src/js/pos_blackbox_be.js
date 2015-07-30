@@ -103,9 +103,14 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         },
 
         // for both amount and price
-        _prepare_number_for_plu: function(number, field_length) {
+        _prepare_number_for_plu: function(number, field_length, decimals) {
             number = Math.abs(number);
-            number = number.toString();
+
+            if (decimals) {
+                number = number.toFixed(2);
+            } else {
+                number = number.toString();                
+            }
 
             number = this._replace_hash_and_sign_chars(number);
             number = this._filter_allowed_hash_and_sign_chars(number);
@@ -155,18 +160,20 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
             var amount = this.get_quantity(); // (todo jov: need grams and milliliters)
             var description = this.get_product().display_name;
-            var price = this.get_product().list_price; // todo jov: get_price_with_tax()?
+            var price = this.get_display_price();
+            // var price = this.get_product().list_price; // todo jov: get_price_with_tax()?
             var vat_code = this._get_vat_code();
 
-            price = this._prepare_number_for_plu(price);
-
-            description = this._replace_hash_and_sign_chars(description);
-            price = this._replace_hash_and_sign_chars(price);
-            vat_code = this._replace_hash_and_sign_chars(vat_code);
-
-            description = this._filter_allowed_hash_and_sign_chars(description);
-            price = this._filter_allowed_hash_and_sign_chars(price);
-            vat_code = this._filter_allowed_hash_and_sign_chars(vat_code);
+            // utils.round_precision() isn't perfect:
+            //
+            // >> utils.round_precision(6.6005, 0.01)
+            // 6.6000000000000005
+            //
+            // point of sale however hardcodes precision to 2
+            // decimals
+            amount = this._prepare_number_for_plu(amount, 4);
+            description = this._prepare_description_for_plu(description);
+            price = this._prepare_number_for_plu(price, 8, 2);
 
             return amount + description + price + vat_code;
         }
