@@ -170,14 +170,14 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
         add_order_line(order, "Huiswijn (liter)", 10.00, 1.25, 1);
 
         assert.strictEqual(order._string_to_hash(),
-"0003SODALIGHT33CL_______00000660A\
+"0003SODALIGHT33CL       00000660A\
 0002SPAGHETTIBOLOGNAISEK00001000B\
-0527SALADBARKG__________00000853B\
-0001STEAKHACHE__________00001450B\
+0527SALADBARKG          00000853B\
+0001STEAKHACHE          00001450B\
 0002KOFFIEVERKEERDMEDIUM00000600A\
-1DAMEBLANCHE________00000700B0001\
-SODALIGHT33CL_______00000220A1250\
-HUISWIJNLITER_______00001250A", "_string_to_hash of example 1");
+0001DAMEBLANCHE         00000700B\
+0001SODALIGHT33CL       00000220A\
+1250HUISWIJNLITER       00001250A", "_string_to_hash of example 1");
         assert.strictEqual(order.calculate_hash(), "bd532992502a62c40a741ec76423198d88d5a4f3", "calculate_hash of example 1");
     });
 });
