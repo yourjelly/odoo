@@ -110,16 +110,48 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
         assert.strictEqual(order_line._filter_allowed_hash_and_sign_chars("A  A"), "AA");
     });
 
-    test('_prepare_amount_for_plu', function (assert, models) {
+    test('_prepare_number_for_plu amount', function (assert, models) {
         var order_line = mock_order_line(models);
 
-        assert.strictEqual(order_line._prepare_amount_for_plu(0), "0000");
-        assert.strictEqual(order_line._prepare_amount_for_plu(1), "0001");
-        assert.strictEqual(order_line._prepare_amount_for_plu(1234), "1234");
-        assert.strictEqual(order_line._prepare_amount_for_plu(123456), "3456");
-        assert.strictEqual(order_line._prepare_amount_for_plu(0.527), "0527");
-        assert.strictEqual(order_line._prepare_amount_for_plu(3.14159265359), "5359");
-        assert.strictEqual(order_line._prepare_amount_for_plu(0.12), "0012");
+        assert.strictEqual(order_line._prepare_number_for_plu(0, 4), "0000");
+        assert.strictEqual(order_line._prepare_number_for_plu(-0, 4), "0000");
+        assert.strictEqual(order_line._prepare_number_for_plu(1, 4), "0001");
+        assert.strictEqual(order_line._prepare_number_for_plu(1234, 4), "1234");
+        assert.strictEqual(order_line._prepare_number_for_plu(-1234, 4), "1234");
+        assert.strictEqual(order_line._prepare_number_for_plu(123456, 4), "3456");
+        assert.strictEqual(order_line._prepare_number_for_plu(-123456, 4), "3456");
+        assert.strictEqual(order_line._prepare_number_for_plu(0.527, 4), "0527");
+        assert.strictEqual(order_line._prepare_number_for_plu(3.14159265359, 4), "5359");
+        assert.strictEqual(order_line._prepare_number_for_plu(-3.14159265359, 4), "5359");
+        assert.strictEqual(order_line._prepare_number_for_plu(0.12, 4), "0012");
+        assert.strictEqual(order_line._prepare_number_for_plu(-0.12, 4), "0012");
+    });
+
+    test('_prepare_number_for_plu price', function (assert, models) {
+        var order_line = mock_order_line(models);
+
+        assert.strictEqual(order_line._prepare_number_for_plu(0, 8), "00000000");
+        assert.strictEqual(order_line._prepare_number_for_plu(-0, 8), "00000000");
+        assert.strictEqual(order_line._prepare_number_for_plu(1, 8), "00000001");
+        assert.strictEqual(order_line._prepare_number_for_plu(-1, 8), "00000001");
+        assert.strictEqual(order_line._prepare_number_for_plu(0.01, 8), "00000001");
+        assert.strictEqual(order_line._prepare_number_for_plu(-0.01, 8), "00000001");
+        assert.strictEqual(order_line._prepare_number_for_plu(1234, 8), "00001234");
+        assert.strictEqual(order_line._prepare_number_for_plu(-1234, 8), "00001234");
+        assert.strictEqual(order_line._prepare_number_for_plu(1234.123, 8), "01234123");
+        assert.strictEqual(order_line._prepare_number_for_plu(-1234.123, 8), "01234123");
+        assert.strictEqual(order_line._prepare_number_for_plu(10000, 8), "00010000");
+        assert.strictEqual(order_line._prepare_number_for_plu(-10000, 8), "00010000");
+    });
+
+    test('_prepare_description_for_plu', function(assert, models) {
+        var order_line = mock_order_line(models);
+
+        assert.strictEqual(order_line._prepare_description_for_plu(""), "                    ");
+        assert.strictEqual(order_line._prepare_description_for_plu("a"), "A                   ");
+        assert.strictEqual(order_line._prepare_description_for_plu("     "), "                    ");
+        assert.strictEqual(order_line._prepare_description_for_plu("product name"), "PRODUCTNAME         ");
+        assert.strictEqual(order_line._prepare_description_for_plu("this is longer than the allowed 20 characters"), "THISISLONGERTHANTHEA");
     });
 
     test('hash orders', function (assert, models) {

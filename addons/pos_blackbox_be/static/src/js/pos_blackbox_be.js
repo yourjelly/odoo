@@ -102,29 +102,38 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             throw "Tax amount " + tax.amount + " doesn't have a VAT code.";
         },
 
-        _prepare_number_for_plu: function(number) {
+        // for both amount and price
+        _prepare_number_for_plu: function(number, field_length) {
             number = Math.abs(number);
-            return number.toString();
-        },
+            number = number.toString();
 
-        _prepare_amount_for_plu: function(amount) {
-            amount = this._prepare_number_for_plu(amount);
-            amount = this._replace_hash_and_sign_chars(amount);
-            amount = this._filter_allowed_hash_and_sign_chars(amount);
+            number = this._replace_hash_and_sign_chars(number);
+            number = this._filter_allowed_hash_and_sign_chars(number);
 
             // get the 4 least significant characters
-            amount = amount.substr(-4);
+            number = number.substr(-field_length);
 
             // pad left with 0 to required size of 4
-            while (amount.length < 4) {
-                amount = "0" + amount;
+            while (number.length < field_length) {
+                number = "0" + number;
             }
 
-            return amount;
+            return number;
         },
 
         _prepare_description_for_plu: function(description) {
+            description = this._replace_hash_and_sign_chars(description);
+            description = this._filter_allowed_hash_and_sign_chars(description);
 
+            // get the 20 most significant characters
+            description = description.substr(0, 20);
+
+            // pad right with SPACE to required size of 20
+            while (description.length < 20) {
+                description = description + " ";
+            }
+
+            return description;
         },
 
         generate_plu_line: function () {
