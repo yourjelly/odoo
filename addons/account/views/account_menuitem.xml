@@ -27,6 +27,10 @@
 
         <menuitem id="menu_account_reports" name="Financial Reports" parent="menu_finance_configuration" sequence="30" />
         
+        <menuitem id="menu_finance_generic_reporting" name="Generic Reporting" parent="menu_finance_reports" sequence="100"/>
+        <menuitem id="next_id_22" name="Partners" parent="menu_finance_generic_reporting" sequence="1"/>
+
+        
     </data>
 </openerp>
 
