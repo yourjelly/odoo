@@ -742,7 +742,10 @@ class website_sale(http.Controller):
         #     acquirer_ids = [tx.acquirer_id.id]
         # else:
         if not values['errors']:
-            acquirer_ids = payment_obj.search(cr, SUPERUSER_ID, [('website_published', '=', True), ('company_id', '=', order.company_id.id)], context=context)
+            domain = [('website_published', '=', True), ('company_id', '=', order.company_id.id)]
+            if request.registry.get('res.users').has_group(cr, uid, 'base.group_public'):
+                domain += [('payment_process', '=', 'redirect')]
+            acquirer_ids = payment_obj.search(cr, SUPERUSER_ID, domain, context=context)
             values['acquirers'] = list(payment_obj.browse(cr, uid, acquirer_ids, context=context))
             render_ctx = dict(context, submit_class='btn btn-primary', submit_txt=_('Pay Now'))
             for acquirer in values['acquirers']:
