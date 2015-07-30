@@ -76,6 +76,23 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return filtered_char_array.join("");
         },
 
+        _get_vat_code: function() {
+            var tax = this.get_taxes()[0]; // todo jov: multiple taxes
+
+            // todo jov: put this stuff on account.tax
+            if (tax.amount === 21) {
+                return "A";
+            } else if (tax.amount === 12) {
+                return "B";
+            } else if (tax.amount === 8) {
+                return "C";
+            } else if (tax.amount === 0) {
+                return "D";
+            }
+
+            return undefined; // todo jov: don't like it
+        },
+
         generate_plu_line: function () {
             // |--------+-------------+-------+-----|
             // | AMOUNT | DESCRIPTION | PRICE | VAT |
@@ -83,7 +100,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             // |--------+-------------+-------+-----|
 
             // fields we need:
-            // - amount => get_quantity() (todo jov: need grams and milliliters)
+            // - amount => get_quantity()
             // - description => display_name
             // - price => get_price_with_tax()
             // - vat => could hardcode table, or add the code to taxes
@@ -93,8 +110,12 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             // 2. filter out forbidden chars
             // 3. build PLU line
 
+            var amount = this.get_quantity(); // (todo jov: need grams and milliliters)
+            var description = this.get_product().display_name;
+            var price = this.get_price_with_tax();
+            var vat_code = this._get_vat_code();
 
-            return this.get_product().display_name;
+            return amount + " " + description + " " + price + " " + vat_code;
         }
     });
 
