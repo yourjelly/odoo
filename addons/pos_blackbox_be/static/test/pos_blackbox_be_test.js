@@ -107,7 +107,7 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
         assert.strictEqual(order_line._filter_allowed_hash_and_sign_chars("abcdef"), "");
         assert.strictEqual(order_line._filter_allowed_hash_and_sign_chars("ÄÅÂÁÀâäáàãÆæßçÇÎÏÍÌïîìí€ÊËÉÈêëéèÛÜÚÙüûúùÔÖÓÒöôóòŒœñÑýÝÿ"), "");
         assert.strictEqual(order_line._filter_allowed_hash_and_sign_chars("AaA"), "AA");
-        assert.strictEqual(order_line._filter_allowed_hash_and_sign_chars("A  A"), "A  A");
+        assert.strictEqual(order_line._filter_allowed_hash_and_sign_chars("A  A"), "AA");
     });
 
     test('_prepare_amount_for_plu', function (assert, models) {
