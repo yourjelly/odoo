@@ -81,6 +81,7 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
         assert.strictEqual(order_line._replace_hash_and_sign_chars(""), "");
         assert.strictEqual(order_line._replace_hash_and_sign_chars("ABC"), "ABC");
         assert.strictEqual(order_line._replace_hash_and_sign_chars("0123456789"), "0123456789");
+        assert.strictEqual(order_line._replace_hash_and_sign_chars("2.2"), "2.2");
         assert.strictEqual(order_line._replace_hash_and_sign_chars("abcdef  ghijkl"), "ABCDEF  GHIJKL");
         assert.strictEqual(order_line._replace_hash_and_sign_chars("AaA"), "AAA");
         assert.strictEqual(order_line._replace_hash_and_sign_chars("ÄÅÂÁÀâäáàã"), "AAAAAAAAAA");
@@ -107,6 +108,18 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
         assert.strictEqual(order_line._filter_allowed_hash_and_sign_chars("ÄÅÂÁÀâäáàãÆæßçÇÎÏÍÌïîìí€ÊËÉÈêëéèÛÜÚÙüûúùÔÖÓÒöôóòŒœñÑýÝÿ"), "");
         assert.strictEqual(order_line._filter_allowed_hash_and_sign_chars("AaA"), "AA");
         assert.strictEqual(order_line._filter_allowed_hash_and_sign_chars("A  A"), "A  A");
+    });
+
+    test('_prepare_amount_for_plu', function (assert, models) {
+        var order_line = mock_order_line(models);
+
+        assert.strictEqual(order_line._prepare_amount_for_plu(0), "0000");
+        assert.strictEqual(order_line._prepare_amount_for_plu(1), "0001");
+        assert.strictEqual(order_line._prepare_amount_for_plu(1234), "1234");
+        assert.strictEqual(order_line._prepare_amount_for_plu(123456), "3456");
+        assert.strictEqual(order_line._prepare_amount_for_plu(0.527), "0527");
+        assert.strictEqual(order_line._prepare_amount_for_plu(3.14159265359), "5359");
+        assert.strictEqual(order_line._prepare_amount_for_plu(0.12), "0012");
     });
 
     test('hash orders', function (assert, models) {
