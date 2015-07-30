@@ -42,6 +42,10 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         },
 
         _replace_hash_and_sign_chars: function(str) {
+            if (typeof str !== 'string') {
+                throw "Can only handle strings";
+            }
+
             var translation_table = this._generate_translation_table();
 
             var replace_char_array = _.map(str, function (char, index, str) {
@@ -61,6 +65,10 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         //   - 0-9
         //   - SPACE
         _filter_allowed_hash_and_sign_chars: function(str) {
+            if (typeof str !== 'string') {
+                throw "Can only handle strings";
+            }
+
             var filtered_char_array = _.filter(str, function (char) {
                 var ascii_code = char.charCodeAt(0);
 
@@ -90,7 +98,32 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                 return "D";
             }
 
-            return undefined; // todo jov: don't like it
+            throw "Tax amount " + tax.amount + " doesn't have a VAT code.";
+        },
+
+        _prepare_number_for_plu: function(number) {
+            number = Math.abs(number);
+            return number.toString();
+        },
+
+        _prepare_amount_for_plu: function(amount) {
+            amount = this._prepare_number_for_plu(amount);
+            amount = this._replace_hash_and_sign_chars(amount);
+            amount = this._filter_allowed_hash_and_sign_chars(amount);
+
+            // get the 4 least significant characters
+            amount = amount.substr(-4);
+
+            // pad left with 0 to required size of 4
+            while (amount.length < 4) {
+                amount = "0" + amount;
+            }
+
+            return amount;
+        },
+
+        _prepare_description_for_plu: function(description) {
+
         },
 
         generate_plu_line: function () {
@@ -112,10 +145,20 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
             var amount = this.get_quantity(); // (todo jov: need grams and milliliters)
             var description = this.get_product().display_name;
-            var price = this.get_price_with_tax();
+            var price = this.get_product().list_price; // todo jov: get_price_with_tax()?
             var vat_code = this._get_vat_code();
 
-            return amount + " " + description + " " + price + " " + vat_code;
+            price = this._prepare_number_for_plu(price);
+
+            description = this._replace_hash_and_sign_chars(description);
+            price = this._replace_hash_and_sign_chars(price);
+            vat_code = this._replace_hash_and_sign_chars(vat_code);
+
+            description = this._filter_allowed_hash_and_sign_chars(description);
+            price = this._filter_allowed_hash_and_sign_chars(price);
+            vat_code = this._filter_allowed_hash_and_sign_chars(vat_code);
+
+            return amount + description + price + vat_code;
         }
     });
 
