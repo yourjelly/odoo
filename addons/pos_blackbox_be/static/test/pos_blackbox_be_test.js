@@ -1,28 +1,50 @@
 odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function (test, mock) {
+    function mock_pos() {
+        var pos = {
+            'pos_session': {
+                'id': 1
+            },
+            'db': {
+                'save_unpaid_order': function () {}
+            },
+            'currency': {
+                'rounding': 0.01
+            },
+            'company': {
+                'tax_calculation_rounding_method': ""
+            },
+            'taxes_by_id': [
+                {},
+                {'amount': 21}, // type A
+                {'amount': 12}, // type B
+                {'amount':  6}, // type C
+                {'amount':  0}  // type D
+            ]
+        };
+
+        pos.taxes = _.map(pos.taxes_by_id, function (tax, id) {
+            return {'id': id, 'amount': tax.amount};
+        });
+
+        return pos;
+    }
+
     function mock_product(name, price, quantity, tax_id) {
         var product = {
             'display_name': name,
             'price': price,
             'list_price': price,
-            'taxes_id': tax_id
+            'taxes_id': [tax_id]
         };
 
         return product;
     }
 
-    function add_order_line(order, name, price, quantity, tax_id) {
-        var product = mock_product(name, price, quantity, tax_id);
-        var options = {
-            'quantity': quantity
-        };
-
-        order.add_product(product, options);
-    }
-
     function mock_order_line(models) {
         var attrs = {};
         var options = {
-            'product': mock_product()
+            'product': mock_product("name", 1, 1, 1),
+            'pos': mock_pos()
         };
 
         var mock_order_line = new models.Orderline(attrs, options);
@@ -32,30 +54,19 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
 
     function mock_order(models) {
         var mock_order = new models.Order({}, {
-            'pos': {
-                'pos_session': {
-                    'id': 1
-                },
-                'db': {
-                    'save_unpaid_order': function () {}
-                },
-                'currency': {
-                    'rounding': 0.01
-                },
-                'company': {
-                    'tax_calculation_rounding_method': ""
-                },
-                'taxes_by_id': [
-                    {},
-                    {'amount': 21}, // type A
-                    {'amount': 12}, // type B
-                    {'amount':  6}, // type C
-                    {'amount':  0}  // type D
-                ]
-            }
+            'pos': mock_pos()
         });
 
         return mock_order;
+    }
+
+    function add_order_line(order, name, price, quantity, tax_id) {
+        var product = mock_product(name, price, quantity, tax_id);
+        var options = {
+            'quantity': quantity
+        };
+
+        order.add_product(product, options);
     }
 
     // allowed range of DATA is
