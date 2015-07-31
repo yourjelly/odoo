@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <odoo>
-    <data noupdate="0">
+    <data>
         <!-- example 1 page 12 -->
         <record id="product_soda_light" model="product.product">
             <field name="name">Soda LIGHT 33 CL.</field>
