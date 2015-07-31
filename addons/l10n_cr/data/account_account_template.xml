@@ -8,7 +8,6 @@
             <field name="code">0-111111</field>
             <field name="name">0-Fondo de caja oficinas centrales CRC</field>
             <field name="user_type_id" ref="account.data_account_type_liquidity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -16,7 +15,6 @@
             <field name="code">0-111121</field>
             <field name="name">0-Fondo de caja oficinas centrales USD</field>
             <field name="user_type_id" ref="account.data_account_type_liquidity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -24,7 +22,6 @@
             <field name="code">0-111211</field>
             <field name="name">0-Cuenta en CRC 1</field>
             <field name="user_type_id" ref="account.data_account_type_liquidity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -32,7 +29,6 @@
             <field name="code">0-111221</field>
             <field name="name">0-Cuenta en USD 1</field>
             <field name="user_type_id" ref="account.data_account_type_liquidity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -40,7 +36,6 @@
             <field name="code">0-111301</field>
             <field name="name">0-Cuenta PayPal 1</field>
             <field name="user_type_id" ref="account.data_account_type_liquidity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -48,7 +43,6 @@
             <field name="code">0-111401</field>
             <field name="name">0-Fondos en tránsito en tesorería</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -56,7 +50,6 @@
             <field name="code">0-111403</field>
             <field name="name">0-Fondos en tránsito de PayPal a Bancos</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -64,7 +57,6 @@
             <field name="code">0-111501</field>
             <field name="name">0-Inversión 1</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -72,7 +64,6 @@
             <field name="code">0-112001</field>
             <field name="name">0-Cuentas por cobrar comerciales</field>
             <field name="user_type_id" ref="account.data_account_type_receivable"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -80,7 +71,6 @@
             <field name="code">0-112002</field>
             <field name="name">0-Cuentas por cobrar a compañías relacionadas</field>
             <field name="user_type_id" ref="account.data_account_type_receivable"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -88,7 +78,6 @@
             <field name="code">0-112003</field>
             <field name="name">0-Cuentas por cobrar a empleados</field>
             <field name="user_type_id" ref="account.data_account_type_receivable"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -96,7 +85,6 @@
             <field name="code">0-112004</field>
             <field name="name">0-Otras cuentas por cobrar</field>
             <field name="user_type_id" ref="account.data_account_type_receivable"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -104,7 +92,6 @@
             <field name="code">0-112005</field>
             <field name="name">0-Inversiones de corto plazo</field>
             <field name="user_type_id" ref="account.data_account_type_receivable"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -112,7 +99,6 @@
             <field name="code">0-113101</field>
             <field name="name">0-Inventario de producto para la venta</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -120,7 +106,6 @@
             <field name="code">0-113102</field>
             <field name="name">0-Inventario de consumibles</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -128,7 +113,6 @@
             <field name="code">0-121111</field>
             <field name="name">0-Terreno 1</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -136,7 +120,6 @@
             <field name="code">0-121121</field>
             <field name="name">0-Terreno 1</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -144,7 +127,6 @@
             <field name="code">0-122111</field>
             <field name="name">0-Edificio 1</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -152,7 +134,6 @@
             <field name="code">0-122121</field>
             <field name="name">0-Edificio 1</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -160,7 +141,6 @@
             <field name="code">0-122211</field>
             <field name="name">0-Edificio 1</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -168,7 +148,6 @@
             <field name="code">0-122221</field>
             <field name="name">0-Edificio 1</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -176,7 +155,6 @@
             <field name="code">0-122301</field>
             <field name="name">0-Maquinaria y equipo de edificios</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -184,7 +162,6 @@
             <field name="code">0-122302</field>
             <field name="name">0-Herramientas mayores</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -192,7 +169,6 @@
             <field name="code">0-122303</field>
             <field name="name">0-Moibliario y equipo de oficina</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -200,7 +176,6 @@
             <field name="code">0-122304</field>
             <field name="name">0-Equipo de cómputo</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -208,7 +183,6 @@
             <field name="code">0-122305</field>
             <field name="name">0-Vehículos</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -216,7 +190,6 @@
             <field name="code">0-131101</field>
             <field name="name">0-Edificio 1</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -224,7 +197,6 @@
             <field name="code">0-131201</field>
             <field name="name">0-Edificio 1</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -232,7 +204,6 @@
             <field name="code">0-132101</field>
             <field name="name">0-Edificio 1</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -240,7 +211,6 @@
             <field name="code">0-132201</field>
             <field name="name">0-Edificio 1</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -248,7 +218,6 @@
             <field name="code">0-133001</field>
             <field name="name">0-Dep. ac. de maquinaria y equipo de edificios</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -256,7 +225,6 @@
             <field name="code">0-133002</field>
             <field name="name">0-Dep. ac. de herramientas mayores</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -264,7 +232,6 @@
             <field name="code">0-133003</field>
             <field name="name">0-Dep. ac. de mobiliario y equipo de oficina</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -272,7 +239,6 @@
             <field name="code">0-133004</field>
             <field name="name">0-Dep. ac. de equipo de cómputo</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -280,7 +246,6 @@
             <field name="code">0-133005</field>
             <field name="name">0-Dep. ac. de vehículos</field>
             <field name="user_type_id" ref="account.data_account_type_current_assets"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -288,7 +253,6 @@
             <field name="code">0-141001</field>
             <field name="name">0-Pólizas de seguros prepagadas</field>
             <field name="user_type_id" ref="account.data_account_type_receivable"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -296,7 +260,6 @@
             <field name="code">0-142001</field>
             <field name="name">0-Depósitos sobre derechos telefónicos</field>
             <field name="user_type_id" ref="account.data_account_type_receivable"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -304,7 +267,6 @@
             <field name="code">0-142002</field>
             <field name="name">0-Depósitos sobre conexiones de Internet</field>
             <field name="user_type_id" ref="account.data_account_type_receivable"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -312,7 +274,6 @@
             <field name="code">0-142003</field>
             <field name="name">0-Depósitos sobre locales en alquiler</field>
             <field name="user_type_id" ref="account.data_account_type_receivable"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -320,7 +281,6 @@
             <field name="code">0-211001</field>
             <field name="name">0-Cuentas por pagar a proveedores</field>
             <field name="user_type_id" ref="account.data_account_type_payable"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -328,7 +288,6 @@
             <field name="code">0-211002</field>
             <field name="name">0-Cuentas por pagar a empleados</field>
             <field name="user_type_id" ref="account.data_account_type_payable"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -336,7 +295,6 @@
             <field name="code">0-211003</field>
             <field name="name">0-Cuentas por pagar de provisiones</field>
             <field name="user_type_id" ref="account.data_account_type_payable"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -344,7 +302,6 @@
             <field name="code">0-211004</field>
             <field name="name">0-Cuentas por pagar a compañías relacionadas</field>
             <field name="user_type_id" ref="account.data_account_type_payable"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -352,7 +309,6 @@
             <field name="code">0-212101</field>
             <field name="name">0-Impuesto de ventas por pagar</field>
             <field name="user_type_id" ref="account.data_account_type_liquidity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -360,7 +316,6 @@
             <field name="code">0-212102</field>
             <field name="name">0-Impuesto de ventas pagado</field>
             <field name="user_type_id" ref="account.data_account_type_liquidity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -368,7 +323,6 @@
             <field name="code">0-212201</field>
             <field name="name">0-Impuesto de renta por pagar</field>
             <field name="user_type_id" ref="account.data_account_type_liquidity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -376,7 +330,6 @@
             <field name="code">0-212202</field>
             <field name="name">0-Adelantos de impuesto de renta</field>
             <field name="user_type_id" ref="account.data_account_type_liquidity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -384,7 +337,6 @@
             <field name="code">0-212203</field>
             <field name="name">0-Retenciones de impuesto de renta</field>
             <field name="user_type_id" ref="account.data_account_type_liquidity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -392,7 +344,6 @@
             <field name="code">0-310001</field>
             <field name="name">0-Socio 1</field>
             <field name="user_type_id" ref="account.data_account_type_equity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -400,7 +351,6 @@
             <field name="code">0-320001</field>
             <field name="name">0-Reserva legal</field>
             <field name="user_type_id" ref="account.data_account_type_equity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -408,7 +358,6 @@
             <field name="code">0-330001</field>
             <field name="name">0-Reserva para mejoras</field>
             <field name="user_type_id" ref="account.data_account_type_equity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -416,7 +365,6 @@
             <field name="code">0-330002</field>
             <field name="name">0-Reserva para proyectos</field>
             <field name="user_type_id" ref="account.data_account_type_equity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -424,7 +372,6 @@
             <field name="code">0-340001</field>
             <field name="name">0-Socio 1</field>
             <field name="user_type_id" ref="account.data_account_type_equity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -432,7 +379,6 @@
             <field name="code">0-350001</field>
             <field name="name">0-Superávit de capital</field>
             <field name="user_type_id" ref="account.data_account_type_equity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -440,7 +386,6 @@
             <field name="code">0-350002</field>
             <field name="name">0-Superavit por revaluación de activos</field>
             <field name="user_type_id" ref="account.data_account_type_equity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -448,7 +393,6 @@
             <field name="code">0-350003</field>
             <field name="name">0-Superavit ganado</field>
             <field name="user_type_id" ref="account.data_account_type_equity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -456,7 +400,6 @@
             <field name="code">0-360001</field>
             <field name="name">0-Periodo 1</field>
             <field name="user_type_id" ref="account.data_account_type_equity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -464,7 +407,6 @@
             <field name="code">0-370001</field>
             <field name="name">0-Utilidad o pérdida del período actual</field>
             <field name="user_type_id" ref="account.data_account_type_equity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -472,7 +414,6 @@
             <field name="code">0-380001</field>
             <field name="name">0-Balance inicial</field>
             <field name="user_type_id" ref="account.data_account_type_equity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -480,7 +421,6 @@
             <field name="code">0-410001</field>
             <field name="name">0-Categoría 1</field>
             <field name="user_type_id" ref="account.data_account_type_other_income"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -488,7 +428,6 @@
             <field name="code">0-420001</field>
             <field name="name">0-Cuota por administración</field>
             <field name="user_type_id" ref="account.data_account_type_other_income"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -496,7 +435,6 @@
             <field name="code">0-430001</field>
             <field name="name">0-Intereses ganados sobre cuentas corrientes</field>
             <field name="user_type_id" ref="account.data_account_type_other_income"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -504,7 +442,6 @@
             <field name="code">0-440001</field>
             <field name="name">0-Ajustes</field>
             <field name="user_type_id" ref="account.data_account_type_other_income"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -512,7 +449,6 @@
             <field name="code">0-440002</field>
             <field name="name">0-Donaciones</field>
             <field name="user_type_id" ref="account.data_account_type_other_income"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -520,7 +456,6 @@
             <field name="code">0-450001</field>
             <field name="name">0-Diferencial cambiario</field>
             <field name="user_type_id" ref="account.data_account_type_other_income"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -528,7 +463,6 @@
             <field name="code">0-511111</field>
             <field name="name">0-Salarios</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -536,7 +470,6 @@
             <field name="code">0-511112</field>
             <field name="name">0-Extras</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -544,7 +477,6 @@
             <field name="code">0-511113</field>
             <field name="name">0-Bonificaciones</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -552,7 +484,6 @@
             <field name="code">0-511114</field>
             <field name="name">0-Comisiones</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -560,7 +491,6 @@
             <field name="code">0-511115</field>
             <field name="name">0-Cargas patronales</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -568,7 +498,6 @@
             <field name="code">0-511116</field>
             <field name="name">0-Aguinaldo</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -576,7 +505,6 @@
             <field name="code">0-511117</field>
             <field name="name">0-Preaviso</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -584,7 +512,6 @@
             <field name="code">0-511118</field>
             <field name="name">0-Cesantía</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -592,7 +519,6 @@
             <field name="code">0-511121</field>
             <field name="name">0-Transporte</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -600,7 +526,6 @@
             <field name="code">0-511122</field>
             <field name="name">0-Alimentación</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -608,7 +533,6 @@
             <field name="code">0-511123</field>
             <field name="name">0-Hospedaje</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -616,7 +540,6 @@
             <field name="code">0-511201</field>
             <field name="name">0-Categoría 1</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -624,7 +547,6 @@
             <field name="code">0-511301</field>
             <field name="name">0-Costo de producto</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -632,7 +554,6 @@
             <field name="code">0-511302</field>
             <field name="name">0-Costo de materia prima</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -640,7 +561,6 @@
             <field name="code">0-511303</field>
             <field name="name">0-Costo de producción</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -648,7 +568,6 @@
             <field name="code">0-511304</field>
             <field name="name">0-Costo de almacenamiento</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -656,7 +575,6 @@
             <field name="code">0-511305</field>
             <field name="name">0-Costo de distribución</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -664,7 +582,6 @@
             <field name="code">0-511401</field>
             <field name="name">0-Diseño de imagen</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -672,7 +589,6 @@
             <field name="code">0-511402</field>
             <field name="name">0-Campañas publicitarias</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -680,7 +596,6 @@
             <field name="code">0-512101</field>
             <field name="name">0-Compañía administradora 1</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -688,7 +603,6 @@
             <field name="code">0-512201</field>
             <field name="name">0-Oficina 1</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -696,7 +610,6 @@
             <field name="code">0-512311</field>
             <field name="name">0-Medidor 1</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -704,7 +617,6 @@
             <field name="code">0-512321</field>
             <field name="name">0-Medidor 1</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -712,7 +624,6 @@
             <field name="code">0-512331</field>
             <field name="name">0-Teléfono 1</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -720,7 +631,6 @@
             <field name="code">0-512341</field>
             <field name="name">0-Contrato 1</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -728,7 +638,6 @@
             <field name="code">0-512401</field>
             <field name="name">0-Departamento 1</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -736,7 +645,6 @@
             <field name="code">0-512501</field>
             <field name="name">0-Departamento 1</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -744,7 +652,6 @@
             <field name="code">0-520001</field>
             <field name="name">0-Ajustes</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -752,7 +659,6 @@
             <field name="code">0-520002</field>
             <field name="name">0-Gastos Financieros</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -760,7 +666,6 @@
             <field name="code">0-520003</field>
             <field name="name">0-Depreciación de activo fijo</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -768,7 +673,6 @@
             <field name="code">0-520004</field>
             <field name="name">0-Perdida por robo</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -776,7 +680,6 @@
             <field name="code">0-520005</field>
             <field name="name">0-Donaciones deducibles</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -784,7 +687,6 @@
             <field name="code">0-530001</field>
             <field name="name">0-Donaciones no deducibles</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -792,7 +694,6 @@
             <field name="code">0-530002</field>
             <field name="name">0-Gastos de presidencia</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -800,7 +701,6 @@
             <field name="code">0-530003</field>
             <field name="name">0-Multas</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -808,7 +708,6 @@
             <field name="code">0-530004</field>
             <field name="name">0-Diferencial cambiario</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -816,7 +715,6 @@
             <field name="code">x111111</field>
             <field name="name">xFondo de caja oficinas centrales CRC</field>
             <field name="user_type_id" ref="account.data_account_type_liquidity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -824,7 +722,6 @@
             <field name="code">x111121</field>
             <field name="name">xFondo de caja oficinas centrales USD</field>
             <field name="user_type_id" ref="account.data_account_type_liquidity"/>
-            <field name="currency_id" ref="base.CRC"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
