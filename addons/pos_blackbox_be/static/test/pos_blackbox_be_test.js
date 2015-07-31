@@ -229,6 +229,12 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
         add_order_line(order, "name", 0, 100, 1, [2, "kg"]);
         assert.strictEqual(order.get_last_orderline()._get_amount_for_plu(), 100000);
 
+        add_order_line(order, "name", 0, 1, 1, [7, "Milliliter(s)"]);
+        assert.strictEqual(order.get_last_orderline()._get_amount_for_plu(), 1);
+
+        add_order_line(order, "name", 0, 1, 1, [6, "Liter(s)"]);
+        assert.strictEqual(order.get_last_orderline()._get_amount_for_plu(), 1000);
+
         add_order_line(order, "name", 0, 23, 1, [3, "lb(s)"]);
         assert.strictEqual(Math.floor(order.get_last_orderline()._get_amount_for_plu()), 10432);
     });
@@ -237,36 +243,36 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
         var order_line = mock_order_line(models);
 
         // values represent grams
-        assert.strictEqual(order_line._prepare_number_for_plu(0, 4, 0), "0000");
-        assert.strictEqual(order_line._prepare_number_for_plu(-0, 4, 0), "0000");
-        assert.strictEqual(order_line._prepare_number_for_plu(1, 4, 0), "0001");
-        assert.strictEqual(order_line._prepare_number_for_plu(1234, 4, 0), "1234");
-        assert.strictEqual(order_line._prepare_number_for_plu(-1234, 4, 0), "1234");
-        assert.strictEqual(order_line._prepare_number_for_plu(123456, 4, 0), "3456");
-        assert.strictEqual(order_line._prepare_number_for_plu(-123456, 4, 0), "3456");
-        assert.strictEqual(order_line._prepare_number_for_plu(0.527, 4, 0), "0001");
-        assert.strictEqual(order_line._prepare_number_for_plu(3.14159265359, 4, 0), "0003");
-        assert.strictEqual(order_line._prepare_number_for_plu(-3.14159265359, 4, 0), "0003");
-        assert.strictEqual(order_line._prepare_number_for_plu(0.12, 4, 0), "0000");
-        assert.strictEqual(order_line._prepare_number_for_plu(-0.12, 4, 0), "0000");
+        assert.strictEqual(order_line._prepare_number_for_plu(0, 4), "0000");
+        assert.strictEqual(order_line._prepare_number_for_plu(-0, 4), "0000");
+        assert.strictEqual(order_line._prepare_number_for_plu(1, 4), "0001");
+        assert.strictEqual(order_line._prepare_number_for_plu(1234, 4), "1234");
+        assert.strictEqual(order_line._prepare_number_for_plu(-1234, 4), "1234");
+        assert.strictEqual(order_line._prepare_number_for_plu(123456, 4), "3456");
+        assert.strictEqual(order_line._prepare_number_for_plu(-123456, 4), "3456");
+        assert.strictEqual(order_line._prepare_number_for_plu(0.527, 4), "0001");
+        assert.strictEqual(order_line._prepare_number_for_plu(3.14159265359, 4), "0003");
+        assert.strictEqual(order_line._prepare_number_for_plu(-3.14159265359, 4), "0003");
+        assert.strictEqual(order_line._prepare_number_for_plu(0.12, 4), "0000");
+        assert.strictEqual(order_line._prepare_number_for_plu(-0.12, 4), "0000");
     });
 
     test('_prepare_number_for_plu price', function (assert, models) {
         var order_line = mock_order_line(models);
 
         // values represent eurocent
-        assert.strictEqual(order_line._prepare_number_for_plu(0, 8, 0), "00000000");
-        assert.strictEqual(order_line._prepare_number_for_plu(-0, 8, 0), "00000000");
-        assert.strictEqual(order_line._prepare_number_for_plu(100, 8, 0), "00000100");
-        assert.strictEqual(order_line._prepare_number_for_plu(-100, 8, 0), "00000100");
-        assert.strictEqual(order_line._prepare_number_for_plu(0.01, 8, 0), "00000000");
-        assert.strictEqual(order_line._prepare_number_for_plu(-0.01, 8, 0), "00000000");
-        assert.strictEqual(order_line._prepare_number_for_plu(123400, 8, 0), "00123400");
-        assert.strictEqual(order_line._prepare_number_for_plu(-123400, 8, 0), "00123400");
-        assert.strictEqual(order_line._prepare_number_for_plu(123412.3, 8, 0), "00123412");
-        assert.strictEqual(order_line._prepare_number_for_plu(-123412.3, 8, 0), "00123412");
-        assert.strictEqual(order_line._prepare_number_for_plu(10000000, 8, 0), "10000000");
-        assert.strictEqual(order_line._prepare_number_for_plu(-10000000, 8, 0), "10000000");
+        assert.strictEqual(order_line._prepare_number_for_plu(0, 8), "00000000");
+        assert.strictEqual(order_line._prepare_number_for_plu(-0, 8), "00000000");
+        assert.strictEqual(order_line._prepare_number_for_plu(100, 8), "00000100");
+        assert.strictEqual(order_line._prepare_number_for_plu(-100, 8), "00000100");
+        assert.strictEqual(order_line._prepare_number_for_plu(0.01, 8), "00000000");
+        assert.strictEqual(order_line._prepare_number_for_plu(-0.01, 8), "00000000");
+        assert.strictEqual(order_line._prepare_number_for_plu(123400, 8), "00123400");
+        assert.strictEqual(order_line._prepare_number_for_plu(-123400, 8), "00123400");
+        assert.strictEqual(order_line._prepare_number_for_plu(123412.3, 8), "00123412");
+        assert.strictEqual(order_line._prepare_number_for_plu(-123412.3, 8), "00123412");
+        assert.strictEqual(order_line._prepare_number_for_plu(10000000, 8), "10000000");
+        assert.strictEqual(order_line._prepare_number_for_plu(-10000000, 8), "10000000");
     });
 
     test('_prepare_description_for_plu', function(assert, models) {
@@ -279,11 +285,15 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
         assert.strictEqual(order_line._prepare_description_for_plu("this is longer than the allowed 20 characters"), "THISISLONGERTHANTHEA");
     });
 
-    test('hash orders', function (assert, models) {
+    test('hash order empty', function (assert, models) {
         var order = mock_order(models);
 
         assert.strictEqual(order._string_to_hash(), "", "_string_to_hash of empty order");
         assert.strictEqual(order.calculate_hash(), "da39a3ee5e6b4b0d3255bfef95601890afd80709", "calculate_hash of empty order");
+    });
+
+    test('hash order 1', function (assert, models) {
+        var order = mock_order(models);
 
         add_order_line(order, "Soda LIGHT 33 CL.", 2.20, 3, 1, [0, "Unit"]);
         add_order_line(order, "Spaghetti Bolognaise (KLEIN)", 5.00, 2, 2, [0, "Unit"]);
@@ -302,7 +312,40 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
 0002KOFFIEVERKEERDMEDIUM00000600A\
 0001DAMEBLANCHE         00000700B\
 0001SODALIGHT33CL       00000220A\
-1250HUISWIJNLITER       00001250A", "_string_to_hash of example 1");
-        assert.strictEqual(order.calculate_hash(), "bd532992502a62c40a741ec76423198d88d5a4f3", "calculate_hash of example 1");
+1250HUISWIJNLITER       00001250A");
+        assert.strictEqual(order.calculate_hash(), "bd532992502a62c40a741ec76423198d88d5a4f3");
+    });
+
+    test('hash order 2', function (assert, models) {
+        var order = mock_order(models);
+
+        add_order_line(order, "DAGSOEP", 5, 1, 2, [0, "Unit"]);
+        add_order_line(order, "SEIZOENSSUGGESTIE", 20, 1, 2, [0, "Unit"]);
+        add_order_line(order, "CRÈME BRULÉE", 5, 1, 2, [0, "Unit"]);
+
+        assert.strictEqual(order._string_to_hash(),
+"0001DAGSOEP             00000500B\
+0001SEIZOENSSUGGESTIE   00002000B\
+0001CREMEBRULEE         00000500B");
+        assert.strictEqual(order.calculate_hash(), "046bfc9425c488b9fe31b78820c21a70ae28005a");
+    });
+
+    test('hash order 3', function (assert, models) {
+        var order = mock_order(models);
+
+        add_order_line(order, "DAGSOEP", 7, 1, 2, [0, "Unit"]);
+        add_order_line(order, "SEIZOENSSUGGESTIE", 25, 1, 2, [0, "Unit"]);
+        add_order_line(order, "CRÈME BRULÉE", 7, 1, 2, [0, "Unit"]);
+        add_order_line(order, "KORTING LENTEMENU", -9, 1, 2, [0, "Unit"]);
+        add_order_line(order, "LENTEMENU DRINKS", 10, 1, 1, [0, "Unit"]);
+
+        assert.strictEqual(order._string_to_hash(),
+"0001DAGSOEP             00000700B\
+0001SEIZOENSSUGGESTIE   00002500B\
+0001CREMEBRULEE         00000700B\
+0001KORTINGLENTEMENU    00000900B\
+0001LENTEMENUDRINKS     00001000A");
+
+        assert.strictEqual(order.calculate_hash(), "095452a3e62d36b5255b18b1070f6832f0c57a85");
     });
 });
