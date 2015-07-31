@@ -5,4 +5,4 @@ import openerp.tests
 
 class WebSuite(openerp.tests.HttpCase):
     def test_01_js(self):
-        self.phantom_js('/web/tests?mod=pos_blackbox_be',"","", login='admin')
+        self.phantom_js('/web/tests?module=pos_blackbox_be.Order',"","", login='admin')
