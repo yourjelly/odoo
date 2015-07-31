@@ -2,6 +2,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     var core    = require('web.core');
     var screens = require('point_of_sale.screens');
     var models = require('point_of_sale.models');
+    var Class = require('web.Class');
     var PaymentScreenWidget = screens.PaymentScreenWidget;
 
     var _t      = core._t;
@@ -193,7 +194,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     });
 
     models.Order = models.Order.extend({
-        _string_to_hash: function() {
+        _hash_and_sign_string: function() {
             var order_str = "";
 
             this.get_orderlines().forEach(function (current, index, array) {
@@ -204,8 +205,55 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         },
 
         calculate_hash: function() {
-            return Sha1.hash(this._string_to_hash());
+            return Sha1.hash(this._hash_and_sign_string());
         }
+    });
+
+    var FDMPacketField = Class.extend({
+        init: function (name, length, pad_character, content) {
+            if (typeof content !== 'string') {
+                throw "Can only handle string contents";
+            }
+
+            this.name = name;
+            this.length = length;
+
+            this.content = this._pad_left_to_length(pad_character, content);
+        },
+
+        _pad_left_to_length: function (pad_character, content) {
+            while (content.length < this.length) {
+                content = pad_character + content;
+            }
+
+            return content;
+        },
+
+        to_string: function () {
+            return this.content;
+        }
+    });
+
+    var FDMPacket = Class.extend({
+        init: function () {
+            this.fields = [];
+        },
+
+        add_field: function (field) {
+            this.fields.push(field);
+        },
+
+        from_string: function (packet_string) {
+            // todo jov: parse FDM responses
+        },
+
+        to_string: function () {
+            return _.map(this.fields, function (field) {
+                return field.to_string();
+            }).join("");
+        }
+
+        // todo jov: send: function () {}?
     });
 
     PaymentScreenWidget.include({
@@ -215,4 +263,9 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             this._super();
         }
     });
+
+    return {
+        'FDMPacketField': FDMPacketField,
+        'FDMPacket': FDMPacket
+    };
 });

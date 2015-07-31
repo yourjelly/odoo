@@ -288,7 +288,7 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
     test('hash order empty', function (assert, models) {
         var order = mock_order(models);
 
-        assert.strictEqual(order._string_to_hash(), "", "_string_to_hash of empty order");
+        assert.strictEqual(order._hash_and_sign_string(), "", "_hash_and_sign_string of empty order");
         assert.strictEqual(order.calculate_hash(), "da39a3ee5e6b4b0d3255bfef95601890afd80709", "calculate_hash of empty order");
     });
 
@@ -304,7 +304,7 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
         add_order_line(order, "Soda LIGHT 33 CL.", -2.20, -1, 1, [0, "Unit"]);
         add_order_line(order, "Huiswijn (liter)", 10.00, 1.25, 1, [6, "Liter(s)"]);
 
-        assert.strictEqual(order._string_to_hash(),
+        assert.strictEqual(order._hash_and_sign_string(),
 "0003SODALIGHT33CL       00000660A\
 0002SPAGHETTIBOLOGNAISEK00001000B\
 0527SALADBARKG          00000853B\
@@ -323,7 +323,7 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
         add_order_line(order, "SEIZOENSSUGGESTIE", 20, 1, 2, [0, "Unit"]);
         add_order_line(order, "CRÈME BRULÉE", 5, 1, 2, [0, "Unit"]);
 
-        assert.strictEqual(order._string_to_hash(),
+        assert.strictEqual(order._hash_and_sign_string(),
 "0001DAGSOEP             00000500B\
 0001SEIZOENSSUGGESTIE   00002000B\
 0001CREMEBRULEE         00000500B");
@@ -339,7 +339,7 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
         add_order_line(order, "KORTING LENTEMENU", -9, 1, 2, [0, "Unit"]);
         add_order_line(order, "LENTEMENU DRINKS", 10, 1, 1, [0, "Unit"]);
 
-        assert.strictEqual(order._string_to_hash(),
+        assert.strictEqual(order._hash_and_sign_string(),
 "0001DAGSOEP             00000700B\
 0001SEIZOENSSUGGESTIE   00002500B\
 0001CREMEBRULEE         00000700B\
@@ -347,5 +347,40 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
 0001LENTEMENUDRINKS     00001000A");
 
         assert.strictEqual(order.calculate_hash(), "095452a3e62d36b5255b18b1070f6832f0c57a85");
+    });
+});
+
+odoo.define_section('pos_blackbox_be.FDMPacket', ['pos_blackbox_be.pos_blackbox_be'], function (test, mock) {
+    test('empty FDMPackets to_string', function (assert, blackbox) {
+        var packet = new blackbox.FDMPacket();
+
+        assert.strictEqual(packet.to_string(), "");
+
+        packet.add_field(new blackbox.FDMPacketField("", 0, "", ""));
+        assert.strictEqual(packet.to_string(), "");
+
+        packet.add_field(new blackbox.FDMPacketField("", 0, "0", ""));
+        assert.strictEqual(packet.to_string(), "");
+    });
+
+    test('filled FDMPackets to_string', function (assert, blackbox) {
+        var packet = new blackbox.FDMPacket();
+
+        packet.add_field(new blackbox.FDMPacketField("hello", 5, "", "world"));
+        assert.strictEqual(packet.to_string(), "world");
+
+        packet = new blackbox.FDMPacket();
+        packet.add_field(new blackbox.FDMPacketField("pad", 5, " ", "me"));
+        assert.strictEqual(packet.to_string(), "   me");
+
+        packet = new blackbox.FDMPacket();
+        packet.add_field(new blackbox.FDMPacketField("pad", 10, "0", "zeros"));
+        assert.strictEqual(packet.to_string(), "00000zeros");
+
+        packet = new blackbox.FDMPacket();
+        packet.add_field(new blackbox.FDMPacketField("hello", 5, "", "world"));
+        packet.add_field(new blackbox.FDMPacketField("pad", 5, " ", "me"));
+        packet.add_field(new blackbox.FDMPacketField("pad", 10, "0", "zeros"));
+        assert.strictEqual(packet.to_string(), "world   me00000zeros");
     });
 });
