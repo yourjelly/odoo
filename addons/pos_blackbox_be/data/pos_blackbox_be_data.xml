@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<odoo>
+    <data>
+        <!-- volume is always sent in milliliter to blackbox -->
+        <record id="product.product_uom_millilitre" model="product.uom">
+            <field name="name">Milliliter(s)</field>
+            <field name="category_id" ref="product.product_uom_categ_vol"/>
+            <field name="factor">1000</field>
+            <field name="uom_type">smaller</field>
+        </record>
+    </data>
+</odoo>

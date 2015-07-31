@@ -18,7 +18,8 @@ add some stuff here
     'website': '',
     'data': [
         'views/res_users.xml',
-        'views/pos_blackbox_assets.xml'
+        'views/pos_blackbox_assets.xml',
+        'data/pos_blackbox_be_data.xml'
     ],
     'demo': [
         'data/pos_blackbox_be_demo.xml'

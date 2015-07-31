@@ -107,7 +107,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         // amount should be in gram
         _prepare_number_for_plu: function(number, field_length) {
             number = Math.abs(number);
-            number = Math.floor(number); // todo jov: this cuts off milligram and fractions of eurocents
+            number = Math.round(number); // todo jov: don't like this
             number = number.toFixed(0);
 
             number = this._replace_hash_and_sign_chars(number);
@@ -152,13 +152,15 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                 return amount;
             } else {
                 if (uom.category_id[1] === "Weight") {
-                    debugger;
                     var uom_gram = _.find(this.pos.units_by_id, function (unit) {
                         return unit.category_id[1] === "Weight" && unit.name === "g";
                     });
                     amount = (amount / uom.factor) * uom_gram.factor;
                 } else if (uom.category_id[1] === "Volume") {
-                    // todo jov: milliliter uom doesn't exist
+                    var uom_milliliter = _.find(this.pos.units_by_id, function (unit) {
+                        return unit.category_id[1] === "Volume" && unit.name === "Milliliter(s)";
+                    });
+                    amount = (amount / uom.factor) * uom_milliliter.factor;
                 }
 
                 return amount;

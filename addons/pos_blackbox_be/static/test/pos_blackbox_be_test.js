@@ -92,6 +92,30 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
                 "id": 5,
                 "groupable": false,
                 "is_unit": false
+            }, {
+                "name": "Liter(s)",
+                "factor_inv": 1,
+                "rounding": 0.01,
+                "active": true,
+                "factor": 1,
+                "uom_type": "reference",
+                "display_name": "Liter(s)",
+                "category_id": [3, "Volume"],
+                "id": 6,
+                "groupable": false,
+                "is_unit": false
+            }, {
+                "name": "Milliliter(s)",
+                "factor_inv": 0.001,
+                "rounding": 0.01,
+                "active": true,
+                "factor": 1000,
+                "uom_type": "smaller",
+                "display_name": "Milliliter(s)",
+                "category_id": [3, "Volume"],
+                "id": 7,
+                "groupable": false,
+                "is_unit": false
             }]
         };
 
@@ -220,7 +244,7 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
         assert.strictEqual(order_line._prepare_number_for_plu(-1234, 4, 0), "1234");
         assert.strictEqual(order_line._prepare_number_for_plu(123456, 4, 0), "3456");
         assert.strictEqual(order_line._prepare_number_for_plu(-123456, 4, 0), "3456");
-        assert.strictEqual(order_line._prepare_number_for_plu(0.527, 4, 0), "0000");
+        assert.strictEqual(order_line._prepare_number_for_plu(0.527, 4, 0), "0001");
         assert.strictEqual(order_line._prepare_number_for_plu(3.14159265359, 4, 0), "0003");
         assert.strictEqual(order_line._prepare_number_for_plu(-3.14159265359, 4, 0), "0003");
         assert.strictEqual(order_line._prepare_number_for_plu(0.12, 4, 0), "0000");
@@ -261,15 +285,14 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
         assert.strictEqual(order._string_to_hash(), "", "_string_to_hash of empty order");
         assert.strictEqual(order.calculate_hash(), "da39a3ee5e6b4b0d3255bfef95601890afd80709", "calculate_hash of empty order");
 
-        add_order_line(order, "Soda LIGHT 33 CL.", 2.20, 3, 1);
-        add_order_line(order, "Spaghetti Bolognaise (KLEIN)", 5.00, 2, 2);
-        add_order_line(order, "Salad Bar (kg)", 16.186, 0.527, 2);
-        add_order_line(order, "Steak Haché", 14.50, 1, 2);
-        add_order_line(order, "Koffie verkeerd medium", 3.00, 2, 1);
-        add_order_line(order, "Dame Blanche", 7.00, 1, 2);
-        add_order_line(order, "Soda LIGHT 33 CL.", -2.20, -1, 1);
-        // add_order_line(order, "Huiswijn (liter)", 10.00, 1.25, 1);
-        add_order_line(order, "Huiswijn (liter)", 10.00, 1250, 1); // todo jov: we need to always use milliliter as a unit
+        add_order_line(order, "Soda LIGHT 33 CL.", 2.20, 3, 1, [0, "Unit"]);
+        add_order_line(order, "Spaghetti Bolognaise (KLEIN)", 5.00, 2, 2, [0, "Unit"]);
+        add_order_line(order, "Salad Bar (kg)", 16.186, 0.527, 2, [2, "kg"]);
+        add_order_line(order, "Steak Haché", 14.50, 1, 2, [0, "Unit"]);
+        add_order_line(order, "Koffie verkeerd medium", 3.00, 2, 1, [0, "Unit"]);
+        add_order_line(order, "Dame Blanche", 7.00, 1, 2, [0, "Unit"]);
+        add_order_line(order, "Soda LIGHT 33 CL.", -2.20, -1, 1, [0, "Unit"]);
+        add_order_line(order, "Huiswijn (liter)", 10.00, 1.25, 1, [6, "Liter(s)"]);
 
         assert.strictEqual(order._string_to_hash(),
 "0003SODALIGHT33CL       00000660A\
