@@ -103,14 +103,12 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         },
 
         // for both amount and price
-        _prepare_number_for_plu: function(number, field_length, decimals) {
+        // price should be in eurocents
+        // amount should be in gram
+        _prepare_number_for_plu: function(number, field_length) {
             number = Math.abs(number);
-
-            if (decimals) {
-                number = number.toFixed(2);
-            } else {
-                number = number.toString();                
-            }
+            number = Math.floor(number); // todo jov: this cuts off milligram and fractions of eurocents
+            number = number.toFixed(0);
 
             number = this._replace_hash_and_sign_chars(number);
             number = this._filter_allowed_hash_and_sign_chars(number);
@@ -141,41 +139,53 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return description;
         },
 
+        _get_amount_for_plu: function () {
+            // three options:
+            // 1. unit => need integer
+            // 2. weight => need integer gram
+            // 3. volume => need integer milliliter
+
+            var uom = this.get_unit();
+            var amount = this.get_quantity();
+
+            if (uom.is_unit) {
+                return amount;
+            } else {
+                if (uom.category_id[1] === "Weight") {
+                    debugger;
+                    var uom_gram = _.find(this.pos.units_by_id, function (unit) {
+                        return unit.category_id[1] === "Weight" && unit.name === "g";
+                    });
+                    amount = (amount / uom.factor) * uom_gram.factor;
+                } else if (uom.category_id[1] === "Volume") {
+                    // todo jov: milliliter uom doesn't exist
+                }
+
+                return amount;
+            }
+        },
+
         generate_plu_line: function () {
             // |--------+-------------+-------+-----|
             // | AMOUNT | DESCRIPTION | PRICE | VAT |
             // |      4 |          20 |     8 |   1 |
             // |--------+-------------+-------+-----|
 
-            // fields we need:
-            // - amount => get_quantity()
-            // - description => display_name
-            // - price => get_price_with_tax()
-            // - vat => could hardcode table, or add the code to taxes
-
             // steps:
             // 1. replace all chars
             // 2. filter out forbidden chars
             // 3. build PLU line
 
-            var amount = this.get_quantity(); // (todo jov: need grams and milliliters)
+            var amount = this._get_amount_for_plu();
             var description = this.get_product().display_name;
-            var price = this.get_display_price();
-            // var price = this.get_product().list_price; // todo jov: get_price_with_tax()?
+            var price_in_eurocents = this.get_display_price() * 100;
             var vat_code = this._get_vat_code();
 
-            // utils.round_precision() isn't perfect:
-            //
-            // >> utils.round_precision(6.6005, 0.01)
-            // 6.6000000000000005
-            //
-            // point of sale however hardcodes precision to 2
-            // decimals
             amount = this._prepare_number_for_plu(amount, 4);
             description = this._prepare_description_for_plu(description);
-            price = this._prepare_number_for_plu(price, 8, 2);
+            price_in_eurocents = this._prepare_number_for_plu(price_in_eurocents, 8);
 
-            return amount + description + price + vat_code;
+            return amount + description + price_in_eurocents + vat_code;
         }
     });
 
