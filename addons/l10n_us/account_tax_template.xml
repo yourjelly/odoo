@@ -1,22 +1,45 @@
-<openerp>
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
     <data noupdate="1">
+
+        <!-- Account Tax Tags -->
+        <record id="tag_purc_tax" model="account.account.tag">
+            <field name="name">Purchase Tax</field>
+            <field name="applicability">taxes</field>
+        </record>
+        <record id="tag_exemp_purc_tax" model="account.account.tag">
+            <field name="name">Exempted Tax (Purchase)</field>
+            <field name="applicability">taxes</field>
+        </record>
+        <record id="tag_sale_tax" model="account.account.tag">
+            <field name="name">Sale Tax</field>
+            <field name="applicability">taxes</field>
+        </record>
+        <record id="tag_exemp_sale_tax" model="account.account.tag">
+            <field name="name">Exempted Tax (Sale)</field>
+            <field name="applicability">taxes</field>
+        </record>
+
+
         <!-- Taxes -->
         <record id="otaxs" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_us.account_chart_template_basic"/>
             <field name="name">default purchase tax</field>
-            <field eval="0.15" name="amount"/>
+            <field name="amount">15</field>
             <field name="sequence">1</field>
-            <field name="type">percent</field>
+            <field name="amount_type">percent</field>
             <field name="type_tax_use">purchase</field>
+            <field name="tag_ids" eval="[(6,0,[ref('tag_purc_tax')])]"/>
         </record>
 
         <record id="otaxx" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_us.account_chart_template_basic"/>
             <field name="name">Exempted Tax (Purchase)</field>
-            <field eval="0.0" name="amount"/>
+            <field name="amount">0</field>
             <field name="sequence">10</field>
-            <field name="type">percent</field>
+            <field name="amount_type">percent</field>
             <field name="type_tax_use">purchase</field>
+            <field name="tag_ids" eval="[(6,0,[ref('tag_exemp_purc_tax')])]"/>
         </record>
 
         <!-- Sales + Input VAT -->
@@ -24,19 +47,21 @@
         <record id="itaxs" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_us.account_chart_template_basic"/>
             <field name="name">default sale tax</field>
-            <field eval="0.15" name="amount"/>
+            <field name="amount">15</field>
             <field name="sequence">1</field>
-            <field name="type">percent</field>
+            <field name="amount_type">percent</field>
             <field name="type_tax_use">sale</field>
+            <field name="tag_ids" eval="[(6,0,[ref('tag_sale_tax')])]"/>
         </record>
 
         <record id="itaxx" model="account.tax.template">
             <field name="chart_template_id" ref="l10n_us.account_chart_template_basic"/>
             <field name="name">Exempted Tax (Sale)</field>
-            <field eval="0.0" name="amount"/>
+            <field name="amount">0</field>
             <field name="sequence">10</field>
-            <field name="type">percent</field>
+            <field name="amount_type">percent</field>
             <field name="type_tax_use">sale</field>
+            <field name="tag_ids" eval="[(6,0,[ref('tag_exemp_sale_tax')])]"/>
         </record>
 
 
@@ -73,5 +98,4 @@
         </record>
 
     </data>
-</openerp>
-
+</odoo>
