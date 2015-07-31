@@ -427,35 +427,35 @@
         <record id="account_account_template_0_420001" model="account.account.template">
             <field name="code">0-420001</field>
             <field name="name">0-Cuota por administración</field>
-            <field name="user_type_id" ref="account.data_account_type_other_income"/>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
         <record id="account_account_template_0_430001" model="account.account.template">
             <field name="code">0-430001</field>
             <field name="name">0-Intereses ganados sobre cuentas corrientes</field>
-            <field name="user_type_id" ref="account.data_account_type_other_income"/>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
         <record id="account_account_template_0_440001" model="account.account.template">
             <field name="code">0-440001</field>
             <field name="name">0-Ajustes</field>
-            <field name="user_type_id" ref="account.data_account_type_other_income"/>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
         <record id="account_account_template_0_440002" model="account.account.template">
             <field name="code">0-440002</field>
             <field name="name">0-Donaciones</field>
-            <field name="user_type_id" ref="account.data_account_type_other_income"/>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
         <record id="account_account_template_0_450001" model="account.account.template">
             <field name="code">0-450001</field>
             <field name="name">0-Diferencial cambiario</field>
-            <field name="user_type_id" ref="account.data_account_type_other_income"/>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
             <field name="reconcile" eval="False"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
