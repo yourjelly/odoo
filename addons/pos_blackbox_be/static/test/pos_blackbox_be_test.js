@@ -19,7 +19,80 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
                 {'amount': 12}, // type B
                 {'amount':  6}, // type C
                 {'amount':  0}  // type D
-            ]
+            ],
+            'units_by_id': [{
+                "name": "Unit(s)",
+                "factor_inv": 1,
+                "rounding": 0.001,
+                "active": true,
+                "factor": 1,
+                "uom_type": "reference",
+                "display_name": "Unit(s)",
+                "category_id": [1, "Unit"],
+                "id": 0,
+                "groupable": false,
+                "is_unit": true
+            }, {
+                "name": "g",
+                "factor_inv": 0.001,
+                "rounding": 0.01,
+                "active": true,
+                "factor": 1000,
+                "uom_type": "smaller",
+                "display_name": "g",
+                "category_id": [2, "Weight"],
+                "id": 1,
+                "groupable": false,
+                "is_unit": false
+            }, {
+                "name": "kg",
+                "factor_inv": 1,
+                "rounding": 0.001,
+                "active": true,
+                "factor": 1,
+                "uom_type": "reference",
+                "display_name": "kg",
+                "category_id": [2, "Weight"],
+                "id": 2,
+                "groupable": false,
+                "is_unit": false
+            }, {
+                "name": "lb(s)",
+                "factor_inv": 0.45359290943563974,
+                "rounding": 0.01,
+                "active": true,
+                "factor": 2.20462,
+                "uom_type": "smaller",
+                "display_name": "lb(s)",
+                "category_id": [2, "Weight"],
+                "id": 3,
+                "groupable": false,
+                "is_unit": false
+            }, {
+                "name": "oz(s)",
+                "factor_inv": 0.02834949254408346,
+                "rounding": 0.01,
+                "active": true,
+                "factor": 35.274,
+                "uom_type": "smaller",
+                "display_name": "oz(s)",
+                "category_id": [2, "Weight"],
+                "id": 4,
+                "groupable": false,
+                "is_unit": false
+            }, {
+                "name": "t",
+                "factor_inv": 1000,
+                "rounding": 0.01,
+                "active": true,
+                "factor": 0.001,
+                "uom_type": "bigger",
+                "display_name": "t",
+                "category_id": [2, "Weight"],
+                "id": 5,
+                "groupable": false,
+                "is_unit": false
+            }]
         };
 
         pos.taxes = _.map(pos.taxes_by_id, function (tax, id) {
@@ -29,12 +102,13 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
         return pos;
     }
 
-    function mock_product(name, price, quantity, tax_id) {
+    function mock_product(name, price, quantity, tax_id, uom_id) {
         var product = {
             'display_name': name,
             'price': price,
             'list_price': price,
-            'taxes_id': [tax_id]
+            'taxes_id': [tax_id],
+            'uom_id': uom_id
         };
 
         return product;
@@ -60,8 +134,8 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
         return mock_order;
     }
 
-    function add_order_line(order, name, price, quantity, tax_id) {
-        var product = mock_product(name, price, quantity, tax_id);
+    function add_order_line(order, name, price, quantity, tax_id, uom_id) {
+        var product = mock_product(name, price, quantity, tax_id, uom_id);
         var options = {
             'quantity': quantity
         };
@@ -110,38 +184,65 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
         assert.strictEqual(order_line._filter_allowed_hash_and_sign_chars("A  A"), "AA");
     });
 
+    test('_get_plu_amount', function (assert, models) {
+        var order = mock_order(models);
+
+        add_order_line(order, "name", 0, 0, 1, [0, "Unit"]);
+        assert.strictEqual(order.get_last_orderline()._get_amount_for_plu(), 0);
+
+        add_order_line(order, "name", 0, 100, 1, [0, "Unit"]);
+        assert.strictEqual(order.get_last_orderline()._get_amount_for_plu(), 100);
+
+        add_order_line(order, "name", 0, 0, 1, [1, "g"]);
+        assert.strictEqual(order.get_last_orderline()._get_amount_for_plu(), 0);
+
+        add_order_line(order, "name", 0, 100, 1, [1, "g"]);
+        assert.strictEqual(order.get_last_orderline()._get_amount_for_plu(), 100);
+
+        add_order_line(order, "name", 0, 0, 1, [2, "kg"]);
+        assert.strictEqual(order.get_last_orderline()._get_amount_for_plu(), 0);
+
+        add_order_line(order, "name", 0, 100, 1, [2, "kg"]);
+        assert.strictEqual(order.get_last_orderline()._get_amount_for_plu(), 100000);
+
+        add_order_line(order, "name", 0, 23, 1, [3, "lb(s)"]);
+        assert.strictEqual(Math.floor(order.get_last_orderline()._get_amount_for_plu()), 10432);
+    });
+
     test('_prepare_number_for_plu amount', function (assert, models) {
         var order_line = mock_order_line(models);
 
-        assert.strictEqual(order_line._prepare_number_for_plu(0, 4), "0000");
-        assert.strictEqual(order_line._prepare_number_for_plu(-0, 4), "0000");
-        assert.strictEqual(order_line._prepare_number_for_plu(1, 4), "0001");
-        assert.strictEqual(order_line._prepare_number_for_plu(1234, 4), "1234");
-        assert.strictEqual(order_line._prepare_number_for_plu(-1234, 4), "1234");
-        assert.strictEqual(order_line._prepare_number_for_plu(123456, 4), "3456");
-        assert.strictEqual(order_line._prepare_number_for_plu(-123456, 4), "3456");
-        assert.strictEqual(order_line._prepare_number_for_plu(0.527, 4), "0527");
-        assert.strictEqual(order_line._prepare_number_for_plu(3.14159265359, 4), "5359");
-        assert.strictEqual(order_line._prepare_number_for_plu(-3.14159265359, 4), "5359");
-        assert.strictEqual(order_line._prepare_number_for_plu(0.12, 4), "0012");
-        assert.strictEqual(order_line._prepare_number_for_plu(-0.12, 4), "0012");
+        // values represent grams
+        assert.strictEqual(order_line._prepare_number_for_plu(0, 4, 0), "0000");
+        assert.strictEqual(order_line._prepare_number_for_plu(-0, 4, 0), "0000");
+        assert.strictEqual(order_line._prepare_number_for_plu(1, 4, 0), "0001");
+        assert.strictEqual(order_line._prepare_number_for_plu(1234, 4, 0), "1234");
+        assert.strictEqual(order_line._prepare_number_for_plu(-1234, 4, 0), "1234");
+        assert.strictEqual(order_line._prepare_number_for_plu(123456, 4, 0), "3456");
+        assert.strictEqual(order_line._prepare_number_for_plu(-123456, 4, 0), "3456");
+        assert.strictEqual(order_line._prepare_number_for_plu(0.527, 4, 0), "0000");
+        assert.strictEqual(order_line._prepare_number_for_plu(3.14159265359, 4, 0), "0003");
+        assert.strictEqual(order_line._prepare_number_for_plu(-3.14159265359, 4, 0), "0003");
+        assert.strictEqual(order_line._prepare_number_for_plu(0.12, 4, 0), "0000");
+        assert.strictEqual(order_line._prepare_number_for_plu(-0.12, 4, 0), "0000");
     });
 
     test('_prepare_number_for_plu price', function (assert, models) {
         var order_line = mock_order_line(models);
 
-        assert.strictEqual(order_line._prepare_number_for_plu(0, 8), "00000000");
-        assert.strictEqual(order_line._prepare_number_for_plu(-0, 8), "00000000");
-        assert.strictEqual(order_line._prepare_number_for_plu(1, 8), "00000001");
-        assert.strictEqual(order_line._prepare_number_for_plu(-1, 8), "00000001");
-        assert.strictEqual(order_line._prepare_number_for_plu(0.01, 8), "00000001");
-        assert.strictEqual(order_line._prepare_number_for_plu(-0.01, 8), "00000001");
-        assert.strictEqual(order_line._prepare_number_for_plu(1234, 8), "00001234");
-        assert.strictEqual(order_line._prepare_number_for_plu(-1234, 8), "00001234");
-        assert.strictEqual(order_line._prepare_number_for_plu(1234.123, 8), "01234123");
-        assert.strictEqual(order_line._prepare_number_for_plu(-1234.123, 8), "01234123");
-        assert.strictEqual(order_line._prepare_number_for_plu(10000, 8), "00010000");
-        assert.strictEqual(order_line._prepare_number_for_plu(-10000, 8), "00010000");
+        // values represent eurocent
+        assert.strictEqual(order_line._prepare_number_for_plu(0, 8, 0), "00000000");
+        assert.strictEqual(order_line._prepare_number_for_plu(-0, 8, 0), "00000000");
+        assert.strictEqual(order_line._prepare_number_for_plu(100, 8, 0), "00000100");
+        assert.strictEqual(order_line._prepare_number_for_plu(-100, 8, 0), "00000100");
+        assert.strictEqual(order_line._prepare_number_for_plu(0.01, 8, 0), "00000000");
+        assert.strictEqual(order_line._prepare_number_for_plu(-0.01, 8, 0), "00000000");
+        assert.strictEqual(order_line._prepare_number_for_plu(123400, 8, 0), "00123400");
+        assert.strictEqual(order_line._prepare_number_for_plu(-123400, 8, 0), "00123400");
+        assert.strictEqual(order_line._prepare_number_for_plu(123412.3, 8, 0), "00123412");
+        assert.strictEqual(order_line._prepare_number_for_plu(-123412.3, 8, 0), "00123412");
+        assert.strictEqual(order_line._prepare_number_for_plu(10000000, 8, 0), "10000000");
+        assert.strictEqual(order_line._prepare_number_for_plu(-10000000, 8, 0), "10000000");
     });
 
     test('_prepare_description_for_plu', function(assert, models) {
