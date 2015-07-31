@@ -48,7 +48,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
             var translation_table = this._generate_translation_table();
 
-            var replace_char_array = _.map(str, function (char, index, str) {
+            var replaced_char_array = _.map(str, function (char, index, str) {
                 var translation = translation_table[char];
                 if (translation) {
                     return translation;
@@ -57,7 +57,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                 }
             });
 
-            return replace_char_array.join("");
+            return replaced_char_array.join("");
         },
 
         // for hash and sign the allowed range for DATA is:
@@ -108,20 +108,21 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         _prepare_number_for_plu: function(number, field_length) {
             number = Math.abs(number);
             number = Math.round(number); // todo jov: don't like this
-            number = number.toFixed(0);
 
-            number = this._replace_hash_and_sign_chars(number);
-            number = this._filter_allowed_hash_and_sign_chars(number);
+            var number_string = number.toFixed(0);
 
-            // get the 4 least significant characters
-            number = number.substr(-field_length);
+            number_string = this._replace_hash_and_sign_chars(number_string);
+            number_string = this._filter_allowed_hash_and_sign_chars(number_string);
 
-            // pad left with 0 to required size of 4
-            while (number.length < field_length) {
-                number = "0" + number;
+            // get the required amount of least significant characters
+            number_string = number_string.substr(-field_length);
+
+            // pad left with 0 to required size
+            while (number_string.length < field_length) {
+                number_string = "0" + number_string;
             }
 
-            return number;
+            return number_string;
         },
 
         _prepare_description_for_plu: function(description) {
@@ -145,8 +146,8 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             // 2. weight => need integer gram
             // 3. volume => need integer milliliter
 
-            var uom = this.get_unit();
             var amount = this.get_quantity();
+            var uom = this.get_unit();
 
             if (uom.is_unit) {
                 return amount;
