@@ -18,6 +18,7 @@ add some stuff here
     'website': '',
     'data': [
         'views/res_users.xml',
+        'views/point_of_sale.xml',
         'views/pos_blackbox_assets.xml',
         'data/pos_blackbox_be_data.xml'
     ],
@@ -25,6 +26,7 @@ add some stuff here
         'data/pos_blackbox_be_demo.xml'
     ],
     'qweb': [
+        'static/xml/pos_blackbox_be.xml'
     ],
     'installable': True,
     'auto_install': False,

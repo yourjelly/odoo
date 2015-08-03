@@ -2,6 +2,8 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     var core    = require('web.core');
     var screens = require('point_of_sale.screens');
     var models = require('point_of_sale.models');
+    var devices = require('point_of_sale.devices');
+    var chrome = require('point_of_sale.chrome');
     var Class = require('web.Class');
     var PaymentScreenWidget = screens.PaymentScreenWidget;
 
@@ -261,6 +263,39 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             // todo jov: talk to blackbox
 
             this._super();
+        }
+    });
+
+    devices.ProxyDevice.include({
+        request_fdm_identification: function () {
+            var ret = new $.Deferred();
+
+            console.log("in Devices");
+
+            this.message('request_fdm_identification',{})
+                .then(function (response) {
+                    console.log("success");
+                    ret.resolve(response);
+                }, function () {
+                    console.error("failed");
+                    ret.resolve();
+                });
+
+            return ret;
+        }
+    });
+
+    chrome.DebugWidget.include({
+        start: function () {
+            var self = this;
+
+            this._super();
+
+            this.$('.button.request-fdm-identification').click(function () {
+                console.log("Sending identification request to controller...");
+
+                self.pos.proxy.request_fdm_identification();
+            });
         }
     });
 
