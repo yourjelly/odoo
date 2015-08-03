@@ -3,3 +3,4 @@
 
 import res_users
 import pos_order
+import point_of_sale
