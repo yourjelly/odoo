@@ -274,7 +274,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
             this.message('request_fdm_identification',{})
                 .then(function (response) {
-                    console.log("success");
+                    console.log("success with " + response);
                     ret.resolve(response);
                 }, function () {
                     console.error("failed");
