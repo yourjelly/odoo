@@ -8,8 +8,8 @@
     'sequence': 6,
     'summary': 'Implements the registered cash system, adhering to guidelines by FPS Finance.',
     'description': """
-TODO
-====
+TODO JOV
+========
 
 add some stuff here
     """,
