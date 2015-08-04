@@ -730,6 +730,7 @@ var Chrome = PosBaseWidget.extend({
 return {
     Chrome: Chrome,
     OrderSelectorWidget: OrderSelectorWidget,
+    DebugWidget: DebugWidget,
 };
 });
 
