@@ -204,12 +204,19 @@
     }
     .dropdown-menu {
       min-width: 340px;
+      padding: 5px;
+      li {
+        display: table;
+      }
       .btn-group {
         margin: 0;
+        display: table-cell;
         &:first-child {
           margin: 0 5px;
         }
-
+        .note-color-palette {
+          margin-right: 5px;
+        }
         .note-palette-title {
           font-size: 12px;
           margin: 2px 7px;
