@@ -270,11 +270,9 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         request_fdm_identification: function () {
             var ret = new $.Deferred();
 
-            console.log("in Devices");
-
             this.message('request_fdm_identification',{})
                 .then(function (response) {
-                    console.log("success with " + response);
+                    console.log("success with " + response['response']);
                     ret.resolve(response);
                 }, function () {
                     console.error("failed");
