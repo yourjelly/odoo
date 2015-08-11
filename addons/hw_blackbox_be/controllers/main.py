@@ -15,7 +15,8 @@ class BlackboxDriver(hw_proxy.Proxy):
     def _lrc(self, msg):
         lrc = 0
 
-        for byte in msg:
+        for character in msg:
+            byte = ord(character)
             lrc = (lrc + byte) & 0xFF
 
         lrc = ((lrc ^ 0xFF) + 1) & 0xFF
@@ -23,47 +24,42 @@ class BlackboxDriver(hw_proxy.Proxy):
         return lrc
 
     def _create_high_layer(self, id):
-        high_layer = bytearray()
-
-        # id
-        high_layer.append(id)
-        # seq number
-        high_layer.append('0')
-        high_layer.append('1')
-        # retry counter
-        high_layer.append('0')
+        high_layer = ""
+        high_layer += id
+        high_layer += "01" # seq  todo jov: increment seq#
+        high_layer += "0"  # retry
 
         return high_layer
 
     def _wrap_low_layer_around(self, high_layer):
-        low_layer = bytearray()
         bcc = self._lrc(high_layer)
 
-        low_layer.append(0x02)
-        low_layer.extend(high_layer)
-        low_layer.append(0x03)
-        low_layer.append(bcc)
+        low_layer = ""
+        low_layer += chr(0x02)
+        low_layer += high_layer
+        low_layer += chr(0x03)
+        low_layer += chr(bcc)
 
         return low_layer
 
     def _create_identification_request(self):
-        return self._create_high_layer('I')
+        return self._create_high_layer("I")
 
     def _send_and_wait_for_ack(self, packet, serial):
         ack = 0
         MAX_RETRIES = 4
 
-        while ack != 0x06 and int(chr(packet[4])) < MAX_RETRIES:
+        while ack != 0x06 and int(packet[4]) < MAX_RETRIES:
             serial.write(packet)
             ack = serial.read(1)
 
-            packet[4] = str(int(chr(packet[4])) + 1)
+            packet = packet[:4] + chr(int(packet[4]) + 1) + packet[5:]
 
-            if not ack:
+            if ack:
+                ack = ord(ack)
+            else:
                 _logger.warning("did not get ACK, retrying...")
                 ack = 0
-            else:
-                ack = ord(ack)
 
         if ack == 0x06:
             return True
@@ -88,9 +84,7 @@ class BlackboxDriver(hw_proxy.Proxy):
                 etx = ser.read(1)
                 bcc = ser.read(1)
 
-                response_lrc = self._lrc([ord(char) for char in response])
-
-                if response_lrc == ord(bcc):
+                if stx == chr(0x02) and etx == chr(0x03) and bcc and self._lrc(response) == ord(bcc):
                     got_response = True
                     ser.write(chr(0x06))
                 else:
@@ -98,12 +92,14 @@ class BlackboxDriver(hw_proxy.Proxy):
                     sent_nacks += 1
                     ser.write(chr(0x15))
 
+            if not got_response:
+                _logger.error("sent " + str(MAX_NACKS) + " NACKS without receiving response, giving up.")
+                return "sent " + str(MAX_NACKS) + " NACKS without receiving response, giving up."
+
             ser.close()
             return response
         else:
             ser.close()
-            _logger.error("sent " + str(MAX_NACKS) + " NACKS without receiving response, giving up.")
-            return "4x no response from blackbox, giving up"
 
     @http.route('/hw_proxy/request_fdm_identification/', type='http', auth='none', cors='*')
     def request_fdm_identification(self):
