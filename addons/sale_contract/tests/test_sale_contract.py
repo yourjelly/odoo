@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from openerp.addons.sale_contract.tests.common_sale_contract import TestContractCommon
-from openerp.tools import mute_logger
+from openerp.tools import float_compare, mute_logger
 
 
 class TestContract(TestContractCommon):
@@ -38,7 +38,7 @@ class TestContract(TestContractCommon):
         self.contract.write({'recurring_invoice_line_ids': [(0, 0, {'product_id': self.product.id, 'name': 'TestRecurringLine', 'price_unit': 31415.9, 'uom_id': self.product_tmpl.uom_id.id})]})
         invoice_id = self.contract._recurring_create_invoice()
         invoice = self.env['account.invoice'].browse(invoice_id)
-        self.assertEqual(invoice.amount_untaxed, 31415.9, 'sale_contract: recurring invoice generation problem')
+        self.assertEqual(float_compare(invoice.amount_untaxed, 31415.9, 1), 0, 'sale_contract: recurring invoice generation problem')
 
     def test_renewal(self):
         """ Test contract renewal """
