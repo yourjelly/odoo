@@ -267,15 +267,32 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     });
 
     devices.ProxyDevice.include({
+        parse_fdm_identification: function (response) {
+            return {
+                identifier: response[0], // 0
+                sequence_number: parseInt(response.substr(1, 2), 10), // 1, 2
+                retry_counter: parseInt(response[3], 10), // 3
+                error_1: parseInt(response[4], 10), // 4
+                error_2: parseInt(response.substr(5, 2), 10), // 5, 6
+                error_3: parseInt(response.substr(7, 3), 10), // 7, 8, 9
+                fdm_unique_production_number: response.substr(10, 11), // 10-20
+                fdm_firmware_version_number: response.substr(21, 20), // 22-40
+                fdm_communication_protocol_version: response[41], // 41
+                vsc_identification_number: response.substr(42, 14), // 42-55
+                vsc_version_number: parseInt(response.substr(56, 3), 10) // 56-59
+            };
+        },
+
         request_fdm_identification: function () {
+            var self = this;
             var ret = new $.Deferred();
 
             this.message('request_fdm_identification',{})
                 .then(function (response) {
-                    console.log("success with " + response['response']);
+                    console.log(response['response']);
+                    console.log(self.parse_fdm_identification(response['response']));
                     ret.resolve(response);
                 }, function () {
-                    console.error("failed");
                     ret.resolve();
                 });
 
