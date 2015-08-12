@@ -156,26 +156,29 @@ class TxAdyen(osv.Model):
         return invalid_parameters
 
     def _adyen_form_validate(self, cr, uid, tx, data, context=None):
-        status = data.get('authResult', 'PENDING')
-        if status == 'AUTHORISED':
-            tx.write({
-                'state': 'done',
-                'adyen_psp_reference': data.get('pspReference'),
-                # 'date_validate': data.get('payment_date', fields.datetime.now()),
-                # 'paypal_txn_type': data.get('express_checkout')
-            })
-            return True
-        elif status == 'PENDING':
-            tx.write({
-                'state': 'pending',
-                'adyen_psp_reference': data.get('pspReference'),
-            })
-            return True
-        else:
-            error = _('Adyen: feedback error')
+        status = data.get('authResult')
+        state = message = None
+        if status in ['AUTHORISED', 'PENDING']:
+            if status == 'AUTHORISED':
+                state = 'done'
+                message = 'the payment authorisation was successfully completed'
+            elif status == 'PENDING':
+                state = 'pending'
+                message = 'it is not possible to obtain the final status of the payment. This can happen if the systems providing final status information for the payment are unavailable, or if the shopper needs to take further action to complete the payment.'
+        elif status in ['REFUSED', 'CANCELLED']:
+            state = 'cancel'
+            if status == 'REFUSED':
+                message = 'the payment was refused. Payment authorisation was unsuccessful.'
+            elif status == 'CANCELLED':
+                message = ' the payment was cancelled by the shopper before completion, or the shopper returned to the merchants site before completing the transaction.'
+        elif status == 'ERROR':
+            error = _('an error occurred during the payment processing')
             _logger.info(error)
-            tx.write({
-                'state': 'error',
-                'state_message': error
-            })
+            tx.write({'state': 'error', 'state_message': error})
             return False
+        _logger.info(message)
+        tx.write({
+            'state': state,
+            'adyen_psp_reference': data.get('pspReference'),
+            'state_message': _(message)})
+        return True
