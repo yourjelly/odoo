@@ -359,28 +359,28 @@ odoo.define_section('pos_blackbox_be.FDMPacket', ['pos_blackbox_be.pos_blackbox_
         packet.add_field(new blackbox.FDMPacketField("", 0, "", ""));
         assert.strictEqual(packet.to_string(), "");
 
-        packet.add_field(new blackbox.FDMPacketField("", 0, "0", ""));
+        packet.add_field(new blackbox.FDMPacketField("", 0, "", "0"));
         assert.strictEqual(packet.to_string(), "");
     });
 
     test('filled FDMPackets to_string', function (assert, blackbox) {
         var packet = new blackbox.FDMPacket();
 
-        packet.add_field(new blackbox.FDMPacketField("hello", 5, "", "world"));
+        packet.add_field(new blackbox.FDMPacketField("hello", 5, "world", ""));
         assert.strictEqual(packet.to_string(), "world");
 
         packet = new blackbox.FDMPacket();
-        packet.add_field(new blackbox.FDMPacketField("pad", 5, " ", "me"));
+        packet.add_field(new blackbox.FDMPacketField("pad", 5, "me", " "));
         assert.strictEqual(packet.to_string(), "   me");
 
         packet = new blackbox.FDMPacket();
-        packet.add_field(new blackbox.FDMPacketField("pad", 10, "0", "zeros"));
+        packet.add_field(new blackbox.FDMPacketField("pad", 10, "zeros", "0"));
         assert.strictEqual(packet.to_string(), "00000zeros");
 
         packet = new blackbox.FDMPacket();
-        packet.add_field(new blackbox.FDMPacketField("hello", 5, "", "world"));
-        packet.add_field(new blackbox.FDMPacketField("pad", 5, " ", "me"));
-        packet.add_field(new blackbox.FDMPacketField("pad", 10, "0", "zeros"));
+        packet.add_field(new blackbox.FDMPacketField("hello", 5, "world", ""));
+        packet.add_field(new blackbox.FDMPacketField("pad", 5, "me", " "));
+        packet.add_field(new blackbox.FDMPacketField("pad", 10, "zeros", "0"));
         assert.strictEqual(packet.to_string(), "world   me00000zeros");
     });
 });
