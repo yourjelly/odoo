@@ -107,7 +107,7 @@ class BlackboxDriver(hw_proxy.Proxy):
         high_layer = self._create_identification_request()
         to_send = self._wrap_low_layer_around(high_layer)
 
-        return {'response': self._send_to_blackbox(to_send, 59)}
+        return self._send_to_blackbox(to_send, 59)
 
         # if good:
         #     return {'weight': scale_thread.get_weight(), 'unit':'kg', 'info': scale_thread.get_weight_info()}
