@@ -212,7 +212,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     });
 
     var FDMPacketField = Class.extend({
-        init: function (name, length, pad_character, content) {
+        init: function (name, length, content, pad_character) {
             if (typeof content !== 'string') {
                 throw "Can only handle string contents";
             }
@@ -220,10 +220,14 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             this.name = name;
             this.length = length;
 
-            this.content = this._pad_left_to_length(pad_character, content);
+            this.content = this._pad_left_to_length(content, pad_character);
         },
 
-        _pad_left_to_length: function (pad_character, content) {
+        _pad_left_to_length: function (content, pad_character) {
+            if (content.length < this.length && ! pad_character) {
+                throw "Can't pad without a pad character";
+            }
+
             while (content.length < this.length) {
                 content = pad_character + content;
             }
@@ -286,21 +290,14 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         },
 
         build_request: function (id) {
-            var request = "";
+            var packet = new FDMPacket();
 
-            request += id;
-
-            // make sure that the sequence number is length 2
-            if (this.sequence_number < 10) {
-                request += "0";
-            }
-
-            request += this.sequence_number;
-            request += "0";  // retry number
-
+            packet.add_field(new FDMPacketField("id", 1, id));
+            packet.add_field(new FDMPacketField("sequence_number", 2, this.sequence_number.toString(), "0"));
+            packet.add_field(new FDMPacketField("retry_number", 1, "0"));
             this.increment_sequence_number();
 
-            return request;
+            return packet;
         },
 
         parse_fdm_identification_response: function (response) {
@@ -326,7 +323,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         request_fdm_identification: function () {
             var self = this;
 
-            return this.message('request_fdm_identification', {'high_layer': self.build_fdm_identification_request()});
+            return this.message('request_fdm_identification', {'high_layer': self.build_fdm_identification_request().to_string()});
         }
     });
 
