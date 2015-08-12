@@ -203,7 +203,7 @@ tax_rrenta_ARREN_06pasauto_ASU,rRENarrMUEB<AR\,tag_201,l10n_co_chart_template_ge
 tax_rrenta_ARREN_06pasauto_CP,rRENarrMUEB<AR/,tag_202,l10n_co_chart_template_generic,none,AR REN - Arrendamiento de bienes muebles CONTRAPARTIDA,914,-4,,percent,,co_puc_521595,co_puc_521595
 tax_rrenta_ARREN_06pasauto,rRENarrMUEB<AR,tag_203,l10n_co_chart_template_generic,sale,AR REN - Arrendamiento de bienes muebles,912,1,,group,"tax_rrenta_ARREN_06pasauto_ASU,tax_rrenta_ARREN_06pasauto_CP",,
 tax_rrenta_ARREN_07act,rRENarrRAICd>,tag_204,l10n_co_chart_template_generic,purchase,R REN C Arrendamiento de bienes raíces; declarante,606,-2.5,,percent,,co_puc_236530,co_puc_236530
-tax_rrenta_ARREN_07pas,rRENarrRAICd<,tag_205,l10n_co_chart_template_generic,sale,R REN V Arrendamiento de bienes raíces; declarante,540,-25,,percent,,co_puc_135515,co_puc_135515
+tax_rrenta_ARREN_07pas,rRENarrRAICd<,tag_205,l10n_co_chart_template_generic,sale,R REN V Arrendamiento de bienes raíces; declarante,540,-2.5,,percent,,co_puc_135515,co_puc_135515
 tax_rrenta_ARREN_07actext,rRENarrRAICd>EX,tag_206,l10n_co_chart_template_generic,purchase,R REN EXTERIOR Arrendamiento de bienes raíces; declarante,706,-2.5,,percent,,co_puc_236530,co_puc_236530
 tax_rrenta_ARREN_07actpf,rRENarrRAICd>PF,tag_207,l10n_co_chart_template_generic,purchase,R REN PARAISO Arrendamiento de bienes raíces; declarante,806,-33,,percent,,co_puc_236530,co_puc_236530
 tax_rrenta_ARREN_07pasauto_ASU,rRENarrRAICd<AR\,tag_208,l10n_co_chart_template_generic,none,AR REN - Arrendamiento de bienes raíces; declarante ASIMUDO,916,2.5,,percent,,co_puc_236575,co_puc_236575
@@ -214,7 +214,7 @@ tax_rrenta_ARREN_08pas,rRENarrRAICn<,tag_212,l10n_co_chart_template_generic,sale
 tax_rrenta_ARREN_08actext,rRENarrRAICn>EX,tag_213,l10n_co_chart_template_generic,purchase,R REN EXTERIOR Arrendamiento de bienes raíces; no declarante,707,-3.5,,percent,,co_puc_236550,co_puc_236550
 tax_rrenta_ARREN_08actpf,rRENarrRAICn>PF,tag_214,l10n_co_chart_template_generic,purchase,R REN PARAISO Arrendamiento de bienes raíces; no declarante,807,-33,,percent,,co_puc_236550,co_puc_236550
 tax_rrenta_COMIS_09act,rRENcmsSECF>,tag_215,l10n_co_chart_template_generic,purchase,R REN C Comisiones en el sector financiero,608,-11,,percent,,co_puc_236520,co_puc_236520
-tax_rrenta_COMIS_09pas,rRENcmsSECF<,tag_216,l10n_co_chart_template_generic,sale,R REN V Comisiones en el sector financiero,505,-1.1,,percent,,co_puc_135515,co_puc_135515
+tax_rrenta_COMIS_09pas,rRENcmsSECF<,tag_216,l10n_co_chart_template_generic,sale,R REN V Comisiones en el sector financiero,505,-11,,percent,,co_puc_135515,co_puc_135515
 tax_rrenta_COMIS_09actext,rRENcmsSECF>EX,tag_217,l10n_co_chart_template_generic,purchase,R REN EXTERIOR Comisiones en el sector financiero,708,-11,,percent,,co_puc_236550,co_puc_236550
 tax_rrenta_COMIS_09actpf,rRENcmsSECF>PF,tag_218,l10n_co_chart_template_generic,purchase,R REN PARAISO Comisiones en el sector financiero,808,-33,,percent,,co_puc_236550,co_puc_236550
 tax_rrenta_COMIS_09pasauto_ASU,rRENcmsSECF<AR\,tag_219,l10n_co_chart_template_generic,none,AR REN - Comisiones en el sector financiero ASIMUDO,919,11,,percent,,co_puc_236575,co_puc_236575
@@ -425,8 +425,8 @@ tax_rrenta_SERVI_44act,rRENserTEMP>,tag_423,l10n_co_chart_template_generic,purch
 tax_rrenta_SERVI_44pas,rRENserTEMP<,tag_424,l10n_co_chart_template_generic,sale,R REN V Servicios temporales de empleo (la base será el 100% del A.I.U. siempre que sea mayor o igual a 4 UVT),533,-1,,percent,,co_puc_135515,co_puc_135515
 tax_rrenta_SERVI_44actext,rRENserTEMP>EX,tag_425,l10n_co_chart_template_generic,purchase,R REN EXTERIOR Servicios temporales de empleo (la base será el 100% del A.I.U. siempre que sea mayor o igual a 4 UVT),666,-1,,percent,,co_puc_236550,co_puc_236550
 tax_rrenta_SERVI_44actpf,rRENserTEMP>PF,tag_426,l10n_co_chart_template_generic,purchase,R REN PARAISO Servicios temporales de empleo (la base será el 100% del A.I.U. siempre que sea mayor o igual a 4 UVT),667,-33,,percent,,co_puc_236550,co_puc_236550
-tax_rrenta_SERVI_44pasauto_ASU,rRENserTEMP<AR\,tag_427,l10n_co_chart_template_generic,none,AR REN - Servicios temporales de empleo (la base será el 100% del A.I.U. siempre que sea mayor o igual a 4 UVT) ASIMUDO,994,1,,percent,,co_puc_236575,co_puc_236575
-tax_rrenta_SERVI_44pasauto_CP,rRENserTEMP<AR/,tag_428,l10n_co_chart_template_generic,none,AR REN - Servicios temporales de empleo (la base será el 100% del A.I.U. siempre que sea mayor o igual a 4 UVT) CONTRAPARTIDA,995,-1,,percent,,co_puc_521595,co_puc_521595
+tax_rrenta_SERVI_44pasauto_ASU,rRENserTEMP<AR\,tag_427,l10n_co_chart_template_generic,none,AR REN - Servicios temporales de empleo (la base será el 100% del A.I.U. siempre que sea mayor o igual a 4 UVT) ASIMUDO,994,10,,percent,,co_puc_236575,co_puc_236575
+tax_rrenta_SERVI_44pasauto_CP,rRENserTEMP<AR/,tag_428,l10n_co_chart_template_generic,none,AR REN - Servicios temporales de empleo (la base será el 100% del A.I.U. siempre que sea mayor o igual a 4 UVT) CONTRAPARTIDA,995,-10,,percent,,co_puc_521595,co_puc_521595
 tax_rrenta_SERVI_44pasauto,rRENserTEMP<AR,tag_429,l10n_co_chart_template_generic,sale,AR REN - Servicios temporales de empleo (la base será el 100% del A.I.U. siempre que sea mayor o igual a 4 UVT),993,1,,group,"tax_rrenta_SERVI_44pasauto_ASU,tax_rrenta_SERVI_44pasauto_CP",,
 tax_rrenta_SERVI_45act,rRENserSISM>,tag_430,l10n_co_chart_template_generic,purchase,R REN C Servicios de sísmica para el sector de hidrocarburos; declarante,668,-6,,percent,,co_puc_236525,co_puc_236525
 tax_rrenta_SERVI_45pas,rRENserSISM<,tag_431,l10n_co_chart_template_generic,sale,R REN V Servicios de sísmica para el sector de hidrocarburos; declarante,534,-6,,percent,,co_puc_135515,co_puc_135515
