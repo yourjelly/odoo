@@ -53,7 +53,7 @@ class BlackboxDriver(hw_proxy.Proxy):
             serial.write(packet)
             ack = serial.read(1)
 
-            packet = packet[:4] + chr(int(packet[4]) + 1) + packet[5:]
+            packet = packet[:4] + str(int(packet[4]) + 1) + packet[5:]
 
             if ack:
                 ack = ord(ack)
