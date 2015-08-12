@@ -267,7 +267,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     });
 
     devices.ProxyDevice.include({
-        parse_fdm_identification: function (response) {
+        parse_fdm_identification_response: function (response) {
             return {
                 identifier: response[0], // 0
                 sequence_number: parseInt(response.substr(1, 2), 10), // 1, 2
@@ -289,8 +289,8 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
             this.message('request_fdm_identification',{})
                 .then(function (response) {
-                    console.log(response['response']);
-                    console.log(self.parse_fdm_identification(response['response']));
+                    console.log(response);
+                    console.log(self.parse_fdm_identification_response(response));
                     ret.resolve(response);
                 }, function () {
                     ret.resolve();
