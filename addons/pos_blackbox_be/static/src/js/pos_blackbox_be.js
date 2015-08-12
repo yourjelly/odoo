@@ -267,12 +267,26 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     });
 
     devices.ProxyDevice.include({
+        sequence_number: 0,
+
+        increment_sequence_number: function () {
+            this.sequence_number = (this.sequence_number + 1) % 100;
+        },
+
         build_request: function (id) {
             var request = "";
 
             request += id;
-            request += "01"; // seq  todo jov: increment seq#
-            request += "0";  // retry
+
+            // make sure that the sequence number is length 2
+            if (this.sequence_number < 10) {
+                request += "0";
+            }
+
+            request += this.sequence_number;
+            request += "0";  // retry number
+
+            this.increment_sequence_number();
 
             return request;
         },
