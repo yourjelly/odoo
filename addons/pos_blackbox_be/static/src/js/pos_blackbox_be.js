@@ -313,18 +313,8 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
         request_fdm_identification: function () {
             var self = this;
-            var ret = new $.Deferred();
 
-            this.message('request_fdm_identification', {'high_layer': self.build_fdm_identification_request()})
-                .then(function (response) {
-                    console.log(response);
-                    console.log(self.parse_fdm_identification_response(response));
-                    ret.resolve(response);
-                }, function () {
-                    ret.resolve();
-                });
-
-            return ret;
+            return this.message('request_fdm_identification', {'high_layer': self.build_fdm_identification_request()});
         }
     });
 
@@ -336,7 +326,10 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             this.$('.button.request-fdm-identification').click(function () {
                 console.log("Sending identification request to controller...");
 
-                self.pos.proxy.request_fdm_identification();
+                self.pos.proxy.request_fdm_identification().then(function (response) {
+                    console.log(response);
+                    console.log(self.pos.proxy.parse_fdm_identification_response(response));
+                });
             });
         }
     });
