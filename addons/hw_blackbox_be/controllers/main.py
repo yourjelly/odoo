@@ -94,12 +94,13 @@ class BlackboxDriver(hw_proxy.Proxy):
 
             if not got_response:
                 _logger.error("sent " + str(MAX_NACKS) + " NACKS without receiving response, giving up.")
-                return "sent " + str(MAX_NACKS) + " NACKS without receiving response, giving up."
+                return ""
 
             ser.close()
             return response
         else:
             ser.close()
+            return ""
 
     @http.route('/hw_proxy/request_fdm_identification/', type='json', auth='none', cors='*')
     def request_fdm_identification(self):
