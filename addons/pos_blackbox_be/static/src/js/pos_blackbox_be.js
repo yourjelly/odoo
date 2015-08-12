@@ -267,6 +267,16 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     });
 
     devices.ProxyDevice.include({
+        build_request: function (id) {
+            var request = "";
+
+            request += id;
+            request += "01"; // seq  todo jov: increment seq#
+            request += "0";  // retry
+
+            return request;
+        },
+
         parse_fdm_identification_response: function (response) {
             return {
                 identifier: response[0], // 0
@@ -283,11 +293,15 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             };
         },
 
+        build_fdm_identification_request: function () {
+            return this.build_request("I");
+        },
+
         request_fdm_identification: function () {
             var self = this;
             var ret = new $.Deferred();
 
-            this.message('request_fdm_identification',{})
+            this.message('request_fdm_identification', {'high_layer': self.build_fdm_identification_request()})
                 .then(function (response) {
                     console.log(response);
                     console.log(self.parse_fdm_identification_response(response));
@@ -303,7 +317,6 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     chrome.DebugWidget.include({
         start: function () {
             var self = this;
-
             this._super();
 
             this.$('.button.request-fdm-identification').click(function () {
