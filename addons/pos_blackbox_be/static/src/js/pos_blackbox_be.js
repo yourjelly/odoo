@@ -260,9 +260,21 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
     PaymentScreenWidget.include({
         validate_order: function(force_validation) {
-            // todo jov: talk to blackbox
+            var self = this;
+            var payment_screen_super = this._super.bind(self);
 
-            this._super();
+            this.pos.proxy.request_fdm_identification().then(function (response) {
+                response = self.pos.proxy.parse_fdm_identification_response(response);
+
+                if (response.vsc_identification_number) {
+                    payment_screen_super();
+                } else {
+                    self.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("Could not connect to the Fiscal Data Module."),
+                    });
+                }
+            });
         }
     });
 
