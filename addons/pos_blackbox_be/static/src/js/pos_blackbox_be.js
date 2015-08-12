@@ -268,6 +268,11 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             var payment_screen_super = this._super.bind(self);
 
             this.pos.proxy.request_fdm_identification().then(function (response) {
+                var order = self.pos.get_order();
+                // var hash = order.calculate_hash();
+
+                // console.log(order._hash_and_sign_string());
+
                 response = self.pos.proxy.parse_fdm_identification_response(response);
 
                 if (response.vsc_identification_number) {
@@ -293,8 +298,8 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             var packet = new FDMPacket();
 
             packet.add_field(new FDMPacketField("id", 1, id));
-            packet.add_field(new FDMPacketField("sequence_number", 2, this.sequence_number.toString(), "0"));
-            packet.add_field(new FDMPacketField("retry_number", 1, "0"));
+            packet.add_field(new FDMPacketField("sequence number", 2, this.sequence_number.toString(), "0"));
+            packet.add_field(new FDMPacketField("retry number", 1, "0"));
             this.increment_sequence_number();
 
             return packet;
@@ -320,6 +325,30 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return this.build_request("I");
         },
 
+        build_fdm_hash_and_sign_request: function (order) {
+            var packet = this.build_request("H");
+
+            packet.add_field(new FDMPacketField("ticket date", 8, moment().format("YYYYMMDD")));
+            packet.add_field(new FDMPacketField("ticket time", 6, moment().format("HHmmss")));
+            // packet.add_field(new FDMPacketField("insz or bis number", 11, "")); // todo jov
+            // packet.add_field(new FDMPacketField("production number POS", 14, "")); // todo jov
+            // packet.add_field(new FDMPacketField("ticket number", 6, "")); // todo jov
+            // packet.add_field(new FDMPacketField("event label", 2, "")); // todo jov
+            // packet.add_field(new FDMPacketField("total amount to pay in eurocent", 11, "")); // todo jov
+
+            // packet.add_field(new FDMPacketField("tax percentage 1", 4, "")); // todo jov
+            // packet.add_field(new FDMPacketField("amount at tax percentage 1 in eurocent", 11, "")); // todo jov
+            // packet.add_field(new FDMPacketField("tax percentage 2", 4, "")); // todo jov
+            // packet.add_field(new FDMPacketField("amount at tax percentage 2 in eurocent", 11, "")); // todo jov
+            // packet.add_field(new FDMPacketField("tax percentage 3", 4, "")); // todo jov
+            // packet.add_field(new FDMPacketField("amount at tax percentage 3 in eurocent", 11, "")); // todo jov
+            // packet.add_field(new FDMPacketField("tax percentage 4", 4, "")); // todo jov
+            // packet.add_field(new FDMPacketField("amount at tax percentage 4 in eurocent", 11, "")); // todo jov
+            // packet.add_field(new FDMPacketField("PLU hash", 40, order.calculate_hash()));
+
+            return packet
+        },
+
         request_fdm_identification: function () {
             var self = this;
 
@@ -333,6 +362,8 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             this._super();
 
             this.$('.button.request-fdm-identification').click(function () {
+                // console.log(self.pos.proxy.build_fdm_hash_and_sign_request());
+
                 console.log("Sending identification request to controller...");
 
                 self.pos.proxy.request_fdm_identification().then(function (response) {
