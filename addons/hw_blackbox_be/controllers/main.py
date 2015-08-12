@@ -23,14 +23,6 @@ class BlackboxDriver(hw_proxy.Proxy):
 
         return lrc
 
-    def _create_high_layer(self, id):
-        high_layer = ""
-        high_layer += id
-        high_layer += "01" # seq  todo jov: increment seq#
-        high_layer += "0"  # retry
-
-        return high_layer
-
     def _wrap_low_layer_around(self, high_layer):
         bcc = self._lrc(high_layer)
 
@@ -41,9 +33,6 @@ class BlackboxDriver(hw_proxy.Proxy):
         low_layer += chr(bcc)
 
         return low_layer
-
-    def _create_identification_request(self):
-        return self._create_high_layer("I")
 
     def _send_and_wait_for_ack(self, packet, serial):
         ack = 0
@@ -103,8 +92,7 @@ class BlackboxDriver(hw_proxy.Proxy):
             return ""
 
     @http.route('/hw_proxy/request_fdm_identification/', type='json', auth='none', cors='*')
-    def request_fdm_identification(self):
-        high_layer = self._create_identification_request()
+    def request_fdm_identification(self, high_layer):
         to_send = self._wrap_low_layer_around(high_layer)
 
         return self._send_to_blackbox(to_send, 59)
