@@ -6331,7 +6331,7 @@
        <record id="chartgr_64_98_00" model="account.account.template">
             <field name="code">64.98.00</field>
             <field name="name">Κοινοπραξίες δαπανών</field>
-            <field name="nocreate" eval="False"/>
+            <field name="nocreate" eval="True"/>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
             <field name="note"></field>
             <field name="chart_template_id" ref="l10n_gr_chart_template"/>
