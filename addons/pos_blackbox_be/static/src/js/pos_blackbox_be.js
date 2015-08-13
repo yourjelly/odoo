@@ -276,7 +276,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                 response = self.pos.proxy.parse_fdm_identification_response(response);
 
                 if (response.vsc_identification_number) {
-                    payment_screen_super();
+                    payment_screen_super(force_validation);
                 } else {
                     self.gui.show_popup("error", {
                         'title': _t("Fiscal Data Module error"),
@@ -346,7 +346,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             // packet.add_field(new FDMPacketField("amount at tax percentage 4 in eurocent", 11, "")); // todo jov
             // packet.add_field(new FDMPacketField("PLU hash", 40, order.calculate_hash()));
 
-            return packet
+            return packet;
         },
 
         request_fdm_identification: function () {
@@ -356,13 +356,27 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         }
     });
 
+    var _posmodelproto = models.PosModel.prototype;
+    models.PosModel = models.PosModel.extend({
+        initialize: function (session, attributes) {
+            var user_model = _.find(this.models, function (model) {
+                return model.model === "res.users" && _.find(model.fields, function (field) {
+                    return field === "pos_security_pin";
+                });
+            });
+
+            user_model.fields.push("insz_or_bis_number");
+            _posmodelproto.initialize.apply(this, arguments);
+        }
+    });
+
     chrome.DebugWidget.include({
         start: function () {
             var self = this;
             this._super();
 
             this.$('.button.request-fdm-identification').click(function () {
-                // console.log(self.pos.proxy.build_fdm_hash_and_sign_request());
+                console.log(self.pos.proxy.build_fdm_hash_and_sign_request());
 
                 console.log("Sending identification request to controller...");
 
