@@ -3331,7 +3331,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">10</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Verkopen/omzet laag</field>
-            <field name="description">6% BTW verkopen</field>
+            <field name="description">6% BTW</field>
             <field eval="6" name="amount"/>
             <field name="amount_type">percent</field>
             <field name="refund_account_id" ref="vat_payable_low"/>
@@ -3343,7 +3343,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">5</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Verkopen/omzet hoog</field>
-            <field name="description">21% BTW verkopen</field>
+            <field name="description">21% BTW</field>
             <field eval="21" name="amount"/>
             <field name="amount_type">percent</field>
             <field name="refund_account_id" ref="vat_payable_high"/>
@@ -3356,7 +3356,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">15</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Verkopen/omzet overig</field>
-            <field name="description">variabel BTW verkopen</field>
+            <field name="description">variabel BTW</field>
             <field eval="21" name="amount"/>
             <field name="amount_type">percent</field>
             <field name="refund_account_id" ref="vat_payable_high"/>
@@ -3370,7 +3370,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">10</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">BTW te vorderen laag (inkopen)</field>
-            <field name="description">6% BTW inkopen</field>
+            <field name="description">6% BTW</field>
             <field eval="6" name="amount"/>
             <field name="amount_type">percent</field>
             <field name="refund_account_id" ref="vat_refund_low"/>
@@ -3382,7 +3382,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">5</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">BTW te vorderen hoog (inkopen)</field>
-            <field name="description">21% BTW inkopen</field>
+            <field name="description">21% BTW</field>
             <field eval="21" name="amount"/>
             <field name="amount_type">percent</field>
             <field name="refund_account_id" ref="vat_refund_high"/>
@@ -3394,7 +3394,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">15</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">BTW te vorderen overig (inkopen)</field>
-            <field name="description">variabel BTW inkopen</field>
+            <field name="description">variabel BTW</field>
             <field eval="21" name="amount"/>
             <field name="amount_type">percent</field>
             <field name="refund_account_id" ref="vat_refund_high"/>
@@ -3420,7 +3420,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">BTW te vorderen verlegd (inkopen1)</field>
             <field name="description">BTW te vorderen verlegd (inkopen1)</field>
-            <field eval="100" name="amount"/>
+            <field eval="21" name="amount"/>
             <field name="amount_type">percent</field>
             <field name="refund_account_id" ref="vat_payable_verlegd"/>
             <field name="account_id" ref="vat_payable_verlegd"/>
@@ -3432,7 +3432,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">BTW af te dragen verlegd (inkopen2)</field>
             <field name="description">BTW af te dragen verlegd (inkopen2)</field>
-            <field eval="-100" name="amount"/>
+            <field eval="-21" name="amount"/>
             <field name="amount_type">percent</field>
             <field name="refund_account_id" ref="vat_payable_verlegd"/>
             <field name="account_id" ref="vat_payable_verlegd"/>
@@ -3456,10 +3456,10 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
 <!-- BTW inkoop -->
         <record id="btw_I_6_1" model="account.tax.template">
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
-            <field name="sequence">99</field>
+            <field name="sequence">21</field>
             <field name="name">Inkopen import binnen EU laag(1)</field>
             <field name="description">Inkopen import binnen EU laag(1)</field>
-            <field eval="-100" name="amount"/>
+            <field eval="-6" name="amount"/>
             <field name="amount_type">percent</field>
             <field name="refund_account_id" ref="vat_payable_low"/>
             <field name="account_id" ref="vat_payable_low"/>
@@ -3468,10 +3468,10 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         </record>
         <record id="btw_I_6_2" model="account.tax.template">
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
-            <field name="sequence">98</field>
+            <field name="sequence">22</field>
             <field name="name">Inkopen import binnen EU laag(2)</field>
             <field name="description">Inkopen import binnen EU laag(2)</field>
-            <field eval="100" name="amount"/>
+            <field eval="6" name="amount"/>
             <field name="amount_type">percent</field>
             <field name="refund_account_id" ref="vat_refund_low"/>
             <field name="account_id" ref="vat_refund_low"/>
@@ -3491,10 +3491,10 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         </record>
         <record id="btw_I_21_1" model="account.tax.template">
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
-            <field name="sequence">99</field>
+            <field name="sequence">21</field>
             <field name="name">Inkopen import binnen EU hoog(1)</field>
             <field name="description">Inkopen import binnen EU hoog(1)</field>
-            <field eval="-100" name="amount"/>
+            <field eval="-21" name="amount"/>
             <field name="amount_type">percent</field>
             <field name="refund_account_id" ref="vat_payable_high"/>
             <field name="account_id" ref="vat_payable_high"/>
@@ -3503,10 +3503,10 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
         </record>
         <record id="btw_I_21_2" model="account.tax.template">
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
-            <field name="sequence">98</field>
+            <field name="sequence">22</field>
             <field name="name">Inkopen import binnen EU hoog(2)</field>
             <field name="description">Inkopen import binnen EU hoog(2)</field>
-            <field eval="100" name="amount"/>
+            <field eval="21" name="amount"/>
             <field name="amount_type">percent</field>
             <field name="refund_account_id" ref="vat_refund_high"/>
             <field name="account_id" ref="vat_refund_high"/>
@@ -3529,7 +3529,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="name">Inkopen import binnen EU overig(1)</field>
             <field name="description">Inkopen import binnen EU overig(1)</field>
             <field name="sequence">99</field>
-            <field eval="-100" name="amount"/>
+            <field eval="0" name="amount"/>
             <field name="amount_type">percent</field>
             <field name="refund_account_id" ref="vat_payable_high"/>
             <field name="account_id" ref="vat_payable_high"/>
@@ -3540,7 +3540,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Inkopen import binnen EU overig(2)</field>
             <field name="description">Inkopen import binnen EU overig(2)</field>
-            <field eval="100" name="amount"/>
+            <field eval="0" name="amount"/>
             <field name="amount_type">percent</field>
             <field name="refund_account_id" ref="vat_refund_high"/>
             <field name="account_id" ref="vat_refund_high"/>
@@ -3591,11 +3591,11 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Inkopen import buiten EU laag(1)</field>
             <field name="description">Inkopen import buiten EU laag(1)</field>
-            <field eval="-100" name="amount"/>
+            <field eval="-6" name="amount"/>
             <field name="amount_type">percent</field>
             <field name="refund_account_id" ref="vat_payable_low"/>
             <field name="account_id" ref="vat_payable_low"/>
-            <field name="sequence">99</field>
+            <field name="sequence">21</field>
             <field name="type_tax_use">none</field>
             <field name="tag_ids" eval="[(6,0,[ref('tax_tag_23')])]"/>
         </record>
@@ -3603,11 +3603,11 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Inkopen import buiten EU laag(2)</field>
             <field name="description">Inkopen import buiten EU laag(2)</field>
-            <field eval="100" name="amount"/>
+            <field eval="6" name="amount"/>
             <field name="amount_type">percent</field>
             <field name="refund_account_id" ref="vat_refund_low"/>
             <field name="account_id" ref="vat_refund_low"/>
-            <field name="sequence">98</field>
+            <field name="sequence">22</field>
             <field name="type_tax_use">none</field>
             <field name="tag_ids" eval="[(6,0,[ref('tax_tag_24')])]"/>
         </record>
@@ -3615,7 +3615,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">20</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Inkopen import buiten EU laag</field>
-            <field name="description">BTW import buiten EU laag inkopen</field>
+            <field name="description">BTW import buiten EU</field>
             <field eval="6" name="amount"/>
             <field name="amount_type">group</field>
             <field name="type_tax_use">purchase</field>
@@ -3626,10 +3626,10 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Inkopen import buiten EU hoog(1)</field>
             <field name="description">Inkopen import buiten EU hoog(1)</field>
-            <field eval="-100" name="amount"/>
+            <field eval="-21" name="amount"/>
             <field name="amount_type">percent</field>
             <field name="refund_account_id" ref="vat_payable_high"/>
-            <field name="sequence">99</field>
+            <field name="sequence">21</field>
             <field name="account_id" ref="vat_payable_high"/>
             <field name="type_tax_use">none</field>
             <field name="tag_ids" eval="[(6,0,[ref('tax_tag_26')])]"/>
@@ -3638,9 +3638,9 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Inkopen import buiten EU hoog(2)</field>
             <field name="description">Inkopen import buiten EU hoog(2)</field>
-            <field eval="100" name="amount"/>
+            <field eval="21" name="amount"/>
             <field name="amount_type">percent</field>
-            <field name="sequence">98</field>
+            <field name="sequence">22</field>
             <field name="refund_account_id" ref="vat_refund_high"/>
             <field name="account_id" ref="vat_refund_high"/>
             <field name="type_tax_use">none</field>
@@ -3650,7 +3650,7 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="sequence">20</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Inkopen import buiten EU hoog</field>
-            <field name="description">BTW import buiten EU hoog inkopen</field>
+            <field name="description">BTW import buiten EU</field>
             <field eval="21" name="amount"/>
             <field name="amount_type">group</field>
             <field name="type_tax_use">purchase</field>
@@ -3661,31 +3661,31 @@ TODO rubriek 1c en 1d moeten nog, zijn variabel, dus BTW percentage moet door ge
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Inkopen import buiten EU overig(1)</field>
             <field name="description">Inkopen import buiten EU overig(1)</field>
-            <field eval="-100" name="amount"/>
+            <field eval="-21" name="amount"/>
             <field name="amount_type">percent</field>
             <field name="refund_account_id" ref="vat_payable_high"/>
             <field name="account_id" ref="vat_payable_high"/>
             <field name="type_tax_use">none</field>
-            <field name="sequence">99</field>
+            <field name="sequence">21</field>
             <field name="tag_ids" eval="[(6,0,[ref('tax_tag_29')])]"/>
         </record>
         <record id="btw_E_overig_2" model="account.tax.template">
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Inkopen import buiten EU overig(2)</field>
             <field name="description">Inkopen import buiten EU overig(2)</field>
-            <field eval="100" name="amount"/>
+            <field eval="21" name="amount"/>
             <field name="amount_type">percent</field>
             <field name="refund_account_id" ref="vat_refund_high"/>
             <field name="account_id" ref="vat_refund_high"/>
             <field name="type_tax_use">none</field>
-            <field name="sequence">98</field>
+            <field name="sequence">22</field>
             <field name="tag_ids" eval="[(6,0,[ref('tax_tag_30')])]"/>
         </record>
         <record id="btw_E_overig" model="account.tax.template">
             <field name="sequence">20</field>
             <field name="chart_template_id" ref="l10nnl_chart_template"/>
             <field name="name">Inkopen import buiten EU overig</field>
-            <field name="description">BTW import buiten EU overig inkopen</field>
+            <field name="description">BTW import buiten EU</field>
             <field eval="21" name="amount"/>
             <field name="amount_type">group</field>
             <field name="type_tax_use">purchase</field>
