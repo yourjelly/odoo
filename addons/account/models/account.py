@@ -605,7 +605,7 @@ class AccountTax(models.Model):
         prec = currency.decimal_places
         if company_id.tax_calculation_rounding_method == 'round_globally':
             prec += 5
-        total_excluded = total_included = base = round(price_unit * quantity, prec)
+        total_excluded = total_included = base = base_new = round(price_unit * quantity, prec)
 
         for tax in self:
             if tax.amount_type == 'group':
@@ -613,6 +613,7 @@ class AccountTax(models.Model):
                 total_excluded = ret['total_excluded']
                 base = ret['total_excluded']
                 total_included = ret['total_included']
+                base_new = ret['total_included']
                 tax_amount = total_included - total_excluded
                 taxes += ret['taxes']
                 continue
@@ -627,8 +628,13 @@ class AccountTax(models.Model):
                 else:
                     total_included += tax_amount
 
-                if tax.include_base_amount:
+                if not tax.include_base_amount:
                     base += tax_amount
+
+                if tax.include_base_amount:
+                    tax_amount = tax._compute_amount(base_new, price_unit, quantity, product, partner)
+                    tax_amount = currency.round(tax_amount)
+                    base_new += tax_amount
 
                 taxes.append({
                     'id': tax.id,
