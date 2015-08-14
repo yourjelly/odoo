@@ -25,3 +25,20 @@ class AccountTax(models.Model):
                 raise UserError(_("Can't determine the tax type required for the Fiscal Data Module. Only 21%, 12%, 8% and 0% are allowed."))
         else:
             return False
+
+class pos_config(models.Model):
+    _inherit = 'pos.config'
+
+    iface_blackbox_be = fields.Boolean("Belgian Fiscal Data Module", help="Enables integration with a Belgian Fiscal Data Module")
+
+class res_users(models.Model):
+    _inherit = 'res.users'
+
+    # bis number is for foreigners in Belgium
+    insz_or_bis_number = fields.Char("INSZ or BIS number",
+                                     help="Social security identification number") # todo jov: enforce length of 11
+
+class pos_order(models.Model):
+    _inherit = 'pos.order'
+
+    # todo jov: add the things that will be coming back from the FDM as fields
