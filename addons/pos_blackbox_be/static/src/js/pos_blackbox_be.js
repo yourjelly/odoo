@@ -334,10 +334,20 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         // todo jov: p77
         build_fdm_hash_and_sign_request: function (order) {
             var packet = this.build_request("H");
+            var insz_or_bis_number = this.pos.get_cashier().insz_or_bis_number;
+
+            if (! insz_or_bis_number) {
+                this.pos.gui.show_popup("error", {
+                    'title': _t("Error"),
+                    'body':  _t("INSZ or BIS number not set for current cashier."),
+                });
+
+                return False;
+            }
 
             packet.add_field(new FDMPacketField("ticket date", 8, moment().format("YYYYMMDD")));
             packet.add_field(new FDMPacketField("ticket time", 6, moment().format("HHmmss")));
-            packet.add_field(new FDMPacketField("insz or bis number", 11, this.pos.get_cashier().insz_or_bis_number));
+            packet.add_field(new FDMPacketField("insz or bis number", 11, insz_or_bis_number));
 
             // todo jov:
             // they want PPPPPPP to uniquely identify users, don't think we can do that
@@ -368,8 +378,6 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             // packet.add_field(new FDMPacketField("amount at tax percentage 4 in eurocent", 11, "")); // todo jov
             // packet.add_field(new FDMPacketField("PLU hash", 40, order.calculate_hash()));
             console.log(packet.to_human_readable_string());
-
-            debugger;
 
             return packet;
         },
@@ -407,14 +415,16 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             this._super();
 
             this.$('.button.request-fdm-identification').click(function () {
-                console.log(self.pos.proxy.build_fdm_hash_and_sign_request(self.pos.get_order()));
-
                 console.log("Sending identification request to controller...");
 
                 self.pos.proxy.request_fdm_identification().then(function (response) {
                     console.log(response);
                     console.log(self.pos.proxy.parse_fdm_identification_response(response));
                 });
+            });
+
+            this.$('.button.build-hash-and-sign-request').click(function () {
+                console.log(self.pos.proxy.build_fdm_hash_and_sign_request(self.pos.get_order()));
             });
         }
     });
