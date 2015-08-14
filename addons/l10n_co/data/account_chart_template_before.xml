@@ -12,7 +12,7 @@
         <field name="name">Colombian - Generic Chart of Accounts</field>
         <field name="currency_id" ref="base.COP"/>
         <field name="bank_account_code_prefix">1110</field>
-        <field name="cash_account_code_prefix">110505</field>
+        <field name="cash_account_code_prefix">1105</field>
         <field name="transfer_account_id" ref="co_puc_1115"/>
     </record>
 
