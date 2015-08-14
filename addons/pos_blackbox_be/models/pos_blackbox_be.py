@@ -9,20 +9,22 @@ from openerp.tools.translate import _
 class AccountTax(models.Model):
     _inherit = 'account.tax'
 
-    identification_letter = fields.Selection([('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')], default=lambda self: self.default_identification_letter())
+    identification_letter = fields.Selection([('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')], compute='_compute_identification_letter')
 
-    def default_identification_letter(self):
+    @api.one
+    @api.depends('amount_type', 'amount')
+    def _compute_identification_letter(self):
         if self.amount_type == "percent" or self.amount_type == "group":
             if self.amount == 21:
-                return "A"
+                self.identification_letter = "A"
             elif self.amount == 12:
-                return "B"
-            elif self.amount == 8:
-                return "C"
+                self.identification_letter = "B"
+            elif self.amount == 6:
+                self.identification_letter = "C"
             elif self.amount == 0:
-                return "D"
+                self.identification_letter = "D"
             else:
-                raise UserError(_("Can't determine the tax type required for the Fiscal Data Module. Only 21%, 12%, 8% and 0% are allowed."))
+                return False
         else:
             return False
 
