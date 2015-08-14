@@ -88,23 +88,6 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return filtered_char_array.join("");
         },
 
-        _get_vat_code: function() {
-            var tax = this.get_taxes()[0]; // todo jov: multiple taxes
-
-            // todo jov: put this stuff on account.tax
-            if (tax.amount === 21) {
-                return "A";
-            } else if (tax.amount === 12) {
-                return "B";
-            } else if (tax.amount === 8) {
-                return "C";
-            } else if (tax.amount === 0) {
-                return "D";
-            }
-
-            throw "Tax amount " + tax.amount + " doesn't have a VAT code.";
-        },
-
         // for both amount and price
         // price should be in eurocents
         // amount should be in gram
@@ -171,6 +154,23 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             }
         },
 
+        _get_vat_letter: function () {
+            var taxes = this.get_taxes()[0];
+            var line_name = this.get_product().display_name;
+
+            if (! taxes) {
+                throw new Error(line_name + " has no tax associated with it.");
+            }
+
+            var vat_letter = taxes.identification_letter;
+
+            if (! vat_letter) {
+                throw new Error(line_name + " has an invalid tax amount. Only 21%, 12%, 6% and 0% are allowed.");
+            }
+
+            return vat_letter;
+        },
+
         generate_plu_line: function () {
             // |--------+-------------+-------+-----|
             // | AMOUNT | DESCRIPTION | PRICE | VAT |
@@ -185,13 +185,13 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             var amount = this._get_amount_for_plu();
             var description = this.get_product().display_name;
             var price_in_eurocents = this.get_display_price() * 100;
-            var vat_code = this._get_vat_code();
+            var vat_letter = this._get_vat_letter();
 
             amount = this._prepare_number_for_plu(amount, 4);
             description = this._prepare_description_for_plu(description);
             price_in_eurocents = this._prepare_number_for_plu(price_in_eurocents, 8);
 
-            return amount + description + price_in_eurocents + vat_code;
+            return amount + description + price_in_eurocents + vat_letter;
         }
     });
 
@@ -204,6 +204,25 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             });
 
             return order_str;
+        },
+
+        get_base_price_in_eurocents_per_tax_letter: function () {
+            var base_price_per_tax_letter = {
+                'A': 0,
+                'B': 0,
+                'C': 0,
+                'D': 0
+            };
+
+            this.get_orderlines().forEach(function (current, index, array) {
+                var tax_letter = current._get_vat_letter();
+
+                if (tax_letter) {
+                    base_price_per_tax_letter[tax_letter] += Math.floor(current.get_price_without_tax() * 100);
+                }
+            });
+
+            return base_price_per_tax_letter;
         },
 
         calculate_hash: function() {
@@ -273,10 +292,13 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             var self = this;
             var payment_screen_super = this._super.bind(self);
 
+            // todo jov: this is all wrong, just immediately do the
+            // hash and sign and deal with whatever comes up
             this.pos.proxy.request_fdm_identification().then(function (response) {
                 var order = self.pos.get_order();
-                // var hash = order.calculate_hash();
+                var hash = "";
 
+                hash = order.calculate_hash();
                 // console.log(order._hash_and_sign_string());
 
                 response = self.pos.proxy.parse_fdm_identification_response(response);
@@ -337,12 +359,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             var insz_or_bis_number = this.pos.get_cashier().insz_or_bis_number;
 
             if (! insz_or_bis_number) {
-                this.pos.gui.show_popup("error", {
-                    'title': _t("Error"),
-                    'body':  _t("INSZ or BIS number not set for current cashier."),
-                });
-
-                return False;
+                throw new Error("INSZ or BIS number not set for current cashier.");
             }
 
             packet.add_field(new FDMPacketField("ticket date", 8, moment().format("YYYYMMDD")));
@@ -368,15 +385,17 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
             packet.add_field(new FDMPacketField("total amount to pay in eurocent", 11, (order.get_due() * 100).toString(), " "));
 
-            // packet.add_field(new FDMPacketField("tax percentage 1", 4, "")); // todo jov
-            // packet.add_field(new FDMPacketField("amount at tax percentage 1 in eurocent", 11, "")); // todo jov
-            // packet.add_field(new FDMPacketField("tax percentage 2", 4, "")); // todo jov
-            // packet.add_field(new FDMPacketField("amount at tax percentage 2 in eurocent", 11, "")); // todo jov
-            // packet.add_field(new FDMPacketField("tax percentage 3", 4, "")); // todo jov
-            // packet.add_field(new FDMPacketField("amount at tax percentage 3 in eurocent", 11, "")); // todo jov
-            // packet.add_field(new FDMPacketField("tax percentage 4", 4, "")); // todo jov
-            // packet.add_field(new FDMPacketField("amount at tax percentage 4 in eurocent", 11, "")); // todo jov
-            // packet.add_field(new FDMPacketField("PLU hash", 40, order.calculate_hash()));
+            var tax_amounts = order.get_base_price_in_eurocents_per_tax_letter();
+            packet.add_field(new FDMPacketField("tax percentage 1", 4, "2100"));
+            packet.add_field(new FDMPacketField("amount at tax percentage 1 in eurocent", 11, tax_amounts['A'].toString(), " "));
+            packet.add_field(new FDMPacketField("tax percentage 2", 4, "1200"));
+            packet.add_field(new FDMPacketField("amount at tax percentage 2 in eurocent", 11, tax_amounts['B'].toString(), " "));
+            packet.add_field(new FDMPacketField("tax percentage 3", 4, " 600"));
+            packet.add_field(new FDMPacketField("amount at tax percentage 3 in eurocent", 11, tax_amounts['C'].toString(), " "));
+            packet.add_field(new FDMPacketField("tax percentage 4", 4, " 000"));
+            packet.add_field(new FDMPacketField("amount at tax percentage 4 in eurocent", 11, tax_amounts['D'].toString(), " "));
+            packet.add_field(new FDMPacketField("PLU hash", 40, order.calculate_hash()));
+
             console.log(packet.to_human_readable_string());
 
             return packet;
@@ -399,7 +418,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                 });
             });
             user_model.fields.push("insz_or_bis_number");
-            debugger;
+
             var tax_model = _.find(this.models, function (model) {
                 return model.model === "account.tax";
             });

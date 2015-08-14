@@ -15,10 +15,10 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
             },
             'taxes_by_id': [
                 {},
-                {'amount': 21}, // type A
-                {'amount': 12}, // type B
-                {'amount':  6}, // type C
-                {'amount':  0}  // type D
+                {'amount': 21, 'identification_letter': "A"}, // type A
+                {'amount': 12, 'identification_letter': "B"}, // type B
+                {'amount':  6, 'identification_letter': "C"}, // type C
+                {'amount':  0, 'identification_letter': "D"}  // type D
             ],
             'units_by_id': [{
                 "name": "Unit(s)",
@@ -120,7 +120,7 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
         };
 
         pos.taxes = _.map(pos.taxes_by_id, function (tax, id) {
-            return {'id': id, 'amount': tax.amount};
+            return {'id': id, 'amount': tax.amount, 'identification_letter': tax.identification_letter};
         });
 
         return pos;
