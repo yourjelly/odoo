@@ -257,6 +257,12 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return _.map(this.fields, function (field) {
                 return field.to_string();
             }).join("");
+        },
+
+        to_human_readable_string: function () {
+            return _.map(this.fields, function (field) {
+                return field.name + ": " + field.to_string();
+            }).join("\n");
         }
 
         // todo jov: send: function () {}?
@@ -325,16 +331,32 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return this.build_request("I");
         },
 
+        // todo jov: p77
         build_fdm_hash_and_sign_request: function (order) {
             var packet = this.build_request("H");
 
             packet.add_field(new FDMPacketField("ticket date", 8, moment().format("YYYYMMDD")));
             packet.add_field(new FDMPacketField("ticket time", 6, moment().format("HHmmss")));
-            // packet.add_field(new FDMPacketField("insz or bis number", 11, "")); // todo jov
-            // packet.add_field(new FDMPacketField("production number POS", 14, "")); // todo jov
-            // packet.add_field(new FDMPacketField("ticket number", 6, "")); // todo jov
-            // packet.add_field(new FDMPacketField("event label", 2, "")); // todo jov
-            // packet.add_field(new FDMPacketField("total amount to pay in eurocent", 11, "")); // todo jov
+            packet.add_field(new FDMPacketField("insz or bis number", 11, this.pos.get_cashier().insz_or_bis_number));
+
+            // todo jov:
+            // they want PPPPPPP to uniquely identify users, don't think we can do that
+            // id   cert license-key
+            // BXXX CCC  PPPPPPP
+            packet.add_field(new FDMPacketField("production number POS", 14, "0", "0"));
+
+            // todo jov:
+            // this should be truly sequential (so always +1) also across sessions
+            // so probably just add a field on the point_of_sale
+            packet.add_field(new FDMPacketField("ticket number", 6, order.sequence_number.toString(), "0"));
+
+            // todo jov:
+            // p3 pdf
+            // most normal thing is normal sales => NS
+            // but there's also the training and pro forma (implement?)
+            packet.add_field(new FDMPacketField("event label", 2, "NS"));
+
+            packet.add_field(new FDMPacketField("total amount to pay in eurocent", 11, (order.get_due() * 100).toString(), " "));
 
             // packet.add_field(new FDMPacketField("tax percentage 1", 4, "")); // todo jov
             // packet.add_field(new FDMPacketField("amount at tax percentage 1 in eurocent", 11, "")); // todo jov
@@ -345,6 +367,9 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             // packet.add_field(new FDMPacketField("tax percentage 4", 4, "")); // todo jov
             // packet.add_field(new FDMPacketField("amount at tax percentage 4 in eurocent", 11, "")); // todo jov
             // packet.add_field(new FDMPacketField("PLU hash", 40, order.calculate_hash()));
+            console.log(packet.to_human_readable_string());
+
+            debugger;
 
             return packet;
         },
@@ -358,14 +383,20 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
     var _posmodelproto = models.PosModel.prototype;
     models.PosModel = models.PosModel.extend({
+        // todo jov: use exports.load_fields = function(model_name, fields) {
         initialize: function (session, attributes) {
             var user_model = _.find(this.models, function (model) {
                 return model.model === "res.users" && _.find(model.fields, function (field) {
                     return field === "pos_security_pin";
                 });
             });
-
             user_model.fields.push("insz_or_bis_number");
+            debugger;
+            var tax_model = _.find(this.models, function (model) {
+                return model.model === "account.tax";
+            });
+            tax_model.fields.push("identification_letter");
+
             _posmodelproto.initialize.apply(this, arguments);
         }
     });
@@ -376,7 +407,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             this._super();
 
             this.$('.button.request-fdm-identification').click(function () {
-                console.log(self.pos.proxy.build_fdm_hash_and_sign_request());
+                console.log(self.pos.proxy.build_fdm_hash_and_sign_request(self.pos.get_order()));
 
                 console.log("Sending identification request to controller...");
 
