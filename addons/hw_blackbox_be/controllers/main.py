@@ -77,7 +77,7 @@ class BlackboxDriver(hw_proxy.Proxy):
                     got_response = True
                     ser.write(chr(0x06))
                 else:
-                    _logger.warning("received ACK but not response, sending NACK...")
+                    _logger.warning("received ACK but not a valid response, sending NACK...")
                     sent_nacks += 1
                     ser.write(chr(0x15))
 
@@ -91,12 +91,8 @@ class BlackboxDriver(hw_proxy.Proxy):
             ser.close()
             return ""
 
-    @http.route('/hw_proxy/request_fdm_identification/', type='json', auth='none', cors='*')
-    def request_fdm_identification(self, high_layer):
+    @http.route('/hw_proxy/request_blackbox/', type='json', auth='none', cors='*')
+    def request_blackbox(self, high_layer, response_size):
         to_send = self._wrap_low_layer_around(high_layer)
 
-        return self._send_to_blackbox(to_send, 59)
-
-        # if good:
-        #     return {'weight': scale_thread.get_weight(), 'unit':'kg', 'info': scale_thread.get_weight_info()}
-        # return None
+        return self._send_to_blackbox(to_send, response_size)

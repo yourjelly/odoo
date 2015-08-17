@@ -292,24 +292,20 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             var self = this;
             var payment_screen_super = this._super.bind(self);
 
-            // todo jov: this is all wrong, just immediately do the
-            // hash and sign and deal with whatever comes up
-            this.pos.proxy.request_fdm_identification().then(function (response) {
-                var order = self.pos.get_order();
-                var hash = "";
-
-                hash = order.calculate_hash();
-                // console.log(order._hash_and_sign_string());
-
-                response = self.pos.proxy.parse_fdm_identification_response(response);
-
-                if (response.vsc_identification_number) {
-                    payment_screen_super(force_validation);
-                } else {
+            var order = self.pos.get_order();
+            this.pos.proxy.request_fdm_hash_and_sign(order).then(function (response) {
+                if (! response) {
                     self.gui.show_popup("error", {
                         'title': _t("Fiscal Data Module error"),
                         'body':  _t("Could not connect to the Fiscal Data Module."),
                     });
+                } else {
+                    // todo jov: deal with error codes
+                    var parsed_response = self.pos.proxy.parse_fdm_hash_and_sign_response(response);
+                    console.log(response);
+                    console.log(parsed_response);
+
+                    // payment_screen_super(force_validation);
                 }
             });
         }
@@ -318,7 +314,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     devices.ProxyDevice.include({
         sequence_number: 0,
 
-        increment_sequence_number: function () {
+        _increment_sequence_number: function () {
             this.sequence_number = (this.sequence_number + 1) % 100;
         },
 
@@ -328,33 +324,52 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             packet.add_field(new FDMPacketField("id", 1, id));
             packet.add_field(new FDMPacketField("sequence number", 2, this.sequence_number.toString(), "0"));
             packet.add_field(new FDMPacketField("retry number", 1, "0"));
-            this.increment_sequence_number();
+            this._increment_sequence_number();
 
             return packet;
         },
 
-        parse_fdm_identification_response: function (response) {
+        _parse_fdm_common_response: function (response) {
             return {
-                identifier: response[0], // 0
-                sequence_number: parseInt(response.substr(1, 2), 10), // 1, 2
-                retry_counter: parseInt(response[3], 10), // 3
-                error_1: parseInt(response[4], 10), // 4
-                error_2: parseInt(response.substr(5, 2), 10), // 5, 6
-                error_3: parseInt(response.substr(7, 3), 10), // 7, 8, 9
-                fdm_unique_production_number: response.substr(10, 11), // 10-20
-                fdm_firmware_version_number: response.substr(21, 20), // 22-40
-                fdm_communication_protocol_version: response[41], // 41
-                vsc_identification_number: response.substr(42, 14), // 42-55
-                vsc_version_number: parseInt(response.substr(56, 3), 10) // 56-59
+                identifier: response[0],
+                sequence_number: parseInt(response.substr(1, 2), 10),
+                retry_counter: parseInt(response[3], 10),
+                error_1: parseInt(response[4], 10),
+                error_2: parseInt(response.substr(5, 2), 10),
+                error_3: parseInt(response.substr(7, 3), 10),
+                fdm_unique_production_number: response.substr(10, 11),
             };
         },
 
-        build_fdm_identification_request: function () {
+        parse_fdm_identification_response: function (response) {
+            return _.extend(this._parse_fdm_common_response(response),
+                            {
+                                fdm_firmware_version_number: response.substr(21, 20),
+                                fdm_communication_protocol_version: response[41],
+                                vsc_identification_number: response.substr(42, 14),
+                                vsc_version_number: parseInt(response.substr(56, 3), 10)
+                            });
+        },
+
+        parse_fdm_hash_and_sign_response: function (response) {
+            return _.extend(this._parse_fdm_common_response(response),
+                            {
+                                vsc_identification_number: response.substr(21, 14),
+                                date: response.substr(35, 8),
+                                time: response.substr(43, 6),
+                                event_label: response.substr(49, 2),
+                                vsc_ticket_counter: parseInt(response.substr(51, 9)),
+                                vsc_total_ticket_counter: parseInt(response.substr(60, 9)),
+                                signature: response.substr(69, 40)
+                            });
+        },
+
+        _build_fdm_identification_request: function () {
             return this.build_request("I");
         },
 
         // todo jov: p77
-        build_fdm_hash_and_sign_request: function (order) {
+        _build_fdm_hash_and_sign_request: function (order) {
             var packet = this.build_request("H");
             var insz_or_bis_number = this.pos.get_cashier().insz_or_bis_number;
 
@@ -396,15 +411,25 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             packet.add_field(new FDMPacketField("amount at tax percentage 4 in eurocent", 11, tax_amounts['D'].toString(), " "));
             packet.add_field(new FDMPacketField("PLU hash", 40, order.calculate_hash()));
 
-            console.log(packet.to_human_readable_string());
-
             return packet;
         },
 
         request_fdm_identification: function () {
             var self = this;
 
-            return this.message('request_fdm_identification', {'high_layer': self.build_fdm_identification_request().to_string()});
+            return this.message('request_blackbox', {
+                'high_layer': self._build_fdm_identification_request().to_string(),
+                'response_size': 59
+            });
+        },
+
+        request_fdm_hash_and_sign: function (order) {
+            var self = this;
+
+            return this.message('request_blackbox', {
+                'high_layer': self._build_fdm_hash_and_sign_request(order).to_string(),
+                'response_size': 109
+            });
         }
     });
 
@@ -443,7 +468,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             });
 
             this.$('.button.build-hash-and-sign-request').click(function () {
-                console.log(self.pos.proxy.build_fdm_hash_and_sign_request(self.pos.get_order()));
+                console.log(self.pos.proxy._build_fdm_hash_and_sign_request(self.pos.get_order()).to_human_readable_string());
             });
         }
     });
