@@ -299,6 +299,8 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                         'body':  _t("PIN accepted."),
                     });
                 }
+
+                return true;
             } else if (error_1 === 1) { // warnings
                 if (error_2 === 1) {
                     this.gui.show_popup("error", {
@@ -321,30 +323,67 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                         'body':  _t("Unspecified warning."),
                     });
                 }
-            } else if (error_1 === 2) { // errors
+
+                return true;
+            } else { // errors
                 if (error_2 === 1) {
-                    throw new Error("No Vat Signing Card or Vat Signing Card broken.");
+                    this.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("No Vat Signing Card or Vat Signing Card broken."),
+                    });
                 } else if (error_2 === 2) {
-                    throw new Error("Vat Signing Card not initialized with PIN.");
+                    this.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("Vat Signing Card not initialized with PIN."),
+                    });
                 } else if (error_2 === 3) {
-                    throw new Error("Vat Signing Card blocked.");
+                    this.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("Vat Signing Card blocked."),
+                    });
                 } else if (error_2 === 4) {
-                    throw new Error("Invalid PIN.");
+                    this.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("Invalid PIN."),
+                    });
                 } else if (error_2 === 5) {
-                    throw new Error("Fiscal Data Module memory full.");
+                    this.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("Fiscal Data Module memory full."),
+                    });
                 } else if (error_2 === 6) {
-                    throw new Error("Unknown identifier.");
+                    this.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("Unknown identifier."),
+                    });
                 } else if (error_2 === 7) {
-                    throw new Error("Invalid data in message.");
+                    this.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("Invalid data in message."),
+                    });
                 } else if (error_2 === 8) {
-                    throw new Error("Fiscal Data Module not operational.");
+                    this.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("Fiscal Data Module not operational."),
+                    });
                 } else if (error_2 === 9) {
-                    throw new Error("Fiscal Data Module real time clock corrupt.");
+                    this.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("Fiscal Data Module real time clock corrupt."),
+                    });
                 } else if (error_2 === 10) {
-                    throw new Error("Vat Signing Card not compatible with Fiscal Data Module.");
+                    this.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("Vat Signing Card not compatible with Fiscal Data Module."),
+                    });
                 } else if (error_2 === 99) {
-                    throw new Error("Unspecified error.");
+                    this.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("Unspecified error."),
+                    });
                 }
+
+                return false;
             }
         },
 
@@ -365,9 +404,9 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                     console.log(response);
                     console.log(parsed_response);
 
-                    self._handle_fdm_errors(parsed_response);
-
-                    // payment_screen_super(force_validation);
+                    if (self._handle_fdm_errors(parsed_response)) {
+                        // payment_screen_super(force_validation);
+                    }
                 }
             });
         }
