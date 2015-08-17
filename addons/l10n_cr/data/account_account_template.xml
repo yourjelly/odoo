@@ -4,34 +4,6 @@
         Resource: account.account.template
         Account templates for Costa Rica
         -->
-        <record id="account_account_template_0_111111" model="account.account.template">
-            <field name="code">0-111111</field>
-            <field name="name">0-Fondo de caja oficinas centrales CRC</field>
-            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
-            <field name="reconcile" eval="True"/>
-            <field name="chart_template_id" ref="account_chart_template_0"/>
-        </record>
-        <record id="account_account_template_0_111121" model="account.account.template">
-            <field name="code">0-111121</field>
-            <field name="name">0-Fondo de caja oficinas centrales USD</field>
-            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
-            <field name="reconcile" eval="True"/>
-            <field name="chart_template_id" ref="account_chart_template_0"/>
-        </record>
-        <record id="account_account_template_0_111211" model="account.account.template">
-            <field name="code">0-111211</field>
-            <field name="name">0-Cuenta en CRC 1</field>
-            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
-            <field name="reconcile" eval="True"/>
-            <field name="chart_template_id" ref="account_chart_template_0"/>
-        </record>
-        <record id="account_account_template_0_111221" model="account.account.template">
-            <field name="code">0-111221</field>
-            <field name="name">0-Cuenta en USD 1</field>
-            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
-            <field name="reconcile" eval="True"/>
-            <field name="chart_template_id" ref="account_chart_template_0"/>
-        </record>
         <record id="account_account_template_0_111301" model="account.account.template">
             <field name="code">0-111301</field>
             <field name="name">0-Cuenta PayPal 1</field>
@@ -308,35 +280,35 @@
         <record id="account_account_template_0_212101" model="account.account.template">
             <field name="code">0-212101</field>
             <field name="name">0-Impuesto de ventas por pagar</field>
-            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
         <record id="account_account_template_0_212102" model="account.account.template">
             <field name="code">0-212102</field>
             <field name="name">0-Impuesto de ventas pagado</field>
-            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
         <record id="account_account_template_0_212201" model="account.account.template">
             <field name="code">0-212201</field>
             <field name="name">0-Impuesto de renta por pagar</field>
-            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
         <record id="account_account_template_0_212202" model="account.account.template">
             <field name="code">0-212202</field>
             <field name="name">0-Adelantos de impuesto de renta</field>
-            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
         <record id="account_account_template_0_212203" model="account.account.template">
             <field name="code">0-212203</field>
             <field name="name">0-Retenciones de impuesto de renta</field>
-            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
             <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
@@ -709,20 +681,6 @@
             <field name="name">0-Diferencial cambiario</field>
             <field name="user_type_id" ref="account.data_account_type_expenses"/>
             <field name="reconcile" eval="False"/>
-            <field name="chart_template_id" ref="account_chart_template_0"/>
-        </record>
-        <record id="account_account_template_x111111" model="account.account.template">
-            <field name="code">x111111</field>
-            <field name="name">xFondo de caja oficinas centrales CRC</field>
-            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
-            <field name="reconcile" eval="True"/>
-            <field name="chart_template_id" ref="account_chart_template_0"/>
-        </record>
-        <record id="account_account_template_x111121" model="account.account.template">
-            <field name="code">x111121</field>
-            <field name="name">xFondo de caja oficinas centrales USD</field>
-            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
-            <field name="reconcile" eval="True"/>
             <field name="chart_template_id" ref="account_chart_template_0"/>
         </record>
 
