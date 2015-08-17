@@ -288,7 +288,67 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     });
 
     PaymentScreenWidget.include({
-        validate_order: function(force_validation) {
+        _handle_fdm_errors: function (parsed_response) {
+            var error_1 = parsed_response.error_1;
+            var error_2 = parsed_response.error_2;
+
+            if (error_1 === 0) { // no errors
+                if (error_2 === 1) {
+                    this.gui.show_popup("confirm", {
+                        'title': _t("Fiscal Data Module"),
+                        'body':  _t("PIN accepted."),
+                    });
+                }
+            } else if (error_1 === 1) { // warnings
+                if (error_2 === 1) {
+                    this.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module warning"),
+                        'body':  _t("Fiscal Data Module memory 90% full."),
+                    });
+                } else if (error_2 === 2) {
+                    this.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module warning"),
+                        'body':  _t("Already handled request."),
+                    });
+                } else if (error_2 === 3) {
+                    this.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module warning"),
+                        'body':  _t("No record."),
+                    });
+                } else if (error_2 === 99) {
+                    this.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module warning"),
+                        'body':  _t("Unspecified warning."),
+                    });
+                }
+            } else if (error_1 === 2) { // errors
+                if (error_2 === 1) {
+                    throw new Error("No Vat Signing Card or Vat Signing Card broken.");
+                } else if (error_2 === 2) {
+                    throw new Error("Vat Signing Card not initialized with PIN.");
+                } else if (error_2 === 3) {
+                    throw new Error("Vat Signing Card blocked.");
+                } else if (error_2 === 4) {
+                    throw new Error("Invalid PIN.");
+                } else if (error_2 === 5) {
+                    throw new Error("Fiscal Data Module memory full.");
+                } else if (error_2 === 6) {
+                    throw new Error("Unknown identifier.");
+                } else if (error_2 === 7) {
+                    throw new Error("Invalid data in message.");
+                } else if (error_2 === 8) {
+                    throw new Error("Fiscal Data Module not operational.");
+                } else if (error_2 === 9) {
+                    throw new Error("Fiscal Data Module real time clock corrupt.");
+                } else if (error_2 === 10) {
+                    throw new Error("Vat Signing Card not compatible with Fiscal Data Module.");
+                } else if (error_2 === 99) {
+                    throw new Error("Unspecified error.");
+                }
+            }
+        },
+
+        validate_order: function (force_validation) {
             var self = this;
             var payment_screen_super = this._super.bind(self);
 
@@ -304,6 +364,8 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                     var parsed_response = self.pos.proxy.parse_fdm_hash_and_sign_response(response);
                     console.log(response);
                     console.log(parsed_response);
+
+                    self._handle_fdm_errors(parsed_response);
 
                     // payment_screen_super(force_validation);
                 }
@@ -410,6 +472,9 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             packet.add_field(new FDMPacketField("tax percentage 4", 4, " 000"));
             packet.add_field(new FDMPacketField("amount at tax percentage 4 in eurocent", 11, tax_amounts['D'].toString(), " "));
             packet.add_field(new FDMPacketField("PLU hash", 40, order.calculate_hash()));
+
+            console.log(order._hash_and_sign_string());
+            console.log(order.calculate_hash());
 
             return packet;
         },
