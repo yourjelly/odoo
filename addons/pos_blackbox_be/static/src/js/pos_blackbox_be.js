@@ -422,7 +422,10 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         sequence_number: 0,
 
         _increment_sequence_number: function () {
-            this.sequence_number = (this.sequence_number + 1) % 100;
+            var sequence_number = this.pos.db.load('sequence_number', 0);
+            this.pos.db.save('sequence_number', (sequence_number + 1) % 100);
+
+            return sequence_number;
         },
 
         build_request: function (id) {
