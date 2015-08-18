@@ -289,6 +289,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
     PaymentScreenWidget.include({
         _handle_fdm_errors: function (parsed_response) {
+            var self = this;
             var error_1 = parsed_response.error_1;
             var error_2 = parsed_response.error_2;
 
@@ -332,9 +333,14 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                         'body':  _t("No Vat Signing Card or Vat Signing Card broken."),
                     });
                 } else if (error_2 === 2) {
-                    this.gui.show_popup("error", {
-                        'title': _t("Fiscal Data Module error"),
-                        'body':  _t("Vat Signing Card not initialized with PIN."),
+                    this.gui.show_popup("number", {
+                        'title': _t("Please initialize the Vat Signing Card with PIN."),
+                        'confirm': function (pin) {
+                            self.pos.proxy.request_fdm_pin_verification(pin).then(function (response) {
+                                var parsed_response = self.pos.proxy.parse_fdm_hash_and_sign_response(response);
+                                self._handle_fdm_errors(parsed_response);
+                            });
+                        }
                     });
                 } else if (error_2 === 3) {
                     this.gui.show_popup("error", {
@@ -469,6 +475,13 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return this.build_request("I");
         },
 
+        _build_fdm_pin_request: function (pin) {
+            var packet = this.build_request("P");
+            packet.add_field(new FDMPacketField("pin code", 5, pin.toString(), "0"));
+
+            return packet;
+        },
+
         // todo jov: p77
         _build_fdm_hash_and_sign_request: function (order) {
             var packet = this.build_request("H");
@@ -524,6 +537,15 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return this.message('request_blackbox', {
                 'high_layer': self._build_fdm_identification_request().to_string(),
                 'response_size': 59
+            });
+        },
+
+        request_fdm_pin_verification: function (pin) {
+            var self = this;
+
+            return this.message('request_blackbox', {
+                'high_layer': self._build_fdm_pin_request(pin).to_string(),
+                'response_size': 35
             });
         },
 
