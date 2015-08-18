@@ -396,8 +396,17 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         validate_order: function (force_validation) {
             var self = this;
             var payment_screen_super = this._super.bind(self);
-
             var order = self.pos.get_order();
+
+            if (! this.pos.get_cashier().insz_or_bis_number) {
+                this.gui.show_popup("error", {
+                    'title': _t("Fiscal Data Module error"),
+                    'body':  _t("INSZ or BIS number not set for current cashier."),
+                });
+
+                return;
+            }
+
             this.pos.proxy.request_fdm_hash_and_sign(order).then(function (response) {
                 if (! response) {
                     self.gui.show_popup("error", {
@@ -489,10 +498,6 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         _build_fdm_hash_and_sign_request: function (order) {
             var packet = this.build_request("H");
             var insz_or_bis_number = this.pos.get_cashier().insz_or_bis_number;
-
-            if (! insz_or_bis_number) {
-                throw new Error("INSZ or BIS number not set for current cashier.");
-            }
 
             packet.add_field(new FDMPacketField("ticket date", 8, moment().format("YYYYMMDD")));
             packet.add_field(new FDMPacketField("ticket time", 6, moment().format("HHmmss")));
