@@ -3,6 +3,7 @@
 
 import logging
 import serial
+from threading import Lock
 
 import openerp
 from openerp import http
@@ -12,6 +13,8 @@ import openerp.addons.hw_proxy.controllers.main as hw_proxy
 _logger = logging.getLogger(__name__)
 
 class BlackboxDriver(hw_proxy.Proxy):
+    blackbox_lock = Lock()
+
     def _lrc(self, msg):
         lrc = 0
 
@@ -95,4 +98,7 @@ class BlackboxDriver(hw_proxy.Proxy):
     def request_blackbox(self, high_layer, response_size):
         to_send = self._wrap_low_layer_around(high_layer)
 
-        return self._send_to_blackbox(to_send, response_size)
+        with self.blackbox_lock:
+            response = self._send_to_blackbox(to_send, response_size)
+
+        return response
