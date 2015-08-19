@@ -479,7 +479,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                                                                     parsed_response.event_label);
                         order.blackbox_signature = parsed_response.signature;
                         order.blackbox_vsc_identification_number = parsed_response.vsc_identification_number;
-                        order.blackbox_unique_production_number = parsed_response.fdm_unique_production_number;
+                        order.blackbox_unique_fdm_production_number = parsed_response.fdm_unique_production_number;
                         order.blackbox_plu_hash = self._prepare_plu_hash_for_ticket(packet.fields[packet.fields.length - 1].content);
 
                         validate_order_super(force_validation);
@@ -564,10 +564,12 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             packet.add_field(new FDMPacketField("insz or bis number", 11, insz_or_bis_number));
 
             // todo jov:
-            // they want PPPPPPP to uniquely identify users, don't think we can do that
+            // format is kind of weird
             // id   cert license-key
             // BXXX CCC  PPPPPPP
-            packet.add_field(new FDMPacketField("production number POS", 14, "0", "0"));
+            // postgres database id is 36 bytes
+            // so take 12 least significant of that and append with 2 bytes pos_config.id
+            packet.add_field(new FDMPacketField("production number POS", 14, this.pos.blackbox_pos_production_id));
 
             // todo jov:
             // this should be truly sequential (so always +1) also across sessions
@@ -644,6 +646,24 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                 console.log(self.pos.proxy._build_fdm_hash_and_sign_request(self.pos.get_order()).to_human_readable_string());
             });
         }
+    });
+
+    models.load_models({
+        'model': "ir.config_parameter",
+        'fields': ['key', 'value'],
+        'domain': [['key', '=', 'database.uuid']],
+        'loaded': function (self, params) {
+            // 12 lsb of db uid + 2 bytes pos config
+            var config_id = self.config.id.toString();
+
+            if (config_id.length < 2) {
+                config_id = "0" + config_id;
+            }
+
+            self.blackbox_pos_production_id = params[0].value.substr(-12) + config_id;
+        }
+    }, {
+        'after': "pos.config"
     });
 
     models.load_fields("res.users", "insz_or_bis_number");
