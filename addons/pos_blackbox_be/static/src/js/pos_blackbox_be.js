@@ -414,12 +414,12 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                         'body':  _t("Could not connect to the Fiscal Data Module."),
                     });
                 } else {
-                    // todo jov: deal with error codes
                     var parsed_response = self.pos.proxy.parse_fdm_hash_and_sign_response(response);
                     console.log(response);
                     console.log(parsed_response);
 
                     if (self._handle_fdm_errors(parsed_response)) {
+                        console.log("success without errors");
                         // payment_screen_super(force_validation);
                     }
                 }
@@ -554,31 +554,14 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
         request_fdm_hash_and_sign: function (order) {
             var self = this;
+            var packet = self._build_fdm_hash_and_sign_request(order);
 
-            return this.message('request_blackbox', {
-                'high_layer': self._build_fdm_hash_and_sign_request(order).to_string(),
+            console.log(packet.to_human_readable_string());
+
+            return this.message('request_blackbox_mock_hash_and_sign', {
+                'high_layer': packet.to_string(),
                 'response_size': 109
             });
-        }
-    });
-
-    var _posmodelproto = models.PosModel.prototype;
-    models.PosModel = models.PosModel.extend({
-        // todo jov: use exports.load_fields = function(model_name, fields) {
-        initialize: function (session, attributes) {
-            var user_model = _.find(this.models, function (model) {
-                return model.model === "res.users" && _.find(model.fields, function (field) {
-                    return field === "pos_security_pin";
-                });
-            });
-            user_model.fields.push("insz_or_bis_number");
-
-            var tax_model = _.find(this.models, function (model) {
-                return model.model === "account.tax";
-            });
-            tax_model.fields.push("identification_letter");
-
-            _posmodelproto.initialize.apply(this, arguments);
         }
     });
 
@@ -601,6 +584,9 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             });
         }
     });
+
+    models.load_fields("res.users", "insz_or_bis_number");
+    models.load_fields("account.tax", "identification_letter");
 
     return {
         'FDMPacketField': FDMPacketField,

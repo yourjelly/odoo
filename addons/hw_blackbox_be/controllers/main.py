@@ -102,3 +102,27 @@ class BlackboxDriver(hw_proxy.Proxy):
             response = self._send_to_blackbox(to_send, response_size)
 
         return response
+
+    @http.route('/hw_proxy/request_blackbox_mock_hash_and_sign/', type='json', auth='none', cors='*')
+    def request_blackbox_mock_hash_and_sign(self, high_layer, response_size):
+        response = ""
+        response += "H"
+        response += "00" # seq
+        response += "0" # retry
+        response += "0" # errors
+        response += "00"
+        response += "000"
+        response += "RET02000123"
+        response += "0887456321-002"
+
+        import datetime
+        current_time = datetime.datetime.now()
+        response += current_time.strftime("%Y%m%d")
+        response += current_time.strftime("%H%M%S")
+
+        response += "000000000" # counter1
+        response += "000000000" # counter2
+
+        response += "ADC83B19E793491B1C6EA0FD8B46CD9F32E592FC" # sha1 empty string
+
+        return response
