@@ -112,16 +112,17 @@ class BlackboxDriver(hw_proxy.Proxy):
         response += "0" # errors
         response += "00"
         response += "000"
-        response += "RET02000123"
-        response += "0887456321-002"
+        response += "RET02000123" # FDM uid
+        response += "0887456321-002" # VSC uid
 
         import datetime
         current_time = datetime.datetime.now()
         response += current_time.strftime("%Y%m%d")
         response += current_time.strftime("%H%M%S")
 
-        response += "000000000" # counter1
-        response += "000000000" # counter2
+        response += "NS" # event label
+        response += "000003214" # counter1
+        response += "000024322" # counter2
 
         response += "ADC83B19E793491B1C6EA0FD8B46CD9F32E592FC" # sha1 empty string
 
