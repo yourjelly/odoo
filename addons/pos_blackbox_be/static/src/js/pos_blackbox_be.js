@@ -442,6 +442,12 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return true;
         },
 
+        _prepare_plu_hash_for_ticket: function (hash) {
+            var amount_of_least_significant_characters = 8;
+
+            return hash.substr(-amount_of_least_significant_characters);
+        },
+
         validate_order: function (force_validation) {
             var self = this;
             var validate_order_super = this._super.bind(this);
@@ -450,8 +456,9 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             if (! this._required_information_filled_in()) {
                 return;
             }
-            
-            this.pos.proxy.request_fdm_hash_and_sign(order).then(function (response) {
+
+            var packet = this.pos.proxy._build_fdm_hash_and_sign_request(order);
+            this.pos.proxy.request_fdm_hash_and_sign(packet).then(function (response) {
                 if (! response) {
                     self.gui.show_popup("error", {
                         'title': _t("Fiscal Data Module error"),
@@ -473,7 +480,8 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                         order.blackbox_signature = parsed_response.signature;
                         order.blackbox_vsc_identification_number = parsed_response.vsc_identification_number;
                         order.blackbox_unique_production_number = parsed_response.fdm_unique_production_number;
-                        console.log("success without errors");
+                        order.blackbox_plu_hash = self._prepare_plu_hash_for_ticket(packet.fields[packet.fields.length - 1].content);
+
                         validate_order_super(force_validation);
                     }
                 }
@@ -606,9 +614,8 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             });
         },
 
-        request_fdm_hash_and_sign: function (order) {
+        request_fdm_hash_and_sign: function (packet) {
             var self = this;
-            var packet = self._build_fdm_hash_and_sign_request(order);
 
             console.log(packet.to_human_readable_string());
 
