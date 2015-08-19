@@ -44,7 +44,7 @@
                 </tr>
                 <tr>
                     <td>FDM ID:</td>
-                    <td class="pos-right-align"><t t-esc="order.blackbox_unique_production_number"/></td>
+                    <td class="pos-right-align"><t t-esc="order.blackbox_unique_fdm_production_number"/></td>
                 </tr>
                 <tr>
                     <td>VSC ID:</td>
@@ -55,6 +55,18 @@
                         PLU hash:
                     </td>
                     <td class="pos-right-align"><t t-esc="order.blackbox_plu_hash"/></td>
+                </tr>
+                <tr>
+                    <td>
+                        POS version:
+                    </td>
+                    <td class="pos-right-align">Odoo <t t-esc="widget.pos.version.server_version"/></td>
+                </tr>
+                <tr>
+                    <td>
+                        POS production ID:
+                    </td>
+                    <td class="pos-right-align"><t t-esc="widget.pos.blackbox_pos_production_id"/></td>
                 </tr>
                 <tr>
                     <td colspan="2">
