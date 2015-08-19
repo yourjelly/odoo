@@ -393,20 +393,64 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             }
         },
 
-        validate_order: function (force_validation) {
-            var self = this;
-            var validate_order_super = this._super.bind(this);
-            var order = self.pos.get_order();
+        _prepare_date_for_ticket: function (date) {
+            // format of date coming from blackbox is YYYYMMDD
+            var year = date.substr(0, 4);
+            var month = date.substr(4, 2);
+            var day = date.substr(6, 2);
 
+            return day + "/" + month + "/" + year;
+        },
+
+        _prepare_time_for_ticket: function (time) {
+            // format of time coming from blackbox is HHMMSS
+            var hours = time.substr(0, 2);
+            var minutes = time.substr(2, 2);
+            var seconds = time.substr(4, 2);
+
+            return hours + ":" + minutes + ":" + seconds;
+        },
+
+        _prepare_ticket_counter_for_ticket: function (counter, total_counter, event_type) {
+            return counter + "/" + total_counter + " " + event_type;
+        },
+
+        _required_information_filled_in: function () {
             if (! this.pos.get_cashier().insz_or_bis_number) {
                 this.gui.show_popup("error", {
                     'title': _t("Fiscal Data Module error"),
                     'body':  _t("INSZ or BIS number not set for current cashier."),
                 });
 
-                return;
+                return false;
+            } else if (! this.pos.company.street) {
+                this.gui.show_popup("error", {
+                    'title': _t("Fiscal Data Module error"),
+                    'body':  _t("Company address must be set."),
+                });
+
+                return false;
+            } else if (! this.pos.company.vat) {
+                this.gui.show_popup("error", {
+                    'title': _t("Fiscal Data Module error"),
+                    'body':  _t("VAT number must be set."),
+                });
+
+                return false;
             }
 
+            return true;
+        },
+
+        validate_order: function (force_validation) {
+            var self = this;
+            var validate_order_super = this._super.bind(this);
+            var order = self.pos.get_order();
+
+            if (! this._required_information_filled_in()) {
+                return;
+            }
+            
             this.pos.proxy.request_fdm_hash_and_sign(order).then(function (response) {
                 if (! response) {
                     self.gui.show_popup("error", {
@@ -419,6 +463,16 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                     console.log(parsed_response);
 
                     if (self._handle_fdm_errors(parsed_response)) {
+                        // put fields that we need on tickets on order
+                        order.blackbox_date = self._prepare_date_for_ticket(parsed_response.date);
+                        order.blackbox_time = self._prepare_time_for_ticket(parsed_response.time);
+                        order.blackbox_ticket_counter =
+                            self._prepare_ticket_counter_for_ticket(parsed_response.vsc_ticket_counter,
+                                                                    parsed_response.vsc_total_ticket_counter,
+                                                                    parsed_response.event_label);
+                        order.blackbox_signature = parsed_response.signature;
+                        order.blackbox_vsc_identification_number = parsed_response.vsc_identification_number;
+                        order.blackbox_unique_production_number = parsed_response.fdm_unique_production_number;
                         console.log("success without errors");
                         validate_order_super(force_validation);
                     }
@@ -587,6 +641,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
     models.load_fields("res.users", "insz_or_bis_number");
     models.load_fields("account.tax", "identification_letter");
+    models.load_fields("res.company", "street");
 
     return {
         'FDMPacketField': FDMPacketField,

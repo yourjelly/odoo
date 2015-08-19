@@ -10,4 +10,49 @@
             </ul>
         </t>
     </t>
+
+    <!-- p18 -->
+    <t t-extend="PosTicket">
+        <t t-jquery=".pos-sale-ticket" t-operation="prepend">
+            <div class="pos-center-align">VAT TICKET</div> <!-- todo jov: translate to BTW-KASTICKET -->
+        </t>
+        <t t-jquery="t[t-esc='widget.pos.company.name']" t-operation="after">
+            <br />
+            Address: <t t-esc="widget.pos.company.street"/><br />
+            VAT number: <t t-esc="widget.pos.company.vat"/>
+        </t>
+        <t t-jquery=".receipt-change" t-operation="after">
+            <br />
+            <table>
+                <tr>
+                    <td colspan="2">Control data:</td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <t t-esc="order.blackbox_date"/>, <t t-esc="order.blackbox_time"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Ticket counter:</td>
+                    <td class="pos-right-align"><t t-esc="order.blackbox_ticket_counter"/></td>
+                </tr>
+                <tr>
+                    <td colspan="2">Ticket signature:</td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="pos-right-align">
+                        &amp;nbsp;&amp;nbsp;<t t-esc="order.blackbox_signature"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Control module ID:</td>
+                    <td class="pos-right-align"><t t-esc="order.blackbox_unique_production_number"/></td>
+                </tr>
+                <tr>
+                    <td>VAT signing card ID:</td>
+                    <td class="pos-right-align"><t t-esc="order.blackbox_vsc_identification_number"/></td>
+                </tr>
+            </table>
+        </t>
+    </t>
 </templates>
