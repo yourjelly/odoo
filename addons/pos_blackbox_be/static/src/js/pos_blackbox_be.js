@@ -428,12 +428,11 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     });
 
     devices.ProxyDevice.include({
-        sequence_number: 0,
-
-        _increment_sequence_number: function () {
+        _get_sequence_number: function () {
             var sequence_number = this.pos.db.load('sequence_number', 0);
             this.pos.db.save('sequence_number', (sequence_number + 1) % 100);
 
+            console.log("using sequence number: " + sequence_number);
             return sequence_number;
         },
 
@@ -441,9 +440,8 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             var packet = new FDMPacket();
 
             packet.add_field(new FDMPacketField("id", 1, id));
-            packet.add_field(new FDMPacketField("sequence number", 2, this.sequence_number.toString(), "0"));
+            packet.add_field(new FDMPacketField("sequence number", 2, this._get_sequence_number().toString(), "0"));
             packet.add_field(new FDMPacketField("retry number", 1, "0"));
-            this._increment_sequence_number();
 
             return packet;
         },
@@ -532,9 +530,6 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             packet.add_field(new FDMPacketField("tax percentage 4", 4, " 000"));
             packet.add_field(new FDMPacketField("amount at tax percentage 4 in eurocent", 11, tax_amounts['D'].toString(), " "));
             packet.add_field(new FDMPacketField("PLU hash", 40, order.calculate_hash()));
-
-            console.log(order._hash_and_sign_string());
-            console.log(order.calculate_hash());
 
             return packet;
         },
