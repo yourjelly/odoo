@@ -21,6 +21,9 @@
             Address: <t t-esc="widget.pos.company.street"/><br />
             VAT number: <t t-esc="widget.pos.company.vat"/>
         </t>
+        <t t-jquery="t[t-esc*='widget.pos.cashier']" t-operation="after">
+            (ID: <t t-esc="widget.pos.get_cashier().insz_or_bis_number"/>)
+        </t>
         <t t-jquery=".receipt-change" t-operation="after">
             <br />
             <table>
