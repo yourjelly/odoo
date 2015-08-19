@@ -83,5 +83,10 @@
         <record id="base.user_root" model="res.users">
             <field name="insz_or_bis_number">01234567890</field>
         </record>
+
+        <record id="base.main_company" model="res.company">
+            <field name="street">Street 100, 1234 City</field>
+            <field name="vat">BE0477472701</field>
+        </record>
     </data>
 </odoo>
