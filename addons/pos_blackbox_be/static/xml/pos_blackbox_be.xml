@@ -28,32 +28,46 @@
             <br />
             <table>
                 <tr>
-                    <td colspan="2">Control data:</td>
-                </tr>
-                <tr>
                     <td colspan="2">
-                        <t t-esc="order.blackbox_date"/>, <t t-esc="order.blackbox_time"/>
+                        <div class="pos-center-align">Control data</div>
                     </td>
                 </tr>
                 <tr>
-                    <td>Ticket counter:</td>
+                    <td>
+                        FDM time:
+                    </td>
+                     <td class="pos-right-align"><t t-esc="order.blackbox_date"/>, <t t-esc="order.blackbox_time"/></td>
+                </tr>
+                <tr>
+                    <td>FDM ticket counter:</td>
                     <td class="pos-right-align"><t t-esc="order.blackbox_ticket_counter"/></td>
                 </tr>
                 <tr>
-                    <td colspan="2">Ticket signature:</td>
-                </tr>
-                <tr>
-                    <td colspan="2" class="pos-right-align">
-                        &amp;nbsp;&amp;nbsp;<t t-esc="order.blackbox_signature"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Control module ID:</td>
+                    <td>FDM ID:</td>
                     <td class="pos-right-align"><t t-esc="order.blackbox_unique_production_number"/></td>
                 </tr>
                 <tr>
-                    <td>VAT signing card ID:</td>
+                    <td>VSC ID:</td>
                     <td class="pos-right-align"><t t-esc="order.blackbox_vsc_identification_number"/></td>
+                </tr>
+                <tr>
+                    <td>
+                        PLU hash:
+                    </td>
+                    <td class="pos-right-align"><t t-esc="order.blackbox_plu_hash"/></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <br />
+                        <div class="pos-center-align">Ticket signature:</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div class="pos-center-align">
+                            <t t-esc="order.blackbox_signature"/>
+                        </div>
+                    </td>
                 </tr>
             </table>
         </t>
