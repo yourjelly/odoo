@@ -395,7 +395,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
         validate_order: function (force_validation) {
             var self = this;
-            var payment_screen_super = this._super.bind(self);
+            var validate_order_super = this._super.bind(this);
             var order = self.pos.get_order();
 
             if (! this.pos.get_cashier().insz_or_bis_number) {
@@ -420,7 +420,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
                     if (self._handle_fdm_errors(parsed_response)) {
                         console.log("success without errors");
-                        // payment_screen_super(force_validation);
+                        validate_order_super(force_validation);
                     }
                 }
             });
