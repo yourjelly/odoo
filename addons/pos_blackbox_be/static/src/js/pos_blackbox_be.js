@@ -196,7 +196,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     });
 
     models.Order = models.Order.extend({
-        _hash_and_sign_string: function() {
+        _hash_and_sign_string: function () {
             var order_str = "";
 
             this.get_orderlines().forEach(function (current, index, array) {
@@ -225,8 +225,12 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return base_price_per_tax_letter;
         },
 
-        calculate_hash: function() {
+        calculate_hash: function () {
             return Sha1.hash(this._hash_and_sign_string());
+        },
+
+        set_validation_time: function () {
+            this.blackbox_pos_receipt_time = moment();
         }
     });
 
@@ -457,6 +461,8 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                 return;
             }
 
+            order.set_validation_time();
+
             var packet = this.pos.proxy._build_fdm_hash_and_sign_request(order);
             this.pos.proxy.request_fdm_hash_and_sign(packet).then(function (response) {
                 if (! response) {
@@ -559,16 +565,15 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             var packet = this.build_request("H");
             var insz_or_bis_number = this.pos.get_cashier().insz_or_bis_number;
 
-            packet.add_field(new FDMPacketField("ticket date", 8, moment().format("YYYYMMDD")));
-            packet.add_field(new FDMPacketField("ticket time", 6, moment().format("HHmmss")));
+            packet.add_field(new FDMPacketField("ticket date", 8, order.blackbox_pos_receipt_time.format("YYYYMMDD")));
+            packet.add_field(new FDMPacketField("ticket time", 6, order.blackbox_pos_receipt_time.format("HHmmss")));
             packet.add_field(new FDMPacketField("insz or bis number", 11, insz_or_bis_number));
 
             // todo jov:
+            // p8
             // format is kind of weird
             // id   cert license-key
             // BXXX CCC  PPPPPPP
-            // postgres database id is 36 bytes
-            // so take 12 least significant of that and append with 2 bytes pos_config.id
             packet.add_field(new FDMPacketField("production number POS", 14, this.pos.blackbox_pos_production_id));
 
             // todo jov:
@@ -643,7 +648,10 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             });
 
             this.$('.button.build-hash-and-sign-request').click(function () {
-                console.log(self.pos.proxy._build_fdm_hash_and_sign_request(self.pos.get_order()).to_human_readable_string());
+                var order = self.pos.get_order();
+                order.set_validation_time();
+
+                console.log(self.pos.proxy._build_fdm_hash_and_sign_request(order).to_human_readable_string());
             });
         }
     });
