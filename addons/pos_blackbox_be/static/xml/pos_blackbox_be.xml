@@ -11,6 +11,14 @@
         </t>
     </t>
 
+    <t t-name="BlackboxIdentificationWidget">
+        <div class="oe_status js_blackbox_identification">
+            <div class="oe_icon oe_green">
+                <i class='fa fa-fw fa-archive'></i>
+            </div>
+        </div>
+    </t>
+
     <!-- p18 -->
     <t t-extend="PosTicket">
         <t t-jquery="t[t-esc='moment().format(\'L LT\')']" t-operation="replace">
