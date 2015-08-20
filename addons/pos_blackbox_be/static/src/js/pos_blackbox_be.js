@@ -154,7 +154,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             }
         },
 
-        _get_vat_letter: function () {
+        get_vat_letter: function () {
             var taxes = this.get_taxes()[0];
             var line_name = this.get_product().display_name;
 
@@ -185,7 +185,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             var amount = this._get_amount_for_plu();
             var description = this.get_product().display_name;
             var price_in_eurocents = this.get_display_price() * 100;
-            var vat_letter = this._get_vat_letter();
+            var vat_letter = this.get_vat_letter();
 
             amount = this._prepare_number_for_plu(amount, 4);
             description = this._prepare_description_for_plu(description);
@@ -206,6 +206,17 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return order_str;
         },
 
+        get_tax_percentage_for_tax_letter: function (tax_letter) {
+            var percentage_per_letter = {
+                'A': 21,
+                'B': 12,
+                'C': 6,
+                'D': 0
+            };
+
+            return percentage_per_letter[tax_letter];
+        },
+
         get_base_price_in_eurocents_per_tax_letter: function () {
             var base_price_per_tax_letter = {
                 'A': 0,
@@ -215,7 +226,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             };
 
             this.get_orderlines().forEach(function (current, index, array) {
-                var tax_letter = current._get_vat_letter();
+                var tax_letter = current.get_vat_letter();
 
                 if (tax_letter) {
                     base_price_per_tax_letter[tax_letter] += Math.floor(current.get_price_without_tax() * 100);
@@ -223,6 +234,20 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             });
 
             return base_price_per_tax_letter;
+        },
+
+        // returns an array of the form:
+        // [{'letter', 'amount'}, {'letter', 'amount'}, ...]
+        get_base_price_in_eurocents_per_tax_letter_list: function () {
+            var base_price_per_tax_letter = this.get_base_price_in_eurocents_per_tax_letter();
+            var base_price_per_tax_letter_list = _.map(_.keys(base_price_per_tax_letter), function (key) {
+                return {
+                    'letter': key,
+                    'amount': base_price_per_tax_letter[key]
+                };
+            });
+
+            return base_price_per_tax_letter_list;
         },
 
         calculate_hash: function () {
