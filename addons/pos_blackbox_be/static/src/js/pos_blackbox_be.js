@@ -5,6 +5,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     var devices = require('point_of_sale.devices');
     var chrome = require('point_of_sale.chrome');
     var Class = require('web.Class');
+    var PosBaseWidget = require('point_of_sale.BaseWidget');
     var PaymentScreenWidget = screens.PaymentScreenWidget;
 
     var _t      = core._t;
@@ -655,6 +656,51 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                 'high_layer': packet.to_string(),
                 'response_size': 109
             });
+        }
+    });
+
+    var BlackBoxIdentificationWidget = PosBaseWidget.extend({
+        template: 'BlackboxIdentificationWidget',
+        start: function () {
+            var self = this;
+
+            this.$el.click(function () {
+                self.pos.proxy.request_fdm_identification().then(function (response) {
+                    var parsed_response = self.pos.proxy.parse_fdm_identification_response(response);
+
+                    var list = _.map(_.pairs(_.pick(parsed_response, 'fdm_unique_production_number',
+                                                    'fdm_firmware_version_number',
+                                                    'fdm_communication_protocol_version',
+                                                    'vsc_identification_number',
+                                                    'vsc_version_number')), function (current) {
+                                                        return {
+                                                            'label': current[0].replace(/_/g, " ") + ": " + current[1]
+                                                        };
+                                                    });
+
+                    self.gui.show_popup("selection", {
+                        'title': _t("FDM identification"),
+                        'list': list
+                    });
+                });
+            });
+        },
+    });
+
+    chrome.Chrome.include({
+        build_widgets: function () {
+            // add blackbox id widget to left of proxy widget
+            var proxy_status_index = _.findIndex(this.widgets, function (widget) {
+                return widget.name === "proxy_status";
+            });
+
+            this.widgets.splice(proxy_status_index, 0, {
+                'name': 'blackbox_identification',
+                'widget': BlackBoxIdentificationWidget,
+                'append': '.pos-rightheader',
+            });
+
+            this._super();
         }
     });
 
