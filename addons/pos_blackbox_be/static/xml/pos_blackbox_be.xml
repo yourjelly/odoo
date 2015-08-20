@@ -27,6 +27,24 @@
         <t t-jquery="t[t-esc*='widget.pos.cashier']" t-operation="after">
             (ID: <t t-esc="widget.pos.get_cashier().insz_or_bis_number"/>)
         </t>
+        <t t-jquery=".receipt-orderlines t[t-esc='widget.format_currency(orderline.get_display_price())']" t-operation="replace">
+            <t t-esc="widget.format_currency(orderline.get_all_prices().priceWithTax)"/>
+        </t>
+        <t t-jquery=".receipt-orderlines td:last" t-operation="append">
+            <t t-esc="orderline.get_vat_letter()"/>
+        </t>
+        <t t-jquery=".receipt-total t[t-foreach='order.get_tax_details()']" t-operation="replace">
+            <t t-foreach="order.get_base_price_in_eurocents_per_tax_letter_list()" t-as="tax">
+                <t t-if="tax.amount">
+                    <tr>
+                        <td>Tax category <t t-esc="tax.letter"/> (<t t-esc="order.get_tax_percentage_for_tax_letter(tax.letter)"/>%):</td>
+                        <td class="pos-right-align">
+                            <t t-esc="widget.format_currency(tax.amount / 100)"/>
+                        </td>
+                    </tr>
+                </t>
+            </t>
+        </t>
         <t t-jquery=".receipt-change" t-operation="after">
             <br />
             <table>
