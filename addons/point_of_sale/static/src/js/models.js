@@ -229,11 +229,7 @@ exports.PosModel = Backbone.Model.extend({
         domain: function(self){ return [['id','=', self.pos_session.config_id[0]]]; },
         loaded: function(self,configs){
             self.config = configs[0];
-            self.config.use_proxy = self.config.iface_payment_terminal || 
-                                    self.config.iface_electronic_scale ||
-                                    self.config.iface_print_via_proxy  ||
-                                    self.config.iface_scan_via_proxy   ||
-                                    self.config.iface_cashdrawer;
+            self.config.use_proxy = self._need_proxy();
 
             if (self.config.company_id[0] !== self.user.company_id[0]) {
                 throw new Error(_t("Error: The Point of Sale User must belong to the same company as the Point of Sale. You are probably trying to load the point of sale as an administrator in a multi-company setup, with the administrator account set to the wrong company."));
@@ -739,6 +735,14 @@ exports.PosModel = Backbone.Model.extend({
         });
 
         return invoiced;
+    },
+
+    _need_proxy: function() {
+        return this.config.iface_payment_terminal ||
+               this.config.iface_electronic_scale ||
+               this.config.iface_print_via_proxy  ||
+               this.config.iface_scan_via_proxy   ||
+               this.config.iface_cashdrawer;
     },
 
     // wrapper around the _save_to_server that updates the synch status widget
