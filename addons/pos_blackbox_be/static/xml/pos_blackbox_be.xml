@@ -5,7 +5,6 @@
         <t t-jquery="div.content" t-operation="append">
             <p class="category">Blackbox</p>
             <ul>
-                <li class="button request-fdm-identification">Request FDM Identification</li>
                 <li class="button build-hash-and-sign-request">Build Hash&amp;Sign Request</li>
             </ul>
         </t>

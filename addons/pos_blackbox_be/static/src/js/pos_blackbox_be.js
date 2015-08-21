@@ -318,111 +318,6 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     });
 
     PaymentScreenWidget.include({
-        _handle_fdm_errors: function (parsed_response) {
-            var self = this;
-            var error_1 = parsed_response.error_1;
-            var error_2 = parsed_response.error_2;
-
-            if (error_1 === 0) { // no errors
-                if (error_2 === 1) {
-                    this.gui.show_popup("confirm", {
-                        'title': _t("Fiscal Data Module"),
-                        'body':  _t("PIN accepted."),
-                    });
-                }
-
-                return true;
-            } else if (error_1 === 1) { // warnings
-                if (error_2 === 1) {
-                    this.gui.show_popup("error", {
-                        'title': _t("Fiscal Data Module warning"),
-                        'body':  _t("Fiscal Data Module memory 90% full."),
-                    });
-                } else if (error_2 === 2) {
-                    this.gui.show_popup("error", {
-                        'title': _t("Fiscal Data Module warning"),
-                        'body':  _t("Already handled request."),
-                    });
-                } else if (error_2 === 3) {
-                    this.gui.show_popup("error", {
-                        'title': _t("Fiscal Data Module warning"),
-                        'body':  _t("No record."),
-                    });
-                } else if (error_2 === 99) {
-                    this.gui.show_popup("error", {
-                        'title': _t("Fiscal Data Module warning"),
-                        'body':  _t("Unspecified warning."),
-                    });
-                }
-
-                return true;
-            } else { // errors
-                if (error_2 === 1) {
-                    this.gui.show_popup("error", {
-                        'title': _t("Fiscal Data Module error"),
-                        'body':  _t("No Vat Signing Card or Vat Signing Card broken."),
-                    });
-                } else if (error_2 === 2) {
-                    this.gui.show_popup("number", {
-                        'title': _t("Please initialize the Vat Signing Card with PIN."),
-                        'confirm': function (pin) {
-                            self.pos.proxy.request_fdm_pin_verification(pin).then(function (response) {
-                                var parsed_response = self.pos.proxy.parse_fdm_hash_and_sign_response(response);
-                                self._handle_fdm_errors(parsed_response);
-                            });
-                        }
-                    });
-                } else if (error_2 === 3) {
-                    this.gui.show_popup("error", {
-                        'title': _t("Fiscal Data Module error"),
-                        'body':  _t("Vat Signing Card blocked."),
-                    });
-                } else if (error_2 === 4) {
-                    this.gui.show_popup("error", {
-                        'title': _t("Fiscal Data Module error"),
-                        'body':  _t("Invalid PIN."),
-                    });
-                } else if (error_2 === 5) {
-                    this.gui.show_popup("error", {
-                        'title': _t("Fiscal Data Module error"),
-                        'body':  _t("Fiscal Data Module memory full."),
-                    });
-                } else if (error_2 === 6) {
-                    this.gui.show_popup("error", {
-                        'title': _t("Fiscal Data Module error"),
-                        'body':  _t("Unknown identifier."),
-                    });
-                } else if (error_2 === 7) {
-                    this.gui.show_popup("error", {
-                        'title': _t("Fiscal Data Module error"),
-                        'body':  _t("Invalid data in message."),
-                    });
-                } else if (error_2 === 8) {
-                    this.gui.show_popup("error", {
-                        'title': _t("Fiscal Data Module error"),
-                        'body':  _t("Fiscal Data Module not operational."),
-                    });
-                } else if (error_2 === 9) {
-                    this.gui.show_popup("error", {
-                        'title': _t("Fiscal Data Module error"),
-                        'body':  _t("Fiscal Data Module real time clock corrupt."),
-                    });
-                } else if (error_2 === 10) {
-                    this.gui.show_popup("error", {
-                        'title': _t("Fiscal Data Module error"),
-                        'body':  _t("Vat Signing Card not compatible with Fiscal Data Module."),
-                    });
-                } else if (error_2 === 99) {
-                    this.gui.show_popup("error", {
-                        'title': _t("Fiscal Data Module error"),
-                        'body':  _t("Unspecified error."),
-                    });
-                }
-
-                return false;
-            }
-        },
-
         _prepare_date_for_ticket: function (date) {
             // format of date coming from blackbox is YYYYMMDD
             var year = date.substr(0, 4);
@@ -490,32 +385,21 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             order.set_validation_time();
 
             var packet = this.pos.proxy._build_fdm_hash_and_sign_request(order);
-            this.pos.proxy.request_fdm_hash_and_sign(packet).then(function (response) {
-                if (! response) {
-                    self.gui.show_popup("error", {
-                        'title': _t("Fiscal Data Module error"),
-                        'body':  _t("Could not connect to the Fiscal Data Module."),
-                    });
-                } else {
-                    var parsed_response = self.pos.proxy.parse_fdm_hash_and_sign_response(response);
-                    console.log(response);
-                    console.log(parsed_response);
+            this.pos.proxy.request_fdm_hash_and_sign(packet).then(function (parsed_response) {
+                if (parsed_response) {
+                    // put fields that we need on tickets on order
+                    order.blackbox_date = self._prepare_date_for_ticket(parsed_response.date);
+                    order.blackbox_time = self._prepare_time_for_ticket(parsed_response.time);
+                    order.blackbox_ticket_counter =
+                        self._prepare_ticket_counter_for_ticket(parsed_response.vsc_ticket_counter,
+                                                                parsed_response.vsc_total_ticket_counter,
+                                                                parsed_response.event_label);
+                    order.blackbox_signature = parsed_response.signature;
+                    order.blackbox_vsc_identification_number = parsed_response.vsc_identification_number;
+                    order.blackbox_unique_fdm_production_number = parsed_response.fdm_unique_production_number;
+                    order.blackbox_plu_hash = self._prepare_plu_hash_for_ticket(packet.fields[packet.fields.length - 1].content);
 
-                    if (self._handle_fdm_errors(parsed_response)) {
-                        // put fields that we need on tickets on order
-                        order.blackbox_date = self._prepare_date_for_ticket(parsed_response.date);
-                        order.blackbox_time = self._prepare_time_for_ticket(parsed_response.time);
-                        order.blackbox_ticket_counter =
-                            self._prepare_ticket_counter_for_ticket(parsed_response.vsc_ticket_counter,
-                                                                    parsed_response.vsc_total_ticket_counter,
-                                                                    parsed_response.event_label);
-                        order.blackbox_signature = parsed_response.signature;
-                        order.blackbox_vsc_identification_number = parsed_response.vsc_identification_number;
-                        order.blackbox_unique_fdm_production_number = parsed_response.fdm_unique_production_number;
-                        order.blackbox_plu_hash = self._prepare_plu_hash_for_ticket(packet.fields[packet.fields.length - 1].content);
-
-                        validate_order_super(force_validation);
-                    }
+                    validate_order_super(force_validation);
                 }
             });
         }
@@ -538,6 +422,124 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             packet.add_field(new FDMPacketField("retry number", 1, "0"));
 
             return packet;
+        },
+
+        // ignore_non_critical: will ignore everything (no errors and
+        // warnings) and will ignore certain 'real' errors defined in
+        // non_critical_errors
+        _handle_fdm_errors: function (parsed_response, ignore_non_critical) {
+            var self = this;
+            var error_1 = parsed_response.error_1;
+            var error_2 = parsed_response.error_2;
+
+            var non_critical_errors = [
+                1, // no vat signing card
+                2, // initialize vat signing card with pin
+                3, // vsc blocked
+                5, // memory full
+                9, // real time clock corrupt
+                10, // vsc not compatible
+            ];
+
+            if (error_1 === 0) { // no errors
+                if (error_2 === 1) {
+                    this.pos.gui.show_popup("confirm", {
+                        'title': _t("Fiscal Data Module"),
+                        'body':  _t("PIN accepted."),
+                    });
+                }
+
+                return true;
+            } else if (error_1 === 1 && ! ignore_non_critical) { // warnings
+                if (error_2 === 1) {
+                    this.pos.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module warning"),
+                        'body':  _t("Fiscal Data Module memory 90% full."),
+                    });
+                } else if (error_2 === 2) {
+                    this.pos.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module warning"),
+                        'body':  _t("Already handled request."),
+                    });
+                } else if (error_2 === 3) {
+                    this.pos.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module warning"),
+                        'body':  _t("No record."),
+                    });
+                } else if (error_2 === 99) {
+                    this.pos.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module warning"),
+                        'body':  _t("Unspecified warning."),
+                    });
+                }
+
+                return true;
+            } else { // errors
+                if (ignore_non_critical && non_critical_errors.indexOf(error_2) !== -1) {
+                    return true;
+                }
+
+                if (error_2 === 1) {
+                    this.pos.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("No Vat Signing Card or Vat Signing Card broken."),
+                    });
+                } else if (error_2 === 2) {
+                    this.pos.gui.show_popup("number", {
+                        'title': _t("Please initialize the Vat Signing Card with PIN."),
+                        'confirm': function (pin) {
+                            self.pos.proxy.request_fdm_pin_verification(pin);
+                        }
+                    });
+                } else if (error_2 === 3) {
+                    this.pos.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("Vat Signing Card blocked."),
+                    });
+                } else if (error_2 === 4) {
+                    this.pos.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("Invalid PIN."),
+                    });
+                } else if (error_2 === 5) {
+                    this.pos.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("Fiscal Data Module memory full."),
+                    });
+                } else if (error_2 === 6) {
+                    this.pos.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("Unknown identifier."),
+                    });
+                } else if (error_2 === 7) {
+                    this.pos.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("Invalid data in message."),
+                    });
+                } else if (error_2 === 8) {
+                    this.pos.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("Fiscal Data Module not operational."),
+                    });
+                } else if (error_2 === 9) {
+                    this.pos.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("Fiscal Data Module real time clock corrupt."),
+                    });
+                } else if (error_2 === 10) {
+                    this.pos.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("Vat Signing Card not compatible with Fiscal Data Module."),
+                    });
+                } else if (error_2 === 99) {
+                    this.pos.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  _t("Unspecified error."),
+                    });
+                }
+
+                return false;
+            }
         },
 
         _parse_fdm_common_response: function (response) {
@@ -629,12 +631,32 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return packet;
         },
 
+        _show_could_not_connect_error: function () {
+            self.pos.gui.show_popup("error", {
+                'title': _t("Fiscal Data Module error"),
+                'body':  _t("Could not connect to the Fiscal Data Module."),
+            });
+        },
+
         request_fdm_identification: function () {
             var self = this;
 
             return this.message('request_blackbox', {
                 'high_layer': self._build_fdm_identification_request().to_string(),
                 'response_size': 59
+            }).then(function (response) {
+                if (! response) {
+                    self._show_could_not_connect_error();
+                    return "";
+                } else {
+                    var parsed_response = self.parse_fdm_identification_response(response);
+
+                    if (self._handle_fdm_errors(parsed_response, true)) {
+                        return parsed_response;
+                    } else {
+                        return "";
+                    }
+                }
             });
         },
 
@@ -644,6 +666,15 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return this.message('request_blackbox', {
                 'high_layer': self._build_fdm_pin_request(pin).to_string(),
                 'response_size': 35
+            }).then(function (response) {
+                if (! response) {
+                    self._show_could_not_connect_error();
+                } else {
+                    var parsed_response = self.parse_fdm_identification_response(response); // todo jov: write parse_fdm_pin_response
+
+                    // pin being verified will show up as 'error'
+                    self._handle_fdm_errors(parsed_response);
+                }
             });
         },
 
@@ -655,6 +686,19 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return this.message('request_blackbox_mock_hash_and_sign', {
                 'high_layer': packet.to_string(),
                 'response_size': 109
+            }).then(function (response) {
+                if (! response) {
+                    self._show_could_not_connect_error();
+                    return "";
+                } else {
+                    var parsed_response = self.parse_fdm_hash_and_sign_response(response);
+
+                    if (self._handle_fdm_errors(parsed_response)) {
+                        return parsed_response;
+                    } else {
+                        return "";
+                    }
+                }
             });
         }
     });
@@ -665,23 +709,23 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             var self = this;
 
             this.$el.click(function () {
-                self.pos.proxy.request_fdm_identification().then(function (response) {
-                    var parsed_response = self.pos.proxy.parse_fdm_identification_response(response);
+                self.pos.proxy.request_fdm_identification().then(function (parsed_response) {
+                    if (parsed_response) {
+                        var list = _.map(_.pairs(_.pick(parsed_response, 'fdm_unique_production_number',
+                                                        'fdm_firmware_version_number',
+                                                        'fdm_communication_protocol_version',
+                                                        'vsc_identification_number',
+                                                        'vsc_version_number')), function (current) {
+                                                            return {
+                                                                'label': current[0].replace(/_/g, " ") + ": " + current[1]
+                                                            };
+                                                        });
 
-                    var list = _.map(_.pairs(_.pick(parsed_response, 'fdm_unique_production_number',
-                                                    'fdm_firmware_version_number',
-                                                    'fdm_communication_protocol_version',
-                                                    'vsc_identification_number',
-                                                    'vsc_version_number')), function (current) {
-                                                        return {
-                                                            'label': current[0].replace(/_/g, " ") + ": " + current[1]
-                                                        };
-                                                    });
-
-                    self.gui.show_popup("selection", {
-                        'title': _t("FDM identification"),
-                        'list': list
-                    });
+                        self.gui.show_popup("selection", {
+                            'title': _t("FDM identification"),
+                            'list': list
+                        });
+                    }
                 });
             });
         },
@@ -709,15 +753,6 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             var self = this;
             this._super();
 
-            this.$('.button.request-fdm-identification').click(function () {
-                console.log("Sending identification request to controller...");
-
-                self.pos.proxy.request_fdm_identification().then(function (response) {
-                    console.log(response);
-                    console.log(self.pos.proxy.parse_fdm_identification_response(response));
-                });
-            });
-
             this.$('.button.build-hash-and-sign-request').click(function () {
                 var order = self.pos.get_order();
                 order.set_validation_time();
@@ -732,7 +767,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         'fields': ['key', 'value'],
         'domain': [['key', '=', 'database.uuid']],
         'loaded': function (self, params) {
-            // 12 lsb of db uid + 2 bytes pos config
+            // 12 lsB of db uid + 2 bytes pos config
             var config_id = self.config.id.toString();
 
             if (config_id.length < 2) {
