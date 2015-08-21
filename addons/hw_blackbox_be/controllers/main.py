@@ -38,7 +38,7 @@ class BlackboxDriver(http.Controller):
     # wins.
     def _find_device_path_by_probing(self):
         path = "/dev/serial/by-id/"
-        probe_message = self._wrap_low_layer_around("S000")
+        probe_message = self._wrap_low_level_message_around("S000")
 
         try:
             devices = listdir(path)
@@ -69,16 +69,16 @@ class BlackboxDriver(http.Controller):
 
         return lrc
 
-    def _wrap_low_layer_around(self, high_layer):
-        bcc = self._lrc(high_layer)
+    def _wrap_low_level_message_around(self, high_level_message):
+        bcc = self._lrc(high_level_message)
 
-        low_layer = ""
-        low_layer += chr(0x02)
-        low_layer += high_layer
-        low_layer += chr(0x03)
-        low_layer += chr(bcc)
+        low_level_message = ""
+        low_level_message += chr(0x02)
+        low_level_message += high_level_message
+        low_level_message += chr(0x03)
+        low_level_message += chr(bcc)
 
-        return low_layer
+        return low_level_message
 
     def _send_and_wait_for_ack(self, packet, serial):
         ack = 0
@@ -141,8 +141,8 @@ class BlackboxDriver(http.Controller):
             return ""
 
     @http.route('/hw_proxy/request_blackbox/', type='json', auth='none', cors='*')
-    def request_blackbox(self, high_layer, response_size):
-        to_send = self._wrap_low_layer_around(high_layer)
+    def request_blackbox(self, high_level_message, response_size):
+        to_send = self._wrap_low_level_message_around(high_level_message)
 
         with self.blackbox_lock:
             response = self._send_to_blackbox(to_send, response_size, self.device_path)
@@ -150,7 +150,7 @@ class BlackboxDriver(http.Controller):
         return response
 
     @http.route('/hw_proxy/request_blackbox_mock_hash_and_sign/', type='json', auth='none', cors='*')
-    def request_blackbox_mock_hash_and_sign(self, high_layer, response_size):
+    def request_blackbox_mock_hash_and_sign(self, high_level_message, response_size):
         response = ""
         response += "H"
         response += "00" # seq

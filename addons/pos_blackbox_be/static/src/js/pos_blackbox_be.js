@@ -645,7 +645,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             var self = this;
 
             return this.message('request_blackbox', {
-                'high_layer': self._build_fdm_identification_request().to_string(),
+                'high_level_message': self._build_fdm_identification_request().to_string(),
                 'response_size': 59
             }).then(function (response) {
                 if (! response) {
@@ -667,7 +667,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             var self = this;
 
             return this.message('request_blackbox', {
-                'high_layer': self._build_fdm_pin_request(pin).to_string(),
+                'high_level_message': self._build_fdm_pin_request(pin).to_string(),
                 'response_size': 35
             }).then(function (response) {
                 if (! response) {
@@ -687,7 +687,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             console.log(packet.to_human_readable_string());
 
             return this.message('request_blackbox_mock_hash_and_sign', {
-                'high_layer': packet.to_string(),
+                'high_level_message': packet.to_string(),
                 'response_size': 109
             }).then(function (response) {
                 if (! response) {
