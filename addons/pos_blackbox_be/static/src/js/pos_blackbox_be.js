@@ -747,21 +747,25 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                 'append': '.pos-rightheader',
             });
 
-            this._super();
-        }
-    });
-
-    chrome.DebugWidget.include({
-        start: function () {
-            var self = this;
-            this._super();
-
-            this.$('.button.build-hash-and-sign-request').click(function () {
-                var order = self.pos.get_order();
-                order.set_validation_time();
-
-                console.log(self.pos.proxy._build_fdm_hash_and_sign_request(order).to_human_readable_string());
+            var debug_widget = _.find(this.widgets, function (widget) {
+                return widget.name === "debug";
             });
+
+            debug_widget.widget.include({
+                start: function () {
+                    var self = this;
+                    this._super();
+
+                    this.$('.button.build-hash-and-sign-request').click(function () {
+                        var order = self.pos.get_order();
+                        order.set_validation_time();
+
+                        console.log(self.pos.proxy._build_fdm_hash_and_sign_request(order).to_human_readable_string());
+                    });
+                }
+            });
+
+            this._super();
         }
     });
 
