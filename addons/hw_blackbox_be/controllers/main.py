@@ -3,17 +3,60 @@
 
 import logging
 import serial
+from os import listdir
 from threading import Lock
 
-import openerp
 from openerp import http
 
 import openerp.addons.hw_proxy.controllers.main as hw_proxy
 
 _logger = logging.getLogger(__name__)
 
-class BlackboxDriver(hw_proxy.Proxy):
+class BlackboxDriver(http.Controller):
     blackbox_lock = Lock()
+
+    def __init__(self):
+        self.set_status('connecting')
+        self.device_path = self._find_device_path_by_probing()
+
+    def set_status(self, status, messages=[]):
+        self.status = {
+            'status': status,
+            'messages': messages
+        }
+
+    def get_status(self):
+        return self.status
+
+    # There is no real way to find a serial device, all you can really
+    # find is the name of the serial to usb interface, which in the
+    # case of the blackbox is not defined because it doesn't always
+    # come with it's own interface (eg. Retail Cleancash SC-B). So, in
+    # order to differentiate between other devices like this, what
+    # we'll do is probe every serial device with an FDM status
+    # request. The first device to give an answer that makes sense
+    # wins.
+    def _find_device_path_by_probing(self):
+        path = "/dev/serial/by-id/"
+        probe_message = self._wrap_low_layer_around("S000")
+
+        try:
+            devices = listdir(path)
+        except OSError:
+            _logger.warning(path + " doesn't exist")
+        else:
+            for device in listdir(path):
+                path_to_device = path + device
+                _logger.debug("Probing " + device)
+
+                if self._send_to_blackbox(probe_message, 21, path_to_device):
+                    _logger.debug(device + " will be used as the blackbox")
+                    self.set_status("connected", [device])
+                    return path_to_device
+
+            _logger.warning("Blackbox could not be found")
+            self.set_status("error", ["Couldn't find the Fiscal Data Module"])
+            return ""
 
     def _lrc(self, msg):
         lrc = 0
@@ -59,8 +102,11 @@ class BlackboxDriver(hw_proxy.Proxy):
             _logger.error("retried " + str(MAX_RETRIES) + " times without receiving ACK, is blackbox properly connected?")
             return False
 
-    def _send_to_blackbox(self, packet, response_size):
-        ser = serial.Serial(port='/dev/ttyUSB0',
+    def _send_to_blackbox(self, packet, response_size, device_path):
+        if not device_path:
+            return ""
+
+        ser = serial.Serial(port=device_path,
                             baudrate=19200,
                             timeout=0.300) # low level protocol timeout
         MAX_NACKS = 4
@@ -99,7 +145,7 @@ class BlackboxDriver(hw_proxy.Proxy):
         to_send = self._wrap_low_layer_around(high_layer)
 
         with self.blackbox_lock:
-            response = self._send_to_blackbox(to_send, response_size)
+            response = self._send_to_blackbox(to_send, response_size, self.device_path)
 
         return response
 
@@ -127,3 +173,5 @@ class BlackboxDriver(hw_proxy.Proxy):
         response += "ADC83B19E793491B1C6EA0FD8B46CD9F32E592FC" # sha1 empty string
 
         return response
+
+hw_proxy.drivers['fiscal_data_module'] = BlackboxDriver()
