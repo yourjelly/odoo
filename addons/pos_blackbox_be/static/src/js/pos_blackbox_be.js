@@ -731,6 +731,10 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                     }
                 });
             });
+
+            if (! this.pos.config.use_proxy) {
+                this.$().addClass('oe_hidden');
+            }
         },
     });
 
