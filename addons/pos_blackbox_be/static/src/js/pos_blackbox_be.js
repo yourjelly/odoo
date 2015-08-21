@@ -635,7 +635,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         },
 
         _show_could_not_connect_error: function () {
-            self.pos.gui.show_popup("error", {
+            this.pos.gui.show_popup("error", {
                 'title': _t("Fiscal Data Module error"),
                 'body':  _t("Could not connect to the Fiscal Data Module."),
             });
