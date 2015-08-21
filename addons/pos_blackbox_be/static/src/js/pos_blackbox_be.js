@@ -13,7 +13,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     models.Orderline = models.Orderline.extend({
         // generates a table of the form
         // {..., 'char_to_translate': translation_of_char, ...}
-        _generate_translation_table: function() {
+        _generate_translation_table: function () {
             var replacements = [
                 ["ÄÅÂÁÀâäáàã", "A"],
                 ["Ææ", "AE"],
@@ -29,15 +29,15 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                 ["ýÝÿ", "Y"]
             ];
 
-            var lowercase_to_uppercase = _.range("a".charCodeAt(0), "z".charCodeAt(0) + 1).map(function(lowercase_ascii_code) {
+            var lowercase_to_uppercase = _.range("a".charCodeAt(0), "z".charCodeAt(0) + 1).map(function (lowercase_ascii_code) {
                 return [String.fromCharCode(lowercase_ascii_code), String.fromCharCode(lowercase_ascii_code).toUpperCase()];
             });
             replacements = replacements.concat(lowercase_to_uppercase);
 
             var lookup_table = {};
 
-            _.forEach(replacements, function(letter_group) {
-                _.forEach(letter_group[0], function(special_char) {
+            _.forEach(replacements, function (letter_group) {
+                _.forEach(letter_group[0], function (special_char) {
                     lookup_table[special_char] = letter_group[1];
                 });
             });
@@ -45,7 +45,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return lookup_table;
         },
 
-        _replace_hash_and_sign_chars: function(str) {
+        _replace_hash_and_sign_chars: function (str) {
             if (typeof str !== 'string') {
                 throw "Can only handle strings";
             }
@@ -70,7 +70,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         // and SPACE as well. We filter SPACE out here though, because
         // SPACE will only be used in DATA of hash and sign as description
         // padding
-        _filter_allowed_hash_and_sign_chars: function(str) {
+        _filter_allowed_hash_and_sign_chars: function (str) {
             if (typeof str !== 'string') {
                 throw "Can only handle strings";
             }
@@ -92,7 +92,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         // for both amount and price
         // price should be in eurocents
         // amount should be in gram
-        _prepare_number_for_plu: function(number, field_length) {
+        _prepare_number_for_plu: function (number, field_length) {
             number = Math.abs(number);
             number = Math.round(number); // todo jov: don't like this
 
@@ -112,7 +112,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return number_string;
         },
 
-        _prepare_description_for_plu: function(description) {
+        _prepare_description_for_plu: function (description) {
             description = this._replace_hash_and_sign_chars(description);
             description = this._filter_allowed_hash_and_sign_chars(description);
 
@@ -296,10 +296,6 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
         add_field: function (field) {
             this.fields.push(field);
-        },
-
-        from_string: function (packet_string) {
-            // todo jov: parse FDM responses
         },
 
         to_string: function () {
