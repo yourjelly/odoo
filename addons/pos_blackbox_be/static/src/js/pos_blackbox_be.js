@@ -564,6 +564,13 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                             });
         },
 
+        parse_fdm_pin_response: function (response) {
+            return _.extend(this._parse_fdm_common_response(response),
+                            {
+                                vsc_identification_number: response.substr(21, 14),
+                            });
+        },
+
         parse_fdm_hash_and_sign_response: function (response) {
             return _.extend(this._parse_fdm_common_response(response),
                             {
@@ -670,7 +677,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                 if (! response) {
                     self._show_could_not_connect_error();
                 } else {
-                    var parsed_response = self.parse_fdm_identification_response(response); // todo jov: write parse_fdm_pin_response
+                    var parsed_response = self.parse_fdm_pin_response(response);
 
                     // pin being verified will show up as 'error'
                     self._handle_fdm_errors(parsed_response);
