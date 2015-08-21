@@ -769,6 +769,17 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         }
     });
 
+    var posmodel_need_proxy_super = models.PosModel.prototype._need_proxy;
+    models.PosModel = models.PosModel.extend({
+        _need_proxy: function () {
+            if (this.config) {
+                return this.config.iface_blackbox_be || posmodel_need_proxy_super.bind(this)();
+            } else {
+                return false;
+            }
+        }
+    });
+
     models.load_models({
         'model': "ir.config_parameter",
         'fields': ['key', 'value'],
