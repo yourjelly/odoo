@@ -14,7 +14,7 @@ class AccountTax(models.Model):
     @api.one
     @api.depends('amount_type', 'amount')
     def _compute_identification_letter(self):
-        if self.type_tax_use == "sale" and (self.amount_type == "percent" or self.amount_type == "group"):
+        if self.type_tax_use == "sale" and (self.amount_type == "percent" or self.amount_type == "group"): # todo jov: do we really need group?
             if self.amount == 21:
                 self.identification_letter = "A"
             elif self.amount == 12:
