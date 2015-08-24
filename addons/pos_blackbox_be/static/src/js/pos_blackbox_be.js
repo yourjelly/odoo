@@ -160,13 +160,13 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             var line_name = this.get_product().display_name;
 
             if (! taxes) {
-                throw new Error(line_name + " has no tax associated with it.");
+                throw new Error("FDM error: " + line_name + " has no tax associated with it.");
             }
 
             var vat_letter = taxes.identification_letter;
 
             if (! vat_letter) {
-                throw new Error(line_name + " has an invalid tax amount. Only 21%, 12%, 6% and 0% are allowed.");
+                throw new Error("FDM error: " + line_name + " has an invalid tax amount. Only 21%, 12%, 6% and 0% are allowed.");
             }
 
             return vat_letter;
@@ -337,14 +337,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         },
 
         _required_information_filled_in: function () {
-            if (! this.pos.get_cashier().insz_or_bis_number) {
-                this.gui.show_popup("error", {
-                    'title': _t("Fiscal Data Module error"),
-                    'body':  _t("INSZ or BIS number not set for current cashier."),
-                });
-
-                return false;
-            } else if (! this.pos.company.street) {
+            if (! this.pos.company.street) {
                 this.gui.show_popup("error", {
                     'title': _t("Fiscal Data Module error"),
                     'body':  _t("Company address must be set."),
@@ -380,24 +373,37 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
             order.set_validation_time();
 
-            var packet = this.pos.proxy._build_fdm_hash_and_sign_request(order);
-            this.pos.proxy.request_fdm_hash_and_sign(packet).then(function (parsed_response) {
-                if (parsed_response) {
-                    // put fields that we need on tickets on order
-                    order.blackbox_date = self._prepare_date_for_ticket(parsed_response.date);
-                    order.blackbox_time = self._prepare_time_for_ticket(parsed_response.time);
-                    order.blackbox_ticket_counter =
-                        self._prepare_ticket_counter_for_ticket(parsed_response.vsc_ticket_counter,
-                                                                parsed_response.vsc_total_ticket_counter,
-                                                                parsed_response.event_label);
-                    order.blackbox_signature = parsed_response.signature;
-                    order.blackbox_vsc_identification_number = parsed_response.vsc_identification_number;
-                    order.blackbox_unique_fdm_production_number = parsed_response.fdm_unique_production_number;
-                    order.blackbox_plu_hash = self._prepare_plu_hash_for_ticket(packet.fields[packet.fields.length - 1].content);
+            try {
+                var packet = this.pos.proxy._build_fdm_hash_and_sign_request(order);
+                this.pos.proxy.request_fdm_hash_and_sign(packet).then(function (parsed_response) {
+                    if (parsed_response) {
+                        // put fields that we need on tickets on order
+                        order.blackbox_date = self._prepare_date_for_ticket(parsed_response.date);
+                        order.blackbox_time = self._prepare_time_for_ticket(parsed_response.time);
+                        order.blackbox_ticket_counter =
+                            self._prepare_ticket_counter_for_ticket(parsed_response.vsc_ticket_counter,
+                                                                    parsed_response.vsc_total_ticket_counter,
+                                                                    parsed_response.event_label);
+                        order.blackbox_signature = parsed_response.signature;
+                        order.blackbox_vsc_identification_number = parsed_response.vsc_identification_number;
+                        order.blackbox_unique_fdm_production_number = parsed_response.fdm_unique_production_number;
+                        order.blackbox_plu_hash = self._prepare_plu_hash_for_ticket(packet.fields[packet.fields.length - 1].content);
 
-                    validate_order_super(force_validation);
+                        validate_order_super(force_validation);
+                    }
+                });
+            } catch (e) {
+                var exception_prefix = "FDM error:";
+
+                if (e.message.startsWith(exception_prefix)) {
+                    this.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  e.message.substr(exception_prefix.length),
+                    });
+                } else {
+                    throw e;
                 }
-            });
+            }
         }
     });
 
@@ -595,6 +601,10 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         _build_fdm_hash_and_sign_request: function (order) {
             var packet = this.build_request("H");
             var insz_or_bis_number = this.pos.get_cashier().insz_or_bis_number;
+
+            if (! insz_or_bis_number) {
+                throw new Error("FDM error: INSZ or BIS number not set for current cashier.");
+            }
 
             packet.add_field(new FDMPacketField("ticket date", 8, order.blackbox_pos_receipt_time.format("YYYYMMDD")));
             packet.add_field(new FDMPacketField("ticket time", 6, order.blackbox_pos_receipt_time.format("HHmmss")));
