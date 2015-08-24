@@ -617,9 +617,6 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             // BXXX CCC  PPPPPPP
             packet.add_field(new FDMPacketField("production number POS", 14, this.pos.blackbox_pos_production_id));
 
-            // todo jov:
-            // this should be truly sequential (so always +1) also across sessions
-            // so probably just add a field on the point_of_sale
             packet.add_field(new FDMPacketField("ticket number", 6, order.sequence_number.toString(), "0"));
 
             // todo jov:
@@ -696,7 +693,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
             console.log(packet.to_human_readable_string());
 
-            return this.message('request_blackbox_mock_hash_and_sign', {
+            return this.message('request_blackbox', {
                 'high_level_message': packet.to_string(),
                 'response_size': 109
             }).then(function (response) {
@@ -705,6 +702,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                     return "";
                 } else {
                     var parsed_response = self.parse_fdm_hash_and_sign_response(response);
+                    console.log(parsed_response);
 
                     if (self._handle_fdm_errors(parsed_response)) {
                         return parsed_response;
