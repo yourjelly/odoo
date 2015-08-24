@@ -48,6 +48,8 @@ You could use this simplified accounting in case you work with an (external) acc
         'report/inherited_layouts.xml',
         'views/account_journal_dashboard_view.xml',
         'wizard/account_report_common_view.xml',
+        'wizard/account_report_partner_balance_view.xml',
+        'views/report_partnerbalance.xml',
     ],
     'demo': [
         'demo/account_demo.xml',

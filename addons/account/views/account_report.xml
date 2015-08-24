@@ -23,5 +23,14 @@
             attachment_use="False"
         />
 
+        <report 
+            id="action_report_account_balance"
+            model="account.account"
+            string="Partner Balance"
+            report_type="qweb-pdf"
+            name="account.report_partnerbalance"
+            file="account.report_partnerbalance"
+        />
+
     </data>
 </openerp>
