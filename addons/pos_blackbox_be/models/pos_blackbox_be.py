@@ -44,3 +44,6 @@ class pos_order(models.Model):
     _inherit = 'pos.order'
 
     # todo jov: add the things that will be coming back from the FDM as fields
+    @api.multi
+    def unlink(self):
+        raise UserError(_('Deleting of point of sale orders is not allowed.'))
