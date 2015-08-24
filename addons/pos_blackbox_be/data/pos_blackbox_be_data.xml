@@ -8,5 +8,23 @@
             <field name="factor">1000</field>
             <field name="uom_type">smaller</field>
         </record>
+        <record id="product_product_work_in" model="product.product">
+            <field name="name">Work In</field>
+            <field name="standard_price">0.0</field>
+            <field name="list_price">0.0</field>
+            <field name="type">consu</field>
+            <field name="uom_id" ref="product.product_uom_unit"/>
+            <field name="uom_po_id" ref="product.product_uom_unit"/>
+            <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-00-L')])]"/>
+        </record>
+        <record id="product_product_work_out" model="product.product">
+            <field name="name">Work Out</field>
+            <field name="standard_price">0.0</field>
+            <field name="list_price">0.0</field>
+            <field name="type">consu</field>
+            <field name="uom_id" ref="product.product_uom_unit"/>
+            <field name="uom_po_id" ref="product.product_uom_unit"/>
+            <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-00-L')])]"/>
+        </record>
     </data>
 </odoo>
