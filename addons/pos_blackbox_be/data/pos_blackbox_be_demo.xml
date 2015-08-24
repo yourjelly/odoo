@@ -8,6 +8,7 @@
             <field name="standard_price">2.20</field>
             <field name="list_price">2.20</field>
             <field name="type">consu</field>
+            <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-21-L')])]"/>
         </record>
         <record id="product_spaghetti" model="product.product">
             <field name="name">Spaghetti Bolognaise (KLEIN)</field>
@@ -15,6 +16,7 @@
             <field name="standard_price">5.00</field>
             <field name="list_price">5.00</field>
             <field name="type">consu</field>
+            <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-12-L')])]"/>
         </record>
         <record id="product_salad" model="product.product">
             <field name="name">Salad Bar (kg)</field>
@@ -24,6 +26,7 @@
             <field name="type">consu</field>
             <field name="uom_po_id" ref="product.product_uom_kgm"/>
             <field name="uom_id" ref="product.product_uom_kgm"/>
+            <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-12-L')])]"/>
         </record>
         <record id="product_steak" model="product.product">
             <field name="name">Steak Haché</field>
@@ -31,6 +34,7 @@
             <field name="standard_price">14.50</field>
             <field name="list_price">14.50</field>
             <field name="type">consu</field>
+            <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-12-L')])]"/>
         </record>
         <record id="product_coffee" model="product.product">
             <field name="name">Koffie verkeerd medium</field>
@@ -38,6 +42,7 @@
             <field name="standard_price">3.00</field>
             <field name="list_price">3.00</field>
             <field name="type">consu</field>
+            <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-21-L')])]"/>
         </record>
         <record id="product_dame_blanche" model="product.product">
             <field name="name">Dame Blanche</field>
@@ -45,6 +50,7 @@
             <field name="standard_price">7.00</field>
             <field name="list_price">7.00</field>
             <field name="type">consu</field>
+            <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-12-L')])]"/>
         </record>
         <record id="product_wine" model="product.product">
             <field name="name">Huiswijn (liter)</field>
@@ -54,6 +60,7 @@
             <field name="type">consu</field>
             <field name="uom_po_id" ref="product.product_uom_litre"/>
             <field name="uom_id" ref="product.product_uom_litre"/>
+            <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-21-L')])]"/>
         </record>
 
         <record id="product_soup" model="product.product">
@@ -62,6 +69,7 @@
             <field name="standard_price">5.00</field>
             <field name="list_price">5.00</field>
             <field name="type">consu</field>
+            <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-12-L')])]"/>
         </record>
 
         <record id="product_season" model="product.product">
@@ -70,6 +78,7 @@
             <field name="standard_price">20.00</field>
             <field name="list_price">20.00</field>
             <field name="type">consu</field>
+            <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-12-L')])]"/>
         </record>
 
         <record id="product_creme_brulee" model="product.product">
@@ -78,6 +87,7 @@
             <field name="standard_price">5.00</field>
             <field name="list_price">5.00</field>
             <field name="type">consu</field>
+            <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-12-L')])]"/>
         </record>
 
         <record id="base.user_root" model="res.users">
