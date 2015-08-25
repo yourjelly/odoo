@@ -4,10 +4,31 @@
         <record model="ir.ui.view" id="view_pos_config_blackbox_form">
             <field name="name">pos.config.form.view</field>
             <field name="model">pos.config</field>
-            <field name="inherit_id" ref="point_of_sale.view_pos_config_form" />
+            <field name="inherit_id" ref="point_of_sale.view_pos_config_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='iface_cashdrawer']" position="after">
-                    <field name="iface_blackbox_be" />
+                    <field name="iface_blackbox_be"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_pos_pos_form">
+            <field name="name">pos.order</field>
+            <field name="model">pos.order</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='extra']" position="inside">
+                    <group string="Fiscal Data Module information">
+                        <field name="blackbox_date"/>
+                        <field name="blackbox_time"/>
+                        <field name="blackbox_ticket_counters"/>
+                        <field name="blackbox_unique_fdm_production_number"/>
+                        <field name="blackbox_vsc_identification_number"/>
+                        <field name="blackbox_signature"/>
+                        <field name="plu_hash"/>
+                        <field name="pos_version"/>
+                        <field name="pos_production_id"/>
+                    </group>
                 </xpath>
             </field>
         </record>

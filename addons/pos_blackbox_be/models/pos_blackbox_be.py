@@ -43,7 +43,36 @@ class res_users(models.Model):
 class pos_order(models.Model):
     _inherit = 'pos.order'
 
-    # todo jov: add the things that will be coming back from the FDM as fields
+    # todo jov: also need base amount per tax category AND tax letter per orderline
+    blackbox_date = fields.Char("Fiscal Data Module date", help="Date returned by the Fiscal Data Module.")
+    blackbox_time = fields.Char("Fiscal Data Module time", help="Time returned by the Fiscal Data Module.")
+    blackbox_ticket_counters = fields.Char("Fiscal Data Module ticket counters", help="Ticket counter returned by the Fiscal Data Module (format: counter / total event type)")
+    blackbox_unique_fdm_production_number = fields.Char("Fiscal Data Module ID", help="Unique ID of the blackbox that handled this order")
+    blackbox_vsc_identification_number = fields.Char("VAT Signing Card ID", help="Unique ID of the VAT signing card that handled this order")
+    blackbox_signature = fields.Char("Electronic signature", help="Electronic signature returned by the Fiscal Data Module")
+
+    plu_hash = fields.Char(help="Eight last characters of PLU hash")
+    pos_version = fields.Char(help="Version of Odoo that created the order")
+    pos_production_id = fields.Char(help="Unique ID of the POS that created this order")
+
     @api.multi
     def unlink(self):
         raise UserError(_('Deleting of point of sale orders is not allowed.'))
+
+    @api.model
+    def _order_fields(self, ui_order):
+        fields = super(pos_order, self)._order_fields(ui_order)
+
+        fields.update({
+            'blackbox_date': ui_order.get('blackbox_date'),
+            'blackbox_time': ui_order.get('blackbox_time'),
+            'blackbox_ticket_counters': ui_order.get('blackbox_ticket_counters'),
+            'blackbox_unique_fdm_production_number': ui_order.get('blackbox_unique_fdm_production_number'),
+            'blackbox_vsc_identification_number': ui_order.get('blackbox_vsc_identification_number'),
+            'blackbox_signature': ui_order.get('blackbox_signature'),
+            'plu_hash': ui_order.get('blackbox_plu_hash'),
+            'pos_version': ui_order.get('blackbox_pos_version'),
+            'pos_production_id': ui_order.get('blackbox_pos_production_id'),
+        })
+
+        return fields

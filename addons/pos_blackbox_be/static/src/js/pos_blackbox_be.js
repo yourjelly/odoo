@@ -196,7 +196,26 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         }
     });
 
+    var order_model_export_as_json_super = models.Order.prototype.export_as_JSON;
     models.Order = models.Order.extend({
+        // we need to patch export_as_JSON because that's what's used
+        // when sending orders to backend
+        export_as_JSON: function () {
+            var json = order_model_export_as_json_super.bind(this)();
+
+            return _.extend(json, {
+                'blackbox_date': this.blackbox_date,
+                'blackbox_time': this.blackbox_time,
+                'blackbox_ticket_counters': this.blackbox_ticket_counters,
+                'blackbox_unique_fdm_production_number': this.blackbox_unique_fdm_production_number,
+                'blackbox_vsc_identification_number': this.blackbox_vsc_identification_number,
+                'blackbox_signature': this.blackbox_signature,
+                'blackbox_plu_hash': this.blackbox_plu_hash,
+                'blackbox_pos_version': this.blackbox_pos_version,
+                'blackbox_pos_production_id': this.blackbox_pos_production_id,
+            });
+        },
+
         _hash_and_sign_string: function () {
             var order_str = "";
 
@@ -365,7 +384,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         validate_order: function (force_validation) {
             var self = this;
             var validate_order_super = this._super.bind(this);
-            var order = self.pos.get_order();
+            var order = this.pos.get_order();
 
             if (! this._required_information_filled_in()) {
                 return;
@@ -380,7 +399,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                         // put fields that we need on tickets on order
                         order.blackbox_date = self._prepare_date_for_ticket(parsed_response.date);
                         order.blackbox_time = self._prepare_time_for_ticket(parsed_response.time);
-                        order.blackbox_ticket_counter =
+                        order.blackbox_ticket_counters =
                             self._prepare_ticket_counter_for_ticket(parsed_response.vsc_ticket_counter,
                                                                     parsed_response.vsc_total_ticket_counter,
                                                                     parsed_response.event_label);
