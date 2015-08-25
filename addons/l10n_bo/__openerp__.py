@@ -21,5 +21,5 @@ Plan contable boliviano e impuestos de acuerdo a disposiciones vigentes
         "account_tax.xml",
         "account_chart_template.yml",
     ],
-    "installable": True,
+    "installable": False,
 }

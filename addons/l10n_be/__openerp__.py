@@ -58,6 +58,6 @@ Wizards provided by this module:
     ],
     'test': [
     ],
-    'installable': True,
+    'installable': False,
     'website': 'https://www.odoo.com/page/accounting',
 }

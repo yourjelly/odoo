@@ -106,5 +106,5 @@ De extra cijfers worden dan achter het rekeningnummer aangevult met 'nullen'.
               "l10n_nl_account_chart.yml",
     ],
     'demo' : [],
-    'installable': True,
+    'installable': False,
 }

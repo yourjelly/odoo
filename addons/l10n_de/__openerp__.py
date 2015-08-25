@@ -20,5 +20,5 @@ German accounting chart and localization.
         'account_account_types.xml',
         'account_account_tags.xml',
     ],
-    'installable': True,
+    'installable': False,
 }

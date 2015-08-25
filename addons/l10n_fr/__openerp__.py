@@ -40,5 +40,5 @@ configuration of their taxes and fiscal positions manually.
     ],
     'demo': [],
     'auto_install': False,
-    'installable': True,
+    'installable': False,
 }

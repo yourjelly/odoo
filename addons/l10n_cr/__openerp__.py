@@ -61,5 +61,5 @@ please go to http://translations.launchpad.net/openerp-costa-rica.
         'data/account_tax_template.xml',
         'data/account.chart.template.yml',
     ],
-    'installable': True,
+    'installable': False,
 }

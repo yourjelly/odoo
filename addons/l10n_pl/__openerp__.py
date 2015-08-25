@@ -29,5 +29,5 @@ Wewnętrzny numer wersji OpenGLOBE 1.02
               'country_pl.xml',
               'account_chart_template.yml'
     ],
-    'installable': True,
+    'installable': False,
 }

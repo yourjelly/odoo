@@ -47,5 +47,5 @@ position.
         'fiscal_templates.xml',
         'account_chart_template.yml',
     ],
-    'installable': True,
+    'installable': False,
 }

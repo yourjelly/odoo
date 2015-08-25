@@ -25,6 +25,5 @@ Con la Colaboración de
         "account_chart_template.yml",
     ],
     "demo_xml": [],
-    "installable": True,
-    "certificate": "",
+    "installable": False,
 }

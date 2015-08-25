@@ -28,5 +28,5 @@
         'data/account_chart_template.yml',
     ],
     'demo': [],
-    'installable': True,
+    'installable': False,
 }

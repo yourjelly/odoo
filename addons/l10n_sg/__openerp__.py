@@ -33,5 +33,5 @@ After installing this module, the Configuration wizard for accounting is launche
              'l10n_sg_chart_tax.xml',
              'account_chart_template.yml',
     ],
-    'installable': True,
+    'installable': False,
 }

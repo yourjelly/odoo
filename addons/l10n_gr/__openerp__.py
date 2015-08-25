@@ -23,5 +23,5 @@ Greek accounting chart and localization.
                'account_tax_vat.xml',
                'account_chart_template.yml'
     ],
-    'installable': True,
+    'installable': False,
 }

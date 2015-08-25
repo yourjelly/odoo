@@ -52,5 +52,5 @@ https://github.com/OCA/l10n-switzerland
  'demo': [],
  'test': [],
  'auto_install': False,
- 'installable': True,
+ 'installable': False,
  }

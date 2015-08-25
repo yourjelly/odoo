@@ -32,6 +32,6 @@ This module consists :
         'data/account_chart_template_after.xml',
         'data/account_chart_template.yml',
     ],
-    'installable': True,
+    'installable': False,
     'auto_install': False,
 }

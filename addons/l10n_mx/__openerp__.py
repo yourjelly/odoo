@@ -37,6 +37,6 @@ With this module you will have:
         "data/account_tax.xml",
         "data/account_chart_template.yml",
     ],
-    "installable": True,
+    "installable": False,
     "certificate": False,
 }

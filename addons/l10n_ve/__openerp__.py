@@ -50,5 +50,5 @@ but you will need set manually account defaults for taxes.
              'data/account_tax.xml',
              'data/account_chart_template.yml'
     ],
-    'installable': True,
+    'installable': False,
 }
