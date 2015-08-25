@@ -388,6 +388,8 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                         order.blackbox_vsc_identification_number = parsed_response.vsc_identification_number;
                         order.blackbox_unique_fdm_production_number = parsed_response.fdm_unique_production_number;
                         order.blackbox_plu_hash = self._prepare_plu_hash_for_ticket(packet.fields[packet.fields.length - 1].content);
+                        order.blackbox_pos_version = "Odoo " + self.pos.version.server_version;
+                        order.blackbox_pos_production_id = self.pos.blackbox_pos_production_id;
 
                         validate_order_super(force_validation);
                     }
