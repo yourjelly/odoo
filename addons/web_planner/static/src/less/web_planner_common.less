@@ -206,6 +206,7 @@
 
 #PlannerDialog {
     font-family: "Lato", serif;
+    font-size: 16px;
     position: absolute;
     top: 46px; // enterprise fine-tuning
     right: 0px;
@@ -220,6 +221,10 @@
 
     @media (max-width: 992px) {
         width: 90%;
+    }
+
+    .well {
+        padding: 30px;
     }
 
     .o-planner-header() {
@@ -260,12 +265,28 @@
             padding-top: 10px;
             padding-left: 10px;
             list-style-type: none;
+            line-height: 3;
 
             > h4 {
                 padding-left: 5px;
+                margin-bottom: 15px;
+                padding-top: 20px;
+                font-size: 12px;
+                color: #a8a8a8;
+                border-top: 1px solid #e6e6e6;
 
                 > i.fa {
-                    margin-right: 10px;
+                    margin-right: 5px;
+                    font-size: 16px;
+                }
+            }
+
+            a {
+                color: #666666;
+                font-size: 15px;
+                font-weight: 600;
+                &:hover {
+                    color: #1fb597;
                 }
             }
         }
@@ -343,7 +364,7 @@
 
                 > li {
                     list-style: none;
-                    border-bottom: 1px dashed #C1D6DA;
+                    border-bottom: 1px dashed #9d9d9d;
                     padding: 10px 10px 5px 55px;
                     text-transform: capitalize;
                     margin: 0;
