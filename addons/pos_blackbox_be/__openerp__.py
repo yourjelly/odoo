@@ -17,9 +17,8 @@ add some stuff here
     'depends': ['web', 'point_of_sale', 'l10n_be'],
     'website': '',
     'data': [
-        'views/res_users.xml',
-        'views/point_of_sale.xml',
-        'views/pos_blackbox_assets.xml',
+        'views/pos_blackbox_be_views.xml',
+        'views/pos_blackbox_be_assets.xml',
         'data/pos_blackbox_be_data.xml'
     ],
     'demo': [
