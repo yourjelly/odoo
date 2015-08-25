@@ -14,7 +14,7 @@ TODO JOV
 add some stuff here
     """,
     'author': 'Odoo SA',
-    'depends': ['web', 'barcodes', 'point_of_sale'],
+    'depends': ['web', 'point_of_sale', 'l10n_be'],
     'website': '',
     'data': [
         'views/res_users.xml',
