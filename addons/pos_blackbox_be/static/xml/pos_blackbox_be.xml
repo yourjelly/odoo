@@ -67,8 +67,8 @@
                      <td class="pos-right-align"><t t-esc="order.blackbox_date"/>, <t t-esc="order.blackbox_time"/></td>
                 </tr>
                 <tr>
-                    <td>FDM ticket counter:</td>
-                    <td class="pos-right-align"><t t-esc="order.blackbox_ticket_counter"/></td>
+                    <td>FDM ticket counters:</td>
+                    <td class="pos-right-align"><t t-esc="order.blackbox_ticket_counters"/></td>
                 </tr>
                 <tr>
                     <td>FDM ID:</td>
