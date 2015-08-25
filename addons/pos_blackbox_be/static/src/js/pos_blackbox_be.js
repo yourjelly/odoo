@@ -216,6 +216,10 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             });
         },
 
+        generate_unique_id: function () {
+            return this.pos.config.blackbox_sequence_id++;
+        },
+
         _hash_and_sign_string: function () {
             var order_str = "";
 
@@ -826,6 +830,21 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             }
 
             self.blackbox_pos_production_id = params[0].value.substr(-12) + config_id;
+        }
+    }, {
+        'after': "pos.config"
+    });
+
+    models.load_models({
+        'model': "ir.sequence",
+        'loaded': function (self, params) {
+            var sequence_id = self.config.sequence_id[0];
+
+            var ir_sequence = _.find(params, function (current_seq) {
+                return current_seq.id === sequence_id;
+            });
+
+            self.config.blackbox_sequence_id = ir_sequence.number_next_actual;
         }
     }, {
         'after': "pos.config"
