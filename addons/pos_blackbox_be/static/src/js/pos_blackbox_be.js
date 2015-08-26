@@ -10,6 +10,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
     var _t      = core._t;
 
+    var orderline_model_export_as_json_super = models.Orderline.prototype.export_as_JSON;
     models.Orderline = models.Orderline.extend({
         // generates a table of the form
         // {..., 'char_to_translate': translation_of_char, ...}
@@ -193,6 +194,14 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             price_in_eurocents = this._prepare_number_for_plu(price_in_eurocents, 8);
 
             return amount + description + price_in_eurocents + vat_letter;
+        },
+
+        export_as_JSON: function () {
+            var json = orderline_model_export_as_json_super.bind(this)();
+
+            return _.extend(json, {
+                'vat_letter': this.get_vat_letter()
+            });
         }
     });
 
