@@ -59,6 +59,18 @@ class pos_order(models.Model):
     def unlink(self):
         raise UserError(_('Deleting of point of sale orders is not allowed.'))
 
+    @api.multi
+    def write(self, values):
+        immutable_fields = ['blackbox_date', 'blackbox_time', 'blackbox_ticket_counters',
+                            'blackbox_unique_fdm_production_number', 'blackbox_vsc_identification_number',
+                            'blackbox_signature', 'plu_hash', 'pos_version', 'pos_production_id']
+
+        for immutable_field in immutable_fields:
+            if values.get(immutable_field):
+                raise UserError(_("Can't modify fields related to the Fiscal Data Module."))
+
+        return super(pos_order, self).write(values)
+
     @api.model
     def _order_fields(self, ui_order):
         fields = super(pos_order, self)._order_fields(ui_order)
@@ -81,6 +93,13 @@ class pos_order_line(models.Model):
     _inherit = 'pos.order.line'
 
     vat_letter = fields.Selection([('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')])
+
+    @api.multi
+    def write(self, values):
+        if values.get('vat_letter'):
+            raise UserError(_("Can't modify fields related to the Fiscal Data Module."))
+
+        return super(pos_order_line, self).write(values)
 
 class product_template(models.Model):
     _inherit = 'product.template'
