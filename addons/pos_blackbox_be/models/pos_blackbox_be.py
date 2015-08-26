@@ -77,6 +77,11 @@ class pos_order(models.Model):
 
         return fields
 
+class pos_order_line(models.Model):
+    _inherit = 'pos.order.line'
+
+    vat_letter = fields.Selection([('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')])
+
 class product_template(models.Model):
     _inherit = 'product.template'
 
