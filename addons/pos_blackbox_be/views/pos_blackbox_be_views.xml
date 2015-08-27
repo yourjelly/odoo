@@ -39,6 +39,10 @@
                         <field name="blackbox_unique_fdm_production_number"/>
                         <field name="blackbox_vsc_identification_number"/>
                         <field name="blackbox_signature"/>
+                        <field name="blackbox_tax_category_a"/>
+                        <field name="blackbox_tax_category_b"/>
+                        <field name="blackbox_tax_category_c"/>
+                        <field name="blackbox_tax_category_d"/>
                         <field name="plu_hash"/>
                         <field name="pos_version"/>
                         <field name="pos_production_id"/>
