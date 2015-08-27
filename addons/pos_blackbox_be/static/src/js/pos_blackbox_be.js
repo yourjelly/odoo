@@ -306,6 +306,10 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                 throw "Can only handle string contents";
             }
 
+            if (content.length > length) {
+                throw "Content (" + content + ") too long (should be max " + length + ")";
+            }
+
             this.name = name;
             this.length = length;
 
@@ -412,6 +416,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             }
 
             order.set_validation_time();
+            order.blackbox_base_price_in_euro_per_tax_letter = order.get_base_price_in_euro_per_tax_letter_list();
 
             try {
                 var packet = this.pos.proxy._build_fdm_hash_and_sign_request(order);
@@ -425,7 +430,6 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                                                                     parsed_response.vsc_total_ticket_counter,
                                                                     parsed_response.event_label);
                         order.blackbox_signature = parsed_response.signature;
-                        order.blackbox_base_price_in_euro_per_tax_letter = order.get_base_price_in_euro_per_tax_letter_list();
                         order.blackbox_vsc_identification_number = parsed_response.vsc_identification_number;
                         order.blackbox_unique_fdm_production_number = parsed_response.fdm_unique_production_number;
                         order.blackbox_plu_hash = self._prepare_plu_hash_for_ticket(packet.fields[packet.fields.length - 1].content);
@@ -670,15 +674,14 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
             packet.add_field(new FDMPacketField("total amount to pay in eurocent", 11, (order.get_due() * 100).toString(), " "));
 
-            var tax_amounts = order.get_base_price_in_eurocent_per_tax_letter();
             packet.add_field(new FDMPacketField("tax percentage 1", 4, "2100"));
-            packet.add_field(new FDMPacketField("amount at tax percentage 1 in eurocent", 11, tax_amounts['A'].toString(), " "));
+            packet.add_field(new FDMPacketField("amount at tax percentage 1 in eurocent", 11, (order.blackbox_base_price_in_euro_per_tax_letter[0].amount * 100).toString(), " "));
             packet.add_field(new FDMPacketField("tax percentage 2", 4, "1200"));
-            packet.add_field(new FDMPacketField("amount at tax percentage 2 in eurocent", 11, tax_amounts['B'].toString(), " "));
+            packet.add_field(new FDMPacketField("amount at tax percentage 2 in eurocent", 11, (order.blackbox_base_price_in_euro_per_tax_letter[1].amount * 100).toString(), " "));
             packet.add_field(new FDMPacketField("tax percentage 3", 4, " 600"));
-            packet.add_field(new FDMPacketField("amount at tax percentage 3 in eurocent", 11, tax_amounts['C'].toString(), " "));
+            packet.add_field(new FDMPacketField("amount at tax percentage 3 in eurocent", 11, (order.blackbox_base_price_in_euro_per_tax_letter[2].amount * 100).toString(), " "));
             packet.add_field(new FDMPacketField("tax percentage 4", 4, " 000"));
-            packet.add_field(new FDMPacketField("amount at tax percentage 4 in eurocent", 11, tax_amounts['D'].toString(), " "));
+            packet.add_field(new FDMPacketField("amount at tax percentage 4 in eurocent", 11, (order.blackbox_base_price_in_euro_per_tax_letter[3].amount * 100).toString(), " "));
             packet.add_field(new FDMPacketField("PLU hash", 40, order.calculate_hash()));
 
             return packet;
