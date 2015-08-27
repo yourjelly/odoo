@@ -49,8 +49,8 @@ class BlackboxDriver(http.Controller):
                 path_to_device = path + device
                 _logger.debug("Probing " + device)
 
-                if self._send_to_blackbox(probe_message, 21, path_to_device):
-                    _logger.debug(device + " will be used as the blackbox")
+                if self._send_to_blackbox(probe_message, 21, path_to_device, just_wait_for_ack=True):
+                    _logger.info(device + " will be used as the blackbox")
                     self.set_status("connected", [device])
                     return path_to_device
 
@@ -108,7 +108,7 @@ class BlackboxDriver(http.Controller):
             _logger.error("retried " + str(MAX_RETRIES) + " times without receiving ACK, is blackbox properly connected?")
             return False
 
-    def _send_to_blackbox(self, packet, response_size, device_path):
+    def _send_to_blackbox(self, packet, response_size, device_path, just_wait_for_ack=False):
         if not device_path:
             return ""
 
@@ -120,6 +120,9 @@ class BlackboxDriver(http.Controller):
         sent_nacks = 0
 
         if self._send_and_wait_for_ack(packet, ser):
+            if just_wait_for_ack:
+                return True
+
             ser.timeout = 0.750 # reconfigure to high level timeout
 
             while not got_response and sent_nacks < MAX_NACKS:
