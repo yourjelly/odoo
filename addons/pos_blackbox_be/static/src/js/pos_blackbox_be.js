@@ -226,7 +226,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         },
 
         generate_unique_id: function () {
-            return this.pos.config.blackbox_sequence_id++;
+            return this.pos.config.id + "-" + this.pos.config.blackbox_sequence_id++;
         },
 
         _hash_and_sign_string: function () {
