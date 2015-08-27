@@ -91,7 +91,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         },
 
         // for both amount and price
-        // price should be in eurocents
+        // price should be in eurocent
         // amount should be in gram
         _prepare_number_for_plu: function (number, field_length) {
             number = Math.abs(number);
@@ -186,14 +186,14 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
             var amount = this._get_amount_for_plu();
             var description = this.get_product().display_name;
-            var price_in_eurocents = this.get_display_price() * 100;
+            var price_in_eurocent = this.get_display_price() * 100;
             var vat_letter = this.get_vat_letter();
 
             amount = this._prepare_number_for_plu(amount, 4);
             description = this._prepare_description_for_plu(description);
-            price_in_eurocents = this._prepare_number_for_plu(price_in_eurocents, 8);
+            price_in_eurocent = this._prepare_number_for_plu(price_in_eurocent, 8);
 
-            return amount + description + price_in_eurocents + vat_letter;
+            return amount + description + price_in_eurocent + vat_letter;
         },
 
         export_as_JSON: function () {
@@ -211,6 +211,10 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         // when sending orders to backend
         export_as_JSON: function () {
             var json = order_model_export_as_json_super.bind(this)();
+            var tax_categories_set = false;
+
+            if (this.blackbox_base_price_in_euro_per_tax_letter)
+                tax_categories_set = true;
 
             return _.extend(json, {
                 'blackbox_date': this.blackbox_date,
@@ -219,6 +223,10 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                 'blackbox_unique_fdm_production_number': this.blackbox_unique_fdm_production_number,
                 'blackbox_vsc_identification_number': this.blackbox_vsc_identification_number,
                 'blackbox_signature': this.blackbox_signature,
+                'blackbox_tax_category_a': tax_categories_set && this.blackbox_base_price_in_euro_per_tax_letter[0].amount,
+                'blackbox_tax_category_b': tax_categories_set && this.blackbox_base_price_in_euro_per_tax_letter[1].amount,
+                'blackbox_tax_category_c': tax_categories_set && this.blackbox_base_price_in_euro_per_tax_letter[2].amount,
+                'blackbox_tax_category_d': tax_categories_set && this.blackbox_base_price_in_euro_per_tax_letter[3].amount,
                 'blackbox_plu_hash': this.blackbox_plu_hash,
                 'blackbox_pos_version': this.blackbox_pos_version,
                 'blackbox_pos_production_id': this.blackbox_pos_production_id,
@@ -250,7 +258,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return percentage_per_letter[tax_letter];
         },
 
-        get_base_price_in_eurocents_per_tax_letter: function () {
+        get_base_price_in_eurocent_per_tax_letter: function () {
             var base_price_per_tax_letter = {
                 'A': 0,
                 'B': 0,
@@ -271,12 +279,12 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
         // returns an array of the form:
         // [{'letter', 'amount'}, {'letter', 'amount'}, ...]
-        get_base_price_in_eurocents_per_tax_letter_list: function () {
-            var base_price_per_tax_letter = this.get_base_price_in_eurocents_per_tax_letter();
+        get_base_price_in_euro_per_tax_letter_list: function () {
+            var base_price_per_tax_letter = this.get_base_price_in_eurocent_per_tax_letter();
             var base_price_per_tax_letter_list = _.map(_.keys(base_price_per_tax_letter), function (key) {
                 return {
                     'letter': key,
-                    'amount': base_price_per_tax_letter[key]
+                    'amount': base_price_per_tax_letter[key] / 100
                 };
             });
 
@@ -417,6 +425,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                                                                     parsed_response.vsc_total_ticket_counter,
                                                                     parsed_response.event_label);
                         order.blackbox_signature = parsed_response.signature;
+                        order.blackbox_base_price_in_euro_per_tax_letter = order.get_base_price_in_euro_per_tax_letter_list();
                         order.blackbox_vsc_identification_number = parsed_response.vsc_identification_number;
                         order.blackbox_unique_fdm_production_number = parsed_response.fdm_unique_production_number;
                         order.blackbox_plu_hash = self._prepare_plu_hash_for_ticket(packet.fields[packet.fields.length - 1].content);
@@ -661,7 +670,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
             packet.add_field(new FDMPacketField("total amount to pay in eurocent", 11, (order.get_due() * 100).toString(), " "));
 
-            var tax_amounts = order.get_base_price_in_eurocents_per_tax_letter();
+            var tax_amounts = order.get_base_price_in_eurocent_per_tax_letter();
             packet.add_field(new FDMPacketField("tax percentage 1", 4, "2100"));
             packet.add_field(new FDMPacketField("amount at tax percentage 1 in eurocent", 11, tax_amounts['A'].toString(), " "));
             packet.add_field(new FDMPacketField("tax percentage 2", 4, "1200"));
