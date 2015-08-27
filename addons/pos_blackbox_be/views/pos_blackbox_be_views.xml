@@ -33,19 +33,19 @@
                 </xpath>
                 <xpath expr="//page[@name='extra']" position="inside">
                     <group string="Fiscal Data Module information">
-                        <field name="blackbox_date"/>
-                        <field name="blackbox_time"/>
-                        <field name="blackbox_ticket_counters"/>
-                        <field name="blackbox_unique_fdm_production_number"/>
-                        <field name="blackbox_vsc_identification_number"/>
-                        <field name="blackbox_signature"/>
-                        <field name="blackbox_tax_category_a"/>
-                        <field name="blackbox_tax_category_b"/>
-                        <field name="blackbox_tax_category_c"/>
-                        <field name="blackbox_tax_category_d"/>
-                        <field name="plu_hash"/>
-                        <field name="pos_version"/>
-                        <field name="pos_production_id"/>
+                        <field name="blackbox_date" readonly="1"/>
+                        <field name="blackbox_time" readonly="1"/>
+                        <field name="blackbox_ticket_counters" readonly="1"/>
+                        <field name="blackbox_unique_fdm_production_number" readonly="1"/>
+                        <field name="blackbox_vsc_identification_number" readonly="1"/>
+                        <field name="blackbox_signature" readonly="1"/>
+                        <field name="blackbox_tax_category_a" readonly="1"/>
+                        <field name="blackbox_tax_category_b" readonly="1"/>
+                        <field name="blackbox_tax_category_c" readonly="1"/>
+                        <field name="blackbox_tax_category_d" readonly="1"/>
+                        <field name="plu_hash" readonly="1"/>
+                        <field name="pos_version" readonly="1"/>
+                        <field name="pos_production_id" readonly="1"/>
                     </group>
                 </xpath>
             </field>
