@@ -125,3 +125,15 @@ class product_template(models.Model):
                 raise UserError(_('Deleting this product is not allowed.'))
 
         return super(product_template, self).unlink()
+
+class module(models.Model):
+    _inherit = "ir.module.module"
+
+    @api.multi
+    def state_update(self, newstate, states_to_update, level=100):
+        if newstate == "to install":
+            for module_to_update in self:
+                if module_to_update.name == "pos_reprint":
+                    raise UserError(_("This module is not allowed with the Fiscal Data Module."))
+
+        return super(module, self).state_update(newstate, states_to_update, level=level)
