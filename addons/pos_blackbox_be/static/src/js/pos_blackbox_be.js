@@ -380,7 +380,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return counter + "/" + total_counter + " " + event_type;
         },
 
-        _required_information_filled_in: function () {
+        _check_validation_constraints: function () {
             if (! this.pos.company.street) {
                 this.gui.show_popup("error", {
                     'title': _t("Fiscal Data Module error"),
@@ -392,6 +392,13 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                 this.gui.show_popup("error", {
                     'title': _t("Fiscal Data Module error"),
                     'body':  _t("VAT number must be set."),
+                });
+
+                return false;
+            } else if (this.pos.blackbox_pos_reprint_installed) {
+                this.gui.show_popup("error", {
+                    'title': _t("Fiscal Data Module error"),
+                    'body':  _t("The reprint module is not allowed to be installed with the Fiscal Data Module."),
                 });
 
                 return false;
@@ -411,7 +418,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             var validate_order_super = this._super.bind(this);
             var order = this.pos.get_order();
 
-            if (! this._required_information_filled_in()) {
+            if (! this._check_validation_constraints()) {
                 return;
             }
 
@@ -869,6 +876,19 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         }
     }, {
         'after': "pos.config"
+    });
+
+    models.load_models({
+        'model': "ir.module.module",
+        'domain': [['name', '=', 'pos_reprint']],
+        'loaded': function (self, module) {
+            debugger;
+            if (module && module[0].state !== "uninstalled") {
+                self.blackbox_pos_reprint_installed = true;
+            } else {
+                self.blackbox_pos_reprint_installed = false;
+            }
+        }
     });
 
     models.load_fields("res.users", "insz_or_bis_number");
