@@ -50,6 +50,10 @@ class pos_order(models.Model):
     blackbox_unique_fdm_production_number = fields.Char("Fiscal Data Module ID", help="Unique ID of the blackbox that handled this order")
     blackbox_vsc_identification_number = fields.Char("VAT Signing Card ID", help="Unique ID of the VAT signing card that handled this order")
     blackbox_signature = fields.Char("Electronic signature", help="Electronic signature returned by the Fiscal Data Module")
+    blackbox_tax_category_a = fields.Float()
+    blackbox_tax_category_b = fields.Float()
+    blackbox_tax_category_c = fields.Float()
+    blackbox_tax_category_d = fields.Float()
 
     plu_hash = fields.Char(help="Eight last characters of PLU hash")
     pos_version = fields.Char(help="Version of Odoo that created the order")
@@ -63,7 +67,9 @@ class pos_order(models.Model):
     def write(self, values):
         immutable_fields = ['blackbox_date', 'blackbox_time', 'blackbox_ticket_counters',
                             'blackbox_unique_fdm_production_number', 'blackbox_vsc_identification_number',
-                            'blackbox_signature', 'plu_hash', 'pos_version', 'pos_production_id']
+                            'blackbox_signature', 'blackbox_tax_category_a', 'blackbox_tax_category_b',
+                            'blackbox_tax_category_c', 'blackbox_tax_category_d', 'plu_hash',
+                            'pos_version', 'pos_production_id']
 
         for immutable_field in immutable_fields:
             if values.get(immutable_field):
@@ -82,6 +88,10 @@ class pos_order(models.Model):
             'blackbox_unique_fdm_production_number': ui_order.get('blackbox_unique_fdm_production_number'),
             'blackbox_vsc_identification_number': ui_order.get('blackbox_vsc_identification_number'),
             'blackbox_signature': ui_order.get('blackbox_signature'),
+            'blackbox_tax_category_a': ui_order.get('blackbox_tax_category_a'),
+            'blackbox_tax_category_b': ui_order.get('blackbox_tax_category_b'),
+            'blackbox_tax_category_c': ui_order.get('blackbox_tax_category_c'),
+            'blackbox_tax_category_d': ui_order.get('blackbox_tax_category_d'),
             'plu_hash': ui_order.get('blackbox_plu_hash'),
             'pos_version': ui_order.get('blackbox_pos_version'),
             'pos_production_id': ui_order.get('blackbox_pos_production_id'),

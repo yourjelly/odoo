@@ -41,12 +41,12 @@
             <t t-esc="orderline.get_vat_letter()"/>
         </t>
         <t t-jquery=".receipt-total t[t-foreach='order.get_tax_details()']" t-operation="replace">
-            <t t-foreach="order.get_base_price_in_eurocents_per_tax_letter_list()" t-as="tax">
+            <t t-foreach="order.blackbox_base_price_in_euro_per_tax_letter" t-as="tax">
                 <t t-if="tax.amount">
                     <tr>
                         <td>Tax category <t t-esc="tax.letter"/> (<t t-esc="order.get_tax_percentage_for_tax_letter(tax.letter)"/>%):</td>
                         <td class="pos-right-align">
-                            <t t-esc="widget.format_currency(tax.amount / 100)"/>
+                            <t t-esc="widget.format_currency(tax.amount)"/>
                         </td>
                     </tr>
                 </t>
