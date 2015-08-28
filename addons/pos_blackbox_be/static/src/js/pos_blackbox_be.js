@@ -882,7 +882,6 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         'model': "ir.module.module",
         'domain': [['name', '=', 'pos_reprint']],
         'loaded': function (self, module) {
-            debugger;
             if (module && module[0].state !== "uninstalled") {
                 self.blackbox_pos_reprint_installed = true;
             } else {
