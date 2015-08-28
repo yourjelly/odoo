@@ -235,9 +235,9 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             });
         },
 
-        generate_unique_id: function () {
-            return this.pos.config.id + "-" + this.pos.config.blackbox_sequence_id++;
-        },
+        // generate_unique_id: function () {
+        //     return this.pos.config.id + "-" + this.pos.config.blackbox_sequence_id++;
+        // },
 
         _hash_and_sign_string: function () {
             var order_str = "";
@@ -428,6 +428,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             order.blackbox_base_price_in_euro_per_tax_letter = order.get_base_price_in_euro_per_tax_letter_list();
 
             try {
+                console.log("Signing order with uid " + order.uid);
                 var packet = this.pos.proxy._build_fdm_hash_and_sign_request(order);
                 this.pos.proxy.request_fdm_hash_and_sign(packet).then(function (parsed_response) {
                     if (parsed_response) {
