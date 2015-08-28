@@ -115,6 +115,19 @@ class product_template(models.Model):
     _inherit = 'product.template'
 
     @api.multi
+    def write(self, values):
+        ir_model_data = self.env['ir.model.data']
+        work_in = ir_model_data.xmlid_to_object('pos_blackbox_be.product_product_work_in').product_tmpl_id.id
+        work_out = ir_model_data.xmlid_to_object('pos_blackbox_be.product_product_work_out').product_tmpl_id.id
+
+        if not self.env.context.get('install_mode'):
+            for product in self.ids:
+                if product == work_in or product == work_out:
+                    raise UserError(_('Modifying this product is not allowed.'))
+
+        return super(product_template, self).write(values)
+
+    @api.multi
     def unlink(self):
         ir_model_data = self.env['ir.model.data']
         work_in = ir_model_data.xmlid_to_object('pos_blackbox_be.product_product_work_in').product_tmpl_id.id
