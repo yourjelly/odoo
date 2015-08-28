@@ -13,6 +13,10 @@ odoo.define_section('pos_blackbox_be.Order', ['point_of_sale.models'], function 
             'company': {
                 'tax_calculation_rounding_method': ""
             },
+            'config': {
+                'id': 1,
+                'blackbox_sequence_id': 1
+            },
             'taxes_by_id': [
                 {},
                 {'amount': 21, 'identification_letter': "A"}, // type A
