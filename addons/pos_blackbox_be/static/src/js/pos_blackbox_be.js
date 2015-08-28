@@ -449,7 +449,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             } catch (e) {
                 var exception_prefix = "FDM error:";
 
-                if (e.message.startsWith(exception_prefix)) {
+                if (e.message && e.message.startsWith(exception_prefix)) {
                     this.gui.show_popup("error", {
                         'title': _t("Fiscal Data Module error"),
                         'body':  e.message.substr(exception_prefix.length),
