@@ -1915,7 +1915,7 @@ var PaymentScreenWidget = ScreenWidget.extend({
             });
         } else {
             this.pos.push_order(order);
-            this.gui.show_screen('receipt');
+            // this.gui.show_screen('receipt');
         }
     },
 });
