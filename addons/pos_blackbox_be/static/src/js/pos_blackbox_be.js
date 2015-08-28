@@ -5,10 +5,12 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     var devices = require('point_of_sale.devices');
     var chrome = require('point_of_sale.chrome');
     var Class = require('web.Class');
+    var utils = require('web.utils');
     var PosBaseWidget = require('point_of_sale.BaseWidget');
     var PaymentScreenWidget = screens.PaymentScreenWidget;
 
     var _t      = core._t;
+    var round_pr = utils.round_precision;
 
     var orderline_model_export_as_json_super = models.Orderline.prototype.export_as_JSON;
     models.Orderline = models.Orderline.extend({
@@ -679,16 +681,16 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             // but there's also the training and pro forma (implement?)
             packet.add_field(new FDMPacketField("event label", 2, "NS"));
 
-            packet.add_field(new FDMPacketField("total amount to pay in eurocent", 11, (order.get_due() * 100).toString(), " "));
+            packet.add_field(new FDMPacketField("total amount to pay in eurocent", 11, (round_pr(order.get_total_with_tax() * 100, 0.01)).toString(), " "));
 
             packet.add_field(new FDMPacketField("tax percentage 1", 4, "2100"));
-            packet.add_field(new FDMPacketField("amount at tax percentage 1 in eurocent", 11, (order.blackbox_base_price_in_euro_per_tax_letter[0].amount * 100).toString(), " "));
+            packet.add_field(new FDMPacketField("amount at tax percentage 1 in eurocent", 11, (round_pr(order.blackbox_base_price_in_euro_per_tax_letter[0].amount * 100, 0.01)).toString(), " "));
             packet.add_field(new FDMPacketField("tax percentage 2", 4, "1200"));
-            packet.add_field(new FDMPacketField("amount at tax percentage 2 in eurocent", 11, (order.blackbox_base_price_in_euro_per_tax_letter[1].amount * 100).toString(), " "));
+            packet.add_field(new FDMPacketField("amount at tax percentage 2 in eurocent", 11, (round_pr(order.blackbox_base_price_in_euro_per_tax_letter[1].amount * 100, 0.01)).toString(), " "));
             packet.add_field(new FDMPacketField("tax percentage 3", 4, " 600"));
-            packet.add_field(new FDMPacketField("amount at tax percentage 3 in eurocent", 11, (order.blackbox_base_price_in_euro_per_tax_letter[2].amount * 100).toString(), " "));
+            packet.add_field(new FDMPacketField("amount at tax percentage 3 in eurocent", 11, (round_pr(order.blackbox_base_price_in_euro_per_tax_letter[2].amount * 100, 0.01)).toString(), " "));
             packet.add_field(new FDMPacketField("tax percentage 4", 4, " 000"));
-            packet.add_field(new FDMPacketField("amount at tax percentage 4 in eurocent", 11, (order.blackbox_base_price_in_euro_per_tax_letter[3].amount * 100).toString(), " "));
+            packet.add_field(new FDMPacketField("amount at tax percentage 4 in eurocent", 11, (round_pr(order.blackbox_base_price_in_euro_per_tax_letter[3].amount * 100, 0.01)).toString(), " "));
             packet.add_field(new FDMPacketField("PLU hash", 40, order.calculate_hash()));
 
             return packet;
