@@ -824,6 +824,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                     this.$('.button.build-hash-and-sign-request').click(function () {
                         var order = self.pos.get_order();
                         order.set_validation_time();
+                        order.blackbox_base_price_in_euro_per_tax_letter = order.get_base_price_in_euro_per_tax_letter_list();
 
                         console.log(self.pos.proxy._build_fdm_hash_and_sign_request(order).to_human_readable_string());
                     });
