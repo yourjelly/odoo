@@ -1135,9 +1135,8 @@ $.summernote.pluginEvents.visible = function (event, editor, layoutInfo) {
     $editable.data('NoteHistory').recordUndo($editable, "visible");
 
     var r = range.create();
-        if (!r) return;
-
-        if (!r.isCollapsed()) {
+    if (!r) return;
+    if (!r.isCollapsed()) {
         r = r.deleteContents(true);
         r.select();
     }
@@ -1195,9 +1194,9 @@ function remove_table_content(sc, ec) {
 $.summernote.pluginEvents.delete = function (event, editor, layoutInfo) {
     var $editable = layoutInfo.editable();
     $editable.data('NoteHistory').recordUndo($editable, "delete");
-    
+
     var r = range.create();
-    if (!r.isContentEditable()) {
+    if (!r || !r.isContentEditable()) {
         return false;
     }
     if (!r.isCollapsed()) {
@@ -1471,6 +1470,7 @@ $.summernote.pluginEvents.insertUnorderedList = function (event, editor, layoutI
 
     var parent;
     var rng = range.create();
+    if (!rng) return;
     var node = rng.sc;
     while (node && node !== $editable[0]) {
 
@@ -1571,6 +1571,7 @@ $.summernote.pluginEvents.indent = function (event, editor, layoutInfo, outdent)
     var $editable = layoutInfo.editable();
     $editable.data('NoteHistory').recordUndo($editable);
     var r = range.create();
+    if (!r) return;
 
     var flag = false;
     function indentUL (UL, start, end) {
