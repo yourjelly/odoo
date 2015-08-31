@@ -4,10 +4,10 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     var models = require('point_of_sale.models');
     var devices = require('point_of_sale.devices');
     var chrome = require('point_of_sale.chrome');
+    var gui = require('point_of_sale.gui');
     var Class = require('web.Class');
     var utils = require('web.utils');
     var PosBaseWidget = require('point_of_sale.BaseWidget');
-    var PaymentScreenWidget = screens.PaymentScreenWidget;
 
     var _t      = core._t;
     var round_pr = utils.round_precision;
@@ -239,6 +239,15 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         //     return this.pos.config.id + "-" + this.pos.config.blackbox_sequence_id++;
         // },
 
+        // todo jov: monkey patch for this.invoice = true
+        // check for sig, if it's not there print a receipt
+        // (because that means the order was invoiced)
+        // finalize: function () {
+        //     if (! this.blackbox_signature) {
+        //         this.pos.gui.show_screen('receipt');
+        //     }
+        // },
+
         _hash_and_sign_string: function () {
             var order_str = "";
 
@@ -359,107 +368,16 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         // todo jov: send: function () {}?
     });
 
-    PaymentScreenWidget.include({
-        _prepare_date_for_ticket: function (date) {
-            // format of date coming from blackbox is YYYYMMDD
-            var year = date.substr(0, 4);
-            var month = date.substr(4, 2);
-            var day = date.substr(6, 2);
-
-            return day + "/" + month + "/" + year;
-        },
-
-        _prepare_time_for_ticket: function (time) {
-            // format of time coming from blackbox is HHMMSS
-            var hours = time.substr(0, 2);
-            var minutes = time.substr(2, 2);
-            var seconds = time.substr(4, 2);
-
-            return hours + ":" + minutes + ":" + seconds;
-        },
-
-        _prepare_ticket_counter_for_ticket: function (counter, total_counter, event_type) {
-            return counter + "/" + total_counter + " " + event_type;
-        },
-
-        _check_validation_constraints: function () {
-            if (! this.pos.company.street) {
-                this.gui.show_popup("error", {
-                    'title': _t("Fiscal Data Module error"),
-                    'body':  _t("Company address must be set."),
-                });
-
-                return false;
-            } else if (! this.pos.company.vat) {
-                this.gui.show_popup("error", {
-                    'title': _t("Fiscal Data Module error"),
-                    'body':  _t("VAT number must be set."),
-                });
-
-                return false;
-            } else if (this.pos.blackbox_pos_reprint_installed) {
-                this.gui.show_popup("error", {
-                    'title': _t("Fiscal Data Module error"),
-                    'body':  _t("The reprint module is not allowed to be installed with the Fiscal Data Module."),
-                });
-
-                return false;
-            }
-
-            return true;
-        },
-
-        _prepare_plu_hash_for_ticket: function (hash) {
-            var amount_of_least_significant_characters = 8;
-
-            return hash.substr(-amount_of_least_significant_characters);
-        },
-
-        validate_order: function (force_validation) {
-            var self = this;
-            var validate_order_super = this._super.bind(this);
-            var order = this.pos.get_order();
-
-            if (! this._check_validation_constraints()) {
-                return;
-            }
-
-            order.set_validation_time();
-            order.blackbox_base_price_in_euro_per_tax_letter = order.get_base_price_in_euro_per_tax_letter_list();
-
-            try {
-                console.log("Signing order with uid " + order.uid);
-                var packet = this.pos.proxy._build_fdm_hash_and_sign_request(order);
-                this.pos.proxy.request_fdm_hash_and_sign(packet).then(function (parsed_response) {
-                    if (parsed_response) {
-                        // put fields that we need on tickets on order
-                        order.blackbox_date = self._prepare_date_for_ticket(parsed_response.date);
-                        order.blackbox_time = self._prepare_time_for_ticket(parsed_response.time);
-                        order.blackbox_ticket_counters =
-                            self._prepare_ticket_counter_for_ticket(parsed_response.vsc_ticket_counter,
-                                                                    parsed_response.vsc_total_ticket_counter,
-                                                                    parsed_response.event_label);
-                        order.blackbox_signature = parsed_response.signature;
-                        order.blackbox_vsc_identification_number = parsed_response.vsc_identification_number;
-                        order.blackbox_unique_fdm_production_number = parsed_response.fdm_unique_production_number;
-                        order.blackbox_plu_hash = self._prepare_plu_hash_for_ticket(packet.fields[packet.fields.length - 1].content);
-                        order.blackbox_pos_version = "Odoo " + self.pos.version.server_version;
-                        order.blackbox_pos_production_id = self.pos.blackbox_pos_production_id;
-
-                        validate_order_super(force_validation);
-                    }
-                });
-            } catch (e) {
-                var exception_prefix = "FDM error:";
-
-                if (e.message && e.message.startsWith(exception_prefix)) {
-                    this.gui.show_popup("error", {
-                        'title': _t("Fiscal Data Module error"),
-                        'body':  e.message.substr(exception_prefix.length),
-                    });
+    gui.Gui.include({
+        show_screen: function(screen_name, params, refresh) {
+            if (screen_name === "receipt") {
+                if (this.pos.get_order().blackbox_signature) {
+                    this._super(screen_name, params, refresh);
                 } else {
-                    throw e;
+                    console.log("not showing receipt because no signature is set");
                 }
+            } else {
+                this._super(screen_name, params, refresh);
             }
         }
     });
@@ -839,12 +757,139 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     });
 
     var posmodel_need_proxy_super = models.PosModel.prototype._need_proxy;
+    var posmodel_push_order_super = models.PosModel.prototype.push_order;
     models.PosModel = models.PosModel.extend({
         _need_proxy: function () {
             if (this.config) {
                 return this.config.iface_blackbox_be || posmodel_need_proxy_super.bind(this)();
             } else {
                 return false;
+            }
+        },
+
+        _prepare_date_for_ticket: function (date) {
+            // format of date coming from blackbox is YYYYMMDD
+            var year = date.substr(0, 4);
+            var month = date.substr(4, 2);
+            var day = date.substr(6, 2);
+
+            return day + "/" + month + "/" + year;
+        },
+
+        _prepare_time_for_ticket: function (time) {
+            // format of time coming from blackbox is HHMMSS
+            var hours = time.substr(0, 2);
+            var minutes = time.substr(2, 2);
+            var seconds = time.substr(4, 2);
+
+            return hours + ":" + minutes + ":" + seconds;
+        },
+
+        _prepare_ticket_counter_for_ticket: function (counter, total_counter, event_type) {
+            return counter + "/" + total_counter + " " + event_type;
+        },
+
+        _prepare_plu_hash_for_ticket: function (hash) {
+            var amount_of_least_significant_characters = 8;
+
+            return hash.substr(-amount_of_least_significant_characters);
+        },
+
+        _check_validation_constraints: function () {
+            if (! this.company.street) {
+                this.gui.show_popup("error", {
+                    'title': _t("Fiscal Data Module error"),
+                    'body':  _t("Company address must be set."),
+                });
+
+                return false;
+            } else if (! this.company.vat) {
+                this.gui.show_popup("error", {
+                    'title': _t("Fiscal Data Module error"),
+                    'body':  _t("VAT number must be set."),
+                });
+
+                return false;
+            } else if (this.blackbox_pos_reprint_installed) {
+                this.gui.show_popup("error", {
+                    'title': _t("Fiscal Data Module error"),
+                    'body':  _t("The reprint module is not allowed to be installed with the Fiscal Data Module."),
+                });
+
+                return false;
+            }
+
+            return true;
+        },
+
+        push_order_to_blackbox: function (order) {
+            var self = this;
+
+            if (! this._check_validation_constraints()) {
+                return false;
+            }
+
+            order.set_validation_time();
+            order.blackbox_base_price_in_euro_per_tax_letter = order.get_base_price_in_euro_per_tax_letter_list();
+
+            try {
+                console.log("Signing order with uid " + order.uid);
+                var packet = this.proxy._build_fdm_hash_and_sign_request(order);
+                var def = this.proxy.request_fdm_hash_and_sign(packet).then(function (parsed_response) {
+                    var def = new $.Deferred();
+
+                    if (parsed_response) {
+                        // put fields that we need on tickets on order
+                        order.blackbox_date = self._prepare_date_for_ticket(parsed_response.date);
+                        order.blackbox_time = self._prepare_time_for_ticket(parsed_response.time);
+                        order.blackbox_ticket_counters =
+                            self._prepare_ticket_counter_for_ticket(parsed_response.vsc_ticket_counter,
+                                                                    parsed_response.vsc_total_ticket_counter,
+                                                                    parsed_response.event_label);
+                        order.blackbox_signature = parsed_response.signature;
+                        order.blackbox_vsc_identification_number = parsed_response.vsc_identification_number;
+                        order.blackbox_unique_fdm_production_number = parsed_response.fdm_unique_production_number;
+                        order.blackbox_plu_hash = self._prepare_plu_hash_for_ticket(packet.fields[packet.fields.length - 1].content);
+                        order.blackbox_pos_version = "Odoo " + self.version.server_version;
+                        order.blackbox_pos_production_id = self.blackbox_pos_production_id;
+
+                        self.gui.show_screen('receipt');
+
+                        return def.resolve();
+                    } else {
+                        return def.reject();
+                    }
+                });
+
+                return def;
+            } catch (e) {
+                var exception_prefix = "FDM error:";
+
+                if (e.message && e.message.startsWith(exception_prefix)) {
+                    this.gui.show_popup("error", {
+                        'title': _t("Fiscal Data Module error"),
+                        'body':  e.message.substr(exception_prefix.length),
+                    });
+                } else {
+                    throw e;
+                }
+
+                return false;
+            }
+        },
+
+        push_order: function (order, opts) {
+            var self = this;
+
+            if (order) {
+                return this.push_order_to_blackbox(order).then(function () {
+                    console.log("blackbox success, calling push_order _super().");
+                    return posmodel_push_order_super.apply(self, [order, opts]);
+                }, function () {
+                    console.log("fdm validation failed, not sending to backend");
+                });
+            } else {
+                return posmodel_push_order_super.apply(this, [order, opts]);
             }
         }
     });
