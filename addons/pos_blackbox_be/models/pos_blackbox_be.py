@@ -150,3 +150,11 @@ class module(models.Model):
                     raise UserError(_("This module is not allowed with the Fiscal Data Module."))
 
         return super(module, self).state_update(newstate, states_to_update, level=level)
+
+    @api.multi
+    def module_uninstall(self):
+        for module_to_remove in self:
+            if module_to_remove.name == "pos_blackbox_be":
+                raise UserError(_("This module is not allowed to be removed."))
+
+        return super(module, self).module_uninstall()
