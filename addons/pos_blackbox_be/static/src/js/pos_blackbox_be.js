@@ -401,9 +401,8 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return packet;
         },
 
-        // ignore_non_critical: will ignore everything (no errors and
-        // warnings) and will ignore certain 'real' errors defined in
-        // non_critical_errors
+        // ignore_non_critical: will ignore warnings and will ignore
+        // certain 'real' errors defined in non_critical_errors
         _handle_fdm_errors: function (parsed_response, ignore_non_critical) {
             var self = this;
             var error_1 = parsed_response.error_1;
@@ -572,6 +571,20 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return packet;
         },
 
+        // fdm needs amounts in cents with at least 3 numbers (eg. 0.5
+        // euro => '050') and encoded as a string
+        _amount_to_fdm_amount_string: function (amount) {
+            amount *= 100; // to eurocent
+            amount = round_pr(amount, 0.01); // make sure it's properly rounded (to avoid eg. x.9999999999999999999)
+            amount = amount.toString();
+
+            while (amount.length < 3) {
+                amount = "0" + amount;
+            }
+
+            return amount;
+        },
+
         // todo jov: p77
         _build_fdm_hash_and_sign_request: function (order) {
             var packet = this.build_request("H");
@@ -600,16 +613,16 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             // but there's also the training and pro forma (implement?)
             packet.add_field(new FDMPacketField("event label", 2, "NS"));
 
-            packet.add_field(new FDMPacketField("total amount to pay in eurocent", 11, (round_pr(order.get_total_with_tax() * 100, 0.01)).toString(), " "));
+            packet.add_field(new FDMPacketField("total amount to pay in eurocent", 11, this._amount_to_fdm_amount_string(order.get_total_with_tax()), " "));
 
             packet.add_field(new FDMPacketField("tax percentage 1", 4, "2100"));
-            packet.add_field(new FDMPacketField("amount at tax percentage 1 in eurocent", 11, (round_pr(order.blackbox_base_price_in_euro_per_tax_letter[0].amount * 100, 0.01)).toString(), " "));
+            packet.add_field(new FDMPacketField("amount at tax percentage 1 in eurocent", 11, this._amount_to_fdm_amount_string(order.blackbox_base_price_in_euro_per_tax_letter[0].amount), " "));
             packet.add_field(new FDMPacketField("tax percentage 2", 4, "1200"));
-            packet.add_field(new FDMPacketField("amount at tax percentage 2 in eurocent", 11, (round_pr(order.blackbox_base_price_in_euro_per_tax_letter[1].amount * 100, 0.01)).toString(), " "));
+            packet.add_field(new FDMPacketField("amount at tax percentage 2 in eurocent", 11, this._amount_to_fdm_amount_string(order.blackbox_base_price_in_euro_per_tax_letter[1].amount), " "));
             packet.add_field(new FDMPacketField("tax percentage 3", 4, " 600"));
-            packet.add_field(new FDMPacketField("amount at tax percentage 3 in eurocent", 11, (round_pr(order.blackbox_base_price_in_euro_per_tax_letter[2].amount * 100, 0.01)).toString(), " "));
+            packet.add_field(new FDMPacketField("amount at tax percentage 3 in eurocent", 11, this._amount_to_fdm_amount_string(order.blackbox_base_price_in_euro_per_tax_letter[2].amount), " "));
             packet.add_field(new FDMPacketField("tax percentage 4", 4, " 000"));
-            packet.add_field(new FDMPacketField("amount at tax percentage 4 in eurocent", 11, (round_pr(order.blackbox_base_price_in_euro_per_tax_letter[3].amount * 100, 0.01)).toString(), " "));
+            packet.add_field(new FDMPacketField("amount at tax percentage 4 in eurocent", 11, this._amount_to_fdm_amount_string(order.blackbox_base_price_in_euro_per_tax_letter[3].amount), " "));
             packet.add_field(new FDMPacketField("PLU hash", 40, order.calculate_hash()));
 
             return packet;
