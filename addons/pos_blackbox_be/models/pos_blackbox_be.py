@@ -43,7 +43,6 @@ class res_users(models.Model):
 class pos_order(models.Model):
     _inherit = 'pos.order'
 
-    # todo jov: also need base amount per tax category AND tax letter per orderline
     blackbox_date = fields.Char("Fiscal Data Module date", help="Date returned by the Fiscal Data Module.")
     blackbox_time = fields.Char("Fiscal Data Module time", help="Time returned by the Fiscal Data Module.")
     blackbox_ticket_counters = fields.Char("Fiscal Data Module ticket counters", help="Ticket counter returned by the Fiscal Data Module (format: counter / total event type)")
@@ -99,6 +98,20 @@ class pos_order(models.Model):
 
         return fields
 
+    @api.model
+    def create_from_ui(self, orders):
+        # this will call pos_order_pro_forma.create_from_ui when required
+        pro_forma_orders = [order['data'] for order in orders if order['data']['blackbox_pro_forma']]
+
+        # filter the pro_forma orders out of the orders list
+        orders = [order for order in orders if order not in pro_forma_orders]
+
+        # deal with the pro forma orders
+        created_order_ids = self.env['pos.order_pro_forma'].create_from_ui(pro_forma_orders)
+
+        # only return regular order ids, shouldn't care about pro forma in the POS anyway
+        return super(pos_order, self).create_from_ui(orders)
+
 class pos_order_line(models.Model):
     _inherit = 'pos.order.line'
 
@@ -110,6 +123,65 @@ class pos_order_line(models.Model):
             raise UserError(_("Can't modify fields related to the Fiscal Data Module."))
 
         return super(pos_order_line, self).write(values)
+
+class pos_order_line_pro_forma(models.Model):
+    _name = 'pos.order_line_pro_forma' # needs to be a new class
+    _inherit = 'pos.order.line'
+
+class pos_order_pro_forma(models.Model):
+    _name = 'pos.order_pro_forma'
+
+    name = fields.Char('Order Ref')
+    company = fields.Many2one('res.company', 'Company')
+    date_order = fields.Datetime('Order Date')
+    user_id = fields.Many2one('res.users', 'Salesman', help="Person who uses the cash register. It can be a reliever, a student or an interim employee.")
+    amount_total = fields.Float()
+    lines = fields.One2many('pos.order.line', 'order_id', 'Order Lines', readonly=True, copy=True)
+    session_id = fields.Many2one('pos.session', 'Session')
+    partner_id = fields.Many2one('res.partner', 'Customer')
+
+    blackbox_date = fields.Char("Fiscal Data Module date", help="Date returned by the Fiscal Data Module.")
+    blackbox_time = fields.Char("Fiscal Data Module time", help="Time returned by the Fiscal Data Module.")
+    blackbox_ticket_counters = fields.Char("Fiscal Data Module ticket counters", help="Ticket counter returned by the Fiscal Data Module (format: counter / total event type)")
+    blackbox_unique_fdm_production_number = fields.Char("Fiscal Data Module ID", help="Unique ID of the blackbox that handled this order")
+    blackbox_vsc_identification_number = fields.Char("VAT Signing Card ID", help="Unique ID of the VAT signing card that handled this order")
+    blackbox_signature = fields.Char("Electronic signature", help="Electronic signature returned by the Fiscal Data Module")
+    blackbox_tax_category_a = fields.Float()
+    blackbox_tax_category_b = fields.Float()
+    blackbox_tax_category_c = fields.Float()
+    blackbox_tax_category_d = fields.Float()
+
+    plu_hash = fields.Char(help="Eight last characters of PLU hash")
+    pos_version = fields.Char(help="Version of Odoo that created the order")
+    pos_production_id = fields.Char(help="Unique ID of the POS that created this order")
+
+    @api.model
+    def create_from_ui(self, orders):
+        import pudb; pu.db
+        for ui_order in orders:
+            values = {
+                'name': ui_order['name'],
+                'user_id': ui_order['user_id'] or False,
+                'session_id': ui_order['pos_session_id'],
+                'lines': [self.env['pos.order_line_pro_forma']._order_line_fields(l) for l in ui_order['lines']] if ui_order['lines'] else False,
+                'partner_id': ui_order['partner_id'] or False,
+                'date_order': ui_order['creation_date'],
+                'blackbox_date': ui_order.get('blackbox_date'),
+                'blackbox_time': ui_order.get('blackbox_time'),
+                'blackbox_ticket_counters': ui_order.get('blackbox_ticket_counters'),
+                'blackbox_unique_fdm_production_number': ui_order.get('blackbox_unique_fdm_production_number'),
+                'blackbox_vsc_identification_number': ui_order.get('blackbox_vsc_identification_number'),
+                'blackbox_signature': ui_order.get('blackbox_signature'),
+                'blackbox_tax_category_a': ui_order.get('blackbox_tax_category_a'),
+                'blackbox_tax_category_b': ui_order.get('blackbox_tax_category_b'),
+                'blackbox_tax_category_c': ui_order.get('blackbox_tax_category_c'),
+                'blackbox_tax_category_d': ui_order.get('blackbox_tax_category_d'),
+                'plu_hash': ui_order.get('blackbox_plu_hash'),
+                'pos_version': ui_order.get('blackbox_pos_version'),
+                'pos_production_id': ui_order.get('blackbox_pos_production_id'),
+            }
+
+            self.create(values)
 
 class product_template(models.Model):
     _inherit = 'product.template'
