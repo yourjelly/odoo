@@ -139,6 +139,7 @@ class pos_order_pro_forma(models.Model):
     lines = fields.One2many('pos.order.line', 'order_id', 'Order Lines', readonly=True, copy=True)
     session_id = fields.Many2one('pos.session', 'Session')
     partner_id = fields.Many2one('res.partner', 'Customer')
+    config_id = fields.Many2one('pos.config', related='session_id.config_id')
 
     blackbox_date = fields.Char("Fiscal Data Module date", help="Date returned by the Fiscal Data Module.")
     blackbox_time = fields.Char("Fiscal Data Module time", help="Time returned by the Fiscal Data Module.")
@@ -159,7 +160,6 @@ class pos_order_pro_forma(models.Model):
     def create_from_ui(self, orders):
         for ui_order in orders:
             values = {
-                'name': ui_order['name'],
                 'user_id': ui_order['user_id'] or False,
                 'session_id': ui_order['pos_session_id'],
                 'lines': [self.env['pos.order_line_pro_forma']._order_line_fields(l) for l in ui_order['lines']] if ui_order['lines'] else False,
@@ -179,6 +179,10 @@ class pos_order_pro_forma(models.Model):
                 'pos_version': ui_order.get('blackbox_pos_version'),
                 'pos_production_id': ui_order.get('blackbox_pos_production_id'),
             }
+
+            # set name based on the sequence specified on the config
+            session = self.env['pos.session'].browse(values['session_id'])
+            values['name'] = session.config_id.sequence_id._next()
 
             self.create(values)
 
