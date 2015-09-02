@@ -909,7 +909,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             // Also don't push orders which have pro_forma set to
             // false. Because those are 'real orders' that we already
             // handled.
-            if (old_order.get_orderlines().length && old_order.blackbox_pro_forma !== false) {
+            if (old_order && old_order.get_orderlines().length && old_order.blackbox_pro_forma !== false) {
                 this.push_order(old_order, undefined, true);
             }
 

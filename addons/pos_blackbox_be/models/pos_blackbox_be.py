@@ -130,18 +130,33 @@ class pos_order_line_pro_forma(models.Model):
     _name = 'pos.order_line_pro_forma' # needs to be a new class
     _inherit = 'pos.order.line'
 
+    order_id = fields.Many2one('pos.order_pro_forma')
+
 class pos_order_pro_forma(models.Model):
     _name = 'pos.order_pro_forma'
 
+    def _default_session(self):
+        so = self.env['pos.session']
+        session_ids = so.search([('state','=', 'opened'), ('user_id','=',self.env.uid)])
+        return session_ids and session_ids[0] or False
+
+    def _default_pricelist(self):
+        session_ids = self._default_session()
+        if session_ids:
+            session_record = self.env['pos.session'].browse(session_ids.id)
+            return session_record.config_id.pricelist_id or False
+        return False
+
     name = fields.Char('Order Ref')
-    company = fields.Many2one('res.company', 'Company')
+    company_id = fields.Many2one('res.company', 'Company', default=lambda self: self.env['res.users'].browse(self.env.uid).company_id.id)
     date_order = fields.Datetime('Order Date')
     user_id = fields.Many2one('res.users', 'Salesman', help="Person who uses the cash register. It can be a reliever, a student or an interim employee.")
     amount_total = fields.Float()
-    lines = fields.One2many('pos.order.line', 'order_id', 'Order Lines', readonly=True, copy=True)
+    lines = fields.One2many('pos.order_line_pro_forma', 'order_id', 'Order Lines', readonly=True, copy=True)
     session_id = fields.Many2one('pos.session', 'Session')
     partner_id = fields.Many2one('res.partner', 'Customer')
     config_id = fields.Many2one('pos.config', related='session_id.config_id')
+    pricelist_id = fields.Many2one('product.pricelist', 'Pricelist', default=_default_pricelist)
 
     blackbox_date = fields.Char("Fiscal Data Module date", help="Date returned by the Fiscal Data Module.")
     blackbox_time = fields.Char("Fiscal Data Module time", help="Time returned by the Fiscal Data Module.")
