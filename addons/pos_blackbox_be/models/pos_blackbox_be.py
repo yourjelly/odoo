@@ -104,13 +104,15 @@ class pos_order(models.Model):
         pro_forma_orders = [order['data'] for order in orders if order['data']['blackbox_pro_forma']]
 
         # filter the pro_forma orders out of the orders list
-        orders = [order for order in orders if order not in pro_forma_orders]
+        regular_orders = [order for order in orders if not order['data']['blackbox_pro_forma']]
+
+        print "Got " + str(len(pro_forma_orders)) + " pro forma and " + str(len(regular_orders)) + " regular orders"
 
         # deal with the pro forma orders
         created_order_ids = self.env['pos.order_pro_forma'].create_from_ui(pro_forma_orders)
 
         # only return regular order ids, shouldn't care about pro forma in the POS anyway
-        return super(pos_order, self).create_from_ui(orders)
+        return super(pos_order, self).create_from_ui(regular_orders)
 
 class pos_order_line(models.Model):
     _inherit = 'pos.order.line'
