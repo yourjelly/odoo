@@ -903,7 +903,16 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
         add_new_order: function () {
             console.log("patch 1");
 
-            this.push_order(this.get_order(), undefined, true);
+            var old_order = this.get_order();
+
+            // Only push orders with something in them as pro forma.
+            // Also don't push orders which have pro_forma set to
+            // false. Because those are 'real orders' that we already
+            // handled.
+            if (old_order.get_orderlines().length && old_order.blackbox_pro_forma !== false) {
+                this.push_order(old_order, undefined, true);
+            }
+
             return posmodel_add_new_order_super.apply(this);
         },
 
