@@ -236,10 +236,6 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             });
         },
 
-        // generate_unique_id: function () {
-        //     return this.pos.config.id + "-" + this.pos.config.blackbox_sequence_id++;
-        // },
-
         // todo jov: monkey patch for this.invoice = true
         // check for sig, if it's not there print a receipt
         // (because that means the order was invoiced)
@@ -606,7 +602,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             // BXXX CCC  PPPPPPP
             packet.add_field(new FDMPacketField("production number POS", 14, this.pos.blackbox_pos_production_id));
 
-            packet.add_field(new FDMPacketField("ticket number", 6, order.sequence_number.toString(), "0"));
+            packet.add_field(new FDMPacketField("ticket number", 6, (++this.pos.config.backend_sequence_number).toString(), "0"));
 
             // todo jov:
             // p3 pdf
@@ -943,15 +939,11 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     });
 
     models.load_models({
-        'model': "ir.sequence",
+        'model': "pos.order",
+        'domain': function (self) { return [['config_id', '=', self.config.id]]; },
+        'order': "-date_order",
         'loaded': function (self, params) {
-            var sequence_id = self.config.sequence_id[0];
-
-            var ir_sequence = _.find(params, function (current_seq) {
-                return current_seq.id === sequence_id;
-            });
-
-            self.config.blackbox_sequence_id = ir_sequence.number_next_actual;
+            self.config.backend_sequence_number = parseInt(params[0]['name'].match(/\d+$/)[0]);
         }
     }, {
         'after': "pos.config"
