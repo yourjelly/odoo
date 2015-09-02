@@ -12,7 +12,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     var _t      = core._t;
     var round_pr = utils.round_precision;
 
-    var orderline_model_export_as_json_super = models.Orderline.prototype.export_as_JSON;
+    var orderline_super = models.Orderline.prototype;
     models.Orderline = models.Orderline.extend({
         // generates a table of the form
         // {..., 'char_to_translate': translation_of_char, ...}
@@ -198,11 +198,58 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             return amount + description + price_in_eurocent + vat_letter;
         },
 
+        can_be_merged_with: function (orderline) {
+            if (this.blackbox_pro_forma_finalized || orderline.blackbox_pro_forma_finalized) {
+                return false;
+            } else {
+                return orderline_super.can_be_merged_with.apply(this, arguments);
+            }
+        },
+
+        _show_finalized_error: function () {
+            this.pos.gui.show_popup("error", {
+                'title': _t("Order error"),
+                'body':  _t("This orderline has already been finalized in a pro forma order and \
+can no longer be modified. Please create a new line with eg. a negative quantity."),
+            });
+        },
+
+        set_discount: function (discount) {
+            if (this.blackbox_pro_forma_finalized) {
+                this._show_finalized_error();
+            } else {
+                orderline_super.set_discount.apply(this, arguments);
+            }
+        },
+
+        set_unit_price: function (price) {
+            if (this.blackbox_pro_forma_finalized) {
+                this._show_finalized_error();
+            } else {
+                orderline_super.set_unit_price.apply(this, arguments);
+            }
+        },
+
+        set_quantity: function (quantity) {
+            if (this.blackbox_pro_forma_finalized) {
+                this._show_finalized_error();
+            } else {
+                console.log("not finalized");
+                orderline_super.set_quantity.apply(this, arguments);
+            }
+        },
+
+        init_from_JSON: function (json) {
+            orderline_super.init_from_JSON.apply(this, arguments);
+            this.blackbox_pro_forma_finalized = json.blackbox_pro_forma_finalized;
+        },
+
         export_as_JSON: function () {
-            var json = orderline_model_export_as_json_super.bind(this)();
+            var json = orderline_super.export_as_JSON.apply(this, arguments);
 
             return _.extend(json, {
-                'vat_letter': this.get_vat_letter()
+                'vat_letter': this.get_vat_letter(),
+                'blackbox_pro_forma_finalized': this.blackbox_pro_forma_finalized
             });
         }
     });
@@ -857,6 +904,13 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                         order.blackbox_plu_hash = self._prepare_plu_hash_for_ticket(packet.fields[packet.fields.length - 1].content);
                         order.blackbox_pos_version = "Odoo " + self.version.server_version;
                         order.blackbox_pos_production_id = self.blackbox_pos_production_id;
+
+                        // mark the lines that have been pro forma'd, because we won't allow to change them
+                        if (order.blackbox_pro_forma) {
+                            order.get_orderlines().forEach(function (current, index, array) {
+                                current.blackbox_pro_forma_finalized = true;
+                            });
+                        }
 
                         self.gui.show_screen('receipt');
 
