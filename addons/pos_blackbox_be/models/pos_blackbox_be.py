@@ -157,7 +157,6 @@ class pos_order_pro_forma(models.Model):
 
     @api.model
     def create_from_ui(self, orders):
-        import pudb; pu.db
         for ui_order in orders:
             values = {
                 'name': ui_order['name'],
