@@ -232,6 +232,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
                 'blackbox_plu_hash': this.blackbox_plu_hash,
                 'blackbox_pos_version': this.blackbox_pos_version,
                 'blackbox_pos_production_id': this.blackbox_pos_production_id,
+                'blackbox_pro_forma': this.blackbox_pro_forma,
             });
         },
 
@@ -771,6 +772,8 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
     var posmodel_need_proxy_super = models.PosModel.prototype._need_proxy;
     var posmodel_push_order_super = models.PosModel.prototype.push_order;
+    var posmodel_add_new_order_super = models.PosModel.prototype.add_new_order;
+    var posmodel_set_order_super = models.PosModel.prototype.set_order;
     models.PosModel = models.PosModel.extend({
         _need_proxy: function () {
             if (this.config) {
@@ -891,10 +894,12 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             }
         },
 
-        push_order: function (order, opts) {
+        push_order: function (order, opts, pro_forma) {
             var self = this;
 
             if (order) {
+                order.blackbox_pro_forma = pro_forma || false;
+
                 return this.push_order_to_blackbox(order).then(function () {
                     console.log("blackbox success, calling push_order _super().");
                     return posmodel_push_order_super.apply(self, [order, opts]);
@@ -904,6 +909,18 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             } else {
                 return posmodel_push_order_super.apply(this, [order, opts]);
             }
+        },
+
+        add_new_order: function () {
+            console.log("patch 1");
+
+            this.push_order(this.get_order(), undefined, true);
+            return posmodel_add_new_order_super.apply(this);
+        },
+
+        set_order: function (order) {
+            console.log("patch 2");
+            posmodel_set_order_super.apply(this, [order]);
         }
     });
 
