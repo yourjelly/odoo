@@ -67,7 +67,7 @@
             <field name="name">Orders Pro Forma</field>
             <field name="model">pos.order_pro_forma</field>
             <field name="arch" type="xml">
-                <tree string="POS Orders Pro Forma">
+                <tree string="POS Orders Pro Forma" default_order="date_order desc">
                     <field name="name"/>
                     <field name="partner_id"/>
                     <field name="date_order"/>
