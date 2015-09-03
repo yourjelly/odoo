@@ -88,7 +88,7 @@
             <field name="name">Orders Pro Forma</field>
             <field name="model">pos.order_pro_forma</field>
             <field name="arch" type="xml">
-                <tree string="POS Orders Pro Forma" default_order="date_order desc">
+                <tree string="POS Orders Pro Forma" default_order="date_order desc" create="false" edit="false" delete="false">
                     <field name="name"/>
                     <field name="partner_id"/>
                     <field name="date_order"/>
@@ -103,7 +103,7 @@
             <field name="name">pos.order_pro_forma</field>
             <field name="model">pos.order_pro_forma</field>
             <field name="arch" type="xml">
-                <form string="Point of Sale Orders Pro Forma">
+                <form string="Point of Sale Orders Pro Forma" create="false" edit="false" delete="false">
                     <sheet>
                         <group col="4" colspan="4" name="order_fields">
                             <field name="name"/>
