@@ -23,17 +23,35 @@
             </field>
         </record>
 
+        <record model="ir.ui.view" id="view_pos_order_tree">
+            <field name="name">Orders</field>
+            <field name="model">pos.order</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_order_tree"/>
+            <field name="arch" type="xml">
+                <tree position="attributes">
+                    <attribute name="create">false</attribute>
+                </tree>
+            </field>
+        </record>
+
         <record model="ir.ui.view" id="view_pos_pos_form">
             <field name="name">pos.order</field>
             <field name="model">pos.order</field>
             <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='tax_ids']" position="after">
-                    <field name="vat_letter"/>
-                </xpath>
+                <form position="attributes">
+                    <attribute name="create">false</attribute>
+                    <attribute name="edit">false</attribute>
+                    <attribute name="delete">false</attribute>
+                </form>
+
                 <xpath expr="//button[@name='%(point_of_sale.action_pos_payment)d']" position="replace"/>
                 <xpath expr="//button[@name='refund']" position="replace"/>
                 <xpath expr="//button[@name='%(point_of_sale.action_report_pos_receipt)d']" position="replace"/>
+
+                <xpath expr="//field[@name='tax_ids']" position="after">
+                    <field name="vat_letter"/>
+                </xpath>
                 <xpath expr="//page[@name='extra']" position="inside">
                     <group string="Fiscal Data Module information">
                         <field name="blackbox_date" readonly="1"/>
