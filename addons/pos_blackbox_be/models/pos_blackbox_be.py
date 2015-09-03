@@ -87,7 +87,8 @@ class pos_order(models.Model):
 
     @api.multi
     def write(self, values):
-        white_listed_fields = ['state', 'account_move', 'picking_id']
+        white_listed_fields = ['state', 'account_move', 'picking_id',
+                               'invoice_id', 'state']
 
         for field in values.keys():
             if field not in white_listed_fields:

@@ -948,6 +948,30 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             }
         },
 
+        push_and_invoice_order: function (order) {
+            var self = this;
+            var invoiced = new $.Deferred();
+
+            // these will never be sent as pro_forma
+            order.blackbox_pro_forma = false;
+
+            // this is a duplicate test from _super(), it is necessary
+            // because we do not want to send orders to the blackbox
+            // which will not be sent to the backend
+            if(! order.get_client()) {
+                invoiced.reject({code:400, message:'Missing Customer', data:{}});
+                return invoiced;
+            }
+
+            return this.push_order_to_blackbox(order).then(function () {
+                console.log("blackbox success, calling push_and_invoice_order _super().");
+                return posmodel_super.push_and_invoice_order.apply(self, [order]);
+            }, function () {
+                console.log("fdm validation failed, not sending to backend");
+            });
+        },
+
+
         _push_pro_forma: function () {
             var old_order = this.get_order();
 
