@@ -805,15 +805,11 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             this._super();
         }
     });
-
-    var posmodel_need_proxy_super = models.PosModel.prototype._need_proxy;
-    var posmodel_push_order_super = models.PosModel.prototype.push_order;
-    var posmodel_add_new_order_super = models.PosModel.prototype.add_new_order;
-    var posmodel_set_order_super = models.PosModel.prototype.set_order;
+    var posmodel_super = models.PosModel.prototype;
     models.PosModel = models.PosModel.extend({
         _need_proxy: function () {
             if (this.config) {
-                return this.config.iface_blackbox_be || posmodel_need_proxy_super.bind(this)();
+                return this.config.iface_blackbox_be || posmodel_super._need_proxy.apply(this, arguments);
             } else {
                 return false;
             }
@@ -945,18 +941,16 @@ can no longer be modified. Please create a new line with eg. a negative quantity
 
                 return this.push_order_to_blackbox(order).then(function () {
                     console.log("blackbox success, calling push_order _super().");
-                    return posmodel_push_order_super.apply(self, [order, opts]);
+                    return posmodel_super.push_order.apply(self, [order, opts]);
                 }, function () {
                     console.log("fdm validation failed, not sending to backend");
                 });
             } else {
-                return posmodel_push_order_super.apply(this, [order, opts]);
+                return posmodel_super.push_order.apply(self, arguments);
             }
         },
 
-        add_new_order: function () {
-            console.log("patch 1");
-
+        _push_pro_forma: function () {
             var old_order = this.get_order();
 
             // Only push orders with something in them as pro forma.
@@ -966,13 +960,18 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             if (old_order && old_order.get_orderlines().length && old_order.blackbox_pro_forma !== false) {
                 this.push_order(old_order, undefined, true);
             }
+        },
 
-            return posmodel_add_new_order_super.apply(this);
+        add_new_order: function () {
+            this._push_pro_forma();
+
+            return posmodel_super.add_new_order.apply(this, arguments);
         },
 
         set_order: function (order) {
-            console.log("patch 2");
-            posmodel_set_order_super.apply(this, [order]);
+            this._push_pro_forma();
+
+            return posmodel_super.set_order.apply(this, arguments);
         }
     });
 
