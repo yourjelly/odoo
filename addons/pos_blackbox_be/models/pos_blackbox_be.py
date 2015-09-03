@@ -64,15 +64,11 @@ class pos_order(models.Model):
 
     @api.multi
     def write(self, values):
-        immutable_fields = ['blackbox_date', 'blackbox_time', 'blackbox_ticket_counters',
-                            'blackbox_unique_fdm_production_number', 'blackbox_vsc_identification_number',
-                            'blackbox_signature', 'blackbox_tax_category_a', 'blackbox_tax_category_b',
-                            'blackbox_tax_category_c', 'blackbox_tax_category_d', 'plu_hash',
-                            'pos_version', 'pos_production_id']
+        white_listed_fields = ['state', 'account_move']
 
-        for immutable_field in immutable_fields:
-            if values.get(immutable_field):
-                raise UserError(_("Can't modify fields related to the Fiscal Data Module."))
+        for field in values.keys():
+            if field not in white_listed_fields:
+                raise UserError(_("Can't modify saved orders."))
 
         return super(pos_order, self).write(values)
 
