@@ -40,6 +40,29 @@ class res_users(models.Model):
     insz_or_bis_number = fields.Char("INSZ or BIS number",
                                      help="Social security identification number") # todo jov: enforce length of 11
 
+class pos_session(models.Model):
+    _inherit = 'pos.session'
+
+    # The issue is I have no idea how non-pos managers are supposed to
+    # work otherwise. They cannot open their own session and opening a
+    # session for them with a pos manager user doesn't work. This
+    # fixes that, but it's not really pretty.
+    @api.multi
+    def open_frontend_cb(self):
+        for session in self.browse(self.ids):
+            if self.env.uid == session.user_id.id:
+                return super(pos_session, self).open_frontend_cb()
+            else:
+                session.signal_workflow('open')
+                return {
+                    'type': 'ir.actions.act_window',
+                    'res_model': 'pos.session',
+                    'view_mode': 'tree',
+                    'target': 'self'
+                }
+
+        return super(pos_session, self).open_frontend_cb()
+
 class pos_order(models.Model):
     _inherit = 'pos.order'
 
