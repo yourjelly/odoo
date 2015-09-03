@@ -803,6 +803,19 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             });
 
             this._super();
+        },
+
+        // show_error with the option of showing user-friendly errors
+        // (without backtrace etc.)
+        show_error: function(error) {
+            if (error.message.indexOf("FDM error: ") > -1) {
+                this.gui.show_popup('error',{
+                    'title': "POS Error",
+                    'body':  error.message,
+                });
+            } else {
+                this._super(error);
+            }
         }
     });
     var posmodel_super = models.PosModel.prototype;
@@ -880,57 +893,42 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             order.set_validation_time();
             order.blackbox_base_price_in_euro_per_tax_letter = order.get_base_price_in_euro_per_tax_letter_list();
 
-            try {
-                console.log("Signing order with uid " + order.uid);
-                var packet = this.proxy._build_fdm_hash_and_sign_request(order);
-                var def = this.proxy.request_fdm_hash_and_sign(packet).then(function (parsed_response) {
-                    var def = new $.Deferred();
+            console.log("Signing order with uid " + order.uid);
+            var packet = this.proxy._build_fdm_hash_and_sign_request(order);
+            var def = this.proxy.request_fdm_hash_and_sign(packet).then(function (parsed_response) {
+                var def = new $.Deferred();
 
-                    if (parsed_response) {
-                        // put fields that we need on tickets on order
-                        order.blackbox_date = self._prepare_date_for_ticket(parsed_response.date);
-                        order.blackbox_time = self._prepare_time_for_ticket(parsed_response.time);
-                        order.blackbox_ticket_counters =
-                            self._prepare_ticket_counter_for_ticket(parsed_response.vsc_ticket_counter,
-                                                                    parsed_response.vsc_total_ticket_counter,
-                                                                    parsed_response.event_label);
-                        order.blackbox_signature = parsed_response.signature;
-                        order.blackbox_vsc_identification_number = parsed_response.vsc_identification_number;
-                        order.blackbox_unique_fdm_production_number = parsed_response.fdm_unique_production_number;
-                        order.blackbox_plu_hash = self._prepare_plu_hash_for_ticket(packet.fields[packet.fields.length - 1].content);
-                        order.blackbox_pos_version = "Odoo " + self.version.server_version;
-                        order.blackbox_pos_production_id = self.blackbox_pos_production_id;
+                if (parsed_response) {
+                    // put fields that we need on tickets on order
+                    order.blackbox_date = self._prepare_date_for_ticket(parsed_response.date);
+                    order.blackbox_time = self._prepare_time_for_ticket(parsed_response.time);
+                    order.blackbox_ticket_counters =
+                        self._prepare_ticket_counter_for_ticket(parsed_response.vsc_ticket_counter,
+                                                                parsed_response.vsc_total_ticket_counter,
+                                                                parsed_response.event_label);
+                    order.blackbox_signature = parsed_response.signature;
+                    order.blackbox_vsc_identification_number = parsed_response.vsc_identification_number;
+                    order.blackbox_unique_fdm_production_number = parsed_response.fdm_unique_production_number;
+                    order.blackbox_plu_hash = self._prepare_plu_hash_for_ticket(packet.fields[packet.fields.length - 1].content);
+                    order.blackbox_pos_version = "Odoo " + self.version.server_version;
+                    order.blackbox_pos_production_id = self.blackbox_pos_production_id;
 
-                        // mark the lines that have been pro forma'd, because we won't allow to change them
-                        if (order.blackbox_pro_forma) {
-                            order.get_orderlines().forEach(function (current, index, array) {
-                                current.blackbox_pro_forma_finalized = true;
-                            });
-                        }
-
-                        self.gui.show_screen('receipt');
-
-                        return def.resolve();
-                    } else {
-                        return def.reject();
+                    // mark the lines that have been pro forma'd, because we won't allow to change them
+                    if (order.blackbox_pro_forma) {
+                        order.get_orderlines().forEach(function (current, index, array) {
+                            current.blackbox_pro_forma_finalized = true;
+                        });
                     }
-                });
 
-                return def;
-            } catch (e) {
-                var exception_prefix = "FDM error:";
+                    self.gui.show_screen('receipt');
 
-                if (e.message && e.message.startsWith(exception_prefix)) {
-                    this.gui.show_popup("error", {
-                        'title': _t("Fiscal Data Module error"),
-                        'body':  e.message.substr(exception_prefix.length),
-                    });
+                    return def.resolve();
                 } else {
-                    throw e;
+                    return def.reject();
                 }
+            });
 
-                return false;
-            }
+            return def;
         },
 
         push_order: function (order, opts, pro_forma) {
