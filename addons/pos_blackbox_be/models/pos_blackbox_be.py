@@ -24,9 +24,9 @@ class AccountTax(models.Model):
             elif self.amount == 0:
                 self.identification_letter = "D"
             else:
-                return False
+                self.identification_letter = False
         else:
-            return False
+            self.identification_letter = False
 
 class pos_config(models.Model):
     _inherit = 'pos.config'
