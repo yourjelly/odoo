@@ -43,6 +43,19 @@ class res_users(models.Model):
 class pos_session(models.Model):
     _inherit = 'pos.session'
 
+    forbidden_modules_installed = fields.Boolean(compute='_compute_forbidden_modules_installed')
+
+    @api.one
+    def _compute_forbidden_modules_installed(self):
+        ir_module = self.env['ir.module.module'].sudo()
+
+        pos_reprint = ir_module.search([('name', '=', 'pos_reprint')])
+
+        if pos_reprint and pos_reprint.state != "uninstalled":
+            self.forbidden_modules_installed = True
+        else:
+            self.forbidden_modules_installed = False
+
     # The issue is I have no idea how non-pos managers are supposed to
     # work otherwise. They cannot open their own session and opening a
     # session for them with a pos manager user doesn't work. This

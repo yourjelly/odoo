@@ -871,7 +871,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                 });
 
                 return false;
-            } else if (this.blackbox_pos_reprint_installed) {
+            } else if (this.pos_session.forbidden_modules_installed) {
                 this.gui.show_popup("error", {
                     'title': _t("Fiscal Data Module error"),
                     'body':  _t("The reprint module is not allowed to be installed with the Fiscal Data Module."),
@@ -1029,6 +1029,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
     models.load_fields("res.users", "insz_or_bis_number");
     models.load_fields("account.tax", "identification_letter");
     models.load_fields("res.company", "street");
+    models.load_fields("pos.session", "forbidden_modules_installed");
 
     return {
         'FDMPacketField': FDMPacketField,
