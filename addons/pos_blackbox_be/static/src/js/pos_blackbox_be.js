@@ -1026,18 +1026,6 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         'after': "pos.config"
     });
 
-    models.load_models({
-        'model': "ir.module.module",
-        'domain': [['name', '=', 'pos_reprint']],
-        'loaded': function (self, module) {
-            if (module && module[0].state !== "uninstalled") {
-                self.blackbox_pos_reprint_installed = true;
-            } else {
-                self.blackbox_pos_reprint_installed = false;
-            }
-        }
-    });
-
     models.load_fields("res.users", "insz_or_bis_number");
     models.load_fields("account.tax", "identification_letter");
     models.load_fields("res.company", "street");
