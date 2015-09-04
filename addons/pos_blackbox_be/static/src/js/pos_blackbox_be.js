@@ -887,7 +887,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             var self = this;
 
             if (! this._check_validation_constraints()) {
-                return false;
+                return new $.Deferred().reject();
             }
 
             order.set_validation_time();
