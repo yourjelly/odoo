@@ -45,6 +45,35 @@ class pos_session(models.Model):
 
     forbidden_modules_installed = fields.Boolean(compute='_compute_forbidden_modules_installed')
 
+    total_sold = fields.Monetary(compute='_compute_total_sold')
+    total_base_of_measure_tax_a = fields.Monetary(compute='_compute_total_tax')
+    total_base_of_measure_tax_b = fields.Monetary(compute='_compute_total_tax')
+    total_base_of_measure_tax_c = fields.Monetary(compute='_compute_total_tax')
+    total_base_of_measure_tax_d = fields.Monetary(compute='_compute_total_tax')
+
+    @api.one
+    @api.depends('statement_ids')
+    def _compute_total_sold(self):
+        self.total_sold = 0
+
+        for st in self.statement_ids:
+            self.total_sold += st.balance_end_real
+
+    @api.one
+    @api.depends('statement_ids')
+    def _compute_total_tax(self):
+        orders = self.env['pos.order'].search([('session_id', '=', self.id)])
+
+        for order in orders:
+            self.total_base_of_measure_tax_a += order.blackbox_tax_category_a
+            self.total_base_of_measure_tax_b += order.blackbox_tax_category_b
+            self.total_base_of_measure_tax_c += order.blackbox_tax_category_c
+            self.total_base_of_measure_tax_d += order.blackbox_tax_category_d
+
+    # @api.multi
+    # def unlink(self):
+    #     import pudb; pu.db
+
     @api.one
     def _compute_forbidden_modules_installed(self):
         ir_module = self.env['ir.module.module'].sudo()
