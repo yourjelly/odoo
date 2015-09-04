@@ -252,7 +252,7 @@ class product_template(models.Model):
         return super(product_template, self).unlink()
 
 class module(models.Model):
-    _inherit = "ir.module.module"
+    _inherit = 'ir.module.module'
 
     @api.multi
     def state_update(self, newstate, states_to_update, level=100):
