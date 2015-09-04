@@ -165,5 +165,83 @@
                 </form>
             </field>
         </record>
+
+        <!-- include vat number in report -->
+        <template id="include_vat_number" inherit_id="report.external_layout_header">
+            <xpath expr="//div[@name='company_address']" position="after">
+                <div class="col-xs-9" name="company_address">
+                    VAT: <t t-esc="company.vat"/>
+                </div>
+            </xpath>
+        </template>
+
+        <report
+            id="action_report_pos_session_summary"
+            string="Z-report"
+            model="pos.session"
+            report_type="qweb-pdf"
+            name="pos_blackbox_be.z_report_template"
+            file="pos_blackbox_be.z_report_template"
+            attachment_use="False"/>
+            <!-- attachment="(object.name + '/z-report.pdf')"/> -->
+
+            <template id="z_report_template">
+                <t t-call="report.html_container">
+                    <t t-foreach="docs" t-as="o">
+                        <t t-call="report.external_layout">
+                            <div class="page">
+                                <h2>Z FINANCIAL</h2>
+                                POS Session: <span t-field="o.name"/>
+                                <div class="row mt32 mb32">
+                                    <div class="col-xs-3">
+                                        <strong>Responsible</strong>:<br/>
+                                        <span t-field="o.user_id"/>
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <strong>Point of Sale</strong>:<br/>
+                                        <span t-field="o.config_id"/>
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <strong>From</strong>:<br/>
+                                        <span t-field="o.start_at"/>
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <strong>To</strong>:<br/>
+                                        <!-- <span t-field="o.stop_at"/> --> <!-- for z-reports -->
+                                        <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y/%m/%d %H:%M:%S')"/> <!-- for x-reports -->
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <strong>Total sold</strong>:
+                                        <span t-field="o.total_sold"/>
+                                    </div>
+                                </div>
+                                <strong>Total base of measure per tax</strong>:
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <strong>A</strong>:
+                                        <span t-field="o.total_base_of_measure_tax_a"/>
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <strong>B</strong>:
+                                        <span t-field="o.total_base_of_measure_tax_b"/>
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <strong>C</strong>:
+                                        <span t-field="o.total_base_of_measure_tax_c"/>
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <strong>D</strong>:
+                                        <span t-field="o.total_base_of_measure_tax_d"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                </t>
+            </template>
+
+        <!-- <menuitem name="Z-reports" action="z_report" id="menu_report_z_report" parent="point_of_sale.menu_point_rep" sequence="100"/> -->
     </data>
 </openerp>
