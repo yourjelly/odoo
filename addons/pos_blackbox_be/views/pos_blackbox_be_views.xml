@@ -222,18 +222,22 @@
                                     <div class="col-xs-3">
                                         <strong>A</strong>:
                                         <span t-field="o.total_base_of_measure_tax_a"/>
+                                        (total tax: <span t-field="o.total_tax_a"/>)
                                     </div>
                                     <div class="col-xs-3">
                                         <strong>B</strong>:
                                         <span t-field="o.total_base_of_measure_tax_b"/>
+                                        (total tax: <span t-field="o.total_tax_b"/>)
                                     </div>
                                     <div class="col-xs-3">
                                         <strong>C</strong>:
                                         <span t-field="o.total_base_of_measure_tax_c"/>
+                                        (total tax: <span t-field="o.total_tax_c"/>)
                                     </div>
                                     <div class="col-xs-3">
                                         <strong>D</strong>:
                                         <span t-field="o.total_base_of_measure_tax_d"/>
+                                        (total tax: <span t-field="o.total_tax_d"/>)
                                     </div>
                                 </div>
                             </div>
