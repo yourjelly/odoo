@@ -267,6 +267,12 @@
                                         <span t-field="o.amount_of_vat_tickets"/>
                                     </div>
                                 </div>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <strong>Amount of Pro Forma VAT tickets</strong>:
+                                        <span t-field="o.amount_of_pro_forma_tickets"/>
+                                    </div>
+                                </div>
                             </div>
                         </t>
                     </t>
