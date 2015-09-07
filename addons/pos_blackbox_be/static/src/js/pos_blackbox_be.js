@@ -1020,7 +1020,11 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         'domain': function (self) { return [['config_id', '=', self.config.id]]; },
         'order': "-date_order",
         'loaded': function (self, params) {
-            self.config.backend_sequence_number = parseInt(params[0]['name'].match(/\d+$/)[0]);
+            if (params.length) {
+                self.config.backend_sequence_number = parseInt(params[0]['name'].match(/\d+$/)[0]);
+            } else {
+                self.config.backend_sequence_number = 0;
+            }
         }
     }, {
         'after': "pos.config"
