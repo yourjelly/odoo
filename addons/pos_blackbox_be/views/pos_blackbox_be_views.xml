@@ -222,7 +222,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-xs-12">
-                                    <strong>Total sold</strong>:
+                                    <strong>Total revenue</strong>:
                                     <span t-field="o.total_sold"/>
                                 </div>
                             </div>
@@ -286,6 +286,18 @@
                                 <div class="col-xs-12">
                                     <strong>Revenue of Pro Forma VAT tickets (including VAT)</strong>:
                                     <span t-field="o.total_pro_forma"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <strong>Amount of discounts</strong>:
+                                    <span t-field="o.amount_of_discounts"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <strong>Total discounts</strong>:
+                                    <span t-field="o.total_discount"/>
                                 </div>
                             </div>
                         </div>
