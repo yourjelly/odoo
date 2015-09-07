@@ -116,9 +116,21 @@ class pos_session(models.Model):
     def _compute_forbidden_modules_installed(self):
         ir_module = self.env['ir.module.module'].sudo()
 
-        pos_reprint = ir_module.search([('name', '=', 'pos_reprint')])
+        # We don't want pos_discount because it creates a single PLU
+        # line with a user-set product that acts as a
+        # discount. Because of this we have to treat the discount line
+        # as a regular PLU line, which is fine, but we also have to
+        # split it per tax. So we would need four PLU products, each
+        # with a different tax, and then we'd have to calculate how
+        # much discount/tax we would need to apply. If necessary, I
+        # think it would be easier to just do the discount per line
+        # (like it happens in the regular pos module). That way the
+        # discounts are 'notices' which are not regulated by law.
+        blacklisted_modules = ["pos_reprint", "pos_discount"]
+        blacklisted_installed_modules = ir_module.search([('name', 'in', blacklisted_modules),
+                                                          ('state', '!=', 'uninstalled')])
 
-        if pos_reprint and pos_reprint.state != "uninstalled":
+        if blacklisted_installed_modules:
             self.forbidden_modules_installed = True
         else:
             self.forbidden_modules_installed = False
@@ -337,9 +349,11 @@ class module(models.Model):
 
     @api.multi
     def state_update(self, newstate, states_to_update, level=100):
+        blacklisted_modules = ["pos_reprint", "pos_discount"]
+
         if newstate == "to install":
             for module_to_update in self:
-                if module_to_update.name == "pos_reprint":
+                if module_to_update.name in blacklisted_modules:
                     raise UserError(_("This module is not allowed with the Fiscal Data Module."))
 
         return super(module, self).state_update(newstate, states_to_update, level=level)
