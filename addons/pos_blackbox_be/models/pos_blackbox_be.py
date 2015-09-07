@@ -68,7 +68,7 @@ class pos_session(models.Model):
         self.total_sold = 0
 
         for st in self.statement_ids:
-            self.total_sold += st.balance_end_real
+            self.total_sold += st.total_entry_encoding
 
     @api.one
     @api.depends('pro_forma_order_ids')
