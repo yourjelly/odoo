@@ -875,7 +875,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             } else if (this.pos_session.forbidden_modules_installed) {
                 this.gui.show_popup("error", {
                     'title': _t("Fiscal Data Module error"),
-                    'body':  _t("The reprint module is not allowed to be installed with the Fiscal Data Module."),
+                    'body':  _t("The reprint and discount module are not allowed to be installed with the Fiscal Data Module."),
                 });
 
                 return false;
