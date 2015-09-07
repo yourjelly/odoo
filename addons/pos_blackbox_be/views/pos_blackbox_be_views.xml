@@ -208,7 +208,7 @@
                                     <div class="col-xs-3">
                                         <strong>To</strong>:<br/>
                                         <!-- <span t-field="o.stop_at"/> --> <!-- for z-reports -->
-                                        <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y/%m/%d %H:%M:%S')"/> <!-- for x-reports -->
+                                        <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%m/%d/%Y %H:%M:%S')"/> <!-- for x-reports -->
                                     </div>
                                 </div>
                                 <div class="row">
@@ -271,6 +271,12 @@
                                     <div class="col-xs-12">
                                         <strong>Amount of Pro Forma VAT tickets</strong>:
                                         <span t-field="o.amount_of_pro_forma_tickets"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <strong>Revenue of Pro Forma VAT tickets (including VAT)</strong>:
+                                        <span t-field="o.total_pro_forma"/>
                                     </div>
                                 </div>
                             </div>

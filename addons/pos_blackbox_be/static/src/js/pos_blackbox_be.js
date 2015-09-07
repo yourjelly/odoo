@@ -268,6 +268,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             return _.extend(json, {
                 'blackbox_date': this.blackbox_date,
                 'blackbox_time': this.blackbox_time,
+                'blackbox_amount_total': this.blackbox_amount_total,
                 'blackbox_ticket_counters': this.blackbox_ticket_counters,
                 'blackbox_unique_fdm_production_number': this.blackbox_unique_fdm_production_number,
                 'blackbox_vsc_identification_number': this.blackbox_vsc_identification_number,
@@ -650,7 +651,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             // but there's also the training and pro forma (implement?)
             packet.add_field(new FDMPacketField("event label", 2, "NS"));
 
-            packet.add_field(new FDMPacketField("total amount to pay in eurocent", 11, this._amount_to_fdm_amount_string(order.get_total_with_tax()), " "));
+            packet.add_field(new FDMPacketField("total amount to pay in eurocent", 11, this._amount_to_fdm_amount_string(order.blackbox_amount_total), " "));
 
             packet.add_field(new FDMPacketField("tax percentage 1", 4, "2100"));
             packet.add_field(new FDMPacketField("amount at tax percentage 1 in eurocent", 11, this._amount_to_fdm_amount_string(order.blackbox_base_price_in_euro_per_tax_letter[0].amount), " "));
@@ -891,6 +892,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             }
 
             order.set_validation_time();
+            order.blackbox_amount_total = order.get_total_with_tax();
             order.blackbox_base_price_in_euro_per_tax_letter = order.get_base_price_in_euro_per_tax_letter_list();
 
             console.log("Signing order with uid " + order.uid);
