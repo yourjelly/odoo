@@ -54,9 +54,10 @@ class pos_session(models.Model):
     total_tax_b = fields.Monetary(compute='_compute_total_tax')
     total_tax_c = fields.Monetary(compute='_compute_total_tax')
     total_tax_d = fields.Monetary(compute='_compute_total_tax')
+    amount_of_vat_tickets = fields.Integer(compute='_compute_amount_of_vat_tickets')
 
     @api.one
-    @api.depends('statement_ids')
+    @api.depends('statement_ids', 'order_ids')
     def _compute_total_sold(self):
         self.total_sold = 0
 
@@ -64,16 +65,14 @@ class pos_session(models.Model):
             self.total_sold += st.balance_end_real
 
     @api.one
-    @api.depends('statement_ids')
+    @api.depends('statement_ids', 'order_ids')
     def _compute_total_tax(self):
-        orders = self.env['pos.order'].search([('session_id', '=', self.id)])
-
         self.total_base_of_measure_tax_a = 0
         self.total_base_of_measure_tax_b = 0
         self.total_base_of_measure_tax_c = 0
         self.total_base_of_measure_tax_d = 0
 
-        for order in orders:
+        for order in self.order_ids:
             self.total_base_of_measure_tax_a += order.blackbox_tax_category_a
             self.total_base_of_measure_tax_b += order.blackbox_tax_category_b
             self.total_base_of_measure_tax_c += order.blackbox_tax_category_c
@@ -85,6 +84,11 @@ class pos_session(models.Model):
         self.total_tax_b = currency.round(self.total_base_of_measure_tax_b * 0.12)
         self.total_tax_c = currency.round(self.total_base_of_measure_tax_c * 0.06)
         self.total_tax_d = 0
+
+    @api.one
+    @api.depends('statement_ids', 'order_ids')
+    def _compute_amount_of_vat_tickets(self):
+        self.amount_of_vat_tickets = len(self.order_ids)
 
     # @api.multi
     # def unlink(self):
