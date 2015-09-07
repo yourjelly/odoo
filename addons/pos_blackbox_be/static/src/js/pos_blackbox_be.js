@@ -920,9 +920,9 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                         order.get_orderlines().forEach(function (current, index, array) {
                             current.blackbox_pro_forma_finalized = true;
                         });
+                    } else {
+                        self.gui.show_screen('receipt');
                     }
-
-                    self.gui.show_screen('receipt');
 
                     return def.resolve();
                 } else {
