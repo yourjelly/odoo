@@ -50,6 +50,10 @@ class pos_session(models.Model):
     total_base_of_measure_tax_b = fields.Monetary(compute='_compute_total_tax')
     total_base_of_measure_tax_c = fields.Monetary(compute='_compute_total_tax')
     total_base_of_measure_tax_d = fields.Monetary(compute='_compute_total_tax')
+    total_tax_a = fields.Monetary(compute='_compute_total_tax')
+    total_tax_b = fields.Monetary(compute='_compute_total_tax')
+    total_tax_c = fields.Monetary(compute='_compute_total_tax')
+    total_tax_d = fields.Monetary(compute='_compute_total_tax')
 
     @api.one
     @api.depends('statement_ids')
@@ -64,11 +68,23 @@ class pos_session(models.Model):
     def _compute_total_tax(self):
         orders = self.env['pos.order'].search([('session_id', '=', self.id)])
 
+        self.total_base_of_measure_tax_a = 0
+        self.total_base_of_measure_tax_b = 0
+        self.total_base_of_measure_tax_c = 0
+        self.total_base_of_measure_tax_d = 0
+
         for order in orders:
             self.total_base_of_measure_tax_a += order.blackbox_tax_category_a
             self.total_base_of_measure_tax_b += order.blackbox_tax_category_b
             self.total_base_of_measure_tax_c += order.blackbox_tax_category_c
             self.total_base_of_measure_tax_d += order.blackbox_tax_category_d
+
+        # compute the tax totals
+        currency = self.env['res.currency'].browse(self.currency_id.id)
+        self.total_tax_a = currency.round(self.total_base_of_measure_tax_a * 0.21)
+        self.total_tax_b = currency.round(self.total_base_of_measure_tax_b * 0.12)
+        self.total_tax_c = currency.round(self.total_base_of_measure_tax_c * 0.06)
+        self.total_tax_d = 0
 
     # @api.multi
     # def unlink(self):
