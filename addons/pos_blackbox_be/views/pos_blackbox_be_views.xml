@@ -166,6 +166,16 @@
             </field>
         </record>
 
+        <!-- get rid of cashbox stuff, because it's currently broken -->
+        <record model="ir.ui.view" id="view_pos_session_form">
+            <field name="name">pos.session.form.view</field>
+            <field name="model">pos.session</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_session_form"/>
+            <field name="arch" type="xml">
+                <div class="oe_button_box" position="replace"/>
+            </field>
+        </record>
+
         <!-- include vat number in report -->
         <template id="include_vat_number" inherit_id="report.external_layout_header">
             <xpath expr="//div[@name='company_address']" position="after">
