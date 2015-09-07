@@ -59,6 +59,8 @@ class pos_session(models.Model):
     total_tax_d = fields.Monetary(compute='_compute_total_tax')
     amount_of_vat_tickets = fields.Integer(compute='_compute_amounts_of_tickets')
     amount_of_pro_forma_tickets = fields.Integer(compute='_compute_amounts_of_tickets')
+    amount_of_discounts = fields.Integer(compute='_compute_discounts')
+    total_discount = fields.Monetary(compute='_compute_discounts')
 
     @api.one
     @api.depends('statement_ids', 'order_ids')
@@ -107,6 +109,27 @@ class pos_session(models.Model):
     def _compute_amounts_of_tickets(self):
         self.amount_of_vat_tickets = len(self.order_ids)
         self.amount_of_pro_forma_tickets = len(self.pro_forma_order_ids)
+
+    @api.one
+    @api.depends('statement_ids', 'order_ids')
+    def _compute_discounts(self):
+        self.amount_of_discounts = 0
+        self.total_discount = 0
+
+        for order in self.order_ids:
+            for line in order.lines:
+                if line.discount > 0:
+                    if line.product_id.uom_id.category_id == self.env["ir.model.data"].xmlid_to_object("product.product_uom_categ_unit"):
+                        self.amount_of_discounts += line.qty
+                    else:
+                        self.amount_of_discounts += 1
+
+                    original_line_discount = line.discount
+                    line.discount = 0
+                    price_without_discount = line._amount_line_all(None, None)[line.id]['price_subtotal_incl']
+                    line.discount = original_line_discount
+
+                    self.total_discount += price_without_discount - line.price_subtotal_incl
 
     # @api.multi
     # def unlink(self):
