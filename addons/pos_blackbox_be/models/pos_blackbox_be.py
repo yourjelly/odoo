@@ -43,6 +43,8 @@ class res_users(models.Model):
 class pos_session(models.Model):
     _inherit = 'pos.session'
 
+    pro_forma_order_ids = fields.One2many('pos.order_pro_forma', 'session_id')
+
     forbidden_modules_installed = fields.Boolean(compute='_compute_forbidden_modules_installed')
 
     total_sold = fields.Monetary(compute='_compute_total_sold')
@@ -54,7 +56,8 @@ class pos_session(models.Model):
     total_tax_b = fields.Monetary(compute='_compute_total_tax')
     total_tax_c = fields.Monetary(compute='_compute_total_tax')
     total_tax_d = fields.Monetary(compute='_compute_total_tax')
-    amount_of_vat_tickets = fields.Integer(compute='_compute_amount_of_vat_tickets')
+    amount_of_vat_tickets = fields.Integer(compute='_compute_amounts_of_tickets')
+    amount_of_pro_forma_tickets = fields.Integer(compute='_compute_amounts_of_tickets')
 
     @api.one
     @api.depends('statement_ids', 'order_ids')
@@ -89,6 +92,12 @@ class pos_session(models.Model):
     @api.depends('statement_ids', 'order_ids')
     def _compute_amount_of_vat_tickets(self):
         self.amount_of_vat_tickets = len(self.order_ids)
+
+    @api.one
+    @api.depends('statement_ids', 'order_ids')
+    def _compute_amounts_of_tickets(self):
+        self.amount_of_vat_tickets = len(self.order_ids)
+        self.amount_of_pro_forma_tickets = len(self.pro_forma_order_ids)
 
     # @api.multi
     # def unlink(self):
