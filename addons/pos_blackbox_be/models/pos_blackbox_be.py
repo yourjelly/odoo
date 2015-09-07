@@ -48,6 +48,7 @@ class pos_session(models.Model):
     forbidden_modules_installed = fields.Boolean(compute='_compute_forbidden_modules_installed')
 
     total_sold = fields.Monetary(compute='_compute_total_sold')
+    total_pro_forma = fields.Monetary(compute='_compute_total_pro_forma')
     total_base_of_measure_tax_a = fields.Monetary(compute='_compute_total_tax')
     total_base_of_measure_tax_b = fields.Monetary(compute='_compute_total_tax')
     total_base_of_measure_tax_c = fields.Monetary(compute='_compute_total_tax')
@@ -66,6 +67,14 @@ class pos_session(models.Model):
 
         for st in self.statement_ids:
             self.total_sold += st.balance_end_real
+
+    @api.one
+    @api.depends('pro_forma_order_ids')
+    def _compute_total_pro_forma(self):
+        self.total_pro_forma = 0
+
+        for pro_forma in self.pro_forma_order_ids:
+            self.total_pro_forma += pro_forma.amount_total
 
     @api.one
     @api.depends('statement_ids', 'order_ids')
@@ -275,6 +284,7 @@ class pos_order_pro_forma(models.Model):
                 'date_order': ui_order['creation_date'],
                 'blackbox_date': ui_order.get('blackbox_date'),
                 'blackbox_time': ui_order.get('blackbox_time'),
+                'amount_total': ui_order.get('blackbox_amount_total'),
                 'blackbox_ticket_counters': ui_order.get('blackbox_ticket_counters'),
                 'blackbox_unique_fdm_production_number': ui_order.get('blackbox_unique_fdm_production_number'),
                 'blackbox_vsc_identification_number': ui_order.get('blackbox_vsc_identification_number'),
