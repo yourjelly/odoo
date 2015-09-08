@@ -311,6 +311,18 @@
                                     <span t-field="o.total_discount"/>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <strong>Amount of corrections</strong>:
+                                    <span t-field="o.amount_of_corrections"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <strong>Total corrections (including VAT)</strong>:
+                                    <span t-field="o.total_corrections"/>
+                                </div>
+                            </div>
                         </div>
                     </t>
                 </t>
