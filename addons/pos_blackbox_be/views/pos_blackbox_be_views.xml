@@ -213,19 +213,15 @@
                                 </div>
                             </div>
                             <div class="row mt32 mb32">
-                                <div class="col-xs-3">
-                                    <strong>Responsible</strong>:<br/>
-                                    <span t-field="o.user_id"/>
-                                </div>
-                                <div class="col-xs-3">
+                                <div class="col-xs-4">
                                     <strong>Point of Sale</strong>:<br/>
                                     <span t-field="o.config_id"/>
                                 </div>
-                                <div class="col-xs-3">
+                                <div class="col-xs-4">
                                     <strong>From</strong>:<br/>
                                     <span t-field="o.start_at"/>
                                 </div>
-                                <div class="col-xs-3">
+                                <div class="col-xs-4">
                                     <strong>To</strong>:<br/>
                                     <!-- <span t-field="o.stop_at"/> --> <!-- for z-reports -->
                                     <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%m/%d/%Y %H:%M:%S')"/> <!-- for x-reports -->
