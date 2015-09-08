@@ -237,7 +237,7 @@
                                 <div class="row">
                                     <div class="col-xs-12">
                                         <strong>Sequence number:</strong>
-                                        <span t-esc="o.config_id.report_sequence_id._next()"/>
+                                        <span t-esc="o.config_id.get_next_report_sequence_number()"/>
                                     </div>
                                 </div>
                             </t>
