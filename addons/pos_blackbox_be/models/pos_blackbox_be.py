@@ -145,7 +145,7 @@ class pos_session(models.Model):
                     self.total_discount += price_without_discount - line.price_subtotal_incl
 
     @api.one
-    @api.depends('order_ids') # todo jov
+    @api.depends('order_ids')
     def _compute_corrections(self):
         self.amount_of_corrections = 0
         self.total_corrections = 0
