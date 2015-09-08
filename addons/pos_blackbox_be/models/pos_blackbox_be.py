@@ -135,10 +135,7 @@ class pos_session(models.Model):
         for order in self.order_ids:
             for line in order.lines:
                 if line.discount > 0:
-                    if line.product_id.uom_id.category_id == self.env["ir.model.data"].xmlid_to_object("product.product_uom_categ_unit"):
-                        self.amount_of_discounts += line.qty
-                    else:
-                        self.amount_of_discounts += 1
+                    self.amount_of_discounts += 1
 
                     original_line_discount = line.discount
                     line.discount = 0
