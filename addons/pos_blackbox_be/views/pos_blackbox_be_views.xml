@@ -273,12 +273,6 @@
                             </div>
                             <div class="row">
                                 <div class="col-xs-12">
-                                    <strong>Amount in cash register at end of period</strong>:
-                                    <span t-field="o.cash_register_balance_end_real"/>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-xs-12">
                                     <strong>Amount of VAT tickets</strong>:
                                     <span t-field="o.amount_of_vat_tickets"/>
                                 </div>
