@@ -230,11 +230,50 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             }
         },
 
-        set_quantity: function (quantity) {
+        set_quantity: function (quantity, no_decrease) {
+            var current_quantity = this.get_quantity();
+            var future_quantity = parseFloat(quantity) || 0;
+
             if (this.blackbox_pro_forma_finalized) {
                 this._show_finalized_error();
+            } else if (no_decrease && (future_quantity === 0 || future_quantity < current_quantity)) {
+                this.pos.gui.show_popup("number", {
+                    'title': _t("Decrease the quantity by"),
+                    'confirm': function (qty_decrease) {
+                        if (qty_decrease) {
+                            var order = this.pos.get_order();
+                            var selected_orderline = order.get_selected_orderline();
+                            qty_decrease = parseInt(qty_decrease, 10);
+
+                            // We have to prevent taking back more than
+                            // what was on the order. The right way to do
+                            // this is by "merging" all the orderlines
+                            // that we can with this one (including
+                            // previous decreases). Then we can figure out
+                            // how much the POS user can still decrease
+                            // by.
+                            var current_total_quantity_remaining = selected_orderline.get_quantity();
+                            order.get_orderlines().forEach(function (orderline, index, array) {
+                                if (selected_orderline.id != orderline.id && selected_orderline.can_be_merged_with(orderline)) {
+                                    current_total_quantity_remaining += orderline.get_quantity();
+                                }
+                            });
+
+                            if (qty_decrease > current_total_quantity_remaining) {
+                                this.pos.gui.show_popup("error", {
+                                    'title': _t("Order error"),
+                                    'body':  _t("Not allowed to take back more than was ordered."),
+                                });
+                            } else {
+                                var decrease_line = order.get_selected_orderline().clone();
+                                decrease_line.order = order;
+                                decrease_line.set_quantity(-qty_decrease);
+                                order.add_orderline(decrease_line);
+                            }
+                        }
+                    }
+                });
             } else {
-                console.log("not finalized");
                 orderline_super.set_quantity.apply(this, arguments);
             }
         },
@@ -251,6 +290,19 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                 'vat_letter': this.get_vat_letter(),
                 'blackbox_pro_forma_finalized': this.blackbox_pro_forma_finalized
             });
+        }
+    });
+
+    screens.OrderWidget.include({
+        set_value: function (val) {
+            var order = this.pos.get_order();
+            var mode = this.numpad_state.get('mode');
+
+            if (order.get_selected_orderline() && mode === 'quantity') {
+                order.get_selected_orderline().set_quantity(val, "dont_allow_decreases");
+            } else {
+                this._super(val);
+            }
         }
     });
 
