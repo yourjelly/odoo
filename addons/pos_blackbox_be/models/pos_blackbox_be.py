@@ -75,6 +75,8 @@ class pos_session(models.Model):
     amount_of_pro_forma_tickets = fields.Integer(compute='_compute_amounts_of_tickets')
     amount_of_discounts = fields.Integer(compute='_compute_discounts')
     total_discount = fields.Monetary(compute='_compute_discounts')
+    amount_of_corrections = fields.Integer(compute='_compute_corrections')
+    total_corrections = fields.Monetary(compute='_compute_corrections')
 
     @api.one
     @api.depends('statement_ids')
@@ -144,6 +146,18 @@ class pos_session(models.Model):
                     line.discount = original_line_discount
 
                     self.total_discount += price_without_discount - line.price_subtotal_incl
+
+    @api.one
+    @api.depends('order_ids') # todo jov
+    def _compute_corrections(self):
+        self.amount_of_corrections = 0
+        self.total_corrections = 0
+
+        for order in self.order_ids:
+            for line in order.lines:
+                if line.price_subtotal_incl < 0:
+                    self.amount_of_corrections += 1
+                    self.total_corrections += line.price_subtotal_incl
 
     # @api.multi
     # def unlink(self):
