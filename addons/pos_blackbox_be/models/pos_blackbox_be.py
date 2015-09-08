@@ -77,7 +77,7 @@ class pos_session(models.Model):
     total_discount = fields.Monetary(compute='_compute_discounts')
 
     @api.one
-    @api.depends('statement_ids', 'order_ids')
+    @api.depends('statement_ids')
     def _compute_total_sold(self):
         self.total_sold = 0
 
@@ -93,7 +93,7 @@ class pos_session(models.Model):
             self.total_pro_forma += pro_forma.amount_total
 
     @api.one
-    @api.depends('statement_ids', 'order_ids')
+    @api.depends('order_ids')
     def _compute_total_tax(self):
         self.total_base_of_measure_tax_a = 0
         self.total_base_of_measure_tax_b = 0
@@ -114,18 +114,18 @@ class pos_session(models.Model):
         self.total_tax_d = 0
 
     @api.one
-    @api.depends('statement_ids', 'order_ids')
+    @api.depends('order_ids')
     def _compute_amount_of_vat_tickets(self):
         self.amount_of_vat_tickets = len(self.order_ids)
 
     @api.one
-    @api.depends('statement_ids', 'order_ids')
+    @api.depends('order_ids', 'pro_forma_order_ids')
     def _compute_amounts_of_tickets(self):
         self.amount_of_vat_tickets = len(self.order_ids)
         self.amount_of_pro_forma_tickets = len(self.pro_forma_order_ids)
 
     @api.one
-    @api.depends('statement_ids', 'order_ids')
+    @api.depends('order_ids')
     def _compute_discounts(self):
         self.amount_of_discounts = 0
         self.total_discount = 0
