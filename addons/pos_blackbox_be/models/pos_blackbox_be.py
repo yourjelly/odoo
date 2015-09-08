@@ -32,20 +32,13 @@ class pos_config(models.Model):
     _inherit = 'pos.config'
 
     iface_blackbox_be = fields.Boolean("Belgian Fiscal Data Module", help="Enables integration with a Belgian Fiscal Data Module")
-    report_sequence_id = fields.Many2one('ir.sequence', readonly=True, copy=False)
+    report_sequence_number = fields.Integer()
 
-    @api.model
-    def create(self, values):
-        ir_sequence = self.env['ir.sequence']
-        values['report_sequence_id'] = ir_sequence.create({
-            'name': 'POS Report %s' % values['name'],
-            'padding': 4,
-            'prefix': "%s/"  % values['name'],
-            'code': "pos.report.%s" % values['name'],
-            'company_id': values.get('company_id', False),
-        }).id
+    def get_next_report_sequence_number(self):
+        to_return = self.report_sequence_number
+        self.report_sequence_number += 1
 
-        return super(pos_config, self).create(values)
+        return to_return
 
 class res_users(models.Model):
     _inherit = 'res.users'
