@@ -4,7 +4,7 @@
 import logging
 import serial
 from os import listdir
-from threading import Lock
+from threading import Thread, Lock
 
 from openerp import http
 
@@ -12,10 +12,10 @@ import openerp.addons.hw_proxy.controllers.main as hw_proxy
 
 _logger = logging.getLogger(__name__)
 
-class BlackboxDriver(http.Controller):
-    blackbox_lock = Lock()
-
+class Blackbox(Thread):
     def __init__(self):
+        Thread.__init__(self)
+        self.blackbox_lock = Lock()
         self.set_status('connecting')
         self.device_path = self._find_device_path_by_probing()
 
@@ -149,12 +149,16 @@ class BlackboxDriver(http.Controller):
             ser.close()
             return ""
 
+blackbox_thread = Blackbox()
+hw_proxy.drivers['fiscal_data_module'] = blackbox_thread
+
+class BlackboxDriver(hw_proxy.Proxy):
     @http.route('/hw_proxy/request_blackbox/', type='json', auth='none', cors='*')
     def request_blackbox(self, high_level_message, response_size):
-        to_send = self._wrap_low_level_message_around(high_level_message)
+        to_send = blackbox_thread._wrap_low_level_message_around(high_level_message)
 
-        with self.blackbox_lock:
-            response = self._send_to_blackbox(to_send, response_size, self.device_path)
+        with blackbox_thread.blackbox_lock:
+            response = blackbox_thread._send_to_blackbox(to_send, response_size, blackbox_thread.device_path)
 
         return response
 
@@ -182,5 +186,3 @@ class BlackboxDriver(http.Controller):
         response += "ADC83B19E793491B1C6EA0FD8B46CD9F32E592FC" # sha1 empty string
 
         return response
-
-hw_proxy.drivers['fiscal_data_module'] = BlackboxDriver()
