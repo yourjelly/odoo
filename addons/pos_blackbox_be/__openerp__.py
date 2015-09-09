@@ -2,16 +2,20 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'Registered Cash Register System',
+    'name': 'Belgian Registered Cash Register',
     'version': '1.0',
     'category': 'Point of Sale',
     'sequence': 6,
     'summary': 'Implements the registered cash system, adhering to guidelines by FPS Finance.',
     'description': """
-TODO JOV
-========
+Belgian Registered Cash Register
+================================
 
-add some stuff here
+This module turns the Point Of Sale module into a certified Belgian cash register.
+
+More info:
+  * http://www.systemedecaisseenregistreuse.be/
+  * http://www.geregistreerdkassasysteem.be/
     """,
     'author': 'Odoo SA',
     'depends': ['web', 'point_of_sale', 'l10n_be'],
