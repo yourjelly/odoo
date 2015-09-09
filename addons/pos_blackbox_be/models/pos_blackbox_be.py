@@ -149,6 +149,30 @@ class pos_session(models.Model):
                     self.amount_of_corrections += 1
                     self.total_corrections += line.price_subtotal_incl
 
+    def get_user_report_data(self):
+        data = {}
+
+        for order in self.order_ids:
+            if not data.get(order.user_id.id):
+                data[order.user_id.id] = {
+                    'login': order.user_id.login,
+                    'insz_or_bis_number': order.user_id.insz_or_bis_number,
+                    'revenue': order.amount_total,
+                    'first_ticket_time': order.blackbox_pos_receipt_time,
+                    'last_ticket_time': order.blackbox_pos_receipt_time
+                }
+            else:
+                current = data[order.user_id.id]
+                current['revenue'] += order.amount_total
+
+                if order.blackbox_pos_receipt_time < current['first_ticket_time']:
+                    current['first_ticket_time'] = order.blackbox_pos_receipt_time
+
+                if order.blackbox_pos_receipt_time > current['last_ticket_time']:
+                    current['last_ticket_time'] = order.blackbox_pos_receipt_time
+
+        return data
+
     # @api.multi
     # def unlink(self):
     #     import pudb; pu.db
@@ -201,6 +225,7 @@ class pos_order(models.Model):
 
     blackbox_date = fields.Char("Fiscal Data Module date", help="Date returned by the Fiscal Data Module.")
     blackbox_time = fields.Char("Fiscal Data Module time", help="Time returned by the Fiscal Data Module.")
+    blackbox_pos_receipt_time = fields.Datetime("Receipt time")
     blackbox_ticket_counters = fields.Char("Fiscal Data Module ticket counters", help="Ticket counter returned by the Fiscal Data Module (format: counter / total event type)")
     blackbox_unique_fdm_production_number = fields.Char("Fiscal Data Module ID", help="Unique ID of the blackbox that handled this order")
     blackbox_vsc_identification_number = fields.Char("VAT Signing Card ID", help="Unique ID of the VAT signing card that handled this order")
@@ -236,6 +261,7 @@ class pos_order(models.Model):
         fields.update({
             'blackbox_date': ui_order.get('blackbox_date'),
             'blackbox_time': ui_order.get('blackbox_time'),
+            'blackbox_pos_receipt_time': ui_order.get('blackbox_pos_receipt_time'),
             'blackbox_ticket_counters': ui_order.get('blackbox_ticket_counters'),
             'blackbox_unique_fdm_production_number': ui_order.get('blackbox_unique_fdm_production_number'),
             'blackbox_vsc_identification_number': ui_order.get('blackbox_vsc_identification_number'),
@@ -313,6 +339,7 @@ class pos_order_pro_forma(models.Model):
 
     blackbox_date = fields.Char("Fiscal Data Module date", help="Date returned by the Fiscal Data Module.")
     blackbox_time = fields.Char("Fiscal Data Module time", help="Time returned by the Fiscal Data Module.")
+    blackbox_pos_receipt_time = fields.Datetime("Receipt time")
     blackbox_ticket_counters = fields.Char("Fiscal Data Module ticket counters", help="Ticket counter returned by the Fiscal Data Module (format: counter / total event type)")
     blackbox_unique_fdm_production_number = fields.Char("Fiscal Data Module ID", help="Unique ID of the blackbox that handled this order")
     blackbox_vsc_identification_number = fields.Char("VAT Signing Card ID", help="Unique ID of the VAT signing card that handled this order")
@@ -337,6 +364,7 @@ class pos_order_pro_forma(models.Model):
                 'date_order': ui_order['creation_date'],
                 'blackbox_date': ui_order.get('blackbox_date'),
                 'blackbox_time': ui_order.get('blackbox_time'),
+                'blackbox_pos_receipt_time': ui_order.get('blackbox_pos_receipt_time'),
                 'amount_total': ui_order.get('blackbox_amount_total'),
                 'blackbox_ticket_counters': ui_order.get('blackbox_ticket_counters'),
                 'blackbox_unique_fdm_production_number': ui_order.get('blackbox_unique_fdm_production_number'),
