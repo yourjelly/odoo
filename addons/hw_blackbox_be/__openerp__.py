@@ -8,10 +8,11 @@
     'summary': 'Hardware Driver for Belgian Fiscal Data Modules',
     'website': 'https://www.odoo.com/page/point-of-sale',
     'description': """
-TODO JOV
-========
+Fiscal Data Module Hardware Driver
+==================================
 
-add some stuff here
+This module allows a Point Of Sale client to communicate with a
+connected Belgian Fiscal Data Module.
 """,
     'author': 'OpenERP SA',
     'depends': ['hw_proxy'],
