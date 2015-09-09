@@ -56,6 +56,7 @@
                     <group string="Fiscal Data Module information">
                         <field name="blackbox_date" readonly="1"/>
                         <field name="blackbox_time" readonly="1"/>
+                        <field name="blackbox_pos_receipt_time" readonly="1"/>
                         <field name="blackbox_ticket_counters" readonly="1"/>
                         <field name="blackbox_unique_fdm_production_number" readonly="1"/>
                         <field name="blackbox_vsc_identification_number" readonly="1"/>
@@ -147,6 +148,7 @@
                                 <group string="Fiscal Data Module information">
                                     <field name="blackbox_date"/>
                                     <field name="blackbox_time"/>
+                                    <field name="blackbox_pos_receipt_time"/>
                                     <field name="blackbox_ticket_counters"/>
                                     <field name="blackbox_unique_fdm_production_number"/>
                                     <field name="blackbox_vsc_identification_number"/>
@@ -191,7 +193,24 @@
                 file="pos_blackbox_be.financial_report_template_z"
                 menu="False"
                 attachment_use="True"
-                attachment="(object.name + '_z_report.pdf')"/>
+                attachment="(object.name + '_financial_z_report.pdf')"/>
+        <report id="action_report_pos_user_x"
+                string="X-report"
+                model="pos.session"
+                report_type="qweb-pdf"
+                name="pos_blackbox_be.user_report_template_x"
+                file="pos_blackbox_be.user_report_template_x"
+                menu="False"
+                attachment_use="False"/>
+        <report id="action_report_pos_user_z"
+                string="Z-report"
+                model="pos.session"
+                report_type="qweb-pdf"
+                name="pos_blackbox_be.user_report_template_z"
+                file="pos_blackbox_be.user_report_template_z"
+                menu="False"
+                attachment_use="True"
+                attachment="(object.name + '_user_z_report.pdf')"/>
 
         <!-- get rid of cashbox stuff, because it's currently broken -->
         <record model="ir.ui.view" id="view_pos_session_form">
@@ -203,12 +222,22 @@
                     <div class="oe_button_box" name="button_box">
                         <button class="oe_stat_button" name="%(action_report_pos_financial_x)d" states="opening_control,opened" type="action" icon="fa-file-text-o">
                             <div class="o_form_field o_stat_info">
-                                <span class="o_stat_text">X-report</span>
+                                <span class="o_stat_text">Financial X-report</span>
                             </div>
                         </button>
                         <button class="oe_stat_button" name="%(action_report_pos_financial_z)d" states="closing_control,closed" type="action" icon="fa-file-text-o">
                             <div class="o_form_field o_stat_info">
-                                <span class="o_stat_text">Z-report</span>
+                                <span class="o_stat_text">Financial Z-report</span>
+                            </div>
+                        </button>
+                        <button class="oe_stat_button" name="%(action_report_pos_user_x)d" states="opening_control,opened" type="action" icon="fa-file-text-o">
+                            <div class="o_form_field o_stat_info">
+                                <span class="o_stat_text">User X-report</span>
+                            </div>
+                        </button>
+                        <button class="oe_stat_button" name="%(action_report_pos_user_z)d" states="closing_control,closed" type="action" icon="fa-file-text-o">
+                            <div class="o_form_field o_stat_info">
+                                <span class="o_stat_text">User Z-report</span>
                             </div>
                         </button>
                     </div>
@@ -252,8 +281,12 @@
                                 </div>
                                 <div class="col-xs-4">
                                     <strong>To</strong>:<br/>
-                                    <!-- <span t-field="o.stop_at"/> --> <!-- for z-reports -->
-                                    <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%m/%d/%Y %H:%M:%S')"/> <!-- for x-reports -->
+                                    <t t-if="o.stop_at">
+                                        <span t-field="o.stop_at"/>
+                                    </t>
+                                    <t t-if="not o.stop_at">
+                                        <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%m/%d/%Y %H:%M:%S')"/>
+                                    </t>
                                 </div>
                             </div>
                             <div class="row">
@@ -326,7 +359,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-xs-12">
-                                    <strong>Total discounts</strong>:
+                                    <strong>Total discounts (including VAT)</strong>:
                                     <span t-field="o.total_discount"/>
                                 </div>
                             </div>
@@ -348,6 +381,88 @@
             </t>
         </template>
 
+        <template id="user_report_template">
+            <t t-call="report.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="report.external_layout">
+                        <div class="page">
+                            <t t-if="o.stop_at">
+                                <h2>Z USERS</h2>
+                            </t>
+                            <t t-if="not o.stop_at">
+                                <h2>X USERS</h2>
+                            </t>
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <strong>POS Session:</strong>
+                                    <span t-field="o.name"/>
+                                </div>
+                            </div>
+                            <t t-if="o.stop_at">
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <strong>Sequence number:</strong>
+                                        <span t-esc="o.config_id.get_next_report_sequence_number()"/>
+                                    </div>
+                                </div>
+                            </t>
+                            <div class="row mt32 mb32">
+                                <div class="col-xs-4">
+                                    <strong>Point of Sale</strong>:<br/>
+                                    <span t-field="o.config_id"/>
+                                </div>
+                                <div class="col-xs-4">
+                                    <strong>From</strong>:<br/>
+                                    <span t-field="o.start_at"/>
+                                </div>
+                                <div class="col-xs-4">
+                                    <strong>To</strong>:<br/>
+                                    <t t-if="o.stop_at">
+                                        <span t-field="o.stop_at"/>
+                                    </t>
+                                    <t t-if="not o.stop_at">
+                                        <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%m/%d/%Y %H:%M:%S')"/>
+                                    </t>
+                                </div>
+                            </div>
+                            <div class="row zero_min_height">
+                                <div class="col-xs-12">
+                                    <div style="border-bottom: 1px solid black;"></div>
+                                </div>
+                            </div>
+                            <t t-foreach="o.get_user_report_data().values()" t-as="user">
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <strong><span t-esc="user['login'] + ' (INSZ/BIS: ' + user['insz_or_bis_number'] + ')'"/></strong>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        Revenue: <span t-esc="user['revenue']"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        First ticket time: <span t-esc="user['first_ticket_time']"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        Last ticket time: <span t-esc="user['last_ticket_time']"/>
+                                    </div>
+                                </div>
+                                <div class="row zero_min_height">
+                                    <div class="col-xs-12">
+                                        <div style="border-bottom: 1px solid black;"></div>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
         <!-- need to create two dummy templates just so they can have
              their own id, otherwise report thinks that both x and z
              reports are the same (difference is that z needs to use
@@ -357,6 +472,12 @@
         </template>
         <template id="financial_report_template_z">
             <t t-call="pos_blackbox_be.financial_report_template"/>
+        </template>
+        <template id="user_report_template_x">
+            <t t-call="pos_blackbox_be.user_report_template"/>
+        </template>
+        <template id="user_report_template_z">
+            <t t-call="pos_blackbox_be.user_report_template"/>
         </template>
 
         <!-- <menuitem name="Z-reports" action="z_report" id="menu_report_z_report" parent="point_of_sale.menu_point_rep" sequence="100"/> -->

@@ -312,12 +312,8 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         // when sending orders to backend
         export_as_JSON: function () {
             var json = order_model_export_as_json_super.bind(this)();
-            var tax_categories_set = false;
 
-            if (this.blackbox_base_price_in_euro_per_tax_letter)
-                tax_categories_set = true;
-
-            return _.extend(json, {
+            var to_return = _.extend(json, {
                 'blackbox_date': this.blackbox_date,
                 'blackbox_time': this.blackbox_time,
                 'blackbox_amount_total': this.blackbox_amount_total,
@@ -325,15 +321,31 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                 'blackbox_unique_fdm_production_number': this.blackbox_unique_fdm_production_number,
                 'blackbox_vsc_identification_number': this.blackbox_vsc_identification_number,
                 'blackbox_signature': this.blackbox_signature,
-                'blackbox_tax_category_a': tax_categories_set && this.blackbox_base_price_in_euro_per_tax_letter[0].amount,
-                'blackbox_tax_category_b': tax_categories_set && this.blackbox_base_price_in_euro_per_tax_letter[1].amount,
-                'blackbox_tax_category_c': tax_categories_set && this.blackbox_base_price_in_euro_per_tax_letter[2].amount,
-                'blackbox_tax_category_d': tax_categories_set && this.blackbox_base_price_in_euro_per_tax_letter[3].amount,
                 'blackbox_plu_hash': this.blackbox_plu_hash,
                 'blackbox_pos_version': this.blackbox_pos_version,
                 'blackbox_pos_production_id': this.blackbox_pos_production_id,
                 'blackbox_pro_forma': this.blackbox_pro_forma,
             });
+
+            if (this.blackbox_base_price_in_euro_per_tax_letter) {
+                to_return = _.extend(to_return, {
+                    'blackbox_tax_category_a': this.blackbox_base_price_in_euro_per_tax_letter[0].amount,
+                    'blackbox_tax_category_b': this.blackbox_base_price_in_euro_per_tax_letter[1].amount,
+                    'blackbox_tax_category_c': this.blackbox_base_price_in_euro_per_tax_letter[2].amount,
+                    'blackbox_tax_category_d': this.blackbox_base_price_in_euro_per_tax_letter[3].amount,
+                });
+            }
+
+            if (this.blackbox_pos_receipt_time) {
+                var DEFAULT_SERVER_DATETIME_FORMAT = "YYYY-MM-DD HH:mm:ss";
+                var original_zone = this.blackbox_pos_receipt_time.zone();
+
+                this.blackbox_pos_receipt_time.zone(0); // server expects UTC
+                to_return['blackbox_pos_receipt_time'] = this.blackbox_pos_receipt_time.format(DEFAULT_SERVER_DATETIME_FORMAT);
+                this.blackbox_pos_receipt_time.zone(original_zone);
+            }
+
+            return to_return;
         },
 
         // todo jov: monkey patch for this.invoice = true

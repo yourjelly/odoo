@@ -21,7 +21,7 @@
     <!-- p18 -->
     <t t-extend="PosTicket">
         <t t-jquery="t[t-esc='moment().format(\'L LT\')']" t-operation="replace">
-            <t t-esc="order.blackbox_pos_receipt_time.format('L LT')"/>
+            <t t-esc="order.blackbox_pos_receipt_time.format('DD/MM/YYYY HH:mm:ss')"/>
         </t>
         <t t-jquery=".pos-sale-ticket" t-operation="prepend">
             <div class="pos-center-align">VAT TICKET</div> <!-- todo jov: translate to BTW-KASTICKET -->
