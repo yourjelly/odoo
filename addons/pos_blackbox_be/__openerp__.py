@@ -17,6 +17,7 @@ add some stuff here
     'depends': ['web', 'point_of_sale', 'l10n_be'],
     'website': '',
     'data': [
+        'security/ir.model.access.csv',
         'views/pos_blackbox_be_views.xml',
         'views/pos_blackbox_be_assets.xml',
         'data/pos_blackbox_be_data.xml'
