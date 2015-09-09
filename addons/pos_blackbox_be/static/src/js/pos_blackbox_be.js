@@ -885,14 +885,6 @@ can no longer be modified. Please create a new line with eg. a negative quantity
     });
     var posmodel_super = models.PosModel.prototype;
     models.PosModel = models.PosModel.extend({
-        _need_proxy: function () {
-            if (this.config) {
-                return this.config.iface_blackbox_be || posmodel_super._need_proxy.apply(this, arguments);
-            } else {
-                return false;
-            }
-        },
-
         _prepare_date_for_ticket: function (date) {
             // format of date coming from blackbox is YYYYMMDD
             var year = date.substr(0, 4);
@@ -1060,6 +1052,14 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             this._push_pro_forma();
 
             return posmodel_super.set_order.apply(this, arguments);
+        },
+
+        after_load_server_data: function () {
+            // with this module we will always have to connect to the
+            // proxy, regardless of user preferences
+            this.config.use_proxy = true;
+
+            return posmodel_super.after_load_server_data.apply(this, arguments);
         }
     });
 

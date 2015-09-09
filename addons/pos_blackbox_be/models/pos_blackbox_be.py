@@ -31,7 +31,6 @@ class AccountTax(models.Model):
 class pos_config(models.Model):
     _inherit = 'pos.config'
 
-    iface_blackbox_be = fields.Boolean("Belgian Fiscal Data Module", help="Enables integration with a Belgian Fiscal Data Module")
     report_sequence_number = fields.Integer()
 
     def get_next_report_sequence_number(self):
