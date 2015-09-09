@@ -348,15 +348,6 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             return to_return;
         },
 
-        // todo jov: monkey patch for this.invoice = true
-        // check for sig, if it's not there print a receipt
-        // (because that means the order was invoiced)
-        // finalize: function () {
-        //     if (! this.blackbox_signature) {
-        //         this.pos.gui.show_screen('receipt');
-        //     }
-        // },
-
         _hash_and_sign_string: function () {
             var order_str = "";
 
@@ -473,8 +464,6 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                 return field.name + ": " + field.to_string();
             }).join("\n");
         }
-
-        // todo jov: send: function () {}?
     });
 
     gui.Gui.include({
