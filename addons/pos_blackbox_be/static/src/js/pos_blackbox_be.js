@@ -975,11 +975,11 @@ can no longer be modified. Please create a new line with eg. a negative quantity
 
         // after_blackbox: function that will be executed when we have
         // received the response from the blackbox.
-        push_order: function (order, opts, after_blackbox) {
+        push_order: function (order, opts, pro_forma, after_blackbox) {
             var self = this;
 
             if (order) {
-                order.blackbox_pro_forma = order.blackbox_pro_forma || false;
+                order.blackbox_pro_forma = pro_forma || false;
 
                 return this.push_order_to_blackbox(order).then(function () {
                     console.log("blackbox success, calling push_order _super().");
@@ -1029,8 +1029,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             // false. Because those are 'real orders' that we already
             // handled.
             if (old_order && old_order.get_orderlines().length && old_order.blackbox_pro_forma !== false) {
-                old_order.blackbox_pro_forma = true;
-                this.push_order(old_order, undefined, function () {
+                this.push_order(old_order, undefined, true, function () {
                     // mark the lines that have been pro forma'd, because we won't allow to change them
                     old_order.get_orderlines().forEach(function (current, index, array) {
                         current.blackbox_pro_forma_finalized = true;
@@ -1070,9 +1069,8 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                 var print_bill_super = print_bill_button.button_click;
                 print_bill_button.button_click = function () {
                     var order = this.pos.get_order();
-                    order.blackbox_pro_forma = true;
 
-                    this.pos.push_order(order, undefined, function () {
+                    this.pos.push_order(order, undefined, true, function () {
                         this.gui.show_screen('bill');
                     }.bind(this));
 
