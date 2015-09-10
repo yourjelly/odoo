@@ -306,12 +306,12 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         }
     });
 
-    var order_model_export_as_json_super = models.Order.prototype.export_as_JSON;
+    var order_model_super = models.Order.prototype;
     models.Order = models.Order.extend({
         // we need to patch export_as_JSON because that's what's used
         // when sending orders to backend
         export_as_JSON: function () {
-            var json = order_model_export_as_json_super.bind(this)();
+            var json = order_model_super.export_as_JSON.bind(this)();
 
             var to_return = _.extend(json, {
                 'blackbox_date': this.blackbox_date,
@@ -346,6 +346,18 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             }
 
             return to_return;
+        },
+
+        export_for_printing: function () {
+            var receipt = order_model_super.export_for_printing.bind(this)();
+
+            receipt = _.extend(receipt, {
+                'blackbox': {
+                    'blackbox_signature': this.blackbox_signature
+                }
+            });
+
+            return receipt;
         },
 
         _hash_and_sign_string: function () {
@@ -469,7 +481,8 @@ can no longer be modified. Please create a new line with eg. a negative quantity
     gui.Gui.include({
         show_screen: function(screen_name, params, refresh) {
             if (screen_name === "receipt" || screen_name === "bill") {
-                if (this.pos.get_order().blackbox_signature) {
+                var order = this.pos.get_order();
+                if (order && order.blackbox_signature) {
                     this._super(screen_name, params, refresh);
                 } else {
                     console.log("not showing receipt because no signature is set");
