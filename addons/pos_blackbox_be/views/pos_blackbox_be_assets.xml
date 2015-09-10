@@ -3,6 +3,7 @@
     <data>
         <template id="assets" inherit_id="point_of_sale.assets">
             <xpath expr="." position="inside">
+                <link rel="stylesheet" href="/pos_blackbox_be/static/src/css/pos_blackbox_be.css"/>
                 <script type="text/javascript" src="/pos_blackbox_be/static/lib/sha1.js"></script>
                 <script type="text/javascript" src="/pos_blackbox_be/static/src/js/pos_blackbox_be.js"></script>
             </xpath>
