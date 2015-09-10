@@ -18,6 +18,10 @@
         </div>
     </t>
 
+    <t t-extend="ReceiptScreenWidget">
+        <t t-jquery=".button.print" t-operation="replace"/>
+    </t>
+
     <!-- p18 -->
     <t t-extend="PosTicket">
         <t t-jquery="t[t-esc='moment().format(\'L LT\')']" t-operation="replace">
