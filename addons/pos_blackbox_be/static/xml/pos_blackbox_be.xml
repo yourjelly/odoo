@@ -121,4 +121,11 @@
             </table>
         </t>
     </t>
+
+    <!-- pos_restaurant -->
+    <t t-extend="OrderChangeReceipt">
+        <t t-jquery="receipt" t-operation="prepend">
+            <div bold="on" size="double">THIS IS NOT A VALID VAT TICKET</div>
+        </t>
+    </t>
 </templates>
