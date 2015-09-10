@@ -698,11 +698,11 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             packet.add_field(new FDMPacketField("production number POS", 14, this.pos.blackbox_pos_production_id));
             packet.add_field(new FDMPacketField("ticket number", 6, (++this.pos.config.backend_sequence_number).toString(), "0"));
 
-            // todo jov:
-            // p3 pdf
-            // most normal thing is normal sales => NS
-            // but there's also the training and pro forma (implement?)
-            packet.add_field(new FDMPacketField("event label", 2, "NS"));
+            if (order.blackbox_pro_forma) {
+                packet.add_field(new FDMPacketField("event label", 2, "PS"));
+            } else {
+                packet.add_field(new FDMPacketField("event label", 2, "NS"));
+            }
 
             packet.add_field(new FDMPacketField("total amount to pay in eurocent", 11, this._amount_to_fdm_amount_string(order.blackbox_amount_total), " "));
 
