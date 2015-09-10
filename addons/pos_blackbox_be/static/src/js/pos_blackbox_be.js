@@ -468,7 +468,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
 
     gui.Gui.include({
         show_screen: function(screen_name, params, refresh) {
-            if (screen_name === "receipt") {
+            if (screen_name === "receipt" || screen_name === "bill") {
                 if (this.pos.get_order().blackbox_signature) {
                     this._super(screen_name, params, refresh);
                 } else {
@@ -978,7 +978,9 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             return def;
         },
 
-        push_order: function (order, opts, pro_forma) {
+        // after_blackbox: function that will be executed when we have
+        // received the response from the blackbox.
+        push_order: function (order, opts, pro_forma, after_blackbox) {
             var self = this;
 
             if (order) {
@@ -986,6 +988,11 @@ can no longer be modified. Please create a new line with eg. a negative quantity
 
                 return this.push_order_to_blackbox(order).then(function () {
                     console.log("blackbox success, calling push_order _super().");
+
+                    if (after_blackbox) {
+                        after_blackbox();
+                    }
+
                     return posmodel_super.push_order.apply(self, [order, opts]);
                 }, function () {
                     console.log("fdm validation failed, not sending to backend");
@@ -1049,6 +1056,24 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             this.config.use_proxy = true;
 
             return posmodel_super.after_load_server_data.apply(this, arguments);
+        }
+    });
+
+    screens.ProductScreenWidget.include({
+        start: function () {
+            this._super();
+
+            var print_bill_button = this.action_buttons['print_bill'];
+
+            if (print_bill_button) {
+                var print_bill_super = print_bill_button.button_click;
+                print_bill_button.button_click = function () {
+                    this.pos.push_order(this.pos.get_order(), undefined, true, function () {
+                        this.gui.show_screen('bill');
+                    }.bind(this));
+                    print_bill_super.bind(this)();
+                };
+            }
         }
     });
 
