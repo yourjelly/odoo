@@ -1071,7 +1071,11 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                     var order = this.pos.get_order();
 
                     this.pos.push_order(order, undefined, true, function () {
-                        this.gui.show_screen('bill');
+                        if (! this.pos.config.iface_print_via_proxy) {
+                            this.gui.show_screen('bill');
+                        } else {
+                            this.print_xml();
+                        }
                     }.bind(this));
 
                     print_bill_super.bind(this)();
