@@ -1905,6 +1905,7 @@ gui.define_screen({name:'payment', widget: PaymentScreenWidget});
 
 return {
     ReceiptScreenWidget: ReceiptScreenWidget,
+    ProductScreenWidget: ProductScreenWidget,
     ActionButtonWidget: ActionButtonWidget,
     define_action_button: define_action_button,
     ScreenWidget: ScreenWidget,
