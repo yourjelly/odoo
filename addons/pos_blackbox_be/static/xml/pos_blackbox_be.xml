@@ -122,6 +122,12 @@
         </t>
     </t>
 
+    <t t-extend="XmlReceipt">
+        <t t-jquery="receipt" t-operation="append">
+            <div><t t-esc="receipt.blackbox.blackbox_signature"/></div>
+        </t>
+    </t>
+
     <!-- pos_restaurant -->
     <t t-extend="OrderChangeReceipt">
         <t t-jquery="receipt" t-operation="prepend">
