@@ -960,12 +960,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                     order.blackbox_pos_version = "Odoo " + self.version.server_version;
                     order.blackbox_pos_production_id = self.blackbox_pos_production_id;
 
-                    // mark the lines that have been pro forma'd, because we won't allow to change them
-                    if (order.blackbox_pro_forma) {
-                        order.get_orderlines().forEach(function (current, index, array) {
-                            current.blackbox_pro_forma_finalized = true;
-                        });
-                    } else {
+                    if (! order.blackbox_pro_forma) {
                         self.gui.show_screen('receipt');
                     }
 
@@ -980,11 +975,11 @@ can no longer be modified. Please create a new line with eg. a negative quantity
 
         // after_blackbox: function that will be executed when we have
         // received the response from the blackbox.
-        push_order: function (order, opts, pro_forma, after_blackbox) {
+        push_order: function (order, opts, after_blackbox) {
             var self = this;
 
             if (order) {
-                order.blackbox_pro_forma = pro_forma || false;
+                order.blackbox_pro_forma = order.blackbox_pro_forma || false;
 
                 return this.push_order_to_blackbox(order).then(function () {
                     console.log("blackbox success, calling push_order _super().");
@@ -1034,7 +1029,13 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             // false. Because those are 'real orders' that we already
             // handled.
             if (old_order && old_order.get_orderlines().length && old_order.blackbox_pro_forma !== false) {
-                this.push_order(old_order, undefined, true);
+                old_order.blackbox_pro_forma = true;
+                this.push_order(old_order, undefined, function () {
+                    // mark the lines that have been pro forma'd, because we won't allow to change them
+                    old_order.get_orderlines().forEach(function (current, index, array) {
+                        current.blackbox_pro_forma_finalized = true;
+                    });
+                });
             }
         },
 
@@ -1068,9 +1069,13 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             if (print_bill_button) {
                 var print_bill_super = print_bill_button.button_click;
                 print_bill_button.button_click = function () {
-                    this.pos.push_order(this.pos.get_order(), undefined, true, function () {
+                    var order = this.pos.get_order();
+                    order.blackbox_pro_forma = true;
+
+                    this.pos.push_order(order, undefined, function () {
                         this.gui.show_screen('bill');
                     }.bind(this));
+
                     print_bill_super.bind(this)();
                 };
             }
