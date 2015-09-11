@@ -290,6 +290,14 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                 'vat_letter': this.get_vat_letter(),
                 'blackbox_pro_forma_finalized': this.blackbox_pro_forma_finalized
             });
+        },
+
+        export_for_printing: function () {
+            var json = orderline_super.export_for_printing.apply(this, arguments);
+
+            return _.extend(json, {
+                'vat_letter': this.get_vat_letter()
+            });
         }
     });
 
@@ -352,9 +360,9 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             var receipt = order_model_super.export_for_printing.bind(this)();
 
             receipt = _.extend(receipt, {
-                'blackbox': {
-                    'blackbox_signature': this.blackbox_signature
-                }
+                'company': _.extend(receipt.company, {
+                    'street': this.pos.company.street
+                })
             });
 
             return receipt;
