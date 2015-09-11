@@ -18,97 +18,97 @@ msgstr ""
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.view_pos_session_form
 msgid "Financial X"
-msgstr ""
+msgstr "Financieel X"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.view_pos_session_form
 msgid "User X"
-msgstr ""
+msgstr "Gebruikers X"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.view_pos_session_form
 msgid "User Z"
-msgstr ""
+msgstr "Gebruikers Z"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 msgid "Amount of Pro Forma VAT tickets:"
-msgstr ""
+msgstr "Aantal aangemaakte pro forma tickets:"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 msgid "Amount of VAT tickets:"
-msgstr ""
+msgstr "Aantal aangemaakte BTW-kastickets:"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 msgid "Amount of corrections:"
-msgstr ""
+msgstr "Aantal correcties:"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 msgid "Amount of discounts:"
-msgstr ""
+msgstr "Aantal toegekende kortingen:"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 #: model:ir.ui.view,arch_db:pos_blackbox_be.user_report_template
 msgid "From"
-msgstr ""
+msgstr "Van"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 #: model:ir.ui.view,arch_db:pos_blackbox_be.user_report_template
 msgid "POS Session:"
-msgstr ""
+msgstr "POS Sessie:"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 #: model:ir.ui.view,arch_db:pos_blackbox_be.user_report_template
 msgid "Point of Sale"
-msgstr ""
+msgstr "Kassa"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 msgid "Revenue of Pro Forma VAT tickets (including VAT):"
-msgstr ""
+msgstr "Totaalbedrag uitgereikte pro forma tickets:"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 #: model:ir.ui.view,arch_db:pos_blackbox_be.user_report_template
 msgid "Sequence number:"
-msgstr ""
+msgstr "Volgnummer:"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 #: model:ir.ui.view,arch_db:pos_blackbox_be.user_report_template
 msgid "To"
-msgstr ""
+msgstr "Tot"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 msgid "Total base of measure per tax:"
-msgstr ""
+msgstr "Totaal maatstaf van heffing per btw-tarief:"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 msgid "Total corrections (including VAT):"
-msgstr ""
+msgstr "Totaal correcties (inclusief BTW):"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 msgid "Total discounts (including VAT):"
-msgstr ""
+msgstr "Totaal kortingen (inclusief BTW):"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 msgid "Total revenue:"
-msgstr ""
+msgstr "Totale omzet:"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 msgid "Total tax:"
-msgstr ""
+msgstr "Totale BTW-bedrag:"
 
 #. module: pos_blackbox_be
 #. openerp-web
@@ -177,7 +177,7 @@ msgstr ""
 #: code:addons/pos_blackbox_be/models/pos_blackbox_be.py:252
 #, python-format
 msgid "Can't modify saved orders."
-msgstr ""
+msgstr "Opgeslagen orders wijzigen is niet toegestaan."
 
 #. module: pos_blackbox_be
 #: model:pos.category,name:pos_blackbox_be.certification
@@ -260,7 +260,7 @@ msgstr ""
 #: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:241
 #, python-format
 msgid "Decrease the quantity by"
-msgstr ""
+msgstr "Verminder hoeveelheid met"
 
 #. module: pos_blackbox_be
 #: code:addons/pos_blackbox_be/models/pos_blackbox_be.py:243
