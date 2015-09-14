@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 9.0alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-11 12:43+0000\n"
-"PO-Revision-Date: 2015-09-11 12:43+0000\n"
+"POT-Creation-Date: 2015-09-14 12:47+0000\n"
+"PO-Revision-Date: 2015-09-14 12:47+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -17,97 +17,97 @@ msgstr ""
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.view_pos_session_form
-msgid "Financial X"
+msgid "<span class=\"o_stat_text\">Financial X</span>"
 msgstr ""
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.view_pos_session_form
-msgid "User X"
+msgid "<span class=\"o_stat_text\">User X</span>"
 msgstr ""
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.view_pos_session_form
-msgid "User Z"
+msgid "<span class=\"o_stat_text\">User Z</span>"
 msgstr ""
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
-msgid "Amount of Pro Forma VAT tickets:"
+msgid "<strong>Amount of Pro Forma VAT tickets</strong>:"
 msgstr ""
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
-msgid "Amount of VAT tickets:"
+msgid "<strong>Amount of VAT tickets</strong>:"
 msgstr ""
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
-msgid "Amount of corrections:"
+msgid "<strong>Amount of corrections</strong>:"
 msgstr ""
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
-msgid "Amount of discounts:"
-msgstr ""
-
-#. module: pos_blackbox_be
-#: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
-#: model:ir.ui.view,arch_db:pos_blackbox_be.user_report_template
-msgid "From"
+msgid "<strong>Amount of discounts</strong>:"
 msgstr ""
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 #: model:ir.ui.view,arch_db:pos_blackbox_be.user_report_template
-msgid "POS Session:"
+msgid "<strong>From</strong>:<br/>"
 msgstr ""
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 #: model:ir.ui.view,arch_db:pos_blackbox_be.user_report_template
-msgid "Point of Sale"
-msgstr ""
-
-#. module: pos_blackbox_be
-#: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
-msgid "Revenue of Pro Forma VAT tickets (including VAT):"
+msgid "<strong>POS Session:</strong>"
 msgstr ""
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 #: model:ir.ui.view,arch_db:pos_blackbox_be.user_report_template
-msgid "Sequence number:"
+msgid "<strong>Point of Sale</strong>:<br/>"
+msgstr ""
+
+#. module: pos_blackbox_be
+#: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
+msgid "<strong>Revenue of Pro Forma VAT tickets (including VAT)</strong>:"
 msgstr ""
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 #: model:ir.ui.view,arch_db:pos_blackbox_be.user_report_template
-msgid "To"
+msgid "<strong>Sequence number:</strong>"
 msgstr ""
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
-msgid "Total base of measure per tax:"
+#: model:ir.ui.view,arch_db:pos_blackbox_be.user_report_template
+msgid "<strong>To</strong>:<br/>"
 msgstr ""
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
-msgid "Total corrections (including VAT):"
+msgid "<strong>Total base of measure per tax</strong>:"
 msgstr ""
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
-msgid "Total discounts (including VAT):"
+msgid "<strong>Total corrections (including VAT)</strong>:"
 msgstr ""
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
-msgid "Total revenue:"
+msgid "<strong>Total discounts (including VAT)</strong>:"
 msgstr ""
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
-msgid "Total tax:"
+msgid "<strong>Total revenue</strong>:"
+msgstr ""
+
+#. module: pos_blackbox_be
+#: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
+msgid "<strong>Total tax</strong>:"
 msgstr ""
 
 #. module: pos_blackbox_be
