@@ -1077,6 +1077,13 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             this.config.use_proxy = true;
 
             return posmodel_super.after_load_server_data.apply(this, arguments);
+        },
+
+        delete_current_order: function () {
+            this.gui.show_popup("error", {
+                'title': _t("Fiscal Data Module error"),
+                'body':  _t("Deleting of orders is not allowed. Finish this order by eg. creating an empty ticket."),
+            });
         }
     });
 
