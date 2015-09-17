@@ -151,8 +151,8 @@
             <field name="name">food2</field>
             <field name="categ_id" ref="product.product_category_1"/>
             <field name="pos_categ_id" ref="certification"/>
-            <field name="standard_price">7.00</field>
-            <field name="list_price">7.00</field>
+            <field name="standard_price">1.00</field>
+            <field name="list_price">1.00</field>
             <field name="type">consu</field>
             <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-12-L')])]"/>
         </record>
@@ -161,8 +161,8 @@
             <field name="name">drink1</field>
             <field name="categ_id" ref="product.product_category_1"/>
             <field name="pos_categ_id" ref="certification"/>
-            <field name="standard_price">1.00</field>
-            <field name="list_price">1.00</field>
+            <field name="standard_price">0.50</field>
+            <field name="list_price">0.50</field>
             <field name="type">consu</field>
             <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-21-L')])]"/>
         </record>
@@ -177,62 +177,12 @@
             <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-21-L')])]"/>
         </record>
 
-        <record id="product_certification_menu_drink" model="product.product">
-            <field name="name">Menu drink</field>
-            <field name="categ_id" ref="product.product_category_1"/>
-            <field name="pos_categ_id" ref="certification"/>
-            <field name="standard_price">10.00</field>
-            <field name="list_price">10.00</field>
-            <field name="type">consu</field>
-            <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-21-L')])]"/>
-        </record>
-
-        <record id="product_certification_menu_food" model="product.product">
-            <field name="name">Menu food</field>
-            <field name="categ_id" ref="product.product_category_1"/>
-            <field name="pos_categ_id" ref="certification"/>
-            <field name="standard_price">40.00</field>
-            <field name="list_price">40.00</field>
-            <field name="type">consu</field>
-            <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-12-L')])]"/>
-        </record>
-
-        <record id="product_certification_suggestion" model="product.product">
-            <field name="name">Suggestion</field>
-            <field name="categ_id" ref="product.product_category_1"/>
-            <field name="pos_categ_id" ref="certification"/>
-            <field name="standard_price">9.00</field>
-            <field name="list_price">9.00</field>
-            <field name="type">consu</field>
-            <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-12-L')])]"/>
-        </record>
-
-        <record id="product_certification_soup" model="product.product">
-            <field name="name">Soup</field>
-            <field name="categ_id" ref="product.product_category_1"/>
-            <field name="pos_categ_id" ref="certification"/>
-            <field name="standard_price">6.00</field>
-            <field name="list_price">6.00</field>
-            <field name="type">consu</field>
-            <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-12-L')])]"/>
-        </record>
-
         <record id="product_certification_creme_brulee" model="product.product">
-            <field name="name">Crème brulée</field>
+            <field name="name">crème brulée</field>
             <field name="categ_id" ref="product.product_category_1"/>
             <field name="pos_categ_id" ref="certification"/>
             <field name="standard_price">5.00</field>
             <field name="list_price">5.00</field>
-            <field name="type">consu</field>
-            <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-12-L')])]"/>
-        </record>
-
-        <record id="product_certification_discount" model="product.product">
-            <field name="name">Discount</field>
-            <field name="categ_id" ref="product.product_category_1"/>
-            <field name="pos_categ_id" ref="certification"/>
-            <field name="standard_price">-9.00</field>
-            <field name="list_price">-9.00</field>
             <field name="type">consu</field>
             <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-12-L')])]"/>
         </record>
