@@ -26,5 +26,21 @@
             <field name="uom_po_id" ref="product.product_uom_unit"/>
             <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-00-L')])]"/>
         </record>
+
+        <!-- read-only user that minfin functionaries can use to export data -->
+        <record id="fdm_functionary" model="res.partner">
+            <field name="name">FDM functionary</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="customer" eval="False"/>
+            <field name="country_id" ref="base.be"/>
+        </record>
+
+        <record id="fdm_functionary_user" model="res.users">
+            <field name="partner_id" ref="fdm_functionary"/>
+            <field name="login">fdm_functionary</field>
+            <field name="password">1</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="groups_id" eval="[(6,0,[ref('base.group_user'), ref('group_minfin_functionary')])]"/>
+        </record>
     </data>
 </odoo>
