@@ -4,6 +4,7 @@
 from openerp import models, fields, api
 
 from openerp.exceptions import UserError
+from openerp.exceptions import ValidationError
 from openerp.tools.translate import _
 
 class AccountTax(models.Model):
@@ -44,7 +45,13 @@ class res_users(models.Model):
 
     # bis number is for foreigners in Belgium
     insz_or_bis_number = fields.Char("INSZ or BIS number",
-                                     help="Social security identification number") # todo jov: enforce length of 11
+                                     help="Social security identification number")
+
+    @api.one
+    @api.constrains('insz_or_bis_number')
+    def _check_insz_or_bis_number(self):
+        if len(self.insz_or_bis_number) != 11 or not self.insz_or_bis_number.isdigit():
+            raise ValidationError(_("The INSZ or BIS number has to consist of 11 numerical digits."))
 
 class pos_session(models.Model):
     _inherit = 'pos.session'
