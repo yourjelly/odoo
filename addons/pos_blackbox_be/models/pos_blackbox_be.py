@@ -50,7 +50,7 @@ class res_users(models.Model):
     @api.one
     @api.constrains('insz_or_bis_number')
     def _check_insz_or_bis_number(self):
-        if len(self.insz_or_bis_number) != 11 or not self.insz_or_bis_number.isdigit():
+        if not self.insz_or_bis_number or len(self.insz_or_bis_number) != 11 or not self.insz_or_bis_number.isdigit():
             raise ValidationError(_("The INSZ or BIS number has to consist of 11 numerical digits."))
 
 class pos_session(models.Model):
