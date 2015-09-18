@@ -63,6 +63,32 @@
             </field>
         </record>
 
+        <record model="ir.actions.act_window" id="action_log_book_form">
+            <field name="name">Log book</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">pos_blackbox_be.log</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" eval="False"/>
+            <field name="domain">[]</field>
+        </record>
+
+        <menuitem parent="point_of_sale.menu_point_of_sale" id="menu_log_book" action="action_log_book_form" sequence="1" groups="point_of_sale.group_pos_manager,point_of_sale.group_pos_user"/>
+
+        <record model="ir.ui.view" id="view_pos_blackbox_be_pro_forma_tree">
+            <field name="name">Log book</field>
+            <field name="model">pos_blackbox_be.log</field>
+            <field name="arch" type="xml">
+                <tree string="Logs" default_order="date" create="false" edit="false" delete="false">
+                    <field name="user"/>
+                    <field name="date"/>
+                    <field name="model_name"/>
+                    <field name="record_name"/>
+                    <field name="description"/>
+                </tree>
+            </field>
+        </record>
+
         <record model="ir.actions.act_window" id="action_pos_order_pro_forma_form">
             <field name="name">Orders Pro Forma</field>
             <field name="type">ir.actions.act_window</field>

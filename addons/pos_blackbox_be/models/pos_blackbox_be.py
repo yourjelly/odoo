@@ -53,6 +53,15 @@ class res_users(models.Model):
         if not self.insz_or_bis_number or len(self.insz_or_bis_number) != 11 or not self.insz_or_bis_number.isdigit():
             raise ValidationError(_("The INSZ or BIS number has to consist of 11 numerical digits."))
 
+    @api.multi
+    def write(self, values):
+        log = self.env['pos_blackbox_be.log']
+
+        for user in self:
+            log.create(values, user._name, user.login)
+
+        return super(res_users, self).write(values)
+
 class pos_session(models.Model):
     _inherit = 'pos.session'
 
@@ -372,6 +381,25 @@ class pos_order_pro_forma(models.Model):
             values['name'] = session.config_id.sequence_id._next()
 
             self.create(values)
+
+class pos_blackbox_be_log(models.Model):
+    _name = 'pos_blackbox_be.log'
+
+    user = fields.Many2one('res.users', readonly=True)
+    date = fields.Datetime(default=fields.Datetime.now, readonly=True)
+    model_name = fields.Char(readonly=True)
+    record_name = fields.Char(readonly=True)
+    description = fields.Char(readonly=True)
+
+    def create(self, values, model_name, record_name):
+        log_values = {
+            'user': self.env.uid,
+            'model_name': model_name,
+            'record_name': record_name,
+            'description': str(values)
+        }
+
+        return super(pos_blackbox_be_log, self).create(log_values)
 
 class product_template(models.Model):
     _inherit = 'product.template'
