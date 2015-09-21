@@ -28,19 +28,19 @@
         </record>
 
         <!-- read-only user that minfin functionaries can use to export data -->
-        <record id="fdm_functionary" model="res.partner">
-            <field name="name">FDM functionary</field>
+        <record id="fdm_minfin" model="res.partner">
+            <field name="name">MinFin personnel</field>
             <field name="company_id" ref="base.main_company"/>
             <field name="customer" eval="False"/>
             <field name="country_id" ref="base.be"/>
         </record>
 
-        <record id="fdm_functionary_user" model="res.users">
-            <field name="partner_id" ref="fdm_functionary"/>
-            <field name="login">fdm_functionary</field>
+        <record id="fdm_minfin_user" model="res.users">
+            <field name="partner_id" ref="fdm_minfin"/>
+            <field name="login">minfin_personnel</field>
             <field name="password">1</field>
             <field name="company_id" ref="base.main_company"/>
-            <field name="groups_id" eval="[(6,0,[ref('base.group_user'), ref('group_minfin_functionary')])]"/>
+            <field name="groups_id" eval="[(6,0,[ref('base.group_user'), ref('group_minfin_personnel')])]"/>
         </record>
     </data>
 </odoo>
