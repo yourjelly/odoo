@@ -706,7 +706,8 @@ class SaleOrderLine(models.Model):
             quantity=self.product_uom_qty,
             date=self.order_id.date_order,
             pricelist=self.order_id.pricelist_id.id,
-            uom=self.product_uom.id
+            uom=self.product_uom.id,
+            currency_id=self.order_id.pricelist_id.currency_id.id
         )
 
         name = product.name_get()[0][1]
@@ -731,7 +732,8 @@ class SaleOrderLine(models.Model):
                 quantity=self.product_uom_qty,
                 date_order=self.order_id.date_order,
                 pricelist=self.order_id.pricelist_id.id,
-                uom=self.product_uom.id
+                uom=self.product_uom.id,
+                currency_id=self.order_id.pricelist_id.currency_id.id
             )
             self.price_unit = product.price
 
