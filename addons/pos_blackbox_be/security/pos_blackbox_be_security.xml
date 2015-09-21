@@ -14,5 +14,9 @@
         <record id="point_of_sale.menu_point_ofsale" model="ir.ui.menu">
             <field name="groups_id" eval="[(4, ref('group_minfin_functionary'))]"/>
         </record>
+
+        <record id="point_of_sale.menu_pos_session_all" model="ir.ui.menu">
+            <field name="groups_id" eval="[(4, ref('group_minfin_functionary'))]"/>
+        </record>
     </data>
 </odoo>
