@@ -5,3 +5,4 @@ access_minfin_pos_order,pos.order,model_pos_order,group_minfin_functionary,1,0,0
 access_minfin_product_template,product.template,model_product_template,group_minfin_functionary,1,0,0,0
 access_minfin_stock_move,stock.move,stock.model_stock_move,group_minfin_functionary,1,0,0,0
 access_minfin_stock_warehouse_orderpoint,stock.warehouse.orderpoint,stock.model_stock_warehouse_orderpoint,group_minfin_functionary,1,0,0,0
+access_minfin_sale_report,sale.report,sale.model_sale_report,group_minfin_functionary,1,0,0,0
