@@ -15,7 +15,7 @@ class AccountTax(models.Model):
     @api.one
     @api.depends('amount_type', 'amount')
     def _compute_identification_letter(self):
-        if self.type_tax_use == "sale" and (self.amount_type == "percent" or self.amount_type == "group"): # todo jov: do we really need group?
+        if self.type_tax_use == "sale" and (self.amount_type == "percent" or self.amount_type == "group"):  # todo jov: do we really need group?
             if self.amount == 21:
                 self.identification_letter = "A"
             elif self.amount == 12:
@@ -274,7 +274,7 @@ class pos_order(models.Model):
         print "Got " + str(len(pro_forma_orders)) + " pro forma and " + str(len(regular_orders)) + " regular orders"
 
         # deal with the pro forma orders
-        created_order_ids = self.env['pos.order_pro_forma'].create_from_ui(pro_forma_orders)
+        self.env['pos.order_pro_forma'].create_from_ui(pro_forma_orders)
 
         # only return regular order ids, shouldn't care about pro forma in the POS anyway
         return super(pos_order, self).create_from_ui(regular_orders)
@@ -292,7 +292,7 @@ class pos_order_line(models.Model):
         return super(pos_order_line, self).write(values)
 
 class pos_order_line_pro_forma(models.Model):
-    _name = 'pos.order_line_pro_forma' # needs to be a new class
+    _name = 'pos.order_line_pro_forma'  # needs to be a new class
     _inherit = 'pos.order.line'
 
     order_id = fields.Many2one('pos.order_pro_forma')
@@ -302,7 +302,7 @@ class pos_order_pro_forma(models.Model):
 
     def _default_session(self):
         so = self.env['pos.session']
-        session_ids = so.search([('state','=', 'opened'), ('user_id','=',self.env.uid)])
+        session_ids = so.search([('state', '=', 'opened'), ('user_id', '=', self.env.uid)])
         return session_ids and session_ids[0] or False
 
     def _default_pricelist(self):
