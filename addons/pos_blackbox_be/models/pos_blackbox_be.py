@@ -15,7 +15,7 @@ class AccountTax(models.Model):
     @api.one
     @api.depends('amount_type', 'amount')
     def _compute_identification_letter(self):
-        if self.type_tax_use == "sale" and (self.amount_type == "percent" or self.amount_type == "group"):  # todo jov: do we really need group?
+        if self.type_tax_use == "sale" and (self.amount_type == "percent" or self.amount_type == "group"):
             if self.amount == 21:
                 self.identification_letter = "A"
             elif self.amount == 12:
@@ -270,8 +270,6 @@ class pos_order(models.Model):
 
         # filter the pro_forma orders out of the orders list
         regular_orders = [order for order in orders if not order['data']['blackbox_pro_forma']]
-
-        print "Got " + str(len(pro_forma_orders)) + " pro forma and " + str(len(regular_orders)) + " regular orders"
 
         # deal with the pro forma orders
         self.env['pos.order_pro_forma'].create_from_ui(pro_forma_orders)
