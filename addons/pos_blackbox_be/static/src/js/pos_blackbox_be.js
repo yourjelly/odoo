@@ -1106,6 +1106,19 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         }
     });
 
+    screens.NumpadWidget.include({
+        clickChangeMode: function (event) {
+            if (event.currentTarget.attributes['data-mode'].nodeValue === "price") {
+                this.gui.show_popup("error", {
+                    'title': _t("Fiscal Data Module error"),
+                    'body':  _t("Adjusting the price is not allowed."),
+                });
+            } else {
+                this._super(event);
+            }
+        }
+    });
+
     models.load_models({
         'model': "ir.config_parameter",
         'fields': ['key', 'value'],
