@@ -47,6 +47,11 @@ msgstr "<strong>Aantal correcties</strong>:"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
+msgid "<strong>Amount of money in cash register</strong>:"
+msgstr "<strong>Bedrag in kassa</strong>:"
+
+#. module: pos_blackbox_be
+#: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 msgid "<strong>Amount of discounts</strong>:"
 msgstr "<strong>Aantal kortingen</strong>:"
 
@@ -112,7 +117,14 @@ msgstr "<strong>Totale BTW-bedrag</strong>:"
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:557
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:1113
+#, python-format
+msgid "Adjusting the price is not allowed."
+msgstr "Aanpassen van de prijs is niet toegestaan."
+
+#. module: pos_blackbox_be
+#. openerp-web
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:556
 #, python-format
 msgid "Already handled request."
 msgstr "Request reeds verwerkt."
@@ -263,7 +275,13 @@ msgid "Decrease the quantity by"
 msgstr "Verminder hoeveelheid met"
 
 #. module: pos_blackbox_be
-#: code:addons/pos_blackbox_be/models/pos_blackbox_be.py:243
+#. openerp-web
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:1084
+msgid "Deleting of orders is not allowed. Finish this order by eg. creating an empty ticket."
+msgstr "Verwijderen van orders is niet toegestaan. Beëindig dit order door bijvoorbeeld een leeg kasticket aan te maken."
+
+#. module: pos_blackbox_be
+#: code:addons/pos_blackbox_be/models/pos_blackbox_be.py:230
 #, python-format
 msgid "Deleting of point of sale orders is not allowed."
 msgstr "Point of sale orders verwijderen is niet toegestaan."
@@ -513,18 +531,6 @@ msgid "Lines of Point of Sale"
 msgstr "Lijnen van kassa"
 
 #. module: pos_blackbox_be
-#: model:product.product,name:pos_blackbox_be.product_certification_menu_drink
-#: model:product.template,name:pos_blackbox_be.product_certification_menu_drink_product_template
-msgid "Menu drink"
-msgstr ""
-
-#. module: pos_blackbox_be
-#: model:product.product,name:pos_blackbox_be.product_certification_menu_food
-#: model:product.template,name:pos_blackbox_be.product_certification_menu_food_product_template
-msgid "Menu food"
-msgstr ""
-
-#. module: pos_blackbox_be
 #: code:addons/pos_blackbox_be/models/pos_blackbox_be.py:399
 #, python-format
 msgid "Modifying this product is not allowed."
@@ -675,6 +681,11 @@ msgid "Quantity"
 msgstr "Hoeveelheid"
 
 #. module: pos_blackbox_be
+#: model:res.groups,name:pos_blackbox_be.group_minfin_personnel
+msgid "Read-only FDM"
+msgstr ""
+
+#. module: pos_blackbox_be
 #: model:ir.model.fields,field_description:pos_blackbox_be.field_pos_order_blackbox_pos_receipt_time
 #: model:ir.model.fields,field_description:pos_blackbox_be.field_pos_order_pro_forma_blackbox_pos_receipt_time
 msgid "Receipt time"
@@ -724,12 +735,6 @@ msgid "Soda LIGHT 33 CL."
 msgstr ""
 
 #. module: pos_blackbox_be
-#: model:product.product,name:pos_blackbox_be.product_certification_soup
-#: model:product.template,name:pos_blackbox_be.product_certification_soup_product_template
-msgid "Soup"
-msgstr ""
-
-#. module: pos_blackbox_be
 #: model:product.product,name:pos_blackbox_be.product_spaghetti
 #: model:product.template,name:pos_blackbox_be.product_spaghetti_product_template
 msgid "Spaghetti Bolognaise (KLEIN)"
@@ -752,12 +757,6 @@ msgid "Subtotal w/o Tax"
 msgstr "Subtotaal zonder BTW"
 
 #. module: pos_blackbox_be
-#: model:product.product,name:pos_blackbox_be.product_certification_suggestion
-#: model:product.template,name:pos_blackbox_be.product_certification_suggestion_product_template
-msgid "Suggestion"
-msgstr ""
-
-#. module: pos_blackbox_be
 #: model:ir.model,name:pos_blackbox_be.model_account_tax
 msgid "Tax"
 msgstr "Belasting"
@@ -766,6 +765,12 @@ msgstr "Belasting"
 #: model:ir.model.fields,field_description:pos_blackbox_be.field_pos_order_line_pro_forma_tax_ids
 msgid "Taxes"
 msgstr "Belastingen"
+
+#. module: pos_blackbox_be
+#: code:addons/pos_blackbox_be/models/pos_blackbox_be.py:54
+#, python-format
+msgid "The INSZ or BIS number has to consist of 11 numerical digits."
+msgstr "Het INSZ of BIS nummer moet bestaan uit 11 cijfers."
 
 #. module: pos_blackbox_be
 #: model:ir.model.fields,help:pos_blackbox_be.field_pos_order_pro_forma_config_id
@@ -1008,6 +1013,12 @@ msgstr "Z GEBRUIKERS"
 #: model:ir.actions.report.xml,name:pos_blackbox_be.action_report_pos_user_z
 msgid "Z-report"
 msgstr "Z-rapport"
+
+#. module: pos_blackbox_be
+#: model:product.product,name:pos_blackbox_be.product_certification_creme_brulee
+#: model:product.template,name:pos_blackbox_be.product_certification_creme_brulee_product_template
+msgid "crème brulée"
+msgstr ""
 
 #. module: pos_blackbox_be
 #: model:product.product,name:pos_blackbox_be.product_certification_drink1
