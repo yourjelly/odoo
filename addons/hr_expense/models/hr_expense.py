@@ -208,9 +208,12 @@ class HrExpense(models.Model):
         if any(not expense.journal_id for expense in self):
             raise UserError(_("Expenses must have an expense journal specified to generate accounting entries."))
 
+        if any(expense.journal_id != self[0].journal_id for expense in self):
+            raise UserError(_("All expenses must belong to the same journal."))
+
         #create the move that will contain the accounting entries
         move = self.env['account.move'].create({
-            'journal_id': self.journal_id.id,
+            'journal_id': self[0].journal_id.id,
             'company_id': self.env.user.company_id.id,
         })
 
