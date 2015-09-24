@@ -400,7 +400,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                 var tax_letter = current.get_vat_letter();
 
                 if (tax_letter) {
-                    base_price_per_tax_letter[tax_letter] += Math.floor(current.get_price_without_tax() * 100);
+                    base_price_per_tax_letter[tax_letter] += Math.round(current.get_price_without_tax() * 100);
                 }
             });
 
