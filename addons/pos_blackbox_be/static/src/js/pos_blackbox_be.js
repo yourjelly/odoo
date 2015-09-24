@@ -245,16 +245,15 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                             var selected_orderline = order.get_selected_orderline();
                             qty_decrease = parseInt(qty_decrease, 10);
 
-                            // We have to prevent taking back more than
-                            // what was on the order. The right way to do
-                            // this is by "merging" all the orderlines
-                            // that we can with this one (including
-                            // previous decreases). Then we can figure out
-                            // how much the POS user can still decrease
-                            // by.
+                            // We have to prevent taking back more than what was on the order. The
+                            // right way to do this is by "merging" all the orderlines that we can
+                            // with this one (including previous decreases). Then we can figure out
+                            // how much the POS user can still decrease by.
                             var current_total_quantity_remaining = selected_orderline.get_quantity();
                             order.get_orderlines().forEach(function (orderline, index, array) {
-                                if (selected_orderline.id != orderline.id && selected_orderline.can_be_merged_with(orderline)) {
+                                if (selected_orderline.id != orderline.id &&
+                                    selected_orderline.get_product().id === orderline.get_product().id &&
+                                    selected_orderline.get_discount() === orderline.get_discount()) {
                                     current_total_quantity_remaining += orderline.get_quantity();
                                 }
                             });
