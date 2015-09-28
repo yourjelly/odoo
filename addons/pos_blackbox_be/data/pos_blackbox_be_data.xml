@@ -9,7 +9,7 @@
             <field name="uom_type">smaller</field>
         </record>
         <record id="product_product_work_in" model="product.product">
-            <field name="name">Work In</field>
+            <field name="name">WORK IN</field>
             <field name="standard_price">0.0</field>
             <field name="list_price">0.0</field>
             <field name="type">consu</field>
@@ -18,7 +18,7 @@
             <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-00-L')])]"/>
         </record>
         <record id="product_product_work_out" model="product.product">
-            <field name="name">Work Out</field>
+            <field name="name">WORK OUT</field>
             <field name="standard_price">0.0</field>
             <field name="list_price">0.0</field>
             <field name="type">consu</field>
