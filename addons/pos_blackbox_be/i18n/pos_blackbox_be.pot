@@ -1095,13 +1095,13 @@ msgstr ""
 #. module: pos_blackbox_be
 #: model:product.product,name:pos_blackbox_be.product_product_work_in
 #: model:product.template,name:pos_blackbox_be.product_product_work_in_product_template
-msgid "Work In"
+msgid "WORK IN"
 msgstr ""
 
 #. module: pos_blackbox_be
 #: model:product.product,name:pos_blackbox_be.product_product_work_out
 #: model:product.template,name:pos_blackbox_be.product_product_work_out_product_template
-msgid "Work Out"
+msgid "WORK OUT"
 msgstr ""
 
 #. module: pos_blackbox_be

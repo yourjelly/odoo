@@ -1096,14 +1096,14 @@ msgstr "Versie van Odoo die het order heeft gecreëerd"
 #. module: pos_blackbox_be
 #: model:product.product,name:pos_blackbox_be.product_product_work_in
 #: model:product.template,name:pos_blackbox_be.product_product_work_in_product_template
-msgid "Work In"
-msgstr ""
+msgid "WORK IN"
+msgstr "ARBEID IN"
 
 #. module: pos_blackbox_be
 #: model:product.product,name:pos_blackbox_be.product_product_work_out
 #: model:product.template,name:pos_blackbox_be.product_product_work_out_product_template
-msgid "Work Out"
-msgstr ""
+msgid "WORK OUT"
+msgstr "ARBEID UIT"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
