@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<templates id="template" inherit_id="point_of_sale.template">
+<templates id="template">
     <t t-extend="DebugWidget">
         <t t-jquery="div.content" t-operation="append">
             <p class="category">Blackbox</p>
