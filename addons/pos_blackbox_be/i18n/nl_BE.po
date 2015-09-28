@@ -4,16 +4,24 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 9.0alpha1\n"
+"Project-Id-Version: Odoo Server 9.0rc1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-14 12:47+0000\n"
-"PO-Revision-Date: 2015-09-14 12:47+0000\n"
+"POT-Creation-Date: 2015-09-28 10:26+0000\n"
+"PO-Revision-Date: 2015-09-28 10:26+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
+#. module: pos_blackbox_be
+#. openerp-web
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:43
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:129
+#, python-format
+msgid "(ID:"
+msgstr ""
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.view_pos_session_form
@@ -47,13 +55,13 @@ msgstr "<strong>Aantal correcties</strong>:"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
-msgid "<strong>Amount of money in cash register</strong>:"
-msgstr "<strong>Bedrag in kassa</strong>:"
+msgid "<strong>Amount of discounts</strong>:"
+msgstr "<strong>Aantal kortingen</strong>:"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
-msgid "<strong>Amount of discounts</strong>:"
-msgstr "<strong>Aantal kortingen</strong>:"
+msgid "<strong>Amount of money in cash register</strong>:"
+msgstr "<strong>Hoeveelheid geld in kassa</strong>:"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
@@ -117,6 +125,13 @@ msgstr "<strong>Totale BTW-bedrag</strong>:"
 
 #. module: pos_blackbox_be
 #. openerp-web
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:39
+#, python-format
+msgid "Address:"
+msgstr "Adres:"
+
+#. module: pos_blackbox_be
+#. openerp-web
 #: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:1113
 #, python-format
 msgid "Adjusting the price is not allowed."
@@ -156,6 +171,13 @@ msgid "Amount total"
 msgstr "Totaal"
 
 #. module: pos_blackbox_be
+#. openerp-web
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:6
+#, python-format
+msgid "Blackbox"
+msgstr ""
+
+#. module: pos_blackbox_be
 #: model:ir.model.fields,field_description:pos_blackbox_be.field_pos_order_blackbox_tax_category_a
 #: model:ir.model.fields,field_description:pos_blackbox_be.field_pos_order_pro_forma_blackbox_tax_category_a
 msgid "Blackbox tax category a"
@@ -180,13 +202,20 @@ msgid "Blackbox tax category d"
 msgstr "Blackbox BTW categorie D"
 
 #. module: pos_blackbox_be
-#: code:addons/pos_blackbox_be/models/pos_blackbox_be.py:303
+#. openerp-web
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:8
+#, python-format
+msgid "Build Hash&Sign Request"
+msgstr ""
+
+#. module: pos_blackbox_be
+#: code:addons/pos_blackbox_be/models/pos_blackbox_be.py:288
 #, python-format
 msgid "Can't modify fields related to the Fiscal Data Module."
 msgstr "Velden in verband met de Fiscal Data Module kunnen niet worden aangepast."
 
 #. module: pos_blackbox_be
-#: code:addons/pos_blackbox_be/models/pos_blackbox_be.py:252
+#: code:addons/pos_blackbox_be/models/pos_blackbox_be.py:239
 #, python-format
 msgid "Can't modify saved orders."
 msgstr "Opgeslagen orders wijzigen is niet toegestaan."
@@ -204,14 +233,22 @@ msgstr "Bedrijf"
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:930
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:929
 #, python-format
 msgid "Company address must be set."
 msgstr "Adres van het huidige bedrijf moet worden ingesteld."
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:746
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:69
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:150
+#, python-format
+msgid "Control data"
+msgstr "Controle data"
+
+#. module: pos_blackbox_be
+#. openerp-web
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:745
 #, python-format
 msgid "Could not connect to the Fiscal Data Module."
 msgstr "Kan geen verbinding maken met de Fiscal Data Module."
@@ -236,12 +273,6 @@ msgstr "Aanmaak datum"
 #: model:product.product,name:pos_blackbox_be.product_creme_brulee
 #: model:product.template,name:pos_blackbox_be.product_creme_brulee_product_template
 msgid "Crème Brulée"
-msgstr ""
-
-#. module: pos_blackbox_be
-#: model:product.product,name:pos_blackbox_be.product_certification_creme_brulee
-#: model:product.template,name:pos_blackbox_be.product_certification_creme_brulee_product_template
-msgid "Crème brulée"
 msgstr ""
 
 #. module: pos_blackbox_be
@@ -277,6 +308,7 @@ msgstr "Verminder hoeveelheid met"
 #. module: pos_blackbox_be
 #. openerp-web
 #: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:1084
+#, python-format
 msgid "Deleting of orders is not allowed. Finish this order by eg. creating an empty ticket."
 msgstr "Verwijderen van orders is niet toegestaan. Beëindig dit order door bijvoorbeeld een leeg kasticket aan te maken."
 
@@ -287,16 +319,10 @@ msgid "Deleting of point of sale orders is not allowed."
 msgstr "Point of sale orders verwijderen is niet toegestaan."
 
 #. module: pos_blackbox_be
-#: code:addons/pos_blackbox_be/models/pos_blackbox_be.py:411
+#: code:addons/pos_blackbox_be/models/pos_blackbox_be.py:396
 #, python-format
 msgid "Deleting this product is not allowed."
 msgstr "Dit product verwijderen is niet toegestaan."
-
-#. module: pos_blackbox_be
-#: model:product.product,name:pos_blackbox_be.product_certification_discount
-#: model:product.template,name:pos_blackbox_be.product_certification_discount_product_template
-msgid "Discount"
-msgstr "Korting"
 
 #. module: pos_blackbox_be
 #: model:ir.model.fields,field_description:pos_blackbox_be.field_pos_order_line_pro_forma_discount
@@ -339,10 +365,34 @@ msgstr ""
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:835
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:83
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:160
+#, python-format
+msgid "FDM ID:"
+msgstr ""
+
+#. module: pos_blackbox_be
+#. openerp-web
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:834
 #, python-format
 msgid "FDM identification"
 msgstr "FDM identificatie"
+
+#. module: pos_blackbox_be
+#. openerp-web
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:79
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:156
+#, python-format
+msgid "FDM ticket counters:"
+msgstr "FDM ticket tellers:"
+
+#. module: pos_blackbox_be
+#. openerp-web
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:73
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:152
+#, python-format
+msgid "FDM time:"
+msgstr "FDM tijd:"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.view_pos_session_form
@@ -356,7 +406,7 @@ msgstr "Tijd eerste aangemaakte BTW-kasticket:"
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:542
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:541
 #, python-format
 msgid "Fiscal Data Module"
 msgstr ""
@@ -375,20 +425,22 @@ msgstr "Fiscal Data Module datum"
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:579
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:591
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:596
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:601
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:606
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:611
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:616
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:621
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:626
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:631
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:745
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:929
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:936
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:943
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:578
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:590
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:595
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:600
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:605
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:610
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:615
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:620
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:625
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:630
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:744
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:928
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:935
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:942
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:1083
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:1112
 #, python-format
 msgid "Fiscal Data Module error"
 msgstr ""
@@ -401,28 +453,28 @@ msgstr "Fiscal Data Module informatie"
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:552
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:551
 #, python-format
 msgid "Fiscal Data Module memory 90% full."
 msgstr "Fiscal Data Module geheugen 90% vol."
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:602
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:601
 #, python-format
 msgid "Fiscal Data Module memory full."
 msgstr "Fiscal Data Module geheugen vol."
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:617
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:616
 #, python-format
 msgid "Fiscal Data Module not operational."
 msgstr "Fiscal Data Module niet operationeel."
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:622
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:621
 #, python-format
 msgid "Fiscal Data Module real time clock corrupt."
 msgstr "Fiscal Data Module real time clock corrupt."
@@ -441,10 +493,10 @@ msgstr "Fiscal Data Module tijd"
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:551
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:556
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:561
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:566
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:550
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:555
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:560
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:565
 #, python-format
 msgid "Fiscal Data Module warning"
 msgstr "Fiscal Data Module waarschuwing"
@@ -478,14 +530,14 @@ msgstr "Identificatie letter"
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:597
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:596
 #, python-format
 msgid "Invalid PIN."
 msgstr "PIN niet geldig."
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:612
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:611
 #, python-format
 msgid "Invalid data in message."
 msgstr "Ongeldige data in boodschap."
@@ -531,7 +583,7 @@ msgid "Lines of Point of Sale"
 msgstr "Lijnen van kassa"
 
 #. module: pos_blackbox_be
-#: code:addons/pos_blackbox_be/models/pos_blackbox_be.py:399
+#: code:addons/pos_blackbox_be/models/pos_blackbox_be.py:384
 #, python-format
 msgid "Modifying this product is not allowed."
 msgstr "Dit product aanpassen is niet toegestaan."
@@ -543,21 +595,21 @@ msgstr ""
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:580
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:579
 #, python-format
 msgid "No Vat Signing Card or Vat Signing Card broken."
 msgstr "Geen Vat Signing Card of Vat Signing Card defect."
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:562
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:561
 #, python-format
 msgid "No record."
 msgstr "Geen record."
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:265
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:264
 #, python-format
 msgid "Not allowed to take back more than was ordered."
 msgstr "Verboden om meer te retourneren dan dat was besteld."
@@ -581,7 +633,7 @@ msgstr ""
 #. module: pos_blackbox_be
 #. openerp-web
 #: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:211
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:264
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:263
 #, python-format
 msgid "Order error"
 msgstr ""
@@ -599,15 +651,39 @@ msgstr ""
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:543
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:542
 #, python-format
 msgid "PIN accepted."
 msgstr "PIN geaccepteerd."
 
 #. module: pos_blackbox_be
+#. openerp-web
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:91
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:168
+#, python-format
+msgid "PLU hash:"
+msgstr ""
+
+#. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.view_pos_order_pro_forma_tree
 msgid "POS Orders Pro Forma"
 msgstr ""
+
+#. module: pos_blackbox_be
+#. openerp-web
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:99
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:176
+#, python-format
+msgid "POS production ID:"
+msgstr "POS productie ID:"
+
+#. module: pos_blackbox_be
+#. openerp-web
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:95
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:172
+#, python-format
+msgid "POS version:"
+msgstr "POS versie:"
 
 #. module: pos_blackbox_be
 #: model:ir.model.fields,help:pos_blackbox_be.field_pos_order_pro_forma_user_id
@@ -616,7 +692,7 @@ msgstr "Persoon die de kassa gebruikt."
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:584
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:583
 #, python-format
 msgid "Please initialize the Vat Signing Card with PIN."
 msgstr "Vat Signing Card niet geïnitialiseerd met PIN."
@@ -757,9 +833,26 @@ msgid "Subtotal w/o Tax"
 msgstr "Subtotaal zonder BTW"
 
 #. module: pos_blackbox_be
+#. openerp-web
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:35
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:187
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:196
+#, python-format
+msgid "THIS IS NOT A VALID VAT TICKET"
+msgstr "DIT IS GEEN GELDIG BTW-TICKET"
+
+#. module: pos_blackbox_be
 #: model:ir.model,name:pos_blackbox_be.model_account_tax
 msgid "Tax"
 msgstr "Belasting"
+
+#. module: pos_blackbox_be
+#. openerp-web
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:56
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:142
+#, python-format
+msgid "Tax category"
+msgstr "BTW categorie"
 
 #. module: pos_blackbox_be
 #: model:ir.model.fields,field_description:pos_blackbox_be.field_pos_order_line_pro_forma_tax_ids
@@ -779,19 +872,19 @@ msgstr "De kassa die wordt gebruikt."
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:944
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:943
 #, python-format
 msgid "The reprint and discount module are not allowed to be installed with the Fiscal Data Module."
 msgstr "De reprint and discount module zijn niet toegestaan in combinatie met de Fiscal Data Module."
 
 #. module: pos_blackbox_be
-#: code:addons/pos_blackbox_be/models/pos_blackbox_be.py:433
+#: code:addons/pos_blackbox_be/models/pos_blackbox_be.py:418
 #, python-format
 msgid "This module is not allowed to be removed."
 msgstr "Deze module mag niet worden verwijderd."
 
 #. module: pos_blackbox_be
-#: code:addons/pos_blackbox_be/models/pos_blackbox_be.py:425
+#: code:addons/pos_blackbox_be/models/pos_blackbox_be.py:410
 #, python-format
 msgid "This module is not allowed with the Fiscal Data Module."
 msgstr "Deze module is niet toegestaan met de Fiscal Data Module."
@@ -810,6 +903,13 @@ msgstr "Deze orderlijn is reeds vastgelegd in een pro forma order en \n"
 #: model:ir.model.fields,help:pos_blackbox_be.field_pos_order_pro_forma_blackbox_ticket_counters
 msgid "Ticket counter returned by the Fiscal Data Module (format: counter / total event type)"
 msgstr "Ticket teller afkomstig van de Fiscal Data Module (formaat: counter / totaal event type)"
+
+#. module: pos_blackbox_be
+#. openerp-web
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:105
+#, python-format
+msgid "Ticket signature:"
+msgstr "Ticket handtekening:"
 
 #. module: pos_blackbox_be
 #: model:ir.model.fields,help:pos_blackbox_be.field_pos_order_blackbox_time
@@ -902,21 +1002,21 @@ msgstr "Eenheidsprijs"
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:607
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:606
 #, python-format
 msgid "Unknown identifier."
 msgstr "Ongekende boodschap."
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:632
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:631
 #, python-format
 msgid "Unspecified error."
 msgstr "Niet gedefinieerde error."
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:567
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:566
 #, python-format
 msgid "Unspecified warning."
 msgstr "Niet gedefinieerde waarschuwing."
@@ -934,10 +1034,25 @@ msgstr ""
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:937
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:32
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:121
+#, python-format
+msgid "VAT TICKET"
+msgstr "BTW-TICKET"
+
+#. module: pos_blackbox_be
+#. openerp-web
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:936
 #, python-format
 msgid "VAT number must be set."
 msgstr "BTW nummer moet worden ingesteld."
+
+#. module: pos_blackbox_be
+#. openerp-web
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:40
+#, python-format
+msgid "VAT number:"
+msgstr "BTW nummer:"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.include_vat_number
@@ -946,14 +1061,22 @@ msgstr "BTW:"
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:592
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:87
+#: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:164
+#, python-format
+msgid "VSC ID:"
+msgstr ""
+
+#. module: pos_blackbox_be
+#. openerp-web
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:591
 #, python-format
 msgid "Vat Signing Card blocked."
 msgstr "Vat Signing Card geblokkeerd."
 
 #. module: pos_blackbox_be
 #. openerp-web
-#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:627
+#: code:addons/pos_blackbox_be/static/src/js/pos_blackbox_be.js:626
 #, python-format
 msgid "Vat Signing Card not compatible with Fiscal Data Module."
 msgstr "Vat Signing Card niet compatible met de Fiscal Data Module."
