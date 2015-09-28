@@ -31,7 +31,7 @@ More info:
         'data/pos_blackbox_be_demo.xml'
     ],
     'qweb': [
-        'static/xml/pos_blackbox_be.xml'
+        'static/src/xml/pos_blackbox_be.xml'
     ],
     'installable': True,
     'auto_install': False,
