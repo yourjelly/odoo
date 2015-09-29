@@ -88,6 +88,16 @@ msgstr "<strong>Totaalbedrag uitgereikte pro forma tickets</strong>:"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
+#: model:ir.ui.view,arch_db:pos_blackbox_be.include_vat_notice_invoice
+#: model:ir.ui.view,arch_db:pos_blackbox_be.include_vat_notice_receipt
+#: model:ir.ui.view,arch_db:pos_blackbox_be.include_vat_notice_saleslines
+#: model:ir.ui.view,arch_db:pos_blackbox_be.include_vat_notice_todays_payment
+#: model:ir.ui.view,arch_db:pos_blackbox_be.user_report_template
+msgid "<strong>THIS IS NOT A VALID VAT TICKET</strong>"
+msgstr "<strong>DIT IS GEEN GELDIG BTW-TICKET</strong>"
+
+#. module: pos_blackbox_be
+#: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
 #: model:ir.ui.view,arch_db:pos_blackbox_be.user_report_template
 msgid "<strong>Sequence number:</strong>"
 msgstr "<strong>Volgnummer:</strong>"
