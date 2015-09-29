@@ -474,6 +474,44 @@
             <t t-call="pos_blackbox_be.user_report_template"/>
         </template>
 
-        <!-- <menuitem name="Z-reports" action="z_report" id="menu_report_z_report" parent="point_of_sale.menu_point_rep" sequence="100"/> -->
+        <template id="include_vat_notice_invoice" inherit_id="account.report_invoice_document">
+            <xpath expr="//div[@class='row']" position="before">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <strong>THIS IS NOT A VALID VAT TICKET</strong>
+                    </div>
+                </div>
+            </xpath>
+        </template>
+
+        <template id="include_vat_notice_receipt" inherit_id="point_of_sale.report_receipt">
+            <xpath expr="//div[@class='row']" position="before">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <strong>THIS IS NOT A VALID VAT TICKET</strong>
+                    </div>
+                </div>
+            </xpath>
+        </template>
+
+        <template id="include_vat_notice_saleslines" inherit_id="point_of_sale.report_saleslines">
+            <xpath expr="//h2" position="after">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <strong>THIS IS NOT A VALID VAT TICKET</strong>
+                    </div>
+                </div>
+            </xpath>
+        </template>
+
+        <template id="include_vat_notice_todays_payment" inherit_id="point_of_sale.report_payment">
+            <xpath expr="//h2" position="after">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <strong>THIS IS NOT A VALID VAT TICKET</strong>
+                    </div>
+                </div>
+            </xpath>
+        </template>
     </data>
 </odoo>
