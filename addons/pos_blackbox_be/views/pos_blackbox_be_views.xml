@@ -237,6 +237,7 @@
                 <t t-foreach="docs" t-as="o">
                     <t t-call="report.external_layout">
                         <div class="page">
+                            <strong>THIS IS NOT A VALID VAT TICKET</strong>
                             <t t-if="o.stop_at">
                                 <h2>Z FINANCIAL</h2>
                             </t>
@@ -380,6 +381,7 @@
                 <t t-foreach="docs" t-as="o">
                     <t t-call="report.external_layout">
                         <div class="page">
+                            <strong>THIS IS NOT A VALID VAT TICKET</strong>
                             <t t-if="o.stop_at">
                                 <h2>Z USERS</h2>
                             </t>
