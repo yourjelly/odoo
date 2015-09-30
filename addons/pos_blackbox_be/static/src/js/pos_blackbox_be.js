@@ -1118,35 +1118,38 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         }
     });
 
-    var work_button = screens.ActionButtonWidget.extend({
-        template: 'WorkButton',
+    var work_out_button = screens.ActionButtonWidget.extend({
+        template: 'WorkOutButton',
         button_click: function () {
             var self = this;
-            var cashier = self.pos.get_cashier();
-            var product;
-
-            if (! cashier.clocked_in) {
-                product = self.pos.work_in_product;
-                cashier.clocked_in = true;
-            } else {
-                product = self.pos.work_out_product;
-                cashier.clocked_in = false;
-            }
 
             self.pos.add_new_order();
-            self.pos.get_order().add_product(product);
+            self.pos.get_order().add_product(self.pos.work_out_product);
             self.pos.push_order(self.pos.get_order());
             self.gui.show_screen('receipt');
-
-            // rerender the button template so it says the right thing
-            // (clock in <-> clock out)
-            self.renderElement();
         }
     });
 
     screens.define_action_button({
-        'name': 'work',
-        'widget': work_button,
+        'name': 'work_out',
+        'widget': work_out_button,
+    });
+
+    var work_in_button = screens.ActionButtonWidget.extend({
+        template: 'WorkInButton',
+        button_click: function () {
+            var self = this;
+
+            self.pos.add_new_order();
+            self.pos.get_order().add_product(self.pos.work_in_product);
+            self.pos.push_order(self.pos.get_order());
+            self.gui.show_screen('receipt');
+        }
+    });
+
+    screens.define_action_button({
+        'name': 'work_in',
+        'widget': work_in_button,
     });
 
     models.load_models({

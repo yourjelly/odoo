@@ -197,14 +197,15 @@
         </t>
     </t>
 
-    <t t-name="WorkButton">
+    <t t-name="WorkInButton">
         <div class='control-button'>
-            <t t-if="! widget.pos.get_cashier().clocked_in">
-                <i class='fa fa-clock-o' /> Clock in
-            </t>
-            <t t-if="widget.pos.get_cashier().clocked_in">
-                <i class='fa fa-clock-o' /> Clock out
-            </t>
+            <i class='fa fa-clock-o' /> Clock in
+        </div>
+    </t>
+
+    <t t-name="WorkOutButton">
+        <div class='control-button'>
+            <i class='fa fa-clock-o' /> Clock out
         </div>
     </t>
 </templates>
