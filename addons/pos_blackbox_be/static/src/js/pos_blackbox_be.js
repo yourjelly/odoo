@@ -1118,6 +1118,20 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         }
     });
 
+    screens.ProductListWidget.include({
+        set_product_list: function (product_list) {
+            var self = this;
+
+            // get rid of the work_in and work_out products because
+            // we're not allowed to have pro forma work_in/out orders.
+            product_list = _.reject(product_list, function (current) {
+                return current === self.pos.work_in_product || current === self.pos.work_out_product;
+            })
+
+            return this._super(product_list);
+        }
+    });
+
     var work_out_button = screens.ActionButtonWidget.extend({
         template: 'WorkOutButton',
         button_click: function () {
