@@ -196,4 +196,15 @@
             <div bold="on" size="double">THIS IS NOT A VALID VAT TICKET</div>
         </t>
     </t>
+
+    <t t-name="WorkButton">
+        <div class='control-button'>
+            <t t-if="! widget.pos.get_cashier().clocked_in">
+                <i class='fa fa-clock-o' /> Clock in
+            </t>
+            <t t-if="widget.pos.get_cashier().clocked_in">
+                <i class='fa fa-clock-o' /> Clock out
+            </t>
+        </div>
+    </t>
 </templates>
