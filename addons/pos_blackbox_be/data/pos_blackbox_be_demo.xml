@@ -91,7 +91,6 @@
         </record>
 
         <record id="base.user_root" model="res.users">
-            <field name="password">1</field>
             <field name="insz_or_bis_number">00000000097</field>
         </record>
 
