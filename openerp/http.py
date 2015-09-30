@@ -387,31 +387,25 @@ class WebRequest(object):
         secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
         assert secret, "CSRF protection requires a configured database secret"
 
-        msg = '%s%s' % (token, max_ts)
-        sign = hashlib.sha1(msg + secret).hexdigest()
+        msg = '%s%s%s' % (token, max_ts, secret)
+        sign = hashlib.sha1(msg).hexdigest()
         return '%s-%s' % (sign, max_ts)
 
     def validate_csrf(self, csrf):
-        if not csrf:
-            return False
-
         try:
-            sign, _, max_ts = str(csrf).rpartition('-')
-        except UnicodeEncodeError:
-            return False
-
-        if max_ts:
-            try:
+            post_sign, _, max_ts = str(csrf).rpartition('-')
+            if max_ts:
                 if int(max_ts) < int(time.time()):
                     return False
-            except ValueError:
-                return False
+        except Exception:
+            return False
 
         token = self.session.sid
         secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
         assert secret, "CSRF protection requires a configured database secret"
-        msg = '%s%s' % (token, max_ts)
-        return hashlib.sha1(msg + secret).hexdigest() == sign
+        msg = '%s%s%s' % (token, max_ts, secret)
+        sign = hashlib.sha1(msg).hexdigest()
+        return post_sign sign
 
 def route(route=None, **kw):
     """
