@@ -105,6 +105,7 @@
             <field name="company_id" ref="base.main_company"/>
             <field name="customer" eval="False"/>
             <field name="country_id" ref="base.be"/>
+            <field name="lang">nl_BE</field>
         </record>
 
         <record id="fdm_user1" model="res.users">
@@ -122,6 +123,7 @@
             <field name="company_id" ref="base.main_company"/>
             <field name="customer" eval="False"/>
             <field name="country_id" ref="base.be"/>
+            <field name="lang">nl_BE</field>
         </record>
 
         <record id="fdm_user2" model="res.users">
