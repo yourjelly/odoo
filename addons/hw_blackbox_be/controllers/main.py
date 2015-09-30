@@ -71,12 +71,13 @@ class Blackbox(Thread):
 
     def _wrap_low_level_message_around(self, high_level_message):
         bcc = self._lrc(high_level_message)
+        high_level_message_bytes = map(ord, high_level_message)
 
-        low_level_message = ""
-        low_level_message += chr(0x02)
-        low_level_message += high_level_message
-        low_level_message += chr(0x03)
-        low_level_message += chr(bcc)
+        low_level_message = bytearray()
+        low_level_message.append(0x02)
+        low_level_message.extend(high_level_message_bytes)
+        low_level_message.append(0x03)
+        low_level_message.append(bcc)
 
         return low_level_message
 
@@ -84,8 +85,8 @@ class Blackbox(Thread):
         ack = 0
         MAX_RETRIES = 4
 
-        while ack != 0x06 and int(packet[4]) < MAX_RETRIES:
-            serial.write(packet.encode())
+        while ack != 0x06 and int(chr(packet[4])) < MAX_RETRIES:
+            serial.write(packet)
             ack = serial.read(1)
 
             # This violates the principle that we do high level
