@@ -1118,6 +1118,37 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         }
     });
 
+    var work_button = screens.ActionButtonWidget.extend({
+        template: 'WorkButton',
+        button_click: function () {
+            var self = this;
+            var cashier = self.pos.get_cashier();
+            var product;
+
+            if (! cashier.clocked_in) {
+                product = self.pos.work_in_product;
+                cashier.clocked_in = true;
+            } else {
+                product = self.pos.work_out_product;
+                cashier.clocked_in = false;
+            }
+
+            self.pos.add_new_order();
+            self.pos.get_order().add_product(product);
+            self.pos.push_order(self.pos.get_order());
+            self.gui.show_screen('receipt');
+
+            // rerender the button template so it says the right thing
+            // (clock in <-> clock out)
+            self.renderElement();
+        }
+    });
+
+    screens.define_action_button({
+        'name': 'work',
+        'widget': work_button,
+    });
+
     models.load_models({
         'model': "ir.config_parameter",
         'fields': ['key', 'value'],
@@ -1149,6 +1180,23 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         }
     }, {
         'after': "pos.config"
+    });
+
+    models.load_models({
+        'model': "ir.model.data",
+        'domain': ['|', ['name', '=', 'product_product_work_in'], ['name', '=', 'product_product_work_out']],
+        'fields': ['name', 'res_id'],
+        'loaded': function (self, params) {
+            params.forEach(function (current, index, array) {
+                if (current.name === "product_product_work_in") {
+                    self.work_in_product = self.db.product_by_id[current['res_id']];
+                } else if (current.name === "product_product_work_out") {
+                    self.work_out_product = self.db.product_by_id[current['res_id']];
+                }
+            });
+        }
+    }, {
+        'after': "product.product"
     });
 
     models.load_fields("res.users", "insz_or_bis_number");
