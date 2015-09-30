@@ -384,18 +384,19 @@ class WebRequest(object):
         """
         token = self.session.sid
         max_ts = '' if not time_limit else int(time.time() + time_limit)
-        msg = '%s%s' % (token, max_ts)
         secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
         assert secret, "CSRF protection requires a configured database secret"
-        hm = hmac.new(str(secret), msg, hashlib.sha1).hexdigest()
-        return '%so%s' % (hm, max_ts)
+
+        msg = '%s%s' % (token, max_ts)
+        sign = hashlib.sha1(msg + secret).hexdigest()
+        return '%s-%s' % (sign, max_ts)
 
     def validate_csrf(self, csrf):
         if not csrf:
             return False
 
         try:
-            hm, _, max_ts = str(csrf).rpartition('o')
+            sign, _, max_ts = str(csrf).rpartition('-')
         except UnicodeEncodeError:
             return False
 
@@ -407,12 +408,10 @@ class WebRequest(object):
                 return False
 
         token = self.session.sid
-
-        msg = '%s%s' % (token, max_ts)
         secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
         assert secret, "CSRF protection requires a configured database secret"
-        hm_expected = hmac.new(str(secret), msg, hashlib.sha1).hexdigest()
-        return consteq(hm, hm_expected)
+        msg = '%s%s' % (token, max_ts)
+        return hashlib.sha1(msg + secret).hexdigest() == sign
 
 def route(route=None, **kw):
     """
