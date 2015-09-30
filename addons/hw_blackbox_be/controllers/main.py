@@ -85,7 +85,7 @@ class Blackbox(Thread):
         MAX_RETRIES = 4
 
         while ack != 0x06 and int(packet[4]) < MAX_RETRIES:
-            serial.write(packet)
+            serial.write(packet.encode())
             ack = serial.read(1)
 
             # This violates the principle that we do high level
