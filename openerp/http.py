@@ -762,11 +762,8 @@ class HttpRequest(WebRequest):
 
         if request.httprequest.method not in ('GET', 'HEAD', 'OPTIONS', 'TRACE') \
                 and request.endpoint.routing.get('csrf', True): # csrf checked by default
-            # TODO: check referer if https
-            # TODO: add header for "unsafe" methods without form data?
             token = self.params.pop('csrf_token', None)
             if not self.validate_csrf(token):
-                # FIXME: clearer error message
                 raise werkzeug.exceptions.BadRequest('Invalid CSRF Token')
 
         r = self._call_function(**self.params)
