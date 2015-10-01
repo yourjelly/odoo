@@ -1,0 +1,10 @@
+-
+  Set all sale taxes to be included in the price (mainly for minfin verification purposes)
+-
+  !python {model: ir.model.data} : |
+      account_tax = self.pool.get('account.tax')
+      taxes = account_tax.search(cr, uid, [('type_tax_use', '=', 'sale')])
+
+      for tax in account_tax.browse(cr, uid, taxes):
+        tax.price_include = True
+        tax.include_base_amount = True
