@@ -1011,6 +1011,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                     return posmodel_super.push_order.apply(self, [order, opts]);
                 }, function () {
                     console.log("fdm validation failed, not sending to backend");
+                    return new $.Deferred().reject();
                 });
             } else {
                 return posmodel_super.push_order.apply(self, arguments);
@@ -1137,10 +1138,14 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         button_click: function () {
             var self = this;
 
-            self.pos.add_new_order();
-            self.pos.get_order().add_product(self.pos.work_out_product);
-            self.pos.push_order(self.pos.get_order());
-            self.gui.show_screen('receipt');
+            self.pos.proxy.request_fdm_identification().then(function (parsed_response) {
+                if (parsed_response) {
+                    self.pos.add_new_order();
+                    self.pos.get_order().add_product(self.pos.work_out_product);
+                    self.pos.push_order(self.pos.get_order());
+                    self.gui.show_screen('receipt');
+                }
+            });
         }
     });
 
@@ -1154,10 +1159,14 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         button_click: function () {
             var self = this;
 
-            self.pos.add_new_order();
-            self.pos.get_order().add_product(self.pos.work_in_product);
-            self.pos.push_order(self.pos.get_order());
-            self.gui.show_screen('receipt');
+            self.pos.proxy.request_fdm_identification().then(function (parsed_response) {
+                if (parsed_response) {
+                    self.pos.add_new_order();
+                    self.pos.get_order().add_product(self.pos.work_in_product);
+                    self.pos.push_order(self.pos.get_order());
+                    self.gui.show_screen('receipt');
+                }
+            });
         }
     });
 
