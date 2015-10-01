@@ -90,10 +90,6 @@
             <field name="taxes_id" eval="[(6, 0, [ref('l10n_be.attn_VAT-OUT-12-L')])]"/>
         </record>
 
-        <record id="base.user_root" model="res.users">
-            <field name="insz_or_bis_number">00000000097</field>
-        </record>
-
         <record id="base.main_company" model="res.company">
             <field name="street">Street 100, 1234 City</field>
             <field name="vat">BE0477472701</field>
@@ -114,7 +110,7 @@
             <field name="password">1</field>
             <field name="company_id" ref="base.main_company"/>
             <field name="groups_id" eval="[(6,0,[ref('base.group_user'), ref('point_of_sale.group_pos_manager'), ref('account.group_account_invoice')])]"/>
-            <field name="insz_or_bis_number">00000000098</field>
+            <field name="insz_or_bis_number">00000000097</field>
         </record>
 
         <record id="fdm_user" model="res.partner">
@@ -132,7 +128,7 @@
             <field name="password">1</field>
             <field name="company_id" ref="base.main_company"/>
             <field name="groups_id" eval="[(6,0,[ref('base.group_user'), ref('point_of_sale.group_pos_user'), ref('account.group_account_invoice')])]"/>
-            <field name="insz_or_bis_number">00000000099</field>
+            <field name="insz_or_bis_number">00000000098</field>
         </record>
 
         <!-- category to group certification products in -->
