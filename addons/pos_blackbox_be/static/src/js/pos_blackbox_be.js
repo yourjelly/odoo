@@ -234,9 +234,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             var current_quantity = this.get_quantity();
             var future_quantity = parseFloat(quantity) || 0;
 
-            if (this.blackbox_pro_forma_finalized) {
-                this._show_finalized_error();
-            } else if (no_decrease && (future_quantity === 0 || future_quantity < current_quantity)) {
+            if (no_decrease && (future_quantity === 0 || future_quantity < current_quantity)) {
                 this.pos.gui.show_popup("number", {
                     'title': _t("Decrease the quantity by"),
                     'confirm': function (qty_decrease) {
