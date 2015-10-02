@@ -1050,12 +1050,15 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             // false. Because those are 'real orders' that we already
             // handled.
             if (old_order && old_order.get_orderlines().length && old_order.blackbox_pro_forma !== false) {
-                this.push_order(old_order, undefined, true, function () {
+                return this.push_order(old_order, undefined, true, function () {
                     // mark the lines that have been pro forma'd, because we won't allow to change them
                     old_order.get_orderlines().forEach(function (current, index, array) {
                         current.blackbox_pro_forma_finalized = true;
+                        current.trigger('change', current); // force export
                     });
                 });
+            } else {
+                return new $.Deferred().reject();
             }
         },
 
@@ -1096,11 +1099,10 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             if (print_bill_button) {
                 var print_bill_super = print_bill_button.button_click;
                 print_bill_button.button_click = function () {
-                    var order = this.pos.get_order();
-
-                    this.pos.push_order(order, undefined, true, function () {
-                        print_bill_super.bind(this)();
-                    }.bind(this));
+                    var self = this;
+                    this.pos._push_pro_forma().then(function () {
+                        print_bill_super.bind(self)();
+                    });
                 };
             }
 
