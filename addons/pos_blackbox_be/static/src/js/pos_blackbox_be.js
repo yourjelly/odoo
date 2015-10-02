@@ -1103,6 +1103,12 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                     }.bind(this));
                 };
             }
+
+            var fiscal_position_button = this.action_buttons['set_fiscal_position'];
+
+            if (fiscal_position_button) {
+                fiscal_position_button.hide();
+            }
         }
     });
 
