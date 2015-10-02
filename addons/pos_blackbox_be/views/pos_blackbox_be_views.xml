@@ -36,6 +36,7 @@
 
                 <xpath expr="//button[@name='%(point_of_sale.action_pos_payment)d']" position="replace"/>
                 <xpath expr="//button[@name='refund']" position="replace"/>
+                <xpath expr="//button[@name='action_invoice']" position="replace"/>
                 <xpath expr="//button[@name='%(point_of_sale.action_report_pos_receipt)d']" position="replace"/>
 
                 <xpath expr="//field[@name='tax_ids']" position="after">
