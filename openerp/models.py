@@ -428,21 +428,13 @@ class BaseModel(object):
 
             if k not in cols:
                 cr.execute('select nextval(%s)', ('ir_model_fields_id_seq',))
-                id = cr.fetchone()[0]
-                vals['id'] = id
+                field_id = cr.fetchone()[0]
+                vals['id'] = field_id
                 query = "INSERT INTO ir_model_fields (%s) VALUES (%s)" % (
                     ",".join(vals),
                     ",".join("%%(%s)s" % name for name in vals),
                 )
                 cr.execute(query, vals)
-                if 'module' in context:
-                    name1 = 'field_' + self._table + '_' + k
-                    cr.execute("select name from ir_model_data where name=%s", (name1,))
-                    if cr.fetchone():
-                        name1 = name1 + "_" + str(id)
-                    cr.execute("INSERT INTO ir_model_data (name,date_init,date_update,module,model,res_id) VALUES (%s, (now() at time zone 'UTC'), (now() at time zone 'UTC'), %s, %s, %s)", \
-                        (name1, context['module'], 'ir.model.fields', id)
-                    )
             else:
                 for key, val in vals.items():
                     if cols[k][key] != vals[key]:
@@ -452,6 +444,16 @@ class BaseModel(object):
                         )
                         cr.execute(query, vals)
                         break
+                cr.execute('SELECT id FROM ir_model_fields WHERE model=%s AND name=%s', (vals['model'], vals['name']))
+                field_id = cr.fetchone()[0]
+            if 'module' in context:
+                name1 = 'field_' + self._table + '_' + k
+                cr.execute("SELECT 1 FROM ir_model_data WHERE module=%s AND name=%s", (context['module'], name1))
+                if not cr.rowcount:
+                    cr.execute("""INSERT INTO ir_model_data (name,date_init,date_update,module,model,res_id)
+                                  VALUES (%s, (now() at time zone 'UTC'), (now() at time zone 'UTC'), %s, %s, %s)""",
+                               (name1, context['module'], 'ir.model.fields', field_id)
+                    )
         self.invalidate_cache(cr, SUPERUSER_ID)
 
     @api.model
