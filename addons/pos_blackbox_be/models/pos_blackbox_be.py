@@ -320,6 +320,7 @@ class pos_order_pro_forma(models.Model):
     partner_id = fields.Many2one('res.partner', 'Customer', readonly=True)
     config_id = fields.Many2one('pos.config', related='session_id.config_id', readonly=True)
     pricelist_id = fields.Many2one('product.pricelist', 'Pricelist', default=_default_pricelist, readonly=True)
+    fiscal_position_id = fields.Many2one('account.fiscal.position', 'Fiscal Position', readonly=True)
 
     blackbox_date = fields.Char("Fiscal Data Module date", help="Date returned by the Fiscal Data Module.", readonly=True)
     blackbox_time = fields.Char("Fiscal Data Module time", help="Time returned by the Fiscal Data Module.", readonly=True)
@@ -346,6 +347,7 @@ class pos_order_pro_forma(models.Model):
                 'lines': [self.env['pos.order_line_pro_forma']._order_line_fields(l) for l in ui_order['lines']] if ui_order['lines'] else False,
                 'partner_id': ui_order['partner_id'] or False,
                 'date_order': ui_order['creation_date'],
+                'fiscal_position_id': ui_order['fiscal_position_id'],
                 'blackbox_date': ui_order.get('blackbox_date'),
                 'blackbox_time': ui_order.get('blackbox_time'),
                 'blackbox_pos_receipt_time': ui_order.get('blackbox_pos_receipt_time'),
