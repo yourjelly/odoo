@@ -120,7 +120,7 @@ class TestMessagePost(TestMail):
         self.assertEqual(msg.body, _body)
         self.assertEqual(msg.partner_ids, self.partner_1 | self.partner_2)
         self.assertEqual(msg.needaction_partner_ids, self.env.user.partner_id | self.partner_1 | self.partner_2)
-        self.assertEqual(msg.channel_ids, self.env['mail.channel'])
+        self.assertEqual(msg.channel_ids, self.group_pigs)
 
         # attachments
         self.assertEqual(set(msg.attachment_ids.mapped('res_model')), set(['mail.channel']),

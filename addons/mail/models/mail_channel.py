@@ -179,6 +179,7 @@ class Channel(models.Model):
         self.filtered(lambda channel: channel.channel_type == 'direct_message').mapped('channel_last_seen_partner_ids').write({'is_pinned': True})
         # apply shortcode (text only) subsitution
         body = self.env['mail.shortcode'].apply_shortcode(body, shortcode_type='text')
+        kwargs['channel_ids'] = [(6, 0, self.ids)]
         message = super(Channel, self.with_context(mail_create_nosubscribe=True)).message_post(body=body, subject=subject, message_type=message_type, subtype=subtype, parent_id=parent_id, attachments=attachments, content_subtype=content_subtype, **kwargs)
         return message
 
