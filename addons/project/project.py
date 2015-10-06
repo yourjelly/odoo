@@ -186,6 +186,13 @@ class project(osv.osv):
                                    ('pending','Pending'),
                                    ('close','Closed')],
                                   'Status', required=True, copy=False),
+        'project_type': fields.selection([('internal', 'Internal'),
+                                        ('single_customer','Single Customer'),
+                                        ('multi_customers','Multi Customers'),],
+                                        'Project Type', required=True, help="Hold the type of project\n"
+                                        "- Internal : No invoice management\n"
+                                        "- Single Customer : select a customer on the project\n"
+                                        "- Multi Customers : select a customer on related tasks or issues"),
         'doc_count': fields.function(
             _get_attached_docs, string="Number of documents attached", type='integer'
         ),
@@ -203,7 +210,14 @@ class project(osv.osv):
         'user_id': lambda self,cr,uid,ctx: uid,
         'alias_model': 'project.task',
         'privacy_visibility': 'employees',
+        'project_type': 'internal',
     }
+    
+    def action_open_analytic_accounts(self, cr, uid, ids, context=None):
+        action_analytic_account = self.pool['ir.actions.act_window'].for_xml_id(
+            cr, uid, 'analytic', 'action_account_analytic_account_form', context=context)
+        action_analytic_account['domain'] = [('id', '=', self.browse(cr, uid, ids[0], context=context).analytic_account_id.id)]
+        return action_analytic_account
 
     # TODO: Why not using a SQL contraints ?
     def _check_dates(self, cr, uid, ids, context=None):
@@ -385,11 +399,14 @@ class task(osv.osv):
         return {'value': {'remaining_hours': planned - effective}}
 
     def onchange_project(self, cr, uid, id, project_id, context=None):
+        vals = {'partner_id': False}
         if project_id:
             project = self.pool.get('project.project').browse(cr, uid, project_id, context=context)
-            if project and project.partner_id:
-                return {'value': {'partner_id': project.partner_id.id}}
-        return {'value': {'partner_id': False}}
+            vals.update({
+                'project_type': project.project_type,
+                'partner_id': project.partner_id and project.partner_id.id
+            })
+        return {'value': vals}
 
     def onchange_user_id(self, cr, uid, ids, user_id, context=None):
         vals = {}
@@ -453,6 +470,7 @@ class task(osv.osv):
         'attachment_ids': fields.one2many('ir.attachment', 'res_id', domain=lambda self: [('res_model', '=', self._name)], auto_join=True, string='Attachments'),
         # In the domain of displayed_image_id, we couln't use attachment_ids because a one2many is represented as a list of commands so we used res_model & res_id
         'displayed_image_id': fields.many2one('ir.attachment', domain="[('res_model', '=', 'project.task'), ('res_id', '=', id), ('mimetype', 'ilike', 'image')]", string='Displayed Image'),
+        'project_type': fields.related('project_id', 'project_type', type='char', string='Project Type'),
         }
     _defaults = {
         'stage_id': _get_default_stage_id,
