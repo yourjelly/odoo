@@ -374,6 +374,7 @@ var SlideDialog = Widget.extend({
 
     // bind the event to the button
     $('.oe_slide_js_upload').on('click', function () {
+        console.log("loded");
         var channel_id = $(this).attr('channel_id');
         slides.page_widgets['upload_dialog'] = new SlideDialog(this, channel_id).appendTo(document.body);
     });
