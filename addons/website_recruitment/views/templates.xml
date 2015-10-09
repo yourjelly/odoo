@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <template id="recruitment_all" name="Jobs">
+            <t t-call="website.layout">
+                <div class="oe_structure"/>
+                    <div class="container">
+                        <h1>Publish Job</h1>
+                            <div class="row">
+                            <div class="col-md-8">
+                            <div class="oe_structure"/>
+                            <form action="/jobs/publish" id="publish_form">
+                                <!-- Form Name -->
+                                <!-- Text input-->
+                                    <div class="form-group">
+                                        <label class="control-label" for="name">Job Title</label>  
+                                        <div>
+                                            <input id="textinput" name="name" type="text" placeholder="Application Engineer " class="form-control input-md"/>
+                                        </div>
+                                    </div>
+
+                                    <!-- Select Multiple -->
+                                    <div class="form-group">
+                                        <label for="skills" class="control-label">Select Skills</label>
+                                        <div>
+                                            <input class="form-control" id="skill_ids" name="skill_ids" type="hidden"/>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Textarea -->
+                                    <div class="form-group">
+                                        <label class="control-label" for="responsibilities">Responsibilities</label>
+                                        <div>                     
+                                            <textarea class="form-control load_editor" placeholder="Work Dedication" name="responsibilities" t-attf-value="responsibilities"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label" for="must_have">Must Have</label>
+                                        <div>                     
+                                            <textarea class="form-control load_editor" placeholder="Python Knowledge" name="must_have" t-attf-value="must_have"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label" for="nice_to_have">Nice To Have</label>
+                                        <div>                     
+                                            <textarea class="form-control load_editor" placeholder="Good Communication skill" name="nice_to_have" t-attf-value="nice_to_have"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label" for="what_we_offer">What We Offer</label>
+                                        <div>                     
+                                            <textarea class="form-control load_editor" placeholder="Better future" name="what_we_offer" t-attf-value="what_we_offer"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="pull-left">
+                                            <button type="submit" data-published="true" class="btn btn-primary save">Publish Job</button> or 
+                                            <a href="#" data-dismiss="modal"  aria-hidden="true">Discard</a>
+                                        </div>
+                                    </div>
+                                </form>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="oe_structure"/>
+                                </div>                          
+                            
+                        </div>
+                    </div>
+            </t>
+            
+        </template>
+    </data>
+</openerp>

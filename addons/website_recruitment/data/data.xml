@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+        <record id="skill1" model="recruitment.skills">
+            <field name="name">Developer</field>
+        </record>
+
+        <record id="skill2" model="recruitment.skills">
+            <field name="name">Functioal Expert</field>
+        </record>
+
+        <record id="skill3" model="recruitment.skills">
+            <field name="name">Good Communication</field>
+        </record>
+
+        <record id="skill4" model="recruitment.skills">
+            <field name="name">Python Expert</field>
+        </record>
+
+        <record id="skill5" model="recruitment.skills">
+            <field name="name">Java Expert</field>
+        </record>
+
+        <record id="skill6" model="recruitment.skills">
+            <field name="name">Odoo Expert</field>
+        </record>
+    </data>
+</openerp>

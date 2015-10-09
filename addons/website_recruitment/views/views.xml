@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+    <!--Hr Recruitment Inherit form view-->
+    <record id="website_recruitment_view_form" model="ir.ui.view">
+        <field name="name">hr.job.form.inherit</field>
+        <field name="model">hr.job</field>
+        <field name="inherit_id" ref="hr.view_hr_job_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='employee_data']" position="after">
+                <label for="responsibilities" />
+                <field name="responsibilities"/>
+
+                <label for="must_have" />
+                <field name="must_have"/>
+
+                <label for="nice_to_have" />
+                <label for="nice_to_have" />
+
+                <label for="what_we_offer" />
+                <field name="what_we_offer"/>
+
+                <label for="skills" />
+                <field name="skill_ids" widget="many2many_tags"/>
+            </xpath>
+        </field>
+    </record>
+  </data>
+</openerp>

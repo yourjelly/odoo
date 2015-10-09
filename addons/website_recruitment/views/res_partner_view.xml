@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+        <record id="view_website_recruitment_form" model="ir.ui.view">
+            <field name="name">res.partner.recruitment.inherit</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook[last()]" position="inside">
+                    <page string="Odoo Jobs" name="odoo_jobs">
+                        <!-- something to do here -->
+                        <group>
+                            <group>
+                                <field name="auto_publish_job"/>
+                                <field name="auto_publish_project"/>
+                            </group>
+                            <group>
+                                <field name="verified"/>
+                                <field name="certified"/>
+                            </group>
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</openerp>
