@@ -806,6 +806,9 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                         return "";
                     }
                 }
+            }, function () {
+                self._show_could_not_connect_error();
+                return "";
             });
         }
     });
