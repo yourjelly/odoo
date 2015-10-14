@@ -40,9 +40,6 @@
             Address: <t t-esc="widget.pos.company.street"/><br />
             VAT number: <t t-esc="widget.pos.company.vat"/>
         </t>
-        <t t-jquery="t[t-esc*='widget.pos.cashier']" t-operation="after">
-            (ID: <t t-esc="widget.pos.get_cashier().insz_or_bis_number"/>)
-        </t>
         <t t-jquery=".receipt-orderlines t[t-esc='widget.format_currency(orderline.get_display_price())']" t-operation="replace">
             <t t-esc="widget.format_currency(orderline.get_all_prices().priceWithTax)"/>
         </t>
@@ -125,9 +122,6 @@
         </t>
         <t t-jquery="t[t-esc='receipt.date.localestring']" t-operation="replace">
             <t t-esc="order.blackbox_pos_receipt_time.format('DD/MM/YYYY HH:mm:ss')"/>
-        </t>
-        <t t-jquery="t[t-esc='receipt.cashier']" t-operation="after">
-            (ID: <t t-esc="order.pos.get_cashier().insz_or_bis_number"/>)
         </t>
         <t t-jquery=".orderlines t[t-esc='line.price_display']" t-operation="replace">
             <t t-esc="line.price_with_tax"/>
