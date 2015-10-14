@@ -222,4 +222,10 @@
             <h3>Version <t t-esc="version_info.server_version"/>BE_FDM</h3>
         </t>
     </t>
+
+    <t t-extend="Chrome">
+        <t t-jquery="img.pos-logo" t-operation="after">
+            <span class="placeholder-posID"/>
+        </t>
+    </t>
 </templates>

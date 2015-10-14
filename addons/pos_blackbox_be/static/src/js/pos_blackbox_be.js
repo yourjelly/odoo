@@ -1197,6 +1197,10 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             }
 
             self.blackbox_pos_production_id = "BODO001" + params[0].value.substr(-5) + config_id;
+
+            self.chrome.ready.then(function () {
+                $(self.chrome.$el).find('.placeholder-posID').text(self.blackbox_pos_production_id);
+            });
         }
     }, {
         'after': "pos.config"
