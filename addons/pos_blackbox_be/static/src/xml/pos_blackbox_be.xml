@@ -50,7 +50,7 @@
             <t t-foreach="order.blackbox_base_price_in_euro_per_tax_letter" t-as="tax">
                 <t t-if="tax.amount">
                     <tr>
-                        <td>Tax category <t t-esc="tax.letter"/> (<t t-esc="order.get_tax_percentage_for_tax_letter(tax.letter)"/>%):</td>
+                        <td><t t-esc="order.get_tax_percentage_for_tax_letter(tax.letter)"/>%:</td>
                         <td class="pos-right-align">
                             <t t-esc="widget.format_currency(tax.amount)"/>
                         </td>
@@ -113,6 +113,52 @@
         </t>
     </t>
 
+    <t t-name="XmlFDMControlData">
+        <br/>
+        <div>Control data</div>
+        <line>
+            <left>FDM time:</left>
+            <right><t t-esc="order.blackbox_date"/>, <t t-esc="order.blackbox_time"/></right>
+        </line>
+        <line>
+            <left>FDM ticket counters:</left>
+            <right><t t-esc="order.blackbox_ticket_counters"/></right>
+        </line>
+        <line>
+            <left>FDM ID:</left>
+            <right><t t-esc="order.blackbox_unique_fdm_production_number"/></right>
+        </line>
+        <line>
+            <left>VSC ID:</left>
+            <right><t t-esc="order.blackbox_vsc_identification_number"/></right>
+        </line>
+        <line>
+            <left>PLU hash:</left>
+            <right><t t-esc="order.blackbox_plu_hash"/></right>
+        </line>
+        <line>
+            <left>POS version:</left>
+            <right><t t-esc="order.blackbox_pos_version"/></right>
+        </line>
+        <line>
+            <left>POS production ID:</left>
+            <right><t t-esc="order.blackbox_pos_production_id"/></right>
+        </line>
+        <br/>
+        <div><t t-esc="order.blackbox_signature"/></div>
+    </t>
+
+    <t t-name="XmlFDMTaxes">
+        <t t-foreach="order.blackbox_base_price_in_euro_per_tax_letter" t-as="tax">
+            <t t-if="tax.amount">
+                <line>
+                    <left><t t-esc="order.get_tax_percentage_for_tax_letter(tax.letter)"/>%</left>
+                    <right><value><t t-esc="tax.amount"/></value></right>
+                </line>
+            </t>
+        </t>
+    </t>
+
     <t t-extend="XmlReceipt">
         <t t-jquery="receipt" t-operation="prepend">
             <div bold="on" size="double">VAT TICKET</div>
@@ -130,48 +176,10 @@
             <t t-esc="line.vat_letter"/>
         </t>
         <t t-jquery="t[t-foreach='receipt.tax_details']" t-operation="replace">
-            <t t-foreach="order.blackbox_base_price_in_euro_per_tax_letter" t-as="tax">
-                <t t-if="tax.amount">
-                    <line>
-                        <left>Tax category <t t-esc="tax.letter"/> (<t t-esc="order.get_tax_percentage_for_tax_letter(tax.letter)"/>%)</left>
-                        <right><value><t t-esc="tax.amount"/></value></right>
-                    </line>
-                </t>
-            </t>
+            <t t-call="XmlFDMTaxes"/>
         </t>
         <t t-jquery="receipt" t-operation="append">
-            <br/>
-            <div>Control data</div>
-            <line>
-                <left>FDM time:</left>
-                <right><t t-esc="order.blackbox_date"/>, <t t-esc="order.blackbox_time"/></right>
-            </line>
-            <line>
-                <left>FDM ticket counters:</left>
-                <right><t t-esc="order.blackbox_ticket_counters"/></right>
-            </line>
-            <line>
-                <left>FDM ID:</left>
-                <right><t t-esc="order.blackbox_unique_fdm_production_number"/></right>
-            </line>
-            <line>
-                <left>VSC ID:</left>
-                <right><t t-esc="order.blackbox_vsc_identification_number"/></right>
-            </line>
-            <line>
-                <left>PLU hash:</left>
-                <right><t t-esc="order.blackbox_plu_hash"/></right>
-            </line>
-            <line>
-                <left>POS version:</left>
-                <right><t t-esc="order.blackbox_pos_version"/></right>
-            </line>
-            <line>
-                <left>POS production ID:</left>
-                <right><t t-esc="order.blackbox_pos_production_id"/></right>
-            </line>
-            <br/>
-            <div><t t-esc="order.blackbox_signature"/></div>
+            <t t-call="XmlFDMControlData"/>
         </t>
     </t>
 
@@ -182,6 +190,12 @@
         </t>
         <t t-jquery="t[t-if='receipt.company.contact_address']" t-operation="after">
             <div><t t-esc="receipt.company.street"/></div>
+        </t>
+        <t t-jquery="t[t-foreach='receipt.tax_details']" t-operation="replace">
+            <t t-call="XmlFDMTaxes"/>
+        </t>
+        <t t-jquery="receipt" t-operation="append">
+            <t t-call="XmlFDMControlData"/>
         </t>
     </t>
 
