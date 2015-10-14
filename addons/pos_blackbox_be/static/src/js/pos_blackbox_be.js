@@ -1196,7 +1196,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                 config_id = "0" + config_id;
             }
 
-            self.blackbox_pos_production_id = params[0].value.substr(-12) + config_id;
+            self.blackbox_pos_production_id = "BODO001" + params[0].value.substr(-5) + config_id;
         }
     }, {
         'after': "pos.config"
