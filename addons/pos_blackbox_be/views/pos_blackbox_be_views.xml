@@ -281,11 +281,11 @@
                             </div>
                             <div class="row">
                                 <div class="col-xs-12">
-                                    <strong>Total revenue</strong>:
+                                    <strong>Total revenue (NS)</strong>:
                                     <span t-field="o.total_sold"/>
                                 </div>
                             </div>
-                            <strong>Total base of measure per tax</strong>:
+                            <strong>Total base of measure per tax (NS)</strong>:
                             <div class="row">
                                 <div class="col-xs-3">
                                     <strong>A</strong>:
@@ -304,7 +304,7 @@
                                     <span t-field="o.total_base_of_measure_tax_d"/>
                                 </div>
                             </div>
-                            <strong>Total tax</strong>:
+                            <strong>Total tax (NS)</strong>:
                             <div class="row">
                                 <div class="col-xs-3">
                                     <strong>A</strong>:
@@ -344,31 +344,31 @@
                             </div>
                             <div class="row">
                                 <div class="col-xs-12">
-                                    <strong>Revenue of Pro Forma VAT tickets (including VAT)</strong>:
+                                    <strong>Revenue of Pro Forma VAT tickets (including VAT) (PS)</strong>:
                                     <span t-field="o.total_pro_forma"/>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-xs-12">
-                                    <strong>Amount of discounts</strong>:
+                                    <strong>Amount of discounts (NS)</strong>:
                                     <span t-field="o.amount_of_discounts"/>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-xs-12">
-                                    <strong>Total discounts (including VAT)</strong>:
+                                    <strong>Total discounts (including VAT) (NS)</strong>:
                                     <span t-field="o.total_discount"/>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-xs-12">
-                                    <strong>Amount of corrections</strong>:
+                                    <strong>Amount of corrections (NS)</strong>:
                                     <span t-field="o.amount_of_corrections"/>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-xs-12">
-                                    <strong>Total corrections (including VAT)</strong>:
+                                    <strong>Total corrections (including VAT) (NS)</strong>:
                                     <span t-field="o.total_corrections"/>
                                 </div>
                             </div>
@@ -436,17 +436,17 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-xs-12">
-                                        Revenue: <span t-esc="user['revenue']"/>
+                                        Revenue (NS): <span t-esc="user['revenue']"/>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-xs-12">
-                                        First ticket time: <span t-esc="user['first_ticket_time']"/>
+                                        First ticket time (NS): <span t-esc="user['first_ticket_time']"/>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-xs-12">
-                                        Last ticket time: <span t-esc="user['last_ticket_time']"/>
+                                        Last ticket time (NS): <span t-esc="user['last_ticket_time']"/>
                                     </div>
                                 </div>
                                 <div class="row zero_min_height">
