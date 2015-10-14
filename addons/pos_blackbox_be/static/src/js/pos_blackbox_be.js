@@ -308,6 +308,12 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             } else {
                 this._super(val);
             }
+        },
+
+        update_summary: function () {
+            if (this.pos.get_order()) {
+                return this._super();
+            }
         }
     });
 
