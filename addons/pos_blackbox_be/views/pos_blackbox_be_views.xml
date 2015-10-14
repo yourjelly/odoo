@@ -511,5 +511,22 @@
                 </div>
             </xpath>
         </template>
+
+        <record id="view_pos_pro_forma_filter" model="ir.ui.view">
+            <field name="name">Pro forma orders</field>
+            <field name="model">pos.order_pro_forma</field>
+            <field name="arch" type="xml">
+                <search string="Search pro forma orders">
+                    <field name="partner_id"/>
+                </search>
+            </field>
+        </record>
+
+        <act_window
+            id="action_pro_forma_orders_by_partner"
+            name="Pro forma orders"
+            context="{'search_default_partner_id': [active_id]}"
+            res_model="pos.order_pro_forma"
+            src_model="res.partner"/>
     </data>
 </odoo>
