@@ -784,7 +784,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             });
         },
 
-        request_fdm_hash_and_sign: function (packet) {
+        request_fdm_hash_and_sign: function (packet, hide_error) {
             var self = this;
 
             console.log(packet.to_human_readable_string());
@@ -794,8 +794,11 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                 'response_size': 109
             }).then(function (response) {
                 if (! response) {
-                    self._show_could_not_connect_error();
-                    return "";
+                    if (! hide_error) {
+                        self._show_could_not_connect_error();
+                    }
+
+                    return self.request_fdm_hash_and_sign(packet, "hide error");
                 } else {
                     var parsed_response = self.parse_fdm_hash_and_sign_response(response);
                     console.log(parsed_response);
