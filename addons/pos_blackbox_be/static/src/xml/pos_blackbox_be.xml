@@ -208,4 +208,10 @@
             <i class='fa fa-clock-o' /> Clock out
         </div>
     </t>
+
+    <t t-extend="PlannerLauncher.about">
+        <t t-jquery="div.user-heading > h3" t-operation="replace">
+            <h3>Version <t t-esc="version_info.server_version"/>BE_FDM</h3>
+        </t>
+    </t>
 </templates>
