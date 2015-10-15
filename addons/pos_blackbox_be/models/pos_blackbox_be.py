@@ -321,6 +321,7 @@ class pos_order_pro_forma(models.Model):
     config_id = fields.Many2one('pos.config', related='session_id.config_id', readonly=True)
     pricelist_id = fields.Many2one('product.pricelist', 'Pricelist', default=_default_pricelist, readonly=True)
     fiscal_position_id = fields.Many2one('account.fiscal.position', 'Fiscal Position', readonly=True)
+    table_id = fields.Many2one('restaurant.table', 'Table', readonly=True)
 
     blackbox_date = fields.Char("Fiscal Data Module date", help="Date returned by the Fiscal Data Module.", readonly=True)
     blackbox_time = fields.Char("Fiscal Data Module time", help="Time returned by the Fiscal Data Module.", readonly=True)
@@ -363,6 +364,7 @@ class pos_order_pro_forma(models.Model):
                 'plu_hash': ui_order.get('blackbox_plu_hash'),
                 'pos_version': ui_order.get('blackbox_pos_version'),
                 'pos_production_id': ui_order.get('blackbox_pos_production_id'),
+                'table_id': ui_order.get('table_id'),
             }
 
             # set name based on the sequence specified on the config
