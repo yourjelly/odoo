@@ -984,6 +984,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
 
                 if (parsed_response) {
                     // put fields that we need on tickets on order
+                    order.blackbox_order_name = self.config.name + "/" + self.config.backend_sequence_number;
                     order.blackbox_date = self._prepare_date_for_ticket(parsed_response.date);
                     order.blackbox_time = self._prepare_time_for_ticket(parsed_response.time);
                     order.blackbox_ticket_counters =
