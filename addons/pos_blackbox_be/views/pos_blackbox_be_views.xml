@@ -108,6 +108,7 @@
             <field name="arch" type="xml">
                 <tree string="POS Orders Pro Forma" default_order="date_order desc" create="false" edit="false" delete="false">
                     <field name="name"/>
+                    <field name="pos_reference"/>
                     <field name="partner_id"/>
                     <field name="date_order"/>
                     <field name="user_id"/>
