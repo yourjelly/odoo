@@ -384,6 +384,11 @@
             <field name="export_id" ref="minfin_export_pro_forma_orders"/>
         </record>
 
+        <record model="ir.exports.line">
+            <field name="name">pos_reference</field>
+            <field name="export_id" ref="minfin_export_pro_forma_orders"/>
+        </record>
+
         <record id="minfin_export_users" model="ir.exports">
             <field name="name">MinFin export users</field>
             <field name="resource">res.users</field>
