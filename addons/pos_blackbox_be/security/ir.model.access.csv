@@ -21,3 +21,4 @@ access_minfin_users,res.users,base.model_res_users,group_minfin_personnel,1,0,0,
 access_minfin_account_move_line,account.move.line,account.model_account_move_line,group_minfin_personnel,1,0,0,0
 access_minfin_account_invoice,account.invoice,account.model_account_invoice,group_minfin_personnel,1,0,0,0
 access_minfin_sale_order,sale.order,sale.model_sale_order,group_minfin_personnel,1,0,0,0
+access_minfin_restaurant_table,pos_restaurant.table,pos_restaurant.model_restaurant_table,group_minfin_personnel,1,0,0,0
