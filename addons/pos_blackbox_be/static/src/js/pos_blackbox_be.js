@@ -493,7 +493,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         show_screen: function(screen_name, params, refresh) {
             if (screen_name === "receipt" || screen_name === "bill") {
                 var order = this.pos.get_order();
-                if (order && order.blackbox_signature) {
+                if (order && order.blackbox_signature.toLowerCase().match(/[a-z]/)) {
                     this._super(screen_name, params, refresh);
                 } else {
                     console.log("not showing receipt because no signature is set");
