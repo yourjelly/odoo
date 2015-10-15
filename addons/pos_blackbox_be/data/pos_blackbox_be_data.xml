@@ -33,6 +33,7 @@
             <field name="company_id" ref="base.main_company"/>
             <field name="customer" eval="False"/>
             <field name="country_id" ref="base.be"/>
+            <field name="lang">nl_BE</field>
         </record>
 
         <record id="fdm_minfin_user" model="res.users">
