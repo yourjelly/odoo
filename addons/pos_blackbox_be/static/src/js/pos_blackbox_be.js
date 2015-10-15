@@ -509,7 +509,6 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             var sequence_number = this.pos.db.load('sequence_number', 0);
             this.pos.db.save('sequence_number', (sequence_number + 1) % 100);
 
-            console.log("using sequence number: " + sequence_number);
             return sequence_number;
         },
 
@@ -904,6 +903,14 @@ can no longer be modified. Please create a new line with eg. a negative quantity
     });
     var posmodel_super = models.PosModel.prototype;
     models.PosModel = models.PosModel.extend({
+        _extract_order_number: function (records) {
+            if (records.length) {
+                return parseInt(records[0]['name'].match(/\d+$/)[0], 10);
+            } else {
+                return 0;
+            }
+        },
+
         _prepare_date_for_ticket: function (date) {
             // format of date coming from blackbox is YYYYMMDD
             var year = date.substr(0, 4);
@@ -1220,14 +1227,23 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         'domain': function (self) { return [['config_id', '=', self.config.id]]; },
         'order': "-date_order",
         'loaded': function (self, params) {
-            if (params.length) {
-                self.config.backend_sequence_number = parseInt(params[0]['name'].match(/\d+$/)[0]);
-            } else {
-                self.config.backend_sequence_number = 0;
-            }
+            self.config.backend_sequence_number = self._extract_order_number(params);
         }
     }, {
         'after': "pos.config"
+    });
+
+    // pro forma and regular orders share numbers, so we also need to check the pro forma orders and pick the max
+    models.load_models({
+        'model': "pos.order_pro_forma",
+        'domain': function (self) { return [['config_id', '=', self.config.id]]; },
+        'order': "-date_order",
+        'loaded': function (self, params) {
+            var pro_forma_number = self._extract_order_number(params);
+            self.config.backend_sequence_number = Math.max(self.config.backend_sequence_number, pro_forma_number);
+        }
+    }, {
+        'after': "pos.order"
     });
 
     models.load_models({
