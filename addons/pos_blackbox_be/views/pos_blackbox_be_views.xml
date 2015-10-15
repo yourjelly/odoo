@@ -73,7 +73,7 @@
             <field name="domain">[]</field>
         </record>
 
-        <menuitem parent="point_of_sale.menu_point_of_sale" id="menu_log_book" action="action_log_book_form" sequence="1" groups="point_of_sale.group_pos_manager,point_of_sale.group_pos_user"/>
+        <menuitem parent="point_of_sale.menu_point_of_sale" id="menu_log_book" action="action_log_book_form" sequence="1" groups="point_of_sale.group_pos_manager,group_minfin_personnel"/>
 
         <record model="ir.ui.view" id="view_pos_blackbox_be_pro_forma_tree">
             <field name="name">Log book</field>

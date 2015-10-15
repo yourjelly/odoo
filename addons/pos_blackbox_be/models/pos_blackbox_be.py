@@ -436,6 +436,12 @@ class pos_blackbox_be_log(models.Model):
 
         return None
 
+    def write(self, values):
+        raise UserError(_("Can't modify the log book."))
+
+    def unlink(self):
+        raise UserError(_("Can't modify the log book."))
+
 class product_template(models.Model):
     _inherit = 'product.template'
 

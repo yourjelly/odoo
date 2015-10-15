@@ -1,6 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_pos_order_pro_forma,pos.order_pro_forma,model_pos_order_pro_forma,point_of_sale.group_pos_user,1,1,1,1
 access_pos_order_line_pro_forma,pos.order.line_pro_forma,model_pos_order_line_pro_forma,point_of_sale.group_pos_user,1,1,1,1
+access_pos_blackbox_be_log,pos_blackbox_be.log,model_pos_blackbox_be_log,point_of_sale.group_pos_manager,1,1,1,1
 access_minfin_pos_order,pos.order,model_pos_order,group_minfin_personnel,1,0,0,0
 access_minfin_product_template,product.template,model_product_template,group_minfin_personnel,1,0,0,0
 access_minfin_stock_move,stock.move,stock.model_stock_move,group_minfin_personnel,1,0,0,0
@@ -22,3 +23,4 @@ access_minfin_account_move_line,account.move.line,account.model_account_move_lin
 access_minfin_account_invoice,account.invoice,account.model_account_invoice,group_minfin_personnel,1,0,0,0
 access_minfin_sale_order,sale.order,sale.model_sale_order,group_minfin_personnel,1,0,0,0
 access_minfin_restaurant_table,pos_restaurant.table,pos_restaurant.model_restaurant_table,group_minfin_personnel,1,0,0,0
+access_minfin_pos_blackbox_be_log,pos_blackbox_be.log,model_pos_blackbox_be_log,group_minfin_personnel,1,0,0,0
