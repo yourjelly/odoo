@@ -427,8 +427,16 @@ class pos_blackbox_be_log(models.Model):
 class product_template(models.Model):
     _inherit = 'product.template'
 
+    @api.model
+    def create(self, values):
+        log = self.env['pos_blackbox_be.log']
+        log.create(values, "create", self._name, values.get('name'))
+
+        return super(product_template, self).create(values)
+
     @api.multi
     def write(self, values):
+        log = self.env['pos_blackbox_be.log']
         ir_model_data = self.env['ir.model.data']
         work_in = ir_model_data.xmlid_to_object('pos_blackbox_be.product_product_work_in').product_tmpl_id.id
         work_out = ir_model_data.xmlid_to_object('pos_blackbox_be.product_product_work_out').product_tmpl_id.id
@@ -438,10 +446,14 @@ class product_template(models.Model):
                 if product == work_in or product == work_out:
                     raise UserError(_('Modifying this product is not allowed.'))
 
+        for product in self:
+            log.create(values, "modify", product._name, product.name)
+
         return super(product_template, self).write(values)
 
     @api.multi
     def unlink(self):
+        log = self.env['pos_blackbox_be.log']
         ir_model_data = self.env['ir.model.data']
         work_in = ir_model_data.xmlid_to_object('pos_blackbox_be.product_product_work_in').product_tmpl_id.id
         work_out = ir_model_data.xmlid_to_object('pos_blackbox_be.product_product_work_out').product_tmpl_id.id
@@ -449,6 +461,9 @@ class product_template(models.Model):
         for product in self.ids:
             if product == work_in or product == work_out:
                 raise UserError(_('Deleting this product is not allowed.'))
+
+        for product in self:
+            log.create({}, "delete", product._name, product.name)
 
         return super(product_template, self).unlink()
 
