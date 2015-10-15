@@ -355,6 +355,7 @@ class pos_order_pro_forma(models.Model):
     user_id = fields.Many2one('res.users', 'Salesman', help="Person who uses the cash register. It can be a reliever, a student or an interim employee.", readonly=True)
     amount_total = fields.Float(readonly=True)
     lines = fields.One2many('pos.order_line_pro_forma', 'order_id', 'Order Lines', readonly=True, copy=True)
+    pos_reference = fields.Char('Receipt Ref', readonly=True)
     session_id = fields.Many2one('pos.session', 'Session', readonly=True)
     partner_id = fields.Many2one('res.partner', 'Customer', readonly=True)
     config_id = fields.Many2one('pos.config', related='session_id.config_id', readonly=True)
@@ -384,6 +385,7 @@ class pos_order_pro_forma(models.Model):
             values = {
                 'user_id': ui_order['user_id'] or False,
                 'session_id': ui_order['pos_session_id'],
+                'pos_reference': ui_order['name'],
                 'lines': [self.env['pos.order_line_pro_forma']._order_line_fields(l) for l in ui_order['lines']] if ui_order['lines'] else False,
                 'partner_id': ui_order['partner_id'] or False,
                 'date_order': ui_order['creation_date'],
