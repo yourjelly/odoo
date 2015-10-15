@@ -82,6 +82,7 @@
                 <tree string="Logs" default_order="date" create="false" edit="false" delete="false">
                     <field name="user"/>
                     <field name="date"/>
+                    <field name="action"/>
                     <field name="model_name"/>
                     <field name="record_name"/>
                     <field name="description"/>

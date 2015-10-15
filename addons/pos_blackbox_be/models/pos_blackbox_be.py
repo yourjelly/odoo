@@ -53,14 +53,32 @@ class res_users(models.Model):
         if self.insz_or_bis_number and (len(self.insz_or_bis_number) != 11 or not self.insz_or_bis_number.isdigit()):
             raise ValidationError(_("The INSZ or BIS number has to consist of 11 numerical digits."))
 
+    @api.model
+    def create(self, values):
+        log = self.env['pos_blackbox_be.log']
+
+        log.create(values, "create", self._name, values.get('login'))
+
+        return super(res_users, self).create(values)
+
     @api.multi
     def write(self, values):
         log = self.env['pos_blackbox_be.log']
 
         for user in self:
-            log.create(values, user._name, user.login)
+            log.create(values, "modify", user._name, user.login)
 
         return super(res_users, self).write(values)
+
+    @api.multi
+    def unlink(self):
+        log = self.env['pos_blackbox_be.log']
+
+        for user in self:
+            log.create({}, "delete", user._name, user.login)
+
+        return super(res_users, self).unlink()
+
 
 class pos_session(models.Model):
     _inherit = 'pos.session'
@@ -386,20 +404,25 @@ class pos_blackbox_be_log(models.Model):
     _name = 'pos_blackbox_be.log'
 
     user = fields.Many2one('res.users', readonly=True)
+    action = fields.Selection([('create', 'create'), ('modify', 'modify'), ('delete', 'delete')], readonly=True)
     date = fields.Datetime(default=fields.Datetime.now, readonly=True)
     model_name = fields.Char(readonly=True)
     record_name = fields.Char(readonly=True)
     description = fields.Char(readonly=True)
 
-    def create(self, values, model_name, record_name):
-        log_values = {
-            'user': self.env.uid,
-            'model_name': model_name,
-            'record_name': record_name,
-            'description': str(values)
-        }
+    def create(self, values, action, model_name, record_name):
+        if not self.env.context.get('install_mode'):
+            log_values = {
+                'user': self.env.uid,
+                'action': action,
+                'model_name': model_name,
+                'record_name': record_name,
+                'description': str(values)
+            }
 
-        return super(pos_blackbox_be_log, self).create(log_values)
+            return super(pos_blackbox_be_log, self).create(log_values)
+
+        return None
 
 class product_template(models.Model):
     _inherit = 'product.template'
