@@ -34,6 +34,18 @@ class pos_config(models.Model):
 
     report_sequence_number = fields.Integer()
 
+    @api.constrains('proxy_ip')
+    def _check_one_posbox_per_config(self):
+        # we need to iterate over all the config records
+        pos_config = self.env['pos.config']
+        proxy_ips = set()
+
+        for config in pos_config.search([]):
+            if config.proxy_ip not in proxy_ips:
+                proxy_ips.add(config.proxy_ip)
+            else:
+                raise ValidationError(_("Only one Point of Sale allowed per proxy."))
+
     def get_next_report_sequence_number(self):
         to_return = self.report_sequence_number
         self.report_sequence_number += 1
