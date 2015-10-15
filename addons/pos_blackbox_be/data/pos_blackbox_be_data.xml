@@ -237,5 +237,30 @@
             <field name="name">insz_or_bis_number</field>
             <field name="export_id" ref="minfin_export_users"/>
         </record>
+
+        <record id="minfin_export_products" model="ir.exports">
+            <field name="name">MinFin export products</field>
+            <field name="resource">product.template</field>
+        </record>
+
+        <record model="ir.exports.line">
+            <field name="name">name</field>
+            <field name="export_id" ref="minfin_export_products"/>
+        </record>
+
+        <record model="ir.exports.line">
+            <field name="name">list_price</field>
+            <field name="export_id" ref="minfin_export_products"/>
+        </record>
+
+        <record model="ir.exports.line">
+            <field name="name">taxes_id/name</field>
+            <field name="export_id" ref="minfin_export_products"/>
+        </record>
+
+        <record model="ir.exports.line">
+            <field name="name">taxes_id/identification_letter</field>
+            <field name="export_id" ref="minfin_export_products"/>
+        </record>
     </data>
 </odoo>
