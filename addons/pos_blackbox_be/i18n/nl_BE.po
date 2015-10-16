@@ -728,7 +728,7 @@ msgstr "Order lijnen"
 #: model:ir.actions.act_window,name:pos_blackbox_be.action_pos_order_pro_forma_form
 #: model:ir.ui.menu,name:pos_blackbox_be.menu_order_pro_forma
 msgid "Orders Pro Forma (PS)"
-msgstr "Kassa Orders Pro Forma (PS)"
+msgstr "Orders Pro Forma (PS)"
 
 #. module: pos_blackbox_be
 #. openerp-web
