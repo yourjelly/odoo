@@ -566,13 +566,5 @@
                 <pre><t t-esc="current_file['contents']"/></pre>
             </t>
         </template>
-
-        <!-- In order to avoid confusion, we must label the Orders and Orders pro forma with NS or PS. -->
-        <record id="point_of_sale.action_pos_pos_form" model="ir.actions.act_window">
-            <field name="name">Orders (NS)</field>
-        </record>
-
-        <!-- We need to add the menuitem again, because otherwise it will still use the old name. -->
-        <menuitem parent="point_of_sale.menu_point_of_sale" id="point_of_sale.menu_point_ofsale" action="point_of_sale.action_pos_pos_form" sequence="1" groups="point_of_sale.group_pos_manager,point_of_sale.group_pos_user"/>
     </data>
 </odoo>
