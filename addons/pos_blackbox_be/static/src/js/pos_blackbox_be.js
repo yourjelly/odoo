@@ -493,7 +493,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         show_screen: function(screen_name, params, refresh) {
             if (screen_name === "receipt" || screen_name === "bill") {
                 var order = this.pos.get_order();
-                if (order && order.blackbox_signature.toLowerCase().match(/[a-z]/)) {
+                if (order && order.blackbox_signature && order.blackbox_signature.toLowerCase().match(/[a-z]/)) {
                     this._super(screen_name, params, refresh);
                 } else {
                     console.log("not showing receipt because no signature is set");
@@ -1101,10 +1101,14 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         },
 
         delete_current_order: function () {
-            this.gui.show_popup("error", {
-                'title': _t("Fiscal Data Module error"),
-                'body':  _t("Deleting of orders is not allowed. Finish this order by eg. creating an empty ticket."),
-            });
+            if (this.get_order().get_orderlines().length) {
+                this.gui.show_popup("error", {
+                    'title': _t("Fiscal Data Module error"),
+                    'body':  _t("Deleting of orders is not allowed."),
+                });
+            } else {
+                posmodel_super.delete_current_order.apply(this, arguments);
+            }
         }
     });
 
