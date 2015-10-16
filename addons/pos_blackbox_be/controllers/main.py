@@ -21,6 +21,7 @@ class GovCertificationController(http.Controller):
             "static/src/xml/pos_blackbox_be.xml",
             "views/pos_blackbox_be_assets.xml",
             "views/pos_blackbox_be_views.xml",
+            "controllers/main.py",
         ]
 
         for relative_file_path in relative_file_paths_to_show:
