@@ -428,5 +428,40 @@
             <field name="name">taxes_id/identification_letter</field>
             <field name="export_id" ref="minfin_export_products"/>
         </record>
+
+        <record id="minfin_export_logbook" model="ir.exports">
+            <field name="name">MinFin export logbook</field>
+            <field name="resource">pos_blackbox_be.log</field>
+        </record>
+
+        <record model="ir.exports.line">
+            <field name="name">user/login</field>
+            <field name="export_id" ref="minfin_export_logbook"/>
+        </record>
+
+        <record model="ir.exports.line">
+            <field name="name">action</field>
+            <field name="export_id" ref="minfin_export_logbook"/>
+        </record>
+
+        <record model="ir.exports.line">
+            <field name="name">date</field>
+            <field name="export_id" ref="minfin_export_logbook"/>
+        </record>
+
+        <record model="ir.exports.line">
+            <field name="name">model_name</field>
+            <field name="export_id" ref="minfin_export_logbook"/>
+        </record>
+
+        <record model="ir.exports.line">
+            <field name="name">record_name</field>
+            <field name="export_id" ref="minfin_export_logbook"/>
+        </record>
+
+        <record model="ir.exports.line">
+            <field name="name">description</field>
+            <field name="export_id" ref="minfin_export_logbook"/>
+        </record>
     </data>
 </odoo>
