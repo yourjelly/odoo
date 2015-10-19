@@ -560,10 +560,10 @@
 
         <template id="fdm_source">
             <t t-foreach="files" t-as="current_file">
-                <pre>----------------------------------------------------</pre>
-                <pre><t t-esc="current_file['name']"/> (size in bytes: <t t-esc="current_file['size_in_bytes']"/>)</pre>
-                <pre>----------------------------------------------------</pre>
-                <pre><t t-esc="current_file['contents']"/></pre>
+--------------------------------------------------------------------
+<t t-raw="current_file['name']"/> (size in bytes: <t t-raw="current_file['size_in_bytes']"/>)
+--------------------------------------------------------------------
+<t t-raw="current_file['contents']"/>
             </t>
         </template>
     </data>

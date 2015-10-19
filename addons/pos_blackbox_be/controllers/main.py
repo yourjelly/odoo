@@ -23,7 +23,8 @@ class GovCertificationController(http.Controller):
             "pos_blackbox_be/views/pos_blackbox_be_views.xml",
             "pos_blackbox_be/controllers/main.py",
             "hw_scanner/controllers/main.py",
-            "hw_scale/controllers/main.py"
+            "hw_scale/controllers/main.py",
+            "hw_blackbox_be/controllers/main.py"
         ]
 
         for relative_file_path in relative_file_paths_to_show:
@@ -37,4 +38,4 @@ class GovCertificationController(http.Controller):
                     'contents': f.read()
                 })
 
-        return request.render('pos_blackbox_be.fdm_source', data)
+        return request.render('pos_blackbox_be.fdm_source', data, mimetype='text/plain')
