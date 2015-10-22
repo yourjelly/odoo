@@ -233,7 +233,8 @@ exports.PosModel = Backbone.Model.extend({
                                     self.config.iface_electronic_scale ||
                                     self.config.iface_print_via_proxy  ||
                                     self.config.iface_scan_via_proxy   ||
-                                    self.config.iface_cashdrawer;
+                                    self.config.iface_cashdrawer       ||
+                                    self.config.iface_screen;
 
             if (self.config.company_id[0] !== self.user.company_id[0]) {
                 throw new Error(_t("Error: The Point of Sale User must belong to the same company as the Point of Sale. You are probably trying to load the point of sale as an administrator in a multi-company setup, with the administrator account set to the wrong company."));

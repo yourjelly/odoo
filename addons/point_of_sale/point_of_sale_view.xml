@@ -701,6 +701,7 @@
                             <field name="iface_scan_via_proxy" string="Barcode Scanner"/>
                             <field name="iface_electronic_scale" />
                             <field name="iface_cashdrawer" />
+                            <field name="iface_screen" />
                         </group>
                         <group name="receipt" string="Receipt" >
                             <field name="receipt_header" string="Header" placeholder="A custom receipt header message"/>
