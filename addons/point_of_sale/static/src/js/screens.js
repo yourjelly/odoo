@@ -487,15 +487,15 @@ var OrderWidget = PosBaseWidget.extend({
 
         var self = this;
         lines.bind('all', function () {
-            console.log("updating");
-
             var rendered_html = "";
+
             self.pos.get_order().get_orderlines().forEach(function (orderline) {
                 rendered_html += orderline.product.display_name + " ";
-                rendered_html += orderline.get_display_price();
+                rendered_html += orderline.get_quantity_str() + " ";
+                rendered_html += self.format_currency(orderline.get_display_price());
                 rendered_html += "<br/>";
             });
-            rendered_html += "TOTAL: " + self.pos.get_order().get_total_with_tax();
+            rendered_html += "TOTAL: " + self.format_currency(self.pos.get_order().get_total_with_tax());
 
             self.pos.proxy.update_screen(rendered_html);
         }, this);

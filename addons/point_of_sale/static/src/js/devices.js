@@ -438,7 +438,6 @@ var ProxyDevice  = core.Class.extend(core.mixins.PropertiesMixin,{
      * ask the posbox to update the screen
      */
     update_screen: function(html) {
-        console.log('updating inside');
         this.message('screen',{ html: html },{ timeout: 5000 });
     },
 
