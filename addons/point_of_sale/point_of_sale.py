@@ -130,7 +130,8 @@ class pos_config(osv.osv):
         'group_pos_manager_id': fields.many2one('res.groups','Point of Sale Manager Group', help='This field is there to pass the id of the pos manager group to the point of sale client'),
         'group_pos_user_id':    fields.many2one('res.groups','Point of Sale User Group', help='This field is there to pass the id of the pos user group to the point of sale client'),
         'tip_product_id':       fields.many2one('product.product','Tip Product', help="The product used to encode the customer tip. Leave empty if you do not accept tips."),
-        'fiscal_position_ids': fields.many2many('account.fiscal.position', string='Fiscal Positions')
+        'fiscal_position_ids': fields.many2many('account.fiscal.position', string='Fiscal Positions'),
+        'screen_html': fields.html('Screen content', translate=True)
     }
 
     def _check_company_location(self, cr, uid, ids, context=None):

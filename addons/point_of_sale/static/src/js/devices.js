@@ -438,7 +438,7 @@ var ProxyDevice  = core.Class.extend(core.mixins.PropertiesMixin,{
      * ask the posbox to update the screen
      */
     update_screen: function(html) {
-        this.message('screen',{ html: html },{ timeout: 5000 });
+        return this.message('screen',{ html: html },{ timeout: 5000 });
     },
 
     // asks the proxy to log some information, as with the debug.log you can provide several arguments.
