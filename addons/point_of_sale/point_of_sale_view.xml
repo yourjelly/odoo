@@ -1002,7 +1002,7 @@
         <template id="FieldTextHtmlInline" name="Editor layout">
             <t t-set="head">
                 <t t-if="enable_editor">
-                    <link rel="stylesheet" href="/point_of_sale/static/src/css/mass_mailing_editor_thumb.css" type="text/css"/>
+                    <link rel="stylesheet" href="/point_of_sale/static/src/css/pos_screen_editor_thumb.css" type="text/css"/>
                 </t>
             </t>
             <t t-call="web_editor.layout">
