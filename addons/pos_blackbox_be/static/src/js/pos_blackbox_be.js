@@ -163,13 +163,23 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             var line_name = this.get_product().display_name;
 
             if (! taxes) {
-                throw new Error("FDM error: " + line_name + " has no tax associated with it.");
+                this.pos.gui.show_popup("error", {
+                    'title': _t("POS error"),
+                    'body':  _t("Product has no tax associated with it."),
+                });
+
+                return false;
             }
 
             var vat_letter = taxes.identification_letter;
 
             if (! vat_letter) {
-                throw new Error("FDM error: " + line_name + " has an invalid tax amount. Only 21%, 12%, 6% and 0% are allowed.");
+                this.pos.gui.show_popup("error", {
+                    'title': _t("POS error"),
+                    'body':  _t("Product has an invalid tax amount. Only 21%, 12%, 6% and 0% are allowed."),
+                });
+
+                return false;
             }
 
             return vat_letter;
@@ -369,6 +379,32 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             });
 
             return receipt;
+        },
+
+        // don't allow to add orderlines without a vat letter
+        add_orderline: function (line) {
+            if (line.get_vat_letter()) {
+                order_model_super.add_orderline.apply(this, arguments);
+            }
+        },
+
+        // don't allow to add products without a vat letter
+        add_product: function (product, options) {
+            if (product.taxes_id.length === 0) {
+                this.pos.gui.show_popup("error", {
+                    'title': _t("POS error"),
+                    'body':  _t("Product has no tax associated with it."),
+                });
+            } else if (! this.pos.taxes_by_id[product.taxes_id[0]].identification_letter) {
+                this.pos.gui.show_popup("error", {
+                    'title': _t("POS error"),
+                    'body':  _t("Product has an invalid tax amount. Only 21%, 12%, 6% and 0% are allowed."),
+                });
+            } else {
+                return order_model_super.add_product.apply(this, arguments);
+            }
+
+            return false;
         },
 
         _hash_and_sign_string: function () {
