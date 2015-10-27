@@ -60,7 +60,6 @@ Main Features
         'views/report_sessionsummary.xml',
         'views/report_userlabel.xml',
         'views/point_of_sale.xml',
-        'views/temp_snippet.xml',
         'point_of_sale_dashboard.xml',
     ],
     'demo': [
