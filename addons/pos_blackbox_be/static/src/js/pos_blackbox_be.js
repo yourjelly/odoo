@@ -323,6 +323,16 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         update_summary: function () {
             if (this.pos.get_order()) {
                 return this._super();
+            } else {
+                return undefined;
+            }
+        },
+
+        orderline_change: function(line) {
+            if (this.pos.get_order()) {
+                return this._super(line);
+            } else {
+                return undefined;
             }
         }
     });
