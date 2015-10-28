@@ -485,26 +485,6 @@ var OrderWidget = PosBaseWidget.extend({
             lines.unbind('change',  this.orderline_change, this);
             lines.bind('change',    this.orderline_change, this);
 
-        var self = this;
-        lines.bind('all', function () {
-            var rendered_html = self.pos.config.screen_html;
-            var orders_html = "";
-
-            self.pos.get_order().get_orderlines().forEach(function (orderline) {
-                orders_html += orderline.product.display_name + " ";
-                orders_html += orderline.get_quantity_str() + " ";
-                orders_html += self.format_currency(orderline.get_display_price());
-                orders_html += "<br/>";
-            });
-            orders_html += "TOTAL: " + self.format_currency(self.pos.get_order().get_total_with_tax());
-
-            rendered_html = rendered_html.replace("[[orders]]", orders_html);
-
-            // hack for base url
-            rendered_html = '<base href="http://' + window.location.host + '/"/>' + rendered_html;
-
-            self.pos.proxy.update_screen(rendered_html);
-        }, this);
     },
     render_orderline: function(orderline){
         var el_str  = QWeb.render('Orderline',{widget:this, line:orderline}); 

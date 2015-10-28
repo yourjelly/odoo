@@ -1520,6 +1520,13 @@ exports.Order = Backbone.Model.extend({
         this.paymentlines.on('add',    function(){ this.save_to_db("paymentline:add"); }, this);
         this.paymentlines.on('remove', function(){ this.save_to_db("paymentline:rem"); }, this);
 
+        if (this.pos.config.iface_screen) {
+            this.orderlines.on('change', this.send_order_to_screen, this);
+            // removing last orderline does not trigger change event
+            this.orderlines.on('remove',   this.send_order_to_screen, this);
+            this.paymentlines.on('change', this.send_order_to_screen, this);
+        }
+
         this.init_locked = false;
         this.save_to_db();
 
@@ -1687,6 +1694,25 @@ exports.Order = Backbone.Model.extend({
         }
 
         return receipt;
+    },
+    send_order_to_screen: function () {
+        var rendered_html = this.pos.config.screen_html;
+        var orders_html = "";
+
+        this.get_orderlines().forEach(function (orderline) {
+            orders_html += orderline.product.display_name + " ";
+            orders_html += orderline.get_quantity_str() + " ";
+            orders_html += orderline.get_display_price();
+            orders_html += "<br/>";
+        });
+        orders_html += "TOTAL: " + this.pos.get_order().get_total_with_tax();
+
+        rendered_html = rendered_html.replace("[[orders]]", orders_html);
+
+        // hack for base url
+        rendered_html = '<base href="http://' + window.location.host + '/"/>' + rendered_html;
+
+        this.pos.proxy.update_screen(rendered_html);
     },
     is_empty: function(){
         return this.orderlines.models.length === 0;
