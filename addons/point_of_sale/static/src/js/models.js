@@ -1525,6 +1525,7 @@ exports.Order = Backbone.Model.extend({
             // removing last orderline does not trigger change event
             this.orderlines.on('remove',   this.send_order_to_screen, this);
             this.paymentlines.on('change', this.send_order_to_screen, this);
+            this.paymentlines.on('remove', this.send_order_to_screen, this);
         }
 
         this.init_locked = false;
@@ -1697,20 +1698,24 @@ exports.Order = Backbone.Model.extend({
     },
     send_order_to_screen: function () {
         var rendered_html = this.pos.config.screen_html;
-        var orders_html = "";
-
-        this.get_orderlines().forEach(function (orderline) {
-            orders_html += orderline.product.display_name + " ";
-            orders_html += orderline.get_quantity_str() + " ";
-            orders_html += orderline.get_display_price();
-            orders_html += "<br/>";
+        var order_data = QWeb.render('CustomerFacingDisplay', {
+            'order': this,
+            'widget': this.pos.chrome,
+            'get_product_image_url': function (product) {
+                return window.location.origin + '/web/image?model=product.product&field=image_medium&id=' + product.id;
+            },
         });
-        orders_html += "TOTAL: " + this.pos.get_order().get_total_with_tax();
 
-        rendered_html = rendered_html.replace("[[orders]]", orders_html);
+        // todo jov: figure out why & gets turned into &amp; when rendering t-att-src
+        order_data = order_data.replace(/&amp;/g, "&");
+        
+        // todo jov: this should replace a <div> or something that contains the
+        // 'demo' data in the orders snippet. fix after design is finished
+        debugger;
+        rendered_html = rendered_html.replace("[[orders]]", order_data);
 
         // hack for base url
-        rendered_html = '<base href="http://' + window.location.host + '/"/>' + rendered_html;
+        rendered_html = '<base href="' + window.location.origin + '/"/>' + rendered_html;
 
         this.pos.proxy.update_screen(rendered_html);
     },

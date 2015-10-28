@@ -1456,4 +1456,27 @@
         </div>
     </t>
 
+    <t t-name="CustomerFacingDisplay">
+        <table>
+            <t t-foreach="order.get_orderlines()" t-as="orderline">
+                <tr>
+                    <td><img t-att-src='get_product_image_url(orderline.product)'/></td>
+                    <td><t t-esc="orderline.product.display_name"/></td>
+                    <td><t t-esc="orderline.get_quantity_str()"/></td>
+                    <td><t t-esc="widget.format_currency(orderline.get_display_price())"/></td>
+                </tr>
+            </t>
+            <t t-foreach="order.get_paymentlines()" t-as="paymentline">
+                <tr>
+                    <td></td>
+                    <td colspan="2"><t t-esc="paymentline.name"/></td>
+                    <td><t t-esc="widget.format_currency(paymentline.get_amount())"/></td>
+                </tr>
+            </t>
+        </table>
+
+        <div>Total: <t t-esc="widget.format_currency(order.get_total_with_tax())"/></div>
+        <div>Change: <t t-esc="widget.format_currency(order.get_change())"/></div>
+    </t>
+
 </templates>
