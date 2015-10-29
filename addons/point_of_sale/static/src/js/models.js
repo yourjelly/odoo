@@ -97,13 +97,7 @@ exports.PosModel = Backbone.Model.extend({
         this.set_start_order();
         if(this.config.use_proxy){
             if (this.config.iface_screen) {
-                // switching between orders
-                this.on('change:selectedOrder', function () {
-                    var order = this.get_order();
-                    if (order) {
-                        order.send_to_screen();
-                    }
-                }, this);
+                this.on('change:selectedOrder', this.send_current_order_to_screen, this);
             }
 
             return this.connect_to_proxy();
@@ -673,6 +667,70 @@ exports.PosModel = Backbone.Model.extend({
         if (order) {
             order.destroy({'reason':'abandon'});
         }
+    },
+
+    _convert_product_img_to_base64: function (product, url) {
+        var deferred = new $.Deferred();
+        var img = new Image();
+
+	img.onload = function () {
+	    var canvas = document.createElement('CANVAS');
+	    var ctx = canvas.getContext('2d');
+
+	    canvas.height = this.height;
+	    canvas.width = this.width;
+	    ctx.drawImage(this,0,0);
+
+            var dataURL = canvas.toDataURL('image/jpeg');
+            product.image_base64 = dataURL;
+	    canvas = null;
+
+            deferred.resolve();
+	};
+	img.src = url;
+
+        return deferred;
+    },
+
+    send_current_order_to_screen: function () {
+        var self = this;
+        var order = this.get_order();
+        var rendered_html = this.config.screen_html;
+
+        // If we're using an external device like the POSBox, we
+        // cannot get eg. /web/image?model=product.product because the
+        // POSBox is not logged in and thus doesn't have the access
+        // rights to access product.product. So instead we'll base64
+        // encode it and embed it in the HTML.
+        var get_image_deferreds = [];
+
+        order.get_orderlines().forEach(function (orderline) {
+            var product = orderline.product;
+            var image_url = window.location.origin + '/web/image?model=product.product&field=image_medium&id=' + product.id;
+
+            // only download image if we haven't got it before
+            if (! product.image_base64) {
+                get_image_deferreds.push(self._convert_product_img_to_base64(product, image_url));
+            }
+        });
+
+        // when all images are loaded in product.image_base64
+        $.when.apply($, get_image_deferreds).then(function () {
+            var order_data = QWeb.render('CustomerFacingDisplay', {
+                'order': order,
+                'widget': self.chrome,
+            });
+
+            // todo jov: this should replace a <div> or something that contains the
+            // 'demo' data in the orders snippet. fix after design is finished
+            rendered_html = rendered_html.replace("[[orders]]", order_data);
+
+            // hack for base url, necessary for assets we get straight
+            // from the Odoo server (like eg. the logo)
+            rendered_html = '<base href="' + window.location.origin + '/"/>' + rendered_html;
+
+            self.proxy.update_screen(rendered_html);
+        });
     },
 
     // saves the order locally and try to send it to the backend. 
@@ -1531,12 +1589,12 @@ exports.Order = Backbone.Model.extend({
         this.paymentlines.on('remove', function(){ this.save_to_db("paymentline:rem"); }, this);
 
         if (this.pos.config.iface_screen) {
-            this.orderlines.on('change', this.send_to_screen, this);
+            this.orderlines.on('change', this.pos.send_current_order_to_screen, this.pos);
             // removing last orderline does not trigger change event
-            this.orderlines.on('remove',   this.send_to_screen, this);
-            this.paymentlines.on('change', this.send_to_screen, this);
+            this.orderlines.on('remove',   this.pos.send_current_order_to_screen, this.pos);
+            this.paymentlines.on('change', this.pos.send_current_order_to_screen, this.pos);
             // removing last paymentline does not trigger change event
-            this.paymentlines.on('remove', this.send_to_screen, this);
+            this.paymentlines.on('remove', this.pos.send_current_order_to_screen, this.pos);
         }
 
         this.init_locked = false;
@@ -1706,69 +1764,6 @@ exports.Order = Backbone.Model.extend({
         }
 
         return receipt;
-    },
-
-    _convert_product_img_to_base64: function (product, url) {
-        var deferred = new $.Deferred();
-        var img = new Image();
-
-	img.onload = function () {
-	    var canvas = document.createElement('CANVAS');
-	    var ctx = canvas.getContext('2d');
-
-	    canvas.height = this.height;
-	    canvas.width = this.width;
-	    ctx.drawImage(this,0,0);
-
-            var dataURL = canvas.toDataURL('image/jpeg');
-            product.image_base64 = dataURL;
-	    canvas = null;
-
-            deferred.resolve();
-	};
-	img.src = url;
-
-        return deferred;
-    },
-
-    send_to_screen: function () {
-        var self = this;
-        var rendered_html = this.pos.config.screen_html;
-
-        // If we're using an external device like the POSBox, we
-        // cannot get eg. /web/image?model=product.product because the
-        // POSBox is not logged in and thus doesn't have the access
-        // rights to access product.product. So instead we'll base64
-        // encode it and embed it in the HTML.
-        var get_image_deferreds = [];
-
-        this.get_orderlines().forEach(function (orderline) {
-            var product = orderline.product;
-            var image_url = window.location.origin + '/web/image?model=product.product&field=image_medium&id=' + product.id;
-
-            // only download image if we haven't got it before
-            if (! product.image_base64) {
-                get_image_deferreds.push(self._convert_product_img_to_base64(product, image_url));
-            }
-        });
-
-        // when all images are loaded in product.image_base64
-        $.when.apply($, get_image_deferreds).then(function () {
-            var order_data = QWeb.render('CustomerFacingDisplay', {
-                'order': self,
-                'widget': self.pos.chrome,
-            });
-
-            // todo jov: this should replace a <div> or something that contains the
-            // 'demo' data in the orders snippet. fix after design is finished
-            rendered_html = rendered_html.replace("[[orders]]", order_data);
-
-            // hack for base url, necessary for assets we get straight
-            // from the Odoo server (like eg. the logo)
-            rendered_html = '<base href="' + window.location.origin + '/"/>' + rendered_html;
-
-            self.pos.proxy.update_screen(rendered_html);
-        });
     },
     is_empty: function(){
         return this.orderlines.models.length === 0;
