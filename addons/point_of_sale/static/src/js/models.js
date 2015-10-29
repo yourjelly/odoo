@@ -99,7 +99,10 @@ exports.PosModel = Backbone.Model.extend({
             if (this.config.iface_screen) {
                 // switching between orders
                 this.on('change:selectedOrder', function () {
-                    this.get_order().send_to_screen();
+                    var order = this.get_order();
+                    if (order) {
+                        order.send_to_screen();
+                    }
                 }, this);
             }
 
