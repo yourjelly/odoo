@@ -704,22 +704,28 @@ exports.PosModel = Backbone.Model.extend({
         // encode it and embed it in the HTML.
         var get_image_deferreds = [];
 
-        order.get_orderlines().forEach(function (orderline) {
-            var product = orderline.product;
-            var image_url = window.location.origin + '/web/image?model=product.product&field=image_medium&id=' + product.id;
+        if (order) {
+            order.get_orderlines().forEach(function (orderline) {
+                var product = orderline.product;
+                var image_url = window.location.origin + '/web/image?model=product.product&field=image_medium&id=' + product.id;
 
-            // only download image if we haven't got it before
-            if (! product.image_base64) {
-                get_image_deferreds.push(self._convert_product_img_to_base64(product, image_url));
-            }
-        });
+                // only download image if we haven't got it before
+                if (! product.image_base64) {
+                    get_image_deferreds.push(self._convert_product_img_to_base64(product, image_url));
+                }
+            });
+        }
 
         // when all images are loaded in product.image_base64
         $.when.apply($, get_image_deferreds).then(function () {
-            var order_data = QWeb.render('CustomerFacingDisplay', {
-                'order': order,
-                'widget': self.chrome,
-            });
+            var order_data = "";
+
+            if (order) {
+                order_data = QWeb.render('CustomerFacingDisplay', {
+                    'order': order,
+                    'widget': self.chrome,
+                });
+            }
 
             // todo jov: this should replace a <div> or something that contains the
             // 'demo' data in the orders snippet. fix after design is finished
