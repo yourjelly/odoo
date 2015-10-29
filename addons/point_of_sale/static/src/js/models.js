@@ -1696,28 +1696,68 @@ exports.Order = Backbone.Model.extend({
 
         return receipt;
     },
+
+    _convert_product_img_to_base64: function (product, url) {
+        var deferred = new $.Deferred();
+        var img = new Image();
+
+	img.onload = function () {
+	    var canvas = document.createElement('CANVAS');
+	    var ctx = canvas.getContext('2d');
+
+	    canvas.height = this.height;
+	    canvas.width = this.width;
+	    ctx.drawImage(this,0,0);
+
+            var dataURL = canvas.toDataURL('image/jpeg');
+            product.image_base64 = dataURL;
+	    canvas = null;
+
+            deferred.resolve();
+	};
+	img.src = url;
+
+        return deferred;
+    },
+
     send_order_to_screen: function () {
+        var self = this;
         var rendered_html = this.pos.config.screen_html;
-        var order_data = QWeb.render('CustomerFacingDisplay', {
-            'order': this,
-            'widget': this.pos.chrome,
-            'get_product_image_url': function (product) {
-                return window.location.origin + '/web/image?model=product.product&field=image_medium&id=' + product.id;
-            },
+
+        // If we're using an external device like the POSBox, we
+        // cannot get eg. /web/image?model=product.product because the
+        // POSBox is not logged in and thus doesn't have the access
+        // rights to access product.product. So instead we'll base64
+        // encode it and embed it in the HTML.
+        var get_image_deferreds = [];
+
+        this.get_orderlines().forEach(function (orderline) {
+            var product = orderline.product;
+            var image_url = window.location.origin + '/web/image?model=product.product&field=image_medium&id=' + product.id;
+
+            // only download image if we haven't got it before
+            if (! product.image_base64) {
+                get_image_deferreds.push(self._convert_product_img_to_base64(product, image_url));
+            }
         });
 
-        // todo jov: figure out why & gets turned into &amp; when rendering t-att-src
-        order_data = order_data.replace(/&amp;/g, "&");
-        
-        // todo jov: this should replace a <div> or something that contains the
-        // 'demo' data in the orders snippet. fix after design is finished
-        debugger;
-        rendered_html = rendered_html.replace("[[orders]]", order_data);
+        // when all images are loaded in product.image_base64
+        $.when.apply($, get_image_deferreds).then(function () {
+            var order_data = QWeb.render('CustomerFacingDisplay', {
+                'order': self,
+                'widget': self.pos.chrome,
+            });
 
-        // hack for base url
-        rendered_html = '<base href="' + window.location.origin + '/"/>' + rendered_html;
+            // todo jov: this should replace a <div> or something that contains the
+            // 'demo' data in the orders snippet. fix after design is finished
+            rendered_html = rendered_html.replace("[[orders]]", order_data);
 
-        this.pos.proxy.update_screen(rendered_html);
+            // hack for base url, necessary for assets we get straight
+            // from the Odoo server (like eg. the logo)
+            rendered_html = '<base href="' + window.location.origin + '/"/>' + rendered_html;
+
+            self.pos.proxy.update_screen(rendered_html);
+        });
     },
     is_empty: function(){
         return this.orderlines.models.length === 0;
