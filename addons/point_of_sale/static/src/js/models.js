@@ -93,11 +93,18 @@ exports.PosModel = Backbone.Model.extend({
         });
     },
     after_load_server_data: function(){
-         this.load_orders();
-         this.set_start_order();
-         if(this.config.use_proxy){
-             return this.connect_to_proxy();
-         }
+        this.load_orders();
+        this.set_start_order();
+        if(this.config.use_proxy){
+            if (this.config.iface_screen) {
+                // switching between orders
+                this.on('change:selectedOrder', function () {
+                    this.get_order().send_order_to_screen();
+                }, this);
+            }
+
+            return this.connect_to_proxy();
+        }
     },
     // releases ressources holds by the model at the end of life of the posmodel
     destroy: function(){
@@ -1525,6 +1532,7 @@ exports.Order = Backbone.Model.extend({
             // removing last orderline does not trigger change event
             this.orderlines.on('remove',   this.send_order_to_screen, this);
             this.paymentlines.on('change', this.send_order_to_screen, this);
+            // removing last paymentline does not trigger change event
             this.paymentlines.on('remove', this.send_order_to_screen, this);
         }
 
