@@ -99,7 +99,7 @@ exports.PosModel = Backbone.Model.extend({
             if (this.config.iface_screen) {
                 // switching between orders
                 this.on('change:selectedOrder', function () {
-                    this.get_order().send_order_to_screen();
+                    this.get_order().send_to_screen();
                 }, this);
             }
 
@@ -1528,12 +1528,12 @@ exports.Order = Backbone.Model.extend({
         this.paymentlines.on('remove', function(){ this.save_to_db("paymentline:rem"); }, this);
 
         if (this.pos.config.iface_screen) {
-            this.orderlines.on('change', this.send_order_to_screen, this);
+            this.orderlines.on('change', this.send_to_screen, this);
             // removing last orderline does not trigger change event
-            this.orderlines.on('remove',   this.send_order_to_screen, this);
-            this.paymentlines.on('change', this.send_order_to_screen, this);
+            this.orderlines.on('remove',   this.send_to_screen, this);
+            this.paymentlines.on('change', this.send_to_screen, this);
             // removing last paymentline does not trigger change event
-            this.paymentlines.on('remove', this.send_order_to_screen, this);
+            this.paymentlines.on('remove', this.send_to_screen, this);
         }
 
         this.init_locked = false;
@@ -1728,7 +1728,7 @@ exports.Order = Backbone.Model.extend({
         return deferred;
     },
 
-    send_order_to_screen: function () {
+    send_to_screen: function () {
         var self = this;
         var rendered_html = this.pos.config.screen_html;
 
