@@ -237,4 +237,9 @@
             <span class="placeholder-posID"/>
         </t>
     </t>
+
+    <!-- don't allow splitting up a bill into multiple PS -->
+    <!-- <t t-extend="SplitbillScreenWidget"> -->
+    <!--     <t t-jquery="div.top-content" t-operation="replace"/> -->
+    <!-- </t> -->
 </templates>
