@@ -5,12 +5,12 @@ var core = require('web.core');
 var pos_models = require('point_of_sale.models');
 
 var AbstractPaymentMethod = core.Class.extend({
-    init: function (journal_name) {
+    init: function (journal_code) {
         var self = this;
 
         // todo jov: maybe this isn't the best way to map
         // account.journal to this
-        this.journal_name = journal_name;
+        this.journal_code = journal_code;
 
         var _super_posmodel = pos_models.PosModel.prototype;
         pos_models.PosModel = pos_models.PosModel.extend({
@@ -26,7 +26,7 @@ var AbstractPaymentMethod = core.Class.extend({
     // In case of something like Mercury you could just ignore
     // this. It's here for payment methods that maybe want to
     // immediately pay the full amount.
-    select: function (created_paymentline) {
+    on_create_paymentline: function (created_paymentline) {
         throw new Error("PaymentMethod select not implemented.");
     },
 
@@ -66,6 +66,10 @@ var AbstractPaymentMethod = core.Class.extend({
 // ----------------
 // example usage:
 var ImplementedPaymentMethod = AbstractPaymentMethod.extend({
+    on_create_paymentline: function () {
+        console.log("implemented on_create_paymentline");
+    },
+
     pay: function (amount) {
         console.log("implemented pay");
     },
@@ -74,8 +78,8 @@ var ImplementedPaymentMethod = AbstractPaymentMethod.extend({
         console.log("implemented remove");
     }
 });
-var instance = new ImplementedPaymentMethod("some journal");
-var instance2 = new ImplementedPaymentMethod("some journal2");
+var instance = new ImplementedPaymentMethod("BNK1");
+var instance2 = new ImplementedPaymentMethod("CSH1");
 // ----------------
 
 return AbstractPaymentMethod;

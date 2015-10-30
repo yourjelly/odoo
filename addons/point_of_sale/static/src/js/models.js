@@ -964,7 +964,18 @@ exports.PosModel = Backbone.Model.extend({
             this.get('orders').add(orders);
         }
     },
-        
+
+    // calls the on_create_paymentline method of the matching electronic payment method
+    electronic_payment_method_create_paymentline: function (journal_code) {
+        debugger;
+        var matching_payment_method = _.find(this.electronic_payment_methods, function (method) {
+            return method.journal_code === journal_code;
+        });
+
+        if (matching_payment_method) {
+            matching_payment_method.on_create_paymentline();
+        }
+    }
 });
 
 // Add fields to the list of read fields when a model is loaded
@@ -1841,6 +1852,7 @@ exports.Order = Backbone.Model.extend({
         this.paymentlines.add(newPaymentline);
         this.select_paymentline(newPaymentline);
 
+        this.pos.electronic_payment_method_create_paymentline(cashregister.journal.code);
     },
     get_paymentlines: function(){
         return this.paymentlines.models;
