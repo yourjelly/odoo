@@ -62,6 +62,7 @@ exports.PosModel = Backbone.Model.extend({
         this.units_by_id = {};
         this.pricelist = null;
         this.order_sequence = 1;
+        this.electronic_payment_methods = [];
         window.posmodel = this;
 
         // these dynamic attributes can be watched for change by other models or widgets
