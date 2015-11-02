@@ -1,22 +1,17 @@
 odoo.define('pos_mercury.pos_mercury', function (require) {
 "use strict";
 
-var Class   = require('web.Class');
-var Model   = require('web.Model');
-var session = require('web.session');
 var core    = require('web.core');
+var Model   = require('web.Model');
 var screens = require('point_of_sale.screens');
 var gui     = require('point_of_sale.gui');
 var pos_model = require('point_of_sale.models');
-var utils = require('web.utils');
 
 var _t      = core._t;
 
-var BarcodeParser = require('barcodes.BarcodeParser');
 var PopupWidget = require('point_of_sale.popups');
 var ScreenWidget = screens.ScreenWidget;
 var PaymentScreenWidget = screens.PaymentScreenWidget;
-var round_pr = utils.round_precision;
 
 var _modelproto = pos_model.PosModel.prototype;
 pos_model.PosModel = pos_model.PosModel.extend({
