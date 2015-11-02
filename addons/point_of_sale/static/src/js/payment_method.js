@@ -29,7 +29,7 @@ odoo.define('point_of_sale.electronic_payment_method', function (require) {
         //
         // Furthermore, the implementation of this function should set
         // whatever metadata we need to keep (for eg. a reversal) on the
-        // paymentline (and in export_as_json() etc.).
+        // paymentline through get_electronic_payment_information()
         pay: function (amount) {
             throw new Error("PaymentMethod pay not implemented.");
         },
@@ -62,39 +62,39 @@ odoo.define('point_of_sale.electronic_payment_method', function (require) {
     exports.ElectronicPaymentInformation = core.Class.extend({
         init: function(order){
             this.order = order;
-            this.metadata = {};
+            this.data = {};
         },
         is_empty: function(){
-            return _.isEmpty(this.metadata);
+            return _.isEmpty(this.data);
         },
         init_from_JSON: function(json){
             var self = this;
 
             self.order = json['order'];
-            _.forEach(_.keys(json.metadata), function (key) {
-                self.metadata[key] = json.metadata[key];
+            _.forEach(_.keys(json.data), function (key) {
+                self.data[key] = json.data[key];
             });
         },
         export_as_JSON: function(){
             return {
                 order: this.order,
-                metadata: this.metadata
+                data: this.data
             };
         },
-        // This sets the metadata of the paymentline. Metadata should be
+        // This sets the data of the paymentline. Data should be
         // an object where values all the values are primitive data types.
-        set_metadata: function(metadata){
-            // Ensure that there are no objects in metadata, because they
+        set_data: function(data){
+            // Ensure that there are no objects in data, because they
             // won't export nicely
-            _.forEach(metadata, function (value) {
+            _.forEach(data, function (value) {
                 if (typeof value === 'object') {
-                    throw new Error("Metadata cannot contain objects as values.");
+                    throw new Error("Data cannot contain objects as values.");
                 }
             });
 
-            this.metadata = metadata;
+            this.data = data;
 
-            // trigger export_to_JSON to ensure the metadata survives a refresh
+            // trigger export_to_JSON to ensure the data survives a refresh
             this.order.trigger('change', this.order);
         }
     });
@@ -121,7 +121,7 @@ odoo.define('point_of_sale.electronic_payment_method_usage_example', function (r
             console.log("received response");
 
             var received_token = Math.floor(Math.random() * 1000);
-            paymentline.get_electronic_payment_information().set_metadata({
+            paymentline.get_electronic_payment_information().set_data({
                 'token': received_token,
                 'some_string': 'abcdefgi'
             });
