@@ -4,6 +4,7 @@ odoo.define('point_of_sale.models', function (require) {
 var BarcodeParser = require('barcodes.BarcodeParser');
 var PosDB = require('point_of_sale.DB');
 var devices = require('point_of_sale.devices');
+var electronic_payment = require('point_of_sale.electronic_payment_method');
 var core = require('web.core');
 var Model = require('web.DataModel');
 var session = require('web.session');
@@ -965,12 +966,15 @@ exports.PosModel = Backbone.Model.extend({
         }
     },
 
-    // calls the on_create_paymentline method of the matching electronic payment method
-    electronic_payment_method_create_paymentline: function (journal_code) {
-        debugger;
-        var matching_payment_method = _.find(this.electronic_payment_methods, function (method) {
-            return method.journal_code === journal_code;
+    get_electronic_payment_methods_by_journal_id: function(journal_id){
+        return _.find(this.electronic_payment_methods, function (method) {
+            return method.journal_id === journal_id;
         });
+    },
+
+    // calls the on_create_paymentline method of the matching electronic payment method
+    electronic_payment_method_create_paymentline: function(journal_id){
+        var matching_payment_method = this.get_electronic_payment_methods_by_journal_id(journal_id);
 
         if (matching_payment_method) {
             matching_payment_method.on_create_paymentline();
@@ -1439,11 +1443,15 @@ exports.Paymentline = Backbone.Model.extend({
         }
         this.cashregister = options.cashregister;
         this.name = this.cashregister.journal_id[1];
+        this.electronic_payment_information = new electronic_payment.ElectronicPaymentInformation(this.order);
     },
     init_from_JSON: function(json){
         this.amount = json.amount;
         this.cashregister = this.pos.cashregisters_by_id[json.statement_id];
         this.name = this.cashregister.journal_id[1];
+
+        this.electronic_payment_information = new electronic_payment.ElectronicPaymentInformation();
+        this.electronic_payment_information.init_from_JSON(json['electronic_payment_information']);
     },
     //sets the amount of money on this payment line
     set_amount: function(value){
@@ -1468,6 +1476,9 @@ exports.Paymentline = Backbone.Model.extend({
     get_type: function(){
         return this.cashregister.journal.type;
     },
+    get_electronic_payment_information: function(){
+        return this.electronic_payment_information;
+    },
     // returns the associated cashregister
     //exports as JSON for server communication
     export_as_JSON: function(){
@@ -1476,7 +1487,8 @@ exports.Paymentline = Backbone.Model.extend({
             statement_id: this.cashregister.id,
             account_id: this.cashregister.account_id[0],
             journal_id: this.cashregister.journal_id[0],
-            amount: this.get_amount()
+            amount: this.get_amount(),
+            electronic_payment_information: this.electronic_payment_information.export_as_JSON()
         };
     },
     //exports as JSON for receipt printing
@@ -1852,13 +1864,20 @@ exports.Order = Backbone.Model.extend({
         this.paymentlines.add(newPaymentline);
         this.select_paymentline(newPaymentline);
 
-        this.pos.electronic_payment_method_create_paymentline(cashregister.journal.code);
+        this.pos.electronic_payment_method_create_paymentline(cashregister.journal.id);
     },
     get_paymentlines: function(){
         return this.paymentlines.models;
     },
     remove_paymentline: function(line){
         this.assert_editable();
+
+        var journal_id = line.cashregister.journal.id;
+        var electronic_payment_method = this.pos.get_electronic_payment_methods_by_journal_id(journal_id);
+        if (electronic_payment_method) {
+            electronic_payment_method.remove(line);
+        }
+
         if(this.selected_paymentline === line){
             this.select_paymentline(undefined);
         }
