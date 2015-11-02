@@ -5,9 +5,8 @@ odoo.define('point_of_sale.electronic_payment_method', function (require) {
     var exports = {};
 
     exports.AbstractPaymentMethod = core.Class.extend({
-        init: function (journal_id) {
-            var self = this;
-
+        init: function (pos, journal_id) {
+            this.pos = pos;
             this.journal_id = journal_id;
         },
 
@@ -69,12 +68,18 @@ odoo.define('point_of_sale.electronic_payment_method', function (require) {
             return _.isEmpty(this.metadata);
         },
         init_from_JSON: function(json){
-            _.forEach(_.keys(json), function (key) {
-                this[key] = json[key];
+            var self = this;
+
+            self.order = json['order'];
+            _.forEach(_.keys(json.metadata), function (key) {
+                self.metadata[key] = json.metadata[key];
             });
         },
         export_as_JSON: function(){
-            return this.metadata;
+            return {
+                order: this.order,
+                metadata: this.metadata
+            };
         },
         // This sets the metadata of the paymentline. Metadata should be
         // an object where values all the values are primitive data types.
@@ -101,6 +106,7 @@ odoo.define('point_of_sale.electronic_payment_method', function (require) {
 // example usage:
 odoo.define('point_of_sale.electronic_payment_method_usage_example', function (require) {
     var pos_models = require('point_of_sale.models');
+    var screens = require('point_of_sale.screens');
     var electronic_payment_method = require('point_of_sale.electronic_payment_method');
 
     var ImplementedPaymentMethod = electronic_payment_method.AbstractPaymentMethod.extend({
@@ -109,7 +115,20 @@ odoo.define('point_of_sale.electronic_payment_method_usage_example', function (r
         },
 
         pay: function (amount) {
-            console.log("implemented pay");
+            var paymentline = this.pos.get_order().selected_paymentline;
+
+            console.log("doing some request...");
+            console.log("received response");
+
+            var received_token = Math.floor(Math.random() * 1000);
+            paymentline.get_electronic_payment_information().set_metadata({
+                'token': received_token,
+                'some_string': 'abcdefgi'
+            });
+
+            console.log("Set " + received_token + " on paymentline");
+
+            this.pos.get_order().selected_paymentline.paid = true;
         },
 
         remove: function (paymentline) {
@@ -127,12 +146,24 @@ odoo.define('point_of_sale.electronic_payment_method_usage_example', function (r
             this.cashregisters.forEach(function (cashregister) {
                 var journal = cashregister.journal;
                 if (journal.code === "CSH1") {
-                    var payment_method = new ImplementedPaymentMethod(journal.id);
+                    var payment_method = new ImplementedPaymentMethod(self, journal.id);
                     self.electronic_payment_methods.push(payment_method);
                 }
             });
 
             return _super_posmodel.after_load_server_data.apply(this, arguments);
+        }
+    });
+
+    // Just as an example, pay when someone clicks on period
+    screens.PaymentScreenWidget.include({
+        payment_input: function(input) {
+            if (input === '.') {
+                this.pos.current_paymentline_electronic_pay();
+                return undefined;
+            } else {
+                return this._super(input);
+            }
         }
     });
 });

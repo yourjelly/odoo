@@ -979,6 +979,18 @@ exports.PosModel = Backbone.Model.extend({
         if (matching_payment_method) {
             matching_payment_method.on_create_paymentline();
         }
+    },
+
+    // calls the pay of the matching electronic payment method should
+    // be called by whoever is implementing the electronic payment
+    // method, for Mercury it's called when a card is scanned
+    current_paymentline_electronic_pay: function(){
+        var journal_id = this.get_order().selected_paymentline.cashregister.journal.id;
+        var matching_payment_method = this.get_electronic_payment_methods_by_journal_id(journal_id);
+
+        if (matching_payment_method) {
+            matching_payment_method.pay();
+        }
     }
 });
 
