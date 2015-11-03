@@ -984,12 +984,26 @@ exports.PosModel = Backbone.Model.extend({
     // calls the pay of the matching electronic payment method should
     // be called by whoever is implementing the electronic payment
     // method, for Mercury it's called when a card is scanned
-    current_paymentline_electronic_pay: function(){
-        var journal_id = this.get_order().selected_paymentline.cashregister.journal.id;
+    current_paymentline_electronic_pay: function(data){
+        var self = this;
+        var order = this.get_order();
+
+        if (this.electronic_payment_methods.length === 0) {
+            return;
+        }
+
+        // if we don't have a paymentline then create one with the first electronic payment method
+        if (! order.selected_paymentline) {
+            order.add_paymentline(_.find(this.cashregisters, function (register) {
+                return self.electronic_payment_methods[0].journal_id === register.journal.id;
+            }));
+        }
+
+        var journal_id = order.selected_paymentline.cashregister.journal.id;
         var matching_payment_method = this.get_electronic_payment_methods_by_journal_id(journal_id);
 
         if (matching_payment_method) {
-            matching_payment_method.pay();
+            matching_payment_method.pay(data);
         }
     }
 });
@@ -1890,10 +1904,18 @@ exports.Order = Backbone.Model.extend({
             electronic_payment_method.remove(line);
         }
 
-        if(this.selected_paymentline === line){
-            this.select_paymentline(undefined);
+        // todo jov: pay and remove should return a deferred with some
+        // kind of standardized response that allows us to figure out
+        // whether whatever transaction took place was succesful or
+        // not. That way the POS can take care of updating
+        // paymentlines etc. instead of every payment method having to
+        // implement it.
+        else {
+            if(this.selected_paymentline === line){
+                this.select_paymentline(undefined);
+            }
+            this.paymentlines.remove(line);
         }
-        this.paymentlines.remove(line);
     },
     clean_empty_paymentlines: function() {
         var lines = this.paymentlines.models;
