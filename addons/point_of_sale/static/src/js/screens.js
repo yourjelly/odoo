@@ -1786,7 +1786,11 @@ var PaymentScreenWidget = ScreenWidget.extend({
         var order = this.pos.get_order();
         if (!order) {
             return;
-        } else if (order.is_paid()) {
+        }
+
+        self.renderElement();
+
+        if (order.is_paid()) {
             self.$('.next').addClass('highlight');
         }else{
             self.$('.next').removeClass('highlight');
