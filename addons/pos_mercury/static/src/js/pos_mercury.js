@@ -140,6 +140,7 @@ var MercuryPaymentMethod = payment_method.AbstractPaymentMethod.extend({
     retry_mercury_transaction: function (def, response, retry_nr, can_connect_to_server, callback, args) {
         var self = this;
         var message = "";
+        var callback_def = new $.Deferred();
 
         if (retry_nr < self.server_retries) {
             if (response) {
@@ -152,7 +153,11 @@ var MercuryPaymentMethod = payment_method.AbstractPaymentMethod.extend({
             });
 
             setTimeout(function () {
-                callback.apply(self, args);
+                callback.apply(self, args).then(function () {
+                    callback_def.resolve();
+                }, function () {
+                    callback_def.reject();
+                });
             }, 1000);
         } else {
             if (response) {
@@ -168,7 +173,10 @@ var MercuryPaymentMethod = payment_method.AbstractPaymentMethod.extend({
                 message: message,
                 auto_close: false
             });
+            callback_def.reject();
         }
+
+        return callback_def;
     },
 
     credit_code_transaction: function (parsed_result, old_deferred, retry_nr) {
@@ -352,8 +360,7 @@ var MercuryPaymentMethod = payment_method.AbstractPaymentMethod.extend({
         return mercury_transaction.call(rpc_method, [request_data], undefined, {timeout: self.server_timeout_in_ms}).then(function (data) {
             var def = new $.Deferred();
             if (data === "timeout") {
-                self.retry_mercury_transaction(popup_def, null, retry_nr, true, self.do_reversal, [line, is_voidsale, popup_def, retry_nr + 1]);
-                return def.reject();
+                return self.retry_mercury_transaction(popup_def, null, retry_nr, true, self.do_reversal, [line, is_voidsale, popup_def, retry_nr + 1]);
             }
 
             if (data === "internal error") {
@@ -394,7 +401,7 @@ var MercuryPaymentMethod = payment_method.AbstractPaymentMethod.extend({
             }
         }, function (error, event) {
             event.preventDefault();
-            self.retry_mercury_transaction(popup_def, null, retry_nr, false, self.do_reversal, [line, is_voidsale, popup_def, retry_nr + 1]); // todo jov
+            return self.retry_mercury_transaction(popup_def, null, retry_nr, false, self.do_reversal, [line, is_voidsale, popup_def, retry_nr + 1]);
         });
     },
         
