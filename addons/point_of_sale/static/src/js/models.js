@@ -1895,26 +1895,30 @@ exports.Order = Backbone.Model.extend({
     get_paymentlines: function(){
         return this.paymentlines.models;
     },
+    _deselect_and_remove_paymentline: function (line) {
+        if(this.selected_paymentline === line){
+            this.select_paymentline(undefined);
+        }
+        this.paymentlines.remove(line);
+    },
     remove_paymentline: function(line){
+        var self = this;
         this.assert_editable();
 
         var journal_id = line.cashregister.journal.id;
         var electronic_payment_method = this.pos.get_electronic_payment_methods_by_journal_id(journal_id);
-        if (electronic_payment_method) {
-            electronic_payment_method.remove(line);
-        }
 
-        // todo jov: pay and remove should return a deferred with some
-        // kind of standardized response that allows us to figure out
-        // whether whatever transaction took place was succesful or
-        // not. That way the POS can take care of updating
-        // paymentlines etc. instead of every payment method having to
-        // implement it.
-        else {
-            if(this.selected_paymentline === line){
-                this.select_paymentline(undefined);
-            }
-            this.paymentlines.remove(line);
+        if (electronic_payment_method) {
+            electronic_payment_method.remove(line).then(function () {
+                self._deselect_and_remove_paymentline(line);
+
+                // todo jov: backbonejs only triggers when we're about to
+                // remove the paymentline, not when the paymentline is
+                // already removed
+                self.trigger('change', self);
+            });
+        } else {
+            self._deselect_and_remove_paymentline(line);
         }
     },
     clean_empty_paymentlines: function() {

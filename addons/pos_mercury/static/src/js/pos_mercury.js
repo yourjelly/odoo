@@ -315,14 +315,15 @@ var MercuryPaymentMethod = payment_method.AbstractPaymentMethod.extend({
     },
     
     do_reversal: function (line, is_voidsale, old_deferred, retry_nr) {
-        var def = old_deferred || new $.Deferred();
+        var transaction_def = new $.Deferred();
+        var popup_def = old_deferred || new $.Deferred();
         var self = this;
         retry_nr = retry_nr || 0;
 
         // show the transaction popup.
         // the transaction deferred is used to update transaction status
         this.pos.gui.show_popup('payment-transaction', {
-            transaction: def
+            transaction: popup_def
         });
 
         var request_data = _.extend({
@@ -342,58 +343,58 @@ var MercuryPaymentMethod = payment_method.AbstractPaymentMethod.extend({
         }
 
         if (! old_deferred) {
-            def.notify({
+            popup_def.notify({
                 message: message,
             });
         }
 
         var mercury_transaction = new Model('pos_mercury.mercury_transaction');
-        mercury_transaction.call(rpc_method, [request_data], undefined, {timeout: self.server_timeout_in_ms}).then(function (data) {
+        return mercury_transaction.call(rpc_method, [request_data], undefined, {timeout: self.server_timeout_in_ms}).then(function (data) {
+            var def = new $.Deferred();
             if (data === "timeout") {
-                self.retry_mercury_transaction(def, null, retry_nr, true, self.do_reversal, [line, is_voidsale, def, retry_nr + 1]);
-                return;
+                self.retry_mercury_transaction(popup_def, null, retry_nr, true, self.do_reversal, [line, is_voidsale, popup_def, retry_nr + 1]);
+                return def.reject();
             }
 
             if (data === "internal error") {
-                def.resolve({
+                popup_def.resolve({
                     message: _t("Odoo error while processing transaction.")
                 });
-                return;
+                return def.reject();
             }
 
             var response = self.pos.decodeMercuryResponse(data);
 
-            debugger;
             if (! is_voidsale) {
                 if (response.status != 'Approved' || response.message != 'REVERSED') {
                     // reversal was not successful, send voidsale
-                    self.do_reversal(line, true);
+                    return self.do_reversal(line, true);
                 } else {
                     // reversal was successful
-                    def.resolve({
+                    popup_def.resolve({
                         message: _t("Reversal succeeded"),
                     });
 
-                    // self.remove_paymentline_by_ref(line); // todo jov: shouldn't be necessary
-                    self.pos.get_order().remove_paymentline(line);
+                    return def.resolve();
                 }
             } else { // voidsale ended, nothing more we can do
                 if (response.status === 'Approved') {
-                    def.resolve({
+                    popup_def.resolve({
                         message: _t("VoidSale succeeded"),
                     });
 
-                    // self.remove_paymentline_by_ref(line); // todo jov: shouldn't be necessary
-                    self.pos.get_order().remove_paymentline(line);
+                    return def.resolve();
                 } else {
-                    def.resolve({
+                    popup_def.resolve({
                         message: "Error " + response.error + ":<br/>" + response.message,
                     });
+
+                    return def.reject();
                 }
             }
-        }).fail(function (error, event) {
+        }, function (error, event) {
             event.preventDefault();
-            self.retry_mercury_transaction(def, null, retry_nr, false, self.do_reversal, [line, is_voidsale, def, retry_nr + 1]);
+            self.retry_mercury_transaction(popup_def, null, retry_nr, false, self.do_reversal, [line, is_voidsale, popup_def, retry_nr + 1]); // todo jov
         });
     },
         
@@ -406,7 +407,7 @@ var MercuryPaymentMethod = payment_method.AbstractPaymentMethod.extend({
     },
 
     remove: function (line) {
-        this.do_reversal(line);
+        return this.do_reversal(line);
     }
 });
 
