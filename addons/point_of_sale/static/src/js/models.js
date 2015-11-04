@@ -997,13 +997,19 @@ exports.PosModel = Backbone.Model.extend({
             order.add_paymentline(_.find(this.cashregisters, function (register) {
                 return self.electronic_payment_methods[0].journal_id === register.journal.id;
             }));
+
+            order.selected_paymentline.electronic_payment_pending = true; // todo jov: export this
+            order.selected_paymentline.trigger('change', this); // todo jov: before this the reset_input() hack was used to display the amount in the payment line
         }
 
         var journal_id = order.selected_paymentline.cashregister.journal.id;
         var matching_payment_method = this.get_electronic_payment_methods_by_journal_id(journal_id);
 
         if (matching_payment_method) {
-            matching_payment_method.pay(data);
+            matching_payment_method.pay(data).fail(function () {
+                order._deselect_and_remove_paymentline(order.selected_paymentline);
+                order.trigger('change', self);
+            });
         }
     }
 });
@@ -1468,12 +1474,14 @@ exports.Paymentline = Backbone.Model.extend({
             return;
         }
         this.cashregister = options.cashregister;
+        this.electronic_payment_pending = options.electronic_payment_pending;
         this.name = this.cashregister.journal_id[1];
         this.electronic_payment_information = new electronic_payment.ElectronicPaymentInformation(this.order);
     },
     init_from_JSON: function(json){
         this.amount = json.amount;
         this.cashregister = this.pos.cashregisters_by_id[json.statement_id];
+        this.electronic_payment_pending = json.electronic_payment_pending;
         this.name = this.cashregister.journal_id[1];
 
         this.electronic_payment_information = new electronic_payment.ElectronicPaymentInformation();
@@ -1498,6 +1506,9 @@ exports.Paymentline = Backbone.Model.extend({
             this.trigger('change',this);
         }
     },
+    set_electronic_payment_pending: function (waiting) {
+        this.electronic_payment_pending = waiting;
+    },
     // returns the payment type: 'cash' | 'bank'
     get_type: function(){
         return this.cashregister.journal.type;
@@ -1514,7 +1525,8 @@ exports.Paymentline = Backbone.Model.extend({
             account_id: this.cashregister.account_id[0],
             journal_id: this.cashregister.journal_id[0],
             amount: this.get_amount(),
-            electronic_payment_information: this.electronic_payment_information.export_as_JSON()
+            electronic_payment_pending: this.electronic_payment_pending,
+            electronic_payment_information: this.electronic_payment_information.export_as_JSON(),
         };
     },
     //exports as JSON for receipt printing
@@ -1887,6 +1899,14 @@ exports.Order = Backbone.Model.extend({
         if(cashregister.journal.type !== 'cash' || this.pos.config.iface_precompute_cash){
             newPaymentline.set_amount( Math.max(this.get_due(),0) );
         }
+
+        // if we the cashregister is an electronic payment method, add a 'payment waiting' line
+        if (this.pos.get_electronic_payment_methods_by_journal_id(cashregister.journal.id)) {
+            // todo jov: only allow one line of these at the same time
+            newPaymentline.set_electronic_payment_pending(true); // todo jov: export
+            console.log('line waiting on payment');
+        }
+        
         this.paymentlines.add(newPaymentline);
         this.select_paymentline(newPaymentline);
 
@@ -1908,7 +1928,7 @@ exports.Order = Backbone.Model.extend({
         var journal_id = line.cashregister.journal.id;
         var electronic_payment_method = this.pos.get_electronic_payment_methods_by_journal_id(journal_id);
 
-        if (electronic_payment_method) {
+        if (electronic_payment_method && ! line.electronic_payment_pending) {
             electronic_payment_method.remove(line).then(function () {
                 self._deselect_and_remove_paymentline(line);
 

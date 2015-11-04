@@ -10,34 +10,6 @@
     </div>
   </t>
 
-  <t t-extend="PaymentScreen-Paymentlines">
-    <t t-jquery=".col-name" t-operation="inner">
-      <t t-if="line.cashregister.journal.type === 'bank'">
-        <t t-if="line.mercury_swipe_pending">
-          <div>WAITING FOR SWIPE</div>
-        </t>
-        <t t-if="! line.mercury_swipe_pending">
-          <t t-esc='line.name' />
-        </t>
-      </t>
-      <t t-if="line.cashregister.journal.type !== 'bank'">
-        <t t-esc='line.name' />
-      </t>
-    </t>
-    <t t-jquery="tbody tr.paymentline.selected">
-      this.removeAttr("class");
-      this.attr('t-attf-class', 'paymentline selected #{line.mercury_swipe_pending ? "o_pos_mercury_swipe_pending" : ""}');
-    </t>
-    <t t-jquery="tbody tr.paymentline[t-att-data-cid*='line.cid']">
-      this.removeAttr("class");
-      this.attr('t-attf-class', 'paymentline #{line.mercury_swipe_pending ? "o_pos_mercury_swipe_pending" : ""}');
-    </t>
-    <t t-jquery="tbody tr td.col-tendered.edit">
-      this.removeAttr("class");
-      this.attr('t-attf-class', 'col-tendered edit #{line.mercury_swipe_pending ? "o_pos_mercury_swipe_pending" : ""}');
-    </t>
-  </t>
-
   <t t-name="PosMercurySignature">
     <t t-foreach="paymentlines" t-as="paymentline">
       <t t-if="paymentline.mercury_data &amp;&amp; ! printed_signature">

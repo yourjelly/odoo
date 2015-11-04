@@ -1,3 +1,7 @@
+/* barcode:
+%B4003000050006781^TEST/MPS^15120000000000000?;4003000050006781=15120000000000000000?|0600|B257B61F3BB59B6A6CDE26795606536F6F0AD84F11C215BCED3FDFD4EBBE6B3BBD248783DF06C295E810C11E95DFEE61|31847E35B0E3EB4A703823550B9A213BC9843813A757A43DA4EADDA056571FFF977F8C8ED5CE8508||61403000|7DB1760CF205E621C057D39E8CFCBF773F4195DCF3507F6D0BB2DD399BF1915A46274F23B1EACA6F8E342575314A00FCCDE4BD32FC0705EB|B29C0CE120214AA|755180835389C38D|9012090B29C0CE0007C7|E375||1000
+*/
+
 odoo.define('pos_mercury.pos_mercury', function (require) {
 "use strict";
 
@@ -113,7 +117,7 @@ var MercuryPaymentMethod = payment_method.AbstractPaymentMethod.extend({
         var lines = this.pos.get_order().get_paymentlines();
 
         for (i = 0; i < lines.length; i++) {
-            if (lines[i].mercury_swipe_pending) {
+            if (lines[i].electronic_payment_pending) {
                 return lines[i];
             }
         }
@@ -137,10 +141,9 @@ var MercuryPaymentMethod = payment_method.AbstractPaymentMethod.extend({
         return false;
     },
 
-    retry_mercury_transaction: function (def, response, retry_nr, can_connect_to_server, callback, args) {
+    retry_mercury_transaction: function (deferred_transaction, deferred_popup, response, retry_nr, can_connect_to_server, callback, args) {
         var self = this;
         var message = "";
-        var callback_def = new $.Deferred();
 
         if (retry_nr < self.server_retries) {
             if (response) {
@@ -148,16 +151,12 @@ var MercuryPaymentMethod = payment_method.AbstractPaymentMethod.extend({
             } else {
                 message = "Retry #" + (retry_nr + 1) + "...";
             }
-            def.notify({
+            deferred_popup.notify({
                 message: message
             });
 
             setTimeout(function () {
-                callback.apply(self, args).then(function () {
-                    callback_def.resolve();
-                }, function () {
-                    callback_def.reject();
-                });
+                callback.apply(self, args);
             }, 1000);
         } else {
             if (response) {
@@ -169,40 +168,35 @@ var MercuryPaymentMethod = payment_method.AbstractPaymentMethod.extend({
                     message = _t("No response from server (connected to network?)");
                 }
             }
-            def.resolve({
+            deferred_popup.resolve({
                 message: message,
                 auto_close: false
             });
-            callback_def.reject();
-        }
 
-        return callback_def;
+            deferred_transaction.reject();
+        }
     },
 
-    credit_code_transaction: function (parsed_result, old_deferred, retry_nr) {
-        if(this.pos.getOnlinePaymentJournals().length === 0) {
-            return;
-        }
-
+    credit_code_transaction: function (parsed_result, deferred_transaction, deferred_popup, retry_nr) {
         var self = this;
         var decodedMagtek = self.pos.decodeMagtek(parsed_result.code);
+
+        deferred_transaction = deferred_transaction || new $.Deferred();            
+        
+        if(this.pos.getOnlinePaymentJournals().length === 0) {
+            return deferred_transaction.reject();
+        }
 
         if (! decodedMagtek) {
             this.pos.gui.show_popup('error',{
                 'title': _t('Could not read card'),
                 'body':  _t('This can be caused by a badly executed swipe or by not having your keyboard layout set to US QWERTY (not US International).'),
             });
-            return;
+            return deferred_transaction.reject();
         }
 
         var swipe_pending_line = self._get_swipe_pending_line();
-        var purchase_amount = 0;
-
-        if (swipe_pending_line) {
-            purchase_amount = swipe_pending_line.get_amount();
-        } else {
-            purchase_amount = self.pos.get_order().get_due();
-        }
+        var purchase_amount = swipe_pending_line.get_amount();
 
         var transaction = {
             'encrypted_key'     : decodedMagtek['encrypted_key'],
@@ -214,17 +208,17 @@ var MercuryPaymentMethod = payment_method.AbstractPaymentMethod.extend({
             'journal_id'        : parsed_result.journal_id,
         };
 
-        var def = old_deferred || new $.Deferred();
         retry_nr = retry_nr || 0;
 
         // show the transaction popup.
         // the transaction deferred is used to update transaction status
         // if we have a previous deferred it indicates that this is a retry
-        if (! old_deferred) {
+        if (! deferred_popup) {
+            deferred_popup = new $.Deferred();
             self.pos.gui.show_popup('payment-transaction', {
-                transaction: def
+                transaction: deferred_popup
             });
-            def.notify({
+            deferred_popup.notify({
                 message: _t('Handling transaction...'),
             });
         }
@@ -233,22 +227,22 @@ var MercuryPaymentMethod = payment_method.AbstractPaymentMethod.extend({
         mercury_transaction.call('do_payment', [transaction], undefined, {timeout: self.server_timeout_in_ms}).then(function (data) {
             // if not receiving a response from Mercury, we should retry
             if (data === "timeout") {
-                self.retry_mercury_transaction(def, null, retry_nr, true, self.credit_code_transaction, [parsed_result, def, retry_nr + 1]);
-                return;
+                self.retry_mercury_transaction(deferred_transaction, deferred_popup, null, retry_nr, true, self.credit_code_transaction, [parsed_result, deferred_transaction, deferred_popup, retry_nr + 1]);
+                return deferred_transaction.reject();
             }
 
             if (data === "not setup") {
-                def.resolve({
+                deferred_popup.resolve({
                     message: _t("Please setup your Mercury merchant account.")
                 });
-                return;
+                return deferred_transaction.reject();
             }
 
             if (data === "internal error") {
-                def.resolve({
+                deferred_popup.resolve({
                     message: _t("Odoo error while processing transaction.")
                 });
-                return;
+                return deferred_transaction.reject();
             }
 
             var response = self.pos.decodeMercuryResponse(data);
@@ -258,20 +252,17 @@ var MercuryPaymentMethod = payment_method.AbstractPaymentMethod.extend({
                 // AP* indicates a duplicate request, so don't add anything for those
                 if (response.message === "AP*" && self._does_credit_payment_line_exist(response.authorize, decodedMagtek['number'],
                                                                                        response.card_type, decodedMagtek['name'])) {
-                    def.resolve({
+                    deferred_popup.resolve({
                         message: self.lookUpCodeTransaction["Approved"][response.error],
                         auto_close: true,
                     });
+
+                    return deferred_transaction.resolve();
                 } else {
                     // If the payment is approved, add a payment line
                     var order = self.pos.get_order();
 
-                    if (swipe_pending_line) {
-                        order.select_paymentline(swipe_pending_line);
-                    } else {
-                        order.add_paymentline(self.pos.getCashRegisterByJournalID(parsed_result.journal_id));
-                    }
-
+                    order.select_paymentline(swipe_pending_line);
                     order.selected_paymentline.paid = true;
                     order.selected_paymentline.mercury_swipe_pending = false;
                     order.selected_paymentline.mercury_amount = response.authorize;
@@ -291,48 +282,45 @@ var MercuryPaymentMethod = payment_method.AbstractPaymentMethod.extend({
                     order.trigger('change', order); // needed so that export_to_JSON gets triggered
 
                     if (response.message === "PARTIAL AP") {
-                        def.resolve({
+                        deferred_popup.resolve({
                             message: _t("Partially approved"),
                             auto_close: false,
                         });
                     } else {
-                        def.resolve({
+                        deferred_popup.resolve({
                             message: self.lookUpCodeTransaction["Approved"][response.error],
                             auto_close: true,
                         });
                     }
+
+                    return deferred_transaction.resolve();
                 }
             }
 
             // if an error related to timeout or connectivity issues arised, then retry the same transaction
             else {
                 if (self.lookUpCodeTransaction["TimeoutError"][response.error]) { // recoverable error
-                    self.retry_mercury_transaction(def, response, retry_nr, true, self.credit_code_transaction, [parsed_result, def, retry_nr + 1]);
+                    return self.retry_mercury_transaction(deferred_transaction, deferred_popup, response, retry_nr, true, self.credit_code_transaction, [parsed_result, deferred_transaction, deferred_popup, retry_nr + 1]);
                 } else { // not recoverable
-                    def.resolve({
+                    deferred_popup.resolve({
                         message: "Error " + response.error + ":<br/>" + response.message,
                         auto_close: false
                     });
+
+                    return deferred_transaction.reject();
                 }
             }
-
-        }).fail(function (error, event) {
-            event.preventDefault();
-            self.retry_mercury_transaction(def, null, retry_nr, false, self.credit_code_transaction, [parsed_result, def, retry_nr + 1]);
+        }).fail(function (error) {
+            return self.retry_mercury_transaction(deferred_transaction, deferred_popup, null, retry_nr, false, self.credit_code_transaction, [parsed_result, deferred_transaction, deferred_popup, retry_nr + 1]);
         });
+
+        return deferred_transaction;
     },
     
-    do_reversal: function (line, is_voidsale, old_deferred, retry_nr) {
-        var transaction_def = new $.Deferred();
-        var popup_def = old_deferred || new $.Deferred();
+    do_reversal: function (line, is_voidsale, deferred_transaction, deferred_popup, retry_nr) {
         var self = this;
+        deferred_transaction = deferred_transaction || new $.Deferred();
         retry_nr = retry_nr || 0;
-
-        // show the transaction popup.
-        // the transaction deferred is used to update transaction status
-        this.pos.gui.show_popup('payment-transaction', {
-            transaction: popup_def
-        });
 
         var request_data = _.extend({
             'transaction_type': 'Credit',
@@ -350,24 +338,29 @@ var MercuryPaymentMethod = payment_method.AbstractPaymentMethod.extend({
             rpc_method = "do_reversal";
         }
 
-        if (! old_deferred) {
-            popup_def.notify({
+        if (! deferred_popup) {
+            deferred_popup = new $.Deferred();
+
+            this.pos.gui.show_popup('payment-transaction', {
+                transaction: deferred_popup
+            });
+
+            deferred_popup.notify({
                 message: message,
             });
         }
 
         var mercury_transaction = new Model('pos_mercury.mercury_transaction');
-        return mercury_transaction.call(rpc_method, [request_data], undefined, {timeout: self.server_timeout_in_ms}).then(function (data) {
-            var def = new $.Deferred();
+        mercury_transaction.call(rpc_method, [request_data], undefined, {timeout: self.server_timeout_in_ms}).then(function (data) {
             if (data === "timeout") {
-                return self.retry_mercury_transaction(popup_def, null, retry_nr, true, self.do_reversal, [line, is_voidsale, popup_def, retry_nr + 1]);
+                return self.retry_mercury_transaction(deferred_transaction, deferred_popup, null, retry_nr, true, self.do_reversal, [line, is_voidsale, deferred_transaction, deferred_popup, retry_nr + 1]);
             }
 
             if (data === "internal error") {
-                popup_def.resolve({
+                deferred_popup.resolve({
                     message: _t("Odoo error while processing transaction.")
                 });
-                return def.reject();
+                return deferred_transaction.reject();
             }
 
             var response = self.pos.decodeMercuryResponse(data);
@@ -378,31 +371,32 @@ var MercuryPaymentMethod = payment_method.AbstractPaymentMethod.extend({
                     return self.do_reversal(line, true);
                 } else {
                     // reversal was successful
-                    popup_def.resolve({
+                    deferred_popup.resolve({
                         message: _t("Reversal succeeded"),
                     });
 
-                    return def.resolve();
+                    return deferred_transaction.resolve();
                 }
             } else { // voidsale ended, nothing more we can do
                 if (response.status === 'Approved') {
-                    popup_def.resolve({
+                    deferred_popup.resolve({
                         message: _t("VoidSale succeeded"),
                     });
 
-                    return def.resolve();
+                    return deferred_transaction.resolve();
                 } else {
-                    popup_def.resolve({
+                    deferred_popup.resolve({
                         message: "Error " + response.error + ":<br/>" + response.message,
                     });
 
-                    return def.reject();
+                    return deferred_transaction.reject();
                 }
             }
-        }, function (error, event) {
-            event.preventDefault();
-            return self.retry_mercury_transaction(popup_def, null, retry_nr, false, self.do_reversal, [line, is_voidsale, popup_def, retry_nr + 1]);
+        }, function (error) {
+            self.retry_mercury_transaction(deferred_transaction, deferred_popup, null, retry_nr, false, self.do_reversal, [line, is_voidsale, deferred_transaction, deferred_popup, retry_nr + 1]);
         });
+
+        return deferred_transaction;
     },
         
     // ------ INTERFACE IMPLEMENTATION ---------
@@ -410,7 +404,7 @@ var MercuryPaymentMethod = payment_method.AbstractPaymentMethod.extend({
     on_create_paymentline: function (created_paymentline) {},
 
     pay: function (parsed_barcode_result) {
-        this.credit_code_transaction(parsed_barcode_result);        
+        return this.credit_code_transaction(parsed_barcode_result);        
     },
 
     remove: function (line) {
@@ -630,37 +624,37 @@ PaymentScreenWidget.include({
         var i;
         var order = this.pos.get_order();
         var cashregister = null;
-        for (i = 0; i < this.pos.cashregisters.length; i++) {
-            if (this.pos.cashregisters[i].journal_id[0] === id){
-                cashregister = this.pos.cashregisters[i];
-                break;
-            }
-        }
+        // for (i = 0; i < this.pos.cashregisters.length; i++) {
+        //     if (this.pos.cashregisters[i].journal_id[0] === id){
+        //         cashregister = this.pos.cashregisters[i];
+        //         break;
+        //     }
+        // }
 
-        if (cashregister.journal.pos_mercury_config_id) {
-            var already_swipe_pending = false;
-            var lines = order.get_paymentlines();
+        // if (cashregister.journal.pos_mercury_config_id) {
+        //     var already_swipe_pending = false;
+        //     var lines = order.get_paymentlines();
 
-            for (i = 0; i < lines.length; i++) {
-                if (lines[i].cashregister.journal.pos_mercury_config_id && lines[i].mercury_swipe_pending) {
-                    already_swipe_pending = true;
-                }
-            }
+        //     for (i = 0; i < lines.length; i++) {
+        //         if (lines[i].cashregister.journal.pos_mercury_config_id && lines[i].mercury_swipe_pending) {
+        //             already_swipe_pending = true;
+        //         }
+        //     }
 
-            if (already_swipe_pending) {
-                this.gui.show_popup('error',{
-                    'title': 'Error',
-                    'body':  _t('One credit card swipe already pending.'),
-                });
-            } else {
-                this._super(id);
-                order.selected_paymentline.mercury_swipe_pending = true;
-                this.render_paymentlines();
-                order.trigger('change', order); // needed so that export_to_JSON gets triggered
-            }
-        } else {
+        //     if (already_swipe_pending) {
+        //         this.gui.show_popup('error',{
+        //             'title': 'Error',
+        //             'body':  _t('One credit card swipe already pending.'),
+        //         });
+        //     } else {
+        //         this._super(id);
+        //         order.selected_paymentline.mercury_swipe_pending = true;
+        //         this.render_paymentlines();
+        //         order.trigger('change', order); // needed so that export_to_JSON gets triggered
+        //     }
+        // } else {
             this._super(id);
-        }
+        // }
     },
 
     // before validating, get rid of any paymentlines that are waiting

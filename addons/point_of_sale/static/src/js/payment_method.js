@@ -129,10 +129,12 @@ odoo.define('point_of_sale.electronic_payment_method_usage_example', function (r
             console.log("Set " + received_token + " on paymentline");
 
             this.pos.get_order().selected_paymentline.paid = true;
+            return new $.Deferred().resolve();
         },
 
         remove: function (paymentline) {
             console.log("implemented remove");
+            return new $.Deferred().resolve();
         }
     });
 

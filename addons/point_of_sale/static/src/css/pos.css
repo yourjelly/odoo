@@ -1275,6 +1275,15 @@ td {
     position: relative;
     border-radius: 3px;
 }
+
+.pos .paymentline.selected.o_pos_electronic_payment_pending, .pos .paymentline.o_pos_electronic_payment_pending {
+    background: rgb(239, 153, 65);
+}
+.pos .col-tendered.edit.o_pos_electronic_payment_pending {
+    color: rgb(239, 153, 65);
+    box-shadow: 0px 0px 0px 3px rgb(239, 153, 65);
+}
+
 .pos .paymentline > *{
     padding: 8px 12px;
 }
