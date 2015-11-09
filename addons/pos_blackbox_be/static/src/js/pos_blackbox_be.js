@@ -1179,6 +1179,19 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             if (fiscal_position_button) {
                 fiscal_position_button.hide();
             }
+
+            // splitting bills is not an issue. The issue is that
+            // during bill splitting you can select orders and click
+            // on back. This splits the order into two orders. In
+            // order to make this legal, we have to generate a Pro
+            // Forma sale for the new order and a Pro Forma refund for
+            // the old table (should be identical to the new order I
+            // suppose).
+            var split_bill_button = this.action_buttons['splitbill'];
+
+            if (split_bill_button) {
+                split_bill_button.hide();
+            }
         }
     });
 
