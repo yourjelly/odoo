@@ -5,6 +5,7 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     var devices = require('point_of_sale.devices');
     var chrome = require('point_of_sale.chrome');
     var gui = require('point_of_sale.gui');
+    var popups = require('point_of_sale.popups');
     var Class = require('web.Class');
     var utils = require('web.utils');
     var PosBaseWidget = require('point_of_sale.BaseWidget');
@@ -789,7 +790,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         },
 
         _show_could_not_connect_error: function () {
-            this.pos.gui.show_popup("error", {
+            this.pos.gui.show_popup("blocking-error", {
                 'title': _t("Fiscal Data Module error"),
                 'body':  _t("Could not connect to the Fiscal Data Module."),
             });
@@ -835,6 +836,26 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             });
         },
 
+        _retry_request_fdm_hash_and_sign: function (packet, hide_error) {
+            var self = this;
+
+            if (! hide_error) {
+                self._show_could_not_connect_error();
+            }
+
+            var delayed_request_hash_and_sign = new $.Deferred();
+
+            // rate limit the retries to 1 every 2 sec
+            // because the blackbox freaks out if we send messages too fast
+            setTimeout(function () {
+                delayed_request_hash_and_sign.resolve();
+            }, 2000);
+
+            return delayed_request_hash_and_sign.then(function () {
+                return self.request_fdm_hash_and_sign(packet, "hide error");
+            });
+        },
+
         request_fdm_hash_and_sign: function (packet, hide_error) {
             var self = this;
 
@@ -845,14 +866,13 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                 'response_size': 109
             }).then(function (response) {
                 if (! response) {
-                    if (! hide_error) {
-                        self._show_could_not_connect_error();
-                    }
-
-                    return self.request_fdm_hash_and_sign(packet, "hide error");
+                    return self._retry_request_fdm_hash_and_sign(packet, hide_error);
                 } else {
                     var parsed_response = self.parse_fdm_hash_and_sign_response(response);
                     console.log(parsed_response);
+
+                    // close any blocking-error popup
+                    self.pos.gui.close_popup();
 
                     if (self._handle_fdm_errors(parsed_response)) {
                         return parsed_response;
@@ -861,8 +881,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                     }
                 }
             }, function () {
-                self._show_could_not_connect_error();
-                return "";
+                return self._retry_request_fdm_hash_and_sign(packet, hide_error);
             });
         }
     });
@@ -1258,6 +1277,14 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             });
         }
     });
+
+    var blocking_error_popup = popups.extend({
+        template: 'BlockingErrorPopupWidget',
+        show: function (options) {
+            this._super(options);
+        }
+    });
+    gui.define_popup({name:'blocking-error', widget: blocking_error_popup});
 
     screens.define_action_button({
         'name': 'work_in',

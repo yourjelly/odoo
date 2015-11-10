@@ -22,6 +22,15 @@
         <t t-jquery=".button.print" t-operation="replace"/>
     </t>
 
+    <t t-name="BlockingErrorPopupWidget">
+        <div class="modal-dialog">
+            <div class="popup popup-error">
+                <p class="title"><t t-esc=" widget.options.title || 'Error' " /></p>
+                <p class="body"><t t-esc=" widget.options.body || '' "/></p>
+            </div>
+        </div>
+    </t>
+
     <!-- p18 -->
     <t t-extend="PosTicket">
         <t t-jquery="t[t-esc='moment().format(\'L LT\')']" t-operation="replace">
