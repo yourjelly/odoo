@@ -548,6 +548,11 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             } else {
                 this._super(screen_name, params, refresh);
             }
+        },
+
+        close: function () {
+            // send a PS when closing the POS
+            this.pos._push_pro_forma().always(this._super.bind(this));
         }
     });
 
