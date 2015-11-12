@@ -194,6 +194,22 @@ class pos_session(models.Model):
                     self.amount_of_corrections += 1
                     self.total_corrections += line.price_subtotal_incl
 
+    @api.multi
+    def wkf_action_closing_control(self):
+        # The government does not want PS orders that have not been
+        # finalized into an NS before we close a session
+        pro_forma_orders = self.env['pos.order_pro_forma'].search([('session_id', '=', self.id)])
+        regular_orders = self.env['pos.order'].search([('session_id', '=', self.id)])
+
+        # we can link pro forma orders to regular orders using their pos_reference
+        pro_forma_orders = {order.pos_reference for order in pro_forma_orders}
+        regular_orders = {order.pos_reference for order in regular_orders}
+
+        if not regular_orders.issuperset(pro_forma_orders):
+            raise UserError(_("Your session still contains open orders. Please close all of them first."))
+
+        return super(pos_session, self).wkf_action_closing_control()
+
     def get_user_report_data(self):
         data = {}
 
