@@ -1001,24 +1001,25 @@
 
         <template id="FieldTextHtmlInline" name="Editor layout">
             <t t-set="head">
+                <t t-raw="head"/>
                 <t t-if="enable_editor">
                     <link rel="stylesheet" href="/point_of_sale/static/src/css/pos_screen_editor_thumb.css" type="text/css"/>
                 </t>
             </t>
             <t t-call="web_editor.layout">
-                <div class="modal-dialog modal-md show">
-                    <div class="modal-content o_popup_modal_content">
-                        <div class="o_popup_modal_body text-center">
-                            <div class="o_popup_content_dev">
+                <!-- <div class="modal-dialog modal-md show"> -->
+                <!--     <div class="modal-content o_popup_modal_content"> -->
+                <!--         <div class="o_popup_modal_body text-center"> -->
+                <!--             <div class="o_popup_content_dev"> -->
                                 <div id="editable_area" class="o_editable" t-att-data-oe-model="model" t-att-data-oe-field="field" t-att-data-oe-id="res_id" data-oe-type="html">
                                     <!-- Can be removed once default values are ok for the editor -->
                                     <t t-raw="content">
                                     </t>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            <!-- </div> -->
+                <!--         </div> -->
+                <!--     </div> -->
+                <!-- </div> -->
             </t>
         </template>
     </data>

@@ -601,7 +601,109 @@
         <record id="product.product_product_59" model="product.product"> <field name="available_in_pos" eval="False"/> </record>
         <record id="sale.advance_product_0" model="product.product"> <field name="available_in_pos" eval="False"/> </record>
 
+        <record model="pos.config" id="pos_config_main">
+            <field name="screen_html">
+                <![CDATA[
+    <div class="container-fluid pos-container">
+      <div class="row">
+        <div class="col-md-12 pos-header">
+          <div>
+            <img src="/logo" alt="Your Company Logo" class="img img-responsive">
+          </div>
+        </div>
+        <div class="col-md-12 pos-body">
+          <div class="col-md-4 pos-ad oe_structure">
+            <!-- SNIPPETS -->
+            <!-- <template name="Text-Image" id="s_text_image"> -->
+            <!-- <section class="s_text_image oe_structure">
+              <div class="container-fluid">
+                <div class="row">
+                  <div class="col-md-12">
+                    <h2 class="text-center">Awesome Timesheet App</h2>
+                  </div>
+                  <div class="col-md-12">
+                    <img src="img/pos_screen_02.png" alt="" class="img img-responsive center-block">
+                  </div>
+                </div>
+              </div>
+            </section> -->
+            <!-- </template> -->
 
+            <!-- <template name="Image-Text" id="s_image_text">
+                 <section class="s_image_text oe_structure">
+                   <div class="container-fluid">
+                     <div class="row">
+                       <div class="col-md-12">
+                         <img src="img/pos_screen_02.png" alt="" class="img img-responsive center-block">
+                       </div>
+                       <div class="col-md-12">
+                         <h2 class="text-center">Awesome Timesheet App</h2>
+                       </div>
+                     </div>
+                   </div>
+                 </section>
+            </template> -->
+          </div>
+          <div class="col-md-8 pos-content table-responsive">
+            <div class="pos-content-table">
+              <table>
 
+                <!-- HEADER -->
+                <div><h2>The following items are in your basket:</h2></div>
+                <thead>
+                  <tr>
+                    <td>Image</td>
+                    <td>Product name</td>
+                    <td style="text-align:right;">Quantity</td>
+                    <td style="text-align:right;">Price / Item</td>
+                  </tr>
+                </thead>
+
+                <tbody class="table-items table table-striped">
+                  <tr class="product-cell">
+                    <td class="product-img" align="center">
+                      <img src="/point_of_sale/static/img/evian_1l-image.jpg" alt="" class="img img-responsive"/>
+                    </td>
+                    <td>Evian 2l</td>
+                    <td align="right">1</td>
+                    <td align="right">$ 2.20</td>
+                  </tr>
+                  <tr class="product-cell">
+                    <td class="product-img" align="center">
+                      <img src="/point_of_sale/static/img/oranges-image.jpg" alt="" class="img img-responsive">
+                    </td>
+                    <td>Oranges</td>
+                    <td align="right">1</td>
+                    <td align="right">$ 4.10</td>
+                  </tr>
+                </tbody>
+                
+              </table>
+            </div>
+
+            <!-- TABLE FOOTER -->
+
+            <div class="col-md-12 total">
+              <div class="col-md-3 col-md-offset-6 col-xs-6 text-right">
+                <span class="total-amount">TOTAL:</span><br>
+                <span>CASH (USD):</span><br>
+                <span>CHANGE:</span>
+              </div>
+
+              <div class="col-md-3 col-xs-6 text-right">
+                <span class="total-amount">$ 2500.00</span><br>
+                <span>$ 2233.00</span><br>
+                <span>$ 247.00</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+]]>
+            </field>
+        </record>
     </data>
 </openerp>

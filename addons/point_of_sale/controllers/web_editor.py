@@ -9,7 +9,9 @@ class Web_Editor(Web_Editor):
     def point_of_sale_FieldTextHtmlEmailTemplate(self, model=None, res_id=None, field=None, callback=None, **kwargs):
         kwargs['snippets'] = '/point_of_sale/snippets'
         kwargs['template'] = 'point_of_sale.FieldTextHtmlInline'
-        return self.FieldTextHtmlInline(model, res_id, field, callback, **kwargs)
+        extra_head = request.registry["ir.ui.view"].render(request.cr, request.uid, 'point_of_sale.extra_head', None, context=request.context)
+
+        return self.FieldTextHtmlInline(model, res_id, field, callback, head=extra_head, **kwargs)
 
     @http.route(['/point_of_sale/snippets'], type='json', auth="user", website=True)
     def point_of_sale_snippets(self):
