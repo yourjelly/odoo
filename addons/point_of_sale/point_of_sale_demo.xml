@@ -613,36 +613,15 @@
         </div>
         <div class="col-md-12 pos-body">
           <div class="col-md-4 pos-ad oe_structure">
-            <!-- SNIPPETS -->
-            <!-- <template name="Text-Image" id="s_text_image"> -->
-            <!-- <section class="s_text_image oe_structure">
+            <section class="s_text_image oe_structure">
               <div class="container-fluid">
                 <div class="row">
                   <div class="col-md-12">
-                    <h2 class="text-center">Awesome Timesheet App</h2>
-                  </div>
-                  <div class="col-md-12">
-                    <img src="img/pos_screen_02.png" alt="" class="img img-responsive center-block">
+                    <img src="/point_of_sale/static/src/img/odoo_ad.png" alt="" class="img img-responsive center-block">
                   </div>
                 </div>
               </div>
-            </section> -->
-            <!-- </template> -->
-
-            <!-- <template name="Image-Text" id="s_image_text">
-                 <section class="s_image_text oe_structure">
-                   <div class="container-fluid">
-                     <div class="row">
-                       <div class="col-md-12">
-                         <img src="img/pos_screen_02.png" alt="" class="img img-responsive center-block">
-                       </div>
-                       <div class="col-md-12">
-                         <h2 class="text-center">Awesome Timesheet App</h2>
-                       </div>
-                     </div>
-                   </div>
-                 </section>
-            </template> -->
+            </section>
           </div>
           <div class="col-md-8 pos-content table-responsive">
             <div class="pos-content-table">
