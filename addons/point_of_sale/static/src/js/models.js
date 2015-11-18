@@ -718,22 +718,31 @@ exports.PosModel = Backbone.Model.extend({
 
         // when all images are loaded in product.image_base64
         $.when.apply($, get_image_deferreds).then(function () {
-            var order_data = "";
+            var rendered_order_lines = "";
+            var rendered_payment_lines = "";
 
             if (order) {
-                order_data = QWeb.render('CustomerFacingDisplay', {
+                rendered_order_lines = QWeb.render('CustomerFacingDisplayOrderLines', {
+                    'orderlines': order.get_orderlines(),
+                    'widget': self.chrome,
+                });
+                rendered_payment_lines = QWeb.render('CustomerFacingDisplayPaymentLines', {
                     'order': order,
                     'widget': self.chrome,
                 });
+                debugger;
             }
 
-            // todo jov: this should replace a <div> or something that contains the
-            // 'demo' data in the orders snippet. fix after design is finished
-            rendered_html = rendered_html.replace("[[orders]]", order_data);
+            var $rendered_html = $(rendered_html);
+            $rendered_html.find('.table-striped.dynamic-update').html(rendered_order_lines);
+            $rendered_html.find('.total-amount.dynamic-update').html(self.chrome.format_currency(order.get_total_with_tax()));
+            $rendered_html.find('.payment.dynamic-update').html(rendered_payment_lines);
+            rendered_html = $rendered_html.prop('outerHTML');
 
-            // hack for base url, necessary for assets we get straight
-            // from the Odoo server (like eg. the logo)
-            rendered_html = '<base href="' + window.location.origin + '/"/>' + rendered_html;
+            // temp
+            rendered_html = '<head><base href="' + window.location.origin + '/"/><link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"/><link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css"/><link href="/point_of_sale/static/src/css/user_facing_screen.css" rel="stylesheet"/><script>window.onload = function () { var to_scroll = document.querySelector(".pos-content"); to_scroll.scrollTop = to_scroll.scrollHeight; };</script></head>' + rendered_html;
+
+            debugger;
 
             self.proxy.update_screen(rendered_html);
         });
@@ -2054,6 +2063,7 @@ exports.Order = Backbone.Model.extend({
         return total;
     },
     get_change: function(paymentline) {
+        debugger;
         if (!paymentline) {
             var change = this.get_total_paid() - this.get_total_with_tax();
         } else {

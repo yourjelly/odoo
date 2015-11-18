@@ -659,7 +659,7 @@
                   </tr>
                 </thead>
 
-                <tbody class="table-items table table-striped">
+                <tbody class="table-items table table-striped dynamic-update">
                   <tr class="product-cell">
                     <td class="product-img" align="center">
                       <img src="/point_of_sale/static/img/evian_1l-image.jpg" alt="" class="img img-responsive"/>
@@ -675,28 +675,37 @@
                     <td>Oranges</td>
                     <td align="right">1</td>
                     <td align="right">$ 4.10</td>
-                  </tr>
+                    </tr>
+                    <tr class="product-cell testing-drop"/>
                 </tbody>
                 
               </table>
             </div>
 
             <!-- TABLE FOOTER -->
-
             <div class="col-md-12 total">
               <div class="col-md-3 col-md-offset-6 col-xs-6 text-right">
                 <span class="total-amount">TOTAL:</span><br>
-                <span>CASH (USD):</span><br>
-                <span>CHANGE:</span>
+              </div>
+              <div class="col-md-3 text-right">
+                <span class="total-amount dynamic-update">$ 2500.00</span><br>
               </div>
 
-              <div class="col-md-3 col-xs-6 text-right">
-                <span class="total-amount">$ 2500.00</span><br>
-                <span>$ 2233.00</span><br>
-                <span>$ 247.00</span>
+              <div class="payment dynamic-update">
+                <div class="col-md-3 col-md-offset-6 col-xs-6 text-right">
+                  <span>CASH (USD):</span>
+                </div>
+                <div class="col-md-3 text-right">
+                  <span>$ 2233.00</span>
+                  </div>
+                <div class="col-md-3 col-md-offset-6 col-xs-6 text-right">
+                  <span>CHANGE:</span>
+                </div>
+                <div class="col-md-3 text-right">
+                  <span>$ 247.00</span>
+                </div>
               </div>
             </div>
-
           </div>
         </div>
       </div>

@@ -1456,27 +1456,44 @@
         </div>
     </t>
 
-    <t t-name="CustomerFacingDisplay">
-        <table>
-            <t t-foreach="order.get_orderlines()" t-as="orderline">
-                <tr>
-                    <td><img t-att-src='orderline.product.image_base64'/></td>
-                    <td><t t-esc="orderline.product.display_name"/></td>
-                    <td><t t-esc="orderline.get_quantity_str()"/></td>
-                    <td><t t-esc="widget.format_currency(orderline.get_display_price())"/></td>
-                </tr>
-            </t>
-            <t t-foreach="order.get_paymentlines()" t-as="paymentline">
-                <tr>
-                    <td></td>
-                    <td colspan="2"><t t-esc="paymentline.name"/></td>
-                    <td><t t-esc="widget.format_currency(paymentline.get_amount())"/></td>
-                </tr>
-            </t>
-        </table>
-
-        <div>Total: <t t-esc="widget.format_currency(order.get_total_with_tax())"/></div>
-        <div>Change: <t t-esc="widget.format_currency(order.get_change())"/></div>
+    <t t-name="CustomerFacingDisplayOrderLines">
+        <t t-foreach="orderlines" t-as="orderline">
+            <tr class="product-cell">
+                <td class="product-img" align="center">
+                    <img t-att-src='orderline.product.image_base64' alt="" class="img img-responsive"/>
+                </td>
+                <td><t t-esc="orderline.product.display_name"/></td>
+                <td align="right"><t t-esc="orderline.get_quantity_str()"/></td>
+                <td align="right"><t t-esc="widget.format_currency(orderline.get_display_price())"/></td>
+            </tr>
+        </t>
+    </t>
+    <t t-name="CustomerFacingDisplayPaymentLines">
+        <t t-foreach="order.get_paymentlines()" t-as="paymentline">
+            <div class="col-md-3 col-md-offset-6 col-xs-6 text-right">
+                <span><t t-esc="paymentline.name"/></span>
+            </div>
+            <div class="col-md-3 text-right">
+                <span><t t-esc="widget.format_currency(paymentline.get_amount())"/></span>
+            </div>
+        </t>
+        <t t-if="order.get_paymentlines().length > 0">
+            <div class="col-md-3 col-md-offset-6 col-xs-6 text-right">
+                <span>CHANGE:</span>
+            </div>
+            <div class="col-md-3 text-right">
+                <span><t t-esc="widget.format_currency(order.get_change())"/></span>
+            </div>
+        </t>
+        <!-- <t t-foreach="order.get_paymentlines()" t-as="paymentline"> -->
+        <!--     <tr> -->
+        <!--         <td></td> -->
+        <!--         <td colspan="2"><t t-esc="paymentline.name"/></td> -->
+        <!--         <td><t t-esc="widget.format_currency(paymentline.get_amount())"/></td> -->
+        <!--     </tr> -->
+        <!-- </t> -->
+        <!-- <div>Total: <t t-esc="widget.format_currency(order.get_total_with_tax())"/></div> -->
+        <!-- <div>Change: <t t-esc="widget.format_currency(order.get_change())"/></div> -->
     </t>
 
 </templates>
