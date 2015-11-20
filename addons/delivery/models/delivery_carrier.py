@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
+import binascii
 import logging
+from pyPdf import PdfFileWriter, PdfFileReader
+try:
+    import cStringIO as StringIO
+except ImportError:
+    import StringIO
+
 from openerp import api, fields, models, _
 from openerp.exceptions import UserError
 
@@ -250,3 +256,15 @@ class DeliveryCarrier(models.Model):
             raise UserError(_("Selected product in the delivery method doesn't fulfill any of the delivery carrier(s) criteria."))
 
         return price
+
+    def _merge_pdf(self, labels):
+        writer = PdfFileWriter()
+        for label in labels:
+            reader = PdfFileReader(label)
+            for page in range(0, reader.getNumPages()):
+                writer.addPage(reader.getPage(page))
+
+        output_res = StringIO.StringIO()
+        writer.write(output_res)
+
+        return binascii.a2b_base64(output_res.getvalue().encode('base64'))
