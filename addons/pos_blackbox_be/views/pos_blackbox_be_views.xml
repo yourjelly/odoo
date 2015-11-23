@@ -477,6 +477,13 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-xs-12">
+                                        <strong>Amount of money in cash register</strong>:
+                                        <span t-field="o.cash_register_balance_end"
+                                              t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-12">
                                         Revenue (NS): <span t-esc="user['revenue']"/>
                                     </div>
                                 </div>
