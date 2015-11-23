@@ -310,8 +310,20 @@
                             </div>
                             <div class="row">
                                 <div class="col-xs-12">
-                                    <strong>Total revenue (NS)</strong>:
-                                    <span t-field="o.total_sold"/>
+                                    <strong>Total revenue (NS)</strong>: <span t-field="o.total_sold"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <strong>Revenue per category (NS)</strong>:
+                                    <table style="margin-left: 20px">
+                                        <t t-foreach="o.get_total_sold_per_category()" t-as="category">
+                                            <tr>
+                                                <td><t t-esc="category[0]"/></td>
+                                                <td style="padding-left: 5px"><t t-esc="category[1]" t-esc-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/></td>
+                                            </tr>
+                                        </t>
+                                    </table>
                                 </div>
                             </div>
                             <strong>Total base of measure per tax (NS)</strong>:

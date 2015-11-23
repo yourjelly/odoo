@@ -116,6 +116,20 @@ class pos_session(models.Model):
     amount_of_corrections = fields.Integer(compute='_compute_corrections')
     total_corrections = fields.Monetary(compute='_compute_corrections')
 
+    def get_total_sold_per_category(self):
+        total_sold_per_category = {}
+
+        for order in self.order_ids:
+            for line in order.lines:
+                key = line.product_id.pos_categ_id.name or "None"
+
+                if key in total_sold_per_category:
+                    total_sold_per_category[key] += line.price_subtotal_incl
+                else:
+                    total_sold_per_category[key] = line.price_subtotal_incl
+
+        return total_sold_per_category.items()
+
     @api.one
     @api.depends('statement_ids')
     def _compute_total_sold(self):
