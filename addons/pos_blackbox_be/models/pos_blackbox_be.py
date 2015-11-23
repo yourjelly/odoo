@@ -116,20 +116,6 @@ class pos_session(models.Model):
     amount_of_corrections = fields.Integer(compute='_compute_corrections')
     total_corrections = fields.Monetary(compute='_compute_corrections')
 
-    def get_total_sold_per_category(self):
-        total_sold_per_category = {}
-
-        for order in self.order_ids:
-            for line in order.lines:
-                key = line.product_id.pos_categ_id.name or "None"
-
-                if key in total_sold_per_category:
-                    total_sold_per_category[key] += line.price_subtotal_incl
-                else:
-                    total_sold_per_category[key] = line.price_subtotal_incl
-
-        return total_sold_per_category.items()
-
     @api.one
     @api.depends('statement_ids')
     def _compute_total_sold(self):
@@ -224,6 +210,34 @@ class pos_session(models.Model):
 
         return super(pos_session, self).wkf_action_closing_control()
 
+    def get_total_sold_per_category(self, group_by_user_id=None):
+        total_sold_per_user_per_category = {}
+
+        for order in self.order_ids:
+            if group_by_user_id:
+                user_id = order.user_id.id
+            else:
+                # use a user_id of 0 to keep the logic between with user group and without user group the same
+                user_id = 0
+
+            if user_id not in total_sold_per_user_per_category:
+                total_sold_per_user_per_category[user_id] = {}
+
+            total_sold_per_category = total_sold_per_user_per_category[user_id]
+
+            for line in order.lines:
+                key = line.product_id.pos_categ_id.name or "None"
+
+                if key in total_sold_per_category:
+                    total_sold_per_category[key] += line.price_subtotal_incl
+                else:
+                    total_sold_per_category[key] = line.price_subtotal_incl
+
+        if group_by_user_id:
+            return total_sold_per_user_per_category.items()
+        else:
+            return total_sold_per_user_per_category[0].items()
+
     def get_user_report_data(self):
         data = {}
 
@@ -245,6 +259,11 @@ class pos_session(models.Model):
 
                 if order.blackbox_pos_receipt_time > current['last_ticket_time']:
                     current['last_ticket_time'] = order.blackbox_pos_receipt_time
+
+        total_sold_per_category_per_user = self.get_total_sold_per_category(group_by_user_id=True)
+
+        for user in total_sold_per_category_per_user:
+            data[user[0]]['revenue_per_category'] = user[1].items()
 
         return data
 

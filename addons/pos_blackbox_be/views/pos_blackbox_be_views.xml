@@ -482,6 +482,19 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-xs-12">
+                                        Revenue per category (NS):
+                                        <table style="margin-left: 20px">
+                                            <t t-foreach="user['revenue_per_category']" t-as="category">
+                                                <tr>
+                                                    <td><t t-esc="category[0]"/></td>
+                                                    <td style="padding-left: 5px"><t t-esc="category[1]" t-esc-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/></td>
+                                                </tr>
+                                            </t>
+                                    </table>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-12">
                                         First ticket time (NS): <span t-esc="user['first_ticket_time']"/>
                                     </div>
                                 </div>
