@@ -680,6 +680,7 @@ class expression(object):
                 :var obj comodel: relational model of field (field.comodel)
                     (res_partner.bank_ids -> res.partner.bank)
         """
+        name_search_ctx = dict(context or {}, raw_name_search=True)
 
         def to_ids(value, comodel, context=None, limit=None):
             """ Normalize a single id or name, or a list of those, into a list of ids
@@ -698,7 +699,7 @@ class expression(object):
             elif isinstance(value, (int, long)):
                 return [value]
             if names:
-                name_get_list = [name_get[0] for name in names for name_get in comodel.name_search(cr, uid, name, [], 'ilike', context=context, limit=limit)]
+                name_get_list = [name_get[0] for name in names for name_get in comodel.name_search(cr, uid, name, [], 'ilike', context=name_search_ctx, limit=limit)]
                 return list(set(name_get_list))
             return list(value)
 
@@ -996,7 +997,7 @@ class expression(object):
                     if right is not False:
                         if isinstance(right, basestring):
                             op = {'!=': '=', 'not like': 'like', 'not ilike': 'ilike'}.get(operator, operator)
-                            res_ids = [x[0] for x in comodel.name_search(cr, uid, right, [], op, context=context)]
+                            res_ids = [x[0] for x in comodel.name_search(cr, uid, right, [], op, context=name_search_ctx)]
                             if res_ids:
                                 operator = 'not in' if operator in NEGATIVE_TERM_OPERATORS else 'in'
                         else:
@@ -1031,9 +1032,7 @@ class expression(object):
                         push(create_substitution_leaf(leaf, dom_leaf, model))
                 else:
                     def _get_expression(comodel, cr, uid, left, right, operator, context=None):
-                        if context is None:
-                            context = {}
-                        c = context.copy()
+                        c = name_search_ctx.copy()
                         c['active_test'] = False
                         #Special treatment to ill-formed domains
                         operator = (operator in ['<', '>', '<=', '>=']) and 'in' or operator

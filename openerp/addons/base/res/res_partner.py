@@ -643,6 +643,8 @@ class res_partner(osv.Model, format_address):
                                                 count=count, access_rights_uid=access_rights_uid)
 
     def name_search(self, cr, uid, name, args=None, operator='ilike', context=None, limit=100):
+        if context is None:
+            context = {}
         if not args:
             args = []
         if name and operator in ('=', 'ilike', '=ilike', 'like', '=like'):
@@ -685,6 +687,8 @@ class res_partner(osv.Model, format_address):
             ids = map(lambda x: x[0], cr.fetchall())
 
             if ids:
+                if context.get('raw_name_search'):
+                    return [(id, None) for id in ids]
                 return self.name_get(cr, uid, ids, context)
             else:
                 return []
