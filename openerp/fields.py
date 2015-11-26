@@ -16,6 +16,7 @@ from openerp.tools import float_round, frozendict, html_sanitize, ustr, OrderedS
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
 from openerp.tools.translate import html_translate
+from openerp.models import NewId
 
 DATE_LENGTH = len(date.today().strftime(DATE_FORMAT))
 DATETIME_LENGTH = len(datetime.now().strftime(DATETIME_FORMAT))
@@ -1776,10 +1777,15 @@ class _RelationalMulti(_Relational):
         # which fields are actually dirty
         fields = [(name, value._fields[name]) for name in (fnames or []) if name != 'id']
         result = [(5,)]
+        values = {}
         for record in value:
             vals = {name: field.convert_to_onchange(record[name]) for name, field in fields}
             if not record.id:
-                result.append((0, 0, vals))
+                for key, val in vals.iteritems():
+                    if type(val) is tuple and isinstance(val[0], NewId):
+                        continue
+                    values[key] = val
+                result.append((0, 0, values))
             elif vals:
                 result.append((1, record.id, vals))
             else:
