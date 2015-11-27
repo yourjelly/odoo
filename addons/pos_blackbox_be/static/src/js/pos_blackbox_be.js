@@ -1162,10 +1162,42 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             return posmodel_super.set_order.apply(this, arguments);
         },
 
+        // we need to be able to identify devices that do
+        // transactions, the best we can do is to generate a terminal
+        // id per device in localstorage and use that. We don't use
+        // the PosDB because it uses a name prefix that allows
+        // multiple db's per browser (in theory).
+        get_blackbox_pos_production_id: function () {
+            if (! localStorage['odoo_pos_blackbox_pos_production_id']) {
+                // the production id needs to be 14 characters long,
+                // so we can generate a 64 bit id and encode it in
+                // base 36, which gives us a max size of 13.
+                var production_id = Math.floor(Math.random() * Math.pow(2, 64)) + 1;
+
+                // represent it as a string with base 36 for compactness
+                production_id = production_id.toString(36);
+
+                // pad it with 0 so it's exactly 14 characters
+                while (production_id.length < 14) {
+                    production_id = "0" + production_id;
+                }
+
+                localStorage['odoo_pos_blackbox_pos_production_id'] = production_id;
+            }
+
+            return localStorage['odoo_pos_blackbox_pos_production_id'];
+        },
+
         after_load_server_data: function () {
+            var self = this;
             // with this module we will always have to connect to the
             // proxy, regardless of user preferences
             this.config.use_proxy = true;
+            this.blackbox_pos_production_id = this.get_blackbox_pos_production_id();
+
+            this.chrome.ready.then(function () {
+                $(self.chrome.$el).find('.placeholder-posID').text('ID: ' + self.blackbox_pos_production_id);
+            });
 
             return posmodel_super.after_load_server_data.apply(this, arguments);
         },
@@ -1294,28 +1326,6 @@ can no longer be modified. Please create a new line with eg. a negative quantity
     screens.define_action_button({
         'name': 'work_in',
         'widget': work_in_button,
-    });
-
-    models.load_models({
-        'model': "ir.config_parameter",
-        'fields': ['key', 'value'],
-        'domain': [['key', '=', 'database.uuid']],
-        'loaded': function (self, params) {
-            // 12 lsB of db uid + 2 bytes pos config
-            var config_id = self.config.id.toString();
-
-            if (config_id.length < 2) {
-                config_id = "0" + config_id;
-            }
-
-            self.blackbox_pos_production_id = "BODO001" + params[0].value.substr(-5) + config_id;
-
-            self.chrome.ready.then(function () {
-                $(self.chrome.$el).find('.placeholder-posID').text(self.blackbox_pos_production_id);
-            });
-        }
-    }, {
-        'after': "pos.config"
     });
 
     models.load_models({
