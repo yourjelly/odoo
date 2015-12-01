@@ -1222,11 +1222,27 @@ can no longer be modified. Please create a new line with eg. a negative quantity
 
             if (print_bill_button) {
                 var print_bill_super = print_bill_button.button_click;
+
+                // don't allow bill spamming, because:
+                // 1. according to minfin it leads to weird characters
+                //    being printed, I can't reproduce it though.
+                // 2. if you press fast enough you'll end up with
+                //    bills being printed before the order gets updated.
+                var disabled = false;
+
                 print_bill_button.button_click = function () {
                     var self = this;
-                    this.pos._push_pro_forma().then(function () {
-                        print_bill_super.bind(self)();
-                    });
+                    if (! disabled) {
+                        disabled = true;
+
+                        setTimeout(function () {
+                            disabled = false;
+                        }, 5000);
+
+                        this.pos._push_pro_forma().then(function () {
+                            print_bill_super.bind(self)();
+                        });
+                    }
                 };
             }
 
