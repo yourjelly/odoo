@@ -209,6 +209,9 @@
         <t t-jquery="t[t-foreach='receipt.tax_details']" t-operation="replace">
             <t t-call="XmlFDMTaxes"/>
         </t>
+        <t t-jquery="right:has(t[t-esc='line.price_display'])" t-operation="append">
+            <t t-esc="line.vat_letter"/>
+        </t>
         <t t-jquery="div[font='b']" t-operation="prepend">
             <t t-esc='order.blackbox_order_name'/>
         </t>
