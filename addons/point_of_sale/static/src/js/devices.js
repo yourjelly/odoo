@@ -226,13 +226,13 @@ var ProxyDevice  = core.Class.extend(core.mixins.PropertiesMixin,{
         }
     },
 
-    message : function(name,params){
+    message : function(name,params,settings){
         var callbacks = this.notifications[name] || [];
         for(var i = 0; i < callbacks.length; i++){
             callbacks[i](params);
         }
         if(this.get('status').status !== 'disconnected'){
-            return this.connection.rpc('/hw_proxy/' + name, params || {});
+            return this.connection.rpc('/hw_proxy/' + name, params || {}, settings);
         }else{
             return (new $.Deferred()).reject();
         }
