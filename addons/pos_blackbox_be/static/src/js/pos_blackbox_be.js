@@ -827,7 +827,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             return this.message('request_blackbox', {
                 'high_level_message': self._build_fdm_identification_request().to_string(),
                 'response_size': 59
-            }, {timeout: 1000}).then(function (response) {
+            }, {timeout: 5000}).then(function (response) {
                 if (! response) {
                     self._show_could_not_connect_error();
                     return "";
@@ -849,7 +849,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             return this.message('request_blackbox', {
                 'high_level_message': self._build_fdm_pin_request(pin).to_string(),
                 'response_size': 35
-            }, {timeout: 1000}).then(function (response) {
+            }, {timeout: 5000}).then(function (response) {
                 if (! response) {
                     self._show_could_not_connect_error();
                 } else {
@@ -874,7 +874,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             // because the blackbox freaks out if we send messages too fast
             setTimeout(function () {
                 delayed_request_hash_and_sign.resolve();
-            }, 2000);
+            }, 5000);
 
             return delayed_request_hash_and_sign.then(function () {
                 return self.request_fdm_hash_and_sign(packet, "hide error");
@@ -889,7 +889,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             return this.message('request_blackbox', {
                 'high_level_message': packet.to_string(),
                 'response_size': 109
-            }, {timeout: 1000}).then(function (response) {
+            }, {timeout: 5000}).then(function (response) {
                 if (! response) {
                     return self._retry_request_fdm_hash_and_sign(packet, hide_error);
                 } else {
