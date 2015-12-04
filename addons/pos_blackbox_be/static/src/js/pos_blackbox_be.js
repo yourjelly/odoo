@@ -428,6 +428,22 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             return order_str;
         },
 
+        get_total_with_tax_without_discounts: function () {
+            var positive_orderlines = _.filter(this.get_orderlines(), function (line) {
+                return line.get_price_without_tax() > 0;
+            });
+
+            var total_without_tax = round_pr(positive_orderlines.reduce((function(sum, orderLine) {
+                return sum + orderLine.get_price_without_tax();
+            }), 0), this.pos.currency.rounding);
+
+            var total_tax = round_pr(positive_orderlines.reduce((function(sum, orderLine) {
+                return sum + orderLine.get_tax();
+            }), 0), this.pos.currency.rounding);
+
+            return total_without_tax + total_tax;
+        },
+
         get_tax_percentage_for_tax_letter: function (tax_letter) {
             var percentage_per_letter = {
                 'A': 21,
@@ -439,8 +455,8 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             return percentage_per_letter[tax_letter];
         },
 
-        get_base_price_in_eurocent_per_tax_letter: function () {
-            var base_price_per_tax_letter = {
+        get_price_in_eurocent_per_tax_letter: function (base) {
+            var price_per_tax_letter = {
                 'A': 0,
                 'B': 0,
                 'C': 0,
@@ -451,17 +467,21 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                 var tax_letter = current.get_vat_letter();
 
                 if (tax_letter) {
-                    base_price_per_tax_letter[tax_letter] += Math.round(current.get_price_without_tax() * 100);
+                    if (base) {
+                        price_per_tax_letter[tax_letter] += Math.round(current.get_price_without_tax() * 100);
+                    } else {
+                        price_per_tax_letter[tax_letter] += Math.round(current.get_price_with_tax() * 100);
+                    }
                 }
             });
 
-            return base_price_per_tax_letter;
+            return price_per_tax_letter;
         },
 
         // returns an array of the form:
         // [{'letter', 'amount'}, {'letter', 'amount'}, ...]
         get_base_price_in_euro_per_tax_letter_list: function () {
-            var base_price_per_tax_letter = this.get_base_price_in_eurocent_per_tax_letter();
+            var base_price_per_tax_letter = this.get_price_in_eurocent_per_tax_letter("base price");
             var base_price_per_tax_letter_list = _.map(_.keys(base_price_per_tax_letter), function (key) {
                 return {
                     'letter': key,
@@ -1089,6 +1109,9 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             if (order) {
                 order.blackbox_pro_forma = pro_forma || false;
 
+                // split discount lines
+                this._split_discount_lines();
+
                 return this.push_order_to_blackbox(order).then(function () {
                     console.log("blackbox success, calling push_order _super().");
 
@@ -1148,6 +1171,63 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             } else {
                 return new $.Deferred().reject();
             }
+        },
+
+        // for pos_loyalty
+        _split_discount_lines: function () {
+            var self = this;
+            var order = this.get_order();
+            var lines_to_delete = [];
+            var lines_to_add = [];
+
+            order.get_orderlines().forEach(function (line) {
+                // discount or resale
+                if (line.reward_id && line.get_price_with_tax() < 0) {
+                    var discount_line = line;
+                    lines_to_delete.push(line);
+
+                    var price_per_tax_letter = order.get_price_in_eurocent_per_tax_letter();
+
+                    // we need to filter out negative orderlines
+                    var order_total = self.get_order().get_total_with_tax_without_discounts();
+                    var discount_percentage_on_order = Math.abs(discount_line.get_price_with_tax() / order_total);
+                    var resale_quantity = discount_line.get_quantity();
+
+                    // 1. delete line
+                    // 2. re-add lines with the same product id but with modified taxes
+                    //    essentially just adding a discount_percentage_on_order% per tax
+
+                    _.forEach(_.pairs(price_per_tax_letter), function (tax) {
+                        tax[1] = tax[1] / 100; // was in eurocents
+                        if (tax[1] > 0.00001) {
+                            var percentage_of_this_tax_in_total = round_pr(tax[1] / order_total, 0.01);
+
+                            // add correct tax on product
+                            var new_line_tax = _.find(self.taxes, function (pos_tax) {
+                                return tax[0] === pos_tax.identification_letter;
+                            });
+
+                            var cloned_product = _.clone(discount_line.product);
+
+                            cloned_product.taxes_id = [new_line_tax.id];
+
+                            console.log('new tax id ' + new_line_tax.id);
+
+                            lines_to_add.push([cloned_product, {
+                                quantity: resale_quantity * percentage_of_this_tax_in_total,
+                                merge: false,
+                                extras: { split_reward_line: true }
+                                // extras: { reward_id: reward.id },
+                            }]);
+
+                            console.log('adding qty of ' + resale_quantity * percentage_of_this_tax_in_total + ' for ' + tax[0]);
+                        }
+                    });
+                }
+            });
+
+            _.map(lines_to_delete, function (line) { self.get_order().remove_orderline(line); });
+            _.map(lines_to_add, function (line) { self.get_order().add_product.apply(self.get_order(), line); });
         },
 
         add_new_order: function () {
