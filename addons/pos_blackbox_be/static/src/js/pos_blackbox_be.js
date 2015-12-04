@@ -1216,8 +1216,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                             lines_to_add.push([cloned_product, {
                                 quantity: resale_quantity * percentage_of_this_tax_in_total,
                                 merge: false,
-                                extras: { split_reward_line: true }
-                                // extras: { reward_id: reward.id },
+                                extras: { reward_id: discount_line.reward_id },
                             }]);
 
                             console.log('adding qty of ' + resale_quantity * percentage_of_this_tax_in_total + ' for ' + tax[0]);
