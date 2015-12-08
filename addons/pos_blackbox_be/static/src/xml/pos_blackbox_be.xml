@@ -109,6 +109,10 @@
                     <td class="pos-right-align"><t t-esc="order.blackbox_pos_production_id"/></td>
                 </tr>
                 <tr>
+                    <td>Terminal ID:</td>
+                    <td class="pos-right-align"><t t-esc="order.blackbox_terminal_id"/></td>
+                </tr>
+                <tr>
                     <td colspan="2">
                         <br />
                         <div class="pos-center-align">Ticket signature:</div>
@@ -155,6 +159,10 @@
         <line>
             <left>POS production ID:</left>
             <right><t t-esc="order.blackbox_pos_production_id"/></right>
+        </line>
+        <line>
+            <left>Terminal ID:</left>
+            <right><t t-esc="order.blackbox_terminal_id"/></right>
         </line>
         <br/>
         <div><t t-esc="order.blackbox_signature"/></div>

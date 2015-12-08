@@ -356,6 +356,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                 'blackbox_plu_hash': this.blackbox_plu_hash,
                 'blackbox_pos_version': this.blackbox_pos_version,
                 'blackbox_pos_production_id': this.blackbox_pos_production_id,
+                'blackbox_terminal_id': this.blackbox_terminal_id,
                 'blackbox_pro_forma': this.blackbox_pro_forma,
             });
 
@@ -1087,6 +1088,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                     order.blackbox_plu_hash = self._prepare_plu_hash_for_ticket(packet.fields[packet.fields.length - 1].content);
                     order.blackbox_pos_version = "Odoo " + self.version.server_version + "BE_FDM";
                     order.blackbox_pos_production_id = self.blackbox_pos_production_id;
+                    order.blackbox_terminal_id = self.blackbox_terminal_id;
 
                     if (! order.blackbox_pro_forma) {
                         self.gui.show_screen('receipt');
@@ -1246,7 +1248,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         // id per device in localstorage and use that. We don't use
         // the PosDB because it uses a name prefix that allows
         // multiple db's per browser (in theory).
-        get_blackbox_pos_production_id: function () {
+        get_blackbox_terminal_id: function () {
             if (! localStorage['odoo_pos_blackbox_pos_production_id']) {
                 // the production id needs to be 14 characters long,
                 // so we can generate a 64 bit id and encode it in
@@ -1272,10 +1274,11 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             // with this module we will always have to connect to the
             // proxy, regardless of user preferences
             this.config.use_proxy = true;
-            this.blackbox_pos_production_id = this.get_blackbox_pos_production_id();
+            this.blackbox_terminal_id = this.get_blackbox_terminal_id();
 
             this.chrome.ready.then(function () {
-                $(self.chrome.$el).find('.placeholder-posID').text('ID: ' + self.blackbox_pos_production_id);
+                var current = $(self.chrome.$el).find('.placeholder-posID').text();
+                $(self.chrome.$el).find('.placeholder-posID').text(current + ' TID: ' + self.blackbox_terminal_id);
             });
 
             return posmodel_super.after_load_server_data.apply(this, arguments);
@@ -1421,6 +1424,29 @@ can no longer be modified. Please create a new line with eg. a negative quantity
     screens.define_action_button({
         'name': 'work_in',
         'widget': work_in_button,
+    });
+
+    models.load_models({
+        'model': "ir.config_parameter",
+        'fields': ['key', 'value'],
+        'domain': [['key', '=', 'database.uuid']],
+        'loaded': function (self, params) {
+            // 12 lsB of db uid + 2 bytes pos config
+            var config_id = self.config.id.toString();
+
+            if (config_id.length < 2) {
+                config_id = "0" + config_id;
+            }
+
+            self.blackbox_pos_production_id = "BODO001" + params[0].value.substr(-5) + config_id;
+
+            self.chrome.ready.then(function () {
+                var current = $(self.chrome.$el).find('.placeholder-posID').text();
+                $(self.chrome.$el).find('.placeholder-posID').text(current + ' ID: ' + self.blackbox_pos_production_id);
+            });
+        }
+    }, {
+        'after': "pos.config"
     });
 
     models.load_models({
