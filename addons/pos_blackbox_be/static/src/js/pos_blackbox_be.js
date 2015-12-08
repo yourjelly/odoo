@@ -791,7 +791,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             packet.add_field(new FDMPacketField("ticket time", 6, order.blackbox_pos_receipt_time.format("HHmmss")));
             packet.add_field(new FDMPacketField("insz or bis number", 11, insz_or_bis_number));
             packet.add_field(new FDMPacketField("production number POS", 14, this.pos.blackbox_pos_production_id));
-            packet.add_field(new FDMPacketField("ticket number", 6, (++this.pos.config.backend_sequence_number).toString(), "0"));
+            packet.add_field(new FDMPacketField("ticket number", 6, (++this.pos.config.backend_sequence_number).toString(), " "));
 
             if (order.blackbox_pro_forma) {
                 packet.add_field(new FDMPacketField("event label", 2, "PS"));
