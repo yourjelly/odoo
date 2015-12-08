@@ -135,6 +135,11 @@
         </record>
 
         <record model="ir.exports.line">
+            <field name="name">pos_terminal_id</field>
+            <field name="export_id" ref="minfin_export_orders"/>
+        </record>
+
+        <record model="ir.exports.line">
             <field name="name">pos_version</field>
             <field name="export_id" ref="minfin_export_orders"/>
         </record>
@@ -306,6 +311,11 @@
 
         <record model="ir.exports.line">
             <field name="name">pos_production_id</field>
+            <field name="export_id" ref="minfin_export_pro_forma_orders"/>
+        </record>
+
+        <record model="ir.exports.line">
+            <field name="name">pos_terminal_id</field>
             <field name="export_id" ref="minfin_export_pro_forma_orders"/>
         </record>
 

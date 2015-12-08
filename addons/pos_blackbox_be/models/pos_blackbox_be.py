@@ -311,7 +311,8 @@ class pos_order(models.Model):
 
     plu_hash = fields.Char(help="Eight last characters of PLU hash")
     pos_version = fields.Char(help="Version of Odoo that created the order")
-    pos_production_id = fields.Char(help="Unique ID of the POS that created this order")
+    pos_production_id = fields.Char(help="Unique ID of Odoo that created this order")
+    terminal_id = fields.Char(help="Unique ID of the terminal that created this order")
 
     @api.multi
     def unlink(self):
@@ -347,6 +348,7 @@ class pos_order(models.Model):
             'plu_hash': ui_order.get('blackbox_plu_hash'),
             'pos_version': ui_order.get('blackbox_pos_version'),
             'pos_production_id': ui_order.get('blackbox_pos_production_id'),
+            'terminal_id': ui_order.get('blackbox_terminal_id'),
         })
 
         return fields
@@ -426,7 +428,8 @@ class pos_order_pro_forma(models.Model):
 
     plu_hash = fields.Char(help="Eight last characters of PLU hash", readonly=True)
     pos_version = fields.Char(help="Version of Odoo that created the order", readonly=True)
-    pos_production_id = fields.Char(help="Unique ID of the POS that created this order", readonly=True)
+    pos_production_id = fields.Char(help="Unique ID of Odoo that created this order", readonly=True)
+    terminal_id = fields.Char(help="Unique ID of the POS that created this order", readonly=True)
 
     @api.model
     def create_from_ui(self, orders):
@@ -454,6 +457,7 @@ class pos_order_pro_forma(models.Model):
                 'plu_hash': ui_order.get('blackbox_plu_hash'),
                 'pos_version': ui_order.get('blackbox_pos_version'),
                 'pos_production_id': ui_order.get('blackbox_pos_production_id'),
+                'terminal_id': ui_order.get('blackbox_terminal_id'),
                 'table_id': ui_order.get('table_id'),
             }
 
