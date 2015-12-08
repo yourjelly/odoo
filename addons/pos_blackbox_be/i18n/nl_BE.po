@@ -102,7 +102,7 @@ msgstr "<strong>Volgnummer:</strong>"
 #: model:ir.ui.view,arch_db:pos_blackbox_be.include_vat_notice_report_internal
 #: model:ir.ui.view,arch_db:pos_blackbox_be.user_report_template
 msgid "<strong>THIS IS NOT A VALID VAT TICKET</strong>"
-msgstr "<strong>DIT IS GEEN GELDIG BTW-TICKET</strong>"
+msgstr "<strong>DIT IS GEEN GELDIG BTW-KASTICKET</strong>"
 
 #. module: pos_blackbox_be
 #: model:ir.ui.view,arch_db:pos_blackbox_be.financial_report_template
@@ -979,7 +979,7 @@ msgstr "Subtotaal zonder BTW"
 #: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:222
 #, python-format
 msgid "THIS IS NOT A VALID VAT TICKET"
-msgstr "DIT IS GEEN GELDIG BTW-TICKET"
+msgstr "DIT IS GEEN GELDIG BTW-KASTICKET"
 
 #. module: pos_blackbox_be
 #: model:ir.model.fields,field_description:pos_blackbox_be.field_pos_order_pro_forma_table_id
@@ -1181,7 +1181,7 @@ msgstr ""
 #: code:addons/pos_blackbox_be/static/src/xml/pos_blackbox_be.xml:176
 #, python-format
 msgid "VAT TICKET"
-msgstr "BTW-TICKET"
+msgstr "BTW-KASTICKET"
 
 #. module: pos_blackbox_be
 #. openerp-web
