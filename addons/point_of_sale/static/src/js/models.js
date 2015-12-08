@@ -1071,7 +1071,13 @@ exports.Orderline = Backbone.Model.extend({
         }
         this.product = options.product;
         this.price   = options.product.price;
-        this.set_quantity(1);
+        this.quantity = 1;
+        this.quantityStr = '1';
+        var unit = this.get_unit();
+        if (unit && unit.rounding) {
+            var decimals = this.pos.dp['Product Unit of Measure'];
+            this.quantityStr = formats.format_value(round_di(1, decimals), {type: 'float', digits: [69, decimals]});
+        }
         this.discount = 0;
         this.discountStr = '0';
         this.type = 'unit';
