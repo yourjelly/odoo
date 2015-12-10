@@ -29,7 +29,6 @@ More info:
     ],
     'demo': [
         'data/pos_blackbox_be_demo.xml',
-        'demo/pos_blackbox_be_demo.yml'
     ],
     'qweb': [
         'static/src/xml/pos_blackbox_be.xml'
