@@ -67,9 +67,9 @@
 </template>
 
 <template id="extra_head">
-    <meta charset="utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <!-- <meta charset="utf-8"/> -->
+    <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge"/> -->
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1"/> -->
 
     <!-- Bootstrap -->
     
@@ -77,6 +77,11 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous"/>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css"/>
     <link href="/point_of_sale/static/src/css/user_facing_screen.css" rel="stylesheet"/>
+    <style>
+        #editable_area {
+           max-width: unset !important; // allow content to be max-width
+        }
+    </style>
 </template>
 
 <template id="screen_snippets">
@@ -91,14 +96,14 @@
                     </span> Body
             </div>
             <div class="o_panel_body">
-                <div name="Text-Image" class="s_text_image o_mail_block_simple_text">
+                <div name="Text-Image" class="basic_theme o_mail_block_simple_text">
                     <div class="container-fluid">
                         <div class="row">
-                            <div class="col-md-12">
-                                <h2 class="text-center">Awesome Timesheet App</h2>
+                            <div class="col-xs-12">
+                                <h2 class="text-center">Odoo ad</h2>
                             </div>
-                            <div class="col-md-12">
-                                <img src="/point_of_sale/static/src/img/odoo_ad.png" alt="" class="img img-responsive center-block"/>
+                            <div class="col-xs-12">
+                                <img src="/point_of_sale/static/src/img/odoo_ad.png" alt="" class="img-responsive"/>
                             </div>
                         </div>
                     </div>
@@ -137,7 +142,7 @@
         <div data-js='content' class="hidden"
              data-selector="[data-oe-field='screen_html'] > div, .oe_snippet_body"
              data-drop-near="[data-oe-field='screen_html'] > *"
-             data-drop-in="[data-oe-field='screen_html']">
+             data-drop-in="[data-oe-field='screen_html'], .ad-space">
         </div>
     </div>
 </template>

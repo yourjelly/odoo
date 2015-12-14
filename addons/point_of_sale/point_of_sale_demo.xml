@@ -604,92 +604,80 @@
         <record model="pos.config" id="pos_config_main">
             <field name="screen_html">
                 <![CDATA[
-    <div class="container-fluid pos-container">
-      <div class="row">
-        <div class="col-md-12 pos-header">
-          <div>
-            <img src="/logo" alt="Your Company Logo" class="img img-responsive">
-          </div>
-        </div>
-        <div class="col-md-12 pos-body">
-          <div class="col-md-4 pos-ad oe_structure">
-            <section class="s_text_image oe_structure">
-              <div class="container-fluid">
-                <div class="row">
-                  <div class="col-md-12">
-                    <img src="/point_of_sale/static/src/img/odoo_ad.png" alt="" class="img img-responsive center-block">
-                  </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-xs-12">
+                    <div>
+                        <img src="/logo" alt="Your Company Logo" class="pull-right img-responsive"/>
+                    </div>
                 </div>
-              </div>
-            </section>
-          </div>
-          <div class="col-md-8 pos-content table-responsive">
-            <div class="pos-content-table">
-              <table>
-
-                <!-- HEADER -->
-                <div><h2>The following items are in your basket:</h2></div>
-                <thead>
-                  <tr>
-                    <td>Image</td>
-                    <td>Product name</td>
-                    <td style="text-align:right;">Quantity</td>
-                    <td style="text-align:right;">Price / Item</td>
-                  </tr>
-                </thead>
-
-                <tbody class="table-items table table-striped dynamic-update">
-                  <tr class="product-cell">
-                    <td class="product-img" align="center">
-                      <img src="/point_of_sale/static/img/evian_1l-image.jpg" alt="" class="img img-responsive"/>
-                    </td>
-                    <td>Evian 2l</td>
-                    <td align="right">1</td>
-                    <td align="right">$ 2.20</td>
-                  </tr>
-                  <tr class="product-cell">
-                    <td class="product-img" align="center">
-                      <img src="/point_of_sale/static/img/oranges-image.jpg" alt="" class="img img-responsive">
-                    </td>
-                    <td>Oranges</td>
-                    <td align="right">1</td>
-                    <td align="right">$ 4.10</td>
-                    </tr>
-                    <tr class="product-cell testing-drop"/>
-                </tbody>
-                
-              </table>
             </div>
 
-            <!-- TABLE FOOTER -->
-            <div class="col-md-12 total">
-              <div class="col-md-3 col-md-offset-6 col-xs-6 text-right">
-                <span class="total-amount">TOTAL:</span><br>
-              </div>
-              <div class="col-md-3 text-right">
-                <span class="total-amount dynamic-update">$ 2500.00</span><br>
-              </div>
+            <div class="row">
+                <div class="col-xs-4 ad-space">
+                    <img src="/point_of_sale/static/src/img/odoo_ad.png" class="img-responsive" alt=""/>
+                </div>
 
-              <div class="payment dynamic-update">
-                <div class="col-md-3 col-md-offset-6 col-xs-6 text-right">
-                  <span>CASH (USD):</span>
+                <div class="col-xs-8">
+                    <h2>The following items are in your basket:</h2>
+                    <div class="scroll-items">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <td>Image</td>
+                                    <td>Product name</td>
+                                    <td style="text-align:right;">Quantity</td>
+                                    <td style="text-align:right;">Price / Item</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="product-cell">
+                                    <td>
+                                        <img alt="" class="img-responsive" src="/point_of_sale/static/img/evian_1l-image.jpg"/>
+                                    </td>
+                                    <td>Evian 2l</td>
+                                    <td align="right">2.000</td>
+                                    <td align="right">$ 1.02</td>
+                                </tr>
+
+                                <tr class="product-cell">
+                                    <td>
+                                        <img alt="" class="img-responsive" src="/point_of_sale/static/img/oranges-image.jpg"/>
+                                    </td>
+                                    <td>Oranges</td>
+                                    <td align="right">3.000</td>
+                                    <td align="right">$ 3.12</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- We use absolute positioning to get this div
+                         at the bottom of the screen.  ecause of this
+                         bootstrap behaves like we're not in a row
+                         anymore, hence the offsets -->
+                    <div class="payment-info">
+                        <div class="col-xs-offset-4 col-xs-4">
+                            <span class="total-amount">TOTAL:</span>
+                        </div>
+                        <div class="col-xs-4 text-right">
+                            <span class="total-amount dynamic-update">$ 1.99</span>
+                        </div>
+                        <div class="col-xs-offset-4 col-xs-4">
+                            <span>Cash (USD)</span>
+                        </div>
+                        <div class="col-xs-4 text-right">
+                            <span>$ 1.99</span>
+                        </div>
+                        <div class="col-xs-offset-4 col-xs-4">
+                            <span>CHANGE:</span>
+                        </div>
+                        <div class="col-xs-4 text-right">
+                            <span>$ 1.01</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-3 text-right">
-                  <span>$ 2233.00</span>
-                  </div>
-                <div class="col-md-3 col-md-offset-6 col-xs-6 text-right">
-                  <span>CHANGE:</span>
-                </div>
-                <div class="col-md-3 text-right">
-                  <span>$ 247.00</span>
-                </div>
-              </div>
             </div>
-          </div>
         </div>
-      </div>
-
-    </div>
 ]]>
             </field>
         </record>

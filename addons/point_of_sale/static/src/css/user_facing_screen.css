@@ -53,6 +53,10 @@ thead {
     border-bottom: 5px solid #adadad;
 }
 
+.product-cell img {
+    height: 45px;
+}
+
 .scroll-items {
     overflow-y: auto;
 }
