@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="acquirer_form_monetico" model="ir.ui.view">
+            <field name="name">acquirer.form.monetico</field>
+            <field name="model">payment.acquirer</field>
+            <field name="inherit_id" ref="payment.acquirer_form"/>
+            <field name="arch" type="xml">
+                <xpath expr='//group[@name="acquirer"]' position='after'>
+                    <group attrs="{'invisible': [('provider', '!=', 'monetico')]}">
+                        <field name="monetico_key"/>
+                        <field name="monetico_ept_number"/>
+                        <field name="monetico_version"/>
+                        <field name="monetico_url_server"/>
+                        <field name="monetico_company_code"/>
+                        <field name="monetico_url_ok"/>
+                        <field name="monetico_url_ko"/>
+                        <field name="monetico_url_payment"/>
+                        <a colspan="2" href="#" target="_blank">How to configure your Monetico account?</a>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</openerp>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <template id="monetico_acquirer_button">
+            <form t-if="acquirer" t-att-action="tx_url" method="post" target="_self">
+                <input type="hidden" name="version" t-att-value="version"/>
+                <input type="hidden" name="TPE" t-att-value="TPE"/>
+                <input type="hidden" name="date" t-att-value="date"/>
+                <input type="hidden" name="montant" t-att-value="montant"/>
+                <input type="hidden" name="reference" t-att-value="reference"/>
+                <input type="hidden" name="MAC" t-att-value="MAC"/>
+                <input type="hidden" name="url_retour" t-att-value="url_retour"/>
+                <input type="hidden" name="url_retour_ok" t-att-value="url_retour_ok"/>
+                <input type="hidden" name="url_retour_err" t-att-value="url_retour_err"/>
+                <input type="hidden" name="lgue" t-att-value="lgue"/>
+                <input type="hidden" name="societe" t-att-value="societe"/>
+                <input type="hidden" name="texte-libre" t-att-value="texte_libre"/>
+                <input type="hidden" name="mail" t-att-value="mail"/>
+                <!-- submit -->
+                <button type="submit" width="100px"
+                    t-att-class="submit_class">
+                    <img t-if="not submit_txt" src="/payment_paypal/static/src/img/monetico_icon.png"/>
+                    <span t-if="submit_txt"><t t-esc="submit_txt"/> <span class="fa fa-long-arrow-right"/></span>
+                </button>
+            </form>
+        </template>
+
+    </data>
+</openerp>
