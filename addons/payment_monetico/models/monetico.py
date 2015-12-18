@@ -5,6 +5,7 @@ import hmac
 import logging
 from openerp.tools.translate import _
 import time
+import encodings.hex_codec
 
 from openerp import api, fields, models
 from openerp.addons.payment.models.payment_acquirer import ValidationError
@@ -96,7 +97,6 @@ class PaymentAcquirerMonetico(models.Model):
         else :
             hexStrKey += hexFinal[0:2]
 
-        import encodings.hex_codec
         c =  encodings.hex_codec.Codec()
         hexStrKey = c.decode(hexStrKey)[0]
 
