@@ -14,11 +14,9 @@
             <field name="monetico_key">12345678901234567890123456789012345678P0</field>
             <field name="monetico_ept_number">0000001</field>
             <field name="monetico_version">3.0</field>
-            <field name="monetico_url_server">https://p.monetico-services.com/test/</field>
             <field name="monetico_company_code">6ea64a90f153b47c3833</field>
             <field name="monetico_url_ok">https://pstest-paris-tournament.odoo.com/payment/monetico/accept</field>
             <field name="monetico_url_ko">https://pstest-paris-tournament.odoo.com/payment/monetico/exception</field>
-            <field name="monetico_url_payment">paiement.cgi</field>
         </record>
 
     </data>

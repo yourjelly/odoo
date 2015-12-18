@@ -35,11 +35,9 @@ class PaymentAcquirerMonetico(models.Model):
     monetico_key = fields.Char(string='Key', required_if_provider='monetico')
     monetico_ept_number = fields.Char(string='EPT Number', required_if_provider='monetico')
     monetico_version = fields.Char(string='Version', required_if_provider='monetico')
-    monetico_url_server = fields.Char(string='URL Server', required_if_provider='monetico')
     monetico_company_code = fields.Char(string='Company Code', size=32, required_if_provider='monetico')
     monetico_url_ok = fields.Char(string='URL OK', required_if_provider='monetico')
     monetico_url_ko = fields.Char(string='URL KO', required_if_provider='monetico')
-    monetico_url_payment = fields.Char(string='URL Payment', required_if_provider='monetico')
 
     @api.multi
     def monetico_form_generate_values(self, values):
@@ -54,7 +52,7 @@ class PaymentAcquirerMonetico(models.Model):
             'reference': values.get('reference'),
             'url_retour': self.monetico_url_ok,
             'url_retour_ok': self.monetico_url_ok,
-            'url_retour_err': self.monetico_url_payment,
+            'url_retour_err': self.monetico_url_ko,
             'lgue': values.get('partner_lang')[:2].upper(),
             'societe': self.monetico_company_code,
             'texte_libre': 'ExempleTexteLibre',
