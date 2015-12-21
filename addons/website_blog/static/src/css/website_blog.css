@@ -225,3 +225,7 @@ div[name="blog_post"] {
   right: 20px;
   z-index: 1000;
 }
+
+.o_date {
+  display: inline;
+}

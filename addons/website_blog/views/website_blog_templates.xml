@@ -211,47 +211,69 @@
 
 
 
-
 <!-- Blog Post Complete -->
 <template id="blog_post_complete" name="Blog Post">
-    <t t-call="website_blog.index">
-        <div class="container blog_publish_btn">
-            <t t-call="website.publish_management">
-                <t t-set="object" t-value="blog_post"/>
-                <t t-set="publish_edit" t-value="True"/>
-                <li>
-                  <form class="duplicate hidden" action="/blog/post_duplicate" method="POST">
-                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                    <input name="blog_post_id" t-att-value="blog_post.id"/>
-                  </form>
-                  <a href="#" class="duplicate" onclick="$(this).prev('form').submit()">Duplicate</a>
-                </li>
-            </t>
-        </div>
-        <div t-attf-class="#{blog_post_cover_properties.get('resize_class', '')}" id="title"  t-ignore="True">
-            <div id="js_blogcover" t-attf-class="#{blog_post_cover_properties.get('background-color')}" t-attf-style="background-image: #{blog_post_cover_properties.get('background-image', 'none')};opacity:#{blog_post_cover_properties.get('opacity', 1)}"></div>
-            <div class="blog_title">
-                <h1 t-field="blog_post.name" id="blog_post_name" t-att-data-blog-id="blog_post.id" placeholder="Blog Post Title"/>
-                <h2 t-field="blog_post.subtitle" placeholder="Subtitle"/>
-                <p class="post-meta text-muted text-center" name="blog_post_data"/>
-                <p class="post-meta text-muted text-center" t-if="len(blog_post.tag_ids)">
-                    <span class="fa fa-tags"/>
-                    <t t-foreach="blog_post.tag_ids" t-as="one_tag">
-                        <a class="mr8" t-attf-href="#{blog_url(tag=one_tag.id)}" t-esc="one_tag.name"/>
-                    </t>
-                </p>
-                <div t-if="blog_post_cover_properties.get('resize_class') == 'cover cover_full'" id="blog_angle_down">
-                    <strong><a href="#blog_content" class="fa fa-angle-down fa-3x fa-inverse mt4"/></strong>
+        <t t-call="website_blog.index">
+            <div id="wrap" class="js_blog website_blog" itemscope="itemscope" itemtype="http://schema.org/LiveBlogPosting">
+            <meta itemscope="itemscope" itemprop="mainEntityOfPage"  itemType="https://schema.org/WebPage" itemid="https://google.com/article"/>
+            <div class="container blog_publish_btn">
+                <t t-call="website.publish_management">
+                    <t t-set="object" t-value="blog_post"/>
+                    <t t-set="publish_edit" t-value="True"/>
+                    <li>
+                      <form class="duplicate hidden" action="/blog/post_duplicate" method="POST">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input name="blog_post_id" t-att-value="blog_post.id"/>
+                      </form>
+                      <a href="#" class="duplicate" onclick="$(this).prev('form').submit()">Duplicate</a>
+                    </li>
+                </t>
+            </div>
+            <div t-attf-class="#{blog_post_cover_properties.get('resize_class', '')}" id="title"  t-ignore="True">
+                <span itemprop="image" itemscope="itemscope" itemtype="https://schema.org/ImageObject">
+                    <div id="js_blogcover" t-attf-class="#{blog_post_cover_properties.get('background-color')}" t-attf-style="background-image: #{blog_post_cover_properties.get('background-image', 'none')};opacity:#{blog_post_cover_properties.get('opacity', 1)}"></div>
+                    <meta itemprop="url" t-attf-content="#{request.httprequest.url_root+blog_post_cover_properties.get('background-image', 'none')[5:-1]}"/>
+                    <meta itemprop="width" content="800"/>
+                    <meta itemprop="height" content="800"/>
+                </span>
+                <div class="blog_title">
+                    <h1 t-field="blog_post.name" id="blog_post_name" t-att-data-blog-id="blog_post.id" placeholder="Blog Post Title" itemprop="headline"/>
+                    <h2 t-field="blog_post.subtitle" placeholder="Subtitle" itemprop="description"/>
+                    <p class="post-meta text-muted text-center" name="blog_post_data"/>
+                    <span itemprop="author" itemscope="" itemtype="https://schema.org/Person">
+                        <meta itemprop="name" t-att-content="blog_post.author_id.name"/>
+                    </span>
+                    <span class="o_date" t-field="blog_post.create_date" t-field-options='{"format": "MMMM yyyy"}'/>
+                    <meta itemprop="datePublished" t-att-content="blog_post.create_date" t-att-content-options='{"format": "yyyy-MM-dd"}'/>
+                    <meta itemprop="dateModified" t-att-content="blog_post.write_date" t-att-content-options='{"format": "yyyy-MM-dd"}' />
+                    <div itemprop="publisher" itemscope="" itemtype="https://schema.org/Organization">
+                        <div itemprop="logo" itemscope="" itemtype="https://schema.org/ImageObject">
+                            <img t-att-content='res_company.logo' />
+                            <meta itemprop="url" t-attf-content="#{request.httprequest.url_root}web/image/res.company/#{res_company.id}/logo" />
+                            <meta itemprop="width" content="600" />
+                            <meta itemprop="height" content="60" />
+                        </div>
+                        <meta itemprop="name" t-att-content="res_company.name" />
+                    </div>
+                    <p class="post-meta text-muted text-center" t-if="len(blog_post.tag_ids)">
+                        <span class="fa fa-tags"/>
+                        <t t-foreach="blog_post.tag_ids" t-as="one_tag">
+                            <a class="mr8" t-attf-href="#{blog_url(tag=one_tag.id)}" t-esc="one_tag.name"/>
+                        </t>
+                    </p>
+                    <div t-if="blog_post_cover_properties.get('resize_class') == 'cover cover_full'" id="blog_angle_down">
+                        <strong><a href="#blog_content" class="fa fa-angle-down fa-3x fa-inverse mt4"/></strong>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div id="blog_content" t-field="blog_post.content" class="blog_content mt32"/>
-        <div class="o_blog_post_complete o_sharing_links">
-            <a class="fa fa-twitter-square o_twitter_complete" id="o_twitter_complete"></a>
-            <a class="fa fa-facebook-square o_facebook_complete" id="o_facebook_complete"></a>
-            <a class="fa fa-linkedin-square o_linkedin_complete" id="o_linkedin_complete"></a>
-            <a class="fa fa-google-plus-square o_google_complete" id="o_google_complete"></a>
+            <div id="blog_content" t-field="blog_post.content" class="blog_content mt32"/>
+            <div class="o_blog_post_complete o_sharing_links">
+                <a class="fa fa-twitter-square o_twitter_complete" id="o_twitter_complete"></a>
+                <a class="fa fa-facebook-square o_facebook_complete" id="o_facebook_complete"></a>
+                <a class="fa fa-linkedin-square o_linkedin_complete" id="o_linkedin_complete"></a>
+                <a class="fa fa-google-plus-square o_google_complete" id="o_google_complete"></a>
+            </div>
         </div>
     </t>
 </template>
@@ -320,15 +342,13 @@
 <template id="opt_blog_post_author_avatar_display" name="Author Avatar"
         inherit_id="website_blog.blog_post_complete" active="False" customize_show="True">
     <xpath expr="//p[@name='blog_post_data']" position="after">
-        <div>
             <t t-if="blog_post.author_avatar">
                 <span t-field="blog_post.author_avatar" class="o_not_editable" t-field-options='{"widget": "image", "class": "img-circle", "style":"width: 30px; margin-right: 10px; display:inline"}' />
             </t>
-            <span t-field="blog_post.author_id" style="display: inline-block;" t-field-options='{
+            <span itemprop="name" t-field="blog_post.author_id" style="display: inline-block;" t-field-options='{
                 "widget": "contact",
                 "fields": ["name"]
-            }'/>
-        </div>
+            }'/> &#5760;
     </xpath>
 </template>
 
@@ -357,9 +377,7 @@
 <!-- Page -->
 <template id="index" name="Blog Navigation">
     <t t-call="website.layout">
-        <div id="wrap" class="js_blog website_blog">
             <t t-raw="0"/>
-        </div>
     </t>
 </template>
 
