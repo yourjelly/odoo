@@ -373,6 +373,19 @@
                 </div>
             </div>
         </div>
+        <t t-set="head">
+          <!-- Facebook and linkedin sharing data -->
+          <meta property="og:type" content="website" />
+          <meta property="og:url" t-att-content="request.httprequest.url" />
+          <meta property="og:title" t-att-content="event.name" />
+          <meta property="og:description" t-att-content="event.date_begin" />
+
+         <!--  Twitter sharing data -->
+          <meta name="twitter:card" content="summary" />
+          <meta name="twitter:site" t-attf-content="@#{res_company.name}" />
+          <meta name="twitter:title" t-att-content="event.name" />
+          <meta name="twitter:description" t-att-content="event.date_begin" />
+      </t>
     </t>
 </template>
 
