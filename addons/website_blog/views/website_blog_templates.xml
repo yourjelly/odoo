@@ -177,6 +177,10 @@
         </div>
 
         <div class="oe_structure"/>
+         <t t-set="head">
+            <meta property="og:type" content="website" />
+            <meta property="og:url" t-att-content="request.httprequest.url" />
+        </t>
     </t>
 </template>
 
@@ -253,7 +257,22 @@
             <a class="fa fa-linkedin-square o_linkedin_complete" id="o_linkedin_complete"></a>
             <a class="fa fa-google-plus-square o_google_complete" id="o_google_complete"></a>
         </div>
+        <t t-set="head">
+            <!-- Facebook and linkedin sharing data -->
+            <meta property="og:type" content="website" />
+            <meta property="og:url" t-att-content="request.httprequest.url" />
+            <meta property="og:image" t-attf-content="#{request.httprequest.url_root+blog_post_cover_properties.get('background-image', 'none')[5:-1]}"/>
+            <meta property="og:description" t-att-content="blog_post.subtitle" />
+
+           <!--  Twitter sharing data -->
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:site" content="@Odoo" />
+            <meta name="twitter:title" t-att-content="blog_post.name" />
+            <meta name="twitter:description" t-att-content="blog_post.subtitle" />
+            <meta name="twitter:image" t-attf-content="#{request.httprequest.url_root+blog_post_cover_properties.get('background-image', 'none')[5:-1]}" />
+        </t>
     </t>
+
 </template>
 
 <!-- Options: Blog Post: breadcrumb -->
