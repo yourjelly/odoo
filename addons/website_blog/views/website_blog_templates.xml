@@ -230,12 +230,23 @@
                 </t>
             </div>
             <div t-attf-class="#{blog_post_cover_properties.get('resize_class', '')}" id="title"  t-ignore="True">
-                <span itemprop="image" itemscope="itemscope" itemtype="https://schema.org/ImageObject">
-                    <div id="js_blogcover" t-attf-class="#{blog_post_cover_properties.get('background-color')}" t-attf-style="background-image: #{blog_post_cover_properties.get('background-image', 'none')};opacity:#{blog_post_cover_properties.get('opacity', 1)}"></div>
-                    <meta itemprop="url" t-attf-content="#{request.httprequest.url_root+blog_post_cover_properties.get('background-image', 'none')[5:-1]}"/>
-                    <meta itemprop="width" content="800"/>
-                    <meta itemprop="height" content="800"/>
-                </span>
+                <t t-if="blog_post_cover_properties.get('background-image', 'none') != 'none'">
+                    <span itemprop="image" itemscope="itemscope" itemtype="https://schema.org/ImageObject">
+                        <div id="js_blogcover" t-attf-class="#{blog_post_cover_properties.get('background-color')}" t-attf-style="background-image: #{blog_post_cover_properties.get('background-image', 'none')};opacity:#{blog_post_cover_properties.get('opacity', 1)}"></div>
+                        <meta itemprop="url" t-attf-content="#{request.httprequest.url_root+blog_post_cover_properties.get('background-image', 'none')[5:-1]}"/>
+                        <meta itemprop="width" content="800"/>
+                        <meta itemprop="height" content="800"/>
+                    </span>
+                </t>
+               <t t-if="blog_post_cover_properties.get('background-image', 'none') == 'none'">
+                    <span itemprop="image" itemscope="itemscope" itemtype="https://schema.org/ImageObject">
+                        <!-- <img t-att-content='res_company.logo' />  -->
+                        <meta itemprop="url" t-attf-content="#{request.httprequest.url_root}web/image/res.company/#{res_company.id}/logo" />
+                            <meta itemprop="width" content="600" />
+                            <meta itemprop="height" content="60" />
+                    </span>
+                </t>
+
                 <div class="blog_title">
                     <h1 t-field="blog_post.name" id="blog_post_name" t-att-data-blog-id="blog_post.id" placeholder="Blog Post Title" itemprop="headline"/>
                     <h2 t-field="blog_post.subtitle" placeholder="Subtitle" itemprop="description"/>
