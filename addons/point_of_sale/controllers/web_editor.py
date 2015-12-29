@@ -11,7 +11,7 @@ class Web_Editor(Web_Editor):
         kwargs['template'] = 'point_of_sale.FieldTextHtmlInline'
         extra_head = request.registry["ir.ui.view"].render(request.cr, request.uid, 'point_of_sale.extra_head', None, context=request.context)
 
-        return self.FieldTextHtmlInline(model, res_id, field, callback, head=extra_head, **kwargs)
+        return self.FieldTextHtml(model, res_id, field, callback, head=extra_head, **kwargs)
 
     @http.route(['/point_of_sale/snippets'], type='json', auth="user", website=True)
     def point_of_sale_snippets(self):
