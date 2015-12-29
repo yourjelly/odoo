@@ -81,6 +81,10 @@
         #editable_area {
            max-width: unset !important; // allow content to be max-width
         }
+
+        .editor_enable #wrapwrap > main > div:first-child:after {
+           display: none; // hide dashed right margin
+        }
     </style>
 </template>
 
