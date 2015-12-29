@@ -630,7 +630,7 @@
                                     <td style="text-align:right;">Price</td>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="order_products">
                                 <tr class="product-cell">
                                     <td>
                                         <img alt="" class="img-responsive" src="/point_of_sale/static/img/evian_1l-image.jpg"/>
@@ -652,7 +652,7 @@
                         </table>
                     </div>
                     <!-- We use absolute positioning to get this div
-                         at the bottom of the screen.  ecause of this
+                         at the bottom of the screen.  because of this
                          bootstrap behaves like we're not in a row
                          anymore, hence the offsets -->
                     <div class="payment-info">
