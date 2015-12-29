@@ -627,7 +627,7 @@
                                     <td>Image</td>
                                     <td>Product name</td>
                                     <td style="text-align:right;">Quantity</td>
-                                    <td style="text-align:right;">Price / Item</td>
+                                    <td style="text-align:right;">Price</td>
                                 </tr>
                             </thead>
                             <tbody>
