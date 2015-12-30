@@ -115,7 +115,7 @@
                         <div class="row">
                             <div class="col-xs-12">
                                 <h2>The following items are in your basket:</h2>
-                                <div class="scroll-items">
+                                <div class="scroll-orderlines">
                                     <table>
                                         <thead>
                                             <tr>
@@ -125,7 +125,7 @@
                                                 <td style="text-align:right;">Price</td>
                                             </tr>
                                         </thead>
-                                        <tbody id="order_products">
+                                        <tbody id="orderlines">
                                             <tr class="product-cell">
                                                 <td>
                                                     <img alt="" class="img-responsive" src="/point_of_sale/static/img/evian_1l-image.jpg"/>

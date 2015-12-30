@@ -22,18 +22,18 @@
     transform: translateY(-50%);
 }
 
-@font-face {
-  font-family: 'OpenSans';
-  src: local('OpenSans'), url('file:///tmp/OpenSans-Regular.ttf') format('truetype');
-}
-@font-face {
-  font-family: 'OpenSans-Light';
-  src: local('OpenSans-Light'), url('file:///tmp/OpenSans-Light.ttf') format('truetype');
-}
-@font-face {
-  font-family: 'OpenSans-Bold';
-  src: local('OpenSans-Bold'), url('file:///tmp/OpenSans-Bold.ttf') format('truetype');
-}
+/* @font-face { */
+/*   font-family: 'OpenSans'; */
+/*   src: local('OpenSans'), url('file:///tmp/OpenSans-Regular.ttf') format('truetype'); */
+/* } */
+/* @font-face { */
+/*   font-family: 'OpenSans-Light'; */
+/*   src: local('OpenSans-Light'), url('file:///tmp/OpenSans-Light.ttf') format('truetype'); */
+/* } */
+/* @font-face { */
+/*   font-family: 'OpenSans-Bold'; */
+/*   src: local('OpenSans-Bold'), url('file:///tmp/OpenSans-Bold.ttf') format('truetype'); */
+/* } */
 h1, h2, h3, h4, h5, h6 {
     font-family: 'OpenSans-Light';
     margin: 0;
@@ -57,12 +57,8 @@ thead {
     height: 45px;
 }
 
-.scroll-items {
+.scroll-orderlines {
     overflow-y: auto;
-}
-
-.product-cell {
-    height: 50px;
 }
 
 /*FOOTER*/
