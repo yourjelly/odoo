@@ -91,7 +91,7 @@
                     <div class="container-fluid">
                         <div class="row">
                             <div class="col-xs-12">
-                                <h2 class="text-center">Odoo ad</h2>
+                                <h2 class="text-center">Fill in text here</h2>
                             </div>
                             <div class="col-xs-12">
                                 <img src="/point_of_sale/static/src/img/odoo_ad.png" alt="" class="img-responsive"/>
@@ -101,26 +101,80 @@
                 </div>
                 
                 <div name="Text Block" class="basic_theme o_user_facing_display_snippet">
-                    <div class="snippet_row bg-color" style="padding:0;width:600px;max-width:600px;margin:0 auto;background: #fff repeat top /100%;color:#777777">
-                        <table style="width:100%;text-align:justify;margin:0 auto;background:inherit;color:inherit;border-collapse:collapse;color:inherit">
-                            <tr>
-                                <td style="padding:10px 30px;font-size:14px">
-                                    Fill in text here
-                                </td>
-                            </tr>
-                        </table>
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <h2 class="text-center">Fill in text here</h2>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div name="Orders Block" class="basic_theme o_user_facing_display_snippet">
-                    <div class="snippet_row bg-color" style="padding:0;width:600px;max-width:600px;margin:0 auto;background: #fff repeat top /100%;color:#777777">
-                        <table style="width:100%;text-align:justify;margin:0 auto;background:inherit;color:inherit;border-collapse:collapse;color:inherit">
-                            <tr>
-                                <td style="padding:10px 30px;font-size:14px">
-                                    <p style="margin:0">[[orders]]</p>
-                                </td>
-                            </tr>
-                        </table>
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <h2>The following items are in your basket:</h2>
+                                <div class="scroll-items">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <td>Image</td>
+                                                <td>Product name</td>
+                                                <td style="text-align:right;">Quantity</td>
+                                                <td style="text-align:right;">Price</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="order_products">
+                                            <tr class="product-cell">
+                                                <td>
+                                                    <img alt="" class="img-responsive" src="/point_of_sale/static/img/evian_1l-image.jpg"/>
+                                                </td>
+                                                <td>Evian 2l</td>
+                                                <td align="right">2.000</td>
+                                                <td align="right">$ 1.02</td>
+                                            </tr>
+
+                                            <tr class="product-cell">
+                                                <td>
+                                                    <img alt="" class="img-responsive" src="/point_of_sale/static/img/oranges-image.jpg"/>
+                                                </td>
+                                                <td>Oranges</td>
+                                                <td align="right">3.000</td>
+                                                <td align="right">$ 3.12</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div name="Payment Info Block" class="basic_theme o_user_facing_display_snippet">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="payment-info">
+                                <div class="col-xs-offset-4 col-xs-4">
+                                    <span class="total-amount">TOTAL:</span>
+                                </div>
+                                <div class="col-xs-4 text-right">
+                                    <span class="total-amount dynamic-update">$ 4.14</span>
+                                </div>
+                                <div class="col-xs-offset-4 col-xs-4">
+                                    <span>Cash (USD)</span>
+                                </div>
+                                <div class="col-xs-4 text-right">
+                                    <span>$ 5.00</span>
+                                </div>
+                                <div class="col-xs-offset-4 col-xs-4">
+                                    <span>CHANGE:</span>
+                                </div>
+                                <div class="col-xs-4 text-right">
+                                    <span>$ 0.86</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
