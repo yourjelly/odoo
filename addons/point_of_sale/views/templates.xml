@@ -68,7 +68,7 @@
 
 <template id="extra_head">
     <link href="/web/static/lib/bootstrap/css/bootstrap.css" rel="stylesheet" />
-    <link href="/point_of_sale/static/src/css/user_facing_screen.css" rel="stylesheet"/>
+    <link href="/point_of_sale/static/src/css/customer_facing_display.css" rel="stylesheet"/>
     <style>
         #editable_area {
            max-width: unset !important; // allow content to be max-width
@@ -80,7 +80,7 @@
     </style>
 </template>
 
-<template id="screen_snippets">
+<template id="customer_facing_display_snippets">
     <!-- web_editor needs a ul (normally contains the header, body, extra buttons)-->
     <ul/>
 
@@ -136,9 +136,9 @@
         <t t-call="web_editor.snippet_options"/>
 
         <div data-js='content' class="hidden"
-             data-selector="[data-oe-field='screen_html'] > div, .oe_snippet_body"
-             data-drop-near="[data-oe-field='screen_html'] > *"
-             data-drop-in="[data-oe-field='screen_html'], .ad-space">
+             data-selector="[data-oe-field='customer_facing_display_html'] > div, .oe_snippet_body"
+             data-drop-near="[data-oe-field='customer_facing_display_html'] > *"
+             data-drop-in="[data-oe-field='customer_facing_display_html'], .ad-space">
         </div>
     </div>
 </template>

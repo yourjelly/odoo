@@ -94,7 +94,7 @@ class pos_config(osv.osv):
         'iface_payment_terminal' : fields.boolean('Payment Terminal', help="Enables Payment Terminal integration"),
         'iface_electronic_scale' : fields.boolean('Electronic Scale', help="Enables Electronic Scale integration"),
         'iface_vkeyboard' : fields.boolean('Virtual KeyBoard', help="Enables an integrated Virtual Keyboard"),
-        'iface_screen' : fields.boolean('Screen', help="Enables remote screen"),
+        'iface_customer_facing_display' : fields.boolean('Customer Facing Display', help="Enables a remotely connect customer facing display"),
         'iface_print_via_proxy' : fields.boolean('Print via Proxy', help="Bypass browser printing and prints via the hardware proxy"),
         'iface_scan_via_proxy' : fields.boolean('Scan via Proxy', help="Enable barcode scanning with a remotely connected barcode scanner"),
         'iface_invoicing': fields.boolean('Invoicing',help='Enables invoice generation from the Point of Sale'),
@@ -131,7 +131,7 @@ class pos_config(osv.osv):
         'group_pos_user_id':    fields.many2one('res.groups','Point of Sale User Group', help='This field is there to pass the id of the pos user group to the point of sale client'),
         'tip_product_id':       fields.many2one('product.product','Tip Product', help="The product used to encode the customer tip. Leave empty if you do not accept tips."),
         'fiscal_position_ids': fields.many2many('account.fiscal.position', string='Fiscal Positions'),
-        'screen_html': fields.html('Screen content', translate=True)
+        'customer_facing_display_html': fields.html('Customer facing display content')
     }
 
     def _check_company_location(self, cr, uid, ids, context=None):

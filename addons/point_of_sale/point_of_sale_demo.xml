@@ -602,7 +602,7 @@
         <record id="sale.advance_product_0" model="product.product"> <field name="available_in_pos" eval="False"/> </record>
 
         <record model="pos.config" id="pos_config_main">
-            <field name="screen_html">
+            <field name="customer_facing_display_html">
                 <![CDATA[
         <div class="container-fluid">
             <div class="row">

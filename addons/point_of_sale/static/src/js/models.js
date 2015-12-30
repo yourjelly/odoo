@@ -96,8 +96,8 @@ exports.PosModel = Backbone.Model.extend({
         this.load_orders();
         this.set_start_order();
         if(this.config.use_proxy){
-            if (this.config.iface_screen) {
-                this.on('change:selectedOrder', this.send_current_order_to_screen, this);
+            if (this.config.iface_customer_facing_display) {
+                this.on('change:selectedOrder', this.send_current_order_to_user_facing_display, this);
             }
 
             return this.connect_to_proxy();
@@ -238,7 +238,7 @@ exports.PosModel = Backbone.Model.extend({
                                     self.config.iface_print_via_proxy  ||
                                     self.config.iface_scan_via_proxy   ||
                                     self.config.iface_cashdrawer       ||
-                                    self.config.iface_screen;
+                                    self.config.iface_customer_facing_display;
 
             if (self.config.company_id[0] !== self.user.company_id[0]) {
                 throw new Error(_t("Error: The Point of Sale User must belong to the same company as the Point of Sale. You are probably trying to load the point of sale as an administrator in a multi-company setup, with the administrator account set to the wrong company."));
@@ -692,10 +692,10 @@ exports.PosModel = Backbone.Model.extend({
         return deferred;
     },
 
-    send_current_order_to_screen: function () {
+    send_current_order_to_customer_facing_display: function () {
         var self = this;
         var order = this.get_order();
-        var rendered_html = this.config.screen_html;
+        var rendered_html = this.config.customer_facing_display_html;
 
         // If we're using an external device like the POSBox, we
         // cannot get eg. /web/image?model=product.product because the
@@ -740,11 +740,11 @@ exports.PosModel = Backbone.Model.extend({
             rendered_html = $rendered_html.prop('outerHTML');
 
             // temp
-            rendered_html = '<head><base href="' + window.location.origin + '/"/><link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"/><link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css"/><link href="/point_of_sale/static/src/css/user_facing_screen.css" rel="stylesheet"/><script>window.onload = function () { var to_scroll = document.querySelector(".pos-content"); to_scroll.scrollTop = to_scroll.scrollHeight; };</script></head>' + rendered_html;
+            rendered_html = '<head><base href="' + window.location.origin + '/"/><link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"/><link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css"/><link href="/point_of_sale/static/src/css/customer_facing_display.css" rel="stylesheet"/><script>window.onload = function () { var to_scroll = document.querySelector(".pos-content"); to_scroll.scrollTop = to_scroll.scrollHeight; };</script></head>' + rendered_html;
 
             debugger;
 
-            self.proxy.update_screen(rendered_html);
+            self.proxy.update_customer_facing_display(rendered_html);
         });
     },
 
@@ -1603,13 +1603,13 @@ exports.Order = Backbone.Model.extend({
         this.paymentlines.on('add',    function(){ this.save_to_db("paymentline:add"); }, this);
         this.paymentlines.on('remove', function(){ this.save_to_db("paymentline:rem"); }, this);
 
-        if (this.pos.config.iface_screen) {
-            this.orderlines.on('change', this.pos.send_current_order_to_screen, this.pos);
+        if (this.pos.config.iface_customer_facing_display) {
+            this.orderlines.on('change', this.pos.send_current_order_to_customer_facing_display, this.pos);
             // removing last orderline does not trigger change event
-            this.orderlines.on('remove',   this.pos.send_current_order_to_screen, this.pos);
-            this.paymentlines.on('change', this.pos.send_current_order_to_screen, this.pos);
+            this.orderlines.on('remove',   this.pos.send_current_order_to_customer_facing_display, this.pos);
+            this.paymentlines.on('change', this.pos.send_current_order_to_customer_facing_display, this.pos);
             // removing last paymentline does not trigger change event
-            this.paymentlines.on('remove', this.pos.send_current_order_to_screen, this.pos);
+            this.paymentlines.on('remove', this.pos.send_current_order_to_customer_facing_display, this.pos);
         }
 
         this.init_locked = false;
