@@ -1003,7 +1003,7 @@
             <t t-set="head">
                 <t t-raw="head"/>
                 <t t-if="enable_editor">
-                    <link rel="stylesheet" href="/point_of_sale/static/src/css/pos_user_facing_display_editor_thumb.css" type="text/css"/>
+                    <link rel="stylesheet" href="/point_of_sale/static/src/css/customer_facing_display_editor_thumb.css" type="text/css"/>
                 </t>
             </t>
             <t t-call="web_editor.layout">

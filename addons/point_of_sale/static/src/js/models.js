@@ -97,7 +97,7 @@ exports.PosModel = Backbone.Model.extend({
         this.set_start_order();
         if(this.config.use_proxy){
             if (this.config.iface_customer_facing_display) {
-                this.on('change:selectedOrder', this.send_current_order_to_user_facing_display, this);
+                this.on('change:selectedOrder', this.send_current_order_to_customer_facing_display, this);
             }
 
             return this.connect_to_proxy();
