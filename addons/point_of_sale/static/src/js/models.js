@@ -735,8 +735,8 @@ exports.PosModel = Backbone.Model.extend({
 
             var $rendered_html = $(rendered_html);
             $rendered_html.find('.table-striped.dynamic-update').html(rendered_order_lines);
-            $rendered_html.find('.total-amount.dynamic-update').html(self.chrome.format_currency(order.get_total_with_tax()));
-            $rendered_html.find('.payment.dynamic-update').html(rendered_payment_lines);
+            $rendered_html.find('#total-amount').html(self.chrome.format_currency(order.get_total_with_tax()));
+            $rendered_html.find('#paymentlines').html(rendered_payment_lines);
             rendered_html = $rendered_html.prop('outerHTML');
 
             // temp

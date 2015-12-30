@@ -660,19 +660,21 @@
                             <span class="total-amount">TOTAL:</span>
                         </div>
                         <div class="col-xs-4 text-right">
-                            <span class="total-amount dynamic-update">$ 4.14</span>
-                        </div>
-                        <div class="col-xs-offset-4 col-xs-4">
-                            <span>Cash (USD)</span>
-                        </div>
-                        <div class="col-xs-4 text-right">
-                            <span>$ 5.00</span>
-                        </div>
-                        <div class="col-xs-offset-4 col-xs-4">
-                            <span>CHANGE:</span>
-                        </div>
-                        <div class="col-xs-4 text-right">
-                            <span>$ 0.86</span>
+                            <span id="total-amount" class="total-amount dynamic-update">$ 4.14</span>
+                            </div>
+                        <div id="paymentlines">
+                            <div class="col-xs-offset-4 col-xs-4">
+                                <span>Cash (USD)</span>
+                            </div>
+                            <div class="col-xs-4 text-right">
+                                <span>$ 5.00</span>
+                            </div>
+                            <div class="col-xs-offset-4 col-xs-4">
+                                <span>CHANGE:</span>
+                            </div>
+                            <div class="col-xs-4 text-right">
+                                <span>$ 0.86</span>
+                            </div>
                         </div>
                     </div>
                 </div>
