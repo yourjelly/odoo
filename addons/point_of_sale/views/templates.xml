@@ -128,7 +128,7 @@
                                         <tbody id="orderlines">
                                             <tr class="product-cell">
                                                 <td>
-                                                    <img alt="" class="img-responsive" src="/point_of_sale/static/img/evian_1l-image.jpg"/>
+                                                    <img alt="" class="img" src="/point_of_sale/static/img/evian_1l-image.jpg"/>
                                                 </td>
                                                 <td>Evian 2l</td>
                                                 <td align="right">2.000</td>
@@ -137,7 +137,7 @@
 
                                             <tr class="product-cell">
                                                 <td>
-                                                    <img alt="" class="img-responsive" src="/point_of_sale/static/img/oranges-image.jpg"/>
+                                                    <img alt="" class="img" src="/point_of_sale/static/img/oranges-image.jpg"/>
                                                 </td>
                                                 <td>Oranges</td>
                                                 <td align="right">3.000</td>

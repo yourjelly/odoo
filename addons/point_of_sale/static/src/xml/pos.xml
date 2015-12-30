@@ -1460,7 +1460,7 @@
         <t t-foreach="orderlines" t-as="orderline">
             <tr class="product-cell">
                 <td>
-                    <img t-att-src='orderline.product.image_base64' alt="" class="img img-responsive"/>
+                    <img t-att-src='orderline.product.image_base64' alt="" class="img"/>
                 </td>
                 <td><t t-esc="orderline.product.display_name"/></td>
                 <td align="right"><t t-esc="orderline.get_quantity_str()"/></td>
