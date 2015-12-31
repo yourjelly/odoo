@@ -36,7 +36,7 @@ tr.product-cell > td:first-child {
     color: white;
     width: 100%;
 }
-.total-amount {
+.total-amount-formatting {
     color: #1fb496;
     font-size: 24px;
 }
