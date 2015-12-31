@@ -732,7 +732,6 @@ exports.PosModel = Backbone.Model.extend({
                 });
             }
 
-            debugger;
             var $rendered_html = $(rendered_html);
             $rendered_html.find('#orderlines').html(rendered_order_lines);
             $rendered_html.find('#total-amount').html(self.chrome.format_currency(order.get_total_with_tax()));
@@ -746,24 +745,9 @@ exports.PosModel = Backbone.Model.extend({
                 return memory + $(current_element).prop('outerHTML');
             }, ""); // initial memory of ""
 
-            // temp
-            rendered_html = '<head>\
-<base href="' + window.location.origin + '/"/>\
-<script src="/web/static/lib/jquery/jquery.js"></script>\
-<link href="/web/static/lib/bootstrap/css/bootstrap.css" rel="stylesheet"/>\
-<link href="/point_of_sale/static/src/css/customer_facing_display.css" rel="stylesheet"/>\
-<script>\
-$(document).ready(function() {\
-      var $orderlines = $(".scroll-orderlines");\
-      var payment_info_top = $(".payment-info").offset().top;\
-      var orderlines_top = $orderlines.offset().top;\
-      /* set the size of the div for scrollbar */\
-      $orderlines.height(payment_info_top - orderlines_top - 5);\
-      /* scroll to bottom */\
-      $orderlines[0].scrollTop = $orderlines[0].scrollHeight;\
-  });\
-</script>\
-</head>' + rendered_html;
+            rendered_html = QWeb.render('CustomerFacingDisplayHead', {
+                origin: window.location.origin
+            }) + rendered_html;
 
             self.proxy.update_customer_facing_display(rendered_html);
         });

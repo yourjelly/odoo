@@ -1456,6 +1456,28 @@
         </div>
     </t>
 
+    <t t-name="CustomerFacingDisplayHead">
+<![CDATA[
+        <head>
+            <base href="]]><t t-esc="origin"/><![CDATA[/"/>
+            <script src="/web/static/lib/jquery/jquery.js"></script>
+            <link href="/web/static/lib/bootstrap/css/bootstrap.css" rel="stylesheet"/>
+            <link href="/point_of_sale/static/src/css/customer_facing_display.css" rel="stylesheet"/>
+            <script>
+                $(document).ready(function() {
+                      var $orderlines = $(".scroll-orderlines");
+                      var payment_info_top = $(".payment-info").offset().top;
+                      var orderlines_top = $orderlines.offset().top;
+                      /* set the size of the div for scrollbar */
+                      $orderlines.height(payment_info_top - orderlines_top - 5);
+                      /* scroll to bottom */
+                      $orderlines[0].scrollTop = $orderlines[0].scrollHeight;
+                  });
+            </script>
+            </head>
+]]>
+    </t>
+
     <t t-name="CustomerFacingDisplayOrderLines">
         <t t-foreach="orderlines" t-as="orderline">
             <tr class="product-cell">
