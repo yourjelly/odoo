@@ -999,7 +999,7 @@
         <menuitem parent="menu_point_config_product" action="barcodes.action_barcode_nomenclature_form" id="menu_pos_barcode_nomenclature_all"
             sequence="30"/>
 
-        <template id="FieldTextHtmlInline" name="Editor layout">
+        <template id="FieldTextHtml">
             <t t-set="head">
                 <t t-raw="head"/>
                 <t t-if="enable_editor">
