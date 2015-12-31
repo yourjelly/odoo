@@ -732,12 +732,19 @@ exports.PosModel = Backbone.Model.extend({
                 });
             }
 
+            debugger;
             var $rendered_html = $(rendered_html);
             $rendered_html.find('#orderlines').html(rendered_order_lines);
             $rendered_html.find('#total-amount').html(self.chrome.format_currency(order.get_total_with_tax()));
             $rendered_html.find('#paymentlines').html(rendered_payment_lines);
-            rendered_html = $rendered_html.prop('outerHTML');
-            debugger;
+
+            // prop only uses the first element in a set of elements,
+            // and there's no guarantee that
+            // customer_facing_display_html is wrapped in a single
+            // root element.
+            rendered_html = _.reduce($rendered_html, function (memory, current_element) {
+                return memory + $(current_element).prop('outerHTML');
+            }, ""); // initial memory of ""
 
             // temp
             rendered_html = '<head>\
