@@ -626,8 +626,8 @@
                                 <tr>
                                     <td>Image</td>
                                     <td>Product name</td>
-                                    <td style="text-align:right;">Quantity</td>
-                                    <td style="text-align:right;">Price</td>
+                                    <td class="text-right">Quantity</td>
+                                    <td class="text-right">Price</td>
                                 </tr>
                             </thead>
                             <tbody id="orderlines">
@@ -636,8 +636,8 @@
                                         <img alt="" class="img" src="/point_of_sale/static/img/evian_1l-image.jpg"/>
                                     </td>
                                     <td>Evian 2l</td>
-                                    <td align="right">2.000</td>
-                                    <td align="right">$ 1.02</td>
+                                    <td class="text-right">2.000</td>
+                                    <td class="text-right">$ 1.02</td>
                                 </tr>
 
                                 <tr class="product-cell">
@@ -645,8 +645,8 @@
                                         <img alt="" class="img" src="/point_of_sale/static/img/oranges-image.jpg"/>
                                     </td>
                                     <td>Oranges</td>
-                                    <td align="right">3.000</td>
-                                    <td align="right">$ 3.12</td>
+                                    <td class="text-right">3.000</td>
+                                    <td class="text-right">$ 3.12</td>
                                 </tr>
                             </tbody>
                         </table>

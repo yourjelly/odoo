@@ -1463,8 +1463,8 @@
                     <img t-att-src='orderline.product.image_base64' alt="" class="img"/>
                 </td>
                 <td><t t-esc="orderline.product.display_name"/></td>
-                <td align="right"><t t-esc="orderline.get_quantity_str()"/></td>
-                <td align="right"><t t-esc="widget.format_currency(orderline.get_display_price())"/></td>
+                <td class="text-right"><t t-esc="orderline.get_quantity_str()"/></td>
+                <td class="text-right"><t t-esc="widget.format_currency(orderline.get_display_price())"/></td>
             </tr>
         </t>
     </t>
