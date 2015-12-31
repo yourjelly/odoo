@@ -69,13 +69,22 @@
 <template id="extra_head">
     <link href="/web/static/lib/bootstrap/css/bootstrap.css" rel="stylesheet" />
     <link href="/point_of_sale/static/src/css/customer_facing_display.css" rel="stylesheet"/>
-    <style>
+    <style type="text/css">
+        /* allow content to be max-width and height, because otherwise
+        it's way narrower than you what actually get on the screen */
         #editable_area {
-           max-width: unset !important; // allow content to be max-width
+           max-width: unset;
+           margin-top: unset;
         }
 
+        /* hide dashed right margin */
         .editor_enable #wrapwrap > main > div:first-child:after {
-           display: none; // hide dashed right margin
+           display: none;
+        }
+
+        /* set a dummy height for orderlines (normally this gets dynamically computed by js) */
+        div.scroll-orderlines {
+           height: 300px;
         }
     </style>
 </template>
