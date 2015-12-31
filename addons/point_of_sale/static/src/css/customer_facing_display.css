@@ -19,7 +19,7 @@ thead {
 
 /* restrict width of image column of table */
 tr.product-cell > td:first-child {
-    width: 100px;
+    width: 12%;
     text-align: center;
 }
 
