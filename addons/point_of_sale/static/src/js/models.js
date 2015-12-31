@@ -698,7 +698,7 @@ exports.PosModel = Backbone.Model.extend({
         var rendered_html = this.config.customer_facing_display_html;
 
         // If we're using an external device like the POSBox, we
-        // cannot get eg. /web/image?model=product.product because the
+        // cannot get /web/image?model=product.product because the
         // POSBox is not logged in and thus doesn't have the access
         // rights to access product.product. So instead we'll base64
         // encode it and embed it in the HTML.
@@ -709,7 +709,7 @@ exports.PosModel = Backbone.Model.extend({
                 var product = orderline.product;
                 var image_url = window.location.origin + '/web/image?model=product.product&field=image_medium&id=' + product.id;
 
-                // only download image if we haven't got it before
+                // only download and convert image if we haven't done it before
                 if (! product.image_base64) {
                     get_image_deferreds.push(self._convert_product_img_to_base64(product, image_url));
                 }

@@ -71,7 +71,7 @@
     <link href="/point_of_sale/static/src/css/customer_facing_display.css" rel="stylesheet"/>
     <style type="text/css">
         /* allow content to be max-width and height, because otherwise
-        it's way narrower than you what actually get on the screen */
+        it's way narrower than what you actually get on the screen */
         #editable_area {
            max-width: unset;
            margin-top: unset;
