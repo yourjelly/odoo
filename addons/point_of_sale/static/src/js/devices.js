@@ -434,9 +434,6 @@ var ProxyDevice  = core.Class.extend(core.mixins.PropertiesMixin,{
         send_printing_job();
     },
 
-    /*
-     * ask the posbox to update the user facing display
-     */
     update_customer_facing_display: function(html) {
         return this.message('customer_facing_display',{ html: html },{ timeout: 5000 });
     },
