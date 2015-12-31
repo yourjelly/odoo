@@ -198,7 +198,7 @@
         <div data-js='content' class="hidden"
              data-selector="[data-oe-field='customer_facing_display_html'] > div, .oe_snippet_body"
              data-drop-near="[data-oe-field='customer_facing_display_html'] > *"
-             data-drop-in="[data-oe-field='customer_facing_display_html'], .ad-space">
+             data-drop-in="[data-oe-field='customer_facing_display_html'], .ad-space, div.row > div[class^='col-xs-']">
         </div>
     </div>
 </template>
