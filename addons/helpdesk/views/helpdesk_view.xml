@@ -284,6 +284,19 @@
             id="menu_helpdesk_ticket_act"
             sequence="10" parent="helpdesk.menu_helpdesk"/>
 
+        <!-- Reporting -->
+
+        <record id="helpdesk_ticket_report_act" model="ir.actions.act_window">
+            <field name="name">Reporting</field>
+            <field name="res_model">helpdesk.ticket</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">graph,pivot,kanban,tree,form</field>
+        </record>
+        <menuitem
+            action="helpdesk_ticket_report_act"
+            id="menu_helpdesk_ticket_report_act"
+            sequence="20" parent="helpdesk.menu_helpdesk"/>
+
 
     </data>
 </openerp>
