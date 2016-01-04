@@ -10,7 +10,7 @@
     'summary': 'Ticketing, Support, Issues',
     'depends': [
         'base_setup',
-        'mail',
+        'mail', 'utm'
     ],
     'description': """
 Omnichannel Helpdesk

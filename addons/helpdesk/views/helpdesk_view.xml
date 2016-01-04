@@ -30,11 +30,10 @@
                         <group>
                             <group>
                                 <field name="name"/>
-                                <field name="color"/>
                             </group>
                         </group>
                     </sheet>
-                </firm>
+                </form>
             </field>
         </record>
 
@@ -80,7 +79,7 @@
                             </group>
                         </group>
                     </sheet>
-                </firm>
+                </form>
             </field>
         </record>
 
@@ -122,9 +121,9 @@
                         <field name="name"/>
                         <field name="sequence"/>
                         <field name="is_open"/>
-                        <field name="folded"/>
+                        <field name="fold"/>
                     </sheet>
-                </firm>
+                </form>
             </field>
         </record>
 
@@ -135,7 +134,7 @@
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
-                Click to set a create stage in your helpdesk pipeline.
+                Click to create a stage in your helpdesk pipeline.
               </p><p>
                 Stages will allow operators to easily track how a specific
                 tickets are positioned in the process.
@@ -159,7 +158,7 @@
                     <field name="type_id"/>
 
                     <field name="team_id"/>
-                    <field name="user_id"/>
+                    <field name="responsible_id"/>
                 </search>
             </field>
         </record>
@@ -217,7 +216,7 @@
                                         <t t-if="record.message_needaction_counter.raw_value">
                                             <span class='oe_kanban_mail_new' title='Important Messages'><i class='fa fa-comments'/><t t-raw="record.message_needaction_counter.raw_value"/></span>
                                         </t>
-                                        <img t-att-src="kanban_image('res.users', 'image_small', record.user_id.raw_value)" t-att-title="record.user_id.value" width="24" height="24" class="oe_kanban_avatar pull-right"/>
+                                        <img t-att-src="kanban_image('res.users', 'image_small', record.responsible_id.raw_value)" t-att-title="record.responsible_id.value" width="24" height="24" class="oe_kanban_avatar pull-right"/>
                                     </div>
                                 </div>
                                 <div class="oe_clear"></div>
@@ -240,7 +239,7 @@
                     <sheet>
                         <div class="oe_button_box" name="button_box">
                             <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive"
-                                    attrs="{'invisible': [('active', '=', True), ('probability', '&lt;', 100)]}">
+                                    attrs="{'invisible': [('active', '=', True)]}">
                                 <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
                             </button>
                         </div>
@@ -264,7 +263,7 @@
                         <field name="message_follower_ids" widget="mail_followers"/>
                         <field name="message_ids" widget="mail_thread"/>
                     </div>
-                </firm>
+                </form>
             </field>
         </record>
 

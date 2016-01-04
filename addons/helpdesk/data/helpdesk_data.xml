@@ -12,13 +12,13 @@
     <record model="helpdesk.stage" id="stage_helpdesk5">
         <field name="name">Solved</field>
         <field name="sequence">30</field>
-        <field name="is_done" eval="True"/>
+        <field name="is_open" eval="True"/>
     </record>
     <record model="helpdesk.stage" id="stage_helpdesk5">
         <field name="name">Cancelled</field>
         <field name="fold" eval="True"/>
         <field name="sequence">40</field>
-        <field name="is_done" eval="True"/>
+        <field name="is_open" eval="True"/>
     </record>
 
 

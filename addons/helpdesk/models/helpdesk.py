@@ -66,10 +66,9 @@ class HelpdeskTicket(models.Model):
             kanban view, even if they are empty
         """
         stage_obj = self.env['helpdesk.stage']
-        stage_ids = stage_obj._search([])
-        result = stage_obj.name_get(stage_ids)
+        result = stage_obj.search([]).name_get()
         fold = {}
-        for stage in stage_obj.browse(stage_ids):
+        for stage in stage_obj.search([]):
             fold[stage.id] = stage.fold
         return result, fold
 
@@ -93,8 +92,8 @@ class HelpdeskTicket(models.Model):
     responsible_id = fields.Many2one('res.users', string='Assignee')
     partner_id = fields.Many2one('res.partner', string='Requester')
 
-    stage = fields.Many2one('helpdesk.stage', 'Stage')
-    priority = fields.selection([
+    stage_id = fields.Many2one('helpdesk.stage', 'Stage')
+    priority = fields.Selection([
             ('0', 'Low'),
             ('1', 'Normal'),
             ('2', 'High'),
