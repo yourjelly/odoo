@@ -5,7 +5,7 @@
     'name': 'Helpdesk',
     'version': '1.1',
     'website': 'https://www.odoo.com',
-    'category': 'Project Management',
+    'category': 'Helpdesk',
     'sequence': 10,
     'summary': 'Ticketing, Support, Issues',
     'depends': [

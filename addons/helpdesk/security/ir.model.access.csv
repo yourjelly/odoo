@@ -1,3 +1,10 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_project_project,project.project,model_project_project,project.group_project_user,1,0,0,0
-cess_project_project_manager,project.project,model_project_project,project.group_project_manager,1,1,1,1
+access_helpdesk_tag,helpdesk.tag,model_helpdesk_tag,helpdesk.group_helpdesk_user,1,0,0,0
+access_helpdesk_tag_manager,helpdesk.tag.manager,model_helpdesk_tag,helpdesk.group_helpdesk_manager,1,1,1,1
+access_helpdesk_type,helpdesk.type,model_helpdesk_type,helpdesk.group_helpdesk_user,1,0,0,0
+access_helpdesk_type_manager,helpdesk.type.manager,model_helpdesk_type,helpdesk.group_helpdesk_manager,1,1,1,1
+access_helpdesk_stage,helpdesk.stage,model_helpdesk_stage,helpdesk.group_helpdesk_user,1,0,0,0
+access_helpdesk_stage_manager,helpdesk.stage.manager,model_helpdesk_stage,helpdesk.group_helpdesk_manager,1,1,1,1
+access_helpdesk_ticket,helpdesk.ticket,model_helpdesk_ticket,helpdesk.group_helpdesk_user,1,1,1,1
+access_helpdesk_team,helpdesk.team,model_helpdesk_team,helpdesk.group_helpdesk_user,1,0,0,0
+access_helpdesk_team_manager,helpdesk.team.manager,model_helpdesk_team,helpdesk.group_helpdesk_manager,1,1,1,1
