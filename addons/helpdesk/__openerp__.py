@@ -22,6 +22,7 @@ Omnichannel Helpdesk
         'security/ir.model.access.csv',
         'data/helpdesk_data.xml',
         'views/helpdesk_view.xml',
+        'views/helpdesk_team.xml',
     ],
     'demo': ['data/helpdesk_demo.xml'],
     'test': [

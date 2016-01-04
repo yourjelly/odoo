@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<openerp>
+
+    <!-- Teams -->
+    <record id="helpdesk_team_search" model="ir.ui.view">
+        <field name="name">Search Teams</field>
+        <field name="model">helpdesk.team</field>
+        <field name="arch" type="xml">
+            <search string="Team search">
+                <field name="name"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="helpdesk_team_form" model="ir.ui.view">
+        <field name="name">Helpdesk Teams</field>
+        <field name="model">helpdesk.team</field>
+        <field name="arch" type="xml">
+            <form string="team search">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="color"/>
+                        </group>
+                    </group>
+                </sheet>
+            </firm>
+        </field>
+    </record>
+
+    <record id="helpdesk_team_act" model="ir.actions.act_window">
+        <field name="name">Ticket Teams</field>
+        <field name="res_model">helpdesk.team</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+          <p class="oe_view_nocontent_create">
+            Click to create a new ticket team.
+          </p><p>
+            Teams allows to organize tickets.
+          </p>
+        </field>
+    </record>
+    <menuitem
+        action="helpdesk_team_act"
+        id="menu_helpdesk_team_act"
+        sequence="1" parent="helpdesk.menu_helpdesk_config"/>
+
+</openerp>
