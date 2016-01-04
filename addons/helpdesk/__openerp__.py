@@ -20,9 +20,10 @@ Omnichannel Helpdesk
     'data': [
         'security/helpdesk_security.xml',
         'security/ir.model.access.csv',
-        'helpdesk_view.xml',
+        'data/helpdesk_data.xml',
+        'views/helpdesk_view.xml',
     ],
-    # 'demo': ['helpdesk_demo.xml'],
+    'demo': ['data/helpdesk_demo.xml'],
     'test': [
     ],
     'installable': True,
