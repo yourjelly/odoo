@@ -18,10 +18,86 @@
         <field name="arch" type="xml">
             <form string="team search">
                 <sheet>
-                    <group>
-                        <group>
-                            <field name="name"/>
-                        </group>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="Subject..."/></h1>
+                    </div>
+                    <group string="Options">
+                        <label for="id" string="Channels"/>
+                        <div>
+                            <button type="object" name="open_company" class="oe_box btn-default pull-left" style="margin-right: 12px">
+                                <div class="fa fa-envelope-o fa-5x fa-border"/>
+                                <div class="text-center mt8">
+                                    Email
+                                </div>
+                            </button>
+                            <button type="object" name="open_company" class="oe_box btn-default pull-left" style="margin-right: 12px">
+                                <div class="fa fa-envelope-o fa-5x fa-border"/>
+                                <div class="text-center mt8">
+                                    Ticket Form
+                                </div>
+                            </button>
+                            <button type="object" name="open_company" class="oe_box btn-default pull-left" style="margin-right: 12px">
+                                <div class="fa fa-envelope-o fa-5x fa-border"/>
+                                <div class="text-center mt8">
+                                    Live Chat
+                                </div>
+                            </button>
+                            <button type="object" name="open_company" class="oe_box btn-default pull-left" style="margin-right: 12px">
+                                <div class="fa fa-twitter fa-5x fa-border"/>
+                                <div class="text-center mt8">
+                                    Twitter
+                                </div>
+                            </button>
+                            <button type="object" name="open_company" class="oe_box btn-default pull-left" style="margin-right: 12px">
+                                <div class="fa fa-gears fa-5x fa-border"/>
+                                <div class="text-center mt8">
+                                    API
+                                </div>
+                            </button>
+                        </div>
+                    </group><group>
+                        <label for="id" string="Self-Service"/>
+                        <div>
+                            <button type="object" name="open_company" class="oe_box btn-default pull-left" style="margin-right: 12px">
+                                <div class="fa fa-envelope-o fa-5x fa-border"/>
+                                <div class="text-center mt8">
+                                    Help Center
+                                </div>
+                            </button>
+                            <button type="object" name="open_company" class="oe_box btn-default pull-left" style="margin-right: 12px">
+                                <div class="fa fa-envelope-o fa-5x fa-border"/>
+                                <div class="text-center mt8">
+                                    eLearning
+                                </div>
+                            </button>
+                        </div>
+                    </group><group>
+                        <label for="id" string="Engagement"/>
+                        <div>
+                            <button type="object" name="open_company" class="oe_box btn-default pull-left" style="margin-right: 12px">
+                                <div class="fa fa-envelope-o fa-5x fa-border"/>
+                                <div class="text-center mt8">
+                                    Ratings
+                                </div>
+                            </button>
+                            <button type="object" name="open_company" class="oe_box btn-default pull-left" style="margin-right: 12px">
+                                <div class="fa fa-envelope-o fa-5x fa-border"/>
+                                <div class="text-center mt8">
+                                    SLA Policies
+                                </div>
+                            </button>
+                        </div>
+                    </group><group>
+                        <label for="id" string="Productivity"/>
+                        <div>
+                            <button type="object" name="open_company" class="oe_box btn-default pull-left" style="margin-right: 12px">
+                                <div class="fa fa-envelope-o fa-5x fa-border"/>
+                                <div class="text-center mt8">
+                                    Mail Templates
+                                </div>
+                            </button>
+                        </div>
                     </group>
                 </sheet>
             </form>
