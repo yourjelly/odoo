@@ -76,6 +76,10 @@ class EscposDriver(Thread):
 
         printers = usb.core.find(find_all=True, custom_match=FindUsbClass(7))
 
+	# trying to find printers using virtual com ports
+	if not printers:
+            printers = usb.core.find(find_all=True, custom_match=FindUsbClass(2))
+
         # if no printers are found after this step we will take the
         # first epson or star device we can find.
         # epson
@@ -86,10 +90,30 @@ class EscposDriver(Thread):
             printers = usb.core.find(find_all=True, idVendor=0x0519)
 
         for printer in printers:
+            # set the active configuration. With no arguments, the first
+            # configuration will be the active one
+            printer.set_configuration()
+
+            # get an endpoint instance
+            configuration = printer.get_active_configuration()
+            interface = configuration[(0,0)]
+
+            in_endpoint = usb.util.find_descriptor(
+                interface,
+                custom_match = lambda e: usb.util.endpoint_direction(e.bEndpointAddress) == usb.util.ENDPOINT_IN
+            )
+            out_endpoint = usb.util.find_descriptor(
+                interface,
+                custom_match = lambda e: usb.util.endpoint_direction(e.bEndpointAddress) == usb.util.ENDPOINT_OUT
+            )
+
             connected.append({
                 'vendor': printer.idVendor,
                 'product': printer.idProduct,
-                'name': usb.util.get_string(printer, 256, printer.iManufacturer) + " " + usb.util.get_string(printer, 256, printer.iProduct)
+                'name': usb.util.get_string(printer, 256, printer.iManufacturer) + " " + usb.util.get_string(printer, 256, printer.iProduct),
+                'interface': interface,
+                'in_endpoint': in_endpoint.bEndpointAddress,
+                'out_endpoint': out_endpoint.bEndpointAddress
             })
 
         return connected
@@ -105,7 +129,7 @@ class EscposDriver(Thread):
         printers = self.connected_usb_devices()
         if len(printers) > 0:
             self.set_status('connected','Connected to '+printers[0]['name'])
-            return Usb(printers[0]['vendor'], printers[0]['product'])
+            return Usb(printers[0]['vendor'], printers[0]['product'], printers[0]['interface'], printers[0]['in_endpoint'], printers[0]['out_endpoint'])
         else:
             self.set_status('disconnected','Printer Not Found')
             return None
