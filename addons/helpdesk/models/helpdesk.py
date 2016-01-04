@@ -18,7 +18,7 @@ class HelpdeskTeam(models.Model):
     name = fields.Char(string='Helpdesk Team', required=True)
     active = fields.Boolean('Active', default=True)
     color = fields.Integer('Color Index')
-    alias_id = fields.Many2one('mail.alias', string='Alias', ondelete="restrict", required=True)
+    alias_id = fields.Many2one('mail.alias', string='Alias', ondelete="restrict")
     assign_method = fields.Selection([
         ('no', 'No assign'),
         ('manual', 'Manual assignation'),
@@ -89,7 +89,7 @@ class HelpdeskTicket(models.Model):
     company_id = fields.Many2one('res.company', string='Company')
     color = fields.Integer('Color Index')
 
-    responsible_id = fields.Many2one('res.users', string='Assignee')
+    responsible_id = fields.Many2one('res.users', string='Assignee', default=lambda self: self.env.uid)
     partner_id = fields.Many2one('res.partner', string='Requester')
 
     stage_id = fields.Many2one('helpdesk.stage', 'Stage')
@@ -99,4 +99,11 @@ class HelpdeskTicket(models.Model):
             ('2', 'High'),
             ('3', 'Urgent')
         ], string='Priority', default='1')
+
+    @api.multi
+    def name_get(self):
+        result = []
+        for ticket in self:
+            result.append((ticket.id, "%s (#%d)" % (ticket.name, ticket.id)))
+        return result
 

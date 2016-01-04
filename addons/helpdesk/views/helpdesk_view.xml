@@ -244,18 +244,19 @@
                             </button>
                         </div>
                         <div class="oe_title">
-                            <label for="name" class="oe_edit_only"/>
-                            <h1><field name="name" placeholder="Subject of the ticket..."/></h1>
+                            <h1><field name="name" placeholder="Subject..."/></h1>
                         </div>
                         <group>
-                            <field name="partner_id"/>
-                            <field name="type_id"/>
-                            <field name="tag_ids"/>
-                        </group><group>
-                            <field name="team_id"/>
-                            <field name="responsible_id"/>
-                            <field name="priority"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
+                            <group>
+                                <field name="team_id"/>
+                                <field name="responsible_id"/>
+                                <field name="priority" widget="priority"/>
+                                <field name="company_id" groups="base.group_multi_company"/>
+                            </group><group>
+                                <field name="partner_id"/>
+                                <field name="type_id"/>
+                                <field name="tag_ids" widget="many2many_tags"/>
+                            </group>
                         </group>
                         <field name="note" placeholder="Description of the ticket..."/>
                     </sheet>
