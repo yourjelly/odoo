@@ -20,85 +20,197 @@
                 <sheet>
                     <div class="oe_title">
                         <label for="name" class="oe_edit_only"/>
-                        <h1><field name="name" placeholder="Subject..."/></h1>
+                        <h1><field name="name" placeholder="Helpdesk Team..."/></h1>
                     </div>
-                    <group string="Options">
-                        <label for="id" string="Channels"/>
-                        <div>
-                            <button type="object" name="open_company" class="oe_box btn-default pull-left" style="margin-right: 12px">
-                                <div class="fa fa-envelope-o fa-5x fa-border"/>
-                                <div class="text-center mt8">
-                                    Email
+
+                    <separator string="Channels" class="mt32"/>
+                    <div class="row mt16">
+                      <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <field name="feature_email" style="padding: 12px; margin: 0"/>
+                            </span>
+                            <div class="form-control" style="float: none;">
+                                <span class="fa fa-3x fa-envelope pull-right"/>
+                                <label for="feature_email"/>
+                                <div class="text-muted">Create tickets and discuss on tickets by email.</div>
+                                <div attrs="{'invisible': [('feature_email','=',False)]}">
+                                    <hr class="mt8 mb8"/>
+                                    <group>
+                                        <label for="alias_id" string="Choose an Email"/>
+                                        <div>
+                                            <field name="alias_id" class="oe_read_only oe_inline" string="Email Alias"/>
+                                            <div class="oe_edit_only oe_inline" name="edit_alias" style="display: inline;" >
+                                                <field name="alias_name" class="oe_inline"/>@<field name="alias_domain" class="oe_inline" readonly="1"/>
+                                            </div>
+                                        </div>
+                                    </group>
                                 </div>
-                            </button>
-                            <button type="object" name="open_company" class="oe_box btn-default pull-left" style="margin-right: 12px">
-                                <div class="fa fa-envelope-o fa-5x fa-border"/>
-                                <div class="text-center mt8">
-                                    Ticket Form
-                                </div>
-                            </button>
-                            <button type="object" name="open_company" class="oe_box btn-default pull-left" style="margin-right: 12px">
-                                <div class="fa fa-envelope-o fa-5x fa-border"/>
-                                <div class="text-center mt8">
-                                    Live Chat
-                                </div>
-                            </button>
-                            <button type="object" name="open_company" class="oe_box btn-default pull-left" style="margin-right: 12px">
-                                <div class="fa fa-twitter fa-5x fa-border"/>
-                                <div class="text-center mt8">
-                                    Twitter
-                                </div>
-                            </button>
-                            <button type="object" name="open_company" class="oe_box btn-default pull-left" style="margin-right: 12px">
-                                <div class="fa fa-gears fa-5x fa-border"/>
-                                <div class="text-center mt8">
-                                    API
-                                </div>
-                            </button>
+                            </div>
                         </div>
-                    </group><group>
-                        <label for="id" string="Self-Service"/>
-                        <div>
-                            <button type="object" name="open_company" class="oe_box btn-default pull-left" style="margin-right: 12px">
-                                <div class="fa fa-envelope-o fa-5x fa-border"/>
-                                <div class="text-center mt8">
-                                    Help Center
+                      </div><div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <field name="feature_livechat" style="padding: 12px; margin: 0"/>
+                                <field name="feature_livechat_active" invisible="1"/>
+                            </span>
+                            <div class="form-control" style="float: none;">
+                                <span class="fa fa-3x fa-comments pull-right"/>
+                                <label for="feature_livechat"/>
+                                <div class="text-muted">Get in touch with you website visitors.</div>
+                                <div attrs="{'invisible': [('feature_livechat','=',False)]}">
+                                    <hr class="mt8 mb8"/>
+                                    <button name="--> Setup your channel" attrs="{'invisible': [('feature_livechat_active','=',False)]}"/>
+                                    <button name="--> Test"/>
                                 </div>
-                            </button>
-                            <button type="object" name="open_company" class="oe_box btn-default pull-left" style="margin-right: 12px">
-                                <div class="fa fa-envelope-o fa-5x fa-border"/>
-                                <div class="text-center mt8">
-                                    eLearning
-                                </div>
-                            </button>
+                            </div>
                         </div>
-                    </group><group>
-                        <label for="id" string="Engagement"/>
-                        <div>
-                            <button type="object" name="open_company" class="oe_box btn-default pull-left" style="margin-right: 12px">
-                                <div class="fa fa-envelope-o fa-5x fa-border"/>
-                                <div class="text-center mt8">
-                                    Ratings
+                      </div>
+                    </div><div class="row mt32">
+                      <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <field name="feature_form" style="padding: 12px; margin: 0"/>
+                            </span>
+                            <div class="form-control" style="float: none;">
+                                <span class="fa fa-3x fa-edit pull-right"/>
+                                <label for="feature_form"/>
+                                <div class="text-muted">Submit tickets with an online form having custom fields.</div>
+                                <div attrs="{'invisible': [('feature_form','=',False)]}">
+                                    <hr class="mt8 mb8"/>
+                                    <a href="/" name="View contact form"/>
                                 </div>
-                            </button>
-                            <button type="object" name="open_company" class="oe_box btn-default pull-left" style="margin-right: 12px">
-                                <div class="fa fa-envelope-o fa-5x fa-border"/>
-                                <div class="text-center mt8">
-                                    SLA Policies
-                                </div>
-                            </button>
+                            </div>
                         </div>
-                    </group><group>
-                        <label for="id" string="Productivity"/>
-                        <div>
-                            <button type="object" name="open_company" class="oe_box btn-default pull-left" style="margin-right: 12px">
-                                <div class="fa fa-envelope-o fa-5x fa-border"/>
-                                <div class="text-center mt8">
-                                    Mail Templates
+                      </div>
+                      <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <field name="feature_twitter" style="padding: 12px; margin: 0"/>
+                            </span>
+                            <div class="form-control" style="float: none;">
+                                <span class="fa fa-3x fa-twitter pull-right"/>
+                                <label for="feature_twitter"/>
+                                <div class="text-muted">Monitor twitter activities and create tickets on the fly.</div>
+                                <div attrs="{'invisible': [('feature_twitter','=',False)]}">
+                                    <hr class="mt8 mb8"/>
+                                    <a href="/" name="View contact form"/>
                                 </div>
-                            </button>
+                            </div>
                         </div>
-                    </group>
+                      </div>
+                    </div><div class="row mt32">
+                      <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <field name="feature_api" style="padding: 12px; margin: 0"/>
+                            </span>
+                            <div class="form-control" style="float: none;">
+                                <span class="fa fa-3x fa-gears pull-right"/>
+                                <label for="feature_api"/>
+                                <div class="text-muted">Create tickets using web services.</div>
+                                <div attrs="{'invisible': [('feature_api','=',False)]}">
+                                    <hr class="mt8 mb8"/>
+                                    <a href="/" name="View contact form"/>
+                                </div>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <separator string="Self-Service" class="mt32"/>
+
+                    <div class="row mt16">
+                      <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <field name="feature_helpcenter" style="padding: 12px; margin: 0"/>
+                            </span>
+                            <div class="form-control" style="float: none;">
+                                <span class="fa fa-3x fa-quote-left pull-right"/>
+                                <label for="feature_helpcenter"/>
+                                <div class="text-muted">Question and answer section on your website.</div>
+                                <div attrs="{'invisible': [('feature_helpcenter','=',False)]}">
+                                    <hr class="mt8 mb8"/>
+                                    <p>Test</p>
+                                </div>
+                            </div>
+                        </div>
+                      </div><div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <field name="feature_elearning" style="padding: 12px; margin: 0"/>
+                            </span>
+                            <div class="form-control" style="float: none;">
+                                <span class="fa fa-3x fa-globe pull-right"/>
+                                <label for="feature_elearning"/>
+                                <div class="text-muted">Share presentation and videos, and organize into courses.</div>
+                                <div attrs="{'invisible': [('feature_elearning','=',False)]}">
+                                    <hr class="mt8 mb8"/>
+                                    <button name="--> Test"/>
+                                </div>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <separator string="Performance" class="mt32"/>
+                    <div class="row mt16">
+                      <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <field name="feature_rating" style="padding: 12px; margin: 0"/>
+                            </span>
+                            <div class="form-control" style="float: none;">
+                                <span class="fa fa-3x fa-star-half-full pull-right"/>
+                                <label for="feature_rating"/>
+                                <div class="text-muted">Allow your customers to easily rate your services.</div>
+                                <div attrs="{'invisible': [('feature_rating','=',False)]}">
+                                    <hr class="mt8 mb8"/>
+                                    <p>Test</p>
+                                </div>
+                            </div>
+                        </div>
+                      </div><div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <field name="feature_sla" style="padding: 12px; margin: 0"/>
+                            </span>
+                            <div class="form-control" style="float: none;">
+                                <span class="fa fa-3x fa-dashboard pull-right"/>
+                                <label for="feature_sla"/>
+                                <div class="text-muted">Register your different level of SLAs applied to tickets.</div>
+                                <div attrs="{'invisible': [('feature_sla','=',False)]}">
+                                    <hr class="mt8 mb8"/>
+                                    <button name="--> Test"/>
+                                </div>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <separator string="Productivity" class="mt32"/>
+                    <div class="row mt16">
+                      <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <field name="feature_template" style="padding: 12px; margin: 0"/>
+                            </span>
+                            <div class="form-control" style="float: none;">
+                                <span class="fa fa-3x fa-comments pull-right"/>
+                                <label for="feature_template"/>
+                                <div class="text-muted">Define template of emails to answer faster.</div>
+                                <div attrs="{'invisible': [('feature_template','=',False)]}">
+                                    <hr class="mt8 mb8"/>
+                                    <p>Test</p>
+                                </div>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+
+
+
                 </sheet>
             </form>
         </field>
@@ -109,6 +221,7 @@
         <field name="res_model">helpdesk.team</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
+        <field name="context">{'default_name': 'Support'}</field>
         <field name="help" type="html">
           <p class="oe_view_nocontent_create">
             Click to create a new ticket team.

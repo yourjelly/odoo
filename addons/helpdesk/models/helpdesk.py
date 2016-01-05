@@ -12,13 +12,14 @@ from openerp.tools import float_is_zero, float_compare, DEFAULT_SERVER_DATETIME_
 class HelpdeskTeam(models.Model):
     _name = "helpdesk.team"
     _inherit = ['mail.thread', 'ir.needaction_mixin']
+    _inherits = {'mail.alias': 'alias_id'}
     _description = "Helpdesk Team"
     _order = 'name'
 
     name = fields.Char(string='Helpdesk Team', required=True)
     active = fields.Boolean('Active', default=True)
     color = fields.Integer('Color Index')
-    alias_id = fields.Many2one('mail.alias', string='Alias', ondelete="restrict")
+    alias_id = fields.Many2one('mail.alias', string='Email', ondelete="restrict")
     assign_method = fields.Selection([
         ('no', 'No assign'),
         ('manual', 'Manual assignation'),
@@ -28,6 +29,20 @@ class HelpdeskTeam(models.Model):
     assign_responsible_ids = fields.Many2many('res.users', string='Team')
     ticket_count = fields.Integer('# Open Tickets')
 
+    feature_email = fields.Boolean('Email')
+    feature_form = fields.Boolean('Website Form')
+    feature_livechat = fields.Boolean('Live chat')
+    feature_livechat_active = fields.Boolean('Liva Chat Active')
+    feature_twitter = fields.Boolean('Twitter')
+    feature_api = fields.Boolean('API')
+
+    feature_helpcenter = fields.Boolean('Help Center')
+    feature_elearning = fields.Boolean('eLearning')
+
+    feature_rating = fields.Boolean('Ratings')
+    feature_sla = fields.Boolean('SLA Policies')
+
+    feature_template = fields.Boolean('SLA Policies')
 
 class HelpdeskStage(models.Model):
     _name = 'helpdesk.stage'
