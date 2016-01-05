@@ -1713,4 +1713,3 @@ msgstr ""
 #: model:ir.ui.view,arch_db:mass_mailing.email_designer_snippets
 msgid "© 2014 All Rights Reserved"
 msgstr ""
-

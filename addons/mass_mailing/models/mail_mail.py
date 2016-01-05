@@ -5,6 +5,7 @@ import re
 import urlparse
 import re
 import werkzeug.urls
+import re
 
 from openerp import tools
 from openerp import SUPERUSER_ID
