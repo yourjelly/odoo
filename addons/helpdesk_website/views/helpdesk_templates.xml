@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template name="Ticket Received" id="helpdesk_website.ticket_submited">
+      <t t-call="website.layout">
+        <div id="wrap" class="oe_structure oe_empty">
+            <p>Thank you!</p>
+        </div>
+      </t>
+    </template>
+
+    <template name="Helpdesk: Submit a Ticket" id="helpdesk_website.ticket_submit">
+      <t t-call="website.layout">
+        <div id="wrap" class="oe_structure oe_empty">
+
+          <form action="/website_form/" class="s_website_form form-horizontal container-fluid mt32" enctype="multipart/form-data" method="post" data-model_name="helpdesk.ticket" data-success_page="/page/helpdesk_website.ticket_submited">
+            <input type="hidden" name="team_id" t-attf-value="team.id"/>
+            <div class="form-group form-field o_website_form_required">
+              <div class="col-md-3 col-sm-4 text-right">
+                <label class="control-label" for="partner_name">Your Name</label>
+              </div>
+              <div class="col-md-7 col-sm-8">
+                <input type="text" class="form-control o_website_form_input" name="partner_name" required="1"/>
+              </div>
+            </div>
+            <div class="form-group form-field o_website_form_required">
+              <div class="col-md-3 col-sm-4 text-right">
+                <label class="control-label" for="partner_email">Your Email</label>
+              </div>
+              <div class="col-md-7 col-sm-8">
+                <input type="text" class="form-control o_website_form_input" name="partner_email" required="1"/>
+              </div>
+            </div>
+            <div class="form-group form-field o_website_form_required">
+              <div class="col-md-3 col-sm-4 text-right">
+                <label class="control-label" for="name">Subject</label>
+              </div>
+              <div class="col-md-7 col-sm-8">
+                <input type="text" class="form-control o_website_form_input" name="name" required="1"/>
+              </div>
+            </div>
+            <div class="form-group form-field">
+              <div class="col-md-3 col-sm-4 text-right">
+                <label class="control-label" for="description">Description</label>
+              </div>
+              <div class="col-md-7 col-sm-8">
+                <textarea class="form-control o_website_form_input" name="description"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="col-md-offset-3 col-sm-offset-4 col-sm-8 col-md-7">
+                <button class="btn btn-primary btn-lg o_website_form_send">Send</button>
+                <span id="o_website_form_result"/>
+              </div>
+            </div>
+          </form>
+        </div>
+      </t>
+    </template>
+
+
+</odoo>

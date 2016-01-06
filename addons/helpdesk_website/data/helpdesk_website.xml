@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="helpdesk.model_helpdesk_ticket" model="ir.model">
+            <field name="website_form_default_field_id" ref="helpdesk.field_helpdesk_ticket_name"/>
+            <field name="website_form_access">True</field>
+            <field name="website_form_label">Helpdesk ticket</field>
+        </record>
+    </data>
+</openerp>

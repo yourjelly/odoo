@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<openerp>
+<odoo>
 
     <!-- Teams -->
     <record id="helpdesk_team_search" model="ir.ui.view">
@@ -23,7 +23,10 @@
                         <h1><field name="name" placeholder="Helpdesk Team..."/></h1>
                     </div>
 
-                    <separator string="Channels" class="mt32"/>
+                    <h2 class="mt32">Channels</h2>
+                    <p class="text-muted">
+                        Channels are the ways in which your customers engage with you.
+                    </p>
                     <div class="row mt16">
                       <div class="col-md-6">
                         <div class="input-group">
@@ -68,9 +71,9 @@
                                         <field name="feature_livechat_web_page" readonly="1" class="badge" widget="url"/>
                                     </p>
                                     <p>
-                                        Or configure the <strong>
+                                        Setup the <strong>
                                             <field name="feature_livechat_channel_id" readonly="1" class="oe_online"/>
-                                        </strong> channel.
+                                        </strong> channel to define auto-popup rules and geolocation filters.
                                     </p>
                                 </div>
                             </div>
@@ -86,9 +89,12 @@
                                 <span class="fa fa-3x fa-edit pull-right"/>
                                 <label for="feature_form"/>
                                 <div class="text-muted">Submit tickets with an online form having custom fields.</div>
-                                <div attrs="{'invisible': [('feature_form','=',False)]}">
+                                <div attrs="{'invisible': [('feature_form_url','=',False)]}">
                                     <hr class="mt8 mb8"/>
-                                    <a href="/" name="View contact form"/>
+                                    <p>
+                                        Submit an issue page:
+                                        <field name="feature_form_url" readonly="1" class="oe_inline" widget="url"/>
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -104,7 +110,7 @@
                                 <div class="text-muted">Monitor twitter activities and create tickets on the fly.</div>
                                 <div attrs="{'invisible': [('feature_twitter','=',False)]}">
                                     <hr class="mt8 mb8"/>
-                                    <a href="/" name="View contact form"/>
+                                    <a href="/" name="View contact form">⇒ Check channel messages</a>
                                 </div>
                             </div>
                         </div>
@@ -122,15 +128,17 @@
                                 <div attrs="{'invisible': [('feature_api','=',False)]}">
                                     <hr class="mt8 mb8"/>
                                     <!-- TODO: write a dedicated doc on how to create helpdesk tickets -->
-                                    <a href="https://odoo.com/documentation" target="_blank">View documentation</a>
+                                    <a href="https://odoo.com/documentation" target="_blank">⇒ View documentation</a>
                                 </div>
                             </div>
                         </div>
                       </div>
                     </div>
 
-                    <separator string="Self-Service" class="mt32"/>
-
+                    <h2 class="mt32">Self-Service</h2>
+                    <p class="text-muted">
+                        Knowledge base, communities, and training material to empower your customers.
+                    </p>
                     <div class="row mt16">
                       <div class="col-md-6">
                         <div class="input-group">
@@ -165,7 +173,10 @@
                       </div>
                     </div>
 
-                    <separator string="Performance" class="mt32"/>
+                    <h2 class="mt32">Performance</h2>
+                    <p class="text-muted">
+                        Optimize your support workflows and get feedback on agents performances.
+                    </p>
                     <div class="row mt16">
                       <div class="col-md-6">
                         <div class="input-group">
@@ -200,7 +211,10 @@
                       </div>
                     </div>
 
-                    <separator string="Productivity" class="mt32"/>
+                    <h2 class="mt32">Productivity</h2>
+                    <p class="text-muted">
+                        Build automated answer to improve your agent efficiency.
+                    </p>
                     <div class="row mt16">
                       <div class="col-md-6">
                         <div class="input-group">
@@ -219,8 +233,6 @@
                         </div>
                       </div>
                     </div>
-
-
 
                 </sheet>
             </form>
@@ -246,4 +258,4 @@
         id="menu_helpdesk_team_act"
         sequence="1" parent="helpdesk.menu_helpdesk_config"/>
 
-</openerp>
+</odoo>

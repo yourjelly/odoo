@@ -29,8 +29,9 @@ class HelpdeskTeam(models.Model):
     assign_responsible_ids = fields.Many2many('res.users', string='Team')
     ticket_count = fields.Integer('# Open Tickets')
 
-    feature_email = fields.Boolean('Email')
-    feature_form = fields.Boolean('Website Form', compute="_module_website_installed")
+    feature_email = fields.Boolean('Email', compute="_get_feature_email", inverse="_set_feature_email")
+    feature_form = fields.Boolean('Website Form', compute="_module_website_installed", inverse="_module_website_install")
+    feature_form_url = fields.Char('URL to Submit Issue', readonly=True, compute='_get_form_url')
     feature_livechat = fields.Boolean('Live chat',
         compute='_livechat_get', inverse='_livechat_set', store=True)
     feature_livechat_channel_id = fields.Many2one('im_livechat.channel', 'Live Chat Channel')
@@ -46,24 +47,47 @@ class HelpdeskTeam(models.Model):
 
     feature_template = fields.Boolean('Email Templates')
 
-    @api.model
-    def create(self, vals):
-        team = super(HelpdeskTeam, self.with_context(alias_model_name='helpdesk.ticket',
-                                           mail_create_nolog=True,
-                                           alias_parent_model_name=self._name)).create(vals)
-        team.alias_id.write({'alias_parent_thread_id': team.id, "alias_defaults": {'team_id': team.id}})
-        return team
+    # Feature Fields  Compute
+    @api.one
+    def _set_feature_email(self):
+        if self.alias_id and not self.feature_email:
+            self.alias_id.unlink()
+            self.alias_name = False
+
+    @api.one
+    @api.depends('feature_form')
+    def _get_form_url(self):
+        self.feature_form_url = self.feature_form and ('/website/helpdesk/'+str(self.id)) or False
+
+    @api.one
+    @api.depends('alias_id')
+    def _get_feature_email(self):
+        self.feature_email = bool(self.alias_id)
+
+    @api.one
+    def _module_twitter_installed(self):
+        module = self.env['ir.module.module'].search([('name','=','mail_channel_twitter')])
+        self.feature_twitter = bool(module and module[0].state in ('installed', 'to upgrade'))
+
+    def _module_twitter_install(self):
+        if self.feature_twitter:
+            module = self.env['ir.module.module'].search([('name','=','mail_channel_twitter')])
+            if not module:
+                raise UserError(_('Module mail_channel_twitter not found!'))
+            module.button_install()
+            # Todo: create a channel and connect twitter
 
     @api.one
     def _module_website_installed(self):
-        module = self.env['ir.module.module'].search_browse([('name','=','helpdesk_website')])
+        module = self.env['ir.module.module'].search([('name','=','helpdesk_website')])
         self.feature_form = bool(module and module[0].state in ('installed', 'to upgrade'))
 
     def _module_website_install(self):
-        module = self.env['ir.module.module'].search_browse([('name','=','helpdesk_website')])
-        if not module:
-            raise UserError(_('Module helpdesk_website not found!'))
-        module.button_install()
+        if self.feature_form:
+            module = self.env['ir.module.module'].search([('name','=','helpdesk_website')])
+            if not module:
+                raise UserError(_('Module helpdesk_website not found!'))
+            module.button_install()
 
     @api.one
     @api.depends('feature_livechat_channel_id')
@@ -77,6 +101,16 @@ class HelpdeskTeam(models.Model):
             })
             channel.action_join()
             self.feature_livechat_channel_id = channel
+
+    # Object methods
+    @api.model
+    def create(self, vals):
+        team = super(HelpdeskTeam, self.with_context(alias_model_name='helpdesk.ticket',
+                                           mail_create_nolog=True,
+                                           alias_parent_model_name=self._name)).create(vals)
+        team.alias_id.write({'alias_parent_thread_id': team.id, "alias_defaults": {'team_id': team.id}})
+        print '*', team.alias_id
+        return team
 
 
 class HelpdeskStage(models.Model):
@@ -141,6 +175,10 @@ class HelpdeskTicket(models.Model):
 
     responsible_id = fields.Many2one('res.users', string='Assignee', default=lambda self: self.env.uid)
     partner_id = fields.Many2one('res.partner', string='Requester')
+
+    # Used to submit tickets from a contact form
+    partner_name = fields.Char(string='Requester Name', related="partner_id.name") #inverse="_set_partner_id") ???
+    partner_email = fields.Char(string='Requester Email', related="partner_id.email") #inverse="_set_partner_id") ???
 
     stage_id = fields.Many2one('helpdesk.stage', 'Stage')
     priority = fields.Selection([
