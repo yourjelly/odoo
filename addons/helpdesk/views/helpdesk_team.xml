@@ -64,17 +64,22 @@
                                 <span class="fa fa-3x fa-comments pull-right"/>
                                 <label for="feature_livechat"/>
                                 <div class="text-muted">Get in touch with you website visitors.</div>
-                                <div attrs="{'invisible': [('feature_livechat_channel_id','=',False)]}">
+                                <div attrs="{'invisible': [('feature_livechat','=',False)]}">
                                     <hr class="mt8 mb8"/>
-                                    <p>
-                                        Test the livechat widget from this page:
-                                        <field name="feature_livechat_web_page" readonly="1" class="badge" widget="url"/>
-                                    </p>
-                                    <p>
-                                        Setup the <strong>
-                                            <field name="feature_livechat_channel_id" readonly="1" class="oe_online"/>
-                                        </strong> channel to define auto-popup rules and geolocation filters.
-                                    </p>
+                                    <div attrs="{'invisible': [('feature_livechat_channel_id','&lt;&gt;',False)]}" class="text-warning">
+                                        Save this page to activate the feature.
+                                    </div>
+                                    <div attrs="{'invisible': [('feature_livechat_channel_id','=',False)]}">
+                                        <p>
+                                            Test the livechat widget from this page:
+                                            <field name="feature_livechat_web_page" readonly="1" class="badge" widget="url"/>
+                                        </p>
+                                        <p>
+                                            Setup the <strong>
+                                                <field name="feature_livechat_channel_id" readonly="1" class="oe_online"/>
+                                            </strong> channel to define auto-popup rules and geolocation filters.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -91,10 +96,8 @@
                                 <div class="text-muted">Submit tickets with an online form having custom fields.</div>
                                 <div attrs="{'invisible': [('feature_form_url','=',False)]}">
                                     <hr class="mt8 mb8"/>
-                                    <p>
-                                        Submit an issue page:
-                                        <field name="feature_form_url" readonly="1" class="oe_inline" widget="url"/>
-                                    </p>
+                                    Submit an issue using this page:<br/>
+                                    ⇒ <field name="feature_form_url" readonly="1" class="oe_inline" widget="url"/>
                                 </div>
                             </div>
                         </div>
@@ -110,7 +113,7 @@
                                 <div class="text-muted">Monitor twitter activities and create tickets on the fly.</div>
                                 <div attrs="{'invisible': [('feature_twitter','=',False)]}">
                                     <hr class="mt8 mb8"/>
-                                    <a href="/" name="View contact form">⇒ Check channel messages</a>
+                                    <a href="/" name="View contact form">⇒ Todo...</a>
                                 </div>
                             </div>
                         </div>

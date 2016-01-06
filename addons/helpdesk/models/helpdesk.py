@@ -29,7 +29,7 @@ class HelpdeskTeam(models.Model):
     assign_responsible_ids = fields.Many2many('res.users', string='Team')
     ticket_count = fields.Integer('# Open Tickets')
 
-    feature_email = fields.Boolean('Email', compute="_get_feature_email", inverse="_set_feature_email")
+    feature_email = fields.Boolean('Email')
     feature_form = fields.Boolean('Website Form', compute="_module_website_installed", inverse="_module_website_install")
     feature_form_url = fields.Char('URL to Submit Issue', readonly=True, compute='_get_form_url')
     feature_livechat = fields.Boolean('Live chat',
@@ -49,20 +49,9 @@ class HelpdeskTeam(models.Model):
 
     # Feature Fields  Compute
     @api.one
-    def _set_feature_email(self):
-        if self.alias_id and not self.feature_email:
-            self.alias_id.unlink()
-            self.alias_name = False
-
-    @api.one
     @api.depends('feature_form')
     def _get_form_url(self):
-        self.feature_form_url = self.feature_form and ('/website/helpdesk/'+str(self.id)) or False
-
-    @api.one
-    @api.depends('alias_id')
-    def _get_feature_email(self):
-        self.feature_email = bool(self.alias_id)
+        self.feature_form_url = (self.feature_form and self.id) and ('/website/helpdesk/'+str(self.id)) or False
 
     @api.one
     def _module_twitter_installed(self):
@@ -105,10 +94,16 @@ class HelpdeskTeam(models.Model):
     # Object methods
     @api.model
     def create(self, vals):
+        print 'ICI', vals.get('feature_email', False), vals.get('alias_name', False)
         team = super(HelpdeskTeam, self.with_context(alias_model_name='helpdesk.ticket',
                                            mail_create_nolog=True,
                                            alias_parent_model_name=self._name)).create(vals)
-        team.alias_id.write({'alias_parent_thread_id': team.id, "alias_defaults": {'team_id': team.id}})
+        #team = super(HelpdeskTeam, self.with_context(alias_model_name='helpdesk.ticket',
+        #                                   mail_create_nolog=True,
+        #                                   alias_parent_model_name=self._name)).create(vals)
+        print 'LA'
+        if team.alias_id:
+            team.alias_id.write({'alias_parent_thread_id': team.id, "alias_defaults": {'team_id': team.id}})
         print '*', team.alias_id
         return team
 
