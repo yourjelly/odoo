@@ -19,7 +19,7 @@ class HelpdeskTeam(models.Model):
     name = fields.Char(string='Helpdesk Team', required=True)
     active = fields.Boolean('Active', default=True)
     color = fields.Integer('Color Index')
-    alias_id = fields.Many2one('mail.alias', string='Email', ondelete="restrict")
+    alias_id = fields.Many2one('mail.alias', string='Email', ondelete="restrict", required=False)
     assign_method = fields.Selection([
         ('no', 'No assign'),
         ('manual', 'Manual assignation'),
@@ -30,9 +30,11 @@ class HelpdeskTeam(models.Model):
     ticket_count = fields.Integer('# Open Tickets')
 
     feature_email = fields.Boolean('Email')
-    feature_form = fields.Boolean('Website Form')
-    feature_livechat = fields.Boolean('Live chat')
-    feature_livechat_active = fields.Boolean('Liva Chat Active')
+    feature_form = fields.Boolean('Website Form', compute="_module_website_installed")
+    feature_livechat = fields.Boolean('Live chat',
+        compute='_livechat_get', inverse='_livechat_set', store=True)
+    feature_livechat_channel_id = fields.Many2one('im_livechat.channel', 'Live Chat Channel')
+    feature_livechat_web_page = fields.Char(related='feature_livechat_channel_id.web_page', string='Live Chat Test Page', readonly=True)
     feature_twitter = fields.Boolean('Twitter')
     feature_api = fields.Boolean('API')
 
@@ -42,7 +44,40 @@ class HelpdeskTeam(models.Model):
     feature_rating = fields.Boolean('Ratings')
     feature_sla = fields.Boolean('SLA Policies')
 
-    feature_template = fields.Boolean('SLA Policies')
+    feature_template = fields.Boolean('Email Templates')
+
+    @api.model
+    def create(self, vals):
+        team = super(HelpdeskTeam, self.with_context(alias_model_name='helpdesk.ticket',
+                                           mail_create_nolog=True,
+                                           alias_parent_model_name=self._name)).create(vals)
+        team.alias_id.write({'alias_parent_thread_id': team.id, "alias_defaults": {'team_id': team.id}})
+        return team
+
+    @api.one
+    def _module_website_installed(self):
+        module = self.env['ir.module.module'].search_browse([('name','=','helpdesk_website')])
+        self.feature_form = bool(module and module[0].state in ('installed', 'to upgrade'))
+
+    def _module_website_install(self):
+        module = self.env['ir.module.module'].search_browse([('name','=','helpdesk_website')])
+        if not module:
+            raise UserError(_('Module helpdesk_website not found!'))
+        module.button_install()
+
+    @api.one
+    @api.depends('feature_livechat_channel_id')
+    def _livechat_instaled(self):
+        self.feature_livechat = bool(self.feature_livechat_channel_id)
+
+    def _livechat_set(self):
+        if self.feature_livechat and not self.feature_livechat_channel_id:
+            channel = self.env['im_livechat.channel'].create({
+                'name': self.name,
+            })
+            channel.action_join()
+            self.feature_livechat_channel_id = channel
+
 
 class HelpdeskStage(models.Model):
     _name = 'helpdesk.stage'

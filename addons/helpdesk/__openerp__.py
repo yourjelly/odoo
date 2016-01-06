@@ -10,7 +10,7 @@
     'summary': 'Ticketing, Support, Issues',
     'depends': [
         'base_setup',
-        'mail', 'utm'
+        'mail', 'utm', 'im_livechat'
     ],
     'description': """
 Omnichannel Helpdesk
