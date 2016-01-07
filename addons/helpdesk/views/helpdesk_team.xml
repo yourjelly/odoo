@@ -23,6 +23,26 @@
         </field>
     </record>
 
+    <record id="action_team_sla" model="ir.actions.act_window">
+        <field name="name">SLA Policies</field>
+        <field name="res_model">helpdesk.sla</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'default_condition_team_id': active_id, 'search_default_condition_team_id': active_id}</field>
+        <field name="help" type="html">
+          <p class="oe_view_nocontent_create">
+            Click to create a new Service Level Agreement (SLA) policy.
+          </p><p>
+            A service level agreement is a contract between you and your
+            customers that specifies performance measures for support
+            by ticket priority.
+          </p><p>
+            For example, we respond to urgent tickets related to bugs
+            intwo hours and resolve them within 36 hours.
+          </p>
+        </field>
+    </record>
+
     <record id="helpdesk_team_form" model="ir.ui.view">
         <field name="name">Helpdesk Teams</field>
         <field name="model">helpdesk.team</field>
@@ -124,7 +144,7 @@
                                 <div class="text-muted">Monitor twitter activities and create tickets on the fly.</div>
                                 <div attrs="{'invisible': [('feature_twitter','=',False)]}">
                                     <hr class="mt8 mb8"/>
-                                    <a href="/" name="View contact form">⇒ Todo...</a>
+                                    <a href="/" name="View contact form">⇒ Not implemented yet...</a>
                                 </div>
                             </div>
                         </div>
@@ -179,7 +199,7 @@
                                 <div class="text-muted">Share presentation and videos, and organize into courses.</div>
                                 <div attrs="{'invisible': [('feature_elearning','=',False)]}">
                                     <hr class="mt8 mb8"/>
-                                    <button name="--> Test"/>
+                                    <div>Not implemented yet...</div>
                                 </div>
                             </div>
                         </div>
@@ -202,7 +222,7 @@
                                 <div class="text-muted">Allow your customers to easily rate your services.</div>
                                 <div attrs="{'invisible': [('feature_rating','=',False)]}">
                                     <hr class="mt8 mb8"/>
-                                    <p>Test</p>
+                                    <p>Not implemented yet...</p>
                                 </div>
                             </div>
                         </div>
@@ -217,7 +237,7 @@
                                 <div class="text-muted">Register your different level of SLAs applied to tickets.</div>
                                 <div attrs="{'invisible': [('feature_sla','=',False)]}">
                                     <hr class="mt8 mb8"/>
-                                    <button name="--> Test"/>
+                                    <button name="%(action_team_sla)d" type="action" string="Configure SLA Policies" class="btn-link"/>
                                 </div>
                             </div>
                         </div>
@@ -240,7 +260,7 @@
                                 <div class="text-muted">Define template of emails to answer faster.</div>
                                 <div attrs="{'invisible': [('feature_template','=',False)]}">
                                     <hr class="mt8 mb8"/>
-                                    <p>Test</p>
+                                    <p>Not implemented yet...</p>
                                 </div>
                             </div>
                         </div>
@@ -253,7 +273,7 @@
     </record>
 
     <record id="helpdesk_team_act" model="ir.actions.act_window">
-        <field name="name">Ticket Teams</field>
+        <field name="name">Helpdesk Teams</field>
         <field name="res_model">helpdesk.team</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>

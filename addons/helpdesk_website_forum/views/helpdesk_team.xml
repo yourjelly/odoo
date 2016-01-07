@@ -11,6 +11,7 @@
                     Save to activate this feature.
                 </div>
                 <div attrs="{'invisible': [('feature_helpcenter_url','=',False)]}">
+                    View the Help Center:<br/>
                     ⇒ <field name="feature_helpcenter_url" readonly="1" class="oe_inline" widget="url"/>
                 </div>
             </xpath>
