@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <record id="helpdesk_team_helpcenter_form" model="ir.ui.view">
+        <field name="name">Helpdesk Teams: Forum</field>
+        <field name="inherit_id" ref="helpdesk.helpdesk_team_form"/>
+        <field name="model">helpdesk.team</field>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@id='feature_helpcenter']" position="inside">
+                <div attrs="{'invisible': [('feature_helpcenter_url','&lt;&gt;',False)]}">
+                    Save to activate this feature.
+                </div>
+                <div attrs="{'invisible': [('feature_helpcenter_url','=',False)]}">
+                    ⇒ <field name="feature_helpcenter_url" readonly="1" class="oe_inline" widget="url"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

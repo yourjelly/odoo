@@ -2,6 +2,17 @@
 <odoo>
 
     <!-- Teams -->
+    <record id="helpdesk_team_tree" model="ir.ui.view">
+        <field name="name">Helpdesk Teams</field>
+        <field name="model">helpdesk.team</field>
+        <field name="arch" type="xml">
+            <tree string="Helpdesk Team">
+                <field name="name"/>
+                <field name="alias_id"/>
+            </tree>
+        </field>
+    </record>
+
     <record id="helpdesk_team_search" model="ir.ui.view">
         <field name="name">Search Teams</field>
         <field name="model">helpdesk.team</field>
@@ -152,9 +163,8 @@
                                 <span class="fa fa-3x fa-quote-left pull-right"/>
                                 <label for="feature_helpcenter"/>
                                 <div class="text-muted">Question and answer section on your website.</div>
-                                <div attrs="{'invisible': [('feature_helpcenter','=',False)]}">
+                                <div attrs="{'invisible': [('feature_helpcenter','=',False)]}" id="feature_helpcenter">
                                     <hr class="mt8 mb8"/>
-                                    <p>Test</p>
                                 </div>
                             </div>
                         </div>

@@ -19,7 +19,7 @@ class HelpdeskTeam(models.Model):
     name = fields.Char(string='Helpdesk Team', required=True)
     active = fields.Boolean('Active', default=True)
     color = fields.Integer('Color Index')
-    alias_id = fields.Many2one('mail.alias', string='Email', ondelete="restrict", required=False)
+    alias_id = fields.Many2one('mail.alias', string='Email', ondelete="restrict", required=True)
     assign_method = fields.Selection([
         ('no', 'No assign'),
         ('manual', 'Manual assignation'),
@@ -51,7 +51,7 @@ class HelpdeskTeam(models.Model):
     @api.one
     @api.depends('feature_form')
     def _get_form_url(self):
-        self.feature_form_url = (self.feature_form and self.id) and ('/website/helpdesk/'+str(self.id)) or False
+        self.feature_form_url = (self.feature_form and self.id) and ('/website/helpdesk/'+str(self.id)+'/submit') or False
 
     @api.one
     def _module_twitter_installed(self):
@@ -104,7 +104,6 @@ class HelpdeskTeam(models.Model):
         print 'LA'
         if team.alias_id:
             team.alias_id.write({'alias_parent_thread_id': team.id, "alias_defaults": {'team_id': team.id}})
-        print '*', team.alias_id
         return team
 
 

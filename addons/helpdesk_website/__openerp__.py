@@ -4,7 +4,7 @@
     'summary': 'Helpdesk form to submit a ticket from your website',
     'description': 'Generic controller for web forms',
     'version': '1.0',
-    'depends': ['website', 'mail', 'helpdesk'],
+    'depends': ['website_form', 'mail', 'helpdesk'],
     'data': [
         'views/helpdesk_templates.xml',
         'data/helpdesk_website.xml',
