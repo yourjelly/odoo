@@ -15,12 +15,12 @@
     <record id="helpdesk_team_view_kanban" model="ir.ui.view" >
         <field name="name">helpdesk.team.dashboard</field>
         <field name="model">helpdesk.team</field>
+        <field name="priority">200</field>
         <field name="arch" type="xml">
             <kanban class="oe_background_grey o_kanban_dashboard o_helpdesk_kanban" create="0">
                 <field name="name"/>
                 <field name="color"/>
                 <field name="feature_email"/>
-                <field name="priority">200</field>
                 <field name="feature_rating"/>
                 <templates>
                     <t t-name="kanban-box">
@@ -59,13 +59,13 @@
                                             <span>View Tickets</span>
                                         </div>
                                         <div>
-                                            <button class="btn btn-primary" name="%(helpdesk.action_helpdesk_team_ticket)d" type="action">Unassigned</button>
+                                            <a name="%(helpdesk.action_helpdesk_team_ticket)d" type="action">Unassigned</a>
                                         </div><div>
-                                            <button class="btn btn-primary" name="%(helpdesk.action_helpdesk_team_ticket)d" type="action">Archived</button>
+                                            <a name="%(helpdesk.action_helpdesk_team_ticket)d" type="action">Archived</a>
                                         </div><div>
-                                            <button class="btn btn-primary" name="%(helpdesk.action_helpdesk_team_ticket)d" type="action">SLA Failed</button>
+                                            <a name="%(helpdesk.action_helpdesk_team_ticket)d" type="action">SLA Failed</a>
                                         </div><div>
-                                            <button class="btn btn-primary" name="%(helpdesk.action_helpdesk_team_ticket)d" type="action">Unhappy Ratings</button>
+                                            <a name="%(helpdesk.action_helpdesk_team_ticket)d" type="action">Unhappy Ratings</a>
                                         </div>
                                     </div>
                                     <div class="col-xs-6 o_kanban_card_manage_section o_kanban_manage_reports">
@@ -91,7 +91,7 @@
         </field>
     </record>
 
-    <record id="helpdesk_team_dashboard" model="ir.actions.act_window">
+    <record id="action_helpdesk_team_dashboard" model="ir.actions.act_window">
         <field name="name">Dashboard</field>
         <field name="res_model">helpdesk.team</field>
         <field name="view_type">form</field>
