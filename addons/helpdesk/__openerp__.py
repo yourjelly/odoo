@@ -23,6 +23,7 @@ Omnichannel Helpdesk
         'data/helpdesk_data.xml',
         'views/helpdesk_view.xml',
         'views/helpdesk_team.xml',
+        'views/helpdesk_dashboard.xml',
     ],
     'demo': ['data/helpdesk_demo.xml'],
     'test': [
