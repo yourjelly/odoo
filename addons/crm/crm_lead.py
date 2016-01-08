@@ -1111,7 +1111,7 @@ Update your business card, phone book, social media,... Send an email right now 
                 'this_month': 0,
                 'last_month': 0,
             },
-            'nb_opportunities': 0,
+            'show_demo': 0,
         }
 
         opportunities = self.search_read(

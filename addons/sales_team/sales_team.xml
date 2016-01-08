@@ -30,7 +30,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">sales_team_dashboard,form</field>
             <field name="context">{}</field>
-            <field name="view_id" ref="crm_team_salesteams_search"/>
+            <field name="view_id" ref="crm_team_salesteams_search"/> <!-- Is this correct? -->
             <field name="help" type="html">
                 <p class="oe_view_nocontent_create">
                     Click here to define a new sales team.

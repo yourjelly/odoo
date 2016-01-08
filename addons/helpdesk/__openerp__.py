@@ -25,6 +25,10 @@ Omnichannel Helpdesk
         'views/helpdesk_team.xml',
         'views/helpdesk_dashboard.xml',
     ],
+    'qweb': [
+        "static/src/xml/helpdesk_dashboard.xml",
+    ],
+    'css': ['static/src/css/helpdesk.css'],
     'demo': ['data/helpdesk_demo.xml'],
     'test': [
     ],

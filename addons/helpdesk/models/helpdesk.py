@@ -107,6 +107,36 @@ class HelpdeskTeam(models.Model):
             team.alias_id.write({'alias_parent_thread_id': team.id, "alias_defaults": {'team_id': team.id}})
         return team
 
+    @api.model
+    def retrieve_dashboard(self):
+        return {
+            'tickets': {
+                'all': 0,
+                'high': 0,
+                'sla': 0
+            }, 'unassigned': {
+                'all': 0,
+                'high': 0,
+                'sla': 0
+            }, 'days': {
+                'all': 0,
+                'high': 0,
+                'sla': 0
+            }, 'my_tickets': {
+                'all': 0,
+                'high': 0,
+                'sla': 0
+            }, 'my_days': {
+                'all': 0,
+                'high': 0,
+                'sla': 0
+            }, 'my_create': {
+                'all': 0,
+                'high': 0,
+                'sla': 0
+            }, 
+            'show_demo': not bool(self.search([], limit=1))
+        }
 
 class HelpdeskStage(models.Model):
     _name = 'helpdesk.stage'

@@ -31,6 +31,7 @@ var SalesTeamDashboardView = KanbanView.extend({
         var super_render = this._super;
         var self = this;
 
+		debugger;
         return this.fetch_data().then(function(result){
             self.show_demo = result && result['nb_opportunities'] == 0;
 
@@ -40,6 +41,7 @@ var SalesTeamDashboardView = KanbanView.extend({
                 values: result,
             });
             super_render.call(self);
+			debugger;
             $(sales_dashboard).prependTo(self.$el);
         });
     },

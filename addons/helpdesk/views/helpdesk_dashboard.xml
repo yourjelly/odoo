@@ -1,4 +1,15 @@
 <odoo>
+
+    <template id="assets_backend" name="crm assets" inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+            <link rel="stylesheet" href="/helpdesk/static/src/css/helpdesk.css"/>
+            <link rel="stylesheet" href="/helpdesk/static/src/less/helpdesk.less"/>
+            <script type="text/javascript" src="/helpdesk/static/src/js/helpdesk_dashboard.js"></script>
+        </xpath>
+    </template>
+
+
+
     <record id="action_helpdesk_team_ticket" model="ir.actions.act_window">
         <field name="name">Tickets</field>
         <field name="res_model">helpdesk.ticket</field>
@@ -12,12 +23,27 @@
         </field>
     </record>
 
+    <record id="helpdesk_team_act_new" model="ir.actions.act_window">
+        <field name="name">Helpdesk Team</field>
+        <field name="res_model">helpdesk.team</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form,tree</field>
+        <field name="context">{'default_name': 'Support'}</field>
+        <field name="help" type="html">
+          <p class="oe_view_nocontent_create">
+            Click to create a new ticket team.
+          </p><p>
+            Teams allows to organize tickets.
+          </p>
+        </field>
+    </record>
+
     <record id="helpdesk_team_view_kanban" model="ir.ui.view" >
         <field name="name">helpdesk.team.dashboard</field>
         <field name="model">helpdesk.team</field>
         <field name="priority">200</field>
         <field name="arch" type="xml">
-            <kanban class="oe_background_grey o_kanban_dashboard o_helpdesk_kanban" create="0">
+            <helpdesk_dashboard class="oe_background_grey o_kanban_dashboard o_helpdesk_kanban" create="0">
                 <field name="name"/>
                 <field name="color"/>
                 <field name="feature_email"/>
@@ -87,7 +113,7 @@
                         </div>
                     </t>
                 </templates>
-            </kanban>
+            </helpdesk_dashboard>
         </field>
     </record>
 
@@ -95,14 +121,12 @@
         <field name="name">Dashboard</field>
         <field name="res_model">helpdesk.team</field>
         <field name="view_type">form</field>
-        <field name="view_mode">kanban,form</field>
+        <field name="view_mode">helpdesk_dashboard,form</field>
         <field name="context">{}</field>
         <field name="view_id" ref="helpdesk.helpdesk_team_view_kanban"/>
         <field name="help" type="html">
-            <p class="oe_view_nocontent_create">
-                Click here to define a new helpdesk team.
-            </p><p>
-                ...
+            <p>
+                Your teams will appear here.
             </p>
         </field>
     </record>
@@ -110,7 +134,5 @@
         action="helpdesk.action_helpdesk_team_dashboard"
         id="menu_helpdesk_team_dashboard"
         sequence="5" parent="helpdesk.menu_helpdesk"/>
-
-
 
 </odoo>

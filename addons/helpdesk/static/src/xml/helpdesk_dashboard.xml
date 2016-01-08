@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <!--
+        This template is the ribbon at the top of the helpdesk dashboard that adds
+        some figures to it. We call this rubbon the "HelpdeskDashboard".
+    -->
+    <t t-name="helpdesk.HelpdeskDashboard">
+        <div t-if="show_demo or values" class="o_helpdesk_dashboard">
+            <div t-attf-class="#{show_demo ? 'o_demo' : ''}">
+                <table class="table table-condensed">
+                    <tr>
+                        <td class="o_text">
+                            <div class="o_highlight">My</div>
+                            Tickets
+                        </td>
+                        <td class="o_main" title="To Calendar">
+                            <a href="#" class="o_dashboard_action" name="calendar.action_calendar_event">
+                                <span class="o_highlight">
+                                    120
+                                </span><br/>
+                                Open Tickets
+                            </a>
+                        </td>
+                        <td class="o_main" title="To Activities">
+                            <a href="#" class="o_dashboard_action" name="crm.crm_lead_action_activities" data-extra="today">
+                                <span class="o_highlight">
+                                    7
+                                </span><br/>
+                                Unassigned
+                            </a>
+                        </td>
+                        <td class="o_main" title="Your Pipeline">
+                            <a href="#" class="o_dashboard_action" name="crm.action_your_pipeline">
+                                <span class="o_highlight">
+                                    7
+                                </span><br/>
+                                Avg Days
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="o_text">High Priority</td>
+                        <td class="o_main" title="To Calendar">
+                            <a href="#" class="o_dashboard_action" name="calendar.action_calendar_event">
+                                9
+                            </a>
+                        </td>
+                        <td class="o_main" title="To Activities">
+                            <a href="#" class="o_dashboard_action" name="crm.crm_lead_action_activities" data-extra="this_week">
+                                28
+                            </a>
+                        </td>
+                        <td class="o_main" title="To Activities">
+                            <a href="#" class="o_dashboard_action" name="crm.crm_lead_action_activities" data-extra="this_week">
+                                28
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="o_text">SLA Failed</td>
+                        <td></td>
+                        <!-- Hide overdue when there is none -->
+                        <td t-if="show_demo" class="o_warning" title="To Activities">
+                            <a href="#" class="o_dashboard_action" name="crm.crm_lead_action_activities" data-extra="overdue">
+                                2
+                            </a>
+                        </td>
+                        <td  t-if="show_demo" class="o_warning" title="To Opportunities">
+                            <a href="#" class="o_dashboard_action" name="crm.action_your_pipeline">
+                                3 exp
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+
+            </div><div t-attf-class="#{show_demo ? 'o_demo' : ''}">
+                <table class="hidden-xs table table-condensed">
+                    <tr>
+                        <td class="o_text">
+                            <div class="o_highlight">Performance</div>
+                            Today
+                        </td>
+                        <td title="To Activity Report">
+                            <a href="#" class="o_dashboard_action" name="crm.crm_activity_report_action">
+                                <span class="o_highlight">
+                                    94
+                                </span><br/>
+                                Closed Tickets
+                            </a>
+                        </td>
+                        <td title="To Opportunity Report">
+                            <a href="#" class="o_dashboard_action" name="crm.crm_opportunity_report_action_graph">
+                                <span class="o_highlight">
+                                    3.5 / 5
+                                </span><br/>
+                                Customer Rating
+
+                            </a>
+                        </td>
+                        <td title="To Invoice Report">
+                            <a href="#" class="o_dashboard_action" name="account.action_account_invoice_report_all">
+                                <span class="o_highlight">
+                                    123
+                                </span><br/>
+                                Activities
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="o_text">Target</td>
+                        <td class="o_secondary">
+                            <span t-if="show_demo">
+                                100
+                            </span>
+                        </td>
+                        <td class="o_secondary">
+                            <span t-if="!show_demo" class="o_target_to_set" name='won' title="Click to set">
+                            </span>
+                            <span t-if="show_demo">
+                                80.000€
+                            </span>
+                        </td>
+                        <td t-if="show_demo or values['invoiced']" class="o_secondary">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="o_text">Last 7 days</td>
+                        <td class="o_secondary" title="To Activity Report">
+                            <a href="#" class="o_dashboard_action" name="crm.crm_activity_report_action">
+                                123
+                            </a>
+                        </td>
+                        <td class="o_secondary" title="To Opportunity Report">
+                            <a href="#" class="o_dashboard_action" name="crm.crm_opportunity_report_action_graph">
+                                345
+                            </a>
+                        </td>
+                        <td t-if="values['invoiced']" class="o_secondary" title="To Invoice Report">
+                            <a href="#" class="o_dashboard_action" name="account.action_account_invoice_report_all">
+                                124
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div t-if="show_demo" class="o_welcome_message">
+                <div class="o_welcome_image">
+                    <i class="fa fa-smile-o fa-5x"></i>
+                </div>
+                <div class="o_welcome_content">
+                    <h2>Hi there.</h2>
+                    <h4>Ready to boost your customer service?</h4>
+                    <h4>Let's start by defining your first helpdesk team.</h4>
+                    <a class="btn btn-primary o_dashboard_action" name="helpdesk.helpdesk_team_act_new">Setup a Team</a>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>
