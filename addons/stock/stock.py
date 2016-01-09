@@ -618,12 +618,13 @@ class stock_quant(osv.osv):
                 self.pool.get("stock.move").write(cr, uid, [move.id], {'partially_available': False}, context=context)
             self.write(cr, SUPERUSER_ID, related_quants, {'reservation_id': False}, context=context)
 
-    def _quants_get_order(self, cr, uid, location, product, quantity, domain=[], orderby='in_date', context=None):
+    def _quants_get_order(self, cr, uid, location, product, qty_demanded, domain=[], orderby='in_date', context=None):
         ''' Implementation of removal strategies
             If it can not reserve, it will return a tuple (None, qty)
         '''
         if context is None:
             context = {}
+        quantity = qty_demanded
         domain += location and [('location_id', 'child_of', location.id)] or []
         domain += [('product_id', '=', product.id)]
         if context.get('force_company'):
