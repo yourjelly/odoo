@@ -4,7 +4,7 @@
     'summary': 'Knowledge base for helpdesk',
     'description': 'Knowledge base for helpdesk based on Odoo Forum',
     'version': '1.0',
-    'depends': ['website_forum', 'helpdesk'],
+    'depends': ['website_forum', 'website_slides', 'helpdesk_website'],
     'data': [
         'views/helpdesk_templates.xml',
         'views/helpdesk_team.xml',

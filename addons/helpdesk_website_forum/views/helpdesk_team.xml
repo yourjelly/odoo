@@ -7,12 +7,23 @@
         <field name="model">helpdesk.team</field>
         <field name="arch" type="xml">
             <xpath expr="//div[@id='feature_helpcenter']" position="inside">
+                <hr class="mt8 mb8"/>
                 <div attrs="{'invisible': [('feature_helpcenter_url','&lt;&gt;',False)]}">
                     Save to activate this feature.
                 </div>
                 <div attrs="{'invisible': [('feature_helpcenter_url','=',False)]}">
                     View the Help Center:<br/>
                     ⇒ <field name="feature_helpcenter_url" readonly="1" class="oe_inline" widget="url"/>
+                </div>
+            </xpath>
+            <xpath expr="//div[@id='feature_elearning']" position="inside">
+                <hr class="mt8 mb8"/>
+                <div attrs="{'invisible': [('feature_elearning_url','&lt;&gt;',False)]}">
+                    Save to activate this feature.
+                </div>
+                <div attrs="{'invisible': [('feature_elearning_url','=',False)]}">
+                    View the presentations:<br/>
+                    ⇒ <field name="feature_elearning_url" readonly="1" class="oe_inline" widget="url"/>
                 </div>
             </xpath>
         </field>

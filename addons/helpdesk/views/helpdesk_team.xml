@@ -73,7 +73,7 @@
                                     <group class="oe_edit_only">
                                         <label for="alias_id" string="Choose an Email:"/>
                                         <div class="oe_inline" name="edit_alias" style="display: inline;" >
-                                            <field name="alias_name" class="oe_inline"/>@<field name="alias_domain" class="oe_inline" readonly="1"/>
+                                            <field name="alias_name" class="oe_inline" attrs="{'required': [('feature_email','=',True)]}"/>@<field name="alias_domain" class="oe_inline" readonly="1"/>
                                         </div>
                                     </group>
                                     <p class="oe_read_only">
@@ -183,9 +183,7 @@
                                 <span class="fa fa-3x fa-quote-left pull-right"/>
                                 <label for="feature_helpcenter"/>
                                 <div class="text-muted">Question and answer section on your website.</div>
-                                <div attrs="{'invisible': [('feature_helpcenter','=',False)]}" id="feature_helpcenter">
-                                    <hr class="mt8 mb8"/>
-                                </div>
+                                <div attrs="{'invisible': [('feature_helpcenter','=',False)]}" id="feature_helpcenter"/>
                             </div>
                         </div>
                       </div><div class="col-md-6">
@@ -197,10 +195,7 @@
                                 <span class="fa fa-3x fa-globe pull-right"/>
                                 <label for="feature_elearning"/>
                                 <div class="text-muted">Share presentation and videos, and organize into courses.</div>
-                                <div attrs="{'invisible': [('feature_elearning','=',False)]}">
-                                    <hr class="mt8 mb8"/>
-                                    <div>Not implemented yet...</div>
-                                </div>
+                                <div attrs="{'invisible': [('feature_elearning','=',False)]}" id="feature_elearning"/>
                             </div>
                         </div>
                       </div>
