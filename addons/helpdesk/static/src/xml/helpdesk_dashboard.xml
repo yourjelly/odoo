@@ -18,15 +18,7 @@
                                 <span class="o_highlight">
                                     120
                                 </span><br/>
-                                Open Tickets
-                            </a>
-                        </td>
-                        <td class="o_main" title="To Activities">
-                            <a href="#" class="o_dashboard_action" name="crm.crm_lead_action_activities" data-extra="today">
-                                <span class="o_highlight">
-                                    7
-                                </span><br/>
-                                Unassigned
+                                Tickets
                             </a>
                         </td>
                         <td class="o_main" title="Your Pipeline">
@@ -34,42 +26,44 @@
                                 <span class="o_highlight">
                                     7
                                 </span><br/>
-                                Avg Days
+                                High Priorities
+                            </a>
+                        </td>
+                        <td title="Your Pipeline" class="o_main">
+                            <a href="#" class="o_dashboard_action" name="crm.action_your_pipeline">
+                                <span class="o_highlight">
+                                    1
+                                </span><br/>
+                                Urgent
                             </a>
                         </td>
                     </tr>
                     <tr>
-                        <td class="o_text">High Priority</td>
+                        <td class="o_text">Avg Hours</td>
                         <td class="o_main" title="To Calendar">
                             <a href="#" class="o_dashboard_action" name="calendar.action_calendar_event">
-                                9
+                                30
                             </a>
                         </td>
                         <td class="o_main" title="To Activities">
-                            <a href="#" class="o_dashboard_action" name="crm.crm_lead_action_activities" data-extra="this_week">
-                                28
+                            <a href="#" class="o_dashboard_action" name="calendar.action_calendar_event">
+                                32
                             </a>
                         </td>
                         <td class="o_main" title="To Activities">
-                            <a href="#" class="o_dashboard_action" name="crm.crm_lead_action_activities" data-extra="this_week">
-                                28
+                            <a href="#" class="o_dashboard_action" name="calendar.action_calendar_event">
+                                45
                             </a>
                         </td>
                     </tr>
                     <tr>
                         <td class="o_text">SLA Failed</td>
-                        <td></td>
-                        <!-- Hide overdue when there is none -->
-                        <td t-if="show_demo" class="o_warning" title="To Activities">
+                        <td class="o_warning" title="To Activities">
                             <a href="#" class="o_dashboard_action" name="crm.crm_lead_action_activities" data-extra="overdue">
                                 2
                             </a>
                         </td>
-                        <td  t-if="show_demo" class="o_warning" title="To Opportunities">
-                            <a href="#" class="o_dashboard_action" name="crm.action_your_pipeline">
-                                3 exp
-                            </a>
-                        </td>
+                        <td></td>
                     </tr>
                 </table>
 
@@ -80,7 +74,7 @@
                             <div class="o_highlight">Performance</div>
                             Today
                         </td>
-                        <td title="To Activity Report">
+                        <td title="To Activity Report" class="o_secondary">
                             <a href="#" class="o_dashboard_action" name="crm.crm_activity_report_action">
                                 <span class="o_highlight">
                                     94
@@ -88,16 +82,16 @@
                                 Closed Tickets
                             </a>
                         </td>
-                        <td title="To Opportunity Report">
+                        <td title="To Opportunity Report" class="o_main">
                             <a href="#" class="o_dashboard_action" name="crm.crm_opportunity_report_action_graph">
                                 <span class="o_highlight">
-                                    3.5 / 5
+                                    4.2 / 5
                                 </span><br/>
                                 Customer Rating
 
                             </a>
                         </td>
-                        <td title="To Invoice Report">
+                        <td title="To Invoice Report" class="o_main">
                             <a href="#" class="o_dashboard_action" name="account.action_account_invoice_report_all">
                                 <span class="o_highlight">
                                     123
@@ -107,37 +101,32 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="o_text">Target</td>
+                        <td class="o_text">Daily Target</td>
                         <td class="o_secondary">
-                            <span t-if="show_demo">
-                                100
-                            </span>
+                            100
                         </td>
                         <td class="o_secondary">
-                            <span t-if="!show_demo" class="o_target_to_set" name='won' title="Click to set">
-                            </span>
-                            <span t-if="show_demo">
-                                80.000€
-                            </span>
+                            4.1
                         </td>
-                        <td t-if="show_demo or values['invoiced']" class="o_secondary">
+                        <td class="o_secondary">
+                            120
                         </td>
                     </tr>
                     <tr>
-                        <td class="o_text">Last 7 days</td>
+                        <td class="o_text">Avg 7 days</td>
                         <td class="o_secondary" title="To Activity Report">
                             <a href="#" class="o_dashboard_action" name="crm.crm_activity_report_action">
-                                123
+                                105
                             </a>
                         </td>
                         <td class="o_secondary" title="To Opportunity Report">
                             <a href="#" class="o_dashboard_action" name="crm.crm_opportunity_report_action_graph">
-                                345
+                                4.0
                             </a>
                         </td>
-                        <td t-if="values['invoiced']" class="o_secondary" title="To Invoice Report">
+                        <td class="o_secondary" title="To Invoice Report">
                             <a href="#" class="o_dashboard_action" name="account.action_account_invoice_report_all">
-                                124
+                                121
                             </a>
                         </td>
                     </tr>

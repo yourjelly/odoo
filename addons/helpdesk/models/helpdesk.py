@@ -258,7 +258,7 @@ class HelpdeskTicket(models.Model):
     def _get_sla_id(self):
         dom = [('condition_team_id','=',self.team_id.id), ('condition_priority','<=', self.priority)]
         if self.type_id: 
-            dom.append('|', ('condition_type_id','=',False), ('condition_type_id','=',self.type_id.id))
+            dom += ['|', ('condition_type_id','=',False), ('condition_type_id','=',self.type_id.id)]
         if self.stage_id: 
             dom.append(('condition_stage_id.sequence','>=',self.stage_id.sequence))
         for sla in self.env['helpdesk.sla'].search(dom):
