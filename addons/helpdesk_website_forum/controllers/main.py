@@ -8,6 +8,9 @@ class WebsiteForm(http.Controller):
     def website_helpdesk_form(self, team, **kwargs):
         ctx = {'team': team}
         ctx['forum'] = team.feature_helpcenter_id
+        ctx['channel'] = team.feature_elearning_id
         if team.feature_helpcenter_id:
             ctx['questions'] = request.env['forum.post'].search([('forum_id','=',ctx['forum'].id),('parent_id','=',False)], limit=10)
+        if team.feature_elearning_id:
+            ctx['slides'] = request.env['slide.slide'].search([('channel_id','=',ctx['channel'].id)], limit=10)
         return request.website.render("helpdesk_website_forum.home", ctx)

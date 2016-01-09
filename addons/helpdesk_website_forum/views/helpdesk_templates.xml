@@ -13,7 +13,7 @@
                 <div class="container">
                   <div class="row content">
                     <div class="carousel-content col-md-offset-3 col-md-6 mb64 mt64">
-                      <h1 class="text-center">Odoo Forum</h1>
+                      <h1 class="text-center" t-esc="team.name"/>
                         <div class="text-center">
                             <form class="navbar-form" role="search" t-attf-action="/forum/#{ slug(forum) }" method="get">
                                 <t t-call="website.website_search_box"/>
@@ -37,15 +37,45 @@
                 <t t-if="forum">
                     <t t-call="helpdesk_website_forum.forum_posts"/>
                 </t>
-                <div class="col-md-6">
-                  <h2>Popular Presentations</h2>
-                  <p class="o_default_snippet_text"> Delete the above image or replace it with a picture that illustrates your message. Click on the picture to change it's <em class="o_default_snippet_text">rounded corner</em> style. </p>
-                </div>
+                <t t-if="slide">
+                    <t t-call="helpdesk_website_forum.slides"/>
+                </t>
               </div>
             </div>
           </section>
         </div>
       </t>
+    </template>
+
+    <template name="Top 10 Posts" id="helpdesk_website_forum.forum_posts">
+        <div class="col-md-6">
+          <h2>Popular Presentations</h2>
+          <p t-if="not slides" class="text-muted">
+              No presentation yet, <a t-attf-href="/slides/#{ slug(channel) }">upload your first PDF presentation</a>.
+          </p>
+          <p class="question-block" t-foreach="slides" t-as="slide">
+              <div class="question-name">
+                  <a t-attf-href="/slides/slide/#{ slug(slide) }">
+                      <span t-field="slide.name"/>
+                  </a>
+              </div>
+              <div><t t-raw="post_content"/></div>
+              <t t-foreach="question.tag_ids" t-as="question_tag">
+                  <a t-attf-href="/forum/#{ slug(forum) }/tag/#{slug(question_tag)}/questions">
+                      <span t-attf-class="pull-right label #{tag and tag.name == question_tag.name and 'label-primary' or 'label-default'}" t-field="question_tag.name"
+                          style="margin-right: 4px;"/>
+                  </a>
+              </t>
+              <small class="text-muted">
+                  <i t-if="question.post_type == 'question'" t-attf-class="fa fa-question-circle" t-att-title="question.post_type.capitalize()" />
+                  <i t-if="question.post_type == 'discussion'" t-attf-class="fa fa-comments-o" t-att-title="question.post_type.capitalize()" />
+                  <i t-if="question.post_type == 'link'" t-attf-class="fa fa-link" t-att-title="question.post_type.capitalize()" />
+                  <span>By </span><span t-field="question.create_uid" t-field-options='{"widget": "contact", "country_image": true, "fields": ["name", "country_id"]}' style="display: inline-block;"/>
+                  <span> • </span><span t-field="question.write_date" t-field-options='{"format":"short"}'/>
+                  <span> • </span><span t-field="question.views" /> View<t t-if="question.views&gt;1">s</t>
+              </small>
+          </p>
+        </div>
     </template>
 
     <template name="Top 10 Posts" id="helpdesk_website_forum.forum_posts">

@@ -15,9 +15,10 @@ class HelpdeskTeam(models.Model):
     _inherit = ['mail.thread', 'ir.needaction_mixin']
     _inherits = {'mail.alias': 'alias_id'}
     _description = "Helpdesk Team"
-    _order = 'name'
+    _order = 'sequence,name'
 
     name = fields.Char(string='Helpdesk Team', required=True)
+    sequence = fields.Integer(string='Sequence', default=1)
     active = fields.Boolean('Active', default=True)
     color = fields.Integer('Color Index')
     alias_id = fields.Many2one('mail.alias', string='Email', ondelete="restrict", required=True)

@@ -8,6 +8,7 @@
     'data': [
         'views/helpdesk_templates.xml',
         'views/helpdesk_team.xml',
+        'views/helpdesk_view.xml',
         'security/ir.model.access.csv',
     ],
     'installable': True,
