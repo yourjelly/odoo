@@ -94,27 +94,15 @@
                         <td title="To Invoice Report" class="o_main">
                             <a href="#" class="o_dashboard_action" name="account.action_account_invoice_report_all">
                                 <span class="o_highlight">
-                                    123
+                                    98%
                                 </span><br/>
-                                Activities
+                                Success Rate
                             </a>
                         </td>
                     </tr>
                     <tr>
-                        <td class="o_text">Daily Target</td>
-                        <td class="o_secondary">
-                            100
-                        </td>
-                        <td class="o_secondary">
-                            4.1
-                        </td>
-                        <td class="o_secondary">
-                            120
-                        </td>
-                    </tr>
-                    <tr>
                         <td class="o_text">Avg 7 days</td>
-                        <td class="o_secondary" title="To Activity Report">
+                        <td class="o_main" title="To Activity Report">
                             <a href="#" class="o_dashboard_action" name="crm.crm_activity_report_action">
                                 105
                             </a>
@@ -126,8 +114,19 @@
                         </td>
                         <td class="o_secondary" title="To Invoice Report">
                             <a href="#" class="o_dashboard_action" name="account.action_account_invoice_report_all">
-                                121
+                                94%
                             </a>
+                        </td>
+                    </tr><tr>
+                        <td class="o_text">Daily Target</td>
+                        <td class="o_secondary">
+                            100
+                        </td>
+                        <td class="o_secondary">
+                            4.1
+                        </td>
+                        <td class="o_secondary">
+                            97%
                         </td>
                     </tr>
                 </table>

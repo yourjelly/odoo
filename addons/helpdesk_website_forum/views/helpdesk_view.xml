@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <record id="helpdesk_ticket_form_website" model="ir.ui.view">
+        <field name="name">Tickets: Website</field>
+        <field name="inherit_id" ref="helpdesk.helpdesk_ticket_form"/>
+        <field name="model">helpdesk.ticket</field>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="forum_post_new" attrs="{'invisible': [('feature_helpcenter','=',False)]}" type="object" string="Write a Post"/>
+            </xpath>
+            <xpath expr="//sheet/div[@name='button_box']" position="inside">
+                <field name="feature_helpcenter" invisible="1"/>
+                <field name="forum_post_id" invisible="1"/>
+                <button name="forum_post_open" type="object" class="oe_stat_button" icon="fa-book"
+                        attrs="{'invisible': [('forum_post_id', '=', False)]}" string="Open Post">
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

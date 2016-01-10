@@ -110,34 +110,52 @@ class HelpdeskTeam(models.Model):
 
     @api.model
     def retrieve_dashboard(self):
-        return {
-            'tickets': {
-                'all': 0,
-                'high': 0,
-                'sla': 0
-            }, 'unassigned': {
-                'all': 0,
-                'high': 0,
-                'sla': 0
-            }, 'days': {
-                'all': 0,
-                'high': 0,
-                'sla': 0
-            }, 'my_tickets': {
-                'all': 0,
-                'high': 0,
-                'sla': 0
-            }, 'my_days': {
-                'all': 0,
-                'high': 0,
-                'sla': 0
-            }, 'my_create': {
-                'all': 0,
-                'high': 0,
-                'sla': 0
-            }, 
+        domain = [('responsible_id','=',self.env.uid)]
+        fields = ['priority','sla_id','create_date','stage_id','stat_hours']
+        data = self.env['helpdesk.ticket'].read_group(domain+[('stage_id.is_open','=',True)], fields, fields, lazy=False)
+        result = {
+            'target': { 'count': 0, 'rating': 0, 'success': 0 },
+            'today': { 'count': 0, 'rating': 0, 'success': 0 },
+            '7days': { 'count': 0, 'rating': 0, 'success': 0 },
+            'my_all': { 'count': 0, 'hours': 0, 'failed': 0 },
+            'my_high': { 'count': 0, 'hours': 0, 'failed': 0 },
+            'my_urgent': { 'count': 0, 'hours': 0, 'failed': 0 },
             'show_demo': not bool(self.search([], limit=1))
         }
+        def add_to(d, key="my_all"):
+            result[key]['count'] += d['__count']
+            result[key]['hours'] += d['stat_hours']
+            if d['sla_id']:
+                result[key]['failed'] += d['__count']
+
+        for d in data:
+            add_to(d, 'my_all')
+            if d['priority'] in ('2','3'):
+                add_to(d, 'my_high')
+            if d['priority'] in ('3',):
+                add_to(d, 'my_urgent')
+
+        dt = (datetime.today() - relativedelta.relativedelta(hours=12)).strftime('%Y-%m-%d %H:%M:%S')
+        data = self.env['helpdesk.ticket'].read_group(domain+[('stage_id.is_open','=',False),('date_close','>=',dt)], fields, fields, lazy=False)
+        for d in data:
+            result['today']['count'] += d['__count']
+            if not d['sla_id']:
+                result['today']['success'] += d['__count']
+            # result['today']['rating'] += d['rating']
+
+        dt = (datetime.today() - relativedelta.relativedelta(days=7)).strftime('%Y-%m-%d %H:%M:%S')
+        data = self.env['helpdesk.ticket'].read_group(domain+[('stage_id.is_open','=',False),('date_close','>=',dt)], fields, fields, lazy=False)
+        for d in data:
+            result['7days']['count'] += d['__count']
+            if not d['sla_id']:
+                result['7days']['success'] += d['__count']
+            # result['today']['rating'] += d['rating']
+        result['today']['success'] = (result['today']['success'] * 100) / (result['today']['count'] or 1)
+        result['7days']['success'] = (result['7days']['success'] * 100) / (result['7days']['count'] or 1)
+        result['my_all']['hours'] = result['my_all']['hours'] / (result['my_all']['count'] or 1)
+        result['my_high']['hours'] = result['my_high']['hours'] / (result['my_high']['count'] or 1)
+        result['my_urgent']['hours'] = result['my_urgent']['hours'] / (result['my_urgent']['count'] or 1)
+        return result
 
 class HelpdeskStage(models.Model):
     _name = 'helpdesk.stage'
@@ -245,6 +263,9 @@ class HelpdeskTicket(models.Model):
 
     sla_id = fields.Many2one('helpdesk.sla', string='Failed SLA Policy ID', compute='_get_sla_id', store=True)
     sla_name = fields.Char(string='Failed SLA Policy', compute='_get_sla_id', store=True)
+
+    stat_hours = fields.Integer('Open Time', default=0) # Number of hours between creation_date and close_date (or now)
+    date_close = fields.Datetime('Closed Date')
 
     @api.multi
     def name_get(self):
