@@ -243,8 +243,8 @@ class HelpdeskTicket(models.Model):
             ('3', 'Urgent')
         ], string='Priority', default='1')
 
-    sla_id = fields.Many2one('helpdesk.sla', string='Failed SLA Policy ID', compute='_get_sla_id')
-    sla_name = fields.Char(string='Failed SLA Policy', compute='_get_sla_id')
+    sla_id = fields.Many2one('helpdesk.sla', string='Failed SLA Policy ID', compute='_get_sla_id', store=True)
+    sla_name = fields.Char(string='Failed SLA Policy', compute='_get_sla_id', store=True)
 
     @api.multi
     def name_get(self):
@@ -270,4 +270,10 @@ class HelpdeskTicket(models.Model):
                 return
         self.sla_id = False
         self.sla_name = False
+
+    # Method to call periodically to update SLA & statistics
+    @api.model
+    def recompute_all(self):
+        self.search([('stage_id.is_open','=',True)])._get_sla_id()
+        return True
 

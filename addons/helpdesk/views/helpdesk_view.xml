@@ -10,6 +10,30 @@
             sequence="100"
             parent="helpdesk.menu_helpdesk"/>
 
+        <record id="view_helpdesk_ticket_graph" model="ir.ui.view">
+            <field name="name">helpdesk.ticket.graph</field>
+            <field name="model">helpdesk.ticket</field>
+            <field name="arch" type="xml">
+                <graph string="Helpdesk Tickets" stacked="True">
+                    <field name="create_date" type="row" interval="day"/>
+                    <field name="stage_id" type="col"/>
+                </graph>
+            </field>
+        </record>
+
+        <record id="view_helpdesk_ticket_pivot" model="ir.ui.view">
+            <field name="name">helpdesk.ticket.pivot</field>
+            <field name="model">helpdesk.ticket</field>
+            <field name="arch" type="xml">
+                <pivot string="Helpdesk Tickets">
+                    <field name="create_date" type="row" interval="day"/>
+                    <field name="stage_id" type="col"/>
+                </pivot>
+            </field>
+        </record>
+
+
+
         <!-- Types -->
         <record id="helpdesk_type_search" model="ir.ui.view">
             <field name="name">Search Types</field>
@@ -246,6 +270,18 @@
 
                     <field name="team_id"/>
                     <field name="responsible_id"/>
+                    <filter string="My Tickets" domain="[('responsible_id','=',uid)]"/>
+                    <filter string="Unassigned Tickets" domain="[('responsible_id','=',False)]"/>
+                    <separator/>
+                    <filter string="Open Tickets" domain="[('stage_id.is_open','=',True)]" name="is_open"/>
+                    <filter string="Closed Tickets" domain="[('stage_id.is_open','=',False)]" name="is_close"/>
+                    <filter string="Archived" domain="[('active','=',False)]" name="archive"/>
+                    <separator/>
+                    <filter string="SLA Failed" domain="[('sla_id','&lt;&gt;',False)]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Responsible" name="responsible" context="{'group_by':'responsible_id'}"/>
+                        <filter string="Team" name="team" context="{'group_by':'team_id'}"/>
+                    </group>
                 </search>
             </field>
         </record>
@@ -390,6 +426,15 @@
             id="menu_helpdesk_ticket_report_act"
             sequence="20" parent="helpdesk.menu_helpdesk"/>
 
+
+        <record id="helpdesk_ticket_team_report_act" model="ir.actions.act_window">
+            <field name="name">Reporting</field>
+            <field name="res_model">helpdesk.ticket</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">graph,pivot,kanban,tree,form</field>
+            <field name="domain">[('team_id','=',active_id)]</field>
+            <field name="context">{'search_default_is_open': True}</field>
+        </record>
 
     </data>
 </openerp>

@@ -67,7 +67,12 @@
                                     </div>
                                     <div class="col-xs-6 o_kanban_primary_right">
                                         <div class="mb4">
-                                            <a name="%(helpdesk.helpdesk_ticket_report_act)d" type="action">
+                                            <a name="%(helpdesk.helpdesk_ticket_team_report_act)d" type="action">
+                                                Open Tickets Analysis
+                                            </a>
+                                        </div>
+                                        <div class="mb4">
+                                            <a name="%(helpdesk.helpdesk_ticket_team_report_act)d" type="action">
                                                 Performance Analysis
                                             </a>
                                         </div>
