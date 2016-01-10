@@ -6,64 +6,65 @@
     -->
     <t t-name="helpdesk.HelpdeskDashboard">
         <div t-if="show_demo or values" class="o_helpdesk_dashboard">
-            <div t-attf-class="#{show_demo ? 'o_demo' : ''}">
+            <div>
                 <table class="table table-condensed">
                     <tr>
                         <td class="o_text">
                             <div class="o_highlight">My</div>
                             Tickets
                         </td>
-                        <td class="o_main" title="To Calendar">
+                        <td class="o_main" title="Open my tickets">
                             <a href="#" class="o_dashboard_action" name="calendar.action_calendar_event">
-                                <span class="o_highlight">
-                                    120
-                                </span><br/>
+                                <span class="o_highlight"><t t-esc="values['my_all']['count']"/></span><br/>
                                 Tickets
                             </a>
                         </td>
-                        <td class="o_main" title="Your Pipeline">
+                        <td class="o_main" title="My hight priority tickets">
                             <a href="#" class="o_dashboard_action" name="crm.action_your_pipeline">
-                                <span class="o_highlight">
-                                    7
-                                </span><br/>
+                                <span class="o_highlight"><t t-esc="values['my_high']['count']"/></span><br/>
                                 High Priorities
                             </a>
                         </td>
-                        <td title="Your Pipeline" class="o_main">
+                        <td title="My urgent tickets" class="o_main">
                             <a href="#" class="o_dashboard_action" name="crm.action_your_pipeline">
-                                <span class="o_highlight">
-                                    1
-                                </span><br/>
+                                <span class="o_highlight"><t t-esc="values['my_urgent']['count']"/></span><br/>
                                 Urgent
                             </a>
                         </td>
                     </tr>
                     <tr>
                         <td class="o_text">Avg Hours</td>
-                        <td class="o_main" title="To Calendar">
+                        <td class="o_main">
+                            <a href="#" class="o_dashboard_action" name="calendar.action_calendar_event"><t t-esc="values['my_all']['hours']"/></a>
+                        </td>
+                        <td class="o_main">
                             <a href="#" class="o_dashboard_action" name="calendar.action_calendar_event">
-                                30
+                                <t t-esc="values['my_high']['hours']"/>
                             </a>
                         </td>
-                        <td class="o_main" title="To Activities">
+                        <td class="o_main">
                             <a href="#" class="o_dashboard_action" name="calendar.action_calendar_event">
-                                32
-                            </a>
-                        </td>
-                        <td class="o_main" title="To Activities">
-                            <a href="#" class="o_dashboard_action" name="calendar.action_calendar_event">
-                                45
+                                <t t-esc="values['my_urgent']['hours']"/>
                             </a>
                         </td>
                     </tr>
                     <tr>
                         <td class="o_text">SLA Failed</td>
-                        <td class="o_warning" title="To Activities">
-                            <a href="#" class="o_dashboard_action" name="crm.crm_lead_action_activities" data-extra="overdue">
-                                2
+                        <td t-att-class="values['my_all']['failed'] and 'o_warning'" title="View failed tickets">
+                            <a href="#" class="o_dashboard_action" name="crm.crm_lead_action_activities" data-extra="overdue" t-if="values['my_all']['failed']">
+                                <t t-esc="values['my_all']['failed']"/>
                             </a>
                         </td>
-                        <td></td>
+                        <td t-att-class="values['my_high']['failed'] and 'o_warning'" title="View high priority failed tickets">
+                            <a href="#" class="o_dashboard_action" name="crm.crm_lead_action_activities" data-extra="overdue" t-if="values['my_high']['failed']">
+                                <t t-esc="values['my_high']['failed']"/>
+                            </a>
+                        </td>
+                        <td class="o_warning" title="View urgent failed tickets" t-if="values['my_urgent']['failed']">
+                            <a href="#" class="o_dashboard_action" name="crm.crm_lead_action_activities" data-extra="overdue">
+                                <t t-esc="values['my_urgent']['failed']"/>
+                            </a>
+                        </td>
                     </tr>
                 </table>
 
@@ -74,27 +75,27 @@
                             <div class="o_highlight">Performance</div>
                             Today
                         </td>
-                        <td title="To Activity Report" class="o_secondary">
+                        <td title="Performance Report" t-att-class="(values['target']['count'] &lt;= values['today']['count'])?'o_main':'o_secondary'">
                             <a href="#" class="o_dashboard_action" name="crm.crm_activity_report_action">
                                 <span class="o_highlight">
-                                    94
+                                    <t t-esc="values['today']['count']"/>
                                 </span><br/>
                                 Closed Tickets
                             </a>
                         </td>
-                        <td title="To Opportunity Report" class="o_main">
+                        <td title="Customer satisfaction analysis" t-att-class="(values['target']['rating'] &lt;= values['today']['rating'])?'o_main':'o_secondary'">
                             <a href="#" class="o_dashboard_action" name="crm.crm_opportunity_report_action_graph">
                                 <span class="o_highlight">
-                                    4.2 / 5
+                                    <t t-esc="values['today']['rating']"/> / 5
                                 </span><br/>
                                 Customer Rating
 
                             </a>
                         </td>
-                        <td title="To Invoice Report" class="o_main">
+                        <td title="Performance Report" t-att-class="(values['target']['success'] &lt;= values['today']['success'])?'o_main':'o_secondary'">
                             <a href="#" class="o_dashboard_action" name="account.action_account_invoice_report_all">
                                 <span class="o_highlight">
-                                    98%
+                                    <t t-esc="values['today']['success']"/>%
                                 </span><br/>
                                 Success Rate
                             </a>
@@ -102,31 +103,31 @@
                     </tr>
                     <tr>
                         <td class="o_text">Avg 7 days</td>
-                        <td class="o_main" title="To Activity Report">
+                        <td t-att-class="(values['target']['count'] &lt;= values['7days']['count'])?'o_main':'o_secondary'">
                             <a href="#" class="o_dashboard_action" name="crm.crm_activity_report_action">
-                                105
+                                <t t-esc="values['7days']['count']"/>
                             </a>
                         </td>
-                        <td class="o_secondary" title="To Opportunity Report">
+                        <td t-att-class="(values['target']['rating'] &lt;= values['7days']['rating'])?'o_main':'o_secondary'">
                             <a href="#" class="o_dashboard_action" name="crm.crm_opportunity_report_action_graph">
-                                4.0
+                                <t t-esc="values['7days']['rating']"/> / 5
                             </a>
                         </td>
-                        <td class="o_secondary" title="To Invoice Report">
+                        <td t-att-class="(values['target']['success'] &lt;= values['7days']['success'])?'o_main':'o_secondary'">
                             <a href="#" class="o_dashboard_action" name="account.action_account_invoice_report_all">
-                                94%
+                                <t t-esc="values['7days']['success']"/>%
                             </a>
                         </td>
                     </tr><tr>
                         <td class="o_text">Daily Target</td>
                         <td class="o_secondary">
-                            100
+                            <t t-esc="values['target']['count']"/>
                         </td>
                         <td class="o_secondary">
-                            4.1
+                            <t t-esc="values['target']['rating']"/>
                         </td>
                         <td class="o_secondary">
-                            97%
+                            <t t-esc="values['target']['success']"/>
                         </td>
                     </tr>
                 </table>

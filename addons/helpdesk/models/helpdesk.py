@@ -114,7 +114,10 @@ class HelpdeskTeam(models.Model):
         fields = ['priority','sla_id','create_date','stage_id','stat_hours']
         data = self.env['helpdesk.ticket'].read_group(domain+[('stage_id.is_open','=',True)], fields, fields, lazy=False)
         result = {
-            'target': { 'count': 0, 'rating': 0, 'success': 0 },
+            'target': {
+                'count': self.env.user.target_closed,
+                'rating': self.env.user.target_rating,
+                'success': self.env.user.target_success },
             'today': { 'count': 0, 'rating': 0, 'success': 0 },
             '7days': { 'count': 0, 'rating': 0, 'success': 0 },
             'my_all': { 'count': 0, 'hours': 0, 'failed': 0 },
@@ -122,6 +125,7 @@ class HelpdeskTeam(models.Model):
             'my_urgent': { 'count': 0, 'hours': 0, 'failed': 0 },
             'show_demo': not bool(self.search([], limit=1))
         }
+        print result['target']
         def add_to(d, key="my_all"):
             result[key]['count'] += d['__count']
             result[key]['hours'] += d['stat_hours']
