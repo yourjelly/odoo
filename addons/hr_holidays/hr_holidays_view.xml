@@ -275,7 +275,7 @@
                     'hr_holidays.menu_open_company_allocation',
                 ]
             }</field>
-            <field name="domain">[('type','=','remove')]</field>
+            <field name="domain">[('type','=','remove'), ('employee_id.user_id','=',uid)]</field>
             <field name="search_view_id" ref="view_hr_holidays_filter"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
@@ -357,7 +357,7 @@
                     'hr_holidays.menu_open_company_allocation',
                 ]
             }</field>
-            <field name="domain">[('type','=','add')]</field>
+            <field name="domain">[('type','=','add'), ('employee_id.user_id','=',uid)]</field>
             <field name="view_id" ref="edit_holiday_new"/>
             <field name="search_view_id" ref="view_hr_holidays_filter"/>
         </record>
@@ -428,7 +428,7 @@
                     'hr_holidays.menu_open_employee_leave',
                 ]
             }</field>
-            <field name="domain">[('holiday_type','=','employee')]</field>
+            <field name="domain">[('holiday_type','=','employee'), ('employee_id.user_id','=',uid)]</field>
             <field name="search_view_id" ref="view_hr_holidays_filter"/>
         </record>
 
