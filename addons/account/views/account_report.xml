@@ -42,6 +42,15 @@
             />
 
         <report 
+            id="action_report_journal"
+            model="account.report.journal"
+            string="Sale/Purchase Journal"
+            report_type="qweb-pdf"
+            name="account.report_journal"
+            file="account.report_journal"
+            />
+
+        <report 
             id="action_report_trial_balance"
             model="account.balance.report"
             string="Trial Balance"
