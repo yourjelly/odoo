@@ -62,6 +62,8 @@ You could use this simplified accounting in case you work with an (external) acc
         'views/report_agedpartnerbalance.xml',
         'wizard/account_report_print_journal_view.xml',
         'views/report_journal.xml',
+        'wizard/account_report_partner_ledger_view.xml',
+        'views/report_partnerledger.xml',
     ],
     'demo': [
         'demo/account_demo.xml',

@@ -9,3 +9,4 @@ import account_balance
 import account_report_financial
 import account_aged_partner_balance
 import account_journal
+import account_partner_ledger
