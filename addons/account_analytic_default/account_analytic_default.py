@@ -96,16 +96,12 @@ class product_product(osv.Model):
     }
 
 
-class product_template(osv.Model):
+class ProductTemplate(models.Model):
     _inherit = 'product.template'
-    
-    def _rules_count(self, cr, uid, ids, field_name, arg, context=None):
-        res = {}
-        for product_tmpl_id in self.browse(cr, uid, ids, context=context):
-            res[product_tmpl_id.id] = sum([p.rules_count for p in product_tmpl_id.product_variant_ids])
-        return res
 
-    _columns = {
-        'rules_count': fields.function(_rules_count, string='# Analytic Rules', type='integer'),
-    }
-
+    def _compute_rules_count(self):
+        product_ids = self.mapped('product_variant_ids').ids
+        product_data = self.env['account.analytic.default'].read_group([('product_id', 'in', product_ids)], ['product_id'], ['product_id'])
+        for data in product_data:
+            self.rules_count += int(data['product_id_count'])
+    rules_count = fields.Integer(compute='_compute_rules_count', string='# Analytic Rules')
