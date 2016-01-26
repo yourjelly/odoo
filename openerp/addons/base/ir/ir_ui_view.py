@@ -337,7 +337,7 @@ class view(osv.osv):
     def create(self, cr, uid, values, context=None):
         if not values.get('type'):
             if values.get('inherit_id'):
-                values['type'] = self.browse(cr, uid, values['inherit_id'], context).type
+                values['type'] = self.search([('id', '=', values['inherit_id'])]).type
             else:
                 values['type'] = etree.fromstring(values['arch']).tag
 
