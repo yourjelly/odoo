@@ -279,16 +279,13 @@ class PaymentAcquirer(osv.Model):
         # because render accepts view ids but not qweb -> need to use the xml_id
         return self.pool['ir.ui.view'].render(cr, uid, acquirer.view_template_id.xml_id, values, engine='ir.qweb', context=context)
 
-    def _registration_render(self, cr, uid, id, partner_id, qweb_context=None, context=None):
-        acquirer = self.browse(cr, uid, id, context=context)
-        if qweb_context is None:
-            qweb_context = {}
-        qweb_context.update(id=id, partner_id=partner_id)
-        method_name = '_%s_registration_form_generate_values' % (acquirer.provider,)
+    def _registration_render(self, partner_id, values={}):
+        values.update(id=self.id, partner_id=partner_id)
+        method_name = '_%s_registration_form_generate_values' % (self.provider)
         if hasattr(self, method_name):
             method = getattr(self, method_name)
-            qweb_context.update(method(cr, uid, id, qweb_context, context=context))
-        return self.pool['ir.ui.view'].render(cr, uid, acquirer.registration_view_template_id.xml_id, qweb_context, engine='ir.qweb', context=context)
+            values.update(method(values))
+        return self.env['ir.ui.view']._model.render(self.env.cr, self.env.uid, self.registration_view_template_id.xml_id, values, context=self.env.context)
 
     def s2s_process(self, cr, uid, id, data, context=None):
         acquirer = self.browse(cr, uid, id, context=context)
