@@ -378,6 +378,18 @@ class MassMailingCampaign(osv.Model):
         else:
             return super(MassMailingCampaign, self).read_group(cr, uid, domain, fields, groupby, offset=offset, limit=limit, context=context, orderby=orderby)
 
+    def on_change_campaign_name(self, cr, uid, ids, name, context=None):
+        if name:
+            mass_mailing_campaign = self.browse(cr, uid, ids, context=context)
+            if mass_mailing_campaign.campaign_id:
+                utm_campaign_id = mass_mailing_campaign.campaign_id.id
+                self.pool['utm.campaign'].write(cr, uid, [utm_campaign_id], {'name': name}, context=context)
+            else:
+                utm_campaign_id = self.pool['utm.campaign'].create(cr, uid, {'name': name}, context=context)
+
+            return {'value': {'campaign_id': utm_campaign_id}}
+
+
 
 class MassMailing(osv.Model):
     """ MassMailing models a wave of emails for a mass mailign campaign.

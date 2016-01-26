@@ -800,7 +800,7 @@
                             <page string="Related Mailings" groups="base.group_no_one">
                                 <field name="mass_mailing_ids" readonly="1" string="Related Mailing(s)">
                                     <tree>
-                                        <field name="name"/>
+                                        <field name="name" on_change="on_change_campaign_name(name)"/>
                                         <field name="sent_date"/>
                                         <field name="state"/>
                                         <field name="delivered"/>
