@@ -18,12 +18,6 @@ class res_partner(osv.osv):
     def _commercial_fields(self, cr, uid, context=None):
         return super(res_partner, self)._commercial_fields(cr, uid, context=context) + \
             ['out_inv_comm_type', 'out_inv_comm_algorithm']
-    
-    _columns = {
-        'out_inv_comm_type': fields.selection(_get_comm_type, 'Communication Type', change_default=True,
-            help='Select Default Communication Type for Outgoing Invoices.' ),
-    }
 
-    _default = {
-        'out_inv_comm_type': 'none',
-    }
+    out_inv_comm_type = fields.Selection('_get_comm_type', string='Communication Type', change_default=True,
+            help='Select Default Communication Type for Outgoing Invoices.')
