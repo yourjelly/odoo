@@ -109,11 +109,3 @@ class product_template(osv.Model):
         'rules_count': fields.function(_rules_count, string='# Analytic Rules', type='integer'),
     }
 
-
-    def action_view_rules(self, cr, uid, ids, context=None):
-        products = self._get_products(cr, uid, ids, context=context)
-        result = self._get_act_window_dict(cr, uid, 'account_analytic_default.action_product_default_list', context=context)
-        result['domain'] = "[('product_id','in',[" + ','.join(map(str, products)) + "])]"
-        # Remove context so it is not going to filter on product_id with active_id of template
-        result['context'] = "{}"
-        return result
