@@ -827,7 +827,7 @@ class AccountInvoice(models.Model):
         }
         result = []
         for inv in self:
-            result.append((inv.id, "%s %s" % (inv.number or TYPES[inv.type], inv.name or '')))
+            result.append((inv.id, _("%s %s" % (inv.number or TYPES[inv.type], inv.name or ''))))
         return result
 
     @api.model
