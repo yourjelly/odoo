@@ -352,7 +352,7 @@ class ir_model_fields_anonymize_wizard(osv.osv_memory):
             'state': 'in_exception',
             'msg': error_msg,
         })
-        raise UserError('%s: %s' % (error_type, error_msg))
+        raise UserError(_('%s: %s') % (error_type, error_msg))
 
     def anonymize_database(self, cr, uid, ids, context=None):
         """Sets the 'anonymized' state to defined fields"""
