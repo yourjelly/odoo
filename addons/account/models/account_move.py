@@ -1120,7 +1120,8 @@ class AccountMoveLine(models.Model):
     @api.model
     def _query_get(self, domain=None):
         context = dict(self._context or {})
-        domain = domain and safe_eval(domain) or []
+        if not isinstance(domain, list):
+            domain = domain and safe_eval(domain) or []
 
         date_field = 'date'
         if context.get('aged_balance'):
