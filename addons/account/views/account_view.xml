@@ -165,6 +165,12 @@
             src_model="account.account"/>
 
         <act_window
+            id="action_move_line_select_partner"
+            name="Journal Items"
+            context="{'search_default_partner_id': [active_id]}"
+            res_model="account.move.line"/>
+
+        <act_window
             id="action_move_select"
             name="Journal Entries"
             context="{'search_default_dummy_account_id': [active_id]}"
