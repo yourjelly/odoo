@@ -80,10 +80,11 @@ class Registry(object):
         self.has_unaccent = openerp.tools.config['unaccent'] and has_unaccent
         cr.close()
 
-    def do_parent_store(self, cr):
-        for o in self._init_parent:
-            self.get(o)._parent_store_compute(cr)
-        self._init = False
+    def do_parent_store(self, cr, init_parent_models):
+        for o in init_parent_models:
+            m = self.get(o)
+            if m:
+                m._parent_store_compute(cr)
 
     def obj_list(self):
         """ Return the list of model names in this registry."""
@@ -238,17 +239,17 @@ class RegistryManager(object):
             # load_modules() above can replace the registry by calling
             # indirectly new() again (when modules have to be uninstalled).
             # Yeah, crazy.
+            init_parent_models = set(registry._init_parent)
             registry = cls.registries[db_name]
+            init_parent_models.update(registry._init_parent)
 
-            cr = registry.db.cursor()
-            try:
-                registry.do_parent_store(cr)
+            with registry.cursor() as cr:
+                if init_parent_models:
+                    registry.do_parent_store(cr, init_parent_models)
                 registry.get('ir.actions.report.xml').register_all(cr)
-                cr.commit()
-            finally:
-                cr.close()
 
-        registry.ready = True
+            registry._init = False
+            registry.ready = True
 
         if update_module:
             # only in case of update, otherwise we'll have an infinite reload loop!
