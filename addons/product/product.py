@@ -1076,8 +1076,11 @@ class product_product(osv.osv):
 
         result = []
         for product in self.browse(cr, SUPERUSER_ID, ids, context=context):
-            variant = ", ".join([v.name for v in product.attribute_value_ids])
-            name = variant and "%s (%s)" % (product.name, variant) or product.name
+            variant = []
+            for spec in product.attribute_line_ids:
+                if len(spec.value_ids) > 1:
+                    variant += [v.name for v in product.attribute_value_ids if v in spec.value_ids]
+            name = variant and "%s (%s)" % (product.name, ', '.join(variant)) or product.name
             sellers = []
             if partner_ids:
                 if variant:
