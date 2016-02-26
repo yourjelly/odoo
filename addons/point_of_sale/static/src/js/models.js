@@ -454,7 +454,7 @@ exports.PosModel = Backbone.Model.extend({
                 logo_loaded.reject();
             };
                 self.company_logo.crossOrigin = "anonymous";
-            self.company_logo.src = '/web/binary/company_logo' +'?_'+Math.random();
+            self.company_logo.src = '/web/binary/company_logo' +'?dbname=' + session.db + '&_'+Math.random();
 
             return logo_loaded;
         },
