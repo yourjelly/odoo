@@ -494,6 +494,7 @@ exports.PosModel = Backbone.Model.extend({
                 var context = typeof model.context === 'function' ? model.context(self,tmp) : model.context; 
                 var ids     = typeof model.ids === 'function'     ? model.ids(self,tmp) : model.ids;
                 var order   = typeof model.order === 'function'   ? model.order(self,tmp):    model.order;
+                var limit   = typeof model.limit === 'function'   ? model.limit(self,tmp):    model.limit;
                 progress += progress_step;
                 
                 var records;
@@ -506,6 +507,7 @@ exports.PosModel = Backbone.Model.extend({
                             .filter(domain)
                             .order_by(order)
                             .context(context)
+                            .limit(limit)
                             .all();
                     }
                     records.then(function(result){
