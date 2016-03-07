@@ -650,7 +650,11 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             }else if(parsed_code.type === 'discount'){
                 selectedOrder.addProduct(product, {discount:parsed_code.value, merge:false});
             }else{
-                selectedOrder.addProduct(product);
+                if(product.to_weight && self.config.iface_electronic_scale){
+                    self.pos_widget.screen_selector.set_current_screen('scale',{product: product});
+                } else {
+                    selectedOrder.addProduct(product);
+                }
             }
             return true;
         },

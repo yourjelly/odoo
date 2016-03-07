@@ -159,7 +159,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         barcode_product_action: function(code){
             var self = this;
             if(self.pos.scan_product(code)){
-                if(self.barcode_product_screen){ 
+                if(self.barcode_product_screen && self.pos_widget.screen_selector.get_current_screen() !== "scale"){
                     self.pos_widget.screen_selector.set_current_screen(self.barcode_product_screen);
                 }
             }else{
