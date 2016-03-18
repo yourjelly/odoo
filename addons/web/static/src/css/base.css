@@ -3019,3 +3019,7 @@ body {
   white-space: nowrap;
   padding-left: 10px;
 }
+
+.o_error_detail .o_error_trace {
+  display: none;
+}

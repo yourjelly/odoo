@@ -12,6 +12,7 @@ import datetime
 import hashlib
 import os
 import re
+import requests
 import json
 import sys
 import time
@@ -598,6 +599,12 @@ class WebClient(http.Controller):
     @http.route('/web/tests', type='http', auth="none")
     def index(self, mod=None, **kwargs):
         return request.render('web.qunit_suite')
+
+    @http.route('/web/export_traceback', type='json', auth="none")
+    def export_traceback(self, message, detail):
+        r = requests.post("some free pastebin")
+        return r.text
+
 
 class Proxy(http.Controller):
 

@@ -30,8 +30,9 @@
 </t>
 <t t-name="CrashManager.error">
     <div class="o_error_detail">
-        <pre><t t-esc="error.message"/></pre>
-        <pre><t t-esc="error.data.debug"/></pre>
+        <pre><t t-esc="error.message"/>
+<a class="display">Display error</a> or <a class="export">Export</a></pre>
+        <pre class="o_error_trace"><t t-esc="error.data.debug"/></pre>
     </div>
 </t>
 

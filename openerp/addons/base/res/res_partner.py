@@ -489,6 +489,7 @@ class Partner(models.Model, FormatAddress):
 
     @api.multi
     def write(self, vals):
+        1/0
         # res.partner must only allow to set the company_id of a partner if it
         # is the same as the company of all users that inherit from this partner
         # (this is to allow the code from res_users to write to the partner!) or

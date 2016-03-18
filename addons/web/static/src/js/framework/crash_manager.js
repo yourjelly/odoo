@@ -129,6 +129,20 @@ var CrashManager = core.Class.extend({
             title: "Odoo " + _.str.capitalize(error.type),
             $content: QWeb.render('CrashManager.error', {session: session, error: error})
         }).open();
+        // you don't know JS John
+        $('.o_error_detail .display').click(function() {
+            $('.o_error_detail .o_error_trace').toggle();
+        });
+        $('.o_error_detail .export').click(function() {
+            // Same-origin policy, need server side
+            ajax.jsonRpc('/web/export_traceback', 'call', {
+                message: error.message,
+                detail: error.data.debug
+            }).then(function(res) {
+                debugger;
+            });
+        });
+
     },
     show_message: function(exception) {
         this.show_error({
