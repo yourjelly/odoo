@@ -37,7 +37,7 @@ class SaleOrder(models.Model):
     @api.depends('order_line.is_delivery')
     def _compute_has_delivery(self):
         for order in self:
-            order.has_delivery = bool(order.order_line.filtered('is_delivery'))
+            order.has_delivery = any(order.order_line.filtered('is_delivery'))
 
     def _check_carrier_quotation(self, force_carrier_id=None):
         # check to add or remove carrier_id
