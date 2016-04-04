@@ -71,6 +71,7 @@
                           quick_add="False" avatar_model="hr.employee">
                     <field name="employee_id"/>
                     <field name="holiday_status_id"/>
+                    <field name="color"/>
                 </calendar>
             </field>
         </record>

@@ -20,11 +20,12 @@ var QWeb = core.qweb;
 function reload_favorite_list(result) {
     var self = result;
     var current = result;
+    var color_default = 1;
     if (result.view) {
         self = result.view;
     }
     return new Model("res.users")
-    .query(["partner_id"])
+    .query(["partner_id","color"])
     .filter([["id", "=", self.dataset.context.uid]])
     .first()
     .done(function(result) {
@@ -33,7 +34,7 @@ function reload_favorite_list(result) {
         var filter_item = {
             value: filter_value,
             label: result.partner_id[1] + _lt(" [Me]"),
-            color: self.get_color(filter_value),
+            color: result.color,
             avatar_model: self.avatar_model,
             is_checked: true,
             is_remove: false,
@@ -43,19 +44,19 @@ function reload_favorite_list(result) {
         filter_item = {
             value: -1,
             label: _lt("Everybody's calendars"),
-            color: self.get_color(-1),
+            color: color_default,
             avatar_model: self.avatar_model,
             is_checked: false
         };
         sidebar_items[-1] = filter_item;
         //Get my coworkers/contacts
-        new Model("calendar.contacts").query(["partner_id"]).filter([["user_id", "=",self.dataset.context.uid]]).all().then(function(result) {
+        new Model("calendar.contacts").query(["partner_id","color"]).filter([["user_id", "=",self.dataset.context.uid]]).all().then(function(result) {
             _.each(result, function(item) {
                 filter_value = item.partner_id[0];
                 filter_item = {
                     value: filter_value,
                     label: item.partner_id[1],
-                    color: self.get_color(filter_value),
+                    color: item.color,
                     avatar_model: self.avatar_model,
                     is_checked: true
                 };

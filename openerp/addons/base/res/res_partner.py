@@ -198,7 +198,7 @@ class Partner(models.Model, FormatAddress):
         selection=[('person', 'Individual'), ('company', 'Company')],
         compute='_compute_company_type', readonly=False)
     company_id = fields.Many2one('res.company', 'Company', index=True, default=_default_company)
-    color = fields.Integer(string='Color Index', default=0)
+    color = fields.Integer(compute='_compute_color',string='Color Index', store=True)
     user_ids = fields.One2many('res.users', 'partner_id', string='Users', auto_join=True)
     contact_address = fields.Char(compute='_compute_contact_address', string='Complete Address')
 
@@ -221,6 +221,11 @@ class Partner(models.Model, FormatAddress):
     _sql_constraints = [
         ('check_name', "CHECK( (type='contact' AND name IS NOT NULL) or (type!='contact') )", 'Contacts require a name.'),
     ]
+
+    @api.depends('name')
+    def _compute_color(self):
+        for partner in self:
+            partner.color = ((((partner.id + 1) * 5) % 24) + 1)
 
     @api.depends('is_company', 'name', 'parent_id.name', 'type')
     def _compute_display_name(self):

@@ -143,7 +143,7 @@ class Employee(models.Model):
     coach_id = fields.Many2one('hr.employee', string='Coach')
     job_id = fields.Many2one('hr.job', string='Job Title')
     passport_id = fields.Char('Passport No')
-    color = fields.Integer('Color Index', default=0)
+    color = fields.Integer(compute='_compute_color', string='Color Index', store=True, default=0)
     city = fields.Char(related='address_id.city')
     login = fields.Char(related='user_id.login', readonly=True)
     last_login = fields.Datetime(related='user_id.login_date', string='Latest Connection', readonly=True)
@@ -169,6 +169,11 @@ class Employee(models.Model):
         'image': _get_default_image,
         'color': 0,
     }
+
+    @api.depends('name_related')
+    def _compute_color(self):
+        for partner in self:
+            partner.color = ((((partner.id + 1) * 5) % 24) + 1)
 
     @api.constrains('parent_id')
     def _check_parent_id(self):

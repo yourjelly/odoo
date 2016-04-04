@@ -437,16 +437,6 @@ var CalendarView = View.extend({
         });
     },
 
-    get_color: function(key) {
-        if (this.color_map[key]) {
-            return this.color_map[key];
-        }
-        var index = (((_.keys(this.color_map).length + 1) * 5) % 24) + 1;
-        this.color_map[key] = index;
-        return index;
-    },
-    
-
     /**
      * In o2m case, records from dataset won't have names attached to their *2o values.
      * We should make sure this is the case.
@@ -623,12 +613,15 @@ var CalendarView = View.extend({
         if (!self.useContacts || self.all_filters[color_key] !== undefined) {
             if (color_key) {
                 if (typeof color_key === "object") {
-                    color_key = color_key[0];
+                    color_key = evt.color;
                 }
-                r.className = 'o_calendar_color_'+ this.get_color(color_key);
+                r.className = 'o_calendar_color_'+ evt.color;
             }
         } else { // if form all, get color -1
             r.className = 'o_calendar_color_'+ (self.all_filters[-1] ? self.all_filters[-1].color : 1);
+        }
+        if (evt.is_highlighted){
+            r.className += ' o_event_hightlight';
         }
         return r;
     },
@@ -776,7 +769,7 @@ var CalendarView = View.extend({
                                 filter_item = {
                                     value: key,
                                     label: val[1],
-                                    color: self.get_color(key),
+                                    color: e.color,
                                     avatar_model: (_.str.toBoolElse(self.avatar_filter, true) ? self.avatar_filter : false ),
                                     is_checked: true
                                 };

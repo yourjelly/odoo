@@ -184,6 +184,7 @@ class hr_holidays(osv.osv):
             help='Green this button when the leave has been taken into account in the payslip.'),
         'report_note': fields.text('HR Comments'),
         'user_id':fields.related('employee_id', 'user_id', type='many2one', relation='res.users', string='User', store=True),
+        'color': fields.related('employee_id', 'color', type="integer", string="Color index of creator", store=False),  # Color of creator
         'date_from': fields.datetime('Start Date', readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}, select=True, copy=False),
         'date_to': fields.datetime('End Date', readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}, copy=False),
         'holiday_status_id': fields.many2one("hr.holidays.status", "Leave Type", required=True,readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}),

@@ -884,6 +884,15 @@ class calendar_event(osv.Model):
                 duration = float(diff.days) * 24 + (float(diff.seconds) / 3600)
                 values['duration'] = round(duration, 2)
 
+    def _is_highlighted(self, cr, uid, ids, field_name, arg, context=None):
+        res = {}
+        for event in self.browse(cr, uid, ids, context=context):
+            if event.partner_ids.filtered(lambda s: s.id == context.get('active_id')) and context.get('active_model') == 'res.partner':
+                res[event.id] = True
+            else:
+                res[event.id] = False
+        return res
+
     _columns = {
         'id': fields.integer('ID', readonly=True),
         'state': fields.selection([('draft', 'Unconfirmed'), ('open', 'Confirmed')], string='Status', readonly=True, track_visibility='onchange'),
@@ -929,6 +938,8 @@ class calendar_event(osv.Model):
 
         'user_id': fields.many2one('res.users', 'Responsible', states={'done': [('readonly', True)]}),
         'color_partner_id': fields.related('user_id', 'partner_id', 'id', type="integer", string="Color index of creator", store=False),  # Color of creator
+        'color': fields.related('user_id', 'partner_id', 'color', type="integer", string="Color index of creator", store=False),
+        'is_highlighted': fields.function(_is_highlighted, string='# Meetings Highlight', type='boolean'),
         'active': fields.boolean('Active', help="If the active field is set to false, it will allow you to hide the event alarm information without removing it."),
         'categ_ids': fields.many2many('calendar.event.type', 'meeting_category_rel', 'event_id', 'type_id', 'Tags'),
         'attendee_ids': fields.one2many('calendar.attendee', 'event_id', 'Attendees', ondelete='cascade'),

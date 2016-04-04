@@ -10,6 +10,7 @@ class calendar_contacts(osv.osv):
         'user_id': fields.many2one('res.users','Me'),
         'partner_id': fields.many2one('res.partner','Employee',required=True, domain=[]),
         'active':fields.boolean('active'),
+        'color': fields.related('partner_id', 'color', type="integer", string="Color index of creator", store=False),  # Color of creator
      }
     _defaults = {
         'user_id': lambda self, cr, uid, ctx: uid,
