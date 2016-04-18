@@ -166,9 +166,13 @@ td {
 .pos .window .subwindow.collapsed{
     height: 0px;
 }
+.pos .window .subwindow-container .collapsed{
+    height: 0px;
+}
 .pos .subwindow .subwindow-container{
     display: table-cell;
     position: relative;
+    height: 100%;
 }
 /* firefox seems to ignore the relative positionning of the subwindow-container
  * putting this inside subwindow-container fixes it.
@@ -984,6 +988,7 @@ td {
 }
 .pos .screen .content-cell{
     width:100%;
+    height: 100%;
 }
 .pos .screen .content-cell .content-container{
     height:100%;
