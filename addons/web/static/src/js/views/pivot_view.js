@@ -91,8 +91,8 @@ var PivotView = View.extend({
             default:
                 if ('operator' in field.attrs) {
                     self.active_measures.push(name);
-                    break;
                 }
+                break;
             case 'row':
                 self.initial_row_groupby.push(name);
             }
@@ -166,13 +166,33 @@ var PivotView = View.extend({
     },
     prepare_fields: function (fields) {
         var self = this,
+            has_view_fields = 0,
+            view_fields = {},
             groupable_types = ['many2one', 'char', 'boolean', 
                                'selection', 'date', 'datetime'];
         this.fields = fields;
+        _.each(self.fields_view.arch.children, function(field) {
+            if ((field.attrs.type !== "row" && field.attrs.type !== "col")) {
+                view_fields[field.attrs.name] = field;
+            }
+        });
+        has_view_fields = _.size(view_fields);
         _.each(fields, function (field, name) {
             if ((name !== 'id') && (field.store === true)) {
                 if (field.type === 'integer' || field.type === 'float' || field.type === 'monetary') {
-                    self.measures[name] = field;
+                    if (has_view_fields) {
+                        var view_field = _.pick(view_fields, name);
+                        if (_.size(view_field)) {
+                            var view_field_string = _.property('string')(view_field[name].attrs);
+                            if (view_field_string) {
+                                field = _.extend({}, field, {string: view_field_string});
+                            }
+                            self.measures[name] = field;
+                        }
+                    }
+                    else {
+                        self.measures[name] = field;
+                    }
                 }
                 if (_.contains(groupable_types, field.type)) {
                     self.groupable_fields[name] = field;
