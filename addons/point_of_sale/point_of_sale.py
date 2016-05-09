@@ -690,8 +690,17 @@ class pos_order(osv.osv):
                                        limit=1, order="start_at DESC", context=context)
 
         if open_sessions:
+            _logger.warning('session (ID: %s) was closed but received order %s (total: %s), using different session (ID: %s) instead',
+                            order['pos_session_id'],
+                            order['name'],
+                            order['amount_total'],
+                            open_sessions[0])
             return open_sessions[0]
         else:
+            _logger.warning('session (ID: %s) was closed but received order %s (total: %s), creating new session',
+                            order['pos_session_id'],
+                            order['name'],
+                            order['amount_total'])
             new_session_id = session.create(cr, uid, {
                 'config_id': closed_session.config_id.id,
             }, context=context)
