@@ -169,11 +169,12 @@ class AccountMove(models.Model):
     @api.multi
     def _check_lock_date(self):
         for move in self:
-            lock_date = max(move.company_id.period_lock_date, move.company_id.fiscalyear_lock_date)
-            if self.user_has_groups('account.group_account_manager'):
-                lock_date = move.company_id.fiscalyear_lock_date
-            if move.date <= lock_date:
-                raise UserError(_("You cannot add/modify entries prior to and inclusive of the lock date %s. Check the company settings or ask someone with the 'Adviser' role") % (lock_date))
+            if move.name != '/' and self.env.context.get('check_lock_date', True):
+                lock_date = max(move.company_id.period_lock_date, move.company_id.fiscalyear_lock_date)
+                if self.user_has_groups('account.group_account_manager'):
+                    lock_date = move.company_id.fiscalyear_lock_date
+                if move.date <= lock_date:
+                    raise UserError(_("You cannot add/modify entries prior to and inclusive of the lock date %s. Check the company settings or ask someone with the 'Adviser' role") % (lock_date))
         return True
 
     @api.multi
@@ -1068,7 +1069,10 @@ class AccountMoveLine(models.Model):
             for line in self:
                 if line.move_id.id not in move_ids:
                     move_ids.add(line.move_id.id)
-            self.env['account.move'].browse(list(move_ids))._post_validate()
+            move_obj = self.env['account.move']
+            if any(key in vals for key in ('blocked', 'reconciled', 'matched_debit_ids', 'matched_credit_ids')):
+                move_obj = move_obj.with_context(check_lock_date=False)
+            move_obj.browse(list(move_ids))._post_validate()
         return result
 
     @api.multi
