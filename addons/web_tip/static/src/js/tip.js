@@ -177,16 +177,6 @@ var Tip = Class.extend({
     trigger_tip: function() {
         var self = this;
 
-        // fix the stacking context problem
-        _.each(this.$element.parentsUntil('body'), function(el) {
-            var zIndex = $(el).css('z-index');
-            var opacity = parseFloat($(el).css('opacity'));
-
-            if (/[0-9]+/.test(zIndex) || opacity < 1) {
-                $(el).addClass('oe_tip_fix_parent');
-            }
-        });
-
         this.$element.popover({
             placement: self.tip.placement,
             title: self.tip.title,
@@ -247,13 +237,9 @@ var Tip = Class.extend({
         var Tips = new Model('web.tip');
 
         this.$element.popover('destroy');
-        this.$element.removeClass('oe_tip_show_element');
         this.$breathing.remove();
         this.$cross.remove();
 
-        _.each($('.oe_tip_fix_parent'), function(el) {
-            $(el).removeClass('oe_tip_fix_parent');
-        });
         $(document).off('keyup.web_tip');
 
         Tips.call('consume', [this.tip.id], {});
@@ -267,7 +253,6 @@ var Tip = Class.extend({
     _set_popover_position: function() {
         if (!this.tip.is_consumed) {
             this.$element.popover('show');
-            //this._set_helper_position();
             this.scroll_to_tip();
 
             if (this.tip.title) {
