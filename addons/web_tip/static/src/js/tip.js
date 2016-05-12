@@ -144,17 +144,6 @@ var Tip = Class.extend({
         }
 
         this.$element = $(this.highlight_selector).first();
-        if (utils.float_is_zero(this.$element.height(), 1) || utils.float_is_zero(this.$element.width(), 1)) {
-            var $images = this.$element.find('img');
-            if ($images.length > 0) {
-                $images.first().load(function() {
-                    var t = new Tip(self.tip);
-                    t.do_tip();
-                    bus.trigger('image_loaded');
-                });
-            }
-            return false;
-        }
 
         if (!this.$element.next().hasClass('oe_breathing')) {
             this.$breathing = $("<div>", { class: 'oe_breathing' });
@@ -164,9 +153,8 @@ var Tip = Class.extend({
         }
         this._set_breathing_position();
 
-        this.$breathing.on('click', function(e) {
-            e.stopImmediatePropagation();
-            self.$breathing.addClass('oe_explode');
+        this.$breathing.on('mouseenter', function() {
+            self.$breathing.addClass('oe_explode').fadeOut(300);
             self.trigger_tip();
         });
 
@@ -188,34 +176,6 @@ var Tip = Class.extend({
 
     trigger_tip: function() {
         var self = this;
-
-        this.$helper = $("<div>", { class: 'oe_tip_helper' });
-        this.$overlay = $("<div>", { class: 'oe_tip_overlay' });
-
-        this.$element.after(this.$helper);
-        this._set_helper_position();
-        this.scroll_to_tip();
-
-        var $bgElem = this.$element;
-        var bgColor = $bgElem.css('background-color');
-        while($bgElem.length > 0 && (bgColor === 'transparent' || bgColor === 'rgba(0, 0, 0, 0)')) {
-            $bgElem = $bgElem.parent();
-            bgColor = $bgElem.css('background-color');
-        }
-        this.$helper.css('background-color', bgColor || "white");
-
-        $('body').append(this.$overlay);
-        this.$element.addClass('oe_tip_show_element');
-
-        // fix the stacking context problem
-        _.each(this.$element.parentsUntil('body'), function(el) {
-            var zIndex = $(el).css('z-index');
-            var opacity = parseFloat($(el).css('opacity'));
-
-            if (/[0-9]+/.test(zIndex) || opacity < 1) {
-                $(el).addClass('oe_tip_fix_parent');
-            }
-        });
 
         this.$element.popover({
             placement: self.tip.placement,
@@ -243,14 +203,19 @@ var Tip = Class.extend({
         this.$cross.on('click', function($ev) {
             self.end_tip();
         });
-        this.$overlay.on('click', function($ev) {
-            self.end_tip();
-        });
+
         $(document).on('keyup.web_tip', function($ev) {
             if ($ev.which === 27) { // esc
                 self.end_tip();
             }
         });
+
+        // dismiss tip on outside click
+        $(document).on("click", function(e) {
+          if ($(e.target).closest(this.tip).length === 0) { // if click outside of searchInput
+               self.end_tip();
+            }
+         });
 
         // resize
         bus.on('resize', this, function() {
@@ -272,15 +237,9 @@ var Tip = Class.extend({
         var Tips = new Model('web.tip');
 
         this.$element.popover('destroy');
-        this.$element.removeClass('oe_tip_show_element');
         this.$breathing.remove();
-        this.$helper.remove();
-        this.$overlay.remove();
         this.$cross.remove();
 
-        _.each($('.oe_tip_fix_parent'), function(el) {
-            $(el).removeClass('oe_tip_fix_parent');
-        });
         $(document).off('keyup.web_tip');
 
         Tips.call('consume', [this.tip.id], {});
@@ -288,25 +247,12 @@ var Tip = Class.extend({
     },
 
     _set_breathing_position: function() {
-        this.$breathing.position({ my: "center", at: "center", of: this.$element });
-    },
-
-    _set_helper_position: function() {
-        var offset = this.$element.offset();
-        var _top = offset.top - 5;
-        var _left = offset.left - 5;
-        var _width = this.$element.outerWidth() + 10;
-        var _height = this.$element.outerHeight() + 10;
-
-        this.$helper.offset({top: _top, left: _left});
-        this.$helper.css('width', _width);
-        this.$helper.css('height', _height);
+        this.$breathing.position({ my: "left", at: "right", of: this.$element });
     },
 
     _set_popover_position: function() {
         if (!this.tip.is_consumed) {
             this.$element.popover('show');
-            this._set_helper_position();
             this.scroll_to_tip();
 
             if (this.tip.title) {

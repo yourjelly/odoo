@@ -15,78 +15,91 @@
     .o-transition(all, 300ms, ease-out);
 }
 
-.oe_tip_helper {
-    position: absolute;
-    z-index: 1008;
-    border: 5px solid @odoo-view-background-color;
-    border-radius: @border-radius-base;
-    box-shadow: 0 2px 15px rgba(0,0,0,.4);
-    .o-transition(all, 300ms, ease-out);
-}
-
 .oe_tip_close {
     padding: 5px 5px 10px 10px !important;
     margin-top: -15px;
     margin-right: -15px;
 }
 
-.oe_tip_fix_parent {
-    z-index: auto !important;
-    opacity: 1.0 !important;
-    transition: none !important;
-}
-
-.oe_tip_show_element {
-    z-index: 1011 !important;
-    position: relative !important;
-    border: none !important;
-}
-
 .oe_breathing {
-  background: transparent url(/web_tip/static/src/img/tip_throbber.png) no-repeat center center;
-  cursor : pointer;
-  height: 58px;
-  width: 58px;
-  position: absolute;
-  z-index: 1;
-  .o-animation(bounce, .5s, steps(12), 0s, infinite, alternate);
+    border: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: block;
+    position: absolute;
+    z-index: 1;
+    left: 15%;
+    background-color: #875a7b;
+    .animation(pulse 2s ease-out);
+    .animation(pulse 2s ease-out);
+    .animation-name(move-left-right);
+    .animation-duration(0.3s);
+    .animation-timing-function(ease-in);
+    .animation-iteration-count(infinite);
+    .animation-direction(alternate);
+
+    &::after {
+        content: '';
+        position: absolute;
+        left: -15%;
+        top: 20%;
+        width: 0;
+        height: 0;
+        width: 0; 
+        height: 0; 
+        border-top: 10px solid transparent;
+        border-bottom: 10px solid transparent; 
+        border-right:10px solid #875a7b;
+        clear: both;
+    }
+
+    &::before {
+        content: '?';
+        color: white;
+        box-shadow: 10px 10px 5px #62495b;
+        font-size: 18px;
+        font-weight: 800;
+        line-height: 0.6;
+        position: absolute;
+        top: 10px;
+        left: 0;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        padding-left: 10px;
+        opacity: 0.5;
+        .animation(sploosh 2s cubic-bezier(0.165, 0.84, 0.44, .8));
+        .animation-iteration-count(infinite);
+    }
 }
 
-@-webkit-keyframes bounce {
-  from{ background-position: 0 0}
-  to{ background-position: -696px 0}
-}
-@-moz-keyframes bounce {
-  from{ background-position: 0 0}
-  to{ background-position: -696px 0}
-}
-@-o-keyframes explode {
-  from{ background-position: 0 0}
-  to{ background-position: -696px 0}
-}
-@keyframes bounce {
-  from{ background-position: 0 0}
-  to{ background-position: -696px 0}
-}
-
-.oe_explode {
-  opacity: 0;
-  .o-animation(explode, .5s);
-}
-
-@-webkit-keyframes explode {
-  from{ opacity: 1; transform: scale(1, 1); }
-  to{ opacity: 0; transform: scale(2, 2); }
-}
-@-moz-keyframes explode {
-  from{ opacity: 1; transform: scale(1, 1);}
-  to{ opacity: 0; transform: scale(2, 2);}
-}
-@-o-keyframes explode {
-  from{ opacity: 1; transform: scale(1, 1);}
-  to{ opacity: 0; transform: scale(2, 2);}
-}
-@keyframes explode {
-  from{ opacity: 1; transform: scale(1, 1);}
-  to{ opacity: 0; transform: scale(2, 2);}
+.popover {
+    border: 2px solid @odoo-brand-primary;
+    &.right > .arrow {
+        border-right-color: @odoo-brand-primary;
+        left: -13px;
+        &::after {
+            border-left-width: 2px;
+        }
+    }
+    &.bottom > .arrow {
+        border-bottom-color: @odoo-brand-primary;
+        top: -13px;
+        &::after {
+            border-top-width: 2px;
+        }
+    }
+    .popover-title {
+        background-color: #fff;
+        color: @odoo-brand-primary;
+        text-transform: uppercase;
+    }
+    .popover-title, .popover-content {
+        .close {
+            opacity: 1;
+            color: @odoo-brand-primary;
+            margin-top: -9px;
+        }
+    }
 }
