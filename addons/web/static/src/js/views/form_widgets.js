@@ -137,7 +137,11 @@ var FieldChar = common.AbstractField.extend(common.ReinitializeFieldMixin, {
     },
     store_dom_value: function () {
         if (this.$input && this.is_syntax_valid()) {
-            this.internal_set_value(this.parse_value(this.$input.val()));
+            var value = this.$input.val();
+            if (this.field.trim) {
+                value = value.trim();
+            }
+            this.internal_set_value(this.parse_value(value));
         }
     },
     commit_value: function () {

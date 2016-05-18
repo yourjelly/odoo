@@ -327,13 +327,18 @@ def _symbol_set_char(self, symb):
 
 class char(_column):
     _type = 'char'
-    __slots__ = ['_symbol_f', '_symbol_set', '_symbol_set_char']
+    __slots__ = ['_symbol_f', '_symbol_set', '_symbol_set_char', 'trim']
 
-    def __init__(self, string="unknown", size=None, **args):
-        _column.__init__(self, string=string, size=size or None, **args)
+    def __init__(self, string="unknown", size=None, trim=True, **args):
+        _column.__init__(self, string=string, size=size or None, trim=trim, **args)
         # self._symbol_set_char defined to keep the backward compatibility
         self._symbol_f = self._symbol_set_char = lambda x: _symbol_set_char(self, x)
         self._symbol_set = (self._symbol_c, self._symbol_f)
+
+    def to_field_args(self):
+        args = super(char, self).to_field_args()
+        args['trim'] = self.trim
+        return args
 
 class text(_column):
     _type = 'text'
@@ -1359,6 +1364,7 @@ class function(_column):
         '_digits',
         '_digits_compute',
         'selection',
+        'trim',
         '_obj',
     ]
 
@@ -1425,6 +1431,7 @@ class function(_column):
             self._symbol_c = char._symbol_c
             self._symbol_f = lambda x: _symbol_set_char(self, x)
             self._symbol_set = (self._symbol_c, self._symbol_f)
+            self.trim = args.get('trim', True)
         elif type == 'float':
             self._symbol_c = float._symbol_c
             self._symbol_f = lambda x: _symbol_set_float(self, x)
@@ -1452,6 +1459,8 @@ class function(_column):
         args['company_dependent'] = False
         if self._type in ('float',):
             args['digits'] = self._digits_compute or self._digits
+        elif self._type in ('char',):
+            args['trim'] = self.trim
         elif self._type in ('binary',):
             # limitation: binary function fields cannot be stored in attachments
             args['attachment'] = False

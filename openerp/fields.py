@@ -1231,6 +1231,9 @@ class Char(_String):
 
     :param int size: the maximum size of values stored for that field
 
+    :param bool trim: remove leading and trailing whitespaces
+        (default: ``True``)
+
     :param translate: enable the translation of the field's values; use
         ``translate=True`` to translate field values as a whole; ``translate``
         may also be a callable such that ``translate(callback, value)``
@@ -1240,11 +1243,16 @@ class Char(_String):
     type = 'char'
     _slots = {
         'size': None,                   # maximum size of values (deprecated)
+        'trim': True,
     }
 
     _column_size = property(attrgetter('size'))
     _related_size = property(attrgetter('size'))
     _description_size = property(attrgetter('size'))
+
+    _column_trim = property(attrgetter('trim'))
+    _related_trim = property(attrgetter('trim'))
+    _description_trim = property(attrgetter('trim'))
 
     def _setup_regular_base(self, model):
         super(Char, self)._setup_regular_base(model)
