@@ -1187,6 +1187,9 @@ class AccountMoveLine(models.Model):
         if context.get('company_id'):
             domain += [('company_id', '=', context['company_id'])]
 
+        if context.get('move_id'):
+            domain += [('move_id', '=', context['move_id'])]
+
         if 'company_ids' in context:
             domain += [('company_id', 'in', context['company_ids'])]
 
