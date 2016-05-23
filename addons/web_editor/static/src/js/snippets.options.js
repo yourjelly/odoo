@@ -1,8 +1,8 @@
 odoo.define('web_editor.snippets.options', function (require) {
     'use strict';
 
-    var Class = require('web.Class');
     var ajax = require('web.ajax');
+    var Class = require('web.Class');
     var core = require('web.core');
     var Dialog = require('web.Dialog');
     var base = require('web_editor.base');

@@ -153,30 +153,13 @@ options.registry.carousel = options.registry.slider.extend({
         });
         this.$target.trigger('slid.bs.carousel');
     },
-    add_slide: function (type, data) {
-        if(type !== "click") return;
-
-        var $clone = this._super(type, data);
-        // choose an other background
-        var bg = this.$target.data("snippet-option-ids").background;
-        if (!bg) return $clone;
-
-        var $styles = bg.$el.find("li[data-background]");
-        var $select = $styles.filter(".active").removeClass("active").next("li[data-background]");
-        if (!$select.length) {
-            $select = $styles.first();
-        }
-        $select.addClass("active");
-        $clone.css("background-image", $select.data("background") ? "url('"+ $select.data("background") +"')" : "");
-
-        return $clone;
-    },
     // rebind event to active carousel on edit mode
     rebind_event: function () {
         var self = this;
         this.$target.find('.carousel-control').off('click').on('click', function () {
-            self.$target.carousel( $(this).data('slide')); });
-        this._super();
+            self.$target.carousel($(this).data('slide'));
+        });
+        this._super.apply(this, arguments);
 
         /* Fix: backward compatibility saas-3 */
         this.$target.find('.item.text_image, .item.image_text, .item.text_only').find('.container > .carousel-caption > div, .container > img.carousel-image').attr('contentEditable', 'true');
