@@ -9,6 +9,7 @@ var Cruise = core.Class.extend({
     init: function() {
         this.tooltips = {};
         core.bus.on('DOM_updated', this, this.check_for_tooltip);
+        this.popovers = [];
     },
     register: function(name, description) {
         this.tooltips[name] = description;
@@ -18,21 +19,28 @@ var Cruise = core.Class.extend({
         _.each(this.tooltips, function (tip) {
             var $trigger = $(tip.trigger);
             if ($trigger.length) {
-                self.trigger_tip($trigger, tip);
+                self.remove_displayed_tips();
+                self.show_tip($trigger, tip);
             }
         });
     },
-    trigger_tip: function($trigger, tip) {
-        console.log('triggering tip', tip);
-        $trigger.popover({
+    remove_displayed_tips: function() {
+        while (this.popovers.length) {
+            this.popovers.pop().popover('destroy');
+        }
+    },
+    show_tip: function($trigger, tip) {
+        var popover = $trigger.popover({
             title: tip.title,
             content: tip.content,
             html: true,
             container: 'body',
             animation: false,
             placement: tip.position,
-        }).popover('show');
+        });
+        popover.popover('show');
 
+        this.popovers.push(popover);
     },
 });
 

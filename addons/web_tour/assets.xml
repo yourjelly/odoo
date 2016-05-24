@@ -6,6 +6,7 @@
                 <!-- <link rel="stylesheet" href="/web_tip/static/src/less/tip.less"/> -->
                 <!-- <link rel="stylesheet" href="/web_tip/static/src/less/keyframes.less"/> -->
                 <script type="text/javascript" src="/web_tour/static/src/js/tour.js"></script>
+                <script type="text/javascript" src="/web_tour/static/src/js/examples.js"></script>
             </xpath>
         </template>
     </data>
