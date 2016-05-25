@@ -886,9 +886,10 @@ class calendar_event(osv.Model):
 
     def _is_highlighted(self, cr, uid, ids, field_name, arg, context=None):
         res = dict.fromkeys(ids, False)
-        for event in self.browse(cr, uid, ids, context=context):
-            if event.partner_ids.filtered(lambda s: s.id == context.get('active_id')) and context.get('active_model') == 'res.partner':
-                res[event.id] = True
+        if context.get('active_model') == 'res.partner':
+            for event in self.browse(cr, uid, ids, context=context):
+                if event.partner_ids.filtered(lambda s: s.id == context.get('active_id')):
+                    res[event.id] = True
         return res
 
     _columns = {
