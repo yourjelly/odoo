@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="assets_frontend" inherit_id="website.assets_frontend" name="Tvpaint Styles">
+        <xpath expr="link[last()]" position="after">
+            <link href="/website_tvpaint/static/src/less/general.less" rel="stylesheet" type="text/less"/>
+
+            <!-- SNIPPETS -->
+            <!-- <link href="/website_portland/static/src/less/snippets/s_banner.less" rel="stylesheet" type="text/less"/> -->
+        </xpath>
+        <xpath expr="script[last()]" position="after">
+            <!-- <script src="/website_portland/static/src/js/portland_main.js" /> -->
+        </xpath>
+    </template>
+
+    <!-- <template id="favicon" inherit_id="website.layout">
+        <xpath expr="//head" position="inside">
+            <link href="/website_tvpaint/static/src/img/favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+        </xpath>
+    </template> -->
+</odoo>
