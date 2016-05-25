@@ -11,6 +11,7 @@ Odoo Web tours.
     'depends': ['web'],
     'data': [
         'assets.xml',
+        'views/tour.xml'
     ],
     'auto_install': True
 }

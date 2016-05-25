@@ -1,14 +1,11 @@
-odoo.define('web_tour.tour', function(require) {
+odoo.define('web_tour.Tour', function(require) {
 "use strict";
 
 var core = require('web.core');
 
-console.log("web_tour.tour sdf");
-
-var Cruise = core.Class.extend({
+return core.Class.extend({
     init: function() {
         this.tooltips = {};
-        core.bus.on('DOM_updated', this, this.check_for_tooltip);
         this.popovers = [];
     },
     register: function(name, description) {
@@ -42,32 +39,6 @@ var Cruise = core.Class.extend({
 
         this.popovers.push(popover);
     },
-});
-
-var cruise = new Cruise();
-
-return cruise;
-});
-
-odoo.define('web.tour_test', function(require) {
-"use strict";
-
-// TO REMOVE THIS BEFORE MERGING IN MASTER
-
-var cruise = require('web_tour.tour');
-
-cruise.register('some tooltip', {
-    trigger: '.o_app[data-action-id="389"]',
-    title: 'Hello Project',
-    content: 'better than Trello',
-    position: 'bottom',
-});
-
-cruise.register('kanban first record', {
-    trigger: '.o_kanban_view .o_kanban_record:first-child',
-    title: 'First kanban record',
-    content: 'You rock',
-    position: 'right',
 });
 
 });
