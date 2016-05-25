@@ -2,6 +2,7 @@ odoo.define('web_tour.Tour', function(require) {
 "use strict";
 
 var core = require('web.core');
+var Tip = require('web_tour.Tip');
 
 function getCurrentStep(name) {
     var key = 'tour_' + name + '_step';
@@ -51,18 +52,14 @@ return core.Class.extend({
             this.displayed_tips.pop().popover('destroy');
         }
     },
-    show_tip: function($trigger, tip) {
-        var popover = $trigger.popover({
-            title: tip.title,
-            content: tip.content,
-            html: true,
-            // container: 'body',
-            animation: false,
-            placement: tip.position,
-        });
-        popover.popover('show');
-
-        this.displayed_tips.push(popover);
+    show_tip: function($trigger, tip_description) {
+        var tip = new Tip(this, $trigger, tip_description);
+        tip.insertAfter($trigger);
+        this.displayed_tips.push(tip);
+        tip.on('tip_consumed', this, this.consume_tip);
+    },
+    consume_tip: function(tip) {
+        console.log('consumed', tip);
     },
 });
 
