@@ -1,3 +1,55 @@
+@-webkit-keyframes opacity-out
+{
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+@-moz-keyframes opacity-out
+{
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@-webkit-keyframes height-in
+{
+    0% {
+        -webkit-transform: scaleY(0);
+        transform: scaleY(0);
+    }
+    30% {
+        border-radius: 50%;
+
+    }
+    100% {
+        -webkit-transform: scaleY(1);
+        transform: scaleY(1);
+        border-radius: 2px;
+    }
+}
+@-moz-keyframes height-in
+{
+    0% {
+        -webkit-transform: scaleX(0);
+        transform: scaleY(0);
+    }
+    30% {
+        border-radius: 50%;
+
+    }
+    100% {
+        -webkit-transform: scaleY(1);
+        transform: scaleY(1);
+        border-radius: 2px;
+    }
+}
+
 @-webkit-keyframes sploosh {
     0% {
         box-shadow: 0 0 0 0px rgba(135, 90, 123, .7);
@@ -89,5 +141,76 @@
     }
     to {
         .translate(5px; 0px);
+    }
+}
+
+@-webkit-keyframes wobble-bottom {
+    0% {
+        transform: scaleX(.1);
+        opacity: 0;
+        border-radius: 50%;
+    }
+    10% {
+        transform: scaleX(1);
+        opacity: 1;
+        border-radius: 2px;
+    }
+    16.65% {
+        transform: skew(-4deg);
+    }
+
+    33.3% {
+        transform: skew(4deg);
+    }
+
+    49.95% {
+        transform: skew(-4deg);
+    }
+
+    66.6% {
+        transform: skew(2deg);
+    }
+
+    83.25% {
+        transform: skew(-2deg);
+    }
+
+    100% {
+        transform: skew(0);
+    }
+}
+@-moz-keyframes wobble-bottom {
+    0% {
+        transform: scaleX(.1);
+        opacity: 0;
+        border-radius: 50%;
+    }
+    10% {
+        transform: scaleX(1);
+        opacity: 1;
+        border-radius: 2px;
+    }
+    16.65% {
+        transform: skew(-4deg);
+    }
+
+    33.3% {
+        transform: skew(4deg);
+    }
+
+    49.95% {
+        transform: skew(-4deg);
+    }
+
+    66.6% {
+        transform: skew(2deg);
+    }
+
+    83.25% {
+        transform: skew(-2deg);
+    }
+
+    100% {
+        transform: skew(0);
     }
 }
