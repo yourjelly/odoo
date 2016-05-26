@@ -8,6 +8,7 @@ Tour.include({
     init: function() {
         this._super();
         core.bus.on('DOM_updated', this, this.check_for_tooltip);
+        core.bus.on('click', this, this.check_for_tooltip);
     },
 });
 

@@ -3,8 +3,7 @@
     <data>
         <template id="assets_backend" name="tours assets" inherit_id="web.assets_backend">
             <xpath expr="." position="inside">
-                <!-- <link rel="stylesheet" href="/web_tip/static/src/less/tip.less"/> -->
-                <!-- <link rel="stylesheet" href="/web_tip/static/src/less/keyframes.less"/> -->
+                <link rel="stylesheet" href="/web_tour/static/src/less/tips.less"/>
                 <script type="text/javascript" src="/web_tour/static/src/js/tour.js"></script>
                 <script type="text/javascript" src="/web_tour/static/src/js/tour_backend.js"></script>
                 <script type="text/javascript" src="/web_tour/static/src/js/tip.js"></script>

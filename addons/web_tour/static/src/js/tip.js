@@ -9,29 +9,41 @@ return Widget.extend({
         this._super(parent);
         this.$anchor = $anchor;
         this.info = info;
+        this.consumed = false;
     },
     start: function() {
         var self = this;
         this.$breathing = this.$('.oe_breathing');
-        this.$el.on('mouseenter', function() {
-            self.$breathing.addClass('oe_explode').fadeOut(300);
-            self.display_info();
-            self.trigger('tip_consumed', self);
+        this.$anchor.on('mouseenter', this.to_info_mode.bind(this));
+        this.$anchor.on('mouseleave', this.to_bubble_mode.bind(this));
+        this.$anchor.on('click', function () {
+            if (this.consumed) return;
+            this.consumed = true;
+            self.trigger('tip_consumed');
         });
         this.reposition();
     },
     reposition: function() {
         this.$breathing.position({ my: "left", at: "right", of: this.$anchor });
+        if (this.$popover) {
+            this.$popover.position({ my: "left", at: "right", of: this.$anchor });
+        }
     },
-    display_info: function() {
-        var popover = this.$el.popover({
+    to_info_mode: function() {
+        this.$breathing.fadeOut(300);
+        this.$popover = this.$popover || this.$el.popover({
             title: this.info.title,
             content: this.info.content,
             html: true,
             animation: false,
+            container: this.$el,
             placement: this.info.position,
         });
-        popover.popover('show');
+        this.$popover.popover('show');
+    },
+    to_bubble_mode: function () {
+        this.$breathing.show();
+        this.$popover.popover('hide');
     },
 });
 

@@ -13,7 +13,6 @@ return core.Class.extend({
     init: function() {
         this.active_tooltips = [];
         this.tours = {};
-        this.displayed_tips = [];
     },
     register: function() {
         var args = Array.prototype.slice.call(arguments);
@@ -24,6 +23,7 @@ return core.Class.extend({
         if (!(steps instanceof Array)) {
             steps = [steps];
         }
+        _.each(steps, function (step) {step.tour = name; });
         var tour = {
             name: name,
             current_step: getCurrentStep(name),
@@ -33,32 +33,37 @@ return core.Class.extend({
         this.tours[name] = tour;
         this.active_tooltips.push(steps[tour.current_step]);
     },
-    check_for_tooltip: function() {
+     check_for_tooltip: function() {
         var self = this;
-        this.active_tooltips = _.filter(this.active_tooltips, function (tip) {
-            var $trigger = $(tip.trigger);
-            if ($trigger.length) {
-                self.remove_displayed_tips();
-                self.show_tip($trigger, tip);
-                return false;
-            } else {
-                return true;
+        _.each(this.active_tooltips, function (tip) {
+            var $trigger = $(tip.trigger).filter(':visible');
+            var triggered = $trigger.length && (tip.extra_trigger ? $(tip.extra_trigger).filter(':visible').length : true);
+            if (triggered && !tip.tip) {
+                console.log('tip activated', tip);
+                var _tip = new Tip(self, $trigger, tip);
+                tip.tip = _tip;
+                _tip.appendTo($trigger);
+                _tip.on('tip_consumed', self, self.consume_tip.bind(self, tip));
+            }
+            if (!triggered && tip.tip) {
+                console.log('tip deactivated', tip);
+                tip.tip.destroy();
+                delete tip.tip;
             }
         });
     },
-    remove_displayed_tips: function() {
-        while (this.displayed_tips.length) {
-            this.displayed_tips.pop().popover('destroy');
-        }
-    },
-    show_tip: function($trigger, tip_description) {
-        var tip = new Tip(this, $trigger, tip_description);
-        tip.insertAfter($trigger);
-        this.displayed_tips.push(tip);
-        tip.on('tip_consumed', this, this.consume_tip);
-    },
     consume_tip: function(tip) {
-        console.log('consumed', tip);
+        console.log('consumed', tip, this.tours);
+        this.active_tooltips = _.without(this.active_tooltips, tip);
+        var tour = this.tours[tip.tour];
+        if (tour.current_step < tour.steps.length - 1) {
+            tip.tip.destroy();
+            delete tip.tip;
+            tour.current_step = tour.current_step + 1;
+            this.active_tooltips.push(tour.steps[tour.current_step]);
+        } else {
+            console.log('tour completed', tour);
+        }
     },
 });
 
