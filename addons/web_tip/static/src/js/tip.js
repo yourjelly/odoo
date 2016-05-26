@@ -202,6 +202,11 @@ odoo.define('web_tip.web_tip', function (require) {
                 self.hide_tip();
             });
 
+            /*(this.popover, this.$breathing).hover(function(e) {
+            }).mouseleave(function (e) {
+                self.hide_tip();
+            });*/
+
             // consume tip
             $(this.end_selector).one(this.tip.end_event, function($ev) {
                 self.end_tip();
