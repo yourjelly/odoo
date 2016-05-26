@@ -23,7 +23,7 @@ class test_expression(common.TransactionCase):
         # Mock BaseModel._where_calc(), to be able to proceed to some tests about generated expression
         self._reinit_mock()
         self._base_model_where_calc = BaseModel._where_calc
-        BaseModel._where_calc = lambda model, cr, uid, args, context: self._mock_base_model_where_calc(model, cr, uid, args, context)
+        BaseModel._where_calc = lambda model, cr, uid, args, context, active_test=True: self._mock_base_model_where_calc(model, cr, uid, args, context)
 
     def tearDown(self):
         # Remove mocks

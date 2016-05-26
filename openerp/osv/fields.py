@@ -970,7 +970,7 @@ class many2many(_column):
         # FIXME: make this distinction explicit in API!
         domain = isinstance(self._domain, list) and self._domain or []
 
-        wquery = obj._where_calc(cr, user, domain, context=context)
+        wquery = obj._where_calc(cr, user, domain, active_test=context.get('active_test', False), context=context)
         obj._apply_ir_rules(cr, user, wquery, 'read', context=context)
         order_by = obj._generate_order_by(None, wquery)
         from_c, where_c, where_params = wquery.get_sql()
