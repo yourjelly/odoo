@@ -19,24 +19,26 @@ tour.register('kanban first record', {
     position: 'right',
 });
 
-// 
-// cruise.register('some_tour', [{
-//     trigger: "some css selector 1",
-//     title: "tooltip 1 title",
-//     content: "tooltip 1 content",
-//     position: "bottom"
-// }, {
-//     trigger: "some css selector 2",
-//     title: "tooltip 2 title",
-//     content: "tooltip 2 content",
-//     position: "left"
-// }, {
-//     trigger: "some css selector 3",
-//     title: "tooltip 3 title",
-//     content: "tooltip 3 content",
-//     position: "right"
-// }]);
-// 
+
+tour.register('some_tour', [{
+    trigger: "some css selector 1",
+    title: "tooltip 1 title",
+    content: "tooltip 1 content",
+    position: "bottom"
+}, {
+    trigger: "some css selector 2",
+    title: "tooltip 2 title",
+    content: "tooltip 2 content",
+    position: "left"
+}, {
+    trigger: "some css selector 3",
+    title: "tooltip 3 title",
+    content: "tooltip 3 content",
+    position: "right"
+}]);
+
+
+
 // cruise.register('some_other_tour', {
 //     url: "/some/url/action=13",
 // }, [{

@@ -13,7 +13,7 @@ return Widget.extend({
     start: function() {
         var self = this;
         this.$breathing = this.$('.oe_breathing');
-        this.$breathing.on('mouseenter', function() {
+        this.$el.on('mouseenter', function() {
             self.$breathing.addClass('oe_explode').fadeOut(300);
             self.display_info();
             self.trigger('tip_consumed', self);

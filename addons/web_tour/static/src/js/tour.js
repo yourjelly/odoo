@@ -47,7 +47,6 @@ return core.Class.extend({
         });
     },
     remove_displayed_tips: function() {
-        // debugger;
         while (this.displayed_tips.length) {
             this.displayed_tips.pop().popover('destroy');
         }
