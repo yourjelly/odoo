@@ -41,19 +41,77 @@
 }
 
 .o_homepage_editor_welcome_message {
-    font-family: Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 3em;
+    font-family: Roboto, @font-family-sans-serif;
 
-    .fa-smile-o {
-        color: @odoo-brand-primary;
-        font-size: 7em;
+    // Bounce
+    // ==========================================
+
+    @-webkit-keyframes bounce {
+        0%, 100% { .scale(0.0) }
+        50% { .scale(1) }
+    }
+    @keyframes bounce {
+        0%, 100% { .scale(0.0) }
+        50% { .scale(1) }
+    }
+
+    .o_homepage_editor_welcome_image {
+        // Use .svg format if supported by the browser
+        background: url('/website/static/src/img/welcome_message/window.png') no-repeat center center / contain;
+        background-image: url('/website/static/src/img/welcome_message/window.svg');
+
+        height:100%;
+        width:100%;
+        .o-position-absolute(0,0);
+    }
+
+    .o_loading_dark {
+        // At the end, this element should have the same style as the tour's tooltip.
+        position: relative;
+        display: inline-block;
+        margin: auto 8px;
+        height:20px;
+        width:20px;
+        .translate(0, 3px);
+
+        &:before, &:after {
+            content: "";
+            border-radius: 50%;
+            background-color: @brand-primary;
+            opacity: 0.6;
+            height:100%;
+            width:100%;
+
+            .o-position-absolute(0,0);
+            .o-animation(bounce, 2s, ease-in-out, 0s, infinite);
+        }
+
+        &:after {
+            background-color: @odoo-brand-primary;
+            -webkit-animation-delay: -1.0s;
+            animation-delay: -1.0s;
+        }
     }
 
     > .row {
         .o-flex-display();
-        .o-flex-flow(row, nowrap);
-        .o-justify-content(center);
-        .o-align-items(center);
+        .o-flex-flow(row, wrap);
+
+        > * {
+            .o-flex(0, 0, auto);
+            max-width: 100%;
+
+            .o-flex-display();
+            .o-flex-flow(column, wrap);
+
+            > * {
+                .o-flex(1, 0, auto);
+            }
+
+            &:not(:last-child) {
+                margin-right: -1px; // TODO this fix old chrome/safari bug but maybe a better solution should be found
+            }
+        }
     }
 }
 
