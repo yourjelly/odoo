@@ -16,7 +16,7 @@ return Widget.extend({
         this.$breathing = this.$('.oe_breathing');
         this.$anchor.on('mouseenter', this.to_info_mode.bind(this));
         this.$anchor.on('mouseleave', this.to_bubble_mode.bind(this));
-        this.$anchor.on('click', function () {
+        this.$anchor.on('click keypress', function () {
             if (this.consumed) return;
             this.consumed = true;
             self.trigger('tip_consumed');

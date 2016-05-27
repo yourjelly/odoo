@@ -36,7 +36,8 @@ return core.Class.extend({
      check_for_tooltip: function() {
         var self = this;
         _.each(this.active_tooltips, function (tip) {
-            var $trigger = $(tip.trigger).filter(':visible');
+            console.log('checking for', tip);
+            var $trigger = $(tip.trigger).filter(':visible').first();
             var triggered = $trigger.length && (tip.extra_trigger ? $(tip.extra_trigger).filter(':visible').length : true);
             if (triggered && !tip.tip) {
                 console.log('tip activated', tip);
@@ -61,6 +62,7 @@ return core.Class.extend({
             delete tip.tip;
             tour.current_step = tour.current_step + 1;
             this.active_tooltips.push(tour.steps[tour.current_step]);
+            console.log('active step', tour.steps[tour.current_step]);
         } else {
             console.log('tour completed', tour);
         }

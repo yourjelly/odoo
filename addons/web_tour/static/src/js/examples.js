@@ -21,6 +21,11 @@ var tour = require('web_tour.tour');
 
 
 tour.register('project_example', [{
+    trigger: '.o_app[data-action-id="147"]',
+    title: 'Hello Project',
+    content: 'so much better than Trello',
+    position: 'right',
+}, {
     trigger: '.o-kanban-button-new',
     extra_trigger: '.o_project_kanban',
     title: 'New project',
@@ -30,6 +35,12 @@ tour.register('project_example', [{
     trigger: '.o_project_form h1',
     title: 'Choose a name',
     content: 'For example, FUCKFUCKFUCK',
+    position: 'right',
+}, {
+    trigger: '.o_menu_sections li:first-child a',
+    extra_trigger: '.o_project_form.o_form_readonly',
+    title: 'Back to dashboard',
+    content: 'Project can be accessed from the dashboard',
     position: 'right',
 }, {
     trigger: '.o_project_kanban .o_kanban_record:first-child',
