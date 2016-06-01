@@ -7,34 +7,40 @@ tour.register('project_tour', {
     'skip_enabled': true,
 }, [{
     trigger: '.o_app[data-menu-xmlid="base.menu_main_pm"], .oe_menu_toggler[data-menu-xmlid="base.menu_main_pm"]',
-    content: 'so much better than Trello',
+    content: 'Let\'s have a look at the <b>Project app</b>.',
     position: 'bottom',
 }, {
     trigger: '.o-kanban-button-new',
     extra_trigger: '.o_project_kanban',
-    content: 'Click here to <b>create</b> a new project',
+    content: '<b>Create a project</b> that your team is working on.',
     position: 'right',
 }, {
-    trigger: '.o_project_form h1 input',
-    content: 'Write the project title',
+    trigger: 'input.o_project_name',
+    content: 'Choose a <b>project name</b>. (e.g. Website Launch, Product Development, Office Party)',
     position: 'right',
-}, {
-    trigger: '.o_menu_sections li a[data-menu-xmlid="project.menu_projects"], .oe_menu_leaf[data-menu-xmlid="project.menu_projects"]',
-    extra_trigger: '.o_project_form.o_form_readonly',
-    content: 'Project can be accessed from the dashboard',
-    position: 'bottom',
 }, {
     trigger: '.o_project_kanban .o_kanban_record:first-child',
-    content: 'Click here to open your new project',
+    content: 'Click to <b>open your project</b>.',
     position: 'right',
 }, {
     trigger: ".o_kanban_project_tasks .o_column_quick_create",
-    content: "Tasks in a project are created in columns, representing their state in the project",
+    content: "Add columns to setup <b>tasks stages</b>.<br/><i>e.g. Specification &gt; Development &gt; Tests</i>",
     position: "right"
 }, {
-    trigger: ".o_kanban_project_tasks .o_kanban_quick_create input",
-    content: "Don't worry, you can change it later if you want",
+    trigger: ".o-kanban-button-new",
+    extra_trigger: '.o_kanban_project_tasks .o_kanban_group',
+    content: "Now that the project is set up, <b>create a few tasks</b>.",
     position: "right"
+}, {
+    trigger: ".o_kanban_record:nth-child(3)",
+    extra_trigger: '.o_kanban_project_tasks',
+    content: "<b>Drag &amp; drop tasks</b> between columns as you work on them.",
+    position: "right"
+}, {
+    trigger: ".o_back_button",
+    extra_trigger: '.o_form_project_tasks',
+    content: "Use the breadcrumd to <b>go back to tasks</b>.",
+    position: "bottom"
 }]);
 
 });

@@ -129,9 +129,11 @@ class project(osv.osv):
 
     def _get_visibility_selection(self, cr, uid, context=None):
         """ Overriden in portal_project to offer more options """
-        return [('portal', _('Customer project')),
-                ('employees', _('All employees')),
-                ('followers', _('Private: followers only'))]
+        return [
+            ('employees', _('Visible by all employees')),
+            ('followers', _('On invitation only')),
+            ('portal', _('Shared with a customer'))
+        ]
 
     def attachment_tree_view(self, cr, uid, ids, context):
         task_ids = self.pool.get('project.task').search(cr, uid, [('project_id', 'in', ids)])
@@ -195,7 +197,7 @@ class project(osv.osv):
                                          "with Tasks (or optionally Issues if the Issue Tracker module is installed)."),
         'alias_model': fields.selection(_alias_models, "Alias Model", select=True, required=True,
                                         help="The kind of document created when an email is received on this project's email alias"),
-        'privacy_visibility': fields.selection(_visibility_selection, 'Privacy / Visibility', required=True,
+        'privacy_visibility': fields.selection(_visibility_selection, 'Privacy', required=True,
             help="Holds visibility of the tasks or issues that belong to the current project:\n"
                     "- Portal : employees see everything;\n"
                     "   if portal is activated, portal users see the tasks or issues followed by\n"
@@ -356,6 +358,9 @@ class project(osv.osv):
         self.write(cr, SUPERUSER_ID, not_fav_project_ids, {'favorite_user_ids': [(4, uid)]}, context=context)
         self.write(cr, SUPERUSER_ID, favorite_project_ids, {'favorite_user_ids': [(3, uid)]}, context=context)
 
+    @api.multi
+    def dummy(self):
+        return {'type': 'ir.actions.act_window_close'}
 
 class task(osv.osv):
     _name = "project.task"
