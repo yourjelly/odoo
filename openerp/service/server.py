@@ -76,7 +76,6 @@ class BaseWSGIServerNoBind(LoggingBaseWSGIServerMixIn, werkzeug.serving.BaseWSGI
         # dont listen as we use PreforkServer#socket
         pass
 
-
 class RequestHandler(werkzeug.serving.WSGIRequestHandler):
     def setup(self):
         # flag the current thread as handling a http request
@@ -773,6 +772,7 @@ class WorkerHTTP(Worker):
     """ HTTP Request workers """
     def process_request(self, client, addr):
         client.setblocking(1)
+        client.settimeout(0.5)
         client.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         # Prevent fd inherientence close_on_exec
         flags = fcntl.fcntl(client, fcntl.F_GETFD) | fcntl.FD_CLOEXEC
