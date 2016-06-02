@@ -21,15 +21,15 @@ var tour = require('web_tour.tour');
 
 
 tour.register('project_example', [{
-    trigger: '.o_app[data-action-id="147"]',
+    /*trigger: '.o_app[data-action-id="147"]',
     title: 'Hello Project',
     content: 'so much better than Trello',
-    position: 'right',
-}, {
+    position: 'right',*/
+//}, {
     trigger: '.o-kanban-button-new',
     extra_trigger: '.o_project_kanban',
     title: 'New project',
-    content: 'Click here to create a new project',
+    content: 'Click here to create a new project </br> Click here to create a new project',
     position: 'right',
 }, {
     trigger: '.o_project_form h1',
