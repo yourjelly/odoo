@@ -24,7 +24,7 @@ return core.Class.extend({
         var last_arg = args[args.length - 1];
         var name = args[0];
         if (this.tours[name]) {
-            console.warn(_("Tour %s is already defined" % name));
+            console.warn(_.str.sprintf(_t("Tour %s is already defined"), name));
             return;
         }
         var options = args.length === 2 ? {} : args[1];
@@ -57,17 +57,19 @@ return core.Class.extend({
     },
     _activate_tip: function(tip, tour, $anchor) {
         var skip_enabled = this.tours[tour].skip_enabled;
-        if (skip_enabled) {
-            tip.content += '<br/><span class="o_skip_tour">' + _t('Skip these tips.') + '</span>';
+        if (skip_enabled && !tip.extra_content) {
+            // FIXME: not pretty but a cleaner solution will be easy when we'll stop using jquery's popover
+            tip.extra_content = '<br/><span class="o_skip_tour">' + _t('Skip these tips.') + '</span>';
         }
         tip.widget = new Tip(this, $anchor, tip);
         tip.widget.appendTo(document.body);
         tip.widget.on('tip_consumed', this, this._consume_tip.bind(this, tip, tour));
         if (skip_enabled) {
-            var self = this;
-            tip.widget.$el.on('click', '.o_skip_tour', function () {
-                self._unactivate_tip(tip);
-                self._consume_tour(tour);
+            tip.widget.on('popover_clicked', this, function (event) {
+                if (event.target.className === 'o_skip_tour') {
+                    this._unactivate_tip(tip);
+                    this._consume_tour(tour);
+                }
             });
         }
     },

@@ -42,7 +42,7 @@ return Widget.extend({
     to_info_mode: function() {
         this.$breathing.fadeOut(300);
         this.$popover = this.$popover || this.$anchor.popover({
-            content: this.info.content,
+            content: this.info.content + (this.info.extra_content || ''),
             html: true,
             animation: false,
             container: this.$el,
@@ -50,12 +50,14 @@ return Widget.extend({
         });
         this.$popover.popover('show');
         this.$('.popover').on('mouseleave.to_bubble_mode', this.to_bubble_mode.bind(this));
+        this.$('.popover').on('click', this.trigger.bind(this, 'popover_clicked'));
     },
     to_bubble_mode: function () {
         this.$breathing.fadeIn(300);
         if (this.$popover) {
             this.$popover.popover('hide');
             this.$('.popover').off('mouseleave.to_bubble_mode');
+            this.$('.popover').off('click');
         }
     },
 });
