@@ -20,6 +20,7 @@ tour.register('project_tour', {
     position: 'right',
 }, {
     trigger: '.o_project_kanban .o_kanban_record:first-child',
+    extra_trigger: 'body:not(.modal-open)',
     content: 'Click to <b>open your project</b>.',
     position: 'right',
 }, {
