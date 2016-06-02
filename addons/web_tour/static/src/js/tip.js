@@ -19,7 +19,7 @@ return Widget.extend({
         this.$anchor.on('mouseenter', this.to_info_mode.bind(this));
         this.$breathing.on('mouseenter', this.to_info_mode.bind(this));
         this.$anchor.on('mouseleave', this.to_bubble_mode.bind(this));
-        this.$anchor.on(this.$anchor.is('input,textarea') ? 'keypress' : 'click', function () {
+        this.$anchor.on(this.$anchor.is('input,textarea') ? 'keypress' : 'mousedown', function () {
             if (self.consumed) return;
             self.consumed = true;
             self.trigger('tip_consumed');
