@@ -108,7 +108,7 @@ return core.Class.extend({
             clearTimeout(this.auto_tour_timeout);
             if (tip.run) {
                 this._consume_tip(tip, tour_name);
-                tip.run();
+                tip.run.apply(tip);
             }
         }
     },

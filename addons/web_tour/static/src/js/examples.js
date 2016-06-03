@@ -76,7 +76,7 @@ tour.register('auto_tour', {
     content: 'Let\'s have a look at the <b>Project app</b>.',
     position: 'bottom',
     run: function () {
-        $('.o_app[data-menu-xmlid="base.menu_main_pm"], .oe_menu_toggler[data-menu-xmlid="base.menu_main_pm"]').click();
+        $(this.trigger).click();
     },
 }, {
     trigger: '.o-kanban-button-new',
@@ -84,14 +84,14 @@ tour.register('auto_tour', {
     content: '<b>Create a project</b> that your team is working on.',
     position: 'right',
     run: function () {
-        $('.o-kanban-button-new').click();
+        $(this.trigger).click();
     },
 }, {
     trigger: 'input.o_project_name',
     content: 'Choose a <b>project name</b>. (e.g. Website Launch, Product Development, Office Party)',
     position: 'right',
     run: function () {
-        $('input.o_project_name').val("Office Party");
+        $(this.trigger).val("Office Party");
         $('.modal-footer .btn-primary').click();
     },
 }, {
@@ -108,7 +108,7 @@ tour.register('auto_tour', {
     content: "Add columns to setup <b>tasks stages</b>.<br/><i>e.g. Specification &gt; Development &gt; Tests</i>",
     position: "right",
     run: function () {
-        $('.o_kanban_project_tasks .o_column_quick_create').click();
+        $(this.trigger).click();
     },
 }, {
     trigger: ".o-kanban-button-new",
@@ -116,7 +116,7 @@ tour.register('auto_tour', {
     content: "Now that the project is set up, <b>create a few tasks</b>.",
     position: "right",
     run: function () {
-        $(".o-kanban-button-new").click();
+        $(this.trigger).click();
     },
 // }, {
 //     trigger: ".o_kanban_record:nth-child(3)",
@@ -128,7 +128,7 @@ tour.register('auto_tour', {
     content: "Use the breadcrumd to <b>go back to tasks</b>.",
     position: "bottom",
     run: function () {
-        $('.o_back_button').click();
+        $(this.trigger).click();
     },
 }]);
 
