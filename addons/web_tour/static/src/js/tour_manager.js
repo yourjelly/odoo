@@ -80,8 +80,12 @@ return core.Class.extend({
         var $trigger = $(tip.trigger).filter(':visible').first();
         var extra_trigger = tip.extra_trigger ? $(tip.extra_trigger).filter(':visible').length : true;
         var triggered = $trigger.length && extra_trigger;
-        if (triggered && !tip.widget) {
-            this._activate_tip(tip, tour_name, $trigger);
+        if (triggered) {
+            if (!tip.widget) {
+                this._activate_tip(tip, tour_name, $trigger);
+            } else {
+                tip.widget.update($trigger);
+            }
         }
         if (!triggered && tip.widget) {
             this._unactivate_tip(tip);

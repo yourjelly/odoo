@@ -14,16 +14,9 @@ return Widget.extend({
         this.consumed = false;
     },
     start: function() {
-        var self = this;
         this.$breathing = this.$('.o_breathing');
-        this.$anchor.on('mouseenter', this.to_info_mode.bind(this));
         this.$breathing.on('mouseenter', this.to_info_mode.bind(this));
-        this.$anchor.on('mouseleave', this.to_bubble_mode.bind(this));
-        this.$anchor.on(this.$anchor.is('input,textarea') ? 'keypress' : 'mousedown', function () {
-            if (self.consumed) return;
-            self.consumed = true;
-            self.trigger('tip_consumed');
-        });
+        this._bind_anchor_events();
         this.reposition();
     },
     reposition: function() {
@@ -32,6 +25,23 @@ return Widget.extend({
         if (this.$popover) {
             this.$popover.position({ my: "left", at: this.info.position, of: this.$anchor });
         }
+    },
+    update: function($anchor) {
+        if (!$anchor.is(this.$anchor)) {
+            this.$anchor.off();
+            this.$anchor = $anchor;
+            this._bind_anchor_events();
+        }
+    },
+    _bind_anchor_events: function () {
+        var self = this;
+        this.$anchor.on('mouseenter', this.to_info_mode.bind(this));
+        this.$anchor.on('mouseleave', this.to_bubble_mode.bind(this));
+        this.$anchor.on(this.$anchor.is('input,textarea') ? 'keypress' : 'mousedown', function () { // change instead of keypress?
+            if (self.consumed) return;
+            self.consumed = true;
+            self.trigger('tip_consumed');
+        });
     },
     _invert_position: function (position) {
         if (position === "right") return "left";
