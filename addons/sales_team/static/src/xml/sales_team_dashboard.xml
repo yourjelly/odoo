@@ -213,7 +213,7 @@
                     <h2>Hi there!</h2>
                     <h4>Great sales journeys start with a clean pipeline.</h4>
                     <h4>Create a few opportunities to activate your dashboard.</h4>
-                    <a class="btn btn-primary o_dashboard_action" name="crm.action_your_pipeline">My Pipeline</a>
+                    <a class="btn btn-primary o_dashboard_action" name="crm.action_your_pipeline" id="crm_welcome_button">My Pipeline</a>
                 </div>
             </div>
         </div>

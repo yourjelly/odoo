@@ -5,6 +5,6 @@
         <field name="load_xmlid" eval="True"/>
     </record>
     <record id="menu_projects" model="ir.ui.menu">
-    	<field name="load_xmlid" eval="True"/>
+        <field name="load_xmlid" eval="True"/>
     </record>
 </odoo>

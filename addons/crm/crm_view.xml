@@ -11,6 +11,7 @@
             id="base.menu_base_partner"
             groups="base.group_sale_manager,base.group_sale_salesman"
             web_icon="crm,static/description/icon.png"
+            load_xmlid="True"
             sequence="6"/>
 
         <menuitem id="base.menu_crm_config_lead" name="Leads &amp; Opportunities"

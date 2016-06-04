@@ -532,6 +532,8 @@ form: module.record_id""" % (xml_id,)
             # ensure menu has a name
             values['name'] = rec_id or '?'
 
+        if rec.get('load_xmlid'):
+            values['load_xmlid'] = rec.get('load_xmlid') in ('True','true','1')
         if rec.get('sequence'):
             values['sequence'] = int(rec.get('sequence'))
 

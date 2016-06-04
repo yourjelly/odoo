@@ -17,7 +17,8 @@ It assigns manager and user access rights to the Administrator for the accountin
     'depends': ['account'],
     'data': [
         'security/account_security.xml',
-        'account_accountant_data.xml'
+        'account_accountant_data.xml',
+        'views/account.xml'
     ],
     'demo': ['account_accountant_demo.xml'],
     'test': [],

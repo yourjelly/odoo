@@ -154,7 +154,7 @@
             <field name="model">project.project</field>
             <field name="arch" type="xml">
                 <form string="Project">
-                    <sheet string="Project">
+                    <sheet>
                         <group>
                             <field name="name" class="o_project_name oe_inline" 
                                 string="Project Name" placeholder="e.g. Office Party"/>

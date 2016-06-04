@@ -55,7 +55,7 @@
         <field name="name">Jobs - Recruitment Form</field>
         <field name="model">hr.applicant</field>
         <field name="arch" type="xml">
-          <form string="Jobs - Recruitment Form">
+          <form string="Jobs - Recruitment Form" class="o_recruitment_job">
             <header>
                 <button string="Create Employee" name="create_employee_from_applicant" type="object"
                         class="oe_highlight" attrs="{'invisible': ['|',('emp_id', '!=', False),('active', '=', False)]}"/>
@@ -534,6 +534,7 @@
         name="Recruitment"
         id="menu_hr_recruitment_root"
         web_icon="hr_recruitment,static/description/icon.png"
+        load_xmlid="True"
         groups="base.group_hr_user"
         sequence="80"/>
 

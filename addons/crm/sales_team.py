@@ -75,6 +75,9 @@ class crm_team(osv.Model):
                 'default_team_id': user_team_id,
             })
 
+        action_simplified = IrModelData.xmlid_to_res_id(cr, uid, 'crm.create_opportunity_simplified')
+        print action_simplified
+
         tree_view_id = IrModelData.xmlid_to_res_id(cr, uid, 'crm.crm_case_tree_view_oppor')
         form_view_id = IrModelData.xmlid_to_res_id(cr, uid, 'crm.crm_case_form_view_oppor')
         kanb_view_id = IrModelData.xmlid_to_res_id(cr, uid, 'crm.crm_case_kanban_view_leads')
@@ -88,5 +91,6 @@ class crm_team(osv.Model):
                 [False, 'pivot']
             ],
             'context': action_context,
+            'action_id': (action_simplified, 'Test')
         })
         return action
