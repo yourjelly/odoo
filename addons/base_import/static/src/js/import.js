@@ -334,9 +334,6 @@ var DataImport = Widget.extend(ControlPanelMixin, {
         this.$el.addClass('oe_import_with_file');
         // TODO: test that write // succeeded?
         this.$el.removeClass('oe_import_preview_error oe_import_error');
-        this.$el.toggleClass(
-            'oe_import_noheaders',
-            !this.$('input.oe_import_has_header').prop('checked'));
         this.Import.call(
             'parse_preview', [this.id, this.import_options()])
             .done(function (result) {
