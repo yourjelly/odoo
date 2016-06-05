@@ -243,7 +243,7 @@
                 <p class="oe_view_nocontent_create">
                     Click to create a new project.
                 </p><p>
-                    Or <a type="action" name="%(project.activate_sample_project)d" style="display: inline-block; color:yellow;">activate a sample project</a> to play with.
+                    Or <a type="action" name="%(project.activate_sample_project)d">activate a sample project</a> to play with.
                 </p>
             </field>
         </record>
