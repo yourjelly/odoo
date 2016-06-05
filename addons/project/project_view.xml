@@ -223,6 +223,14 @@
             <field name="target">new</field>
         </record>
 
+        <record id="activate_sample_project" model="ir.actions.server">
+            <field name="name">Activate Sample Project</field>
+            <field name="model_id" ref="project.model_project_project"/>
+            <field name="code">
+                self.project_sample_active(cr, uid, context=context)
+            </field>
+        </record>
+
         <record id="open_view_project_all" model="ir.actions.act_window">
             <field name="name">Projects</field>
             <field name="res_model">project.project</field>
@@ -233,9 +241,9 @@
             <field name="action_id" ref="open_create_project"/>
             <field name="help" type="html">
                 <p class="oe_view_nocontent_create">
-                    Create a new project.
+                    Click to create a new project.
                 </p><p>
-                    Organize your activities (plan tasks, track issues, invoice timesheets) for internal, personal or customer projects.
+                    Or <a type="action" name="%(project.activate_sample_project)d" style="display: inline-block; color:yellow;">activate a sample project</a> to play with.
                 </p>
             </field>
         </record>

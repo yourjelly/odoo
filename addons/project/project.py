@@ -159,6 +159,23 @@ class project(osv.osv):
             'context': "{'default_res_model': '%s','default_res_id': %d}" % (self._name, res_id)
         }
 
+    def project_sample_active(self, cr, uid, context=None):
+        data_obj = self.pool.get('ir.model.data')
+        proj_id = data_obj.xmlid_to_res_id(cr, uid, 'project.project_project_data')
+        if proj_id:
+            proj = self.browse(cr, uid, proj_id, context=context)
+            proj.write({'active': True})
+
+        # Change the help message on the action. (no more activate project)
+        act_id = data_obj.xmlid_to_res_id(cr, uid, 'project.open_view_project_all')
+        if act_id:
+            self.pool.get('ir.actions.act_window').write(cr, 1, [act_id], {
+                "help": _('''<p class="oe_view_nocontent_create">Click to create a new project.</p>''')
+            }, context=context)
+        # TODO: Would be better to send a signal to reload the screen
+        # return {'type': 'ir.actions.act_window_reload'}
+        return True
+
     def _get_favorite(self, cr, uid, ids, name, args, context=None):
         return dict((project.id, uid in project.favorite_user_ids.ids) for project in self.browse(cr, uid, ids, context=context))
 

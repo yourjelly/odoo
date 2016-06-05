@@ -10,11 +10,6 @@ tour.register('project_tour', {
     content: 'Let\'s have a look at the <b>Project app</b>.',
     position: 'bottom',
 }, {
-    trigger: '.o-kanban-button-new',
-    extra_trigger: '.o_project_kanban',
-    content: '<b>Create a project</b> that your team is working on.',
-    position: 'right',
-}, {
     trigger: 'input.o_project_name',
     content: 'Choose a <b>project name</b>. (e.g. Website Launch, Product Development, Office Party)',
     position: 'right',
