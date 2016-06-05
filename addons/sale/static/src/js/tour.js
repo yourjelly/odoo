@@ -17,12 +17,12 @@ tour.register('crm_tour', {
 }, {
     trigger: ".btn-primary.sale-confirm",
     extra_trigger: '.o_sale_order',
-    content: "<b>Confirm this quotation</b> to convert it to a sale order. <p><i>The customer can confirm the order directly from the email he received. If he does so, you'll get a confirmation by email</i></p>.",
+    content: "<p><b>Confirm the order</b> if the customer purchases.</p><p><i>The customer can also confirm the order directly from the email he received.</i></p>",
     position: "bottom"
 }, {
     trigger: ".o_back_button",
     extra_trigger: ".o_sale_order [data-id='sale'].btn-primary",
-    content: "Use the breadcrumd to <b>go back to your dashboard</b>.",
+    content: "Use the breadcrumd to <b>go back to preceeding screens</b>.",
     position: "bottom"
 }, {
     trigger: 'li[data-menu-xmlid="base.menu_sales"], li[data-menu-xmlid="base.menu_sales"]',
