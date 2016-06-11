@@ -10,7 +10,7 @@ tour.register('crm_tour', {
     'skip_enabled': true,
 }, [{
     trigger: '.o_app[data-menu-xmlid="sales_team.menu_base_partner"], .oe_menu_toggler[data-menu-xmlid="sales_team.menu_base_partner"]',
-    content: _t("Organize your sales activities with the <b>CRM app</b>."),
+    content: _t("Ready to boost you sales? It starts with the <b>CRM app</b>."),
     position: 'bottom',
 }, {
     trigger: ".o_welcome_content .o_dashboard_action",
@@ -34,7 +34,7 @@ tour.register('crm_tour', {
 }, {
     trigger: ".o_recommended_activity .o_radio_item:first() .o_form_label",
     extra_trigger: ".o_opportunity_kanban",
-    content: _t("<p>You will be able to customize your followup activities. (e.g. call back 15 days after an introductory email)</p><p class='mb0'><i>Select a standard activity for now on.</i></p>"),
+    content: _t("<p>You will be able to customize your followup activities. Examples:</p><ol><li>introductory email</li><li>call 10 days after</li><li>second call 3 days after, ...</li></ol><p class='mb0'><i>Select a standard activity for now on.</i></p>"),
     position: "right"
 }, {
     trigger: ".o_kanban_record",

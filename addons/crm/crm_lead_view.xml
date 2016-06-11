@@ -325,7 +325,6 @@
                                             </a>
                                             <a name="%(crm.crm_activity_schedule_action)d" type="action" t-if="record.kanban_state.raw_value=='red'">
                                               <span
-                                                title="No 'next activity' scheduled, click to set one."
                                                 class="oe_kanban_status oe_kanban_status_red"/>
                                             </a>
                                             <img t-att-src="kanban_image('res.users', 'image_small', record.user_id.raw_value)" t-att-title="record.user_id.value" width="24" height="24" class="oe_kanban_avatar pull-right"/>
