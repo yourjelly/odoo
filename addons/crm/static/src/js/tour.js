@@ -9,7 +9,7 @@ var _t = core._t;
 tour.register('crm_tour', {
     'skip_enabled': true,
 }, [{
-    trigger: '.o_app[data-menu-xmlid="base.menu_base_partner"], .oe_menu_toggler[data-menu-xmlid="base.menu_base_partner"]',
+    trigger: '.o_app[data-menu-xmlid="sales_team.menu_base_partner"], .oe_menu_toggler[data-menu-xmlid="sales_team.menu_base_partner"]',
     content: _t("Organize your sales activities with the <b>CRM app</b>."),
     position: 'bottom',
 }, {
@@ -26,6 +26,21 @@ tour.register('crm_tour', {
     trigger: ".o_opportunity_kanban .o_kanban_record:nth-child(2)",
     content: _t("<b>Drag &amp; drop opportunities</b> between columns as you progress in your sales cycle."),
     position: "right"
+}, {
+    trigger: ".o_kanban_record .oe_kanban_status_red",
+    extra_trigger: ".o_opportunity_kanban",
+    content: _t("This opportunity has <b>no next activity scheduled</b>. <i>Click to set one.</i>"),
+    position: "bottom"
+}, {
+    trigger: ".o_recommended_activity .o_radio_item:first() .o_form_label",
+    extra_trigger: ".o_opportunity_kanban",
+    content: _t("<p>You will be able to customize your followup activities. (e.g. call back 15 days after an introductory email)</p><p class='mb0'><i>Select a standard activity for now on.</i></p>"),
+    position: "right"
+}, {
+    trigger: ".o_kanban_record",
+    extra_trigger: ".o_opportunity_kanban",
+    content: _t("Click on an opportunity to zoom to it."),
+    position: "bottom"
 }, {
     trigger: ".o_opportunity_form .o_chatter_button_new_message",
     content: _t('<p><b>Send messages</b> to your prospect and get replies automatically attached to this opportunity.</p><p class="mb0">Type <i>\'@\'</i> to mention people - it\'s like cc-ing on emails.</p>'),
