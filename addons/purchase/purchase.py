@@ -724,6 +724,14 @@ class PurchaseOrderLine(models.Model):
             return {'warning': warning}
         return {}
 
+    @api.onchange('price_unit')
+    def on_change_price(self):
+        if self.product_id.seller_ids:
+            supp_info = self.product_id.seller_ids.filtered(lambda x: x.name.id == self.order_id.partner_id.id)
+        else:
+            supp_info = self.product_id.product_tmpl_id.seller_ids.filtered(lambda x: x.name.id == self.order_id.partner_id.id)
+        supp_info.write({'price': self.price_unit})
+
     @api.onchange('product_qty', 'product_uom')
     def _onchange_quantity(self):
         if not self.product_id:
@@ -738,10 +746,8 @@ class PurchaseOrderLine(models.Model):
 
         if seller or not self.date_planned:
             self.date_planned = self._get_date_planned(seller).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-
         if not seller:
             return
-
         price_unit = self.env['account.tax']._fix_tax_included_price(seller.price, self.product_id.supplier_taxes_id, self.taxes_id) if seller else 0.0
         if price_unit and seller and self.order_id.currency_id and seller.currency_id != self.order_id.currency_id:
             price_unit = seller.currency_id.compute(price_unit, self.order_id.currency_id)
@@ -761,7 +767,7 @@ class PurchaseOrderLine(models.Model):
         seller_min_qty = self.product_id.seller_ids\
             .filtered(lambda r: r.name == self.order_id.partner_id)\
             .sorted(key=lambda r: r.min_qty)
-        if seller_min_qty:
+        if seller_min_qty and not self.product_uom:
             self.product_qty = seller_min_qty[0].min_qty or 1.0
             self.product_uom = seller_min_qty[0].product_uom
         else:

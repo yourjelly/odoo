@@ -928,7 +928,11 @@ class product_product(osv.osv):
         if context is None:
             context = {}
         res = self.pool.get('product.supplierinfo').browse(cr, uid, [])
-        for seller in product_id.seller_ids:
+        if product_id.seller_ids:
+            sellers = product_id.seller_ids
+        else:
+            sellers = product_id.product_tmpl_id.seller_ids
+        for seller in sellers:
             # Set quantity in UoM of seller
             quantity_uom_seller = quantity
             if quantity_uom_seller and uom_id and uom_id != seller.product_uom:
@@ -990,6 +994,7 @@ class product_product(osv.osv):
         'volume': fields.float('Volume', help="The volume in m3."),
         'weight': fields.float('Weight', digits_compute=dp.get_precision('Stock Weight'), help="The weight of the contents in Kg, not including any packaging, etc."),
         'pricelist_item_ids': fields.function(_get_pricelist_items, type='many2many', relation='product.pricelist.item', string='Pricelist Items'),
+        'seller_ids': fields.one2many('product.supplierinfo', 'product_id', 'Vendors'),
     }
 
     _defaults = {

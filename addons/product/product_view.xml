@@ -275,6 +275,9 @@
                                 </group>
                             </group>
                         </group>
+                        <field name="product_tmpl_id" invisible="1"/>
+                        <separator string="Vendors"/>
+                        <field name="seller_ids" context="{'default_product_tmpl_id': product_tmpl_id}"/>
                     </sheet>
                 </form>
             </field>
