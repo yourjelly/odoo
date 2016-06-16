@@ -11,6 +11,7 @@ var Model = require('web.DataModel');
 var time = require('web.time');
 var View = require('web.View');
 var widgets = require('web_calendar.widgets');
+var local_storage = require('web.local_storage');
 
 var CompoundDomain = data.CompoundDomain;
 

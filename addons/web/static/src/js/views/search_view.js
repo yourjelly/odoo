@@ -11,6 +11,7 @@ var pyeval = require('web.pyeval');
 var search_inputs = require('web.search_inputs');
 var utils = require('web.utils');
 var Widget = require('web.Widget');
+var local_storage = require('web.local_storage');
 
 var Backbone = window.Backbone;
 
@@ -334,7 +335,8 @@ var SearchView = Widget.extend(/** @lends instance.web.SearchView# */{
         'click .oe_searchview_unfold_drawer': function (e) {
             e.stopImmediatePropagation();
             $(e.target).toggleClass('fa-caret-down fa-caret-up');
-            localStorage.visible_search_menu = (localStorage.visible_search_menu !== 'true');
+            var visible_search_menu = (local_storage.getItem('visible_search_menu') !== 'true');
+            local_storage.setItem('visible_search_menu', visible_search_menu);
             this.toggle_buttons();
         },
         'keydown .oe_searchview_input, .oe_searchview_facet': function (e) {
@@ -383,7 +385,7 @@ var SearchView = Widget.extend(/** @lends instance.web.SearchView# */{
         this.search_fields = [];
         this.filters = [];
         this.groupbys = [];
-        this.visible_filters = (localStorage.visible_search_menu === 'true');
+        this.visible_filters = (local_storage.getItem('visible_search_menu') === 'true');
         this.input_subviews = []; // for user input in searchbar
         this.defaults = defaults || {};
         this.headless = this.options.hidden &&  _.isEmpty(this.defaults);
