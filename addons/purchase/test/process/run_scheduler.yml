@@ -1,13 +1,29 @@
 -
   In order to test the scheduler to generate RFQ, I create a new product
+
+-
+  !record {model: product.template, id: scheduler_product_template}:
+    name: scheduler prod
+    type: product
+    uom_id: product.product_uom_unit
+    uom_po_id: product.product_uom_unit
 -
   !record {model: product.product, id: scheduler_product, view: False}:
     name: scheduler prod
     type: product
+    product_tmpl_id: scheduler_product_template
     seller_ids:
       - delay: 1
         name: base.res_partner_2
         min_qty: 5.0
+        product_tmpl_id: scheduler_product_template
+-
+  !record {model: product.supplierinfo, id: product_seller}:
+    name: seller
+    product_id: scheduler_product
+    name: base.res_partner_3
+    product_tmpl_id: scheduler_product_template
+
 -
   Add Buy route
 - 
