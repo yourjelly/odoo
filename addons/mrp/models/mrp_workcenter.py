@@ -11,6 +11,7 @@ class MrpWorkcenter(models.Model):
     _name = 'mrp.workcenter'
     _description = 'Work Center'
     _inherits = {'resource.resource': 'resource_id'}
+    _order = "sequence, id"
 
     note = fields.Text(
         'Description',
@@ -31,12 +32,13 @@ class MrpWorkcenter(models.Model):
     workorder_count = fields.Integer('# Work Orders', compute='_compute_workorder_count')
     workorder_ready_count = fields.Integer('# Read Work Orders', compute='_compute_workorder_ready_count')
     workorder_progress_count = fields.Integer('Total Running Orders', compute='_compute_workorder_progress_count')
+    workorder_pending_count = fields.Integer('Total Running Orders', compute='_compute_workorder_pending_count')
 
     time_ids = fields.One2many('mrp.workcenter.productivity', 'workcenter_id', 'Time Logs')
     working_state = fields.Selection([
         ('normal', 'Normal'),
         ('blocked', 'Blocked'),
-        ('done', 'In Progress')], 'Status', compute="_compute_working_state")  # TDE FIXME: store ?
+        ('done', 'In Progress')], 'Status', compute="_compute_working_state", store=True)
     blocked_time = fields.Float(
         'Blocked Time', compute='_compute_blocked_time',
         help='Blocked hours over the last month')
@@ -68,6 +70,13 @@ class MrpWorkcenter(models.Model):
         for workcenter in self:
             workcenter.workorder_progress_count = count_data.get(workcenter.id, 0)
 
+    @api.depends('order_ids.workcenter_id', 'order_ids.state')
+    def _compute_workorder_pending_count(self):
+        data = self.env['mrp.workorder'].read_group([('workcenter_id', 'in', self.ids), ('state', '=', 'pending')], ['workcenter_id'], ['workcenter_id'])
+        count_data = dict((item['workcenter_id'][0], item['workcenter_id_count']) for item in data)
+        for workcenter in self:
+            workcenter.workorder_pending_count = count_data.get(workcenter.id, 0)
+
     @api.multi
     @api.depends('time_ids.date_end', 'time_ids.loss_type')
     def _compute_working_state(self):
@@ -82,7 +91,7 @@ class MrpWorkcenter(models.Model):
 
     @api.multi
     def _compute_blocked_time(self):
-        # TDE FIXME: productivity loss type should be only losses, probably count other time logs differently
+        # TDE FIXME: productivity loss type should be only losses, probably count other time logs differently ??
         data = self.env['mrp.workcenter.productivity'].read_group([
             ('date_start', '>=', fields.Datetime.to_string(datetime.datetime.now() - relativedelta.relativedelta(months=1))),
             ('workcenter_id', 'in', self.ids),
@@ -147,6 +156,7 @@ class MrpWorkcenter(models.Model):
 class MrpWorkcenterProductivityLoss(models.Model):
     _name = "mrp.workcenter.productivity.loss"
     _description = "TPM Big Losses"
+    _order = "sequence, id"
 
     name = fields.Char('Reason', required=True)
     sequence = fields.Integer('Sequence', default=1)

@@ -23,7 +23,7 @@ class StockMoveLots(models.Model):
     product_id = fields.Many2one(
         'product.product', 'Product',
         readonly=True, related="move_id.product_id", store=True)
-    done_wo = fields.Boolean('Done for Work Order', default=True)  # TDE FIXME: naming
+    done_wo = fields.Boolean('Done for Work Order', default=True, help="Technical Field which is False when temporarily filled in in work order")  # TDE FIXME: naming
     done_move = fields.Boolean('Move Done', related='move_id.is_done', store=True)  # TDE FIXME: naming
     plus_visible = fields.Boolean("Plus Visible", compute='_compute_plus')
 
@@ -207,6 +207,7 @@ class StockMove(models.Model):
             # Next move in production order
             if move.move_dest_id:
                 move.move_dest_id.action_assign()
+        moves_todo.write({'state': 'done', 'date': fields.Datetime.now()})
         return moves_todo
 
     @api.multi
@@ -249,7 +250,7 @@ class StockMove(models.Model):
         return result
 
     @api.multi
-    def dummy(self):
+    def save(self):
         return True
 
     def _generate_move_phantom(self, bom_line, quantity, result=None):

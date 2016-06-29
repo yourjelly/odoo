@@ -7,6 +7,8 @@ from dateutil.relativedelta import relativedelta
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.tools import float_compare
+from odoo.addons import decimal_precision as dp
+
 
 
 class MrpProductionWorkcenterLine(models.Model):
@@ -44,7 +46,7 @@ class MrpProductionWorkcenterLine(models.Model):
     production_state = fields.Selection(
         'Production State', readonly=True,
         related='production_id.state',
-        help='Technical: used in views only.')  # TDE FIXME: if you want to search on it, you have to store it
+        help='Technical: used in views only.')
     product_tracking = fields.Selection(
         'Product Tracking', related='production_id.product_id.tracking',
         help='Technical: used in views only.')
@@ -52,9 +54,11 @@ class MrpProductionWorkcenterLine(models.Model):
     qty_produced = fields.Float(
         'Quantity', default=0.0,
         readonly=True,
-        help="The number of products already handled by this work order")  # TODO: decimal precision
+        digits_compute=dp.get_precision('Product Unit of Measure'),
+        help="The number of products already handled by this work order")
     qty_producing = fields.Float(
         'Currently Produced Quantity', default=1.0,
+        digits_compute=dp.get_precision('Product Unit of Measure'),
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
     is_produced = fields.Boolean(compute='_compute_is_produced')
 
@@ -108,12 +112,20 @@ class MrpProductionWorkcenterLine(models.Model):
     final_lot_id = fields.Many2one(
         'stock.production.lot', 'Current Lot', domain="[('product_id', '=', product_id)]",
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
-
     time_ids = fields.One2many(
         'mrp.workcenter.productivity', 'workorder_id')
     user_state = fields.Boolean(compute='_get_current_state', help="Technical field indicating whether the current user is working. ")
     production_messages = fields.Html('Workorder Message', compute='_compute_production_messages')
     next_work_order_id = fields.Many2one('mrp.workorder', "Next Work Order")
+    scrap_ids = fields.One2many('stock.scrap', 'workorder_id')
+    scrap_count = fields.Integer(compute='_compute_scrap_move_count', string='Scrap Move')
+
+    @api.multi
+    def _compute_scrap_move_count(self):
+        data = self.env['stock.scrap'].read_group([('workorder_id', 'in', self.ids)], ['workorder_id'], ['workorder_id'])
+        count_data = dict((item['workorder_id'][0], item['workorder_id_count']) for item in data)
+        for workorder in self:
+            workorder.scrap_count = count_data.get(workorder.id, 0)
 
     @api.one
     @api.depends('production_id.product_qty', 'qty_produced')
@@ -124,7 +136,7 @@ class MrpProductionWorkcenterLine(models.Model):
     @api.depends('time_ids.duration', 'qty_produced')
     def _compute_duration(self):
         self.duration = sum(self.time_ids.mapped('duration'))
-        self.duration_unit = round(self.duration / max(self.qty_produced, 1), 2)
+        self.duration_unit = round(self.duration / max(self.qty_produced, 1), 2) #rounding 2 because it is a time
         if self.duration:
             self.duration_percent = 100 * (self.duration_expected - self.duration) / self.duration
         else:
@@ -184,7 +196,7 @@ class MrpProductionWorkcenterLine(models.Model):
                             break
                         if move_lot.quantity_done == 0 and qty_todo > move_lot.quantity:
                             qty_todo = qty_todo - move_lot.quantity
-                            self.active_move_lot_ids -= move_lot  # TDE: command ?
+                            self.active_move_lot_ids -= move_lot  # Difference operator
                         else:
                             move_lot.quantity = move_lot.quantity - qty_todo
                             qty_todo = 0
@@ -347,7 +359,8 @@ class MrpProductionWorkcenterLine(models.Model):
         domain = [('workorder_id', 'in', self.ids), ('date_end', '=', False)]
         if not doall:
             domain.append(('user_id', '=', self.env.user.id))
-        for timeline in timeline_obj.search(domain, limit=doall and None or 1):
+        limit=None if doall else 1
+        for timeline in timeline_obj.search(domain, limit=limit):
             wo = timeline.workorder_id
             if timeline.loss_type <> 'productive':
                 timeline.write({'date_end': fields.Datetime.now()})
@@ -405,3 +418,10 @@ class MrpProductionWorkcenterLine(models.Model):
             # 'context': {'product_ids': self.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel')).mapped('product_id').ids + [self.production_id.product_id.id]},
             'target': 'new',
         }
+
+    @api.multi
+    def action_see_move_scrap(self):
+        self.ensure_one()
+        action = self.env.ref('stock.action_stock_scrap').read()[0]
+        action['domain'] = [('workorder_id', '=', self.id)]
+        return action
