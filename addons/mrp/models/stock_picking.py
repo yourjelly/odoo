@@ -17,8 +17,13 @@ class StockPickingType(models.Model):
     def _get_mo_count(self):
         # TDE FIXME: use fields.Datetime
         MrpProduction = self.env['mrp.production']
-        for picking in self:
-            if picking.code == 'mrp_operation':
-                picking.count_mo_waiting = MrpProduction.search_count([('availability', '=', 'waiting')])
-                picking.count_mo_todo = MrpProduction.search_count([('state', 'in', ('confirmed', 'planned', 'progress'))])
-                picking.count_mo_late = MrpProduction.search_count(['&', ('date_planned_start', '<', datetime.now().strftime('%Y-%m-%d')), ('state', '=', 'confirmed')])
+        domains = {
+            'count_mo_waiting': [('availability', '=', 'waiting')],
+            'count_mo_todo': [('state', 'in', ('confirmed', 'planned', 'progress'))],
+            'count_mo_late': ['&', ('date_planned_start', '<', datetime.now().strftime('%Y-%m-%d')), ('state', '=', 'confirmed')],
+        }
+        for picking in self.filtered(lambda pick: pick.code == 'mrp_operation'):
+            for field in domains:
+                data = MrpProduction.read_group(domains[field], ['picking_type_id'], ['picking_type_id'])
+                count = dict(map(lambda x: (x['picking_type_id'] and x['picking_type_id'][0], x['picking_type_id_count']), data))
+                picking[field] = count.get(picking.id, 0)
