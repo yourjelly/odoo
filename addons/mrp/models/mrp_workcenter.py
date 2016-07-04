@@ -30,10 +30,10 @@ class MrpWorkcenter(models.Model):
 
     order_ids = fields.One2many('mrp.workorder', 'workcenter_id', "Orders")
     workorder_count = fields.Integer('# Work Orders', compute='_compute_workorder_count')
-    workorder_ready_count = fields.Integer('# Read Work Orders', compute='_compute_workorder_ready_count')
-    workorder_progress_count = fields.Integer('Total Running Orders', compute='_compute_workorder_progress_count')
-    workorder_pending_count = fields.Integer('Total Running Orders', compute='_compute_workorder_pending_count')
-    workorder_late_count = fields.Integer('Total Late Orders', compute='_compute_workorder_late_count')
+    workorder_ready_count = fields.Integer('# Read Work Orders', compute='_compute_workorder_count')
+    workorder_progress_count = fields.Integer('Total Running Orders', compute='_compute_workorder_count')
+    workorder_pending_count = fields.Integer('Total Running Orders', compute='_compute_workorder_count')
+    workorder_late_count = fields.Integer('Total Late Orders', compute='_compute_workorder_count')
 
     time_ids = fields.One2many('mrp.workcenter.productivity', 'workcenter_id', 'Time Logs')
     working_state = fields.Selection([
@@ -52,38 +52,17 @@ class MrpWorkcenter(models.Model):
 
     @api.depends('order_ids.workcenter_id', 'order_ids.state')
     def _compute_workorder_count(self):
-        data = self.env['mrp.workorder'].read_group([('workcenter_id', 'in', self.ids), ('state', 'not in', ('done', 'cancel'))], ['workcenter_id'], ['workcenter_id'])
-        count_data = dict((item['workcenter_id'][0], item['workcenter_id_count']) for item in data)
+        domains = {
+            'workorder_count': [('state', 'not in', ('done', 'cancel'))],
+            'workorder_ready_count': [('state', '=', 'ready')],
+            'workorder_progress_count': [('state', '=', 'progress')],
+            'workorder_pending_count': [('state', '=', 'pending')],
+            'workorder_late_count': [('state', 'in', ('pending', 'ready')), ('date_planned_start', '<', datetime.datetime.now().strftime('%Y-%m-%d'))]}
         for workcenter in self:
-            workcenter.workorder_count = count_data.get(workcenter.id, 0)
-
-    @api.depends('order_ids.workcenter_id', 'order_ids.state')
-    def _compute_workorder_ready_count(self):
-        data = self.env['mrp.workorder'].read_group([('workcenter_id', 'in', self.ids), ('state', '=', 'ready')], ['workcenter_id'], ['workcenter_id'])
-        count_data = dict((item['workcenter_id'][0], item['workcenter_id_count']) for item in data)
-        for workcenter in self:
-            workcenter.workorder_ready_count = count_data.get(workcenter.id, 0)
-
-    @api.depends('order_ids.workcenter_id', 'order_ids.state')
-    def _compute_workorder_progress_count(self):
-        data = self.env['mrp.workorder'].read_group([('workcenter_id', 'in', self.ids), ('state', '=', 'progress')], ['workcenter_id'], ['workcenter_id'])
-        count_data = dict((item['workcenter_id'][0], item['workcenter_id_count']) for item in data)
-        for workcenter in self:
-            workcenter.workorder_progress_count = count_data.get(workcenter.id, 0)
-
-    @api.depends('order_ids.workcenter_id', 'order_ids.state')
-    def _compute_workorder_pending_count(self):
-        data = self.env['mrp.workorder'].read_group([('workcenter_id', 'in', self.ids), ('state', '=', 'pending')], ['workcenter_id'], ['workcenter_id'])
-        count_data = dict((item['workcenter_id'][0], item['workcenter_id_count']) for item in data)
-        for workcenter in self:
-            workcenter.workorder_pending_count = count_data.get(workcenter.id, 0)
-
-    @api.depends('order_ids.workcenter_id', 'order_ids.state', 'order_ids.date_planned_start')
-    def _compute_workorder_late_count(self):
-        data = self.env['mrp.workorder'].read_group([('workcenter_id', 'in', self.ids), ('state', 'in', ('pending', 'ready')), ('date_planned_start', '<', datetime.datetime.now().strftime('%Y-%m-%d'))], ['workcenter_id'], ['workcenter_id'])
-        count_data = dict((item['workcenter_id'][0], item['workcenter_id_count']) for item in data)
-        for workcenter in self:
-            workcenter.workorder_late_count = count_data.get(workcenter.id, 0)
+            for field in domains:
+                data = self.env['mrp.workorder'].read_group([('workcenter_id', '=', workcenter.id)] + domains[field], ['workcenter_id'], ['workcenter_id'])
+                count_data = dict((item['workcenter_id'][0], item['workcenter_id_count']) for item in data)
+                workcenter[field] = count_data.get(workcenter.id, 0)
 
     @api.multi
     @api.depends('time_ids.date_end', 'time_ids.loss_type')
