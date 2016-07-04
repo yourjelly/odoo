@@ -167,14 +167,14 @@
                                                     <field name="workorder_progress_count"/>
                                                 </div>
                                             </div>
-                                            <div class="row" t-if="record.workorder_pending_count.raw_value &gt; 0">
+                                            <div class="row" t-if="record.workorder_late_count.raw_value &gt; 0">
                                                 <div class="col-xs-8">
-                                                    <a name="%(action_work_orders)d" type="action" context="{'search_default_pending': 1}">
+                                                    <a name="%(action_work_orders)d" type="action" context="{'search_default_late': 1}">
                                                         Late
                                                     </a>
                                                 </div>
                                                 <div class="col-xs-4 text-right">
-                                                    <field name="workorder_pending_count"/>
+                                                    <field name="workorder_late_count"/>
                                                 </div>
                                             </div>
                                             <div class="row" t-if="record.oee.raw_value &gt; 0">

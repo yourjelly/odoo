@@ -13,6 +13,7 @@
                     <filter string="Pending" name="pending" domain="[('state','=','pending')]"/>
                     <filter string="In Progress" name="progress" domain="[('state','=','progress')]"/>
                     <filter string="Done" name="done" domain="[('state','=', 'done')]"/>
+                    <filter string="Late" name="late" domain="[('date_planned_start','&lt;=',time.strftime('%%Y-%%m-%%d'))]"/>
                     <separator/>
                 </search>
             </field>
