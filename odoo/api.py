@@ -732,7 +732,7 @@ class Environment(Mapping):
         self = object.__new__(cls)
         self.cr, self.uid, self.context = self.args = (cr, uid, frozendict(context))
         self.registry = Registry(cr.dbname)
-        self.cache = defaultdict(dict)              # {field: {id: value, ...}, ...}
+        self.cache = envs.cache                     # {field: {key: {id: value}, ...}, ...}
         self._protected = defaultdict(frozenset)    # {field: ids, ...}
         self.dirty = defaultdict(set)               # {record: set(field_name), ...}
         self.all = envs
@@ -838,21 +838,14 @@ class Environment(Mapping):
         """
         if not spec:
             return
-        for env in list(self.all):
-            c = env.cache
-            for field, ids in spec:
-                if ids is None:
-                    if field in c:
-                        del c[field]
-                else:
-                    field_cache = c[field]
-                    for id in ids:
-                        field_cache.pop(id, None)
+        cache = self.cache
+        for field, ids in spec:
+            field.invalidate(cache, ids)
 
     def invalidate_all(self):
         """ Clear the cache of all environments. """
+        self.cache.clear()
         for env in list(self.all):
-            env.cache.clear()
             env._protected.clear()
             env.dirty.clear()
 
@@ -936,10 +929,7 @@ class Environment(Mapping):
         from odoo.fields import SpecialValue
 
         # make a full copy of the cache, and invalidate it
-        cache_dump = dict(
-            (field, dict(field_cache))
-            for field, field_cache in self.cache.iteritems()
-        )
+        cache_dump = {field: dict(field.cache(self)) for field in self.cache}
         self.invalidate_all()
 
         # re-fetch the records, and compare with their former cache
@@ -983,6 +973,9 @@ class Environments(object):
         self.todo = {}                  # recomputations {field: [records]}
         self.mode = False               # flag for draft/onchange
         self.recompute = True
+
+        # record cache: cache[field][key][record_id]
+        self.cache = defaultdict(lambda: defaultdict(dict))
 
     def add(self, env):
         """ Add the environment ``env``. """
