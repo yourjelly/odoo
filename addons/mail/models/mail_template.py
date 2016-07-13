@@ -14,6 +14,8 @@ from openerp import _, api, fields, models, SUPERUSER_ID
 from openerp import tools
 from openerp import report as odoo_report
 from openerp.exceptions import UserError
+from odoo.tools.safe_eval import safe_eval_format as eval
+
 
 _logger = logging.getLogger(__name__)
 
@@ -321,7 +323,7 @@ class MailTemplate(models.Model):
         return html
 
     @api.model
-    def render_template(self, template_txt, model, res_ids, post_process=False):
+    def render_template(self, template_txt, model, res_ids, post_process=False, html_content=False):
         """ Render the given template text, replace mako expressions ``${expr}``
         with the result of evaluating these expressions with an evaluation
         context containing:
@@ -369,6 +371,18 @@ class MailTemplate(models.Model):
                 render_result = u""
             if render_result == u"False":
                 render_result = u""
+
+            qcontext = {
+                'record': record,
+                'datetime': datetime
+            }
+            if html_content:
+                content = lxml.html.fromstring('<t>%s</t>' % render_result)
+                render_result = self.env['ir.qweb'].render(content, qcontext)
+            else:
+                # evaluate format expression
+                render_result = eval(render_result, qcontext)
+
             results[res_id] = render_result
 
         if post_process:
@@ -468,7 +482,7 @@ class MailTemplate(models.Model):
                 Template = Template.with_context(safe=field in {'subject'})
                 generated_field_values = Template.render_template(
                     getattr(template, field), template.model, template_res_ids,
-                    post_process=(field == 'body_html'))
+                    post_process=(field == 'body_html'), html_content=(template._fields[field].type == 'html'))
                 for res_id, field_value in generated_field_values.iteritems():
                     results.setdefault(res_id, dict())[field] = field_value
             # compute recipients

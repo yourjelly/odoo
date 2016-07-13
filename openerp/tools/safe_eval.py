@@ -20,6 +20,7 @@ from psycopg2 import OperationalError
 from types import CodeType
 import logging
 import werkzeug
+import re
 
 from .misc import ustr
 
@@ -64,6 +65,10 @@ _SAFE_OPCODES = _EXPR_OPCODES.union(set(opmap[x] for x in [
     'LOAD_FAST', 'STORE_FAST', 'DELETE_FAST', 'UNPACK_SEQUENCE',
     'LOAD_GLOBAL', # Only allows access to restricted globals
 ] if x in opmap))
+
+_FORMAT_REGEX = re.compile(
+    # ( ruby-style )|(  jinja-style  )
+    r'(?:#\{(.+?)\})|(?:\{\{(.+?)\}\})')
 
 _logger = logging.getLogger(__name__)
 
@@ -321,6 +326,23 @@ def safe_eval(expr, globals_dict=None, locals_dict=None, mode="eval", nocopy=Fal
         import sys
         exc_info = sys.exc_info()
         raise ValueError, '%s: "%s" while evaluating\n%r' % (ustr(type(e)), ustr(e), expr), exc_info[2]
+
+def safe_eval_format(f, globals_dict=None, locals_dict=None, mode="eval", nocopy=False, locals_builtins=False):
+    base_idx = 0
+    result = []
+    for m in _FORMAT_REGEX.finditer(f):
+        literal = f[base_idx:m.start()]
+        if literal:
+            result.append(ustr(literal))
+        expr = m.group(1) or m.group(2)
+        val = safe_eval(expr, globals_dict, locals_dict, mode, nocopy, locals_builtins)
+        result.append(ustr(val))
+        base_idx = m.end()
+    literal = f[base_idx:]
+    if literal:
+        result.append(ustr(literal))
+    return ''.join(result)
+
 def test_python_expr(expr, mode="eval"):
     try:
         test_expr(expr, _SAFE_OPCODES, mode=mode)
