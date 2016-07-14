@@ -921,20 +921,127 @@ Javascript and CSS
 Git
 ===
 
-Commit message
+The primary role of the versioning system is to easy the work of the devloppers
+maintaning (Bugfixes) and improving the code base.
+
+This is done by tracking the actual changes and authors and by documenting the
+reasons behind those changes (commit message).
+
+.. note:: Re-establishing the context of a piece of code is time-consuming. We
+          can't avoid it completely, so our efforts should go to reducing it as
+          much as possible. Commit messages can do exactly that and as a
+          result, a commit message shows whether a developer is a good
+          collaborator.  (From http://who-t.blogspot.be/2009/12/on-commit-messages.html)
+
+Shortlogs
+---------
+
+A properly formed shortlog line should always be able to complete the following sentence:
+
+If applied, this commit will [shortlog]
+
+Examples:
+
+If applied, this commit will refactor subsystem X for readability
+
+If applied, this commit will correct a typo in the form view
+
+This does not work:
+
+If applied, this commit will fixed bug
+
+If applied, this commit will search input of date
+
+If applied, this commit will access rules
+
+If applied, this commit will new dashboard
+
+If applied, this commit will cancelling a bank statement line linked to a payment SEPA or batch deposit should set it back to 'sent' state, not 'posted'.
+
+Renaming commits
 --------------
+
+Because git track files solely based on hash if you need to both rename and
+modifiy the content of a file make sure you do it in two seprate commits.
+
+The [MOV] shortlog prefix can be used for rename commits.
+
+Bugfix commits
+--------------
+
+Bugfixes they should be commited in the oldest supported branch where the bug
+occurs. You should avoid committing several bug fixes in a single revision, so
+you can distinguish which change solves which issue.
+
+The commit message should include:
+
+- A logical statement of the problem
+- The steps to reproduce it
+- Why the current code doesnt work
+- The rationale behind the fix (but not the detail of the fix this can be
+  understood from the diff)
+- Reference to commits, tickets numbers or external links
+
+
+Commit format:
+
+.. code-block:: text
+    [FIX] <module_involved>: shortlog
+
+    Message
+
+    optional ticket number, or issue number
+
+Example https://github.com/odoo/odoo/commit/50b94ef079b2fd9f4e9201ea8f977fadab109aea
+
+Small Improvements
+------------------
+
+Small improvments are done in one commit, they should be commited in the master
+branch. It's more important to document both the functional and technical
+rationale behind the changes instead of the implemetation details.
+
+https://github.com/odoo/odoo/commit/790d84 chat mention
+
+https://github.com/odoo/odoo/commit/d65d251c fullscren action
+
+Commit format:
+
+.. code-block:: text
+    [IMP] <module_involved>: shortlog
+
+    Message
+
+    optional PR number
+
+For a new feature, new module [ADD] can be used instead of [IMP].
+
+
+Big Improvements
+----------------
+
+Big improvmenta are usually merged as a feature branche with multiple commit,
+each one might a subfeature or a technical split (data, code, documentation).
+
+The merge commit should summarize the overall change and guidelines for one
+commit improvement should apply.
+
+The mainline should always be runnable and green whereas it's allowed to break
+things between commits in a feature branch.
+
+In the feature branch you may split commits by feature, logical steps or
+file and modules.
+
+[MERGE]
+
+
+Migration refactoring
+---------------------
 
 Prefix your commit with
 
-- **[IMP]** for improvements
-- **[FIX]** for bug fixes
 - **[REF]** for refactoring
-- **[ADD]** for adding new resources
 - **[REM]** for removing of resources
-- **[MOV]** for moving files (Do not change content of moved file, otherwise
-  Git will loose track, and the history will be lost !), or simply moving code
-  from a file to another one.
-- **[MERGE]** for merge commits (only for forward/back-port)
 - **[CLA]** for signing the Odoo Individual Contributor License
 
 Then, in the message itself, specify the part of the code impacted by
