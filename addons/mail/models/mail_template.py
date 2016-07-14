@@ -372,16 +372,14 @@ class MailTemplate(models.Model):
             if render_result == u"False":
                 render_result = u""
 
-            qcontext = {
-                'record': record,
-                'datetime': datetime
-            }
+            variables.update({'record': record,
+                             'datetime': datetime})
             if html_content:
                 content = lxml.html.fromstring('<t>%s</t>' % render_result)
-                render_result = self.env['ir.qweb'].render(content, qcontext)
+                render_result = self.env['ir.qweb'].render(content, variables)
             else:
                 # evaluate format expression
-                render_result = eval(render_result, qcontext)
+                render_result = eval(render_result, variables)
 
             results[res_id] = render_result
 
