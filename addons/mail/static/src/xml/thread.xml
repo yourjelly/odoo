@@ -1,6 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
+    <!--
+        Chatter Planned div
+    -->
+    <t t-name="mail.Activity">
+        <div class="o_mail_activity" />
+    </t>
+
+    <t t-name="mail.Activity.Log">
+        <div class="o_thread_date_separator o_border_dashed">
+            <span t-attf-class="o_thread_date">
+                Planned
+            </span>
+        </div>
+        <t t-foreach="activities" t-as="activity">
+            <div class="o_thread_message">
+                <div class="o_thread_message_sidebar">
+                    <img t-attf-src="/web/image/res.users/#{activity.create_uid[0]}/image_small"
+                        class="o_thread_message_avatar mb8"/>
+                    <a href="#" class="o_mark_as_done" t-att-data-activity-id="activity.id"><span class="fa fa-check-circle fa-2x" /></a>
+                </div>
+                <div class="o_thread_message_core o_mail_note">
+                    <div class="o_mail_info">
+                        <strong>Activity Planned</strong> by <strong><t t-esc="activity.create_uid[1]" /></strong>
+                        - <small class="o_activity_timestamp" t-att-data-datetime="activity.create_date"><t t-esc="activity.create_date"/></small>
+                        <div class="btn-group pull-right">
+                            <button t-att-data-activity-id="activity.id" class="btn btn-default btn-sm o_edit_activity">Edit</button>
+                            <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              <span class="caret"></span>
+                              <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="#" class="o_mark_as_done" t-att-data-activity-id="activity.id">Mark as Done</a></li>
+                                <li><a href="#" class="o_remove_activity" t-att-data-activity-id="activity.id">Delete</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p>
+                        <span t-attf-class="fa #{activity.icon}" /> <t t-esc="activity.next_activity_id[1]" /> on <span t-attf-class="o_activity_date o_activity_color_#{activity.state}"><t t-esc="activity.day" /></span><span t-if="activity.title_action"> - <i><t t-esc="activity.title_action" /></i></span>
+                    </p>
+                    <div t-if="activity.note">
+                        <t t-raw="activity.note"/>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </t>
+
     <t t-name="mail.ChatThread">
         <t t-if="messages.length">
             <t t-if="options.display_load_more &amp;&amp; options.display_order == ORDER.ASC"

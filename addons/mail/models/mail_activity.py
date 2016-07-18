@@ -41,6 +41,7 @@ class MailActivityLog(models.Model):
     state = fields.Selection([('overdue', 'Overdue'), ('today', 'Today'), ('planned', 'Planned')],
                              compute="_compute_state", default="planned")
 
+    @api.depends('date_action')
     def _compute_state(self):
         today = date.today()
         for record in self:
@@ -55,37 +56,47 @@ class MailActivityLog(models.Model):
 
     @api.onchange('next_activity_id')
     def onchange_next_activity_id(self):
-        if not self.title_action:
-            self.title_action = self.next_activity_id.description
+        self.title_action = self.next_activity_id.description
         if self.next_activity_id.days:
             self.date_action = (datetime.now() + timedelta(days=self.next_activity_id.days))
 
+    @api.model
+    def create(self, vals):
+        res_id = vals.get('res_id')
+        model = vals.get('model')
+        vals['record_name'] = self.env[model].browse(res_id).display_name
+        return super(MailActivityLog, self).create(vals)
+
     @api.multi
-    def action_mark_as_done(self):
-        msg = None
+    def mark_as_done(self):
+        msg_id = None
         for log in self:
             body_html = """
                 <div>
-                    <p>%(title)s</p>
-                    <p><span class='fa %(icon)s' /> %(activity_name)s - <i>%(title_action)s</i></p>
-                    <p>%(note)s</p>
+                    <p>%(title)s
+                    <br />
+                    <span class='fa %(icon)s' /> %(activity_name)s - <i>%(title_action)s</i>
+                    <br />
+                    %(note)s</p>
                 </div> """ % {
                     'title': _('Activity Done'),
-                    'icon': log.icon,
+                    'icon': log.next_activity_id.icon,
                     'activity_name': log.next_activity_id.name,
                     'title_action': log.title_action or '',
                     'note': log.note or '',
                 }
-            msg = self.env[log.model].browse(log.res_id).message_post(body_html, subject=log.title_action, subtype_id=log.next_activity_id.subtype_id.id)
+            msg_id = self.env[log.model].browse(log.res_id).message_post(body_html, subject=log.title_action, subtype_id=log.next_activity_id.subtype_id.id).id
         # Because activity already logged in chatter
         self.unlink()
-        return msg.id
+        return msg_id
 
     @api.multi
-    def action_remove_activity_log(self):
-        if not self:
-            return False
+    def remove_activity_log(self):
         return self.unlink()
+
+    @api.multi
+    def close_dialog(self):
+        return {'type': 'ir.actions.act_window_close'}
 
     @api.model
     def fetch_activity_logs(self, res_id, model, limit=None):
@@ -102,3 +113,15 @@ class MailActivityLog(models.Model):
                 day = _("Today")
             log.update({'day': day})
         return activity_logs
+
+    @api.multi
+    def open_related_document(self):
+        self.ensure_one()
+        return {
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': self.model,
+            'type': 'ir.actions.act_window',
+            'res_id': self.res_id,
+            'context': self.env.context,
+        }
