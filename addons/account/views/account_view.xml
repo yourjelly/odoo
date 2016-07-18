@@ -1467,6 +1467,13 @@
                                     <field name="days"/>
                                     days
                                 </div>
+                            <separator/>
+                                <div string="Extra Computation" attrs="{'invisible': [('option', 'in', ['last_day_following_month', 'last_day_current_month'])]}">
+                                    <field name="arrive_value" widget="radio"/>
+                                    <div class="o_row" attrs="{'invisible': [('arrive_value','!=','day_of_month')]}">
+                                        <field name="days2" />days
+                                    </div>
+                                </div>
                             </div>
                         </group>
                     </group>

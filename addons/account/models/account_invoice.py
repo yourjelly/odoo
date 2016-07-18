@@ -1366,9 +1366,18 @@ class AccountPaymentTerm(models.Model):
                 next_date = fields.Date.from_string(date_ref)
                 if line.option == 'day_after_invoice_date':
                     next_date += relativedelta(days=line.days)
+                    if line.arrive_value == 'day_of_month':
+                        next_date += relativedelta(day=line.days2, months=1)
+                    else:
+                        next_month_date = next_date + relativedelta(day=1,months=1)
+                        next_date = next_month_date + relativedelta(days=-1)
                 elif line.option == 'fix_day_following_month':
                     next_first_date = next_date + relativedelta(day=1, months=1)  # Getting 1st of next month
                     next_date = next_first_date + relativedelta(days=line.days - 1)
+                    if line.arrive_value == 'day_of_month':
+                        next_date += relativedelta(day=line.days2, months=1)
+                    else:
+                        next_date = next_first_date + relativedelta(days=-1)
                 elif line.option == 'last_day_following_month':
                     next_date += relativedelta(day=31, months=1)  # Getting last day of next month
                 elif line.option == 'last_day_current_month':
@@ -1406,6 +1415,10 @@ class AccountPaymentTermLine(models.Model):
         )
     payment_id = fields.Many2one('account.payment.term', string='Payment Term', required=True, index=True, ondelete='cascade')
     sequence = fields.Integer(default=10, help="Gives the sequence order when displaying a list of payment term lines.")
+    days2 = fields.Integer('Day of the Month', required=True, default=0)
+    arrive_value= fields.Selection([
+            ('arrive_last_day', 'Arrive Last Day'),
+            ('day_of_month', 'Day Of Month')],string='Arrive Day Value', required=True, default='arrive_last_day')
 
     @api.one
     @api.constrains('value', 'value_amount')
