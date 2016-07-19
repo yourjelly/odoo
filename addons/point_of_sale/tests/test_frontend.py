@@ -52,9 +52,9 @@ class TestUi(odoo.tests.HttpCase):
         env['ir.module.module'].search([('name', '=', 'point_of_sale')], limit=1).state = 'installed'
         cr.release()
 
-        self.phantom_js("/pos/web",
-                        "odoo.__DEBUG__.services['web.Tour'].run('pos_basic_order', 'test')",
-                        "odoo.__DEBUG__.services['web.Tour'].tours.pos_basic_order",
+        self.phantom_js("/web",
+                        "odoo.__DEBUG__.services['web_tour.tour'].run('point_of_sale_tour')",
+                        "odoo.__DEBUG__.services['web_tour.tour'].tours.point_of_sale_tour",
                         login="admin")
 
         for order in env['pos.order'].search([]):

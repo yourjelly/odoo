@@ -3,4 +3,3 @@
 
 import test_point_of_sale_flow
 import test_frontend
-import test_point_of_sale_ui
