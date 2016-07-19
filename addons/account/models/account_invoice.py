@@ -1417,8 +1417,8 @@ class AccountPaymentTermLine(models.Model):
     sequence = fields.Integer(default=10, help="Gives the sequence order when displaying a list of payment term lines.")
     days2 = fields.Integer('Day of the Month', required=True, default=0)
     arrive_value= fields.Selection([
-            ('arrive_last_day', 'Arrive Last Day'),
-            ('day_of_month', 'Day Of Month')],string='Arrive Day Value', required=True, default='arrive_last_day')
+            ('arrive_last_day', 'Arrive Month Last Day'),
+            ('day_of_month', 'Day Of Arrive Month')],string='Arrive Day Value', required=True, default='arrive_last_day')
 
     @api.one
     @api.constrains('value', 'value_amount')
