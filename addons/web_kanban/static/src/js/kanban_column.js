@@ -77,6 +77,7 @@ var KanbanColumn = Widget.extend({
     start: function() {
         var self = this;
         this.$header = this.$('.o_kanban_header');
+        this.$counter = this.$('.o_kamban_counter');
 
         for (var i = 0; i < this.data_records.length; i++) {
             this.add_record(this.data_records[i], {no_update: true});
@@ -166,6 +167,7 @@ var KanbanColumn = Widget.extend({
     },
 
     update_column: function () {
+        var self = this;
         var title = this.folded ? this.title + ' (' + this.dataset.size() + ')' : this.title;
         this.$header.find('.o_column_title').text(title);
         this.$header.find('.o-kanban-count').text(this.records.length);
@@ -183,6 +185,37 @@ var KanbanColumn = Widget.extend({
             this.$('.o_kanban_load_more').remove();
         } else {
             this.$('.o_kanban_load_more').html(QWeb.render('KanbanView.LoadMore', {widget:this}))
+        }
+        if (!this.folded) {
+            self.update_counter();
+        }
+    },
+
+    update_counter: function () {
+        var self     = this;
+        var $counter = self.$counter;
+        var $left    = self.$('.o_kamban_counter_left');
+        var $side    = self.$('.o_kamban_counter_side');
+        var $bar     = self.$('.progress-bar');
+
+        // NOTE:
+        // the following code is for the "project" mudule only.
+
+        var left = 0;
+        var side = this.records.length;
+
+        $(this.records).each(function () {
+            if (this.values.kanban_state.value == "done") {
+                left ++;
+            }
+        });
+        $left.text(left);
+        $side.text(side);
+
+        if( left > 0 ){
+            $bar.width((left/side)*100 + "%");
+        } else {
+            $bar.width(0);
         }
     },
 
@@ -246,7 +279,7 @@ var KanbanColumn = Widget.extend({
         var self = this;
         var width = this.records.length ? this.records[0].$el.innerWidth() : this.$el.width() - 8;
         this.quick_create_widget = new RecordQuickCreate(this, width);
-        this.quick_create_widget.insertAfter(this.$header);
+        this.quick_create_widget.insertAfter(this.$counter);
         this.quick_create_widget.$el.focusout(function () {
             var hasFocus = (self.quick_create_widget.$(':focus').length > 0);
             if (! hasFocus && self.quick_create_widget) {
