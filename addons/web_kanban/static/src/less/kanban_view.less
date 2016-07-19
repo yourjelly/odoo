@@ -9,16 +9,21 @@
 @o-kanban-inside-hgutter: 8px;
 @o-kanban-inside-hgutter-mobile: @odoo-horizontal-padding;
 
+@-kanban-header-height : 38px;
+
+@o-kanban-counter-font-size: 10px;
+
 // mixins
 .o-kanban-icon() {
     // Share the style of `.o_kanban_quick_add` and `o_kanban_config`.
-    height: 50px;
-    width: 50px;
-    line-height: 1.8;
-    text-align: center;
+    height: @-kanban-header-height;
+    width: 30px;
+    font-weight: 700;
+    line-height: 1.9;
+    text-align: right;;
     color: @odoo-main-text-color;
-    padding: 8px;
-    font-size: 22px;
+    padding: @o-kanban-record-margin*2;
+    font-size: 12px;
     cursor: pointer;
 }
 
@@ -373,7 +378,7 @@
        .o_kanban_header {
             color: @odoo-main-text-color;
             margin: 0 @o-kanban-record-margin;
-            height: 50px;
+            height: @-kanban-header-height;
             line-height: 2.2;
             cursor: move;
             .o-flex-display();
@@ -381,31 +386,61 @@
                 display: none;
             }
             .o_column_title {
-                font-size: 18px;
-                font-weight: 300;
+                font-size: 15px;
+                font-weight: 700;
                 .o-flex(1, 1, auto);
                 .o-text-overflow();
                 padding-top: 5px;
             }
-            .o_kanban_quick_add i {
+            .o_kanban_quick_add {
                 .o-kanban-icon;
+                font-size: 20px;
+                line-height: 1;
+                opacity: 0.5;
+
                 &:hover {
-                    background-color: darken(@odoo-webclient-background-color, 10%);
-                    color: white !important;
+                    opacity: 1;
                 }
             }
             &:hover .o_kanban_config, .o_kanban_config.open {
-                display: inline-block;
                 margin-left: 4px;
+                opacity: 1;
             }
             .o_kanban_config {
-                display: none;
+                display: inline-block;
+                opacity: 0;
                 i {
                     .o-kanban-icon;
-                    &:hover {
-                        background-color: darken(@odoo-webclient-background-color, 10%);
-                    }
+
                 }
+            }
+        }
+
+        .o_kamban_counter {
+            height: 18px;
+            margin-bottom: 10px;
+            position: relative;
+            margin: 0 @o-kanban-record-margin @o-kanban-record-margin*4;
+
+            .o_kamban_counter_progress {
+                display: inline-block;
+                background: fade(black, 7%);
+                box-shadow: none;
+                .size(80%, 100%);
+
+                .progress-bar {
+                    .o-linear-gradient(45deg, lighten(@brand-primary, 5%), @brand-primary);
+                }
+
+                .o_kamban_counter_left {
+                    font-size: @o-kanban-counter-font-size;
+                    .o-position-absolute(0, auto, auto, @o-kanban-record-margin);
+                }
+            }
+            .o_kamban_counter_side {
+                font-size: @o-kanban-counter-font-size*1.2;
+                font-weight: bold;
+                text-align: right;
             }
         }
 
@@ -424,7 +459,7 @@
                 position: absolute;
                 overflow: visible;
             }
-            > .o_kanban_record, .o_kanban_quick_add, .o_kanban_config, .o_kanban_load_more {
+            > .o_kanban_record, .o_kanban_quick_add, .o_kanban_config, .o_kanban_load_more, .o_kamban_counter {
                 display: none!important;
             }
             &:hover {
