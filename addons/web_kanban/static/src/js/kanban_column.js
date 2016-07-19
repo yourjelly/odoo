@@ -205,18 +205,28 @@ var KanbanColumn = Widget.extend({
         var side = this.records.length;
 
         $(this.records).each(function () {
-            if (this.values.kanban_state.value == "done") {
-                left ++;
-            }
+            if (this.values.kanban_state.value == "done") { left ++; }
         });
-        $left.text(left);
-        $side.text(side);
+
+        self.animate_number(parseInt($left.text()), left, $left, 1000, " ready");
+        self.animate_number(parseInt($side.text()), side, $side, 1000);
 
         if( left > 0 ){
             $bar.width((left/side)*100 + "%");
         } else {
             $bar.width(0);
         }
+    },
+
+    animate_number: function (start,end,$el,duration, suffix) {
+        suffix = suffix || "";
+        $({someValue: start}).animate({someValue: end}, {
+             duration: duration,
+             easing:'swing',
+             step: function() {
+                 $el.text(Math.round(this.someValue) + suffix);
+             }
+         });
     },
 
     archive_records: function(event) {
