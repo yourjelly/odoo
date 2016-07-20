@@ -35,6 +35,7 @@ var KanbanColumn = Widget.extend({
         'kanban_record_delete': 'delete_record',
         'cancel_quick_create': 'cancel_quick_create',
         'quick_create_add_record': 'quick_create_add_record',
+        'record_update' : 'update_counter',
     },
 
     init: function(parent, group_data, options, record_options) {

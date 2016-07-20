@@ -115,7 +115,7 @@ var KanbanRecord = Widget.extend({
         this.init_content(record);
         this.renderElement();
         this.add_widgets();
-        this.__parentedParent.update_counter();
+        this.trigger_up('record_update');
     },
 
     kanban_image: function(model, field, id, cache, options) {
