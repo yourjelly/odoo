@@ -251,6 +251,7 @@
                     <field name="title_action"/>
                     <field name="active"/>
                     <field name="company_currency"/>
+                    <field name="probability"/>
                     <templates>
                         <field name="date_deadline"/>
                         <t t-name="kanban-box">
