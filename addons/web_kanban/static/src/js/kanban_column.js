@@ -249,6 +249,8 @@ var KanbanColumn = Widget.extend({
         // Retrive current value
         var start = $el.data('current-value');
 
+        $el.addClass('animate');
+
         if (end > 100) { end = end / 100; suffix = "K"}
 
         $({someValue: start}).animate({someValue: end}, {
@@ -260,6 +262,7 @@ var KanbanColumn = Widget.extend({
              complete: function() {
                 // Apply new current value
                 $el.data('current-value', end);
+                $el.removeClass('animate');
              }
          });
     },

@@ -594,9 +594,15 @@
         }
     }
     .o_kamban_counter_side {
+        will-change: transfrom;
+        -webkit-font-smoothing: subpixel-antialiased;
         font-size: @o-kanban-counter-font-size*1.2;
         font-weight: bold;
         text-align: right;
         .o-position-absolute(0,0);
+
+        &.animate {
+            .o-animation(grow, 0.5s);
+        }
     }
 }
