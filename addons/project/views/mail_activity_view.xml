@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_project_task_activity_log" model="ir.actions.act_window">
+        <field name="name">Activity</field>
+        <field name="res_model">mail.activity.log</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form,calendar</field>
+        <field name="view_id" ref="mail.mail_activity_log_view"/>
+        <field name="context">{
+            'state_btn': True,
+            'search_default_model':'project.task',
+            'search_default_my_activity':1
+        }
+        </field>
+        <field name="help" type="html">
+            <p>
+                Currently there are not any activity scheduled.
+            </p>
+        </field>
+    </record>
+
+    <menuitem name="My Tasks Next Activities"
+        id="menu_project_task_next_activity"
+        parent="project.menu_project_management"
+        action="action_project_task_activity_log"
+        sequence="25"/>
+</odoo>
