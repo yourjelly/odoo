@@ -194,38 +194,72 @@ var KanbanColumn = Widget.extend({
 
     update_counter: function () {
         var self     = this;
-        var $counter = self.$counter;
         var $left    = self.$('.o_kamban_counter_left');
         var $side    = self.$('.o_kamban_counter_side');
         var $bar     = self.$('.progress-bar');
 
         // NOTE:
         // the following code is for the "project" mudule only.
+        switch (self.relation) {
+            case "project.task.type":
+                var left = 0;
+                var side = this.records.length;
 
-        var left = 0;
-        var side = this.records.length;
+                $(self.records).each(function () {
+                    this.values.kanban_state.value == "done" && left ++;
+                });
 
-        $(this.records).each(function () {
-            if (this.values.kanban_state.value == "done") { left ++; }
-        });
+                self.animate_number(left, $left, 1000, "", " ready");
+                self.animate_number(side, $side, 1000);
 
-        self.animate_number(parseInt($left.text()), left, $left, 1000, " ready");
-        self.animate_number(parseInt($side.text()), side, $side, 1000);
+                left > 0 ? $bar.width((left/side)*100 + "%") : $bar.width(0);
+                break;
 
-        if( left > 0 ){
-            $bar.width((left/side)*100 + "%");
-        } else {
-            $bar.width(0);
+            case "crm.stage":
+                var left = [];
+                var side = 0;
+
+                // It should dynamically get the right symbol
+                var currency = "$ ";
+
+                $(self.records).each(function () {
+                    side = side + this.values.planned_revenue.value;
+                    left.push(this.record.probability.raw_value);
+                });
+
+                // Retrive avarage probability
+                var left = _.reduce(left, function(memo, num) {
+                    return memo + num;
+                }, 0) / (left.length === 0 ? 1 : left.length);
+
+                self.animate_number(left, $left, 1000, "", "%");
+                self.animate_number(side, $side, 1000, currency);
+
+                left > 0 ? $bar.width(left + "%") : $bar.width(0);
+                break;
+
+            default:
+                console.info("kanban_counter layout for " + self.relation + " not definied")
         }
     },
 
-    animate_number: function (start,end,$el,duration, suffix) {
+    animate_number: function (end, $el, duration, prefix, suffix) {
         suffix = suffix || "";
+        prefix = prefix || "";
+        // Retrive current value
+        var start = $el.data('current-value');
+
+        if (end > 100) { end = end / 100; suffix = "K"}
+
         $({someValue: start}).animate({someValue: end}, {
              duration: duration,
              easing:'swing',
              step: function() {
-                 $el.text(Math.round(this.someValue) + suffix);
+                 $el.text(prefix + Math.round(this.someValue) + suffix);
+             },
+             complete: function() {
+                // Apply new current value
+                $el.data('current-value', end);
              }
          });
     },
