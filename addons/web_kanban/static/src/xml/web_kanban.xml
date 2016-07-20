@@ -47,10 +47,10 @@
     <div class="o_kamban_counter">
         <div class="o_kamban_counter_progress progress" >
             <div class="progress-bar" style="width: 50%;">
-                <span data-left-value="0" class="o_kamban_counter_left"/>
+                <span data-current-value="0" class="o_kamban_counter_left"/>
             </div>
         </div>
-        <div data-side-value="0" class="o_kamban_counter_side pull-right"/>
+        <div data-current-value="0" class="o_kamban_counter_side pull-right"/>
     </div>
 </t>
 
