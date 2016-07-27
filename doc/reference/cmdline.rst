@@ -81,6 +81,16 @@ Running the server
 
         Defaults to 120.
 
+    .. option:: --limit-time-real-cron <limit>
+
+        Prevents the cron worker from taking longer than <limit> seconds to process
+        a cron job. If the limit is exceeded, the worker is killed. As :option:`--limit-time-real`,
+        this is a "wall time" limit including e.g. SQL queries.
+
+        Set to 0 for no limit.
+
+        Defaults to limit-time-real.
+
 .. option:: --max-cron-threads <count>
 
     number of workers dedicated to cron jobs. Defaults to 2. The workers are
