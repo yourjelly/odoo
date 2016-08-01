@@ -66,8 +66,8 @@ def amount_to_text_fr(number, currency):
     start_word = french_number(abs(int(list[0])))
     end_word = french_number(int(list[1]))
     cents_number = int(list[1])
-    cents_name = (cents_number > 1) and ' Cents' or ' Cent'
-    final_result = start_word +' '+units_name+' '+ end_word +' '+cents_name
+    cents_name = (cents_number > 1) and ' cents' or ' cent'
+    final_result = start_word +' '+units_name+' et '+ end_word +' '+cents_name
     return final_result
 
 #-------------------------------------------------------------
@@ -135,21 +135,88 @@ def amount_to_text_nl(number, currency):
     end_word = dutch_number(int(list[1]))
     cents_number = int(list[1])
     cents_name = (cents_number > 1) and 'cent' or 'cent'
-    final_result = start_word +' '+units_name+' '+ end_word +' '+cents_name
+    final_result = start_word +' '+units_name+' en '+ end_word +' '+cents_name
     return final_result
+
+#-------------------------------------------------------------
+#ENGLISH
+#-------------------------------------------------------------
+
+to_19_en = ( 'Zero',  'One',   'Two',  'Three', 'Four',   'Five',   'Six',
+          'Seven', 'Eight', 'Nine', 'Ten',   'Eleven', 'Twelve', 'Thirteen',
+          'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen' )
+tens_en = ( 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety')
+denom_en = ( '',
+          'Thousand',     'Million',         'Billion',       'Trillion',       'Quadrillion',
+          'Quintillion',  'Sextillion',      'Septillion',    'Octillion',      'Nonillion',
+          'Decillion',    'Undecillion',     'Duodecillion',  'Tredecillion',   'Quattuordecillion',
+          'Sexdecillion', 'Septendecillion', 'Octodecillion', 'Novemdecillion', 'Vigintillion' )
+
+def _convert_nn_en(val):
+    """convert a value < 100 to English.
+    """
+    if val < 20:
+        return to_19_en[val]
+    for (dcap, dval) in ((k, 20 + (10 * v)) for (v, k) in enumerate(tens_en)):
+        if dval + 10 > val:
+            if val % 10:
+                return dcap + '-' + to_19_en[val % 10]
+            return dcap
+
+def _convert_nnn_en(val):
+    """
+        convert a value < 1000 to english, special cased because it is the level that kicks 
+        off the < 100 special case.  The rest are more general.  This also allows you to
+        get strings in the form of 'forty-five hundred' if called directly.
+    """
+    word = ''
+    (mod, rem) = (val % 100, val // 100)
+    if rem > 0:
+        word = to_19_en[rem] + ' Hundred'
+        if mod > 0:
+            word += ' '
+    if mod > 0:
+        word += _convert_nn_en(mod)
+    return word
+
+def english_number(val):
+    if val < 100:
+        return _convert_nn_en(val)
+    if val < 1000:
+         return _convert_nnn_en(val)
+    for (didx, dval) in ((v - 1, 1000 ** v) for v in range(len(denom_en))):
+        if dval > val:
+            mod = 1000 ** didx
+            l = val // mod
+            r = val - (l * mod)
+            ret = _convert_nnn_en(l) + ' ' + denom_en[didx]
+            if r > 0:
+                ret = ret + ', ' + english_number(r)
+            return ret
+
+def amount_to_text_en(number, currency):
+    number = '%.2f' % number
+    units_name = currency
+    list = str(number).split('.')
+    start_word = english_number(int(list[0]))
+    end_word = english_number(int(list[1]))
+    cents_number = int(list[1])
+    cents_name = (cents_number > 1) and 'Cents' or 'Cent'
+
+    return ' '.join(filter(None, [start_word, units_name, (start_word or units_name) and (end_word or cents_name) and 'and', end_word, cents_name]))
 
 #-------------------------------------------------------------
 # Generic functions
 #-------------------------------------------------------------
 
-_translate_funcs = {'fr' : amount_to_text_fr, 'nl' : amount_to_text_nl}
+_translate_funcs = {'fr': amount_to_text_fr, 'nl': amount_to_text_nl, 'en': amount_to_text_en}
 
 def add_amount_to_text_function(lang, func):
     _translate_funcs[lang] = func
     
 #TODO: we should use the country AND language (ex: septante VS soixante dix)
 #TODO: we should use en by default, but the translation func is yet to be implemented
-def amount_to_text(nbr, lang='fr', currency='euro'):
+def amount_to_text_all(nbr, lang='fr', currency='euro'):
     """ Converts an integer to its textual representation, using the language set in the context if any.
 
         Example::
@@ -165,7 +232,7 @@ def amount_to_text(nbr, lang='fr', currency='euro'):
 #TODO: use logger   
         print "WARNING: no translation function found for lang: '%s'" % (lang,)
 #TODO: (default should be en) same as above
-        lang = 'fr'
+        lang = 'en'
     return _translate_funcs[lang](abs(nbr), currency)
 
 if __name__=='__main__':

@@ -3,7 +3,7 @@
 import math
 
 from openerp import models, fields, api, _
-from openerp.tools import amount_to_text_en, float_round
+from openerp.tools import amount_to_text_all, float_round
 from openerp.exceptions import UserError, ValidationError
 
 class account_register_payments(models.TransientModel):
@@ -27,8 +27,7 @@ class account_register_payments(models.TransientModel):
     def _onchange_amount(self):
         if hasattr(super(account_register_payments, self), '_onchange_amount'):
             super(account_register_payments, self)._onchange_amount()
-        # TODO: merge, refactor and complete the amount_to_text and amount_to_text_en classes
-        check_amount_in_words = amount_to_text_en.amount_to_text(math.floor(self.amount), lang='en', currency='')
+        check_amount_in_words = amount_to_text_all(math.floor(self.amount), lang=self.env.context['lang'], currency='')
         check_amount_in_words = check_amount_in_words.replace(' and Zero Cent', '') # Ugh
         decimals = self.amount % 1
         if decimals >= 10**-2:
@@ -65,11 +64,8 @@ class account_payment(models.Model):
     def _onchange_amount(self):
         if hasattr(super(account_payment, self), '_onchange_amount'):
             super(account_payment, self)._onchange_amount()
-        check_amount_in_words = amount_to_text_en.amount_to_text(math.floor(self.amount), lang='en', currency='')
+        check_amount_in_words = amount_to_text_all(math.floor(self.amount), lang=self.env.context['lang'][0:2], currency='')
         check_amount_in_words = check_amount_in_words.replace(' and Zero Cent', '') # Ugh
-        decimals = self.amount % 1
-        if decimals >= 10**-2:
-            check_amount_in_words += _(' and %s/100') % str(int(round(float_round(decimals*100, precision_rounding=1))))
         self.check_amount_in_words = check_amount_in_words
 
     def _check_communication(self, payment_method_id, communication):
@@ -93,7 +89,7 @@ class account_payment(models.Model):
         """ Check that the recordset is valid, set the payments state to sent and call print_checks() """
         # Since this method can be called via a client_action_multi, we need to make sure the received records are what we expect
         self = self.filtered(lambda r: r.payment_method_id.code == 'check_printing' and r.state != 'reconciled')
-
+ 
         if len(self) == 0:
             raise UserError(_("Payments to print as a checks must have 'Check' selected as payment method and "
                               "not have already been reconciled"))
