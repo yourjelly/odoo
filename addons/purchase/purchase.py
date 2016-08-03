@@ -305,10 +305,10 @@ class PurchaseOrder(models.Model):
 
     @api.multi
     def button_approve(self, force=False):
-        if order.company_id.po_double_validation == 'two_step'\
-          and order.amount_total >= self.env.user.company_id.currency_id.compute(order.company_id.po_double_validation_amount, order.currency_id)\
-          and not order.user_has_groups('purchase.group_purchase_manager'):
-            raise UserError(_('You need purchase manager access rights to validate an order above %.2f %s.') % (order.company_id.po_double_validation_amount, order.company_id.currency_id.name))
+        if self.company_id.po_double_validation == 'two_step'\
+          and self.amount_total >= self.env.user.company_id.currency_id.compute(self.company_id.po_double_validation_amount, self.currency_id)\
+          and not self.user_has_groups('purchase.group_purchase_manager'):
+            raise UserError(_('You need purchase manager access rights to validate an order above %.2f %s.') % (self.company_id.po_double_validation_amount, self.company_id.currency_id.name))
         self.write({'state': 'purchase'})
         self._create_picking()
         return {}
