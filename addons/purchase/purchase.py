@@ -311,6 +311,8 @@ class PurchaseOrder(models.Model):
             raise UserError(_('You need purchase manager access rights to validate an order above %.2f %s.') % (self.company_id.po_double_validation_amount, self.company_id.currency_id.name))
         self.write({'state': 'purchase'})
         self._create_picking()
+        if self.company_id.po_lock == 'lock':
+            self.write({'state': 'done'})
         return {}
 
     @api.multi
