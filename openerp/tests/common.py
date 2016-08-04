@@ -370,6 +370,9 @@ class HttpCase(TransactionCase):
             _logger.info('phantomjs unlink localstorage %s', i)
             os.unlink(i)
         try:
+            phantom_version = subprocess.Popen(['phantomjs', '--version'], stdout=subprocess.PIPE)
+            version, _ = phantom_version.communicate()
+            _logger.info('Phantomjs Version: %s', version)
             phantom = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=None)
         except OSError:
             raise unittest.SkipTest("PhantomJS not found")
