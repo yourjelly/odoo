@@ -40,7 +40,6 @@ Dashboard / Reports for MRP will include:
         'data/mrp_data.yml',
         'wizard/mrp_product_produce_views.xml',
         'wizard/change_production_qty_views.xml',
-        'wizard/stock_move_consume_views.xml',
         'wizard/mrp_workcenter_block_view.xml',
         'views/mrp_views_menus.xml',
         'views/stock_move_views.xml',
