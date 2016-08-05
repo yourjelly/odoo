@@ -24,7 +24,7 @@ var ActivityLog = Widget.extend({
     start: function () {
         this.fetch_and_render_activity_log();
     },
-    fetch_activities() {
+    fetch_activities: function() {
         var self = this;
         return this.ActivityLogModel
             .call("fetch_activity_logs", [this.res_id, this.model, this.limit || false]);
