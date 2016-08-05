@@ -331,7 +331,7 @@ class Field(object):
         'related_sudo': True,           # whether related fields should be read as admin
         'company_dependent': False,     # whether ``self`` is company-dependent (property field)
         'default': None,                # default(recs) returns the default value
-
+        'digits_compute': None,
         'string': None,                 # field label
         'help': None,                   # field tooltip
         'readonly': False,              # whether the field is readonly
@@ -1103,33 +1103,38 @@ class Float(Field):
     type = 'float'
     _slots = {
         '_digits': None,                # digits argument passed to class initializer
+        '_digits_compute': None,
         'group_operator': 'sum',
     }
 
-    def __init__(self, string=Default, digits=Default, **kwargs):
-        super(Float, self).__init__(string=string, _digits=digits, **kwargs)
+    def __init__(self, string=Default, digits=Default, digits_compute=Default, **kwargs):
+        super(Float, self).__init__(string=string, _digits=digits, _digits_compute=digits_compute, **kwargs)
 
     @property
     def digits(self):
-        if callable(self._digits):
+        if callable(self._digits_compute):
+            with LazyCursor() as cr:
+                return self._digits_compute(cr)
+        elif callable(self._digits):
             with LazyCursor() as cr:
                 return self._digits(cr)
         else:
             return self._digits
 
     _related__digits = property(attrgetter('_digits'))
+    _related__digits_compute = property(attrgetter('_digits_compute'))
 
     _description_digits = property(attrgetter('digits'))
 
     _column_digits = property(lambda self: not callable(self._digits) and self._digits)
-    _column_digits_compute = property(lambda self: callable(self._digits) and self._digits)
+    _column_digits_compute = property(lambda self: not callable(self._digits_compute) and self._digits_compute)
 
     def convert_to_cache(self, value, record, validate=True):
         # apply rounding here, otherwise value in cache may be wrong!
         value = float(value or 0.0)
         if not validate:
             return value
-        digits = self.digits
+        digits = self.digits_compute or self.digits
         return float_round(value, precision_digits=digits[1]) if digits else value
 
     def convert_to_export(self, value, record):
