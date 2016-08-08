@@ -19,10 +19,22 @@
             <field name="model">report.workcenter.load</field>
             <field name="arch" type="xml">
                 <graph string="Work Center load" type="bar">
-                    <field name="name"/>
-                    <field name="duration" operator="+"/>
-                    <field group="True" name="workcenter_id"/>
+                    <field name="workcenter_id"/>
+                    <field name="workorder_id"/>
+                    <field name="duration" type="measure"/>
                 </graph>
+            </field>
+        </record>
+
+        <record id="view_workcenter_load_pivot" model="ir.ui.view">
+            <field name="name">report.workcenter.load.pivot</field>
+            <field name="model">report.workcenter.load</field>
+            <field name="arch" type="xml">
+                <pivot string="Work Center Loads">
+                    <field name="name" type="row"/>
+                    <field name="duration" type="measure"/>
+                    <field name="workcenter_id" type="row"/>
+                </pivot>
             </field>
         </record>
 
@@ -86,5 +98,18 @@
             <field name="help">Weekly Stock Value Variation enables you to track the stock value evolution linked to manufacturing activities, receipts of products and delivery orders.</field>
         </record>
 
+        <record model="ir.actions.act_window" id="mrp_workcenter_load_report">
+            <field name="name">Work Center Loads</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">report.workcenter.load</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">graph,pivot,tree,form</field>
+        </record>
+
+        <menuitem id="menu_mrp_workcenter_load_report"
+              parent="menu_mrp_reporting"
+              action="mrp_workcenter_load_report"
+              groups="group_mrp_routings"
+              sequence="13"/>
     </data>
 </odoo>

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import api, fields, models, tools
 
 
 class WorkCenterLoad(models.Model):
@@ -13,22 +13,27 @@ class WorkCenterLoad(models.Model):
     name = fields.Char('Week', required=True)
     workcenter_id = fields.Many2one('mrp.workcenter', 'Work Center', required=True)
     duration = fields.Float('Duration')
+    production_id = fields.Many2one('mrp.production', string='Manufacturing Order')
+    workorder_id = fields.Many2one('mrp.workorder', string='Work Order')
 
     @api.model_cr
     def init(self):
+        tools.drop_view_if_exists(self._cr,  self._table)
         self._cr.execute("""
             create or replace view report_workcenter_load as (
                 SELECT
                     min(wl.id) as id,
+                    wl.id as workorder_id,
                     to_char(p.date_planned_start,'YYYY:mm:dd') as name,
                     SUM(wl.duration_expected) AS duration,
-                    wl.workcenter_id as workcenter_id
+                    wl.workcenter_id as workcenter_id,
+                    p.id as production_id
                 FROM
                     mrp_workorder wl
                     LEFT JOIN mrp_production p
                         ON p.id = wl.production_id
                 GROUP BY
-                    wl.workcenter_id,
+                    wl.workcenter_id, wl.id, p.id,
                     to_char(p.date_planned_start,'YYYY:mm:dd')
             )""")
 
@@ -46,6 +51,7 @@ class ValueVariation(models.Model):
 
     @api.model_cr
     def init(self):
+        tools.drop_view_if_exists(self._cr, self._table)
         self._cr.execute("""
             create or replace view report_mrp_inout as (
                 select
