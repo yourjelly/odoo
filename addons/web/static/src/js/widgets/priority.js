@@ -3,6 +3,7 @@ odoo.define('web.Priority', function (require) {
 
 var core = require('web.core');
 var Widget = require('web.Widget');
+var ControlPanel = require('web.ControlPanel');
 
 var QWeb = core.qweb;
 var _t = core._t;
@@ -74,6 +75,7 @@ var Priority = Widget.extend({
             $star.toggleClass('fa-star', (star_value <= current_value))
                  .toggleClass('fa-star-o', (star_value > current_value));
         });
+        new ControlPanel().mouse_over_out_event(this.value)
     },
 });
 

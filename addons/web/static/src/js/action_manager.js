@@ -187,6 +187,8 @@ var ViewManagerAction = WidgetAction.extend({
                 title: view.controller.get('title') || self.title,
                 index: index,
                 action: self,
+                view: view,
+                data_record: view.controller.datarecord,
             };
         });
     },
