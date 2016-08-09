@@ -11,9 +11,9 @@ class WorkCenterLoad(models.Model):
     _log_access = False
 
     name = fields.Char('Week', required=True)
-    workcenter_id = fields.Many2one('mrp.workcenter', 'Work Center', required=True)
+    workcenter_id = fields.Many2one('mrp.workcenter', string='Work Center', required=True)
     duration = fields.Float('Duration')
-    production_id = fields.Many2one('mrp.production', string='Manufacturing Order')
+    production_id = fields.Many2one('mrp.production', string='Production')
     workorder_id = fields.Many2one('mrp.workorder', string='Work Order')
 
     @api.model_cr

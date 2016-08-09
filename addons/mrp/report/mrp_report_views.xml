@@ -10,6 +10,8 @@
                     <field name="name"/>
                     <field name="workcenter_id"/>
                     <field name="duration"/>
+                    <field name="workorder_id"/>
+                    <field name="production_id"/>
                 </tree>
             </field>
         </record>
@@ -46,7 +48,7 @@
                     <field name="name" string="Week"/>
                     <field name="workcenter_id"/>
                     <group expand='0' string='Group by...'>
-                        <filter string="Manufacturing Order" name="production_id" context="{'group_by': 'production_id'}"/>
+                        <filter string="Production" name="production_id" context="{'group_by': 'production_id'}"/>
                         <filter string="Work Order" name="workorder_id" context="{'group_by': 'workorder_id'}"/>
                         <filter string='Workcenter' name="workcenter_id" context="{'group_by': 'workcenter_id'}"/>
                         <filter string="Week" name="name" context="{'group_by': 'name'}"/>
@@ -83,7 +85,6 @@
             </field>
         </record>
 
-
         <record id="view_report_in_out_picking_graph" model="ir.ui.view">
             <field name="name">report.mrp.inout.graph</field>
             <field name="model">report.mrp.inout</field>
@@ -104,7 +105,7 @@
             <field name="help">Weekly Stock Value Variation enables you to track the stock value evolution linked to manufacturing activities, receipts of products and delivery orders.</field>
         </record>
 
-        <record id="mrp_workcenter_load_report" model="ir.actions.act_window">
+        <record id="action_mrp_workcenter_load_report" model="ir.actions.act_window">
             <field name="name">Work Center Loads</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">report.workcenter.load</field>
@@ -114,7 +115,7 @@
 
         <menuitem id="menu_mrp_workcenter_load_report"
               parent="menu_mrp_reporting"
-              action="mrp_workcenter_load_report"
+              action="action_mrp_workcenter_load_report"
               groups="group_mrp_routings"
               sequence="13"/>
     </data>
