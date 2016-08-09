@@ -548,3 +548,30 @@ class Holidays(models.Model):
             'actions': actions
         }
         return result
+
+    @api.multi
+    @api.returns('self', lambda value: value.id)
+    def message_post(self, body='', subject=None, message_type='notification',
+                     subtype=None, parent_id=False, attachments=None,
+                     content_subtype='html', **kwargs):
+        if subtype not in ['mail.mt_comment', 'mail.mt_note']:
+            state = kwargs.pop('tracking_value_ids')[0][2]
+            body = _("""
+            <ul>
+                <li>
+                    Employee : %s
+                </li>
+                <li>
+                    Leave From : %s to %s
+                </li>
+                <li>
+                    Leave Duration : %.2f Day(s)
+                </li>
+                <li>
+                    Status : %s -> %s
+                </li>
+            </ul>
+            """) % (self.employee_id.name, self.date_from, self.date_to, self.number_of_days_temp, state['old_value_char'], state['new_value_char'])
+        return super(Holidays, self).message_post(body=body, subject=subject, message_type=message_type,
+                     subtype=subtype, parent_id=parent_id, attachments=attachments,
+                     content_subtype=content_subtype, **kwargs)
