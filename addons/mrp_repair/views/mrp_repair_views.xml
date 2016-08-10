@@ -38,6 +38,7 @@
                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
                </header>
                <sheet string="Repairs order">
+                    <div class="oe_button_box" name="button_box"/>
                     <label for="name"/>
                     <h1>
                         <field name="name"/>
