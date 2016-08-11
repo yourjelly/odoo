@@ -162,7 +162,7 @@ class Holidays(models.Model):
         ('refuse', 'Refused'),
         ('validate1', 'Second Approval'),
         ('validate', 'Approved')
-        ], string='Status', readonly=True, track_visibility='onchange', copy=False, default='confirm',
+        ], string='Status', readonly=True, copy=False, default='confirm',
             help="The status is set to 'To Submit', when a holiday request is created." +
             "\nThe status is 'To Approve', when holiday request is confirmed by user." +
             "\nThe status is 'Refused', when holiday request is refused by manager." +
@@ -359,6 +359,12 @@ class Holidays(models.Model):
             raise AccessError(_('You cannot set a leave request as \'%s\'. Contact a human resource manager.') % values.get('state'))
         result = super(Holidays, self).write(values)
         self.add_follower(employee_id)
+        if 'state' in values and self.state in ['validate', 'validate1', 'confirm', 'refuse']:
+            subtype = self.env.ref(self._get_subtype())
+            template = self.env.ref('hr_holidays.hr_holidays_notification_email_custom')
+            partners_to_notify = self.message_follower_ids.filtered(lambda f: subtype in f.subtype_ids).mapped('partner_id')
+            if partners_to_notify:
+                self.with_context({'subtype_description': subtype.description}).message_post_with_template(template.id, subtype_id=subtype.id, partner_ids=partners_to_notify.ids)
         return result
 
     @api.multi
@@ -505,17 +511,18 @@ class Holidays(models.Model):
     ####################################################
     # Messaging methods
     ####################################################
-    @api.multi
-    def _track_subtype(self, init_values):
-        if 'state' in init_values and self.state == 'validate':
+    @api.model
+    def _get_subtype(self):
+        if self.state == 'validate':
             return 'hr_holidays.mt_holidays_approved'
-        elif 'state' in init_values and self.state == 'validate1':
+        elif self.state == 'validate1':
             return 'hr_holidays.mt_holidays_first_validated'
-        elif 'state' in init_values and self.state == 'confirm':
+        elif self.state == 'confirm':
             return 'hr_holidays.mt_holidays_confirmed'
-        elif 'state' in init_values and self.state == 'refuse':
+        elif self.state == 'refuse':
             return 'hr_holidays.mt_holidays_refused'
-        return super(Holidays, self)._track_subtype(init_values)
+        else:
+            return 'mail.mt_comment'
 
     def _notification_group_recipients(self, message, recipients, done_ids, group_data):
         """ Override the mail.thread method to handle HR users and officers
@@ -549,29 +556,34 @@ class Holidays(models.Model):
         }
         return result
 
-    @api.multi
-    @api.returns('self', lambda value: value.id)
-    def message_post(self, body='', subject=None, message_type='notification',
-                     subtype=None, parent_id=False, attachments=None,
-                     content_subtype='html', **kwargs):
-        if subtype not in ['mail.mt_comment', 'mail.mt_note']:
-            state = kwargs.pop('tracking_value_ids')[0][2]
-            body = _("""
-            <ul>
-                <li>
-                    Employee : %s
-                </li>
-                <li>
-                    Leave From : %s to %s
-                </li>
-                <li>
-                    Leave Duration : %.2f Day(s)
-                </li>
-                <li>
-                    Status : %s -> %s
-                </li>
-            </ul>
-            """) % (self.employee_id.name, self.date_from, self.date_to, self.number_of_days_temp, state['old_value_char'], state['new_value_char'])
-        return super(Holidays, self).message_post(body=body, subject=subject, message_type=message_type,
-                     subtype=subtype, parent_id=parent_id, attachments=attachments,
-                     content_subtype=content_subtype, **kwargs)
+    @api.model
+    def get_state_value(self):
+        return dict(self.fields_get(allfields=['state'])['state']['selection'])[self.state]
+
+
+    # @api.multi
+    # @api.returns('self', lambda value: value.id)
+    # def message_post(self, body='', subject=None, message_type='notification',
+    #                  subtype=None, parent_id=False, attachments=None,
+    #                  content_subtype='html', **kwargs):
+    #     if subtype not in ['mail.mt_comment', 'mail.mt_note']:
+    #         state = kwargs.pop('tracking_value_ids')[0][2]
+    #         body = _("""
+    #         <ul>
+    #             <li>
+    #                 Employee : %s
+    #             </li>
+    #             <li>
+    #                 Leave From : %s to %s
+    #             </li>
+    #             <li>
+    #                 Leave Duration : %.2f Day(s)
+    #             </li>
+    #             <li>
+    #                 Status : %s -> %s
+    #             </li>
+    #         </ul>
+    #         """) % (self.employee_id.name, self.date_from, self.date_to, self.number_of_days_temp, state['old_value_char'], state['new_value_char'])
+    #     return super(Holidays, self).message_post(body=body, subject=subject, message_type=message_type,
+    #                  subtype=subtype, parent_id=parent_id, attachments=attachments,
+    #                  content_subtype=content_subtype, **kwargs)
