@@ -16,3 +16,4 @@ import account_report_general_ledger
 import account_report_trial_balance
 import account_financial_report
 import account_report_aged_partner_balance
+import account_validate_payments
