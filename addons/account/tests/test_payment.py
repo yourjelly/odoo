@@ -6,6 +6,7 @@ class TestPayment(AccountingTestCase):
     def setUp(self):
         super(TestPayment, self).setUp()
         self.register_payments_model = self.env['account.register.payments']
+        self.validate_payments_model = self.env['validate.payment']
         self.payment_model = self.env['account.payment']
         self.invoice_model = self.env['account.invoice']
         self.invoice_line_model = self.env['account.invoice.line']
@@ -123,25 +124,31 @@ class TestPayment(AccountingTestCase):
             'payment_method_id': self.payment_method_manual_in.id,
         })
         register_payments.create_payment()
-        payment = self.payment_model.search([], order="id desc", limit=1)
+        payments = self.payment_model.search([], order="id desc", limit=2)
 
-        self.assertAlmostEquals(payment.amount, 300)
-        self.assertEqual(payment.state, 'posted')
+        self.assertAlmostEquals(sum(payments.mapped('amount')), 300)
+
+        ctx = {'active_model': 'account.payment', 'active_ids': payments.ids}
+        validate_payments = self.validate_payments_model.with_context(ctx).create({})
+        validate_payments.with_context(ctx).validate_payment()
+
+        self.assertEqual(payments[0].state, 'posted')
+        self.assertEqual(payments[1].state, 'posted')
         self.assertEqual(inv_1.state, 'paid')
         self.assertEqual(inv_2.state, 'paid')
 
-        self.check_journal_items(payment.move_line_ids, [
-            {'account_id': self.account_eur.id, 'debit': 300.0, 'credit': 0.0, 'amount_currency': 0, 'currency_id': False},
-            {'account_id': inv_1.account_id.id, 'debit': 0.0, 'credit': 300.0, 'amount_currency': 00, 'currency_id': False},
+        self.check_journal_items(payments[0].move_line_ids, [
+            {'account_id': self.account_eur.id, 'credit': 0.0, 'debit': 200.0, 'amount_currency': 0, 'currency_id': False},
+            {'account_id': inv_1.account_id.id, 'credit': 200.0, 'debit': 0.0, 'amount_currency': 00, 'currency_id': False},
         ])
 
-        liquidity_aml = payment.move_line_ids.filtered(lambda r: r.account_id == self.account_eur)
-        bank_statement = self.reconcile(liquidity_aml, 200, 0, False)
+        liquidity_aml = payments[0].move_line_ids.filtered(lambda r: r.account_id == self.account_eur)
+        bank_statement = self.reconcile(liquidity_aml, 100, 0, False)
 
         self.assertEqual(liquidity_aml.statement_id, bank_statement)
         self.assertEqual(liquidity_aml.move_id.statement_line_id, bank_statement.line_ids[0])
 
-        self.assertEqual(payment.state, 'reconciled')
+        self.assertEqual(payments[0].state, 'reconciled')
 
     def test_internal_transfer_journal_usd_journal_eur(self):
         """ Create a transfer from a EUR journal to a USD journal """
