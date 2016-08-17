@@ -49,6 +49,13 @@ class MrpWorkcenter(models.Model):
     oee = fields.Float(compute='_compute_oee', help='Overall Equipment Effectiveness, based on the last month')
     oee_target = fields.Float(string='OEE Target', help="OEE Target in percentage", default=90)
     performance = fields.Integer('Performance', compute='_compute_performance', help='Performance over the last month')
+    workcenter_load = fields.Float('Work Center Load', compute='_compute_workcenter_load')
+
+    @api.multi
+    def _compute_workcenter_load(self):
+        workorder_data = self.env['mrp.workorder'].read_group([('workcenter_id', 'in', self.ids)], ['duration_expected', 'workcenter_id', 'duration'], ['workcenter_id'], lazy=False)
+        for workorder in workorder_data:
+            self.workcenter_load += workorder['duration_expected']
 
     @api.depends('order_ids.workcenter_id', 'order_ids.state', 'order_ids.date_planned_start')
     def _compute_workorder_count(self):
