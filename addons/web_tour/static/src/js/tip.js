@@ -82,6 +82,10 @@ var Tip = Widget.extend({
             this._reposition();
         }, 500));
 
+        // core.bus.on("tour_disable", this, function () {
+        //     this.destroy();
+        // });
+
         this.$el.on("transitionend oTransitionEnd webkitTransitionEnd", (function () {
             if (!this.tip_opened && this.$el.parent()[0] === document.body) {
                 this.$el.detach();

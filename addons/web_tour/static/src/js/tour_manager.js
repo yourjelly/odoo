@@ -189,6 +189,9 @@ return core.Class.extend({
     play: function () {
         this.paused = false;
     },
+    deactivate_tips: function() {
+        _.each(this.active_tooltips, this._deactivate_tip.bind(this));
+    },
     /**
      * Checks for tooltips to activate (only from the running tour or specified tour if there
      * is one, from all active tours otherwise). Should be called each time the DOM changes.

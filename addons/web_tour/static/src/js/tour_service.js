@@ -80,6 +80,17 @@ return session.is_bound.then(function () {
             };
         }
 
+        core.bus.on('tour_disable', this, function () {
+            tour.pause();
+            tour.deactivate_tips();
+            observer.disconnect();
+        });
+
+        core.bus.on('tour_enable', this, function() {
+            tour.play();
+            observe();
+        });
+
         return tour;
     });
 });
