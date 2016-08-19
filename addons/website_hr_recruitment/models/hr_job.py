@@ -17,8 +17,13 @@ class hr_job(osv.osv):
         self.write(cr, uid, ids, {'website_published': False}, context=context)
         return super(hr_job, self).set_open(cr, uid, ids, context)
 
-    def _get_default_website_description(self, cr, uid, context):
-        return self.pool.get('ir.ui.view').render(cr, uid, 'website_hr_recruitment.default_website_description', context=context)
+    def _get_default_website_description(self, cr, uid, context=None):
+        IrModelData = self.pool.get('ir.model.data')
+        default_description = IrModelData.xmlid_to_object(cr, uid, 'website_hr_recruitment.default_website_description', context=context)
+        if default_description: 
+            return self.pool.get('ir.ui.view').render(cr, uid, default_description.id, context=context)
+        else:
+            return ''
 
     _columns = {
         'website_description': fields.html('Website description', translate=html_translate, sanitize=False),
