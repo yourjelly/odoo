@@ -9,6 +9,10 @@ var utils = require('web.utils');
 return core.Class.extend({
     init: function () {
         this.Filters = new Model('ir.filters');
+        this._init_cache();
+    },
+
+    _init_cache: function () {
         this._cache = {
             actions: {},
             fields_views: {},
@@ -229,6 +233,14 @@ return core.Class.extend({
      */
     _invalidate: function (cache, key) {
         delete cache[key];
+    },
+
+    /**
+     * Invalidate the cache after a modification to avoid a refresh
+     * TODO: could be refined to invalidate some part of the cache
+     */
+    invalidate: function () {
+        this._init_cache();
     },
 });
 
