@@ -373,10 +373,11 @@ class Repair(models.Model):
                     'partner_id': repair.address_id.id,
                     'location_id': operation.location_id.id,
                     'location_dest_id': operation.location_dest_id.id,
+                    'consume_repair_id': repair.id,
                 })
                 moves |= move
                 operation.write({'move_id': move.id, 'state': 'done'})
-            move = Move.create({
+            repair_move = Move.create({
                 'name': repair.name,
                 'product_id': repair.product_id.id,
                 'product_uom': repair.product_uom.id or repair.product_id.uom_id.id,
@@ -385,11 +386,16 @@ class Repair(models.Model):
                 'location_id': repair.location_id.id,
                 'location_dest_id': repair.location_dest_id.id,
                 'restrict_lot_id': repair.lot_id.id,
+                'repair_id': repair.id,
             })
-            moves |= move
+            moves |= repair_move
             moves.action_done()
-            repair.write({'state': 'done', 'move_id': move.id})
-            res[repair.id] = move.id
+            op_moves = moves-repair_move
+            consumed_quants = op_moves.mapped('quant_ids').filtered(lambda x: x.qty > 0.0)
+            for quant in repair_move.quant_ids.filtered(lambda x: x.qty > 0.0):
+                quant.write({'consumed_quant_ids': [(6, 0, [x.id for x in consumed_quants])]})
+            repair.write({'state': 'done', 'move_id': repair_move.id})
+            res[repair.id] = repair_move.id
         return res
 
 
@@ -564,3 +570,10 @@ class RepairFee(models.Model):
                 self.price_unit = price
         if warning:
             return {'warning': warning}
+
+
+class StockMove(models.Model):
+    _inherit = 'stock.move'
+
+    repair_id = fields.Many2one('mrp.repair', string='Repair Order')
+    consume_repair_id = fields.Many2one('mrp.repair', string='Consume Repair Order')
