@@ -217,8 +217,12 @@ return core.Class.extend({
             }
             if (node.tag === 'field') {
                 fields[node.attrs.name].__attrs = node.attrs;
-                if (node.attrs.widget === 'statusbar' && fields[node.attrs.name].type === 'many2one') { // FIXME: this shouldn't be done here
-                    fields[node.attrs.name].__fetch_status = true;
+                if (fields[node.attrs.name].type === 'many2one') { // FIXME: this shouldn't be done here
+                    if (node.attrs.widget === 'statusbar' || node.attrs.widget === 'radio') {
+                        fields[node.attrs.name].__fetch_status = true;
+                    } else if (node.attrs.widget === 'selection') {
+                        fields[node.attrs.name].__fetch_selection = true;
+                    }
                 }
                 return false;
             }
