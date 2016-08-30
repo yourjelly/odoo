@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from dateutil.relativedelta import relativedelta
 from collections import defaultdict
 import math
 
@@ -80,12 +81,10 @@ class MrpProduction(models.Model):
         help="Location where the system will stock the finished products.")
     date_planned_start = fields.Datetime(
         'Expected Start Date', copy=False, default=fields.Datetime.now,
-        index=True, required=True, readonly=True,
-        states={'confirmed': [('readonly', False)]}, oldname="date_planned")
+        index=True, required=True, oldname="date_planned")
     date_planned_finished = fields.Datetime(
         'Expected End Date', copy=False, default=fields.Datetime.now,
-        index=True, readonly=True,
-        states={'confirmed': [('readonly', False)]})
+        index=True)
     date_start = fields.Datetime('Start Date', copy=False, index=True, readonly=True)
     date_finished = fields.Datetime('End Date', copy=False, index=True, readonly=True)
     bom_id = fields.Many2one(
@@ -230,6 +229,7 @@ class MrpProduction(models.Model):
             bom = self.env['mrp.bom']._bom_find(product=self.product_id, picking_type=self.picking_type_id, company_id=self.company_id.id)
             self.bom_id = bom.id
             self.product_uom_id = self.product_id.uom_id.id
+            self.date_planned_finished = fields.Datetime.from_string(self.date_planned_finished) + relativedelta(days=self.product_id.produce_delay or 0.0)
             return {'domain': {'product_uom_id': [('category_id', '=', self.product_id.uom_id.category_id.id)]}}
 
     @api.onchange('picking_type_id')
