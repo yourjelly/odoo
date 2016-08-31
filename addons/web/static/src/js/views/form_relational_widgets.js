@@ -260,7 +260,6 @@ var FieldMany2One = common.AbstractField.extend(common.CompletionFieldMixin, com
             }
         });
 
-        var isSelecting = false;
         // autocomplete
         this.$input.autocomplete({
             source: function(req, resp) {
@@ -269,7 +268,6 @@ var FieldMany2One = common.AbstractField.extend(common.CompletionFieldMixin, com
                 });
             },
             select: function(event, ui) {
-                isSelecting = true;
                 var item = ui.item;
                 if (item.id) {
                     self.display_value = {};
@@ -298,10 +296,8 @@ var FieldMany2One = common.AbstractField.extend(common.CompletionFieldMixin, com
         // used to correct a bug when selecting an element by pushing 'enter' in an editable list
         this.$input.keyup(function(e) {
             if (e.which === 13) { // ENTER
-                if (isSelecting)
-                    e.stopPropagation();
+                e.stopPropagation();
             }
-            isSelecting = false;
         });
         this.setupFocus(this.$follow_button);
     },
