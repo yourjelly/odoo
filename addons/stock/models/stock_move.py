@@ -254,6 +254,32 @@ class StockMove(models.Model):
             picking.message_track(picking.fields_get(['state']), initial_values)
         return res
 
+    def _move_origin_update(self, date_expected=False, privious=None):
+        for move in self:
+            if move.move_orig_ids and move.propagate and date_expected:
+                    current_date = datetime.strptime(move.date_expected, DEFAULT_SERVER_DATETIME_FORMAT)
+                    new_date = datetime.strptime(date_expected, DEFAULT_SERVER_DATETIME_FORMAT)
+                    delta = new_date - current_date
+                    if abs(delta.days) >= move.company_id.propagation_minimum_delta:
+                        for org_move in move.move_orig_ids:
+                            old_move_date = datetime.strptime(org_move.date_expected, DEFAULT_SERVER_DATETIME_FORMAT)
+                            new_move_date = (old_move_date - relativedelta.relativedelta(days=delta.days or 0)).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+                            privious.update({org_move: new_move_date})
+                            org_move._move_origin_update(new_move_date, privious)
+
+    @api.multi
+    def _move_dest_update(self, date_expected=False, next_move=None):
+        for move in self:
+            if move.move_dest_id and move.propagate and date_expected:
+                current_date = datetime.strptime(move.date_expected, DEFAULT_SERVER_DATETIME_FORMAT)
+                new_date = datetime.strptime(date_expected, DEFAULT_SERVER_DATETIME_FORMAT)
+                delta = new_date - current_date
+                if abs(delta.days) >= move.company_id.propagation_minimum_delta:
+                    old_move_date = datetime.strptime(move.move_dest_id.date_expected, DEFAULT_SERVER_DATETIME_FORMAT)
+                    new_move_date = (old_move_date + relativedelta.relativedelta(days=delta.days or 0)).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+                    next_move.update({move.move_dest_id: new_move_date})
+                    move.move_dest_id._move_dest_update(new_move_date, next_move)
+
     @api.multi
     def write(self, vals):
         # TDE CLEANME: it is a gros bordel + tracking
@@ -280,22 +306,12 @@ class StockMove(models.Model):
 
         if not self._context.get('do_not_propagate', False) and (propagated_date_field or propagated_changes_dict):
             #any propagation is (maybe) needed
+            propogate_moves = {}
             for move in self:
-                if move.move_dest_id and move.propagate:
-                    if 'date_expected' in propagated_changes_dict:
-                        propagated_changes_dict.pop('date_expected')
-                    if propagated_date_field:
-                        current_date = datetime.strptime(move.date_expected, DEFAULT_SERVER_DATETIME_FORMAT)
-                        new_date = datetime.strptime(vals.get(propagated_date_field), DEFAULT_SERVER_DATETIME_FORMAT)
-                        delta = new_date - current_date
-                        if abs(delta.days) >= move.company_id.propagation_minimum_delta:
-                            old_move_date = datetime.strptime(move.move_dest_id.date_expected, DEFAULT_SERVER_DATETIME_FORMAT)
-                            new_move_date = (old_move_date + relativedelta.relativedelta(days=delta.days or 0)).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-                            propagated_changes_dict['date_expected'] = new_move_date
-                    #For pushed moves as well as for pulled moves, propagate by recursive call of write().
-                    #Note that, for pulled moves we intentionally don't propagate on the procurement.
-                    if propagated_changes_dict:
-                        move.move_dest_id.write(propagated_changes_dict)
+                move._move_origin_update(vals.get(propagated_date_field), propogate_moves)
+                move._move_dest_update(vals.get(propagated_date_field), propogate_moves)
+            for prop_move, date_expected in propogate_moves.iteritems():
+                prop_move.with_context(do_not_propagate=True).write({'date_expected': date_expected})
         track_pickings = not self._context.get('mail_notrack') and any(field in vals for field in ['state', 'picking_id', 'partially_available'])
         if track_pickings:
             to_track_picking_ids = set([move.picking_id.id for move in self if move.picking_id])

@@ -2,10 +2,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
+from datetime import datetime
+from dateutil import relativedelta
 import math
 
 from odoo import api, fields, models, _
 from odoo.addons import decimal_precision as dp
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from odoo.exceptions import UserError
 
 
@@ -253,6 +256,23 @@ class MrpProduction(models.Model):
         return production
 
     @api.multi
+    def write(self, values):
+        if values.get('date_planned_start'):
+            for order in self:
+                date_planned_start = datetime.strptime(order.date_planned_start, DEFAULT_SERVER_DATETIME_FORMAT)
+                date_planned_end = datetime.strptime(order.date_planned_finished, DEFAULT_SERVER_DATETIME_FORMAT)
+                new_date_planned_start = datetime.strptime(values.get('date_planned_start'), DEFAULT_SERVER_DATETIME_FORMAT)
+                delta = new_date_planned_start - date_planned_start
+                order.date_planned_finished = date_planned_end + relativedelta.relativedelta(days=delta.days)
+                finish_move = order.move_finished_ids.filtered(lambda x: x.product_id == order.product_id)                print '\n\nfinish_move:', finish_move
+                finish_move_date = datetime.strptime(finish_move.date_expected, DEFAULT_SERVER_DATETIME_FORMAT)
+                finish_move.date_expected = finish_move_date + relativedelta.relativedelta(days=delta.days)
+                for move in order.move_raw_ids:
+                    consumed_moves_date = datetime.strptime(move.date_expected, DEFAULT_SERVER_DATETIME_FORMAT)
+                    move.date_expected = consumed_moves_date + relativedelta.relativedelta(days=delta.days)
+        return super(MrpProduction, self).write(values)
+
+    @api.multi
     def unlink(self):
         if any(production.state != 'cancel' for production in self):
             raise UserError(_('Cannot delete a manufacturing order not in cancel state'))
@@ -312,6 +332,7 @@ class MrpProduction(models.Model):
             'name': self.name,
             'date': self.date_planned_start,
             'bom_line_id': bom_line.id,
+            'date_expected': self.date_planned_start,
             'product_id': bom_line.product_id.id,
             'product_uom_qty': quantity,
             'product_uom': bom_line.product_uom_id.id,
