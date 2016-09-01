@@ -2,10 +2,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
+from datetime import datetime
+from dateutil import relativedelta
 import math
 
 from odoo import api, fields, models, _
 from odoo.addons import decimal_precision as dp
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from odoo.exceptions import UserError
 
 
@@ -242,6 +245,26 @@ class MrpProduction(models.Model):
     def onchange_bom_id(self):
         self.routing_id = self.bom_id.routing_id.id
 
+    @api.onchange('date_planned_start')
+    def onchange_start_planned_date(self):
+        min_date = min(self.move_raw_ids.mapped('date_expected'))
+        max_date = max(self.move_finished_ids.mapped('date_expected'))
+        new_date_planned_start = datetime.strptime(self.date_planned_start, DEFAULT_SERVER_DATETIME_FORMAT)
+        old_date_planned_start = datetime.strptime(min_date, DEFAULT_SERVER_DATETIME_FORMAT)
+        delta = new_date_planned_start  - old_date_planned_start
+        date_planned_finished = datetime.strptime(max_date, DEFAULT_SERVER_DATETIME_FORMAT)
+        self.date_planned_finished = date_planned_finished + relativedelta.relativedelta(days=delta.days)
+
+    @api.multi
+    def write(self, values):
+        for order in self:
+            if values.get('date_planned_start'):
+                raw_mateials = order.move_raw_ids.filtered(lambda x: not x.move_dest_id.raw_material_production_id)
+                raw_mateials.write({'date_expected': values.get('date_planned_start')})
+            if values.get('date_planned_finished'):
+                order.move_finished_ids.write({'date_expected': values.get('date_planned_finished')})
+        return super(MrpProduction, self).write(values)
+
     @api.model
     def create(self, values):
         if not values.get('name', False) or values['name'] == 'New':
@@ -274,7 +297,7 @@ class MrpProduction(models.Model):
         move = self.env['stock.move'].create({
             'name': self.name,
             'date': self.date_planned_start,
-            'date_expected': self.date_planned_start,
+            'date_expected': self.date_planned_finished,
             'product_id': self.product_id.id,
             'product_uom': self.product_uom_id.id,
             'product_uom_qty': self.product_qty,
@@ -312,6 +335,7 @@ class MrpProduction(models.Model):
             'name': self.name,
             'date': self.date_planned_start,
             'bom_line_id': bom_line.id,
+            'date_expected': self.date_planned_start,
             'product_id': bom_line.product_id.id,
             'product_uom_qty': quantity,
             'product_uom': bom_line.product_uom_id.id,
