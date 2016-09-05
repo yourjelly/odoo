@@ -186,16 +186,16 @@ class MrpWorkorder(models.Model):
         produced. """
         moves = self.move_raw_ids.filtered(lambda move: move.state not in ('done', 'cancel') and move.product_id.tracking != 'none' and move.product_id.id != self.production_id.product_id.id)
         for move in moves:
-            move_lots = self.active_move_lot_ids.filtered(lambda move_lot: move_lot.move_id == move)
-            if not move_lots:
+            self.active_move_lot_ids = self.active_move_lot_ids.filtered(lambda move_lot: move_lot.move_id == move)
+            if not self.active_move_lot_ids:
                 continue
             new_qty = move.unit_factor * self.qty_producing
             if move.product_id.tracking == 'lot':
-                move_lots[0].quantity = new_qty
-                move_lots[0].quantity_done = new_qty
+                self.active_move_lot_ids[0].quantity = new_qty
+                self.active_move_lot_ids[0].quantity_done = new_qty
             elif move.product_id.tracking == 'serial':
                 # Create extra pseudo record
-                qty_todo = new_qty - sum(move_lots.mapped('quantity'))
+                qty_todo = new_qty - sum(self.active_move_lot_ids.mapped('quantity'))
                 if float_compare(qty_todo, 0.0, precision_rounding=move.product_uom.rounding) > 0:
                     while float_compare(qty_todo, 0.0, precision_rounding=move.product_uom.rounding) > 0:
                         self.active_move_lot_ids += self.env['stock.move.lots'].new({
@@ -210,7 +210,7 @@ class MrpWorkorder(models.Model):
                         qty_todo -= 1
                 elif float_compare(qty_todo, 0.0, precision_rounding=move.product_uom.rounding) < 0:
                     qty_todo = abs(qty_todo)
-                    for move_lot in move_lots:
+                    for move_lot in self.active_move_lot_ids:
                         if qty_todo <= 0:
                             break
                         if move_lot.quantity_done == 0 and qty_todo > move_lot.quantity:
