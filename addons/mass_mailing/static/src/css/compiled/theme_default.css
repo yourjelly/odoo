@@ -5,7 +5,7 @@
 }
 .o_mail_snippet_general .o_mail_btn {
   -webkit-user-select: none;
-  padding: 6px 12px;
+  padding: 8px 25px;
   font-size: 14px;
   color: #ffffff;
   border: none;
@@ -16,11 +16,11 @@
   text-align: center;
   cursor: pointer;
   border-radius: 2px;
-  background-color: #34c9a4;
+  background-color: #10b189;
 }
 .o_mail_snippet_general a,
 .o_mail_snippet_general .o_mail_link {
-  color: #2aa083;
+  color: #0c8265;
   font-weight: bold;
   text-decoration: none !important;
 }
@@ -52,7 +52,7 @@
 }
 .o_mail_block_footer_separator .separator {
   height: 1px;
-  background-color: #f5f5f5;
+  background-color: #c2c2c2;
 }
 .o_mail_display_coupon,
 .display-1,
