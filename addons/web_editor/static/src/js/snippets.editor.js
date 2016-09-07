@@ -780,8 +780,11 @@ data.Class = Widget.extend({
  * Snippet editor Editor class.
  * Management of the overlay and option list for a snippet.
  */
-data.Editor = Class.extend({
+data.Editor = Class.extend(core.mixins.EventDispatcherMixin, {
     init: function (BuildingBlock, dom) {
+        core.mixins.EventDispatcherMixin.init.apply(this, arguments);
+        this.setParent(BuildingBlock);
+
         this.buildingBlock = BuildingBlock;
         this.$target = $(dom);
         this.$overlay = this.$target.data('overlay');
@@ -1046,6 +1049,8 @@ data.Editor = Class.extend({
         // clean editor if they are image or table in deleted content
         $(".note-control-selection").hide();
         $('.o_table_handler').remove();
+
+        this.trigger_up("snippet_removed");
 
         return false;
     },

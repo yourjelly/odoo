@@ -166,14 +166,8 @@ snippets_editor.Class.include({
             }),
         }));
 
-        var first_choice = ($editable_area.html().trim() === "");
-        if (first_choice) {
-            $body.addClass("o_force_mail_theme_choice");
-            $dropdown.one("click", "li > a", function () {
-                $body.removeClass("o_force_mail_theme_choice");
-                first_choice = false;
-            });
-        }
+        var first_choice;
+        check_if_must_force_theme_choice();
 
         $dropdown.on("mouseenter", "li > a", function (e) {
             e.preventDefault();
@@ -185,7 +179,7 @@ snippets_editor.Class.include({
             var $new_layout = $("<div/>", {"class": "o_layout oe_structure " + classname});
             var $contents;
 
-            if (first_choice || $editable_area.html().trim() === "" || ($old_layout.length > 0 && $old_layout.html().trim() === "")) {
+            if (first_choice || editable_area_is_empty($old_layout)) {
                 $contents = themes_bodies[$theme_option.parent().index()];
             } else if ($old_layout.length) {
                 $contents = ($old_layout.hasClass("oe_structure") ? $old_layout : $old_layout.find(".oe_structure").first()).contents();
@@ -198,9 +192,29 @@ snippets_editor.Class.include({
             $old_layout.remove();
         });
 
+        this.on("snippet_removed", this, function () {
+            check_if_must_force_theme_choice();
+        });
+
         $dropdown.insertAfter(this.$el.find("#snippets_menu"));
 
         return ret;
+
+        function check_if_must_force_theme_choice() {
+            first_choice = editable_area_is_empty();
+            if (first_choice) {
+                $body.addClass("o_force_mail_theme_choice");
+                $dropdown.one("click", "li > a", function () {
+                    $body.removeClass("o_force_mail_theme_choice");
+                    first_choice = false;
+                });
+            }
+        }
+
+        function editable_area_is_empty($layout) {
+            $layout = $layout || $editable_area.find(".o_layout");
+            return ($editable_area.html().trim() === "" || ($layout.length > 0 && $layout.html().trim() === ""));
+        }
     },
 });
 
