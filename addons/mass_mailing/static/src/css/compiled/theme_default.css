@@ -32,6 +32,12 @@
 .o_mail_snippet_general .bg-beta {
   background-color: #906784;
 }
+.o_mail_snippet_general .text-beta {
+  color: #906784;
+}
+.o_mail_snippet_general .bg-delta {
+  background-color: #87a6b5;
+}
 .o_mail_snippet_general .bg-gray-lighter {
   background-color: #f5f5f5;
 }
