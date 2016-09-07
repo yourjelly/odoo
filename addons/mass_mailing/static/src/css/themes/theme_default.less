@@ -1,0 +1,129 @@
+// out: ../compiled/theme_default.css, sourcemap: false, compress: false
+// lessc@1.4.2
+
+// =======================================
+// ========== Mass Mailing "Theme Default"
+// =======================================
+
+
+// ===========   Variables
+
+// 'Default Theme' Palette
+@o_mm_def_color_alpha   : #e3e3e3;
+@o_mm_def_color_beta    : #ffffff;
+@o_mm_def_color_gamma   : #34c9a4;
+@o_mm_def_color_delta   : #464646;
+@o_mm_def_color_epsilon : darken(@o_mm_def_color_gamma, 10%);
+
+// 'Default Theme' Images
+
+@o_mm_def_b_radius      : 2px;
+
+
+// Assign 'Default Theme' Variables
+@o_mm_def_body_width    : 600px;
+
+@o_mm_def_font          : "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+@o_mm_def_text_color    : @o_mm_def_color_delta;
+
+@o_mm_def_btn_bg        : @o_mm_def_color_gamma;
+@o_mm_def_btn_text      : @o_mm_def_color_beta;
+
+
+
+
+// ===========   Components
+
+.o_mail_snippet_general {
+    width: @o_mm_def_body_width;
+    color: @o_mm_def_text_color;
+    margin: 0 auto;
+
+
+    .o_mail_btn {
+        -webkit-user-select: none;
+        padding: 6px 12px;
+        font-size: 14px;
+        color: @o_mm_def_btn_text;
+        border: none;
+        text-decoration: none;
+        display: inline-block;
+        font-weight: 400;
+        font-family: @o_mm_def_font;
+        text-align: center;
+        cursor: pointer;
+        border-radius: @o_mm_def_b_radius;
+        background-color: @o_mm_def_btn_bg;
+    }
+
+    a, .o_mail_link {
+        color: @o_mm_def_color_epsilon;
+    }
+
+    img {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+    }
+}
+
+
+// ===========   Snippets
+
+.o_mail_block_header_text_social {
+    .o_mail_display_3 {
+        font-weight: bold;
+    }
+}
+
+
+
+// ===========   Typography
+
+.o_mail_display_coupon, .display-1, .display-2, .display-3, p, th, td, a, .table-styles {
+    font-family: @o_mm_def_font;
+    font-weight: 300;
+    text-decoration: none !important;
+}
+.o_mail_display_coupon {
+    font-size: 60px;
+}
+.o_mail_display_1 {
+    font-size: 30px;
+}
+.o_mail_display_2 {
+    font-size: 25px;
+}
+.o_mail_display_3 {
+    font-size: 18px;
+}
+p, th, td {
+    text-align:left;
+    font-size: 14px;
+}
+a:hover, a:focus {
+    color: inherit;
+    text-transform: inherit;
+}
+.text-center {
+    text-align: center;
+}
+
+/* ======================== MISC ====================== */
+
+.o_mail_h_padding {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+.o_mail_v_padding {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+.o_mail_no_margin {
+    margin: 0;
+}
+.o_mail_table_styles {
+    border-collapse:separate;
+}
+
+

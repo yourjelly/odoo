@@ -1,0 +1,86 @@
+.o_mail_snippet_general {
+  width: 600px;
+  color: #464646;
+  margin: 0 auto;
+}
+.o_mail_snippet_general .o_mail_btn {
+  -webkit-user-select: none;
+  padding: 6px 12px;
+  font-size: 14px;
+  color: #ffffff;
+  border: none;
+  text-decoration: none;
+  display: inline-block;
+  font-weight: 400;
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 2px;
+  background-color: #34c9a4;
+}
+.o_mail_snippet_general a,
+.o_mail_snippet_general .o_mail_link {
+  color: #2aa083;
+}
+.o_mail_snippet_general img {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+.o_mail_block_header_text_social .o_mail_display_3 {
+  font-weight: bold;
+}
+.o_mail_display_coupon,
+.display-1,
+.display-2,
+.display-3,
+p,
+th,
+td,
+a,
+.table-styles {
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-weight: 300;
+  text-decoration: none !important;
+}
+.o_mail_display_coupon {
+  font-size: 60px;
+}
+.o_mail_display_1 {
+  font-size: 30px;
+}
+.o_mail_display_2 {
+  font-size: 25px;
+}
+.o_mail_display_3 {
+  font-size: 18px;
+}
+p,
+th,
+td {
+  text-align: left;
+  font-size: 14px;
+}
+a:hover,
+a:focus {
+  color: inherit;
+  text-transform: inherit;
+}
+.text-center {
+  text-align: center;
+}
+/* ======================== MISC ====================== */
+.o_mail_h_padding {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.o_mail_v_padding {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+.o_mail_no_margin {
+  margin: 0;
+}
+.o_mail_table_styles {
+  border-collapse: separate;
+}
