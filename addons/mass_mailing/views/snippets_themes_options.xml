@@ -2,6 +2,7 @@
 <odoo>
 
 <template id="snippet_options">
+    <t t-call="web_editor.snippet_options"/>
     <t t-raw="0"/>
 
     <div data-js='width-x'
@@ -32,6 +33,10 @@
     <div data-js='resize'
         data-selector="div.snippet_row"
         data-drop-in=".oe_structure, [data-oe-type=html]:not(:has(.o_layout))">
+    </div>
+
+    <div data-js='margin-y'
+        data-selector="div.snippet_row, .mv, .col_mv">
     </div>
 
     <!-- <div data-js='background'
