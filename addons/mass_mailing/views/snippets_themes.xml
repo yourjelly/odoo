@@ -94,7 +94,7 @@
                             &amp;nbsp;
                         </td>
                         <td width="20%">
-                            <table t-if="website" border="0" cellpadding="0" cellspacing="0" align="right" style="border-collapse:separate; margin-right:30px;">
+                            <table t-if="website" border="0" cellpadding="0" cellspacing="0" align="right" style="border-collapse:separate; margin-right:20px;">
                                 <tr>
                                     <t t-if="website.social_facebook">
                                         <td align="right">
@@ -148,7 +148,7 @@
                             &amp;nbsp;
                         </td>
                         <td valign="center" width="20%">
-                            <table t-if="website" border="0" cellpadding="0" cellspacing="0" align="right" style="border-collapse:separate;margin-right:30px">
+                            <table t-if="website" border="0" cellpadding="0" cellspacing="0" align="right" style="border-collapse:separate;margin-right:20px">
                                 <tr>
                                     <t t-if="website.social_facebook">
                                         <td align="right">
@@ -196,7 +196,7 @@
                     <tbody>
                       <tr>
                           <td width="100%" valign="top" class="o_mail_h_padding">
-                                <img src="https://source.unsplash.com/in7_58C6GBc/550x200" alt="Your Banner Image" />
+                                <img src="https://source.unsplash.com/in7_58C6GBc/560x200" alt="Your Banner Image" />
                           </td>
                       </tr>
                     </tbody>
