@@ -10,8 +10,13 @@
         overflow: auto;
         background-color: @o-we-color-dark;
 
-        > li:hover > a {
-            background-color: @o-we-color-darker;
+        > li {
+            &:hover > a {
+                background-color: @o-we-color-darker;
+            }
+            &.selected {
+                border: 2px solid @odoo-brand-primary;
+            }
         }
     }
 }
