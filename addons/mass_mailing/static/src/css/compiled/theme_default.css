@@ -21,6 +21,7 @@
 .o_mail_snippet_general a,
 .o_mail_snippet_general .o_mail_link {
   color: #2aa083;
+  font-weight: bold;
 }
 .o_mail_snippet_general img {
   width: 100%;
