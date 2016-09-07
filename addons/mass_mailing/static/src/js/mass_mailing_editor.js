@@ -8,8 +8,6 @@ var web_editor = require('web_editor.editor');
 var options = require('web_editor.snippets.options');
 var snippets_editor = require('web_editor.snippet.editor');
 
-var _t = core._t;
-
 var $editable_area = $("#editable_area");
 if ($editable_area.length === 0 || !$editable_area.is(".o_mail_area")) {
     return;
@@ -147,8 +145,13 @@ snippets_editor.Class.include({
     compute_snippet_templates: function (html) {
         var ret = this._super.apply(this, arguments);
 
-        var $themes = this.$("#email_designer_themes").children().addClass("oe_snippet_body");
+        var $themes = this.$("#email_designer_themes").children();
         if ($themes.length === 0) return ret;
+
+        var $body = $(document.body);
+        var themes_bodies = _.map($themes, function (theme) {
+            return theme.innerHTML.trim();
+        });
 
         var all_classes = "";
         var $dropdown = $(core.qweb.render("mass_mailing.theme_selector", {
@@ -163,34 +166,39 @@ snippets_editor.Class.include({
             }),
         }));
 
-        var $body = $(document.body);
-        $dropdown.on("mouseenter click", "li > a", function (e) {
+        var first_choice = ($editable_area.html().trim() === "");
+        if (first_choice) {
+            $body.addClass("o_force_mail_theme_choice");
+            $dropdown.one("click", "li > a", function () {
+                $body.removeClass("o_force_mail_theme_choice");
+                first_choice = false;
+            });
+        }
+
+        $dropdown.on("mouseenter", "li > a", function (e) {
             e.preventDefault();
-            var classname = $(e.currentTarget).data("class");
+            var $theme_option = $(e.currentTarget);
+            var classname = $theme_option.data("class");
             $body.removeClass(all_classes).addClass(classname);
-            var $layout = $editable_area.find(".o_layout");
+
+            var $old_layout = $editable_area.find(".o_layout");
+            var $new_layout = $("<div/>", {"class": "o_layout oe_structure " + classname});
             var $contents;
-            if ($layout.length) {
-                $contents = ($layout.hasClass("oe_structure") ? $layout : $layout.find(".oe_structure").first()).contents();
+
+            if (first_choice || $editable_area.html().trim() === "" || ($old_layout.length > 0 && $old_layout.html().trim() === "")) {
+                $contents = themes_bodies[$theme_option.parent().index()];
+            } else if ($old_layout.length) {
+                $contents = ($old_layout.hasClass("oe_structure") ? $old_layout : $old_layout.find(".oe_structure").first()).contents();
             } else {
                 $contents = $editable_area.contents();
             }
-            var $div = $("<div/>", {"class": "o_layout oe_structure " + classname});
-            $editable_area.append($div);
-            $div.append($contents);
-            $layout.remove();
+
+            $editable_area.empty().append($new_layout);
+            $new_layout.append($contents);
+            $old_layout.remove();
         });
 
-        var $snippets_menu = this.$el.find("#snippets_menu");
-        var old_title = $snippets_menu.text();
-        $dropdown.on("shown.bs.dropdown", function () {
-            $snippets_menu.text(_t("Choose a Theme"));
-        });
-        $dropdown.on("hidden.bs.dropdown", function () {
-            $snippets_menu.text(old_title);
-        });
-
-        $dropdown.insertAfter($snippets_menu);
+        $dropdown.insertAfter(this.$el.find("#snippets_menu"));
 
         return ret;
     },

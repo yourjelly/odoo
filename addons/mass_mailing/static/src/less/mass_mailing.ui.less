@@ -15,3 +15,22 @@
         }
     }
 }
+
+#email_designer_themes {
+    display: none;
+}
+
+body.o_force_mail_theme_choice {
+    .o_mail_theme_selector {
+        .dropdown-toggle {
+            display: none;
+        }
+        .dropdown-menu {
+            display: block;
+        }
+    }
+    #editable_area::after {
+        content: "";
+        .o-position-absolute(0, 0, 0, 0);
+    }
+}
