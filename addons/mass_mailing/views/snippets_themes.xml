@@ -12,7 +12,6 @@
                     <t t-call="mass_mailing.s_mail_block_header_social"/>
                     <t t-call="mass_mailing.s_mail_block_banner"/>
                     <t t-call="mass_mailing.s_mail_block_title_text"/>
-                    <t t-call="mass_mailing.s_mail_block_footer_separator"/>
                     <t t-call="mass_mailing.s_mail_block_footer_social"/>
                 </div>
                 <div data-class="o_airmail_theme" data-img="/mass_mailing/static/src/img/theme_imgs/airmail_template_thumb.png">
@@ -273,7 +272,7 @@
                                     <tbody class="bg-gray-lighter">
                                         <tr>
                                             <td class="text-center col_mv">
-                                                <p class="o_mail_display_coupon text-center" style="font-weight:800;">$40</p>
+                                                <p class="o_mail_display_coupon text-center" style="margin-top:10px;">$40</p>
                                                 <small>user / month (billed annually)</small>
                                             </td>
                                         </tr>
@@ -331,7 +330,7 @@
                                     <tbody class="bg-gray-lighter">
                                         <tr>
                                             <td class="text-center col_mv">
-                                                <p class="o_mail_display_coupon text-center" style="font-weight:800;">$40</p>
+                                                <p class="o_mail_display_coupon text-center" style="margin-top:10px;">$40</p>
                                                 <small>user / month (billed annually)</small>
                                             </td>
                                         </tr>
@@ -562,8 +561,8 @@
 <template id="s_mail_block_footer_tag_line" name="Tag Line">
     <div class="o_mail_block_footer_tag_line">
         <div class="snippet_row">
-            <div class="o_mail_snippet_general" bgcolor="#875a7b" style="background-color:#875a7b;width:600px;">
-                <table class="o_mail_table_styles" width="600" align="center" cellpadding="0" cellspacing="0">
+            <div class="o_mail_snippet_general">
+                <table class="o_mail_table_styles o_mail_h_padding" width="600" align="center" cellpadding="0" cellspacing="0">
                     <tbody>
                         <tr>
                             <td width="600" class="text-center o_mail_h_padding o_mail_v_padding bg-beta">
@@ -581,7 +580,6 @@
                             <td>
                                 <div class="bg-beta">
                                     &amp;nbsp;
-
                                 </div>
                             </td>
                         </tr>
@@ -596,10 +594,10 @@
     <div class="o_mail_block_discount2">
         <div class="snippet_row">
             <div class="o_mail_snippet_general">
-                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles" width="600">
+                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_h_padding" width="600">
                     <tbody>
                         <tr>
-                            <td class="o_mail_h_padding o_mail_v_padding">
+                            <td class="o_mail_v_padding">
                                 <div class="text-center center-block">
                                     <p class="o_mail_display_coupon o_mail_no_margin text-center text-beta" style="font-weight:800;">
                                         $20
@@ -609,26 +607,16 @@
                             </td>
                         </tr>
                         <tr>
-                            <td valign="top" style="width:600px;" class="o_mail_v_padding">
-                                <div style="width:600px;" class="separator"></div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
+                            <td class="text-center">
                                 <p class="text-center" style="margin-top:10px;">
                                     Use This Promo Code BEFORE 1st of August
                                 </p>
-                                <p class="o_mail_h_padding o_mail_v_padding o_mail_display_2 text-center">
-                                    Code: <strong>45A9E77DGW8455</strong>
+                                <p class="o_mail_h_padding text-center">
+                                    <small>CODE</small>:   <strong class="o_mail_display_2">45A9E77DGW8455</strong>
                                 </p>
                                 <p class="text-center">
                                     to receive $20 from your next purchase!
                                 </p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td valign="top" style="width:600px;" class="o_mail_v_padding">
-                                <div style="width:600px;" class="separator"></div>
                             </td>
                         </tr>
                     </tbody>
@@ -655,13 +643,12 @@
                                     </tr>
                                     <tr>
                                         <td>
-                                            <p class="o_mail_display_3 text-center">FROM YOUR NEXT ORDER! <br/> &amp;nbsp;</p>
+                                            <p class="text-center">FROM YOUR NEXT ORDER!</p>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="text-center">
-                                            &amp;nbsp;
-                                            <a href="#" class="o_mail_btn" style="margin-top:15px;">Redeem Discount!</a>
+                                            <a href="#" class="o_mail_btn">Redeem Discount!</a>
                                             &amp;nbsp;
                                         </td>
                                     </tr>
@@ -754,7 +741,7 @@
     <div class="o_mail_block_steps">
         <div class="snippet_row">
             <div class="o_mail_snippet_general">
-                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles" width="600">
+                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_h_padding" width="600">
                     <tbody>
                         <tr>
                             <td class="col_mv o_mail_h_padding o_mail_v_padding bg-beta">
@@ -762,7 +749,7 @@
                                     <tr>
                                         <td rowspan="2">
                                             &amp;nbsp;
-                                            <span class="fa fa-hand-pointer-o fa-3x"></span>
+                                            <span class="fa fa-hand-pointer-o fa-2x"></span>
                                             &amp;nbsp;
                                         </td>
                                         <td style="padding-left:10px;">
@@ -777,7 +764,7 @@
                                     <tr>
                                         <td rowspan="2">
                                             &amp;nbsp;
-                                            <span class="fa fa-map-marker fa-3x"></span>
+                                            <span class="fa fa-map-marker fa-2x"></span>
                                             &amp;nbsp;
                                         </td>
                                         <td style="padding-left:10px;">
@@ -792,7 +779,7 @@
                                     <tr>
                                         <td rowspan="2">
                                             &amp;nbsp;
-                                            <span class="fa fa-money fa-3x"></span>
+                                            <span class="fa fa-money fa-2x"></span>
                                             &amp;nbsp;
                                         </td>
                                         <td style="padding-left:10px;">
@@ -814,44 +801,42 @@
     <div class="o_mail_block_footer_social">
         <div class="snippet_row">
             <div class="o_mail_snippet_general">
-                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles" width="600">
+                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_h_padding" width="600">
                     <tbody>
                         <tr>
-                            <td style="text-align:center">
+                            <td class="o_mail_footer_social" style="text-align:center">
                                 &amp;nbsp;
                                 <t t-if="website.social_facebook">
                                     <a t-att-href="website.social_facebook" class="o_mail_link">
-                                        <span class="fa fa-facebook-square fa-2x"></span>
+                                        <span class="fa fa-facebook"></span>
                                     </a>
                                 </t>
                                 <t t-if="website.social_googleplus">
-                                    <a t-att-href="website.social_googleplus" style="padding-left:5px;" class="o_mail_link">
-                                        <span class="fa fa-google-plus-square fa-2x"></span>
+                                    <a t-att-href="website.social_googleplus" style="padding-left:10px;" class="o_mail_link">
+                                        <span class="fa fa-google-plus"></span>
                                     </a>
                                 </t>
                                 <t t-if="website.social_linkedin">
-                                    <a t-att-href="website.social_linkedin" style="padding-left:5px;" class="o_mail_link">
-                                        <span class="fa fa-linkedin-square fa-2x"></span>
+                                    <a t-att-href="website.social_linkedin" style="padding-left:10px;" class="o_mail_link">
+                                        <span class="fa fa-linkedin"></span>
                                     </a>
                                 </t>
                                 <t t-if="website.social_twitter">
-                                    <a t-att-href="website.social_twitter" style="padding-left:5px;" class="o_mail_link">
-                                        <span class="fa fa-twitter-square fa-2x"></span>
+                                    <a t-att-href="website.social_twitter" style="padding-left:10px;" class="o_mail_link">
+                                        <span class="fa fa-twitter"></span>
                                     </a>
                                 </t>
                                 &amp;nbsp;
                             </td>
                         </tr>
                         <tr>
-                            <td style="font-size:12px;text-align:center;padding:10px">
-                                &amp;nbsp;
+                            <td class="o_mail_footer_links">
                                 <a href="/unsubscribe_from_list" class="o_mail_link">Unsubscribe</a> | <a href="/page/contactus" class="o_mail_link">Contact</a>
-                                &amp;nbsp;
                             </td>
                         </tr>
                         <tr>
-                            <td class="o_mail_h_padding o_mail_v_padding">
-                                <p style="font-size:12px;text-align:center;" class="o_mail_no_margin">© 2014 All Rights Reserved</p>
+                            <td>
+                                <p style="font-size:12px;text-align:center;" class="o_mail_copy">© 2014 All Rights Reserved</p>
                             </td>
                         </tr>
                     </tbody>
