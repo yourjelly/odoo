@@ -11,9 +11,9 @@
 // 'Default Theme' Palette
 @o_mm_def_color_alpha   : #f5f5f5;
 @o_mm_def_color_beta    : #ffffff;
-@o_mm_def_color_gamma   : #10b189;
+@o_mm_def_color_gamma   : #1cc1a9;
 @o_mm_def_color_delta   : #464646;
-@o_mm_def_color_epsilon : darken(@o_mm_def_color_gamma, 10%);
+@o_mm_def_color_epsilon : darken(@o_mm_def_color_gamma, 5%);
 @o_mm_def_color_zeta    : #906784;
 @o_mm_def_color_eta     : #87a6b5;
 
@@ -26,7 +26,7 @@
 // Assign 'Default Theme' Variables
 @o_mm_def_body_width    : 600px;
 
-@o_mm_def_font          : -apple-system, "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+@o_mm_def_font          : -apple-system, "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
 @o_mm_def_text_color    : @o_mm_def_color_delta;
 
 @o_mm_def_btn_bg        : @o_mm_def_color_gamma;
@@ -75,6 +75,11 @@
         height: auto;
     }
 
+    .separator {
+        height: 2px;
+        background-color: @o_mm_def_color_alpha;
+    }
+
     .bg-beta {
         background-color: @o_mm_def_color_zeta;
     }
@@ -100,23 +105,34 @@
     }
 }
 
-.o_mail_block_footer_separator {
-    .separator {
-        height: 1px;
-        background-color: darken(@o_mm_def_color_alpha, 20%);
+.o_mail_block_footer_social {
+    .o_mail_footer_social {
+        padding-top: 20px;
+        border-top: 2px solid @o_mm_def_color_alpha;
+    }
+
+    .o_mail_footer_links {
+        text-align: center;
+        font-size: 12px;
+        padding-top: 10px;
+        padding-bottom: 20px;
+    }
+
+    .o_mail_footer_copy {
+        font-size: 12px;
     }
 }
-
 
 // ===========   Typography
 
 .o_mail_display_coupon, .display-1, .display-2, .display-3, p, th, td, .table-styles {
     font-family: @o_mm_def_font;
-    font-weight: 300;
+    font-weight: normal;
     text-decoration: none !important;
 }
 .o_mail_display_coupon {
     font-size: 60px;
+    line-height: 1;
 }
 .o_mail_display_1 {
     font-size: 30px;
@@ -128,8 +144,7 @@
     font-size: 18px;
 }
 p, th, td {
-    text-align:left;
-    font-size: 14px;
+    font-size: normal;
 }
 
 .text-center {
