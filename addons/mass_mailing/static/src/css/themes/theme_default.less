@@ -9,11 +9,13 @@
 // ===========   Variables
 
 // 'Default Theme' Palette
-@o_mm_def_color_alpha   : #e3e3e3;
+@o_mm_def_color_alpha   : #f5f5f5;
 @o_mm_def_color_beta    : #ffffff;
 @o_mm_def_color_gamma   : #34c9a4;
 @o_mm_def_color_delta   : #464646;
 @o_mm_def_color_epsilon : darken(@o_mm_def_color_gamma, 10%);
+@o_mm_def_color_zeta    : #906784;
+
 
 // 'Default Theme' Images
 
@@ -67,6 +69,14 @@
         max-width: 100%;
         height: auto;
     }
+
+    .bg-beta {
+        background-color: @o_mm_def_color_zeta;
+    }
+
+    .bg-gray-lighter {
+        background-color: @o_mm_def_color_alpha;
+    }
 }
 
 
@@ -78,6 +88,12 @@
     }
 }
 
+.o_mail_block_footer_separator {
+    .separator {
+        height: 1px;
+        background-color: @o_mm_def_color_alpha;
+    }
+}
 
 
 // ===========   Typography
