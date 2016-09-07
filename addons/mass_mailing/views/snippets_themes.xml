@@ -485,7 +485,7 @@
                 <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles" width="600">
                     <tbody>
                         <tr>
-                            <td style="width:270px;vertical-align:middle;text-align:justify;" class="col_mv o_mail_h_padding o_mail_v_padding mobile-col">
+                            <td style="width:270px;vertical-align:middle;text-align:justify;" class="col_mv o_mail_h_padding o_mail_v_padding">
                                 <p class="o_mail_display_2">Account Information</p>
                                 <p class="o_mail_no_margin">We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.</p>
                                 <div class="text-center" style="margin-top:15px;">
