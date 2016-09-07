@@ -9,7 +9,11 @@
         <div id="o_scroll">
             <div id="email_designer_themes">
                 <div data-class="o_default_theme" data-img="/mass_mailing/static/src/img/theme_imgs/default_template_thumb.png">
-                    <!-- here put the t-call to the default theme template -->
+                    <t t-call="mass_mailing.s_mail_block_header_social"/>
+                    <t t-call="mass_mailing.s_mail_block_banner"/>
+                    <t t-call="mass_mailing.s_mail_block_title_text"/>
+                    <t t-call="mass_mailing.s_mail_block_footer_separator"/>
+                    <t t-call="mass_mailing.s_mail_block_footer_social"/>
                 </div>
                 <div data-class="o_airmail_theme" data-img="/mass_mailing/static/src/img/theme_imgs/airmail_template_thumb.png">
 
