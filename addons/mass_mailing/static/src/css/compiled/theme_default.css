@@ -11,8 +11,8 @@
   border: none;
   text-decoration: none;
   display: inline-block;
-  font-weight: 400;
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-weight: bold;
+  font-family: -apple-system, "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
   text-align: center;
   cursor: pointer;
   border-radius: 2px;
@@ -22,6 +22,7 @@
 .o_mail_snippet_general .o_mail_link {
   color: #2aa083;
   font-weight: bold;
+  text-decoration: none !important;
 }
 .o_mail_snippet_general img {
   width: 100%;
@@ -38,9 +39,8 @@
 p,
 th,
 td,
-a,
 .table-styles {
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-family: -apple-system, "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
   font-weight: 300;
   text-decoration: none !important;
 }

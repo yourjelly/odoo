@@ -23,7 +23,7 @@
 // Assign 'Default Theme' Variables
 @o_mm_def_body_width    : 600px;
 
-@o_mm_def_font          : "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+@o_mm_def_font          : -apple-system, "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
 @o_mm_def_text_color    : @o_mm_def_color_delta;
 
 @o_mm_def_btn_bg        : @o_mm_def_color_gamma;
@@ -48,7 +48,7 @@
         border: none;
         text-decoration: none;
         display: inline-block;
-        font-weight: 400;
+        font-weight: bold;
         font-family: @o_mm_def_font;
         text-align: center;
         cursor: pointer;
@@ -59,6 +59,7 @@
     a, .o_mail_link {
         color: @o_mm_def_color_epsilon;
         font-weight: bold;
+        text-decoration: none !important;
     }
 
     img {
@@ -81,7 +82,7 @@
 
 // ===========   Typography
 
-.o_mail_display_coupon, .display-1, .display-2, .display-3, p, th, td, a, .table-styles {
+.o_mail_display_coupon, .display-1, .display-2, .display-3, p, th, td, .table-styles {
     font-family: @o_mm_def_font;
     font-weight: 300;
     text-decoration: none !important;
