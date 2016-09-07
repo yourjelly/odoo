@@ -24,6 +24,12 @@
   font-weight: bold;
   text-decoration: none !important;
 }
+.o_mail_snippet_general a a:hover,
+.o_mail_snippet_general .o_mail_link a:hover,
+.o_mail_snippet_general a a:focus,
+.o_mail_snippet_general .o_mail_link a:focus {
+  color: inherit;
+}
 .o_mail_snippet_general img {
   width: 100%;
   max-width: 100%;
@@ -77,11 +83,6 @@ th,
 td {
   text-align: left;
   font-size: 14px;
-}
-a:hover,
-a:focus {
-  color: inherit;
-  text-transform: inherit;
 }
 .text-center {
   text-align: center;
