@@ -344,6 +344,30 @@
             </field>
         </record>
 
+        <record id="view_report_stock_value_variation_graph" model="ir.ui.view">
+            <field name="name">report.mrp.inout.graph</field>
+            <field name="model">stock.move</field>
+            <field name="arch" type="xml">
+                <graph string="Stock value variation" type="bar">
+                    <field name="company_id" groups="base.group_multi_company" type="row"/>
+                    <field name="date"/>
+                    <field name="variation_value" type="measure"/>
+                </graph>
+            </field>
+        </record>
+
+        <record id="stock_value_variation_action" model="ir.actions.act_window">
+            <field name="name">Weekly Stock Value Variation</field>
+            <field name="res_model">stock.move</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">graph</field>
+            <field name="context">{'group_by': ['company_id','date:week','variation_value']}</field>
+            <field name="domain">[('state','=','done')]</field>
+            <field name="view_id" ref="view_report_stock_value_variation_graph"/>
+            <field name="help">Weekly Stock Value Variation enables you to track the stock value evolution linked to manufacturing activities, receipts of products and delivery orders.</field>
+        </record>
+
 <menuitem action="stock_move_action" id="stock_move_menu" parent="stock.menu_warehouse_report" sequence="130"/>
 
+<menuitem id="stock_value_variation" parent="stock.menu_warehouse_report" sequence="140" action="stock_value_variation_action"/>
 </odoo>

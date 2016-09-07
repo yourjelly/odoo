@@ -151,6 +151,17 @@ class StockMove(models.Model):
     restrict_partner_id = fields.Many2one('res.partner', 'Owner ', help="Technical field used to depict a restriction on the ownership of quants to consider when marking this move as 'done'")
     route_ids = fields.Many2many('stock.location.route', 'stock_location_route_move', 'move_id', 'route_id', 'Destination route', help="Preferred route to be followed by the procurement order")
     warehouse_id = fields.Many2one('stock.warehouse', 'Warehouse', help="Technical field depicting the warehouse to consider for the route selection on the next procurement (if any).")
+    variation_value = fields.Float('Variation Value', compute='_comute_stock_variation', store=True)
+
+    @api.depends('state')
+    def _comute_stock_variation(self):
+        for move in self.filtered(lambda m: m.state == 'done'):
+            value = 0
+            if move.location_id.usage == 'internal':
+                value = move.product_qty * move.price_unit
+            if move.location_dest_id.usage == 'internal':
+                value -= move.product_qty * move.price_unit
+            move.variation_value = value
 
     @api.one
     @api.depends('product_id', 'product_uom', 'product_uom_qty')
