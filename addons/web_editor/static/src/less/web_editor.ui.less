@@ -1057,21 +1057,19 @@ body.editor_enable {
 #web_editor_inside_iframe {
     background-color: @odoo-brand-secondary;
 
-    &.editor_enable #wrapwrap {
+    #wrapwrap {
         height: 100%;
+
         > main {
+            .o-flex-display();
+            .o-justify-content(center);
             height: 100%;
+
             #editable_area {
                 position: relative;
-                overflow: hidden;
-                min-height: 100%;
-                margin: 0 auto;
-
                 background-color: white;
+                border: 2px solid darken(@odoo-brand-secondary, 10%);
             }
         }
-    }
-    .note-color-palette .colorpicker {
-        display: none;
     }
 }
