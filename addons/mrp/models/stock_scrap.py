@@ -41,6 +41,7 @@ class StockScrap(models.Model):
     def _prepare_move_values(self):
         vals = super(StockScrap, self)._prepare_move_values()
         if self.production_id:
+            vals['origin'] = self.origin or self.picking_id.name or self.production_id.name or ''
             if self.product_id in self.production_id.move_finished_ids.mapped('product_id'):
                 vals.update({'production_id': self.production_id.id})
             else:
