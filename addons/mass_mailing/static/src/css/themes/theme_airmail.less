@@ -56,13 +56,17 @@
 
     // =========== Snippets
 
+    > div { // All snippets
+        margin-bottom: 16px;
+    }
+
     .o_mail_block_header_social, .o_mail_block_header_text_social {
         .o_mail_snippet_general {
             background: rgba(0,0,0,0);
             background: transparent;
 
             > table {
-                border-bottom: 4px solid @o_mm_airmail_color_gamma;
+                border-bottom: 2px solid @o_mm_airmail_color_gamma;
             }
         }
 
@@ -83,6 +87,32 @@
         td.o_mail_h_padding {
             padding-left: 0;
             padding-right: 0;
+        }
+    }
+
+    .o_mail_block_two_cols, .o_mail_block_three_cols {
+        @tmp-gap: 10px;
+
+        table {
+            width: (600+(@tmp-gap*2));
+            margin: auto (@tmp-gap*-1);
+        }
+        .o_mail_snippet_general {
+            background: rgba(0,0,0,0);
+            background: transparent;
+        }
+        .o_mail_col_container {
+            padding: 0 0 (@tmp-gap*2);
+            margin: 0 @tmp-gap;
+            background-color: @o_mm_airmail_color_beta;
+
+            > * {
+                padding: 0 (@tmp-gap*2);
+            }
+
+            img {
+                padding: 0!important;
+            }
         }
     }
 

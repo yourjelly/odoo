@@ -16,9 +16,7 @@
                 </div>
                 <div data-name="airmail" data-img="/mass_mailing/static/src/img/theme_imgs/airmail_template_thumb.png">
                     <t t-call="mass_mailing.s_mail_block_header_social"/>
-                    <t t-call="mass_mailing.s_mail_block_title_sub"/>
                     <t t-call="mass_mailing.s_mail_block_image"/>
-                    <t t-call="mass_mailing.s_mail_block_footer_separator"/>
                     <t t-call="mass_mailing.s_mail_block_two_cols"/>
                     <t t-call="mass_mailing.s_mail_block_footer_tag_line"/>
                     <t t-call="mass_mailing.s_mail_block_three_cols"/>
@@ -396,28 +394,32 @@
     <div class="o_mail_block_two_cols">
         <div class="snippet_row">
             <div class="o_mail_snippet_general">
-                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles" width="600">
+                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_v_padding o_mail_col_table" width="600">
                     <tbody>
                         <tr>
-                            <td style="vertical-align:top;width:270px;padding:20px 10px 20px 20px;" class="col_mv">
-                                <img src="https://source.unsplash.com/vCF5sB7QecM/270x150" alt="Your Picture" />
-                                <p class="o_mail_display_2 text-center" style="margin-top:20px;">Step 1</p>
-                                <p class="text-center o_mail_no_margin">
-                                    We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.
-                                </p>
-                                <div class="text-center" style="margin-top:15px;">
-                                    <a href="#" class="o_mail_link">Read More...</a>
+                            <td style="vertical-align:top;width:270px;" class="col_mv">
+                                <div class="o_mail_col_container">
+                                    <img src="https://source.unsplash.com/vCF5sB7QecM/270x150" alt="Your Picture" />
+                                    <p class="o_mail_display_3 text-center">Step 1</p>
+                                    <p class="text-center o_mail_no_margin">
+                                        We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.
+                                    </p>
+                                    <div class="text-center" style="margin-top:15px;">
+                                        <a href="#" class="o_mail_link">Read More...</a>
+                                    </div>
                                 </div>
                             </td>
 
-                            <td style="vertical-align:top;width:270px;padding:20px 20px 20px 10px;" class="col_mv">
-                                <img src="https://source.unsplash.com/C3V88BOoRoM/270x150" alt="Your Picture" />
-                                <p class="o_mail_display_2 text-center" style="margin-top:20px;">Step 2</p>
-                                <p class="text-center o_mail_no_margin">
-                                    We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.
-                                </p>
-                                <div class="text-center" style="margin-top:15px;">
-                                    <a href="#" class="o_mail_link">Read More...</a>
+                            <td style="vertical-align:top;width:270px;" class="col_mv">
+                                <div class="o_mail_col_container">
+                                    <img src="https://source.unsplash.com/C3V88BOoRoM/270x150" alt="Your Picture" />
+                                    <p class="o_mail_display_3 text-center">Step 2</p>
+                                    <p class="text-center o_mail_no_margin">
+                                        We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.
+                                    </p>
+                                    <div class="text-center" style="margin-top:15px;">
+                                        <a href="#" class="o_mail_link">Read More...</a>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -432,39 +434,45 @@
     <div class="o_mail_block_three_cols">
         <div class="snippet_row">
             <div class="o_mail_snippet_general">
-                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles" width="600">
+                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_v_padding o_mail_col_table" width="600">
                     <tbody>
                         <tr>
-                            <td style="vertical-align:top;width:180px;padding:20px 5px 20px 20px;" class="col_mv">
-                                <img src="https://source.unsplash.com/bIhpiQA009k/190x95" alt="Your Picture" />
-                                <p class="o_mail_display_2 text-center" style="margin-top:20px;">Step 1</p>
-                                <p class="text-center o_mail_no_margin">
-                                    We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.
-                                </p>
-                                <div class="text-center" style="margin-top:15px;">
-                                    <a href="#" class="o_mail_link">Read More...</a>
+                            <td style="vertical-align:top;width:180px;" class="col_mv">
+                                <div class="o_mail_col_container">
+                                    <img src="https://source.unsplash.com/bIhpiQA009k/190x95" alt="Your Picture" />
+                                    <p class="o_mail_display_3 text-center">Step 1</p>
+                                    <p class="text-center o_mail_no_margin">
+                                        We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.
+                                    </p>
+                                    <div class="text-center" style="margin-top:15px;">
+                                        <a href="#" class="o_mail_link">Read More...</a>
+                                    </div>
                                 </div>
                             </td>
 
-                            <td style="vertical-align:top;width:180px;padding:20px 5px 20px 5px;" class="col_mv">
-                                <img src="https://source.unsplash.com/hUU9dtVUg8U/190x95" alt="Your Picture" />
-                                <p class="o_mail_display_2 text-center" style="margin-top:20px;">Step 2</p>
-                                <p class="text-center o_mail_no_margin">
-                                    We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.
-                                </p>
-                                <div class="text-center" style="margin-top:15px;">
-                                    <a href="#" class="o_mail_link">Read More...</a>
+                            <td style="vertical-align:top;width:180px;" class="col_mv">
+                                <div class="o_mail_col_container">
+                                    <img src="https://source.unsplash.com/hUU9dtVUg8U/190x95" alt="Your Picture" />
+                                    <p class="o_mail_display_3 text-center">Step 2</p>
+                                    <p class="text-center o_mail_no_margin">
+                                        We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.
+                                    </p>
+                                    <div class="text-center" style="margin-top:15px;">
+                                        <a href="#" class="o_mail_link">Read More...</a>
+                                    </div>
                                 </div>
                             </td>
 
-                            <td style="vertical-align:top;width:180px;padding:20px 20px 20px 5px;" class="col_mv">
-                                <img src="https://source.unsplash.com/FDJ371PeyhY/190x95" alt="Your Picture" />
-                                <p class="o_mail_display_2 text-center" style="margin-top:20px;">Step 3</p>
-                                <p class="text-center o_mail_no_margin">
-                                    We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.
-                                </p>
-                                <div class="text-center" style="margin-top:15px;">
-                                    <a href="#" class="o_mail_link">Read More...</a>
+                            <td style="vertical-align:top;width:180px;" class="col_mv">
+                                <div class="o_mail_col_container">
+                                    <img src="https://source.unsplash.com/FDJ371PeyhY/190x95" alt="Your Picture" />
+                                    <p class="o_mail_display_3 text-center" style="margin-top:20px;">Step 3</p>
+                                    <p class="text-center o_mail_no_margin">
+                                        We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.
+                                    </p>
+                                    <div class="text-center" style="margin-top:15px;">
+                                        <a href="#" class="o_mail_link">Read More...</a>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
