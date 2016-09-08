@@ -149,7 +149,7 @@ snippets_editor.Class.include({
         if ($themes.length === 0) return ret;
 
         /**
-         * Initialiaze theme parameters.
+         * Initialize theme parameters.
          */
         var all_classes = "";
         var themes_params = _.map($themes, function (theme) {
