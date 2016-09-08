@@ -161,6 +161,7 @@ snippets_editor.Class.include({
                 className: classname || "",
                 img: $theme.data("img") || "",
                 template: $theme.html().trim(),
+                module: $theme.data("module") || "mass_mailing",
             };
         });
         $themes.parent().remove();
@@ -192,6 +193,26 @@ snippets_editor.Class.include({
             $editable_area.empty().append($new_layout);
             $new_layout.append($contents);
             $old_layout.remove();
+        });
+
+        $dropdown.on("click", "li > a", function (e) {
+            e.preventDefault();
+            var theme_params = themes_params[$(e.currentTarget).parent().index()];
+            $snippets.add($editable_area).find("img").each(function () {
+                var $img = $(this);
+                var src = $img.attr("src");
+
+                var m = src.match(/^\/web\/image\/(\w+)\.s_default_image_(?:theme_[a-z]+_)?(.+)$/);
+                if (!m) return;
+
+                var mod = theme_params.module || m[1];
+                var file = m[2];
+                if (mod === "mass_mailing") {
+                    file = "theme_" + theme_params.name + "_" + file;
+                }
+
+                $img.attr("src", "/web/image/" + mod + ".s_default_image_" + file);
+            });
         });
 
         this.on("snippet_removed", this, function () {
