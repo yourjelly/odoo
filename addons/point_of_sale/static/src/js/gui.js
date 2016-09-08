@@ -368,15 +368,13 @@ var Gui = core.Class.extend({
             contents = JSON.stringify(contents,null,2);
         }
 
-        var blob = new Blob([contents]);
-
-        var evt  = document.createEvent("HTMLEvents");
-            evt.initEvent("click");
-
-        $("<a>",{
-            download: name || 'document.txt',
-            href: URL.createObjectURL(blob),
-        }).get(0).dispatchEvent(evt);
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(contents));
+        element.setAttribute('download', name);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
     },
 
     /* ---- Gui: EMAILS ---- */
