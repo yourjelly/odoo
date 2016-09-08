@@ -149,21 +149,24 @@ snippets_editor.Class.include({
         if ($themes.length === 0) return ret;
 
         var $body = $(document.body);
-        var themes_bodies = _.map($themes, function (theme) {
-            return theme.innerHTML.trim();
-        });
-
+        var $snippets = this.$(".oe_snippet");
         var all_classes = "";
+        var themes_params = _.map($themes, function (theme) {
+            var $theme = $(theme);
+            var name = $theme.data("name");
+            var classname = "o_" + name + "_theme";
+            all_classes += " " + classname;
+            return {
+                name: name,
+                className: classname || "",
+                img: $theme.data("img") || "",
+                template: $theme.html().trim(),
+            };
+        });
+        $themes.parent().remove();
+
         var $dropdown = $(core.qweb.render("mass_mailing.theme_selector", {
-            themes: _.map($themes, function (theme) {
-                var $theme = $(theme);
-                var classname = $theme.data("class");
-                all_classes += " " + classname;
-                return {
-                    className: classname,
-                    imgSource: $theme.data("img"),
-                };
-            }),
+            themes: themes_params
         }));
 
         var first_choice;
@@ -171,16 +174,15 @@ snippets_editor.Class.include({
 
         $dropdown.on("mouseenter", "li > a", function (e) {
             e.preventDefault();
-            var $theme_option = $(e.currentTarget);
-            var classname = $theme_option.data("class");
-            $body.removeClass(all_classes).addClass(classname);
+            var theme_params = themes_params[$(e.currentTarget).parent().index()];
+            $body.removeClass(all_classes).addClass(theme_params.className);
 
             var $old_layout = $editable_area.find(".o_layout");
-            var $new_layout = $("<div/>", {"class": "o_layout oe_structure " + classname});
-            var $contents;
+            var $new_layout = $("<div/>", {"class": "o_layout oe_structure " + theme_params.className});
 
+            var $contents;
             if (first_choice || editable_area_is_empty($old_layout)) {
-                $contents = themes_bodies[$theme_option.parent().index()];
+                $contents = theme_params.template;
             } else if ($old_layout.length) {
                 $contents = ($old_layout.hasClass("oe_structure") ? $old_layout : $old_layout.find(".oe_structure").first()).contents();
             } else {
@@ -239,7 +241,6 @@ window.top.odoo[window["callback"]+"_updown"] = function (value, fields_values, 
         }
 
         if (value.indexOf('on_change_model_and_list') === -1) {
-
             $editable.html(value);
 
             if (editor_enable) {
