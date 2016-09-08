@@ -157,13 +157,15 @@ snippets_editor.Class.include({
             var name = $theme.data("name");
             var classname = "o_" + name + "_theme";
             all_classes += " " + classname;
-            var images_info = _.defaults($theme.data("imagesInfo") || {}, {all: {format: "jpg"}});
+            var images_info = _.defaults($theme.data("imagesInfo") || {}, {all: {}});
+            _.each(images_info, function (info) {
+                info = _.defaults(info, {module: "mass_mailing", format: "jpg"});
+            });
             return {
                 name: name,
                 className: classname || "",
                 img: $theme.data("img") || "",
                 template: $theme.html().trim(),
-                module: $theme.data("module") || "mass_mailing",
                 get_image_info: function (filename) {
                     if (images_info[filename]) {
                         return images_info[filename];
@@ -268,21 +270,19 @@ snippets_editor.Class.include({
                 var $img = $(this);
                 var src = $img.attr("src");
 
-                var m = src.match(/^\/web\/image\/(\w+)\.s_default_image_(?:theme_[a-z]+_)?(.+)$/);
+                var m = src.match(/^\/web\/image\/\w+\.s_default_image_(?:theme_[a-z]+_)?(.+)$/);
                 if (!m) {
-                    m = src.match(/^\/(\w+)\/static\/src\/img\/(?:theme_[a-z]+\/)?s_default_image_(.+)\.[a-z]+$/);
+                    m = src.match(/^\/\w+\/static\/src\/img\/(?:theme_[a-z]+\/)?s_default_image_(.+)\.[a-z]+$/);
                 }
                 if (!m) return;
 
-                var mod = theme_params.module || m[1];
-                var file = m[2];
-
+                var file = m[1];
                 var img_info = theme_params.get_image_info(file);
 
                 if (img_info.format) {
-                    src = "/" + mod + "/static/src/img/theme_" + theme_params.name + "/s_default_image_" + file + "." + img_info.format;
+                    src = "/" + img_info.module + "/static/src/img/theme_" + theme_params.name + "/s_default_image_" + file + "." + img_info.format;
                 } else {
-                    src = "/web/image/" + mod + ".s_default_image_theme_" + theme_params.name + "_" + file;
+                    src = "/web/image/" + img_info.module + ".s_default_image_theme_" + theme_params.name + "_" + file;
                 }
 
                 $img.attr("src", src);
