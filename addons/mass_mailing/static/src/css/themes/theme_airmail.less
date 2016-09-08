@@ -1,2 +1,119 @@
 // out: ../compiled/theme_airmail.css, sourcemap: false, compress: false
 // lessc@1.4.2
+
+
+@o_mm_airmail_color_alpha   : #eee;
+@o_mm_airmail_color_beta    : white;
+@o_mm_airmail_color_gamma   : #6077a8;
+@o_mm_airmail_color_delta   : darken(@o_mm_airmail_color_gamma, 5%);
+@o_mm_airmail_color_epsilon : black;
+@o_mm_airmail_color_zeta    : #a17e92;
+
+
+
+#web_editor_inside_iframe.o_airmail_theme  {
+    background-color: @o_mm_airmail_color_alpha;
+}
+
+.o_layout.o_airmail_theme {
+    padding-bottom: 20px;
+
+    // ===========   Components
+
+    .o_mail_snippet_general {
+        background-color: @o_mm_airmail_color_beta;
+        color: @o_mm_airmail_color_epsilon;
+
+        .o_mail_btn {
+            color: @o_mm_airmail_color_beta;
+            background-color: @o_mm_airmail_color_gamma;
+        }
+
+        a, .o_mail_link {
+            color: @o_mm_airmail_color_delta;
+        }
+
+        .bg-beta {
+            background-color: @o_mm_airmail_color_gamma;
+
+            .o_mail_btn {
+                color: @o_mm_airmail_color_beta;
+                background-color: @o_mm_airmail_color_zeta;
+            }
+        }
+        .text-beta {
+            color: @o_mm_airmail_color_gamma;
+        }
+
+        .bg-delta {
+            background-color: @o_mm_airmail_color_zeta;
+        }
+
+        .bg-gray-lighter {
+            background-color: @o_mm_airmail_color_zeta;
+        }
+    }
+
+    // =========== Snippets
+
+    .o_mail_block_header_social, .o_mail_block_header_text_social {
+        .o_mail_snippet_general {
+            background: rgba(0,0,0,0);
+            background: transparent;
+
+            > table {
+                border-bottom: 4px solid @o_mm_airmail_color_gamma;
+            }
+        }
+
+        .o_mail_h_padding {
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .o_mail_header_social {
+            margin-right: 0px;
+            a {
+                color: darken(@o_mm_airmail_color_alpha, 40%);
+            }
+        }
+    }
+
+    .o_mail_block_banner {
+        td.o_mail_h_padding {
+            padding-left: 0;
+            padding-right: 0;
+        }
+    }
+
+    .o_mail_block_footer_tag_line {
+        table.o_mail_h_padding {
+            padding-left: 0;
+            padding-right: 0;
+        }
+    }
+
+    .o_mail_block_footer_social {
+        .o_mail_snippet_general {
+            background: rgba(0,0,0,0);
+            background: transparent;
+        }
+
+        .o_mail_footer_social {
+            border: none;
+            a {
+                color: darken(@o_mm_airmail_color_alpha, 40%);
+            }
+        }
+
+        .o_mail_footer_links a {
+            color: darken(@o_mm_airmail_color_alpha, 40%);
+        }
+
+        .o_mail_footer_copy {
+            font-weight: bold;
+            font-size: 9px;
+            color: darken(@o_mm_airmail_color_alpha, 30%);
+        }
+    }
+}
