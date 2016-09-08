@@ -33,6 +33,16 @@
 @o_mm_def_btn_text      : @o_mm_def_color_beta;
 
 
+// ===========   Editor
+
+#web_editor_inside_iframe {
+    background-color: @o_mm_def_color_beta;
+
+    #wrapwrap > main #editable_area {
+        border: none;
+        background-color: transparent;
+    }
+}
 
 
 // ===========   Components
@@ -99,6 +109,12 @@
 
 // ===========   Snippets
 
+.o_mail_block_header_social, .o_mail_block_header_text_social {
+    .o_mail_header_social {
+        margin-right: 20px;
+    }
+}
+
 .o_mail_block_header_text_social {
     .o_mail_display_3 {
         font-weight: bold;
@@ -120,6 +136,7 @@
 
     .o_mail_footer_copy {
         font-size: 12px;
+        text-align:center;
     }
 }
 
@@ -144,7 +161,7 @@
     font-size: 18px;
 }
 p, th, td {
-    font-size: normal;
+    font-size: small;
 }
 
 .text-center {
