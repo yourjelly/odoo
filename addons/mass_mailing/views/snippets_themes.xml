@@ -8,24 +8,22 @@
     <xpath expr="//div[@id='o_scroll']" position="replace">
         <div id="o_scroll">
             <div id="email_designer_themes">
-                <div data-name="default" data-img="/mass_mailing/static/src/img/theme_imgs/default_template_thumb.png">
-                    <t t-call="mass_mailing.s_mail_block_header_social"/>
-                    <t t-call="mass_mailing.s_mail_block_footer_separator"/>
-                    <t t-call="mass_mailing.s_mail_block_title_text"/>
-                    <t t-call="mass_mailing.s_mail_block_footer_social"/>
+                <div data-name="default"
+                     data-img="/mass_mailing/static/src/img/theme_imgs/default_template_thumb.png"
+                     data-images-info='{"logo": {"format": "png"}}'>
+                    <t t-call="mass_mailing.theme_default_template"/>
                 </div>
-                <div data-name="airmail" data-img="/mass_mailing/static/src/img/theme_imgs/airmail_template_thumb.png">
-                    <t t-call="mass_mailing.s_mail_block_header_social"/>
-                    <t t-call="mass_mailing.s_mail_block_image"/>
-                    <t t-call="mass_mailing.s_mail_block_two_cols"/>
-                    <t t-call="mass_mailing.s_mail_block_footer_tag_line"/>
-                    <t t-call="mass_mailing.s_mail_block_three_cols"/>
-                    <t t-call="mass_mailing.s_mail_block_footer_social"/>
+                <div data-name="airmail"
+                     data-img="/mass_mailing/static/src/img/theme_imgs/airmail_template_thumb.png"
+                     data-images-info='{"logo": {"format": "png"}}'>
+                    <t t-call="mass_mailing.theme_airmail_template"/>
                 </div>
-                <div data-name="tech" data-img="/mass_mailing/static/src/img/theme_imgs/tech_template_thumb.png">
+                <div data-name="tech"
+                     data-img="/mass_mailing/static/src/img/theme_imgs/tech_template_thumb.png"
+                     data-images-info='{"logo": {"format": "png"}}'>
+                     <t t-call="mass_mailing.theme_tech_template"/>
                     <t t-call="mass_mailing.s_mail_block_header_social"/>
                     <t t-call="mass_mailing.s_mail_block_banner"/>
-
                 </div>
                 <div data-name="lemon" data-img="/mass_mailing/static/src/img/theme_imgs/lemon_template_thumb.png">
 
@@ -92,10 +90,10 @@
             <div class="o_mail_snippet_general">
                 <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles" width="600">
                     <tr>
-                        <td width="80%"  class="o_mail_h_padding o_mail_v_padding">
+                        <td width="80%"  class="o_mail_logo_container o_mail_h_padding o_mail_v_padding">
                             &amp;nbsp;
                             <a t-att-href="(company_id.website) or '#'" style="text-decoration:none;float:none;">
-                                 <img border="0" src="http://www.odoocdn.com/openerp_website/static/src/img/2016/logos/odoo_logo_small.png" style="height:auto;max-width:400px;width:90px;margin-left:-6px;" alt="Your Logo" />
+                                 <img border="0" src="/web/image/mass_mailing.s_default_image_logo" style="height:auto;max-width:400px;margin-left:-6px;" alt="Your Logo" />
                             </a>
                             &amp;nbsp;
                         </td>
