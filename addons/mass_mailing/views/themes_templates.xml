@@ -53,7 +53,6 @@
                 </div>
             </div>
         </div>
-        <t t-call="mass_mailing.s_mail_block_footer_separator"/>
         <t t-call="mass_mailing.s_mail_block_title_text"/>
         <t t-call="mass_mailing.s_mail_block_footer_social"/>
     </template>
@@ -110,10 +109,137 @@
                 </div>
             </div>
         </div>
-        <t t-call="mass_mailing.s_mail_block_image"/>
-        <t t-call="mass_mailing.s_mail_block_two_cols"/>
-        <t t-call="mass_mailing.s_mail_block_footer_tag_line"/>
-        <t t-call="mass_mailing.s_mail_block_three_cols"/>
+        <div class="o_mail_block_banner">
+            <div class="snippet_row">
+                <div class="o_mail_snippet_general">
+                    <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles" width="600">
+                        <tbody>
+                            <tr>
+                                <td width="100%" valign="top" class="o_mail_h_padding">
+                                    <a href="#">
+                                        <img src="/mass_mailing/static/src/img/theme_airmail/s_default_image_block_banner.jpg" alt="Your Banner Image"/>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="o_mail_block_two_cols">
+            <div class="snippet_row">
+                <div class="o_mail_snippet_general">
+                    <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_v_padding o_mail_col_table" width="600">
+                        <tbody>
+                            <tr>
+                                <td style="vertical-align:top;width:270px;" class="col_mv">
+                                    <div class="o_mail_col_container">
+                                        <img src="/mass_mailing/static/src/img/theme_airmail/s_default_image_block_two_cols_1.jpg" alt="Your Picture"/>
+                                        <p class="o_mail_display_3 text-center o_default_snippet_text">Gibson Les Paul Junior</p>
+                                        <p class="text-center o_mail_no_margin o_default_snippet_text">
+                                            Check the top electric guitar brands and their models!
+                                        </p>
+                                        <div class="text-center" style="margin-top:15px;">
+                                            <a href="#" class="o_mail_link o_default_snippet_text">Read More...</a>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td style="vertical-align:top;width:270px;" class="col_mv">
+                                    <div class="o_mail_col_container">
+                                        <img src="/mass_mailing/static/src/img/theme_airmail/s_default_image_block_two_cols_2.jpg" alt="Your Picture"/>
+                                        <p class="o_mail_display_3 text-center o_default_snippet_text">Sony BDVE210</p>
+                                        <p class="text-center o_mail_no_margin o_default_snippet_text">
+                                            Heat up the popcorn and get ready for an immersive experience.
+                                        </p>
+                                        <div class="text-center" style="margin-top:15px;">
+                                            <a href="#" class="o_mail_link o_default_snippet_text">Read More...</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="o_mail_block_discount1">
+            <div class="snippet_row">
+                <div class="o_mail_snippet_general">
+                    <table align="center" cellpadding="0" cellspacing="0" width="600" class="o_mail_table_styles">
+                        <tbody>
+                            <tr>
+                                <td class="o_mail_h_padding o_mail_v_padding text-center col_mv" width="250">
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <p class="o_mail_display_coupon text-beta text-center o_mail_no_margin o_default_snippet_text" style="font-weight:800;">20%</p>
+                                                    <p class="o_mail_display_3 text-beta text-center o_default_snippet_text" style="font-weight:800;">OFF</p>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <p class="text-center o_default_snippet_text">FROM YOUR NEXT ORDER!</p>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-center">
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                                <td class="o_mail_h_padding o_mail_v_padding col_mv" width="350">
+                                    <p class="o_mail_no_margin o_default_snippet_text">We are continuing to grow and we miss seeing you be a part of it! We've increased store hours and have lot's of new brands available.<br/>To welcome you back please accept this 20% discount on you next purchase by clicking the button.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="o_mail_block_three_cols">
+            <div class="snippet_row">
+                <div class="o_mail_snippet_general">
+                    <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_v_padding o_mail_col_table" width="600">
+                        <tbody>
+                            <tr>
+                                <td style="vertical-align:top;width:180px;" class="col_mv">
+                                    <div class="o_mail_col_container">
+                                        <img src="/mass_mailing/static/src/img/theme_airmail/s_default_image_block_three_cols_1.jpg" alt="Your Picture"/>
+                                        <p class="o_mail_display_3 text-center">1958 Royal</p>
+                                        <div class="text-center" style="margin-top:15px;">
+                                            <a href="#" class="o_mail_btn">DIscover</a>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td style="vertical-align:top;width:180px;" class="col_mv">
+                                    <div class="o_mail_col_container">
+                                        <img src="/mass_mailing/static/src/img/theme_airmail/s_default_image_block_three_cols_2.jpg" alt="Your Picture"/>
+                                        <p class="o_mail_display_3 text-center">Classic D8 Skate</p>
+                                        <div class="text-center" style="margin-top:15px;">
+                                            <a href="#" class="o_mail_btn">Discover</a>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td style="vertical-align:top;width:180px;" class="col_mv">
+                                    <div class="o_mail_col_container">
+                                        <img src="/mass_mailing/static/src/img/theme_airmail/s_default_image_block_three_cols_3.jpg" alt="Your Picture"/>
+                                        <p class="o_mail_display_3 text-center">Puccini Jar</p>
+                                        <div class="text-center" style="margin-top:15px;">
+                                            <a href="#" class="o_mail_btn">Discover</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
         <t t-call="mass_mailing.s_mail_block_footer_social"/>
     </template>
 
@@ -170,7 +296,7 @@
             </div>
         </div>
         <div class="o_mail_block_banner">
-            <div class="snippet_row">
+            <div class="snippet_row mb16">
                 <div class="o_mail_snippet_general">
                     <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles" width="600">
                         <tbody>
@@ -190,13 +316,13 @@
                     <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles" width="600">
                         <tbody>
                             <tr>
-                                <td style="width:270px;text-align:center;vertical-align:middle" class="col_mv o_mail_h_padding o_mail_v_padding">
-                                    <img src="/mass_mailing/static/src/img/theme_tech/s_default_image_block_image_text.jpg" alt="Your Picture"/>
+                                <td style="width:200px;text-align:center;vertical-align:middle" class="col_mv o_mail_h_padding o_mail_v_padding">
+                                    <img src="/mass_mailing/static/src/img/theme_tech/s_default_image_block_image.jpg" alt="Your Picture"/>
                                 </td>
-                                <td style="width:270px;vertical-align:middle;text-align:justify;" class="col_mv o_mail_h_padding o_mail_v_padding">
-                                    <p class="o_mail_display_2 o_default_snippet_text">Account Information</p>
-                                    <p class="o_mail_no_margin o_default_snippet_text">We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.</p>
-                                    <div class="text-center" style="margin-top:15px;">
+                                <td style="width:400px;vertical-align:middle;" class="col_mv o_mail_h_padding o_mail_v_padding">
+                                    <p class="o_mail_display_3 o_default_snippet_text">The Rise Of The Drone</p>
+                                    <p class="o_mail_no_margin o_default_snippet_text">They sit at terminals at Holloman Air Force Base, watching grainy images from a drone video feed.</p>
+                                    <div class="text-left" style="margin-top:15px;">
                                         <a href="#" class="o_mail_link o_default_snippet_text">Read More...</a>
                                     </div>
                                 </td>
@@ -206,5 +332,52 @@
                 </div>
             </div>
         </div>
+        <div class="o_mail_block_image_text">
+            <div class="snippet_row">
+                <div class="o_mail_snippet_general">
+                    <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles" width="600">
+                        <tbody>
+                            <tr>
+                                <td style="width:200px;text-align:center;vertical-align:middle" class="col_mv o_mail_h_padding o_mail_v_padding">
+                                    <img src="/mass_mailing/static/src/img/theme_tech/s_default_image_block_image_text.jpg" alt="Your Picture"/>
+                                </td>
+                                <td style="width:400px;vertical-align:middle;" class="col_mv o_mail_h_padding o_mail_v_padding">
+                                    <p class="o_mail_display_3 o_default_snippet_text">New 45Hc-270A laptop</p>
+                                    <p class="o_mail_no_margin o_default_snippet_text">The new laptops look nearly identical to the original models, but closer inspection reveals a refined design.</p>
+                                    <div class="text-left" style="margin-top:15px;">
+                                        <a href="#" class="o_mail_link o_default_snippet_text">Read More...</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="o_mail_block_image_text">
+            <div class="snippet_row">
+                <div class="o_mail_snippet_general">
+                    <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles" width="600">
+                        <tbody>
+                            <tr>
+                                <td style="width:200px;text-align:center;vertical-align:middle" class="col_mv o_mail_h_padding o_mail_v_padding">
+                                    <img src="/mass_mailing/static/src/img/theme_tech/s_default_image_block_text_image.jpg" alt="Your Picture"/>
+                                </td>
+                                <td style="width:400px;vertical-align:middle;" class="col_mv o_mail_h_padding o_mail_v_padding">
+                                    <p class="o_mail_display_3 o_default_snippet_text">Two-lens phone cameras</p>
+                                    <p class="o_mail_no_margin o_default_snippet_text">Normally mirrorless cameras have always sat slightly above entry-level in terms of price..</p>
+                                    <div class="text-left" style="margin-top:15px;">
+                                        <a href="#" class="o_mail_link o_default_snippet_text">Read More...</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <t t-call="mass_mailing.s_mail_block_footer_separator"/>
+        <t t-call="mass_mailing.s_mail_block_footer_social"/>
     </template>
 </odoo>
