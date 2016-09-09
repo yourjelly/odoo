@@ -2,7 +2,7 @@
   background-color: #333;
 }
 .o_layout.o_tech_theme {
-  padding-bottom: 20px;
+  background-color: #333;
 }
 .o_layout.o_tech_theme .o_mail_snippet_general {
   background: rgba(0, 0, 0, 0);
@@ -57,7 +57,6 @@
 .o_layout.o_tech_theme .o_mail_block_header_social .o_mail_snippet_general > table,
 .o_layout.o_tech_theme .o_mail_block_header_text_social .o_mail_snippet_general > table {
   max-width: 560px;
-  border-top: 1px solid #666666;
   border-bottom: 1px solid #666666;
 }
 .o_layout.o_tech_theme .o_mail_block_header_social .o_mail_h_padding.o_mail_v_padding,

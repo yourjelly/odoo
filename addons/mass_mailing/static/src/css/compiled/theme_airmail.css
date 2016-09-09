@@ -1,6 +1,9 @@
 #web_editor_inside_iframe.o_airmail_theme {
   background-color: #EAECED;
 }
+.o_layout.o_airmail_theme {
+  background-color: #EAECED;
+}
 .o_layout.o_airmail_theme .o_mail_snippet_general {
   background-color: white;
   color: black;

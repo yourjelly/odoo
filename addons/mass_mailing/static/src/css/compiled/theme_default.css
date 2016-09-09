@@ -5,6 +5,10 @@
   border: none;
   background-color: transparent;
 }
+.o_layout {
+  background-color: #fafafa;
+  padding-bottom: 20px;
+}
 .o_mail_snippet_general {
   width: 600px;
   color: #797979;
@@ -19,7 +23,7 @@
   border: none;
   text-decoration: none;
   display: inline-block;
-  font-weight: bold;
+  font-weight: normal;
   font-family: -apple-system, "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
   text-align: center;
   cursor: pointer;
