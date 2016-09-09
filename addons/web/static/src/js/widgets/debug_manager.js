@@ -650,7 +650,7 @@ if (core.debug) {
             this._super.apply(this, arguments);
             var action_descr = action && action.action_descr;
             var action_widget = action && action.widget;
-            var debug_manager = _.find(this.menu.systray_menu.widgets, function(item) {return item instanceof DebugManager; });
+            var debug_manager = _.find(this.systray_menu.widgets, function(item) {return item instanceof DebugManager; });
             debug_manager.update('action', action_descr, action_widget);
         },
     });
