@@ -1,3 +1,105 @@
 // out: ../compiled/theme_tech.css, sourcemap: false, compress: false
 // lessc@1.4.2
 
+
+@o_mm_tech_color_alpha   : #333;
+@o_mm_tech_color_beta    : white;
+@o_mm_tech_color_gamma   : #6077a8;
+@o_mm_tech_color_delta   : darken(@o_mm_tech_color_gamma, 5%);
+@o_mm_tech_color_epsilon : black;
+@o_mm_tech_color_zeta    : #a17e92;
+
+
+
+#web_editor_inside_iframe.o_tech_theme  {
+    background-color: @o_mm_tech_color_alpha;
+}
+
+.o_layout.o_tech_theme {
+    padding-bottom: 20px;
+
+    // ===========   Components
+
+    .o_mail_snippet_general {
+        color: @o_mm_tech_color_beta;
+
+        .o_mail_btn {
+            color: @o_mm_tech_color_beta;
+            background-color: @o_mm_tech_color_gamma;
+        }
+
+        a, .o_mail_link {
+            color: @o_mm_tech_color_delta;
+        }
+
+        .bg-beta {
+            background-color: @o_mm_tech_color_gamma;
+
+            .o_mail_btn {
+                color: @o_mm_tech_color_beta;
+                background-color: @o_mm_tech_color_zeta;
+            }
+        }
+        .text-beta {
+            color: @o_mm_tech_color_gamma;
+        }
+
+        .bg-delta {
+            background-color: @o_mm_tech_color_zeta;
+        }
+
+        .bg-gray-lighter {
+            background-color: @o_mm_tech_color_zeta;
+        }
+    }
+
+    // =========== Snippets
+
+
+    .o_mail_block_header_social, .o_mail_block_header_text_social {
+        .o_mail_snippet_general {
+            background: rgba(0,0,0,0);
+            background: transparent;
+        }
+
+        .o_mail_header_social {
+            a {
+                color: darken(@o_mm_tech_color_beta, 40%);
+            }
+        }
+    }
+
+    .o_mail_block_banner {
+        img {
+            border-top: 2px solid @o_mm_tech_color_delta;
+        }
+    }
+
+
+    .o_mail_block_footer_tag_line {
+    }
+
+    .o_mail_block_footer_social {
+        .o_mail_snippet_general {
+            background: rgba(0,0,0,0);
+            background: transparent;
+        }
+
+        .o_mail_footer_social {
+            border: none;
+            a {
+                color: darken(@o_mm_tech_color_beta, 40%);
+            }
+        }
+
+        .o_mail_footer_links a {
+            color: darken(@o_mm_tech_color_beta, 40%);
+        }
+
+        .o_mail_footer_copy {
+            font-weight: bold;
+            font-size: 9px;
+            color: darken(@o_mm_tech_color_beta, 30%);
+        }
+    }
+}
