@@ -202,7 +202,7 @@
                     <tbody>
                       <tr>
                           <td width="100%" valign="top" class="o_mail_h_padding">
-                                <img src="https://source.unsplash.com/in7_58C6GBc/560x200" alt="Your Banner Image" />
+                                <img src="/web/image/mass_mailing.s_default_image_block_banner" alt="Your Banner Image" />
                           </td>
                       </tr>
                     </tbody>
@@ -400,7 +400,7 @@
                         <tr>
                             <td style="vertical-align:top;width:270px;" class="col_mv">
                                 <div class="o_mail_col_container">
-                                    <img src="https://source.unsplash.com/vCF5sB7QecM/270x150" alt="Your Picture" />
+                                    <img src="/web/image/mass_mailing.s_default_image_block_two_cols_1" alt="Your Picture" />
                                     <p class="o_mail_display_3 text-center">Step 1</p>
                                     <p class="text-center o_mail_no_margin">
                                         We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.
@@ -413,7 +413,7 @@
 
                             <td style="vertical-align:top;width:270px;" class="col_mv">
                                 <div class="o_mail_col_container">
-                                    <img src="https://source.unsplash.com/C3V88BOoRoM/270x150" alt="Your Picture" />
+                                    <img src="/web/image/mass_mailing.s_default_image_block_two_cols_2" alt="Your Picture" />
                                     <p class="o_mail_display_3 text-center">Step 2</p>
                                     <p class="text-center o_mail_no_margin">
                                         We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.
@@ -440,7 +440,7 @@
                         <tr>
                             <td style="vertical-align:top;width:180px;" class="col_mv">
                                 <div class="o_mail_col_container">
-                                    <img src="https://source.unsplash.com/bIhpiQA009k/190x95" alt="Your Picture" />
+                                    <img src="/web/image/mass_mailing.s_default_image_block_three_cols_1" alt="Your Picture" />
                                     <p class="o_mail_display_3 text-center">Step 1</p>
                                     <p class="text-center o_mail_no_margin">
                                         We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.
@@ -453,7 +453,7 @@
 
                             <td style="vertical-align:top;width:180px;" class="col_mv">
                                 <div class="o_mail_col_container">
-                                    <img src="https://source.unsplash.com/hUU9dtVUg8U/190x95" alt="Your Picture" />
+                                    <img src="/web/image/mass_mailing.s_default_image_block_three_cols_2" alt="Your Picture" />
                                     <p class="o_mail_display_3 text-center">Step 2</p>
                                     <p class="text-center o_mail_no_margin">
                                         We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.
@@ -466,7 +466,7 @@
 
                             <td style="vertical-align:top;width:180px;" class="col_mv">
                                 <div class="o_mail_col_container">
-                                    <img src="https://source.unsplash.com/FDJ371PeyhY/190x95" alt="Your Picture" />
+                                    <img src="/web/image/mass_mailing.s_default_image_block_three_cols_3" alt="Your Picture" />
                                     <p class="o_mail_display_3 text-center" style="margin-top:20px;">Step 3</p>
                                     <p class="text-center o_mail_no_margin">
                                         We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.
@@ -492,7 +492,7 @@
                     <tbody>
                         <tr>
                             <td style="width:270px;text-align:center;vertical-align:middle" class="col_mv o_mail_h_padding o_mail_v_padding">
-                                <img src="https://source.unsplash.com/zEJIuKZcD8c/280x200" alt="Your Picture" />
+                                <img src="/web/image/mass_mailing.s_default_image_block_image_text" alt="Your Picture" />
                             </td>
                             <td style="width:270px;vertical-align:middle;text-align:justify;" class="col_mv o_mail_h_padding o_mail_v_padding">
                                 <p class="o_mail_display_2">Account Information</p>
@@ -524,7 +524,7 @@
                                 </div>
                             </td>
                             <td style="width:270px;text-align:center;vertical-align:middle" class="col_mv o_mail_h_padding o_mail_v_padding">
-                                <img src="https://source.unsplash.com/8TGRQ6-5KRU/280x200" alt="Your Picture" />
+                                <img src="/web/image/mass_mailing.s_default_image_block_text_image" alt="Your Picture" />
                             </td>
                         </tr>
                     </tbody>
@@ -542,7 +542,7 @@
                     <tbody>
                         <tr>
                             <td width="100%" align="center" style="text-align:center" class="o_mail_h_padding o_mail_v_padding">
-                                <img src="https://source.unsplash.com/vbUULTovNaM/560x600" alt="Your Picture" />
+                                <img src="/web/image/mass_mailing.s_default_image_block_image" alt="Your Picture" />
                             </td>
                         </tr>
                         <tr>
