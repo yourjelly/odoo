@@ -37,30 +37,17 @@ class ChangeProductionQty(models.TransientModel):
 
     @api.multi
     def change_prod_qty(self):
-        MrpBom = self.env['mrp.bom']
         for wizard in self:
             production = wizard.mo_id
             produced = sum(production.move_finished_ids.mapped('quantity_done'))
             if wizard.product_qty < produced:
                 raise UserError(_("You have already produced %d qty , Please give update quantity more then %d ")%(produced, produced))
             production.write({'product_qty': wizard.product_qty})
-            #production.action_compute()
-            #TODO: Do we still need to change the quantity of a production order?
-            production_move = production.move_finished_ids.filtered(lambda x : x.state not in ('done', 'cancel') and production.product_id.id == x.product_id.id)
-            for move in production.move_raw_ids:
-                bom_point = production.bom_id
-                # TDE FIXME: this is not the place to do that kind of computation, please
-                if not bom_point:
-                    bom_point = MrpBom._bom_find(product=production.product_id, picking_type=production.picking_type_id)
-                    if not bom_point:
-                        raise UserError(_("Cannot find bill of material for this production."))
-                    production.write({'bom_id': bom_point.id})
-                if not bom_point:
-                    raise UserError(_("Cannot find bill of material for this production."))
-                factor = (production.product_qty - production.qty_produced) * production.product_uom_id.factor / bom_point.product_uom_id.factor
-                boms, lines = production.bom_id.explode(production.product_id, factor, picking_type=production.bom_id.picking_type_id)
-                for line, line_data in lines:
-                    production._update_raw_move(line, line_data['qty'])
+            bom_point = production.bom_id
+            factor = (production.product_qty - production.qty_produced) * production.product_uom_id.factor / bom_point.product_uom_id.factor
+            boms, lines = production.bom_id.explode(production.product_id, factor, picking_type=production.bom_id.picking_type_id)
+            for line, line_data in lines:
+                production._update_raw_move(line, line_data)
             self._update_product_to_produce(production, production.product_qty - production.qty_produced)
             moves = production.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
             moves.do_unreserve()
