@@ -4,8 +4,8 @@
 
 @o_mm_tech_color_alpha   : #333;
 @o_mm_tech_color_beta    : white;
-@o_mm_tech_color_gamma   : #6077a8;
-@o_mm_tech_color_delta   : darken(@o_mm_tech_color_gamma, 5%);
+@o_mm_tech_color_gamma   : #59cdcd;
+@o_mm_tech_color_delta   : #bdbdbd;
 @o_mm_tech_color_epsilon : black;
 @o_mm_tech_color_zeta    : #a17e92;
 
@@ -21,7 +21,7 @@
     // ===========   Components
 
     .o_mail_snippet_general {
-        color: @o_mm_tech_color_beta;
+        color: @o_mm_tech_color_delta;
 
         .o_mail_btn {
             color: @o_mm_tech_color_beta;
@@ -29,7 +29,7 @@
         }
 
         a, .o_mail_link {
-            color: @o_mm_tech_color_delta;
+            color: @o_mm_tech_color_gamma;
         }
 
         .bg-beta {
@@ -51,18 +51,36 @@
         .bg-gray-lighter {
             background-color: @o_mm_tech_color_zeta;
         }
+
+        .o_mail_display_1, .o_mail_display_2, .o_mail_display_3, h1, h2, h3, h4, h5, h6 {
+            color: @o_mm_tech_color_beta;
+        }
     }
 
     // =========== Snippets
 
-
     .o_mail_block_header_social, .o_mail_block_header_text_social {
         .o_mail_snippet_general {
+            margin-top: 10px;
+            margin-bottom: 25px;
+            padding-left: 20px;
+            padding-right: 20px;
             background: rgba(0,0,0,0);
             background: transparent;
+
+            > table {
+                max-width: 560px;
+                border-top: 1px solid darken(@o_mm_tech_color_beta, 60%);
+                border-bottom: 1px solid darken(@o_mm_tech_color_beta, 60%);
+            }
+        }
+
+        .o_mail_h_padding.o_mail_v_padding {
+            padding: 10px 0 5px;
         }
 
         .o_mail_header_social {
+            margin-right: 0px;
             a {
                 color: darken(@o_mm_tech_color_beta, 40%);
             }
@@ -70,9 +88,6 @@
     }
 
     .o_mail_block_banner {
-        img {
-            border-top: 2px solid @o_mm_tech_color_delta;
-        }
     }
 
 
