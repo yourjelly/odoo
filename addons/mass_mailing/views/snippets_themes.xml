@@ -151,7 +151,6 @@
                             <a t-att-href="(company_id.website) or '#'" class="o_mail_display_3" style="margin-left:-6px;">
                                 My Company
                             </a>
-                            <img src="/mass_mailing/static/src/img/blocks/block_banner.png" alt=""/>
                             &amp;nbsp;
                         </td>
                         <td valign="center" width="20%">
