@@ -1,5 +1,5 @@
 #web_editor_inside_iframe {
-  background-color: #ffffff;
+  background-color: #fafafa;
 }
 #web_editor_inside_iframe #wrapwrap > main #editable_area {
   border: none;
@@ -7,7 +7,8 @@
 }
 .o_mail_snippet_general {
   width: 600px;
-  color: #464646;
+  color: #797979;
+  background-color: #ffffff;
   margin: 0 auto;
 }
 .o_mail_snippet_general .o_mail_btn {
@@ -69,6 +70,10 @@
 .o_mail_block_header_text_social .o_mail_display_3 {
   font-weight: bold;
 }
+.o_mail_block_two_cols,
+.o_mail_block_three_cols {
+  font-size: small;
+}
 .o_mail_block_two_cols .o_mail_col_container,
 .o_mail_block_three_cols .o_mail_col_container {
   padding: 10px 20px;
@@ -76,6 +81,10 @@
 .o_mail_block_two_cols .o_mail_col_container .o_mail_display_3,
 .o_mail_block_three_cols .o_mail_col_container .o_mail_display_3 {
   margin-top: 15px;
+}
+.o_mail_block_image_text,
+.o_mail_block_text_image {
+  font-size: small;
 }
 .o_mail_block_footer_social .o_mail_footer_social {
   padding-top: 20px;
@@ -85,11 +94,13 @@
   text-align: center;
   font-size: 12px;
   padding-top: 10px;
-  padding-bottom: 20px;
+  padding-bottom: 10px;
 }
 .o_mail_block_footer_social .o_mail_footer_copy {
-  font-size: 12px;
+  font-size: 9px;
+  font-weight: bold;
   text-align: center;
+  color: #939393;
 }
 .o_mail_display_coupon,
 .display-1,
@@ -102,6 +113,17 @@ td,
   font-family: -apple-system, "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
   font-weight: normal;
   text-decoration: none !important;
+}
+.o_mail_display_1,
+.o_mail_display_2,
+.o_mail_display_3,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #464646;
 }
 .o_mail_display_coupon {
   font-size: 60px;
@@ -116,10 +138,11 @@ td,
 .o_mail_display_3 {
   font-size: 18px;
 }
-p,
-th,
-td {
-  font-size: small;
+.o_layout {
+  font-size: normal;
+}
+.o_layout p {
+  line-height: 1.6;
 }
 .text-center {
   text-align: center;

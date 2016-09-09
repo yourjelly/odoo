@@ -21,6 +21,8 @@
     // ===========   Components
 
     .o_mail_snippet_general {
+        background: rgba(0,0,0,0);
+        background: transparent;
         color: @o_mm_tech_color_delta;
 
         .o_mail_btn {
@@ -29,6 +31,7 @@
         }
 
         a, .o_mail_link {
+            font-weight: normal;
             color: @o_mm_tech_color_gamma;
         }
 
@@ -53,7 +56,7 @@
         }
 
         .o_mail_display_1, .o_mail_display_2, .o_mail_display_3, h1, h2, h3, h4, h5, h6 {
-            color: @o_mm_tech_color_beta;
+            color: darken(@o_mm_tech_color_beta, 10%);
         }
     }
 
@@ -88,6 +91,12 @@
     }
 
     .o_mail_block_banner {
+    }
+
+    .o_mail_block_footer_separator {
+        .separator {
+            background-color: darken(@o_mm_tech_color_beta, 60%);
+        }
     }
 
 
