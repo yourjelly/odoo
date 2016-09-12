@@ -264,7 +264,7 @@
                 <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles" width="600">
                     <tbody>
                         <tr>
-                            <td class="o_mail_h_padding o_mail_v_padding col_mv">
+                            <td class="o_mail_h_padding o_mail_v_padding o_mail_col_mv">
                                 <table cellspacing="0" cellpadding="0" class="o_mail_table_styles">
                                     <thead>
                                         <tr>
@@ -275,33 +275,33 @@
                                     </thead>
                                     <tbody class="bg-gray-lighter">
                                         <tr>
-                                            <td class="text-center col_mv">
+                                            <td class="text-center o_mail_col_mv">
                                                 <p class="o_mail_display_coupon text-center" style="margin-top:10px;">$40</p>
                                                 <small>user / month (billed annually)</small>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td valign="top" class="o_mail_v_padding col_mv">
+                                            <td valign="top" class="o_mail_v_padding o_mail_col_mv">
                                                 <div class="separator"></div>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="col_mv">
+                                            <td class="o_mail_col_mv">
                                                 <p style="margin: 0 15px 15px;">Basic sales and marketing for up to 2 users</p>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="col_mv">
+                                            <td class="o_mail_col_mv">
                                                 <p style="margin: 0 15px 15px;">Account and sales management</p>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="col_mv">
+                                            <td class="o_mail_col_mv">
                                                 <p style="margin: 0 15px 15px;">No customization</p>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="col_mv">
+                                            <td class="o_mail_col_mv">
                                                 <p style="margin: 0 15px 15px;">No support</p>
                                             </td>
                                         </tr>
@@ -322,7 +322,7 @@
                                     </tfoot>
                                 </table>
                             </td>
-                            <td class="o_mail_h_padding o_mail_v_padding col_mv">
+                            <td class="o_mail_h_padding o_mail_v_padding o_mail_col_mv">
                                 <table cellspacing="0" cellpadding="0" class="o_mail_table_styles">
                                     <thead>
                                         <tr>
@@ -333,33 +333,33 @@
                                     </thead>
                                     <tbody class="bg-gray-lighter">
                                         <tr>
-                                            <td class="text-center col_mv">
+                                            <td class="text-center o_mail_col_mv">
                                                 <p class="o_mail_display_coupon text-center" style="margin-top:10px;">$40</p>
                                                 <small>user / month (billed annually)</small>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td valign="top" class="o_mail_v_padding col_mv">
+                                            <td valign="top" class="o_mail_v_padding o_mail_col_mv">
                                                 <div class="separator"></div>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="col_mv">
+                                            <td class="o_mail_col_mv">
                                                 <p style="margin: 0 15px 15px;">Basic sales and marketing for up to 2 users</p>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="col_mv">
+                                            <td class="o_mail_col_mv">
                                                 <p style="margin: 0 15px 15px;">Account and sales management</p>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="col_mv">
+                                            <td class="o_mail_col_mv">
                                                 <p style="margin: 0 15px 15px;">No customization</p>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="col_mv">
+                                            <td class="o_mail_col_mv">
                                                 <p style="margin: 0 15px 15px;">No support</p>
                                             </td>
                                         </tr>
@@ -395,7 +395,7 @@
                 <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_v_padding o_mail_col_table" width="600">
                     <tbody>
                         <tr>
-                            <td style="vertical-align:top;width:270px;" class="col_mv">
+                            <td style="vertical-align:top;width:270px;" class="o_mail_col_mv">
                                 <div class="o_mail_col_container">
                                     <img src="/web/image/mass_mailing.s_default_image_block_two_cols_1" alt="Your Picture" />
                                     <p class="o_mail_display_3 text-center">Step 1</p>
@@ -408,7 +408,7 @@
                                 </div>
                             </td>
 
-                            <td style="vertical-align:top;width:270px;" class="col_mv">
+                            <td style="vertical-align:top;width:270px;" class="o_mail_col_mv">
                                 <div class="o_mail_col_container">
                                     <img src="/web/image/mass_mailing.s_default_image_block_two_cols_2" alt="Your Picture" />
                                     <p class="o_mail_display_3 text-center">Step 2</p>
@@ -435,7 +435,7 @@
                 <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_v_padding o_mail_col_table" width="600">
                     <tbody>
                         <tr>
-                            <td style="vertical-align:top;width:180px;" class="col_mv">
+                            <td style="vertical-align:top;width:180px;" class="o_mail_col_mv">
                                 <div class="o_mail_col_container">
                                     <img src="/web/image/mass_mailing.s_default_image_block_three_cols_1" alt="Your Picture" />
                                     <p class="o_mail_display_3 text-center">Step 1</p>
@@ -448,7 +448,7 @@
                                 </div>
                             </td>
 
-                            <td style="vertical-align:top;width:180px;" class="col_mv">
+                            <td style="vertical-align:top;width:180px;" class="o_mail_col_mv">
                                 <div class="o_mail_col_container">
                                     <img src="/web/image/mass_mailing.s_default_image_block_three_cols_2" alt="Your Picture" />
                                     <p class="o_mail_display_3 text-center">Step 2</p>
@@ -461,7 +461,7 @@
                                 </div>
                             </td>
 
-                            <td style="vertical-align:top;width:180px;" class="col_mv">
+                            <td style="vertical-align:top;width:180px;" class="o_mail_col_mv">
                                 <div class="o_mail_col_container">
                                     <img src="/web/image/mass_mailing.s_default_image_block_three_cols_3" alt="Your Picture" />
                                     <p class="o_mail_display_3 text-center">Step 3</p>
@@ -491,7 +491,7 @@
                             <td style="width:270px;text-align:center;vertical-align:middle" class="o_mail_img_container o_mail_h_padding o_mail_v_padding">
                                 <img src="/web/image/mass_mailing.s_default_image_block_image_text" alt="Your Picture" />
                             </td>
-                            <td style="width:270px;vertical-align:middle;text-align:justify;" class="col_mv o_mail_h_padding o_mail_v_padding">
+                            <td style="width:270px;vertical-align:middle;text-align:justify;" class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
                                 <p class="o_mail_display_2">Account Information</p>
                                 <p class="o_mail_no_margin">We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.</p>
                                 <div class="text-center" style="margin-top:15px;">
@@ -513,7 +513,7 @@
                 <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles" width="600">
                     <tbody>
                         <tr>
-                            <td style="width:270px;vertical-align:middle;text-align:justify;" class="col_mv o_mail_h_padding o_mail_v_padding">
+                            <td style="width:270px;vertical-align:middle;text-align:justify;" class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
                                 <p class="o_mail_display_2">Account Information</p>
                                 <p class="o_mail_no_margin">We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.</p>
                                 <div class="text-center" style="margin-top:15px;">
@@ -647,7 +647,7 @@
                 <table align="center" cellpadding="0" cellspacing="0" width="600" class="o_mail_table_styles">
                     <tbody>
                         <tr>
-                            <td class="o_mail_h_padding o_mail_v_padding text-center col_mv" width="250">
+                            <td class="o_mail_h_padding o_mail_v_padding text-center o_mail_col_mv" width="250">
                                 <table>
                                     <tr>
                                         <td>
@@ -668,7 +668,7 @@
                                     </tr>
                                 </table>
                             </td>
-                            <td class="o_mail_h_padding o_mail_v_padding col_mv" width="350">
+                            <td class="o_mail_h_padding o_mail_v_padding o_mail_col_mv" width="350">
                                 <p class="o_mail_no_margin">We are continuing to grow and we miss seeing you be a part of it! We've increased store hours and have lot's of new brands available. To welcome you back please accept this 20% discount on you next purchase by clicking the button.</p>
                             </td>
                         </tr>
@@ -699,7 +699,7 @@
                                 &amp;nbsp;
                             </div>
                         </td>
-                        <td style="vertical-align:top;width:50%;height:150px;min-width:255px" class="col_mv">
+                        <td style="vertical-align:top;width:50%;height:150px;min-width:255px" class="o_mail_col_mv">
                             <table style="width:100%;border-collapse:separate;">
                                 <tr style="padding-right:5px;">
                                     <td style="padding-top:20px;padding-left:20px;float:left" width="90%">
@@ -758,7 +758,7 @@
                 <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_h_padding" width="600">
                     <tbody>
                         <tr>
-                            <td class="col_mv o_mail_h_padding o_mail_v_padding bg-beta">
+                            <td class="o_mail_col_mv o_mail_h_padding o_mail_v_padding bg-beta">
                                 <table class="o_mail_table_styles">
                                     <tr>
                                         <td rowspan="2">
@@ -773,7 +773,7 @@
                                     </tr>
                                 </table>
                             </td>
-                            <td class="col_mv o_mail_h_padding o_mail_v_padding">
+                            <td class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
                                 <table class="o_mail_table_styles">
                                     <tr>
                                         <td rowspan="2">
@@ -788,7 +788,7 @@
                                     </tr>
                                 </table>
                             </td>
-                            <td class="col_mv o_mail_h_padding o_mail_v_padding">
+                            <td class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
                                 <table class="o_mail_table_styles">
                                     <tr>
                                         <td rowspan="2">

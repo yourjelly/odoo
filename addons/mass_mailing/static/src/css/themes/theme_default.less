@@ -18,13 +18,10 @@
 @o_mm_def_color_eta     : #87a6b5;
 
 
-// 'Default Theme' Images
-
-@o_mm_def_b_radius      : 2px;
-
-
 // Assign 'Default Theme' Variables
 @o_mm_def_body_width    : 600px;
+@o_mm_def_body_bobile   : 480px;
+@o_mm_def_b_radius      : 2px;
 
 @o_mm_def_font          : -apple-system, "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
 @o_mm_def_text_color    : @o_mm_def_color_delta;
@@ -224,4 +221,17 @@
     border-collapse:separate;
 }
 
+// =========== Mobile
 
+@media screen and (max-width: @o_mm_def_body_bobile) {
+    .o_mail_col_mv {
+        display: block!important;
+        max-width: @o_mm_def_body_bobile!important;
+        width: 100%!important;
+    }
+
+    .o_mail_table_styles {
+        max-width: @o_mm_def_body_bobile!important;
+        width: 100%!important;
+    }
+}

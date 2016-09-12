@@ -132,7 +132,7 @@
                     <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_v_padding o_mail_col_table" width="600">
                         <tbody>
                             <tr>
-                                <td style="vertical-align:top;width:270px;" class="col_mv">
+                                <td style="vertical-align:top;width:270px;" class="o_mail_col_mv">
                                     <div class="o_mail_col_container">
                                         <img src="/mass_mailing/static/src/img/theme_airmail/s_default_image_block_two_cols_1.jpg" alt="Your Picture"/>
                                         <p class="o_mail_display_3 text-center o_default_snippet_text">Gibson Les Paul Junior</p>
@@ -145,7 +145,7 @@
                                     </div>
                                 </td>
 
-                                <td style="vertical-align:top;width:270px;" class="col_mv">
+                                <td style="vertical-align:top;width:270px;" class="o_mail_col_mv">
                                     <div class="o_mail_col_container">
                                         <img src="/mass_mailing/static/src/img/theme_airmail/s_default_image_block_two_cols_2.jpg" alt="Your Picture"/>
                                         <p class="o_mail_display_3 text-center o_default_snippet_text">Sony BDVE210</p>
@@ -169,7 +169,7 @@
                     <table align="center" cellpadding="0" cellspacing="0" width="600" class="o_mail_table_styles">
                         <tbody>
                             <tr>
-                                <td class="o_mail_h_padding o_mail_v_padding text-center col_mv" width="250">
+                                <td class="o_mail_h_padding o_mail_v_padding text-center o_mail_col_mv" width="250">
                                     <table>
                                         <tbody>
                                             <tr>
@@ -190,7 +190,7 @@
                                         </tbody>
                                     </table>
                                 </td>
-                                <td class="o_mail_h_padding o_mail_v_padding col_mv" width="350">
+                                <td class="o_mail_h_padding o_mail_v_padding o_mail_col_mv" width="350">
                                     <p class="o_mail_no_margin o_default_snippet_text">We are continuing to grow and we miss seeing you be a part of it! We've increased store hours and have lot's of new brands available.<br/>To welcome you back please accept this 20% discount on you next purchase by clicking the button.</p>
                                 </td>
                             </tr>
@@ -205,7 +205,7 @@
                     <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_v_padding o_mail_col_table" width="600">
                         <tbody>
                             <tr>
-                                <td style="vertical-align:top;width:180px;" class="col_mv">
+                                <td style="vertical-align:top;width:180px;" class="o_mail_col_mv">
                                     <div class="o_mail_col_container">
                                         <img src="/mass_mailing/static/src/img/theme_airmail/s_default_image_block_three_cols_1.jpg" alt="Your Picture"/>
                                         <p class="o_mail_display_3 text-center">1958 Royal</p>
@@ -215,7 +215,7 @@
                                     </div>
                                 </td>
 
-                                <td style="vertical-align:top;width:180px;" class="col_mv">
+                                <td style="vertical-align:top;width:180px;" class="o_mail_col_mv">
                                     <div class="o_mail_col_container">
                                         <img src="/mass_mailing/static/src/img/theme_airmail/s_default_image_block_three_cols_2.jpg" alt="Your Picture"/>
                                         <p class="o_mail_display_3 text-center">Classic D8 Skate</p>
@@ -225,7 +225,7 @@
                                     </div>
                                 </td>
 
-                                <td style="vertical-align:top;width:180px;" class="col_mv">
+                                <td style="vertical-align:top;width:180px;" class="o_mail_col_mv">
                                     <div class="o_mail_col_container">
                                         <img src="/mass_mailing/static/src/img/theme_airmail/s_default_image_block_three_cols_3.jpg" alt="Your Picture"/>
                                         <p class="o_mail_display_3 text-center">Puccini Jar</p>
@@ -316,10 +316,10 @@
                     <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles" width="600">
                         <tbody>
                             <tr>
-                                <td style="width:200px;text-align:center;vertical-align:middle" class="col_mv o_mail_h_padding o_mail_v_padding">
+                                <td style="width:200px;text-align:center;vertical-align:middle" class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
                                     <img src="/mass_mailing/static/src/img/theme_tech/s_default_image_block_image.jpg" alt="Your Picture"/>
                                 </td>
-                                <td style="width:400px;vertical-align:middle;" class="col_mv o_mail_h_padding o_mail_v_padding">
+                                <td style="width:400px;vertical-align:middle;" class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
                                     <p class="o_mail_display_3 o_default_snippet_text">The Rise Of The Drone</p>
                                     <p class="o_mail_no_margin o_default_snippet_text">They sit at terminals at Holloman Air Force Base, watching grainy images from a drone video feed.</p>
                                     <div class="text-left" style="margin-top:15px;">
@@ -338,10 +338,10 @@
                     <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles" width="600">
                         <tbody>
                             <tr>
-                                <td style="width:200px;text-align:center;vertical-align:middle" class="col_mv o_mail_h_padding o_mail_v_padding">
+                                <td style="width:200px;text-align:center;vertical-align:middle" class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
                                     <img src="/mass_mailing/static/src/img/theme_tech/s_default_image_block_image_text.jpg" alt="Your Picture"/>
                                 </td>
-                                <td style="width:400px;vertical-align:middle;" class="col_mv o_mail_h_padding o_mail_v_padding">
+                                <td style="width:400px;vertical-align:middle;" class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
                                     <p class="o_mail_display_3 o_default_snippet_text">New 45Hc-270A laptop</p>
                                     <p class="o_mail_no_margin o_default_snippet_text">The new laptops look nearly identical to the original models, but closer inspection reveals a refined design.</p>
                                     <div class="text-left" style="margin-top:15px;">
@@ -360,10 +360,10 @@
                     <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles" width="600">
                         <tbody>
                             <tr>
-                                <td style="width:200px;text-align:center;vertical-align:middle" class="col_mv o_mail_h_padding o_mail_v_padding">
+                                <td style="width:200px;text-align:center;vertical-align:middle" class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
                                     <img src="/mass_mailing/static/src/img/theme_tech/s_default_image_block_text_image.jpg" alt="Your Picture"/>
                                 </td>
-                                <td style="width:400px;vertical-align:middle;" class="col_mv o_mail_h_padding o_mail_v_padding">
+                                <td style="width:400px;vertical-align:middle;" class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
                                     <p class="o_mail_display_3 o_default_snippet_text">Two-lens phone cameras</p>
                                     <p class="o_mail_no_margin o_default_snippet_text">Normally mirrorless cameras have always sat slightly above entry-level in terms of price..</p>
                                     <div class="text-left" style="margin-top:15px;">

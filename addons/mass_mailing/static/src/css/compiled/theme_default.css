@@ -166,3 +166,14 @@ h6 {
 .o_mail_table_styles {
   border-collapse: separate;
 }
+@media screen and (max-width: 480px) {
+  .o_mail_col_mv {
+    display: block!important;
+    max-width: 480px !important;
+    width: 100%!important;
+  }
+  .o_mail_table_styles {
+    max-width: 480px !important;
+    width: 100%!important;
+  }
+}
