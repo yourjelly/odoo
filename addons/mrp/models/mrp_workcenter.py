@@ -42,10 +42,10 @@ class MrpWorkcenter(models.Model):
         ('done', 'In Progress')], 'Status', compute="_compute_working_state", store=True)
     blocked_time = fields.Float(
         'Blocked Time', compute='_compute_blocked_time',
-        help='Blocked hours over the last month')
+        help='Blocked minutes over the last month')
     productive_time = fields.Float(
         'Productive Time', compute='_compute_productive_time',
-        help='Productive hours over the last month')
+        help='Productive minutes over the last month')
     oee = fields.Float(compute='_compute_oee', help='Overall Equipment Effectiveness, based on the last month')
     oee_target = fields.Float(string='OEE Target', help="OEE Target in percentage", default=90)
     performance = fields.Integer('Performance', compute='_compute_performance', help='Performance over the last month')

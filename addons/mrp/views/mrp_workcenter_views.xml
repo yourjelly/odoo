@@ -267,7 +267,7 @@
                             </button>
                             <button name="%(mrp_workcenter_productivity_report_blocked)d" type="action" class="oe_stat_button" icon="fa-bar-chart">
                                 <div class="o_form_field o_stat_info">
-                                    <span class="o_stat_value"><field name="blocked_time" widget="statinfo" nolabel="1"/> hour(s)</span>
+                                    <span class="o_stat_value"><field name="blocked_time" widget="statinfo" nolabel="1"/> minute(s)</span>
                                     <span class="o_stat_text">Lost</span>
                                 </div>
                             </button>
@@ -517,7 +517,7 @@
                 <field name="workcenter_id"/>
                 <field name="user_id"/>
                 <field name="loss_id"/>
-                <field name="duration" string="Duration (hours)" sum="Duration"/>
+                <field name="duration" string="Duration (minutes)" sum="Duration"/>
             </tree>
         </field>
     </record>
