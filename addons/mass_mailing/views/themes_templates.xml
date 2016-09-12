@@ -109,7 +109,7 @@
                     <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles" width="600">
                         <tbody>
                             <tr>
-                                <td width="100%" valign="top" class="o_mail_h_padding">
+                                <td width="100%" valign="top" class="o_mail_full_width_padding">
                                     <a href="#">
                                         <img src="/mass_mailing/static/src/img/theme_airmail/s_default_image_block_banner.jpg" alt="Your Banner Image"/>
                                     </a>
@@ -295,7 +295,7 @@
                     <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles" width="600">
                         <tbody>
                           <tr>
-                              <td width="100%" valign="top" class="o_mail_h_padding">
+                              <td width="100%" valign="top" class="o_mail_full_width_padding">
                                     <img src="/mass_mailing/static/src/img/theme_tech/s_default_image_block_banner.jpg" alt="Your Banner Image" />
                               </td>
                           </tr>

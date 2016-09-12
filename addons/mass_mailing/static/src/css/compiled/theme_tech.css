@@ -13,6 +13,10 @@
   color: white;
   background-color: #59cdcd;
 }
+.o_layout.o_tech_theme .o_mail_snippet_general .o_mail_full_width_padding {
+  padding-left: 20px;
+  padding-right: 20px;
+}
 .o_layout.o_tech_theme .o_mail_snippet_general a,
 .o_layout.o_tech_theme .o_mail_snippet_general .o_mail_link {
   font-weight: normal;
