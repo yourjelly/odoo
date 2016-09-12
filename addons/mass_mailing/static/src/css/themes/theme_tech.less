@@ -111,10 +111,11 @@
             background: transparent;
         }
 
-        .o_mail_footer_social {
-            border: none;
-            border-top: 1px solid  darken(@o_mm_tech_color_beta, 60%);
+        .o_mail_table_styles {
+            border-top: none;
+        }
 
+        .o_mail_footer_social {
             a {
                 color: darken(@o_mm_tech_color_beta, 40%);
             }
@@ -128,6 +129,15 @@
             font-weight: bold;
             font-size: 9px;
             color: darken(@o_mm_tech_color_beta, 30%);
+        }
+
+        &.o_mail_footer_social_left {
+            .o_mail_footer_description {
+                padding-left: 0;
+            }
+            .o_mail_footer_social {
+                padding-right: 0;
+            }
         }
     }
 }

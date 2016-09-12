@@ -100,8 +100,9 @@
             background: transparent;
 
             .separator {
-                height: 1px;
+                height: 3px;
                 background-color: darken(@o_mm_airmail_color_alpha, 10%);
+                border-bottom: 2px solid darken(white, 3%);
             }
         }
     }
@@ -179,6 +180,15 @@
             font-weight: bold;
             font-size: 9px;
             color: darken(@o_mm_airmail_color_alpha, 30%);
+        }
+
+        &.o_mail_footer_social_left {
+            .o_mail_footer_description {
+                padding-left: 0;
+            }
+            .o_mail_footer_social {
+                padding-right: 0;
+            }
         }
     }
 }

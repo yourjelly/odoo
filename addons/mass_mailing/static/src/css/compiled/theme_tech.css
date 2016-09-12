@@ -88,9 +88,8 @@
   background: rgba(0, 0, 0, 0);
   background: transparent;
 }
-.o_layout.o_tech_theme .o_mail_block_footer_social .o_mail_footer_social {
-  border: none;
-  border-top: 1px solid #666666;
+.o_layout.o_tech_theme .o_mail_block_footer_social .o_mail_table_styles {
+  border-top: none;
 }
 .o_layout.o_tech_theme .o_mail_block_footer_social .o_mail_footer_social a {
   color: #999999;
@@ -102,4 +101,10 @@
   font-weight: bold;
   font-size: 9px;
   color: #b3b3b3;
+}
+.o_layout.o_tech_theme .o_mail_block_footer_social.o_mail_footer_social_left .o_mail_footer_description {
+  padding-left: 0;
+}
+.o_layout.o_tech_theme .o_mail_block_footer_social.o_mail_footer_social_left .o_mail_footer_social {
+  padding-right: 0;
 }

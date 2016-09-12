@@ -74,8 +74,9 @@
   background: transparent;
 }
 .o_layout.o_airmail_theme .o_mail_block_footer_separator .o_mail_snippet_general .separator {
-  height: 1px;
+  height: 3px;
   background-color: #cfd3d5;
+  border-bottom: 2px solid #f7f7f7;
 }
 .o_layout.o_airmail_theme .o_mail_block_two_cols table,
 .o_layout.o_airmail_theme .o_mail_block_three_cols table {
@@ -132,4 +133,10 @@
   font-weight: bold;
   font-size: 9px;
   color: #98a1a6;
+}
+.o_layout.o_airmail_theme .o_mail_block_footer_social.o_mail_footer_social_left .o_mail_footer_description {
+  padding-left: 0;
+}
+.o_layout.o_airmail_theme .o_mail_block_footer_social.o_mail_footer_social_left .o_mail_footer_social {
+  padding-right: 0;
 }
