@@ -39,12 +39,6 @@
         data-selector="div.snippet_row, .mv, .col_mv">
     </div>
 
-    <!-- <div data-js='background'
-        data-selector="div.snippet_row">
-        <li data-choose_image="choose_image" data-background=""><a>Choose a background image</a></li>
-        <li data-background=""><a>No background image</a></li>
-    </div> -->
-
     <div data-js="colorpicker"
         data-selector="div.snippet_row td">
         <li class="dropdown-submenu">
