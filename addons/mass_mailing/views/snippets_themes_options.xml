@@ -6,12 +6,7 @@
     <t t-raw="0"/>
 
     <div data-js='width-x'
-        data-selector="img, .mv, .col_mv">
-    </div>
-
-    <div data-js='table_row'
-        data-selector="tr:has(>.row), tr:has(>.col_mv)"
-        data-drop-near="tr:has(>.row), tr:has(>.col_mv)">
+        data-selector="img, .o_mail_col_mv">
     </div>
 
     <div data-js='table_column'
@@ -20,27 +15,28 @@
     </div>
 
     <div data-js='table_column_mv'
-        data-selector=".col_mv"
-        data-drop-near=".col_mv">
+        data-selector=".o_mail_col_mv"
+        data-drop-near=".o_mail_col_mv">
     </div>
 
     <div data-js='content' class="hidden"
-        data-selector="[data-oe-field='body_html'] > div:not(.o_layout), [data-oe-field='body_html'] .oe_structure > div, .oe_snippet_body"
-        data-drop-near="[data-oe-field='body_html']:not(:has(.o_layout)) > *, .oe_structure > *"
-        data-drop-in="[data-oe-field='body_html']:not(:has(.o_layout)), .oe_structure">
+        data-selector="[class^='o_mail_block_']"
+        data-drop-near=".oe_structure > *"
+        data-drop-in=".oe_structure">
     </div>
 
     <div data-js='resize'
-        data-selector="div.snippet_row"
-        data-drop-in=".oe_structure, [data-oe-type=html]:not(:has(.o_layout))">
+        data-selector="[class^='o_mail_block_']"
+        data-drop-near=".oe_structure > *"
+        data-drop-in=".oe_structure">
     </div>
 
     <div data-js='margin-y'
-        data-selector="div.snippet_row, .mv, .col_mv">
+        data-selector="[class^='o_mail_block_'], .o_mail_col_mv">
     </div>
 
     <div data-js="colorpicker"
-        data-selector="div.snippet_row td">
+        data-selector="[class^='o_mail_block_'], [class^='o_mail_block_'] td">
         <li class="dropdown-submenu">
             <a tabindex="-1" href="#"><i class="fa fa-eyedropper"/>Background Color</a>
             <ul class="dropdown-menu">
