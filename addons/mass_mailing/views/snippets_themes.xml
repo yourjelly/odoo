@@ -577,7 +577,7 @@
     <div class="o_mail_block_footer_separator">
         <div class="snippet_row">
             <div class="o_mail_snippet_general">
-                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_h_padding" width="600">
+                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_full_width_padding" width="600">
                     <tbody>
                         <tr>
                             <td valign="top" style="width:100%;" class="o_mail_v_padding">
@@ -834,7 +834,7 @@
     <div class="o_mail_block_footer_social">
         <div class="snippet_row">
             <div class="o_mail_snippet_general">
-                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_h_padding" width="600">
+                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_full_width_padding" width="600">
                     <tbody>
                         <tr>
                             <td class="o_mail_footer_social" style="text-align:center">

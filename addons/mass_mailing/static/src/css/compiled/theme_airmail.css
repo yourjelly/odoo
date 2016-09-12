@@ -36,21 +36,25 @@
   margin-bottom: 16px;
 }
 .o_layout.o_airmail_theme .o_mail_block_header_social .o_mail_snippet_general,
-.o_layout.o_airmail_theme .o_mail_block_header_text_social .o_mail_snippet_general {
+.o_layout.o_airmail_theme .o_mail_block_header_text_social .o_mail_snippet_general,
+.o_layout.o_airmail_theme .o_mail_block_header_logo .o_mail_snippet_general {
   background: rgba(0, 0, 0, 0);
   background: transparent;
 }
 .o_layout.o_airmail_theme .o_mail_block_header_social .o_mail_h_padding,
-.o_layout.o_airmail_theme .o_mail_block_header_text_social .o_mail_h_padding {
+.o_layout.o_airmail_theme .o_mail_block_header_text_social .o_mail_h_padding,
+.o_layout.o_airmail_theme .o_mail_block_header_logo .o_mail_h_padding {
   padding-left: 0;
   padding-right: 0;
 }
 .o_layout.o_airmail_theme .o_mail_block_header_social .o_mail_header_social,
-.o_layout.o_airmail_theme .o_mail_block_header_text_social .o_mail_header_social {
+.o_layout.o_airmail_theme .o_mail_block_header_text_social .o_mail_header_social,
+.o_layout.o_airmail_theme .o_mail_block_header_logo .o_mail_header_social {
   margin-right: 0px;
 }
 .o_layout.o_airmail_theme .o_mail_block_header_social .o_mail_header_social a,
-.o_layout.o_airmail_theme .o_mail_block_header_text_social .o_mail_header_social a {
+.o_layout.o_airmail_theme .o_mail_block_header_text_social .o_mail_header_social a,
+.o_layout.o_airmail_theme .o_mail_block_header_logo .o_mail_header_social a {
   color: #7c898f;
 }
 .o_layout.o_airmail_theme .o_mail_block_image .o_mail_h_padding {
@@ -64,6 +68,14 @@
 .o_layout.o_airmail_theme .o_mail_block_image .o_mail_h_padding > img {
   padding: 0;
   margin-bottom: 15px;
+}
+.o_layout.o_airmail_theme .o_mail_block_footer_separator .o_mail_snippet_general {
+  background: rgba(0, 0, 0, 0);
+  background: transparent;
+}
+.o_layout.o_airmail_theme .o_mail_block_footer_separator .o_mail_snippet_general .separator {
+  height: 1px;
+  background-color: #cfd3d5;
 }
 .o_layout.o_airmail_theme .o_mail_block_two_cols table,
 .o_layout.o_airmail_theme .o_mail_block_three_cols table {

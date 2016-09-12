@@ -67,7 +67,7 @@
 
     // =========== Snippets
 
-    .o_mail_block_header_social, .o_mail_block_header_text_social {
+    .o_mail_block_header_social, .o_mail_block_header_text_social, .o_mail_block_header_logo {
         .o_mail_snippet_general {
             margin-top: 10px;
             margin-bottom: 25px;
@@ -96,6 +96,7 @@
 
     .o_mail_block_footer_separator {
         .separator {
+            height: 1px;
             background-color: darken(@o_mm_tech_color_beta, 60%);
         }
     }
@@ -112,6 +113,8 @@
 
         .o_mail_footer_social {
             border: none;
+            border-top: 1px solid  darken(@o_mm_tech_color_beta, 60%);
+
             a {
                 color: darken(@o_mm_tech_color_beta, 40%);
             }

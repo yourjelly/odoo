@@ -60,7 +60,7 @@
         margin-bottom: 16px;
     }
 
-    .o_mail_block_header_social, .o_mail_block_header_text_social {
+    .o_mail_block_header_social, .o_mail_block_header_text_social, .o_mail_block_header_logo {
         .o_mail_snippet_general {
             background: rgba(0,0,0,0);
             background: transparent;
@@ -90,6 +90,18 @@
             > img {
                 padding: 0;
                 margin-bottom: 15px;
+            }
+        }
+    }
+
+    .o_mail_block_footer_separator {
+        .o_mail_snippet_general {
+            background: rgba(0,0,0,0);
+            background: transparent;
+
+            .separator {
+                height: 1px;
+                background-color: darken(@o_mm_airmail_color_alpha, 10%);
             }
         }
     }
