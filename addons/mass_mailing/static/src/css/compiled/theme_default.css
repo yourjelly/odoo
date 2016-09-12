@@ -10,7 +10,8 @@
   padding-bottom: 20px;
 }
 .o_mail_snippet_general {
-  width: 600px;
+  width: 100%;
+  max-width: 600px;
   color: #797979;
   margin: 0 auto;
 }
@@ -176,6 +177,7 @@ h6 {
   margin: 0;
 }
 .o_mail_table_styles {
+  width: 100%;
   border-collapse: separate;
 }
 @media screen and (max-width: 480px) {
