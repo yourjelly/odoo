@@ -34,6 +34,7 @@
                 <div class="o_panel_body">
                     <t t-snippet="mass_mailing.s_mail_block_header_social" t-thumbnail="/mass_mailing/static/src/img/blocks/block_header_social.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_header_text_social" t-thumbnail="/mass_mailing/static/src/img/blocks/block_header_text_social.png"/>
+                    <t t-snippet="mass_mailing.s_mail_block_header_logo" t-thumbnail="/mass_mailing/static/src/img/blocks/block_header_logo.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_banner" t-thumbnail="/mass_mailing/static/src/img/blocks/block_banner.png"/>
                 </div>
             </div>
@@ -183,6 +184,24 @@
                                 </tr>
                             </table>
                         </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="s_mail_block_header_logo" name="Centered Logo">
+    <div class="o_mail_block_header_logo">
+        <div class="snippet_row">
+            <div class="o_mail_snippet_general">
+                <table align="center" width="600" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles o_mail_h_padding">
+                    <tr>
+                        <td width="20%"/>
+                        <td valign="center" width="60%" class="text-center o_mail_v_padding">
+                             <img border="0" src="/web/image/mass_mailing.s_default_image_logo" style="height:auto;max-width:400px;width:auto" alt="Your Logo" />
+                        </td>
+                        <td width="20%" style="text-align:right"/>
                     </tr>
                 </table>
             </div>
