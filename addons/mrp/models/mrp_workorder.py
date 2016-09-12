@@ -260,7 +260,7 @@ class MrpWorkorder(models.Model):
     @api.multi
     def record_production(self):
         self.ensure_one()
-        if self.qty_producing <= 0:
+        if self.qty_producing <= 0 and self.qty_produced < self.qty_production: #You can add extra minutes add the end without producing
             raise UserError(_('Please set the quantity you produced in the Current Qty field. It can not be 0!'))
 
         if (self.production_id.product_id.tracking != 'none') and not self.final_lot_id:
