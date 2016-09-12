@@ -45,7 +45,7 @@
 // ===========   Components
 
 .o_layout {
-    background-color: lighten(@o_mm_def_color_alpha, 2%);
+    background-color: @o_mm_def_color_beta;
     padding-bottom: 20px;
 }
 
@@ -53,7 +53,6 @@
 .o_mail_snippet_general {
     width: @o_mm_def_body_width;
     color: lighten(@o_mm_def_text_color, 20%);
-    background-color: @o_mm_def_color_beta;
     margin: 0 auto;
 
 
@@ -113,7 +112,7 @@
 
 // ===========   Snippets
 
-.o_mail_block_header_social, .o_mail_block_header_text_social {
+.o_mail_block_header_social, .o_mail_block_header_text_social, .o_mail_block_header_logo {
     .o_mail_logo_container {
         img {
             width: auto;
