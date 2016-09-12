@@ -80,7 +80,7 @@
 }
 .o_layout.o_airmail_theme .o_mail_block_two_cols table,
 .o_layout.o_airmail_theme .o_mail_block_three_cols table {
-  width: 100%;
+  width: 110%;
   max-width: 620px;
   margin: auto -10px;
 }
