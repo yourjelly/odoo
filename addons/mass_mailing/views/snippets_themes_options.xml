@@ -9,11 +9,6 @@
         data-selector="img, .o_mail_col_mv">
     </div>
 
-    <div data-js='table_column'
-        data-selector=".col>td, .col>th"
-        data-drop-near=".col>td, .col>th">
-    </div>
-
     <div data-js='table_column_mv'
         data-selector=".o_mail_col_mv"
         data-drop-near=".o_mail_col_mv">
@@ -26,9 +21,7 @@
     </div>
 
     <div data-js='resize'
-        data-selector="[class^='o_mail_block_']"
-        data-drop-near=".oe_structure > *"
-        data-drop-in=".oe_structure">
+        data-selector="[class^='o_mail_block_']">
     </div>
 
     <div data-js='margin-y'
