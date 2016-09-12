@@ -60,7 +60,7 @@ class ChangeProductionQty(models.TransientModel):
                 factor = (production.product_qty - production.qty_produced) * production.product_uom_id.factor / bom_point.product_uom_id.factor
                 boms, lines = production.bom_id.explode(production.product_id, factor, picking_type=production.bom_id.picking_type_id)
                 for line, line_data in lines:
-                    production._update_raw_move(line, line_data['qty'])
+                    production._update_raw_move(line, line_data)
             self._update_product_to_produce(production, production.product_qty - production.qty_produced)
             moves = production.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
             moves.do_unreserve()

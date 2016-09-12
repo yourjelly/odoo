@@ -354,14 +354,14 @@ class MrpProduction(models.Model):
                     move.procure_method = 'make_to_order'
 
     @api.multi
-    def _update_raw_move(self, bom_line, quantity, **kw):
+    def _update_raw_move(self, bom_line, line_data, **kw):
         self.ensure_one()
         move = self.move_raw_ids.filtered(lambda x: x.bom_line_id.id == bom_line.id and x.state not in ('done', 'cancel'))
         if move:
-            move.write({'product_uom_qty': quantity})
+            move.write({'product_uom_qty': line_data['qty']})
             return move
         else:
-            self._generate_raw_move(bom_line, quantity)
+            self._generate_raw_move(bom_line, line_data)
 
     @api.multi
     def action_assign(self):
