@@ -4,7 +4,7 @@
     <template id="theme_default_template">
         <div class="o_mail_block_header_logo">
             <div class="o_mail_snippet_general">
-                <table align="center" width="600" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles o_mail_h_padding">
+                <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles o_mail_h_padding">
                     <tr>
                         <td width="20%"/>
                         <td valign="center" width="60%" class="o_mail_logo_container text-center o_mail_v_padding">
@@ -18,7 +18,7 @@
 
         <div class="o_mail_block_title_text" style="margin-top:25px;">
             <div class="o_mail_snippet_general">
-                <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles" width="600">
+                <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles">
                     <tbody>
                         <tr>
                             <td width="100%" class="o_mail_h_padding o_mail_v_padding">
@@ -50,7 +50,7 @@
     <template id="theme_airmail_template">
         <div class="o_mail_block_header_social">
             <div class="o_mail_snippet_general">
-                <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles" width="600">
+                <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles">
                     <tr>
                         <td width="80%"  class="o_mail_logo_container o_mail_h_padding o_mail_v_padding">
                             &amp;nbsp;
@@ -99,7 +99,7 @@
         </div>
         <div class="o_mail_block_banner">
             <div class="o_mail_snippet_general">
-                <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles" width="600">
+                <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles">
                     <tbody>
                         <tr>
                             <td width="100%" valign="top" class="o_mail_full_width_padding">
@@ -114,7 +114,7 @@
         </div>
         <div class="o_mail_block_two_cols">
             <div class="o_mail_snippet_general">
-                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_v_padding o_mail_col_table" width="600">
+                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_v_padding o_mail_col_table">
                     <tbody>
                         <tr>
                             <td style="vertical-align:top;width:270px;" class="o_mail_col_mv">
@@ -149,7 +149,7 @@
         </div>
         <div class="o_mail_block_discount1">
             <div class="o_mail_snippet_general">
-                <table align="center" cellpadding="0" cellspacing="0" width="600" class="o_mail_table_styles">
+                <table align="center" cellpadding="0" cellspacing="0" class="o_mail_table_styles">
                     <tbody>
                         <tr>
                             <td class="o_mail_h_padding o_mail_v_padding text-center o_mail_col_mv" width="250">
@@ -183,7 +183,7 @@
         </div>
         <div class="o_mail_block_three_cols">
             <div class="o_mail_snippet_general">
-                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_v_padding o_mail_col_table" width="600">
+                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_v_padding o_mail_col_table">
                     <tbody>
                         <tr>
                             <td style="vertical-align:top;width:180px;" class="o_mail_col_mv">
@@ -226,7 +226,7 @@
     <template id="theme_tech_template">
         <div class="o_mail_block_header_social">
             <div class="o_mail_snippet_general">
-                <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles" width="600">
+                <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles">
                     <tr>
                         <td width="80%"  class="o_mail_logo_container o_mail_h_padding o_mail_v_padding">
                             &amp;nbsp;
@@ -275,7 +275,7 @@
         </div>
         <div class="o_mail_block_banner">
             <div class="o_mail_snippet_general">
-                <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles" width="600">
+                <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles">
                     <tbody>
                       <tr>
                           <td width="100%" valign="top" class="o_mail_full_width_padding">
@@ -288,7 +288,7 @@
         </div>
         <div class="o_mail_block_image_text">
             <div class="o_mail_snippet_general">
-                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles" width="600">
+                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles">
                     <tbody>
                         <tr>
                             <td style="width:200px;text-align:center;vertical-align:middle" class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
@@ -308,7 +308,7 @@
         </div>
         <div class="o_mail_block_image_text">
             <div class="o_mail_snippet_general">
-                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles" width="600">
+                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles">
                     <tbody>
                         <tr>
                             <td style="width:200px;text-align:center;vertical-align:middle" class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
@@ -328,7 +328,7 @@
         </div>
         <div class="o_mail_block_image_text">
             <div class="o_mail_snippet_general">
-                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles" width="600">
+                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles">
                     <tbody>
                         <tr>
                             <td style="width:200px;text-align:center;vertical-align:middle" class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
@@ -353,7 +353,7 @@
     <template id="theme_resto_template">
         <div class="o_mail_block_header_social">
             <div class="o_mail_snippet_general">
-                <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles" width="600">
+                <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles">
                     <tr>
                         <td width="80%"  class="o_mail_logo_container o_mail_h_padding o_mail_v_padding">
                             &amp;nbsp;
@@ -402,7 +402,7 @@
         </div>
         <div class="o_mail_block_banner">
             <div class="o_mail_snippet_general">
-                <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles" width="600">
+                <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles">
                     <tbody>
                         <tr>
                             <td width="100%" valign="top" class="o_mail_full_width_padding">
