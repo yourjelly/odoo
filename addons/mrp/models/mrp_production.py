@@ -151,6 +151,7 @@ class MrpProduction(models.Model):
     scrap_count = fields.Integer(compute='_compute_scrap_move_count', string='Scrap Move')
     priority = fields.Selection([('0', 'Not urgent'), ('1', 'Normal'), ('2', 'Urgent'), ('3', 'Very Urgent')], 'Priority',
                                 readonly=True, states={'confirmed': [('readonly', False)]}, default='1')
+    is_produce_invisible = fields.Boolean(compute='compute_produce_invisible')
 
     @api.multi
     @api.depends('workorder_ids')
@@ -217,6 +218,11 @@ class MrpProduction(models.Model):
         for production in self:
             production.scrap_count = count_data.get(production.id, 0)
 
+    @api.multi
+    @api.depends('qty_produced', 'product_qty')
+    def compute_produce_invisible(self):
+        for production in self.filtered(lambda x: x.product_qty <= x.qty_produced):
+            production.is_produce_invisible = True
 
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per Company!'),
