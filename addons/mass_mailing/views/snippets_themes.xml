@@ -3,27 +3,28 @@
 <!-- Snippets & Themes Menu -->
 <template id="email_designer_snippets" inherit_id="web_editor.snippets" primary="True">
     <xpath expr="//h2[@id='snippets_menu']" position="replace">
-        <h2 id="snippets_menu">Choose style</h2>
+        <h2 id="snippets_menu">Choose a template</h2>
     </xpath>
     <xpath expr="//div[@id='o_scroll']" position="replace">
         <div id="o_scroll">
             <div id="email_designer_themes">
                 <div data-name="default"
-                     data-img="/mass_mailing/static/src/img/theme_imgs/default_template_thumb.png"
+                     data-img="/mass_mailing/static/src/img/theme_imgs/default_thumb"
                      data-images-info='{"logo": {"format": "png"}}'>
                     <t t-call="mass_mailing.theme_default_template"/>
                 </div>
                 <div data-name="airmail"
-                     data-img="/mass_mailing/static/src/img/theme_imgs/airmail_template_thumb.png"
+                     data-img="/mass_mailing/static/src/img/theme_imgs/airmail_thumb"
                      data-images-info='{"logo": {"format": "png"}}'>
                     <t t-call="mass_mailing.theme_airmail_template"/>
                 </div>
                 <div data-name="tech"
-                     data-img="/mass_mailing/static/src/img/theme_imgs/tech_template_thumb.png"
+                     data-img="/mass_mailing/static/src/img/theme_imgs/tech_thumb"
                      data-images-info='{"logo": {"format": "png"}}'>
                      <t t-call="mass_mailing.theme_tech_template"/>
                 </div>
-                <div data-name="resto" data-img="/mass_mailing/static/src/img/theme_imgs/lemon_template_thumb.png"
+                <div data-name="resto"
+                     data-img="/mass_mailing/static/src/img/theme_imgs/resto_thumb"
                      data-images-info='{"logo": {"format": "png"}}'>
                      <t t-call="mass_mailing.theme_resto_template"/>
                 </div>
