@@ -105,12 +105,12 @@
                         <group>
                             <label for="date_planned_start" string="Deadline start"/>
                             <div name="date_planned" class="o_row">
-                                <field name="date_planned_start" attrs="{'readonly': [('move_raw_ids', '!=', False)]}"/>
+                                <field name="date_planned_start"/>
                                 <label string="to" invisible="1"/>
                                 <field name="date_planned_finished" invisible="1"/>
                             </div>
-                            <field name="user_id" attrs="{'readonly': [('has_moves', '=', True)]}"/>
-                            <field name="origin" attrs="{'readonly': [('has_moves', '=', True)]}"/>
+                            <field name="user_id"/>
+                            <field name="origin"/>
                             <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" attrs="{'readonly': [('has_moves', '=', True)]}"/>
                         </group>
                     </group>
