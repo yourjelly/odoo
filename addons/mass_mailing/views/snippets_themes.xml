@@ -676,64 +676,25 @@
         <div class="o_mail_snippet_general">
             <table align="center" cellpadding="0" cellspacing="0" class="o_mail_table_styles">
                 <tr>
-                    <td style="width:25%;height: 150px;vertical-align:middle;" class="o_mail_h_padding o_mail_v_padding bg-beta text-center">
-                        <span class="o_mail_display_1">21</span>
-                        <span class="o_mail_display_1">Jul</span>
-                        <span style="display: block;font-weight: 600" class="o_mail_display_3">
-                            ALL DAY
-                        </span>
+                    <td style="width:25%;min-height: 150px;vertical-align:middle;" class="o_mail_h_padding o_mail_v_padding bg-beta text-center o_mail_col_mv">
+                        <span class="o_mail_no_margin o_mail_display_1">21 Jul</span>
+                        <p class="o_mail_no_margin">ALL DAY</p>
                     </td>
-                    <td style="width:25%;height: 150px;" class="o_mail_h_padding o_mail_v_padding text-center bg-delta">
-                        <div style="margin:27px auto">
-                            &amp;nbsp;
-                            <span class="fa fa-calendar fa-5x"></span>
-                            &amp;nbsp;
+                    <td style="width:25%;min-height: 150px;" class="text-center bg-delta o_mail_col_mv">
+                        <img src="/web/image/mass_mailing.s_default_image_block_event" class="center-block" alt="Your Picture" />
+                    </td>
+                    <td class="o_mail_h_padding o_mail_v_padding o_mail_col_mv" style="min-height: 150px;">
+                        <div style="min-height: 111px">
+                            <p class="o_mail_display_3">Cybersecurity</p>
+                            <p class="o_mail_no_margin">
+                                Cyber-threats continue to increase.<br/>
+                                The discussion will examine how to develop new norms and integrate them into EU
+                            </p>
                         </div>
-                    </td>
-                    <td style="vertical-align:top;width:50%;height:150px;min-width:255px" class="o_mail_col_mv">
-                        <table style="width:100%;border-collapse:separate;">
-                            <tr style="padding-right:5px;">
-                                <td style="padding-top:20px;padding-left:20px;float:left" width="90%">
-                                    <div style="min-height:100px;text-align:left">
-                                        <p class="o_mail_no_margin o_mail_display_3">Your Event Name</p>
-                                        <p class="o_mail_no_margin">Description</p>
-                                    </div>
-                                    <div style="padding-left:0">
-                                        <p style="display: table-cell;cursor: pointer;font-size: 11px;font-weight: 300;padding: 3px 30px;">
-                                            <a href="#" class="o_mail_link">Link </a>
-                                        </p>
-                                        <p style="display: table-cell;cursor: pointer;font-size: 11px;font-weight: 300;padding: 3px 30px;">
-                                            <a href="#" class="o_mail_link">Info</a>
-                                        </p>
-                                    </div>
-                                </td>
-                                <td style="vertical-align:middle;">
-                                    <div t-if="website" style="padding-left:16px">
-                                        <t t-if="website.social_facebook">
-                                            <div style="width:33%;margin-left:0">
-                                                <a t-att-href="website.social_facebook">
-                                                  <span class="fa fa-facebook-square fa-2x"></span>
-                                                </a>
-                                            </div>
-                                        </t>
-                                        <t t-if="website.social_twitter">
-                                            <div style="width:34%;margin-left:0">
-                                                <a t-att-href="website.social_twitter">
-                                                  <span class="fa fa-twitter-square fa-2x"></span>
-                                                </a>
-                                            </div>
-                                        </t>
-                                        <t t-if="website.social_googleplus">
-                                            <div style="width:33%;margin-left:0">
-                                                <a t-att-href="website.social_googleplus">
-                                                  <span class="fa fa-google-plus-square fa-2x"></span>
-                                                </a>
-                                            </div>
-                                        </t>
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
+                        <div class="small mt16">
+                            <a href="#" class="o_mail_btn">Registration</a>
+                            <a href="#" class="o_mail_link" style="margin-left:10px">More Info</a>
+                        </div>
                     </td>
                 </tr>
             </table>
@@ -744,20 +705,20 @@
 <template id="s_mail_block_steps" name="Steps">
     <div class="o_mail_block_steps">
         <div class="o_mail_snippet_general">
-            <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_h_padding">
+            <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_full_width_padding">
                 <tbody>
                     <tr>
                         <td class="o_mail_col_mv o_mail_h_padding o_mail_v_padding bg-beta">
                             <table class="o_mail_table_styles">
                                 <tr>
-                                    <td rowspan="2">
+                                    <td rowspan="2" class="text-right">
                                         &amp;nbsp;
-                                        <span class="fa fa-hand-pointer-o fa-2x"></span>
+                                        <span class="fa fa-compass fa-2x text-delta"></span>
                                         &amp;nbsp;
                                     </td>
                                     <td style="padding-left:10px;">
-                                        <p style="font-weight:bold;margin:0 0 3px 0;" class="o_mail_display_3">Step 1:</p>
-                                        <p class="o_mail_no_margin">Register</p>
+                                        <p class="o_mail_no_margin"><small>Step 1:</small></p>
+                                        <p class="o_mail_no_margin o_mail_display_3">Choose</p>
                                     </td>
                                 </tr>
                             </table>
@@ -765,14 +726,14 @@
                         <td class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
                             <table class="o_mail_table_styles">
                                 <tr>
-                                    <td rowspan="2">
+                                    <td rowspan="2" class="text-right">
                                         &amp;nbsp;
-                                        <span class="fa fa-map-marker fa-2x"></span>
+                                        <span class="fa fa-credit-card fa-2x text-delta"></span>
                                         &amp;nbsp;
                                     </td>
                                     <td style="padding-left:10px;">
-                                        <p style="font-weight:bold;margin:0 0 3px 0" class="o_mail_display_3">Step 2:</p>
-                                        <p class="o_mail_no_margin">Attend</p>
+                                        <p class="o_mail_no_margin"><small>Step 2:</small></p>
+                                        <p class="o_mail_no_margin o_mail_display_3">Order</p>
                                     </td>
                                 </tr>
                             </table>
@@ -780,14 +741,14 @@
                         <td class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
                             <table class="o_mail_table_styles">
                                 <tr>
-                                    <td rowspan="2">
+                                    <td rowspan="2" class="text-right">
                                         &amp;nbsp;
-                                        <span class="fa fa-money fa-2x"></span>
+                                        <span class="fa fa-smile-o fa-2x text-delta"></span>
                                         &amp;nbsp;
                                     </td>
                                     <td style="padding-left:10px;">
-                                        <p style="font-weight:bold;margin:0 0 3px 0" class="o_mail_display_3">Step 3:</p>
-                                        <p class="o_mail_no_margin">Win</p>
+                                        <p class="o_mail_no_margin"><small>Step 3:</small></p>
+                                        <p class="o_mail_no_margin o_mail_display_3">Enjoy!</p>
                                     </td>
                                 </tr>
                             </table>
