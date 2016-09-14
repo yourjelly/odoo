@@ -41,16 +41,18 @@
   background-color: #1cc1a9;
 }
 .o_mail_snippet_general a,
-.o_mail_snippet_general .o_mail_link {
+.o_mail_snippet_general .btn.btn-link {
   color: #19ab96;
   font-weight: bold;
   text-decoration: none !important;
 }
-.o_mail_snippet_general a a:hover,
-.o_mail_snippet_general .o_mail_link a:hover,
-.o_mail_snippet_general a a:focus,
-.o_mail_snippet_general .o_mail_link a:focus {
-  color: inherit;
+.o_mail_snippet_general a:hover,
+.o_mail_snippet_general .btn.btn-link:hover,
+.o_mail_snippet_general a:focus,
+.o_mail_snippet_general .btn.btn-link:focus,
+.o_mail_snippet_general a:active,
+.o_mail_snippet_general .btn.btn-link:active {
+  text-decoration: none !important;
 }
 .o_mail_snippet_general img {
   width: 100%;
@@ -111,9 +113,12 @@
   padding-top: 20px;
 }
 .o_mail_block_footer_social .o_mail_footer_links {
-  font-size: 12px;
   padding-top: 10px;
   padding-bottom: 10px;
+}
+.o_mail_block_footer_social .o_mail_footer_links .btn-link {
+  padding: 0;
+  font-size: 12px;
 }
 .o_mail_block_footer_social .o_mail_footer_copy {
   font-size: 9px;
@@ -132,6 +137,10 @@
   padding-right: 20px;
   text-align: right;
   vertical-align: top;
+}
+.o_mail_block_footer_social.o_mail_footer_social_left .o_mail_footer_social .btn-link {
+  padding: 0;
+  font-size: 12px;
 }
 .o_mail_display_coupon {
   font-size: 50px;

@@ -127,7 +127,7 @@
                                             Check the top electric guitar brands and their models!
                                         </p>
                                         <div class="text-center" style="margin-top:15px;">
-                                            <a href="#" class="o_mail_link">Read More...</a>
+                                            <a href="#" class="btn btn-link">Read More...</a>
                                         </div>
                                     </div>
                                 </td>
@@ -140,7 +140,7 @@
                                             Heat up the popcorn and get ready for an immersive experience.
                                         </p>
                                         <div class="text-center" style="margin-top:15px;">
-                                            <a href="#" class="o_mail_link">Read More...</a>
+                                            <a href="#" class="btn btn-link">Read More...</a>
                                         </div>
                                     </div>
                                 </td>
@@ -302,7 +302,7 @@
                                     <h4 class="">The Rise Of The Drone</h4>
                                     <p class="o_mail_no_margin">They sit at terminals at Holloman Air Force Base, watching grainy images from a drone video feed.</p>
                                     <div class="text-left" style="margin-top:15px;">
-                                        <a href="#" class="o_mail_link">Read More...</a>
+                                        <a href="#" class="btn btn-link">Read More...</a>
                                     </div>
                                 </td>
                             </tr>
@@ -322,7 +322,7 @@
                                     <h4 class="">New 45Hc-270A laptop</h4>
                                     <p class="o_mail_no_margin">The new laptops look nearly identical to the original models, but closer inspection reveals a refined design.</p>
                                     <div class="text-left" style="margin-top:15px;">
-                                        <a href="#" class="o_mail_link">Read More...</a>
+                                        <a href="#" class="btn btn-link">Read More...</a>
                                     </div>
                                 </td>
                             </tr>
@@ -342,7 +342,7 @@
                                     <h4 class="">Two-lens phone cameras</h4>
                                     <p class="o_mail_no_margin">Normally mirrorless cameras have always sat slightly above entry-level in terms of price..</p>
                                     <div class="text-left" style="margin-top:15px;">
-                                        <a href="#" class="o_mail_link">Read More...</a>
+                                        <a href="#" class="btn btn-link">Read More...</a>
                                     </div>
                                 </td>
                             </tr>
@@ -612,7 +612,7 @@
                                     <h4 class="">Recipe of the day</h4>
                                     <p class="o_mail_no_margin">A delicious soup made of one or more seasonal vegetables, without added fat, starches and lactose.</p>
                                     <div class="text-center" style="margin-top:15px;">
-                                        <a href="#" class="o_mail_link">Read More...</a>
+                                        <a href="#" class="btn btn-link">Read More...</a>
                                     </div>
                                 </td>
                             </tr>

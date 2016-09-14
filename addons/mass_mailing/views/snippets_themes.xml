@@ -411,7 +411,7 @@
                                     We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.
                                 </p>
                                 <div class="text-center" style="margin-top:15px;">
-                                    <a href="#" class="o_mail_link">Read More...</a>
+                                    <a href="#" class="btn btn-link">Read More...</a>
                                 </div>
                             </div>
                         </td>
@@ -424,7 +424,7 @@
                                     We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.
                                 </p>
                                 <div class="text-center" style="margin-top:15px;">
-                                    <a href="#" class="o_mail_link">Read More...</a>
+                                    <a href="#" class="btn btn-link">Read More...</a>
                                 </div>
                             </div>
                         </td>
@@ -449,7 +449,7 @@
                                     We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.
                                 </p>
                                 <div class="text-center" style="margin-top:15px;">
-                                    <a href="#" class="o_mail_link">Read More...</a>
+                                    <a href="#" class="btn btn-link">Read More...</a>
                                 </div>
                             </div>
                         </td>
@@ -462,7 +462,7 @@
                                     We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.
                                 </p>
                                 <div class="text-center" style="margin-top:15px;">
-                                    <a href="#" class="o_mail_link">Read More...</a>
+                                    <a href="#" class="btn btn-link">Read More...</a>
                                 </div>
                             </div>
                         </td>
@@ -475,7 +475,7 @@
                                     We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.
                                 </p>
                                 <div class="text-center" style="margin-top:15px;">
-                                    <a href="#" class="o_mail_link">Read More...</a>
+                                    <a href="#" class="btn btn-link">Read More...</a>
                                 </div>
                             </div>
                         </td>
@@ -499,7 +499,7 @@
                             <h3>Account Information</h3>
                             <p class="o_mail_no_margin">We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.</p>
                             <div class="text-center" style="margin-top:15px;">
-                                <a href="#" class="o_mail_link">Read More...</a>
+                                <a href="#" class="btn btn-link">Read More...</a>
                             </div>
                         </td>
                     </tr>
@@ -519,7 +519,7 @@
                             <h3>Account Information</h3>
                             <p class="o_mail_no_margin">We need you to update your account information. If there is ever a problem with your account, this information will make it easier for you to log back in.</p>
                             <div class="text-center" style="margin-top:15px;">
-                                <a href="#" class="o_mail_link">Read More...</a>
+                                <a href="#" class="btn btn-link">Read More...</a>
                             </div>
                         </td>
                         <td style="width:270px;text-align:center;vertical-align:middle" class="o_mail_img_container o_mail_h_padding o_mail_v_padding">
@@ -694,7 +694,7 @@
                         </div>
                         <div class="small mt16">
                             <a href="#" class="o_mail_btn">Registration</a>
-                            <a href="#" class="o_mail_link" style="margin-left:10px">More Info</a>
+                            <a href="#" class="btn btn-link" style="margin-left:10px">More Info</a>
                         </div>
                     </td>
                 </tr>
@@ -770,22 +770,22 @@
                         <td class="o_mail_footer_social">
                             &amp;nbsp;
                             <t t-if="website.social_facebook">
-                                <a t-att-href="website.social_facebook" class="o_mail_link">
+                                <a t-att-href="website.social_facebook" class="btn btn-link">
                                     <span class="fa fa-facebook"></span>
                                 </a>
                             </t>
                             <t t-if="website.social_googleplus">
-                                <a t-att-href="website.social_googleplus" style="padding-left:10px;" class="o_mail_link">
+                                <a t-att-href="website.social_googleplus" style="padding-left:10px;" class="btn btn-link">
                                     <span class="fa fa-google-plus"></span>
                                 </a>
                             </t>
                             <t t-if="website.social_linkedin">
-                                <a t-att-href="website.social_linkedin" style="padding-left:10px;" class="o_mail_link">
+                                <a t-att-href="website.social_linkedin" style="padding-left:10px;" class="btn btn-link">
                                     <span class="fa fa-linkedin"></span>
                                 </a>
                             </t>
                             <t t-if="website.social_twitter">
-                                <a t-att-href="website.social_twitter" style="padding-left:10px;" class="o_mail_link">
+                                <a t-att-href="website.social_twitter" style="padding-left:10px;" class="btn btn-link">
                                     <span class="fa fa-twitter"></span>
                                 </a>
                             </t>
@@ -794,7 +794,7 @@
                     </tr>
                     <tr>
                         <td class="o_mail_footer_links">
-                            <a href="/unsubscribe_from_list" class="o_mail_link">Unsubscribe</a> | <a href="/page/contactus" class="o_mail_link">Contact</a>
+                            <a href="/unsubscribe_from_list" class="btn btn-link">Unsubscribe</a> | <a href="/page/contactus" class="btn btn-link">Contact</a>
                         </td>
                     </tr>
                     <tr>
@@ -819,7 +819,7 @@
                                 <strong><t t-esc="res_company.partner_id.name"/></strong>
                             </p>
                             <div class="o_mail_footer_links">
-                                <a href="/unsubscribe_from_list" class="o_mail_link">Unsubscribe</a> | <a href="/page/contactus" class="o_mail_link">Contact</a>
+                                <a href="/unsubscribe_from_list" class="btn btn-link">Unsubscribe</a> | <a href="/page/contactus" class="btn btn-link">Contact</a>
                             </div>
                             <div>
                                 <p class="o_mail_footer_copy">© 2016 All Rights Reserved</p>
@@ -828,22 +828,22 @@
                         <td class="o_mail_footer_social">
                             &amp;nbsp;
                             <t t-if="website.social_facebook">
-                                <a t-att-href="website.social_facebook" class="o_mail_link">
+                                <a t-att-href="website.social_facebook" class="btn btn-link">
                                     <span class="fa fa-facebook"></span>
                                 </a>
                             </t>
                             <t t-if="website.social_googleplus">
-                                <a t-att-href="website.social_googleplus" style="padding-left:10px;" class="o_mail_link">
+                                <a t-att-href="website.social_googleplus" style="padding-left:10px;" class="btn btn-link">
                                     <span class="fa fa-google-plus"></span>
                                 </a>
                             </t>
                             <t t-if="website.social_linkedin">
-                                <a t-att-href="website.social_linkedin" style="padding-left:10px;" class="o_mail_link">
+                                <a t-att-href="website.social_linkedin" style="padding-left:10px;" class="btn btn-link">
                                     <span class="fa fa-linkedin"></span>
                                 </a>
                             </t>
                             <t t-if="website.social_twitter">
-                                <a t-att-href="website.social_twitter" style="padding-left:10px;" class="o_mail_link">
+                                <a t-att-href="website.social_twitter" style="padding-left:10px;" class="btn btn-link">
                                     <span class="fa fa-twitter"></span>
                                 </a>
                             </t>

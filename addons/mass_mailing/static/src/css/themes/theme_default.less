@@ -85,13 +85,13 @@
         background-color: @o_mm_def_btn_bg;
     }
 
-    a, .o_mail_link {
+    a, .btn.btn-link {
         color: @o_mm_def_color_epsilon;
         font-weight: bold;
         text-decoration: none !important;
 
-        a:hover, a:focus {
-            color: inherit;
+        &:hover, &:focus, &:active {
+            text-decoration: none !important;
         }
     }
 
@@ -171,9 +171,13 @@
     }
 
     .o_mail_footer_links {
-        font-size: 12px;
         padding-top: 10px;
         padding-bottom: 10px;
+
+        .btn-link{
+            padding: 0;
+            font-size: 12px;
+        }
     }
 
     .o_mail_footer_copy {
@@ -196,6 +200,11 @@
             padding-right: 20px;
             text-align: right;
             vertical-align: top;
+
+            .btn-link{
+                padding: 0;
+                font-size: 12px;
+            }
         }
     }
 }
