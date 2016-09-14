@@ -35,7 +35,7 @@
                                         </small>
                                     </p>
                                     <div class="o_mail_v_padding text-center">
-                                        <a href="#" class="o_mail_btn">LOGIN</a>
+                                        <a href="#" class="btn btn-primary">LOGIN</a>
                                     </div>
 
                                 </td>
@@ -193,7 +193,7 @@
                                         <img src="/mass_mailing/static/src/img/theme_airmail/s_default_image_block_three_cols_1.jpg" class="center-block" alt="Your Picture"/>
                                         <h4 class="text-center">1958 Royal</h4>
                                         <div class="text-center" style="margin-top:15px;">
-                                            <a href="#" class="o_mail_btn">Discover</a>
+                                            <a href="#" class="btn btn-primary">Discover</a>
                                         </div>
                                     </div>
                                 </td>
@@ -203,7 +203,7 @@
                                         <img src="/mass_mailing/static/src/img/theme_airmail/s_default_image_block_three_cols_2.jpg" class="center-block" alt="Your Picture"/>
                                         <h4 class="text-center">Classic D8 Skate</h4>
                                         <div class="text-center" style="margin-top:15px;">
-                                            <a href="#" class="o_mail_btn">Discover</a>
+                                            <a href="#" class="btn btn-primary">Discover</a>
                                         </div>
                                     </div>
                                 </td>
@@ -213,7 +213,7 @@
                                         <img src="/mass_mailing/static/src/img/theme_airmail/s_default_image_block_three_cols_3.jpg" class="center-block" alt="Your Picture"/>
                                         <h4 class="text-center">Puccini Jar</h4>
                                         <div class="text-center" style="margin-top:15px;">
-                                            <a href="#" class="o_mail_btn">Discover</a>
+                                            <a href="#" class="btn btn-primary">Discover</a>
                                         </div>
                                     </div>
                                 </td>
@@ -499,7 +499,7 @@
                                         <img src="/mass_mailing/static/src/img/theme_resto/s_default_image_block_three_cols_1.jpg" class="center-block" alt="Your Picture"/>
                                         <h4 class="text-center">Tomato Soup</h4>
                                         <div class="text-center" style="margin-top:15px;">
-                                            <a href="#" class="o_mail_btn btn-xs">Order</a>
+                                            <a href="#" class="btn btn-primary btn-xs">Order</a>
                                         </div>
                                     </div>
                                 </td>
@@ -509,7 +509,7 @@
                                         <img src="/mass_mailing/static/src/img/theme_resto/s_default_image_block_three_cols_2.jpg" class="center-block" alt="Your Picture"/>
                                         <h4 class="text-center">Captain’s Salad</h4>
                                         <div class="text-center" style="margin-top:15px;">
-                                            <a href="#" class="o_mail_btn btn-xs">Order</a>
+                                            <a href="#" class="btn btn-primary btn-xs">Order</a>
                                         </div>
                                     </div>
                                 </td>
@@ -519,7 +519,7 @@
                                         <img src="/mass_mailing/static/src/img/theme_resto/s_default_image_block_three_cols_3.jpg" class="center-block" alt="Your Picture"/>
                                         <h4 class="text-center">Mini Hamburgers</h4>
                                         <div class="text-center" style="margin-top:15px;">
-                                            <a href="#" class="o_mail_btn btn-xs">Order</a>
+                                            <a href="#" class="btn btn-primary btn-xs">Order</a>
                                         </div>
                                     </div>
                                 </td>
@@ -566,7 +566,7 @@
                                         <img src="/mass_mailing/static/src/img/theme_resto/s_default_image_block_two_cols_1.jpg" class="center-block" alt="Your Picture"/>
                                         <h4 class="text-center">Tagliatelle Boscaiola</h4>
                                         <div class="text-center" style="margin-top:15px;">
-                                            <a href="#" class="o_mail_btn btn-xs">Order</a>
+                                            <a href="#" class="btn btn-primary btn-xs">Order</a>
                                         </div>
                                     </div>
                                 </td>
@@ -576,7 +576,7 @@
                                         <img src="/mass_mailing/static/src/img/theme_resto/s_default_image_block_two_cols_2.jpg" class="center-block" alt="Your Picture"/>
                                         <h4 class="text-center">BBQ Mix</h4>
                                         <div class="text-center" style="margin-top:15px;">
-                                            <a href="#" class="o_mail_btn btn-xs">Order</a>
+                                            <a href="#" class="btn btn-primary btn-xs">Order</a>
                                         </div>
                                     </div>
                                 </td>
