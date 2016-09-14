@@ -177,27 +177,31 @@ var ViewEditor = Widget.extend({
             method: 'read',
             args: [[viewId], ['arch'], _.extend(base.get_context(), {'lang': null})],
         }).then(function (result) {
-            var editingSession = self.buffers[viewId] = new ace.EditSession(result[0].arch);
-            editingSession.setUseWorker(false);
-            editingSession.setMode("ace/mode/xml");
-            editingSession.setUndoManager(new ace.UndoManager());
-            editingSession.on("change", function () {
-                setTimeout(function () {
-                    var $option = self.$('#ace-view-list').find('[value='+viewId+']');
-                    var bufferName = $option.text();
-                    var dirtyMarker = " (unsaved changes)";
-                    var isDirty = editingSession.getUndoManager().hasUndo();
-                    if (isDirty && bufferName.indexOf(dirtyMarker) < 0) {
-                        $option.text(bufferName + dirtyMarker);
-                    } else if (!isDirty && bufferName.indexOf(dirtyMarker) > 0) {
-                        $option.text(bufferName.substring(0, bufferName.indexOf(dirtyMarker)));
-                    }
-                }, 1);
-            });
-            if (viewId === self.selectedViewId()) {
-                self.displayView.call(self, viewId);
-            }
+            self._displayArch(result[0].arch, viewId);
         });
+    },
+    _displayArch: function(arch, viewId) {
+        var self = this;
+        var editingSession = this.buffers[viewId] = new ace.EditSession(arch);
+        editingSession.setUseWorker(false);
+        editingSession.setMode("ace/mode/xml");
+        editingSession.setUndoManager(new ace.UndoManager());
+        editingSession.on("change", function () {
+            setTimeout(function () {
+                var $option = self.$('#ace-view-list').find('[value='+viewId+']');
+                var bufferName = $option.text();
+                var dirtyMarker = " (unsaved changes)";
+                var isDirty = editingSession.getUndoManager().hasUndo();
+                if (isDirty && bufferName.indexOf(dirtyMarker) < 0) {
+                    $option.text(bufferName + dirtyMarker);
+                } else if (!isDirty && bufferName.indexOf(dirtyMarker) > 0) {
+                    $option.text(bufferName.substring(0, bufferName.indexOf(dirtyMarker)));
+                }
+            }, 1);
+        });
+        if (viewId === self.selectedViewId()) {
+            self.displayView.call(self, viewId);
+        }
     },
     selectedViewId: function () {
         return parseInt(this.$('#ace-view-list').val(), 10);
