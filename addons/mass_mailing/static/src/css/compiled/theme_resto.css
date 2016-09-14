@@ -13,7 +13,7 @@
   background: transparent;
   color: #37220D;
 }
-.o_layout.o_resto_theme .o_mail_snippet_general .o_mail_btn {
+.o_layout.o_resto_theme .o_mail_snippet_general .btn.btn-primary {
   color: #ffffff;
   background-color: #E96D1F;
 }

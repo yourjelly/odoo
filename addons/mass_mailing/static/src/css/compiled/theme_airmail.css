@@ -10,7 +10,7 @@
   background-color: white;
   color: black;
 }
-.o_layout.o_airmail_theme .o_mail_snippet_general .o_mail_btn {
+.o_layout.o_airmail_theme .o_mail_snippet_general .btn.btn-primary {
   color: white;
   background-color: #FB3C6B;
 }
@@ -21,7 +21,7 @@
 .o_layout.o_airmail_theme .o_mail_snippet_general .bg-beta {
   background-color: #FB3C6B;
 }
-.o_layout.o_airmail_theme .o_mail_snippet_general .bg-beta .o_mail_btn {
+.o_layout.o_airmail_theme .o_mail_snippet_general .bg-beta .btn.btn-primary {
   color: white;
   background-color: #a17e92;
 }

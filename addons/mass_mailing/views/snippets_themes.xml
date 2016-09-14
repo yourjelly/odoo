@@ -239,7 +239,7 @@
                             <p>Kind Regards,</p>
                             <p class="o_mail_no_margin">Michael Fletcher</p>
                             <div class="o_mail_v_padding text-center">
-                                <a href="#" class="o_mail_btn">See Our Deals!</a>
+                                <a href="#" class="btn btn-primary">See Our Deals!</a>
                                 &amp;nbsp;
                             </div>
 
@@ -325,7 +325,7 @@
                                     <tr>
                                         <td class="text-center" style="padding:15px 0;">
                                             &amp;nbsp;
-                                            <a href="#" class="o_mail_btn">More</a>
+                                            <a href="#" class="btn btn-primary">More</a>
                                             &amp;nbsp;
                                         </td>
                                     </tr>
@@ -383,7 +383,7 @@
                                     <tr>
                                         <td class="text-center" style="padding:15px 0;">
                                             &amp;nbsp;
-                                            <a href="#" class="o_mail_btn">More</a>
+                                            <a href="#" class="btn btn-primary">More</a>
                                             &amp;nbsp;
                                         </td>
                                     </tr>
@@ -584,7 +584,7 @@
                     <tr>
                         <td class="o_mail_h_padding o_mail_v_padding bg-beta" style="padding:10px;">
                             &amp;nbsp;
-                            <a href="#" class="o_mail_btn">My Account</a>
+                            <a href="#" class="btn btn-primary">My Account</a>
                             &amp;nbsp;
                         </td>
                     </tr>
@@ -656,7 +656,7 @@
                                 </tr>
                                 <tr>
                                     <td class="text-center">
-                                        <a href="#" class="o_mail_btn">Redeem Discount!</a>
+                                        <a href="#" class="btn btn-primary">Redeem Discount!</a>
                                         &amp;nbsp;
                                     </td>
                                 </tr>
@@ -693,7 +693,7 @@
                             </p>
                         </div>
                         <div class="small mt16">
-                            <a href="#" class="o_mail_btn">Registration</a>
+                            <a href="#" class="btn btn-primary">Registration</a>
                             <a href="#" class="btn btn-link" style="margin-left:10px">More Info</a>
                         </div>
                     </td>

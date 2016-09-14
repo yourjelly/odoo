@@ -25,7 +25,7 @@
   color: #797979;
   margin: 0 auto;
 }
-.o_mail_snippet_general .o_mail_btn {
+.o_mail_snippet_general .btn.btn-primary {
   -webkit-user-select: none;
   padding: 8px 25px;
   font-size: 14px;
