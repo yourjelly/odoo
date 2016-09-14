@@ -33,11 +33,11 @@
 // ===========   Editor
 
 #web_editor_inside_iframe {
-    background-color: lighten(@o_mm_def_color_alpha, 2%);
-
     #wrapwrap > main #editable_area {
+        display: block;
         border: none;
         background-color: transparent;
+        width: 100%;
     }
 }
 
@@ -45,8 +45,17 @@
 // ===========   Components
 
 .o_layout {
+    overflow: hidden;
+    width: 100%;
     background-color: @o_mm_def_color_beta;
     padding-bottom: 20px;
+
+    .o_mail_wrapper {
+        width: 100%;
+        max-width: @o_mm_def_body_width;
+        margin: auto;
+        background-color: lighten(@o_mm_def_color_alpha, 2%);
+    }
 }
 
 
@@ -96,6 +105,7 @@
 
     .bg-beta {
         background-color: @o_mm_def_color_zeta;
+        color:  @o_mm_def_color_beta;
     }
     .text-beta {
         color: @o_mm_def_color_zeta;
@@ -146,6 +156,10 @@
     font-size: small;
 }
 
+.o_mail_block_event .o_mail_snippet_general{
+    background: @o_mm_def_color_alpha;
+}
+
 .o_mail_block_footer_social {
 
     .o_mail_table_styles {
@@ -191,12 +205,8 @@
     text-decoration: none !important;
 }
 
-.o_mail_display_1, .o_mail_display_2, .o_mail_display_3, h1, h2, h3, h4, h5, h6 {
-    color: @o_mm_def_text_color;
-}
-
 .o_mail_display_coupon {
-    font-size: 60px;
+    font-size: 50px;
     line-height: 1;
 }
 .o_mail_display_1 {
@@ -210,10 +220,6 @@
 }
 .o_layout{
     font-size: normal;
-
-    p {
-        line-height: 1.6;
-    }
 }
 
 .text-center {
@@ -232,6 +238,7 @@
 }
 .o_mail_no_margin {
     margin: 0;
+    line-height: 1.2;
 }
 .o_mail_table_styles {
     width: 100%;

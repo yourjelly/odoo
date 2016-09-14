@@ -1,13 +1,20 @@
-#web_editor_inside_iframe {
-  background-color: #fafafa;
-}
 #web_editor_inside_iframe #wrapwrap > main #editable_area {
+  display: block;
   border: none;
   background-color: transparent;
+  width: 100%;
 }
 .o_layout {
+  overflow: hidden;
+  width: 100%;
   background-color: #ffffff;
   padding-bottom: 20px;
+}
+.o_layout .o_mail_wrapper {
+  width: 100%;
+  max-width: 600px;
+  margin: auto;
+  background-color: #fafafa;
 }
 .o_mail_snippet_general {
   width: 100%;
@@ -53,6 +60,7 @@
 }
 .o_mail_snippet_general .bg-beta {
   background-color: #906784;
+  color: #ffffff;
 }
 .o_mail_snippet_general .text-beta {
   color: #906784;
@@ -91,6 +99,9 @@
 .o_mail_block_image_text,
 .o_mail_block_text_image {
   font-size: small;
+}
+.o_mail_block_event .o_mail_snippet_general {
+  background: #f5f5f5;
 }
 .o_mail_block_footer_social .o_mail_table_styles {
   border-top: 2px solid #f5f5f5;
@@ -131,19 +142,8 @@ td,
   font-weight: normal;
   text-decoration: none !important;
 }
-.o_mail_display_1,
-.o_mail_display_2,
-.o_mail_display_3,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  color: #464646;
-}
 .o_mail_display_coupon {
-  font-size: 60px;
+  font-size: 50px;
   line-height: 1;
 }
 .o_mail_display_1 {
@@ -157,9 +157,6 @@ h6 {
 }
 .o_layout {
   font-size: normal;
-}
-.o_layout p {
-  line-height: 1.6;
 }
 .text-center {
   text-align: center;
@@ -175,6 +172,7 @@ h6 {
 }
 .o_mail_no_margin {
   margin: 0;
+  line-height: 1.2;
 }
 .o_mail_table_styles {
   width: 100%;

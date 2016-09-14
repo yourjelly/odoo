@@ -16,8 +16,8 @@
 
     <div data-js='content' class="hidden"
         data-selector="[class^='o_mail_block_']"
-        data-drop-near=".oe_structure > *"
-        data-drop-in=".oe_structure">
+        data-drop-near=".o_mail_wrapper > *"
+        data-drop-in=".o_mail_wrapper">
     </div>
 
     <div data-js='resize'

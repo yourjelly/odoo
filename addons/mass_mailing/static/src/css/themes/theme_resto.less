@@ -13,7 +13,7 @@
 }
 
 .o_layout.o_resto_theme {
-    background-color: @o_mm_resto_color_alpha;
+    background-color: @o_mm_resto_color_beta;
 
     // ===========   Components
 
@@ -31,6 +31,32 @@
             font-weight: normal;
             color: @o_mm_resto_color_epsilon;
         }
+
+        .bg-beta {
+            background-color: @o_mm_resto_color_zeta;
+            color: @o_mm_resto_color_beta;
+
+            .o_mail_display_1, .o_mail_display_2, .o_mail_display_3,  p, th, td, .table-styles , h1, h2, h3, h4, h5, h6 {
+                color: @o_mm_resto_color_beta;
+            }
+        }
+
+        .text-beta {
+            color: @o_mm_resto_color_zeta;
+        }
+
+        .bg-delta {
+            background-color: @o_mm_resto_color_gamma;
+            color: @o_mm_resto_color_beta;
+
+            .o_mail_display_1, .o_mail_display_2, .o_mail_display_3,  p, th, td, .table-styles , h1, h2, h3, h4, h5, h6 {
+                color: @o_mm_resto_color_beta;
+            }
+        }
+
+        .text-delta {
+            color: @o_mm_resto_color_epsilon;
+        }
     }
 
     // ===========   Snippets
@@ -43,6 +69,15 @@
             a {
                 color: @o_mm_resto_color_gamma;
             }
+        }
+    }
+
+    .o_mail_block_steps {
+        border-top: 2px solid @o_mm_resto_color_gamma;
+        background: @o_mm_resto_color_zeta;
+
+        .o_mail_snippet_general, .o_mail_display_1, .o_mail_display_2, .o_mail_display_3,  p, th, td, .table-styles , h1, h2, h3, h4, h5, h6 {
+            color: @o_mm_resto_color_beta;
         }
     }
 }

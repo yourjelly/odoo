@@ -2,7 +2,7 @@
   background-color: #F1EDDF;
 }
 .o_layout.o_resto_theme {
-  background-color: #F1EDDF;
+  background-color: #ffffff;
 }
 .o_layout.o_resto_theme .o_mail_snippet_general {
   background: rgba(0, 0, 0, 0);
@@ -18,6 +18,50 @@
   font-weight: normal;
   color: #d96115;
 }
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta {
+  background-color: #401904;
+  color: #ffffff;
+}
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta .o_mail_display_1,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta .o_mail_display_2,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta .o_mail_display_3,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta p,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta th,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta td,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta .table-styles,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta h1,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta h2,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta h3,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta h4,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta h5,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta h6 {
+  color: #ffffff;
+}
+.o_layout.o_resto_theme .o_mail_snippet_general .text-beta {
+  color: #401904;
+}
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta {
+  background-color: #E96D1F;
+  color: #ffffff;
+}
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta .o_mail_display_1,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta .o_mail_display_2,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta .o_mail_display_3,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta p,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta th,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta td,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta .table-styles,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta h1,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta h2,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta h3,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta h4,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta h5,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta h6 {
+  color: #ffffff;
+}
+.o_layout.o_resto_theme .o_mail_snippet_general .text-delta {
+  color: #d96115;
+}
 .o_layout.o_resto_theme .o_mail_block_header_social,
 .o_layout.o_resto_theme .o_mail_block_header_text_social,
 .o_layout.o_resto_theme .o_mail_block_header_logo {
@@ -29,4 +73,24 @@
 .o_layout.o_resto_theme .o_mail_block_header_text_social .o_mail_header_social a,
 .o_layout.o_resto_theme .o_mail_block_header_logo .o_mail_header_social a {
   color: #E96D1F;
+}
+.o_layout.o_resto_theme .o_mail_block_steps {
+  border-top: 2px solid #E96D1F;
+  background: #401904;
+}
+.o_layout.o_resto_theme .o_mail_block_steps .o_mail_snippet_general,
+.o_layout.o_resto_theme .o_mail_block_steps .o_mail_display_1,
+.o_layout.o_resto_theme .o_mail_block_steps .o_mail_display_2,
+.o_layout.o_resto_theme .o_mail_block_steps .o_mail_display_3,
+.o_layout.o_resto_theme .o_mail_block_steps p,
+.o_layout.o_resto_theme .o_mail_block_steps th,
+.o_layout.o_resto_theme .o_mail_block_steps td,
+.o_layout.o_resto_theme .o_mail_block_steps .table-styles,
+.o_layout.o_resto_theme .o_mail_block_steps h1,
+.o_layout.o_resto_theme .o_mail_block_steps h2,
+.o_layout.o_resto_theme .o_mail_block_steps h3,
+.o_layout.o_resto_theme .o_mail_block_steps h4,
+.o_layout.o_resto_theme .o_mail_block_steps h5,
+.o_layout.o_resto_theme .o_mail_block_steps h6 {
+  color: #ffffff;
 }

@@ -11,28 +11,21 @@
 
 
 
-#web_editor_inside_iframe.o_tech_theme  {
-    background-color: @o_mm_tech_color_alpha;
-}
-
 .o_layout.o_tech_theme {
     background-color: @o_mm_tech_color_alpha;
+
+    .o_mail_wrapper {
+        background-color: transparent;
+        color: @o_mm_tech_color_delta;
+    }
 
     // ===========   Components
 
     .o_mail_snippet_general {
-        background: rgba(0,0,0,0);
-        background: transparent;
-        color: @o_mm_tech_color_delta;
 
         .o_mail_btn {
             color: @o_mm_tech_color_beta;
             background-color: @o_mm_tech_color_gamma;
-        }
-
-        .o_mail_full_width_padding {
-            padding-left: 20px;
-            padding-right: 20px;
         }
 
         a, .o_mail_link {
@@ -71,13 +64,8 @@
         .o_mail_snippet_general {
             margin-top: 10px;
             margin-bottom: 25px;
-            padding-left: 20px;
-            padding-right: 20px;
-            background: rgba(0,0,0,0);
-            background: transparent;
 
             > table {
-                max-width: 560px;
                 border-bottom: 1px solid darken(@o_mm_tech_color_beta, 60%);
             }
         }
