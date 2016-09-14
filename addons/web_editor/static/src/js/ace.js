@@ -127,13 +127,14 @@ var ViewEditor = Widget.extend({
 
     loadViews: function (views) {
         var $viewList = this.$('#ace-view-list').empty();
-        _(this.buildViewGraph(views)).each(function (view) {
+        var viewGraph = this.buildViewGraph(views);
+        _(viewGraph).each(function (view) {
             if (!view.id) { return; }
 
             this.views[view.id] = view;
             new ViewOption(this, view).appendTo($viewList);
-            this.loadView(view.id);
         }.bind(this));
+        return this.loadView(viewGraph[0].id);
     },
     buildViewGraph: function (views) {
         var activeViews = _.uniq(_.filter(views, function (view) {
@@ -171,15 +172,15 @@ var ViewEditor = Widget.extend({
     loadView: function (id) {
         var viewId = parseInt(id, 10);
         var self = this;
-        ajax.jsonRpc('/web/dataset/call', 'call', {
+        return ajax.jsonRpc('/web/dataset/call', 'call', {
             model: 'ir.ui.view',
             method: 'read',
             args: [[viewId], ['arch'], _.extend(base.get_context(), {'lang': null})],
         }).then(function (result) {
             var editingSession = self.buffers[viewId] = new ace.EditSession(result[0].arch);
+            editingSession.setUseWorker(false);
             editingSession.setMode("ace/mode/xml");
             editingSession.setUndoManager(new ace.UndoManager());
-            editingSession.setUseWorker(false);
             editingSession.on("change", function () {
                 setTimeout(function () {
                     var $option = self.$('#ace-view-list').find('[value='+viewId+']');
@@ -212,8 +213,16 @@ var ViewEditor = Widget.extend({
         }
     },
     displaySelectedView: function () {
-        this.displayView(this.selectedViewId());
-        this.updateHash();
+        var self = this;
+        var viewID = this.selectedViewId();
+        if (this.buffers[viewID]) {
+            this.displayView(viewID);
+            this.updateHash();
+        } else {
+            this.loadView(viewID).then(function() {
+                self.updateHash();
+            });
+        }
     },
     formatXml: function () {
         var xml = new XmlDocument(this.aceEditor.getValue());
