@@ -35,15 +35,18 @@
 .o_layout.o_tech_theme .o_mail_snippet_general .bg-gray-lighter {
   background-color: #a17e92;
 }
-.o_layout.o_tech_theme .o_mail_snippet_general .o_mail_display_1,
-.o_layout.o_tech_theme .o_mail_snippet_general .o_mail_display_2,
-.o_layout.o_tech_theme .o_mail_snippet_general .o_mail_display_3,
 .o_layout.o_tech_theme .o_mail_snippet_general h1,
 .o_layout.o_tech_theme .o_mail_snippet_general h2,
 .o_layout.o_tech_theme .o_mail_snippet_general h3,
 .o_layout.o_tech_theme .o_mail_snippet_general h4,
 .o_layout.o_tech_theme .o_mail_snippet_general h5,
-.o_layout.o_tech_theme .o_mail_snippet_general h6 {
+.o_layout.o_tech_theme .o_mail_snippet_general h6,
+.o_layout.o_tech_theme .o_mail_snippet_general .h1,
+.o_layout.o_tech_theme .o_mail_snippet_general .h2,
+.o_layout.o_tech_theme .o_mail_snippet_general .h3,
+.o_layout.o_tech_theme .o_mail_snippet_general .h4,
+.o_layout.o_tech_theme .o_mail_snippet_general .h5,
+.o_layout.o_tech_theme .o_mail_snippet_general .h6 {
   color: #e6e6e6;
 }
 .o_layout.o_tech_theme .o_mail_block_header_social .o_mail_snippet_general,

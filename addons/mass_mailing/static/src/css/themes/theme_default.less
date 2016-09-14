@@ -45,6 +45,8 @@
 // ===========   Components
 
 .o_layout {
+    font-family: @o_mm_def_font;
+    color: @o_mm_def_text_color;
     overflow: hidden;
     width: 100%;
     background-color: @o_mm_def_color_alpha;
@@ -136,7 +138,7 @@
 }
 
 .o_mail_block_header_text_social {
-    .o_mail_display_3 {
+    h3 {
         font-weight: bold;
     }
 }
@@ -146,8 +148,8 @@
 
     .o_mail_col_container {
         padding: 10px 20px;
-        .o_mail_display_3 {
 
+        h4 {
             margin-top: 15px;
         }
     }
@@ -200,31 +202,10 @@
 
 // ===========   Typography
 
-.o_mail_display_coupon, .display-1, .display-2, .display-3, p, th, td, .table-styles {
-    font-family: @o_mm_def_font;
-    font-weight: normal;
-    text-decoration: none !important;
-}
 
 .o_mail_display_coupon {
     font-size: 50px;
     line-height: 1;
-}
-.o_mail_display_1 {
-    font-size: 30px;
-}
-.o_mail_display_2 {
-    font-size: 25px;
-}
-.o_mail_display_3 {
-    font-size: 18px;
-}
-.o_layout{
-    font-size: normal;
-}
-
-.text-center {
-    text-align: center;
 }
 
 /* ======================== MISC ====================== */

@@ -5,6 +5,8 @@
   width: 100%;
 }
 .o_layout {
+  font-family: -apple-system, "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  color: #464646;
   overflow: hidden;
   width: 100%;
   background-color: #f5f5f5;
@@ -82,7 +84,7 @@
 .o_mail_block_header_logo .o_mail_header_social {
   margin-right: 20px;
 }
-.o_mail_block_header_text_social .o_mail_display_3 {
+.o_mail_block_header_text_social h3 {
   font-weight: bold;
 }
 .o_mail_block_two_cols,
@@ -93,8 +95,8 @@
 .o_mail_block_three_cols .o_mail_col_container {
   padding: 10px 20px;
 }
-.o_mail_block_two_cols .o_mail_col_container .o_mail_display_3,
-.o_mail_block_three_cols .o_mail_col_container .o_mail_display_3 {
+.o_mail_block_two_cols .o_mail_col_container h4,
+.o_mail_block_three_cols .o_mail_col_container h4 {
   margin-top: 15px;
 }
 .o_mail_block_image_text,
@@ -131,36 +133,9 @@
   text-align: right;
   vertical-align: top;
 }
-.o_mail_display_coupon,
-.display-1,
-.display-2,
-.display-3,
-p,
-th,
-td,
-.table-styles {
-  font-family: -apple-system, "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-  font-weight: normal;
-  text-decoration: none !important;
-}
 .o_mail_display_coupon {
   font-size: 50px;
   line-height: 1;
-}
-.o_mail_display_1 {
-  font-size: 30px;
-}
-.o_mail_display_2 {
-  font-size: 25px;
-}
-.o_mail_display_3 {
-  font-size: 18px;
-}
-.o_layout {
-  font-size: normal;
-}
-.text-center {
-  text-align: center;
 }
 /* ======================== MISC ====================== */
 .o_mail_h_padding {
