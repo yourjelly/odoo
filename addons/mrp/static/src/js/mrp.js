@@ -72,6 +72,28 @@ var TimeCounter = common.AbstractField.extend(common.ReinitializeFieldMixin, {
     },
 });
 
+var PdfViewer = common.AbstractField.extend(common.ReinitializeFieldMixin, {
+    tagName: 'iframe',
+    className: 'o_form_field_pdfviewer',
+    get_uri: function(){
+        var query_obj = {
+            model: this.view.dataset.model,
+            field: this.name,
+            id: this.view.datarecord.id
+        };
+        var query_string = $.param(query_obj);
+        var url = encodeURIComponent('/web/image?' + query_string);
+        // we can access static(pdfjs) assets of website even though website in not installed
+        // we did the same in website_sign but what if someone rm -r /website for save cloud space ??
+        return '/website/static/lib/pdfjs/web/viewer.html?file=' + url;
+    },
+    render_value: function() {
+        this._super.apply(this, arguments);
+        this.$el.attr('src', this.get_uri());
+    },
+
+});
 core.form_widget_registry.add('bullet_state', SetBulletStatus)
-                         .add('mrp_time_counter', TimeCounter);
+                         .add('mrp_time_counter', TimeCounter)
+                         .add('pdf_viewer', PdfViewer);
 });
