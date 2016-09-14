@@ -2,7 +2,11 @@
   background-color: #F1EDDF;
 }
 .o_layout.o_resto_theme {
-  background-color: #ffffff;
+  background-color: #F1EDDF;
+}
+.o_layout.o_resto_theme .o_mail_wrapper {
+  border: none;
+  background-color: transparent;
 }
 .o_layout.o_resto_theme .o_mail_snippet_general {
   background: rgba(0, 0, 0, 0);

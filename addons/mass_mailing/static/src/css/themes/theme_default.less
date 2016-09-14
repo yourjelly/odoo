@@ -47,14 +47,15 @@
 .o_layout {
     overflow: hidden;
     width: 100%;
-    background-color: @o_mm_def_color_beta;
+    background-color: @o_mm_def_color_alpha;
     padding-bottom: 20px;
 
     .o_mail_wrapper {
         width: 100%;
         max-width: @o_mm_def_body_width;
         margin: auto;
-        background-color: lighten(@o_mm_def_color_alpha, 2%);
+        border: 1px solid darken(@o_mm_def_color_alpha, 2%);
+        background-color: @o_mm_def_color_beta;
     }
 }
 

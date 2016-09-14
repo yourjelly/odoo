@@ -17,6 +17,7 @@
     .o_mail_wrapper {
         background-color: transparent;
         color: @o_mm_tech_color_delta;
+        border: none;
     }
 
     // ===========   Components
@@ -27,7 +28,10 @@
             color: @o_mm_tech_color_beta;
             background-color: @o_mm_tech_color_gamma;
         }
-
+        .o_mail_full_width_padding {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
         a, .o_mail_link {
             font-weight: normal;
             color: @o_mm_tech_color_gamma;
@@ -64,8 +68,11 @@
         .o_mail_snippet_general {
             margin-top: 10px;
             margin-bottom: 25px;
+            padding-left: 20px;
+            padding-right: 20px;
 
             > table {
+                max-width: 560px;
                 border-bottom: 1px solid darken(@o_mm_tech_color_beta, 60%);
             }
         }
@@ -87,6 +94,10 @@
             height: 1px;
             background-color: darken(@o_mm_tech_color_beta, 60%);
         }
+    }
+    .o_mail_block_event {
+        margin-left: 20px;
+        margin-right: 20px;
     }
 
 

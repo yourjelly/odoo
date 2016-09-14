@@ -4,10 +4,15 @@
 .o_layout.o_tech_theme .o_mail_wrapper {
   background-color: transparent;
   color: #bdbdbd;
+  border: none;
 }
 .o_layout.o_tech_theme .o_mail_snippet_general .o_mail_btn {
   color: white;
   background-color: #59cdcd;
+}
+.o_layout.o_tech_theme .o_mail_snippet_general .o_mail_full_width_padding {
+  padding-left: 20px;
+  padding-right: 20px;
 }
 .o_layout.o_tech_theme .o_mail_snippet_general a,
 .o_layout.o_tech_theme .o_mail_snippet_general .o_mail_link {
@@ -46,10 +51,13 @@
 .o_layout.o_tech_theme .o_mail_block_header_logo .o_mail_snippet_general {
   margin-top: 10px;
   margin-bottom: 25px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 .o_layout.o_tech_theme .o_mail_block_header_social .o_mail_snippet_general > table,
 .o_layout.o_tech_theme .o_mail_block_header_text_social .o_mail_snippet_general > table,
 .o_layout.o_tech_theme .o_mail_block_header_logo .o_mail_snippet_general > table {
+  max-width: 560px;
   border-bottom: 1px solid #666666;
 }
 .o_layout.o_tech_theme .o_mail_block_header_social .o_mail_h_padding.o_mail_v_padding,
@@ -70,6 +78,10 @@
 .o_layout.o_tech_theme .o_mail_block_footer_separator .separator {
   height: 1px;
   background-color: #666666;
+}
+.o_layout.o_tech_theme .o_mail_block_event {
+  margin-left: 20px;
+  margin-right: 20px;
 }
 .o_layout.o_tech_theme .o_mail_block_footer_social .o_mail_snippet_general {
   background: rgba(0, 0, 0, 0);
