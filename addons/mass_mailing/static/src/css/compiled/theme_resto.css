@@ -26,6 +26,20 @@
   background-color: #401904;
   color: #ffffff;
 }
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta h1,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta h2,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta h3,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta h4,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta h5,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta h6,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta .h1,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta .h2,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta .h3,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta .h4,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta .h5,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-beta .h6 {
+  color: #ffffff;
+}
 .o_layout.o_resto_theme .o_mail_snippet_general .text-beta {
   color: #401904;
 }
@@ -33,8 +47,25 @@
   background-color: #E96D1F;
   color: #ffffff;
 }
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta h1,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta h2,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta h3,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta h4,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta h5,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta h6,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta .h1,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta .h2,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta .h3,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta .h4,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta .h5,
+.o_layout.o_resto_theme .o_mail_snippet_general .bg-delta .h6 {
+  color: #ffffff;
+}
 .o_layout.o_resto_theme .o_mail_snippet_general .text-delta {
   color: #d96115;
+}
+.o_layout.o_resto_theme .o_mail_snippet_general .separator {
+  background-color: #E96D1F;
 }
 .o_layout.o_resto_theme .o_mail_block_header_social,
 .o_layout.o_resto_theme .o_mail_block_header_text_social,
@@ -55,7 +86,24 @@
 .o_layout.o_resto_theme .o_mail_block_steps .o_mail_snippet_general {
   color: #ffffff;
 }
+.o_layout.o_resto_theme .o_mail_block_steps h1,
+.o_layout.o_resto_theme .o_mail_block_steps h2,
+.o_layout.o_resto_theme .o_mail_block_steps h3,
+.o_layout.o_resto_theme .o_mail_block_steps h4,
+.o_layout.o_resto_theme .o_mail_block_steps h5,
+.o_layout.o_resto_theme .o_mail_block_steps h6,
+.o_layout.o_resto_theme .o_mail_block_steps .h1,
+.o_layout.o_resto_theme .o_mail_block_steps .h2,
+.o_layout.o_resto_theme .o_mail_block_steps .h3,
+.o_layout.o_resto_theme .o_mail_block_steps .h4,
+.o_layout.o_resto_theme .o_mail_block_steps .h5,
+.o_layout.o_resto_theme .o_mail_block_steps .h6 {
+  color: #ffffff;
+}
 .o_layout.o_resto_theme .o_mail_block_event {
   margin-left: 0;
   margin-right: 0;
+}
+.o_layout.o_resto_theme .o_mail_block_event .o_mail_snippet_general {
+  background: #fafafa;
 }

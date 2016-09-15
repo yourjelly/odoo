@@ -83,6 +83,20 @@
   margin-left: 20px;
   margin-right: 20px;
 }
+.o_layout.o_tech_theme .o_mail_block_event h1,
+.o_layout.o_tech_theme .o_mail_block_event h2,
+.o_layout.o_tech_theme .o_mail_block_event h3,
+.o_layout.o_tech_theme .o_mail_block_event h4,
+.o_layout.o_tech_theme .o_mail_block_event h5,
+.o_layout.o_tech_theme .o_mail_block_event h6,
+.o_layout.o_tech_theme .o_mail_block_event .h1,
+.o_layout.o_tech_theme .o_mail_block_event .h2,
+.o_layout.o_tech_theme .o_mail_block_event .h3,
+.o_layout.o_tech_theme .o_mail_block_event .h4,
+.o_layout.o_tech_theme .o_mail_block_event .h5,
+.o_layout.o_tech_theme .o_mail_block_event .h6 {
+  color: #333;
+}
 .o_layout.o_tech_theme .o_mail_block_footer_separator {
   margin-left: 0;
   margin-right: 0;

@@ -6,7 +6,7 @@
 }
 .o_layout {
   font-family: -apple-system, "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-  color: #464646;
+  color: #797979;
   overflow: hidden;
   width: 100%;
   height: 100%;
@@ -23,8 +23,21 @@
 .o_mail_snippet_general {
   width: 100%;
   max-width: 600px;
-  color: #797979;
   margin: 0 auto;
+}
+.o_mail_snippet_general h1,
+.o_mail_snippet_general h2,
+.o_mail_snippet_general h3,
+.o_mail_snippet_general h4,
+.o_mail_snippet_general h5,
+.o_mail_snippet_general h6,
+.o_mail_snippet_general .h1,
+.o_mail_snippet_general .h2,
+.o_mail_snippet_general .h3,
+.o_mail_snippet_general .h4,
+.o_mail_snippet_general .h5,
+.o_mail_snippet_general .h6 {
+  color: #464646;
 }
 .o_mail_snippet_general .btn.btn-primary {
   -webkit-user-select: none;
@@ -62,6 +75,20 @@
 }
 .o_mail_snippet_general .bg-beta {
   background-color: #706482;
+  color: #ffffff;
+}
+.o_mail_snippet_general .bg-beta h1,
+.o_mail_snippet_general .bg-beta h2,
+.o_mail_snippet_general .bg-beta h3,
+.o_mail_snippet_general .bg-beta h4,
+.o_mail_snippet_general .bg-beta h5,
+.o_mail_snippet_general .bg-beta h6,
+.o_mail_snippet_general .bg-beta .h1,
+.o_mail_snippet_general .bg-beta .h2,
+.o_mail_snippet_general .bg-beta .h3,
+.o_mail_snippet_general .bg-beta .h4,
+.o_mail_snippet_general .bg-beta .h5,
+.o_mail_snippet_general .bg-beta .h6 {
   color: #ffffff;
 }
 .o_mail_snippet_general .text-beta {

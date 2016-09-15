@@ -25,6 +25,20 @@
   color: white;
   background-color: #a17e92;
 }
+.o_layout.o_airmail_theme .o_mail_snippet_general .bg-beta h1,
+.o_layout.o_airmail_theme .o_mail_snippet_general .bg-beta h2,
+.o_layout.o_airmail_theme .o_mail_snippet_general .bg-beta h3,
+.o_layout.o_airmail_theme .o_mail_snippet_general .bg-beta h4,
+.o_layout.o_airmail_theme .o_mail_snippet_general .bg-beta h5,
+.o_layout.o_airmail_theme .o_mail_snippet_general .bg-beta h6,
+.o_layout.o_airmail_theme .o_mail_snippet_general .bg-beta .h1,
+.o_layout.o_airmail_theme .o_mail_snippet_general .bg-beta .h2,
+.o_layout.o_airmail_theme .o_mail_snippet_general .bg-beta .h3,
+.o_layout.o_airmail_theme .o_mail_snippet_general .bg-beta .h4,
+.o_layout.o_airmail_theme .o_mail_snippet_general .bg-beta .h5,
+.o_layout.o_airmail_theme .o_mail_snippet_general .bg-beta .h6 {
+  color: white;
+}
 .o_layout.o_airmail_theme .o_mail_snippet_general .text-beta {
   color: #FB3C6B;
 }
