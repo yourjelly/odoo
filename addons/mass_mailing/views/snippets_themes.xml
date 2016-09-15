@@ -13,6 +13,11 @@
                      data-images-info='{"logo": {"format": "png"}}'>
                     <t t-call="mass_mailing.theme_default_template"/>
                 </div>
+                <div data-name="newsletter"
+                     data-img="/mass_mailing/static/src/img/theme_imgs/newsletter_thumb"
+                     data-images-info='{"logo": {"format": "png"}}'>
+                    <t t-call="mass_mailing.theme_newsletter_template"/>
+                </div>
                 <div data-name="airmail"
                      data-img="/mass_mailing/static/src/img/theme_imgs/airmail_thumb"
                      data-images-info='{"logo": {"format": "png"}}'>
@@ -47,6 +52,7 @@
                 <div class="o_panel_body">
                     <t t-snippet="mass_mailing.s_mail_block_title_text" t-thumbnail="/mass_mailing/static/src/img/blocks/block_title_text.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_title_sub" t-thumbnail="/mass_mailing/static/src/img/blocks/block_title_sub.png"/>
+                    <t t-snippet="mass_mailing.s_mail_block_paragraph" t-thumbnail="/mass_mailing/static/src/img/blocks/block_paragraph.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_comparison_table" t-thumbnail="/mass_mailing/static/src/img/blocks/block_comparison_table.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_two_cols" t-thumbnail="/mass_mailing/static/src/img/blocks/block_two_cols.png"/>
                     <t t-snippet="mass_mailing.s_mail_block_three_cols" t-thumbnail="/mass_mailing/static/src/img/blocks/block_three_cols.png"/>
@@ -94,7 +100,7 @@
                     <td width="80%"  class="o_mail_logo_container o_mail_h_padding o_mail_v_padding">
                         &amp;nbsp;
                         <a t-att-href="(company_id.website) or '#'" style="text-decoration:none;float:none;">
-                             <img border="0" src="/web/image/mass_mailing.s_default_image_logo" style="height:auto;max-width:400px;margin-left:-6px;" alt="Your Logo" />
+                             <img border="0" src="/web/image/mass_mailing.s_default_image_logo" style="height:auto;max-width:400px;" alt="Your Logo" />
                         </a>
                         &amp;nbsp;
                     </td>
@@ -146,7 +152,7 @@
                     <td width="80%" class="o_mail_h_padding o_mail_v_padding">
                         &amp;nbsp;
                         <h3>
-                            <a t-att-href="(company_id.website) or '#'" style="margin-left:-6px;">
+                            <a t-att-href="(company_id.website) or '#'">
                                 My Company
                             </a>
                         </h3>
@@ -233,7 +239,7 @@
                 <tbody>
                     <tr>
                         <td width="100%" class="o_mail_h_padding o_mail_v_padding">
-                            <h2>Thank you for joining us!</h2>
+                            <h2 class="mt0">Thank you for joining us!</h2>
                             <p>We want to take this opportunity to welcome you to our ever-growing community!<br/></p>
                             <p>Your platform is ready for work. It will help you reduce the costs of digital signage, attract new customers and increase sales.</p>
                             <p>Enjoy,</p>
@@ -255,6 +261,29 @@
         </div>
     </div>
 </template>
+
+<template id="s_mail_block_paragraph" name="Paragraph">
+    <div class="o_mail_block_paragraph">
+        <div class="o_mail_snippet_general">
+            <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles">
+                <tbody>
+                    <tr>
+                        <td width="100%" class="o_mail_h_padding o_mail_v_padding">
+                            <p> The open source model of Odoo has allowed us to leverage thousands of developers and
+                                business experts to build hundreds of apps in just a few years.</p>
+                            <p> With strong technical foundations, Odoo's framework is unique.
+                                It provides top notch usability that scales across all apps.</p>
+                            <p> Usability improvements made on Odoo will automatically apply to all
+                                of our fully integrated apps.</p>
+                            <p> That way, Odoo evolves much faster than any other solution.</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</template>
+
 
 <template id="s_mail_block_title_sub" name="Title - Subtitle">
     <div class="o_mail_block_title_sub">
@@ -328,8 +357,8 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td valign="top" class="text-center o_mail_col_mv" style="padding-bottom: 20px;">
-                                            <a href="#" class="btn btn-primary">More</a>
+                                        <td valign="top" class="text-center o_mail_h_padding o_mail_col_mv" style="padding-bottom: 20px;">
+                                            <a href="#" class="btn btn-block btn-primary">More</a>
                                         </td>
                                     </tr>
                                 </tfoot>
@@ -384,8 +413,8 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td valign="top" class="text-center o_mail_col_mv" style="padding-bottom: 20px;">
-                                            <a href="#" class="btn btn-primary">More</a>
+                                        <td valign="top" class="text-center o_mail_h_padding o_mail_col_mv" style="padding-bottom: 20px;">
+                                            <a href="#" class="btn btn-block btn-primary">More</a>
                                         </td>
                                     </tr>
                                 </tfoot>
@@ -497,12 +526,12 @@
             <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles">
                 <tbody>
                     <tr>
-                        <td style="width:270px;text-align:center;vertical-align:middle" class="o_mail_img_container o_mail_h_padding o_mail_v_padding">
+                        <td style="width:270px;text-align:center;vertical-align:middle" class="o_mail_col_mv o_mail_img_container o_mail_h_padding o_mail_v_padding">
                             <img src="/web/image/mass_mailing.s_default_image_block_image_text" class="center-block" alt="Your Picture" />
                         </td>
                         <td style="width:270px;vertical-align:middle;text-align:center;" class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
                             <h3>Omnichannel sales</h3>
-                            <p class="o_mail_no_margin">Get your inside sales (CRM) fully integrated with online sales (eCommerce), in-store sales (Point of Sale) and marketplaces like eBay and Amazon.</p>
+                            <p class="o_mail_no_margin" style="text-align:justify;">Get your inside sales (CRM) fully integrated with online sales (eCommerce), in-store sales (Point of Sale) and marketplaces like eBay and Amazon.</p>
                             <div class="text-center" style="margin-top:15px;">
                                 <a href="#" class="btn btn-link">Read More...</a>
                             </div>
@@ -520,9 +549,9 @@
             <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles">
                 <tbody>
                     <tr>
-                        <td style="width:270px;vertical-align:middle;text-align:center;" class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
+                        <td style="width:270px;vertical-align:middle;text-align:center;" class="o_mail_col_mvo_mail_col_mv o_mail_h_padding o_mail_v_padding">
                             <h3>A unique value</h3>
-                            <p class="o_mail_no_margin">The open source model of Odoo has allowed us to leverage thousands of developers and business experts to build hundreds of apps in just a few years.</p>
+                            <p class="o_mail_no_margin" style="text-align:justify;">The open source model of Odoo has allowed us to leverage thousands of developers and business experts to build hundreds of apps in just a few years.</p>
                             <div class="text-center" style="margin-top:15px;">
                                 <a href="#" class="btn btn-link">Read More...</a>
                             </div>
@@ -560,18 +589,16 @@
 
 <template id="s_mail_block_footer_separator" name="Separator">
     <div class="o_mail_block_footer_separator">
-        <div class="snippet_row">
-            <div class="o_mail_snippet_general">
-                <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_full_width_padding">
-                    <tbody>
-                        <tr>
-                            <td valign="top" style="width:100%;" class="o_mail_v_padding">
-                                <div style="width:100%;" class="separator"></div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <div class="o_mail_snippet_general">
+            <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_full_width_padding">
+                <tbody>
+                    <tr>
+                        <td valign="top" style="width:100%;" class="o_mail_v_padding">
+                            <div style="width:100%;" class="separator"></div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </template>
@@ -698,8 +725,8 @@
                             </p>
                         </div>
                         <div class="small mt16">
-                            <a href="#" class="btn btn-primary">Registration</a>
-                            <a href="#" class="btn btn-link" style="margin-left:10px">More Info</a>
+                            <a href="#" class="btn btn-sm btn-primary">Registration</a>
+                            <a href="#" class="btn btn-sm btn-link" style="margin-left:10px">More Info</a>
                         </div>
                     </td>
                 </tr>

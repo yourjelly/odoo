@@ -83,6 +83,10 @@
   margin-left: 20px;
   margin-right: 20px;
 }
+.o_layout.o_tech_theme .o_mail_block_footer_separator {
+  margin-left: 0;
+  margin-right: 0;
+}
 .o_layout.o_tech_theme .o_mail_block_steps {
   background-color: transparent;
 }

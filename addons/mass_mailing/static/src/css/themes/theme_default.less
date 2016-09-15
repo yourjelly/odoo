@@ -11,10 +11,10 @@
 // 'Default Theme' Palette
 @o_mm_def_color_alpha   : #f5f5f5;
 @o_mm_def_color_beta    : #ffffff;
-@o_mm_def_color_gamma   : #1cc1a9;
+@o_mm_def_color_gamma   : #706482;
 @o_mm_def_color_delta   : #464646;
 @o_mm_def_color_epsilon : darken(@o_mm_def_color_gamma, 5%);
-@o_mm_def_color_zeta    : #906784;
+@o_mm_def_color_zeta    : #706482;
 @o_mm_def_color_eta     : #87a6b5;
 
 
@@ -72,15 +72,11 @@
 
     .btn.btn-primary {
         -webkit-user-select: none;
-        padding: 8px 25px;
-        font-size: 14px;
         color: @o_mm_def_btn_text;
         border: none;
         text-decoration: none;
-        display: inline-block;
         font-weight: normal;
         font-family: @o_mm_def_font;
-        text-align: center;
         cursor: pointer;
         border-radius: @o_mm_def_b_radius;
         background-color: @o_mm_def_btn_bg;
@@ -164,8 +160,17 @@
     font-size: small;
 }
 
-.o_mail_block_event .o_mail_snippet_general{
-    background: @o_mm_def_color_alpha;
+.o_mail_block_event {
+    margin-left: 20px;
+    margin-right: 20px;
+    .o_mail_snippet_general{
+        background: darken(@o_mm_def_color_alpha, 2%);
+    }
+}
+
+.o_mail_block_footer_separator {
+    margin-left: 20px;
+    margin-right: 20px;
 }
 
 .o_mail_block_comparison_table {

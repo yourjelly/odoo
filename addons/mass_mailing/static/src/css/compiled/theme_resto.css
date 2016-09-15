@@ -55,3 +55,7 @@
 .o_layout.o_resto_theme .o_mail_block_steps .o_mail_snippet_general {
   color: #ffffff;
 }
+.o_layout.o_resto_theme .o_mail_block_event {
+  margin-left: 0;
+  margin-right: 0;
+}
