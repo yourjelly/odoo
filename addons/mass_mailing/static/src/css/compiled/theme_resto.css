@@ -100,10 +100,15 @@
 .o_layout.o_resto_theme .o_mail_block_steps .h6 {
   color: #ffffff;
 }
-.o_layout.o_resto_theme .o_mail_block_event {
-  margin-left: 0;
-  margin-right: 0;
-}
 .o_layout.o_resto_theme .o_mail_block_event .o_mail_snippet_general {
   background: #fafafa;
+}
+.o_layout.o_resto_theme .o_mail_block_header_social,
+.o_layout.o_resto_theme .o_mail_block_header_text_social,
+.o_layout.o_resto_theme .o_mail_block_header_logo,
+.o_layout.o_resto_theme .o_mail_block_steps,
+.o_layout.o_resto_theme .o_mail_block_event,
+.o_layout.o_resto_theme .o_mail_block_banner {
+  margin-left: 20px;
+  margin-right: 20px;
 }
