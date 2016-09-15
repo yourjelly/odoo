@@ -33,8 +33,6 @@
 
             > a {
                 padding: 10px 10px;
-                opacity: 0.8;
-                border: 2px solid transparent;
 
                 .o_thumb {
                     display: none;
@@ -48,17 +46,19 @@
                     }
                 }
             }
+
             &:hover > a {
                 background-color: @o-we-color-darker;
-                opacity: 1;
-                border: 2px solid transparent;
+
+                .o_thumb{
+                    border: 1px solid white;
+                }
             }
 
-            &.selected, &.selected:hover {
-                border: 2px solid @odoo-brand-primary;
-                > a {
+            &.selected {
+                > a .o_thumb{
+                    border: 2px solid @odoo-brand-primary;
                     background-color: @o-we-color-dark;
-                    opacity: 1;
                 }
             }
         }
@@ -88,7 +88,6 @@ body.o_force_mail_theme_choice {
                     max-width: 25%;
 
                     > a {
-                        opacity: 1;
                         .o-transition(all, 0.3s, ease);
 
                         .o_thumb {

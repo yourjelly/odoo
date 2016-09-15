@@ -218,7 +218,7 @@ snippets_editor.Class.include({
         $dropdown.on("shown.bs.dropdown", function () {
             check_selected_theme();
             $dropdown.find("li").removeClass("selected").filter(function () {
-                return ($(this).has("img[src=\"" + (selected_theme && selected_theme.img) + "\"]").length > 0);
+                return ($(this).has(".o_thumb[style=\""+ "background-image: url(" + (selected_theme && selected_theme.img) + "_small.png)"+ "\"]").length > 0);
             }).addClass("selected");
         });
         $dropdown.on("hidden.bs.dropdown", function () {
