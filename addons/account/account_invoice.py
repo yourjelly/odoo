@@ -741,6 +741,8 @@ class account_invoice(models.Model):
                 line['currency_id'] = currency.id
                 line['amount_currency'] = currency.round(line['price'])
                 line['price'] = currency.compute(line['price'], company_currency)
+                line['tax_amount'] = currency.compute(line['tax_amount'], company_currency)
+
             else:
                 line['currency_id'] = False
                 line['amount_currency'] = False
