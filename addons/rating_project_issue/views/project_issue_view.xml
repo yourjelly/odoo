@@ -19,7 +19,7 @@
             <field name="model">project.issue</field>
             <field name="inherit_id" ref="project_issue.project_issue_form_view"/>
             <field name="arch" type="xml">
-                <xpath expr="//div[@name='button_box']" position="inside">
+                <xpath expr="//button[@name='toggle_active']" position="before">
                     <button name="%(rating_rating_action_issue)d" type="action"
                             class="oe_stat_button" icon="fa-smile-o">
                         <field name="rating_count" string="Rating" widget="statinfo"/>
@@ -54,7 +54,7 @@
             <field name="inherit_id" ref="project.edit_project"/>
             <field name="priority" eval="20"/>
             <field name="arch" type="xml">
-                <div name="button_box" position="inside">
+                <button name="toggle_active" position="before">
                     <button name="action_view_issue_rating"
                         attrs="{'invisible': ['|', '|', ('use_issues','=', False), ('rating_status', '=', 'no'), ('percentage_satisfaction_issue', '=', -1)]}"
                         class="oe_stat_button oe_percent"
@@ -62,7 +62,7 @@
                         icon="fa-smile-o">
                         <field string="% On issues" name="percentage_satisfaction_issue" widget="statinfo"/>
                      </button>
-                </div>
+                </button>
             </field>
         </record>
 
