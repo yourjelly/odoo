@@ -29,7 +29,7 @@
     </div>
 
     <div data-js="colorpicker"
-        data-selector="[class^='o_mail_block_'], [class^='o_mail_block_'] td">
+        data-selector="[class^='o_mail_block_']:not(.o_mail_block_event):not(.o_mail_block_steps), [class^='o_mail_block_'] td">
         <li class="dropdown-submenu">
             <a tabindex="-1" href="#"><i class="fa fa-eyedropper"/>Background Color</a>
             <ul class="dropdown-menu">
