@@ -36,7 +36,7 @@ class res_currency_account(osv.osv):
             query = self.pool.get('account.move.line')._query_get(cr, uid, context=context)
             cr.execute('select sum(debit-credit),sum(amount_currency) from account_move_line l ' \
               'where l.currency_id=%s and l.account_id=%s and '+query, (account.currency_id.id,account.id,))
-            tot1,tot2 = cr.fetchone()
+            tot1, tot2 = cr.fetchone()
             if tot2 and not account_invert:
                 rate = float(tot1)/float(tot2)
             elif tot1 and account_invert:
