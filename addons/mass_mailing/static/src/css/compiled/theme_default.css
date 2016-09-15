@@ -112,6 +112,10 @@
 .o_mail_block_event .o_mail_snippet_general {
   background: #f5f5f5;
 }
+.o_mail_block_comparison_table .separator {
+  height: 1px;
+  background-color: #cfcfcf;
+}
 .o_mail_block_footer_social .o_mail_table_styles {
   border-top: 2px solid #f5f5f5;
   padding-top: 20px;
