@@ -147,6 +147,12 @@
   height: 1px;
   background-color: #cfcfcf;
 }
+.o_mail_block_discount2 .o_code {
+  padding: 5px 10px;
+  background: #f5f5f5;
+  border-radius: 3px;
+  font-family: monospace;
+}
 .o_mail_block_footer_social .o_mail_table_styles {
   border-top: 2px solid #f5f5f5;
   padding-top: 20px;

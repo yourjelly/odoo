@@ -634,7 +634,7 @@
 </template>
 
 <template id="s_mail_block_discount2" name="Discount Coupon">
-    <div class="o_mail_block_discount2">
+    <div class="o_mail_block_discount2 mb16">
         <div class="o_mail_snippet_general">
             <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_h_padding">
                 <tbody>
@@ -654,7 +654,7 @@
                                 Use This Promo Code BEFORE 1st of August
                             </p>
                             <p class="o_mail_h_padding text-center">
-                                <small>CODE</small>:   <strong class="h3">45A9E77DGW8455</strong>
+                                <small>CODE</small>:   <strong class="o_code h3">45A9E77DGW8455</strong>
                             </p>
                             <p class="text-center">
                                 to receive $20 from your next purchase!

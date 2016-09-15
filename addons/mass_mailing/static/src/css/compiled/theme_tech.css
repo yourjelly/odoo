@@ -97,6 +97,9 @@
 .o_layout.o_tech_theme .o_mail_block_event .h6 {
   color: #333;
 }
+.o_layout.o_tech_theme .o_mail_block_discount2 .o_code {
+  color: #333;
+}
 .o_layout.o_tech_theme .o_mail_block_footer_separator {
   margin-left: 0;
   margin-right: 0;
