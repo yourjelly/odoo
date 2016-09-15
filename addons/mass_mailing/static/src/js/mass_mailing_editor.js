@@ -29,7 +29,7 @@ options.registry["width-x"] = options.Class.extend({
         this.$overlay.find(".oe_handle.e, .oe_handle.w").removeClass("readonly");
         if (this.$target.is('img')) {
             this.$overlay.find(".oe_handle.w").addClass("readonly");
-            this.$overlay.find(".oe_snippet_remove, .oe_snippet_move, .oe_snippet_clone").addClass("hidden");
+            this.$overlay.find(".oe_snippet_move, .oe_snippet_clone").addClass("hidden");
             this.is_image=true;
         }
 
