@@ -196,11 +196,9 @@
                     <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles">
                         <tr>
                             <td width="80%"  class="o_mail_logo_container o_mail_h_padding o_mail_v_padding">
-                                &amp;nbsp;
                                 <a t-att-href="(company_id.website) or '#'" style="text-decoration:none;float:none;">
                                      <img border="0" src="/mass_mailing/static/src/img/theme_airmail/s_default_image_logo.png" style="height:auto;max-width:400px;" alt="Your Logo" />
                                 </a>
-                                &amp;nbsp;
                             </td>
                             <td width="20%">
                                 <table t-if="website" class="o_mail_header_social" border="0" cellpadding="0" cellspacing="0" align="right" style="border-collapse:separate;">
@@ -374,11 +372,9 @@
                     <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles">
                         <tr>
                             <td width="80%"  class="o_mail_logo_container o_mail_h_padding o_mail_v_padding">
-                                &amp;nbsp;
                                 <a t-att-href="(company_id.website) or '#'" style="text-decoration:none;float:none;">
                                      <img border="0" src="/mass_mailing/static/src/img/theme_tech/s_default_image_logo.png" style="height:auto;max-width:400px;" alt="Your Logo" />
                                 </a>
-                                &amp;nbsp;
                             </td>
                             <td width="20%">
                                 <table t-if="website" class="o_mail_header_social" border="0" cellpadding="0" cellspacing="0" align="right" style="border-collapse:separate;">
@@ -503,11 +499,9 @@
                     <table align="center" cellspacing="0" cellpadding="0" border="0" class="o_mail_table_styles">
                         <tr>
                             <td width="80%"  class="o_mail_logo_container o_mail_h_padding o_mail_v_padding">
-                                &amp;nbsp;
                                 <a t-att-href="(company_id.website) or '#'" style="text-decoration:none;float:none;">
                                      <img border="0" src="/mass_mailing/static/src/img/theme_resto/s_default_image_logo.png" style="height:auto;max-width:400px;" alt="Your Logo" />
                                 </a>
-                                &amp;nbsp;
                             </td>
                             <td width="20%">
                                 <table t-if="website" class="o_mail_header_social" border="0" cellpadding="0" cellspacing="0" align="right" style="border-collapse:separate;">
@@ -571,9 +565,7 @@
                                     <table class="o_mail_table_styles">
                                         <tr>
                                             <td rowspan="2" class="text-right">
-                                                &amp;nbsp;
                                                 <span class="fa fa-compass fa-2x text-delta"></span>
-                                                &amp;nbsp;
                                             </td>
                                             <td style="padding-left:10px;">
                                                 <p class="o_mail_no_margin"><small>Step 1:</small></p>
@@ -586,9 +578,7 @@
                                     <table class="o_mail_table_styles">
                                         <tr>
                                             <td rowspan="2" class="text-right">
-                                                &amp;nbsp;
                                                 <span class="fa fa-credit-card fa-2x text-delta"></span>
-                                                &amp;nbsp;
                                             </td>
                                             <td style="padding-left:10px;">
                                                 <p class="o_mail_no_margin"><small>Step 2:</small></p>
@@ -601,9 +591,7 @@
                                     <table class="o_mail_table_styles">
                                         <tr>
                                             <td rowspan="2" class="text-right">
-                                                &amp;nbsp;
                                                 <span class="fa fa-smile-o fa-2x text-delta"></span>
-                                                &amp;nbsp;
                                             </td>
                                             <td style="padding-left:10px;">
                                                 <p class="o_mail_no_margin"><small>Step 3:</small></p>

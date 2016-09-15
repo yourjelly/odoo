@@ -4,7 +4,7 @@
 @o_mm_resto_color_alpha   : #F1EDDF;
 @o_mm_resto_color_beta    : #ffffff;
 @o_mm_resto_color_gamma   : #E96D1F;
-@o_mm_resto_color_delta   : #37220D;
+@o_mm_resto_color_delta   : #712b22;
 @o_mm_resto_color_epsilon : darken(@o_mm_resto_color_gamma, 5%);
 @o_mm_resto_color_zeta    : #401904;
 
@@ -103,5 +103,12 @@
     .o_mail_block_header_social, .o_mail_block_header_text_social, .o_mail_block_header_logo, .o_mail_block_steps, .o_mail_block_event, .o_mail_block_banner {
         margin-left: 20px;
         margin-right: 20px;
+    }
+
+    .o_mail_block_footer_social {
+        .o_mail_table_styles {
+            border-top: 2px solid @o_mm_resto_color_gamma;
+            padding-top: 20px;
+        }
     }
 }
