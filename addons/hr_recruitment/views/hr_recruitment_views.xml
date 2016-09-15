@@ -63,6 +63,12 @@
             </header>
             <sheet>
                 <div class="oe_button_box" name="button_box">
+                    <button name="toggle_active" type="object"
+                            class="oe_stat_button" icon="fa-archive"
+                            attrs="{'invisible': [('active', '=', True)]}">
+                        <field name="active" widget="boolean_button"
+                            options='{"terminology": "archive"}'/>
+                    </button>
                     <button name="action_makeMeeting" class="oe_stat_button" icon="fa-calendar" type="object"
                          help="Schedule interview with this applicant">
                         <div class="o_form_field o_stat_info">
@@ -81,12 +87,6 @@
                         type="object"
                         attrs="{'invisible': [('emp_id', '=', False)]}">
                         <field name="employee_name" widget="statinfo" string="Employee"/>
-                    </button>
-                    <button name="toggle_active" type="object"
-                            class="oe_stat_button" icon="fa-archive"
-                            attrs="{'invisible': [('active', '=', True)]}">
-                        <field name="active" widget="boolean_button"
-                            options='{"terminology": "archive"}'/>
                     </button>
                 </div>
                 <div class="oe_title">
