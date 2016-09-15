@@ -19,7 +19,7 @@
             <field name="model">project.task</field>
             <field name="inherit_id" ref="project.view_task_form2"/>
             <field name="arch" type="xml">
-                <xpath expr="//div[@name='button_box']" position="inside">
+                <xpath expr="//button[@name='toggle_active']" position="before">
                     <button name="%(rating_rating_action_task)d" type="action"
                             attrs="{'invisible': [('rating_count', '=', 0)]}"
                             class="oe_stat_button" icon="fa-smile-o">
@@ -55,7 +55,7 @@
             <field name="inherit_id" ref="project.edit_project"/>
             <field name="priority" eval="20"/>
             <field name="arch" type="xml">
-                <div name="button_box" position="inside">
+                <button name="toggle_active" position="before">
                     <button name="action_view_task_rating"
                         attrs="{'invisible': ['|', '|', ('rating_status', '=', 'no'), ('use_tasks','=', False), ('percentage_satisfaction_task', '=', -1)]}"
                         class="oe_stat_button oe_percent"
@@ -63,7 +63,7 @@
                         icon="fa-smile-o">
                         <field string="% On tasks" name="percentage_satisfaction_task" widget="statinfo"/>
                     </button>
-                </div>
+                </button>
                 <xpath expr="//field[@name='partner_id']" position="after">
                     <label for="rating_status"/>
                     <div>
