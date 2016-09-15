@@ -63,21 +63,25 @@
         }
     }
 
-    .o_mail_block_header_social, .o_mail_block_header_text_social, .o_mail_block_header_logo {
-        .o_mail_snippet_general {
-            background: rgba(0,0,0,0);
-            background: transparent;
-        }
+    .o_mail_wrapper {
+        .o_mail_block_header_social, .o_mail_block_header_text_social, .o_mail_block_header_logo {
+            margin-bottom: 0;
 
-        .o_mail_h_padding {
-            padding-left: 0;
-            padding-right: 0;
-        }
+            .o_mail_snippet_general {
+                background: rgba(0,0,0,0);
+                background: transparent;
+            }
 
-        .o_mail_header_social {
-            margin-right: 0px;
-            a {
-                color: darken(@o_mm_airmail_color_alpha, 40%);
+            .o_mail_h_padding {
+                padding-left: 0;
+                padding-right: 0;
+            }
+
+            .o_mail_header_social {
+                margin-right: 0px;
+                a {
+                    color: darken(@o_mm_airmail_color_alpha, 40%);
+                }
             }
         }
     }

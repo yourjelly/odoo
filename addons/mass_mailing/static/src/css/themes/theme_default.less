@@ -49,6 +49,7 @@
     color: @o_mm_def_text_color;
     overflow: hidden;
     width: 100%;
+    height: 100%;
     background-color: @o_mm_def_color_alpha;
     padding-bottom: 20px;
 
@@ -143,6 +144,10 @@
     }
 }
 
+.o_mail_block_steps {
+    background-color: @o_mm_def_color_alpha;
+}
+
 .o_mail_block_two_cols, .o_mail_block_three_cols {
     font-size: small;
 
@@ -229,7 +234,10 @@
 }
 .o_mail_no_margin {
     margin: 0;
-    line-height: 1.2;
+
+    &.o_mail_display_coupon {
+        line-height: 1.1;
+    }
 }
 .o_mail_table_styles {
     width: 100%;

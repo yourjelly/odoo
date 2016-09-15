@@ -86,6 +86,27 @@
   margin-left: 20px;
   margin-right: 20px;
 }
+.o_layout.o_tech_theme .o_mail_block_steps {
+  background-color: transparent;
+}
+.o_layout.o_tech_theme .o_mail_block_steps h1,
+.o_layout.o_tech_theme .o_mail_block_steps h2,
+.o_layout.o_tech_theme .o_mail_block_steps h3,
+.o_layout.o_tech_theme .o_mail_block_steps h4,
+.o_layout.o_tech_theme .o_mail_block_steps h5,
+.o_layout.o_tech_theme .o_mail_block_steps h6,
+.o_layout.o_tech_theme .o_mail_block_steps .h1,
+.o_layout.o_tech_theme .o_mail_block_steps .h2,
+.o_layout.o_tech_theme .o_mail_block_steps .h3,
+.o_layout.o_tech_theme .o_mail_block_steps .h4,
+.o_layout.o_tech_theme .o_mail_block_steps .h5,
+.o_layout.o_tech_theme .o_mail_block_steps .h6 {
+  color: #333;
+}
+.o_layout.o_tech_theme .o_mail_block_steps .o_mail_full_width_padding > tbody > tr {
+  background-color: white;
+  color: #333;
+}
 .o_layout.o_tech_theme .o_mail_block_footer_social .o_mail_snippet_general {
   background: rgba(0, 0, 0, 0);
   background: transparent;
