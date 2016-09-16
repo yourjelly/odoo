@@ -84,7 +84,7 @@ var FieldPdfViewer = FieldBinaryFile.extend({
         };
         var query_string = $.param(query_obj);
         var url = encodeURIComponent('/web/image?' + query_string);
-        var viewer_url = '/website/static/lib/pdfjs/web/viewer.html?file=';
+        var viewer_url = '/web/static/lib/pdfjs/web/viewer.html?file=';
         if (data)
             return viewer_url + 'data:application/pdf;base64,' + data;
         return viewer_url + url;
