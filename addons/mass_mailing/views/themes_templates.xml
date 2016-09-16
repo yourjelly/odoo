@@ -561,7 +561,7 @@
                     <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles o_mail_full_width_padding">
                         <tbody>
                             <tr>
-                                <td class="o_mail_col_mv o_mail_h_padding o_mail_v_padding bg-beta">
+                                <td class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
                                     <table class="o_mail_table_styles">
                                         <tr>
                                             <td rowspan="2" class="text-right">
@@ -611,7 +611,7 @@
                         <tbody>
                             <tr>
                                 <td class="o_mail_h_padding">
-                                    <h2 class="text-center ">Starters</h2>
+                                    <h3 class="text-center ">Starters</h3>
                                 </td>
                             </tr>
                         </tbody>
@@ -626,9 +626,9 @@
                                 <td style="vertical-align:top;width:180px;" class="o_mail_col_mv">
                                     <div class="o_mail_col_container">
                                         <img src="/mass_mailing/static/src/img/theme_resto/s_default_image_block_three_cols_1.jpg" class="center-block" alt="Your Picture"/>
-                                        <h4 class="text-center">Tomato Soup</h4>
+                                        <h5 class="text-center">Tomato Soup</h5>
                                         <div class="text-center" style="margin-top:15px;">
-                                            <a href="#" class="btn btn-primary btn-xs">Order</a>
+                                            <a href="#" class="btn btn-primary">Order</a>
                                         </div>
                                     </div>
                                 </td>
@@ -636,9 +636,9 @@
                                 <td style="vertical-align:top;width:180px;" class="o_mail_col_mv">
                                     <div class="o_mail_col_container">
                                         <img src="/mass_mailing/static/src/img/theme_resto/s_default_image_block_three_cols_2.jpg" class="center-block" alt="Your Picture"/>
-                                        <h4 class="text-center">Captain’s Salad</h4>
+                                        <h5 class="text-center">Captain’s Salad</h5>
                                         <div class="text-center" style="margin-top:15px;">
-                                            <a href="#" class="btn btn-primary btn-xs">Order</a>
+                                            <a href="#" class="btn btn-primary">Order</a>
                                         </div>
                                     </div>
                                 </td>
@@ -646,9 +646,9 @@
                                 <td style="vertical-align:top;width:180px;" class="o_mail_col_mv">
                                     <div class="o_mail_col_container">
                                         <img src="/mass_mailing/static/src/img/theme_resto/s_default_image_block_three_cols_3.jpg" class="center-block" alt="Your Picture"/>
-                                        <h4 class="text-center">Mini Hamburgers</h4>
+                                        <h5 class="text-center">Mini Hamburgers</h5>
                                         <div class="text-center" style="margin-top:15px;">
-                                            <a href="#" class="btn btn-primary btn-xs">Order</a>
+                                            <a href="#" class="btn btn-primary">Order</a>
                                         </div>
                                     </div>
                                 </td>
@@ -678,7 +678,7 @@
                         <tbody>
                             <tr>
                                 <td class="o_mail_h_padding">
-                                    <h2 class="text-center">Mains</h2>
+                                    <h3 class="text-center">Mains</h3>
                                 </td>
                             </tr>
                         </tbody>
@@ -693,9 +693,9 @@
                                 <td style="vertical-align:top;width:270px;" class="o_mail_col_mv">
                                     <div class="o_mail_col_container">
                                         <img src="/mass_mailing/static/src/img/theme_resto/s_default_image_block_two_cols_1.jpg" class="center-block" alt="Your Picture"/>
-                                        <h4 class="text-center">Tagliatelle Boscaiola</h4>
+                                        <h5 class="text-center">Tagliatelle Boscaiola</h5>
                                         <div class="text-center" style="margin-top:15px;">
-                                            <a href="#" class="btn btn-primary btn-xs">Order</a>
+                                            <a href="#" class="btn btn-primary">Order</a>
                                         </div>
                                     </div>
                                 </td>
@@ -703,9 +703,9 @@
                                 <td style="vertical-align:top;width:270px;" class="o_mail_col_mv">
                                     <div class="o_mail_col_container">
                                         <img src="/mass_mailing/static/src/img/theme_resto/s_default_image_block_two_cols_2.jpg" class="center-block" alt="Your Picture"/>
-                                        <h4 class="text-center">BBQ Mix</h4>
+                                        <h5 class="text-center">BBQ Mix</h5>
                                         <div class="text-center" style="margin-top:15px;">
-                                            <a href="#" class="btn btn-primary btn-xs">Order</a>
+                                            <a href="#" class="btn btn-primary">Order</a>
                                         </div>
                                     </div>
                                 </td>
@@ -738,7 +738,7 @@
                                     <img src="/mass_mailing/static/src/img/theme_resto/s_default_image_block_image_text.jpg" class="center-block" alt="Your Picture"/>
                                 </td>
                                 <td style="width:270px;vertical-align:middle;text-align:justify;" class="o_mail_col_mv o_mail_h_padding o_mail_v_padding">
-                                    <h4 class="">Recipe of the day</h4>
+                                    <h3 class="">Recipe of the day</h3>
                                     <p class="o_mail_no_margin">A delicious soup made of one or more seasonal vegetables, without added fat, starches and lactose.</p>
                                     <div class="text-center" style="margin-top:15px;">
                                         <a href="#" class="btn btn-link">Read More...</a>

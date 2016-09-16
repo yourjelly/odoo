@@ -1,8 +1,8 @@
 #web_editor_inside_iframe.o_resto_theme {
-  background-color: #F1EDDF;
+  background-color: #f0ede0;
 }
 .o_layout.o_resto_theme {
-  background-color: #F1EDDF;
+  background-color: #f0ede0;
 }
 .o_layout.o_resto_theme .o_mail_wrapper {
   border: none;
@@ -23,7 +23,7 @@
   color: #d96115;
 }
 .o_layout.o_resto_theme .o_mail_snippet_general .bg-beta {
-  background-color: #401904;
+  background-color: #795745;
   color: #ffffff;
 }
 .o_layout.o_resto_theme .o_mail_snippet_general .bg-beta h1,
@@ -41,7 +41,7 @@
   color: #ffffff;
 }
 .o_layout.o_resto_theme .o_mail_snippet_general .text-beta {
-  color: #401904;
+  color: #795745;
 }
 .o_layout.o_resto_theme .o_mail_snippet_general .bg-delta {
   background-color: #E96D1F;
@@ -65,13 +65,26 @@
   color: #d96115;
 }
 .o_layout.o_resto_theme .o_mail_snippet_general .separator {
-  background-color: #E96D1F;
+  background-color: #b08974;
 }
-.o_layout.o_resto_theme .o_mail_block_header_social,
-.o_layout.o_resto_theme .o_mail_block_header_text_social,
-.o_layout.o_resto_theme .o_mail_block_header_logo {
-  background: #401904;
-  color: #ffffff;
+.o_layout.o_resto_theme h1,
+.o_layout.o_resto_theme h2,
+.o_layout.o_resto_theme h3,
+.o_layout.o_resto_theme h4,
+.o_layout.o_resto_theme h5,
+.o_layout.o_resto_theme h6,
+.o_layout.o_resto_theme .h1,
+.o_layout.o_resto_theme .h2,
+.o_layout.o_resto_theme .h3,
+.o_layout.o_resto_theme .h4,
+.o_layout.o_resto_theme .h5,
+.o_layout.o_resto_theme .h6 {
+  color: #594032;
+  font-weight: bold;
+}
+.o_layout.o_resto_theme .o_mail_block_header_social .o_mail_snippet_general,
+.o_layout.o_resto_theme .o_mail_block_header_text_social .o_mail_snippet_general,
+.o_layout.o_resto_theme .o_mail_block_header_logo .o_mail_snippet_general {
   border-bottom: 5px solid #E96D1F;
 }
 .o_layout.o_resto_theme .o_mail_block_header_social .o_mail_header_social a,
@@ -81,24 +94,7 @@
 }
 .o_layout.o_resto_theme .o_mail_block_steps {
   border-top: 2px solid #E96D1F;
-  background: #401904;
-}
-.o_layout.o_resto_theme .o_mail_block_steps .o_mail_snippet_general {
-  color: #ffffff;
-}
-.o_layout.o_resto_theme .o_mail_block_steps h1,
-.o_layout.o_resto_theme .o_mail_block_steps h2,
-.o_layout.o_resto_theme .o_mail_block_steps h3,
-.o_layout.o_resto_theme .o_mail_block_steps h4,
-.o_layout.o_resto_theme .o_mail_block_steps h5,
-.o_layout.o_resto_theme .o_mail_block_steps h6,
-.o_layout.o_resto_theme .o_mail_block_steps .h1,
-.o_layout.o_resto_theme .o_mail_block_steps .h2,
-.o_layout.o_resto_theme .o_mail_block_steps .h3,
-.o_layout.o_resto_theme .o_mail_block_steps .h4,
-.o_layout.o_resto_theme .o_mail_block_steps .h5,
-.o_layout.o_resto_theme .o_mail_block_steps .h6 {
-  color: #ffffff;
+  background: #ffffff;
 }
 .o_layout.o_resto_theme .o_mail_block_event .o_mail_snippet_general {
   background: #fafafa;
@@ -113,6 +109,6 @@
   margin-right: 20px;
 }
 .o_layout.o_resto_theme .o_mail_block_footer_social .o_mail_table_styles {
-  border-top: 2px solid #E96D1F;
+  border-top: 2px solid #b08974;
   padding-top: 20px;
 }
