@@ -5,6 +5,8 @@ var core = require('web.core');
 var common = require('web.form_common');
 var Model = require('web.Model');
 var time = require('web.time');
+var utils = require('web.utils');
+var FieldBinaryFile = core.form_widget_registry.get('binary');
 
 var _t = core._t;
 
@@ -72,10 +74,9 @@ var TimeCounter = common.AbstractField.extend(common.ReinitializeFieldMixin, {
     },
 });
 
-var PdfViewer = common.AbstractField.extend(common.ReinitializeFieldMixin, {
-    tagName: 'iframe',
-    className: 'o_form_field_pdfviewer',
-    get_uri: function(){
+var FieldPdfViewer = FieldBinaryFile.extend({
+    template: 'FieldPdfViewer',
+    get_uri: function(data){
         var query_obj = {
             model: this.view.dataset.model,
             field: this.name,
@@ -83,17 +84,37 @@ var PdfViewer = common.AbstractField.extend(common.ReinitializeFieldMixin, {
         };
         var query_string = $.param(query_obj);
         var url = encodeURIComponent('/web/image?' + query_string);
-        // we can access static(pdfjs) assets of website even though website in not installed
-        // we did the same in website_sign but what if someone rm -r /website for save cloud space ??
-        return '/website/static/lib/pdfjs/web/viewer.html?file=' + url;
+        var viewer_url = '/website/static/lib/pdfjs/web/viewer.html?file=';
+        if (data)
+            return viewer_url + 'data:application/pdf;base64,' + data;
+        return viewer_url + url;
     },
     render_value: function() {
-        this._super.apply(this, arguments);
-        this.$el.attr('src', this.get_uri());
+        var $pdf_viewer = this.$('.o_form_pdf_controls').children().add(this.$('.o_pdfview_iframe')),
+            $select_upload_el = this.$('.o_select_file_button').first(),
+            value = this.get('value');
+
+        var data = utils.is_bin_size(value) ? false : value;
+        var url = this.get_uri(data);
+        if (this.get("effective_readonly")) {
+            if (value) {
+                this.$el.off('click'); // off click event(on_save_as) of FieldBinaryFile
+                this.$('.o_pdfview_iframe').attr('src', url);
+            }
+        } else {
+            if (value) {
+                $pdf_viewer.removeClass('o_hidden');
+                $select_upload_el.addClass('o_hidden');
+                this.$('.o_pdfview_iframe').attr('src', url);
+            } else {
+                $pdf_viewer.addClass('o_hidden');
+                $select_upload_el.removeClass('o_hidden');
+            }
+        }
     },
 
 });
 core.form_widget_registry.add('bullet_state', SetBulletStatus)
                          .add('mrp_time_counter', TimeCounter)
-                         .add('pdf_viewer', PdfViewer);
+                         .add('pdf_viewer', FieldPdfViewer);
 });
