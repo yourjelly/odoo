@@ -185,6 +185,8 @@ class MrpWorkorder(models.Model):
         """ Update stock.move.lot records, according to the new qty currently
         produced. """
         moves = self.move_raw_ids.filtered(lambda move: move.state not in ('done', 'cancel') and move.product_id.tracking != 'none' and move.product_id.id != self.production_id.product_id.id)
+        # Set active move lots which having lots ( need to reset in case of two time onchange. )
+        self.active_move_lot_ids = self.active_move_lot_ids.filtered(lambda x: x.lot_id) or self.active_move_lot_ids.ids
         for move in moves:
             move_lots = self.active_move_lot_ids.filtered(lambda move_lot: move_lot.move_id == move)
             if not move_lots:
@@ -197,8 +199,12 @@ class MrpWorkorder(models.Model):
                 # Create extra pseudo record
                 qty_todo = new_qty - sum(move_lots.mapped('quantity'))
                 if float_compare(qty_todo, 0.0, precision_rounding=move.product_uom.rounding) > 0:
+                    # increase quantity 'To DO' in case of zero.
+                    for move_lot in move_lots.filtered(lambda x: not x.quantity):
+                        move_lot.quantity += 1
+                        qty_todo -= 1
                     while float_compare(qty_todo, 0.0, precision_rounding=move.product_uom.rounding) > 0:
-                        self.active_move_lot_ids += self.env['stock.move.lots'].new({
+                        self.env['stock.move.lots'].new({
                             'move_id': move.id,
                             'product_id': move.product_id.id,
                             'lot_id': False,
@@ -213,12 +219,17 @@ class MrpWorkorder(models.Model):
                     for move_lot in move_lots:
                         if qty_todo <= 0:
                             break
-                        if move_lot.quantity_done == 0 and qty_todo > move_lot.quantity:
-                            qty_todo = qty_todo - move_lot.quantity
+                        if not move_lot.lot_id and qty_todo > 0 and self.qty_producing:
+                            # Lots not set on active move lots then remove line.
+                            qty_todo -= move_lot.quantity
                             self.active_move_lot_ids -= move_lot  # Difference operator
                         else:
-                            move_lot.quantity = move_lot.quantity - qty_todo
-                            qty_todo = 0
+                            # In case of lot set on move lots we have to decrease 1 quantity 'To Do' as it is serial product.
+                            if move_lot.quantity != 0:
+                                move_lot.quantity -= 1
+                                qty_todo -= 1
+
+
 
     @api.multi
     def write(self, values):
