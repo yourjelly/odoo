@@ -311,8 +311,7 @@ class MrpProduction(models.Model):
             source_location = self.bom_id.routing_id.location_id
         else:
             source_location = self.location_src_id
-        original_quantity = self.env['product.uom']._compute_qty(self.product_uom_id.id, self.product_qty, self.bom_id.product_uom_id.id)
-
+        original_quantity = self.env['product.uom']._compute_qty(self.product_uom_id.id, self.product_qty - self.qty_produced, self.bom_id.product_uom_id.id)
         data = {
             'name': self.name,
             'date': self.date_planned_start,
