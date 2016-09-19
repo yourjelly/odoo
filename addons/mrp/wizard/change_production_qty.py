@@ -44,7 +44,7 @@ class ChangeProductionQty(models.TransientModel):
                 raise UserError(_("You have already produced %d qty , Please give update quantity more then %d ")%(produced, produced))
             production.write({'product_qty': wizard.product_qty})
             bom_point = production.bom_id
-            factor = (production.product_qty - production.qty_produced) * production.product_uom_id.factor / bom_point.product_uom_id.factor
+            factor = self.env['product.uom']._compute_qty(production.product_uom_id.id, production.product_qty - production.qty_produced, production.bom_id.product_uom_id.id)
             boms, lines = production.bom_id.explode(production.product_id, factor, picking_type=production.bom_id.picking_type_id)
             for line, line_data in lines:
                 production._update_raw_move(line, line_data)
