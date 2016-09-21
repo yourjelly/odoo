@@ -183,8 +183,8 @@ class Employee(models.Model):
     @api.onchange('user_id')
     def _onchange_user(self):
         self.work_email = self.user_id.email
-        self.name = self.user_id.name
-        self.image = self.user_id.image
+        self.name = self.name or self.user_id.name
+        self.image = self.image or self.user_id.image
 
     @api.model
     def create(self, vals):
