@@ -113,7 +113,7 @@ class MrpBom(models.Model):
     def explode(self, product, quantity, picking_type=False):
         """
             Explodes the BoM and creates two lists with all the information you need: bom_done and line_done
-            Quantity should be passed in the UoM of the BoM (don't divide by its quantity)
+            Quantity should be passed in the UoM of the BoM (but not taking into account the quantity on the BoM)
         """
         boms_done = [(self, {'qty': quantity, 'product': product, 'original_qty': quantity, 'parent_line': False})]
         lines_done = []

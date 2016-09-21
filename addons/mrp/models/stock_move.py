@@ -278,7 +278,7 @@ class StockMove(models.Model):
             return self
         phantom_moves = self.env['stock.move']
         processed_moves = self.env['stock.move']
-        factor = self.env['product.uom']._compute_qty(self.product_uom.id, self.product_uom_qty, bom.product_uom_id.id) / bom.product_qty
+        factor = self.env['product.uom']._compute_qty(self.product_uom.id, self.product_uom_qty, bom.product_uom_id.id)
         boms, lines = bom.sudo().explode(self.product_id, factor, picking_type=bom.picking_type_id)
         for bom_line, line_data in lines:
             phantom_moves += self._generate_move_phantom(bom_line, line_data['qty'])
