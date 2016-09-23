@@ -224,6 +224,9 @@ return core.Class.extend({
                         fields[node.attrs.name].__fetch_selection = true;
                     }
                 }
+                if (node.attrs.widget === 'many2many_checkboxes') {
+                    fields[node.attrs.name].__fetch_many2manys = true;
+                }
                 return false;
             }
             return node.tag !== 'arch';
