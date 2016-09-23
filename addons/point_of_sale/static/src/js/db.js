@@ -435,6 +435,11 @@ var PosDB = core.Class.extend({
 
         orders.push({id: order_id, data: order});
         this.save('orders',orders);
+
+        // Only necessary when we store a new, validated order. Orders
+        // that where already stored should already have been removed.
+        this.remove_unpaid_order(order);
+
         return order_id;
     },
     remove_order: function(order_id){
