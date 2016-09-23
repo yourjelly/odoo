@@ -178,7 +178,8 @@ def load_module_graph(cr, graph, status=None, perform_checks=True, skip_modules=
 
             if has_demo:
                 # launch tests only in demo mode, allowing tests to use demo data.
-                if tools.config.options['test_enable']:
+                test_enable = tools.config.options['test_enable']
+                if {'all', module_name} & test_enable:
                     # Yamel test
                     report.record_result(load_test(module_name, idref, mode))
                     # Python tests
@@ -415,11 +416,12 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
 
         t0 = time.time()
         t0_sql = odoo.sql_db.sql_counter
-        if odoo.tools.config['test_enable']:
-            if update_module:
-                cr.execute("SELECT name FROM ir_module_module WHERE state='installed' and name = ANY(%s)", (processed_modules,))
-            else:
+        test_enable = odoo.tools.config['test_enable']
+        if test_enable:
+            if 'all' in test_enable:
                 cr.execute("SELECT name FROM ir_module_module WHERE state='installed'")
+            else:
+                cr.execute("SELECT name FROM ir_module_module WHERE state='installed' and name = ANY(%s)", [list(test_enable)])
             for module_name in cr.fetchall():
                 report.record_result(odoo.modules.module.run_unit_tests(module_name[0], cr.dbname, position=runs_post_install))
             _logger.log(25, "All post-tested in %.2fs, %s queries", time.time() - t0, odoo.sql_db.sql_counter - t0_sql)

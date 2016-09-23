@@ -76,7 +76,7 @@ class configmanager(object):
 
         # Not exposed in the configuration file.
         self.blacklist_for_save = set([
-            'publisher_warranty_url', 'load_language', 'root_path',
+            'publisher_warranty_url', 'load_language', 'root_path', 'test_enable',
             'init', 'save', 'config', 'update', 'stop_after_init', 'dev_mode', 'shell_interface'
         ])
 
@@ -143,8 +143,8 @@ class configmanager(object):
                          help="Launch a python or YML test file.")
         group.add_option("--test-report-directory", dest="test_report_directory", my_default=False,
                          help="If set, will save sample of all reports in this directory.")
-        group.add_option("--test-enable", action="store_true", dest="test_enable",
-                         my_default=False, help="Enable YAML and unit tests.")
+        group.add_option("--test-enable", dest="test_enable",
+                         my_default='', help="Modules on which running tests. Use `all` for testing all modules.")
         group.add_option("--test-commit", action="store_true", dest="test_commit",
                          my_default=False, help="Commit database changes performed by YAML or XML tests.")
         parser.add_option_group(group)
@@ -318,6 +318,14 @@ class configmanager(object):
     def _parse_config(self, args=None):
         if args is None:
             args = []
+        else:
+            args = args[:]
+        # retro-compatibility patch for --test-enable without argument
+        l = len(args)
+        for i, a in enumerate(args):
+            if a == '--test-enable' and (i == l - 1 or args[i + 1].startswith('-')):
+                args[i] = '--test-enable=all'
+                break
         opt, args = self.parser.parse_args(args)
 
         def die(cond, msg):
@@ -403,7 +411,7 @@ class configmanager(object):
             'dev_mode', 'shell_interface', 'smtp_ssl', 'load_language',
             'stop_after_init', 'logrotate', 'without_demo', 'xmlrpc', 'syslog',
             'list_db', 'proxy_mode',
-            'test_file', 'test_enable', 'test_commit', 'test_report_directory',
+            'test_file', 'test_commit', 'test_report_directory',
             'osv_memory_count_limit', 'osv_memory_age_limit', 'max_cron_threads', 'unaccent',
             'data_dir',
         ]
@@ -451,6 +459,8 @@ class configmanager(object):
 
         dev_split = opt.dev_mode and  map(str.strip, opt.dev_mode.split(',')) or []
         self.options['dev_mode'] = 'all' in dev_split and dev_split + ['pdb', 'reload', 'qweb', 'werkzeug', 'xml'] or dev_split
+
+        self.options['test_enable'] = set(filter(None, map(str.strip, (opt.test_enable or '').split(','))))
 
         if opt.pg_path:
             self.options['pg_path'] = opt.pg_path
