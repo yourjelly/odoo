@@ -88,6 +88,7 @@
 
     <link rel="stylesheet" type="text/less" href="/web_editor/static/src/less/web_editor.ui.less"/>
     <link rel="stylesheet" type="text/less" href="/web_editor/static/src/less/web_editor.ui.components.less"/>
+    <link rel="stylesheet" type="text/less" href="/web_editor/static/src/less/web_editor.ui_shield.less"/>
 
     <script type="text/javascript" src="/web_editor/static/lib/nearest/jquery.nearest.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/editor.js"/>
