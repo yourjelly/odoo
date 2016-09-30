@@ -10,7 +10,7 @@ class MrpConfigSettings(models.TransientModel):
 
     company_id = fields.Many2one('res.company', string='Company', required=True,
         default=lambda self: self.env.user.company_id)
-    manufacturing_lead = fields.Float(related='company_id.manufacturing_lead', string="Manufacturing Lead Time *")
+    manufacturing_lead = fields.Float(related='company_id.manufacturing_lead', string="Manufacturing Lead Time")
     group_product_variant = fields.Selection([
         (0, "No variants on products"),
         (1, 'Products can have several attributes, defining variants (Example: size, color,...)')], "Product Variants",
