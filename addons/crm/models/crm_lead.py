@@ -47,6 +47,7 @@ CRM_LEAD_FIELDS_TO_MERGE = [
     'date_action_next',
     'email_from',
     'email_cc',
+    'website',
     'partner_name']
 
 
@@ -94,6 +95,7 @@ class Lead(FormatAddress, models.Model):
         help="Type is used to separate Leads and Opportunities")
     priority = fields.Selection(crm_stage.AVAILABLE_PRIORITIES, string='Rating', index=True, default=crm_stage.AVAILABLE_PRIORITIES[0][0])
     date_closed = fields.Datetime('Closed Date', readonly=True, copy=False)
+    website = fields.Char('Website', index=True, help="Website of the contact")
 
     stage_id = fields.Many2one('crm.stage', string='Stage', track_visibility='onchange', index=True,
         domain="['|', ('team_id', '=', False), ('team_id', '=', team_id)]",
@@ -238,6 +240,7 @@ class Lead(FormatAddress, models.Model):
                 'fax': partner.fax,
                 'zip': partner.zip,
                 'function': partner.function,
+                'website': partner.website,
             }
         return {}
 
@@ -727,6 +730,7 @@ class Lead(FormatAddress, models.Model):
             'city': self.city,
             'country_id': self.country_id.id,
             'state_id': self.state_id.id,
+            'website': self.website,
             'is_company': is_company,
             'type': 'contact'
         }
