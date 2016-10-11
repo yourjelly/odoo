@@ -31,7 +31,7 @@ class Help(Command):
         padding = max([len(k) for k in names]) + 2
         for k in sorted(names):
             name = k.ljust(padding, ' ')
-            doc = (commands[k].__doc__ or '').strip()
+            doc = (commands[k].__doc__.strip().splitlines()[0] or '').strip()
             print "    %s%s" % (name, doc)
         print "\nUse '%s <command> --help' for individual command help." % sys.argv[0].split(os.path.sep)[-1]
 
