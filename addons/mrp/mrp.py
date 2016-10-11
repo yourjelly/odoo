@@ -542,7 +542,7 @@ class mrp_production(osv.osv):
         return res
 
     _columns = {
-        'name': fields.char('Reference', required=True, readonly=True, states={'draft': [('readonly', False)]}, copy=False),
+        'name': fields.char('Reference', required=True, readonly=True, states={'draft': [('readonly', False)]}, copy=False, default=lambda x: _('New')),
         'origin': fields.char('Source Document', readonly=True, states={'draft': [('readonly', False)]},
             help="Reference of the document that generated this production order request.", copy=False),
         'priority': fields.selection([('0', 'Not urgent'), ('1', 'Normal'), ('2', 'Urgent'), ('3', 'Very Urgent')], 'Priority',
@@ -612,7 +612,6 @@ class mrp_production(osv.osv):
         'date_planned': lambda *a: time.strftime('%Y-%m-%d %H:%M:%S'),
         'product_qty': lambda *a: 1.0,
         'user_id': lambda self, cr, uid, c: uid,
-        'name': lambda self, cr, uid, context: self.pool['ir.sequence'].next_by_code(cr, uid, 'mrp.production', context=context) or '/',
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'mrp.production', context=c),
         'location_src_id': _src_id_default,
         'location_dest_id': _dest_id_default
@@ -638,6 +637,8 @@ class mrp_production(osv.osv):
         if context is None:
             context = {}
         product_obj = self.pool.get('product.product')
+        if not values.get('name', False) or values['name'] == _('New'):
+            values['name'] = self.pool['ir.sequence'].next_by_code(cr, uid, 'mrp.production', context=context) or '/'
         if 'product_id' in values and not 'product_uom' in values:
             values['product_uom'] = product_obj.browse(cr, uid, values.get('product_id'), context=context).uom_id.id
         return super(mrp_production, self).create(cr, uid, values, context=context)
