@@ -45,8 +45,8 @@ def main():
         odoo.tools.config._parse_config([args[0]])
         args = args[1:]
 
-    # Default legacy command
-    command = "server"
+    # Display main help if no arguments are provided, otherwise default to server command (legacy behavior)
+    command = "help" if not args else "server"
 
     # TODO: find a way to properly discover addons subcommands without importing the world
     # Subcommand discovery
