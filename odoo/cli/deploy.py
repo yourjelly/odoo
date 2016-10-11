@@ -5,9 +5,12 @@ import os
 import requests
 import sys
 import tempfile
+from urlparse import urlparse
 import zipfile
 
 from . import Command
+
+LOCAL_NETLOCS = ['localhost', '127.0.0.1']
 
 class Deploy(Command):
     """Deploy a module on an Odoo instance"""
@@ -80,19 +83,30 @@ class Deploy(Command):
         parser.add_argument('--db', dest='db', help='Database to use if server does not use db-filter.')
         parser.add_argument('--login', dest='login', default="admin", help='Login (default=admin)')
         parser.add_argument('--password', dest='password', default="admin", help='Password (default=admin)')
-        parser.add_argument('--verify-ssl', action='store_true', help='Verify SSL certificate')
+        parser.add_argument('--insecure', action='store_true', help="Allow insecure connections such as plain http or https with broken certificates.")
         parser.add_argument('--force', action='store_true', help='Force init even if module is already installed. (will update `noupdate="1"` records)')
         if not cmdargs:
             sys.exit(parser.print_help())
 
         args = parser.parse_args(args=cmdargs)
 
-        if not args.verify_ssl:
+        if '://' not in args.url:
+            # plain http is allowed for local net locations
+            scheme = 'http://' if args.url.split('/')[0].split(':')[0] in LOCAL_NETLOCS else 'https://'
+            args.url = scheme + args.url
+
+        _url = urlparse(args.url)
+
+        if not _url.netloc:
+            parser.error("Invalid url: %s" % args.url)
+        if not args.insecure and _url.netloc.split(':')[0] not in LOCAL_NETLOCS and _url.scheme != 'https':
+            parser.error("Deployment on %s will send your credentials through an unencrypted connection. "
+                         "Use --insecure to confirm that you want to use an insecure connection." % _url.geturl())
+
+        if args.insecure:
             self.session.verify = False
 
         try:
-            if not args.url.startswith(('http://', 'https://')):
-                args.url = 'https://%s' % args.url
             result = self.deploy_module(args.path, args.url, args.login, args.password, args.db, force=args.force)
             print(result)
         except Exception, e:
