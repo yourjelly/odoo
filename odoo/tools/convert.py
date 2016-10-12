@@ -31,6 +31,7 @@ safe_eval = lambda expr, ctx={}: s_eval(expr, ctx, nocopy=True)
 
 class ParseError(Exception):
     def __init__(self, msg, text, filename, lineno):
+        self.args = (msg,)
         self.msg = msg
         self.text = text
         self.filename = filename
