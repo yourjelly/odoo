@@ -2,11 +2,13 @@
 {%- set model = "%s.%s"|format(mod, mod) -%}
 <odoo>
     <data>
-        <!-- {% for item in range(5) %} -->
-        <!--   <record id="object{{ item }}" model="{{ model }}"> -->
-        <!--     <field name="name">Object {{ item }}</field> -->
-        <!--     <field name="value">{{ item * 10 }}</field> -->
-        <!--   </record> -->
-        <!-- {% endfor %} -->
+{% for item in 'First,Second,Third'.split(',') %}
+        <!--
+        <record id="object{{ loop.index }}" model="{{ model }}">
+            <field name="name">{{ item }} object</field>
+            <field name="value">{{ loop.index * 10 }}</field>
+        </record>
+        -->
+{% endfor %}
     </data>
 </odoo>

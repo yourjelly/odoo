@@ -4,6 +4,7 @@
 # -*- coding: utf-8 -*-
 from odoo import http
 
+
 # class {{ mod|pascal }}(http.Controller):
 #     @http.route('{{ root }}/', auth='public')
 #     def index(self, **kw):
