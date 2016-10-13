@@ -17,6 +17,7 @@ invoices from picking, the system is able to add and compute the shipping line.
     'data': [
         'security/ir.model.access.csv',
         'views/delivery_view.xml',
+        'views/delivery_templates.xml',
         'views/partner_view.xml',
         'views/product_template_view.xml',
         'views/product_packaging_view.xml',

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<template id="delivery_template_confirmation_mail">
+        <p>Dear <t t-esc="object.partner_id.name"/>,</p>
+        <p>Thank you for your order.We are glad to inform you that the items in this email have been shipped to the following address.</p>
+        <div style="margin-bottom: 10px;">
+            <div><strong>DELIVERY ADDRESS: </strong></div>
+            <div t-field="object.partner_id"
+                   t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True}'/>
+        </div>
+        <div>
+            <strong>ORDER SUMMARY : </strong>
+            <table width="50%">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;"><strong>Product</strong></th>
+                        <th style="text-align:right;"><strong>Delivered Qty</strong></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="object.pack_operation_ids" t-as="pack_operation">
+                        <tr>
+                            <td style="text-align:left;"> 
+                                <t t-esc="pack_operation.product_id.name"/> 
+                            </td>
+                            <td style="text-align:right;"> 
+                                <t t-esc="pack_operation.qty_done"/>
+                                <span t-field="pack_operation.product_uom_id"/> 
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+        </div>
+        <div style="margin-top: 10px; margin-bottom: 10px;" t-if="object.carrier_tracking_url">
+            <div> Click here to track your delivery:  
+                <a t-att-href="object.carrier_tracking_url" target="_blank">
+                    <t t-esc="object.carrier_tracking_ref"/>.
+                </a>
+            </div>
+        </div>
+        <p>Thank you,</p>
+  	</template>
+</odoo>

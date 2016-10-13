@@ -89,6 +89,7 @@ class StockPicking(models.Model):
     package_ids = fields.Many2many('stock.quant.package', compute='_compute_packages', string='Packages')
     weight_bulk = fields.Float('Bulk Weight', compute='_compute_bulk_weight')
     shipping_weight = fields.Float("Weight for Shipping", compute='_compute_shipping_weight')
+    carrier_tracking_url = fields.Char(string='Tracking Url', copy=False)
 
     @api.depends('product_id', 'move_lines')
     def _cal_weight(self):
@@ -140,12 +141,20 @@ class StockPicking(models.Model):
     @api.multi
     def send_to_shipper(self):
         self.ensure_one()
-        res = self.carrier_id.send_shipping(self)[0]
+        res = self.carrier_id.send_shipping(self)
+        if not res:
+            return
+        res = res[0]
         self.carrier_price = res['exact_price']
         self.carrier_tracking_ref = res['tracking_number']
         order_currency = self.sale_id.currency_id or self.company_id.currency_id
-        msg = _("Shipment sent to carrier %s for expedition with tracking number %s<br/>Cost: %.2f %s") % (self.carrier_id.name, self.carrier_tracking_ref, self.carrier_price, order_currency.name)
-        self.message_post(body=msg)
+        url = self.carrier_id.get_tracking_link(self)
+        if url:
+            self.carrier_tracking_url = url[0]
+        picking_subtype = self.env.ref('delivery.mt_order_validated')
+        delivery_confirmation_mail_template = self.env.ref('delivery.delivery_template_confirmation_mail')
+        self.message_subscribe(partner_ids=[self.partner_id.id], subtype_ids=[picking_subtype.id])
+        self.message_post_with_view(delivery_confirmation_mail_template, subtype_id=picking_subtype.id)
 
     @api.multi
     def _add_delivery_cost_to_so(self):
@@ -157,15 +166,14 @@ class StockPicking(models.Model):
     @api.multi
     def open_website_url(self):
         self.ensure_one()
-        if self.carrier_id.get_tracking_link(self):
-            url = self.carrier_id.get_tracking_link(self)[0]
-        else:
+        
+        if not self.carrier_tracking_url:
             raise UserError(_("Your delivery method has no redirect on courier provider's website to track this order."))
 
         client_action = {'type': 'ir.actions.act_url',
                          'name': "Shipment Tracking Page",
                          'target': 'new',
-                         'url': url,
+                         'url': self.carrier_tracking_url,
                          }
         return client_action
 
