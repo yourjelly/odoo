@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import argparse
 import os
@@ -13,7 +12,11 @@ from . import Command
 LOCAL_NETLOCS = ['localhost', '127.0.0.1']
 
 class Deploy(Command):
-    """Deploy a module on an Odoo instance"""
+    """
+    Deploy a module on an Odoo instance
+
+    Note: `base_import_module` must be installed on the remote database.
+    """
     def __init__(self):
         super(Deploy, self).__init__()
         self.session = requests.session()
@@ -32,7 +35,8 @@ class Deploy(Command):
         url = server + '/base_import_module/upload'
 
         post_data = {'force': '1' if force else ''}
-        if csrf_token: post_data['csrf_token'] = csrf_token
+        if csrf_token:
+            post_data['csrf_token'] = csrf_token
 
         with open(module_file, 'rb') as f:
             res = self.session.post(url, files={'mod_file': f}, data=post_data)
@@ -74,13 +78,15 @@ class Deploy(Command):
             raise
 
     def run(self, cmdargs):
+        doclines = self.__doc__.strip().splitlines()
         parser = argparse.ArgumentParser(
             prog="%s deploy" % sys.argv[0].split(os.path.sep)[-1],
-            description=self.__doc__
+            description=doclines[0],
+            epilog='\n'.join(doclines[1:]),
         )
-        parser.add_argument('path', help="Path of the module to deploy")
+        parser.add_argument('path', help="Local path of the module to deploy")
         parser.add_argument('url', nargs='?', help='Url of the server (default=http://localhost:8069)', default="http://localhost:8069")
-        parser.add_argument('--db', dest='db', help='Database to use if server does not use db-filter.')
+        parser.add_argument('-d', '--database', '--db', dest='database', help='Database to use if server does not use db-filter.')
         parser.add_argument('--login', dest='login', default="admin", help='Login (default=admin)')
         parser.add_argument('--password', dest='password', default="admin", help='Password (default=admin)')
         parser.add_argument('--insecure', action='store_true', help="Allow insecure connections such as plain http or https with broken certificates.")
@@ -107,7 +113,7 @@ class Deploy(Command):
             self.session.verify = False
 
         try:
-            result = self.deploy_module(args.path, args.url, args.login, args.password, args.db, force=args.force)
+            result = self.deploy_module(args.path, args.url, args.login, args.password, args.database, force=args.force)
             print(result)
         except Exception, e:
             sys.exit("ERROR: %s" % e)
