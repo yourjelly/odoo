@@ -771,7 +771,7 @@ class WebsiteSale(http.Controller):
             return request.redirect("/shop/payment?error=no_token_or_missmatch_tx")
 
     @http.route(['/shop/payment/transaction/<int:acquirer_id>'], type='json', auth="public", website=True)
-    def payment_transaction(self, acquirer_id, tx_type='form', token=None):
+    def payment_transaction(self, acquirer_id, tx_type='form', token=None, **kwargs):
         """ Json method that creates a payment.transaction, used to create a
         transaction when the user clicks on 'pay now' button. After having
         created the transaction, the event continues and the user is redirected
@@ -815,10 +815,12 @@ class WebsiteSale(http.Controller):
             request.session['sale_transaction_id'] = tx.id
 
         # update quotation
-        order.write({
+        payment_data = {
             'payment_acquirer_id': acquirer_id,
             'payment_tx_id': request.session['sale_transaction_id']
-        })
+        }
+        payment_data.update(kwargs)
+        order._update_quotation(payment_data)
         if token:
             return request.env.ref('website_sale.payment_token_form').render(dict(tx=tx), engine='ir.qweb')
 

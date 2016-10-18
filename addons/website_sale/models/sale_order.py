@@ -160,6 +160,11 @@ class SaleOrder(models.Model):
             accessory_products -= order.website_order_line.mapped('product_id')
             return random.sample(accessory_products, len(accessory_products))
 
+    @api.multi
+    def _update_quotation(self, data):
+        self.ensure_one()
+        return self.write(data)
+
 
 class Website(models.Model):
     _inherit = 'website'
