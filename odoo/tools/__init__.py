@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import copy
 import win32
 import appdirs
-from config import config
+from config_manager import config
 from misc import *
 from convert import *
 from translate import *

@@ -36,8 +36,8 @@ try:
 except ImportError:
     html2text = None
 
-from config import config
 from cache import *
+from .config_manager import config
 from .parse_version import parse_version 
 
 import odoo
