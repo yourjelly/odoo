@@ -9,6 +9,7 @@
         file="hr_attendance.print_employee_badge"/>
 
     <template id="print_employee_badge">
+        <t t-set="editable" t-value="False"/>
         <t t-call="report.html_container">
             <div class="page">
                 <t t-foreach="docs" t-as="employee">
