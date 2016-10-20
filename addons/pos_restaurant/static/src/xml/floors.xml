@@ -88,7 +88,7 @@
     </t>
 
     <t t-name="FloorScreenWidget">
-        <div class='floor-screen screen'>
+        <div class='floor-screen screen' tabindex="1">
             <div class='screen-content-flexbox'>
                 <t t-if='widget.pos.floors.length > 1'>
                     <div class='floor-selector'>

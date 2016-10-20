@@ -628,6 +628,14 @@ var FloorScreenWidget = screens.ScreenWidget.extend({
             this.table_widgets.push(tw);
         }
 
+        this.$el.on('keyup', function(event){
+            var x = event.which || event.keyCode;
+            if (x == 27) {
+                self.editing = false;
+                self.update_toolbar();
+            }
+        });
+
         this.$('.floor-selector .button').click(function(event){
             self.click_floor_button(event,$(this));
         });
@@ -659,6 +667,7 @@ var FloorScreenWidget = screens.ScreenWidget.extend({
         this.$('.edit-button.trash').click(function(){
             self.tool_trash_table();
         });
+
 
         this.$('.color-picker .close-picker').click(function(event){
             self.tool_colorpicker_close();
