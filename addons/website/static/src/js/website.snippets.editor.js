@@ -307,6 +307,7 @@ options.registry.parallax = options.Class.extend({
     },
     start: function () {
         this._super.apply(this, arguments);
+        var self= this;
         if (!this.$target.data("snippet-view")) {
             this.$target.data("snippet-view", new animation.registry.parallax(this.$target));
         }
@@ -315,6 +316,23 @@ options.registry.parallax = options.Class.extend({
         this._refresh_callback = this._refresh.bind(this);
         this.buildingBlock.$el.on("snippet-dropped snippet-activated", this._refresh_callback);
         this.$target.on('snippet-option-change snippet-option-preview', this._refresh_callback);
+
+        this.editor.styles.background_position.$target = self.editor.styles.background.$target;
+        this.editor.styles.background_position.set_active();
+        this.editor.styles.background.$target.trigger("snippet-option-change", [self.editor.styles.background]);
+        if (!self.editor) return;
+
+        _.each(["background", "background_position"], function (opt_name) {
+            var s_option = self.editor.styles[opt_name];
+            if (!s_option) return;
+
+            s_option.$target = self.$target.find(".s_parallax_bg");
+            s_option.set_active();
+            s_option.$target.trigger("snippet-option-change", [s_option]);
+            s_option.$target.on("snippet-option-change", function () {
+                self._refresh();
+            });
+        });
     },
     scroll: function (type, value) {
         this.$target.attr("data-scroll-background-ratio", value);
@@ -326,7 +344,7 @@ options.registry.parallax = options.Class.extend({
     },
     clean_for_save: function () {
         this._super.apply(this, arguments);
-        this.$target.css("background-position", '').css("background-attachment", '');
+        this.$target.find(".s_parallax_bg").css("transform", '');
     },
     on_move: function () {
         this._super.apply(this, arguments);

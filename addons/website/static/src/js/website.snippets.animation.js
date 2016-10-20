@@ -47,50 +47,84 @@ animation.registry.parallax = animation.Class.extend({
     selector: ".parallax",
 
     start: function () {
+        this.visible_area = [];
+
         _.defer((function () { this.set_values(); }).bind(this));
         $(window).on("scroll.animation_parallax", _.throttle(this.on_scroll.bind(this), 10))
                  .on("resize.animation_parallax", _.debounce(this.set_values.bind(this), 500));
 
         return this._super.apply(this, arguments);
     },
+
     stop: function () {
         $(window).off(".animation_parallax");
     },
 
     set_values: function () {
-        var self = this;
-        this.speed = parseFloat(self.$target.attr("data-scroll-background-ratio") || 0);
-        this.offset = 0;
+        var self      = this;
+        this.$bg      = this.$target.find('.s_parallax_bg');
+        this.viewport = document.body.clientHeight - $('#wrapwrap').position().top;
+        this.speed    = parseFloat(self.$target.attr("data-scroll-background-ratio") || 0);
+        this.s_ratio  = this.speed * (this.viewport / 10);
 
-        if (this.speed === 1 || this.$target.css("background-image") === "none") {
-            this.$target.css("background-attachment", "fixed").css("background-position", "0px 0px");
-            return;
-        }
+        this.check_bg();
 
-        this.$target.css("background-attachment", "scroll");
+        // Skip next steps if static or fixed
+        if (this.speed === 1 || this.speed === 0) { return; }
+
+        // Provide a "safe-area" to limit parallax
+        this.$bg.css( {'top': -this.s_ratio, 'bottom': -this.s_ratio } );
 
         var img = new Image();
         img.onload = function () {
-            var offset = 0;
-            var padding =  parseInt($(document.body).css("padding-top"));
-            if (self.speed > 1) {
-                var inner_offset = - self.$target.outerHeight() + this.height / this.width * document.body.clientWidth;
-                var outer_offset = self.$target.offset().top - (document.body.clientHeight - self.$target.outerHeight()) - padding;
-                offset = - outer_offset * self.speed + inner_offset;
-            } else {
-                offset = - self.$target.offset().top * self.speed;
-            }
-            self.offset = offset > 0 ? 0 : offset;
+            self.visible_area = [
+                self.$target.offset().top,
+                self.$target.offset().top + self.$target.height() + self.viewport
+            ];
+
             self.on_scroll();
+            img.remove();
         };
-        img.src = this.$target.css("background-image").replace(/url\(['"]*|['"]*\)/g, "");
+        img.src = this.$bg.css("background-image").replace(/url\(['"]*|['"]*\)/g, "");
     },
 
     on_scroll: function () {
-        if (this.speed === 1) return;
-        var top = this.offset + window.scrollY * this.speed;
-        this.$target.css("background-position", "0px " + top + "px");
+        if (this.speed === 1 || this.speed === 0 ) return;
+
+        var pos = window.scrollY + this.viewport;
+
+        // Perform effect if element is visible only
+        if ( (pos >= this.visible_area[0]) && (pos <= this.visible_area[1]) ) {
+            this.$bg.css('transform', 'translateY(' + this.normalize_scroll(pos) + 'px)');
+        }
     },
+
+    check_bg: function () {
+        // Create $bg if accidentaly removed
+        if (this.$bg.length === 0) {
+            this.$target.prepend('<span class="s_parallax_bg"/>');
+            this.$bg = this.$target.find('.s_parallax_bg');
+
+            var bg_url = (this.$target.css("background-image") != 'none') ? this.$target.css("background-image") : 'url(/web/image/website.s_background_image_04)' ;
+            this.$bg.css('background-image', bg_url);
+        }
+
+        if (this.speed === 0 || this.speed === 1) {
+            // Reset style if parallax effect will not be performed
+            this.$bg.css({ 'transform': '', 'top': '', 'bottom': '' });
+        }
+
+        // Apply or remove fixed class
+        this.$target.toggleClass('s_parallax_is_fixed', this.speed === 1);
+    },
+
+    normalize_scroll: function (pos) {
+            // Normalize scroll in a 1 to 0 range
+        var r = (pos - this.visible_area[1]) / (this.visible_area[0] - this.visible_area[1]) ;
+            // Normalize accordingly to current options
+            r = parseInt( r * (this.s_ratio * 2) + -this.s_ratio);
+        return r;
+    }
 });
 
 animation.registry.share = animation.Class.extend({

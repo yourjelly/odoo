@@ -403,8 +403,14 @@ div.carousel {
         height: 100%;
         vertical-align: middle;
     }
-
+    .s_parallax_bg {
+        will-change: transform;
+        background-attachment: scroll;
+        background-size: cover;
+        .o-position-absolute(0,0,0,0);
+    }
     > .oe_structure {
+        position: relative;
         display: inline-block;
         width: 100%;
         vertical-align: middle;
@@ -414,6 +420,11 @@ div.carousel {
         }
         > :last-child {
             margin-bottom: 32px;
+        }
+    }
+    &.s_parallax_is_fixed {
+        .s_parallax_bg {
+            background-attachment: fixed;
         }
     }
 }
