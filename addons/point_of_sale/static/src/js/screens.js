@@ -363,6 +363,9 @@ var NumpadWidget = PosBaseWidget.extend({
         this.state = new models.NumpadState();
     },
     start: function() {
+        if (this.pos.user.role != "manager"){
+        this.$el.find("[data-mode='price']").hide();
+        }
         this.state.bind('change:mode', this.changedMode, this);
         this.changedMode();
         this.$el.find('.numpad-backspace').click(_.bind(this.clickDeleteLastChar, this));
