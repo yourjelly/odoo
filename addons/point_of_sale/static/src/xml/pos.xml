@@ -1402,6 +1402,15 @@
             <t t-esc="widget.pos.company.name"/><br />
             Phone: <t t-esc="widget.pos.company.phone || ''"/><br />
             User: <t t-esc="widget.pos.cashier ? widget.pos.cashier.name : widget.pos.user.name"/><br />
+            Barcode:
+            <t t-set="customer" t-value="widget.pos.get_client()" />
+            <span t-if="customer">
+                <img t-if="customer.barcode" t-attf-src="/report/barcode/Code128/#{customer.barcode}" style="width:100px;height:15px"/>
+            </span>
+            <span t-if="!customer || !customer.barcode">
+                N/A
+            </span>
+            <br />
             <br />
             <t t-if="receipt.header">
                 <div style='text-align:center'>
