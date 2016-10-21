@@ -47,11 +47,9 @@ animation.registry.parallax = animation.Class.extend({
     selector: ".parallax",
 
     start: function () {
-        this.visible_area = [];
 
         _.defer((function () { this.set_values(); }).bind(this));
-        $(window).on("scroll.animation_parallax", _.throttle(this.on_scroll.bind(this), 10))
-                 .on("resize.animation_parallax", _.debounce(this.set_values.bind(this), 500));
+        $(window).on("resize.animation_parallax", _.debounce(this.set_values.bind(this), 500));
 
         return this._super.apply(this, arguments);
     },
@@ -61,11 +59,13 @@ animation.registry.parallax = animation.Class.extend({
     },
 
     set_values: function () {
-        var self      = this;
-        this.$bg      = this.$target.find('.s_parallax_bg');
-        this.viewport = document.body.clientHeight - $('#wrapwrap').position().top;
-        this.speed    = parseFloat(self.$target.attr("data-scroll-background-ratio") || 0);
-        this.s_ratio  = this.speed * (this.viewport / 10);
+        var self          = this;
+        this.visible_area = [];
+        this.lastPosition = -1;
+        this.$bg          = this.$target.find('.s_parallax_bg');
+        this.viewport     = document.body.clientHeight - $('#wrapwrap').position().top;
+        this.speed        = parseFloat(self.$target.attr("data-scroll-background-ratio") || 0);
+        this.s_ratio      = this.speed * (this.viewport / 10);
 
         this.check_bg();
 
@@ -82,21 +82,42 @@ animation.registry.parallax = animation.Class.extend({
                 self.$target.offset().top + self.$target.height() + self.viewport
             ];
 
-            self.on_scroll();
+            self.parallax_effect();
             img.remove();
         };
         img.src = this.$bg.css("background-image").replace(/url\(['"]*|['"]*\)/g, "");
     },
 
-    on_scroll: function () {
-        if (this.speed === 1 || this.speed === 0 ) return;
+    parallax_effect: function () {
+        var self = this;
 
-        var pos = window.scrollY + this.viewport;
+        // Use requestAnimationFrame rather then onScroll to:
+        // - avoid to overlap rendering calculations between two frames
+        // - avoid to perform unecessary reflows
+        var scroll = window.requestAnimationFrame       ||
+                     window.webkitRequestAnimationFrame ||
+                     window.mozRequestAnimationFrame    ||
+                     window.msRequestAnimationFrame     ||
+                     window.oRequestAnimationFrame      ||
+                     // IE Fallback
+                     function(callback){ window.setTimeout(callback, 10); };
 
-        // Perform effect if element is visible only
-        if ( (pos >= this.visible_area[0]) && (pos <= this.visible_area[1]) ) {
-            this.$bg.css('transform', 'translateY(' + this.normalize_scroll(pos) + 'px)');
+        function loop(){
+            if (self.lastPosition == window.pageYOffset) {
+                scroll(loop);
+                return false;
+            }
+
+            self.lastPosition = window.pageYOffset;
+            var pos= self.lastPosition + self.viewport;
+
+            // Perform tranlsate if the element is visible only
+            if ( (pos >= self.visible_area[0]) && (pos <= self.visible_area[1]) ) {
+                self.$bg.css('transform', 'translateY(' + self.normalize_scroll(pos) + 'px)');
+            }
+            scroll(loop);
         }
+        loop();
     },
 
     check_bg: function () {
