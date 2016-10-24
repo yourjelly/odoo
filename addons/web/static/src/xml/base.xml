@@ -57,7 +57,7 @@
     </div>
 </form>
 
-<div t-name="ActionManager" class="o_content"/>
+<div t-name="ActionManager" class="o_content" dir="rtl"/>
 
 <t t-name="ControlPanel">
     <div class="o_control_panel">
