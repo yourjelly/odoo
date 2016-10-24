@@ -13,13 +13,19 @@ import odoo.loglevels as loglevels
 import odoo.release as release
 from odoo.tools import appdirs
 
-
 DEFAULT_LOG_HANDLER = ':INFO'
 
 LOG_LEVELS = [
     'info', 'debug_rpc', 'warn', 'test', 'critical',
     'debug_sql', 'error', 'debug', 'debug_rpc_answer', 'notset'
 ]
+
+# The logging can be configured only once the configuration is parsed
+# This list will keep temporary logging as tuples (LOG_LEVEL, message)
+# and will be purged once the configuration is done
+_pre_logger = []
+
+_logger = logging.getLogger(__name__)
 
 # This will hold the option groups registered by instantiating the Group class
 _groups_registry = []
@@ -46,7 +52,7 @@ def _get_default_datadir():
         if sys.platform in ['win32', 'darwin']:
             func = appdirs.site_data_dir
         else:
-            func = lambda **kwarg: "/var/lib/%s" % kwarg['appname'].lower()
+            func = lambda **kwarg: "/var/lib/%s" % kwarg['appname'].lower()  # noqa
     # No "version" kwarg as session and filestore paths are shared against series
     return func(appname=release.product_name, appauthor=release.author)
 
@@ -545,6 +551,7 @@ class ConfigManager(object):
         """
         self._parse_config(args)
         odoo.netsvc.init_logger()
+        self.purge_pre_logger()
         odoo.modules.module.initialize_sys_path()
 
     def _parse_config(self, args=None):
@@ -653,6 +660,13 @@ class ConfigManager(object):
             m.strip() for m in self.options['server_wide_modules'].split(',') if m.strip()
         ]
 
+    def purge_pre_logger(self):
+        global _pre_logger
+        for log_level, msg in _pre_logger:
+            if not isinstance(log_level, int):
+                log_level = self._LOGLEVELS[log_level.lower()]
+            _logger.log(log_level, msg)
+
     def load(self):
         p = ConfigParser.ConfigParser()
         try:
@@ -670,12 +684,12 @@ class ConfigManager(object):
                     else:
                         self.options[name] = value
                 else:
-                    # we can't yet log something as the logger config is not ready.
-                    # in previous versions (< 11) the 'demo' key was wrongly saved in the configuration
-                    # file so we will keep this case silent
+                    # in previous versions (< 11) the 'demo' key was wrongly saved
+                    # in the configuration file so we will keep this case silent
+                    msg = "Unrecognized option '%s' found in config file." % name
                     if name != 'demo':
-                        # TODO: make a 'pre_logger' that will output stuff once the logging is configured
-                        print("Unrecognized option '%s' found in config file. Please Ignored." % name)
+                        _pre_logger.append(('warn', msg))
+
             #parse the other sections, as well
             for sec in p.sections():
                 if sec == 'options':
