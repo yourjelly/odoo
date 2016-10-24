@@ -176,7 +176,7 @@
                     </div>
                 </div>
             </header>
-            <main>
+            <main dir="rtl">
                 <t t-raw="0"/>
             </main>
             <footer>
