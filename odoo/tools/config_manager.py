@@ -2,34 +2,53 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import ConfigParser
+import logging
 import optparse
 import os
 import sys
+
 import odoo
 import odoo.conf
 import odoo.loglevels as loglevels
-import logging
 import odoo.release as release
-import appdirs
+from odoo.tools import appdirs
 
-class MyOption (optparse.Option, object):
-    """ optparse Option with two additional attributes.
-
-    The list of command line options (getopt.Option) is used to create the
-    list of the configuration file options. When reading the file, and then
-    reading the command line arguments, we don't want optparse.parse results
-    to override the configuration file values. But if we provide default
-    values to optparse, optparse will return them and we can't know if they
-    were really provided by the user or not. A solution is to not use
-    optparse's default attribute, but use a custom one (that will be copied
-    to create the default values of the configuration file).
-
-    """
-    def __init__(self, *opts, **attrs):
-        self.my_default = attrs.pop('my_default', None)
-        super(MyOption, self).__init__(*opts, **attrs)
 
 DEFAULT_LOG_HANDLER = ':INFO'
+
+LOG_LEVELS = [
+    'info', 'debug_rpc', 'warn', 'test', 'critical',
+    'debug_sql', 'error', 'debug', 'debug_rpc_answer', 'notset'
+]
+
+# This will hold the option groups registered by instantiating the Group class
+_groups_registry = []
+
+
+def is_addons_path(path):
+    from odoo.modules.module import MANIFEST_NAMES
+    for f in os.listdir(path):
+        modpath = os.path.join(path, f)
+        if os.path.isdir(modpath):
+            def hasfile(filename):
+                return os.path.isfile(os.path.join(modpath, filename))
+            if hasfile('__init__.py') and any(hasfile(mname) for mname in MANIFEST_NAMES):
+                return True
+    return False
+
+def _check_addons_path(option, opt, value, parser):
+    ad_paths = []
+    for path in value.split(','):
+        path = path.strip()
+        res = os.path.abspath(os.path.expanduser(path))
+        if not os.path.isdir(res):
+            raise optparse.OptionValueError("option %s: no such directory: %r" % (opt, path))
+        if not is_addons_path(res):
+            raise optparse.OptionValueError("option %s: The addons-path %r does not seem to a be a valid Addons Directory!" % (opt, path))
+        ad_paths.append(res)
+
+    setattr(parser.values, option.dest, ",".join(ad_paths))
+
 def _get_default_datadir():
     home = os.path.expanduser('~')
     if os.path.isdir(home):
@@ -56,7 +75,412 @@ def _deduplicate_loggers(loggers):
     )
 
 
-class configmanager(object):
+class Group(object):
+    """
+    Group of command line arguments (iterable)
+
+    :param str title: group title
+    :param str description: group description (will be rendered as an indented paragraph)
+    :param str section: section name used in configuration file (Defaults to 'options')
+    :param bool save: persist the goup's options in the configuration file (Defaults to True)
+                      (supersede option's ``save`` attribute if False)
+    :param bool hidden: whether the group should be hidden from the help screen (Defaults to False)
+                        (supersede option's ``hidden`` attribute if True)
+    :param bool disabled: if True the group and it's options will be disabled, values will be ``None``
+                          (supersede option's ``disabled`` attribute if True)
+    """
+    def __init__(self, title=None, description=None, section='options',
+                 cli=True, save=True, hidden=False, disabled=False):
+        _groups_registry.append(self)
+        self.title = title
+        self.description = description
+        self.section = section
+        self.save = save
+        self.disabled = disabled
+        self.hidden = hidden
+        self.options = []
+        self._integrity_checks = []
+
+    def __iter__(self):
+        for option in self.options:
+            yield option
+
+    def _add(self, option):
+        assert isinstance(option, Option)
+        option.group = self
+        self.options.append(option)
+
+    def add_option(self, *args, **kwargs):
+        """
+        Add an option to the group
+
+        Accepts the same arguments as the :class:`Option` class.
+        """
+        if any(isinstance(arg, Option) for arg in args):
+            raise ValueError("add_option does not takes <Option> instances as argument")
+        self._add(Option(*args, **kwargs))
+
+    def add_options(self, *options):
+        """
+        Adds one or more :class:`Option` instances to the group
+        """
+        for option in options:
+            self._add(option)
+
+    def keys(self):
+        """
+        Returns a set of ``dest`` attributes in the group's options
+        """
+        return set([option.dest for option in self])
+
+    def get(self, key, all=False):
+        """
+        Get the group option whose ``dest`` attribute or one option string matches the given key.
+
+        Example:
+            >>> odoo.tools.config_manager.smtp_group.get('--smtp-port')
+
+        .. note::
+
+           In case of linked options sharing the same ``dest`` attribute (eg: :py:attr:`optparse.Option.action`
+           with ``append`` and ``append_const``) only the first option found will be returned.
+           Use ``all=True` to retreive all of them.
+        """
+        opts = []
+        for group in _groups_registry:
+            for option in group.options:
+                if option.dest == key or key in option._long_opts or key in option._short_opts:
+                    opts.append(option)
+        if all:
+            return opts
+        return opts[0]
+
+    def check(self, func, error_message):
+        """
+        Add a differed options integrity check.
+
+        :param callable func: callable integrity check
+        :param str error_message: used for the parse error in case the callable returns True
+        """
+        self._integrity_checks.append([func, error_message])
+
+    def integrity_check(self, values):
+        """
+        Launch the integrity check, returns an error message if the check failed, None otherwise
+
+        :param optparse.Values values: the optparse parsed values
+        """
+        for func, error_message in self._integrity_checks:
+            if func(values):
+                return error_message.format(values, opt=values)
+
+
+class Option(optparse.Option, object):
+    """
+    An Option inherited from :py:class:`optparse.Option`
+
+    If no option string(s) are provided (positional arguments) it is assumed that the option will not be exposed
+    to the command line interface but will still be exposed to the configuration file.
+
+
+    Additional named arguments:
+
+    :param bool save: persist this option in the configuration file (Defaults to True)
+    :param bool hidden: hide this option from the help screen but keep it working through cli.  (Defaults to False)
+    :param bool disabled: if True the option will be disabled and it's value will be ``None`` (Defaults to False)
+    """
+    def __init__(self, *args, **kwargs):
+        self.cli = bool(args)
+        if not args:
+            if 'dest' not in kwargs:
+                raise NameError("'dest' argument must be provided if no positional argument are passed")
+            args = ['--' + kwargs['dest'].replace('_', '-')]  # create mandatory option string even if we won't use it
+        self.save = kwargs.pop('save', True)
+        self.hidden = kwargs.pop('hidden', False)
+        self.disabled = kwargs.pop('disabled', False)
+        self.group = None
+
+        # As we will deal with two sources: configuration file and cli, we need to be able to see if the user actually
+        # used a cli argument or not. We keep the `default` argument stored in another attribute, so we can compare the
+        # cli values with None to check if the user actually used a particular argument.
+        if 'my_default' in kwargs:
+            self.my_default = kwargs.pop('my_default')
+        else:
+            self.my_default = kwargs.pop('default', None)
+
+        super(Option, self).__init__(*args, **kwargs)
+
+
+# Server startup config group {{{
+common_group = Group("Common options")
+common_group.add_options(
+    Option("-c", "--config", dest="config", help="specify alternate config file", save=False),
+
+    Option("-s", "--save", action="store_true", dest="save", default=False, save=False,
+           help="save configuration to ~/.odoorc (or to ~/.openerp_serverrc if it exists)"),
+
+    Option("-i", "--init", dest="init", save=False, help="install one or more modules (comma-separated list, use "
+           "\"all\" for all modules), requires -d"),
+
+    Option("-u", "--update", dest="update", save=False, help="update one or more modules (comma-separated list, use "
+           "\"all\" for all modules). Requires -d."),
+
+    Option("--without-demo", dest="without_demo", default=False,
+           help="disable loading demo data for modules to be installed (comma-separated, use \"all\" for all modules). "
+                "Requires -d and -i. Default is %default"),
+
+    Option("-P", "--import-partial", dest="import_partial", default='',
+           help="Use this for big data importation, if it crashes you will be able to continue at the current state. "
+                "Provide a filename to store intermediate importation states."),
+
+    Option("--pidfile", dest="pidfile", help="file where the server pid will be stored"),
+
+    Option("--addons-path", dest="addons_path", action="callback", callback=_check_addons_path, nargs=1,
+           type='string', help="specify additional addons paths (separated by commas)."),
+
+    Option("--load", dest="server_wide_modules", help="Comma-separated list of server-wide modules default=web"),
+
+    Option("-D", "--data-dir", dest="data_dir", default=_get_default_datadir(),
+           help="Directory where to store Odoo data"),
+)
+common_group.check(lambda opt: not opt.save and opt.config and not os.access(opt.config, os.R_OK),
+                   "The config file '{0.config}' selected with -c/--config doesn't exist or is not readable, "
+                   "use -s/--save if you want to generate it")
+# }}}
+
+# XML-RPC / HTTP config group {{{
+http_group = Group("XML-RPC Configuration")
+http_group.add_options(
+    Option("--xmlrpc-interface", dest="xmlrpc_interface", default='',
+           help="Specify the TCP IP address for the XML-RPC protocol. The empty string binds to all interfaces."),
+
+    Option("--xmlrpc-port", dest="xmlrpc_port", default=8069, type="int",
+           help="specify the TCP port for the XML-RPC protocol"),
+
+    Option("--no-xmlrpc", dest="xmlrpc", action="store_false", default=True, help="disable the XML-RPC protocol"),
+
+    Option("--proxy-mode", dest="proxy_mode", action="store_true", default=False,
+           help="Enable correct behavior when behind a reverse proxy"),
+
+    Option("--longpolling-port", dest="longpolling_port", default=8072, type="int",
+           help="specify the TCP port for longpolling requests"),
+)
+# }}}
+
+# WEB config group {{{
+web_group = Group("web", "Web interface Configuration")
+web_group.add_options(
+    Option("--db-filter", dest="dbfilter", default='.*', help="Filter listed database", metavar="REGEXP"),
+)
+# }}}
+
+# Testing group {{{
+testing_group = Group("testing", "Testing Configuration")
+testing_group.add_options(
+    Option("--test-file", dest="test_file", default=False, help="Launch a python or YML test file."),
+
+    Option("--test-report-directory", dest="test_report_directory", default=False,
+           help="If set, will save sample of all reports in this directory."),
+
+    Option("--test-enable", action="store_true", dest="test_enable", default=False, help="Enable YAML and unit tests."),
+
+    Option("--test-commit", action="store_true", dest="test_commit", default=False,
+           help="Commit database changes performed by YAML or XML tests."),
+)
+# }}}
+
+# Logging group {{{
+logging_group = Group("Logging Configuration")
+logging_group.add_options(
+    Option("--logfile", dest="logfile", help="file where the server log will be stored"),
+
+    Option("--logrotate", dest="logrotate", action="store_true", default=False, help="enable logfile rotation"),
+
+    Option("--syslog", action="store_true", dest="syslog", default=False, help="Send the log to the syslog server"),
+
+    Option('--log-handler', action="append", default=[], my_default=DEFAULT_LOG_HANDLER, metavar="PREFIX:LEVEL",
+           help='setup a handler at LEVEL for a given PREFIX. An empty PREFIX indicates the root logger. '
+                'This option can be repeated. Example: "odoo.orm:DEBUG" or "werkzeug:CRITICAL" (default: ":INFO")'),
+
+    Option('--log-request', action="append_const", dest="log_handler", const="odoo.http.rpc.request:DEBUG",
+           help='shortcut for --log-handler=odoo.http.rpc.request:DEBUG'),
+
+    Option('--log-response', action="append_const", dest="log_handler", const="odoo.http.rpc.response:DEBUG",
+           help='shortcut for --log-handler=odoo.http.rpc.response:DEBUG'),
+
+    Option('--log-web', action="append_const", dest="log_handler", const="odoo.http:DEBUG",
+           help='shortcut for --log-handler=odoo.http:DEBUG'),
+
+    Option('--log-sql', action="append_const", dest="log_handler", const="odoo.sql_db:DEBUG",
+           help='shortcut for --log-handler=odoo.sql_db:DEBUG'),
+
+    Option('--log-db', dest='log_db', help="Logging database", default=False),
+
+    Option('--log-db-level', dest='log_db_level', default='warning', help="Logging database level"),
+
+    Option('--log-level', dest='log_level', type='choice', choices=LOG_LEVELS, default='info',
+           help='specify the level of the logging. Accepted values: %s.' % (LOG_LEVELS,)),
+)
+logging_group.check(lambda opt: opt.syslog and opt.logfile, "the syslog and logfile options are exclusive")
+# }}}
+
+# SMTP group {{{
+smtp_group = Group("SMTP Configuration")
+smtp_group.add_options(
+    Option('--email-from', dest='email_from', default=False, help='specify the SMTP email address for sending email'),
+
+    Option('--smtp', dest='smtp_server', default='localhost', help='specify the SMTP server for sending email'),
+
+    Option('--smtp-port', dest='smtp_port', default=25, help='specify the SMTP port', type="int"),
+
+    Option('--smtp-ssl', dest='smtp_ssl', action='store_true', default=False,
+           help='if passed, SMTP connections will be encrypted with SSL (STARTTLS)'),
+
+    Option('--smtp-user', dest='smtp_user', default=False, help='specify the SMTP username for sending email'),
+
+    Option('--smtp-password', dest='smtp_password', default=False, help='specify the SMTP password for sending email'),
+)
+# }}}
+
+# Database group {{{
+db_group = Group("Database related options")
+db_group.add_options(
+    Option("-d", "--database", dest="db_name", default=False, help="specify the database name"),
+
+    Option("-r", "--db_user", dest="db_user", default=False, help="specify the database user name"),
+
+    Option("-w", "--db_password", dest="db_password", default=False, help="specify the database password"),
+
+    Option("--pg_path", dest="pg_path", help="specify the pg executable path"),
+
+    Option("--db_host", dest="db_host", default=False, help="specify the database host"),
+
+    Option("--db_port", dest="db_port", default=False, help="specify the database port", type="int"),
+
+    Option("--db_maxconn", dest="db_maxconn", type='int', default=64,
+           help="specify the the maximum number of physical connections to posgresql"),
+
+    Option("--db-template", dest="db_template", default="template1",
+           help="specify a custom database template to create a new database"),
+)
+# }}}
+
+# Internationalisation group {{{
+i18n_group = Group(
+    title="Internationalisation options",
+    description="Use these options to translate Odoo to another language. See i18n section of the user manual. "
+                "Option '-d' is mandatory. Option '-l' is mandatory in case of importation"
+)
+i18n_group.add_options(
+    Option('--load-language', dest="load_language", save=False,
+           help="specifies the languages for the translations you want to be loaded"),
+
+    Option('-l', "--language", dest="language", save=False,
+           help="specify the language of the translation file. Use it with --i18n-export or --i18n-import"),
+
+    Option("--i18n-export", dest="translate_out", save=False,
+           help="export all sentences to be translated to a CSV file, a PO file or a TGZ archive and exit"),
+
+    Option("--i18n-import", dest="translate_in", save=False,
+           help="import a CSV or a PO file with translations and exit. The '-l' option is required."),
+
+    Option("--i18n-overwrite", dest="overwrite_existing_translations", action="store_true", default=False, save=False,
+           help="overwrites existing translation terms on updating a module or importing a CSV or a PO file."),
+
+    Option("--modules", dest="translate_modules",
+           help="specify modules to export. Use in combination with --i18n-export"),
+)
+i18n_group.check(lambda opt: opt.translate_in and (not opt.language or not opt.db_name),
+                 "the i18n-import option cannot be used without the language (-l) and the database (-d) options")
+i18n_group.check(lambda opt: opt.overwrite_existing_translations and not (opt.translate_in or opt.update),
+                 "the i18n-overwrite option cannot be used without the i18n-import option or without the update option")
+i18n_group.check(lambda opt: opt.translate_out and (not opt.db_name),
+                 "the i18n-export option cannot be used without the database (-d) option")
+# }}}
+
+# Security group {{{
+security_group = Group("Security-related options")
+security_group.add_options(
+    Option('--no-database-list', action="store_false", dest='list_db', default=True,
+           help="disable the ability to return the list of databases"),
+)
+# }}}
+
+# Advanced group {{{
+advanced_group = Group("Advanced options")
+advanced_group.add_options(
+    Option('--dev', dest='dev_mode', save=False, type='string',
+           help="Enable developer mode. Param: List of options separated by comma. "
+                "Options : all, [pudb|wdb|ipdb|pdb], reload, qweb, werkzeug, xml"),
+
+    Option('--shell-interface', dest='shell_interface', type='string',
+           help="Specify a preferred REPL to use in shell mode. Supported REPLs are: [ipython|ptpython|bpython|python]"),
+
+    Option("--stop-after-init", action="store_true", dest="stop_after_init", default=False, hidden=True, save=False,
+           help="stop the server after its initialization"),
+
+    Option("--osv-memory-count-limit", dest="osv_memory_count_limit", default=False, type='int',
+           help="Force a limit on the maximum number of records kept in the virtual "
+                "osv_memory tables. The default is False, which means no count-based limit."),
+
+    Option("--osv-memory-age-limit", dest="osv_memory_age_limit", default=1.0, type='float',
+           help="Force a limit on the maximum age of records kept in the virtual osv_memory tables. "
+                "This is a decimal value expressed in hours, and the default is 1 hour."),
+
+    Option("--max-cron-threads", dest="max_cron_threads", default=2, type='int',
+           help="Maximum number of threads processing concurrently cron jobs (default 2)."),
+
+    Option("--unaccent", dest="unaccent", default=False, action="store_true",
+           help="Use the unaccent function provided by the database when available."),
+
+    Option("--geoip-db", dest="geoip_database", default='/usr/share/GeoIP/GeoLiteCity.dat',
+           help="Absolute path to the GeoIP database file."),
+)
+# }}}
+
+# Multiprocessing group {{{
+multiprocess_group = Group("Multiprocessing options", disabled=(os.name == 'posix'),)
+multiprocess_group.add_options(
+    # TODO sensible default for the three following limits.
+    Option("--workers", dest="workers", default=0, type='int',
+           help="Specify the number of workers, 0 disable prefork mode."),
+
+    Option("--limit-memory-soft", dest="limit_memory_soft", default=2048 * 1024 * 1024, type='int',
+           help="Maximum allowed virtual memory per worker, when reached the worker be reset after the current "
+                "request (default 671088640 aka 640MB)."),
+
+    Option("--limit-memory-hard", dest="limit_memory_hard", default=2560 * 1024 * 1024, type='int',
+           help="Maximum allowed virtual memory per worker, when reached, any memory allocation will fail "
+                "(default 805306368 aka 768MB)."),
+
+    Option("--limit-time-cpu", dest="limit_time_cpu", default=60, type='int',
+           help="Maximum allowed CPU time per request (default 60)."),
+
+    Option("--limit-time-real", dest="limit_time_real", default=120, type='int',
+           help="Maximum allowed Real time per request (default 120)."),
+
+    Option("--limit-time-real-cron", dest="limit_time_real_cron", default=-1, type='int',
+           help="Maximum allowed Real time per cron job. (default: --limit-time-real). Set to 0 for no limit."),
+
+    Option("--limit-request", dest="limit_request", default=8192, type='int',
+           help="Maximum number of request to be processed per worker (default 8192)."),
+)
+# }}}
+
+# Unexposed group {{{
+# Those options are deliberately not exposed to the command line but most of them are saved in the config file.
+unexposed_group = Group()
+unexposed_group.add_options(
+    Option(dest="admin_passwd", default='admin'),
+    Option(dest="csv_internal_sep", default=','),
+    Option(dest="publisher_warranty_url", save=False, default='http://services.openerp.com/publisher-warranty/'),
+    Option(dest="reportgz", default=False),
+    Option(dest="root_path", default=None, save=False),
+)
+# }}}
+
+
+class ConfigManager(object):
     def __init__(self, fname=None):
         """Constructor.
 
@@ -64,23 +488,10 @@ class configmanager(object):
                       from Python code without resorting to environment
                       variable
         """
-        # Options not exposed on the command line. Command line options will be added
-        # from optparse's parser.
-        self.options = {
-            'admin_passwd': 'admin',
-            'csv_internal_sep': ',',
-            'publisher_warranty_url': 'http://services.openerp.com/publisher-warranty/',
-            'reportgz': False,
-            'root_path': None,
-        }
+        # This dictionary will contain all the options values once the cli and config files are parsed
+        self.options = {}
 
-        # Not exposed in the configuration file.
-        self.blacklist_for_save = set([
-            'publisher_warranty_url', 'load_language', 'root_path',
-            'init', 'save', 'config', 'update', 'stop_after_init', 'dev_mode', 'shell_interface'
-        ])
-
-        # dictionary mapping option destination (keys in self.options) to MyOptions.
+        # dictionary mapping of <Option> instances with the option names keys
         self.casts = {}
 
         self.misc = {}
@@ -92,206 +503,38 @@ class configmanager(object):
         ])
 
         version = "%s %s" % (release.description, release.version)
-        self.parser = parser = optparse.OptionParser(version=version, option_class=MyOption)
+        self.parser = parser = optparse.OptionParser(version=version, option_class=Option)
 
-        # Server startup config
-        group = optparse.OptionGroup(parser, "Common options")
-        group.add_option("-c", "--config", dest="config", help="specify alternate config file")
-        group.add_option("-s", "--save", action="store_true", dest="save", default=False,
-                          help="save configuration to ~/.odoorc (or to ~/.openerp_serverrc if it exists)")
-        group.add_option("-i", "--init", dest="init", help="install one or more modules (comma-separated list, use \"all\" for all modules), requires -d")
-        group.add_option("-u", "--update", dest="update",
-                          help="update one or more modules (comma-separated list, use \"all\" for all modules). Requires -d.")
-        group.add_option("--without-demo", dest="without_demo",
-                          help="disable loading demo data for modules to be installed (comma-separated, use \"all\" for all modules). Requires -d and -i. Default is %default",
-                          my_default=False)
-        group.add_option("-P", "--import-partial", dest="import_partial", my_default='',
-                        help="Use this for big data importation, if it crashes you will be able to continue at the current state. Provide a filename to store intermediate importation states.")
-        group.add_option("--pidfile", dest="pidfile", help="file where the server pid will be stored")
-        group.add_option("--addons-path", dest="addons_path",
-                         help="specify additional addons paths (separated by commas).",
-                         action="callback", callback=self._check_addons_path, nargs=1, type="string")
-        group.add_option("--load", dest="server_wide_modules", help="Comma-separated list of server-wide modules.", my_default='web,web_kanban')
+        for group in _groups_registry:
+            group_disabled = group.disabled or all(option.disabled for option in group)
+            # Group is hidden if it's property hidden is True OR all of it's option's hidden property are True
+            # OR all of it's options are not exposed to cli (because they did not defined an option string)
+            group_hidden = (group.hidden or all(option.hidden for option in group) or
+                            all(option.cli is False for option in group))
 
-        group.add_option("-D", "--data-dir", dest="data_dir", my_default=_get_default_datadir(),
-                         help="Directory where to store Odoo data")
-        parser.add_option_group(group)
-
-        # XML-RPC / HTTP
-        group = optparse.OptionGroup(parser, "XML-RPC Configuration")
-        group.add_option("--xmlrpc-interface", dest="xmlrpc_interface", my_default='',
-                         help="Specify the TCP IP address for the XML-RPC protocol. The empty string binds to all interfaces.")
-        group.add_option("--xmlrpc-port", dest="xmlrpc_port", my_default=8069,
-                         help="specify the TCP port for the XML-RPC protocol", type="int")
-        group.add_option("--no-xmlrpc", dest="xmlrpc", action="store_false", my_default=True,
-                         help="disable the XML-RPC protocol")
-        group.add_option("--proxy-mode", dest="proxy_mode", action="store_true", my_default=False,
-                         help="Enable correct behavior when behind a reverse proxy")
-        group.add_option("--longpolling-port", dest="longpolling_port", my_default=8072,
-                         help="specify the TCP port for longpolling requests", type="int")
-        parser.add_option_group(group)
-
-        # WEB
-        group = optparse.OptionGroup(parser, "Web interface Configuration")
-        group.add_option("--db-filter", dest="dbfilter", my_default='.*',
-                         help="Filter listed database", metavar="REGEXP")
-        parser.add_option_group(group)
-
-        # Testing Group
-        group = optparse.OptionGroup(parser, "Testing Configuration")
-        group.add_option("--test-file", dest="test_file", my_default=False,
-                         help="Launch a python or YML test file.")
-        group.add_option("--test-report-directory", dest="test_report_directory", my_default=False,
-                         help="If set, will save sample of all reports in this directory.")
-        group.add_option("--test-enable", action="store_true", dest="test_enable",
-                         my_default=False, help="Enable YAML and unit tests.")
-        group.add_option("--test-commit", action="store_true", dest="test_commit",
-                         my_default=False, help="Commit database changes performed by YAML or XML tests.")
-        parser.add_option_group(group)
-
-        # Logging Group
-        group = optparse.OptionGroup(parser, "Logging Configuration")
-        group.add_option("--logfile", dest="logfile", help="file where the server log will be stored")
-        group.add_option("--logrotate", dest="logrotate", action="store_true", my_default=False, help="enable logfile rotation")
-        group.add_option("--syslog", action="store_true", dest="syslog", my_default=False, help="Send the log to the syslog server")
-        group.add_option('--log-handler', action="append", default=[], my_default=DEFAULT_LOG_HANDLER, metavar="PREFIX:LEVEL", help='setup a handler at LEVEL for a given PREFIX. An empty PREFIX indicates the root logger. This option can be repeated. Example: "odoo.orm:DEBUG" or "werkzeug:CRITICAL" (default: ":INFO")')
-        group.add_option('--log-request', action="append_const", dest="log_handler", const="odoo.http.rpc.request:DEBUG", help='shortcut for --log-handler=odoo.http.rpc.request:DEBUG')
-        group.add_option('--log-response', action="append_const", dest="log_handler", const="odoo.http.rpc.response:DEBUG", help='shortcut for --log-handler=odoo.http.rpc.response:DEBUG')
-        group.add_option('--log-web', action="append_const", dest="log_handler", const="odoo.http:DEBUG", help='shortcut for --log-handler=odoo.http:DEBUG')
-        group.add_option('--log-sql', action="append_const", dest="log_handler", const="odoo.sql_db:DEBUG", help='shortcut for --log-handler=odoo.sql_db:DEBUG')
-        group.add_option('--log-db', dest='log_db', help="Logging database", my_default=False)
-        group.add_option('--log-db-level', dest='log_db_level', my_default='warning', help="Logging database level")
-        # For backward-compatibility, map the old log levels to something
-        # quite close.
-        levels = [
-            'info', 'debug_rpc', 'warn', 'test', 'critical',
-            'debug_sql', 'error', 'debug', 'debug_rpc_answer', 'notset'
-        ]
-        group.add_option('--log-level', dest='log_level', type='choice',
-                         choices=levels, my_default='info',
-                         help='specify the level of the logging. Accepted values: %s.' % (levels,))
-
-        parser.add_option_group(group)
-
-        # SMTP Group
-        group = optparse.OptionGroup(parser, "SMTP Configuration")
-        group.add_option('--email-from', dest='email_from', my_default=False,
-                         help='specify the SMTP email address for sending email')
-        group.add_option('--smtp', dest='smtp_server', my_default='localhost',
-                         help='specify the SMTP server for sending email')
-        group.add_option('--smtp-port', dest='smtp_port', my_default=25,
-                         help='specify the SMTP port', type="int")
-        group.add_option('--smtp-ssl', dest='smtp_ssl', action='store_true', my_default=False,
-                         help='if passed, SMTP connections will be encrypted with SSL (STARTTLS)')
-        group.add_option('--smtp-user', dest='smtp_user', my_default=False,
-                         help='specify the SMTP username for sending email')
-        group.add_option('--smtp-password', dest='smtp_password', my_default=False,
-                         help='specify the SMTP password for sending email')
-        parser.add_option_group(group)
-
-        group = optparse.OptionGroup(parser, "Database related options")
-        group.add_option("-d", "--database", dest="db_name", my_default=False,
-                         help="specify the database name")
-        group.add_option("-r", "--db_user", dest="db_user", my_default=False,
-                         help="specify the database user name")
-        group.add_option("-w", "--db_password", dest="db_password", my_default=False,
-                         help="specify the database password")
-        group.add_option("--pg_path", dest="pg_path", help="specify the pg executable path")
-        group.add_option("--db_host", dest="db_host", my_default=False,
-                         help="specify the database host")
-        group.add_option("--db_port", dest="db_port", my_default=False,
-                         help="specify the database port", type="int")
-        group.add_option("--db_maxconn", dest="db_maxconn", type='int', my_default=64,
-                         help="specify the the maximum number of physical connections to posgresql")
-        group.add_option("--db-template", dest="db_template", my_default="template1",
-                         help="specify a custom database template to create a new database")
-        parser.add_option_group(group)
-
-        group = optparse.OptionGroup(parser, "Internationalisation options",
-            "Use these options to translate Odoo to another language."
-            "See i18n section of the user manual. Option '-d' is mandatory."
-            "Option '-l' is mandatory in case of importation"
-            )
-        group.add_option('--load-language', dest="load_language",
-                         help="specifies the languages for the translations you want to be loaded")
-        group.add_option('-l', "--language", dest="language",
-                         help="specify the language of the translation file. Use it with --i18n-export or --i18n-import")
-        group.add_option("--i18n-export", dest="translate_out",
-                         help="export all sentences to be translated to a CSV file, a PO file or a TGZ archive and exit")
-        group.add_option("--i18n-import", dest="translate_in",
-                         help="import a CSV or a PO file with translations and exit. The '-l' option is required.")
-        group.add_option("--i18n-overwrite", dest="overwrite_existing_translations", action="store_true", my_default=False,
-                         help="overwrites existing translation terms on updating a module or importing a CSV or a PO file.")
-        group.add_option("--modules", dest="translate_modules",
-                         help="specify modules to export. Use in combination with --i18n-export")
-        parser.add_option_group(group)
-
-        security = optparse.OptionGroup(parser, 'Security-related options')
-        security.add_option('--no-database-list', action="store_false", dest='list_db', my_default=True,
-                            help="disable the ability to return the list of databases")
-        parser.add_option_group(security)
-
-        # Advanced options
-        group = optparse.OptionGroup(parser, "Advanced options")
-        group.add_option('--dev', dest='dev_mode', type="string",
-                         help="Enable developer mode. Param: List of options separated by comma. "
-                              "Options : all, [pudb|wdb|ipdb|pdb], reload, qweb, werkzeug, xml")
-        group.add_option('--shell-interface', dest='shell_interface', type="string",
-                         help="Specify a preferred REPL to use in shell mode. Supported REPLs are: "
-                              "[ipython|ptpython|bpython|python]")
-        group.add_option("--stop-after-init", action="store_true", dest="stop_after_init", my_default=False,
-                          help="stop the server after its initialization")
-        group.add_option("--osv-memory-count-limit", dest="osv_memory_count_limit", my_default=False,
-                         help="Force a limit on the maximum number of records kept in the virtual "
-                              "osv_memory tables. The default is False, which means no count-based limit.",
-                         type="int")
-        group.add_option("--osv-memory-age-limit", dest="osv_memory_age_limit", my_default=1.0,
-                         help="Force a limit on the maximum age of records kept in the virtual "
-                              "osv_memory tables. This is a decimal value expressed in hours, "
-                              "and the default is 1 hour.",
-                         type="float")
-        group.add_option("--max-cron-threads", dest="max_cron_threads", my_default=2,
-                         help="Maximum number of threads processing concurrently cron jobs (default 2).",
-                         type="int")
-        group.add_option("--unaccent", dest="unaccent", my_default=False, action="store_true",
-                         help="Use the unaccent function provided by the database when available.")
-        group.add_option("--geoip-db", dest="geoip_database", my_default='/usr/share/GeoIP/GeoLiteCity.dat',
-                         help="Absolute path to the GeoIP database file.")
-        parser.add_option_group(group)
-
-        if os.name == 'posix':
-            group = optparse.OptionGroup(parser, "Multiprocessing options")
-            # TODO sensible default for the three following limits.
-            group.add_option("--workers", dest="workers", my_default=0,
-                             help="Specify the number of workers, 0 disable prefork mode.",
-                             type="int")
-            group.add_option("--limit-memory-soft", dest="limit_memory_soft", my_default=2048 * 1024 * 1024,
-                             help="Maximum allowed virtual memory per worker, when reached the worker be reset after the current request (default 671088640 aka 640MB).",
-                             type="int")
-            group.add_option("--limit-memory-hard", dest="limit_memory_hard", my_default=2560 * 1024 * 1024,
-                             help="Maximum allowed virtual memory per worker, when reached, any memory allocation will fail (default 805306368 aka 768MB).",
-                             type="int")
-            group.add_option("--limit-time-cpu", dest="limit_time_cpu", my_default=60,
-                             help="Maximum allowed CPU time per request (default 60).",
-                             type="int")
-            group.add_option("--limit-time-real", dest="limit_time_real", my_default=120,
-                             help="Maximum allowed Real time per request (default 120).",
-                             type="int")
-            group.add_option("--limit-time-real-cron", dest="limit_time_real_cron", my_default=-1,
-                             help="Maximum allowed Real time per cron job. (default: --limit-time-real). "
-                                  "Set to 0 for no limit. ",
-                             type="int")
-            group.add_option("--limit-request", dest="limit_request", my_default=8192,
-                             help="Maximum number of request to be processed per worker (default 8192).",
-                             type="int")
-            parser.add_option_group(group)
-
-        # Copy all optparse options (i.e. MyOption) into self.options.
-        for group in parser.option_groups:
-            for option in group.option_list:
+            # We always create the group but it will not necessarily be added to the parser. This will be decided
+            # according to hidden and disabled logic
+            opt_group = optparse.OptionGroup(parser, group.title, group.description)
+            for option in group:
+                if not group.disabled and not option.disabled and option.cli is not False:
+                    if group_hidden or option.hidden:
+                        # We hide the option from the cli if it is hidden or if it's group is hidden
+                        option.help = optparse.SUPPRESS_HELP
+                    if group_hidden:
+                        parser.add_option(option)
+                    else:
+                        opt_group.add_option(option)
+                # Copy all optparse options (i.e. Option) into self.options.
                 if option.dest not in self.options:
-                    self.options[option.dest] = option.my_default
+                    # The default value of options are filled in early and are decoupled from the cli parsing on purpose
+                    # so we know if a user actually used a cli switch or not (See Option)
+                    default_value = None if option.disabled else option.my_default
+                    if 'append' in option.action:
+                        default_value = default_value.split(',')
+                    self.options[option.dest] = default_value
                     self.casts[option.dest] = option
+            if not group_disabled and not group_hidden:
+                parser.add_option_group(opt_group)
 
         # generate default config
         self._parse_config()
@@ -320,29 +563,15 @@ class configmanager(object):
             args = []
         opt, args = self.parser.parse_args(args)
 
-        def die(cond, msg):
-            if cond:
-                self.parser.error(msg)
-
         # Ensures no illegitimate argument is silently discarded (avoids insidious "hyphen to dash" problem)
-        die(args, "unrecognized parameters: '%s'" % " ".join(args))
+        if args:
+            self.parser.error("unrecognized parameters: '%s'" % " ".join(args))
 
-        die(bool(opt.syslog) and bool(opt.logfile),
-            "the syslog and logfile options are exclusive")
-
-        die(opt.translate_in and (not opt.language or not opt.db_name),
-            "the i18n-import option cannot be used without the language (-l) and the database (-d) options")
-
-        die(opt.overwrite_existing_translations and not (opt.translate_in or opt.update),
-            "the i18n-overwrite option cannot be used without the i18n-import option or without the update option")
-
-        die(opt.translate_out and (not opt.db_name),
-            "the i18n-export option cannot be used without the database (-d) option")
-
-        # Check if the config file exists (-c used, but not -s)
-        die(not opt.save and opt.config and not os.access(opt.config, os.R_OK),
-            "The config file '%s' selected with -c/--config doesn't exist or is not readable, "\
-            "use -s/--save if you want to generate it"% opt.config)
+        # Check the integrity of the options
+        for group in _groups_registry:
+            error = group.integrity_check(opt)
+            if error is not None:
+                self.parser.error(error)
 
         # place/search the config file on Win32 near the server installation
         # (../etc from the server)
@@ -355,9 +584,9 @@ class configmanager(object):
             rcfilepath = os.path.expanduser('~/.odoorc')
             old_rcfilepath = os.path.expanduser('~/.openerp_serverrc')
 
-            die(os.path.isfile(rcfilepath) and os.path.isfile(old_rcfilepath),
-                "Found '.odoorc' and '.openerp_serverrc' in your path. Please keep only one of "\
-                "them, preferrably '.odoorc'.")
+            if os.path.isfile(rcfilepath) and os.path.isfile(old_rcfilepath):
+                self.parser.error("Found '.odoorc' and '.openerp_serverrc' in your path. Please keep only one of "
+                                  "them, preferrably '.odoorc'.")
 
             if not os.path.isfile(rcfilepath) and os.path.isfile(old_rcfilepath):
                 rcfilepath = old_rcfilepath
@@ -376,60 +605,23 @@ class configmanager(object):
         if self.options['server_wide_modules'] in ('', 'None', 'False'):
             self.options['server_wide_modules'] = 'web,web_kanban'
 
-        # if defined dont take the configfile value even if the defined value is None
-        keys = ['xmlrpc_interface', 'xmlrpc_port', 'longpolling_port',
-                'db_name', 'db_user', 'db_password', 'db_host',
-                'db_port', 'db_template', 'logfile', 'pidfile', 'smtp_port',
-                'email_from', 'smtp_server', 'smtp_user', 'smtp_password',
-                'db_maxconn', 'import_partial', 'addons_path',
-                'xmlrpc', 'syslog', 'without_demo',
-                'dbfilter', 'log_level', 'log_db',
-                'log_db_level', 'geoip_database', 'dev_mode', 'shell_interface'
-        ]
+        for name, option in self.casts.items():
+            # Copy the command-line argument
+            cli_value = getattr(opt, name, None)
 
-        for arg in keys:
-            # Copy the command-line argument (except the special case for log_handler, due to
-            # action=append requiring a real default, so we cannot use the my_default workaround)
-            if getattr(opt, arg):
-                self.options[arg] = getattr(opt, arg)
-            # ... or keep, but cast, the config file value.
-            elif isinstance(self.options[arg], basestring) and self.casts[arg].type in optparse.Option.TYPE_CHECKER:
-                self.options[arg] = optparse.Option.TYPE_CHECKER[self.casts[arg].type](self.casts[arg], arg, self.options[arg])
+            if cli_value and not option.disabled and option.cli:
+                if 'append' in option.action:
+                    # we take care of action=append cli options here by extending the config file values
+                    self.options[name].extend(cli_value)
+                else:
+                    self.options[name] = cli_value
+            elif option.disabled:
+                # Always fill disabled option values with None
+                self.options[name] = None
 
-        if isinstance(self.options['log_handler'], basestring):
-            self.options['log_handler'] = self.options['log_handler'].split(',')
-        self.options['log_handler'].extend(opt.log_handler)
-
-        # if defined but None take the configfile value
-        keys = [
-            'language', 'translate_out', 'translate_in', 'overwrite_existing_translations',
-            'dev_mode', 'shell_interface', 'smtp_ssl', 'load_language',
-            'stop_after_init', 'logrotate', 'without_demo', 'xmlrpc', 'syslog',
-            'list_db', 'proxy_mode',
-            'test_file', 'test_enable', 'test_commit', 'test_report_directory',
-            'osv_memory_count_limit', 'osv_memory_age_limit', 'max_cron_threads', 'unaccent',
-            'data_dir',
-            'server_wide_modules',
-        ]
-
-        posix_keys = [
-            'workers',
-            'limit_memory_hard', 'limit_memory_soft',
-            'limit_time_cpu', 'limit_time_real', 'limit_request', 'limit_time_real_cron'
-        ]
-
-        if os.name == 'posix':
-            keys += posix_keys
-        else:
-            self.options.update(dict.fromkeys(posix_keys, None))
-
-        # Copy the command-line arguments...
-        for arg in keys:
-            if getattr(opt, arg) is not None:
-                self.options[arg] = getattr(opt, arg)
-            # ... or keep, but cast, the config file value.
-            elif isinstance(self.options[arg], basestring) and self.casts[arg].type in optparse.Option.TYPE_CHECKER:
-                self.options[arg] = optparse.Option.TYPE_CHECKER[self.casts[arg].type](self.casts[arg], arg, self.options[arg])
+            type_checker = optparse.Option.TYPE_CHECKER.get(option.type)
+            if isinstance(self.options[name], basestring) and type_checker:
+                self.options[name] = type_checker(option, name, self.options[name])
 
         self.options['root_path'] = os.path.abspath(os.path.expanduser(os.path.expandvars(os.path.join(os.path.dirname(__file__), '..'))))
         if not self.options['addons_path'] or self.options['addons_path']=='None':
@@ -472,30 +664,6 @@ class configmanager(object):
             m.strip() for m in self.options['server_wide_modules'].split(',') if m.strip()
         ]
 
-    def _is_addons_path(self, path):
-        from odoo.modules.module import MANIFEST_NAMES
-        for f in os.listdir(path):
-            modpath = os.path.join(path, f)
-            if os.path.isdir(modpath):
-                def hasfile(filename):
-                    return os.path.isfile(os.path.join(modpath, filename))
-                if hasfile('__init__.py') and any(hasfile(mname) for mname in MANIFEST_NAMES):
-                    return True
-        return False
-
-    def _check_addons_path(self, option, opt, value, parser):
-        ad_paths = []
-        for path in value.split(','):
-            path = path.strip()
-            res = os.path.abspath(os.path.expanduser(path))
-            if not os.path.isdir(res):
-                raise optparse.OptionValueError("option %s: no such directory: %r" % (opt, path))
-            if not self._is_addons_path(res):
-                raise optparse.OptionValueError("option %s: The addons-path %r does not seem to a be a valid Addons Directory!" % (opt, path))
-            ad_paths.append(res)
-
-        setattr(parser.values, option.dest, ",".join(ad_paths))
-
     def load(self):
         p = ConfigParser.ConfigParser()
         try:
@@ -505,7 +673,20 @@ class configmanager(object):
                     value = True
                 if value=='False' or value=='false':
                     value = False
-                self.options[name] = value
+                if name in self.casts:
+
+                    if 'append' in self.casts[name].action:
+                        # append* action work with lists
+                        self.options[name] = value.split(',')
+                    else:
+                        self.options[name] = value
+                else:
+                    # we can't yet log something as the logger config is not ready.
+                    # in previous versions (< 11) the 'demo' key was wrongly saved in the configuration
+                    # file so we will keep this case silent
+                    if name != 'demo':
+                        # TODO: make a 'pre_logger' that will output stuff once the logging is configured
+                        print("Unrecognized option '%s' found in config file. Please Ignored." % name)
             #parse the other sections, as well
             for sec in p.sections():
                 if sec == 'options':
@@ -528,9 +709,13 @@ class configmanager(object):
         loglevelnames = dict(zip(self._LOGLEVELS.values(), self._LOGLEVELS.keys()))
         p.add_section('options')
         for opt in sorted(self.options.keys()):
-            if opt in ('version', 'language', 'translate_out', 'translate_in', 'overwrite_existing_translations', 'init', 'update'):
+            option = self.casts.get(opt)
+            if not option:
+                # We ignore non option config keys such as 'demo', they should not be stored in the
+                # configuration file as they are generated for runtime usage only
                 continue
-            if opt in self.blacklist_for_save:
+            if not option.save or (option.group and not option.group.save):
+                # We do not save options with save=False or option's group whose save=False
                 continue
             if opt in ('log_level',):
                 p.set('options', opt, loglevelnames.get(self.options[opt], self.options[opt]))
@@ -601,4 +786,4 @@ class configmanager(object):
     def filestore(self, dbname):
         return os.path.join(self['data_dir'], 'filestore', dbname)
 
-config = configmanager()
+config = ConfigManager()
