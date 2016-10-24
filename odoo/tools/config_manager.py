@@ -25,17 +25,6 @@ LOG_LEVELS = [
 _groups_registry = []
 
 
-def is_addons_path(path):
-    from odoo.modules.module import MANIFEST_NAMES
-    for f in os.listdir(path):
-        modpath = os.path.join(path, f)
-        if os.path.isdir(modpath):
-            def hasfile(filename):
-                return os.path.isfile(os.path.join(modpath, filename))
-            if hasfile('__init__.py') and any(hasfile(mname) for mname in MANIFEST_NAMES):
-                return True
-    return False
-
 def _check_addons_path(option, opt, value, parser):
     ad_paths = []
     for path in value.split(','):
@@ -43,7 +32,7 @@ def _check_addons_path(option, opt, value, parser):
         res = os.path.abspath(os.path.expanduser(path))
         if not os.path.isdir(res):
             raise optparse.OptionValueError("option %s: no such directory: %r" % (opt, path))
-        if not is_addons_path(res):
+        if not odoo.modules.is_addons_path(res):
             raise optparse.OptionValueError("option %s: The addons-path %r does not seem to a be a valid Addons Directory!" % (opt, path))
         ad_paths.append(res)
 

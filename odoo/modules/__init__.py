@@ -11,6 +11,7 @@ from odoo.modules.loading import load_modules
 
 from odoo.modules.module import (
     adapt_version,
+    is_addons_path,
     get_module_path,
     get_module_resource,
     get_modules,

@@ -152,6 +152,14 @@ def initialize_sys_path():
         sys.meta_path.append(OdooHook())
         hooked = True
 
+def is_addons_path(path):
+    """Check if the given path is an addons path (directory containing at least one Odoo module)"""
+    for item in os.listdir(path):
+        modpath = os.path.join(path, item)
+        if os.path.isdir(modpath) and os.path.isfile(opj(modpath, '__init__.py')) and module_manifest(modpath):
+            return True
+    return False
+
 def get_module_path(module, downloaded=False, display_warning=True):
     """Return the path of the given module.
 
