@@ -45,8 +45,12 @@ def main():
         odoo.tools.config._parse_config([args[0]])
         args = args[1:]
 
-    # Display main help if no arguments are provided, otherwise default to server command (legacy behavior)
-    command = "help" if not args else "server"
+    # For backward compatibility sake, the default subcommand is 'server', but
+    # if no argument is given we will display the main help screen showing the
+    # available subcommands. Another exception is the `odoo gevent` switch
+    # which is consumed early in `odoo.__init__.py` because gevent needs to
+    # monkey patch before other IO libs.
+    command = "help" if not args and not odoo.evented else "server"
 
     # TODO: find a way to properly discover addons subcommands without importing the world
     # Subcommand discovery
