@@ -162,9 +162,6 @@
     #ace-view-editor {
         height: 70%; // in case flex is not supported
         .o-flex(1, 1, auto);
-        .ace_gutter {
-            cursor: ew-resize;
-        }
     }
 
     &.oe_ace_open {
@@ -173,6 +170,11 @@
     &.oe_ace_closed {
         z-index: -1000;
         opacity: 0;
+    }
+    &.o_resizable {
+        .ace_gutter {
+            cursor: ew-resize;
+        }
     }
 }
 

@@ -65,9 +65,10 @@ var ViewEditor = Widget.extend({
         'click button[data-action=format]': 'formatXml',
         'click button[data-action=close]': 'close',
     },
-    init: function (parent) {
+    init: function (parent, allow_resize) {
         this.buffers = {};
         this.views = {};
+        this.allow_resize = allow_resize !== undefined ? allow_resize : true; 
         this._super(parent);
     },
     start: function () {
@@ -106,13 +107,16 @@ var ViewEditor = Widget.extend({
                 storeEditorWidth();
             }
         }
-        document.body.addEventListener('mouseup', stopResizing, true);
-        self.$('.ace_gutter').mouseup(stopResizing).mousedown(startResizing).click(stopResizing);
-        $(document).mousemove(updateWidth);
+        if (this.allow_resize) {
+            self.$el.addClass('o_resizable');
+            document.body.addEventListener('mouseup', stopResizing, true);
+            self.$('.ace_gutter').mouseup(stopResizing).mousedown(startResizing).click(stopResizing);
+            $(document).mousemove(updateWidth);
+            resizeEditor(readEditorWidth());
+        }
         $('button[data-action=edit]').click(function () {
             self.close();
         });
-        resizeEditor(readEditorWidth());
     },
 
     // The 4 following methods are meant to be extended depending on the context
