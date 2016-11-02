@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models
+from odoo import api, fields, models
 from odoo.tools import float_compare
 
 
@@ -9,6 +9,25 @@ class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
 
     qty_received = fields.Float(compute='_compute_qty_received', string="Received Qty", store=True)
+
+    @api.multi
+    def write(self, values):
+        lines = self.env['purchase.order.line']
+        moves = self.env['stock.move']
+        done = self.env['stock.move'].browse()
+        for line in self:
+            bom = self.env['mrp.bom']._bom_find(product=line.product_id)
+            if bom and bom.type == 'phantom':
+                lines |= line
+                picking = line.order_id.picking_ids.filtered(lambda x: x.state not in ('done','cancel'))
+                diff_qty = values['product_qty'] - line.product_qty
+                template = line._prepare_move_lines(picking[0])
+                if float_compare(diff_qty, 0.0, precision_rounding=line.product_uom.rounding) > 0:
+                    template['product_uom_qty'] = diff_qty
+                    done += moves.create(template)
+                moves = done.action_confirm()
+                moves.force_assign()
+        return super(PurchaseOrderLine, self).write(values)
 
     def _compute_qty_received(self):
         super(PurchaseOrderLine, self)._compute_qty_received()

@@ -602,16 +602,10 @@ class PurchaseOrderLine(models.Model):
         return price_unit
 
     @api.multi
-    def _create_stock_moves(self, picking):
-        moves = self.env['stock.move']
-        done = self.env['stock.move'].browse()
+    def _prepare_move_lines(self, picking):
+        self.ensure_one()
         for line in self:
-            if line.product_id.type not in ['product', 'consu']:
-                continue
-            qty = 0.0
             price_unit = line._get_stock_move_price_unit()
-            for move in line.move_ids.filtered(lambda x: x.state != 'cancel'):
-                qty += move.product_qty
             template = {
                 'name': line.name or '',
                 'product_id': line.product_id.id,
@@ -634,23 +628,33 @@ class PurchaseOrderLine(models.Model):
                 'route_ids': line.order_id.picking_type_id.warehouse_id and [(6, 0, [x.id for x in line.order_id.picking_type_id.warehouse_id.route_ids])] or [],
                 'warehouse_id':line.order_id.picking_type_id.warehouse_id.id,
             }
+            return template
+
+    @api.multi
+    def _create_stock_moves(self, picking):
+        moves = self.env['stock.move']
+        done = self.env['stock.move'].browse()
+        for line in self:
+            if line.product_id.type not in ['product', 'consu']:
+                continue
+            qty = 0.0
+            price_unit = line._get_stock_move_price_unit()
+            for move in line.move_ids.filtered(lambda x: x.state != 'cancel'):
+                qty += move.product_qty
+            template = line._prepare_move_lines(picking)
             # Fullfill all related procurements with this po line
             diff_quantity = line.product_qty - qty
             for procurement in line.procurement_ids:
-                # If the procurement has some moves already, we should deduct their quantity
-                sum_existing_moves = sum(x.product_qty for x in procurement.move_ids if x.state != 'cancel')
-                existing_proc_qty = procurement.product_id.uom_id._compute_quantity(sum_existing_moves, procurement.product_uom)
-                procurement_qty = procurement.product_uom._compute_quantity(procurement.product_qty, line.product_uom) - existing_proc_qty
-                if float_compare(procurement_qty, 0.0, precision_rounding=procurement.product_uom.rounding) > 0:
-                    tmp = template.copy()
-                    tmp.update({
-                        'product_uom_qty': min(procurement_qty, diff_quantity),
-                        'move_dest_id': procurement.move_dest_id.id,  #move destination is same as procurement destination
-                        'procurement_id': procurement.id,
-                        'propagate': procurement.rule_id.propagate,
-                    })
-                    done += moves.create(tmp)
-                    diff_quantity -= min(procurement_qty, diff_quantity)
+                procurement_qty = procurement.product_uom._compute_quantity(procurement.product_qty, line.product_uom)
+                tmp = template.copy()
+                tmp.update({
+                    'product_uom_qty        ': min(procurement_qty, diff_quantity),
+                    'move_dest_id': procurement.move_dest_id.id,  #move destination is same as procurement destination
+                    'procurement_id': procurement.id,
+                    'propagate': procurement.rule_id.propagate,
+                })
+                done += moves.create(tmp)
+                diff_quantity -= min(procurement_qty, diff_quantity)
             if float_compare(diff_quantity, 0.0, precision_rounding=line.product_uom.rounding) > 0:
                 template['product_uom_qty'] = diff_quantity
                 done += moves.create(template)
