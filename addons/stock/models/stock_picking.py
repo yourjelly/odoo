@@ -17,7 +17,7 @@ class PickingType(models.Model):
     _description = "The picking type determines the picking view"
     _order = 'sequence, id'
 
-    name = fields.Char('Picking Type Name', required=True, translate=True)
+    name = fields.Char('Operation Types', required=True, translate=True)
     color = fields.Integer('Color')
     sequence = fields.Integer('Sequence', help="Used to order the 'All Operations' kanban view")
     sequence_id = fields.Many2one('ir.sequence', 'Reference Sequence', required=True)
