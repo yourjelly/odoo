@@ -139,22 +139,41 @@ class StockPicking(models.Model):
         }
 
     @api.multi
-    def send_to_shipper(self):
+    def action_send_confirmation_email(self):
         self.ensure_one()
-        res = self.carrier_id.send_shipping(self)
-        if not res:
-            return
-        res = res[0]
-        self.carrier_price = res['exact_price']
-        self.carrier_tracking_ref = res['tracking_number']
-        order_currency = self.sale_id.currency_id or self.company_id.currency_id
+
         url = self.carrier_id.get_tracking_link(self)
         if url:
             self.carrier_tracking_url = url[0]
-        picking_subtype = self.env.ref('delivery.mt_order_validated')
-        delivery_confirmation_mail_template = self.env.ref('delivery.delivery_template_confirmation_mail')
-        self.message_subscribe(partner_ids=[self.partner_id.id], subtype_ids=[picking_subtype.id])
-        self.message_post_with_view(delivery_confirmation_mail_template, subtype_id=picking_subtype.id)
+
+        template = self.env.ref('delivery.delivery_template_confirmation_mail', False)
+        compose_form = self.env.ref('mail.email_compose_message_wizard_form', False)
+        ctx = dict(
+            default_model='stock.picking',
+            default_res_id=self.id,
+            default_use_template=bool(template),
+            default_template_id=template.id,
+            default_composition_mode='comment',
+            custom_layout="delivery.mail_template_data_notification_email_confirm"
+        )
+        return {
+            'name': _('Compose Email'),
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'mail.compose.message',
+            'views': [(compose_form.id, 'form')],
+            'view_id': compose_form.id,
+            'target': 'new',
+            'context': ctx,
+        }
+
+    @api.multi
+    def send_to_shipper(self):
+        self.ensure_one()
+        res = self.carrier_id.send_shipping(self)[0]
+        self.carrier_price = res['exact_price']
+        self.carrier_tracking_ref = res['tracking_number']
 
     @api.multi
     def _add_delivery_cost_to_so(self):
