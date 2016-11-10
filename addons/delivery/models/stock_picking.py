@@ -153,8 +153,7 @@ class StockPicking(models.Model):
             default_res_id=self.id,
             default_use_template=bool(template),
             default_template_id=template.id,
-            default_composition_mode='comment',
-            custom_layout="delivery.mail_template_data_notification_email_confirm"
+            default_composition_mode='comment'
         )
         return {
             'name': _('Compose Email'),
@@ -174,6 +173,9 @@ class StockPicking(models.Model):
         res = self.carrier_id.send_shipping(self)[0]
         self.carrier_price = res['exact_price']
         self.carrier_tracking_ref = res['tracking_number']
+        order_currency = self.sale_id.currency_id or self.company_id.currency_id
+        msg = _("Shipment sent to carrier %s for expedition with tracking number %s<br/>Cost: %.2f %s") % (self.carrier_id.name, self.carrier_tracking_ref, self.carrier_price, order_currency.name)
+        self.message_post(body=msg)
 
     @api.multi
     def _add_delivery_cost_to_so(self):

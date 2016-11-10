@@ -5,26 +5,30 @@
         <!--Email template -->
         <record id="delivery_template_confirmation_mail" model="mail.template">
             <field name="name">Delivery Confirmation - Send by Email</field>
-            <field name="email_from">${(object.partner_id.email and '%s &lt;%s&gt;' % (object.partner_id.name, object.partner_id.email) or '')|safe}</field>
             <field name="subject">${object.company_id.name} ${object.state in ('done') and 'Quotation' or 'Order'} (Ref ${object.name or 'n/a' })</field>
             <field name="partner_to">${object.partner_id.id}</field>
             <field name="model_id" ref="delivery.model_stock_picking"/>
             <field name="lang">${object.partner_id.lang}</field>
             <field name="body_html"><![CDATA[
-                <p style="font-family:Roboto;font-size:15px;margin-bottom:10px;">Dear ${object.partner_id.name},</p>
-                <p style="font-family:Roboto;font-size:14px;text-indent:50px;margin-bottom:20px;">
-                    &nbsp;&nbsp;&nbsp;&nbsp;
-                    Thank you for your order. We are glad to inform you that the items in this email have been shipped to the following address :</p>
-                <div style="margin-bottom: 10px;font-family:Roboto;font-size:15px;">
-                    <p style="font-family:Roboto;font-size:14px;margin-top:10px;">${object.partner_id.name}</p>
-                    <p style="font-family:Roboto;font-size:14px;"> ${object.partner_id.street}</p>
-                    <p style="font-family:Roboto;font-size:14px;"> ${object.partner_id.city} ${object.partner_id.state_id.name} ${object.partner_id.zip} </p>
-                    <p style="font-family:Roboto;font-size:14px;margin-bottom: 20px;"> ${object.partner_id.country_id.name}</p>
+                <div valign="center" style="font-size: 12px;border-bottom:1px solid #DDD;margin-bottom:20px;">
+                    <img src="/logo.png" style="margin: 0px; height: auto; width: 80px;" alt="${user.company_id.name}">
                 </div>
-                <div style="margin-bottom: 10px;font-family:Roboto;font-size:15px;">
+                <div valign="center">
+                    <p style="margin-bottom:10px;font-size:15px;">Dear ${object.partner_id.name},</p>
+                    <p style="text-indent:50px;margin-bottom:20px;font-size:15px;">
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        Thank you for your order. We are glad to inform you that the items in this email have been shipped to the following address :</p>
+                </div>
+                <div valign="center">
+                    <p valign="center" style="margin-top:10px;font-size:15px;">${object.partner_id.name}</p>
+                    <p valign="center" style="font-size:15px;"> ${object.partner_id.street}</p>
+                    <p valign="center" style="font-size:15px;"> ${object.partner_id.city} ${object.partner_id.state_id.name} ${object.partner_id.zip} </p>
+                    <p valign="center" style="margin-bottom: 20px; font-size:15px;"> ${object.partner_id.country_id.name}</p>
+                </div>
+                <div valign="center" style="margin-bottom: 10px;">
                     <strong>Order summary :</strong>
                 </div>
-                <table width="50%" style="font-family:Roboto;font-size:15px;">
+                <table width="30%" valign="center">
                     <thead>
                         <tr>
                             <th style="text-align:left;">
@@ -50,94 +54,15 @@
                     </tbody>
                 </table>
             </div>
-            <div style="font-family:Roboto;font-size:14px;margin-top: 20px; margin-bottom: 20px;">
+            <div valign="center" style="margin-top: 20px; margin-bottom: 20px; font-size:15px;">
                 %if object.carrier_tracking_url:
-                    <div> Click here to track your delivery :
-                        <a href="${object.carrier_tracking_url}" target="_blank">
-                            ${object.carrier_tracking_ref}
-                        </a>
-                    </div>
+                    Click here to track your delivery :
+                    <a href="${object.carrier_tracking_url}" target="_blank">
+                        ${object.carrier_tracking_ref}
+                    </a>
                 %endif
             </div>
-            <p style="font-family:Roboto;font-size:14px;">Thank you,</p>
-            ]]></field>
-        </record>
-
-        <!--Default Notification Email template for invoices-->
-        <record id="delivery.mail_template_data_notification_email_confirm" model="mail.template">
-            <field name="name">Delivery Confirmation Email</field>
-            <field name="subject">${object.subject}</field>
-            <field name="model_id" ref="mail.model_mail_message"/>
-            <field name="auto_delete" eval="True"/>
-            <field name="body_html"><![CDATA[<html>
-                <head></head>
-                <body style="margin: 0; padding: 0;">
-                <table border="0" width="100%" cellpadding="0" bgcolor="#ededed" style="padding: 20px; background-color: #ededed" summary="o_mail_notification">
-                    <tbody>
-
-                      <!-- HEADER -->
-                      <tr>
-                        <td align="center" style="min-width: 590px;">
-                          <table width="650" border="0" cellpadding="0" bgcolor="#875A7B" style="min-width: 590px; background-color: rgb(135,90,123); padding: 20px;">
-                            <tr>
-                              <td valign="middle">
-                                  <span style="font-size:20px; color:white; font-weight: bold;">
-                                      ${object.record_name}
-                                  </span>
-                              </td>
-                              <td valign="middle" align="right">
-                                  <img src="/logo.png" style="padding: 0px; margin: 0px; height: auto; width: 80px;" alt="${user.company_id.name}">
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
-                      </tr>
-
-                      <!-- CONTENT -->
-                      <tr>
-                        <td align="center" style="min-width: 590px;">
-                          <table width="650" border="0" cellpadding="0" bgcolor="#ffffff" style="min-width: 590px; background-color: rgb(255, 255, 255); padding: 5px;">
-                            <tbody>
-                              <td valign="top">
-                                ${object.body | safe}
-                              </td>
-                            </tbody>
-                          </table>
-                        </td>
-                      </tr>
-
-                      <!-- FOOTER -->
-                      <tr>
-                        <td align="center" style="min-width: 590px;">
-                          <table width="650" border="0" cellpadding="0" bgcolor="#875A7B" style="min-width: 590px; background-color: rgb(135,90,123); padding: 10px;">
-                            <tr>
-                              <td valign="middle" align="left" style="color: #fff; padding-top: 10px; padding-bottom: 10px; font-size: 12px;">
-                                ${user.company_id.name}<br/>
-                                ${user.company_id.phone or ''}
-                              </td>
-                              <td valign="middle" align="right" style="color: #fff; padding-top: 10px; padding-bottom: 10px; font-size: 12px;">
-                                % if user.company_id.email:
-                                <a href="mailto:${user.company_id.email}" style="text-decoration:none; color: white;">${user.company_id.email}</a><br/>
-                                % endif
-                                % if user.company_id.website:
-                                    <a href="${user.company_id.website}" style="text-decoration:none; color: white;">
-                                        ${user.company_id.website}
-                                    </a>
-                                % endif
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td align="center">
-                            Powered by <a href="https://www.odoo.com">Odoo</a>.
-                        </td>
-                      </tr>
-                    </tbody>
-                </table>
-                </body>
-                </html>
+            <p valign="center" style="font-size:15px;">Thank you,</p>
             ]]></field>
         </record>
 

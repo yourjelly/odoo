@@ -217,7 +217,7 @@
                     <button name="send_to_shipper" string="Send to Shipper" type="object" attrs="{'invisible':['|','|','|',('carrier_tracking_ref','!=',False),('delivery_type','in', ['fixed', 'base_on_rule']),('delivery_type','=',False),('state','not in',('done'))]}"/>
                 </xpath>
                 <xpath expr="/form/header/button[position()=5]" position="after">
-                    <button name="action_send_confirmation_email" string="Send Confirmation Email" type="object" attrs="{'invisible':['|','|','|',('carrier_tracking_ref','=',False),('delivery_type','in', ['fixed', 'base_on_rule']),('state','not in',('done'))]}" class="oe_highlight"/>
+                    <button name="action_send_confirmation_email" string="Send Confirmation Email" type="object" attrs="{'invisible':['|',('carrier_tracking_ref','=',False),('delivery_type','in', ['fixed', 'base_on_rule'])]}" class="oe_highlight"/>
                 </xpath>
                 <field name="result_package_id" position="before">
                     <button name="manage_package_type" string="Manage Package Type" type="object" icon="fa-dropbox" groups="stock.group_tracking_lot" attrs="{'invisible': [('result_package_id','=', False)]}"/>
