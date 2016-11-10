@@ -599,13 +599,13 @@ class QuantPackage(models.Model):
         help="This field should be completed only if everything inside the package share the same product, otherwise it doesn't really makes sense.")
     location_id = fields.Many2one(
         'stock.location', 'Location', compute='_compute_package_info',
-        index=True, readonly=True)
+        store=True, index=True, readonly=True)
     company_id = fields.Many2one(
         'res.company', 'Company', compute='_compute_package_info',
-        index=True, readonly=True)
+        store=True, index=True, readonly=True)
     owner_id = fields.Many2one(
         'res.partner', 'Owner', compute='_compute_package_info',
-        index=True, readonly=True)
+        store=True, index=True, readonly=True)
 
     @api.one
     @api.depends('parent_id', 'children_ids')
