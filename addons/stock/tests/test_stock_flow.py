@@ -1248,7 +1248,6 @@ class TestStockFlow(TestStockCommon):
         picking_out.action_confirm()
         picking_out.action_assign()
         picking_out.do_prepare_partial()
-        import pdb; pdb.set_trace()
         #Convert entire packs into taking out of packs
         packout0 = picking_out.pack_operation_ids[0]
         packout1 = picking_out.pack_operation_ids[1]
