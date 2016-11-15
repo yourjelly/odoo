@@ -1312,9 +1312,9 @@ class stock_picking(osv.osv):
                         if quant.id in quants_in_package_done:
                             continue
 
-                        #check if the quant is matching the operation details
+                        #check if the quant is matching the operation details (it should be in the package)
                         if ops.package_id:
-                            flag = quant.package_id and bool(package_obj.search(cr, uid, [('id', 'child_of', [ops.package_id.id])], context=context)) or False
+                            flag = quant.package_id and (quant.package_id.parent_left >= ops.package_id.parent_left) and (quant.package_id.parent_left < ops.package_id.parent_right) or False
                         else:
                             flag = not quant.package_id.id
                         flag = flag and ((ops.lot_id and ops.lot_id.id == quant.lot_id.id) or not ops.lot_id)
