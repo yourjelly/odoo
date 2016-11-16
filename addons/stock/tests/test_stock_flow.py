@@ -1204,6 +1204,8 @@ class TestStockFlow(TestStockCommon):
         #Check there are no negative quants
         neg_quants = self.env['stock.quant'].search([('product_id', '=', self.productE.id), ('qty', '<', 0.0)])
         self.assertEqual(len(neg_quants), 0, 'There are negative quants!')
+        self.assertEqual(len(picking_out.move_lines[0].linked_move_operation_ids), 2, 'We should have 2 links in the matching between the move and the operations')
+        self.assertEqual(len(picking_out.move_lines[0].quant_ids), 2, 'We should have exactly 2 quants in the end')
         
         
     def test_40_create_in_out_with_product_pack_lines(self):
@@ -1230,10 +1232,10 @@ class TestStockFlow(TestStockCommon):
         packop2.product_qty = 80
         packop2.result_package_id = pack2
         picking_in.do_transfer()
-        self.assertEqual(sum([x.qty for x in picking_in.move_lines[0].quant_ids]), 200.0, 'Expecting 10 pieces in stock')
+        self.assertEqual(sum([x.qty for x in picking_in.move_lines[0].quant_ids]), 200.0, 'Expecting 200 pieces in stock')
         #check the quants are in the package
-        self.assertEqual(sum(x.qty for x in pack1.quant_ids), 120, 'Pack 1 should have 4 pieces')
-        self.assertEqual(sum(x.qty for x in pack2.quant_ids), 80, 'Pack 2 should have 6 pieces')
+        self.assertEqual(sum(x.qty for x in pack1.quant_ids), 120, 'Pack 1 should have 120 pieces')
+        self.assertEqual(sum(x.qty for x in pack2.quant_ids), 80, 'Pack 2 should have 80 pieces')
         picking_out = self.PickingObj.create({
             'partner_id': self.partner_agrolite_id,
             'picking_type_id': self.picking_type_out})
@@ -1254,12 +1256,17 @@ class TestStockFlow(TestStockCommon):
         packout0.write({'product_id': self.productE.id, 
                         'product_qty' : 120.0,
                         'product_uom_id' : self.productE.uom_id.id,
+                        'package_id': pack1.id,
                         })
         packout1.write({'product_id': self.productE.id, 
                         'product_qty' : 80.0,
                         'product_uom_id' : self.productE.uom_id.id,
+                        'package_id': pack2.id,
                         })
         picking_out.do_transfer()
         #Check there are no negative quants
         neg_quants = self.env['stock.quant'].search([('product_id', '=', self.productE.id), ('qty', '<', 0.0)])
         self.assertEqual(len(neg_quants), 0, 'There are negative quants!')
+        # We should also make sure that when matching stock moves with pack operations, it takes the correct
+        self.assertEqual(len(picking_out.move_lines[0].linked_move_operation_ids), 2, 'We should only have 2 links beween the move and the 2 operations')
+        self.assertEqual(len(picking_out.move_lines[0].quant_ids), 2, 'We should have exactly 2 quants in the end')
