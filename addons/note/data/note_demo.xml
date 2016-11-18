@@ -1,24 +1,6 @@
 <?xml version="1.0"?>
 <odoo>
-  <data noupdate="1">
-    <record model="note.stage" id="demo_note_stage_01">
-      <field name="name">Today</field>
-      <field name="sequence">1</field>
-      <field name="user_id" ref="base.user_demo"/>
-    </record>
-
-    <record model="note.stage" id="demo_note_stage_02">
-      <field name="name">Tomorrow</field>
-      <field name="sequence">2</field>
-      <field name="user_id" ref="base.user_demo"/>
-    </record>
-
-    <record model="note.stage" id="demo_note_stage_03">
-      <field name="name">Later</field>
-      <field name="sequence">3</field>
-      <field name="user_id" ref="base.user_demo"/>
-    </record>
-
+  <data>
     <record id="note_1" model="note.note">
       <field name="name">Customer report #349872</field>
       <field name="memo"><![CDATA[<b>Customer report #349872</b>
@@ -28,7 +10,7 @@
     <br/>*  We should use the term Calendar, not Meeting.
      ]]>
       </field>
-      <field name="stage_id" ref="demo_note_stage_01"/>
+      <field name="stage_id" ref="note_stage_00"/>
       <field name="color">2</field>
     </record>
 
@@ -37,7 +19,7 @@
     <br/><br/>* Followed by the telephone conversation and mail about D.544.3
     ]]>
       </field>
-      <field name="stage_id" ref="demo_note_stage_01"/>
+      <field name="stage_id" ref="note_stage_01"/>
     </record>
 
     <record id="note_4" model="note.note">
@@ -53,7 +35,7 @@
     <br/>* wine
     ]]>
       </field>
-      <field name="stage_id" ref="demo_note_stage_02"/>
+      <field name="stage_id" ref="note_stage_03"/>
     </record>
 
     <record id="note_6" model="note.note">
@@ -93,7 +75,7 @@
       <br/>* Odoo for Retail and Industrial Management
       ]]>
       </field>
-      <field name="stage_id" ref="demo_note_stage_02"/>
+      <field name="stage_id" ref="note_stage_04"/>
     </record>
 
     <record id="note_12" model="note.note">
@@ -103,7 +85,7 @@
       ]]>
       </field>
       <field name="color">7</field>
-      <field name="stage_ids" eval="['note_stage_03']"/>
+      <field name="stage_id" ref="note_stage_01"/>
     </record>
 
   </data>
