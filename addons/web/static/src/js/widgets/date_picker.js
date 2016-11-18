@@ -14,6 +14,12 @@ var DateWidget = Widget.extend({
     events: {
         'dp.change': 'change_datetime',
         'dp.show': 'set_datetime_default',
+        'dp.hide': function(){
+            // We wait all handlers executions before setting the datepicker as closed
+            _.defer(function(){
+                this.datepicker_open = false;
+            }.bind(this));
+        },
         'change .o_datepicker_input': 'change_datetime',
     },
     init: function(parent, options) {
@@ -37,9 +43,21 @@ var DateWidget = Widget.extend({
             language : moment.locale(),
             format : time.strftime_to_moment_format((this.type_of_date === 'datetime')? (l10n.date_format + ' ' + l10n.time_format) : l10n.date_format),
         });
+        // We use this variable in order to avoid opening the datepicker
+        // when we click on the field datetime if already opened. 
+        this.datepicker_open = false;
     },
     start: function() {
+        var self = this;
         this.$input = this.$('input.o_datepicker_input');
+        this.$input.click(function(e){
+            e.stopImmediatePropagation();
+            if(self.picker.widget.hasClass('picker-open')){
+                self.picker.hide();
+            }else if(!self.datepicker_open){
+                self.picker.show();
+            }
+        });
         this.$el.datetimepicker(this.options);
         this.picker = this.$el.data('DateTimePicker');
         this.set_readonly(false);
@@ -94,6 +112,7 @@ var DateWidget = Widget.extend({
         this.picker.options.pickTime = true;
         this.picker.setValue(value);
         this.picker.options.pickTime = saved_picktime;
+        this.datepicker_open = true;
     },
     change_datetime: function(e) {
         if(this.is_valid()) {
