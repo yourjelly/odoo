@@ -454,7 +454,22 @@ var ProxyDevice  = core.Class.extend(core.mixins.PropertiesMixin,{
     },
 
     update_customer_facing_display: function(html) {
-        return this.message('customer_facing_display',{ html: html },{ timeout: 5000 });
+        return this.message('customer_facing_display',
+            { html: html },
+            { timeout: 5000 });
+    },
+
+    take_ownership_over_client_screen: function(html) {
+        return this.connection.rpc("/point_of_sale/take_control", 
+            { html: html }, 
+            { dataType: "json" });
+    },
+
+    test_ownership_of_client_screen: function() {
+        if (this.connection) {
+            return this.connection.rpc("/point_of_sale/test_ownership", {}, {dataType: "json"});
+        }
+        return null;
     },
 
     // asks the proxy to log some information, as with the debug.log you can provide several arguments.

@@ -324,6 +324,7 @@ var DebugWidget = PosBaseWidget.extend({
 
 var StatusWidget = PosBaseWidget.extend({
     status: ['connected','connecting','disconnected','warning','error'],
+
     set_status: function(status,msg){
         for(var i = 0; i < this.status.length; i++){
             this.$('.js_'+this.status[i]).addClass('oe_hidden');
@@ -391,6 +392,7 @@ var ProxyStatusWidget = StatusWidget.extend({
                     msg += _t('Scale');
                 }
             }
+
             msg = msg ? msg + ' ' + _t('Offline') : msg;
             this.set_status(warning ? 'warning' : 'connected', msg);
         }else{
@@ -425,6 +427,87 @@ var SaleDetailsButton = PosBaseWidget.extend({
         this.$el.click(function(){
             self.pos.proxy.print_sale_details();
         });
+    },
+});
+
+var ClientScreenWidget = PosBaseWidget.extend({
+    template: 'ClientScreenWidget',
+    change_status_display: function(status) {
+        var el = this.$el;
+        if (status === 'success') {
+            el.find('.js_warning').addClass('oe_hidden');
+            el.find('.js_disconnected').addClass('oe_hidden');
+            el.find('.js_connected').removeClass('oe_hidden');
+        } else if (status === 'warning') {
+            el.find('.js_disconnected').addClass('oe_hidden');
+            el.find('.js_connected').addClass('oe_hidden');
+            el.find('.js_warning').removeClass('oe_hidden');
+        } else {
+            el.find('.js_warning').addClass('oe_hidden');
+            el.find('.js_connected').addClass('oe_hidden');
+            el.find('.js_disconnected').removeClass('oe_hidden');
+        }
+    },
+
+    status_loop: function() {
+        var self = this;
+
+        function loop() {
+            var deff = self.pos.proxy.test_ownership_of_client_screen();
+            if (deff) {
+                deff.then(
+                    function(data) {
+                        if (typeof data === 'string') {
+                            data = JSON.parse(data);
+                        }
+                        console.log(data.status);
+                        if (data.status === 'OWNER') {
+                            self.change_status_display('success');
+                        } else {
+                            self.change_status_display('warning');
+                        }
+                    },
+                    
+                    function(err) {
+                        self.change_status_display('failure');
+                    })
+
+                .always(function () {
+                    setTimeout(loop,3000);
+                });
+            }
+        }   
+
+        loop();
+    },
+
+    start: function(){
+        if (this.pos.config.iface_customer_facing_display) {
+                this.show();
+                var self = this;
+                this.$el.click(function(){
+                    var html = self.pos.render_html_for_customer_facing_display();
+                   self.pos.proxy.take_ownership_over_client_screen(html).then(
+       
+                   function(data) {
+                        if (typeof data === 'string') {
+                            data = JSON.parse(data);
+                        }
+                        if (data.status === 'success') {
+                           self.change_status_display('success');
+                        } else {
+                           self.change_status_display('warning');
+                        }
+                    }, 
+       
+                   function(err) {
+                       self.change_status_display('failure');
+                    });
+                });
+                this.status_loop();
+        } else {
+            this.hide();
+        }
     },
 });
 
@@ -696,6 +779,11 @@ var Chrome = PosBaseWidget.extend({
             'append':  '.pos-rightheader',
             'condition': function(){ return this.pos.config.use_proxy; },
         },{
+            'name': 'screen_status',
+            'widget': ClientScreenWidget,
+            'append': '.pos-rightheader',
+            'condition': function(){ return this.pos.config.use_proxy; },
+        },{
             'name':   'notification',
             'widget': SynchNotificationWidget,
             'append':  '.pos-rightheader',
@@ -798,6 +886,7 @@ return {
     OrderSelectorWidget: OrderSelectorWidget,
     ProxyStatusWidget: ProxyStatusWidget,
     SaleDetailsButton: SaleDetailsButton,
+    ClientScreenWidget: ClientScreenWidget,
     StatusWidget: StatusWidget,
     SynchNotificationWidget: SynchNotificationWidget,
     UsernameWidget: UsernameWidget,

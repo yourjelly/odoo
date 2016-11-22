@@ -685,7 +685,12 @@ exports.PosModel = Backbone.Model.extend({
         return deferred;
     },
 
-    send_current_order_to_customer_facing_display: function () {
+    send_current_order_to_customer_facing_display: function() {
+        var rendered_html = this.render_html_for_customer_facing_display();
+        this.proxy.update_customer_facing_display(rendered_html);
+    },
+
+    render_html_for_customer_facing_display: function () {
         var self = this;
         var order = this.get_order();
         var rendered_html = this.config.customer_facing_display_html;
@@ -741,9 +746,8 @@ exports.PosModel = Backbone.Model.extend({
             rendered_html = QWeb.render('CustomerFacingDisplayHead', {
                 origin: window.location.origin
             }) + rendered_html;
-
-            self.proxy.update_customer_facing_display(rendered_html);
         });
+        return rendered_html;
     },
 
     // saves the order locally and try to send it to the backend. 
