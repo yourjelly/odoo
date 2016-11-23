@@ -1,6 +1,7 @@
 odoo.define('web.datepicker', function (require) {
 "use strict";
 
+var ajax = require('web.ajax');
 var core = require('web.core');
 var formats = require('web.formats');
 var time = require('web.time');
@@ -41,20 +42,26 @@ var DateWidget = Widget.extend({
         });
     },
     start: function() {
+        var self = this;
         this.$input = this.$('input.o_datepicker_input');
         this.$input.focus(function(e) {
             e.stopImmediatePropagation();
         });
-        this.$el.datetimepicker(this.options);
-        this.picker = this.$el.data('DateTimePicker');
-        this.$input.click(this.picker.toggle.bind(this.picker));
         this.set_readonly(false);
         this.set_value(false);
+        this.library_loaded = ajax.loadJS("/web/static/lib/bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js");
+        this.library_loaded.then(function () {
+            self.$el.datetimepicker(self.options);
+            self.picker = self.$el.data('DateTimePicker');
+            self.$input.click(self.picker.toggle.bind(self.picker));
+        });
     },
     set_value: function(value) {
         this.set({'value': value});
         this.$input.val((value)? this.format_client(value) : '');
-        this.picker.date(this.format_client(value));
+        if (this.picker) {
+            this.picker.date(this.format_client(value));
+        }
     },
     get_value: function() {
         return this.get('value');
@@ -103,7 +110,7 @@ var DateWidget = Widget.extend({
         }
         //Close the datetimepicker when a date is selected
         //We check only if the date has changed.
-        if(!e.date.isSame(e.oldDate, 'day')){
+        if(!e.date.isSame(e.oldDate, 'day') && this.picker){
             this.picker.hide();
         }
     },
