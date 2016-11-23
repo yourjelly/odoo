@@ -84,7 +84,7 @@ class WebsiteEventTrackController(http.Controller):
             speakers_name = u" – ".join(track.speaker_ids.mapped('name'))
             speakers[track.id] = speakers_name
 
-        return request.render("website_event_track.agenda", {
+        return request.render("website_event_track.schedule", {
             'event': event,
             'days': days,
             'tracks_by_days': tracks_by_days,
