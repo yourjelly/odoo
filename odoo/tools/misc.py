@@ -37,10 +37,10 @@ except ImportError:
     html2text = None
 
 from cache import *
-from .config_manager import config
 from .parse_version import parse_version 
 
 import odoo
+from odoo.conf import settings
 # get_encodings, ustr and exception_to_unicode were originally from tools.misc.
 # There are moved to loglevels until we refactor tools.
 from odoo.loglevels import get_encodings, ustr, exception_to_unicode     # noqa
@@ -60,8 +60,8 @@ etree.set_default_parser(etree.XMLParser(resolve_entities=False))
 
 def find_in_path(name):
     path = os.environ.get('PATH', os.defpath).split(os.pathsep)
-    if config.get('bin_path') and config['bin_path'] != 'None':
-        path.append(config['bin_path'])
+    if settings.get('bin_path'):
+        path.append(settings['bin_path'])
     return which(name, path=os.pathsep.join(path))
 
 def _exec_pipe(prog, args, env=None):
@@ -84,8 +84,8 @@ def exec_command_pipe(name, *args):
 
 def find_pg_tool(name):
     path = None
-    if config['pg_path'] and config['pg_path'] != 'None':
-        path = config['pg_path']
+    if settings['pg_path']:
+        path = settings['pg_path']
     try:
         return which(name, path=path)
     except IOError:
@@ -104,14 +104,14 @@ def exec_pg_environ():
     See also http://www.postgresql.org/docs/8.4/static/libpq-envars.html
     """
     env = os.environ.copy()
-    if odoo.tools.config['db_host']:
-        env['PGHOST'] = odoo.tools.config['db_host']
-    if odoo.tools.config['db_port']:
-        env['PGPORT'] = str(odoo.tools.config['db_port'])
-    if odoo.tools.config['db_user']:
-        env['PGUSER'] = odoo.tools.config['db_user']
-    if odoo.tools.config['db_password']:
-        env['PGPASSWORD'] = odoo.tools.config['db_password']
+    if settings['db_host']:
+        env['PGHOST'] = settings['db_host']
+    if settings['db_port']:
+        env['PGPORT'] = str(settings['db_port'])
+    if settings['db_user']:
+        env['PGUSER'] = settings['db_user']
+    if settings['db_password']:
+        env['PGPASSWORD'] = settings['db_password']
     return env
 
 def exec_pg_command(name, *args):
@@ -152,7 +152,7 @@ def file_open(name, mode="r", subdir='addons', pathinfo=False):
     """
     import odoo.modules as addons
     adps = addons.module.ad_paths
-    rtp = os.path.normcase(os.path.abspath(config['root_path']))
+    rtp = os.path.normcase(os.path.abspath(settings['root_path']))
 
     basename = name
 
@@ -949,6 +949,7 @@ class CountingStream(object):
 
 def stripped_sys_argv(*strip_args):
     """Return sys.argv with some arguments stripped, suitable for reexecution or subprocesses"""
+    from pudb import set_trace; set_trace()  # *** Breakpoint ***
     strip_args = sorted(set(strip_args) | set(['-s', '--save', '-u', '--update', '-i', '--init', '--i18n-overwrite']))
     assert all(config.parser.has_option(s) for s in strip_args)
     takes_value = dict((s, config.parser.get_option(s).takes_value()) for s in strip_args)

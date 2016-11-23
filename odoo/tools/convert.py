@@ -18,11 +18,11 @@ from lxml import etree, builder
 import odoo
 import odoo.release
 from . import assertion_report
-from .config_manager import config
 from .misc import file_open, unquote, ustr, SKIPPED_ELEMENT_TYPES
 from .translate import _
 from .yaml_import import convert_yaml_import
 from odoo import SUPERUSER_ID
+from odoo.conf import settings
 
 _logger = logging.getLogger(__name__)
 
@@ -711,7 +711,7 @@ form: module.record_id""" % (xml_id,)
         id = self.env(context=rec_context)['ir.model.data']._update(rec_model, self.module, res, rec_id or False, not self.isnoupdate(data_node), noupdate=self.isnoupdate(data_node), mode=self.mode)
         if rec_id:
             self.idref[rec_id] = int(id)
-        if config.get('import_partial'):
+        if settings.get('import_partial'):
             self.cr.commit()
         return rec_model, id
 
@@ -900,8 +900,8 @@ def convert_csv_import(cr, module, fname, csvcontent, idref=None, mode='init',
 
 def convert_xml_import(cr, module, xmlfile, idref=None, mode='init', noupdate=False, report=None):
     doc = etree.parse(xmlfile)
-    relaxng = etree.RelaxNG(
-        etree.parse(os.path.join(config['root_path'],'import_xml.rng' )))
+    rng_path = os.path.join(settings['root_path'], 'import_xml.rng')
+    relaxng = etree.RelaxNG(etree.parse(rng_path))
     try:
         relaxng.assert_(doc)
     except Exception:

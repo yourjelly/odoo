@@ -124,6 +124,11 @@ def initialize_sys_path():
     ``import odoo.addons.crm``) works even if the addons are not in the
     PYTHONPATH.
     """
+    # TODO: optimize here, should only be called when odoo.conf.settings['addons_path'] changed
+    #       add a callback mechanism
+    # import inspect
+    # (_, filename, line, _, _, _) = inspect.getouterframes(inspect.currentframe())[1]
+    # print('INITIALIZE_SYS_PATH at %s:%s' % (filename, line))
     global ad_paths
     global hooked
 

@@ -81,5 +81,5 @@ from odoo.tools.translate import _
 #----------------------------------------------------------
 # Other imports, which may require stuff from above
 #----------------------------------------------------------
-import cli
+import cli  # odoo.conf.settings default values are initialised here
 import http

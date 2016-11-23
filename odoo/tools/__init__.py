@@ -4,8 +4,7 @@
 
 import copy
 import win32
-from odoo.conf import appdirs  # backward compatiblity < 11.0
-from config_manager import config
+from odoo.conf import settings as config, appdirs  # backward compatiblity < 11.0
 from misc import *
 from convert import *
 from translate import *

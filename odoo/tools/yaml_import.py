@@ -14,9 +14,9 @@ import yaml
 import odoo
 from . import assertion_report
 from . import yaml_tag
-from .config_manager import config
 from .misc import file_open, DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
 from odoo import SUPERUSER_ID
+from odoo.conf import settings
 
 # YAML import needs both safe and unsafe eval, but let's
 # default to /safe/.
@@ -327,7 +327,7 @@ class YamlInterpreter(object):
             id = env['ir.model.data']._update(record.model, \
                     module, record_dict, record_id, noupdate=self.isnoupdate(record), mode=self.mode)
             self.id_map[record.id] = int(id)
-            if config.get('import_partial'):
+            if settings.get('import_partial'):
                 self.cr.commit()
 
     def _create_record(self, model, fields, view_info=None, parent={}, default=True, context=None):

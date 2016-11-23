@@ -8,10 +8,18 @@ import signal
 import sys
 
 import odoo
-from odoo.tools import config
-from . import Command
+from odoo.conf import settings
+from . import Command, OptionGroup, Option, server
 
 _logger = logging.getLogger(__name__)
+
+
+# Shell config group {{{
+shell_group = OptionGroup("Database Shell Configuration", options=[
+    Option('--shell-interface', dest='shell_interface', type='string',
+           help="Specify a preferred REPL to use in shell mode. Supported REPLs are: [ipython|ptpython|bpython|python]"),
+])
+# }}}
 
 
 def raise_keyboard_interrupt(*a):
@@ -35,12 +43,6 @@ class Shell(Command):
     """Start odoo in an interactive shell"""
     supported_shells = ['ipython', 'ptpython', 'bpython', 'python']
 
-    def init(self, args):
-        config.parse_config(args)
-        odoo.cli.server.report_configuration()
-        odoo.service.server.start(preload=[], stop=True)
-        signal.signal(signal.SIGINT, raise_keyboard_interrupt)
-
     def console(self, local_vars):
         if not os.isatty(sys.stdin.fileno()):
             exec sys.stdin in local_vars
@@ -50,7 +52,7 @@ class Shell(Command):
             for i in sorted(local_vars):
                 print '%s: %s' % (i, local_vars[i])
 
-            preferred_interface = config.options.get('shell_interface')
+            preferred_interface = settings.get('shell_interface')
             if preferred_interface:
                 shells_to_try = [preferred_interface, 'python']
             else:
@@ -74,6 +76,7 @@ class Shell(Command):
         embed({}, local_vars)
 
     def bpython(self, local_vars):
+        # https://github.com/bpython/bpython/issues/640
         from bpython import embed
         embed(local_vars)
 
@@ -99,6 +102,16 @@ class Shell(Command):
                 self.console(local_vars)
 
     def run(self, args):
-        self.init(args)
-        self.shell(config['db_name'])
+        groups = [
+            shell_group,
+            server.db_group,
+        ]
+        self.parser.add_option_groups(groups)
+        self.parser.parse_args(args)
+
+        odoo.cli.server.report_configuration()
+        odoo.service.server.start(preload=[], stop=True)
+        signal.signal(signal.SIGINT, raise_keyboard_interrupt)
+
+        self.shell(settings['db_name'])
         return 0

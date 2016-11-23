@@ -178,7 +178,7 @@ def load_module_graph(cr, graph, status=None, perform_checks=True, skip_modules=
 
             if has_demo:
                 # launch tests only in demo mode, allowing tests to use demo data.
-                if tools.config.options['test_enable']:
+                if tools.config['test_enable']:
                     # Yamel test
                     report.record_result(load_test(module_name, idref, mode))
                     # Python tests
