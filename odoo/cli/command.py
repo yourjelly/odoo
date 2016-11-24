@@ -41,7 +41,9 @@ def init_settings(args=None, opts=None):
         shared, args = extract_shared_args(sys.argv[1:])
         if shared:
             if shared.config:
-                odoo.conf.settings.load_rc_files(shared.config)
+                # TODO: check if file exists
+                odoo.conf.settings['config'] = shared.config
+                odoo.conf.settings.load_rc_files()
             if shared.addons_path:
                 odoo.conf.settings.set_addons_path(shared.addons_path)
     subcommand_discovery()
@@ -53,7 +55,7 @@ def extract_shared_args(args=None):
     if args is None:
         args = sys.argv
     parser = argparse.ArgumentParser(add_help=False)
-    parser.usage = ("odoo [-c/--config CONFIG] [--addons-path ADDONS_PATH] "
+    parser.usage = ("%prog [-c/--config CONFIG] [--addons-path ADDONS_PATH] "
                     "<command> [<args>]")
     parser.add_argument('-c', '--config')
     parser.add_argument('--addons-path')
@@ -75,8 +77,6 @@ def subcommand_discovery():
 
 class OptionParser(optparse.OptionParser, object):
     def __init__(self, **kwargs):
-        if 'version' not in kwargs:
-            kwargs['version'] = "%s %s" % (release.description, release.version)
         super(OptionParser, self).__init__(option_class=Option, **kwargs)
 
     def add_option_group(self, group):
@@ -294,8 +294,9 @@ class Command(object):
             if len(doc) > 1:
                 desc = textwrap.dedent('\n'.join(doc[1:])).strip()
         self.parser = OptionParser(
-            usage="odoo-bin %s [options]" % name,
+            usage="%%prog %s [options]" % name,
             description=desc,
+            add_help_option=False,
         )
 
     def run(self, args):
@@ -305,7 +306,12 @@ class Command(object):
 class Help(Command):
     """Display the list of available commands"""
     def run(self, args):
-        print "Available commands:\n"
+        prog = sys.argv[0].split(os.path.sep)[-1]
+        usage = (
+            "Usage: %s [--version] [--config=FILE] [--addons-path=PATH] <command>\n\n"
+            "Available commands:\n"
+        )
+        print(usage % prog)
         names = commands.keys()
         padding = max([len(k) for k in names]) + 2
         for k in sorted(names):
@@ -320,7 +326,7 @@ class Help(Command):
               -c FILE, --config=FILE  Specify additional config file
               --addons-path=PATH      Specify additional addons paths (separated by commas).
         ''')
-        print "\nUse '%s <command> --help' for individual command help." % sys.argv[0].split(os.path.sep)[-1]
+        print "\nUse '%s <command> --help' for individual command help." % prog
 
 
 def main():
@@ -328,6 +334,10 @@ def main():
     # have provided specific addons_path or a custom configuration containing
     # additional addons_path and we need this information to probe new addons
     args = init_settings(sys.argv[1:])
+
+    if '--version' in args:
+        print("%s %s" % (release.description, release.version))
+        sys.exit()
 
     # For backward compatibility sake, the default subcommand is server_legacy,
     # but if no argument is given we will display the main help screen listing

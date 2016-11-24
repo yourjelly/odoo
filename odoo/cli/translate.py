@@ -92,6 +92,9 @@ class Translate(Command):
             i18n_group,
             server.db_group,
         ]
+
+        self.parser.usage = "%prog translate [-d DATABASE] [options]"
+        self.parser.add_option(server.db_option)
         self.parser.add_option_groups(groups)
 
         if not args:

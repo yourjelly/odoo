@@ -51,17 +51,10 @@ def _check_addons_path(option, opt, value, parser):
     setattr(parser.values, option.dest, ",".join(ad_paths))
 
 
-def sanitize_dict(value):
-    if value:
-        return dict.fromkeys(value.split(','), 1)
-    return {}
-
-
 # Database options {{{
+db_option = Option("-d", "--database", dest="db_name", default=False, help="specify the database name")
 db_group = OptionGroup("Common database options")
 db_group.add_options([
-    Option("-d", "--database", dest="db_name", default=False, help="specify the database name"),
-
     Option("-r", "--db_user", dest="db_user", default=False, help="specify the database user name"),
 
     Option("-w", "--db_password", dest="db_password", default=False, help="specify the database password"),
@@ -80,29 +73,10 @@ db_group.add_options([
 ])
 # }}}
 
-# Server startup config group {{{
-common_group = OptionGroup("Common options")
+# Server group {{{
+common_group = OptionGroup("Server options")
 common_group.add_options([
-    Option("-c", "--config", dest="config", help="specify alternate config file", save=False),
-
-    Option("-i", "--init", dest="init", save=False, sanitize=sanitize_dict,
-           help="install one or more modules (comma-separated list, use \"all\" for all modules), requires -d"),
-
-    Option("-u", "--update", dest="update", save=False, sanitize=sanitize_dict,
-           help="update one or more modules (comma-separated list, use \"all\" for all modules). Requires -d."),
-
-    Option("--without-demo", dest="without_demo", default=False,
-           help="disable loading demo data for modules to be installed (comma-separated, use \"all\" for all modules). "
-                "Requires -d and -i. Default is %default"),
-
-    Option("-P", "--import-partial", dest="import_partial", default='',
-           help="Use this for big data importation, if it crashes you will be able to continue at the current state. "
-                "Provide a filename to store intermediate importation states."),
-
     Option("--pidfile", dest="pidfile", help="file where the server pid will be stored"),
-
-    Option("--addons-path", dest="addons_path", action="callback", callback=_check_addons_path, nargs=1,
-           type='string', help="specify additional addons paths (separated by commas)."),
 
     Option("--load", dest="server_wide_modules", help="Comma-separated list of server-wide modules.", default='web,web_kanban'),
 
@@ -120,7 +94,7 @@ http_group.add_options([
     Option("--http-port", dest="http_port", default=8069, type="int",
            help="specify the TCP port for the HTTP protocol"),
 
-    Option("--no-xmlrpc", dest="xmlrpc", action="store_false", default=True, help="disable the XML-RPC protocol"),
+    Option("--no-http", dest="http", action="store_false", default=True, help="disable the HTTP protocol"),
 
     Option("--proxy-mode", dest="proxy_mode", action="store_true", default=False,
            help="Enable correct behavior when behind a reverse proxy"),
@@ -134,21 +108,6 @@ http_group.add_options([
 web_group = OptionGroup("Web interface Configuration")
 web_group.add_options([
     Option("--db-filter", dest="dbfilter", default='.*', help="Filter listed database", metavar="REGEXP"),
-])
-# }}}
-
-# Testing group {{{
-testing_group = OptionGroup("Testing Configuration")
-testing_group.add_options([
-    Option("--test-file", dest="test_file", default=False, help="Launch a python or YML test file."),
-
-    Option("--test-report-directory", dest="test_report_directory", default=False,
-           help="If set, will save sample of all reports in this directory."),
-
-    Option("--test-enable", action="store_true", dest="test_enable", default=False, help="Enable YAML and unit tests."),
-
-    Option("--test-commit", action="store_true", dest="test_commit", default=False,
-           help="Commit database changes performed by YAML or XML tests."),
 ])
 # }}}
 
@@ -189,7 +148,10 @@ logging_group.check(lambda opts: opts.syslog and opts.logfile, "the syslog and l
 # }}}
 
 # SMTP group {{{
-smtp_group = OptionGroup("SMTP Configuration")
+smtp_group = OptionGroup(
+    "SMTP Configuration",
+    description="TODO: those are the fallback settings, document it !"
+)
 smtp_group.add_options([
     Option('--email-from', dest='email_from', default=False, help='specify the SMTP email address for sending email'),
 
@@ -285,6 +247,16 @@ windows_group = OptionGroup("Windows options")
 windows_group.add_options([
     Option("--bin-path", dest="bin_path", default=None, type='string',
            help="Specify the path where Odoo should search for external binaries."),
+])
+# }}}
+
+# Shared options {{{
+shared_group = OptionGroup("Shared options")
+shared_group.add_options([
+    Option("-c", "--config", dest="config", help="specify alternate config file", save=False),
+
+    Option("--addons-path", dest="addons_path", action="callback", callback=_check_addons_path, nargs=1,
+           type='string', help="specify additional addons paths (separated by commas)."),
 ])
 # }}}
 
@@ -394,13 +366,13 @@ class Server(Command):
             common_group,
             http_group,
             web_group,
-            testing_group,
             logging_group,
             smtp_group,
             security_group,
             advanced_group,
             multiprocess_group,
             windows_group,
+            shared_group,
             unexposed_group,
         ]
         if os.name == 'posix':
@@ -408,9 +380,10 @@ class Server(Command):
         else:
             groups.remove(multiprocess_group)
 
+        self.parser.add_option(db_option)
         self.parser.add_option_groups(groups)
 
-        if not args:
+        if not args and not settings['db_name']:
             self.parser.exit_with_help()
 
         self.parser.parse_args(args)

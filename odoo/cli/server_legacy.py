@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from __future__ import absolute_import, division, print_function
-
 import os
 
 from . import Command, OptionGroup, Option, server
@@ -30,7 +28,6 @@ class Server_Legacy(Command):
             server.common_group,
             server.http_group,
             server.web_group,
-            server.testing_group,
             server.logging_group,
             server.smtp_group,
             i18n_group,
@@ -38,9 +35,11 @@ class Server_Legacy(Command):
             server.advanced_group,
             server.multiprocess_group,
             server.windows_group,
+            server.shared_group,
             server.unexposed_group,
             legacy_group,
         ]
+        self.parser.add_option(server.db_option)
         self.parser.add_option_groups(groups)
         opt = self.parser.parse_args(args)
 

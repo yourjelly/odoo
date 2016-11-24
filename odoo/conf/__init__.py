@@ -59,6 +59,9 @@ class Settings(object):
             'reportgz': False,
             'root_path': self.root_path,
             'demo': {},
+
+            # TODO: So, ... should I have all defaults here ? I think so.
+            'config': None,
         }
 
         # Cli options instances
@@ -69,7 +72,6 @@ class Settings(object):
 
         # List of configuration files Odoo will parse for options
         self.user_rc_file = appdirs.user_config_dir(opj('odoo', 'odoo.conf'))
-        self.rc_files = self.get_rc_files()
         self.loaded_files = set()
 
         # Values defined through the command line interface
@@ -81,6 +83,7 @@ class Settings(object):
         # Order used for the dictionary lookup. First item found is returned.
         self.order = [self.runtime, self.cli, self.rc_values, self.defaults]
 
+        self.rc_files = self.get_rc_files()
         self.load_rc_files()
 
     def __contains__(self, key):
@@ -97,6 +100,9 @@ class Settings(object):
             demo = dict(self.defaults['demo'])
             demo.update(self['init'])
             return demo
+        if 'xmlrpc' in key:
+            # Legacy options
+            return self[key.replace('xmlrpc', 'http')]
 
         last_src = self.order[-1]
         for dic in self.order:
@@ -215,10 +221,12 @@ class Settings(object):
 
         # current working directory config (handy for development)
         files.append('.odoorc')
-
         env_file = os.getenv('ODOO_RC')
         if env_file:
             files.append(env_file)
+
+        if self['config']:
+            files.append(self['config'])
 
         return files
 
@@ -242,7 +250,7 @@ class Settings(object):
     def _parse_config_old(self, args=None):
         if args is None:
             args = []
-        opt, args = self.parser.parse_args([]) #args)
+        opt, args = self.parser.parse_args([])
 
         for name, option in self.casts.items():
             # Copy the command-line argument
