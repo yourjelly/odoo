@@ -239,7 +239,9 @@ class Settings(object):
                 for name, value in parser.items('options'):
                     # TODO: check if sanitization failed and warn user about variable name + file the error lays
                     self.rc_values[name] = self.sanitize(name, value)
-                self.loaded_files.add(rc_file)
+                if os.path.isfile(rc_file):
+                    print(rc_file)
+                    self.loaded_files.add(rc_file)
                 # TODO: parse the other sections, as well
                 # for sec in p.sections():
             except IOError:
