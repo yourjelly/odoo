@@ -235,7 +235,7 @@ class Picking(models.Model):
         default=lambda self: self.env['stock.picking.type'].browse(self._context.get('default_picking_type_id')).default_location_dest_id,
         readonly=True, required=True,
         states={'draft': [('readonly', False)]})
-    move_lines = fields.One2many('stock.move', 'picking_id', string="Stock Moves", copy=True)
+    move_lines = fields.One2many('stock.move', 'picking_id', string="Stock Moves", auto_join=True, copy=True)
     picking_type_id = fields.Many2one(
         'stock.picking.type', 'Picking Type',
         required=True,
