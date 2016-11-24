@@ -68,6 +68,7 @@ class Settings(object):
         self.rc_values = {}
 
         # List of configuration files Odoo will parse for options
+        self.user_rc_file = appdirs.user_config_dir(opj('odoo', 'odoo.conf'))
         self.rc_files = self.get_rc_files()
         self.loaded_files = set()
 
@@ -80,7 +81,6 @@ class Settings(object):
         # Order used for the dictionary lookup. First item found is returned.
         self.order = [self.runtime, self.cli, self.rc_values, self.defaults]
 
-        # Load configuration files
         self.load_rc_files()
 
     def __contains__(self, key):
@@ -211,9 +211,7 @@ class Settings(object):
                 os.path.expanduser('~/.odoorc'),
             ])
 
-        # New configuration path
-        user_path = appdirs.user_config_dir(opj('odoo', 'odoo.conf'))
-        files.append(user_path)
+        files.append(self.user_rc_file)
 
         # current working directory config (handy for development)
         files.append('.odoorc')

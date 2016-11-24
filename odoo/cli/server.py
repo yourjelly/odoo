@@ -58,7 +58,7 @@ def sanitize_dict(value):
 
 
 # Database options {{{
-db_group = OptionGroup("Database related options")
+db_group = OptionGroup("Common database options")
 db_group.add_options([
     Option("-d", "--database", dest="db_name", default=False, help="specify the database name"),
 
@@ -85,9 +85,6 @@ common_group = OptionGroup("Common options")
 common_group.add_options([
     Option("-c", "--config", dest="config", help="specify alternate config file", save=False),
 
-    Option("-s", "--save", action="store_true", dest="save", default=False, save=False,
-           help="save configuration to ~/.odoorc (or to ~/.openerp_serverrc if it exists)"),
-
     Option("-i", "--init", dest="init", save=False, sanitize=sanitize_dict,
            help="install one or more modules (comma-separated list, use \"all\" for all modules), requires -d"),
 
@@ -112,9 +109,6 @@ common_group.add_options([
     Option("-D", "--data-dir", dest="data_dir", default=odoo.conf._get_default_datadir(),
            help="Directory where to store Odoo data"),
 ])
-common_group.check(lambda opts: not opts.save and opts.config and not os.access(opts.config, os.R_OK),
-                   "The config file '{0.config}' selected with -c/--config doesn't exist or is not readable, "
-                   "use -s/--save if you want to generate it")
 # }}}
 
 # HTTP config group {{{
@@ -210,39 +204,6 @@ smtp_group.add_options([
 
     Option('--smtp-password', dest='smtp_password', default=False, help='specify the SMTP password for sending email'),
 ])
-# }}}
-
-# Internationalisation group {{{
-i18n_group = OptionGroup(
-    title="Internationalisation options",
-    description="Use these options to translate Odoo to another language. See i18n section of the user manual. "
-                "Option '-d' is mandatory. Option '-l' is mandatory in case of importation"
-)
-i18n_group.add_options([
-    Option('--load-language', dest="load_language", save=False,
-           help="specifies the languages for the translations you want to be loaded"),
-
-    Option('-l', "--language", dest="language", save=False,
-           help="specify the language of the translation file. Use it with --i18n-export or --i18n-import"),
-
-    Option("--i18n-export", dest="translate_out", save=False,
-           help="export all sentences to be translated to a CSV file, a PO file or a TGZ archive and exit"),
-
-    Option("--i18n-import", dest="translate_in", save=False,
-           help="import a CSV or a PO file with translations and exit. The '-l' option is required."),
-
-    Option("--i18n-overwrite", dest="overwrite_existing_translations", action="store_true", default=False, save=False,
-           help="overwrites existing translation terms on updating a module or importing a CSV or a PO file."),
-
-    Option("--modules", dest="translate_modules",
-           help="specify modules to export. Use in combination with --i18n-export"),
-])
-i18n_group.check(lambda opts: opts.translate_in and (not opts.language or not opts.db_name),
-                 "the i18n-import option cannot be used without the language (-l) and the database (-d) options")
-i18n_group.check(lambda opts: opts.overwrite_existing_translations and not (opts.translate_in or opts.update),
-                 "the i18n-overwrite option cannot be used without the i18n-import option or without the update option")
-i18n_group.check(lambda opts: opts.translate_out and (not opts.db_name),
-                 "the i18n-export option cannot be used without the database (-d) option")
 # }}}
 
 # Security group {{{
@@ -389,43 +350,36 @@ def setup_pid_file():
             fd.write(str(pid))
         atexit.register(rm_pid_file, pid)
 
-def main():
+def bootstrap():
     check_root_user()
     odoo.netsvc.init_logger()
     odoo.modules.module.initialize_sys_path()
     check_postgres_user()
     report_configuration()
 
-    config = odoo.tools.config
-
     # the default limit for CSV fields in the module is 128KiB, which is not
     # quite sufficient to import images to store in attachment. 500MiB is a
     # bit overkill, but better safe than sorry I guess
     csv.field_size_limit(500 * 1024 * 1024)
 
+def main():
+    bootstrap()
+
     preload = []
-    if config['db_name']:
-        preload = config['db_name'].split(',')
+    if settings['db_name']:
+        preload = settings['db_name'].split(',')
         for db_name in preload:
             try:
                 odoo.service.db._create_empty_database(db_name)
             except odoo.service.db.DatabaseExists:
                 pass
 
-    if config["translate_out"]:
-        export_translation()
-        sys.exit(0)
-
-    if config["translate_in"]:
-        import_translation()
-        sys.exit(0)
-
     # This needs to be done now to ensure the use of the multiprocessing
     # signaling mecanism for registries loaded with -d
-    if config['workers']:
+    if settings['workers']:
         odoo.multi_process = True
 
-    stop = config["stop_after_init"]
+    stop = settings["stop_after_init"]
 
     setup_pid_file()
     rc = odoo.service.server.start(preload=preload, stop=stop)
@@ -443,7 +397,6 @@ class Server(Command):
             testing_group,
             logging_group,
             smtp_group,
-            i18n_group,
             security_group,
             advanced_group,
             multiprocess_group,
@@ -456,5 +409,9 @@ class Server(Command):
             groups.remove(multiprocess_group)
 
         self.parser.add_option_groups(groups)
+
+        if not args:
+            self.parser.exit_with_help()
+
         self.parser.parse_args(args)
         main()

@@ -127,7 +127,11 @@ class OptionParser(optparse.OptionParser, object):
 
         # Update cli settings
         odoo.conf.settings.cli.update(opt.__dict__)
-        return opt, args
+        return opt
+
+    def exit_with_help(self, return_code=-1):
+        self.print_help()
+        sys.exit(return_code)
 
 
 class OptionGroup(optparse.OptionGroup, object):
@@ -282,8 +286,17 @@ class Command(object):
     __metaclass__ = CommandType
 
     def __init__(self):
-        name = self.__class__.__name__.lower()
-        self.parser = OptionParser(usage="odoo-bin %s [options]" % name)
+        cls = self.__class__
+        name = cls.__name__.lower()
+        desc = None
+        if cls.__doc__:
+            doc = cls.__doc__.strip().splitlines()
+            if len(doc) > 1:
+                desc = textwrap.dedent('\n'.join(doc[1:])).strip()
+        self.parser = OptionParser(
+            usage="odoo-bin %s [options]" % name,
+            description=desc,
+        )
 
     def run(self, args):
         pass
