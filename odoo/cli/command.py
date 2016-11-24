@@ -333,7 +333,6 @@ def main():
     # At this point, all core commands have been loaded, but the user might
     # have provided specific addons_path or a custom configuration containing
     # additional addons_path and we need this information to probe new addons
-    print(sys.argv)
     args = init_settings(sys.argv[1:])
 
     if '--version' in args:

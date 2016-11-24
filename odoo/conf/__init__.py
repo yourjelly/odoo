@@ -52,6 +52,7 @@ class Settings(object):
     # TODO: properly implement dict
     def __init__(self):
 
+        print(sys.argv)
         # The defaults settings (will be updated by odoo.cli.init_settings)
         self.defaults = {
             'addons_path': self.get_default_addons_path(),
@@ -240,7 +241,6 @@ class Settings(object):
                     # TODO: check if sanitization failed and warn user about variable name + file the error lays
                     self.rc_values[name] = self.sanitize(name, value)
                 if os.path.isfile(rc_file):
-                    print(rc_file)
                     self.loaded_files.add(rc_file)
                 # TODO: parse the other sections, as well
                 # for sec in p.sections():
