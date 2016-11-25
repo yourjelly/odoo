@@ -474,6 +474,209 @@
             }
         }
     }
+
+    // Domain selector
+    &.o_ds_dialog{
+        overflow: visible !important;
+        .o_ds_table{
+            th,td{
+                padding: 5px;
+                vertical-align: top;
+            }
+            select{
+                padding-top: 2px; // fix for selection alignment (ent)
+            }
+            .o_ds_tags{
+                .o_ds_add_tag{
+                    border-bottom: 1px solid @odoo-form-lightsecondary;
+                }
+                .o_ds_remove_tag{
+                    cursor: pointer;
+                }
+            }
+        }
+    }
+    .o_ds_container{
+        .o_ds_node{
+            display: inline-block;
+            background: #f3f3f2;
+            border: 1px solid #e2e1e1;
+            position: relative;
+            padding: 0px 8px;
+            margin: 2px 0px;
+            .o_ds_node_chain,.o_ds_node_value{
+                font-weight: 700;
+            }
+            .o_ds_node_operator{
+                font-style: italic;
+            }
+            .o_ds_node_options{
+                .o-position-absolute(@right: 0px);
+                width: 100%;
+                color: #fff;
+                opacity: 0;
+                transition: opacity 0.4s;
+                -webkit-transition: opacity 0.4s;
+                .o_ds_node_btn{
+                    cursor: pointer;
+                    width: 50%;
+                    max-height: 18px; // fix for small node
+                    &.o_ds_edit_node{
+                        background: @odoo-brand-optional;
+                        &:hover{
+                            background: darken(@odoo-brand-optional, 3%);
+                        }
+                    }
+                    &.o_ds_delete_node{
+                        background: @brand-danger;
+                        &:hover{
+                            background: darken(@brand-danger, 3%);
+                        }
+                    }
+                }
+            }
+            &:hover{
+                .o_ds_node_options{
+                    opacity: 1;
+                }
+            }
+        }
+        .o_ds_logical_operator{
+            display: inline-block;
+            padding: 0px 8px;
+            margin: 2px 0px;
+            position: relative;
+            font-size: 10px;
+            color: @odoo-brand-optional;
+            font-weight: 700;
+            text-transform: uppercase;
+            &.o_ds_add{
+                border: 0px;
+                color: #cacaca;
+                background: #efefeb;
+                border: 1px solid #efefeb;
+                cursor: pointer;
+            }
+        }
+        .o_ds_saprator{
+            position: relative;
+            height: 6px;
+        }
+    }
+
+    // field selector
+    .o_field_selector{
+        .o_fs_chain{
+            padding-right: 25px;
+        }
+        .o_fs_warning{
+            .o-position-absolute(@right: 25px, @top: 4px);
+            color:  @brand-danger;
+            vertical-align: middle;
+        }
+        .o_open_fs{
+            border-bottom: 1px solid @odoo-form-lightsecondary;
+        }
+        .o_fs_popover {
+            background: white;
+            width: 265px;
+            margin-top: 10px;
+            position: absolute;
+            z-index: 5;
+            box-shadow: 0 3px 10px rgba(0,0,0,.4);
+            -webkit-box-shadow: 0 3px 10px rgba(0,0,0,.4);
+            &:focus{
+                outline: none;
+            }
+            .o_fs_popover_header {
+                color: #fff;
+                background: @brand-primary;
+                font-weight: bold;
+                padding: 5px 0em 5px .4em;
+                .o_fs_title{
+                    .o-text-overflow(block);
+                    padding: 0px 35px;
+                }
+                .o_popover_option {
+                    padding: 7px 8px 8px 6px;
+                    &.o_prev_page {
+                        .o-position-absolute(@top:0px, @left:0px);
+                        border-right: 1px solid darken(@brand-primary, 10%);
+                    }
+                    &.o_close_fs {
+                        .o-position-absolute(@top:0px, @right:0px);
+                        border-left: 1px solid darken(@brand-primary, 10%);
+                    }
+                    &:hover {
+                        background: darken(@brand-primary, 10%);
+                    }
+                }
+                &:before {
+                    .o-caret-up(7px);
+                    .o-position-absolute(@top:-7px, @left: 7px);
+                    border-bottom-color: @brand-primary;
+                }
+            }
+            .o_fs_popover_body {
+                overflow: hidden;
+                .o_animated_mixin();
+                .o_fs_page {
+                    // .hide_types_mixin();
+                    padding: 0px 0px;
+                    margin: 0px;
+                    overflow-y: scroll;
+                    max-height: 320px;
+                    -webkit-animation-duration: 0.2s;
+                    animation-duration: 0.2s;
+                    -webkit-animation-fill-mode: both;
+                    animation-fill-mode: both;
+                    -webkit-transition-timing-function: ease-in;
+                    transition-timing-function: ease-in;
+                    li {
+                        list-style: none;
+                        position: relative;
+                        padding: 5px 0em 5px .4em;
+                        cursor: pointer;
+                        font-family: Arial;
+                        font-size: 13px;
+                        color: #444;
+                        border-bottom: 1px solid #eee;
+                        &.active {
+                            background: #f5f5f5;
+                        }
+                        .o_small_title{
+                            font-size: 12px;
+                        }
+                        .o_next {
+                            .o-position-absolute(@top:0px, @right: 0px, @bottom: 0px);
+                            position: absolute;
+                            display: flex;
+                            padding: 10px;
+                            align-items: center;
+                            &.o_next_page {
+                                border-left: 1px solid #eee;
+                                background: rgba(255,255,255, 0.85);
+                            }
+                            &.o_next_page:hover {
+                                background: #E5E5E5;
+                                border-left: 1px solid #E5E5E5;
+                            }
+                        }
+                    }
+                    &::-webkit-scrollbar {
+                        width: 5px;
+                    }
+                    &::-webkit-scrollbar-thumb {
+                        border-radius: 10px;
+                        background: #A5A5A5;
+                    }
+                    &::-webkit-scrollbar-track {
+                        background: #EFEFEF;
+                    }
+                }
+            }
+        }
+    }
 }
 
 // Overriden style when form view in modal
@@ -501,4 +704,66 @@
 .o_control_panel .o_form_buttons_view > button:first-child {
     float: left; // Unfortunately needed for the bounce effect
     margin-right: 4px;
+}
+
+
+// Animated mixin used in domain/field selector
+.o_animated_mixin(){
+    @-webkit-keyframes slideInLeft {
+      from {
+        -webkit-transform: translate3d(-100%, 0, 0);
+        transform: translate3d(-100%, 0, 0);
+        visibility: visible;
+      }
+      to {
+        -webkit-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+      }
+    }
+
+    @keyframes slideInLeft {
+      from {
+        -webkit-transform: translate3d(-100%, 0, 0);
+        transform: translate3d(-100%, 0, 0);
+        visibility: visible;
+      }
+      to {
+        -webkit-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+      }
+    }
+
+    .o_animate_slide_left {
+      -webkit-animation-name: slideInLeft;
+      animation-name: slideInLeft;
+    }
+
+    @-webkit-keyframes slideInRight {
+      from {
+        -webkit-transform: translate3d(100%, 0, 0);
+        transform: translate3d(100%, 0, 0);
+        visibility: visible;
+      }
+      to {
+        -webkit-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        -webkit-transform: translate3d(100%, 0, 0);
+        transform: translate3d(100%, 0, 0);
+        visibility: visible;
+      }
+      to {
+        -webkit-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+      }
+    }
+
+    .o_animate_slide_right {
+      -webkit-animation-name: slideInRight;
+      animation-name: slideInRight;
+    }
 }

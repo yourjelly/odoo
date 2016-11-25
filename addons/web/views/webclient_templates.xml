@@ -169,6 +169,7 @@
         <script type="text/javascript" src="/web/static/src/js/views/form_common.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/form_widgets.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/form_upgrade_widgets.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/form_domain_widgets.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/form_relational_widgets.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/list_view_editable.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/pivot_view.js"></script>

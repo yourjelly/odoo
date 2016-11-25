@@ -676,6 +676,205 @@
         <input t-if="widget.debug" t-att-readonly="widget.get('effective_readonly')" type="text" class="o_form_input o_debug_input"/>
     </div>
 </t>
+<div t-name="FieldDomain">
+    <div class="o_ds_container mt8"/>
+    <input t-if="widget.debug" t-att-readonly="widget.get('effective_readonly') or none" type="text" class="o_form_input o_debug_input  mt4 mb4"/>
+</div>
+<t t-name="FieldDomain.pills">
+    <div class="o_ds_container mt4">
+        <div class="mb4">
+            <span t-if="widget.options.show_count"><span class="o_ds_count"></span> Records Selected</span>
+            <span t-if="widget.options.show_selection"><button class="btn btn-default btn-xs o_ds_selection" type="button">See selection <span class="fa fa-arrow-right"></span></button> </span>
+            <span t-if="widget.options.validator" class="o_ds_validator text-danger hidden"><i class="fa fa-exclamation-triangle" title="Invalid domain"></i> Invalid domain</span>
+        </div>
+        <t t-foreach="domain" t-as="node">
+            <span class="text-center o_ds_node" t-att-data-index="node_index" t-if="_.isArray(node)">
+                <t t-set="chain" t-value="node[0]"/>
+                <t t-set="operator" t-value="node[1]"/>
+                <t t-set="value" t-value="node[2]"/>
+                <span t-if="!widget.get('effective_readonly')" class="o_ds_node_options"><span class="pull-left o_ds_node_btn o_ds_edit_node" t-att-data-index="node_index"><i class="fa fa-pencil"></i> Edit</span> <span class="pull-right o_ds_node_btn o_ds_delete_node" t-att-data-index="node_index"><i class="fa fa-trash"></i> Delete</span></span>
+                <span class="o_ds_node_chain"><t t-esc="chain"></t></span>
+                <t t-if="_.isArray(value)">
+                    <span class="o_ds_node_operator"><t t-esc="widget.operator_mapping[operator]"></t></span>
+                    <t t-foreach="value" t-as="v">
+                        <span class="o_ds_node_value text-primary">
+                            <t t-if="_.isNumber(v)">
+                                <t t-esc="v"></t>
+                            </t>
+                            <t t-else="">
+                                '<t t-esc="v"></t>'
+                            </t>
+                        </span>
+                        <t t-if="!v_last"> or </t>
+                    </t>
+                </t>
+                <t t-elif="_.isBoolean(value)">
+                    is
+                    <t t-if="operator == '=' and value == false">
+                        not 
+                    </t>
+                    <t t-if="operator == '!=' and value == true">
+                        not 
+                    </t>
+                    set
+                </t>
+                <t t-else="">
+                    <span class="o_ds_node_operator"><t t-esc="widget.operator_mapping[operator]"></t></span>
+                    <t t-if="_.isNumber(value)">
+                        <span class="o_ds_node_value text-primary"><t t-esc="value"></t></span>
+                    </t>
+                    <t t-if="_.isString(value)">
+                        <span class="o_ds_node_value text-primary">'<t t-esc="value"></t>'</span>
+                    </t>
+                </t>
+            </span>
+            <t t-else="">
+                <t t-if="widget.logical_priority != node and !widget.get('effective_readonly')">
+                    <span class="o_ds_logical_operator o_ds_add" t-att-data-index="node_index">
+                        <i class="fa fa-plus"></i>
+                        <t t-if="widget.logical_priority == '|'">or</t>
+                        <t t-if="widget.logical_priority == '&amp;'">and</t>
+                    </span>
+                </t>
+                <span class="o_ds_logical_operator" t-att-data-index="node_index">
+                    <t t-if="node == '|'">or</t>
+                    <t t-if="node == '&amp;'">and</t>
+                </span>
+                <t t-if="widget.logical_priority != node">
+                    <div class="o_ds_saprator"></div>
+                </t>
+            </t>
+        </t>
+        <t t-if="domain.length == 0">
+            <span class="text-muted">(No filter applied)</span>
+            <span t-if="!widget.get('effective_readonly')" class="o_ds_logical_operator o_ds_add">
+                <i class="fa fa-plus"></i> Add a filter
+            </span>
+        </t>
+        <t t-else="">
+            <span t-if="!widget.get('effective_readonly')" class="o_ds_logical_operator o_ds_add" t-att-data-index="widget.logical_priority">
+                <i class="fa fa-plus"></i>
+                <t t-if="widget.logical_priority == '|'">or</t>
+                <t t-if="widget.logical_priority == '&amp;'">and</t>
+            </span>
+            <span t-if="!widget.get('effective_readonly')" class="o_ds_logical_operator o_ds_add" t-att-data-index="widget.logical_alternative">
+                <i class="fa fa-plus"></i>
+                <t t-if="widget.logical_alternative == '|'">or</t>
+                <t t-if="widget.logical_alternative == '&amp;'">and</t>
+            </span>
+        </t>
+    </div>
+</t>
+<t t-name="FieldDomain.editor">
+    <div class="text-center">
+        <table class="o_ds_table text-left" style="width:100%">
+            <tbody>
+                <tr>
+                    <th>
+                        Field
+                    </th>
+                    <th>
+                        Operator
+                    </th>
+                    <th class="o_ds_value_cell">
+                        Value
+                    </th>
+                </tr>
+                <tr class="o_domain_row">
+                    <td class="o_field_selector_container" style="width:40%">
+                    </td>
+                    <td class="o_domain_row_operator" style="width:30%">
+                        <select class="o_ds_field_operator">
+
+                        </select>
+                    </td>
+                    <td style="width:30%" class="o_ds_value_cell">
+                        <input class="o_ds_field_value" placeholder="Value" type="text" t-att-value="widget.field_value"/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</t>
+<t t-name="FieldDomain.editor.operators">
+    <select class="o_ds_field_operator">
+        <t t-foreach="operators" t-as="key">
+            <option t-att-value="key"><t t-esc="operators[key]"></t> </option>
+        </t>
+    </select>
+</t>
+<t t-name="FieldDomain.editor.value">
+    <t t-set="type" t-value="widget.selected_field.type"/>
+    <t t-set="value" t-value="widget.value"/>
+    <t t-if="_.isArray(value)">
+        <div class="o_ds_tags">
+            <div class="input-group mb8">
+                <t t-if="type == 'selection'">
+                    <select class="o_ds_field_value">
+                        <t t-foreach="selection" t-as="val">
+                            <option t-att-value="val[0]"><t t-esc="val[1]"></t> </option>
+                        </t>
+                    </select>
+                </t>
+                <t t-else="">
+                    <input placeholder="Add new value" t-att-step="type == 'float' and 0.01 or None" t-att-type="['integer', 'float', 'monetary'].indexOf(type) !== -1  and 'number' or 'text'"/>
+                </t>
+                <span class="input-group-btn ">
+                    <button class="btn btn-default btn-xs o_ds_add_tag" type="button"><i class="fa fa-plus"></i></button>
+                </span>
+            </div>
+            <div>
+                <t t-foreach="widget.value" t-as="val">
+                    <span class="badge"><t t-esc="val"></t> <i class="o_ds_remove_tag fa fa-times" t-att-data-value="val"></i></span>
+                </t>
+            </div>
+        </div>
+    </t>
+    <t t-elif="type == 'selection' || type == 'boolean'">
+        <select class="o_ds_field_value">
+            <t t-foreach="selection" t-as="val">
+                <option t-att-value="val[0]"><t t-esc="val[1]"></t> </option>
+            </t>
+        </select>
+    </t>
+    <t t-elif="['integer', 'float', 'monetary'].indexOf(type) !== -1">
+        <input class="o_ds_field_value" placeholder="Value" t-att-step="type == 'float' and 0.01 or None" type="number"/>
+    </t>
+    <t t-else="">
+        <input class="o_ds_field_value" placeholder="Value" type="text"/>
+    </t>
+</t>
+<t t-name="FieldSelector">
+    <div class="o_field_selector" t-if="!widget.get('effective_readonly')">
+        <div class="input-group has-feedback">
+            <input class="o_fs_chain o_form_input" placeholder="Select field" t-att-value="widget.chain" type="text" t-att-readonly="!(widget.debug) and 1 or None"/> 
+            <span class="o_fs_warning fa fa-exclamation-triangle hidden" title="Invalid field chain"></span>
+            <span class="input-group-btn">
+                <button class="btn btn-default btn-xs o_open_fs " > <i class="fa fa-pencil-square-o"></i></button>
+            </span>
+        </div>
+        <div class="o_fs_popover" style="display:none;" tabindex="0">
+            <div class="o_fs_popover_header text-center"> <i class="fa fa-arrow-left o_popover_option o_prev_page"></i>  <div class="o_fs_title"/> <i class="fa fa-times o_popover_option o_close_fs"></i></div>
+            <div class="o_fs_popover_body">
+                <ul class="o_fs_page">
+                </ul>
+            </div>
+        </div>
+    </div>
+    <span t-if="widget.get('effective_readonly')"/>
+</t>
+<t t-name="FieldSelector.page">
+    <ul class="o_fs_page" style="position:relative;">
+        <t t-foreach="lines" t-as="line">
+            <t t-set="has_relation" t-value="line.relation and (line.name != 'write_uid' and line.name != 'create_uid')"/>
+            <li t-attf-class="o_field_item #{line_index == 0 and 'active' or ''} #{!debug and has_relation and 'o_next_page' or 'o_select_field'}" t-att-data-name="line.name" t-att-data-field_relation="has_relation and line.relation or None">
+                <t t-esc="line.string"/> 
+                <t t-if="debug"> <div class="text-muted o_small_title"> <t t-esc="line.name"/> (<i><t t-esc="line.type"/></i>)</div></t>
+                <t t-if="has_relation"> <i t-attf-class="fa fa-chevron-right o_next #{debug and 'o_next_page' or ''}" t-att-data-name="line.name" t-att-data-field_relation="line.relation"></i> </t>
+            </li>
+        </t>
+    </ul>
+</t>
 <t t-name="web.datepicker">
     <t t-set="placeholder" t-value="widget.getParent().node and widget.getParent().node.attrs.placeholder"/>
     <div class="o_datepicker">

@@ -335,6 +335,7 @@ class MassMailing(models.Model):
     mailing_model_real = fields.Char(compute='_compute_model', string='Recipients Real Model', default='mail.mass_mailing.contact', required=True)
     mailing_model = fields.Selection(selection=_mailing_model, string='Recipients Model', default='mail.mass_mailing.list')
     mailing_domain = fields.Char(string='Domain', oldname='domain', default=[])
+    domain_priority = fields.Selection([('&', 'AND'), ('|', 'OR')], default="&")
     contact_list_ids = fields.Many2many('mail.mass_mailing.list', 'mail_mass_mailing_list_rel',
         string='Mailing Lists')
     contact_ab_pc = fields.Integer(string='A/B Testing percentage',

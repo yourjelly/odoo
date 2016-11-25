@@ -355,6 +355,8 @@
                                             <li>record.partner_id.currency_id</li>
                                         </ul>
                                         <field name="write_expression"
+                                                widget="field_selector"
+                                                options="{'model': 'model_name', 'prefix': 'record.', 'filters': {'types': ['many2one']}}"
                                                 attrs="{'required': [('state', '=', 'object_write'), ('use_write', '=', 'expression')]}"/>
                                     </div>
 

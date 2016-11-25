@@ -284,8 +284,9 @@ class Challenge(models.Model):
 
     def _get_challenger_users(self, domain):
         # FIXME: literal_eval?
-        user_domain = safe_eval(domain)
-        return self.env['res.users'].search(user_domain)
+        if not isinstance(domain, list):
+            domain = safe_eval(domain)
+        return self.env['res.users'].search(domain)
 
     def _recompute_challenge_users(self):
         """Recompute the domain to add new users and remove the one no longer matching the domain"""

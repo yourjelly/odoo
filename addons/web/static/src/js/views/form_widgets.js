@@ -388,86 +388,6 @@ var FieldFloat = FieldChar.extend({
     }
 });
 
-var FieldCharDomain = common.AbstractField.extend(common.ReinitializeFieldMixin, {
-    template: "FieldCharDomain",
-    events: {
-        'click button': 'on_click',
-        'change .o_debug_input': function(e) {
-            this.set('value', $(e.target).val());
-        }
-    },
-    init: function() {
-        this._super.apply(this, arguments);
-        this.debug = session.debug;
-    },
-    start: function() {
-        var self = this;
-        var tmp = this._super();
-        if (this.options.model_field){
-            this.field_manager.fields[this.options.model_field].on("change:value", this, function(){
-                if (self.view && self.view.record_loaded.state == "resolved" && self.view.onchanges_mutex){
-                    self.view.onchanges_mutex.def.then(function(){
-                        self.render_value();
-                    });
-                }
-            });
-        }
-        return tmp;
-    },
-    render_value: function() {
-        var self = this;
-
-        if (this.get('value')) {
-            var model = this.options.model || this.field_manager.get_field_value(this.options.model_field);
-            try{
-                var domain = pyeval.eval('domain', this.get('value'));
-            }
-            catch(e){
-                this.do_warn(_t('Error: Bad domain'), _t('The domain is wrong.'));
-                return;
-            }
-            var ds = new data.DataSetStatic(self, model, self.build_context());
-            ds.call('search_count', [domain]).then(function (results) {
-                self.$('.o_count').text(results + _t(' selected records'));
-                if (self.get('effective_readonly')) {
-                    self.$('button').text(_t('See selection '));
-                }
-                else {
-                    self.$('button').text(_t('Change selection '));
-                }
-                self.$('button').append($("<span/>").addClass('fa fa-arrow-right'));
-            });
-
-            if(this.debug) {
-                this.$('.o_debug_input').val(this.get('value'));
-            }
-        } else {
-            this.$('.o_form_input').val('');
-            this.$('.o_count').text(_t('No selected record'));
-            var $arrow = this.$('button span').detach();
-            this.$('button').text(_t('Select records ')).append($("<span/>").addClass('fa fa-arrow-right'));
-        }
-    },
-    on_click: function(event) {
-        event.preventDefault();
-
-        var self = this;
-        var dialog = new common.DomainEditorDialog(this, {
-            res_model: this.options.model || this.field_manager.get_field_value(this.options.model_field),
-            default_domain: this.get('value'),
-            title: this.get('effective_readonly') ? _t('Selected records') : _t('Select records...'),
-            readonly: this.get('effective_readonly'),
-            disable_multiple_selection: this.get('effective_readonly'),
-            no_create: this.get('effective_readonly'),
-            on_selected: function(selected_ids) {
-                if (!self.get('effective_readonly')) {
-                    self.set_value(dialog.get_domain(selected_ids));
-                }
-            }
-        }).open();
-    },
-});
-
 var FieldDate = common.AbstractField.extend(common.ReinitializeFieldMixin, {
     tagName: "span",
     className: "o_form_field_date",
@@ -1682,7 +1602,6 @@ core.form_widget_registry
     .add('email', FieldEmail)
     .add('url', FieldUrl)
     .add('text',FieldText)
-    .add('char_domain', FieldCharDomain)
     .add('date', FieldDate)
     .add('datetime', FieldDatetime)
     .add('selection', FieldSelection)

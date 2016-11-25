@@ -1485,6 +1485,16 @@ class BaseModel(object):
         return res if isinstance(res, (int, long)) else len(res)
 
     @api.model
+    def safe_search_count(self, args):
+        """ Used in DomainSelector widget to varify domain is valid or not"""
+        try:
+            res = self.search(args, count=True)
+        except Exception as e:
+            print e
+            return False
+        return res if isinstance(res, (int, long)) else len(res)
+
+    @api.model
     @api.returns('self',
         upgrade=lambda self, value, args, offset=0, limit=None, order=None, count=False: value if count else self.browse(value),
         downgrade=lambda self, value, args, offset=0, limit=None, order=None, count=False: value if count else value.ids)
@@ -2916,6 +2926,18 @@ class BaseModel(object):
             res[fname] = description
 
         return res
+
+    # TO-DO: not sure
+    @api.model
+    def fields_get_with_title(self, allfields=None, attributes=None):
+        """ Used in domain_selector and field_selctor widget
+            It saves one extra rpc-call & one query per model
+            Internally it just use original fields_get
+        """
+        return {
+            'title': self._description or self._name,
+            'fields': self.fields_get(allfields, attributes)
+        }
 
     @api.model
     def get_empty_list_help(self, help):
