@@ -414,7 +414,7 @@ class StockMove(models.Model):
         Picking = self.env['stock.picking']
         for move in self:
             picking = Picking.search([
-                ('group_id', '=', move.group_id.id),
+                ('move_lines.group_id', '=', move.group_id.id),
                 ('location_id', '=', move.location_id.id),
                 ('location_dest_id', '=', move.location_dest_id.id),
                 ('picking_type_id', '=', move.picking_type_id.id),
