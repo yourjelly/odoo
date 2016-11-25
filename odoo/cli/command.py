@@ -38,7 +38,7 @@ def init_settings(args=None, opts=None):
     """
     odoo.conf.settings.init_options(_options.values())
     if args is not None:
-        shared, args = extract_shared_args(sys.argv[1:])
+        shared, args = extract_shared_args(args)
         if shared:
             if shared.config:
                 # TODO: check if file exists

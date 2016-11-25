@@ -51,8 +51,6 @@ class Settings(object):
 
     # TODO: properly implement dict
     def __init__(self):
-
-        print(sys.argv)
         # The defaults settings (will be updated by odoo.cli.init_settings)
         self.defaults = {
             'addons_path': self.get_default_addons_path(),
@@ -132,7 +130,8 @@ class Settings(object):
             name = option.dest
             if name not in self._options:
                 self._options[name] = option
-                self.defaults[name] = self.sanitize(name, option.my_default)
+                if name not in self:
+                    self.defaults[name] = self.sanitize(name, option.my_default)
 
     def sanitize(self, name, value):
         """
@@ -185,6 +184,7 @@ class Settings(object):
     #     pass
 
     def set_addons_path(self, addons_path):
+        from pudb import set_trace; set_trace()  # *** Breakpoint ***
         self['addons_path'] = ",".join(
             os.path.abspath(os.path.expanduser(os.path.expandvars(path.strip())))
             for path in addons_path.split(',')
