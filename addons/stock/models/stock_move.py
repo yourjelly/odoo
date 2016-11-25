@@ -414,12 +414,12 @@ class StockMove(models.Model):
         Picking = self.env['stock.picking']
         for move in self:
             picking = Picking.search([
-                ('move_lines.group_id', '=', move.group_id.id),
+                ('group_id', '=', move.group_id.id),
                 ('location_id', '=', move.location_id.id),
                 ('location_dest_id', '=', move.location_dest_id.id),
                 ('picking_type_id', '=', move.picking_type_id.id),
                 ('printed', '=', False),
-                ('state', 'in', ['draft', 'confirmed', 'waiting', 'partially_available', 'assigned'])], limit=1)
+                ('move_lines.state', 'in', ['draft', 'confirmed', 'waiting', 'assigned'])], limit=1)
             if not picking:
                 picking = Picking.create(move._get_new_picking_values())
             move.write({'picking_id': picking.id})
