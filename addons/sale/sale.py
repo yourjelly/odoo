@@ -646,9 +646,9 @@ class SaleOrderLine(models.Model):
 
             vals = line._prepare_order_line_procurement(group_id=line.order_id.procurement_group_id.id)
             vals['product_qty'] = line.product_uom_qty - qty
-            new_proc = self.env["procurement.order"].create(vals)
+            new_proc = self.env["procurement.order"].with_context(recompute=True).create(vals)
             new_procs += new_proc
-        new_procs.run()
+        new_procs.with_context(recompute=True).run()
         return new_procs
 
     @api.model
