@@ -382,6 +382,8 @@ class MrpProduction(models.Model):
         orders_to_plan = self.filtered(lambda order: order.routing_id and order.state == 'confirmed')
         UoM = self.env['product.uom']
         for order in orders_to_plan:
+            if not order.routing_id.operation_ids:
+                raise UserError(_('Either create an operation in the routing or remove the routing'))
             quantity = UoM._compute_qty_obj(order.product_uom_id, order.product_qty, order.bom_id.product_uom_id) / order.bom_id.product_qty
             boms, lines = order.bom_id.explode(order.product_id, quantity, picking_type=order.bom_id.picking_type_id)
             order._generate_workorders(boms)
