@@ -942,8 +942,26 @@
 <t t-name="SearchView.filters">
     <li t-foreach="widget.filters" t-as="filter" t-if="!filter.visible || filter.visible()"
             t-att-title="filter.attrs.string ? filter.attrs.help : undefined"
-            t-att-data-index="filter_index">
-        <a href="#"><t t-esc="filter.attrs.string or filter.attrs.help or filter.attrs.name or 'Ω'"/></a>
+            t-att-data-index="filter_index" t-att-class="filter.attrs.widget == 'date_ranges' and 'o_inline_dropdown'">
+        <t t-if="!filter.attrs.widget">
+            <a href="#"><t t-esc="filter.attrs.string or filter.attrs.help or filter.attrs.name or 'Ω'"/></a>
+        </t>
+        <t t-if="filter.attrs.widget == 'date_ranges'">
+            <a href="#"><t t-esc="filter.attrs.string or filter.attrs.help or filter.attrs.field or 'Ω'"/></a>
+            <ul class="dropdown-menu" t-att-data="filter.attrs.field">
+                <li class="o_date_ranges" t-att-data-index="filter_index"><a class="o_filter_today" t-attf-data-domain="['&amp;', ('#{filter.attrs.field}', '&gt;=', '#{moment().startOf('day').utc().format('YYYY-MM-DD HH:mm:ss')}'), ('#{filter.attrs.field}', '&lt;', '#{moment().startOf('day').add(1,'days').utc().format('YYYY-MM-DD HH:mm:ss')}')]">Today</a></li>
+                <li class="o_date_ranges" t-att-data-index="filter_index"><a class="o_filter_this_week" t-attf-data-domain="['&amp;', ('#{filter.attrs.field}', '&gt;=', '#{moment().startOf('isoweek').utc().format('YYYY-MM-DD HH:mm:ss')}'), ('#{filter.attrs.field}', '&lt;', '#{moment().startOf('isoweek').add(7,'days').utc().format('YYYY-MM-DD HH:mm:ss')}')]">This Week</a></li>
+                <li class="o_date_ranges" t-att-data-index="filter_index"><a class="o_filter_this_month" t-attf-data-domain="['&amp;', ('#{filter.attrs.field}', '&gt;=', '#{moment().startOf('month').utc().format('YYYY-MM-DD HH:mm:ss')}'), ('#{filter.attrs.field}', '&lt;', '#{moment().startOf('month').add(1,'months').utc().format('YYYY-MM-DD HH:mm:ss')}')]">This Month</a></li>
+                <li class="o_date_ranges" t-att-data-index="filter_index"><a class="o_filter_this_quarter" t-attf-data-domain="['&amp;', ('#{filter.attrs.field}', '&gt;=', '#{moment().startOf('quarter').utc().format('YYYY-MM-DD HH:mm:ss')}'), ('#{filter.attrs.field}', '&lt;', '#{moment().startOf('quarter').add(3,'months').utc().format('YYYY-MM-DD HH:mm:ss')}')]">This Quarter</a></li>
+                <li class="o_date_ranges" t-att-data-index="filter_index"><a class="o_filter_this_year" t-attf-data-domain="['&amp;', ('#{filter.attrs.field}', '&gt;=', '#{moment().startOf('year').utc().format('YYYY-MM-DD HH:mm:ss')}'), ('#{filter.attrs.field}', '&lt;', '#{moment().startOf('year').add(1,'years').utc().format('YYYY-MM-DD HH:mm:ss')}')]">This Year</a></li>
+                <hr/>
+                <li class="o_date_ranges" t-att-data-index="filter_index"><a class="o_filter_yesterday" t-attf-data-domain="['&amp;', ('#{filter.attrs.field}', '&gt;=', '#{moment().startOf('day').subtract(1,'days').utc().format('YYYY-MM-DD HH:mm:ss')}'), ('#{filter.attrs.field}', '&lt;', '#{moment().startOf('day').utc().format('YYYY-MM-DD HH:mm:ss')}')]">Yesterday</a></li>
+                <li class="o_date_ranges" t-att-data-index="filter_index"><a class="o_filter_last_week" t-attf-data-domain="['&amp;', ('#{filter.attrs.field}', '&lt;', '#{moment().startOf('isoweek').utc().format('YYYY-MM-DD HH:mm:ss')}'), ('#{filter.attrs.field}', '&gt;=', '#{moment().startOf('isoweek').subtract(1,'weeks').utc().format('YYYY-MM-DD HH:mm:ss')}')]">Last Week</a></li>
+                <li class="o_date_ranges" t-att-data-index="filter_index"><a class="o_filter_last_month" t-attf-data-domain="['&amp;', ('#{filter.attrs.field}', '&lt;', '#{moment().startOf('month').utc().format('YYYY-MM-DD HH:mm:ss')}'), ('#{filter.attrs.field}', '&gt;=', '#{moment().startOf('month').subtract(1,'months').utc().format('YYYY-MM-DD HH:mm:ss')}')]">Last Month</a></li>
+                <li class="o_date_ranges" t-att-data-index="filter_index"><a class="o_filter_last_quarter" t-attf-data-domain="['&amp;', ('#{filter.attrs.field}', '&lt;', '#{moment().startOf('quarter').utc().format('YYYY-MM-DD HH:mm:ss')}'), ('#{filter.attrs.field}', '&gt;=', '#{moment().startOf('quarter').subtract(3,'months').utc().format('YYYY-MM-DD HH:mm:ss')}')]">Last Quarter</a></li>
+                <li class="o_date_ranges" t-att-data-index="filter_index"><a class="o_filter_last_year" t-attf-data-domain="['&amp;', ('#{filter.attrs.field}', '&lt;', '#{moment().startOf('year').utc().format('YYYY-MM-DD HH:mm:ss')}'), ('#{filter.attrs.field}', '&gt;=', '#{moment().startOf('year').subtract(1,'years').utc().format('YYYY-MM-DD HH:mm:ss')}')]">Last Year</a></li>
+            </ul>
+        </t>
     </li>
 </t>
 <t t-name="SearchView.field">

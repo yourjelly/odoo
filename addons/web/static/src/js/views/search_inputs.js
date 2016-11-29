@@ -535,9 +535,13 @@ var FilterGroup = Input.extend(/** @lends instance.web.search.FilterGroup# */{
         facet.values.each(function (v) {
             var i = _(self.filters).indexOf(v.get('value'));
             if (i === -1) { return; }
-            $filters.filter(function () {
+            var $filter = $filters.filter(function () {
                 return Number($(this).data('index')) === i;
             }).addClass('selected');
+            if ($filter.hasClass('o_inline_dropdown')) {
+                $filter.data('target').siblings().removeClass('selected');
+                $filter.data('target').addClass('selected');
+            }
         });
     },
     /**
@@ -630,7 +634,35 @@ var FilterGroup = Input.extend(/** @lends instance.web.search.FilterGroup# */{
     toggle_filter: function (e) {
         e.preventDefault();
         e.stopPropagation();
-        this.toggle(this.filters[Number($(e.target).parent().data('index'))]);
+        var $parent = $(e.target).parent();
+        var filter = this.filters[Number($parent.data('index'))];
+        if ($parent.hasClass('o_inline_dropdown selected')) {
+            $parent.find('.o_date_ranges').removeClass('selected');
+        } else if ($parent.hasClass('o_inline_dropdown') && !$parent.find('.o_date_ranges .selected').length) {
+            var $month_filter = $parent.find('.o_filter_this_month');
+            filter.attrs.domain = $month_filter.data('domain');
+            $month_filter.parent().addClass('selected');
+            $parent.data().target = $month_filter.parent();
+        }
+        if ($parent.hasClass('o_date_ranges')) {
+            filter.attrs.domain = $(e.target).data('domain');
+            // set in the li element of the filters list which date was clicked
+            // in order to toggle the selected class in the search_change function
+            var $filter = $parent.parents('.o_inline_dropdown');
+            $filter.data().target = $parent;
+            // if the filter is already selected in the filter list
+            // but we change the date of the domain
+            if ($filter.hasClass('selected') && !$parent.hasClass('selected')) {
+                $parent.siblings().removeClass('selected');
+                $parent.addClass('selected');
+                this.searchview.do_search();
+                return;
+            }
+            if ($filter.hasClass('selected') && $parent.hasClass('selected')) {
+                $parent.removeClass('selected');
+            }
+        }
+        this.toggle(filter);
     },
     toggle: function (filter, options) {
         this.searchview.query.toggle(this.make_facet([this.make_value(filter)]), options);

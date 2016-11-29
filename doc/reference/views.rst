@@ -1188,7 +1188,12 @@ Possible children elements of the search view are:
         tooltip
     ``groups``
         makes a filter only available to specific users
-
+    ``widget``
+        if set to ``date_ranges``, the ``domain`` attribute will be ignored and the filter will set up a dropdown with the predefined domains:
+        today, this week, this month, this quarter, this year, yesterday, last week, last month,
+        last quarter, last year.
+    ``field``
+        the field used if the attribute ``widget`` is set to ``date_ranges`` to create the domain.
     .. tip::
 
        .. versionadded:: 7.0

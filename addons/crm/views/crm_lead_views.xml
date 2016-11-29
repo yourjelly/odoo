@@ -574,6 +574,8 @@
                     <filter string="Won" name="won"
                             domain="['&amp;', ('stage_id.probability', '=', 100), ('stage_id.fold', '=', True)]"/>
                     <separator/>
+                    <filter field="date_action" widget="date_ranges" string="Next Activity Date"/>
+                    <separator/>
                     <filter string="My Opportunities" name="assigned_to_me"
                             domain="[('user_id', '=', uid)]"
                             help="Opportunities that are assigned to me"/>
