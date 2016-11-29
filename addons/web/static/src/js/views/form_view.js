@@ -12,6 +12,7 @@ var Pager = require('web.Pager');
 var Sidebar = require('web.Sidebar');
 var utils = require('web.utils');
 var View = require('web.View');
+var Tip = require('web_tour.Tip');
 
 var _t = core._t;
 var _lt = core._lt;
@@ -136,6 +137,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
      * if it exists
      */
     render_buttons: function($node) {
+        var self = this;
         this.$buttons = $('<div/>');
 
         var $footer = this.$('footer');
@@ -152,12 +154,31 @@ var FormView = View.extend(common.FieldManagerMixin, {
         this.$buttons.on('click', '.o_form_button_edit', this.on_button_edit);
         this.$buttons.on('click', '.o_form_button_save', this.on_button_save);
         this.$buttons.on('click', '.o_form_button_cancel', this.on_button_cancel);
-        //this.$buttons.on('focus', null, this.show_tip);
+        this.$buttons.on('focus', '.o_form_button_save', function() {
+            self.show_tip(_t("Press TAB to Save and Esc to Cancel"), this);
+        });
+        this.$buttons.on('blur', '.o_form_button_save', this.destroy_tip.bind(this));
 
         this.$buttons.appendTo($node);
     },
-    show_tip: function() {
-
+    show_tip: function(content, attach_to) {
+        var tip_info = _.extend({}, {
+            content: content,
+            event_handlers: [{
+                event: 'click',
+                selector: '.o_skip_tour',
+            }],
+        });
+        this.$tip = new Tip(this, tip_info);
+        attach_to = attach_to && $(attach_to) || this.$el;
+        this.$tip.attach_to(attach_to);
+        this.$tip._to_info_mode();
+    },
+    destroy_tip: function() {
+        console.log("Inside dewstroy tip ::: ");
+        if (this.$tip) {
+            this.$tip.destroy();
+        }
     },
     /**
      * Instantiate and render the sidebar if a sidebar is requested

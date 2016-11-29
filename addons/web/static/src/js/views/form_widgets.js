@@ -139,7 +139,6 @@ var WidgetButton = common.FormWidget.extend({
         this.$tip._to_info_mode();
     },
     on_focusout: function() {
-        console.log("this.$tip ::: ", this.$tip);
         if (this.$tip) {
             this.$tip.destroy();
         }
