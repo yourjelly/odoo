@@ -446,7 +446,12 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
         var self = this;
         $e.on({
             focus: function () { self.trigger('focused'); },
-            blur: function () { self.trigger('blurred'); }
+            blur: function () { 
+                if (parseInt(self.node.attrs.tabindex)) {
+                    self.view.last_tabindex = parseInt(self.node.attrs.tabindex);
+                }
+                self.trigger('blurred');
+            }
         });
     },
     process_modifiers: function() {
@@ -509,6 +514,13 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
             final_domain = new data.CompoundDomain(final_domain).set_eval_context(fields_values);
         }
         return final_domain;
+    },
+    focus: function() {
+        console.log("Inside form widget focus :::: ");
+        // Implement focus method here and set last tabinex, so that when manually focus set on any widget we can move according to tabindex
+        if (parseInt(this.node.attrs.tabindex)) {
+            this.view.last_tabindex = parseInt(this.node.attrs.tabindex);
+        }
     }
 });
 
@@ -766,6 +778,7 @@ var AbstractField = FormWidget.extend(FieldInterface, {
             .toggleClass('o_form_invalid', !this.disable_utility_classes && !!this.field_manager.get('display_invalid_fields') && !this.is_valid());
     },
     focus: function() {
+        this._super();
         return false;
     },
     set_input_id: function(id) {

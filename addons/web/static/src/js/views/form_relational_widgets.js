@@ -872,6 +872,9 @@ var FieldX2Many = AbstractManyField.extend({
     is_false: function() {
         return _(this.dataset.ids).isEmpty();
     },
+    focus: function() {
+        return false;
+    }
 });
 
 var X2ManyDataSet = data.BufferedDataSet.extend({
@@ -941,6 +944,10 @@ var X2ManyViewManager = ViewManager.extend({
             self.x2m.reload_current_view();
         });
     },
+    focus: function() {
+        self.x2m.focus();
+    }
+
 });
 
 var X2ManyListView = ListView.extend({
@@ -1246,7 +1253,7 @@ var One2ManyListView = X2ManyListView.extend({
         }
 
         return this._super(record);
-    },
+    }
 });
 
 var One2ManyGroups = ListView.Groups.extend({
@@ -1284,6 +1291,13 @@ var FieldOne2Many = FieldX2Many.extend({
     is_false: function() {
         return false;
     },
+    focus: function() {
+        var controller = this.viewmanager.active_view && this.viewmanager.active_view.controller;
+        if (controller) {
+            controller.do_add_record(this);
+        }
+        //this.do_add_record(this);
+    }
 });
 
 var Many2ManyListView = X2ManyListView.extend({

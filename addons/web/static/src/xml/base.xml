@@ -338,7 +338,7 @@
     <t t-if="!widget.no_leaf and widget.options.action_buttons !== false">
         <div class="o_list_buttons">
             <t t-if="widget.options.addable and widget.is_action_enabled('create')">
-                <button type="button" class="btn btn-primary btn-sm o_list_button_add" accesskey="c">
+                <button type="button" class="btn btn-primary btn-sm o_list_button_add" accesskey="c" autofocus="1">
                     <t t-esc="widget.options.addable"/>
                 </button>
             </t>
@@ -409,11 +409,11 @@
 <t t-name="FormView.buttons">
     <div class="o_form_buttons_view">
         <button t-if="widget.is_action_enabled('edit')" type="button"
-                class="btn btn-primary btn-sm o_form_button_edit" accesskey="a">
+                class="btn btn-primary btn-sm o_form_button_edit" accesskey="a" tabindex="-1">
             Edit
         </button>
         <button t-if="widget.is_action_enabled('create')" type="button"
-                class="btn btn-default btn-sm o_form_button_create" accesskey="c">
+                class="btn btn-default btn-sm o_form_button_create" accesskey="c" autofocus="1" on_focus_tip="Press TAB to save or ESC to cancel">
             Create
         </button>
     </div>
@@ -423,7 +423,7 @@
             Save
         </button>
         <button type="button"
-                class="btn btn-default btn-sm o_form_button_cancel" accesskey="j">
+                class="btn btn-default btn-sm o_form_button_cancel" accesskey="j" tabindex="-1">
             Discard
         </button>
     </div>

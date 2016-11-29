@@ -59,6 +59,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         this.onchanges_mutex = new utils.Mutex();
         this.default_focus_field = null;
         this.default_focus_button = null;
+        this.last_tabindex = null;
         this.fields_registry = core.form_widget_registry;
         this.tags_registry = core.form_tag_registry;
         this.widgets_registry = core.form_custom_registry;
@@ -78,8 +79,11 @@ var FormView = View.extend(common.FieldManagerMixin, {
             self._build_onchange_specs();
             self.on("change:actual_mode", self, self.toggle_buttons);
             self.on("change:actual_mode", self, self.toggle_sidebar);
+            self.on("change:actual_mode", self, self.bind_tabindex); // Bind tabindex and set focus to next tabindex element
         });
         self.on("load_record", self, self.load_record);
+        this.is_initialized.done(function() {self.bind_tabindex();});
+
         core.bus.on('clear_uncommitted_changes', this, function(chain_callbacks) {
             var self = this;
             chain_callbacks(function() {
@@ -148,8 +152,12 @@ var FormView = View.extend(common.FieldManagerMixin, {
         this.$buttons.on('click', '.o_form_button_edit', this.on_button_edit);
         this.$buttons.on('click', '.o_form_button_save', this.on_button_save);
         this.$buttons.on('click', '.o_form_button_cancel', this.on_button_cancel);
+        //this.$buttons.on('focus', null, this.show_tip);
 
         this.$buttons.appendTo($node);
+    },
+    show_tip: function() {
+
     },
     /**
      * Instantiate and render the sidebar if a sidebar is requested
@@ -254,6 +262,83 @@ var FormView = View.extend(common.FieldManagerMixin, {
             self.trigger('blurred');
         }, 0);
     },
+    get_tabindex_widgets: function() {
+        return _.chain(this.get_widgets()).filter(function(w) {
+            return w.node.attrs.tabindex && parseInt(w.node.attrs.tabindex);
+        }).sortBy(function(w) {
+            return parseInt(w.node.attrs.tabindex);
+        }).value();
+    },
+    bind_tabindex: function() {
+        var self = this;
+        if (this.get("actual_mode") == "view") {
+            return;
+        }
+        var tabindex_widgets = this.get_tabindex_widgets();
+
+        var tabindex_supported_widgets = _.filter(tabindex_widgets, function(w) {
+            return !w.no_tabindex;
+        });
+
+        _.each(tabindex_supported_widgets, function(w) {
+            w.$el.on("keydown", function(e) {
+                // FIXME/Blocking Issue:
+                //If editable listview inside form then this keydown + TAB logic can create issue, also need to check Form is blurred or not
+                //If we set blur based logic then we will have issue whether blur is happened through keyboard or mouse,
+                //because we do not want to set tabindex if blur is happened through mouse
+
+                // TODO: To check if focus is on editable one2many, editable o2m is exceptional, need generic solution
+                // So that if focus comes on such field we do not navigate to main form's tabindex elements
+                if (e.which == $.ui.keyCode.TAB) {
+                    e.stopPropagation(); //To avoid clash with editable listview(TAB feature)
+                    self.set_next_tabindex(e, w, tabindex_widgets);
+                }
+            });
+        });
+    },
+    set_next_tabindex: function(e, current_widget, tabindex_widgets) {
+        var self = this;
+        if (!tabindex_widgets) {
+            tabindex_widgets = this.get_tabindex_widgets();
+        }
+        if (!tabindex_widgets.length) {
+            return;
+        }
+        if (!this.last_tabindex) {
+            var widget = tabindex_widgets[0]; //Set focus to first widget
+            if (typeof(widget.focus) == "function" && widget.focus() !== false) {
+                self.last_tabindex = parseInt(widget.node.attrs.tabindex);
+            }
+            return false;
+        }
+        if (!current_widget) {
+            current_widget = _.find(tabindex_widgets, function(w) {
+                return parseInt(w.node.attrs.tabindex) == self.last_tabindex;
+            });
+        }
+        var next_widget = null;
+        var current_index = _(tabindex_widgets).indexOf(current_widget);
+        var get_next_widget = function() {
+            current_index += 1;
+            var next_widget = tabindex_widgets[current_index];
+            if (next_widget && next_widget.$el.hasClass("o_form_invisible")) {
+                return get_next_widget();
+            }
+            return next_widget;
+        };
+        next_widget = get_next_widget();
+        if (next_widget) {
+            if (next_widget.node.tag == "button" && this.$buttons.find(".o_form_button_save").is(":visible")) { //TODO: Remove this sitty visibility based checking for save button
+                // FIXME: Need to preventDefault TAB key to keep focus on save button
+                if (e) { e.preventDefault(); }
+                return this.$buttons.find(".o_form_button_save").focus();
+            }
+            if (typeof(next_widget.focus) == "function") {
+                this.last_tabindex = parseInt(next_widget.node.attrs.tabindex);
+                next_widget.focus();
+            }
+        }
+    },
 
     do_load_state: function(state, warm) {
         if (state.id && this.datarecord.id != state.id) {
@@ -297,6 +382,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         });
     },
     load_record: function(record) {
+        console.log("Inside load_record ::: ");
         var self = this, set_values = [];
         if (!record) {
             this.set({ 'title' : undefined });
@@ -333,8 +419,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 } else {
                     self.do_push_state({});
                 }
-                self.$el.removeClass('oe_form_dirty');
-            });
+                self.$el.removeClass('oe_form_dirty');                
+                self.set_next_tabindex();
          });
     },
     /**
@@ -659,6 +745,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 core.bus.trigger('form_view_saved', self);
             }).always(function() {
                 self.enable_button();
+                self.set_next_tabindex();
             });
         }).fail(function(){
             self.enable_button();
@@ -688,6 +775,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         return this.to_edit_mode();
     },
     on_button_create: function() {
+        this.last_tabindex = null;
         this.dataset.index = null;
         this.do_show();
     },

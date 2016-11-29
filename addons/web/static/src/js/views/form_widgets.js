@@ -19,6 +19,7 @@ var Model = require('web.DataModel');
 var pyeval = require('web.pyeval');
 var session = require('web.session');
 var utils = require('web.utils');
+var Tip = require('web_tour.Tip');
 
 var _t = core._t;
 var QWeb = core.qweb;
@@ -47,6 +48,7 @@ var WidgetButton = common.FormWidget.extend({
             this.do_attach_tooltip();
         }
         this.setupFocus(this.$el);
+        this.$el.on("blur", this.on_focusout);
     },
     on_click: function() {
         var self = this;
@@ -93,7 +95,9 @@ var WidgetButton = common.FormWidget.extend({
                     self.view.recursive_reload();
                 }
             }).fail(function () {
-                self.view.recursive_reload();
+                self.view.recursive_reload().then(function() {
+                    self.view.set_next_tabindex();
+                });
             });
     },
     check_disable: function() {
@@ -113,6 +117,32 @@ var WidgetButton = common.FormWidget.extend({
         setTimeout(function() {
             $body.removeClass(class_to_add);
         }, 1000);
+    },
+    focus: function() {
+        this.$el.focus();
+        //For instance used Tip to show tooltip, we'll implement proper api for tip to make it available in all views
+        if (this.node.attrs.on_focus_tip) {
+            content = this.node.attrs.on_focus_tip;
+        } else {
+            var content = _.str.sprintf("Press TAB to %s or ESC to Cancel", this.string);
+        }
+        var tip_info = _.extend({}, {
+            content: content,
+            event_handlers: [{
+                event: 'click',
+                selector: '.o_skip_tour',
+                //handler: tour.skip_handler.bind(this, tip),
+            }],
+        });
+        this.$tip = new Tip(this, tip_info);
+        this.$tip.attach_to(this.$el);
+        this.$tip._to_info_mode();
+    },
+    on_focusout: function() {
+        console.log("this.$tip ::: ", this.$tip);
+        if (this.$tip) {
+            this.$tip.destroy();
+        }
     }
 });
 
@@ -1654,6 +1684,10 @@ var FieldToggleBoolean = common.AbstractField.extend({
 
 var AceEditor = common.AbstractField.extend(common.ReinitializeFieldMixin, {
     template: "AceEditor",
+    init: function() {
+        this._super.apply(this, arguments);
+        this.no_tabindex = true;
+    },
     willStart: function() {
         if (!window.ace && !this.loadJS_def) {
             this.loadJS_def = ajax.loadJS('/web/static/lib/ace/ace.odoo-custom.js').then(function () {
