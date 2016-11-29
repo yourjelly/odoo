@@ -349,7 +349,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         };
         next_widget = get_next_widget();
         if (next_widget) {
-            if (next_widget.node.tag == "button" && this.$buttons.find(".o_form_button_save").is(":visible")) { //TODO: Remove this sitty visibility based checking for save button
+            if (next_widget.node.tag == "button" && this.get("actual_mode") != "view") { //TODO: Remove this sitty visibility based checking for save button
                 // FIXME: Need to preventDefault TAB key to keep focus on save button
                 if (e) { e.preventDefault(); }
                 return this.$buttons.find(".o_form_button_save").focus();
