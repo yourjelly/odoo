@@ -131,7 +131,6 @@ var WidgetButton = common.FormWidget.extend({
             event_handlers: [{
                 event: 'click',
                 selector: '.o_skip_tour',
-                //handler: tour.skip_handler.bind(this, tip),
             }],
         });
         this.$tip = new Tip(this, tip_info);

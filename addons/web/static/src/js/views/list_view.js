@@ -425,6 +425,7 @@ var ListView = View.extend({
     },
     do_show: function () {
         this._super();
+        this.$buttons.find('.o_list_button_add').trigger('focus');
         if (this.sidebar) {
             // Hide the sidebar by default (will be shown once a record is selected)
             this.sidebar.do_hide();

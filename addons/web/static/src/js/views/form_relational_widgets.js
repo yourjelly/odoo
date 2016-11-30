@@ -1293,10 +1293,11 @@ var FieldOne2Many = FieldX2Many.extend({
     },
     focus: function() {
         var controller = this.viewmanager.active_view && this.viewmanager.active_view.controller;
-        if (controller) {
-            controller.do_add_record(this);
-        }
-        //this.do_add_record(this);
+        this.is_loaded.done(function () {
+            return controller.save_edition().done(function() {
+                controller.do_add_record();
+            });
+        });
     }
 });
 
