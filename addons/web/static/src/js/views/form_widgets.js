@@ -40,6 +40,7 @@ var WidgetButton = common.FormWidget.extend({
         }
     },
     start: function() {
+        var self = this;
         this._super.apply(this, arguments);
         this.view.on('view_content_has_changed', this, this.check_disable);
         this.check_disable();
@@ -49,6 +50,11 @@ var WidgetButton = common.FormWidget.extend({
         }
         this.setupFocus(this.$el);
         this.$el.on("blur", this.on_focusout);
+        this.$el.on("keydown", function(e) {
+            if (e.which == $.ui.keyCode.ESCAPE) {
+                self.on_escape();
+            }
+        });
     },
     on_click: function() {
         var self = this;
@@ -138,6 +144,13 @@ var WidgetButton = common.FormWidget.extend({
         this.$tip._to_info_mode();
     },
     on_focusout: function() {
+        this.destroy_tip();
+    },
+    on_escape: function() {
+        this.destroy_tip();
+        this.view.trigger('history_back');
+    },
+    destroy_tip: function() {
         if (this.$tip) {
             this.$tip.destroy();
         }

@@ -158,6 +158,14 @@ var FormView = View.extend(common.FieldManagerMixin, {
             self.show_tip(_t("Press TAB to Save and Esc to Cancel"), this);
         });
         this.$buttons.on('blur', '.o_form_button_save', this.destroy_tip.bind(this));
+        this.$buttons.on('keydown', '.o_form_button_save', function(e) {
+            if (e.which == $.ui.keyCode.TAB) { //We can use switch here
+                $(this).trigger("click");
+            }
+            if (e.which == $.ui.keyCode.ESCAPE) {
+                self.on_button_cancel();
+            }
+        });
 
         this.$buttons.appendTo($node);
     },
@@ -327,7 +335,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         }
         if (!this.last_tabindex) {
             var widget = tabindex_widgets[0]; //Set focus to first widget
-            if (typeof(widget.focus) == "function" && widget.focus() !== false) {
+            if (typeof(widget.focus) == "function" && widget.focus() !== false) { //TODO: remove condition as focus method is available on FormWidget and tabindex is set from there, only set focus
                 self.last_tabindex = parseInt(widget.node.attrs.tabindex);
             }
             return false;
@@ -354,13 +362,17 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 if (e) { e.preventDefault(); }
                 return this.$buttons.find(".o_form_button_save").focus();
             }
-            if (typeof(next_widget.focus) == "function") {
+            if (typeof(next_widget.focus) == "function") { //TODO: remove this condition as focus function is available on FormWidget
                 this.last_tabindex = parseInt(next_widget.node.attrs.tabindex);
                 next_widget.focus();
             }
-        } else if (_.isEqual(current_widget, tabindex_widgets[tabindex_widgets.length-1]) && this.get("actual_mode") == "view") {
-            //Set focus to create button again
-            return this.$buttons.find(".o_form_button_create").focus();
+        } else if (_.isEqual(current_widget, tabindex_widgets[tabindex_widgets.length-1])) {
+            if (this.get("actual_mode") == "view") {
+                //Set focus to create button again
+                return this.$buttons.find(".o_form_button_create").focus();
+            } else {
+                tabindex_widgets[0].focus();
+            }
         }
     },
 
