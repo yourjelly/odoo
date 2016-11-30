@@ -277,8 +277,8 @@ var ListView = View.extend({
                     self.$buttons.find('.o_list_button_add').trigger("click");
                 }
             });
+
             this.$buttons.appendTo($node);
-            this.$buttons.find('.o_list_button_add').trigger('focus');
         }
     },
     /**
@@ -425,11 +425,13 @@ var ListView = View.extend({
     },
     do_show: function () {
         this._super();
-        this.$buttons.find('.o_list_button_add').trigger('focus');
         if (this.sidebar) {
             // Hide the sidebar by default (will be shown once a record is selected)
             this.sidebar.do_hide();
         }
+        _.delay(_.bind(function()
+            {this.$buttons.find('.o_list_button_add').trigger('focus');
+        }, this));
     },
     /**
      * re-renders the content of the list view
@@ -682,6 +684,9 @@ var ListView = View.extend({
     */
     do_show_tabindex_tip: function(event, attach_to) {
         //For instance used Tip to show tooltip
+        if (this.$tip) {
+            this.do_destroy_tabindex_tip();
+        }
         if (!attach_to) {
             attach_to = $(event.currentTarget);
         }
