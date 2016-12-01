@@ -398,7 +398,7 @@
                                     <field name="sequence" widget="handle"/>
                                     <field name="product_id" domain="[('sale_ok','=',True)]" tabindex="1"/>
                                     <field name="origin" invisible="1"/>
-                                    <field name="name" tabindex="1"/>
+                                    <field name="name"/>
                                     <field name="company_id" invisible="1"/>
                                     <field name="account_id" groups="account.group_account_user"
                                         domain="[('company_id', '=', parent.company_id), ('internal_type', '=', 'other')]"/>
