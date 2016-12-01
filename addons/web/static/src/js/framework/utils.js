@@ -529,6 +529,25 @@ function async_when() {
     return def;
 }
 
+function show_tabindex_tip(options) {
+    // Keep here so in future we can create dynamic position tip
+    $(options.attach_to).tooltip({
+        title: options.title,
+        trigger: options.trigger || 'manual',
+        placement: options.placement || 'top'
+    });
+    $(options.attach_to).tooltip('show');
+    /*
+    $(options.attach_to).popover({
+        placement : options.placement || 'right', // top, bottom, left or right
+        content : options.title, 
+        html: 'true',
+        trigger: 'manual'
+    });
+    $(options.attach_to).popover('show');
+    */
+}
+
 return {
     divmod: divmod,
     modf: modf,
@@ -561,6 +580,7 @@ return {
     swap: swap,
     toBoolElse: toBoolElse,
     async_when: async_when,
+    show_tabindex_tip: show_tabindex_tip
 };
 
 });

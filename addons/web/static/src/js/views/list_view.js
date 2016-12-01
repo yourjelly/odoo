@@ -15,7 +15,6 @@ var session = require('web.session');
 var Sidebar = require('web.Sidebar');
 var utils = require('web.utils');
 var View = require('web.View');
-var Tip = require('web_tour.Tip');
 
 var Class = core.Class;
 var _t = core._t;
@@ -270,8 +269,10 @@ var ListView = View.extend({
         if (!this.$buttons) {
             this.$buttons = $(QWeb.render("ListView.buttons", {'widget': this}));
             this.$buttons.on('click', '.o_list_button_add', this.proxy('do_add_record'));
-            this.$buttons.on('focus', '.o_list_button_add', this.proxy('do_show_tabindex_tip'));
-            this.$buttons.on('blur', '.o_list_button_add', this.proxy('do_destroy_tabindex_tip'));
+            this.$buttons.on('focus', '.o_list_button_add', function(e) {
+                utils.show_tabindex_tip({attach_to: e.currentTarget, title: _t("Press TAB to Create or ESC to Cancel"), trigger: 'focus'});
+            });
+            //this.$buttons.on('blur', '.o_list_button_add', this.proxy('do_destroy_tabindex_tip'));
             this.$buttons.on('keydown', '.o_list_button_add', function(event) {
                 if (event.which == $.ui.keyCode.TAB) {
                     self.$buttons.find('.o_list_button_add').trigger("click");
@@ -678,35 +679,6 @@ var ListView = View.extend({
      */
     do_add_record: function () {
         this.select_record(null);
-    },
-    /**
-    * Show tooltip on tabindex
-    */
-    do_show_tabindex_tip: function(event, attach_to) {
-        //For instance used Tip to show tooltip
-        if (this.$tip) {
-            this.do_destroy_tabindex_tip();
-        }
-        if (!attach_to) {
-            attach_to = $(event.currentTarget);
-        }
-        var tip_info = _.extend({}, {
-            content: _t("Press TAB to Create or ESC to Cancel"),
-            event_handlers: [{
-                event: 'click',
-                selector: '.o_skip_tour',
-                //handler: tour.skip_handler.bind(this, tip),
-            }],
-        });
-        this.$tip = new Tip(this, tip_info);
-        this.$tip.attach_to(attach_to);
-        this.$tip._to_info_mode();
-    },
-    /**
-    *
-    */
-    do_destroy_tabindex_tip: function() {
-        this.$tip.destroy();
     },
     /**
      * Handles deletion of all selected lines

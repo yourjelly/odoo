@@ -12,7 +12,6 @@ var Pager = require('web.Pager');
 var Sidebar = require('web.Sidebar');
 var utils = require('web.utils');
 var View = require('web.View');
-var Tip = require('web_tour.Tip');
 
 var _t = core._t;
 var _lt = core._lt;
@@ -154,10 +153,22 @@ var FormView = View.extend(common.FieldManagerMixin, {
         this.$buttons.on('click', '.o_form_button_edit', this.on_button_edit);
         this.$buttons.on('click', '.o_form_button_save', this.on_button_save);
         this.$buttons.on('click', '.o_form_button_cancel', this.on_button_cancel);
-        this.$buttons.on('focus', '.o_form_button_save', function() {
-            self.show_tip(_t("Press TAB to Save and Esc to Cancel"), this);
+
+        this.$buttons.on('focus', '.o_form_button_create', function() {
+            utils.show_tabindex_tip({attach_to: this, title: _t("Press TAB to <b>Create</b> and ESC to <b>Edit</b>"), trigger: 'focus'});
         });
-        this.$buttons.on('blur', '.o_form_button_save', this.destroy_tip.bind(this));
+        this.$buttons.on('keydown', '.o_form_button_create', function(e) {
+            if (e.which == $.ui.keyCode.TAB) { //We can use switch here
+                $(this).trigger("click");
+            }
+            if (e.which == $.ui.keyCode.ESCAPE) {
+                self.on_button_edit();
+            }
+        });
+
+        this.$buttons.on('focus', '.o_form_button_save', function() {
+            utils.show_tabindex_tip({attach_to: this, title: _t("Press TAB to Save or ESC to Cancel"), trigger: 'focus'});
+        });
         this.$buttons.on('keydown', '.o_form_button_save', function(e) {
             if (e.which == $.ui.keyCode.TAB) { //We can use switch here
                 $(this).trigger("click");
@@ -168,25 +179,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
         });
 
         this.$buttons.appendTo($node);
-    },
-    show_tip: function(content, attach_to) {
-        var tip_info = _.extend({}, {
-            content: content,
-            event_handlers: [{
-                event: 'click',
-                selector: '.o_skip_tour',
-            }],
-        });
-        this.$tip = new Tip(this, tip_info);
-        attach_to = attach_to && $(attach_to) || this.$el;
-        this.$tip.attach_to(attach_to);
-        this.$tip._to_info_mode();
-    },
-    destroy_tip: function() {
-        console.log("Inside dewstroy tip ::: ");
-        if (this.$tip) {
-            this.$tip.destroy();
-        }
     },
     /**
      * Instantiate and render the sidebar if a sidebar is requested

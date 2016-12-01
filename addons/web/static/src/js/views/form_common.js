@@ -516,11 +516,7 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
         return final_domain;
     },
     focus: function() {
-        console.log("Inside form widget focus :::: ");
-        // Implement focus method here and set last tabinex, so that when manually focus set on any widget we can move according to tabindex
-        if (parseInt(this.node.attrs.tabindex)) {
-            this.view.last_tabindex = parseInt(this.node.attrs.tabindex);
-        }
+        // Implement/override focus method wherever needed
     }
 });
 

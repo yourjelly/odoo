@@ -19,7 +19,6 @@ var Model = require('web.DataModel');
 var pyeval = require('web.pyeval');
 var session = require('web.session');
 var utils = require('web.utils');
-var Tip = require('web_tour.Tip');
 
 var _t = core._t;
 var QWeb = core.qweb;
@@ -126,34 +125,18 @@ var WidgetButton = common.FormWidget.extend({
     },
     focus: function() {
         this.$el.focus();
-        //For instance used Tip to show tooltip, we'll implement proper api for tip to make it available in all views
         if (this.node.attrs.on_focus_tip) {
             content = this.node.attrs.on_focus_tip;
         } else {
             var content = _.str.sprintf("Press TAB to %s or ESC to Cancel", this.string);
         }
-        var tip_info = _.extend({}, {
-            content: content,
-            event_handlers: [{
-                event: 'click',
-                selector: '.o_skip_tour',
-            }],
-        });
-        this.$tip = new Tip(this, tip_info);
-        this.$tip.attach_to(this.$el);
-        this.$tip._to_info_mode();
+        utils.show_tabindex_tip({attach_to: this.$el, title: content, trigger: 'focus'});
     },
     on_focusout: function() {
-        this.destroy_tip();
+        // To implement if need to special thing on focusout
     },
     on_escape: function() {
-        this.destroy_tip();
         this.view.trigger('history_back');
-    },
-    destroy_tip: function() {
-        if (this.$tip) {
-            this.$tip.destroy();
-        }
     }
 });
 
