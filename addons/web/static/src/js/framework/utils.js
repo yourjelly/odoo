@@ -531,12 +531,16 @@ function async_when() {
 
 function show_tabindex_tip(options) {
     // Keep here so in future we can create dynamic position tip
-    $(options.attach_to).tooltip({
-        title: options.title,
+    var $attach_to = $(options.attach_to);
+    var $template = $("<div class='oe_tooltip_string'>"+options.title+"</div>")
+    $attach_to.tooltip({
         trigger: options.trigger || 'manual',
-        placement: options.placement || 'top'
+        placement: options.placement || 'bottom',
+        title: function() {
+            return $template;
+        }
     });
-    $(options.attach_to).tooltip('show');
+    $attach_to.tooltip('show');
     /*
     $(options.attach_to).popover({
         placement : options.placement || 'right', // top, bottom, left or right
