@@ -376,7 +376,7 @@ class AccountBankStatementLine(models.Model):
     def _check_amount(self):
         # This constraint could possibly underline flaws in bank statement import (eg. inability to
         # support hacks such as using dummy transactions to give additional informations)
-        if self.amount == 0:
+        if float_is_zero(self.amount, precision_rounding=self.journal_currency_id.rounding):
             raise ValidationError(_('A transaction can\'t have a 0 amount.'))
 
     @api.one
