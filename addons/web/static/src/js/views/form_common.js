@@ -446,7 +446,7 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
         var self = this;
         $e.on({
             focus: function () { self.trigger('focused'); },
-            blur: function () { 
+            blur: function () {
                 if (parseInt(self.node.attrs.tabindex)) {
                     self.view.last_tabindex = parseInt(self.node.attrs.tabindex);
                 }

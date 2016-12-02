@@ -311,7 +311,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 // TODO: To check if focus is on editable one2many, editable o2m is exceptional, need generic solution
                 // So that if focus comes on such field we do not navigate to main form's tabindex elements
                 if (e.which == $.ui.keyCode.TAB) {
-                    e.stopPropagation(); //To avoid clash with editable listview(TAB feature)
+                    e.preventDefault(); //Need to preventDefault otherwise TAB key will immediately set focus on another field of current form
+                    e.stopImmediatePropagation(); //To avoid clash with editable listview(TAB feature)
                     self.set_next_tabindex(e, w, tabindex_widgets);
                 }
             });
