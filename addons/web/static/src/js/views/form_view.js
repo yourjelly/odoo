@@ -283,36 +283,36 @@ var FormView = View.extend(common.FieldManagerMixin, {
     },
     get_tabindex_widgets: function() {
         return _.chain(this.get_widgets()).filter(function(w) {
-            return w.node.attrs.tabindex && parseInt(w.node.attrs.tabindex);
+            return w.node.attrs.tabindex && parseInt(w.node.attrs.tabindex) && !w.no_tabindex;
         }).sortBy(function(w) {
             return parseInt(w.node.attrs.tabindex);
         }).value();
     },
-    set_next_tabindex: function(e, current_widget, tabindex_widgets) {
+    set_next_tabindex: function(current_widget, reverse) {
         var self = this;
-        if (!tabindex_widgets) {
-            tabindex_widgets = this.get_tabindex_widgets();
+        if (!this.tabindex_widgets) {
+            this.tabindex_widgets = this.get_tabindex_widgets();
         }
-        if (!tabindex_widgets.length) {
+        if (!this.tabindex_widgets.length) {
             return;
         }
         if (!this.last_tabindex) {
-            var widget = tabindex_widgets[0]; //Set focus to first widget
-            if (typeof(widget.focus) == "function" && widget.focus() !== false) { //TODO: remove condition as focus method is available on FormWidget and tabindex is set from there, only set focus
+            var widget = this.tabindex_widgets[0]; //Set focus to first widget
+            if (widget.focus() !== false) {
                 self.last_tabindex = parseInt(widget.node.attrs.tabindex);
             }
             return false;
         }
         if (!current_widget) {
-            current_widget = _.find(tabindex_widgets, function(w) {
+            current_widget = _.find(this.tabindex_widgets, function(w) {
                 return parseInt(w.node.attrs.tabindex) == self.last_tabindex;
             });
         }
         var next_widget = null;
-        var current_index = _(tabindex_widgets).indexOf(current_widget);
+        var current_index = _(this.tabindex_widgets).indexOf(current_widget);
         var get_next_widget = function() {
-            current_index += 1;
-            var next_widget = tabindex_widgets[current_index];
+            current_index += (reverse && -1 || 1);
+            var next_widget = self.tabindex_widgets[current_index];
             if (next_widget && next_widget.$el.hasClass("o_form_invisible")) {
                 return get_next_widget();
             }
@@ -321,20 +321,16 @@ var FormView = View.extend(common.FieldManagerMixin, {
         next_widget = get_next_widget();
         if (next_widget) {
             if (next_widget.node.tag == "button" && this.get("actual_mode") != "view") { //TODO: Remove this sitty visibility based checking for save button
-                // FIXME: Need to preventDefault TAB key to keep focus on save button
-                if (e) { e.preventDefault(); }
                 return this.$buttons.find(".o_form_button_save").focus();
             }
-            if (typeof(next_widget.focus) == "function") { //TODO: remove this condition as focus function is available on FormWidget
-                this.last_tabindex = parseInt(next_widget.node.attrs.tabindex);
-                next_widget.focus();
-            }
-        } else if (_.isEqual(current_widget, tabindex_widgets[tabindex_widgets.length-1])) {
+            this.last_tabindex = parseInt(next_widget.node.attrs.tabindex);
+            next_widget.focus();
+        } else if (_.isEqual(current_widget, this.tabindex_widgets[this.tabindex_widgets.length-1])) {
             if (this.get("actual_mode") == "view") {
                 //Set focus to create button again
                 return this.$buttons.find(".o_form_button_create").focus();
             } else {
-                tabindex_widgets[0].focus();
+                this.tabindex_widgets[0].focus();
             }
         }
     },
@@ -381,7 +377,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
         });
     },
     load_record: function(record) {
-        console.log("Inside load_record ::: ");
         var self = this, set_values = [];
         if (!record) {
             this.set({ 'title' : undefined });

@@ -526,7 +526,11 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
                 if (e.which == $.ui.keyCode.TAB) {
                     e.preventDefault(); //Need to preventDefault otherwise TAB key will immediately set focus on another field of current form
                     e.stopImmediatePropagation(); //To avoid clash with editable listview(TAB feature)
-                    self.view.set_next_tabindex(e, self);
+                    if (e.shiftKey) {
+                        self.view.set_next_tabindex(self, true);
+                    } else {
+                        self.view.set_next_tabindex(self, false);
+                    }
                 }
             });
         }
