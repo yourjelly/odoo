@@ -79,10 +79,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
             self._build_onchange_specs();
             self.on("change:actual_mode", self, self.toggle_buttons);
             self.on("change:actual_mode", self, self.toggle_sidebar);
-            self.on("change:actual_mode", self, self.bind_tabindex); // Bind tabindex and set focus to next tabindex element
         });
         self.on("load_record", self, self.load_record);
-        this.is_initialized.done(function() {self.bind_tabindex();});
 
         core.bus.on('clear_uncommitted_changes', this, function(chain_callbacks) {
             var self = this;
@@ -289,34 +287,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
         }).sortBy(function(w) {
             return parseInt(w.node.attrs.tabindex);
         }).value();
-    },
-    bind_tabindex: function() {
-        var self = this;
-        if (this.get("actual_mode") == "view") {
-            return;
-        }
-        var tabindex_widgets = this.get_tabindex_widgets();
-
-        var tabindex_supported_widgets = _.filter(tabindex_widgets, function(w) {
-            return !w.no_tabindex;
-        });
-
-        _.each(tabindex_supported_widgets, function(w) {
-            w.$el.on("keydown", function(e) {
-                // FIXME/Blocking Issue:
-                //If editable listview inside form then this keydown + TAB logic can create issue, also need to check Form is blurred or not
-                //If we set blur based logic then we will have issue whether blur is happened through keyboard or mouse,
-                //because we do not want to set tabindex if blur is happened through mouse
-
-                // TODO: To check if focus is on editable one2many, editable o2m is exceptional, need generic solution
-                // So that if focus comes on such field we do not navigate to main form's tabindex elements
-                if (e.which == $.ui.keyCode.TAB) {
-                    e.preventDefault(); //Need to preventDefault otherwise TAB key will immediately set focus on another field of current form
-                    e.stopImmediatePropagation(); //To avoid clash with editable listview(TAB feature)
-                    self.set_next_tabindex(e, w, tabindex_widgets);
-                }
-            });
-        });
     },
     set_next_tabindex: function(e, current_widget, tabindex_widgets) {
         var self = this;

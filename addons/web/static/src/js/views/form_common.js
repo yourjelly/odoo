@@ -430,6 +430,7 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
         this._super();
         this.$el.addClass(this.node.attrs["class"] || "");
         this.$el.attr('style', this.node.attrs.style);
+        this.bind_tabindex();
     },
     destroy: function() {
         $.fn.tooltip('destroy');
@@ -517,6 +518,18 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
     },
     focus: function() {
         // Implement/override focus method wherever needed
+    },
+    bind_tabindex: function() {
+        var self = this;
+        if (!this.get('effective_readonly') && !this.no_tabindex) {
+            this.$el.on("keydown", function(e) {
+                if (e.which == $.ui.keyCode.TAB) {
+                    e.preventDefault(); //Need to preventDefault otherwise TAB key will immediately set focus on another field of current form
+                    e.stopImmediatePropagation(); //To avoid clash with editable listview(TAB feature)
+                    self.view.set_next_tabindex(e, self);
+                }
+            });
+        }
     }
 });
 
