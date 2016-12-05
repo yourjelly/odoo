@@ -521,19 +521,22 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
     },
     bind_tabindex: function() {
         var self = this;
-        if (!this.get('effective_readonly') && !this.no_tabindex) {
+        if (!this.get('effective_readonly') && !this.no_tabindex) { // We can only bind widgets with tabindex(this.node.attrs.tabindex && parseInt(this.node.attrs.tabindex) > 0)
             this.$el.on("keydown", function(e) {
                 if (e.which == $.ui.keyCode.TAB) {
                     e.preventDefault(); //Need to preventDefault otherwise TAB key will immediately set focus on another field of current form
                     e.stopImmediatePropagation(); //To avoid clash with editable listview(TAB feature)
                     if (e.shiftKey) {
-                        self.view.set_next_tabindex(self, true);
+                        self.set_next_tabindex(true);
                     } else {
-                        self.view.set_next_tabindex(self, false);
+                        self.set_next_tabindex(false);
                     }
                 }
             });
         }
+    },
+    set_next_tabindex: function(reverse) {
+        return this.view.set_next_tabindex(this, reverse);
     }
 });
 
@@ -813,6 +816,13 @@ var AbstractField = FormWidget.extend(FieldInterface, {
     commit_value: function() {
         return $.when();
     },
+    set_next_tabindex: function(reverse) {
+        if (this.is_valid()) {
+            return this._super(reverse);
+        } else {
+            this.$el.add(this.$label).toggleClass('o_form_invalid', true);
+        }
+    }
 });
 
 /**
