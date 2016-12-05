@@ -516,7 +516,7 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
     },
     bind_tabindex: function() {
         var self = this;
-        if (!this.get('effective_readonly') && !this.no_tabindex) { // We can only bind widgets with tabindex(this.node.attrs.tabindex && parseInt(this.node.attrs.tabindex) > 0)
+        if (!this.get('effective_readonly') && this.node.attrs.tabindex && parseInt(this.node.attrs.tabindex) > 0 && !this.no_tabindex) {
             this.$el.on("keydown", function(e) {
                 if (e.which == $.ui.keyCode.TAB) {
                     e.preventDefault(); //Need to preventDefault otherwise TAB key will immediately set focus on another field of current form
