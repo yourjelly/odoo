@@ -282,6 +282,9 @@ var FormView = View.extend(common.FieldManagerMixin, {
         }, 0);
     },
     get_tabindex_widgets: function() {
+        // In future if we want to support tabindex on other elements like page then we can prepare 
+        // tabindex list in render_to method of renering engine and add jQuery wrapped elements of page and other elements
+        // So that we can have focus method available(we may bind set_next_tabindex on TAB key for such elements explicitly)
         return _.chain(this.get_widgets()).filter(function(w) {
             return w.node.attrs.tabindex && parseInt(w.node.attrs.tabindex) && !w.no_tabindex;
         }).sortBy(function(w) {
@@ -299,7 +302,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         if (!this.last_tabindex) {
             var widget = this.tabindex_widgets[0]; //Set focus to first widget
             if (widget.focus() !== false) {
-                self.last_tabindex = parseInt(widget.node.attrs.tabindex);
+                this.last_tabindex = parseInt(widget.node.attrs.tabindex);
             }
             return false;
         }
@@ -308,8 +311,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 return parseInt(w.node.attrs.tabindex) == self.last_tabindex;
             });
         }
-        var next_widget = null;
         var current_index = _(this.tabindex_widgets).indexOf(current_widget);
+
         var get_next_widget = function() {
             current_index += (reverse && -1 || 1);
             var next_widget = self.tabindex_widgets[current_index];
@@ -318,7 +321,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
             }
             return next_widget;
         };
-        next_widget = get_next_widget();
+
+        var next_widget = get_next_widget();
         if (next_widget) {
             if (next_widget.node.tag == "button" && this.get("actual_mode") != "view") { //TODO: Remove this sitty visibility based checking for save button
                 return this.$buttons.find(".o_form_button_save").focus();
@@ -327,10 +331,9 @@ var FormView = View.extend(common.FieldManagerMixin, {
             next_widget.focus();
         } else if (_.isEqual(current_widget, this.tabindex_widgets[this.tabindex_widgets.length-1])) {
             if (this.get("actual_mode") == "view") {
-                //Set focus to create button again
-                return this.$buttons.find(".o_form_button_create").focus();
+                return this.$buttons.find(".o_form_button_create").focus(); //Set focus to create button again
             } else {
-                this.tabindex_widgets[0].focus();
+                this.tabindex_widgets[0].focus(); // If edit/create mode and there is no further tabindex then set focus to first widget again
             }
         }
     },
