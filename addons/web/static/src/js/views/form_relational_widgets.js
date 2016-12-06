@@ -1097,7 +1097,9 @@ var One2ManyListView = X2ManyListView.extend({
                 child_name: self.x2m.name,
                 form_view_options: {'not_interactible_on_create':true},
                 on_selected: function() {
-                    self.x2m.reload_current_view();
+                    self.x2m.reload_current_view().then(function() {
+                        self.x2m.view.set_next_tabindex();
+                    });
                 }
             }).open();
         }
@@ -1293,11 +1295,13 @@ var FieldOne2Many = FieldX2Many.extend({
     },
     focus: function() {
         var controller = this.viewmanager.active_view && this.viewmanager.active_view.controller;
-        this.is_loaded.done(function () {
-            return controller.save_edition().done(function() {
-                controller.do_add_record();
+        if (controller) {
+            this.is_loaded.done(function () {
+                return controller.save_edition().done(function() {
+                    controller.do_add_record();
+                });
             });
-        });
+        }
     }
 });
 
