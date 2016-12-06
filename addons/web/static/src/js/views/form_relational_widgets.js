@@ -1723,6 +1723,14 @@ var FieldMany2ManyCheckBoxes = AbstractManyField.extend(common.ReinitializeField
     is_false: function() {
         return false;
     },
+    set_next_tabindex: function() {
+        var $inputs = this.$("input");
+        var index = $inputs.index(this.$("input:focus"));
+        if (this.$("input") && index == $inputs.length-1) {
+            return this._super.apply(this, arguments);
+        }
+        $inputs[index+1] && $inputs[index+1].focus();
+    }
 });
 
 core.form_widget_registry
