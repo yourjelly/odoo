@@ -3,7 +3,7 @@
 
     <template id="website_planner">
         <t t-call="web_planner.pages">
-            <t t-call="web_planner.page">
+           <t t-call="web_planner.page">
                 <t t-set="page_title">Welcome</t>
                 <t t-set="hide_mark_as_done" t-value="True"/>
                 <div class="o_planner_intro">
@@ -139,127 +139,14 @@
                     </div>
                 </t>
             </t>
+             
             <t t-call="web_planner.category">
                 <t t-set="menu_categorytitle" name="design_placeholder">Design</t>
                 <t t-set="menu_categoryclasses" t-value="'fa-image'"/>
+
+
                 <t t-call="web_planner.page">
-                    <t t-set="page_title">Theme Selection</t>
-                    <p class="text-muted">The theme you choose sets the tone for the overall look and feel of your site design: building blocks, color palettes, pre-loaded images.</p>
-                    <div class="row">
-                        <div class="col-md-6 col-xs-12">
-                            <div class="panel panel-success">
-                                <div class="panel-heading">
-                                    <span class="panel-title"><span class="fa fa-magic"/><strong> 1. Choose your theme</strong></span>
-                                </div>
-                                <div class="panel-body">
-                                    <li>Online users: when installing Website</li>
-                                    <p>
-                                    <a href="https://www.odoo.com/apps/themes/browse?series=online" target="_blank">View our Odoo Online themes (free!)</a>
-                                    </p>
-                                    <li>Community &amp; Enterprise users:</li>
-                                    <p> <a href="https://www.odoo.com/apps/themes" target="_blank">View downloadable themes</a>
-                                    </p>
-                                    <p>It's not recommended to change your theme after creating your website. So take the time to check their preview behorehand. </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-xs-12">
-                            <div class="panel panel-success">
-                                <div class="panel-heading">
-                                    <span class="panel-title"><span class="fa fa-code"/><strong> 2. Customize its appearance</strong></span>
-                                </div>
-                                <div class="panel-body">
-                                    <p>
-                                        Use the <i>Customize</i> menu to change the look of your theme:
-                                        <li>Background image</li>
-                                        <li>Special effects and animations</li>
-                                        <li>Colors palette</li>
-                                        <li>Fonts</li>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="alert alert-info info_icon" role="alert">
-                            <span class="fa fa-lightbulb-o fa-2x"></span><p>If you have a designer background you can edit the code directly thanks to the <i>HTML Editor</i> (in Customize menu).</p>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12 col-xs-12">
-                                <div class="well well-lg">
-                                    <strong>For a custom-made theme: <a href="https://www.odoo.com/help" target="_blank"><i class="fa fa-envelope-o"/> Contact Our Website Experts</a></strong>
-                                    <p>We can create a customized theme for you with your company colors, logo and images from your library.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </t>
-                <t t-call="web_planner.page">
-                    <t t-set="page_title">Install Features</t>
-                    <h4>
-                        <strong>Install</strong> what you need:
-                    </h4>
-                    <section>
-                        <div class="row o_planner_row_apps">
-                            <div class="text-center col-md-4 col-xs-6">
-                                <span class="fa fa-credit-card fa-4x"></span>
-                                <h3><strong>eCommerce</strong></h3>
-                                <p>Boost your online sales with sleek product pages.</p>
-                                <a t-att-href="prepare_backend_url('base.open_module_tree', 'form', 'website_sale')" target="_blank" class="btn odoo_purple">
-                                    <span class="fa fa-arrow-circle-o-down"/> Install now
-                                </a>
-                            </div>
-
-                            <div class="text-center col-md-4 col-xs-6">
-                                <span class="fa fa-file-text-o fa-4x"></span>
-                                <h3><strong>Contact Form</strong></h3>
-                                <p>Publish a contact form to fill in your CRM pipeline.</p>
-                                <a t-att-href="prepare_backend_url('base.open_module_tree', 'form', 'website_crm')" target="_blank" class="btn odoo_purple">
-                                    <span class="fa fa-arrow-circle-o-down"/> Install now
-                                </a>
-                            </div>
-
-                            <div class="text-center col-md-4 col-xs-6">
-                                <span class="fa fa-rss fa-4x"></span>
-                                <h3><strong>Blogs</strong></h3>
-                                <p>Attract more visitors with a content marketing strategy.</p>
-                                <a t-att-href="prepare_backend_url('base.open_module_tree', 'form', 'website_blog')" target="_blank" class="btn odoo_purple">
-                                <span class="fa fa-arrow-circle-o-down"/> Install now</a>
-                            </div>
-
-                            <div class="text-center col-md-4 col-xs-6">
-                                <span class="fa fa-male fa-4x"></span>
-                                <h3><strong>Jobs</strong></h3>
-                                <p>Promote your job announces and attract new talents.</p>
-                                <a t-att-href="prepare_backend_url('base.open_module_tree', 'form', 'website_hr_recruitment')" target="_blank" class="btn odoo_purple">
-                                    <span class="fa fa-arrow-circle-o-down"/> Install now
-                                </a>
-                            </div>
-
-                            <div class="text-center col-md-4 col-xs-6">
-                                <span class="fa fa-refresh fa-4x"></span>
-                                <h3><strong>Subscriptions</strong></h3>
-                                <p>Sell subscriptions and manage recurring payments.</p>
-                                <a t-att-href="prepare_backend_url('base.open_module_tree', 'form', 'website_contract')" target="_blank" class="btn odoo_purple">
-                                    <span class="fa fa-arrow-circle-o-down"/> Install now
-                                </a>
-                            </div>
-
-                            <div class="text-center col-md-4 col-xs-6">
-                                <span class="fa fa-ticket fa-4x"></span>
-                                <h3><strong>Event Tickets</strong></h3>
-                                <p>Organize events and sell tickets online.</p>
-                                <a t-att-href="prepare_backend_url('base.open_module_tree', 'form', 'website_event_sale')" target="_blank" class="btn odoo_purple">
-                                    <span class="fa fa-arrow-circle-o-down"/> Install now
-                                </a>
-                            </div>
-
-                            <div class="clearfix hidden-xs mb16"></div>
-                        </div>
-                    </section>
-                </t>
-                <t t-call="web_planner.page">
-                    <t t-set="page_title">Your Homepage</t>
+                    <t t-set="page_title">Homepage</t>
                     <p class="text-muted">
                         Your homepage is the most important page of your website. This is where visitors get their first impressions of you. An efficient homepage will prompt them to stay on your site, guide them towards your content, strengthen your company's branding and more.<br/>
                         Here are some pointers to help you get started.
@@ -318,11 +205,19 @@
                                     You have many blocks available: References, Quotes Slider, Twitter Scroller,etc.
                                 </p>
                             </div>
+
+                            <div class="col-sm-1 col-md-2 icon"><span class="fa fa-paint-brush"/></div>
+                            <div class="col-sm-11 col-md-10">
+                                <p><strong>Finetune your theme</strong><br/>
+                                The theme you selected is customizable to perfectly fit your company branding: color palettes, background, fonts, etc. Click Customize to start customizing your theme.
+                                </p>
+                            </div>
+                            
                         </div>
                     </div>
                 </t>
                 <t t-call="web_planner.page">
-                    <t t-set="page_title">Your Main Menu</t>
+                    <t t-set="page_title">Main Menu</t>
                     <p class="text-muted">
                         Your menu must be built for your visitors and not for your own purposes or objectives.<br/>
                         It needs to be organized, so that they see all the main content at a glance.<br/>
@@ -407,7 +302,7 @@
                     </div>
                 </t>
                 <t t-call="web_planner.page">
-                    <t t-set="page_title">Your Footer</t>
+                    <t t-set="page_title">Footer</t>
                     <p class="text-muted">
                         Your visitors won't see the footer immediately. Use it for links you don't want in your main menu (e.g. social media, terms and conditions, privacy terms, etc.).
                     </p>
@@ -483,17 +378,15 @@
                 <t t-set="menu_categorytitle">Launch</t>
                 <t t-set="menu_categoryclasses" t-value="'fa-rocket'"/>
                 <t t-call="web_planner.page">
-                    <t t-set="page_title">Your Domain Name</t>
+                    <t t-set="page_title">Domain Name</t>
                     <p class="text-muted">
-                        You can set a custom domain name (e.g. yourcompany.com) for both the website
-                        and your emails. Your website address is as important to your branding as the
-                        name of your business or organization, so put some thought into changing it
-                        for a proper domain.
+                        It's now time to set your own domain name (e.g. yourcompany.com). Your website address is as important to your branding as the
+                        name of your business or organization, so put some thought into it.
                     </p>
                     <div class="row">
                         <div class="col-md-6 col-sm-12 col-xs-12">
                             <div class="well well-lg">
-                                <strong>How to get a custom domain name?</strong><br/>
+                                <strong>How to get a domain name?</strong><br/>
                                 <li><a href="https://www.whois.net/" target="_blank">Check its availability</a></li>
                                 <li>Buy it at a provider:
                                     <ul>
@@ -510,16 +403,15 @@
                                 <span class="fa fa-lightbulb-o fa-2x"></span>
                                 <strong>Tips for a good domain:</strong>
                                 <li>Simple and obvious</li>
-                                <li>Easy to remember and spell</li>
+                                <li>Easy to spell</li>
                                 <li>The shorter the better</li>
                                 <li>Avoid special characters</li>
-                                <li>Aim for a .com and/or your country extension</li>
                             </div>
                         </div>
                     </div>
                     <div class="well well-lg">
                         <strong>You own your domain name?</strong><br/>
-                        <li>Online users: <a href="https://www.odoo.com/documentation/user/online/website/publish/domain_name.html" target="_blank">Apply it to your website from your database admin page</a></li>
+                        <li>Online users: <a href="https://accounts.odoo.com/my/databases/manage" target="_blank">Apply it to your website from your database admin page</a> (<a href="https://www.odoo.com/documentation/user/online/website/publish/domain_name.html" target="_blank">read how to</a>)</li>
                         <li>Community &amp; Enterprise users: apply a redirection from your Domain Manager platform</li>
                     </div>
                 </t>
@@ -785,15 +677,15 @@
                         </div>
                     </div>
                     <div class="row mb16">
-                        <div class="col-md-2"><span class="fa fa-book fa-4x"/></div>
+                        <div class="col-md-2"><span class="fa fa-file-video-o fa-4x"/></div>
                         <div class="col-md-10">
-                            <h4><strong>Publish documentation</strong>
-                            <a t-att-href="prepare_backend_url('base.open_module_tree', 'form', 'website_forum_doc')" target="_blank"
+                            <h4><strong>Publish multimedias</strong>
+                            <a t-att-href="prepare_backend_url('base.open_module_tree', 'form', 'website_slides')" target="_blank"
                                class="btn odoo_purple">
                                 <span class="fa fa-arrow-circle-o-down"/> Install now
                             </a>
                             </h4>
-                            <li>Publish multimedias to document your products/services</li>
+                            <li>Bring up digital content related to your business</li>
                             <li>Manage channels to structure your content</li>
                         </div>
                     </div>
