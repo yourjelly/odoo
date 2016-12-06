@@ -153,7 +153,7 @@
                         <div class="panel-body">
                             <p><a class="fa fa-arrow-right" t-attf-href="#{prepare_backend_url('account.action_account_config')}" target="_blank">
                                 Set a default tax rate for local transactions</a></p>
-                            <t t-if="is_module_installed('l10n_us')">    
+                            <t t-if="is_module_installed('account_taxcloud')">    
                                 <p><a class="fa fa-arrow-right" t-attf-href="#{prepare_backend_url('account.action_account_config')}" target="_blank">
                                 Use TaxCloud to compute tax rates based on U.S. ZIP codes</a></p>
                             </t>
