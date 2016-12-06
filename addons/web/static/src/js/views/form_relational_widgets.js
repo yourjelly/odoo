@@ -1294,12 +1294,17 @@ var FieldOne2Many = FieldX2Many.extend({
         return false;
     },
     focus: function() {
-        var controller = this.viewmanager.active_view && this.viewmanager.active_view.controller;
-        if (controller) {
+        var view = this.viewmanager.active_view;
+        //var controller = this.viewmanager.active_view && this.viewmanager.active_view.controller;
+        if (view && view.controller) {
             this.is_loaded.done(function () {
-                return controller.save_edition().done(function() {
-                    controller.do_add_record();
-                });
+                if (view.type == 'list') {
+                    return view.controller.save_edition().done(function() {
+                        view.controller.do_add_record();
+                    });
+                } else if (view.type == 'kanban') {
+                    return view.controller.add_record();
+                }
             });
         }
     }
