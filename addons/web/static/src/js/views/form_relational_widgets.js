@@ -1727,6 +1727,7 @@ var FieldMany2ManyCheckBoxes = AbstractManyField.extend(common.ReinitializeField
         var $inputs = this.$("input");
         var index = $inputs.index(this.$("input:focus"));
         if (this.$("input") && index == $inputs.length-1) {
+            this.view.last_tabindex = parseInt(this.node.attrs.tabindex);
             return this._super.apply(this, arguments);
         }
         $inputs[index+1] && $inputs[index+1].focus();

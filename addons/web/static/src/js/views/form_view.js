@@ -323,8 +323,9 @@ var FormView = View.extend(common.FieldManagerMixin, {
         };
 
         var next_widget = get_next_widget();
+        //TODO: Simplify following conditions, apply and operation
         if (next_widget) {
-            if (next_widget.node.tag == "button" && this.get("actual_mode") != "view") { //TODO: Remove this sitty visibility based checking for save button
+            if (next_widget.node.tag == "button" && this.get("actual_mode") != "view") {
                 return this.$buttons.find(".o_form_button_save").focus();
             }
             this.last_tabindex = parseInt(next_widget.node.attrs.tabindex);
@@ -333,7 +334,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
             if (this.get("actual_mode") == "view") {
                 return this.$buttons.find(".o_form_button_create").focus(); //Set focus to create button again
             } else {
-                this.tabindex_widgets[0].focus(); // If edit/create mode and there is no further tabindex then set focus to first widget again
+                return this.$buttons.find(".o_form_button_save").focus();
             }
         }
     },
