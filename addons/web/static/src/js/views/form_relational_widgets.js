@@ -873,7 +873,18 @@ var FieldX2Many = AbstractManyField.extend({
         return _(this.dataset.ids).isEmpty();
     },
     focus: function() {
-        return false;
+        var view = this.viewmanager.active_view;
+        if (view && view.controller) {
+            this.is_loaded.done(function () {
+                if (view.type == 'list') {
+                    return view.controller.save_edition().done(function() {
+                        view.controller.do_add_record();
+                    });
+                } else if (view.type == 'kanban') {
+                    return view.controller.add_record();
+                }
+            });
+        }
     }
 });
 
@@ -1292,20 +1303,6 @@ var FieldOne2Many = FieldX2Many.extend({
     },
     is_false: function() {
         return false;
-    },
-    focus: function() {
-        var view = this.viewmanager.active_view;
-        if (view && view.controller) {
-            this.is_loaded.done(function () {
-                if (view.type == 'list') {
-                    return view.controller.save_edition().done(function() {
-                        view.controller.do_add_record();
-                    });
-                } else if (view.type == 'kanban') {
-                    return view.controller.add_record();
-                }
-            });
-        }
     }
 });
 
@@ -1392,20 +1389,6 @@ var FieldMany2Many = FieldX2Many.extend({
     start: function() {
         this.$el.addClass('o_form_field_many2many');
         return this._super.apply(this, arguments);
-    },
-    focus: function() {
-        var view = this.viewmanager.active_view;
-        if (view && view.controller) {
-            this.is_loaded.done(function () {
-                if (view.type == 'list') {
-                    return view.controller.save_edition().done(function() {
-                        view.controller.do_add_record();
-                    });
-                } else if (view.type == 'kanban') {
-                    return view.controller.add_record();
-                }
-            });
-        }
     }
 });
 
