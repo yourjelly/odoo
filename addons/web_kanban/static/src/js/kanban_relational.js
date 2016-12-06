@@ -55,7 +55,9 @@ var Many2ManyKanbanView = X2ManyKanbanView.extend({
             title: _t("Add: ") + this.x2m.string,
             on_selected: function(element_ids) {
                 return self.x2m.data_link_multi(element_ids).then(function() {
-                    self.x2m.reload_current_view();
+                    self.x2m.reload_current_view().then(function() {
+                        self.x2m.view.set_next_tabindex();
+                    });
                 });
             }
         }).open();

@@ -1295,7 +1295,6 @@ var FieldOne2Many = FieldX2Many.extend({
     },
     focus: function() {
         var view = this.viewmanager.active_view;
-        //var controller = this.viewmanager.active_view && this.viewmanager.active_view.controller;
         if (view && view.controller) {
             this.is_loaded.done(function () {
                 if (view.type == 'list') {
@@ -1331,7 +1330,9 @@ var Many2ManyListView = X2ManyListView.extend({
             no_create: this.x2m.options.no_create || !this.is_action_enabled('create'),
             on_selected: function(element_ids) {
                 return self.x2m.data_link_multi(element_ids).then(function() {
-                    self.x2m.reload_current_view();
+                    self.x2m.reload_current_view().then(function() {
+                        self.x2m.view.set_next_tabindex();
+                    });
                 });
             }
         }).open();
@@ -1391,6 +1392,20 @@ var FieldMany2Many = FieldX2Many.extend({
     start: function() {
         this.$el.addClass('o_form_field_many2many');
         return this._super.apply(this, arguments);
+    },
+    focus: function() {
+        var view = this.viewmanager.active_view;
+        if (view && view.controller) {
+            this.is_loaded.done(function () {
+                if (view.type == 'list') {
+                    return view.controller.save_edition().done(function() {
+                        view.controller.do_add_record();
+                    });
+                } else if (view.type == 'kanban') {
+                    return view.controller.add_record();
+                }
+            });
+        }
     }
 });
 
