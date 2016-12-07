@@ -330,7 +330,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
             }
             this.last_tabindex = parseInt(next_widget.node.attrs.tabindex);
             next_widget.focus();
-        } else if (_.isEqual(current_widget, this.tabindex_widgets[this.tabindex_widgets.length-1])) {
+        } else if (_.isEqual(current_widget, this.tabindex_widgets[this.tabindex_widgets.length-1]) && this.$buttons) {
             if (this.get("actual_mode") == "view") {
                 return this.$buttons.find(".o_form_button_create").focus(); //Set focus to create button again
             } else {
