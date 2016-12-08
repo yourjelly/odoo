@@ -150,6 +150,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         this.toggle_buttons();
 
         // Bind button events
+        //TODO: Focus and Click both set focus on button and tip will be visible, may be do a trick of flag in click event or bind keydown + TAB
         this.$buttons
             .on('click', '.o_form_button_create', this.on_button_create)
             .on('focus', function(e) {
