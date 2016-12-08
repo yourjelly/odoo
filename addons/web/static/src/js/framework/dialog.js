@@ -83,6 +83,7 @@ var Dialog = Widget.extend({
 
             var $b = $(QWeb.render('WidgetButton', { widget : { string: text, node: { attrs: {'class': classes, icon: b.icon} }, fa_icon: true }}));
             $b.prop('disabled', b.disabled);
+            $b.attr('autofocus', b.autofocus);
             $b.on('click', function(e) {
                 var click_def;
                 if(b.click) {
@@ -159,6 +160,7 @@ Dialog.alert = function (owner, message, options) {
         text: _t("Ok"),
         close: true,
         click: options && options.confirm_callback,
+        autofocus: true
     }];
     return new Dialog(owner, _.extend({
         size: 'medium',
@@ -177,7 +179,8 @@ Dialog.confirm = function (owner, message, options) {
             text: _t("Ok"),
             classes: 'btn-primary',
             close: true,
-            click: options && options.confirm_callback
+            click: options && options.confirm_callback,
+            autofocus: true
         },
         {
             text: _t("Cancel"),
