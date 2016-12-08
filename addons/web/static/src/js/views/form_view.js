@@ -287,7 +287,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         // tabindex list in render_to method of renering engine and add jQuery wrapped elements of page and other elements
         // So that we can have focus method available(we may bind set_next_tabindex on TAB key for such elements explicitly)
         return _.chain(this.get_widgets()).filter(function(w) {
-            return w.node.attrs.tabindex && parseInt(w.node.attrs.tabindex) && !w.no_tabindex;
+            return w.node.attrs.tabindex && parseInt(w.node.attrs.tabindex) && parseInt(w.node.attrs.tabindex) >= 0 && !w.no_tabindex;
         }).sortBy(function(w) {
             return parseInt(w.node.attrs.tabindex);
         }).value();
@@ -326,7 +326,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         var next_widget = get_next_widget();
         //TODO: Simplify following conditions, apply and operation
         if (next_widget) {
-            if (next_widget.node.tag == "button" && this.get("actual_mode") != "view") {
+            if (next_widget.node.tag == "button" && this.get("actual_mode") != "view" && this.$buttons.find(".o_form_button_save").length) {
                 return this.$buttons.find(".o_form_button_save").focus();
             }
             this.last_tabindex = parseInt(next_widget.node.attrs.tabindex);
@@ -419,7 +419,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
                     self.do_push_state({});
                 }
                 self.$el.removeClass('oe_form_dirty');                
-                self.set_next_tabindex();
+                self.set_next_tabindex(); //Bind it on load_record, call it on load_record event, instead of here
+            });
          });
     },
     /**
