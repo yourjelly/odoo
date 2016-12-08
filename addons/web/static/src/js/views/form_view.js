@@ -148,34 +148,38 @@ var FormView = View.extend(common.FieldManagerMixin, {
 
         // Show or hide the buttons according to the view mode
         this.toggle_buttons();
-        this.$buttons.on('click', '.o_form_button_create', this.on_button_create);
+
+        // Bind button events
+        this.$buttons
+            .on('click', '.o_form_button_create', this.on_button_create)
+            .on('focus', function(e) {
+                utils.show_tabindex_tip({attach_to: this, title: _t("Press TAB to <b>Create</b> and ESC to <b>Edit</b>"), trigger: 'focus'});
+            })
+            .on('keydown', function(e) {
+                if (e.which == $.ui.keyCode.TAB) { //We can use switch here
+                    $(this).trigger("click");
+                }
+                if (e.which == $.ui.keyCode.ESCAPE) {
+                    self.on_button_edit();
+                }
+            });
+
+        this.$buttons
+            .on('click', '.o_form_button_save', this.on_button_save)
+            .on('focus', function(e) {
+                utils.show_tabindex_tip({attach_to: this, title: _t("Press TAB to Save or ESC to Cancel"), trigger: 'focus'});
+            })
+            .on('keydown', function() {
+                if (e.which == $.ui.keyCode.TAB) { //We can use switch here
+                    $(this).trigger("click");
+                }
+                if (e.which == $.ui.keyCode.ESCAPE) {
+                    self.on_button_cancel();
+                }
+            });
+
         this.$buttons.on('click', '.o_form_button_edit', this.on_button_edit);
-        this.$buttons.on('click', '.o_form_button_save', this.on_button_save);
         this.$buttons.on('click', '.o_form_button_cancel', this.on_button_cancel);
-
-        this.$buttons.on('focus', '.o_form_button_create', function() {
-            utils.show_tabindex_tip({attach_to: this, title: _t("Press TAB to <b>Create</b> and ESC to <b>Edit</b>"), trigger: 'focus'});
-        });
-        this.$buttons.on('keydown', '.o_form_button_create', function(e) {
-            if (e.which == $.ui.keyCode.TAB) { //We can use switch here
-                $(this).trigger("click");
-            }
-            if (e.which == $.ui.keyCode.ESCAPE) {
-                self.on_button_edit();
-            }
-        });
-
-        this.$buttons.on('focus', '.o_form_button_save', function() {
-            utils.show_tabindex_tip({attach_to: this, title: _t("Press TAB to Save or ESC to Cancel"), trigger: 'focus'});
-        });
-        this.$buttons.on('keydown', '.o_form_button_save', function(e) {
-            if (e.which == $.ui.keyCode.TAB) { //We can use switch here
-                $(this).trigger("click");
-            }
-            if (e.which == $.ui.keyCode.ESCAPE) {
-                self.on_button_cancel();
-            }
-        });
 
         this.$buttons.appendTo($node);
     },
