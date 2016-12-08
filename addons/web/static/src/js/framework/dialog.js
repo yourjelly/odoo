@@ -38,7 +38,7 @@ var Dialog = Widget.extend({
             size: 'large',
             dialogClass: '',
             $content: false,
-            buttons: [{text: _t("Ok"), close: true}]
+            buttons: [{text: _t("Ok"), close: true, autofocus: true}]
         });
 
         this.$content = options.$content;

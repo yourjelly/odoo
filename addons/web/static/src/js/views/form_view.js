@@ -81,6 +81,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
             self.on("change:actual_mode", self, self.toggle_sidebar);
         });
         self.on("load_record", self, self.load_record);
+        this.on("set_last_tabindex", this, this.set_next_tabindex);
 
         core.bus.on('clear_uncommitted_changes', this, function(chain_callbacks) {
             var self = this;
@@ -594,6 +595,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
             });
             dialog.open();
             dialog.on('closed', this, function () {
+                this.trigger("set_last_tabindex"); //TODO: Set focus to last widget which triggers onchange
                 this.warning_displayed = false;
             });
         }
