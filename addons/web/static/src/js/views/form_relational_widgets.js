@@ -1723,7 +1723,7 @@ var FieldMany2ManyCheckBoxes = AbstractManyField.extend(common.ReinitializeField
     is_false: function() {
         return false;
     },
-    set_next_tabindex: function() {
+    keydown_TAB: function() {
         var $inputs = this.$("input");
         var index = $inputs.index(this.$("input:focus"));
         if (this.$("input") && index == $inputs.length-1) {

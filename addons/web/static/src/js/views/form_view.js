@@ -151,8 +151,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
 
         // Bind button events
         //TODO: Focus and Click both set focus on button and tip will be visible, may be do a trick of flag in click event or bind keydown + TAB
-        this.$buttons
-            .on('click', '.o_form_button_create', this.on_button_create)
+        this.$buttons.find('.o_form_button_create')
+            .on('click', this.on_button_create)
             .on('focus', function(e) {
                 utils.show_tabindex_tip({attach_to: this, title: _t("Press TAB to <b>Create</b> and ESC to <b>Edit</b>"), trigger: 'focus'});
             })
@@ -165,12 +165,12 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 }
             });
 
-        this.$buttons
-            .on('click', '.o_form_button_save', this.on_button_save)
+        this.$buttons.find('.o_form_button_save')
+            .on('click', this.on_button_save)
             .on('focus', function(e) {
                 utils.show_tabindex_tip({attach_to: this, title: _t("Press TAB to Save or ESC to Cancel"), trigger: 'focus'});
             })
-            .on('keydown', function() {
+            .on('keydown', function(e) {
                 if (e.which == $.ui.keyCode.TAB) { //We can use switch here
                     $(this).trigger("click");
                 }

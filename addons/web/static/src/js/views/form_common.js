@@ -522,15 +522,15 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
                     e.preventDefault(); //Need to preventDefault otherwise TAB key will immediately set focus on another field of current form
                     e.stopImmediatePropagation(); //To avoid clash with editable listview(TAB feature)
                     if (e.shiftKey) {
-                        self.set_next_tabindex(true);
+                        self.keydown_TAB(true);
                     } else {
-                        self.set_next_tabindex(false);
+                        self.keydown_TAB(false);
                     }
                 }
             });
         }
     },
-    set_next_tabindex: function(reverse) {
+    keydown_TAB: function(reverse) {
         return this.view.set_next_tabindex(this, reverse);
     }
 });
@@ -811,7 +811,7 @@ var AbstractField = FormWidget.extend(FieldInterface, {
     commit_value: function() {
         return $.when();
     },
-    set_next_tabindex: function(reverse) {
+    keydown_TAB: function(reverse) {
         if (this.is_valid()) {
             return this._super(reverse);
         } else {
