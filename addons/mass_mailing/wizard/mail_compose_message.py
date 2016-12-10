@@ -45,6 +45,7 @@ class MailComposeMessage(models.TransientModel):
                     'mailing_id': mass_mailing.id,
                     'statistics_ids': [(0, 0, {
                         'model': self.model,
+                        'recipient': res[res_id]['email_to'],
                         'res_id': res_id,
                         'mass_mailing_id': mass_mailing.id,
                     })],

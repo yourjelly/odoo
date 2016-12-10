@@ -113,7 +113,8 @@ class MassMailingContact(models.Model):
 
     @api.multi
     def message_get_default_recipients(self):
-        return dict((record.id, {'partner_ids': [], 'email_to': record.email, 'email_cc': False}) for record in self)
+        result = dict((record.id, {'email_to': record.email, 'email_cc': False}) for record in self if record.email)
+        return result
 
 
 class MassMailingStage(models.Model):
@@ -152,6 +153,7 @@ class MassMailingCampaign(models.Model):
         'mail.mass_mailing', 'mass_mailing_campaign_id',
         string='Mass Mailings')
     unique_ab_testing = fields.Boolean(string='AB Testing',
+        default=lambda self: True,
         help='If checked, recipients will be mailed only once, allowing to send '
              'various mailings in a single campaign to test the effectiveness '
              'of the mailings.')
@@ -567,35 +569,38 @@ class MassMailing(models.Model):
     # Email Sending
     #------------------------------------------------------
 
-    def get_recipients(self):
+    def get_recipients(self, exclude=[]):
+        model = self.env[self.mailing_model_real]
         if self.mailing_domain:
             domain = safe_eval(self.mailing_domain)
-            res_ids = self.env[self.mailing_model_real].search(domain).ids
+            results = model.search(domain)
+
+            email_fname = 'email_from'
+            if 'email' in model._fields:
+                email_fname = 'email'
+
+            # Remove records without email address;
+            # FP Todo: this can be improved calling flanker
+            fmethod = lambda x: x[email_fname]
+            if exclude and self.mass_mailing_campaign_id and self.mass_mailing_campaign_id.unique_ab_testing:
+                fmethod = lambda x: x[email_fname] and (x[email_fname] not in exclude)
+            results = results.filtered(fmethod)
+            res_ids = results.ids
         else:
             res_ids = []
-            domain = [('id', 'in', res_ids)]
 
         # randomly choose a fragment
-        if self.contact_ab_pc < 100:
-            contact_nbr = self.env[self.mailing_model_real].search_count(domain)
-            topick = int(contact_nbr / 100.0 * self.contact_ab_pc)
-            if self.mass_mailing_campaign_id and self.mass_mailing_campaign_id.unique_ab_testing:
-                already_mailed = self.mass_mailing_campaign_id.get_recipients()[self.mass_mailing_campaign_id.id]
-            else:
-                already_mailed = set([])
-            remaining = set(res_ids).difference(already_mailed)
-            if topick > len(remaining):
-                topick = len(remaining)
-            res_ids = random.sample(remaining, topick)
+        if (self.contact_ab_pc < 100) and (self.contact_ab_pc > 0):
+            topick = len(res_ids) * self.contact_ab_pc // 100
+            res_ids = random.sample(res_ids, min(topick, len(remaining)))
         return res_ids
 
     def get_remaining_recipients(self):
-        res_ids = self.get_recipients()
-        already_mailed = self.env['mail.mail.statistics'].search_read([('model', '=', self.mailing_model_real),
-                                                                     ('res_id', 'in', res_ids),
-                                                                     ('mass_mailing_id', '=', self.id)], ['res_id'])
-        already_mailed_res_ids = [record['res_id'] for record in already_mailed]
-        return list(set(res_ids) - set(already_mailed_res_ids))
+        already_mailed = self.env['mail.mail.statistics'].search_read([
+            ('model', '=', self.mailing_model_real),
+            ('mass_mailing_id', '=', self.id)], ['recipient'])
+        exclude = [record['recipient'] for record in already_mailed]
+        return self.get_recipients(exclude)
 
     def send_mail(self):
         author_id = self.env.user.partner_id.id
@@ -649,6 +654,9 @@ class MassMailing(models.Model):
             res[mass_mailing.id] = self.env['link.tracker'].convert_links(html, vals, blacklist=['/unsubscribe_from_list'])
 
         return res
+
+    def process_mass_mailing_queue(self):
+        return self.env['mail.mass_mailing']._process_mass_mailing_queue()
 
     @api.model
     def _process_mass_mailing_queue(self):

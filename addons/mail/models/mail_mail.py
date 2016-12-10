@@ -162,12 +162,10 @@ class MailMail(models.Model):
 
     @api.multi
     def send_get_mail_to(self, partner=None):
-        """Forge the email_to with the following heuristic:
-          - if 'partner', recipient specific (Partner Name <email>)
-          - else fallback on mail.email_to splitting """
         self.ensure_one()
-        if partner:
+        if not self.email_to:
             email_to = [formataddr((partner.name, partner.email))]
+            self.email_to = partner.email
         else:
             email_to = tools.email_split_and_format(self.email_to)
         return email_to

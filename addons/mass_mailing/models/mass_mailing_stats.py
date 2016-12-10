@@ -38,7 +38,7 @@ class MailMailStats(models.Model):
     opened = fields.Datetime(help='Date when the email has been opened the first time')
     replied = fields.Datetime(help='Date when this email has been replied for the first time.')
     bounced = fields.Datetime(help='Date when this email has bounced.')
-    links_click_ids = fields.One2many('link.tracker.click', 'mail_stat_id', string='Links click')
+    links_click_ids = fields.One2many('link.tracker.click', 'mail_stat_id', string='Links Click')
     state = fields.Selection(compute="_compute_state",
                              selection=[('outgoing', 'Outgoing'),
                                         ('exception', 'Exception'),
@@ -49,7 +49,7 @@ class MailMailStats(models.Model):
     state_update = fields.Datetime(compute="_compute_state", string='State Update',
                                     help='Last state update of the mail',
                                     store=True)
-    recipient = fields.Char(compute="_compute_recipient")
+    recipient = fields.Char(string='Recipient', required=True)
 
     @api.depends('sent', 'opened', 'replied', 'bounced', 'exception')
     def _compute_state(self):
@@ -68,26 +68,13 @@ class MailMailStats(models.Model):
             else:
                 stat.state = 'outgoing'
 
-    def _compute_recipient(self):
-        for stat in self:
-            if stat.model not in self.env:
-                continue
-            target = self.env[stat.model].browse(stat.res_id)
-            if not target or not target.exists():
-                continue
-            email = ''
-            for email_field in ('email', 'email_from'):
-                if email_field in target and target[email_field]:
-                    email = ' <%s>' % target[email_field]
-                    break
-            stat.recipient = '%s%s' % (target.display_name, email)
-
     @api.model
     def create(self, values):
         if 'mail_mail_id' in values:
             values['mail_mail_id_int'] = values['mail_mail_id']
-        res = super(MailMailStats, self).create(values)
-        return res
+        if not values['recipient']:
+            raise
+        return super(MailMailStats, self).create(values)
 
     def _get_records(self, mail_mail_ids=None, mail_message_ids=None, domain=None):
         if not self.ids and mail_mail_ids:
