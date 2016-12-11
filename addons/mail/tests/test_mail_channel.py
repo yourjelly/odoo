@@ -129,4 +129,4 @@ class TestMailGroup(TestMail):
         for email in sent_emails:
             self.assertIn(
                 email['email_to'][0],
-                [self.user_employee.email, self.user_portal.email])
+                [formataddr((self.user_employee.name, self.user_employee.email)), formataddr((self.user_portal.name, self.user_portal.email))])
