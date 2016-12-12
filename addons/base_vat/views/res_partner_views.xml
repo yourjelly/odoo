@@ -13,4 +13,19 @@
                 </field>
             </field>
         </record>
+
+        <record id="minimal_partner_accounting_inherit" model="ir.ui.view">
+            <field name="name">res.partner.vat.inherit</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="account.minimal_partner_accounting_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='accounting_info']" position="inside">
+                    <label for="vat"/>
+                    <div name="vat_info" class="o_row">
+                        <field name="vat" placeholder="e.g. BE0477472701"/>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+
 </odoo>
