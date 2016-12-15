@@ -1414,8 +1414,8 @@ class pos_order(osv.osv):
                         'product_id': line.product_id.id,
                         'quantity': line.qty,
                         'account_id': tax['account_id'] or income_account,
-                        'credit': ((tax['amount']>0) and tax['amount']) or 0.0,
-                        'debit': ((tax['amount']<0) and -tax['amount']) or 0.0,
+                        'credit': cur.round(((tax['amount']>0) and tax['amount'])) or 0.0,
+                        'debit': cur.round(((tax['amount']<0) and -tax['amount'])) or 0.0,
                         'tax_line_id': tax['id'],
                         'partner_id': order.partner_id and self.pool.get("res.partner")._find_accounting_partner(order.partner_id).id or False
                     })
