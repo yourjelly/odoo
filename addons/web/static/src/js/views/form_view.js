@@ -322,7 +322,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         var get_next_widget = function() {
             current_index += (reverse && -1 || 1);
             var next_widget = self.tabindex_widgets[current_index];
-            if (next_widget && next_widget.$el.hasClass("o_form_invisible")) {
+            if (next_widget && (next_widget.$el.hasClass("o_form_invisible") || next_widget.get('effective_readonly'))) {
                 return get_next_widget();
             }
             return next_widget;

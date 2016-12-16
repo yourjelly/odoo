@@ -1311,12 +1311,20 @@ var FieldOne2Many = FieldX2Many.extend({
         return this.is_loaded.then(function() {
             var view = self.viewmanager.active_view;
             if(view.type === "list" && view.controller.editable()) {
-                return view.controller.keydown_TAB(e);
+                if (view.controller.editor.is_editing()) {
+                    return view.controller.keydown_TAB(e);
+                } else if (self.$el.is(":focus")) { //FIXME: Fix this focus based checking, we want if focus is on o2m and if it is not editing then set focus to parent's next tabindex
+                    e.preventDefault();
+                    return self.view.set_next_tabindex(self, reverse);
+                }
             }
         });
     },
     keyup_ESCAPE: function(e) {
         //this.view.set_next_tabindex(this); //Call next tabindex after editor is closed
+        if (this.node.attrs.tabindex) {
+            this.view.last_tabindex = parseInt(this.node.attrs.tabindex);
+        }
         this.$el.focus();
     },
     keydown_ESCAPE: function(e) {
