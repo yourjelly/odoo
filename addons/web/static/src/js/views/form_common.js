@@ -823,6 +823,7 @@ var AbstractField = FormWidget.extend(FieldInterface, {
         if (this.is_valid()) {
             return this._super(e, reverse);
         } else {
+            e.preventDefault();
             this.$el.add(this.$label).toggleClass('o_form_invalid', true);
         }
     }
