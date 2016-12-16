@@ -728,6 +728,7 @@ var FieldX2Many = AbstractManyField.extend({
         });
         this.view.on("on_button_cancel", this, destroy);
         this.is_started = true;
+        this.$el.attr("tabindex", this.node.attrs.tabindex);
         this.reload_current_view();
     },
     load_views: function() {
@@ -1303,6 +1304,23 @@ var FieldOne2Many = FieldX2Many.extend({
     },
     is_false: function() {
         return false;
+    },
+    // TODO: Check if we can move required methods in FieldX2Many
+    keydown_TAB: function(e, reverse) {
+        var self = this;
+        return this.is_loaded.then(function() {
+            var view = self.viewmanager.active_view;
+            if(view.type === "list" && view.controller.editable()) {
+                return view.controller.keydown_TAB(e);
+            }
+        });
+    },
+    keyup_ESCAPE: function(e) {
+        //this.view.set_next_tabindex(this); //Call next tabindex after editor is closed
+        this.$el.focus();
+    },
+    keydown_ESCAPE: function(e) {
+        return false;
     }
 });
 
@@ -1723,7 +1741,8 @@ var FieldMany2ManyCheckBoxes = AbstractManyField.extend(common.ReinitializeField
     is_false: function() {
         return false;
     },
-    keydown_TAB: function() {
+    keydown_TAB: function(e, reverse) {
+        e.preventDefault(); //Need to preventDefault otherwise TAB key will immediately set focus on another field of current form
         var $inputs = this.$("input");
         var index = $inputs.index(this.$("input:focus"));
         if (this.$("input") && index == $inputs.length-1) {

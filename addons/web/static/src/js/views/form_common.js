@@ -511,28 +511,36 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
         }
         return final_domain;
     },
-    focus: function() {
-        // Implement/override focus method wherever needed
-    },
     bind_tabindex: function() {
         var self = this;
         if (!this.get('effective_readonly') && this.node.attrs.tabindex && parseInt(this.node.attrs.tabindex) > 0 && !this.no_tabindex) {
             this.$el.on("keydown", function(e) {
                 if (e.which == $.ui.keyCode.TAB) {
-                    e.preventDefault(); //Need to preventDefault otherwise TAB key will immediately set focus on another field of current form
-                    e.stopImmediatePropagation(); //To avoid clash with editable listview(TAB feature)
                     if (e.shiftKey) {
-                        self.keydown_TAB(true);
+                        self.keydown_TAB(e, true);
                     } else {
-                        self.keydown_TAB(false);
+                        self.keydown_TAB(e, false);
                     }
+                }
+                if (e.which == $.ui.keyCode.ESCAPE) {
+                    self.keydown_ESCAPE(e);
+                }
+            });
+            //FIXME: Don't know why keydown binded and overridden in o2m is not called, maybe due to editor
+            this.$el.on("keyup", function(e) {
+                if (e.which == $.ui.keyCode.ESCAPE) {
+                    self.keyup_ESCAPE(e);
                 }
             });
         }
     },
-    keydown_TAB: function(reverse) {
+    focus: function() {},
+    keydown_TAB: function(e, reverse) {
+        e.preventDefault(); //Need to preventDefault otherwise TAB key will immediately set focus on another field of current form
         return this.view.set_next_tabindex(this, reverse);
-    }
+    },
+    keyup_ESCAPE: function(e) {},
+    keydown_ESCAPE: function(e) {}
 });
 
 /*
@@ -811,9 +819,9 @@ var AbstractField = FormWidget.extend(FieldInterface, {
     commit_value: function() {
         return $.when();
     },
-    keydown_TAB: function(reverse) {
+    keydown_TAB: function(e, reverse) {
         if (this.is_valid()) {
-            return this._super(reverse);
+            return this._super(e, reverse);
         } else {
             this.$el.add(this.$label).toggleClass('o_form_invalid', true);
         }

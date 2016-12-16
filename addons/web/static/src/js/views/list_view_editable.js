@@ -796,9 +796,16 @@ ListView.include(/** @lends instance.web.ListView# */{
     },
     keydown_TAB: function (e) { // Keydown and not keyup because this handler must be called before the browser has focused the next field
         var form = this.editor.form;
+        var tabindex_widgets = form.get_tabindex_widgets();
+        var has_tabindex_widgets = tabindex_widgets.length ? true : false;
         var last_field = _(form.fields_order).chain()
             .map(function (name) { return form.fields[name]; })
-            .filter(function (field) { return field.$el.is(':visible') && !field.get('effective_readonly'); })
+            .filter(function (field) {
+                if (has_tabindex_widgets) {
+                    return field.$el.is(':visible') && !field.get('effective_readonly') && field.node.attrs.tabindex && parseInt(field.node.attrs.tabindex) >= 0;
+                }
+                return field.$el.is(':visible') && !field.get('effective_readonly');
+            })
             .last()
             .value();
         // tabbed from last field in form
