@@ -50,7 +50,9 @@ var WidgetButton = common.FormWidget.extend({
         this.setupFocus(this.$el);
         this.$el.on("blur", this.on_focusout);
         this.$el.on("keydown", function(e) {
-            if (e.which == $.ui.keyCode.ESCAPE) {
+            if (e.which == $.ui.keyCode.TAB) {
+                self.on_click();
+            } else if (e.which == $.ui.keyCode.ESCAPE) {
                 self.on_escape();
             }
         });

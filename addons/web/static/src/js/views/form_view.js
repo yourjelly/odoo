@@ -159,8 +159,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
             .on('keydown', function(e) {
                 if (e.which == $.ui.keyCode.TAB) { //We can use switch here
                     $(this).trigger("click");
-                }
-                if (e.which == $.ui.keyCode.ESCAPE) {
+                } else if (e.which == $.ui.keyCode.ESCAPE) {
                     self.on_button_edit();
                 }
             });
@@ -173,8 +172,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
             .on('keydown', function(e) {
                 if (e.which == $.ui.keyCode.TAB) { //We can use switch here
                     $(this).trigger("click");
-                }
-                if (e.which == $.ui.keyCode.ESCAPE) {
+                } else if (e.which == $.ui.keyCode.ESCAPE) {
                     self.last_tabindex = null;
                     self.on_button_cancel();
                 }
