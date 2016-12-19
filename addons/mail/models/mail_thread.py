@@ -662,7 +662,13 @@ class MailThread(models.AbstractModel):
         else:
             access_link = self._notification_link_helper('view', message_id=message.id)
 
-        if message.model:
+        if message.model == 'hr.holidays':
+            leave_type = self.env['hr.holidays'].search([('id', '=', message.res_id)]).type
+            if leave_type == 'remove':
+                view_title = _('View leave request')
+            else:
+                view_title = _('View Allocation request')
+        elif message.model:
             model_name = self.env['ir.model'].sudo().search([('model', '=', self.env[message.model]._name)]).name_get()[0][1]
             view_title = '%s %s' % (_('View'), model_name)
         else:
