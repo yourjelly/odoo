@@ -541,15 +541,6 @@ function show_tabindex_tip(options) {
         }
     });
     $attach_to.tooltip('show');
-    /*
-    $(options.attach_to).popover({
-        placement : options.placement || 'right', // top, bottom, left or right
-        content : options.title, 
-        html: 'true',
-        trigger: 'manual'
-    });
-    $(options.attach_to).popover('show');
-    */
 }
 
 return {

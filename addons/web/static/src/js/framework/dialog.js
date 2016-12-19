@@ -121,7 +121,6 @@ var Dialog = Widget.extend({
         var self = this;
         this.replace(this.$modal.find(".modal-body")).then(function() {
             self.$modal.modal('show');
-            console.log('elements autofocus :::: ', self.$modal.find("button[autofocus]"));
             self.$modal.find("button[autofocus]").focus(); //FIXME: Need to set focus explicitly after shown(bind shown.bs.modal)
             self._opened.resolve();
         });
