@@ -728,7 +728,6 @@ var FieldX2Many = AbstractManyField.extend({
         });
         this.view.on("on_button_cancel", this, destroy);
         this.is_started = true;
-        this.$el.attr("tabindex", this.node.attrs.tabindex);
         this.reload_current_view();
     },
     load_views: function() {
@@ -816,6 +815,7 @@ var FieldX2Many = AbstractManyField.extend({
         });
         utils.async_when().done(function () {
             self.$el.addClass('o_view_manager_content');
+            self.$el.attr("tabindex", self.node.attrs.tabindex);
             self.alive(self.viewmanager.attachTo(self.$el));
         });
         return def;
@@ -873,7 +873,7 @@ var FieldX2Many = AbstractManyField.extend({
     is_false: function() {
         return _(this.dataset.ids).isEmpty();
     },
-    focus: function() {
+    set_focus: function() {
         var view = this.viewmanager.active_view;
         if (view && view.controller) {
             this.is_loaded.done(function () {
@@ -956,7 +956,7 @@ var X2ManyViewManager = ViewManager.extend({
             self.x2m.reload_current_view();
         });
     },
-    focus: function() {
+    set_focus: function() {
         self.x2m.focus();
     }
 

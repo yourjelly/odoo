@@ -534,6 +534,10 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
             });
         }
     },
+    // Maybe function name can be on_focus
+    set_focus: function() {
+        return this.focus();
+    },
     focus: function() {},
     keydown_TAB: function(e, reverse) {
         e.preventDefault(); //Need to preventDefault otherwise TAB key will immediately set focus on another field of current form

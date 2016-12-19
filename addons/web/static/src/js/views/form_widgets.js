@@ -123,7 +123,7 @@ var WidgetButton = common.FormWidget.extend({
             $body.removeClass(class_to_add);
         }, 1000);
     },
-    focus: function() {
+    set_focus: function() {
         this.$el.focus();
         if (this.node.attrs.on_focus_tip) {
             content = this.node.attrs.on_focus_tip;

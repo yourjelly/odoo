@@ -307,9 +307,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
         }
         if (!this.last_tabindex) {
             var widget = this.tabindex_widgets[0]; //Set focus to first widget
-            if (widget.focus() !== false) {
-                this.last_tabindex = parseInt(widget.node.attrs.tabindex);
-            }
+            widget.set_focus();
+            this.last_tabindex = parseInt(widget.node.attrs.tabindex);
             return false;
         }
         if (!current_widget) {
@@ -337,7 +336,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 return this.$buttons.find(".o_form_button_save").focus();
             }
             this.last_tabindex = parseInt(next_widget.node.attrs.tabindex);
-            next_widget.focus();
+            next_widget.set_focus();
         } else if (_.isEqual(current_widget, this.tabindex_widgets[this.tabindex_widgets.length-1]) && this.$buttons) {
             if (this.get("actual_mode") == "view") {
                 return this.$buttons.find(".o_form_button_create").focus(); //Set focus to create button again
