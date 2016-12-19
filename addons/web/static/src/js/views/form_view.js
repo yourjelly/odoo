@@ -175,6 +175,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
                     $(this).trigger("click");
                 }
                 if (e.which == $.ui.keyCode.ESCAPE) {
+                    self.last_tabindex = null;
                     self.on_button_cancel();
                 }
             });
@@ -364,6 +365,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         var self = this;
         options = options || {};
         this.$el.removeClass('oe_form_dirty');
+        this.last_tabindex = null;
 
         var shown = this.has_been_loaded;
         if (options.reload !== false) {

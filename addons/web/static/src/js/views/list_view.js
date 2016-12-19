@@ -430,11 +430,6 @@ var ListView = View.extend({
             // Hide the sidebar by default (will be shown once a record is selected)
             this.sidebar.do_hide();
         }
-        if (this.$buttons) {
-            _.delay(_.bind(function() {
-                this.$buttons.find('.o_list_button_add').trigger('focus');
-            }, this));
-        }
     },
     /**
      * re-renders the content of the list view

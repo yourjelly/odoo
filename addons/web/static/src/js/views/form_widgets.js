@@ -203,6 +203,12 @@ var FieldChar = common.AbstractField.extend(common.ReinitializeFieldMixin, {
         }
         return false;
     },
+    set_focus: function() {
+        this._super();
+        if (this.$input) {
+            return this.$input.select();
+        }
+    }
 });
 
 var KanbanSelection = common.AbstractField.extend({
