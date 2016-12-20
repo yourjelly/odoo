@@ -1325,7 +1325,11 @@ var FieldOne2Many = FieldX2Many.extend({
         if (this.node.attrs.tabindex) {
             this.view.last_tabindex = parseInt(this.node.attrs.tabindex);
         }
-        this.$el.focus();
+        if (!this.$el.is(":focus")) {
+            this.$el.focus();
+        } else {
+            this._super(e);
+        }
     },
     keydown_ESCAPE: function(e) {
         return false;

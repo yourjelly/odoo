@@ -776,6 +776,9 @@ var FormView = View.extend(common.FieldManagerMixin, {
         this.trigger('on_button_cancel');
         return false;
     },
+    do_cancel: function() {
+        return this.on_button_cancel();
+    },
     on_button_new: function() {
         return $.when(this.has_been_loaded)
             .then(this.can_be_discarded.bind(this))

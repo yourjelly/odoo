@@ -49,13 +49,6 @@ var WidgetButton = common.FormWidget.extend({
         }
         this.setupFocus(this.$el);
         this.$el.on("blur", this.on_focusout);
-        this.$el.on("keydown", function(e) {
-            if (e.which == $.ui.keyCode.TAB) {
-                self.on_click();
-            } else if (e.which == $.ui.keyCode.ESCAPE) {
-                self.on_escape();
-            }
-        });
     },
     on_click: function() {
         var self = this;
@@ -136,6 +129,9 @@ var WidgetButton = common.FormWidget.extend({
     },
     on_focusout: function() {
         // To implement if need to special thing on focusout
+    },
+    keydown_TAB: function() {
+        this.on_click();
     },
     on_escape: function() {
         this.view.trigger('history_back');

@@ -513,6 +513,7 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
     },
     bind_tabindex: function() {
         var self = this;
+        //TODO: Bind event on all widget so on all widget escape key cancels record
         if (!this.get('effective_readonly') && this.node.attrs.tabindex && parseInt(this.node.attrs.tabindex) > 0 && !this.no_tabindex) {
             this.$el.on("keydown", function(e) {
                 if (e.which == $.ui.keyCode.TAB) {
@@ -541,10 +542,16 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
     focus: function() {},
     keydown_TAB: function(e, reverse) {
         e.preventDefault(); //Need to preventDefault otherwise TAB key will immediately set focus on another field of current form
-        return this.view.set_next_tabindex(this, reverse);
+        return this.field_manager.set_next_tabindex(this, reverse);
     },
-    keyup_ESCAPE: function(e) {},
-    keydown_ESCAPE: function(e) {}
+    keyup_ESCAPE: function(e) {
+        console.log("Inside keyup Escape ::: ");
+        this.on_escape();
+    },
+    keydown_ESCAPE: function(e) {},
+    on_escape: function() {
+        this.field_manager.do_cancel();
+    }
 });
 
 /*
