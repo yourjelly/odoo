@@ -154,13 +154,13 @@ var FormView = View.extend(common.FieldManagerMixin, {
         this.$buttons.find('.o_form_button_create')
             .on('click', this.on_button_create)
             .on('focus', function(e) {
-                utils.show_tabindex_tip({attach_to: this, title: _t("Press TAB to <b>Create</b> and ESC to <b>Edit</b>"), trigger: 'focus'});
+                utils.show_tabindex_tip({attach_to: this, title: _t("Press TAB to <b>Create</b> and ESC to go back to the list view"), trigger: 'focus'});
             })
             .on('keydown', function(e) {
                 if (e.which == $.ui.keyCode.TAB) { //We can use switch here
                     $(this).trigger("click");
                 } else if (e.which == $.ui.keyCode.ESCAPE) {
-                    self.on_button_edit();
+                    self.trigger('history_back');
                 }
             });
 
@@ -729,6 +729,9 @@ var FormView = View.extend(common.FieldManagerMixin, {
                     }
                 }
             }
+        }
+        if (this.$buttons && this.get('actual_mode') == 'view') {
+            this.$buttons.find('.o_form_button_edit').focus();
         }
     },
     disable_button: function () {

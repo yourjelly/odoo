@@ -413,7 +413,7 @@
             Edit
         </button>
         <button t-if="widget.is_action_enabled('create')" type="button"
-                class="btn btn-default btn-sm o_form_button_create" accesskey="c" autofocus="1" on_focus_tip="Press TAB to save or ESC to cancel">
+                class="btn btn-default btn-sm o_form_button_create" accesskey="c">
             Create
         </button>
     </div>

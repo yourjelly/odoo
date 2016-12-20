@@ -276,6 +276,8 @@ var ListView = View.extend({
             this.$buttons.on('keydown', '.o_list_button_add', function(event) {
                 if (event.which == $.ui.keyCode.TAB) {
                     self.$buttons.find('.o_list_button_add').trigger("click");
+                } else if (event.which == $.ui.keyCode.ESCAPE) {
+                    self.trigger('history_back');
                 }
             });
 
