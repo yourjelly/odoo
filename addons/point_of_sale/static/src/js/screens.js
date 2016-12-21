@@ -1458,6 +1458,7 @@ var ReceiptScreenWidget = ScreenWidget.extend({
     },
     print_xml: function() {
         var env = {
+            lang_direction: _t.database.parameters.direction,
             widget:  this,
             order: this.pos.get_order(),
             receipt: this.pos.get_order().export_for_printing(),
