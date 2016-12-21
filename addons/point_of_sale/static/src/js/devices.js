@@ -460,14 +460,12 @@ var ProxyDevice  = core.Class.extend(core.mixins.PropertiesMixin,{
     },
 
     take_ownership_over_client_screen: function(html) {
-        return this.connection.rpc("/point_of_sale/take_control", 
-            { html: html }, 
-            { dataType: "json" });
+        return this.message("take_control", { html: html });
     },
 
     test_ownership_of_client_screen: function() {
         if (this.connection) {
-            return this.connection.rpc("/point_of_sale/test_ownership", {}, {dataType: "json"});
+            return this.message("test_ownership", {});
         }
         return null;
     },

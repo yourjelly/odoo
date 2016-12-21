@@ -666,28 +666,30 @@ exports.PosModel = Backbone.Model.extend({
         var deferred = new $.Deferred();
         var img = new Image();
 
-	img.onload = function () {
-	    var canvas = document.createElement('CANVAS');
-	    var ctx = canvas.getContext('2d');
+	    img.onload = function () {
+	       var canvas = document.createElement('CANVAS');
+	       var ctx = canvas.getContext('2d');
 
-	    canvas.height = this.height;
-	    canvas.width = this.width;
-	    ctx.drawImage(this,0,0);
+	       canvas.height = this.height;
+	       canvas.width = this.width;
+	       ctx.drawImage(this,0,0);
 
             var dataURL = canvas.toDataURL('image/jpeg');
             product.image_base64 = dataURL;
-	    canvas = null;
+	       canvas = null;
 
             deferred.resolve();
-	};
-	img.src = url;
+	   };
+	   img.src = url;
 
         return deferred;
     },
 
     send_current_order_to_customer_facing_display: function() {
-        var rendered_html = this.render_html_for_customer_facing_display();
-        this.proxy.update_customer_facing_display(rendered_html);
+        var self = this;
+        this.render_html_for_customer_facing_display().then(function (rendered_html) {
+            self.proxy.update_customer_facing_display(rendered_html);
+        });
     },
 
     render_html_for_customer_facing_display: function () {
@@ -715,7 +717,7 @@ exports.PosModel = Backbone.Model.extend({
         }
 
         // when all images are loaded in product.image_base64
-        $.when.apply($, get_image_deferreds).then(function () {
+        return $.when.apply($, get_image_deferreds).then(function () {
             var rendered_order_lines = "";
             var rendered_payment_lines = "";
 
@@ -746,14 +748,14 @@ exports.PosModel = Backbone.Model.extend({
             rendered_html = QWeb.render('CustomerFacingDisplayHead', {
                 origin: window.location.origin
             }) + rendered_html;
+            return rendered_html;
         });
-        return rendered_html;
     },
 
     // saves the order locally and try to send it to the backend. 
     // it returns a deferred that succeeds after having tried to send the order and all the other pending orders.
     push_order: function(order, opts) {
-            opts = opts || {};
+        opts = opts || {};
         var self = this;
 
         if(order){

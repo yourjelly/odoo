@@ -1337,6 +1337,7 @@
                 <p class="category">Hardware Status</p>
                 <ul>
                     <li class="status weighing">Weighing</li>
+                    <li class="button display_refresh">Refresh Display</li>
                 </ul>
                 <p class="category">Hardware Events</p>
                 <ul>
@@ -1620,7 +1621,7 @@
             <base href="]]><t t-esc="origin"/><![CDATA[/"/>
             <link href="/point_of_sale/static/src/css/customer_facing_display.css" rel="stylesheet"/>
             <script>
-                $(window).load(function () {
+                $().on("load", function () {
                       var $orderlines = $(".scroll-orderlines");
                       var payment_info_top = $(".payment-info").offset().top;
                       var orderlines_top = $orderlines.offset().top;

@@ -293,6 +293,10 @@ var DebugWidget = PosBaseWidget.extend({
             );
         });
 
+        this.$('.button.display_refresh').click(function () {
+            self.pos.proxy.message('display_refresh', {});
+        });
+
         this.$('.button.import_orders input').on('change', function(event) {
             var file = event.target.files[0];
 
@@ -460,7 +464,6 @@ var ClientScreenWidget = PosBaseWidget.extend({
                         if (typeof data === 'string') {
                             data = JSON.parse(data);
                         }
-                        console.log(data.status);
                         if (data.status === 'OWNER') {
                             self.change_status_display('success');
                         } else {
@@ -486,23 +489,25 @@ var ClientScreenWidget = PosBaseWidget.extend({
                 this.show();
                 var self = this;
                 this.$el.click(function(){
-                    var html = self.pos.render_html_for_customer_facing_display();
-                   self.pos.proxy.take_ownership_over_client_screen(html).then(
+                    self.pos.render_html_for_customer_facing_display().then(function(rendered_html) {
+                        self.pos.proxy.take_ownership_over_client_screen(rendered_html).then(
        
-                   function(data) {
-                        if (typeof data === 'string') {
-                            data = JSON.parse(data);
-                        }
-                        if (data.status === 'success') {
-                           self.change_status_display('success');
-                        } else {
-                           self.change_status_display('warning');
-                        }
-                    }, 
-       
-                   function(err) {
-                       self.change_status_display('failure');
+                        function(data) {
+                            if (typeof data === 'string') {
+                                data = JSON.parse(data);
+                            }
+                            if (data.status === 'success') {
+                               self.change_status_display('success');
+                            } else {
+                               self.change_status_display('warning');
+                            }
+                        }, 
+        
+                        function(err) {
+                           self.change_status_display('failure');
+                        });
                     });
+
                 });
                 this.status_loop();
         } else {
