@@ -815,6 +815,7 @@ var FieldX2Many = AbstractManyField.extend({
         });
         utils.async_when().done(function () {
             self.$el.addClass('o_view_manager_content');
+            // To set tabindex on main div of o2m so that focus is possible on escape
             self.$el.attr("tabindex", self.node.attrs.tabindex);
             self.alive(self.viewmanager.attachTo(self.$el));
         });
@@ -1267,6 +1268,31 @@ var One2ManyListView = X2ManyListView.extend({
         }
 
         return this._super(record);
+    },
+    keydown_TAB: function(e) {
+        var self = this;
+        var form = this.editor.form;
+        var tabindex_widgets = form.get_tabindex_widgets();
+        var has_tabindex_widgets = tabindex_widgets.length ? true : false;
+
+        return this._super(e).then(function() {
+            var first_field = _(form.fields_order).chain()
+                .map(function (name) { return form.fields[name]; })
+                .filter(function (field) {
+                    if (has_tabindex_widgets) {
+                        return field.$el.is(':visible') && !field.get('effective_readonly') && field.node.attrs.tabindex && parseInt(field.node.attrs.tabindex) >= 0;
+                    }
+                    return field.$el.is(':visible') && !field.get('effective_readonly');
+                })
+                .first()
+                .value();
+            if (first_field && !first_field.get_value() && $(e.target).closest(first_field.el).length) {
+                e.preventDefault();
+                self.cancel_edition().then(function() {
+                    self.x2m.view.set_next_tabindex();
+                });
+            }
+        });
     }
 });
 
@@ -1305,20 +1331,9 @@ var FieldOne2Many = FieldX2Many.extend({
     is_false: function() {
         return false;
     },
-    // TODO: Check if we can move required methods in FieldX2Many
     keydown_TAB: function(e, reverse) {
-        var self = this;
-        return this.is_loaded.then(function() {
-            var view = self.viewmanager.active_view;
-            if(view.type === "list" && view.controller.editable()) {
-                if (view.controller.editor.is_editing()) {
-                    return view.controller.keydown_TAB(e);
-                } else if (self.$el.is(":focus")) { //FIXME: Fix this focus based checking, we want if focus is on o2m and if it is not editing then set focus to parent's next tabindex
-                    e.preventDefault();
-                    return self.view.set_next_tabindex(self, reverse);
-                }
-            }
-        });
+        //Just return override to not allow to call set_next_tabindex which is called by super
+        return false;
     },
     keyup_ESCAPE: function(e) {
         //this.view.set_next_tabindex(this); //Call next tabindex after editor is closed

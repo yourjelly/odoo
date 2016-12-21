@@ -425,6 +425,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
                     self.do_push_state({});
                 }
                 self.$el.removeClass('oe_form_dirty');                
+                // FIXME: load_record is called from reload, when record created, from defaults, so it is called many times
+                // We are triggering set_tabindex_focus because we want to reset tabindex focus on button click reload 
                 self.trigger('set_tabindex_focus');
             });
          });
