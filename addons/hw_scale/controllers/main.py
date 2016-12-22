@@ -45,6 +45,11 @@ def _toledo8217StatusParse(status):
             weight_info.append('net_weight')
     return weight, weight_info
 
+def _ANDEK1200iStatusParse(status):
+    weight = 1
+    weight_info = 'ok'
+    return weight, weight_info
+
 ScaleProtocol = namedtuple(
     'ScaleProtocol',
     "name baudrate bytesize stopbits parity timeout writeTimeout weightRegexp statusRegexp "
@@ -73,6 +78,30 @@ Toledo8217Protocol = ScaleProtocol(
     newWeightDelay=0.2,
     commandTerminator='',
     weightCommand='W',
+    zeroCommand='Z',
+    tareCommand='T',
+    clearCommand='C',
+    emptyAnswerValid=False,
+    autoResetWeight=False,
+)
+
+ANDEK1200iProtocol = ScaleProtocol(
+    name='ANDEK1200i',
+    baudrate=2400,
+    bytesize=serial.SEVENBITS,
+    stopbits=serial.STOPBITS_ONE,
+    parity=serial.PARITY_EVEN,
+    timeout=1,
+    writeTimeout=1,
+    weightRegexp="ST,.([0-9.]+)  g\r\n",
+    # weightRegexp="\x02\\s*([0-9.]+)N?\\r",
+    statusRegexp=False,
+    statusParse=_ANDEK1200iStatusParse,
+    commandDelay=0.2,
+    weightDelay=0.5,
+    newWeightDelay=0.2,
+    commandTerminator='\r\n',
+    weightCommand='Q',
     zeroCommand='Z',
     tareCommand='T',
     clearCommand='C',
@@ -112,6 +141,7 @@ ADAMEquipmentProtocol = ScaleProtocol(
 
 SCALE_PROTOCOLS = (
     Toledo8217Protocol,
+    ANDEK1200iProtocol,
     ADAMEquipmentProtocol, # must be listed last, as it supports no probing!
 )
 
