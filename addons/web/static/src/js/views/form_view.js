@@ -150,7 +150,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
         this.toggle_buttons();
 
         // Bind button events
-        //TODO: Focus and Click both set focus on button and tip will be visible, may be do a trick of flag in mousedown event
+        // TODO: Focus and Click both set focus on button and tip will be visible, may be do a trick of flag in mousedown event
+        // TODO: Create method on_button_keydown method and pass cancel callback function as all having duplicate code
         this.$buttons.find('.o_form_button_create')
             .on('click', this.on_button_create)
             .on('focus', function(e) {
@@ -158,6 +159,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
             })
             .on('keydown', function(e) {
                 if (e.which == $.ui.keyCode.TAB) { //We can use switch here
+                    e.preventDefault();
                     $(this).trigger("click");
                 } else if (e.which == $.ui.keyCode.ESCAPE) {
                     self.trigger('history_back');
@@ -171,6 +173,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
             })
             .on('keydown', function(e) {
                 if (e.which == $.ui.keyCode.TAB) { //We can use switch here
+                    e.preventDefault();
                     $(this).trigger("click");
                 } else if (e.which == $.ui.keyCode.ESCAPE) {
                     self.last_tabindex = null;
@@ -178,7 +181,16 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 }
             });
 
-        this.$buttons.on('click', '.o_form_button_edit', this.on_button_edit);
+        this.$buttons.find('.o_form_button_edit')
+            .on('click', this.on_button_edit)
+            .on('keydown', function(e) {
+                if (e.which == $.ui.keyCode.TAB) { //We can use switch here
+                    e.preventDefault();
+                    $(this).trigger("click");
+                } else if (e.which == $.ui.keyCode.ESCAPE) {
+                    self.trigger('history_back');
+                }
+            });
         this.$buttons.on('click', '.o_form_button_cancel', this.on_button_cancel);
 
         this.$buttons.appendTo($node);
@@ -427,7 +439,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 self.$el.removeClass('oe_form_dirty');                
                 // FIXME: load_record is called from reload, when record created, from defaults, so it is called many times
                 // We are triggering set_tabindex_focus because we want to reset tabindex focus on button click reload 
-                self.trigger('set_tabindex_focus');
+                //self.trigger('set_tabindex_focus');
             });
          });
     },
@@ -720,6 +732,11 @@ var FormView = View.extend(common.FieldManagerMixin, {
     autofocus: function() {
         if (this.get("actual_mode") !== "view" && !this.options.disable_autofocus) {
             var fields_order = this.fields_order.slice(0);
+            this.tabindex_widgets = this.get_tabindex_widgets();
+            if (this.tabindex_widgets.length) {
+                this.last_tabindex = null;
+                this.trigger('set_tabindex_focus');
+            }
             if (this.default_focus_field) {
                 fields_order.unshift(this.default_focus_field.name);
             }
@@ -1037,6 +1054,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
                         check_access_rule: true
                     }).then(function(r) {
                         self.trigger('load_record', r);
+                    }).then(function() {
+                        self.trigger('set_tabindex_focus');
                     }).fail(function (){
                         self.do_action('history_back');
                     });
