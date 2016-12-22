@@ -253,6 +253,28 @@ var ListView = View.extend({
             }
         }
 
+        var searchview = this.getParent().searchview;
+        if (searchview) {
+            searchview.on('search_widget_down', this, function (e) {
+                self.keydown_DOWN(e);
+            });
+        }
+        this.$('tbody .o_list_record_selector input').keydown(function(e) {
+            switch(e.which) {
+                case $.ui.keyCode.DOWN:
+                    self.keydown_DOWN(e);
+                    break
+                case $.ui.keyCode.UP:
+                    self.keydown_UP(e);
+                    break;
+                case $.ui.keyCode.ENTER:
+                    if ($(e.currentTarget).is(":checked")) {
+                        $(e.target).closest('tr').trigger("click");
+                    }
+                    break;
+            }
+        });
+
         this.trigger('list_view_loaded', data, this.grouped);
         return $.when();
     },
@@ -403,6 +425,32 @@ var ListView = View.extend({
         });
 
         this.aggregate_columns = _(this.visible_columns).invoke('to_aggregate');
+    },
+    keydown_DOWN: function(e) {
+        var $target = $(e.currentTarget);
+        if (this.dataset.size() === 0) {
+            return false;
+        }
+        if ($target.is(":checkbox") && $target.hasClass("o_list_record_selector")) {
+            return this.$('tbody .o_list_record_selector input').first().trigger("click").focus();
+        }
+        $target.prop("checked", false);
+        var $next_row = $(e.target).closest('tr').next();
+        // To Discuss: If there is no next row then we can set focus to search again
+        if (!$next_row.length || !$next_row.attr('data-id')) {
+            return this.$('tbody .o_list_record_selector input').first().trigger("click").focus();
+        }
+        return $next_row.find(".o_list_record_selector input").trigger("click").focus();
+    },
+    keydown_UP: function(e) {
+        var $target = $(e.currentTarget);
+        $target.prop("checked", false);
+        var $prev_row = $(e.target).closest('tr').prev();
+        // To Discuss: If there is no previous row then we can set focus to search again
+        if (!$prev_row.length) {
+            return this.$('tbody .o_list_record_selector input').last().trigger("click").focus();
+        }
+        return $prev_row.find(".o_list_record_selector input").trigger("click").focus();
     },
     /**
      * Used to handle a click on a table row, if no other handler caught the
