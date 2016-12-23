@@ -123,8 +123,8 @@
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="arch" type="xml">
-                <page name="general_information" position="after">
-                    <page string="Inventory">
+                <page name="sales" position="after">
+                    <page string="Inventory" name="inventory">
                         <group name="inventory">
                             <group>
                                 <field name="route_ids" widget="many2many_checkboxes" attrs="{'invisible':[('type', 'in', ['service', 'digital'])]}"/>
@@ -140,9 +140,6 @@
                                 <div class="o_row" name="volume" attrs="{'invisible':['|', ('type', 'not in', ['product', 'consu']), ('product_variant_count', '&gt;', 1)]}">
                                     <field name="volume" string="Volume"/>
                                 </div>
-                            </group>
-                            <group>
-                                <field name="categ_id" string="Internal Category"/>
                             </group>
                             <group name="stock_property" groups="base.group_no_one">
                                 <field name="property_stock_procurement" domain="[('usage','=','procurement')]"/>
@@ -165,7 +162,7 @@
                         <field name="description_pickingin" nolabel="1" placeholder="This note will be displayed on the Receptions."/>
                     </group>
                 </group>
-                <group name="email_template_and_project" position="before">
+<!--                 <group name="email_template_and_project" position="before">
                     <group name="sale_condition" string="Sale Conditions">
                         <label for="warranty" groups="stock.group_stock_production_lot"/>
                         <div groups="stock.group_stock_production_lot">
@@ -176,7 +173,7 @@
                             <field name="sale_delay" attrs="{'readonly':[('sale_ok','=',False)]}" class="oe_inline" style="vertical-align:baseline"/> days
                         </div>
                     </group>
-                </group>
+                </group> -->
             </field>
         </record>
 
@@ -348,11 +345,6 @@
                                 <span class="o_stat_text">Forecasted</span>
                             </div>
                         </button>
-                        <button string="Traceability" type="object"
-                            name= "action_view_stock_moves"
-                            attrs="{'invisible':[('type', 'not in', ['product', 'consu'])]}"
-                            class="oe_stat_button" icon="fa-arrows-v"
-                            groups="stock.group_stock_user"/>
                         <button type="object"
                             name="action_view_orderpoints"
                             attrs="{'invisible':['|',('type', '!=', 'product'),('nbr_reordering_rules', '==', 1)]}"
@@ -378,6 +370,13 @@
                             attrs="{'invisible':[('type', '!=', 'product')]}"
                             class="oe_stat_button" icon="fa-cogs"
                             groups="stock.group_adv_location"/>
+                    </button>
+                    <button name="action_view_orderpoints" position="after">
+                        <button string="Traceability" type="object"
+                                name= "action_view_stock_moves"
+                                attrs="{'invisible':[('type', 'not in', ['product', 'consu'])]}"
+                                class="oe_stat_button" icon="fa-arrows-v"
+                                groups="stock.group_stock_user"/>
                     </button>
                 </data>
             </field>

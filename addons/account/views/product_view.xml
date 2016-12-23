@@ -8,13 +8,12 @@
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="arch" type="xml">
                 <page name="sales" position="after">
-                    <page string="Invoicing" name="invoicing" groups="account.group_account_invoice">
+                    <page string="Accounting" name="invoicing" groups="account.group_account_invoice">
                         <group name="properties">
                             <group>
                                 <field name="property_account_income_id"
                                     domain="[('internal_type','=','other'),('deprecated','=',False)]"
                                     groups="account.group_account_user"/>
-                                <field name="taxes_id" widget="many2many_tags"/>
                             </group>
                             <group>
                                 <field name="property_account_expense_id"
@@ -26,6 +25,11 @@
                         <group name="accounting"/>
                     </page>
                 </page>
+                <xpath expr="//group[@name='email_template_and_project']" position="before">
+                    <group name="taxes" string="Taxes">
+                        <field name="taxes_id" widget="many2many_tags"/>
+                    </group>
+                </xpath>
             </field>
         </record>
 

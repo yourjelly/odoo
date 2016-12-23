@@ -44,11 +44,13 @@
             <field name="inherit_id" ref="product.product_template_only_form_view"/>
             <field name="groups_id" eval="[(4, ref('mrp.group_mrp_user'))]"/>
             <field name="arch" type="xml">
-                <button name="toggle_active" position="before">
+                <button name="action_view_orderpoints" position="before">
                     <button class="oe_stat_button" name="%(template_open_bom)d" type="action"
                         attrs="{'invisible':[('type', 'not in', ['product', 'consu'])]}" icon="fa-flask">
                         <field string="Bill of Materials" name="bom_count" widget="statinfo" />
                     </button>
+                </button>
+                <button name="action_view_orderpoints" position="after">   
                     <button class="oe_stat_button" name="action_view_mos" type="object"
                         attrs="{'invisible':[('type', 'not in', ['product', 'consu'])]}" icon="fa-list-alt">
                         <field string="Manufacturing" name="mo_count" widget="statinfo" />

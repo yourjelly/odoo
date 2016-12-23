@@ -557,6 +557,13 @@
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="arch" type="xml">
+                <page name="sales" position="after">
+                    <page string="Purchase" name="purchase">
+                        <group name="Purchase">
+                         
+                        </group>
+                    </page>
+                </page>
                 <group name="inventory" position="after">
                     <separator string="Vendors"/>
                     <field name="seller_ids" context="{'default_product_tmpl_id': context.get('product_tmpl_id', active_id)}"/>
@@ -625,7 +632,7 @@
             <field name="inherit_id" ref="product.product_template_only_form_view"/>
             <field name="groups_id" eval="[(4, ref('purchase.group_purchase_user'))]"/>
             <field name="arch" type="xml">
-                <button name="toggle_active" position="before">
+                <button name="action_view_orderpoints" position="after">
                    <button class="oe_stat_button" name="%(purchase.action_purchase_line_product_tree)d"
                        type="action" icon="fa-shopping-cart">
                        <field string="Purchases" name="purchase_count" widget="statinfo"/>
