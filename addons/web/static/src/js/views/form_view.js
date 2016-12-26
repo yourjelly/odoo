@@ -150,11 +150,16 @@ var FormView = View.extend(common.FieldManagerMixin, {
         this.toggle_buttons();
 
         // Bind button events
-        // TODO: Focus and Click both set focus on button and tip will be visible, may be do a trick of flag in mousedown event
         // TODO: Create method on_button_keydown method and pass cancel callback function as all having duplicate code
+        var mouse_clicked = false;
+        this.$buttons.on('mousedown', 'button', function() {mouse_clicked = true;});
         this.$buttons.find('.o_form_button_create')
             .on('click', this.on_button_create)
             .on('focus', function(e) {
+                if (mouse_clicked) {
+                    mouse_clicked = false;
+                    return;
+                }
                 utils.show_tabindex_tip({attach_to: this, title: _t("Press TAB to <b>Create</b> and ESC to go back to the list view"), trigger: 'focus'});
             })
             .on('keydown', function(e) {
@@ -169,6 +174,10 @@ var FormView = View.extend(common.FieldManagerMixin, {
         this.$buttons.find('.o_form_button_save')
             .on('click', this.on_button_save)
             .on('focus', function(e) {
+                if (mouse_clicked) {
+                    mouse_clicked = false;
+                    return;
+                }
                 utils.show_tabindex_tip({attach_to: this, title: _t("Press TAB to Save or ESC to Cancel"), trigger: 'focus'});
             })
             .on('keydown', function(e) {
@@ -183,6 +192,13 @@ var FormView = View.extend(common.FieldManagerMixin, {
 
         this.$buttons.find('.o_form_button_edit')
             .on('click', this.on_button_edit)
+            .on('focus', function(e) {
+                if (mouse_clicked) {
+                    mouse_clicked = false;
+                    return;
+                }
+                utils.show_tabindex_tip({attach_to: this, title: _t("Press TAB to Edit or ESC to Cancel"), trigger: 'focus'});
+            })
             .on('keydown', function(e) {
                 if (e.which == $.ui.keyCode.TAB) { //We can use switch here
                     e.preventDefault();
