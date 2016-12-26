@@ -130,7 +130,8 @@ var WidgetButton = common.FormWidget.extend({
     on_focusout: function() {
         // To implement if need to special thing on focusout
     },
-    keydown_TAB: function() {
+    keydown_TAB: function(e, reverse) {
+        e.preventDefault();
         this.on_click();
     },
     on_escape: function() {

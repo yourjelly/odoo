@@ -732,19 +732,28 @@ var FormView = View.extend(common.FieldManagerMixin, {
     autofocus: function() {
         if (this.get("actual_mode") !== "view" && !this.options.disable_autofocus) {
             var fields_order = this.fields_order.slice(0);
-            this.tabindex_widgets = this.get_tabindex_widgets();
-            if (this.tabindex_widgets.length) {
-                this.last_tabindex = null;
-                this.trigger('set_tabindex_focus');
-            }
+            var tabindex_widgets = this.get_tabindex_widgets();
             if (this.default_focus_field) {
                 fields_order.unshift(this.default_focus_field.name);
             }
-            for (var i = 0; i < fields_order.length; i += 1) {
-                var field = this.fields[fields_order[i]];
-                if (!field.get('effective_invisible') && !field.get('effective_readonly') && field.$label) {
-                    if (field.focus() !== false) {
+            if (tabindex_widgets) {
+                for (var i = 0; i < tabindex_widgets.length; i += 1) {
+                    var field = tabindex_widgets[i];
+                    if (!field.get('effective_invisible') && !field.get('effective_readonly') && field.$label) {
+                        field.set_focus()
+                        if (!this.last_tabindex) {
+                            this.last_tabindex = parseInt(field.node.attrs.tabindex);
+                        }
                         break;
+                    }
+                }
+            } else {
+                for (var i = 0; i < fields_order.length; i += 1) {
+                    var field = this.fields[fields_order[i]];
+                    if (!field.get('effective_invisible') && !field.get('effective_readonly') && field.$label) {
+                        if (field.focus() !== false) {
+                            break;
+                        }
                     }
                 }
             }
