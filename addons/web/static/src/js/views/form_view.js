@@ -756,11 +756,12 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 for (var i = 0; i < tabindex_widgets.length; i += 1) {
                     var field = tabindex_widgets[i];
                     if (!field.get('effective_invisible') && !field.get('effective_readonly') && field.$label) {
-                        field.set_focus()
-                        if (!this.last_tabindex) {
-                            this.last_tabindex = parseInt(field.node.attrs.tabindex);
+                        if (field.focus() !== false) {
+                            if (!this.last_tabindex) {
+                                this.last_tabindex = parseInt(field.node.attrs.tabindex);
+                            }
+                            break;
                         }
-                        break;
                     }
                 }
             } else {
