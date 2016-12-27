@@ -289,21 +289,27 @@ var ListView = View.extend({
     render_buttons: function($node) {
         var self = this;
         if (!this.$buttons) {
+            var mouse_clicked = false;
             this.$buttons = $(QWeb.render("ListView.buttons", {'widget': this}));
-            this.$buttons.on('click', '.o_list_button_add', this.proxy('do_add_record'));
-            this.$buttons.on('focus', '.o_list_button_add', function(e) {
-                utils.show_tabindex_tip({attach_to: e.currentTarget, title: _t("Press TAB to Create or ESC to Cancel"), trigger: 'focus'});
-            });
-            //this.$buttons.on('blur', '.o_list_button_add', this.proxy('do_destroy_tabindex_tip'));
-            this.$buttons.on('keydown', '.o_list_button_add', function(event) {
-                if (event.which == $.ui.keyCode.TAB) {
-                    if (!event.shiftKey) {
-                        self.$buttons.find('.o_list_button_add').trigger("click");
+            this.$buttons.find('.o_list_button_add')
+                .on('click', this.proxy('do_add_record'))
+                .on('mousedown', function() {mouse_clicked = true;})
+                .on('focus', function(e) {
+                    if (mouse_clicked) {
+                        mouse_clicked = false;
+                        return;
                     }
-                } else if (event.which == $.ui.keyCode.ESCAPE) {
-                    self.trigger('history_back');
-                }
-            });
+                    utils.show_tabindex_tip({attach_to: e.currentTarget, title: _t("Press TAB to Create or ESC to Cancel"), trigger: 'focus'});
+                })
+                .on('keydown', function(event) {
+                    if (event.which == $.ui.keyCode.TAB) {
+                        if (!event.shiftKey) {
+                            self.$buttons.find('.o_list_button_add').trigger("click");
+                        }
+                    } else if (event.which == $.ui.keyCode.ESCAPE) {
+                        self.trigger('history_back');
+                    }
+                });
 
             this.$buttons.appendTo($node);
         }
