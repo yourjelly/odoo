@@ -1074,6 +1074,7 @@ var SelectCreateDialog = ViewDialog.extend({
             }
         });
         return this.searchview.prependTo($header).then(function() {
+            self.searchview.$('.o_searchview_input').focus();
             self.searchview.toggle_visibility(true);
 
             self.view_list = new SelectCreateListView(self,

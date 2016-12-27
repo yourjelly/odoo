@@ -253,7 +253,7 @@ var ListView = View.extend({
             }
         }
 
-        var searchview = this.getParent().searchview;
+        var searchview = this.getParent() && this.getParent().searchview;
         if (searchview) {
             searchview.on('search_widget_down', this, function (e) {
                 self.keydown_DOWN(e);
@@ -268,9 +268,7 @@ var ListView = View.extend({
                     self.keydown_UP(e);
                     break;
                 case $.ui.keyCode.ENTER:
-                    if ($(e.currentTarget).is(":checked")) {
-                        $(e.target).closest('tr').trigger("click");
-                    }
+                    self.keydown_ENTER(e);
                     break;
             }
         });
@@ -439,26 +437,28 @@ var ListView = View.extend({
         if (this.dataset.size() === 0) {
             return false;
         }
-        if ($target.is(":checkbox") && $target.hasClass("o_list_record_selector")) {
-            return this.$('tbody .o_list_record_selector input').first().trigger("click").focus();
-        }
-        $target.prop("checked", false);
-        var $next_row = $(e.target).closest('tr').next();
-        // To Discuss: If there is no next row then we can set focus to search again
+        $target.trigger("click").closest("tr").toggleClass("o_row_selected");
+        var $next_row = $(e.target).closest('tr').next().toggleClass("o_row_selected");
         if (!$next_row.length || !$next_row.attr('data-id')) {
+            this.$('tbody tr').filter("[data-id]").first().toggleClass("o_row_selected");
             return this.$('tbody .o_list_record_selector input').first().trigger("click").focus();
         }
         return $next_row.find(".o_list_record_selector input").trigger("click").focus();
     },
     keydown_UP: function(e) {
         var $target = $(e.currentTarget);
-        $target.prop("checked", false);
-        var $prev_row = $(e.target).closest('tr').prev();
-        // To Discuss: If there is no previous row then we can set focus to search again
+        $target.trigger("click").closest("tr").toggleClass("o_row_selected");
+        var $prev_row = $target.closest('tr').prev().toggleClass("o_row_selected");
         if (!$prev_row.length) {
+            this.$('tbody tr').filter("[data-id]").last().toggleClass("o_row_selected");
             return this.$('tbody .o_list_record_selector input').last().trigger("click").focus();
         }
         return $prev_row.find(".o_list_record_selector input").trigger("click").focus();
+    },
+    keydown_ENTER: function(e) {
+        if ($(e.currentTarget).is(":checked")) {
+            $(e.target).closest('tr').trigger("click");
+        }
     },
     /**
      * Used to handle a click on a table row, if no other handler caught the
