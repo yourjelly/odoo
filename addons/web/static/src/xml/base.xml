@@ -299,7 +299,7 @@
 </tr>
 
 <div t-name="ListView" class="table-responsive">
-    <table class="o_list_view table table-condensed table-striped">
+    <table class="o_list_view table table-condensed table-striped" tabindex="0">
         <t t-set="columns_count" t-value="visible_columns.length + (options.selectable ? 1 : 0) + (options.deletable ? 1 : 0)"/>
         <thead>
             <tr t-if="options.header">

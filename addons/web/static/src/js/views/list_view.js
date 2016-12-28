@@ -253,25 +253,27 @@ var ListView = View.extend({
             }
         }
 
+        // Listview selection using keyboard
         var searchview = this.getParent() && this.getParent().searchview;
         if (searchview) {
             searchview.on('search_widget_down', this, function (e) {
                 self.keydown_DOWN(e);
+                self.$(".o_list_view").on('keydown', function(e) {
+                    switch(e.which) {
+                        case $.ui.keyCode.DOWN:
+                            self.keydown_DOWN(e);
+                            break
+                        case $.ui.keyCode.UP:
+                            self.keydown_UP(e);
+                            break;
+                        case $.ui.keyCode.ENTER:
+                            self.keydown_ENTER(e);
+                            break;
+                    }
+                })
+                .focus();
             });
         }
-        this.$('tbody .o_list_record_selector input').keydown(function(e) {
-            switch(e.which) {
-                case $.ui.keyCode.DOWN:
-                    self.keydown_DOWN(e);
-                    break
-                case $.ui.keyCode.UP:
-                    self.keydown_UP(e);
-                    break;
-                case $.ui.keyCode.ENTER:
-                    self.keydown_ENTER(e);
-                    break;
-            }
-        });
 
         this.trigger('list_view_loaded', data, this.grouped);
         return $.when();
@@ -433,31 +435,46 @@ var ListView = View.extend({
         this.aggregate_columns = _(this.visible_columns).invoke('to_aggregate');
     },
     keydown_DOWN: function(e) {
-        var $target = $(e.currentTarget);
         if (this.dataset.size() === 0) {
             return false;
         }
-        $target.trigger("click").closest("tr").toggleClass("o_row_selected");
-        var $next_row = $(e.target).closest('tr').next().toggleClass("o_row_selected");
-        if (!$next_row.length || !$next_row.attr('data-id')) {
-            this.$('tbody tr').filter("[data-id]").first().toggleClass("o_row_selected");
-            return this.$('tbody .o_list_record_selector input').first().trigger("click").focus();
+        var $row = null;
+        var $already_selected = this.$(".o_row_selected");
+        if (!$already_selected.length) {
+            $row = this.$('tbody tr').filter("[data-id]").first();
+        } else {
+            $row = $already_selected.last().next();
+            if (!$row.length || !$row.attr('data-id')) {
+                $row = this.$('tbody tr').filter("[data-id]").first();
+            }
         }
-        return $next_row.find(".o_list_record_selector input").trigger("click").focus();
+
+        if (this.options.selectable) {
+            $already_selected.find(".o_list_record_selector input").trigger("click");
+            $row.find(".o_list_record_selector input").trigger("click");
+        } else {
+            $already_selected.toggleClass("o_row_selected");
+            $row.toggleClass("o_row_selected");
+        }
     },
     keydown_UP: function(e) {
-        var $target = $(e.currentTarget);
-        $target.trigger("click").closest("tr").toggleClass("o_row_selected");
-        var $prev_row = $target.closest('tr').prev().toggleClass("o_row_selected");
-        if (!$prev_row.length) {
-            this.$('tbody tr').filter("[data-id]").last().toggleClass("o_row_selected");
-            return this.$('tbody .o_list_record_selector input').last().trigger("click").focus();
+        var $already_selected = this.$(".o_row_selected");
+        var $row = $already_selected.first().prev();
+        if (!$row.length) {
+            $row = this.$('tbody tr').filter("[data-id]").last();
         }
-        return $prev_row.find(".o_list_record_selector input").trigger("click").focus();
+
+        if (this.options.selectable) {
+            $already_selected.find(".o_list_record_selector input").trigger("click");
+            $row.find(".o_list_record_selector input").trigger("click");
+        } else {
+            $already_selected.toggleClass("o_row_selected");
+            $row.toggleClass("o_row_selected");
+        }
     },
     keydown_ENTER: function(e) {
-        if ($(e.currentTarget).is(":checked")) {
-            $(e.target).closest('tr').trigger("click");
+        if (this.$(".o_row_selected").length) {
+            this.$(".o_row_selected").last().trigger("click");
         }
     },
     /**
@@ -650,6 +667,11 @@ var ListView = View.extend({
         if (deselected) {
             this.$('thead .o_list_record_selector input').prop('checked', false);
         }
+        // Show selected rows highlighted
+        this.$(".o_row_selected").removeClass("o_row_selected");
+        _.each(ids, _.bind(function(id) {
+            this.$('tr[data-id=' + id + ']').addClass("o_row_selected");
+        }, this));
 
         if (!ids.length) {
             this.dataset.index = 0;
