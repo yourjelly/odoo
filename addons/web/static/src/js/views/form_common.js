@@ -1055,7 +1055,10 @@ var SelectCreateDialog = ViewDialog.extend({
             .then(this.setup.bind(this, search_defaults))
             .then(function (fragment) {
                 _super().$el.append(fragment);
-            });
+            })
+            .then(_.bind(function() {
+                this.searchview.$('.o_searchview_input').focus();
+            }, this));
         return this;
     },
 
@@ -1083,7 +1086,6 @@ var SelectCreateDialog = ViewDialog.extend({
             }
         });
         return this.searchview.prependTo($header).then(function() {
-            self.searchview.$('.o_searchview_input').focus();
             self.searchview.toggle_visibility(true);
 
             self.view_list = new SelectCreateListView(self,
