@@ -452,11 +452,13 @@ var ListView = View.extend({
         }
 
         if (this.options.selectable) {
-            $already_selected.find(".o_list_record_selector input").trigger("click");
+            if (!e.shiftKey) {
+                $already_selected.find(".o_list_record_selector input:checked").trigger("click");
+            }
             $row.find(".o_list_record_selector input").trigger("click");
         } else {
-            $already_selected.toggleClass("o_row_selected");
-            $row.toggleClass("o_row_selected");
+            $already_selected.removeClass("o_row_selected");
+            $row.addClass("o_row_selected");
         }
     },
     keydown_UP: function(e) {
@@ -467,11 +469,13 @@ var ListView = View.extend({
         }
 
         if (this.options.selectable) {
-            $already_selected.find(".o_list_record_selector input").trigger("click");
+            if (!e.shiftKey) {
+                $already_selected.find(".o_list_record_selector input:checked").trigger("click");
+            }
             $row.find(".o_list_record_selector input").trigger("click");
         } else {
-            $already_selected.toggleClass("o_row_selected");
-            $row.toggleClass("o_row_selected");
+            $already_selected.removeClass("o_row_selected");
+            $row.addClass("o_row_selected");
         }
     },
     keydown_ENTER: function(e) {
@@ -670,7 +674,7 @@ var ListView = View.extend({
             this.$('thead .o_list_record_selector input').prop('checked', false);
         }
         // Show selected rows highlighted
-        this.$(".o_row_selected").removeClass("o_row_selected");
+        this.$(".o_row_selected").removeClass('o_row_selected');
         _.each(ids, _.bind(function(id) {
             this.$('tr[data-id=' + id + ']').addClass("o_row_selected");
         }, this));

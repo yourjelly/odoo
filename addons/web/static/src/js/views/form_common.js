@@ -1002,6 +1002,15 @@ var SelectCreateListView = ListView.extend({
     do_select: function(ids, records) {
         this._super.apply(this, arguments);
         this.popup.on_click_element(ids);
+    },
+    keydown_ENTER: function(e) {
+        //TODO: We can pass keydown_enter method in options of SelectCreateDialog like on_selected
+        if (this.popup.selected_ids) {
+            this.popup.on_selected(this.popup.selected_ids);
+            this.popup.close();
+        } else {
+            this.$(".o_row_selected").last().trigger("click");
+        }
     }
 });
 
