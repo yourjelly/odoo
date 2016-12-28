@@ -258,20 +258,22 @@ var ListView = View.extend({
         if (searchview) {
             searchview.on('search_widget_down', this, function (e) {
                 self.keydown_DOWN(e);
-                self.$(".o_list_view").on('keydown', function(e) {
-                    switch(e.which) {
-                        case $.ui.keyCode.DOWN:
-                            self.keydown_DOWN(e);
-                            break
-                        case $.ui.keyCode.UP:
-                            self.keydown_UP(e);
-                            break;
-                        case $.ui.keyCode.ENTER:
-                            self.keydown_ENTER(e);
-                            break;
-                    }
-                })
-                .focus();
+                self.$(".o_list_view")
+                    .off("keydown")
+                    .on('keydown', function(e) {
+                        switch(e.which) {
+                            case $.ui.keyCode.DOWN:
+                                self.keydown_DOWN(e);
+                                break
+                            case $.ui.keyCode.UP:
+                                self.keydown_UP(e);
+                                break;
+                            case $.ui.keyCode.ENTER:
+                                self.keydown_ENTER(e);
+                                break;
+                        }
+                    })
+                    .focus();
             });
         }
 
