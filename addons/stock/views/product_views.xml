@@ -124,22 +124,28 @@
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="arch" type="xml">
                 <page name="sales" position="after">
-                    <page string="Inventory" name="inventory">
+                    <page string="Inventory" name="inventory" attrs="{'invisible':[('type', '=', 'service')]}">
                         <group name="inventory">
-                            <group>
+                            <group string="Operations">
                                 <field name="route_ids" widget="many2many_checkboxes" attrs="{'invisible':[('type', 'in', ['service', 'digital'])]}"/>
                                 <field name="route_from_categ_ids" widget="many2many_tags" readonly="1" attrs="{'invisible':[('route_from_categ_ids', '=', [])]}"/>
+                                <label for="sale_delay"/>
+                                <div>
+                                    <field name="sale_delay" attrs="{'readonly':[('sale_ok','=',False)]}" class="oe_inline" style="vertical-align:baseline"/> days
+                                </div>
                             </group>
-                            <group name="group_lots_and_weight">
+                            <group name="group_lots_and_weight" string="Logistics">
                                 <label for="weight" attrs="{'invisible':['|', ('type', 'not in', ['product', 'consu']), ('product_variant_count', '&gt;', 1)]}"/>
                                 <div class="o_row" name="weight" attrs="{'invisible':['|', ('type', 'not in', ['product', 'consu']), ('product_variant_count', '&gt;', 1)]}">
                                     <field name="weight"/>
                                 </div>
-                                <field name="tracking" widget="radio" attrs="{'invisible':[('type', 'in', ['service', 'digital'])]}" groups="stock.group_production_lot"/>
                                 <label for="volume" attrs="{'invisible':['|', ('type', 'not in', ['product', 'consu']), ('product_variant_count', '&gt;', 1)]}"/>
                                 <div class="o_row" name="volume" attrs="{'invisible':['|', ('type', 'not in', ['product', 'consu']), ('product_variant_count', '&gt;', 1)]}">
                                     <field name="volume" string="Volume"/>
                                 </div>
+                            </group>
+                            <group string="Traceability" name="traceability">
+                                <field name="tracking" widget="radio" attrs="{'invisible':[('type', 'in', ['service', 'digital'])]}" groups="stock.group_production_lot"/>
                             </group>
                             <group name="stock_property" groups="base.group_no_one">
                                 <field name="property_stock_procurement" domain="[('usage','=','procurement')]"/>
@@ -162,18 +168,14 @@
                         <field name="description_pickingin" nolabel="1" placeholder="This note will be displayed on the Receptions."/>
                     </group>
                 </group>
-<!--                 <group name="email_template_and_project" position="before">
+                <group name="email_template_and_project" position="before">
                     <group name="sale_condition" string="Sale Conditions">
                         <label for="warranty" groups="stock.group_stock_production_lot"/>
                         <div groups="stock.group_stock_production_lot">
                             <field name="warranty" class="oe_inline"/> months
                         </div>
-                        <label for="sale_delay"/>
-                        <div>
-                            <field name="sale_delay" attrs="{'readonly':[('sale_ok','=',False)]}" class="oe_inline" style="vertical-align:baseline"/> days
-                        </div>
                     </group>
-                </group> -->
+                </group>
             </field>
         </record>
 

@@ -7,13 +7,13 @@ from odoo import api, fields, models
 class StockProductionLot(models.Model):
     _inherit = 'stock.production.lot'
 
-    life_date = fields.Datetime(string='End of Life Date',
+    life_date = fields.Datetime(string='Use by',
         help='This is the date on which the goods with this Serial Number may become dangerous and must not be consumed.')
-    use_date = fields.Datetime(string='Best before Date',
+    use_date = fields.Datetime(string='Best before',
         help='This is the date on which the goods with this Serial Number start deteriorating, without being dangerous yet.')
-    removal_date = fields.Datetime(string='Removal Date',
+    removal_date = fields.Datetime(string='Remove on',
         help='This is the date on which the goods with this Serial Number should be removed from the stock.')
-    alert_date = fields.Datetime(string='Alert Date',
+    alert_date = fields.Datetime(string='Alert',
         help="This is the date on which an alert should be notified about the goods with this Serial Number.")
     product_expiry_alert = fields.Boolean(compute='_compute_product_expiry_alert', help="The Alert Date has been reached.")
 

@@ -31,7 +31,7 @@
                         <div name="options" groups="base.group_user">
                             <div>
                                 <field name="sale_ok"/>
-                                <label for="sale_ok"/>
+                                <label for="sale_ok" name="sale_ok"/>
                             </div>
                             <div>
                                 <field name="purchase_ok"/>
@@ -59,7 +59,7 @@
                                 </group>
                             </group>
                         </page>
-                        <page string="Sales" attrs="{'invisible':[('sale_ok','=',False)]}" name="sales">
+                        <page string="Sales" attrs="{'invisible':['|', ('sale_ok','=',False), ('recurring_invoice','=',False)]}" name="sales">
                             <div name="pricelist_item" groups="product.group_product_pricelist">
                                 <separator string="Pricing"/>
                                 <field name="item_ids" nolabel="1" context="{'default_base':'list_price', 'default_applied_on' :'1_product'}">
@@ -80,7 +80,7 @@
                         </page>
                         <page string="Notes" name="notes">
                             <group name="description">
-                                <group string="Description for Quotations">
+                                <group string="Description for Quotations" attrs="{'invisible': [('sale_ok','=',False)]}">
                                     <field name="description_sale" nolabel="1" placeholder="This note will be displayed on the quotations."/>
                                 </group>
                             </group>

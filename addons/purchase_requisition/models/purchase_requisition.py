@@ -280,9 +280,9 @@ class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
     purchase_requisition = fields.Selection(
-        [('rfq', 'Create a draft purchase order'),
-         ('tenders', 'Propose a call for tenders')],
-        string='Procurement', default='rfq')
+        [('rfq', 'a draft purchase order'),
+         ('tenders', 'a call for tenders')],
+        string='A procurement request creates', default='rfq')
 
 
 class ProcurementOrder(models.Model):

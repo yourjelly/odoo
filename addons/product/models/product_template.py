@@ -103,7 +103,7 @@ class ProductTemplate(models.Model):
         'product.packaging', 'product_tmpl_id', 'Logistical Units',
         help="Gives the different ways to package the same product. This has no impact on "
              "the picking order and is mainly used if you use the EDI module.")
-    seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id', 'Vendors')
+    seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id', oldname='Vendors')
 
     active = fields.Boolean('Active', default=True, help="If unchecked, it will allow you to hide the product without removing it.")
     color = fields.Integer('Color Index')
