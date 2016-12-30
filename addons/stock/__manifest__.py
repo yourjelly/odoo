@@ -49,7 +49,8 @@ Dashboard / Reports for Inventory Management will include:
         'security/stock_security.xml',
         'security/ir.model.access.csv',
         'views/stock_menu_views.xml',
-
+        
+        'report/report_stock_exact_location.xml',
         'report/report_stock_forecast.xml',
         'report/stock_report_views.xml',
         'report/report_stock_view.xml',
