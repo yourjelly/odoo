@@ -373,13 +373,27 @@ ListView.include(/** @lends instance.web.ListView# */{
                         return field && field.$el.is(':visible:not(.o_readonly)');
                     };
                     var focus_field = options && options.focus_field ? options.focus_field : undefined;
+                    var tabindex_widgets = self.editor.form.get_tabindex_widgets();
                     if (!is_focusable(fields[focus_field])) {
                         focus_field = _.find(self.editor.form.fields_order, function(field) {
                             return is_focusable(fields[field]);
                         });
                     }
-                    if (fields[focus_field]) {
+                    if (!tabindex_widgets && fields[focus_field]) {
                         fields[focus_field].$el.find('input, textarea').andSelf().filter('input, textarea').select();
+                    } else {
+                        if (tabindex_widgets) {
+                            for (var i = 0; i < tabindex_widgets.length; i += 1) {
+                                var field = tabindex_widgets[i];
+                                if (is_focusable(field)) {
+                                    field.set_focus();
+                                    if (!self.editor.form.last_tabindex) {
+                                        self.editor.form.last_tabindex = parseInt(field.node.attrs.tabindex);
+                                    }
+                                    break;
+                                }
+                            }
+                        }
                     }
                     return record.attributes;
                 });
@@ -792,9 +806,16 @@ ListView.include(/** @lends instance.web.ListView# */{
     },
     keydown_TAB: function (e) { // Keydown and not keyup because this handler must be called before the browser has focused the next field
         var form = this.editor.form;
+        var tabindex_widgets = form.get_tabindex_widgets();
+        var has_tabindex_widgets = tabindex_widgets.length ? true : false;
         var last_field = _(form.fields_order).chain()
             .map(function (name) { return form.fields[name]; })
-            .filter(function (field) { return field.$el.is(':visible') && !field.get('effective_readonly'); })
+            .filter(function (field) {
+                if (has_tabindex_widgets) {
+                    return field.$el.is(':visible') && !field.get('effective_readonly') && field.node.attrs.tabindex && parseInt(field.node.attrs.tabindex) >= 0;
+                }
+                return field.$el.is(':visible') && !field.get('effective_readonly');
+            })
             .last()
             .value();
         // tabbed from last field in form

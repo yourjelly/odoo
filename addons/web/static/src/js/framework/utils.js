@@ -496,6 +496,20 @@ function async_when() {
     return def;
 }
 
+function show_tabindex_tip(options) {
+    // Keep here so in future we can create dynamic position tip
+    var $attach_to = $(options.attach_to);
+    var $template = $("<div class='oe_tooltip_string'>"+options.title+"</div>")
+    $attach_to.tooltip({
+        trigger: options.trigger || 'manual',
+        placement: options.placement || 'bottom',
+        title: function() {
+            return $template;
+        }
+    });
+    $attach_to.tooltip('show');
+}
+
 return {
     divmod: divmod,
     modf: modf,
@@ -527,6 +541,7 @@ return {
     swap: swap,
     toBoolElse: toBoolElse,
     async_when: async_when,
+    show_tabindex_tip: show_tabindex_tip
 };
 
 });

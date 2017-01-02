@@ -59,6 +59,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         this.onchanges_mutex = new utils.Mutex();
         this.default_focus_field = null;
         this.default_focus_button = null;
+        this.last_tabindex = null;
         this.fields_registry = core.form_widget_registry;
         this.tags_registry = core.form_tag_registry;
         this.widgets_registry = core.form_custom_registry;
@@ -80,6 +81,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
             self.on("change:actual_mode", self, self.toggle_sidebar);
         });
         self.on("load_record", self, self.load_record);
+        this.on("set_tabindex_focus", this, this.set_next_tabindex);
+
         core.bus.on('clear_uncommitted_changes', this, function(chain_callbacks) {
             var self = this;
             chain_callbacks(function() {
@@ -132,6 +135,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
      * if it exists
      */
     render_buttons: function($node) {
+        var self = this;
         this.$buttons = $('<div/>');
 
         var $footer = this.$('footer');
@@ -144,9 +148,65 @@ var FormView = View.extend(common.FieldManagerMixin, {
 
         // Show or hide the buttons according to the view mode
         this.toggle_buttons();
-        this.$buttons.on('click', '.o_form_button_create', this.on_button_create);
-        this.$buttons.on('click', '.o_form_button_edit', this.on_button_edit);
-        this.$buttons.on('click', '.o_form_button_save', this.on_button_save);
+
+        // Bind button events
+        // TODO: Create method on_button_keydown method and pass cancel callback function as all having duplicate code
+        var mouse_clicked = false;
+        this.$buttons.on('mousedown', 'button', function() {mouse_clicked = true;});
+        this.$buttons.find('.o_form_button_create')
+            .on('click', this.on_button_create)
+            .on('focus', function(e) {
+                if (mouse_clicked) {
+                    mouse_clicked = false;
+                    return;
+                }
+                utils.show_tabindex_tip({attach_to: this, title: _t("Press TAB to <b>Create</b> and ESC to go back to the list view"), trigger: 'focus'});
+            })
+            .on('keydown', function(e) {
+                if (e.which == $.ui.keyCode.TAB) { //We can use switch here
+                    e.preventDefault();
+                    $(this).trigger("click");
+                } else if (e.which == $.ui.keyCode.ESCAPE) {
+                    self.trigger('history_back');
+                }
+            });
+
+        this.$buttons.find('.o_form_button_save')
+            .on('click', this.on_button_save)
+            .on('focus', function(e) {
+                if (mouse_clicked) {
+                    mouse_clicked = false;
+                    return;
+                }
+                utils.show_tabindex_tip({attach_to: this, title: _t("Press TAB to Save or ESC to Cancel"), trigger: 'focus'});
+            })
+            .on('keydown', function(e) {
+                if (e.which == $.ui.keyCode.TAB) { //We can use switch here
+                    e.preventDefault();
+                    $(this).trigger("click");
+                } else if (e.which == $.ui.keyCode.ESCAPE) {
+                    self.last_tabindex = null;
+                    self.on_button_cancel();
+                }
+            });
+
+        this.$buttons.find('.o_form_button_edit')
+            .on('click', this.on_button_edit)
+            .on('focus', function(e) {
+                if (mouse_clicked) {
+                    mouse_clicked = false;
+                    return;
+                }
+                utils.show_tabindex_tip({attach_to: this, title: _t("Press TAB to Edit or ESC to Cancel"), trigger: 'focus'});
+            })
+            .on('keydown', function(e) {
+                if (e.which == $.ui.keyCode.TAB) { //We can use switch here
+                    e.preventDefault();
+                    $(this).trigger("click");
+                } else if (e.which == $.ui.keyCode.ESCAPE) {
+                    self.trigger('history_back');
+                }
+            });
         this.$buttons.on('click', '.o_form_button_cancel', this.on_button_cancel);
 
         this.$buttons.appendTo($node);
@@ -254,6 +314,65 @@ var FormView = View.extend(common.FieldManagerMixin, {
             self.trigger('blurred');
         }, 0);
     },
+    get_tabindex_widgets: function() {
+        // In future if we want to support tabindex on other elements like page then we can prepare 
+        // tabindex list in render_to method of renering engine and add jQuery wrapped elements of page and other elements
+        // So that we can have focus method available(we may bind set_next_tabindex on TAB key for such elements explicitly)
+        return _.chain(this.get_widgets()).filter(function(w) {
+            return w.node.attrs.tabindex && parseInt(w.node.attrs.tabindex) && parseInt(w.node.attrs.tabindex) >= 0 && !w.no_tabindex;
+        }).sortBy(function(w) {
+            return parseInt(w.node.attrs.tabindex);
+        }).value();
+    },
+    set_next_tabindex: function(current_widget, reverse) {
+        var self = this;
+        if (!this.tabindex_widgets) {
+            this.tabindex_widgets = this.get_tabindex_widgets();
+        }
+        if (!this.tabindex_widgets.length) {
+            return;
+        }
+        if (!this.last_tabindex) {
+            var widget = this.tabindex_widgets[0]; //Set focus to first widget
+            widget.set_focus();
+            this.last_tabindex = parseInt(widget.node.attrs.tabindex);
+            return false;
+        }
+        if (!current_widget) {
+            current_widget = _.find(this.tabindex_widgets, function(w) {
+                return parseInt(w.node.attrs.tabindex) == self.last_tabindex;
+            });
+        }
+        var current_index = _(this.tabindex_widgets).indexOf(current_widget);
+
+        var get_next_widget = function() {
+            current_index += (reverse && -1 || 1);
+            var next_widget = self.tabindex_widgets[current_index];
+            //TODO: Check why checking effective readonly not set focus to button after reload, seems because buttons are readonly while record is reloaded
+            //if (next_widget && (next_widget.$el.hasClass("o_form_invisible") || next_widget.get('effective_readonly'))) {
+            if (next_widget && (next_widget.$el.hasClass("o_form_invisible"))) {
+                return get_next_widget();
+            }
+            return next_widget;
+        };
+
+        var next_widget = get_next_widget();
+        //TODO: Simplify following conditions, apply and operation
+        if (next_widget) {
+            if (next_widget.node.tag == "button" && this.get("actual_mode") != "view" && this.$buttons.find(".o_form_button_save").length) {
+                return this.$buttons.find(".o_form_button_save").focus();
+            }
+            this.last_tabindex = parseInt(next_widget.node.attrs.tabindex);
+            next_widget.set_focus();
+        //} else if (_.isEqual(current_widget, this.tabindex_widgets[this.tabindex_widgets.length-1]) && this.$buttons) {
+        } else if (this.$buttons) {
+            if (this.get("actual_mode") == "view") {
+                return this.$buttons.find(".o_form_button_create").focus(); //Set focus to create button again
+            } else {
+                return this.$buttons.find(".o_form_button_save").focus();
+            }
+        }
+    },
 
     do_load_state: function(state, warm) {
         if (state.id && this.datarecord.id != state.id) {
@@ -273,6 +392,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         var self = this;
         options = options || {};
         this.$el.removeClass('oe_form_dirty');
+        this.last_tabindex = null;
 
         var shown = this.has_been_loaded;
         if (options.reload !== false) {
@@ -334,6 +454,9 @@ var FormView = View.extend(common.FieldManagerMixin, {
                     self.do_push_state({});
                 }
                 self.$el.removeClass('oe_form_dirty');                
+                // FIXME: load_record is called from reload, when record created, from defaults, so it is called many times
+                // We are triggering set_tabindex_focus because we want to reset tabindex focus on button click reload 
+                //self.trigger('set_tabindex_focus');
             });
          });
     },
@@ -510,6 +633,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
             });
             dialog.open();
             dialog.on('closed', this, function () {
+                this.trigger("set_tabindex_focus"); //TODO: Set focus to last widget which triggers onchange
                 this.warning_displayed = false;
             });
         }
@@ -625,17 +749,35 @@ var FormView = View.extend(common.FieldManagerMixin, {
     autofocus: function() {
         if (this.get("actual_mode") !== "view" && !this.options.disable_autofocus) {
             var fields_order = this.fields_order.slice(0);
+            var tabindex_widgets = this.get_tabindex_widgets();
             if (this.default_focus_field) {
                 fields_order.unshift(this.default_focus_field.name);
             }
-            for (var i = 0; i < fields_order.length; i += 1) {
-                var field = this.fields[fields_order[i]];
-                if (!field.get('effective_invisible') && !field.get('effective_readonly') && field.$label) {
-                    if (field.focus() !== false) {
-                        break;
+            if (tabindex_widgets) {
+                for (var i = 0; i < tabindex_widgets.length; i += 1) {
+                    var field = tabindex_widgets[i];
+                    if (!field.get('effective_invisible') && !field.get('effective_readonly') && field.$label) {
+                        if (field.focus() !== false) {
+                            if (!this.last_tabindex) {
+                                this.last_tabindex = parseInt(field.node.attrs.tabindex);
+                            }
+                            break;
+                        }
+                    }
+                }
+            } else {
+                for (var i = 0; i < fields_order.length; i += 1) {
+                    var field = this.fields[fields_order[i]];
+                    if (!field.get('effective_invisible') && !field.get('effective_readonly') && field.$label) {
+                        if (field.focus() !== false) {
+                            break;
+                        }
                     }
                 }
             }
+        }
+        if (this.$buttons && this.get('actual_mode') == 'view') {
+            this.$buttons.find('.o_form_button_edit').focus();
         }
     },
     disable_button: function () {
@@ -657,6 +799,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
             return self.reload().then(function() {
                 self.to_view_mode();
                 core.bus.trigger('form_view_saved', self);
+                self.set_next_tabindex();
             });
         }).always(function(){
             self.enable_button();
@@ -677,6 +820,9 @@ var FormView = View.extend(common.FieldManagerMixin, {
         this.trigger('on_button_cancel');
         return false;
     },
+    do_cancel: function() {
+        return this.on_button_cancel();
+    },
     on_button_new: function() {
         return $.when(this.has_been_loaded)
             .then(this.can_be_discarded.bind(this))
@@ -686,6 +832,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         return this.to_edit_mode();
     },
     on_button_create: function() {
+        this.last_tabindex = null;
         this.dataset.index = null;
         this.do_show();
     },
@@ -932,7 +1079,9 @@ var FormView = View.extend(common.FieldManagerMixin, {
                         check_access_rule: true
                     }).then(function(r) {
                         self.trigger('load_record', r);
-                    }).fail(function (){
+                    }).then(function() {
+                        self.trigger('set_tabindex_focus');
+                     }).fail(function (){
                         self.do_action('history_back');
                     });
             }

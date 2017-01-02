@@ -253,6 +253,30 @@ var ListView = View.extend({
             }
         }
 
+        // Listview selection using keyboard
+        var searchview = this.getParent() && this.getParent().searchview;
+        if (searchview) {
+            searchview.on('search_widget_down', this, function (e) {
+                self.keydown_DOWN(e);
+                self.$(".o_list_view")
+                    .off("keydown")
+                    .on('keydown', function(e) {
+                        switch(e.which) {
+                            case $.ui.keyCode.DOWN:
+                                self.keydown_DOWN(e);
+                                break
+                            case $.ui.keyCode.UP:
+                                self.keydown_UP(e);
+                                break;
+                            case $.ui.keyCode.ENTER:
+                                self.keydown_ENTER(e);
+                                break;
+                        }
+                    })
+                    .focus();
+            });
+        }
+
         this.trigger('list_view_loaded', data, this.grouped);
         return $.when();
     },
@@ -265,9 +289,30 @@ var ListView = View.extend({
      * if it exists
      */
     render_buttons: function($node) {
+        var self = this;
         if (!this.$buttons) {
+            var mouse_clicked = false;
             this.$buttons = $(QWeb.render("ListView.buttons", {'widget': this}));
-            this.$buttons.on('click', '.o_list_button_add', this.proxy('do_add_record'));
+            this.$buttons.find('.o_list_button_add')
+                .on('click', this.proxy('do_add_record'))
+                .on('mousedown', function() {mouse_clicked = true;})
+                .on('focus', function(e) {
+                    if (mouse_clicked) {
+                        mouse_clicked = false;
+                        return;
+                    }
+                    utils.show_tabindex_tip({attach_to: e.currentTarget, title: _t("Press TAB to Create or ESC to Cancel"), trigger: 'focus'});
+                })
+                .on('keydown', function(event) {
+                    if (event.which == $.ui.keyCode.TAB) {
+                        if (!event.shiftKey) {
+                            self.$buttons.find('.o_list_button_add').trigger("click");
+                        }
+                    } else if (event.which == $.ui.keyCode.ESCAPE) {
+                        self.trigger('history_back');
+                    }
+                });
+
             this.$buttons.appendTo($node);
         }
     },
@@ -390,6 +435,53 @@ var ListView = View.extend({
         });
 
         this.aggregate_columns = _(this.visible_columns).invoke('to_aggregate');
+    },
+    keydown_DOWN: function(e) {
+        if (this.dataset.size() === 0) {
+            return false;
+        }
+        var $row = null;
+        var $already_selected = this.$(".o_row_selected");
+        if (!$already_selected.length) {
+            $row = this.$('tbody tr').filter("[data-id]").first();
+        } else {
+            $row = $already_selected.last().next();
+            if (!$row.length || !$row.attr('data-id')) {
+                $row = this.$('tbody tr').filter("[data-id]").first();
+            }
+        }
+
+        if (this.options.selectable) {
+            if (!e.shiftKey) {
+                $already_selected.find(".o_list_record_selector input:checked").trigger("click");
+            }
+            $row.find(".o_list_record_selector input").trigger("click");
+        } else {
+            $already_selected.removeClass("o_row_selected");
+            $row.addClass("o_row_selected");
+        }
+    },
+    keydown_UP: function(e) {
+        var $already_selected = this.$(".o_row_selected");
+        var $row = $already_selected.first().prev();
+        if (!$row.length) {
+            $row = this.$('tbody tr').filter("[data-id]").last();
+        }
+
+        if (this.options.selectable) {
+            if (!e.shiftKey) {
+                $already_selected.find(".o_list_record_selector input:checked").trigger("click");
+            }
+            $row.find(".o_list_record_selector input").trigger("click");
+        } else {
+            $already_selected.removeClass("o_row_selected");
+            $row.addClass("o_row_selected");
+        }
+    },
+    keydown_ENTER: function(e) {
+        if (this.$(".o_row_selected").length) {
+            this.$(".o_row_selected").last().trigger("click");
+        }
     },
     /**
      * Used to handle a click on a table row, if no other handler caught the
@@ -581,6 +673,11 @@ var ListView = View.extend({
         if (deselected) {
             this.$('thead .o_list_record_selector input').prop('checked', false);
         }
+        // Show selected rows highlighted
+        this.$(".o_row_selected").removeClass('o_row_selected');
+        _.each(ids, _.bind(function(id) {
+            this.$('tr[data-id=' + id + ']').addClass("o_row_selected");
+        }, this));
 
         if (!ids.length) {
             this.dataset.index = 0;

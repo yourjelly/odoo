@@ -430,6 +430,7 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
         this._super();
         this.$el.addClass(this.node.attrs["class"] || "");
         this.$el.attr('style', this.node.attrs.style);
+        this.bind_tabindex();
     },
     destroy: function() {
         $.fn.tooltip('destroy');
@@ -509,6 +510,46 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
             final_domain = new data.CompoundDomain(final_domain).set_eval_context(fields_values);
         }
         return final_domain;
+    },
+    bind_tabindex: function() {
+        var self = this;
+        //TODO: Bind event on all widget so on all widget escape key cancels record
+        if (!this.get('readonly') && this.node.attrs.tabindex && parseInt(this.node.attrs.tabindex) > 0 && !this.no_tabindex) {
+            this.$el.on("keydown", function(e) {
+                if (e.which == $.ui.keyCode.TAB) {
+                    if (e.shiftKey) {
+                        self.keydown_TAB(e, true);
+                    } else {
+                        self.keydown_TAB(e, false);
+                    }
+                }
+                if (e.which == $.ui.keyCode.ESCAPE) {
+                    self.keydown_ESCAPE(e);
+                }
+            });
+            //FIXME: Don't know why keydown binded and overridden in o2m is not called, maybe due to editor
+            this.$el.on("keyup", function(e) {
+                if (e.which == $.ui.keyCode.ESCAPE) {
+                    self.keyup_ESCAPE(e);
+                }
+            });
+        }
+    },
+    // Maybe function name can be on_focus
+    set_focus: function() {
+        return this.focus();
+    },
+    focus: function() {},
+    keydown_TAB: function(e, reverse) {
+        e.preventDefault(); //Need to preventDefault otherwise TAB key will immediately set focus on another field of current form
+        return this.field_manager.set_next_tabindex(this, reverse);
+    },
+    keyup_ESCAPE: function(e) {
+        this.on_escape();
+    },
+    keydown_ESCAPE: function(e) {},
+    on_escape: function() {
+        this.field_manager.do_cancel();
     }
 });
 
@@ -766,6 +807,7 @@ var AbstractField = FormWidget.extend(FieldInterface, {
             .toggleClass('o_form_invalid', !this.disable_utility_classes && !!this.field_manager.get('display_invalid_fields') && !this.is_valid());
     },
     focus: function() {
+        this._super();
         return false;
     },
     set_input_id: function(id) {
@@ -787,6 +829,14 @@ var AbstractField = FormWidget.extend(FieldInterface, {
     commit_value: function() {
         return $.when();
     },
+    keydown_TAB: function(e, reverse) {
+        if (this.is_valid()) {
+            return this._super(e, reverse);
+        } else {
+            e.preventDefault();
+            this.$el.add(this.$label).toggleClass('o_form_invalid', true);
+        }
+    }
 });
 
 /**
@@ -951,6 +1001,15 @@ var SelectCreateListView = ListView.extend({
     do_select: function(ids, records) {
         this._super.apply(this, arguments);
         this.popup.on_click_element(ids);
+    },
+    keydown_ENTER: function(e) {
+        //TODO: We can pass keydown_enter method in options of SelectCreateDialog like on_selected
+        if (this.popup.selected_ids) {
+            this.popup.on_selected(this.popup.selected_ids);
+            this.popup.close();
+        } else {
+            this.$(".o_row_selected").last().trigger("click");
+        }
     }
 });
 
@@ -995,7 +1054,10 @@ var SelectCreateDialog = ViewDialog.extend({
             .then(this.setup.bind(this, search_defaults))
             .then(function (fragment) {
                 _super().$el.append(fragment);
-            });
+            })
+            .then(_.bind(function() {
+                this.searchview.$('.o_searchview_input').focus();
+            }, this));
         return this;
     },
 

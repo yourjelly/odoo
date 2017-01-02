@@ -37,6 +37,7 @@ var WidgetButton = common.FormWidget.extend({
         }
     },
     start: function() {
+        var self = this;
         this._super.apply(this, arguments);
         this.view.on('view_content_has_changed', this, this.check_disable);
         this.check_disable();
@@ -91,7 +92,9 @@ var WidgetButton = common.FormWidget.extend({
                     self.view.recursive_reload();
                 }
             }).fail(function () {
-                self.view.recursive_reload();
+                self.view.recursive_reload().then(function() {
+                    self.view.set_next_tabindex();
+                });
             });
     },
     check_disable: function() {
@@ -111,6 +114,18 @@ var WidgetButton = common.FormWidget.extend({
         setTimeout(function() {
             $body.removeClass(class_to_add);
         }, 1000);
+    },
+    set_focus: function() {
+        this.$el.focus();
+        if (this.node.attrs.on_focus_tip) {
+            content = this.node.attrs.on_focus_tip;
+        } else {
+            var content = _.str.sprintf("Press TAB to %s or ESC to Cancel", this.string);
+        }
+        utils.show_tabindex_tip({attach_to: this.$el, title: content, trigger: 'focus'});
+    },
+    on_escape: function() {
+        this.view.trigger('history_back');
     }
 });
 
@@ -177,6 +192,12 @@ var FieldChar = common.AbstractField.extend(common.ReinitializeFieldMixin, {
         }
         return false;
     },
+    set_focus: function() {
+        this._super();
+        if (this.$input) {
+            return this.$input.select();
+        }
+    }
 });
 
 var KanbanSelection = common.AbstractField.extend({
@@ -1582,6 +1603,10 @@ var FieldToggleBoolean = common.AbstractField.extend({
 
 var AceEditor = common.AbstractField.extend(common.ReinitializeFieldMixin, {
     template: "AceEditor",
+    init: function() {
+        this._super.apply(this, arguments);
+        this.no_tabindex = true;
+    },
     willStart: function() {
         if (!window.ace && !this.loadJS_def) {
             this.loadJS_def = ajax.loadJS('/web/static/lib/ace/ace.odoo-custom.js').then(function () {

@@ -815,6 +815,8 @@ var FieldX2Many = AbstractManyField.extend({
         });
         utils.async_when().done(function () {
             self.$el.addClass('o_view_manager_content');
+            // To set tabindex on main div of o2m so that focus is possible on escape
+            self.$el.attr("tabindex", self.node.attrs.tabindex);
             self.alive(self.viewmanager.attachTo(self.$el));
         });
         return def;
@@ -872,6 +874,20 @@ var FieldX2Many = AbstractManyField.extend({
     is_false: function() {
         return _(this.dataset.ids).isEmpty();
     },
+    set_focus: function() {
+        var view = this.viewmanager.active_view;
+        if (view && view.controller) {
+            this.is_loaded.done(function () {
+                if (view.type == 'list') {
+                    return view.controller.save_edition().done(function() {
+                        view.controller.do_add_record();
+                    });
+                } else if (view.type == 'kanban') {
+                    return view.controller.add_record();
+                }
+            });
+        }
+    }
 });
 
 var X2ManyDataSet = data.BufferedDataSet.extend({
@@ -941,6 +957,10 @@ var X2ManyViewManager = ViewManager.extend({
             self.x2m.reload_current_view();
         });
     },
+    set_focus: function() {
+        self.x2m.focus();
+    }
+
 });
 
 var X2ManyListView = ListView.extend({
@@ -1088,7 +1108,9 @@ var One2ManyListView = X2ManyListView.extend({
                 child_name: self.x2m.name,
                 form_view_options: {'not_interactible_on_create':true},
                 on_selected: function() {
-                    self.x2m.reload_current_view();
+                    self.x2m.reload_current_view().then(function() {
+                        self.x2m.view.set_next_tabindex();
+                    });
                 }
             }).open();
         }
@@ -1245,6 +1267,31 @@ var One2ManyListView = X2ManyListView.extend({
 
         return this._super(record);
     },
+    keydown_TAB: function(e) {
+        var self = this;
+        var form = this.editor.form;
+        var tabindex_widgets = form.get_tabindex_widgets();
+        var has_tabindex_widgets = tabindex_widgets.length ? true : false;
+
+        return this._super(e).then(function() {
+            var first_field = _(form.fields_order).chain()
+                .map(function (name) { return form.fields[name]; })
+                .filter(function (field) {
+                    if (has_tabindex_widgets) {
+                        return field.$el.is(':visible') && !field.get('effective_readonly') && field.node.attrs.tabindex && parseInt(field.node.attrs.tabindex) >= 0;
+                    }
+                    return field.$el.is(':visible') && !field.get('effective_readonly');
+                })
+                .first()
+                .value();
+            if (first_field && !first_field.get_value() && $(e.target).closest(first_field.el).length) {
+                e.preventDefault();
+                self.cancel_edition().then(function() {
+                    self.x2m.view.set_next_tabindex();
+                });
+            }
+        });
+    }
 });
 
 var One2ManyGroups = ListView.Groups.extend({
@@ -1282,6 +1329,24 @@ var FieldOne2Many = FieldX2Many.extend({
     is_false: function() {
         return false;
     },
+    keydown_TAB: function(e, reverse) {
+        //Just return override to not allow to call set_next_tabindex which is called by super
+        return false;
+    },
+    keyup_ESCAPE: function(e) {
+        //this.view.set_next_tabindex(this); //Call next tabindex after editor is closed
+        if (this.node.attrs.tabindex) {
+            this.view.last_tabindex = parseInt(this.node.attrs.tabindex);
+        }
+        if (!this.$el.is(":focus")) {
+            this.$el.focus();
+        } else {
+            this._super(e);
+        }
+    },
+    keydown_ESCAPE: function(e) {
+        return false;
+    }
 });
 
 var Many2ManyListView = X2ManyListView.extend({
@@ -1305,7 +1370,9 @@ var Many2ManyListView = X2ManyListView.extend({
             no_create: this.x2m.options.no_create,
             on_selected: function(element_ids) {
                 return self.x2m.data_link_multi(element_ids).then(function() {
-                    self.x2m.reload_current_view();
+                    self.x2m.reload_current_view().then(function() {
+                        self.x2m.view.set_next_tabindex();
+                    });
                 });
             }
         }).open();
@@ -1715,6 +1782,17 @@ var FieldMany2ManyCheckBoxes = AbstractManyField.extend(common.ReinitializeField
     is_false: function() {
         return false;
     },
+    keydown_TAB: function(e, reverse) {
+        e.preventDefault(); //Need to preventDefault otherwise TAB key will immediately set focus on another field of current form
+        var $inputs = this.$("input");
+        var index = $inputs.index(this.$("input:focus"));
+        if (this.$("input") && index == $inputs.length-1) {
+            this.view.last_tabindex = parseInt(this.node.attrs.tabindex);
+            return this._super.apply(this, arguments);
+        }
+        $inputs[index+1] && $inputs[index+1].focus();
+    }
+
 });
 
 core.form_widget_registry

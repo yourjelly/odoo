@@ -298,7 +298,7 @@
 </tr>
 
 <div t-name="ListView" class="table-responsive">
-    <table class="o_list_view table table-condensed table-striped">
+    <table class="o_list_view table table-condensed table-striped" tabindex="0">
         <t t-set="columns_count" t-value="visible_columns.length + (options.selectable ? 1 : 0) + (options.deletable ? 1 : 0)"/>
         <thead>
             <tr t-if="options.header">
@@ -408,7 +408,7 @@
 <t t-name="FormView.buttons">
     <div class="o_form_buttons_view">
         <button t-if="widget.is_action_enabled('edit')" type="button"
-                class="btn btn-primary btn-sm o_form_button_edit" accesskey="a">
+                class="btn btn-primary btn-sm o_form_button_edit" accesskey="a" tabindex="-1">
             Edit
         </button>
         <button t-if="widget.is_action_enabled('create')" type="button"
@@ -422,7 +422,7 @@
             Save
         </button>
         <button type="button"
-                class="btn btn-default btn-sm o_form_button_cancel" accesskey="j">
+                class="btn btn-default btn-sm o_form_button_cancel" accesskey="j" tabindex="-1">
             Discard
         </button>
     </div>
@@ -909,7 +909,7 @@
 <div t-name="SearchView" class="o_searchview">
     <span class="o_searchview_more fa" title="Advanced Search..."/>
 </div>
-<input t-name="SearchView.InputView" type="text" class="o_searchview_input" placeholder="Search..."/>
+<input t-name="SearchView.InputView" type="text" class="o_searchview_input" placeholder="Search..." autofocus="1"/>
 <div t-name="SearchView.FacetView" tabindex="0" class="o_searchview_facet">
     <span t-if="widget.model.has('icon')" t-att-class="'fa ' + widget.model.get('icon') + ' o_searchview_facet_label'"/>
     <span t-if="!widget.model.has('icon')" class="o_searchview_facet_label">
