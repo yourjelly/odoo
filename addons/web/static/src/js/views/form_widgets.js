@@ -124,6 +124,10 @@ var WidgetButton = common.FormWidget.extend({
         }
         utils.show_tabindex_tip({attach_to: this.$el, title: content, trigger: 'focus'});
     },
+    keydown_TAB: function(e, reverse) {
+        e.preventDefault();
+        this.on_click();
+    },
     on_escape: function() {
         this.view.trigger('history_back');
     }
