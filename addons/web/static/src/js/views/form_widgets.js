@@ -48,7 +48,6 @@ var WidgetButton = common.FormWidget.extend({
             this.do_attach_tooltip();
         }
         this.setupFocus(this.$el);
-        this.$el.on("blur", this.on_focusout);
     },
     on_click: function() {
         var self = this;
@@ -126,13 +125,6 @@ var WidgetButton = common.FormWidget.extend({
             var content = _.str.sprintf("Press TAB to %s or ESC to Cancel", this.string);
         }
         utils.show_tabindex_tip({attach_to: this.$el, title: content, trigger: 'focus'});
-    },
-    on_focusout: function() {
-        // To implement if need to special thing on focusout
-    },
-    keydown_TAB: function(e, reverse) {
-        e.preventDefault();
-        this.on_click();
     },
     on_escape: function() {
         this.view.trigger('history_back');
