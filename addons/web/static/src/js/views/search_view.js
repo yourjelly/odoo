@@ -432,6 +432,9 @@ var SearchView = View.extend({
             this.$buttons.toggle(this.visible_filters);
         }
     },
+    set_input_focus: function() {
+        this.$('.o_searchview_input').focus();
+    },
     /**
      * Sets up search view's view-wide auto-completion widget
      */
