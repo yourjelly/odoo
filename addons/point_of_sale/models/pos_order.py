@@ -645,8 +645,8 @@ class PosOrder(models.Model):
         self.ensure_one()
         picking.action_confirm()
         picking.force_assign()
-        self.set_pack_operation_lot(picking)
-        if not any([(x.product_id.tracking != 'none') for x in picking.pack_operation_ids]):
+        wrong_lots = self.set_pack_operation_lot(picking)
+        if not wrong_lots:
             picking.action_done()
 
     def set_pack_operation_lot(self, picking=None):
@@ -654,7 +654,7 @@ class PosOrder(models.Model):
 
         StockProductionLot = self.env['stock.production.lot']
         PosPackOperationLot = self.env['pos.pack.operation.lot']
-
+        has_wrong_lots = False
         for order in self:
             for pack_operation in (picking or self.picking_id).pack_operation_ids:
                 qty = 0
@@ -673,9 +673,14 @@ class PosOrder(models.Model):
                                 qty = 1.0
                             qty_done += qty
                             pack_lots.append({'lot_id': stock_production_lot.id, 'qty': qty})
-                else:
+                        else:
+                            has_wrong_lots = True
+                elif pack_operation.product_id.tracking == 'none':
                     qty_done = pack_operation.product_qty
+                else:
+                    has_wrong_lots = True
                 pack_operation.write({'pack_lot_ids': map(lambda x: (0, 0, x), pack_lots), 'qty_done': qty_done})
+        return has_wrong_lots
 
     def add_payment(self, data):
         """Create a new payment for the order"""
