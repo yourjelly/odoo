@@ -171,7 +171,11 @@ var FormView = View.extend(common.FieldManagerMixin, {
             .on('keydown', function(e) {
                 if (e.which == $.ui.keyCode.TAB) { //We can use switch here
                     e.preventDefault();
-                    $(this).trigger("click");
+                    if (e.shiftKey) {
+                        self.set_next_tabindex(null, true, true);
+                    } else {
+                        $(this).trigger("click");
+                    }
                 } else if (e.which == $.ui.keyCode.ESCAPE) {
                     self.trigger('history_back');
                 }
@@ -189,7 +193,11 @@ var FormView = View.extend(common.FieldManagerMixin, {
             .on('keydown', function(e) {
                 if (e.which == $.ui.keyCode.TAB) { //We can use switch here
                     e.preventDefault();
-                    $(this).trigger("click");
+                    if (e.shiftKey) {
+                        self.set_next_tabindex(null, true, true);
+                    } else {
+                        $(this).trigger("click");
+                    }
                 } else if (e.which == $.ui.keyCode.ESCAPE) {
                     self.last_tabindex = null;
                     self.on_button_cancel();
@@ -365,7 +373,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
             return parseInt(w.node.attrs.tabindex);
         }).value();
     },
-    set_next_tabindex: function(current_widget, reverse) {
+    set_next_tabindex: function(current_widget, reverse, keep_focus_on_current) {
         var self = this;
         if (!this.tabindex_widgets) {
             this.tabindex_widgets = this.get_tabindex_widgets();
@@ -395,7 +403,12 @@ var FormView = View.extend(common.FieldManagerMixin, {
             return next_widget;
         };
 
-        var next_widget = get_next_widget();
+        var next_widget = false;
+        if (keep_focus_on_current && current_widget) {
+            next_widget = current_widget;
+        } else {
+            next_widget = get_next_widget();
+        }
         //TODO: Simplify following conditions, apply and operation
         if (next_widget) {
             if (next_widget.node.tag == "button" && this.get("actual_mode") != "view" && this.$buttons.find(".o_form_button_save").length) {
