@@ -187,19 +187,19 @@
             </field>
         </record>
 
-        <record id="action_general_configuration" model="ir.actions.act_window">
-            <field name="name">General Settings</field>
-            <field name="res_model">base.config.settings</field>
-            <field name="view_mode">form</field>
-            <field name="target">inline</field>
-        </record>
+    <record id="action_general_configuration" model="ir.actions.act_window">
+        <field name="name">General Settings</field>
+        <field name="res_model">base.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+    </record>
 
-        <menuitem
-            id="menu_config"
-            name="General Settings"
-            parent="base.menu_administration"
-            sequence="1"
-            action="action_general_configuration"
-            groups="base.group_system"/>
+    <menuitem
+        id="menu_config"
+        name="General Settings"
+        parent="base.menu_administration"
+        sequence="1"
+        action="action_general_configuration"
+        groups="base.group_system"/>
 
 </odoo>
