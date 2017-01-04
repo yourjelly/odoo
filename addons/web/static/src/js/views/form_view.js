@@ -105,6 +105,12 @@ var FormView = View.extend(common.FieldManagerMixin, {
         this.$el.on('mousedown.formBlur', function () {
             self.__clicked_inside = true;
         });
+        this.$el.on('keyup', function (e) {
+            if (e.which == $.ui.keyCode.ESCAPE && self.get("actual_mode") !== "view") {
+                self.do_cancel(e);
+            }
+        });
+        this.$el.on('keydown', this.on_keydown_SHIFT_ENTER);
 
         this.has_been_loaded.resolve();
 
@@ -314,6 +320,41 @@ var FormView = View.extend(common.FieldManagerMixin, {
             self.trigger('blurred');
         }, 0);
     },
+    on_keydown_SHIFT_ENTER: function (e) {
+        var self = this;
+        if (e.which == $.ui.keyCode.ENTER && e.shiftKey && self.get("actual_mode") !== "view") {
+            var tabindex_widgets = self.get_tabindex_widgets();
+            var current_widget = _.find(tabindex_widgets, function(w) {
+                return parseInt(w.node.attrs.tabindex) == self.last_tabindex;
+            });
+            var current_index = _(tabindex_widgets).indexOf(current_widget);
+
+            var get_first_button_widget = function() {
+                var next_widget = tabindex_widgets[current_index];
+                current_index += 1;
+                if (next_widget && (next_widget.node.tag != "button" || (next_widget.$el.hasClass("o_form_invisible") || next_widget.get('readonly')))) {
+                    return get_first_button_widget();
+                }
+                return next_widget;
+            };
+            if (self.$buttons && self.$buttons.find(".o_form_button_save").length) {
+                var first_button = get_first_button_widget();
+                self.on_button_save();
+                if (first_button) {
+                    self.last_tabindex = parseInt(first_button.node.attrs.tabindex);
+                    core.bus.on('form_view_saved', self, function() {
+                        first_button.set_focus();
+                    });
+                }
+            } else {
+                var first_button = get_first_button_widget();
+                if (first_button) {
+                    self.last_tabindex = parseInt(first_button.node.attrs.tabindex);
+                    first_button.$el.trigger("click");
+                }
+            }
+        }
+    },
     get_tabindex_widgets: function() {
         // In future if we want to support tabindex on other elements like page then we can prepare 
         // tabindex list in render_to method of renering engine and add jQuery wrapped elements of page and other elements
@@ -348,9 +389,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         var get_next_widget = function() {
             current_index += (reverse && -1 || 1);
             var next_widget = self.tabindex_widgets[current_index];
-            //TODO: Check why checking effective readonly not set focus to button after reload, seems because buttons are readonly while record is reloaded
-            //if (next_widget && (next_widget.$el.hasClass("o_form_invisible") || next_widget.get('effective_readonly'))) {
-            if (next_widget && (next_widget.$el.hasClass("o_form_invisible"))) {
+            if (next_widget && (next_widget.$el.hasClass("o_form_invisible") || next_widget.get('readonly'))) {
                 return get_next_widget();
             }
             return next_widget;
@@ -364,7 +403,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
             }
             this.last_tabindex = parseInt(next_widget.node.attrs.tabindex);
             next_widget.set_focus();
-        //} else if (_.isEqual(current_widget, this.tabindex_widgets[this.tabindex_widgets.length-1]) && this.$buttons) {
         } else if (this.$buttons) {
             if (this.get("actual_mode") == "view") {
                 return this.$buttons.find(".o_form_button_create").focus(); //Set focus to create button again
@@ -1082,7 +1120,10 @@ var FormView = View.extend(common.FieldManagerMixin, {
                     }).then(function(r) {
                         self.trigger('load_record', r);
                     }).then(function() {
-                        self.trigger('set_tabindex_focus');
+                        if (!self.do_not_set_tabindex) {
+                            self.trigger('set_tabindex_focus');
+                        }
+                        self.do_not_set_tabindex = false;
                     }).fail(function (){
                         self.do_action('history_back');
                     });

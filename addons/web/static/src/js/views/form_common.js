@@ -532,6 +532,9 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
                 if (e.which == $.ui.keyCode.ESCAPE) {
                     self.keyup_ESCAPE(e);
                 }
+                if (e.which == $.ui.keyCode.ENTER) {
+                    self.keyup_ENTER(e);
+                }
             });
         }
     },
@@ -544,12 +547,13 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
         e.preventDefault(); //Need to preventDefault otherwise TAB key will immediately set focus on another field of current form
         return this.field_manager.set_next_tabindex(this, reverse);
     },
-    keyup_ESCAPE: function(e) {
-        this.on_escape();
-    },
     keydown_ESCAPE: function(e) {},
-    on_escape: function() {
-        this.field_manager.do_cancel();
+    keyup_ENTER: function(e) {},
+    keyup_ESCAPE: function(e) {
+        this.on_escape(e);
+    },
+    on_escape: function(e) {
+        //this.field_manager.do_cancel(e);
     }
 });
 

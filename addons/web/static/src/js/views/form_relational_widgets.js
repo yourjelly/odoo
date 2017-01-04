@@ -252,7 +252,7 @@ var FieldMany2One = common.AbstractField.extend(common.CompletionFieldMixin, com
         this.$input.on({
             focusout: anyoneLoosesFocus,
             focus: function () { self.trigger('focused'); },
-            autocompleteopen: function () { ignore_blur = true; },
+            autocompleteopen: function () { ignore_blur = true; self.ignore_escape = true; self.ignore_enter = true; },
             autocompleteclose: function () { setTimeout(function() {ignore_blur = false;},0); },
             blur: function () {
                 // autocomplete open
@@ -274,6 +274,9 @@ var FieldMany2One = common.AbstractField.extend(common.CompletionFieldMixin, com
             },
             select: function(event, ui) {
                 isSelecting = true;
+                if (self.ignore_enter) {
+                    event.stopPropagation();
+                }
                 var item = ui.item;
                 if (item.id) {
                     self.display_value = {};
@@ -414,6 +417,12 @@ var FieldMany2One = common.AbstractField.extend(common.CompletionFieldMixin, com
         this.ignore_focusout = false;
         this.no_ed = false;
         return res;
+    },
+    keyup_ESCAPE: function(e) {
+        if (this.ignore_escape) {
+            e.stopPropagation();
+            this.ignore_escape = false;
+        }
     },
 });
 

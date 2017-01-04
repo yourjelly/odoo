@@ -18,6 +18,13 @@ var Widget = require('web.Widget');
 
 var _t = core._t;
 
+var ListViewEditableFormView = FormView.extend({
+    do_cancel: function(e) {
+        e.stopPropagation();
+    }
+});
+
+
 var Editor = Widget.extend({
     /**
      * @constructs instance.web.list.Editor
@@ -34,7 +41,7 @@ var Editor = Widget.extend({
         this._super(parent);
         this.options = options || {};
         _.defaults(this.options, {
-            formView: FormView,
+            formView: ListViewEditableFormView,
             delegate: this.getParent(),
         });
         this.delegate = this.options.delegate;

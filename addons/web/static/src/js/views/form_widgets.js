@@ -57,7 +57,7 @@ var WidgetButton = common.FormWidget.extend({
         this.force_disabled = true;
         this.check_disable();
         this.view.disable_button();
-        this.execute_action().always(function() {
+        return this.execute_action().always(function() {
             self.view.enable_button();
             self.force_disabled = false;
             self.check_disable();
@@ -94,9 +94,8 @@ var WidgetButton = common.FormWidget.extend({
                     self.view.recursive_reload();
                 }
             }).fail(function () {
-                self.view.recursive_reload().then(function() {
-                    self.view.set_next_tabindex();
-                });
+                self.view.do_not_set_tabindex = true;
+                self.view.recursive_reload();
             });
     },
     check_disable: function() {
@@ -125,6 +124,12 @@ var WidgetButton = common.FormWidget.extend({
             var content = _.str.sprintf("Press TAB to %s or ESC to Cancel", this.string);
         }
         utils.show_tabindex_tip({attach_to: this.$el, title: content, trigger: 'focus'});
+    },
+    keyup_ENTER: function(e) {
+        var self = this;
+        $.when(self.on_click()).done(function() {
+            self.field_manager.last_tabindex = parseInt(self.node.attrs.tabindex);
+        });
     },
     on_escape: function() {
         this.view.trigger('history_back');
