@@ -124,7 +124,7 @@
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="arch" type="xml">
                 <page name="sales" position="after">
-                    <page string="Inventory" name="inventory" attrs="{'invisible':[('type', '=', 'service')]}">
+                    <page string="Inventory" name="inventory" attrs="{'invisible':[('type', 'in', ['service', 'event_ticket'])]}">
                         <group name="inventory">
                             <group string="Operations">
                                 <field name="route_ids" widget="many2many_checkboxes" attrs="{'invisible':[('type', 'in', ['service', 'digital'])]}"/>
@@ -142,6 +142,10 @@
                                 <label for="volume" attrs="{'invisible':['|', ('type', 'not in', ['product', 'consu']), ('product_variant_count', '&gt;', 1)]}"/>
                                 <div class="o_row" name="volume" attrs="{'invisible':['|', ('type', 'not in', ['product', 'consu']), ('product_variant_count', '&gt;', 1)]}">
                                     <field name="volume" string="Volume"/>
+                                </div>
+                                <label for="warranty" groups="stock.group_stock_production_lot"/>
+                                <div groups="stock.group_stock_production_lot">
+                                    <field name="warranty" class="oe_inline"/> months
                                 </div>
                             </group>
                             <group string="Traceability" name="traceability">
@@ -166,14 +170,6 @@
                     </group>
                     <group string="Description for Receptions">
                         <field name="description_pickingin" nolabel="1" placeholder="This note will be displayed on the Receptions."/>
-                    </group>
-                </group>
-                <group name="email_template_and_project" position="before">
-                    <group name="sale_condition" string="Sale Conditions">
-                        <label for="warranty" groups="stock.group_stock_production_lot"/>
-                        <div groups="stock.group_stock_production_lot">
-                            <field name="warranty" class="oe_inline"/> months
-                        </div>
                     </group>
                 </group>
             </field>
@@ -367,18 +363,17 @@
                                 <span class="o_stat_value"><field name="reordering_max_qty"/></span>
                             </div>
                         </button>
-                        <button string="Routes" type="object"
-                            name="action_view_routes"
-                            attrs="{'invisible':[('type', '!=', 'product')]}"
-                            class="oe_stat_button" icon="fa-cogs"
-                            groups="stock.group_adv_location"/>
-                    </button>
-                    <button name="action_view_orderpoints" position="after">
                         <button string="Traceability" type="object"
                                 name= "action_view_stock_moves"
                                 attrs="{'invisible':[('type', 'not in', ['product', 'consu'])]}"
                                 class="oe_stat_button" icon="fa-arrows-v"
                                 groups="stock.group_stock_user"/>
+                        <button string="Routes" type="object"
+                            name="action_view_routes"
+                            attrs="{'invisible':[('type', '!=', 'product')]}"
+                            class="oe_stat_button" icon="fa-cogs"
+                            groups="stock.group_adv_location"/>
+
                     </button>
                 </data>
             </field>

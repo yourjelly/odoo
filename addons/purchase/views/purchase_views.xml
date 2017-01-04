@@ -629,15 +629,15 @@
         <record id="view_product_template_purchase_buttons_from" model="ir.ui.view">
             <field name="name">product.template.purchase.button.inherit</field>
             <field name="model">product.template</field>
-            <field name="inherit_id" ref="sale.product_template_form_view_sale_order_button"/>
+            <field name="inherit_id" ref="product.product_template_only_form_view"/>
             <field name="groups_id" eval="[(4, ref('purchase.group_purchase_user'))]"/>
             <field name="arch" type="xml">
-                <button name="action_view_sales" position="after">
-                   <button class="oe_stat_button" name="%(purchase.action_purchase_line_product_tree)d"
+                <xpath expr="//button[@name='toggle_active']" position="before">
+                   <button class="oe_stat_button" id="purchase" name="%(purchase.action_purchase_line_product_tree)d"
                        type="action" icon="fa-shopping-cart">
                        <field string="Purchases" name="purchase_count" widget="statinfo"/>
                    </button>
-                </button>
+                </xpath>
             </field>
         </record>
 
