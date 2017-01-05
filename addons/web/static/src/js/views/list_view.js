@@ -301,13 +301,11 @@ var ListView = View.extend({
                         mouse_clicked = false;
                         return;
                     }
-                    utils.show_tabindex_tip({attach_to: e.currentTarget, title: _t("Press TAB to Create or ESC to Cancel"), trigger: 'focus'});
+                    utils.show_tabindex_tip({attach_to: e.currentTarget, title: _t("Press ENTER to Create or ESC to Cancel"), trigger: 'focus'});
                 })
-                .on('keydown', function(event) {
-                    if (event.which == $.ui.keyCode.TAB) {
-                        if (!event.shiftKey) {
-                            self.$buttons.find('.o_list_button_add').trigger("click");
-                        }
+                .on('keyup', function(event) {
+                    if (event.which == $.ui.keyCode.ENTER) {
+                        self.$buttons.find('.o_list_button_add').trigger("click");
                     } else if (event.which == $.ui.keyCode.ESCAPE) {
                         self.history_back();
                     }

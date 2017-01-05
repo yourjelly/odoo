@@ -114,7 +114,11 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 self.do_cancel(e);
             }
         });
-        this.$el.on('keydown', this.on_keydown_SHIFT_ENTER);
+        this.$el.on('keydown', function(e) {
+            if (e.which === $.ui.keyCode.ENTER && e.shiftKey) {
+                self.on_keydown_SHIFT_ENTER(e);
+            }
+        });
 
         this.has_been_loaded.resolve();
 
@@ -170,16 +174,13 @@ var FormView = View.extend(common.FieldManagerMixin, {
                     mouse_clicked = false;
                     return;
                 }
-                utils.show_tabindex_tip({attach_to: this, title: _t("Press TAB to <b>Create</b> and ESC to go back to the list view"), trigger: 'focus'});
+                utils.show_tabindex_tip({attach_to: this, title: _t("Press ENTER to <b>Create</b> and ESC to go back to the list view"), trigger: 'focus'});
             })
             .on('keydown', function(e) {
                 if (e.which == $.ui.keyCode.TAB) { //We can use switch here
                     e.preventDefault();
-                    if (e.shiftKey) {
-                        self.set_next_tabindex(null, true, true);
-                    } else {
-                        $(this).trigger("click");
-                    }
+                    var is_shiftkey = e.shiftKey ? true : false;
+                    self.set_next_tabindex(null, is_shiftkey, true);
                 } else if (e.which == $.ui.keyCode.ESCAPE) {
                     self.trigger('history_back');
                 }
@@ -192,16 +193,16 @@ var FormView = View.extend(common.FieldManagerMixin, {
                     mouse_clicked = false;
                     return;
                 }
-                utils.show_tabindex_tip({attach_to: this, title: _t("Press TAB to Save or ESC to Cancel"), trigger: 'focus'});
+                utils.show_tabindex_tip({attach_to: this, title: _t("Press ENTER to Save or ESC to Cancel"), trigger: 'focus'});
             })
             .on('keydown', function(e) {
                 if (e.which == $.ui.keyCode.TAB) { //We can use switch here
                     e.preventDefault();
-                    if (e.shiftKey) {
-                        self.set_next_tabindex(null, true, true);
-                    } else {
-                        $(this).trigger("click");
-                    }
+                    var is_shiftkey = e.shiftKey ? true : false;
+                    self.set_next_tabindex(null, is_shiftkey, true);
+                } else if (e.which == $.ui.keyCode.ENTER) {
+                    e.preventDefault();
+                    self.on_keydown_SHIFT_ENTER(e);
                 } else if (e.which == $.ui.keyCode.ESCAPE) {
                     self.last_tabindex = null;
                     self.on_button_cancel();
@@ -215,13 +216,10 @@ var FormView = View.extend(common.FieldManagerMixin, {
                     mouse_clicked = false;
                     return;
                 }
-                utils.show_tabindex_tip({attach_to: this, title: _t("Press TAB to Edit or ESC to Cancel"), trigger: 'focus'});
+                utils.show_tabindex_tip({attach_to: this, title: _t("Press ENTER to Edit or ESC to Cancel"), trigger: 'focus'});
             })
             .on('keydown', function(e) {
-                if (e.which == $.ui.keyCode.TAB) { //We can use switch here
-                    e.preventDefault();
-                    $(this).trigger("click");
-                } else if (e.which == $.ui.keyCode.ESCAPE) {
+                if (e.which == $.ui.keyCode.ESCAPE) {
                     self.trigger('history_back');
                 }
             });
@@ -334,7 +332,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
     },
     on_keydown_SHIFT_ENTER: function (e) {
         var self = this;
-        if (e.which == $.ui.keyCode.ENTER && e.shiftKey && self.get("actual_mode") !== "view") {
+        if (self.get("actual_mode") !== "view") {
             var tabindex_widgets = self.get_tabindex_widgets();
             var current_widget = _.find(tabindex_widgets, function(w) {
                 return parseInt(w.node.attrs.tabindex) == self.last_tabindex;
@@ -367,6 +365,15 @@ var FormView = View.extend(common.FieldManagerMixin, {
             }
         }
     },
+    last_tabindex_field: function(widgets) {
+        var last_field_tabindex = 0;
+        _.each(widgets, function(widget) {
+            if (widget.node.tag != "button" && widget.node.attrs.tabindex && parseInt(widget.node.attrs.tabindex) && parseInt(widget.node.attrs.tabindex) >= last_field_tabindex) {
+                last_field_tabindex = parseInt(widget.node.attrs.tabindex)
+            }
+        });
+        return last_field_tabindex;
+    },
     get_tabindex_widgets: function() {
         // In future if we want to support tabindex on other elements like page then we can prepare 
         // tabindex list in render_to method of renering engine and add jQuery wrapped elements of page and other elements
@@ -385,7 +392,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         if (!this.tabindex_widgets.length) {
             return;
         }
-        if (!this.last_tabindex) {
+        if (!this.last_tabindex && this.get("actual_mode") != "view") {
             var widget = this.tabindex_widgets[0]; //Set focus to first widget
             widget.set_focus();
             this.last_tabindex = parseInt(widget.node.attrs.tabindex);
@@ -413,9 +420,12 @@ var FormView = View.extend(common.FieldManagerMixin, {
         } else {
             next_widget = get_next_widget();
         }
-        //TODO: Simplify following conditions, apply and operation
+
         if (next_widget) {
-            if (next_widget.node.tag == "button" && this.get("actual_mode") != "view" && this.$buttons.find(".o_form_button_save").length) {
+            // If it is last field and tab is pressed then move focus to save button
+            var last_field_tabindex = self.last_tabindex_field(this.tabindex_widgets);
+            if (parseInt(current_widget.node.attrs.tabindex) == last_field_tabindex && this.get("actual_mode") != "view" && this.$buttons.find(".o_form_button_save").length) {
+                this.last_tabindex = parseInt(next_widget.node.attrs.tabindex);
                 return this.$buttons.find(".o_form_button_save").focus();
             }
             this.last_tabindex = parseInt(next_widget.node.attrs.tabindex);
