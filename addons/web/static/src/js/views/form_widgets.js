@@ -127,9 +127,12 @@ var WidgetButton = common.FormWidget.extend({
     },
     keyup_ENTER: function(e) {
         var self = this;
-        $.when(self.on_click()).done(function() {
-            self.field_manager.last_tabindex = parseInt(self.node.attrs.tabindex);
-        });
+        if (!this.field_manager.ignore_enter) {
+            $.when(self.on_click()).done(function() {
+                self.field_manager.last_tabindex = parseInt(self.node.attrs.tabindex);
+            });
+        }
+        this.field_manager.ignore_enter = false;
     },
     on_escape: function() {
         this.view.trigger('history_back');

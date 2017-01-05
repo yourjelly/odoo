@@ -89,7 +89,10 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 return self.can_be_discarded();
             });
         });
-        core.bus.on('dialog_closed', this, this.set_next_tabindex);
+        core.bus.on('dialog_closed', this, function() {
+            this.ignore_enter = true; //Need to ignore enter keyup, dialog is closed and focus goes to Button and then button's keyup is trigerred
+            this.set_next_tabindex(null, false, true);
+        });
     },
     start: function() {
         if (this.$pager) {
