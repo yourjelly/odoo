@@ -106,6 +106,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
         this.rendering_engine.set_fields_view(this.fields_view);
         this.rendering_engine.render_to(this.$el);
 
+        this.tabindex_widgets = this.get_tabindex_widgets();
+
         this.$el.on('mousedown.formBlur', function () {
             self.__clicked_inside = true;
         });
@@ -164,17 +166,19 @@ var FormView = View.extend(common.FieldManagerMixin, {
         this.toggle_buttons();
 
         // Bind button events
-        // TODO: Create method on_button_keydown method and pass cancel callback function as all having duplicate code
         var mouse_clicked = false;
+        var on_button_focus = function(bind_elem, message) {
+            if (mouse_clicked) {
+                mouse_clicked = false;
+                return;
+            }
+            utils.show_tabindex_tip({attach_to: bind_elem, title: message, trigger: 'focus'});
+        };
         this.$buttons.on('mousedown', 'button', function() {mouse_clicked = true;});
         this.$buttons.find('.o_form_button_create')
             .on('click', this.on_button_create)
             .on('focus', function(e) {
-                if (mouse_clicked) {
-                    mouse_clicked = false;
-                    return;
-                }
-                utils.show_tabindex_tip({attach_to: this, title: _t("Press ENTER to <b>Create</b> and ESC to go back to the list view"), trigger: 'focus'});
+                on_button_focus(this, _t("Press ENTER to <b>Create</b> and ESC to go back to the list view"));
             })
             .on('keydown', function(e) {
                 if (e.which == $.ui.keyCode.TAB) { //We can use switch here
@@ -189,19 +193,14 @@ var FormView = View.extend(common.FieldManagerMixin, {
         this.$buttons.find('.o_form_button_save')
             .on('click', this.on_button_save)
             .on('focus', function(e) {
-                if (mouse_clicked) {
-                    mouse_clicked = false;
-                    return;
-                }
-                utils.show_tabindex_tip({attach_to: this, title: _t("Press ENTER to Save or ESC to Cancel"), trigger: 'focus'});
+                on_button_focus(this, _t("Press ENTER to Save or ESC to Cancel"));
             })
             .on('keydown', function(e) {
+                e.preventDefault();
                 if (e.which == $.ui.keyCode.TAB) { //We can use switch here
-                    e.preventDefault();
                     var is_shiftkey = e.shiftKey ? true : false;
                     self.set_next_tabindex(null, is_shiftkey, true);
                 } else if (e.which == $.ui.keyCode.ENTER) {
-                    e.preventDefault();
                     self.on_keydown_SHIFT_ENTER(e);
                 } else if (e.which == $.ui.keyCode.ESCAPE) {
                     self.last_tabindex = null;
@@ -212,11 +211,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         this.$buttons.find('.o_form_button_edit')
             .on('click', this.on_button_edit)
             .on('focus', function(e) {
-                if (mouse_clicked) {
-                    mouse_clicked = false;
-                    return;
-                }
-                utils.show_tabindex_tip({attach_to: this, title: _t("Press ENTER to Edit or ESC to Cancel"), trigger: 'focus'});
+                on_button_focus(this, _t("Press ENTER to Edit or ESC to Cancel"));
             })
             .on('keydown', function(e) {
                 if (e.which == $.ui.keyCode.ESCAPE) {
@@ -333,46 +328,47 @@ var FormView = View.extend(common.FieldManagerMixin, {
     on_keydown_SHIFT_ENTER: function (e) {
         var self = this;
         if (self.get("actual_mode") !== "view") {
-            var tabindex_widgets = self.get_tabindex_widgets();
-            var current_widget = _.find(tabindex_widgets, function(w) {
-                return parseInt(w.node.attrs.tabindex) == self.last_tabindex;
-            });
-            var current_index = _(tabindex_widgets).indexOf(current_widget);
-
-            var get_first_button_widget = function() {
-                var next_widget = tabindex_widgets[current_index];
-                current_index += 1;
-                if (next_widget && (next_widget.node.tag != "button" || (next_widget.$el.hasClass("o_form_invisible") || next_widget.get('readonly')))) {
-                    return get_first_button_widget();
-                }
-                return next_widget;
-            };
+            var first_tabindex_button = this.first_tabindex_button();
             if (self.$buttons && self.$buttons.find(".o_form_button_save").length) {
-                var first_button = get_first_button_widget();
                 self.on_button_save();
-                if (first_button) {
-                    self.last_tabindex = parseInt(first_button.node.attrs.tabindex);
+                if (first_tabindex_button) {
+                    self.last_tabindex = parseInt(first_tabindex_button.node.attrs.tabindex);
                     core.bus.on('form_view_saved', self, function() {
-                        first_button.set_focus();
+                        first_tabindex_button.set_focus();
                     });
                 }
-            } else {
-                var first_button = get_first_button_widget();
-                if (first_button) {
-                    self.last_tabindex = parseInt(first_button.node.attrs.tabindex);
-                    first_button.$el.trigger("click");
-                }
+            } else if(first_tabindex_button) {
+                // Note: Consider if there is no save button line wizard, so click on first tabindex button
+                self.last_tabindex = parseInt(first_tabindex_button.node.attrs.tabindex);
+                first_tabindex_button.$el.trigger("click");
             }
         }
     },
-    last_tabindex_field: function(widgets) {
-        var last_field_tabindex = 0;
-        _.each(widgets, function(widget) {
-            if (widget.node.tag != "button" && widget.node.attrs.tabindex && parseInt(widget.node.attrs.tabindex) && parseInt(widget.node.attrs.tabindex) >= last_field_tabindex) {
-                last_field_tabindex = parseInt(widget.node.attrs.tabindex)
+    first_tabindex_button: function() {
+        var first_button_tabindex = 0;
+        var first_button = false;
+        _.chain(this.tabindex_widgets).filter(function(w) {
+            return !(w.$el.hasClass("o_form_invisible") || w.get('readonly'));
+        }).map(function(widget) {
+            if (widget.node.tag == "button" && widget.node.attrs.tabindex && parseInt(widget.node.attrs.tabindex) && (!first_button_tabindex || parseInt(widget.node.attrs.tabindex) <= first_button_tabindex)) {
+                first_button_tabindex = parseInt(widget.node.attrs.tabindex);
+                first_button = widget;
             }
         });
-        return last_field_tabindex;
+        return first_button;
+    },
+    last_tabindex_field: function(widgets) {
+        var last_field_tabindex = 0;
+        var last_field = false;
+        _.chain(this.tabindex_widgets).filter(function(w) {
+            return !(w.$el.hasClass("o_form_invisible") || w.get('readonly'));
+        }).map(function(widget) {
+            if (widget.node.tag != "button" && widget.node.attrs.tabindex && parseInt(widget.node.attrs.tabindex) && parseInt(widget.node.attrs.tabindex) >= last_field_tabindex) {
+                last_field_tabindex = parseInt(widget.node.attrs.tabindex);
+                last_field = widget;
+            }
+        });
+        return last_field;
     },
     get_tabindex_widgets: function() {
         // In future if we want to support tabindex on other elements like page then we can prepare 
@@ -386,9 +382,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
     },
     set_next_tabindex: function(current_widget, reverse, keep_focus_on_current) {
         var self = this;
-        if (!this.tabindex_widgets) {
-            this.tabindex_widgets = this.get_tabindex_widgets();
-        }
         if (!this.tabindex_widgets.length) {
             return;
         }
@@ -423,8 +416,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
 
         if (next_widget) {
             // If it is last field and tab is pressed then move focus to save button
-            var last_field_tabindex = self.last_tabindex_field(this.tabindex_widgets);
-            if (parseInt(current_widget.node.attrs.tabindex) == last_field_tabindex && this.get("actual_mode") != "view" && this.$buttons.find(".o_form_button_save").length) {
+            var last_field_tabindex = self.last_tabindex_field();
+            if (current_widget && last_field_tabindex && parseInt(current_widget.node.attrs.tabindex) == parseInt(last_field_tabindex.node.attrs.tabindex) && this.get("actual_mode") != "view" && this.$buttons && this.$buttons.find(".o_form_button_save").length) {
                 this.last_tabindex = parseInt(next_widget.node.attrs.tabindex);
                 return this.$buttons.find(".o_form_button_save").focus();
             }
@@ -814,13 +807,12 @@ var FormView = View.extend(common.FieldManagerMixin, {
     autofocus: function() {
         if (this.get("actual_mode") !== "view" && !this.options.disable_autofocus) {
             var fields_order = this.fields_order.slice(0);
-            var tabindex_widgets = this.get_tabindex_widgets();
             if (this.default_focus_field) {
                 fields_order.unshift(this.default_focus_field.name);
             }
-            if (tabindex_widgets) {
-                for (var i = 0; i < tabindex_widgets.length; i += 1) {
-                    var field = tabindex_widgets[i];
+            if (this.tabindex_widgets) {
+                for (var i = 0; i < this.tabindex_widgets.length; i += 1) {
+                    var field = this.tabindex_widgets[i];
                     if (!field.get('effective_invisible') && !field.get('effective_readonly') && field.$label) {
                         if (field.focus() !== false) {
                             if (!this.last_tabindex) {
@@ -866,7 +858,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 core.bus.trigger('form_view_saved', self);
             }).always(function() {
                 self.enable_button();
-                self.set_next_tabindex();
             });
         }).fail(function(){
             self.enable_button();
