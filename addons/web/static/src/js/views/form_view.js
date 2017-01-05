@@ -89,6 +89,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 return self.can_be_discarded();
             });
         });
+        core.bus.on('dialog_closed', this, this.set_next_tabindex);
     },
     start: function() {
         if (this.$pager) {

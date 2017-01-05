@@ -309,7 +309,7 @@ var ListView = View.extend({
                             self.$buttons.find('.o_list_button_add').trigger("click");
                         }
                     } else if (event.which == $.ui.keyCode.ESCAPE) {
-                        self.trigger('history_back');
+                        self.history_back();
                     }
                 });
 
@@ -435,6 +435,9 @@ var ListView = View.extend({
         });
 
         this.aggregate_columns = _(this.visible_columns).invoke('to_aggregate');
+    },
+    history_back: function() {
+        this.do_action('history_back');
     },
     keydown_DOWN: function(e) {
         if (this.dataset.size() === 0) {
