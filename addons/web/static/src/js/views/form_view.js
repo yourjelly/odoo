@@ -181,7 +181,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 on_button_focus(this, _t("Press ENTER to <b>Create</b> and ESC to go back to the list view"));
             })
             .on('keydown', function(e) {
-                if (e.which == $.ui.keyCode.TAB) { //We can use switch here
+                if (e.which == $.ui.keyCode.TAB) {
                     e.preventDefault();
                     var is_shiftkey = e.shiftKey ? true : false;
                     self.set_next_tabindex(null, is_shiftkey, true);
@@ -199,7 +199,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 e.preventDefault();
                 if (e.which == $.ui.keyCode.TAB) { //We can use switch here
                     var is_shiftkey = e.shiftKey ? true : false;
-                    self.set_next_tabindex(null, is_shiftkey, true);
+                    self.set_next_tabindex(null, is_shiftkey, !is_shiftkey);
                 } else if (e.which == $.ui.keyCode.ENTER) {
                     self.on_keydown_SHIFT_ENTER(e);
                 } else if (e.which == $.ui.keyCode.ESCAPE) {
@@ -417,7 +417,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         if (next_widget) {
             // If it is last field and tab is pressed then move focus to save button
             var last_field_tabindex = self.last_tabindex_field();
-            if (current_widget && last_field_tabindex && parseInt(current_widget.node.attrs.tabindex) == parseInt(last_field_tabindex.node.attrs.tabindex) && this.get("actual_mode") != "view" && this.$buttons && this.$buttons.find(".o_form_button_save").length) {
+            if (!reverse && current_widget && last_field_tabindex && parseInt(current_widget.node.attrs.tabindex) == parseInt(last_field_tabindex.node.attrs.tabindex) && this.get("actual_mode") != "view" && this.$buttons && this.$buttons.find(".o_form_button_save").length) {
                 this.last_tabindex = parseInt(next_widget.node.attrs.tabindex);
                 return this.$buttons.find(".o_form_button_save").focus();
             }
@@ -512,9 +512,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
                     self.do_push_state({});
                 }
                 self.$el.removeClass('oe_form_dirty');                
-                // FIXME: load_record is called from reload, when record created, from defaults, so it is called many times
-                // We are triggering set_tabindex_focus because we want to reset tabindex focus on button click reload 
-                //self.trigger('set_tabindex_focus');
             });
          });
     },
