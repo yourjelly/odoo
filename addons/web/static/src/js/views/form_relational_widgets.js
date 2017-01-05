@@ -274,7 +274,7 @@ var FieldMany2One = common.AbstractField.extend(common.CompletionFieldMixin, com
             },
             select: function(event, ui) {
                 isSelecting = true;
-                if (self.ignore_enter) {
+                if (self.ignore_enter) { // To ignore shift + enter
                     event.stopPropagation();
                 }
                 var item = ui.item;

@@ -527,16 +527,19 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
                     self.keydown_ESCAPE(e);
                 }
             });
-            //FIXME: Don't know why keydown binded and overridden in o2m is not called, maybe due to editor
-            this.$el.on("keyup", function(e) {
-                if (e.which == $.ui.keyCode.ESCAPE) {
-                    self.keyup_ESCAPE(e);
-                }
-                if (e.which == $.ui.keyCode.ENTER) {
-                    self.keyup_ENTER(e);
-                }
-            });
         }
+
+        // FIXME: Don't know why keydown binded and overridden in o2m is not called, maybe due to editor
+        // Note: We will bind keyup_ESCAPE and keyup_ENTER for all widgets as we want to discard changes when escape pressed on any widget
+        this.$el.on("keyup", function(e) {
+            if (e.which == $.ui.keyCode.ESCAPE) {
+                self.keyup_ESCAPE(e);
+            }
+            if (e.which == $.ui.keyCode.ENTER) {
+                self.keyup_ENTER(e);
+            }
+        });
+
     },
     // Maybe function name can be on_focus
     set_focus: function() {

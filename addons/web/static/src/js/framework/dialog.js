@@ -138,7 +138,6 @@ var Dialog = Widget.extend({
         }
 
         this.trigger("closed", reason);
-        core.bus.trigger("dialog_closed");
 
         this._super();
 
@@ -152,6 +151,7 @@ var Dialog = Widget.extend({
                 modals.last().focus();
                 $('body').addClass('modal-open');
             }
+            core.bus.trigger("dialog_closed");
         }, 0);
     }
 });
