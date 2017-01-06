@@ -145,6 +145,10 @@ var ListView = View.extend({
         // the index of the first displayed record (starting from 1)
         this.current_min = 1;
 
+        // to maintain current selection using mosue or keydown and up
+        this.current_selection = [];
+        this.current_selected_row = false;
+
         // Sort
         var default_order = this.fields_view.arch.attrs.default_order;
         var unsorted = !this.dataset._sort.length;
@@ -441,42 +445,74 @@ var ListView = View.extend({
         if (this.dataset.size() === 0) {
             return false;
         }
-        var $row = null;
-        var $already_selected = this.$(".o_row_selected");
-        if (!$already_selected.length) {
-            $row = this.$('tbody tr').filter("[data-id]").first();
+        var previous_row_selected = this.current_selected_row;
+        if (!this.current_selected_row) { //TODO: and not any row selected already add condition
+            this.current_selected_row = this.$('tbody tr').filter("[data-id]").first();
         } else {
-            $row = $already_selected.last().next();
-            if (!$row.length || !$row.attr('data-id')) {
-                $row = this.$('tbody tr').filter("[data-id]").first();
+            var $row = this.current_selected_row.next();
+            if (!$row.length) {
+                return;
             }
+            this.current_selected_row = $row.attr("data-id") ? $row : false;
         }
 
         if (this.options.selectable) {
-            if (!e.shiftKey) {
-                $already_selected.find(".o_list_record_selector input:checked").trigger("click");
+            if (!e.shiftKey && !e.ctrlKey) {
+                _.each(this.current_selection, function($row) { $row.find(".o_list_record_selector input:checked").trigger("click"); });
+                this.current_selected_row.find(".o_list_record_selector input").trigger("click");
+                this.current_selection = [this.current_selected_row];
+            } else if (e.shiftKey && !e.ctrlKey) {
+                this.current_selected_row.find(".o_list_record_selector input").trigger("click");
+                this.current_selection.push(this.current_selected_row);
+            } else if (e.ctrlKey && !e.shiftKey) {
+                if (previous_row_selected && !previous_row_selected.find(".o_list_record_selector input").is(":checked")) {
+                    previous_row_selected.removeClass("o_row_selected");
+                }
+                this.current_selected_row.addClass("o_row_selected");
+                this.current_selected_row.find(".o_list_record_selector input").focus();
             }
-            $row.find(".o_list_record_selector input").trigger("click");
         } else {
-            $already_selected.removeClass("o_row_selected");
-            $row.addClass("o_row_selected");
+            _.each(this.current_selection, function($row) { $row.find(".o_list_record_selector input:checked").trigger("click"); });
+            this.current_selected_row.find(".o_list_record_selector input").trigger("click");
+            this.current_selection = [this.current_selected_row];
         }
     },
     keydown_UP: function(e) {
-        var $already_selected = this.$(".o_row_selected");
-        var $row = $already_selected.first().prev();
-        if (!$row.length) {
-            $row = this.$('tbody tr').filter("[data-id]").last();
+        //TODO: Optimize code keep common code in separate method
+        var previous_row_selected = this.current_selected_row;
+        if (!this.current_selected_row) {
+            this.current_selected_row = this.$('tbody tr').filter("[data-id]").last();
+        } else {
+            var $row = this.current_selected_row.prev();
+            if (!$row.length) {
+                return;
+            }
+            this.current_selected_row = $row.attr("data-id") ? $row : false;
         }
 
+        if (!this.current_selected_row.length) {
+            e.preventDefault();
+            return;
+        }
         if (this.options.selectable) {
-            if (!e.shiftKey) {
-                $already_selected.find(".o_list_record_selector input:checked").trigger("click");
+            if (!e.shiftKey && !e.ctrlKey) {
+                _.each(this.current_selection, function($row) { $row.find(".o_list_record_selector input:checked").trigger("click"); });
+                this.current_selected_row.find(".o_list_record_selector input").trigger("click");
+                this.current_selection = [this.current_selected_row];
+            } else if (e.shiftKey && !e.ctrlKey) {
+                this.current_selected_row.find(".o_list_record_selector input").trigger("click");
+                this.current_selection.push(this.current_selected_row);
+            } else if (e.ctrlKey && !e.shiftKey) {
+                if (previous_row_selected && !previous_row_selected.find(".o_list_record_selector input").is(":checked")) {
+                    previous_row_selected.removeClass("o_row_selected");
+                }
+                this.current_selected_row.addClass("o_row_selected");
+                this.current_selected_row.find(".o_list_record_selector input").focus();
             }
-            $row.find(".o_list_record_selector input").trigger("click");
         } else {
-            $already_selected.removeClass("o_row_selected");
-            $row.addClass("o_row_selected");
+            _.each(this.current_selection, function($row) { $row.find(".o_list_record_selector input:checked").trigger("click"); });
+            this.current_selected_row.find(".o_list_record_selector input").trigger("click");
+            this.current_selection = [this.current_selected_row];
         }
     },
     keydown_ENTER: function(e) {
@@ -678,6 +714,10 @@ var ListView = View.extend({
         this.$(".o_row_selected").removeClass('o_row_selected');
         _.each(ids, _.bind(function(id) {
             this.$('tr[data-id=' + id + ']').addClass("o_row_selected");
+            if (this.$('tr[data-id=' + id + ']').length) {
+                this.current_selection.push(this.$('tr[data-id=' + id + ']'));
+                this.current_selected_row = this.$('tr[data-id=' + id + ']');
+            }
         }, this));
 
         if (!ids.length) {
