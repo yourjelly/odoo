@@ -111,7 +111,9 @@
                                                 <field name="serialization_field_id"
                                                     domain="[('ttype','=','serialized'), ('model_id', '=', parent.model)]"
                                                     attrs="{'readonly': [('state','=','base')]}"/>
-                                                <field name="related"/>
+                                                <field name="model" invisible="1"/>
+                                                <field name="model_id" invisible="1"/>
+                                                <field name="related" widget="field" options="{'model': 'model'}"/>
                                                 <field name="depends"/>
                                                 <field name="compute" widget="ace" options="{'mode': 'python'}"/>
                                             </group>
@@ -284,7 +286,9 @@
                                     <field name="serialization_field_id"
                                         domain="[('ttype','=','serialized'), ('model_id', '=', model_id)]"
                                         attrs="{'readonly': [('state','=','base')]}"/>
-                                    <field name="related"/>
+                                        <field name="model" invisible="1"/>
+                                        <field name="model_id" invisible="1"/>
+                                        <field name="related" widget="field" options="{'model': 'model'}"/>
                                     <field name="depends" attrs="{'required': [('compute', '!=', False)] }"/>
                                     <field name="compute" widget="ace" options="{'mode': 'python'}"/>
                                 </group>
@@ -545,7 +549,7 @@
                         <field name="perm_create"/>
                         <field name="perm_unlink"/>
                     </group>
-                   </sheet> 
+                   </sheet>
                 </form>
             </field>
         </record>

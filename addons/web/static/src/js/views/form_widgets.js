@@ -16,6 +16,7 @@ var common = require('web.form_common');
 var formats = require('web.formats');
 var framework = require('web.framework');
 var Model = require('web.DataModel');
+var ModelFieldSelector = require("web.ModelFieldSelector");
 var pyeval = require('web.pyeval');
 var session = require('web.session');
 var utils = require('web.utils');
@@ -426,7 +427,7 @@ var FieldDomain = common.AbstractField.extend(common.ReinitializeFieldMixin).ext
             fs_filters: {}, // Field selector filters (to only show a subset of available fields @see FieldSelector)
         });
     },
-    start: function() {
+    start: function () {
         this.model = _get_model.call(this); // TODO get the model another way ?
         this.field_manager.on("view_content_has_changed", this, function () {
             var currentModel = this.model;
@@ -508,6 +509,82 @@ var FieldDomain = common.AbstractField.extend(common.ReinitializeFieldMixin).ext
             fs_filters: this.options.fs_filters,
             debugMode: session.debug,
         }).open();
+    },
+});
+
+var FieldModelField = common.AbstractField.extend(common.ReinitializeFieldMixin).extend({
+    custom_events: {
+        "field_chain_changed": function (e) {
+            this.internal_set_value(e.data.chain);
+        }
+    },
+    init: function () {
+        this._super.apply(this, arguments);
+
+        this.options = _.defaults(this.options || {}, {
+            model: undefined, // this option is mandatory !
+            fs_filters: {}, // Field selector filters (to only show a subset of available fields @see FieldSelector)
+        });
+    },
+    start: function () {
+        this.model = _get_model.call(this); // TODO get the model another way ?
+        this.field_manager.on("view_content_has_changed", this, function () {
+            var currentModel = this.model;
+            this.model = _get_model.call(this);
+            if (currentModel !== this.model) {
+                this.render_value();
+            }
+        });
+
+        return this._super.apply(this, arguments);
+
+        function _get_model() {
+            if (this.field_manager.fields[this.options.model]) {
+                return this.field_manager.get_field_value(this.options.model); // may be false, also used for in construction modelddddd
+            }
+            return this.options.model;
+        }
+    },
+    initialize_content: function () {
+        this._super.apply(this, arguments);
+        if (this.get("effective_readonly")) {
+            this.$readonlyArea = $("<span/>").appendTo(this.$el);
+        } else {
+            this.fieldSelector = new ModelFieldSelector(this, this.model, "", {
+                fs_filters: this.options.fs_filters,
+                debugMode: session.debug,
+            });
+            this.__fieldSelector_def = this.fieldSelector.appendTo(this.$el);
+        }
+    },
+    destroy_content: function () {
+        this._super.apply(this, arguments);
+        if (this.$readonlyArea) {
+            this.$readonlyArea.remove();
+            delete this.$readonlyArea;
+        }
+        if (this.fieldSelector) {
+            this.__fieldSelector_def.then((function () {
+                this.fieldSelector.destroy();
+                delete this.fieldSelector;
+            }).bind(this));
+        }
+    },
+    render_value: function () {
+        this._super.apply(this, arguments);
+        if (this.$readonlyArea) {
+            this.$readonlyArea.text(this.get("value"));
+        }
+        if (this.fieldSelector) {
+            this.__fieldSelector_def.then((function () {
+                this.fieldSelector.setChain(this.get("value") || "");
+            }).bind(this));
+        }
+    },
+    is_syntax_valid: function () {
+        return this.field_manager.get("actual_mode") === "view"
+            || !this.fieldSelector
+            || this.fieldSelector.valid;
     },
 });
 
@@ -1732,6 +1809,7 @@ core.form_widget_registry
     .add('url', FieldUrl)
     .add('text',FieldText)
     .add('domain', FieldDomain)
+    .add('field', FieldModelField)
     .add('date', FieldDate)
     .add('datetime', FieldDatetime)
     .add('selection', FieldSelection)
