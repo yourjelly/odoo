@@ -477,8 +477,8 @@ var ListView = View.extend({
                 this.current_selected_row.find(".o_list_record_selector input").focus();
             }
         } else {
-            _.each(this.current_selection, function($row) { $row.find(".o_list_record_selector input:checked").trigger("click"); });
-            this.current_selected_row.find(".o_list_record_selector input").trigger("click");
+            _.each(this.current_selection, function($row) { $row.removeClass("o_row_selected"); });
+            this.current_selected_row.addClass("o_row_selected");
             this.current_selection = [this.current_selected_row];
         }
     },
@@ -515,8 +515,8 @@ var ListView = View.extend({
                 this.current_selected_row.find(".o_list_record_selector input").focus();
             }
         } else {
-            _.each(this.current_selection, function($row) { $row.find(".o_list_record_selector input:checked").trigger("click"); });
-            this.current_selected_row.find(".o_list_record_selector input").trigger("click");
+            _.each(this.current_selection, function($row) { $row.removeClass("o_row_selected"); });
+            this.current_selected_row.addClass("o_row_selected");
             this.current_selection = [this.current_selected_row];
         }
     },
