@@ -260,9 +260,12 @@ var ListView = View.extend({
         // Listview selection using keyboard
         var searchview = this.getParent() && this.getParent().searchview;
         if (searchview) {
-            searchview.on('search_widget_down', this, function (e) {
-                self.keydown_DOWN(e);
-                self.$(".o_list_view")
+            searchview.off('search_widget_down')
+                .on('search_widget_down', this, function (e) {
+                    self.keydown_DOWN(e);
+                    self.$(".o_list_view").focus();
+                });
+            self.$(".o_list_view")
                     .off("keydown")
                     .on('keydown', function(e) {
                         switch(e.which) {
@@ -273,12 +276,14 @@ var ListView = View.extend({
                                 self.keydown_UP(e);
                                 break;
                             case $.ui.keyCode.ENTER:
+                                // Reset current selection and current selected row
                                 self.keydown_ENTER(e);
+                                self.current_selected_row = false;
+                                self.current_selection = [];
                                 break;
                         }
                     })
                     .focus();
-            });
         }
 
         this.trigger('list_view_loaded', data, this.grouped);
