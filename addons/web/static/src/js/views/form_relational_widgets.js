@@ -253,7 +253,7 @@ var FieldMany2One = common.AbstractField.extend(common.CompletionFieldMixin, com
             focusout: anyoneLoosesFocus,
             focus: function () { self.trigger('focused'); },
             autocompleteopen: function () { ignore_blur = true; self.ignore_escape = true; self.ignore_enter = true; },
-            autocompleteclose: function () { setTimeout(function() {ignore_blur = false;},0); },
+            autocompleteclose: function () { setTimeout(function() {ignore_blur = false; self.ignore_escape = false; self.ignore_enter = false; },0); },
             blur: function () {
                 // autocomplete open
                 if (ignore_blur) { $(this).focus(); return; }
