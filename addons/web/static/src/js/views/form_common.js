@@ -514,7 +514,6 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
     },
     bind_tabindex: function() {
         var self = this;
-        //TODO: Bind event on all widget so on all widget escape key cancels record
         if (!this.get('readonly') && this.tabindex && this.tabindex > 0 && !this.no_tabindex) {
             this.$el.on("keydown", function(e) {
                 if (e.which == $.ui.keyCode.TAB) {
@@ -530,7 +529,6 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
             });
         }
 
-        // FIXME: Don't know why keydown binded and overridden in o2m is not called, maybe due to editor
         // Note: We will bind keyup_ESCAPE and keyup_ENTER for all widgets as we want to discard changes when escape pressed on any widget
         this.$el.on("keyup", function(e) {
             if (e.which == $.ui.keyCode.ESCAPE) {
@@ -542,7 +540,6 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
         });
 
     },
-    // Maybe function name can be on_focus
     set_focus: function() {
         return this.focus();
     },
@@ -557,7 +554,6 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
         this.on_escape(e);
     },
     on_escape: function(e) {
-        //this.field_manager.do_cancel(e);
     }
 });
 

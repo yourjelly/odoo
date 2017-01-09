@@ -382,24 +382,22 @@ ListView.include(/** @lends instance.web.ListView# */{
                     var focus_field = options && options.focus_field ? options.focus_field : undefined;
                     var tabindex_widgets = self.editor.form.get_tabindex_widgets();
                     if (!is_focusable(fields[focus_field])) {
-                        focus_field = _.find(self.editor.form.fields_order, function(field) {
-                            return is_focusable(fields[field]);
-                        });
+                        if (tabindex_widgets.length) {
+                            focus_field = _.find(tabindex_widgets, function(field) {
+                                return is_focusable(field);
+                            });
+                            focus_field = focus_field.name;
+                        } else {
+                            focus_field = _.find(self.editor.form.fields_order, function(field) {
+                                return is_focusable(fields[field]);
+                            });
+                        }
                     }
-                    if (!tabindex_widgets && fields[focus_field]) {
+                    if (fields[focus_field]) {
                         fields[focus_field].$el.find('input, textarea').andSelf().filter('input, textarea').select();
-                    } else {
-                        if (tabindex_widgets) {
-                            for (var i = 0; i < tabindex_widgets.length; i += 1) {
-                                var field = tabindex_widgets[i];
-                                if (is_focusable(field)) {
-                                    field.set_focus();
-                                    if (!self.editor.form.last_tabindex) {
-                                        self.editor.form.last_tabindex = field.tabindex;
-                                    }
-                                    break;
-                                }
-                            }
+                        if (fields[focus_field].tabindex) {
+                            fields[focus_field].set_focus();
+                            self.editor.form.last_tabindex = fields[focus_field].tabindex;
                         }
                     }
                     return record.attributes;
@@ -817,20 +815,23 @@ ListView.include(/** @lends instance.web.ListView# */{
     },
     keydown_TAB: function (e) { // Keydown and not keyup because this handler must be called before the browser has focused the next field
         var form = this.editor.form;
-        var tabindex_widgets = form.get_tabindex_widgets();
-        var has_tabindex_widgets = tabindex_widgets.length ? true : false;
         var last_field = _(form.fields_order).chain()
             .map(function (name) { return form.fields[name]; })
             .filter(function (field) {
-                if (has_tabindex_widgets) {
-                    return field.$el.is(':visible') && !field.get('effective_readonly') && field.tabindex && field.tabindex >= 0;
-                }
                 return field.$el.is(':visible') && !field.get('effective_readonly');
             })
             .last()
             .value();
+
+        var tabindex_last_field = _(form.tabindex_widgets).chain()
+            .filter(function (field) {
+                return field.$el.is(':visible') && !field.get('effective_readonly') && field.tabindex >= 0;
+            })
+            .last()
+            .value();
+
         // tabbed from last field in form
-        if (last_field && $(e.target).closest(last_field.el).length) {
+        if ((last_field && $(e.target).closest(last_field.el).length) || (tabindex_last_field && $(e.target).closest(tabindex_last_field.el).length)) {
             e.preventDefault();
             return this._next();
         }
