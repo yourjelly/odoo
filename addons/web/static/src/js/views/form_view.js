@@ -332,14 +332,14 @@ var FormView = View.extend(common.FieldManagerMixin, {
             if (self.$buttons && self.$buttons.find(".o_form_button_save").length) {
                 self.on_button_save();
                 if (first_tabindex_button) {
-                    self.last_tabindex = parseInt(first_tabindex_button.node.attrs.tabindex);
+                    self.last_tabindex = first_tabindex_button.tabindex;
                     core.bus.on('form_view_saved', self, function() {
                         first_tabindex_button.set_focus();
                     });
                 }
             } else if(first_tabindex_button) {
                 // Note: Consider if there is no save button line wizard, so click on first tabindex button
-                self.last_tabindex = parseInt(first_tabindex_button.node.attrs.tabindex);
+                self.last_tabindex = first_tabindex_button.tabindex;
                 first_tabindex_button.$el.trigger("click");
             }
         }
@@ -350,8 +350,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
         _.chain(this.tabindex_widgets).filter(function(w) {
             return !(w.$el.hasClass("o_form_invisible") || w.get('readonly'));
         }).map(function(widget) {
-            if (widget.node.tag == "button" && widget.node.attrs.tabindex && parseInt(widget.node.attrs.tabindex) && (!first_button_tabindex || parseInt(widget.node.attrs.tabindex) <= first_button_tabindex)) {
-                first_button_tabindex = parseInt(widget.node.attrs.tabindex);
+            if (widget.node.tag == "button" && widget.tabindex && (!first_button_tabindex || widget.tabindex <= first_button_tabindex)) {
+                first_button_tabindex = widget.tabindex;
                 first_button = widget;
             }
         });
@@ -363,8 +363,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
         _.chain(this.tabindex_widgets).filter(function(w) {
             return !(w.$el.hasClass("o_form_invisible") || w.get('readonly'));
         }).map(function(widget) {
-            if (widget.node.tag != "button" && widget.node.attrs.tabindex && parseInt(widget.node.attrs.tabindex) && parseInt(widget.node.attrs.tabindex) >= last_field_tabindex) {
-                last_field_tabindex = parseInt(widget.node.attrs.tabindex);
+            if (widget.node.tag != "button" && widget.tabindex && widget.tabindex >= last_field_tabindex) {
+                last_field_tabindex = widget.tabindex;
                 last_field = widget;
             }
         });
@@ -375,9 +375,9 @@ var FormView = View.extend(common.FieldManagerMixin, {
         // tabindex list in render_to method of renering engine and add jQuery wrapped elements of page and other elements
         // So that we can have focus method available(we may bind set_next_tabindex on TAB key for such elements explicitly)
         return _.chain(this.get_widgets()).filter(function(w) {
-            return w.node.attrs.tabindex && parseInt(w.node.attrs.tabindex) && parseInt(w.node.attrs.tabindex) >= 0 && !w.no_tabindex;
+            return w.tabindex && w.tabindex >= 0 && !w.no_tabindex;
         }).sortBy(function(w) {
-            return parseInt(w.node.attrs.tabindex);
+            return w.tabindex;
         }).value();
     },
     set_next_tabindex: function(current_widget, reverse, keep_focus_on_current) {
@@ -388,12 +388,12 @@ var FormView = View.extend(common.FieldManagerMixin, {
         if (!this.last_tabindex && this.get("actual_mode") != "view") {
             var widget = this.tabindex_widgets[0]; //Set focus to first widget
             widget.set_focus();
-            this.last_tabindex = parseInt(widget.node.attrs.tabindex);
+            this.last_tabindex = widget.tabindex;
             return false;
         }
         if (!current_widget) {
             current_widget = _.find(this.tabindex_widgets, function(w) {
-                return parseInt(w.node.attrs.tabindex) == self.last_tabindex;
+                return w.tabindex == self.last_tabindex;
             });
         }
         var current_index = _(this.tabindex_widgets).indexOf(current_widget);
@@ -417,11 +417,11 @@ var FormView = View.extend(common.FieldManagerMixin, {
         if (next_widget) {
             // If it is last field and tab is pressed then move focus to save button
             var last_field_tabindex = self.last_tabindex_field();
-            if (!reverse && current_widget && last_field_tabindex && parseInt(current_widget.node.attrs.tabindex) == parseInt(last_field_tabindex.node.attrs.tabindex) && this.get("actual_mode") != "view" && this.$buttons && this.$buttons.find(".o_form_button_save").length) {
-                this.last_tabindex = parseInt(next_widget.node.attrs.tabindex);
+            if (!reverse && current_widget && last_field_tabindex && current_widget.tabindex == last_field_tabindex.tabindex && this.get("actual_mode") != "view" && this.$buttons && this.$buttons.find(".o_form_button_save").length) {
+                this.last_tabindex = next_widget.tabindex;
                 return this.$buttons.find(".o_form_button_save").focus();
             }
-            this.last_tabindex = parseInt(next_widget.node.attrs.tabindex);
+            this.last_tabindex = next_widget.tabindex;
             next_widget.set_focus();
         } else if (this.$buttons) {
             if (this.get("actual_mode") == "view") {
@@ -813,7 +813,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
                     if (!field.get('effective_invisible') && !field.get('effective_readonly') && field.$label) {
                         if (field.focus() !== false) {
                             if (!this.last_tabindex) {
-                                this.last_tabindex = parseInt(field.node.attrs.tabindex);
+                                this.last_tabindex = field.tabindex;
                             }
                             break;
                         }

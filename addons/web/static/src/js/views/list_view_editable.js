@@ -395,7 +395,7 @@ ListView.include(/** @lends instance.web.ListView# */{
                                 if (is_focusable(field)) {
                                     field.set_focus();
                                     if (!self.editor.form.last_tabindex) {
-                                        self.editor.form.last_tabindex = parseInt(field.node.attrs.tabindex);
+                                        self.editor.form.last_tabindex = field.tabindex;
                                     }
                                     break;
                                 }
@@ -823,7 +823,7 @@ ListView.include(/** @lends instance.web.ListView# */{
             .map(function (name) { return form.fields[name]; })
             .filter(function (field) {
                 if (has_tabindex_widgets) {
-                    return field.$el.is(':visible') && !field.get('effective_readonly') && field.node.attrs.tabindex && parseInt(field.node.attrs.tabindex) >= 0;
+                    return field.$el.is(':visible') && !field.get('effective_readonly') && field.tabindex && field.tabindex >= 0;
                 }
                 return field.$el.is(':visible') && !field.get('effective_readonly');
             })

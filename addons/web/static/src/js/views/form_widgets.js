@@ -129,7 +129,7 @@ var WidgetButton = common.FormWidget.extend({
         var self = this;
         if (!this.field_manager.ignore_enter) {
             $.when(self.on_click()).done(function() {
-                self.field_manager.last_tabindex = parseInt(self.node.attrs.tabindex);
+                self.field_manager.last_tabindex = self.tabindex;
             });
         }
         this.field_manager.ignore_enter = false;

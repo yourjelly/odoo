@@ -825,7 +825,7 @@ var FieldX2Many = AbstractManyField.extend({
         utils.async_when().done(function () {
             self.$el.addClass('o_view_manager_content');
             // To set tabindex on main div of o2m so that focus is possible on escape
-            self.$el.attr("tabindex", self.node.attrs.tabindex);
+            self.$el.attr("tabindex", self.tabindex);
             self.alive(self.viewmanager.attachTo(self.$el));
         });
         return def;
@@ -1289,7 +1289,7 @@ var One2ManyListView = X2ManyListView.extend({
                 .map(function (name) { return form.fields[name]; })
                 .filter(function (field) {
                     if (has_tabindex_widgets) {
-                        return field.$el.is(':visible') && !field.get('effective_readonly') && field.node.attrs.tabindex && parseInt(field.node.attrs.tabindex) >= 0;
+                        return field.$el.is(':visible') && !field.get('effective_readonly') && field.tabindex && field.tabindex >= 0;
                     }
                     return field.$el.is(':visible') && !field.get('effective_readonly');
                 })
@@ -1346,8 +1346,8 @@ var FieldOne2Many = FieldX2Many.extend({
     },
     keyup_ESCAPE: function(e) {
         //this.view.set_next_tabindex(this); //Call next tabindex after editor is closed
-        if (this.node.attrs.tabindex) {
-            this.view.last_tabindex = parseInt(this.node.attrs.tabindex);
+        if (this.tabindex) {
+            this.view.last_tabindex = this.tabindex;
         }
         if (!this.$el.is(":focus")) {
             this.$el.focus();
@@ -1782,7 +1782,7 @@ var FieldMany2ManyCheckBoxes = AbstractManyField.extend(common.ReinitializeField
         var $inputs = this.$("input");
         var index = $inputs.index(this.$("input:focus"));
         if (this.$("input") && index == $inputs.length-1) {
-            this.view.last_tabindex = parseInt(this.node.attrs.tabindex);
+            this.view.last_tabindex = this.tabindex;
             return this._super.apply(this, arguments);
         }
         $inputs[index+1] && $inputs[index+1].focus();

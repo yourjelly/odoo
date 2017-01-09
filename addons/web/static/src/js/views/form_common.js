@@ -407,6 +407,7 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
         this.node = node;
         this.session = session;
         this.modifiers = JSON.parse(this.node.attrs.modifiers || '{}');
+        this.tabindex = this.node.attrs.tabindex && parseInt(this.node.attrs.tabindex);
         InvisibilityChangerMixin.init.call(this, this.field_manager, this.modifiers.invisible);
 
         this.field_manager.on("view_content_has_changed", this, this.process_modifiers);
@@ -514,7 +515,7 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
     bind_tabindex: function() {
         var self = this;
         //TODO: Bind event on all widget so on all widget escape key cancels record
-        if (!this.get('readonly') && this.node.attrs.tabindex && parseInt(this.node.attrs.tabindex) > 0 && !this.no_tabindex) {
+        if (!this.get('readonly') && this.tabindex && this.tabindex > 0 && !this.no_tabindex) {
             this.$el.on("keydown", function(e) {
                 if (e.which == $.ui.keyCode.TAB) {
                     if (e.shiftKey) {
