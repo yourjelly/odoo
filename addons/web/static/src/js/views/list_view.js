@@ -41,6 +41,8 @@ var ListView = View.extend({
     defaults: _.extend({}, View.prototype.defaults, {
         // records can be selected one by one
         selectable: true,
+        // list rows can be seletable using keyboard up/down key
+        keyboard_selectable: true,
         // list rows can be deleted
         deletable: false,
         // whether the column headers should be displayed
@@ -258,32 +260,34 @@ var ListView = View.extend({
         }
 
         // Listview selection using keyboard
-        var searchview = this.getParent() && this.getParent().searchview;
-        if (searchview) {
-            searchview.off('search_widget_down')
-                .on('search_widget_down', this, function (e) {
-                    self.keydown_DOWN(e);
-                    self.$(".o_list_view").focus();
-                });
-            self.$(".o_list_view")
-                    .off("keydown")
-                    .on('keydown', function(e) {
-                        switch(e.which) {
-                            case $.ui.keyCode.DOWN:
-                                self.keydown_DOWN(e);
-                                break
-                            case $.ui.keyCode.UP:
-                                self.keydown_UP(e);
-                                break;
-                            case $.ui.keyCode.ENTER:
-                                // Reset current selection and current selected row
-                                self.keydown_ENTER(e);
-                                self.current_selected_row = false;
-                                self.current_selection = [];
-                                break;
-                        }
-                    })
-                    .focus();
+        if (this.options.keyboard_selectable) {
+            var searchview = this.getParent() && this.getParent().searchview;
+            if (searchview) {
+                searchview.off('search_widget_down')
+                    .on('search_widget_down', this, function (e) {
+                        self.keydown_DOWN_select(e);
+                        self.$(".o_list_view").focus();
+                    });
+                self.$(".o_list_view")
+                        .off("keydown")
+                        .on('keydown', function(e) {
+                            switch(e.which) {
+                                case $.ui.keyCode.DOWN:
+                                    self.keydown_DOWN_select(e); // Kept name keydown_DOWN_select to avoid collisiong with keydown_DOWN method of editable listview
+                                    break
+                                case $.ui.keyCode.UP:
+                                    self.keydown_UP_select(e);
+                                    break;
+                                case $.ui.keyCode.ENTER:
+                                    // Reset current selection and current selected row
+                                    self.keydown_ENTER(e);
+                                    self.current_selected_row = false;
+                                    self.current_selection = [];
+                                    break;
+                            }
+                        })
+                        .focus();
+            }
         }
 
         this.trigger('list_view_loaded', data, this.grouped);
@@ -446,15 +450,15 @@ var ListView = View.extend({
     history_back: function() {
         this.do_action('history_back');
     },
-    keydown_DOWN: function(e) {
+    keydown_select: function(e, direction) {
         if (this.dataset.size() === 0) {
             return false;
         }
         var previous_row_selected = this.current_selected_row;
         if (!this.current_selected_row) { //TODO: and not any row selected already add condition
-            this.current_selected_row = this.$('tbody tr').filter("[data-id]").first();
+            this.current_selected_row = direction == 'down' ? this.$('tbody tr').filter("[data-id]").first() : this.$('tbody tr').filter("[data-id]").last();
         } else {
-            var $row = this.current_selected_row.next();
+            var $row = direction == 'down' ? this.current_selected_row.next() : this.current_selected_row.prev();
             if (!$row.length) {
                 return;
             }
@@ -482,47 +486,15 @@ var ListView = View.extend({
             this.current_selection = [this.current_selected_row];
         }
     },
-    keydown_UP: function(e) {
-        //TODO: Optimize code keep common code in separate method
-        var previous_row_selected = this.current_selected_row;
-        if (!this.current_selected_row) {
-            this.current_selected_row = this.$('tbody tr').filter("[data-id]").last();
-        } else {
-            var $row = this.current_selected_row.prev();
-            if (!$row.length) {
-                return;
-            }
-            this.current_selected_row = $row.attr("data-id") ? $row : false;
-        }
-
-        if (!this.current_selected_row.length) {
-            e.preventDefault();
-            return;
-        }
-        if (this.options.selectable) {
-            if (!e.shiftKey && !e.ctrlKey) {
-                _.each(this.current_selection, function($row) { $row.find(".o_list_record_selector input:checked").trigger("click"); });
-                this.current_selected_row.find(".o_list_record_selector input").trigger("click");
-                this.current_selection = [this.current_selected_row];
-            } else if (e.shiftKey && !e.ctrlKey) {
-                this.current_selected_row.find(".o_list_record_selector input").trigger("click");
-                this.current_selection.push(this.current_selected_row);
-            } else if (e.ctrlKey && !e.shiftKey) {
-                if (previous_row_selected && !previous_row_selected.find(".o_list_record_selector input").is(":checked")) {
-                    previous_row_selected.removeClass("o_row_selected");
-                }
-                this.current_selected_row.addClass("o_row_selected");
-                this.current_selected_row.find(".o_list_record_selector input").focus();
-            }
-        } else {
-            _.each(this.current_selection, function($row) { $row.removeClass("o_row_selected"); });
-            this.current_selected_row.addClass("o_row_selected");
-            this.current_selection = [this.current_selected_row];
-        }
+    keydown_DOWN_select: function(e) {
+        this.keydown_select(e, 'down');
+    },
+    keydown_UP_select: function(e) {
+        this.keydown_select(e, 'up');
     },
     keydown_ENTER: function(e) {
-        if (this.$(".o_row_selected").length) {
-            this.$(".o_row_selected").last().trigger("click");
+        if (this.current_selected_row.length) {
+            this.current_selected_row.trigger("click");
         }
     },
     /**
