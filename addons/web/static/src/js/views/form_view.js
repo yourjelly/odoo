@@ -690,7 +690,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
             });
             dialog.open();
             dialog.on('closed', this, function () {
-                this.trigger("set_tabindex_focus"); //TODO: Set focus to last widget which triggers onchange
+                this.set_next_tabindex({keep_focus_on_current: true});
                 this.warning_displayed = false;
             });
         }

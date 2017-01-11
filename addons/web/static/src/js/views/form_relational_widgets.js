@@ -885,7 +885,7 @@ var FieldX2Many = AbstractManyField.extend({
     },
     set_focus: function() {
         var view = this.viewmanager.active_view;
-        if (view && view.controller && !this.get('readonly')) {
+        if (view && view.controller && !this.get('effective_readonly')) {
             this.is_loaded.done(function () {
                 if (view.type == 'list') {
                     return view.controller.save_edition().done(function() {
