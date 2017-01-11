@@ -1346,7 +1346,7 @@ var FieldOne2Many = FieldX2Many.extend({
         return false;
     },
     keyup_ESCAPE: function(e) {
-        //this.view.set_next_tabindex(this); //Call next tabindex after editor is closed
+        //this.view.set_next_tabindex({current_widget: this}); //Call next tabindex after editor is closed
         if (this.tabindex) {
             this.view.last_tabindex = this.tabindex;
         }

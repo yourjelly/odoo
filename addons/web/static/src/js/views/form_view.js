@@ -91,7 +91,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         });
         core.bus.on('dialog_closed', this, function() {
             this.ignore_enter = true; //Need to ignore enter keyup, dialog is closed and focus goes to Button and then button's keyup is trigerred
-            this.set_next_tabindex(null, false, true);
+            this.set_next_tabindex({keep_focus_on_current: true});
         });
     },
     start: function() {
@@ -184,7 +184,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 if (e.which == $.ui.keyCode.TAB) {
                     e.preventDefault();
                     var is_shiftkey = e.shiftKey ? true : false;
-                    self.set_next_tabindex(null, is_shiftkey, true);
+                    self.set_next_tabindex({reverse: is_shiftkey, keep_focus_on_current: true});
                 } else if (e.which == $.ui.keyCode.ESCAPE) {
                     self.trigger('history_back');
                 }
@@ -199,7 +199,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 e.preventDefault();
                 if (e.which == $.ui.keyCode.TAB) { //We can use switch here
                     var is_shiftkey = e.shiftKey ? true : false;
-                    self.set_next_tabindex(null, is_shiftkey, !is_shiftkey);
+                    self.set_next_tabindex({reverse: is_shiftkey, keep_focus_on_current: !is_shiftkey});
                 } else if (e.which == $.ui.keyCode.ENTER) {
                     self.on_keydown_SHIFT_ENTER(e);
                 } else if (e.which == $.ui.keyCode.ESCAPE) {
@@ -380,8 +380,10 @@ var FormView = View.extend(common.FieldManagerMixin, {
             return w.tabindex;
         }).value();
     },
-    set_next_tabindex: function(current_widget, reverse, keep_focus_on_current) {
+    set_next_tabindex: function(options) {
         var self = this;
+        var current_widget = options && options.current_widget;
+        var reverse = options && options.reverse;
         if (!this.tabindex_widgets.length) {
             return;
         }
@@ -408,7 +410,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         };
 
         var next_widget = false;
-        if (keep_focus_on_current && current_widget) {
+        if (options && options.keep_focus_on_current && current_widget) {
             next_widget = current_widget;
         } else {
             next_widget = get_next_widget();
