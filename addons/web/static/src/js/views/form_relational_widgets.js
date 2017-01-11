@@ -965,9 +965,6 @@ var X2ManyViewManager = ViewManager.extend({
         pop.on("elements_selected", self, function() {
             self.x2m.reload_current_view();
         });
-    },
-    set_focus: function() {
-        self.x2m.focus();
     }
 
 });
@@ -1304,6 +1301,12 @@ var One2ManyListView = X2ManyListView.extend({
             }
         });
     },
+    keyup_ESCAPE: function(e) {
+        var self = this;
+        return this._super.apply(this, arguments).then(function() {
+            self.x2m.keyup_ESCAPE(e);
+        });
+    }
 });
 
 var One2ManyGroups = ListView.Groups.extend({
@@ -1342,11 +1345,12 @@ var FieldOne2Many = FieldX2Many.extend({
         return false;
     },
     keydown_TAB: function(e, reverse) {
-        //Just return override to not allow to call set_next_tabindex which is called by super
+        if (this.$el.is(":focus")) {
+            this.view.set_next_tabindex({current_widget: this}); //Call next tabindex after editor is closed and focus is on o2m field itself
+        }
         return false;
     },
     keyup_ESCAPE: function(e) {
-        //this.view.set_next_tabindex({current_widget: this}); //Call next tabindex after editor is closed
         if (this.tabindex) {
             this.view.last_tabindex = this.tabindex;
         }
