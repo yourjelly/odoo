@@ -133,6 +133,7 @@ var Dialog = Widget.extend({
     },
 
     destroy: function(reason) {
+        var self = this;
         if (this.isDestroyed()) {
             return;
         }
@@ -151,7 +152,6 @@ var Dialog = Widget.extend({
                 modals.last().focus();
                 $('body').addClass('modal-open');
             }
-            core.bus.trigger("dialog_closed");
         }, 0);
     }
 });

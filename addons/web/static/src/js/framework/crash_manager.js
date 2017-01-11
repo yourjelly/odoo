@@ -103,12 +103,15 @@ var CrashManager = core.Class.extend({
         if (!this.active) {
             return;
         }
-        new Dialog(this, {
+        var dialog = new Dialog(this, {
             size: 'medium',
             title: _.str.capitalize(error.type || error.message) || _t("Odoo Warning"),
             subtitle: error.data.title,
             $content: $(QWeb.render('CrashManager.warning', {error: error}))
         }).open();
+        dialog.on("closed", this, function() {
+            core.bus.trigger("dialog_closed");
+        });
     },
     show_error: function(error) {
         if (!this.active) {
@@ -118,6 +121,9 @@ var CrashManager = core.Class.extend({
             title: _.str.capitalize(error.type || error.message) || _t("Odoo Error"),
             $content: $(QWeb.render('CrashManager.error', {error: error}))
         }).open();
+        dialog.on("closed", this, function() {
+            core.bus.trigger("dialog_closed");
+        });
 
         // When the dialog opens, initialize the copy feature and destroy it when the dialog is closed
         var $clipboardBtn;
@@ -142,6 +148,7 @@ var CrashManager = core.Class.extend({
         dialog.on("closed", this, function () {
             $clipboardBtn.tooltip("destroy");
             clipboard.destroy();
+            core.bus.trigger("dialog_closed");
         });
 
         // When the full traceback is shown, scroll it to the end (useful for better python error reporting)
