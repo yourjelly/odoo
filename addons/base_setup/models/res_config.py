@@ -32,6 +32,7 @@ class BaseConfigSettings(models.TransientModel):
     group_multi_currency = fields.Boolean(string='Allow multi currencies',
             implied_group='base.group_multi_currency',
             help="Allows to work in a multi currency environment")
+    module_mail_twitter = fields.Boolean("Users can receive tweets and retweet from specific hashtags in the channels of their choice")
 
     @api.multi
     def open_company(self):
