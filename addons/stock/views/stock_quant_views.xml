@@ -61,8 +61,8 @@
                             <button type="object" name="show_picking" icon="fa-list-alt" attrs="{'invisible': [('picking_id', '=', False)]}"/>
                             <field name="product_uom_qty"/>
                             <field name="date"/>
-                            <field name="location_id" groups="stock.group_stock_multi_locations" string="Source Location Zone"/>
-                            <field name="location_dest_id" groups="stock.group_stock_multi_locations" string="Destination Location Zone"/>
+                            <field name="location_spec_id" groups="stock.group_stock_multi_locations" string="Source Location"/>
+                            <field name="location_spec_dest_id" groups="stock.group_stock_multi_locations" string="Destination Location"/>
                             <field name="state" invisible="1"/>
                         </tree>
                     </field>
