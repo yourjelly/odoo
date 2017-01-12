@@ -1117,8 +1117,11 @@ var One2ManyListView = X2ManyListView.extend({
                 child_name: self.x2m.name,
                 form_view_options: {'not_interactible_on_create':true},
                 on_selected: function() {
+                    // FIXME: Find better solution to not allow tabindexing when widget is focused using mouse not keyboard
+                    self.x2m.view.do_not_set_tabindex = true; // Need to stop tabindex else if someone opens o2m record using mouse and closes then on clsoe it goes to next widget
                     self.x2m.reload_current_view().then(function() {
-                        self.x2m.view.set_next_tabindex();
+                        //self.x2m.view.set_next_tabindex();
+                        self.x2m.$el.focus();
                     });
                 }
             }).open();
@@ -1386,8 +1389,10 @@ var Many2ManyListView = X2ManyListView.extend({
             no_create: this.x2m.options.no_create || !this.is_action_enabled('create'),
             on_selected: function(element_ids) {
                 return self.x2m.data_link_multi(element_ids).then(function() {
+                    self.x2m.view.do_not_set_tabindex = true;
                     self.x2m.reload_current_view().then(function() {
-                        self.x2m.view.set_next_tabindex();
+                        self.x2m.$el.focus();
+                        //self.x2m.view.set_next_tabindex();
                     });
                 });
             }
