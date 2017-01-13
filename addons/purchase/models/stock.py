@@ -51,7 +51,6 @@ class StockMove(models.Model):
                 # 2) the move hasn't yet the correct date (currently it is the expected date, after
                 #    completion of action_done() it will be now() )
                 price_unit = self.purchase_line_id._get_stock_move_price_unit()
-                self.write({'price_unit': price_unit})
                 return price_unit
             return self.price_unit
         return super(StockMove, self).get_price_unit()
