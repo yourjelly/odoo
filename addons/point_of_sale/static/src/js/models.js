@@ -789,11 +789,7 @@ exports.PosModel = Backbone.Model.extend({
                 timeout: timeout
             }
         ).then(function (server_ids) {
-            _.each(orders, function (order) {
-                self.db.remove_order(order.id);
-            });
-            self.set('failed',false);
-            return server_ids;
+            return self._flush_after_server(orders, server_ids);
         }).fail(function (error, event){
             if(error.code === 200 ){    // Business Logic Error, not a connection problem
                 //if warning do not need to display traceback!!
@@ -815,6 +811,14 @@ exports.PosModel = Backbone.Model.extend({
             event.preventDefault();
             console.error('Failed to send orders:', orders);
         });
+    },
+
+    _flush_after_server: function(orders, server_ids){
+        _.each(orders, function (order) {
+            self.db.remove_order(order.id);
+        });
+        self.set('failed',false);
+        return server_ids;
     },
 
     scan_product: function(parsed_code){
