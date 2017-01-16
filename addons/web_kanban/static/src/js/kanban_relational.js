@@ -20,7 +20,7 @@ var X2ManyKanbanView = KanbanView.extend({
 var One2ManyKanbanView = X2ManyKanbanView.extend({
     add_record: function() {
         var self = this;
-        new common.FormViewDialog(this, {
+        var formview_dialog = new common.FormViewDialog(this, {
             res_model: self.x2m.field.relation,
             domain: self.x2m.build_domain(),
             context: self.x2m.build_context(),
@@ -38,17 +38,21 @@ var One2ManyKanbanView = X2ManyKanbanView.extend({
             form_view_options: {'not_interactible_on_create':true},
             on_selected: function() {
                 self.x2m.reload_current_view().then(function() {
-                    self.x2m.view.set_next_tabindex();
+                    //self.x2m.view.set_next_tabindex();
+                    self.x2m.$el.focus();
                 });
             }
         }).open();
+        formview_dialog.on('closed', this, function(e) {
+            self.x2m.$el.focus();
+        });
     },
 });
 
 var Many2ManyKanbanView = X2ManyKanbanView.extend({
     add_record: function() {
         var self = this;
-        new common.SelectCreateDialog(this, {
+        var select_create_dialog = new common.SelectCreateDialog(this, {
             res_model: this.x2m.field.relation,
             domain: new data.CompoundDomain(this.x2m.build_domain(), ["!", ["id", "in", this.dataset.ids]]),
             context: this.x2m.build_context(),
@@ -56,11 +60,15 @@ var Many2ManyKanbanView = X2ManyKanbanView.extend({
             on_selected: function(element_ids) {
                 return self.x2m.data_link_multi(element_ids).then(function() {
                     self.x2m.reload_current_view().then(function() {
-                        self.x2m.view.set_next_tabindex();
+                        //self.x2m.view.set_next_tabindex();
+                        self.x2m.$el.focus();
                     });
                 });
             }
         }).open();
+        select_create_dialog.on('closed', this, function(e) {
+            self.x2m.$el.focus();
+        });
     },
     open_record: function(event) {
         var self = this;
