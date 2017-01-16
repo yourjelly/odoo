@@ -127,6 +127,8 @@ var WidgetButton = common.FormWidget.extend({
     },
     keyup_ENTER: function(e) {
         var self = this;
+        // FIXME: We can remove this shitty ignore_enter logic, we added to avoide Enter on bootstrap modal and keyup on button
+        // bootstrap modal close will set focus on current widget and then keyup is trigerred which will again click button, may cause recursion of modal
         if (!this.field_manager.ignore_enter) {
             $.when(self.on_click()).done(function() {
                 self.field_manager.last_tabindex = self.tabindex;

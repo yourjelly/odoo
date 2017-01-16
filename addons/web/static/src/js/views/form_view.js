@@ -90,7 +90,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
             });
         });
         core.bus.on('dialog_closed', this, function() {
-            this.ignore_enter = true; //Need to ignore enter keyup, dialog is closed and focus goes to Button and then button's keyup is trigerred
+            //this.ignore_enter = true; //Need to ignore enter keyup, dialog is closed and focus goes to Button and then button's keyup is trigerred
             this.set_next_tabindex({keep_focus_on_current: true});
         });
     },
@@ -111,7 +111,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
         this.$el.on('mousedown.formBlur', function () {
             self.__clicked_inside = true;
         });
-        this.$el.on('keyup', function (e) {
+        // Note: Need to bind bloody keydown, because when bootstrap modal is closed using keydown escape then focus goes to widget on dialog closed and keyup will trigger discard popup
+        this.$el.on('keydown', function (e) {
             if (e.which == $.ui.keyCode.ESCAPE && self.get("actual_mode") !== "view") {
                 self.do_cancel(e);
             }

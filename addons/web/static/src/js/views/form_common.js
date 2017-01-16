@@ -548,11 +548,12 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
         e.preventDefault(); //Need to preventDefault otherwise TAB key will immediately set focus on another field of current form
         return this.field_manager.set_next_tabindex({current_widget: this, reverse: reverse});
     },
-    keydown_ESCAPE: function(e) {},
-    keyup_ENTER: function(e) {},
-    keyup_ESCAPE: function(e) {
+    keydown_ESCAPE: function(e) {
         this.on_escape(e);
     },
+    keydown_ENTER: function(e) {},
+    keyup_ENTER: function(e) {},
+    keyup_ESCAPE: function(e) {},
     on_escape: function(e) {
     }
 });

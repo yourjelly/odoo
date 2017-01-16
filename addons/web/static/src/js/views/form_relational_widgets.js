@@ -1100,7 +1100,7 @@ var One2ManyListView = X2ManyListView.extend({
             this._super.apply(this, arguments);
         } else {
             var self = this;
-            new common.SelectCreateDialog(this, {
+            var select_create_dialog = new common.SelectCreateDialog(this, {
                 res_model: self.x2m.field.relation,
                 domain: self.x2m.build_domain(),
                 context: self.x2m.build_context(),
@@ -1125,6 +1125,9 @@ var One2ManyListView = X2ManyListView.extend({
                     });
                 }
             }).open();
+            select_create_dialog.on('closed', this, function(e) {
+                self.x2m.$el.focus();
+            });
         }
     },
     do_activate_record: function(index, id) {
@@ -1380,7 +1383,7 @@ var Many2ManyListView = X2ManyListView.extend({
     do_add_record: function () {
         var self = this;
 
-        new common.SelectCreateDialog(this, {
+        var select_create_dialog = new common.SelectCreateDialog(this, {
             res_model: this.model,
             domain: new data.CompoundDomain(this.x2m.build_domain(), ["!", ["id", "in", this.x2m.dataset.ids]]),
             context: this.x2m.build_context(),
@@ -1397,6 +1400,9 @@ var Many2ManyListView = X2ManyListView.extend({
                 });
             }
         }).open();
+        select_create_dialog.on('closed', this, function(e) {
+            self.x2m.$el.focus();
+        });
     },
     do_activate_record: function(index, id) {
         var self = this;

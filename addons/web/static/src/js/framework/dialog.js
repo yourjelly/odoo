@@ -62,6 +62,16 @@ var Dialog = Widget.extend({
         this.set_buttons(options.buttons);
 
         this.$modal.on('hidden.bs.modal', _.bind(this.destroy, this));
+        
+        this.$modal
+            .off('keydown.dismiss.bs.modal')
+            .on('keydown.dismiss.bs.modal', _.bind(function(e) {
+                if (e.which == 27) {
+                    e.stopPropagation();
+                    this.destroy();
+                }
+            }, this));
+        
     },
 
     renderElement: function() {
@@ -121,7 +131,9 @@ var Dialog = Widget.extend({
         var self = this;
         this.replace(this.$modal.find(".modal-body")).then(function() {
             self.$modal.modal('show');
-            self.$modal.find("button[autofocus]").focus(); //FIXME: Need to set focus explicitly after shown(bind shown.bs.modal)
+            setTimeout(function() {
+                self.$modal.find("button[autofocus]").focus(); //FIXME: Need to set focus explicitly after shown(bind shown.bs.modal)
+            }, 0);
             self._opened.resolve();
         });
 
