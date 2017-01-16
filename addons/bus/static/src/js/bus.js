@@ -6,10 +6,10 @@ var session = require('web.session');
 var Widget = require('web.Widget');
 
 var bus = {};
-var PARTNERS_PRESENCE_CHECK_PERIOD = 30000;  // don't check presence more than once every 30s
+var PARTNERS_PRESENCE_CHECK_PERIOD = 3000000;  // don't check presence more than once every 30s
 
-var TAB_HEARTBEAT_PERIOD = 10000;  // 10 seconds
-var MASTER_TAB_HEARTBEAT_PERIOD = 1500;  // 1.5 second
+var TAB_HEARTBEAT_PERIOD = 10000000;  // 10 seconds
+var MASTER_TAB_HEARTBEAT_PERIOD = 1500000;  // 1.5 second
 
 bus.ERROR_DELAY = 10000;
 
@@ -65,6 +65,7 @@ bus.Bus = Widget.extend({
     },
     poll: function() {
         var self = this;
+        return;
         self.activated = true;
         var now = new Date().getTime();
         var options = _.extend({}, this.options, {
@@ -156,6 +157,7 @@ var CrossTabBus = bus.Bus.extend({
     },
     start_polling: function(){
         var self = this;
+        return;
         if (!this.is_registered) {
             this.is_registered = true;
             tab_manager.register_tab(function () {

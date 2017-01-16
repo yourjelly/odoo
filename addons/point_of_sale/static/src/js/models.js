@@ -789,7 +789,9 @@ exports.PosModel = Backbone.Model.extend({
                 timeout: timeout
             }
         ).then(function (server_ids) {
-            return self._flush_after_server(orders, server_ids);
+            self._flush_after_server(orders, server_ids, self.db);
+            self.set('connected',0);
+            return server_ids;
         }).fail(function (error, event){
             if(error.code === 200 ){    // Business Logic Error, not a connection problem
                 //if warning do not need to display traceback!!
@@ -813,12 +815,11 @@ exports.PosModel = Backbone.Model.extend({
         });
     },
 
-    _flush_after_server: function(orders, server_ids){
+    _flush_after_server: function(orders, server_ids, db){
         _.each(orders, function (order) {
-            self.db.remove_order(order.id);
+            db.remove_order(order.id);
         });
-        self.set('failed',false);
-        return server_ids;
+        
     },
 
     scan_product: function(parsed_code){
