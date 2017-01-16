@@ -612,7 +612,10 @@ class PurchaseOrderLine(models.Model):
             qty = 0.0
             price_unit = line._get_stock_move_price_unit()
             for move in line.move_ids.filtered(lambda x: x.state != 'cancel'):
-                qty += move.product_qty
+                if line.product_id == move.product_id: #Treat case of phantom BoMs
+                    qty += move.product_qty
+                else:
+                    move.action_cancel()
             template = {
                 'name': line.name or '',
                 'product_id': line.product_id.id,
