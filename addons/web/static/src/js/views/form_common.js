@@ -549,6 +549,7 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
         return this.field_manager.set_next_tabindex({current_widget: this, reverse: reverse});
     },
     keydown_ESCAPE: function(e) {
+        // NOTE: No need to bind keydown_ESCAPE if we are going to cancel record on whole form element
         this.on_escape(e);
     },
     keydown_ENTER: function(e) {},

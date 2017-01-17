@@ -125,16 +125,11 @@ var WidgetButton = common.FormWidget.extend({
         }
         utils.show_tabindex_tip({attach_to: this.$el, title: content, trigger: 'focus'});
     },
-    keyup_ENTER: function(e) {
+    keydown_ENTER: function(e) {
         var self = this;
-        // FIXME: We can remove this shitty ignore_enter logic, we added to avoide Enter on bootstrap modal and keyup on button
-        // bootstrap modal close will set focus on current widget and then keyup is trigerred which will again click button, may cause recursion of modal
-        if (!this.field_manager.ignore_enter) {
-            $.when(self.on_click()).done(function() {
-                self.field_manager.last_tabindex = self.tabindex;
-            });
-        }
-        this.field_manager.ignore_enter = false;
+        $.when(self.on_click()).done(function() {
+            self.field_manager.last_tabindex = self.tabindex;
+        });
     },
     on_escape: function() {
         this.view.trigger('history_back');

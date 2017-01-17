@@ -90,7 +90,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
             });
         });
         core.bus.on('dialog_closed', this, function() {
-            this.ignore_enter = true; //Need to ignore enter keyup, dialog is closed and focus goes to Button and then button's keyup is trigerred
             this.set_next_tabindex({keep_focus_on_current: true});
         });
     },
