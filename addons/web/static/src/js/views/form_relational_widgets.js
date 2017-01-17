@@ -1352,7 +1352,7 @@ var FieldOne2Many = FieldX2Many.extend({
     },
     keydown_TAB: function(e, reverse) {
         if (this.$el.is(":focus")) {
-            this.view.set_next_tabindex({current_widget: this}); //Call next tabindex after editor is closed and focus is on o2m field itself
+            this._super.apply(this, arguments); //Call next tabindex after editor is closed and focus is on o2m field itself
         }
         return false;
     },
