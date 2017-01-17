@@ -527,18 +527,17 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
                     self.keydown_ESCAPE(e);
                 }
             });
+
+            // Note: We should bind keyup_ESCAPE and keyup_ENTER for all widgets if we want to discard changes when focus is on widget only and escape pressed
+            this.$el.on("keyup", function(e) {
+                if (e.which == $.ui.keyCode.ESCAPE) {
+                    self.keyup_ESCAPE(e);
+                }
+                if (e.which == $.ui.keyCode.ENTER) {
+                    self.keyup_ENTER(e);
+                }
+            });
         }
-
-        // Note: We will bind keyup_ESCAPE and keyup_ENTER for all widgets as we want to discard changes when escape pressed on any widget
-        this.$el.on("keyup", function(e) {
-            if (e.which == $.ui.keyCode.ESCAPE) {
-                self.keyup_ESCAPE(e);
-            }
-            if (e.which == $.ui.keyCode.ENTER) {
-                self.keyup_ENTER(e);
-            }
-        });
-
     },
     set_focus: function() {
         return this.focus();
@@ -555,8 +554,7 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
     keydown_ENTER: function(e) {},
     keyup_ENTER: function(e) {},
     keyup_ESCAPE: function(e) {},
-    on_escape: function(e) {
-    }
+    on_escape: function(e) {}
 });
 
 /*
