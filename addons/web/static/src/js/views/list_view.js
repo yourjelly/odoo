@@ -485,11 +485,26 @@ var ListView = View.extend({
             this.current_selected_row.addClass("o_row_selected");
             this.current_selection = [this.current_selected_row];
         }
+
+        if (this.current_selected_row) {
+            // Manually scroll instead of standard scrolling
+            var $row = this.current_selected_row.next();
+            var table_offset = this.$('.o_list_view').offset().top;
+            var row_offset = this.current_selected_row.offset().top;
+            var scroll_amount = direction == 'down' ? 10 : -10; // TODO: +/- row height
+            if ((row_offset - table_offset) > (this.$el.parent().height()/2) ) {
+                this.trigger_up('scrollTo', {
+                    offset: (row_offset - table_offset - (this.$el.parent().height()/2) + scroll_amount)
+                });
+            }
+        }
     },
     keydown_DOWN_select: function(e) {
+        e.preventDefault();
         this.keydown_select(e, 'down');
     },
     keydown_UP_select: function(e) {
+        e.preventDefault();
         this.keydown_select(e, 'up');
     },
     keydown_ENTER: function(e) {
