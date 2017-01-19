@@ -23,6 +23,10 @@
                     <field name="file_import" />
                     <field name="msg" />
                 </group>
+                <footer invisible="True">
+                    <button type="object" string="Save" class="btn btn-sm btn-primary" />
+                    <button string="Discard" special="cancel" class="btn btn-sm btn-default" />
+                </footer>
             </form>
         </field>
     </record>
