@@ -425,15 +425,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
             }
             this.last_tabindex = next_widget.tabindex;
             next_widget.set_focus();
-
-            // Scroll manually if widget is at bottom of the form
-            var widget_offset = next_widget.$el.offset().top;
-            var form_height = this.$el.parent().height();
-            if (widget_offset > (form_height*2)/3) {
-                this.trigger_up('scrollTo', {
-                    offset: (form_height*2)/3
-                });
-            }
         } else if (this.$buttons) {
             if (this.get("actual_mode") == "view") {
                 return this.$buttons.find(".o_form_button_create").focus(); //Set focus to create button again
