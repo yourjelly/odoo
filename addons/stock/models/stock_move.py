@@ -41,8 +41,10 @@ class StockMove(models.Model):
         help="Scheduled date for the processing of this move")
     product_id = fields.Many2one(
         'product.product', 'Product',
-        domain=[('type', 'in', ['product', 'consu'])], index=True, required=True,
+        domain=[('type', 'in', ['product', 'consu'])], index=True, 
         states={'done': [('readonly', True)]})
+    package_id = fields.Many2one('stock.quant.package')
+    result_package_id = fields.Many2one('stock.quant.package')
     ordered_qty = fields.Float('Ordered Quantity', digits=dp.get_precision('Product Unit of Measure'))
     product_qty = fields.Float(
         'Real Quantity', compute='_compute_product_qty', inverse='_set_product_qty',
@@ -81,13 +83,6 @@ class StockMove(models.Model):
         'res.partner', 'Destination Address ',
         states={'done': [('readonly', True)]},
         help="Optional address where goods are to be delivered, specifically used for allotment")
-    move_dest_id = fields.Many2one(
-        'stock.move', 'Destination Move',
-        copy=False, index=True,
-        help="Optional: next stock move when chaining them")
-    move_orig_ids = fields.One2many(
-        'stock.move', 'move_dest_id', 'Original Move',
-        help="Optional: previous stock move when chaining them")
     picking_id = fields.Many2one('stock.picking', 'Transfer Reference', index=True, states={'done': [('readonly', True)]})
     picking_partner_id = fields.Many2one('res.partner', 'Transfer Destination Address', related='picking_id.partner_id')
     note = fields.Text('Notes')
@@ -105,37 +100,16 @@ class StockMove(models.Model):
     price_unit = fields.Float(
         'Unit Price', help="Technical field used to record the product cost set by the user during a picking confirmation (when costing "
                            "method used is 'average price' or 'real'). Value given in company currency and in product uom.")  # as it's a technical field, we intentionally don't provide the digits attribute
-    split_from = fields.Many2one('stock.move', "Move Split From", copy=False, help="Technical field used to track the origin of a split move, which can be useful in case of debug")
     backorder_id = fields.Many2one('stock.picking', 'Back Order of', related='picking_id.backorder_id', index=True)
     origin = fields.Char("Source Document")
-    procure_method = fields.Selection([
-        ('make_to_stock', 'Default: Take From Stock'),
-        ('make_to_order', 'Advanced: Apply Procurement Rules')], string='Supply Method',
-        default='make_to_stock', required=True,
-        help="By default, the system will take from the stock in the source location and passively wait for availability."
-             "The other possibility allows you to directly create a procurement on the source location (and thus ignore "
-             "its current stock) to gather products. If we want to chain moves and have this one to wait for the previous,"
-             "this second option should be chosen.")
     scrapped = fields.Boolean('Scrapped', related='location_dest_id.scrap_location', readonly=True, store=True)
     quant_ids = fields.Many2many('stock.quant', 'stock_quant_move_rel', 'move_id', 'quant_id', 'Moved Quants', copy=False)
-    reserved_quant_ids = fields.One2many('stock.quant', 'reservation_id', 'Reserved quants')
-    linked_move_operation_ids = fields.One2many(
-        'stock.move.operation.link', 'move_id', 'Linked Operations', readonly=True,
-        help='Operations that impact this move for the computation of the remaining quantities')
     remaining_qty = fields.Float(
         'Remaining Quantity', compute='_get_remaining_qty',
         digits=0, states={'done': [('readonly', True)]},
         help="Remaining Quantity in default UoM according to operations matched with this move")
-    procurement_id = fields.Many2one('procurement.order', 'Procurement')
-    group_id = fields.Many2one('procurement.group', 'Procurement Group', default=_default_group_id)
-    rule_id = fields.Many2one('procurement.rule', 'Procurement Rule', help='The procurement rule that created this stock move')
-    push_rule_id = fields.Many2one('stock.location.path', 'Push Rule', help='The push rule that created this stock move')
-    propagate = fields.Boolean(
-        'Propagate cancel and split', default=True,
-        help='If checked, when this move is cancelled, cancel the linked move too')
-    picking_type_id = fields.Many2one('stock.picking.type', 'Picking Type')
     inventory_id = fields.Many2one('stock.inventory', 'Inventory')
-    lot_ids = fields.Many2many('stock.production.lot', string='Lots/Serial Numbers', compute='_compute_lot_ids')
+    move_lot_ids = fields.One2many('stock.move.lot')
     origin_returned_move_id = fields.Many2one('stock.move', 'Origin return move', copy=False, help='Move that created the return move')
     returned_move_ids = fields.One2many('stock.move', 'origin_returned_move_id', 'All returned moves', help='Optional: all returned moves created from this move')
     reserved_availability = fields.Float(
@@ -147,8 +121,7 @@ class StockMove(models.Model):
     string_availability_info = fields.Text(
         'Availability', compute='_compute_string_qty_information',
         readonly=True, help='Show various information on stock availability for this move')
-    restrict_lot_id = fields.Many2one('stock.production.lot', 'Lot/Serial Number', help="Technical field used to depict a restriction on the lot/serial number of quants to consider when marking this move as 'done'")
-    restrict_partner_id = fields.Many2one('res.partner', 'Owner ', help="Technical field used to depict a restriction on the ownership of quants to consider when marking this move as 'done'")
+    partner_id = fields.Many2one('res.partner', 'Owner ', help="Technical field used to depict a restriction on the ownership of quants to consider when marking this move as 'done'")
     route_ids = fields.Many2many('stock.location.route', 'stock_location_route_move', 'move_id', 'route_id', 'Destination route', help="Preferred route to be followed by the procurement order")
     warehouse_id = fields.Many2one('stock.warehouse', 'Warehouse', help="Technical field depicting the warehouse to consider for the route selection on the next procurement (if any).")
 

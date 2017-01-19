@@ -56,15 +56,23 @@ class ProcurementRule(models.Model):
 class ProcurementOrder(models.Model):
     _inherit = "procurement.order"
 
-    location_id = fields.Many2one('stock.location', 'Procurement Location')  # not required because task may create procurements that aren't linked to a location with sale_service
+    location_id = fields.Many2one('stock.location', 'Procurement Location (Zone)')  # not required because task may create procurements that aren't linked to a location with sale_service
+    location_src_id = fields.Many2one('stock.location', 'Source Location (Zone)')
     partner_dest_id = fields.Many2one('res.partner', 'Customer Address', help="In case of dropshipping, we need to know the destination address more precisely")
-    move_ids = fields.One2many('stock.move', 'procurement_id', 'Moves', help="Moves created by the procurement")
-    move_dest_id = fields.Many2one('stock.move', 'Destination Move', help="Move which caused (created) the procurement")
+    previous_procurement_id = fields.Many2one('procurement.order', 'Previous Procurement in the chain')
+    next_procurement_id = fields.Many2one('procurement.order', 'Next Procurement in the chain')
+    quant_ids = fields.Many2many('stock.quant')
+    reserved_quant_ids = fields.One2many('stock.quant')
     route_ids = fields.Many2many(
         'stock.location.route', 'stock_location_route_procurement', 'procurement_id', 'route_id', 'Preferred Routes',
         help="Preferred route to be followed by the procurement order. Usually copied from the generating document (SO) but could be set up manually.")
     warehouse_id = fields.Many2one('stock.warehouse', 'Warehouse', help="Warehouse to consider for the route selection")
     orderpoint_id = fields.Many2one('stock.warehouse.orderpoint', 'Minimum Stock Rule')
+    picking_id = fields.Many2one('stock.picking', 'Picking')
+    # inherited rule_id should maybe support push rules too
+    propagate = fields.Boolean(
+        'Propagate cancel and split', default=True,
+        help='If checked, when this move is cancelled, cancel the linked move too')
 
     @api.onchange('warehouse_id')
     def onchange_warehouse_id(self):

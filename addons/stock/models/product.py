@@ -78,10 +78,10 @@ class Product(models.Model):
     reordering_max_qty = fields.Float(compute='_compute_nbr_reordering_rules')
 
     def _compute_reception_count(self):
-        move_data = self.env['stock.move'].read_group([
+        move_data = self.env['procurement.order'].read_group([
             ('product_id', 'in', self.ids),
-            ('location_id.usage', '!=', 'internal'),
-            ('location_dest_id.usage', '=', 'internal'),
+            ('location_src_id.usage', '!=', 'internal'),
+            ('location_id.usage', '=', 'internal'),#maybe src/dest everywhere
             ('state', 'in', ('confirmed', 'assigned', 'pending'))], ['product_id'], ['product_id'])
         res = dict((data['product_id'][0], data['product_id_count']) for data in move_data)
         for move in self:
@@ -139,7 +139,7 @@ class Product(models.Model):
             domain_move_in += [('date', '<=', to_date)]
             domain_move_out += [('date', '<=', to_date)]
 
-        Move = self.env['stock.move']
+        Move = self.env['procurement.order']
         Quant = self.env['stock.quant']
         domain_move_in_todo = [('state', 'not in', ('done', 'cancel', 'draft'))] + domain_move_in
         domain_move_out_todo = [('state', 'not in', ('done', 'cancel', 'draft'))] + domain_move_out
@@ -221,12 +221,12 @@ class Product(models.Model):
         for location in hierarchical_locations:
             loc_domain = loc_domain and ['|'] + loc_domain or loc_domain
             loc_domain += ['&',
-                           ('location_id.parent_left', '>=', location.parent_left),
-                           ('location_id.parent_left', '<', location.parent_right)]
+                           ('location_src_id.parent_left', '>=', location.parent_left),
+                           ('location_src_id.parent_left', '<', location.parent_right)]
             dest_loc_domain = dest_loc_domain and ['|'] + dest_loc_domain or dest_loc_domain
             dest_loc_domain += ['&',
-                                ('location_dest_id.parent_left', '>=', location.parent_left),
-                                ('location_dest_id.parent_left', '<', location.parent_right)]
+                                ('location_id.parent_left', '>=', location.parent_left),
+                                ('location_id.parent_left', '<', location.parent_right)]
         if other_locations:
             loc_domain = loc_domain and ['|'] + loc_domain or loc_domain
             loc_domain = loc_domain + [('location_id', operator, [location.id for location in other_locations])]
