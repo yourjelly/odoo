@@ -16,12 +16,12 @@ odoo.define("website.tour.banner", function (require) {
         position: "bottom",
     }, {
         trigger: "#snippet_structure .oe_snippet:eq(1) .oe_snippet_thumbnail",
-        content: _t("Drag the <i>Cover</i> block and drop it in your page."),
+        content: _t("Drag the <i>Cover</i> block and drop it on your page."),
         position: "bottom",
         run: "drag_and_drop",
     }, {
         trigger: "#wrapwrap .s_text_block_image_fw h2",
-        content: _t("<b>Click on a text</b> to start editing it. <i>It's that easy to edit your content!</i>"),
+        content: _t("<b>Click on the text</b> to start editing it. <i>It's that easy to edit your content!</i>"),
         position: "left",
         width: 150,
         run: "text",
@@ -32,7 +32,7 @@ odoo.define("website.tour.banner", function (require) {
         position: "bottom",
     }, {
         trigger: "#snippet_structure .oe_snippet:eq(3) .oe_snippet_thumbnail",
-        content: _t("Drag another block in your page, below the cover."),
+        content: _t("Drag another block on your page, below the cover."),
         position: "bottom",
         run: "drag_and_drop",
     }, {
@@ -42,11 +42,11 @@ odoo.define("website.tour.banner", function (require) {
         position: "bottom",
     }, {
         trigger: "a[data-action=show-mobile-preview]",
-        content: _t("Good Job! You created your first page. Let's check how this page looks like on <b>mobile devices</b>."),
+        content: _t("Good Job! You have just created your first page. Let's check how it looks like on <b>mobile devices</b>."),
         position: "bottom",
     }, {
         trigger: ".modal-dialog:has(#mobile-viewport) button[data-dismiss=modal]",
-        content: _t("After having checked how it looks on mobile, <b>close the preview</b>."),
+        content: _t("Close the preview."),
         position: "right",
     }, {
         trigger: "#oe_main_menu_navbar a[data-action=new_page]",
@@ -69,7 +69,7 @@ odoo.define("website.tour.contact", function (require) {
         wait_for: base.ready(),
     }, [{
         trigger: "li#customize-menu",
-        content: _t("<b>Install a contact form</b> to improve this page."),
+        content: _t("<b>Add a contact form</b> to this page to ease the contact process. Incoming messages will generate opportunities in your CRM app."),
         extra_trigger: "#o_contact_mail",
         position: "bottom",
     }, {
