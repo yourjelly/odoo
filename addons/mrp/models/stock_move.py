@@ -226,9 +226,11 @@ class StockMove(models.Model):
         # Create extra moves where necessary
         for move in moves:
             rounding = move.product_uom.rounding
-            if float_compare(move.quantity_done, 0.0, precision_rounding=rounding) <= 0:
+            if float_compare(move.quantity_done, 0.0, precision_rounding=rounding) < 0:
                 continue
             moves_todo |= move
+            if float_compare(move.quantity_done, 0.0, precision_rounding=rounding) == 0:
+                continue
             moves_todo |= move._create_extra_move()
         # Split moves where necessary and move quants
         for move in moves_todo:
