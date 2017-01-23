@@ -53,11 +53,16 @@ var FieldTextHtmlSimple = widget.extend({
         return config;
     },
     start: function () {
+        var self = this;
         var def = this._super.apply(this, arguments);
         this.$translate.remove();
         this.$translate = $();
         // Triggers a mouseup to refresh the editor toolbar
         this.$content.trigger('mouseup');
+        // Deadly fix: Forcefully call autofocus as mouseup of this.$content will set focus on current widget
+        setTimeout(function() {
+            self.field_manager.autofocus();
+        }, 0);
         return def;
     },
     initialize_content: function () {

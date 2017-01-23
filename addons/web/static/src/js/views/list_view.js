@@ -314,7 +314,7 @@ var ListView = View.extend({
                         mouse_clicked = false;
                         return;
                     }
-                    utils.show_tabindex_tip({attach_to: e.currentTarget, title: _t("Press ENTER to Create or ESC to Cancel"), trigger: 'focus'});
+                    utils.show_tabindex_tip({attach_to: e.currentTarget, title: _t("Press ENTER to Create"), trigger: 'focus'});
                 })
                 .on('keyup', function(event) {
                     if (event.which == $.ui.keyCode.ENTER) {

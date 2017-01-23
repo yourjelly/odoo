@@ -193,7 +193,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         this.$buttons.find('.o_form_button_save')
             .on('click', this.on_button_save)
             .on('focus', function(e) {
-                on_button_focus(this, _t("Press ENTER to Save or ESC to Cancel"));
+                on_button_focus(this, _t("Press ENTER to Save or ESC to Discard"));
             })
             .on('keydown', function(e) {
                 e.preventDefault();

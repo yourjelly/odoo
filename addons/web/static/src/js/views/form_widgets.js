@@ -121,7 +121,7 @@ var WidgetButton = common.FormWidget.extend({
         if (this.node.attrs.on_focus_tip) {
             content = this.node.attrs.on_focus_tip;
         } else {
-            var content = _.str.sprintf("Press ENTER to %s or ESC to Cancel", this.string);
+            var content = _.str.sprintf("Press ENTER to %s", this.string);
         }
         utils.show_tabindex_tip({attach_to: this.$el, title: content, trigger: 'focus'});
     },
