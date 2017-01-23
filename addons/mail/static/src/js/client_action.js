@@ -127,8 +127,10 @@ var ChatAction = Widget.extend(ControlPanelMixin, {
             this.$(".o_mail_annoying_notification_bar").slideUp();
             var def = window.Notification.requestPermission();
             if (def) {
-                def.then(function () {
-                    utils.send_notification('Permission granted', 'Odoo has now the permission to send you native notifications on this device.');
+                def.then(function (permission) {
+                    if (permission == 'granted') {
+                        utils.send_notification('Permission granted', 'Odoo has now the permission to send you native notifications on this device.');
+                    }
                 });
             }
         },
@@ -699,7 +701,6 @@ var utils = require('mail.utils');
 var Widget = require('web.Widget');
 
 var AppSwitcher = require('web_enterprise.AppSwitcher');
-var ChatAction = require('mail.chat_client_action');
 
 var QWeb = core.qweb;
 
@@ -710,20 +711,23 @@ AppSwitcher.include({
             this.notification_bar = (window.Notification && window.Notification.permission === "default");
         },
         start: function() {
-            var self = this;
             this._super.apply(this, arguments);
             if (_.last(odoo.session_info.server_version_info) == 'e') {
                 var notification_perm = $(QWeb.render("mail.permission_notification", { widget: this }));
                 notification_perm.insertBefore(this.$menu_search);
-                notification_perm.find('.o_mail_request_permission').on('click', function() {
-                    event.preventDefault();
-                    self.$(".o_mail_annoying_notification_bar").slideUp();
+                notification_perm.find('.o_web_enterprise_request_permission').on('click', function() {
+                    notification_perm.slideUp();
                     var def = window.Notification.requestPermission();
                     if (def) {
-                        def.then(function () {
-                            utils.send_notification('Permission granted', 'Odoo has now the permission to send you native notifications on this device.');
+                        def.then(function (permission) {
+                            if (permission == 'granted') {
+                                utils.send_notification('Permission granted', 'Odoo has now the permission to send you native notifications on this device.');
+                            }
                         });
                     }
+                });
+                notification_perm.find(".fa-close").on('click', function() {
+                    notification_perm.slideUp();
                 });
             }
         }

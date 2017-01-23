@@ -17,8 +17,8 @@
     </t>
     <t t-name="mail.permission_notification">
         <t t-if="widget.notification_bar">
-            <div class="o_mail_annoying_notification_bar">
-                <span class="o_mail_request_permission">Odoo needs your permission to <a href="#"> enable desktop notifications</a>.</span>
+            <div class="o_web_enterprise_annoying_notification_bar">
+                <span class="o_web_enterprise_request_permission">Odoo needs your permission to <a href="#"> enable desktop notifications</a>.</span>
                 <span class="fa fa-close"></span>
             </div>
         </t>
