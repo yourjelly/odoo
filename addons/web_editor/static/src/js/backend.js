@@ -140,6 +140,8 @@ var FieldTextHtmlSimple = widget.extend({
             return this.$textarea.focusInEnd();
         } catch (e) {
             return this.$textarea.focus();
+        } finally {
+            this.$content.trigger('mouseup');
         }
     },
     resize: function() {
