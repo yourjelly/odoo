@@ -1282,6 +1282,15 @@ var One2ManyListView = X2ManyListView.extend({
 
         return this._super(record);
     },
+    keyup_ENTER: function() {
+        var self = this;
+        if (!this.editor.form.is_dirty()) {
+            return self.cancel_edition().then(function() {
+                self.x2m.view.set_next_tabindex();
+            });
+        }
+        return this._super.apply(this, arguments);
+    },
     keydown_TAB: function(e) {
         var self = this;
         var form = this.editor.form;
