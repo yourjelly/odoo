@@ -345,40 +345,41 @@ var FormView = View.extend(common.FieldManagerMixin, {
         }
     },
     first_tabindex_button: function() {
-        var first_button_tabindex = 0;
-        var first_button = false;
-        _.chain(this.tabindex_widgets).filter(function(w) {
-            return !(w.$el.hasClass("o_form_invisible") || w.get('readonly'));
-        }).map(function(widget) {
-            if (widget.node.tag == "button" && widget.tabindex && (!first_button_tabindex || widget.tabindex <= first_button_tabindex)) {
-                first_button_tabindex = widget.tabindex;
-                first_button = widget;
-            }
-        });
+        var tabindex_buttons = _.chain(this.tabindex_widgets).filter(function(w) {
+            return !(w.$el.is(":hidden") || w.get('readonly')) && w.node.tag == "button";
+        }).value();
+        var first_button = _(tabindex_buttons).first();
         return first_button;
     },
     last_tabindex_field: function(widgets) {
-        var last_field_tabindex = 0;
-        var last_field = false;
-        _.chain(this.tabindex_widgets).filter(function(w) {
-            return !(w.$el.hasClass("o_form_invisible") || w.get('readonly'));
-        }).map(function(widget) {
-            if (widget.node.tag != "button" && widget.tabindex && widget.tabindex >= last_field_tabindex) {
-                last_field_tabindex = widget.tabindex;
-                last_field = widget;
-            }
-        });
+        var tabindex_fields = _.chain(this.tabindex_widgets).filter(function(w) {
+            return !(w.$el.is(":hidden") || w.get('readonly')) && w.node.tag != "button";
+        }).value();
+        var last_field = _(tabindex_fields).last();
         return last_field;
     },
     get_tabindex_widgets: function() {
         // In future if we want to support tabindex on other elements like page then we can prepare 
         // tabindex list in render_to method of renering engine and add jQuery wrapped elements of page and other elements
         // So that we can have focus method available(we may bind set_next_tabindex on TAB key for such elements explicitly)
-        return _.chain(this.get_widgets()).filter(function(w) {
+        var all_widgets = this.get_widgets();
+        var tabindex_widgets = [];
+        tabindex_widgets = _.chain(all_widgets).filter(function(w) {
             return w.tabindex && w.tabindex >= 0 && !w.no_tabindex;
         }).sortBy(function(w) {
             return w.tabindex;
         }).value();
+
+        if (!tabindex_widgets.length) {
+            tabindex_widgets = _.chain(all_widgets).filter(function(w) {
+                return !w.tabindex && !w.no_tabindex;
+            }).value();
+            //TODO: Check: do not assign tabindex automatically and manage based on index of tabindex_widget list
+            _.each(tabindex_widgets, function(widget, index) {
+                widget.tabindex = index+1;
+            });
+        }
+        return tabindex_widgets;
     },
     set_next_tabindex: function(options) {
         var self = this;
@@ -400,10 +401,11 @@ var FormView = View.extend(common.FieldManagerMixin, {
         }
         var current_index = _(this.tabindex_widgets).indexOf(current_widget);
 
+        console.log("self.tabindex_widgets :::: ", self.tabindex_widgets);
         var get_next_widget = function() {
             current_index += (reverse && -1 || 1);
             var next_widget = self.tabindex_widgets[current_index];
-            if (next_widget && (next_widget.$el.hasClass("o_form_invisible") || next_widget.get('readonly'))) {
+            if (next_widget && (next_widget.$el.is(":hidden") || next_widget.get('readonly'))) {
                 return get_next_widget();
             }
             return next_widget;
@@ -418,8 +420,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
 
         if (next_widget) {
             // If it is last field and tab is pressed then move focus to save button
-            var last_field_tabindex = self.last_tabindex_field();
-            if (!reverse && current_widget && last_field_tabindex && current_widget.tabindex == last_field_tabindex.tabindex && this.get("actual_mode") != "view" && this.$buttons && this.$buttons.find(".o_form_button_save").length) {
+            var last_field = self.last_tabindex_field();
+            if (!reverse && current_widget && last_field && _.isEqual(current_widget, last_field) && this.get("actual_mode") != "view" && this.$buttons && this.$buttons.find(".o_form_button_save").length) {
                 this.last_tabindex = next_widget.tabindex;
                 return this.$buttons.find(".o_form_button_save").focus();
             }
