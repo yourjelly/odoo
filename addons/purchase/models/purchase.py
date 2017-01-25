@@ -773,7 +773,7 @@ class PurchaseOrderLine(models.Model):
 
     @api.onchange('product_qty')
     def _onchange_product_qty(self):
-        if (self.state == 'purchase' or self.state == 'to approve') and self.product_id.type in ['product', 'consu'] and self.product_qty < self._origin.product_qty:
+        if (self.state == 'purchase' or self.state == 'to approve') and self.product_id.type in ['product', 'consu'] and self.product_qty < self._origin.product_qty and self.product_qty >= self.qty_received:
             warning_mess = {
                 'title': _('Ordered quantity decreased!'),
                 'message' : _('You are decreasing the ordered quantity!\nYou must update the quantities on the reception and/or bills.'),
