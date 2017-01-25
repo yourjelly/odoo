@@ -557,7 +557,11 @@ class PurchaseOrderLine(models.Model):
     def write(self, values):
         result = super(PurchaseOrderLine, self).write(values)
         orders = self.filtered(lambda x: x.order_id.state == 'purchase').mapped('order_id')
-        orders._create_picking()
+        if 'product_qty' in values:
+            for line in self:
+                if line.product_qty < line.qty_received:
+                    raise UserError(_('You can not change the quantity to less than what you have already received.  '))
+            orders._create_picking()
         return result
 
     name = fields.Text(string='Description', required=True)
