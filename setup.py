@@ -170,6 +170,8 @@ setup(
         'werkzeug',
         'xlsxwriter',
         'xlwt',
+        'oauthlib',
+        'requests-oauthlib'
     ],
     extras_require={
         'SSL': ['pyopenssl'],
