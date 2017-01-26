@@ -3,7 +3,7 @@
 
 from odoo import api, exceptions, fields, models, _
 from odoo.exceptions import UserError
-from odoo.tools import float_compare
+from odoo.tools import float_compare, float_round
 from odoo.addons import decimal_precision as dp
 
 
@@ -173,6 +173,7 @@ class StockMove(models.Model):
         uom_qty_to_split = 0
         extra_move = self.env['stock.move']
         rounding = self.product_uom.rounding
+        product_uom_qty_rounded = float_round(self.product_uom_qty, precision_rounding=rounding, rounding_method="UP")
         link_procurement = False
         # If more produced than the procurement linked, you should create an extra move
         if self.procurement_id and self.production_id and float_compare(self.production_id.qty_produced, self.procurement_id.product_qty, precision_rounding=rounding) > 0:
@@ -180,17 +181,17 @@ class StockMove(models.Model):
             # If you depassed the quantity before, you don't need to split anymore, but adapt the quantities
             if float_compare(done_moves_total, self.procurement_id.product_qty, precision_rounding=rounding) >= 0:
                 quantity_to_split = 0
-                if float_compare(self.product_uom_qty, self.quantity_done, precision_rounding=rounding) < 0:
+                if float_compare(product_uom_qty_rounded, self.quantity_done, precision_rounding=rounding) < 0:
                     self.product_uom_qty = self.quantity_done #TODO: could change qty on move_dest_id also (in case of 2-step in/out)
             else:
                 quantity_to_split = done_moves_total + self.quantity_done - self.procurement_id.product_qty
-                uom_qty_to_split = self.product_uom_qty - (self.quantity_done - quantity_to_split)#self.product_uom_qty - (self.procurement_id.product_qty + done_moves_total)
+                uom_qty_to_split = product_uom_qty_rounded - (self.quantity_done - quantity_to_split)#self.product_uom_qty - (self.procurement_id.product_qty + done_moves_total)
                 if float_compare(uom_qty_to_split, quantity_to_split, precision_rounding=rounding) < 0:
                     uom_qty_to_split = quantity_to_split
                 self.product_uom_qty = self.quantity_done - quantity_to_split
         # You split also simply  when the quantity done is bigger than foreseen
-        elif float_compare(self.quantity_done, self.product_uom_qty, precision_rounding=rounding) > 0:
-            quantity_to_split = self.quantity_done - self.product_uom_qty
+        elif float_compare(self.quantity_done, product_uom_qty_rounded, precision_rounding=rounding) > 0:
+            quantity_to_split = self.quantity_done - product_uom_qty_rounded
             uom_qty_to_split = quantity_to_split # + no need to change existing self.product_uom_qty 
             link_procurement = True
         if quantity_to_split:
@@ -226,7 +227,8 @@ class StockMove(models.Model):
         # Create extra moves where necessary
         for move in moves:
             rounding = move.product_uom.rounding
-            if float_compare(move.quantity_done, 0.0, precision_rounding=rounding) <= 0:
+            move.quantity_done = float_round(move.quantity_done, precision_rounding=rounding, rounding_method="UP")
+            if move.quantity_done <= 0:
                 continue
             moves_todo |= move
             moves_todo |= move._create_extra_move()
