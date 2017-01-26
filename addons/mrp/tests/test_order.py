@@ -2,7 +2,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from datetime import datetime, timedelta
-
 from odoo.fields import Datetime as Dt
 from odoo.addons.mrp.tests.common import TestMrpCommon
 
@@ -427,3 +426,38 @@ class TestMrpOrder(TestMrpCommon):
 
         # check the consumed quants of the newly produced quant
         self.assertEquals(sum(second_move.quant_ids.mapped('consumed_quant_ids').mapped('qty')), 2)
+
+    def test_rounding(self):
+        """ In previous versions we had rounding and efficiency fields.  We check if we can still do the same, but with only the rounding on the UoM"""
+        self.product_6.uom_id.rounding = 1.0
+        bom_eff = self.env['mrp.bom'].create({'product_id': self.product_6.id,
+                                    'product_tmpl_id': self.product_6.product_tmpl_id.id, 
+                                    'product_qty': 1, 
+                                    'product_uom_id': self.product_6.uom_id.id, 
+                                    'type': 'normal',
+                                    'bom_line_ids': [
+                                        (0, 0, {'product_id': self.product_2.id, 'product_qty': 2.03}),
+                                        (0, 0, {'product_id': self.product_8.id, 'product_qty': 4.16})
+                                        ]})
+        production = self.env['mrp.production'].create({'name': 'MO efficiency test',
+                                           'product_id': self.product_6.id,
+                                           'product_qty': 20,
+                                           'bom_id': bom_eff.id,
+                                           'product_uom_id': self.product_6.uom_id.id,})
+        #Check the production order has the right quantities
+        self.assertEqual(production.move_raw_ids[0].product_qty, 41, 'The quantity should be rounded up')
+        self.assertEqual(production.move_raw_ids[1].product_qty, 84, 'The quantity should be rounded up')
+        
+        # produce product
+        produce_wizard = self.env['mrp.product.produce'].with_context({
+            'active_id': production.id,
+            'active_ids': [production.id],
+        }).create({
+            'product_qty': 8,
+        })
+        produce_wizard.do_produce()
+        self.assertEqual(round(production.move_raw_ids[0].quantity_done, 2), 16.24, 'Should not use rounding when producing')
+        self.assertEqual(round(production.move_raw_ids[1].quantity_done, 2), 33.28, 'Should not use rounding when producing')
+        production.post_inventory()
+        self.assertEqual(production.move_raw_ids[0].quantity_done, 17, 'Should use UP rounding for validation to reflect what really happened in stock')
+        self.assertEqual(production.move_raw_ids[1].quantity_done, 34, 'Should use UP rounding for validation to reflect what really happened in stock')
