@@ -182,30 +182,44 @@ class Quant(models.Model):
         quants_reconcile_sudo = self.env['stock.quant'].sudo()
         quants_move_sudo = self.env['stock.quant'].sudo()
         check_lot = False
-        for quant, qty in quants:
-            if not quant:
-                #If quant is None, we will create a quant to move (and potentially a negative counterpart too)
-                quant = self._quant_create_from_move(
-                    qty, move, lot_id=lot_id, owner_id=owner_id, src_package_id=src_package_id, dest_package_id=dest_package_id, force_location_from=location_from, force_location_to=location_to)
-                check_lot = True
-            else:
-                quant._quant_split(qty)
-                quants_move_sudo |= quant
-            quants_reconcile_sudo |= quant
+        if move.product_id.type == 'product':
+            for quant, qty in quants:
+                if not quant:
+                    #If quant is None, we will create a quant to move (and potentially a negative counterpart too)
+                    quant = self._quant_create_from_move(
+                        qty, move, lot_id=lot_id, owner_id=owner_id, src_package_id=src_package_id, dest_package_id=dest_package_id, force_location_from=location_from, force_location_to=location_to)
+                    check_lot = True
+                else:
+                    quant._quant_split(qty)
+                    quants_move_sudo |= quant
+                quants_reconcile_sudo |= quant
+            
+            if quants_move_sudo:
+                moves_recompute = quants_move_sudo.filtered(lambda self: self.reservation_id != move).mapped('reservation_id')
+                quants_move_sudo._quant_update_from_move(move, location_to, dest_package_id, lot_id=lot_id, entire_pack=entire_pack)
+                moves_recompute.recalculate_move_state()
+    
+            if location_to.usage == 'internal':
+                # Do manual search for quant to avoid full table scan (order by id)
+                self._cr.execute("""
+                    SELECT 0 FROM stock_quant, stock_location WHERE product_id = %s AND stock_location.id = stock_quant.location_id AND
+                    ((stock_location.parent_left >= %s AND stock_location.parent_left < %s) OR stock_location.id = %s) AND qty < 0.0 LIMIT 1
+                """, (move.product_id.id, location_to.parent_left, location_to.parent_right, location_to.id))
+                if self._cr.fetchone():
+                    quants_reconcile_sudo._quant_reconcile_negative(move)
+        else:
+            dest_quant = self.search([('product_id', '=', move.product_id.id),
+                                       ('location_id', '=', location_to)]) #needs lot/package maybe too
+            if not dest_quant:
+                dest_quant = self.create({'product_id': move.product_id.id, 
+                             'location_id': location_from, }) #needs lot/package too
+            for quant, qty in quants:
+                dest_quant[0].qty += qty
+                quant.qty -= qty
+                if quant.qty == 0:
+                    quant.with_context(force_unlink = True).unlink()
 
-        if quants_move_sudo:
-            moves_recompute = quants_move_sudo.filtered(lambda self: self.reservation_id != move).mapped('reservation_id')
-            quants_move_sudo._quant_update_from_move(move, location_to, dest_package_id, lot_id=lot_id, entire_pack=entire_pack)
-            moves_recompute.recalculate_move_state()
-
-        if location_to.usage == 'internal':
-            # Do manual search for quant to avoid full table scan (order by id)
-            self._cr.execute("""
-                SELECT 0 FROM stock_quant, stock_location WHERE product_id = %s AND stock_location.id = stock_quant.location_id AND
-                ((stock_location.parent_left >= %s AND stock_location.parent_left < %s) OR stock_location.id = %s) AND qty < 0.0 LIMIT 1
-            """, (move.product_id.id, location_to.parent_left, location_to.parent_right, location_to.id))
-            if self._cr.fetchone():
-                quants_reconcile_sudo._quant_reconcile_negative(move)
+        
 
         # In case of serial tracking, check if the product does not exist somewhere internally already
         # Checking that a positive quant already exists in an internal location is too restrictive.
