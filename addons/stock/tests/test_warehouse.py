@@ -128,7 +128,6 @@ class TestInventory(TestStockCommon):
             'location_dest_id': self.customer_location})
         picking_out.action_confirm()
         picking_out.force_assign()
-        picking_out.do_prepare_partial()
         # Transfer outgoing shipment
         picking_out.do_transfer()
 
@@ -140,7 +139,6 @@ class TestInventory(TestStockCommon):
         return_pick = self.env['stock.picking'].browse(res['res_id'])
         # Validate picking
         return_pick.action_assign()
-        return_pick.do_prepare_partial()
         return_pick.do_transfer()
 
         # Update Inventory.
@@ -161,14 +159,14 @@ class TestInventory(TestStockCommon):
         self.assertEqual(quantity, [1, 1], "Moves created with wrong quantity.")
         location_ids = inventory.move_ids.mapped('location_id').ids
         location_loss = self.env.ref('stock.location_inventory')
-        self.assertEqual(location_ids, [self.stock_location, location_loss.id])
+        self.assertEqual(set(location_ids), set((self.stock_location, location_loss.id,)))
         # Check quants on stock location.
         quants = Quant.search([('product_id', '=', productA.id), ('location_id', '=', self.stock_location)])
         self.assertEqual(len(quants), 0)
         # Check quants on inventory loss location.
         quant = Quant.search([('product_id', '=', productA.id), ('location_id', '=', location_loss.id)])
         self.assertEqual(len(quant), 1)
-        self.assertEqual(len(quant.qty), 1)
+        self.assertEqual(quant.qty, 1)
 
 
 class TestResupply(TestStockCommon):
