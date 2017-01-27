@@ -401,7 +401,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
         }
         var current_index = _(this.tabindex_widgets).indexOf(current_widget);
 
-        console.log("self.tabindex_widgets :::: ", self.tabindex_widgets);
         var get_next_widget = function() {
             current_index += (reverse && -1 || 1);
             var next_widget = self.tabindex_widgets[current_index];
@@ -427,6 +426,11 @@ var FormView = View.extend(common.FieldManagerMixin, {
             }
             this.last_tabindex = next_widget.tabindex;
             next_widget.set_focus();
+
+            // Scroll manually if widget is at bottom of the form
+            var offset = next_widget.$el.prop('offsetTop');
+            this.trigger_up('scrollTo', {offset: offset});
+
         } else if (this.$buttons) {
             if (this.get("actual_mode") == "view") {
                 return this.$buttons.find(".o_form_button_create").focus(); //Set focus to create button again
