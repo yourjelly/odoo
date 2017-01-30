@@ -384,9 +384,11 @@ class InventoryLine(models.Model):
         moves = self.env['stock.move']
         Quant = self.env['stock.quant']
         for line in self:
-            neg_quants = Quant.search([('qty', '<', 0.0), ('product_id', '=', line.product_id.id),
-                                       ('location_id', '=', line.location_id.id), ('package_id', '=', line.package_id.id), 
-                                       ('lot_id', '=', line.prod_lot_id.id), ('owner_id', '=', line.partner_id.id)])
+            neg_quants = self.env['stock.quant']
+            if float_utils.float_compare(line.theoretical_qty, 0, precision_rounding=line.product_id.uom_id.rounding) >= 0: 
+                neg_quants = Quant.search([('qty', '<', 0.0), ('product_id', '=', line.product_id.id),
+                                           ('location_id', '=', line.location_id.id), ('package_id', '=', line.package_id.id), 
+                                           ('lot_id', '=', line.prod_lot_id.id), ('owner_id', '=', line.partner_id.id)])
             if float_utils.float_compare(line.theoretical_qty, line.product_qty, precision_rounding=line.product_id.uom_id.rounding) == 0:
                 if not neg_quants:
                     continue
