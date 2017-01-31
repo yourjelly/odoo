@@ -455,6 +455,7 @@ function on_notification (notifications) {
             return notif[0][1] === "mail.channel" && notif[0][2] === unsubscribed_notif[1].id;
         });
     }
+    console.log("notifications :::: ", notifications);
     _.each(notifications, function (notification) {
         var model = notification[0][1];
         if (model === 'ir.needaction') {
@@ -469,6 +470,21 @@ function on_notification (notifications) {
         } else if (model === 'bus.presence') {
             // update presence of users
             on_presence_notification(notification[1]);
+        } else if (model === 'channel.name') {
+            var partner_id = notification[0][2];
+            var dm = chat_manager.get_dm_from_partner_id(partner_id);
+            if (!dm) {
+                chat_manager.open_and_detach_dm(partner_id);
+            } else {
+                var dm_session = _.findWhere(chat_sessions, {id: dm.id});
+                if (!dm_session) {
+                    chat_manager.detach_channel(dm);
+                } else {
+                    close_chat(dm_session);
+                    dm.is_folded = false;
+                    open_chat(dm);
+                }
+            }
         }
     });
 }

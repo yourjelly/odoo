@@ -38,6 +38,21 @@ class Users(models.Model):
         type(self).SELF_READABLE_FIELDS.extend(['notify_email'])
         return init_res
 
+    @classmethod
+    def authenticate(cls, db, login, password, user_agent_env):
+        uid = super(Users, cls).authenticate(db, login, password, user_agent_env)
+
+        print "\n\nuid ::: ", uid
+        if uid:
+            with cls.pool.cursor() as cr:
+                env = api.Environment(cr, uid, {})
+                ResUsersLog = env['res.users.log']
+                user_logs = ResUsersLog.search_count([('create_uid', '=', uid)])
+                print "\n\nuser_logs :::: ", user_logs
+                if user_logs == 1:
+                    env['bus.bus'].sendmany([[(cr.dbname, 'channel.name', env.user.partner_id.id), {}]])
+        return uid
+
     @api.model
     def create(self, values):
         if not values.get('login', False):
