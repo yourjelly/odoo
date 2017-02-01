@@ -560,7 +560,9 @@ class PurchaseOrderLine(models.Model):
         if 'product_qty' in values:
             for line in self:
                 if line.product_qty < line.qty_received:
-                    raise UserError(_('You can not change the quantity to less than what you have already received.  '))
+                    raise UserError(_('You can not change the quantity to less than what you have already received.'))
+                if line.product_qty < line.qty_invoiced:
+                    raise UserError(_('You can not change the quantity to less than what you have already invoiced'))
             orders._create_picking()
         return result
 
