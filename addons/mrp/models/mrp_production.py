@@ -380,6 +380,8 @@ class MrpProduction(models.Model):
     @api.multi
     def action_assign(self):
         for production in self:
+            moves_draft = production.move_raw_ids.filtered(lambda x: x.state == 'draft')
+            moves_draft.action_confirm()
             move_to_assign = production.move_raw_ids.filtered(lambda x: x.state in ('confirmed', 'waiting', 'assigned'))
             move_to_assign.action_assign()
         return True
@@ -389,6 +391,12 @@ class MrpProduction(models.Model):
         self.ensure_one()
         action = self.env.ref('mrp.act_mrp_product_produce').read()[0]
         return action
+
+    def handle_null_lines(self):
+        self.ensure_one()
+        null_moves = self.move_raw_ids.filtered(lambda x: x.unit_factor == 0.0 and x.has_tracking == 'none' and x.quantity_done == 0.0)
+        for move in null_moves:
+            move.quantity_done = move.product_uom_qty
 
     @api.multi
     def button_plan(self):

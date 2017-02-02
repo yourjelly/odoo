@@ -88,6 +88,8 @@ class MrpProductProduce(models.TransientModel):
             elif move.unit_factor:
                 move.quantity_done_store += quantity * move.unit_factor
         self.check_finished_move_lots()
+        if self.production_id.check_to_done: #all qties produced
+            self.production_id.handle_null_lines()
         if self.production_id.state == 'confirmed':
             self.production_id.write({
                 'state': 'progress',
