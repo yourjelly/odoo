@@ -157,6 +157,17 @@ class MrpProduction(models.Model):
     scrap_count = fields.Integer(compute='_compute_scrap_move_count', string='Scrap Move')
     priority = fields.Selection([('0', 'Not urgent'), ('1', 'Normal'), ('2', 'Urgent'), ('3', 'Very Urgent')], 'Priority',
                                 readonly=True, states={'confirmed': [('readonly', False)]}, default='1')
+    is_locked = fields.Boolean('Is Locked', default=True)
+    show_final_lots = fields.Boolean('Show Final Lots', compute='_compute_show_lots')
+
+    @api.depends('product_id.tracking')
+    def _compute_show_lots(self):
+        for production in self:
+            production.show_final_lots = production.product_id.tracking != 'none'
+
+    def action_toggle_is_locked(self):
+        self.is_locked = not self.is_locked
+        return True
 
     @api.multi
     @api.depends('bom_id.routing_id', 'bom_id.routing_id.operation_ids')
@@ -199,18 +210,20 @@ class MrpProduction(models.Model):
                 assigned_list = [x.state in ('assigned', 'done', 'cancel') for x in order.move_raw_ids]
                 order.availability = (all(assigned_list) and 'assigned') or (any(partial_list) and 'partially_available') or 'waiting'
 
+    @api.depends('move_raw_ids', 'is_locked')
     def _compute_unreserve_visible(self):
-        return True
+        for order in self:
+            order.unreserve_visible = order.is_locked and order.mapped('move_raw_ids').mapped('move_line_ids') or False
 
     @api.multi
-    @api.depends('move_raw_ids.quantity_done', 'move_finished_ids.quantity_done')
+    @api.depends('move_raw_ids.quantity_done', 'move_finished_ids.quantity_done', 'is_locked')
     def _compute_post_visible(self):
         for order in self:
             if order.product_tmpl_id._is_cost_method_standard():
-                order.post_visible = any((x.quantity_done > 0 and x.state not in ['done', 'cancel']) for x in order.move_raw_ids) or \
+                order.post_visible = order.is_locked and any((x.quantity_done > 0 and x.state not in ['done', 'cancel']) for x in order.move_raw_ids) or \
                     any((x.quantity_done > 0 and x.state not in ['done' 'cancel']) for x in order.move_finished_ids)
             else:
-                order.post_visible = any((x.quantity_done > 0 and x.state not in ['done', 'cancel']) for x in order.move_finished_ids)
+                order.post_visible = order.is_locked and any((x.quantity_done > 0 and x.state not in ['done', 'cancel']) for x in order.move_finished_ids)
 
     @api.multi
     @api.depends('move_raw_ids.quantity_done', 'move_raw_ids.product_uom_qty')
@@ -223,7 +236,7 @@ class MrpProduction(models.Model):
             )
 
     @api.multi
-    @api.depends('workorder_ids.state', 'move_finished_ids')
+    @api.depends('workorder_ids.state', 'move_finished_ids', 'is_locked')
     def _get_produced_qty(self):
         for production in self:
             done_moves = production.move_finished_ids.filtered(lambda x: x.state != 'cancel' and x.product_id.id == production.product_id.id)
@@ -231,7 +244,7 @@ class MrpProduction(models.Model):
             wo_done = True
             if any([x.state not in ('done', 'cancel') for x in production.workorder_ids]):
                 wo_done = False
-            production.check_to_done = done_moves and (qty_produced >= production.product_qty) and (production.state not in ('done', 'cancel')) and wo_done
+            production.check_to_done = production.is_locked and done_moves and (qty_produced >= production.product_qty) and (production.state not in ('done', 'cancel')) and wo_done
             production.qty_produced = qty_produced
         return True
 
@@ -397,7 +410,7 @@ class MrpProduction(models.Model):
         self.ensure_one()
         move = self.move_raw_ids.filtered(lambda x: x.bom_line_id.id == bom_line.id and x.state not in ('done', 'cancel'))
         if move:
-            if quantity > 0:
+            if quantity > 0 or move.bom_line_id.product_qty == 0:
                 move[0].write({'product_uom_qty': quantity})
             else:
                 if move[0].quantity_done > 0:
@@ -534,7 +547,7 @@ class MrpProduction(models.Model):
             if wo.time_ids.filtered(lambda x: (not x.date_end) and (x.loss_type in ('productive', 'performance'))):
                 raise UserError(_('Work order %s is still running') % wo.name)
         self.post_inventory()
-        moves_to_cancel = (self.move_raw_ids | self.move_finished_ids).filtered(lambda x: x.state not in ('done', 'cancel'))
+        moves_to_cancel = (self.move_raw_ids | self.move_finished_ids).filtered(lambda x: x.state not in ('done', 'cancel') or x.product_uom_qty == 0.0)
         moves_to_cancel.action_cancel()
         self.write({'state': 'done', 'date_finished': fields.Datetime.now()})
         return self.write({'state': 'done'})

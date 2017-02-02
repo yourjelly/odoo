@@ -16,6 +16,13 @@ class StockMoveLine(models.Model):
     lot_produced_qty = fields.Float('Quantity Finished Product', help="Informative, not used in matching")
     done_wo = fields.Boolean('Done for Work Order', default=True, help="Technical Field which is False when temporarily filled in in work order")  # TDE FIXME: naming
     done_move = fields.Boolean('Move Done', related='move_id.is_done', store=True)  # TDE FIXME: naming
+    is_locked = fields.Boolean('Is Locked', compute='_compute_is_locked')
+    
+    @api.multi
+    @api.depends('move_id.raw_material_production_id.is_locked')
+    def _compute_is_locked(self):
+        for moveline in self:
+            moveline.is_locked = moveline.move_id.raw_material_production_id.is_locked or False #or moveline.move_id.picking_id.is_locked
 
     @api.one
     @api.constrains('lot_id', 'qty_done')
@@ -63,7 +70,23 @@ class StockMove(models.Model):
         'Done', compute='_compute_is_done',
         store=True,
         help='Technical Field to order moves')
+    is_locked = fields.Boolean('Is Locked', compute='_compute_is_locked')
+    show_lots = fields.Boolean('Show Lots', compute='_compute_show_lots')
+    show_final_lots = fields.Boolean('Show Final Lots', compute='_compute_show_lots')
+    production_product_id = fields.Many2one('product.product', 'Production Product')
     
+    @api.depends('product_id.tracking', 'raw_material_production_id.product_id.tracking')
+    def _compute_show_lots(self):
+        for move in self:
+            move.show_lots = move.product_id.tracking != 'none'
+            move.show_final_lots = move.show_lots and (move.raw_material_production_id.product_id.tracking != 'none')
+            move.production_product_id = move.raw_material_production_id.product_id.id or move.production_id.product_id.id
+
+    @api.depends('raw_material_production_id.is_locked')
+    def _compute_is_locked(self):
+        for move in self:
+            move.is_locked = move.raw_material_production_id.is_locked or False #or move.picking_id.is_locked
+
     def _get_move_lines(self):
         self.ensure_one()
         if self.raw_material_production_id:
