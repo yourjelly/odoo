@@ -382,7 +382,7 @@ class MrpProduction(models.Model):
         for production in self:
             moves_draft = production.move_raw_ids.filtered(lambda x: x.state == 'draft')
             moves_draft.action_confirm()
-            move_to_assign = production.move_raw_ids.filtered(lambda x: x.state in ('confirmed', 'waiting', 'assigned'))
+            move_to_assign = production.move_raw_ids.filtered(lambda x: x.state in ('confirmed', 'waiting', 'assigned') and x.product_uom_qty > 0)
             move_to_assign.action_assign()
         return True
 
@@ -494,7 +494,7 @@ class MrpProduction(models.Model):
     @api.multi
     def post_inventory(self):
         for order in self:
-            moves_to_do = order.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
+            moves_to_do = order.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel') and x.product_uom_qty > 0)
             moves_to_do.action_done()
             order._cal_price(moves_to_do)
             moves_to_finish = order.move_finished_ids.filtered(lambda x: x.state not in ('done','cancel'))
@@ -531,7 +531,7 @@ class MrpProduction(models.Model):
             if wo.time_ids.filtered(lambda x: (not x.date_end) and (x.loss_type in ('productive', 'performance'))):
                 raise UserError(_('Work order %s is still running') % wo.name)
         self.post_inventory()
-        moves_to_cancel = (self.move_raw_ids | self.move_finished_ids).filtered(lambda x: x.state not in ('done', 'cancel'))
+        moves_to_cancel = (self.move_raw_ids | self.move_finished_ids).filtered(lambda x: x.state not in ('done', 'cancel') or x.product_uom_qty == 0.0)
         moves_to_cancel.action_cancel()
         self.write({'state': 'done', 'date_finished': fields.Datetime.now()})
         self.env["procurement.order"].search([('production_id', 'in', self.ids)]).check()
