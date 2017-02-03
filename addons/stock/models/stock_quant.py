@@ -74,6 +74,7 @@ class Quant(models.Model):
         'stock.location', "Negative Destination Location", related='negative_move_id.location_dest_id',
         readonly=True,
         help="Technical field used to record the destination location of a move that created a negative quant")
+    operation_id = fields.Many2many('stock.pack.operation')
 
     @api.one
     def _compute_name(self):

@@ -69,6 +69,7 @@ class PackOperation(models.Model):
         ('assigned', 'Available'),
         ('done', 'Done')], related='picking_id.state')
     move_id = fields.Many2one('stock.move', 'Direct move link')
+    quant_ids = fields.Many2many('stock.quant')
 
     @api.one
     def _compute_is_done(self):
