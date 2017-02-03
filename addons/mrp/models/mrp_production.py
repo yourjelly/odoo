@@ -380,7 +380,7 @@ class MrpProduction(models.Model):
     @api.multi
     def action_assign(self):
         for production in self:
-            moves_draft = production.move_raw_ids.filtered(lambda x: x.state == 'draft')
+            moves_draft = production.move_raw_ids.filtered(lambda x: x.state == 'draft' and x.product_uom_qty > 0)
             moves_draft.action_confirm()
             move_to_assign = production.move_raw_ids.filtered(lambda x: x.state in ('confirmed', 'waiting', 'assigned') and x.product_uom_qty > 0)
             move_to_assign.action_assign()
@@ -494,6 +494,9 @@ class MrpProduction(models.Model):
     @api.multi
     def post_inventory(self):
         for order in self:
+            null_set_moves = order.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel') and x.product_uom_qty == 0 and x.quantity_done > 0)
+            for move in null_set_moves:
+                move.product_uom_qty = move.quantity_done
             moves_to_do = order.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel') and x.product_uom_qty > 0)
             moves_to_do.action_done()
             order._cal_price(moves_to_do)
