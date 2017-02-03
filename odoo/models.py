@@ -1127,13 +1127,15 @@ class BaseModel(object):
 
     @api.model
     def _get_default_search_view(self):
-        """ Generates a single-field search view, based on _rec_name.
+        """ Generates a single-field search view, based on _rec_name with an empty group.
 
         :returns: a tree view as an lxml document
         :rtype: etree._Element
         """
         element = E.field(name=self._rec_name_fallback())
-        return E.search(element, string=self._description)
+        search = E.search(element, string=self._description)
+        search.append(E.group())
+        return search
 
     @api.model
     def _get_default_tree_view(self):
