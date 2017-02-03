@@ -46,6 +46,7 @@
                                 <field name="code"/>
                                 <field name="return_picking_type_id"/>
                                 <field name="barcode_nomenclature_id" groups="base.group_no_one"/>
+                                <field name="group_procurements"/>
                             </group>
                         </group>
                         <group>
