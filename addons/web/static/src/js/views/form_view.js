@@ -327,19 +327,19 @@ var FormView = View.extend(common.FieldManagerMixin, {
     },
     on_keydown_SHIFT_ENTER: function (e) {
         var self = this;
-        if (self.get("actual_mode") !== "view") {
+        if (this.get("actual_mode") !== "view") {
             var first_tabindex_button = this.first_tabindex_button();
-            if (self.$buttons && self.$buttons.find(".o_form_button_save").length) {
-                self.on_button_save();
-                if (first_tabindex_button) {
-                    self.last_tabindex = first_tabindex_button.tabindex;
-                    core.bus.on('form_view_saved', self, function() {
+            if (this.$buttons && self.$buttons.find(".o_form_button_save").length) {
+                this.do_not_set_tabindex = true; // We will manually set focus on first primary button
+                this.on_button_save().then(function() {
+                    if (first_tabindex_button) {
+                        self.last_tabindex = first_tabindex_button.tabindex;
                         first_tabindex_button.set_focus();
-                    });
-                }
+                    }
+                });
             } else if(first_tabindex_button) {
                 // Note: Consider if there is no save button line wizard, so click on first tabindex button
-                self.last_tabindex = first_tabindex_button.tabindex;
+                this.last_tabindex = first_tabindex_button.tabindex;
                 first_tabindex_button.$el.trigger("click");
             }
         }
