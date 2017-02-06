@@ -1282,38 +1282,39 @@ var One2ManyListView = X2ManyListView.extend({
 
         return this._super(record);
     },
-    keyup_ENTER: function() {
-        var self = this;
-        if (!this.editor.form.is_dirty()) {
-            return self.cancel_edition().then(function() {
-                self.x2m.view.set_next_tabindex();
-            });
-        }
-        return this._super.apply(this, arguments);
-    },
-    keydown_TAB: function(e) {
+    is_cancelled_on_first_field: function(e) {
         var self = this;
         var form = this.editor.form;
         var tabindex_widgets = form.get_tabindex_widgets();
         var has_tabindex_widgets = tabindex_widgets.length ? true : false;
-
+        var first_field = _(form.fields_order).chain()
+            .map(function (name) { return form.fields[name]; })
+            .filter(function (field) {
+                if (has_tabindex_widgets) {
+                    return field.$el.is(':visible') && !field.get('effective_readonly') && field.tabindex && field.tabindex >= 0;
+                }
+                return field.$el.is(':visible') && !field.get('effective_readonly');
+            })
+            .first()
+            .value();
+        if (first_field && !first_field.get_value() && $(e.target).closest(first_field.el).length) {
+            e.preventDefault();
+            return self.cancel_edition().then(function() {
+                self.x2m.view.set_next_tabindex();
+            });
+        }
+        return $.Deferred().reject();
+    },
+    keyup_ENTER: function(e) {
+        var self = this;
+        return self.is_cancelled_on_first_field(e).fail(function() {
+            return this._super.apply(this, arguments);
+        });
+    },
+    keydown_TAB: function(e) {
+        var self = this;
         return this._super(e).then(function() {
-            var first_field = _(form.fields_order).chain()
-                .map(function (name) { return form.fields[name]; })
-                .filter(function (field) {
-                    if (has_tabindex_widgets) {
-                        return field.$el.is(':visible') && !field.get('effective_readonly') && field.tabindex && field.tabindex >= 0;
-                    }
-                    return field.$el.is(':visible') && !field.get('effective_readonly');
-                })
-                .first()
-                .value();
-            if (first_field && !first_field.get_value() && $(e.target).closest(first_field.el).length) {
-                e.preventDefault();
-                self.cancel_edition().then(function() {
-                    self.x2m.view.set_next_tabindex();
-                });
-            }
+            self.is_cancelled_on_first_field(e);
         });
     },
     keyup_ESCAPE: function(e) {
