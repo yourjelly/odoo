@@ -87,6 +87,9 @@ var FieldTextHtmlSimple = widget.extend({
             }
         } else {
             this.$textarea.summernote(this._config());
+            // Forcefully stop tab/untab, Do nothing on tab and Untab, maybe we can override plugin method or we can pass special config and avoid tab/untab
+            $.summernote.options.keyMap.pc['TAB'] = $.summernote.options.keyMap.mac['TAB'] = false;
+            $.summernote.options.keyMap.pc['SHIFT+TAB'] = $.summernote.options.keyMap.mac['SHIFT+TAB'] = false;
 
             if (this.field.translate && this.view) {
                 $(QWeb.render('web_editor.FieldTextHtml.button.translate', {'widget': this}))
