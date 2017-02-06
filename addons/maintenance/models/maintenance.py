@@ -233,6 +233,7 @@ class MaintenanceEquipment(models.Model):
             'maintenance_type': 'preventive',
             'owner_user_id': self.owner_user_id.id,
             'technician_user_id': self.technician_user_id.id,
+            'team_id': self.maintenance_team_id.id or self.env.ref('maintenance.equipment_team_maintenance'),
             })
 
     @api.model
@@ -247,6 +248,7 @@ class MaintenanceEquipment(models.Model):
                                                     ('request_date', '=', equipment.next_action_date)])
             if not next_requests:
                 equipment._create_new_request(equipment.next_action_date)
+
 
 class MaintenanceRequest(models.Model):
     _name = 'maintenance.request'
