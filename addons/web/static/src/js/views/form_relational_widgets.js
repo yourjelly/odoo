@@ -1300,7 +1300,11 @@ var One2ManyListView = X2ManyListView.extend({
         if (first_field && !first_field.get_value() && $(e.target).closest(first_field.el).length) {
             e.preventDefault();
             return self.cancel_edition().then(function() {
-                self.x2m.view.set_next_tabindex();
+                var options = {};
+                if (e.shiftKey) {
+                    options['reverse'] = true;
+                }
+                self.x2m.view.set_next_tabindex(options);
             });
         }
         return $.Deferred().reject();
@@ -1308,7 +1312,7 @@ var One2ManyListView = X2ManyListView.extend({
     keyup_ENTER: function(e) {
         var self = this;
         return this.is_cancelled_on_first_field(e).fail(function() {
-            return self._super.apply(this, arguments);
+            return self._super.apply(self, arguments);
         });
     },
     keydown_TAB: function(e) {
