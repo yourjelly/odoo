@@ -1307,8 +1307,8 @@ var One2ManyListView = X2ManyListView.extend({
     },
     keyup_ENTER: function(e) {
         var self = this;
-        return self.is_cancelled_on_first_field(e).fail(function() {
-            return this._super.apply(this, arguments);
+        return this.is_cancelled_on_first_field(e).fail(function() {
+            return self._super.apply(this, arguments);
         });
     },
     keydown_TAB: function(e) {
