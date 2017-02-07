@@ -184,7 +184,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 if (e.which == $.ui.keyCode.TAB) {
                     e.preventDefault();
                     var is_shiftkey = e.shiftKey ? true : false;
-                    self.set_next_tabindex({reverse: is_shiftkey, keep_focus_on_current: is_shiftkey});
+                    //TODO: Remove keep_focus_on_current logic as we have now focus_first_button option
+                    self.set_next_tabindex({focus_first_button: !is_shiftkey, reverse: is_shiftkey, keep_focus_on_current: is_shiftkey});
                 } else if (e.which == $.ui.keyCode.ESCAPE) {
                     self.trigger('history_back');
                 }
@@ -199,7 +200,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 e.preventDefault();
                 if (e.which == $.ui.keyCode.TAB) { //We can use switch here
                     var is_shiftkey = e.shiftKey ? true : false;
-                    self.set_next_tabindex({reverse: is_shiftkey, keep_focus_on_current: !is_shiftkey});
+                    self.set_next_tabindex({focus_first_button: !is_shiftkey, reverse: is_shiftkey, keep_focus_on_current: !is_shiftkey});
                 } else if (e.which == $.ui.keyCode.ENTER) {
                     self.on_keydown_SHIFT_ENTER(e);
                 } else if (e.which == $.ui.keyCode.ESCAPE) {
@@ -358,6 +359,14 @@ var FormView = View.extend(common.FieldManagerMixin, {
         var last_field = _(tabindex_fields).last();
         return last_field;
     },
+    set_first_widget: function() {
+        var tabindex_fields = _.chain(this.tabindex_widgets).filter(function(w) {
+            return !(w.$el.is(":hidden") || w.get('effective_readonly')) && w.node.tag != "button";
+        }).value();
+        var first_widget = _(tabindex_fields).first();
+        first_widget.set_focus();
+        this.last_tabindex = first_widget.tabindex;
+    },
     get_tabindex_widgets: function() {
         // In future if we want to support tabindex on other elements like page then we can prepare 
         // tabindex list in render_to method of renering engine and add jQuery wrapped elements of page and other elements
@@ -381,6 +390,9 @@ var FormView = View.extend(common.FieldManagerMixin, {
         }
         return tabindex_widgets;
     },
+    // TODO MSH: Instead of manually moving focus to Save button and then add first button option and all
+    // why not setting tabindex of save, edit, create button's tabindex, set tabindex of these buttons last_field + 1
+    // and set buttons tabindex = last_field + create/save/edit tabindex + 1, this way we don't need to handle these buttons manually
     set_next_tabindex: function(options) {
         var self = this;
         var current_widget = options && options.current_widget;
@@ -389,9 +401,13 @@ var FormView = View.extend(common.FieldManagerMixin, {
             return;
         }
         if (!this.last_tabindex && this.get("actual_mode") != "view") {
-            var widget = this.tabindex_widgets[0]; //Set focus to first widget
-            widget.set_focus();
-            this.last_tabindex = widget.tabindex;
+            this.set_first_widget();
+            return false;
+        }
+        if (options && options.focus_first_button) {
+            var first_tabindex_button = this.first_tabindex_button();
+            this.last_tabindex = first_tabindex_button.tabindex;
+            first_tabindex_button.set_focus();
             return false;
         }
         if (!current_widget) {
@@ -433,10 +449,12 @@ var FormView = View.extend(common.FieldManagerMixin, {
 
         } else if (this.$buttons) {
             if (this.get("actual_mode") == "view") {
-                return this.$buttons.find(".o_form_button_create").focus(); //Set focus to create button again
+                return this.$buttons.find(".o_form_button_edit").focus(); //Set focus to create button again
             } else {
-                return this.$buttons.find(".o_form_button_save").focus();
+                this.set_first_widget();
             }
+        } else {
+            this.set_first_widget(); // Set focus to first widget
         }
     },
 
