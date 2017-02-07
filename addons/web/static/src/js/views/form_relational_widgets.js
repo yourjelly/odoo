@@ -1300,10 +1300,7 @@ var One2ManyListView = X2ManyListView.extend({
         if (first_field && !first_field.get_value() && $(e.target).closest(first_field.el).length) {
             e.preventDefault();
             return self.cancel_edition().then(function() {
-                var options = {};
-                if (e.shiftKey) {
-                    options['reverse'] = true;
-                }
+                var options = {reverse: (e.shiftKey ? true : false)};
                 self.x2m.view.set_next_tabindex(options);
             });
         }

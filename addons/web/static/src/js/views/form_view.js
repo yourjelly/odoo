@@ -184,7 +184,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 if (e.which == $.ui.keyCode.TAB) {
                     e.preventDefault();
                     var is_shiftkey = e.shiftKey ? true : false;
-                    self.set_next_tabindex({reverse: is_shiftkey, keep_focus_on_current: true});
+                    self.set_next_tabindex({reverse: is_shiftkey, keep_focus_on_current: is_shiftkey});
                 } else if (e.which == $.ui.keyCode.ESCAPE) {
                     self.trigger('history_back');
                 }
@@ -372,7 +372,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
 
         if (!tabindex_widgets.length) {
             tabindex_widgets = _.chain(all_widgets).filter(function(w) {
-                return !w.tabindex && !w.no_tabindex;
+                return (!w.tabindex && !w.no_tabindex && w.node.tag != 'button') || (w.node.tag == 'button' && w.node.attrs.class && w.node.attrs.class.indexOf('btn-primary') != -1);
             }).value();
             //TODO: Check: do not assign tabindex automatically and manage based on index of tabindex_widget list
             _.each(tabindex_widgets, function(widget, index) {
@@ -404,7 +404,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         var get_next_widget = function() {
             current_index += (reverse && -1 || 1);
             var next_widget = self.tabindex_widgets[current_index];
-            if (next_widget && (next_widget.$el.is(":hidden") || next_widget.get('readonly'))) {
+            if (next_widget && (next_widget.$el.is(":hidden") || (next_widget.node.tag != 'button' && next_widget.get('effective_readonly')) || (next_widget.node.tag == 'button' && next_widget.get('readonly')))) {
                 return get_next_widget();
             }
             return next_widget;
