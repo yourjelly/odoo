@@ -4,6 +4,7 @@
 from odoo import api, fields, models, _
 import odoo.addons.decimal_precision as dp
 from odoo.exceptions import UserError
+from gtk._gtk import Requisition
 
 
 class PurchaseRequisitionType(models.Model):
@@ -293,6 +294,15 @@ class ProcurementOrder(models.Model):
     def _search_po(self, domain):
         # Check if there is no blanket order related to the 
         return self.env['purchase.order'].search(list(domain))
+
+    def _prepare_purchase_order(self):
+        vals = super(ProcurementOrder, self)._prepare_purchase_order()
+        requisition_lines = self.env['purchase.requisition.line'].search([('requisition_id.state', 'not in', ('done', 'cancel')), 
+                                                                          ('product_id', '=', self.product_id.id), 
+                                                                          ('type_id.quantity_copy', '=', 'none')])
+        if requisition_lines:
+            vals['requisition_id'] = requisition_lines[0].id
+        return vals
 
     @api.multi
     def make_po(self):
