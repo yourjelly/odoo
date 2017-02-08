@@ -295,13 +295,24 @@ class ProcurementOrder(models.Model):
         # Check if there is no blanket order related to the 
         return self.env['purchase.order'].search(list(domain))
 
-    def _prepare_purchase_order(self):
-        vals = super(ProcurementOrder, self)._prepare_purchase_order()
+    def _prepare_purchase_order(self, partner):
+        vals = super(ProcurementOrder, self)._prepare_purchase_order(partner)
         requisition_lines = self.env['purchase.requisition.line'].search([('requisition_id.state', 'not in', ('done', 'cancel')), 
                                                                           ('product_id', '=', self.product_id.id), 
-                                                                          ('type_id.quantity_copy', '=', 'none')])
+                                                                          ('requisition_id.type_id.quantity_copy', '=', 'none')])
         if requisition_lines:
             vals['requisition_id'] = requisition_lines[0].id
+        return vals
+
+    def _prepare_purchase_order_line(self, po, supplier):
+        vals = super(ProcurementOrder, self)._prepare_purchase_order_line(po, supplier)
+        if po.requisition_id:
+            line = po.requisition_id.line_ids.filtered(lambda x: x.product_id == self.product_id)
+            if line and line.product_uom_id != self.product_uom:
+                vals['price_unit'] = line.product_uom_id._compute_price(
+                            line.price_unit, self.product_uom)
+            elif line:
+                vals['price_unit'] = line.price_unit
         return vals
 
     @api.multi
