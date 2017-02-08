@@ -184,7 +184,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 if (e.which == $.ui.keyCode.TAB) {
                     e.preventDefault();
                     var is_shiftkey = e.shiftKey ? true : false;
-                    //TODO: Remove keep_focus_on_current logic as we have now focus_first_button option
                     self.set_next_tabindex({focus_first_button: !is_shiftkey, reverse: is_shiftkey, keep_focus_on_current: is_shiftkey});
                 } else if (e.which == $.ui.keyCode.ESCAPE) {
                     self.trigger('history_back');
@@ -364,8 +363,10 @@ var FormView = View.extend(common.FieldManagerMixin, {
             return !(w.$el.is(":hidden") || w.get('effective_readonly')) && w.node.tag != "button";
         }).value();
         var first_widget = _(tabindex_fields).first();
-        first_widget.set_focus();
-        this.last_tabindex = first_widget.tabindex;
+        if (first_widget) {
+            first_widget.set_focus();
+            this.last_tabindex = first_widget.tabindex;
+        }
     },
     get_tabindex_widgets: function() {
         // In future if we want to support tabindex on other elements like page then we can prepare 
@@ -406,9 +407,11 @@ var FormView = View.extend(common.FieldManagerMixin, {
         }
         if (options && options.focus_first_button) {
             var first_tabindex_button = this.first_tabindex_button();
-            this.last_tabindex = first_tabindex_button.tabindex;
-            first_tabindex_button.set_focus();
-            return false;
+            if (first_tabindex_button) {
+                this.last_tabindex = first_tabindex_button.tabindex;
+                first_tabindex_button.set_focus();
+                return false;
+            }
         }
         if (!current_widget) {
             current_widget = _.find(this.tabindex_widgets, function(w) {
