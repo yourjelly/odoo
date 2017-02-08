@@ -290,6 +290,10 @@ class ProcurementOrder(models.Model):
 
     requisition_id = fields.Many2one('purchase.requisition', string='Latest Requisition')
 
+    def _search_po(self, domain):
+        # Check if there is no blanket order related to the 
+        return self.env['purchase.order'].search(list(domain))
+
     @api.multi
     def make_po(self):
         Requisition = self.env['purchase.requisition']

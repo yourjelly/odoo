@@ -943,6 +943,9 @@ class ProcurementOrder(models.Model):
             'group_id': group
         }
 
+    def _search_po(self, domain):
+        return self.env['purchase.order'].search(list(domain))
+
     @api.multi
     def make_po(self):
         cache = {}
@@ -965,15 +968,18 @@ class ProcurementOrder(models.Model):
                 ('picking_type_id', '=', procurement.rule_id.picking_type_id.id),
                 ('company_id', '=', procurement.company_id.id),
                 ('dest_address_id', '=', procurement.partner_dest_id.id))
+            
             if group:
                 domain += (('group_id', '=', group.id),)
 
             if domain in cache:
                 po = cache[domain]
             else:
-                po = self.env['purchase.order'].search([dom for dom in domain])
+                 
+                po = self._search_po(domain)
                 po = po[0] if po else False
                 cache[domain] = po
+            
             if not po:
                 vals = procurement._prepare_purchase_order(partner)
                 po = self.env['purchase.order'].create(vals)
