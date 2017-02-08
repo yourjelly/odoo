@@ -943,8 +943,22 @@ class ProcurementOrder(models.Model):
             'group_id': group
         }
 
-    def _search_po(self, domain):
-        return self.env['purchase.order'].search(list(domain))
+    def _get_po_domain(self, partner):
+        self.ensure_one()
+        gpo = self.rule_id.group_propagation_option
+        group = (gpo == 'fixed' and self.rule_id.group_id) or \
+                (gpo == 'propagate' and self.group_id) or False
+
+        domain = (
+            ('partner_id', '=', partner.id),
+            ('state', '=', 'draft'),
+            ('picking_type_id', '=', self.rule_id.picking_type_id.id),
+            ('company_id', '=', self.company_id.id),
+            ('dest_address_id', '=', self.partner_dest_id.id))
+        
+        if group:
+            domain += (('group_id', '=', group.id),)
+        return domain
 
     @api.multi
     def make_po(self):
@@ -958,25 +972,12 @@ class ProcurementOrder(models.Model):
             supplier = suppliers[0]
             partner = supplier.name
 
-            gpo = procurement.rule_id.group_propagation_option
-            group = (gpo == 'fixed' and procurement.rule_id.group_id) or \
-                    (gpo == 'propagate' and procurement.group_id) or False
-
-            domain = (
-                ('partner_id', '=', partner.id),
-                ('state', '=', 'draft'),
-                ('picking_type_id', '=', procurement.rule_id.picking_type_id.id),
-                ('company_id', '=', procurement.company_id.id),
-                ('dest_address_id', '=', procurement.partner_dest_id.id))
-            
-            if group:
-                domain += (('group_id', '=', group.id),)
-
+            domain = procurement._get_po_domain(supplier)
             if domain in cache:
                 po = cache[domain]
             else:
                  
-                po = self._search_po(domain)
+                po = self.env['purchase.order'].search(list(domain))
                 po = po[0] if po else False
                 cache[domain] = po
             

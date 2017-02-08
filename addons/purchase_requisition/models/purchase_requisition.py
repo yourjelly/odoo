@@ -291,9 +291,15 @@ class ProcurementOrder(models.Model):
 
     requisition_id = fields.Many2one('purchase.requisition', string='Latest Requisition')
 
-    def _search_po(self, domain):
-        # Check if there is no blanket order related to the 
-        return self.env['purchase.order'].search(list(domain))
+    def _get_po_domain(self, partner):
+        domain = super(ProcurementOrder, self)._get_po_domain(partner)
+        requisition_lines = self.env['purchase.requisition.line'].search([('requisition_id.state', 'not in', ('done', 'cancel')), 
+                                                                          ('product_id', '=', self.product_id.id), 
+                                                                          ('requisition_id.type_id.quantity_copy', '=', 'none')])
+        if requisition_lines:
+            requisitions = requisition_lines.mapped('requisition_id')
+            domain += (('requisition_id', 'in', tuple(requisitions.ids)),)
+        return domain
 
     def _prepare_purchase_order(self, partner):
         vals = super(ProcurementOrder, self)._prepare_purchase_order(partner)
