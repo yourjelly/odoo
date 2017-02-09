@@ -90,6 +90,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
             });
         });
         core.bus.on('dialog_closed', this, function() {
+            // FIXME: Note: This is going to be bind on each formview, this will create issue when dialog is closed so will get trigerred for all formviews
             this.set_next_tabindex({keep_focus_on_current: true});
         });
     },
@@ -358,6 +359,13 @@ var FormView = View.extend(common.FieldManagerMixin, {
         var last_field = _(tabindex_fields).last();
         return last_field;
     },
+    last_tabindex_widget: function(widgets) {
+        var tabindex_widgets = _.chain(this.tabindex_widgets).filter(function(w) {
+            return !(w.$el.is(":hidden") || w.get('readonly'));
+        }).value();
+        var last_widget = _(tabindex_widgets).last();
+        return last_widget;
+    },
     set_first_widget: function() {
         var tabindex_fields = _.chain(this.tabindex_widgets).filter(function(w) {
             return !(w.$el.is(":hidden") || w.get('effective_readonly')) && w.node.tag != "button";
@@ -391,9 +399,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
         }
         return tabindex_widgets;
     },
-    // TODO MSH: Instead of manually moving focus to Save button and then add first button option and all
-    // why not setting tabindex of save, edit, create button's tabindex, set tabindex of these buttons last_field + 1
-    // and set buttons tabindex = last_field + create/save/edit tabindex + 1, this way we don't need to handle these buttons manually
     set_next_tabindex: function(options) {
         var self = this;
         var current_widget = options && options.current_widget;
@@ -401,10 +406,12 @@ var FormView = View.extend(common.FieldManagerMixin, {
         if (!this.tabindex_widgets.length) {
             return;
         }
+        // Note: If user switch record from listview and edit it, it should set focus to first widget
         if (!this.last_tabindex && this.get("actual_mode") != "view") {
             this.set_first_widget();
             return false;
         }
+        // Note: To set focus om first button forcefully based on options, when focus is on save button and TAB pressed
         if (options && options.focus_first_button) {
             var first_tabindex_button = this.first_tabindex_button();
             if (first_tabindex_button) {
@@ -413,13 +420,13 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 return false;
             }
         }
+
         if (!current_widget) {
             current_widget = _.find(this.tabindex_widgets, function(w) {
                 return w.tabindex == self.last_tabindex;
             });
         }
         var current_index = _(this.tabindex_widgets).indexOf(current_widget);
-
         var get_next_widget = function() {
             current_index += (reverse && -1 || 1);
             var next_widget = self.tabindex_widgets[current_index];
@@ -436,28 +443,40 @@ var FormView = View.extend(common.FieldManagerMixin, {
             next_widget = get_next_widget();
         }
 
+        // If it is last field and tab is pressed then move focus to save button
+        var last_field = this.last_tabindex_field();
+        var last_widget = this.last_tabindex_widget();
         if (next_widget) {
-            // If it is last field and tab is pressed then move focus to save button
-            var last_field = self.last_tabindex_field();
+            // Set focus to Save button if buttons available
+            // If buttons not available but next widget is available then set focus to next widget(wizard with button case)
             if (!reverse && current_widget && last_field && _.isEqual(current_widget, last_field) && this.get("actual_mode") != "view" && this.$buttons && this.$buttons.find(".o_form_button_save").length) {
                 this.last_tabindex = next_widget.tabindex;
-                return this.$buttons.find(".o_form_button_save").focus();
+                this.$buttons.find(".o_form_button_save").focus();
+            } else {
+                this.last_tabindex = next_widget.tabindex;
+                next_widget.set_focus();
             }
-            this.last_tabindex = next_widget.tabindex;
-            next_widget.set_focus();
-
             // Scroll manually if widget is at bottom of the form
             var offset = next_widget.$el.prop('offsetTop');
             this.trigger_up('scrollTo', {offset: offset});
-
-        } else if (this.$buttons) {
-            if (this.get("actual_mode") == "view") {
-                return this.$buttons.find(".o_form_button_edit").focus(); //Set focus to create button again
+        } else if (_.isEqual(current_widget, last_widget) && !_.isEqual(current_widget, last_field)) {
+            // If its wizard then last widget can be button and pressing tab on last widget button we want user to move on first widget
+            if (this.get("actual_mode") != "view") {
+                this.set_first_widget();
+            } else if (this.get("actual_mode") == "view" && this.$buttons) {
+                this.$buttons.find(".o_form_button_edit").focus();
+            }
+        } else {
+            // If there is no next widget and there is no last widget, consider example of wizard opened on button which is last button in form
+            // Closing on wizard it should move to either first widget or on edit button
+            // Also consider if its o2m then we will have last field but no next widget in that case we want to move user to save button
+            if (this.get("actual_mode") == "view" && this.$buttons) {
+                this.$buttons.find(".o_form_button_edit").focus();
+            } else if (this.get("actual_mode") != "view" && this.$buttons) {
+                this.$buttons.find(".o_form_button_save").first().focus();
             } else {
                 this.set_first_widget();
             }
-        } else {
-            this.set_first_widget(); // Set focus to first widget
         }
     },
 
