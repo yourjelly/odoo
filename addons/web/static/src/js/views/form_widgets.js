@@ -204,6 +204,9 @@ var FieldChar = common.AbstractField.extend(common.ReinitializeFieldMixin, {
         if (this.$input) {
             return this.$input.select();
         }
+    },
+    is_blank: function() {
+        return this.is_syntax_valid() && !(this.get('required') && this.$input && !this.$input.val());
     }
 });
 
@@ -578,6 +581,7 @@ var FieldDate = common.AbstractField.extend(common.ReinitializeFieldMixin, {
                 self.datewidget.$input.addClass('o_form_input');
                 self.setupFocus(self.datewidget.$input);
             });
+            this.bind_tabindex();
         }
     },
     render_value: function() {
@@ -598,6 +602,12 @@ var FieldDate = common.AbstractField.extend(common.ReinitializeFieldMixin, {
             return this.datewidget.$input.focus();
         }
         return false;
+    },
+    is_blank: function() {
+        return this.is_syntax_valid() && !(this.get('required') && this.datewidget.$input && !this.datewidget.$input.val());
+    },
+    get_tabindex_element: function() {
+        return this.datewidget && this.datewidget.$input;
     },
 });
 
@@ -672,6 +682,9 @@ var FieldText = common.AbstractField.extend(common.ReinitializeFieldMixin, {
             minHeight: height,
         });
     },
+    is_blank: function() {
+        return this.is_syntax_valid() && !(this.get('required') && !this.$el.val());
+    }
 });
 
 var FieldBoolean = common.AbstractField.extend({
@@ -913,6 +926,9 @@ var FieldSelection = common.AbstractField.extend(common.ReinitializeFieldMixin, 
         }
         return false;
     },
+    is_blank: function() {
+        return this.is_syntax_valid() && !(this.get('required') && !this.$el.val());
+    }
 });
 
 /**
@@ -1059,6 +1075,9 @@ var FieldRadio = common.AbstractField.extend(common.ReinitializeFieldMixin, {
         } else {
             this.$("input").prop("checked", false).filter(function () {return this.value == self.get_value();}).prop("checked", true);
         }
+    },
+    is_blank: function() {
+        return this.is_syntax_valid() && !(this.get('required') && !this.$("input").is(":checked"));
     }
 });
 
@@ -1144,6 +1163,9 @@ var FieldReference = common.AbstractField.extend(common.ReinitializeFieldMixin, 
     is_false: function() {
         return !this.get_value();
     },
+    is_blank: function() {
+        return this.selection.is_blank();
+    }
 });
 
 var FieldBinary = common.AbstractField.extend(common.ReinitializeFieldMixin, {

@@ -406,11 +406,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
         if (!this.tabindex_widgets.length) {
             return;
         }
-        // Note: If user switch record from listview and edit it, it should set focus to first widget
-        if (!this.last_tabindex && this.get("actual_mode") != "view") {
-            this.set_first_widget();
-            return false;
-        }
         // Note: To set focus om first button forcefully based on options, when focus is on save button and TAB pressed
         if (options && options.focus_first_button) {
             var first_tabindex_button = this.first_tabindex_button();

@@ -512,11 +512,16 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
         }
         return final_domain;
     },
+    get_tabindex_element: function() {
+        // Some widget may have different element to bind, say for example date/datetime widgets, where we need to bind datewidget.$input
+        return this.$el;
+    },
     bind_tabindex: function() {
         var self = this;
+        var $element = this.get_tabindex_element();
         // if (!this.get('readonly') && this.tabindex && this.tabindex > 0 && !this.no_tabindex) {
-        if (!this.get('readonly') && (!this.tabindex || (this.tabindex && this.tabindex >= 0)) && !this.no_tabindex) { //No need of this, uncomment above line as we automatically assign tabindex to all widgets
-            this.$el.on("keydown", function(e) {
+        if ($element && !this.get('readonly') && (!this.tabindex || (this.tabindex && this.tabindex >= 0)) && !this.no_tabindex) { //No need of this, uncomment above line as we automatically assign tabindex to all widgets
+            $element.on("keydown", function(e) {
                 if (e.which == $.ui.keyCode.TAB) {
                     if (e.shiftKey) {
                         self.keydown_TAB(e, true);
@@ -530,7 +535,7 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
             });
 
             // Note: We should bind keyup_ESCAPE and keyup_ENTER for all widgets if we want to discard changes when focus is on widget only and escape pressed
-            this.$el.on("keyup", function(e) {
+            $element.on("keyup", function(e) {
                 if (e.which == $.ui.keyCode.ESCAPE) {
                     self.keyup_ESCAPE(e);
                 }
@@ -661,6 +666,11 @@ var FieldInterface = {
      * valid too according to the semantic restrictions applied to the field.
      */
     is_valid: function() {},
+    /**
+     * Returns true if field holds some value, it checks value before value stored
+     * i.e. called on keydown tab
+     */
+    is_blank: function() {},
     /**
      * Returns true if the field holds a value which is syntactically correct, ignoring
      * the potential semantic restrictions applied to the field.
@@ -835,12 +845,15 @@ var AbstractField = FormWidget.extend(FieldInterface, {
         return $.when();
     },
     keydown_TAB: function(e, reverse) {
-        if (this.is_valid()) {
+        if (this.get('effective_readonly') || this.is_blank()) {
             return this._super(e, reverse);
         } else {
             e.preventDefault();
             this.$el.add(this.$label).toggleClass('o_form_invalid', true);
         }
+    },
+    is_blank: function() {
+        return true;
     }
 });
 
