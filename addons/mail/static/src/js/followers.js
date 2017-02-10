@@ -36,6 +36,7 @@ var Followers = form_common.AbstractField.extend({
         this.data_subtype = {};
 
         this.view_is_editable = this.__parentedParent.is_action_enabled('edit');
+        this.no_tabindex = true;
     },
 
     start: function () {

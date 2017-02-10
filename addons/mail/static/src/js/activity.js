@@ -70,6 +70,7 @@ var Activity = form_common.AbstractField.extend({
         this.model = this.view.dataset.model;
         this.activities = [];
         this.Activity = new Model('mail.activity');
+        this.no_tabindex = true;
     },
 
     start: function () {

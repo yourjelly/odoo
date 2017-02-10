@@ -300,6 +300,7 @@ var Chatter = form_common.AbstractField.extend({
         this.options = _.extend(this.options || {}, {
             'display_activity_button': this.field_manager.fields.activity_ids
         });
+        this.no_tabindex = true;
     },
 
     willStart: function () {

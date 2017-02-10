@@ -905,18 +905,19 @@ var FormView = View.extend(common.FieldManagerMixin, {
     },
     on_button_cancel: function() {
         var self = this;
-        this.can_be_discarded().then(function() {
-            if (self.get('actual_mode') === 'create') {
-                self.trigger('history_back');
-            } else {
+        if (!this.$el.is('.oe_form_dirty')) {
+            if (this.get('actual_mode') === 'create') {
+                this.trigger('history_back');
+            }
+        } else {
+            this.can_be_discarded().then(function() {
                 self.to_view_mode();
                 $.when.apply(null, self.render_value_defs).then(function(){
                     self.trigger('load_record', self.datarecord);
                 });
-            }
-        });
+            });
+        }
         this.trigger('on_button_cancel');
-        return false;
     },
     do_cancel: function() {
         return this.on_button_cancel();

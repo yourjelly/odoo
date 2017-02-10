@@ -422,7 +422,7 @@ var FieldMany2One = common.AbstractField.extend(common.CompletionFieldMixin, com
         this.no_ed = false;
         return res;
     },
-    keyup_ESCAPE: function(e) {
+    keydown_ESCAPE: function(e) {
         if (this.ignore_escape) {
             e.stopPropagation();
             this.ignore_escape = false;
