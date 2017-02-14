@@ -247,6 +247,17 @@ exports.PosModel = Backbone.Model.extend({
             }
        },
     },{
+        model: 'pos.order',
+        fields: ['pos_reference'],
+        domain: function(self){ return [['session_id','=', self.pos_session.id], ['state', 'in', ['paid', 'done']]]; },
+        loaded: function(self, orders){
+            var paid_orders = [];
+            for (var i = 0; i < orders.length; i++) {
+                paid_orders.push(orders[i].pos_reference);
+            }
+            self.paid_orders = paid_orders;
+       },
+    },{
         model:  'res.users',
         fields: ['name','pos_security_pin','groups_id','barcode'],
         domain: function(self){ return [['company_id','=',self.user.company_id[0]],'|', ['groups_id','=', self.config.group_pos_manager_id[0]],['groups_id','=', self.config.group_pos_user_id[0]]]; },
@@ -597,14 +608,19 @@ exports.PosModel = Backbone.Model.extend({
         var jsons = this.db.get_unpaid_orders();
         var orders = [];
         var not_loaded_count = 0; 
+        var already_paid_count = 0;
 
         for (var i = 0; i < jsons.length; i++) {
             var json = jsons[i];
             if (json.pos_session_id === this.pos_session.id) {
-                orders.push(new exports.Order({},{
-                    pos:  this,
-                    json: json,
-                }));
+                if (this.paid_orders.indexOf(json.name) >= 0) {
+                    already_paid_count += 1
+                } else {
+                    orders.push(new exports.Order({},{
+                        pos:  this,
+                        json: json,
+                    }));
+                }
             } else {
                 not_loaded_count += 1;
             }
@@ -612,6 +628,9 @@ exports.PosModel = Backbone.Model.extend({
 
         if (not_loaded_count) {
             console.info('There are '+not_loaded_count+' locally saved unpaid orders belonging to another session');
+        }
+        if (already_paid_count) {
+            console.info('There are '+already_paid_count+' locally saved paid orders from this session');
         }
         
         orders = orders.sort(function(a,b){
@@ -621,6 +640,8 @@ exports.PosModel = Backbone.Model.extend({
         if (orders.length) {
             this.get('orders').add(orders);
         }
+        // useless to keep
+        delete this.paid_orders;
     },
 
     set_start_order: function(){
