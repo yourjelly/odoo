@@ -985,6 +985,7 @@ var FormViewDialog = ViewDialog.extend({
         }
         _.extend(options, {
             $buttons: this.$buttons,
+            formview_in_popup: true,
         });
         var FormView = core.view_registry.get('form');
         var fields_view_def;

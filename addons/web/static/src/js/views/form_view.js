@@ -905,10 +905,9 @@ var FormView = View.extend(common.FieldManagerMixin, {
     },
     on_button_cancel: function() {
         var self = this;
-        if (!this.$el.is('.oe_form_dirty')) {
-            if (this.get('actual_mode') === 'create') {
-                this.trigger('history_back');
-            }
+        // Note: formview_in_popup option will decide whether form view is in popup, if it is in popup then we will not do history back
+        if (!this.options.formview_in_popup && !this.$el.is('.oe_form_dirty') && this.get('actual_mode') === 'create') {
+            this.do_action('history_back');
         } else {
             this.can_be_discarded().then(function() {
                 self.to_view_mode();
@@ -918,6 +917,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
             });
         }
         this.trigger('on_button_cancel');
+        return false;
     },
     do_cancel: function() {
         return this.on_button_cancel();

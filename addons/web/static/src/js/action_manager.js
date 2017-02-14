@@ -380,6 +380,12 @@ var ActionManager = Widget.extend({
         return this.inner_widget;
     },
     history_back: function() {
+        // TODO: Is there any better way to prevent history back on escape when wizard is opened
+        // If wizard is opened in dialog and customer presses escape then we do not want history back, first escape will close popup
+        if (this.dialog_widget && !this.dialog_widget.isDestroyed()) {
+            this.dialog_widget.destroy();
+            return $.Deferred().reject();
+        }
         var nb_views = this.inner_action.get_nb_views();
         if (nb_views > 1) {
             // Stay on this action, but select the previous view
