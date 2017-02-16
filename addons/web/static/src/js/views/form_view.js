@@ -200,7 +200,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 e.preventDefault();
                 if (e.which == $.ui.keyCode.TAB) { //We can use switch here
                     var is_shiftkey = e.shiftKey ? true : false;
-                    self.set_next_tabindex({focus_first_button: !is_shiftkey, reverse: is_shiftkey, keep_focus_on_current: !is_shiftkey});
+                    self.set_next_tabindex({focus_first_button: !is_shiftkey, reverse: is_shiftkey, keep_focus_on_current: is_shiftkey});
                 } else if (e.which == $.ui.keyCode.ENTER) {
                     self.on_keydown_SHIFT_ENTER(e);
                 } else if (e.which == $.ui.keyCode.ESCAPE) {
@@ -336,6 +336,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
                     if (first_tabindex_button) {
                         self.last_tabindex = first_tabindex_button.tabindex;
                         first_tabindex_button.set_focus();
+                    } else {
+                        self.$buttons && self.$buttons.find(".o_form_button_edit").focus();
                     }
                 });
             } else if(first_tabindex_button) {
@@ -374,6 +376,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
         if (first_widget) {
             first_widget.set_focus();
             this.last_tabindex = first_widget.tabindex;
+        } else {
+            this.$buttons && this.get("actual_mode") !== "view" ? this.$buttons.find(".o_form_button_save").focus() : this.$buttons.find(".o_form_button_edit").focus();
         }
     },
     get_tabindex_widgets: function() {
@@ -406,12 +410,15 @@ var FormView = View.extend(common.FieldManagerMixin, {
         if (!this.tabindex_widgets.length) {
             return;
         }
-        // Note: To set focus om first button forcefully based on options, when focus is on save button and TAB pressed
-        if (options && options.focus_first_button) {
+        // Note: To set focus on first button forcefully based on options, when focus is on save button and TAB pressed
+        if (!reverse && options && options.focus_first_button) {
             var first_tabindex_button = this.first_tabindex_button();
             if (first_tabindex_button) {
                 this.last_tabindex = first_tabindex_button.tabindex;
                 first_tabindex_button.set_focus();
+                return false;
+            } else {
+                this.set_first_widget();
                 return false;
             }
         }
@@ -906,7 +913,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
     on_button_cancel: function() {
         var self = this;
         // Note: formview_in_popup option will decide whether form view is in popup, if it is in popup then we will not do history back
-        if (!this.options.formview_in_popup && !this.$el.is('.oe_form_dirty') && this.get('actual_mode') === 'create') {
+        if (!this.options.formview_in_popup && !this.$el.is('.oe_form_dirty') && this.get('actual_mode') != 'view') {
             this.do_action('history_back');
         } else {
             this.can_be_discarded().then(function() {

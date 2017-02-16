@@ -734,6 +734,7 @@ var ActionManager = Widget.extend({
                 });
                 if (this.dialog_widget.action.view_mode === 'form') {
                     this.dialog_widget.flags.headless = true;
+                    this.dialog_widget.flags.formview_in_popup = true;
                 }
             }
             if (this.dialog_widget.need_control_panel) {
