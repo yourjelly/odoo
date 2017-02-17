@@ -636,61 +636,84 @@ class Picking(models.Model):
     def action_done2(self): #Maybe to be called do_transfer2
         self.ensure_one()
         quants = self.env['stock.quant']
+        Quant = self.env['stock.quant']
+        history_moves = self.env['stock.move']
         initial_demand_qty = {}
-        # For each initial demand
+        # For each initial demand, check what is reserved
         for move in self.move_lines:
             quants |= move.reserved_quant_ids
             initial_demand_qty[move.id] = move.product_qty
+            history_moves |= move.move_orig_ids
         non_reserved_package_quants = self.env['stock.quant']
         extra_demand = {}
-        # For each operation
+        ops_qty_todo = {}
+        ops_quants = {}
+        ops_lot_qty = {}
+        ops_lot_quant = {}
+        # EVERYTHING RESERVED CORRECTLY
         for ops in self.pack_operation_ids:
             if not ops.product_id: #and ops.package_id: -> MOVE ENTIRE PACKAGES
                 package_quants = ops.package_id.children_quant_ids #Need all quants of all children
                 non_reserved_package_quants |= (package_quants - quants)
+                reserved_quants = package_quants & quants
+                reserved_quants_list = [(x.id, x.qty) for x in reserved_quants]
+                ops_quants[ops.id] = reserved_quants
+                #Quant.quants_move(reserved_quants_list, location_dest_id = ops.location_dest_id) #...
+                for reserved_quant in reserved_quants:
+                    initial_demand_qty[reserved_quant.reservation_id] -= reserved_quant.qty
                 #quants_move package_quants & quants by move
                 # subtract qty from move
                 # quants -= (package_quants & move_quants)
-                for quant in non_reserved_package_quants:
-                    # Search initial demand quantity to diminish
-                    for move in self.move_lines.filtered(lambda x: x.product_id == quant.product_id):
-                        # Compare quants with initial demand
-                        initial_demand_qty[move.id] -= quant.qty #but can not go under zero
-                        #quants_move
-                # If non_reserved_quants left, put them in extra demand 
             else:
                 if ops.product_id.tracking == 'none':
-                    move_quants = quants.filtered(lambda x: x.package_id == ops.package_id and x.location_id == ops.location_id and x.product_id == ops.product_id)
-                    
-                    # if ops.move_id -> 
-                    # Don't take more than product_qty on ops
-                    #quants_move by move
-                    #subtract_qty_by_move
-                    #quants -= those moved
-                    
-                    #quants_get_preferred_domain [('reservation_id', '=', False), ('reservation_id', '!=', False)]]
-                    # MIGHT HAVE FORGOTTEN PREFERABLE return domain
-                    # MATCH WITH INITIAL DEMAND of PREFERREDLY move_id
-                    # quants_move
-                    # subtract
-                    # Add to extra_demand
-                    
-                    
+                    ops_qty_todo = ops.product_qty #UoM things later
+                    reserved_quants = quants.filtered(lambda x: x.package_id == ops.package_id and x.location_id == ops.location_id and x.product_id == ops.product_id)
+                    reserved_quants_list = [(x.id, x.qty) for x in reserved_quants]
+                    ops_quants[ops.id] = reserved_quants_list
                 else:
                     lot_quants = quants.filtered(lambda x: x.package_id == ops.package_id and x.location_id == ops.location_id and x.product_id == ops.product_id)
                     for opslot in ops.pack_lot_ids:
-                        quants = move_quants.filtered(lambda x: x.lot_id == ops.lot_id) #and the same shit as before
+                        quants = lot_quants.filtered(lambda x: x.lot_id == ops.lot_id) #TODO: lots might be False too 
+                        ops_lot_quant[opslot.id] = quants
+                        ops_lot_quant = opslot.quantity - sum([x.qty for x in quants]) 
                         # Same thing as without lot but by lot
-            # Create extra initial demand for push rules
-            for extra in extra_demand:
-                new_move = self.env['stock.move'].copy()
-                new_move.action_confirm()
-            # Split initial demand where there are leftovers:
-            for initial_demand in initial_demand_qty:
-                if initial_demand_qty[initial_demand] > 0:
-                    pass
-                    # split move so we can put rest in backorder (need to find a test to see if a backorder is needed)
-                    
+        # EVERYTHING HISTORY_IDS/RETURN MOVES but not reserved
+        for ops in self.pack_operation_ids: 
+            # Check quants not reserved but in history_ids of the moves
+            if not ops.product_id:
+                non_reserved_package_quants.filtered(lambda x: x in history_ids)
+                # Deduct quantity again
+            else:
+                # TODO: make again distinction between lots and not
+                # move package quants
+                moves = [x.id for x in self.move_lines]
+                if ops.move_id: # Might depend from previous moves also if you want to specifically take from those or not
+                    history_ids = move.move_orig_ids #Could be return moves also as some kind of history_id
+                else: 
+                    history_ids = history_moves
+                domain = [('reservation_id', 'not in', moves), ('history_ids', 'in', history_moves)]
+                preferred_domain = [[('reservation_id', '=', False)], [('reservation_id', '!=', False)]]
+                #get quants_preferred
+                
+                
+        # EVERYTHING ELSE (use first move initial_demand)
+        for ops in self.pack_operation_ids:
+            domain = [('reservation_id', 'not in', moves)]
+            if history_moves:
+                domain += [('history_ids', 'not in', history_moves)]
+            preferred_domain = [[('reservation_id', '=', False)], [('reservation_id', '!=', False)]]
+            # Here we need to also create extra_demand
+            
+        # Create extra initial demand for what is moved more
+        for extra in extra_demand:
+            new_move = self.env['stock.move'].copy()
+            new_move.action_confirm()
+        # Split initial demand where there are leftovers, so they can be put in a back order
+        for initial_demand in initial_demand_qty:
+            if initial_demand_qty[initial_demand] > 0:
+                pass
+                # split move so we can put rest in backorder (need to find a test to see if a backorder is needed)
+                
 
     def recompute_remaining_qty(self, done_qtys=False):
 
