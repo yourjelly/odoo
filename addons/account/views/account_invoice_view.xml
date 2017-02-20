@@ -67,7 +67,7 @@
                                 <field name="quantity" class="oe_inline"/>
                                 <field name="uom_id" class="oe_inline" groups="product.group_uom"/>
                             </div>
-                            <field name="price_unit" tabindex="2"/>
+                            <field name="price_unit"/>
                             <field name="discount" groups="base.group_no_one"/>
                             <field name="currency_id" invisible="1"/>
                         </group>
