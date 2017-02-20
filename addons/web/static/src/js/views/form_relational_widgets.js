@@ -1134,7 +1134,7 @@ var One2ManyListView = X2ManyListView.extend({
     },
     do_activate_record: function(index, id) {
         var self = this;
-        new common.FormViewDialog(self, {
+        var pop = new common.FormViewDialog(self, {
             res_model: self.x2m.field.relation,
             res_id: id,
             context: self.x2m.build_context(),
@@ -1153,6 +1153,10 @@ var One2ManyListView = X2ManyListView.extend({
             form_view_options: {'not_interactible_on_create':true},
             readonly: !this.is_action_enabled('edit') || self.x2m.get("effective_readonly")
         }).open();
+
+        pop.on('closed', this, function(e) {
+            self.x2m.$el.focus();
+        });
     },
     do_button_action: function (name, id, callback) {
         if (!_.isNumber(id)) {
@@ -1429,6 +1433,9 @@ var Many2ManyListView = X2ManyListView.extend({
         pop.on('write_completed', self, function () {
             self.dataset.evict_record(id);
             self.reload_content();
+        });
+        pop.on('closed', this, function(e) {
+            self.x2m.$el.focus();
         });
     },
     do_button_action: function(name, id, callback) {
