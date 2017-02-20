@@ -91,10 +91,13 @@ var WidgetButton = common.FormWidget.extend({
             _.extend({}, this.node.attrs, {context: context}),
             this.view.dataset, this.view.datarecord.id, function (reason) {
                 if (!_.isObject(reason)) {
-                    self.view.recursive_reload();
+                    self.view.recursive_reload().then(function() {
+                        self.field_manager.trigger('set_tabindex_focus');
+                    });
+                } else {
+                    self.field_manager.trigger('set_tabindex_focus');
                 }
             }).fail(function () {
-                self.view.do_not_set_tabindex = true;
                 self.view.recursive_reload();
             });
     },

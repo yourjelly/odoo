@@ -331,7 +331,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
         if (this.get("actual_mode") !== "view") {
             var first_tabindex_button = this.first_tabindex_button();
             if (this.$buttons && self.$buttons.find(".o_form_button_save").length) {
-                this.do_not_set_tabindex = true; // We will manually set focus on first primary button
                 this.on_button_save().then(function() {
                     if (first_tabindex_button) {
                         self.last_tabindex = first_tabindex_button.tabindex;
@@ -376,8 +375,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
         if (first_widget) {
             first_widget.set_focus();
             this.last_tabindex = first_widget.tabindex;
-        } else {
-            this.$buttons && this.get("actual_mode") !== "view" ? this.$buttons.find(".o_form_button_save").focus() : this.$buttons.find(".o_form_button_edit").focus();
+        } else if (this.$buttons) {
+            this.get("actual_mode") !== "view" ? this.$buttons.find(".o_form_button_save").focus() : this.$buttons.find(".o_form_button_edit").focus();
         }
     },
     get_tabindex_widgets: function() {
@@ -1185,11 +1184,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
                         check_access_rule: true
                     }).then(function(r) {
                         self.trigger('load_record', r);
-                    }).then(function() {
-                        if (!self.do_not_set_tabindex) {
-                            self.trigger('set_tabindex_focus');
-                        }
-                        self.do_not_set_tabindex = false;
                     }).fail(function (){
                         self.do_action('history_back');
                     });
