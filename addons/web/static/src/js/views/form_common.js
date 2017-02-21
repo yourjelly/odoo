@@ -822,7 +822,6 @@ var AbstractField = FormWidget.extend(FieldInterface, {
             .toggleClass('o_form_invalid', !this.disable_utility_classes && !!this.field_manager.get('display_invalid_fields') && !this.is_valid());
     },
     focus: function() {
-        this._super();
         return false;
     },
     set_input_id: function(id) {

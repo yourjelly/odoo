@@ -44,7 +44,9 @@ var One2ManyKanbanView = X2ManyKanbanView.extend({
             }
         }).open();
         formview_dialog.on('closed', this, function(e) {
-            self.x2m.$el.focus();
+            _.delay(function () {
+                self.x2m.$el.focus();
+            }, 100);
         });
     },
 });

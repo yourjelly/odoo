@@ -460,7 +460,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
             }
             // Scroll manually if widget is at bottom of the form
             var offset = next_widget.$el.prop('offsetTop');
-            this.trigger_up('scrollTo', {offset: offset});
+            this.scrollTo({offset: offset});
         } else if (_.isEqual(current_widget, last_widget) && !_.isEqual(current_widget, last_field)) {
             // If its wizard then last widget can be button and pressing tab on last widget button we want user to move on first widget
             if (this.get("actual_mode") != "view") {
@@ -480,6 +480,11 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 this.set_first_widget();
             }
         }
+    },
+    scrollTo: function (options) {
+        var offset = {top: options.offset, left: options.offset_left || 0};
+        this.$el.scrollTop = offset.top;
+        this.$el.scrollLeft = offset.left;
     },
 
     do_load_state: function(state, warm) {
@@ -860,7 +865,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
             if (this.tabindex_widgets) {
                 for (var i = 0; i < this.tabindex_widgets.length; i += 1) {
                     var field = this.tabindex_widgets[i];
-                    if (!field.get('effective_invisible') && !field.get('effective_readonly') && field.$label) {
+                    if (!field.get('effective_invisible') && !field.get('effective_readonly') && field.$label && !field.$el.is(":hidden")) {
                         if (field.focus() !== false) {
                             if (!this.last_tabindex) {
                                 this.last_tabindex = field.tabindex;
