@@ -74,6 +74,7 @@ var FieldMany2ManyTagsEmail = form_relational.FieldMany2ManyTags.extend({
                     pop.on('closed', self, function () {
                         this.values_checking = _.without(this.values_checking, id);
                         this.set({'value': this.values});
+                        _.delay(_.bind(function() { this.focus(); }, this), 100);
                     });
                 });
             });

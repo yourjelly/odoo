@@ -94,6 +94,9 @@ var Dialog = Widget.extend({
             var $b = $(QWeb.render('WidgetButton', { widget : { string: text, node: { attrs: {'class': classes, icon: b.icon} }, fa_icon: true }}));
             $b.prop('disabled', b.disabled);
             $b.attr('autofocus', b.autofocus);
+            if (b.tabindex) {
+                $b.attr('tabindex', b.tabindex);
+            }
             $b.on('click', function(e) {
                 var click_def;
                 if(b.click) {
@@ -101,6 +104,11 @@ var Dialog = Widget.extend({
                 }
                 if(b.close) {
                     $.when(click_def).always(self.close.bind(self));
+                }
+            });
+            $b.on('keydown', function(e) {
+                if(b.keydown) {
+                    b.keydown.call(self, e);
                 }
             });
             self.$footer.append($b);

@@ -472,9 +472,9 @@ var FormView = View.extend(common.FieldManagerMixin, {
             // If there is no next widget and there is no last widget, consider example of wizard opened on button which is last button in form
             // Closing on wizard it should move to either first widget or on edit button
             // Also consider if its o2m then we will have last field but no next widget in that case we want to move user to save button
-            if (this.get("actual_mode") == "view" && this.$buttons) {
+            if (this.get("actual_mode") == "view" && this.$buttons && this.$buttons.find(".o_form_button_edit").length) {
                 this.$buttons.find(".o_form_button_edit").focus();
-            } else if (this.get("actual_mode") != "view" && this.$buttons) {
+            } else if (this.get("actual_mode") != "view" && this.$buttons && this.$buttons.find(".o_form_button_save").length) {
                 this.$buttons.find(".o_form_button_save").first().focus();
             } else {
                 this.set_first_widget();

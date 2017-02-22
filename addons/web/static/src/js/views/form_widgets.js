@@ -727,6 +727,7 @@ var FieldBoolean = common.AbstractField.extend({
 */
 var FieldBooleanButton = common.AbstractField.extend({
     className: 'o_stat_info',
+    no_tabindex: true,
     init: function() {
         this._super.apply(this, arguments);
         switch (this.options["terminology"]) {
@@ -994,6 +995,7 @@ var LabelSelection = FieldSelection.extend({
 
 var FieldRadio = common.AbstractField.extend(common.ReinitializeFieldMixin, {
     template: 'FieldRadio',
+    no_tabindex: true,
     events: {
         'click input': 'click_change_value'
     },
@@ -1336,6 +1338,7 @@ var FieldBinaryFile = FieldBinary.extend({
 var FieldBinaryImage = FieldBinary.extend({
     template: 'FieldBinaryImage',
     placeholder: "/web/static/src/img/placeholder.png",
+    no_tabindex: true,
     render_value: function() {
         var url = this.placeholder;
         if(this.get('value')) {
@@ -1634,6 +1637,7 @@ var FieldMonetary = FieldFloat.extend({
 */
 var StatInfo = common.AbstractField.extend({
     is_field_number: true,
+    no_tabindex: true,
     init: function() {
         this._super.apply(this, arguments);
         this.internal_set_value(0);
@@ -1705,10 +1709,7 @@ var FieldToggleBoolean = common.AbstractField.extend({
 
 var AceEditor = common.AbstractField.extend(common.ReinitializeFieldMixin, {
     template: "AceEditor",
-    init: function() {
-        this._super.apply(this, arguments);
-        this.no_tabindex = true;
-    },
+    no_tabindex: true,
     willStart: function() {
         if (!window.ace && !this.loadJS_def) {
             this.loadJS_def = ajax.loadJS('/web/static/lib/ace/ace.odoo-custom.js').then(function () {

@@ -932,7 +932,7 @@ var FormViewDialog = ViewDialog.extend({
         if(!options || !options.buttons) {
             options = options || {};
             options.buttons = [
-                {text: (readonly ? _t("Close") : _t("Discard")), classes: "btn-default o_form_button_cancel", close: true, click: function() {
+                {text: (readonly ? _t("Close") : _t("Discard")), classes: "btn-default o_form_button_cancel", tabindex: '-1', close: true, click: function() {
                     self.view_form.trigger('on_button_cancel');
                 }}
             ];
@@ -949,6 +949,13 @@ var FormViewDialog = ViewDialog.extend({
                                 });
                             }
                         });
+                    },
+                    // Note: Add support for keydown TAB and set next tabindex on Save button
+                    'keydown': function(e) {
+                        if (e.which == $.ui.keyCode.TAB) {
+                            var is_shiftkey = e.shiftKey ? true : false;
+                            self.view_form.set_next_tabindex({focus_first_button: !is_shiftkey, reverse: is_shiftkey, keep_focus_on_current: is_shiftkey});
+                        }
                     }
                 });
 
@@ -959,6 +966,12 @@ var FormViewDialog = ViewDialog.extend({
                                 self.view_form.on_button_new();
                             });
                         });
+                    },
+                    'keydown': function(e) {
+                        if (e.which == $.ui.keyCode.TAB) {
+                            var is_shiftkey = e.shiftKey ? true : false;
+                            self.view_form.set_next_tabindex({focus_first_button: !is_shiftkey, reverse: is_shiftkey, keep_focus_on_current: is_shiftkey});
+                        }
                     }});
                 }
             }

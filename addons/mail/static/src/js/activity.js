@@ -56,6 +56,7 @@ var set_delay_label = function(activities){
 
 var Activity = form_common.AbstractField.extend({
     className: 'o_mail_activity',
+    no_tabindex: true,
 
     events: {
         "click .o_activity_edit": "on_activity_edit",
@@ -70,7 +71,6 @@ var Activity = form_common.AbstractField.extend({
         this.model = this.view.dataset.model;
         this.activities = [];
         this.Activity = new Model('mail.activity');
-        this.no_tabindex = true;
     },
 
     start: function () {

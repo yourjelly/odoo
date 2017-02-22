@@ -283,6 +283,7 @@ var ChatterComposer = composer.BasicComposer.extend({
 // -----------------------------------------------------------------------------
 var Chatter = form_common.AbstractField.extend({
     template: 'mail.Chatter',
+    no_tabindex: true,
 
     events: {
         'click .o_chatter_button_new_message': 'on_open_composer_new_message',
@@ -300,7 +301,6 @@ var Chatter = form_common.AbstractField.extend({
         this.options = _.extend(this.options || {}, {
             'display_activity_button': this.field_manager.fields.activity_ids
         });
-        this.no_tabindex = true;
     },
 
     willStart: function () {

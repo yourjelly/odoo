@@ -22,6 +22,7 @@ var qweb = core.qweb;
 // -----------------------------------------------------------------------------
 var Followers = form_common.AbstractField.extend({
     template: 'mail.Followers',
+    no_tabindex: true,
 
     init: function () {
         this._super.apply(this, arguments);
@@ -36,7 +37,6 @@ var Followers = form_common.AbstractField.extend({
         this.data_subtype = {};
 
         this.view_is_editable = this.__parentedParent.is_action_enabled('edit');
-        this.no_tabindex = true;
     },
 
     start: function () {
