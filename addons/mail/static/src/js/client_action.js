@@ -340,7 +340,7 @@ var ChatAction = Widget.extend(ControlPanelMixin, {
             select: function(event, ui) {
                 if (self.last_search_val) {
                     if (ui.item.value === '_create') {
-                        chat_manager.create_channel(self.last_search_val, "public");
+                        chat_manager.create_channel(self.last_search_val, "groups");
                     } else {
                         chat_manager.join_channel(ui.item.id);
                     }
