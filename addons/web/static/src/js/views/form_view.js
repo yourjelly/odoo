@@ -205,7 +205,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
                     self.on_keydown_SHIFT_ENTER(e);
                 } else if (e.which == $.ui.keyCode.ESCAPE) {
                     self.last_tabindex = null;
-                    self.on_button_cancel();
+                    self.do_cancel();
                 }
             });
 
@@ -858,11 +858,21 @@ var FormView = View.extend(common.FieldManagerMixin, {
     },
     autofocus: function() {
         if (this.get("actual_mode") !== "view" && !this.options.disable_autofocus) {
+            var focused = false;
             var fields_order = this.fields_order.slice(0);
             if (this.default_focus_field) {
                 fields_order.unshift(this.default_focus_field.name);
             }
-            if (this.tabindex_widgets) {
+            for (var i = 0; i < fields_order.length; i += 1) {
+                var field = this.fields[fields_order[i]];
+                if (!field.get('effective_invisible') && !field.get('effective_readonly') && field.$label) {
+                    if (field.focus() !== false) {
+                        focused = true;
+                        break;
+                    }
+                }
+            }
+            if (!focused && this.tabindex_widgets) {
                 for (var i = 0; i < this.tabindex_widgets.length; i += 1) {
                     var field = this.tabindex_widgets[i];
                     if (!field.get('effective_invisible') && !field.get('effective_readonly') && field.$label && !field.$el.is(":hidden")) {
@@ -870,15 +880,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
                             if (!this.last_tabindex) {
                                 this.last_tabindex = field.tabindex;
                             }
-                            break;
-                        }
-                    }
-                }
-            } else {
-                for (var i = 0; i < fields_order.length; i += 1) {
-                    var field = this.fields[fields_order[i]];
-                    if (!field.get('effective_invisible') && !field.get('effective_readonly') && field.$label) {
-                        if (field.focus() !== false) {
                             break;
                         }
                     }
@@ -932,6 +933,16 @@ var FormView = View.extend(common.FieldManagerMixin, {
         return false;
     },
     do_cancel: function() {
+        // If popups are open and by chance if popup does not have focus instead focus is on some other form maybe on main form
+        // then first close the top popup otherwise main form's cancel will move us to history_back(maybe on listview) but popup still remains open
+        // this should never happen so to avoid this worst case scenario we check if popup is available then close top popup
+        var modals = $('body > .modal').filter(':visible');
+        if(modals.length) {
+            var last_modal = modals.last();
+            last_modal.modal('hide');
+            last_modal.remove();
+            return;
+        }
         return this.on_button_cancel();
     },
     on_button_new: function() {
