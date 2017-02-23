@@ -288,7 +288,8 @@ var CompletionFieldMixin = {
             }
         })).open();
         select_create_dialog.on('closed', this, function(e) {
-            this.focus();
+            // Note: Need to add timeout because focus is not set on element when "this" is in bootstrap modal, because bootstrap calls focus after timeout
+            _.delay(function() { self.focus(); }, 100);
         });
     },
     /**
@@ -1016,7 +1017,9 @@ var FormViewDialog = ViewDialog.extend({
             self.view_form.appendTo(fragment).then(function () {
                 self.view_form.do_show().then(function() {
                     _super().$el.append(fragment);
-                    self.view_form.autofocus();
+                    // Note: Need to add timeout because m2o autocomplete has timeout to make ignore_blur=false 
+                    // and hence focus is again set to m2o widget even bootstrap modal os open on top of it
+                    _.delay(function() { self.view_form.autofocus(); }, 0);
                 });
             });
         });
