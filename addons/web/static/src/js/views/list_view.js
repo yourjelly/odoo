@@ -493,9 +493,8 @@ var ListView = View.extend({
             var row_offset = this.current_selected_row.offset().top;
             var scroll_amount = direction == 'down' ? 10 : -10; // TODO: +/- row height
             if ((row_offset - table_offset) > (this.$el.parent().height()/2) ) {
-                this.trigger_up('scrollTo', {
-                    offset: (row_offset - table_offset - (this.$el.parent().height()/2) + scroll_amount)
-                });
+                var offset = (row_offset - table_offset - (this.$el.parent().height()/2) + scroll_amount)
+                this.scrollTo(offset);
             }
         }
     },
@@ -511,6 +510,10 @@ var ListView = View.extend({
         if (this.current_selected_row.length) {
             this.current_selected_row.trigger("click");
         }
+    },
+    scrollTo: function(offset) {
+        var $scrollable_element = this.$el.scrollParent();
+        $scrollable_element.scrollTop(offset);
     },
     /**
      * Used to handle a click on a table row, if no other handler caught the

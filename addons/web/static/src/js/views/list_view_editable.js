@@ -397,6 +397,7 @@ ListView.include(/** @lends instance.web.ListView# */{
                         fields[focus_field].$el.find('input, textarea').andSelf().filter('input, textarea').select();
                         if (fields[focus_field].tabindex) {
                             fields[focus_field].set_focus();
+                            self.editor.form.scrollTo(fields[focus_field]);
                             self.editor.form.last_tabindex = fields[focus_field].tabindex;
                         }
                     }

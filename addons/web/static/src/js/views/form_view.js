@@ -185,7 +185,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 if (e.which == $.ui.keyCode.TAB) {
                     e.preventDefault();
                     var is_shiftkey = e.shiftKey ? true : false;
-                    self.set_next_tabindex({focus_first_button: !is_shiftkey, reverse: is_shiftkey, keep_focus_on_current: is_shiftkey});
+                    self.set_next_tabindex({focus_first_button: !is_shiftkey, reverse: is_shiftkey});
                 } else if (e.which == $.ui.keyCode.ESCAPE) {
                     self.trigger('history_back');
                 }
@@ -200,7 +200,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 e.preventDefault();
                 if (e.which == $.ui.keyCode.TAB) { //We can use switch here
                     var is_shiftkey = e.shiftKey ? true : false;
-                    self.set_next_tabindex({focus_first_button: !is_shiftkey, reverse: is_shiftkey, keep_focus_on_current: is_shiftkey});
+                    self.set_next_tabindex({focus_first_button: !is_shiftkey, reverse: is_shiftkey});
                 } else if (e.which == $.ui.keyCode.ENTER) {
                     self.on_keydown_SHIFT_ENTER(e);
                 } else if (e.which == $.ui.keyCode.ESCAPE) {
@@ -459,8 +459,8 @@ var FormView = View.extend(common.FieldManagerMixin, {
                 next_widget.set_focus();
             }
             // Scroll manually if widget is at bottom of the form
-            var offset = next_widget.$el.prop('offsetTop');
-            this.scrollTo({offset: offset});
+            this.scrollTo(next_widget, reverse);
+
         } else if (_.isEqual(current_widget, last_widget) && !_.isEqual(current_widget, last_field)) {
             // If its wizard then last widget can be button and pressing tab on last widget button we want user to move on first widget
             if (this.get("actual_mode") != "view") {
@@ -481,10 +481,17 @@ var FormView = View.extend(common.FieldManagerMixin, {
             }
         }
     },
-    scrollTo: function (options) {
-        var offset = {top: options.offset, left: options.offset_left || 0};
-        this.$el.scrollTop = offset.top;
-        this.$el.scrollLeft = offset.left;
+    scrollTo: function (next_widget, reverse) {
+        if (reverse) {
+            return;
+        }
+        var $scrollable_element = this.$el.scrollParent();
+        var offset_top = next_widget.$el.offset().top;
+        offset_top = (offset_top - $scrollable_element.offset().top);
+        console.log("scrollable_element ::: ", $scrollable_element, $scrollable_element.height(), offset_top);
+        if (offset_top > $scrollable_element.height() - ($scrollable_element.height()*0.10)) {
+            $scrollable_element.animate({ scrollTop: offset_top - ($scrollable_element.height()*0.05)}, 1000);
+        }
     },
 
     do_load_state: function(state, warm) {
