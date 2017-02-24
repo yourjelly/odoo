@@ -286,6 +286,12 @@ class ProductTemplate(models.Model):
         string='Procurement', default='rfq')
 
 
+class SupplierInfo(models.Model):
+    _inherit = "product.supplierinfo"
+    
+    requisition_id = fields.Many2one('purchase.requisition', 'Purchase Requisition')
+
+
 class ProcurementOrder(models.Model):
     _inherit = 'procurement.order'
 
