@@ -455,7 +455,7 @@ var ListView = View.extend({
             return false;
         }
         var previous_row_selected = this.current_selected_row;
-        if (!this.current_selected_row) { //TODO: and not any row selected already add condition
+        if (!this.current_selected_row) {
             this.current_selected_row = direction == 'down' ? this.$('tbody tr').filter("[data-id]").first() : this.$('tbody tr').filter("[data-id]").last();
         } else {
             var $row = direction == 'down' ? this.current_selected_row.next() : this.current_selected_row.prev();
@@ -465,33 +465,32 @@ var ListView = View.extend({
             this.current_selected_row = $row.attr("data-id") ? $row : false;
         }
 
+        var current_selected_row = this.current_selected_row;
         if (this.options.selectable) {
             if (!e.shiftKey && !e.ctrlKey) {
                 _.each(this.current_selection, function($row) { $row.find(".o_list_record_selector input:checked").trigger("click"); });
-                this.current_selected_row.find(".o_list_record_selector input").trigger("click");
-                this.current_selection = [this.current_selected_row];
+                current_selected_row.find(".o_list_record_selector input").trigger("click");
             } else if (e.shiftKey && !e.ctrlKey) {
-                this.current_selected_row.find(".o_list_record_selector input").trigger("click");
-                this.current_selection.push(this.current_selected_row);
+                current_selected_row.find(".o_list_record_selector input").trigger("click");
             } else if (e.ctrlKey && !e.shiftKey) {
                 if (previous_row_selected && !previous_row_selected.find(".o_list_record_selector input").is(":checked")) {
                     previous_row_selected.removeClass("o_row_selected");
                 }
-                this.current_selected_row.addClass("o_row_selected");
-                this.current_selected_row.find(".o_list_record_selector input").focus();
+                current_selected_row.addClass("o_row_selected");
+                current_selected_row.find(".o_list_record_selector input").focus();
             }
         } else {
             _.each(this.current_selection, function($row) { $row.removeClass("o_row_selected"); });
-            this.current_selected_row.addClass("o_row_selected");
+            current_selected_row.addClass("o_row_selected");
             this.current_selection = [this.current_selected_row];
         }
 
-        if (this.current_selected_row) {
+        if (current_selected_row) {
             // Manually scroll instead of standard scrolling
-            var $row = this.current_selected_row.next();
+            var $row = current_selected_row.next();
             var table_offset = this.$('.o_list_view').offset().top;
-            var row_offset = this.current_selected_row.offset().top;
-            var scroll_amount = direction == 'down' ? 10 : -10; // TODO: +/- row height
+            var row_offset = current_selected_row.offset().top;
+            var scroll_amount = direction == 'down' ? current_selected_row.height() : -current_selected_row.height();
             if ((row_offset - table_offset) > (this.$el.parent().height()/2) ) {
                 var offset = (row_offset - table_offset - (this.$el.parent().height()/2) + scroll_amount)
                 this.scrollTo(offset);
@@ -711,7 +710,6 @@ var ListView = View.extend({
             this.$('tr[data-id=' + id + ']').addClass("o_row_selected");
             if (this.$('tr[data-id=' + id + ']').length) {
                 this.current_selection.push(this.$('tr[data-id=' + id + ']'));
-                this.current_selected_row = this.$('tr[data-id=' + id + ']');
             }
         }, this));
 
@@ -1121,6 +1119,8 @@ ListView.List = Class.extend({
                 e.stopPropagation();
                 var selection = self.get_selection();
                 var checked = $(e.currentTarget).find('input').prop('checked');
+                var $row = $(e.target).closest('tr');
+                self.view.current_selected_row = $row;
                 $(self).trigger(
                         'selected', [selection.ids, selection.records, ! checked]);
             })
