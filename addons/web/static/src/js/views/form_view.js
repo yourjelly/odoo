@@ -482,14 +482,12 @@ var FormView = View.extend(common.FieldManagerMixin, {
         }
     },
     scrollTo: function (next_widget, reverse) {
-        if (reverse) {
-            return;
-        }
         var $scrollable_element = this.$el.scrollParent();
         var offset_top = next_widget.$el.offset().top;
         offset_top = (offset_top - $scrollable_element.offset().top);
-        console.log("scrollable_element ::: ", $scrollable_element, $scrollable_element.height(), offset_top);
-        if (offset_top > $scrollable_element.height() - ($scrollable_element.height()*0.10)) {
+        if (reverse && offset_top < 0) {
+            $scrollable_element.animate({ scrollTop: offset_top - ($scrollable_element.height()*0.05)}, 1000);
+        } else if (offset_top > $scrollable_element.height() - ($scrollable_element.height()*0.10)) {
             $scrollable_element.animate({ scrollTop: offset_top - ($scrollable_element.height()*0.05)}, 1000);
         }
     },
