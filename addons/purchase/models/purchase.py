@@ -554,6 +554,8 @@ class PurchaseOrderLine(models.Model):
 
     @api.multi
     def write(self, values):
+        if any(self.filtered(lambda x: x.order_id.state == 'purchase' and x.product_id.type in ['consu', 'product'] and x.qty_received and x.product_id not in x.move_ids.mapped('product_id'))):
+            raise UserError(_('You can not update the quantities for a kit when you have already received quantities. You can still create a new PO or cancel the backorder.'))
         result = super(PurchaseOrderLine, self).write(values)
         orders = self.filtered(lambda x: x.order_id.state == 'purchase').mapped('order_id')
         orders._create_picking()
@@ -771,11 +773,12 @@ class PurchaseOrderLine(models.Model):
 
     @api.onchange('product_qty')
     def _onchange_product_qty(self):
-        if (self.state == 'purchase' or self.state == 'to approve') and self.product_id.type in ['product', 'consu'] and self.product_qty < self._origin.product_qty:
-            warning_mess = {
-                'title': _('Ordered quantity decreased!'),
-                'message' : _('You are decreasing the ordered quantity!\nYou must update the quantities on the reception and/or bills.'),
-            }
+        if (self.state == 'purchase' or self.state == 'to approve') and self.product_id.type in ['product', 'consu'] a:
+            if :
+                warning_mess = {
+                    'title': _('Ordered quantity decreased!'),
+                    'message': _('You are decreasing the ordered quantity!\nYou must update the quantities on the reception and/or bills.'),
+                }
             return {'warning': warning_mess}
 
     def _suggest_quantity(self):
