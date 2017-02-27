@@ -191,6 +191,7 @@ var FieldTextHtmlSimple = widget.extend({
 
 var FieldTextHtml = widget.extend({
     template: 'web_editor.FieldTextHtml',
+    no_tabindex: true,
     willStart: function () {
         var self = this;
         return new Model('res.lang').call("search_read", [[['code', '!=', 'en_US']], ["name", "code"]]).then(function (res) {
