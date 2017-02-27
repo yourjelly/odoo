@@ -215,6 +215,7 @@ var FieldChar = common.AbstractField.extend(common.ReinitializeFieldMixin, {
 
 var KanbanSelection = common.AbstractField.extend({
     template: "FormSelection",
+    no_tabindex: true,
     events: {
         'click a': function(e) {
             e.preventDefault();
@@ -310,6 +311,7 @@ var KanbanSelection = common.AbstractField.extend({
 });
 
 var FieldPriority = common.AbstractField.extend({
+    no_tabindex: true,
     events: {
         'mouseup': function(e) {
             e.stopPropagation();
@@ -431,6 +433,7 @@ var FieldFloat = FieldChar.extend({
 /// directly (or to build advanced domains the tree-like interface does not allow to).
 var FieldDomain = common.AbstractField.extend(common.ReinitializeFieldMixin).extend({
     template: "FieldDomain",
+    no_tabindex: true,
     events: {
         "click .o_domain_show_selection_button": function (e) {
             e.preventDefault();
@@ -771,6 +774,7 @@ var FieldBooleanButton = common.AbstractField.extend({
 
 // The progressbar field expects a float from 0 to 100.
 var FieldProgressBar = common.AbstractField.extend(common.ReinitializeFieldMixin, {
+    no_tabindex: true,
     initialize_content: function() {
         if(this.progressbar) {
             this.progressbar.destroy();
@@ -803,6 +807,7 @@ var FieldProgressBar = common.AbstractField.extend(common.ReinitializeFieldMixin
 // The PercentPie field expects a float from 0 to 100.
 var FieldPercentPie = common.AbstractField.extend({
     template: 'FieldPercentPie',
+    no_tabindex: true,
     start: function() {
         this.$left_mask = this.$('.o_mask').first();
         this.$right_mask = this.$('.o_mask').last();
@@ -1088,6 +1093,7 @@ var FieldRadio = common.AbstractField.extend(common.ReinitializeFieldMixin, {
 
 var FieldReference = common.AbstractField.extend(common.ReinitializeFieldMixin, {
     className: 'o_row',
+    no_tabindex: true,
     init: function(field_manager, node) {
         this._super(field_manager, node);
         this.reference_ready = true;
@@ -1174,6 +1180,7 @@ var FieldReference = common.AbstractField.extend(common.ReinitializeFieldMixin, 
 });
 
 var FieldBinary = common.AbstractField.extend(common.ReinitializeFieldMixin, {
+    no_tabindex: true,
     init: function(field_manager, node) {
         var self = this;
         this._super(field_manager, node);
@@ -1338,7 +1345,6 @@ var FieldBinaryFile = FieldBinary.extend({
 var FieldBinaryImage = FieldBinary.extend({
     template: 'FieldBinaryImage',
     placeholder: "/web/static/src/img/placeholder.png",
-    no_tabindex: true,
     render_value: function() {
         var url = this.placeholder;
         if(this.get('value')) {
@@ -1403,6 +1409,7 @@ var FieldBinaryImage = FieldBinary.extend({
 
 var FieldStatus = common.AbstractField.extend({
     template: "FieldStatus",
+    no_tabindex: true,
     init: function(field_manager, node) {
         this._super(field_manager, node);
         this.options.clickable = this.options.clickable || (this.node.attrs || {}).clickable || false;
@@ -1671,6 +1678,7 @@ var StatInfo = common.AbstractField.extend({
 */
 var FieldToggleBoolean = common.AbstractField.extend({
     template: "toggle_button",
+    no_tabindex: true,
     events: {
         'click': 'set_toggle_button'
     },

@@ -485,7 +485,7 @@ var ListView = View.extend({
             this.current_selection = [this.current_selected_row];
         }
 
-        if (current_selected_row) {
+        if (current_selected_row && current_selected_row.length) {
             // Manually scroll instead of standard scrolling
             var $row = current_selected_row.next();
             var table_offset = this.$('.o_list_view').offset().top;
