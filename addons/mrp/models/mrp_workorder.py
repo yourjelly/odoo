@@ -296,6 +296,12 @@ class MrpWorkorder(models.Model):
                 move_lot.lot_produced_id = self.final_lot_id.id
                 move_lot.done_wo = True
 
+        # Bymoves
+        production_move = self.production_id.move_finished_ids.filtered(lambda x: (x.product_id.id == self.production_id.product_id.id) and (x.state not in ('done', 'cancel')))
+        by_moves = self.production_id.move_finished_ids.filtered(lambda x: x.product_id.id != production_move.product_id.id and x.state not in ('done', 'cancel') and x.workorder_id == self)
+        for move in by_moves:
+            move.quantity_done += self.qty_producing * move.unit_factor
+
         # One a piece is produced, you can launch the next work order
         if self.next_work_order_id.state == 'pending':
             self.next_work_order_id.state = 'ready'
@@ -310,9 +316,7 @@ class MrpWorkorder(models.Model):
         })
 
         # If last work order, then post lots used
-        # TODO: should be same as checking if for every workorder something has been done?
         if not self.next_work_order_id:
-            production_move = self.production_id.move_finished_ids.filtered(lambda x: (x.product_id.id == self.production_id.product_id.id) and (x.state not in ('done', 'cancel')))
             if production_move.product_id.tracking != 'none':
                 move_lot = production_move.move_lot_ids.filtered(lambda x: x.lot_id.id == self.final_lot_id.id)
                 if move_lot:
@@ -327,9 +331,10 @@ class MrpWorkorder(models.Model):
             else:
                 production_move.quantity_done += self.qty_producing
             #by_products in the end (could be improved by using operation_id on by_products)
-            for move in self.production_id.move_finished_ids.filtered(lambda x: x.product_id.id != production_move.product_id.id and x.state not in ('done', 'cancel')):
-                if move.product_id.tracking == 'none':
-                    move.quantity_done += self.qty_producing * move.unit_factor
+            by_moves = self.production_id.move_finished_ids.filtered(lambda x: x.product_id.id != production_move.product_id.id and x.state not in ('done', 'cancel') and not x.workorder_id)
+            for move in by_moves:
+                move.quantity_done += self.qty_producing * move.unit_factor
+            
         # Update workorder quantity produced
         self.qty_produced += self.qty_producing
 
