@@ -55,9 +55,9 @@
                             <span attrs="{'invisible':['|', ('model', '=', False), ('composition_mode', '=', 'mass_mail')]}">Followers of the document and</span>
                             <field name="partner_ids" widget="many2many_tags_email" placeholder="Add contacts to notify..."
                                 context="{'force_email':True, 'show_email':True}"
-                                attrs="{'invisible': [('composition_mode', '!=', 'comment')]}" tabindex="1"/>
+                                attrs="{'invisible': [('composition_mode', '!=', 'comment')]}"/>
                         </div>
-                        <field name="subject" placeholder="Subject..." required="True" tabindex="2"/>
+                        <field name="subject" placeholder="Subject..." required="True"/>
                         <!-- mass post -->
                         <field name="notify"
                             attrs="{'invisible':['|', ('composition_mode', '!=', 'mass_post')]}"/>
@@ -67,14 +67,14 @@
                             attrs="{'invisible':['|', ('no_auto_thread', '=', False), ('composition_mode', '!=', 'mass_mail')],
                                     'required':[('no_auto_thread', '=', True), ('composition_mode', '=', 'mass_mail')]}"/>
                     </group>
-                    <field name="body" options="{'style-inline': true}" tabindex="3"/>
+                    <field name="body" options="{'style-inline': true}"/>
                     <group col="4">
                         <field name="attachment_ids" widget="many2many_binary" string="Attach a file" nolabel="1" colspan="2"/>
                         <field name="template_id" options="{'no_create': True}"
                                context="{'default_model': model, 'default_body_html': body, 'default_subject': subject}"/>
                     </group>
                     <footer>
-                        <button string="Send" name="send_mail_action" type="object" class="btn-primary" tabindex="4"/>
+                        <button string="Send" name="send_mail_action" type="object" class="btn-primary"/>
                         <button string="Cancel" class="btn-default" special="cancel" />
 
                         <button icon="fa-lg fa-save" type="object" name="save_as_template" string="Save as new template"

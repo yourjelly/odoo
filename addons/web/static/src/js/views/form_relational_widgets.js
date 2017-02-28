@@ -1643,6 +1643,7 @@ var FieldMany2ManyTags = AbstractManyField.extend(common.CompletionFieldMixin, c
  */
 var FieldMany2ManyBinaryMultiFiles = AbstractManyField.extend(common.ReinitializeFieldMixin, {
     template: "FieldBinaryFileUploader",
+    no_tabindex: true,
     events: {
         'click .o_attach': function(e) {
             this.$('.o_form_input_file').click();

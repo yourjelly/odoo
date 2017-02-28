@@ -933,6 +933,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
         } else {
             this.can_be_discarded().then(function() {
                 self.to_view_mode();
+                self.$buttons && self.$buttons.find(".o_form_button_edit").focus();
                 $.when.apply(null, self.render_value_defs).then(function(){
                     self.trigger('load_record', self.datarecord);
                 });
