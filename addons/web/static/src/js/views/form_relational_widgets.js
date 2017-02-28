@@ -1122,7 +1122,6 @@ var One2ManyListView = X2ManyListView.extend({
                 form_view_options: {'not_interactible_on_create':true},
                 on_selected: function() {
                     self.x2m.reload_current_view().then(function() {
-                        //self.x2m.view.set_next_tabindex();
                         self.x2m.$el.focus();
                     });
                 }
@@ -1411,7 +1410,6 @@ var Many2ManyListView = X2ManyListView.extend({
                 return self.x2m.data_link_multi(element_ids).then(function() {
                     self.x2m.reload_current_view().then(function() {
                         self.x2m.$el.focus();
-                        //self.x2m.view.set_next_tabindex();
                     });
                 });
             }

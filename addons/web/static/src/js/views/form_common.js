@@ -288,7 +288,7 @@ var CompletionFieldMixin = {
             }
         })).open();
         select_create_dialog.on('closed', this, function(e) {
-            // Note: Need to add timeout because focus is not set on element when "this" is in bootstrap modal, because bootstrap calls focus after timeout
+            // Note: Need to add timeout because focus is not set on element when CompletionMixin/m2o is in bootstrap modal, because focus for bootstrap model(we did it in dialog.js) is called after some timeout
             _.delay(function() { self.focus(); }, 100);
         });
     },
@@ -517,7 +517,7 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
         return final_domain;
     },
     get_tabindex_element: function() {
-        // Some widget may have different element to bind, say for example date/datetime widgets, where we need to bind datewidget.$input
+        // Note: Some widget may have different element to bind, say for example date/datetime widgets, where we need to bind datewidget.$input
         return this.$el;
     },
     bind_tabindex: function() {
@@ -538,7 +538,7 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
                 }
             });
 
-            // Note: We should bind keyup_ESCAPE and keyup_ENTER for all widgets if we want to discard changes when focus is on widget only and escape pressed
+            // Note: We should bind keyup_ESCAPE and keyup_ENTER for all widgets if we want to discard changes when focus is on widget only and escape/enter is pressed
             $element.on("keyup", function(e) {
                 if (e.which == $.ui.keyCode.ESCAPE) {
                     self.keyup_ESCAPE(e);
@@ -558,13 +558,13 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
         return this.field_manager.set_next_tabindex({current_widget: this, reverse: reverse});
     },
     keydown_ESCAPE: function(e) {
-        // NOTE: No need to bind keydown_ESCAPE if we are going to cancel record on whole form element
+        // NOTE: No need to bind keydown_ESCAPE if we are going to cancel record when escape pressed on whole form element
         this.on_escape(e);
     },
     keydown_ENTER: function(e) {},
     keyup_ENTER: function(e) {},
     keyup_ESCAPE: function(e) {},
-    on_escape: function(e) {}, // Not needed for instance as we are binding escape key on whole form
+    on_escape: function(e) {}, // Not needed for instance as we are binding escape key on whole form element
     get_string: function() {}
 });
 
@@ -1022,7 +1022,7 @@ var FormViewDialog = ViewDialog.extend({
                 self.view_form.do_show().then(function() {
                     _super().$el.append(fragment);
                     // Note: Need to add timeout because m2o autocomplete has timeout to make ignore_blur=false 
-                    // and hence focus is again set to m2o widget even bootstrap modal os open on top of it
+                    // and hence focus is again set to m2o widget even bootstrap modal is open on top of it
                     _.delay(function() { self.view_form.autofocus(); }, 0);
                 });
             });
@@ -1096,8 +1096,7 @@ var SelectCreateDialog = ViewDialog.extend({
             .then(this.setup.bind(this, search_defaults))
             .then(function (fragment) {
                 _super().$el.append(fragment);
-            })
-            .then(_.bind(function() {
+            }).then(_.bind(function() {
                 this.searchview.$('.o_searchview_input').focus();
             }, this));
         return this;

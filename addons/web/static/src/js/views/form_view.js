@@ -399,7 +399,6 @@ var FormView = View.extend(common.FieldManagerMixin, {
                             || w.node.attrs.class.indexOf('oe_highlight') != -1
                             || w.node.attrs.class.indexOf('oe_stat_button') != -1));
             }).value();
-            //TODO: Check: do not assign tabindex automatically and manage based on index of tabindex_widget list
             _.each(tabindex_widgets, function(widget, index) {
                 widget.tabindex = index+1;
             });
@@ -413,16 +412,14 @@ var FormView = View.extend(common.FieldManagerMixin, {
         if (!this.tabindex_widgets.length) {
             return;
         }
-        // Note: To set focus on first button forcefully based on options, when focus is on save button and TAB pressed
+        // Note: To set focus on first button forcefully based on options, Ex. when focus is on save button and TAB pressed
         if (!reverse && options && options.focus_first_button) {
             var first_tabindex_button = this.first_tabindex_button();
             if (first_tabindex_button) {
                 this.last_tabindex = first_tabindex_button.tabindex;
-                first_tabindex_button.set_focus();
-                return false;
+                return first_tabindex_button.set_focus();
             } else {
-                this.set_first_widget();
-                return false;
+                return this.set_first_widget();
             }
         }
 
@@ -443,7 +440,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
 
         var next_widget = false;
         if (options && options.keep_focus_on_current && current_widget && !(current_widget.$el.is(":hidden") || current_widget.get('readonly') || current_widget.get('effective_readonly'))) {
-            // Note: If shift + TAB is pressed on create button then we may have current widget hidden(i.e. last button is hidden when focus goes to create button)
+            // Note: If shift + TAB is pressed on create(view mode) button then we may have current widget hidden(i.e. last button is hidden when focus goes to create button, handled that scenario by check is hidden)
             next_widget = current_widget;
         } else {
             next_widget = get_next_widget();
