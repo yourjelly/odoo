@@ -129,7 +129,7 @@ class PosConfig(models.Model):
     fiscal_position_ids = fields.Many2many('account.fiscal.position', string='Fiscal Positions')
     default_fiscal_position_id = fields.Many2one('account.fiscal.position', string='Default Fiscal Position')
     default_cashbox_lines_ids = fields.One2many('account.cashbox.line', 'default_pos_id', string='Default Balance')
-    customer_facing_display_html = fields.Html(string='Customer facing display content')
+    customer_facing_display_html = fields.Html(string='Customer facing display content', translate=True)
 
     @api.depends('journal_id.currency_id', 'journal_id.company_id.currency_id')
     def _compute_currency(self):
