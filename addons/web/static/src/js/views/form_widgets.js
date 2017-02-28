@@ -149,9 +149,6 @@ var WidgetButton = common.FormWidget.extend({
             self.field_manager.last_tabindex = self.tabindex;
         });
     },
-    on_escape: function() {
-        this.view.trigger('history_back');
-    }
 });
 
 var FieldChar = common.AbstractField.extend(common.ReinitializeFieldMixin, {

@@ -564,7 +564,7 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
     keydown_ENTER: function(e) {},
     keyup_ENTER: function(e) {},
     keyup_ESCAPE: function(e) {},
-    on_escape: function(e) {},
+    on_escape: function(e) {}, // Not needed for instance as we are binding escape key on whole form
     get_string: function() {}
 });
 
