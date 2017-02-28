@@ -393,7 +393,11 @@ var FormView = View.extend(common.FieldManagerMixin, {
 
         if (!tabindex_widgets.length) {
             tabindex_widgets = _.chain(all_widgets).filter(function(w) {
-                return (!w.tabindex && !w.no_tabindex && w.node.tag != 'button') || (w.node.tag == 'button' && w.node.attrs.class && (w.node.attrs.class.indexOf('btn-primary') != -1 || w.node.attrs.class.indexOf('oe_highlight') != -1));
+                return (!w.tabindex && !w.no_tabindex && w.node.tag != 'button')
+                            || (w.node.tag == 'button' && w.node.attrs.class
+                            && (w.node.attrs.class.indexOf('btn-primary') != -1
+                            || w.node.attrs.class.indexOf('oe_highlight') != -1
+                            || w.node.attrs.class.indexOf('oe_stat_button') != -1));
             }).value();
             //TODO: Check: do not assign tabindex automatically and manage based on index of tabindex_widget list
             _.each(tabindex_widgets, function(widget, index) {

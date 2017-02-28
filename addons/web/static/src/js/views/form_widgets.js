@@ -119,12 +119,27 @@ var WidgetButton = common.FormWidget.extend({
             $body.removeClass(class_to_add);
         }, 1000);
     },
+    get_string: function(node) {
+        for (var i = 0; i < node.children.length; i += 1) {
+            if (node.children[i].attrs && node.children[i].tag == 'field') {
+                var field = this.field_manager.fields[node.children[i].attrs.name];
+                return field.get_string();
+            } else {
+                return this.get_string(node.children[i]);
+            }
+        };
+    },
     set_focus: function() {
         this.$el.focus();
         if (this.node.attrs.on_focus_tip) {
-            content = this.node.attrs.on_focus_tip;
+            var content = this.node.attrs.on_focus_tip;
         } else {
-            var content = _.str.sprintf("Press ENTER to %s", this.string);
+            if (!this.string) { // If stat button then there will be no string of button
+                var string = this.get_string(this.node);
+                var content = _.str.sprintf("Press ENTER to %s", string);
+            } else {
+                var content = _.str.sprintf("Press ENTER to %s", this.string);
+            }
         }
         utils.show_tabindex_tip({attach_to: this.$el, title: content, trigger: 'focus'});
     },
@@ -770,6 +785,9 @@ var FieldBooleanButton = common.AbstractField.extend({
     is_false: function() {
         return false;
     },
+    get_string: function() {
+        return this.get_value() && this.hover_true || this.hover_false;
+    }
 });
 
 // The progressbar field expects a float from 0 to 100.

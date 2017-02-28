@@ -564,7 +564,8 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
     keydown_ENTER: function(e) {},
     keyup_ENTER: function(e) {},
     keyup_ESCAPE: function(e) {},
-    on_escape: function(e) {}
+    on_escape: function(e) {},
+    get_string: function() {}
 });
 
 /*
@@ -857,6 +858,9 @@ var AbstractField = FormWidget.extend(FieldInterface, {
     },
     is_blank: function() {
         return true;
+    },
+    get_string: function() {
+        return this.string;
     }
 });
 
