@@ -874,7 +874,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
             }
             for (var i = 0; i < fields_order.length; i += 1) {
                 var field = this.fields[fields_order[i]];
-                if (!field.get('effective_invisible') && !field.get('effective_readonly') && field.$label) {
+                if (!field.get('effective_invisible') && !field.get('effective_readonly') && field.$label && !field.$el.is(":hidden")) {
                     if (field.focus() !== false) {
                         focused = true;
                         break;
