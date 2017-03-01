@@ -80,6 +80,17 @@ class PurchaseRequisition(models.Model):
     def action_in_progress(self):
         if not all(obj.line_ids for obj in self):
             raise UserError(_('You cannot confirm call because there is no product line.'))
+        for requisition in self.filtered(lambda x: x.type_id.quantity_copy == 'none'):
+            for line in requisition.line_ids:
+                seller = line.product_id.seller_ids.filtered(lambda x: x.requisition_id == requisition)
+                if not seller:
+                    self.env['product.supplierinfo'].create({'product_id': line.product_id.id,
+                                                             'name': requisition.vendor_id.id,
+                                                             'requisition_id': requisition.id,
+                                                             'price': line.price_unit,
+                                                             'delay': 1.0,
+                                                             'sequence': 0.0,
+                                                              })
         self.write({'state': 'in_progress'})
 
     @api.multi
@@ -97,6 +108,8 @@ class PurchaseRequisition(models.Model):
         """
         if any(purchase_order.state in ['draft', 'sent', 'to approve'] for purchase_order in self.mapped('purchase_ids')):
             raise UserError(_('You have to cancel or validate every RfQ before closing the purchase requisition.'))
+        # Unlink supplierinfo that had to do with 
+        self.env['product.supplierinfo'].search([('requisition_id', 'in', self.ids)]).unlink()
         self.write({'state': 'done'})
 
 
@@ -302,7 +315,7 @@ class ProcurementOrder(models.Model):
         procurements = self.env['procurement.order']
         Warehouse = self.env['stock.warehouse']
         res = []
-        for procurement in self:
+        for procurement in self: 
             if procurement.product_id.purchase_requisition == 'tenders':
                 warehouse_id = Warehouse.search([('company_id', '=', procurement.company_id.id)], limit=1).id
                 requisition_id = Requisition.create({
