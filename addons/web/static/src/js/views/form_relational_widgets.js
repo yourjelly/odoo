@@ -401,7 +401,7 @@ var FieldMany2One = common.AbstractField.extend(common.CompletionFieldMixin, com
     },
     is_blank: function() {
         var $input = !this.get('effective_readonly') && this.$input;
-        return this.is_syntax_valid() && !(this.get('required') && $input && !$input.val());
+        return !this.is_syntax_valid() || (this.get('required') && $input && !$input.val());
     },
     focus: function () {
         var input = !this.get('effective_readonly') && this.$input && this.$input[0];

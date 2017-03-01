@@ -849,7 +849,7 @@ var AbstractField = FormWidget.extend(FieldInterface, {
         return $.when();
     },
     keydown_TAB: function(e, reverse) {
-        if (this.get('effective_readonly') || this.is_blank()) {
+        if (this.get('effective_readonly') || !this.is_blank()) {
             return this._super(e, reverse);
         } else {
             e.preventDefault();
@@ -857,7 +857,7 @@ var AbstractField = FormWidget.extend(FieldInterface, {
         }
     },
     is_blank: function() {
-        return true;
+        return false;
     },
     get_string: function() {
         return this.string;
