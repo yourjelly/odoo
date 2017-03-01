@@ -482,7 +482,7 @@ var ListView = View.extend({
         } else {
             _.each(this.current_selection, function($row) { $row.removeClass("o_row_selected"); });
             current_selected_row.addClass("o_row_selected");
-            this.current_selection = [this.current_selected_row];
+            this.current_selection = [current_selected_row];
         }
 
         if (current_selected_row && current_selected_row.length) {

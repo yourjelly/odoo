@@ -134,12 +134,9 @@ var WidgetButton = common.FormWidget.extend({
         if (this.node.attrs.on_focus_tip) {
             var content = this.node.attrs.on_focus_tip;
         } else {
-            if (!this.string) { // If stat button then there will be no string of button
-                var string = this.get_string(this.node);
-                var content = _.str.sprintf("Press ENTER to %s", string);
-            } else {
-                var content = _.str.sprintf("Press ENTER to %s", this.string);
-            }
+            // If stat button then there will be no string on button instead we will use string of child
+            var content = _t("Press ENTER to %s");
+            content = this.string ? _.str.sprintf(content, this.string) : _.str.sprintf(content, this.get_string(this.node));
         }
         utils.show_tabindex_tip({attach_to: this.$el, title: content, trigger: 'focus'});
     },

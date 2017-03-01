@@ -386,7 +386,7 @@ ListView.include(/** @lends instance.web.ListView# */{
                             focus_field = _.find(tabindex_widgets, function(field) {
                                 return is_focusable(field);
                             });
-                            focus_field = focus_field.name;
+                            focus_field = focus_field && focus_field.name;
                         } else {
                             focus_field = _.find(self.editor.form.fields_order, function(field) {
                                 return is_focusable(fields[field]);

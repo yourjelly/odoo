@@ -411,7 +411,7 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
         this.node = node;
         this.session = session;
         this.modifiers = JSON.parse(this.node.attrs.modifiers || '{}');
-        this.tabindex = this.node.attrs.tabindex && parseInt(this.node.attrs.tabindex) || false;
+        this.tabindex = this.node.attrs.tabindex && parseInt(this.node.attrs.tabindex) || null;
         InvisibilityChangerMixin.init.call(this, this.field_manager, this.modifiers.invisible);
 
         this.field_manager.on("view_content_has_changed", this, this.process_modifiers);
@@ -523,8 +523,7 @@ var FormWidget = Widget.extend(InvisibilityChangerMixin, {
     bind_tabindex: function() {
         var self = this;
         var $element = this.get_tabindex_element();
-        // if (!this.get('readonly') && this.tabindex && this.tabindex > 0 && !this.no_tabindex) {
-        if ($element && !this.get('readonly') && (!this.tabindex || (this.tabindex && this.tabindex >= 0)) && !this.no_tabindex) { //No need of this, uncomment above line as we automatically assign tabindex to all widgets
+        if ($element && !this.get('readonly') && (!_.isNull(this.tabindex) && this.tabindex >= 0) && !this.no_tabindex) {
             $element.on("keydown", function(e) {
                 if (e.which == $.ui.keyCode.TAB) {
                     if (e.shiftKey) {

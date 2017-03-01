@@ -274,7 +274,7 @@ var FieldMany2One = common.AbstractField.extend(common.CompletionFieldMixin, com
             },
             select: function(event, ui) {
                 isSelecting = true;
-                if (self.ignore_enter) { // To ignore shift + enter
+                if (self.ignore_enter && event.shiftKey) { // To ignore shift + enter
                     event.stopPropagation();
                 }
                 var item = ui.item;
@@ -1127,7 +1127,7 @@ var One2ManyListView = X2ManyListView.extend({
                 }
             }).open();
             select_create_dialog.on('closed', this, function(e) {
-                self.x2m.$el.focus();
+                _.delay(function() { self.x2m.$el.focus(); }, 100); // delay is required when there is a bootstrap model inside bootstrap model(i.e. o2m inside o2m)
             });
         }
     },
@@ -1291,11 +1291,10 @@ var One2ManyListView = X2ManyListView.extend({
         var self = this;
         var form = this.editor.form;
         var tabindex_widgets = form.get_tabindex_widgets();
-        var has_tabindex_widgets = tabindex_widgets.length ? true : false;
         var first_field = _(form.fields_order).chain()
             .map(function (name) { return form.fields[name]; })
             .filter(function (field) {
-                if (has_tabindex_widgets) {
+                if (tabindex_widgets.length) {
                     return field.$el.is(':visible') && !field.get('effective_readonly') && field.tabindex && field.tabindex >= 0;
                 }
                 return field.$el.is(':visible') && !field.get('effective_readonly');
@@ -1415,7 +1414,7 @@ var Many2ManyListView = X2ManyListView.extend({
             }
         }).open();
         select_create_dialog.on('closed', this, function(e) {
-            self.x2m.$el.focus();
+            _.delay(function() { self.x2m.$el.focus(); }, 100); // delay will be usefull when there is popup inside bootstrap modal(modal top of modal)
         });
     },
     do_activate_record: function(index, id) {
@@ -1780,10 +1779,18 @@ var FieldMany2ManyCheckBoxes = AbstractManyField.extend(common.ReinitializeField
         this.records_orderer = new utils.DropMisordered();
     },
     initialize_field: function() {
+        var self = this;
         common.ReinitializeFieldMixin.initialize_field.call(this);
         this.on("change:domain", this, this.query_records);
         this.set("domain", new data.CompoundDomain(this.build_domain()).eval());
         this.on("change:records", this, this.render_value);
+        if (!this.get("effective_readonly")) {
+            this.$el.on("keydown", function(e) {
+                if (_.contains([$.ui.keyCode.UP, $.ui.keyCode.DOWN], e.which)) {
+                    self.select_checkbox(e);
+                }
+            });
+        }
     },
     query_records: function() {
         var self = this;
@@ -1811,15 +1818,22 @@ var FieldMany2ManyCheckBoxes = AbstractManyField.extend(common.ReinitializeField
     is_false: function() {
         return false;
     },
-    keydown_TAB: function(e, reverse) {
-        e.preventDefault(); //Need to preventDefault otherwise TAB key will immediately set focus on another field of current form
+    set_focus: function() {
+        var $inputs = this.$("input");
+        if ($inputs) {
+            $inputs.filter(":checked").length ? $inputs.filter(":checked").first().focus() : $inputs.first().focus();
+        }
+    },
+    select_checkbox: function(e) {
+        e.preventDefault();
+        var direction = e.which == $.ui.keyCode.UP ? 'previous' : 'next';
         var $inputs = this.$("input");
         var index = $inputs.index(this.$("input:focus"));
         if (this.$("input") && index == $inputs.length-1) {
-            this.view.last_tabindex = this.tabindex;
-            return this._super.apply(this, arguments);
+            $inputs.first().focus();
+        } else {
+            $inputs[index+1] && $inputs[index+1].focus();
         }
-        $inputs[index+1] && $inputs[index+1].focus();
     }
 });
 

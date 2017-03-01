@@ -438,12 +438,11 @@ var FormView = View.extend(common.FieldManagerMixin, {
             return next_widget;
         };
 
-        var next_widget = false;
         if (options && options.keep_focus_on_current && current_widget && !(current_widget.$el.is(":hidden") || current_widget.get('readonly') || current_widget.get('effective_readonly'))) {
             // Note: If shift + TAB is pressed on create(view mode) button then we may have current widget hidden(i.e. last button is hidden when focus goes to create button, handled that scenario by check is hidden)
-            next_widget = current_widget;
+            var next_widget = current_widget;
         } else {
-            next_widget = get_next_widget();
+            var next_widget = get_next_widget();
         }
 
         // If it is last field and tab is pressed then move focus to save button
