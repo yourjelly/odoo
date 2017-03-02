@@ -1080,7 +1080,6 @@ var One2ManyListView = X2ManyListView.extend({
         this.options = _.extend(this.options, {
             GroupsType: One2ManyGroups,
             ListType: X2ManyList,
-            keyboard_selectable: false
         });
         this.on('edit:after', this, this.proxy('_after_edit'));
         this.on('save:before cancel:before', this, this.proxy('_before_unedit'));

@@ -41,8 +41,6 @@ var ListView = View.extend({
     defaults: _.extend({}, View.prototype.defaults, {
         // records can be selected one by one
         selectable: true,
-        // list rows can be seletable using keyboard up/down key
-        keyboard_selectable: true,
         // list rows can be deleted
         deletable: false,
         // whether the column headers should be displayed
@@ -260,34 +258,32 @@ var ListView = View.extend({
         }
 
         // Listview selection using keyboard
-        if (this.options.keyboard_selectable) {
-            var searchview = this.getParent() && this.getParent().searchview;
-            if (searchview) {
-                searchview.off('search_widget_down')
-                    .on('search_widget_down', this, function (e) {
-                        self.keydown_DOWN_select(e);
-                        self.$(".o_list_view").focus();
-                    });
-                self.$(".o_list_view")
-                        .off("keydown")
-                        .on('keydown', function(e) {
-                            switch(e.which) {
-                                case $.ui.keyCode.DOWN:
-                                    self.keydown_DOWN_select(e); // Kept name keydown_DOWN_select to avoid collisiong with keydown_DOWN method of editable listview
-                                    break
-                                case $.ui.keyCode.UP:
-                                    self.keydown_UP_select(e);
-                                    break;
-                                case $.ui.keyCode.ENTER:
-                                    // Reset current selection and current selected row
-                                    self.keydown_ENTER(e);
-                                    self.current_selected_row = false;
-                                    self.current_selection = [];
-                                    break;
-                            }
-                        })
-                        .focus();
-            }
+        var searchview = this.getParent() && this.getParent().searchview;
+        if (searchview) {
+            searchview.off('search_widget_down')
+                .on('search_widget_down', this, function (e) {
+                    self.keydown_DOWN_select(e);
+                    self.$(".o_list_view").focus();
+                });
+            self.$(".o_list_view")
+                .off("keydown")
+                .on('keydown', function(e) {
+                    switch(e.which) {
+                        case $.ui.keyCode.DOWN:
+                            self.keydown_DOWN_select(e); // Kept name keydown_DOWN_select to avoid collisiong with keydown_DOWN method of editable listview
+                            break
+                        case $.ui.keyCode.UP:
+                            self.keydown_UP_select(e);
+                            break;
+                        case $.ui.keyCode.ENTER:
+                            // Reset current selection and current selected row
+                            self.keydown_ENTER(e);
+                            self.current_selected_row = false;
+                            self.current_selection = [];
+                            break;
+                    }
+                })
+                .focus();
         }
 
         this.trigger('list_view_loaded', data, this.grouped);
