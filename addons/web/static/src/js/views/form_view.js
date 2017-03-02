@@ -90,8 +90,10 @@ var FormView = View.extend(common.FieldManagerMixin, {
             });
         });
         core.bus.on('dialog_closed', this, function() {
-            // FIXME: Note: This is going to be bind on each formview, this will create issue when dialog is closed so will get trigerred for all formviews
-            this.set_next_tabindex({keep_focus_on_current: true});
+            // Hacky Fix: Note: This is going to be bind on each formview, this will create issue when dialog is closed so will get trigerred for all formviews
+            if (this.$el.is(":visible")) {
+                this.set_next_tabindex({keep_focus_on_current: true});
+            }
         });
     },
     start: function() {
