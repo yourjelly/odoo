@@ -889,6 +889,9 @@ var FieldX2Many = AbstractManyField.extend({
     },
     set_focus: function() {
         var view = this.viewmanager.active_view;
+        if (!view.controller.is_action_enabled('create') || this.get('effective_readonly')) {
+            return this.view.set_next_tabindex();
+        }
         if (view && view.controller && !this.get('effective_readonly')) {
             this.is_loaded.done(function () {
                 if (view.type == 'list') {
