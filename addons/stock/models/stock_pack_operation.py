@@ -60,21 +60,6 @@ class PackOperation(models.Model):
                 self.qty_done = 0.0
 
     @api.one
-    def _get_remaining_qty(self):
-        if self.package_id and not self.product_id:
-            # dont try to compute the remaining quantity for packages because it's not relevant (a package could include different products).
-            # should use _get_remaining_prod_quantities instead
-            # TDE FIXME: actually resolve the comment hereabove
-            self.remaining_qty = 0
-        else:
-            qty = self.product_qty
-            if self.product_uom_id:
-                qty = self.product_uom_id._compute_quantity(self.product_qty, self.product_id.uom_id)
-            for record in self.linked_move_operation_ids:
-                qty -= record.qty
-            self.remaining_qty = float_round(qty, precision_rounding=self.product_id.uom_id.rounding)
-
-    @api.one
     def _compute_location_description(self):
         self.from_loc = '%s%s' % (self.location_id.name, self.product_id and self.package_id.name or '')
         self.to_loc = '%s%s' % (self.location_dest_id.name, self.result_package_id.name or '')
