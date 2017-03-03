@@ -215,6 +215,7 @@
                             string="Reset Operations" type="object"/>
                     <field name="launch_pack_operations" invisible="1"/>
                     <field name="show_operations" invisible="1"/>
+                    <field name="pack_operation_exist" invisible="1"/>
                     <button name="button_scrap" type="object" string="Scrap" attrs="{'invisible': ['|', ('state', 'in', ('draft', 'cancel')), '&amp;', ('picking_type_code', '=', 'incoming'), ('state', '!=', 'done')]}"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,partially_available,assigned,done" />
                 </header>
