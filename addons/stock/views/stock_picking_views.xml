@@ -248,19 +248,28 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Moves" attrs="{'invisible': [('show_operations', '=', True)]}">
-                            <field name="move_lines">
-                                <tree>
+                        <page string="MovesOperations" attrs="{'invisible': [('show_operations', '=', True)]}">
+                            <field name="move_lines" context="{'address_in_id': partner_id, 'default_picking_type_id': picking_type_id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id}">
+                                <tree decoration-muted="scrapped == True" string="Stock Moves" editable="bottom">
                                     <field name="product_id"/>
-                                    <field name="availability" invisible="1"/>
+                                    <field name="name" invisible="1"/>
                                     <field name="product_uom_qty"/>
-                                    <field name="product_uom" options="{'no_open': True, 'no_create': True}"/>
+                                    <field name="product_uom" options="{'no_open': True, 'no_create': True}" string="Unit of Measure" groups="product.group_uom"/>
+                                    <field name="location_id" invisible="1"/>
+                                    <field name="create_date" invisible="1" />
+                                    <field name="date_expected" invisible="1" />
+                                    <field name="picking_type_id" invisible="1"/>
+                                    <field name="scrapped" invisible="1"/>
+                                    <field name="availability" invisible="1"/>
+                                    <field name="reserved_availability" invisible="1"/>
+                                    <field name="location_dest_id" invisible="1"/>
                                     <field name="state"/>
+                                    <field name=""/>
                                 </tree>
                             </field>
                         </page>
                         <page string="Operations" attrs="{'invisible': [('show_operations', '=', False)]}">
-                            <field name="pack_operation_ids">
+                            <field name="pack_operation_ids" context="{'default_picking_id': id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id}">
                                 <tree editable="bottom" decoration-muted="result_package_id" decoration-danger="qty_done&gt;product_qty" decoration-success="qty_done==product_qty and state!='done' and not result_package_id">
                                     <field name="package_id" groups="stock.group_tracking_lot" invisible="1"/>
                                     <field name="product_id" required="1" attrs="{'readonly': [('fresh_record', '=', False)]}"/>
