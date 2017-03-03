@@ -40,6 +40,8 @@ class PickingType(models.Model):
     use_existing_lots = fields.Boolean(
         'Use Existing Lots/Serial Numbers', default=True,
         help="If this is checked, you will be able to choose the Lots/Serial Numbers. You can also decide to not put lots in this operation type.  This means it will create stock with no lot or not put a restriction on the lot taken. ")
+    show_operations = fields.Boolean(
+        'Show operations', default=False)
 
     # Statistics for the kanban view
     last_done_picking = fields.Char('Last 10 Done Pickings', compute='_compute_last_done_picking')
@@ -264,17 +266,8 @@ class Picking(models.Model):
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
     # TDE FIXME: separate those two kind of pack operations
     pack_operation_ids = fields.One2many(
-        'stock.pack.operation', 'picking_id', 'Related Packing Operations',
+        'stock.pack.operation', 'picking_id', 'Packing Operations',
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
-    pack_operation_product_ids = fields.One2many(
-        'stock.pack.operation', 'picking_id', 'Non pack',
-        domain=[('product_id', '!=', False)],
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
-    pack_operation_pack_ids = fields.One2many(
-        'stock.pack.operation', 'picking_id', 'Pack',
-        domain=[('product_id', '=', False)],
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
-
     pack_operation_exist = fields.Boolean(
         'Has Pack Operations', compute='_compute_pack_operation_exist',
         help='Check the existence of pack operation on the picking')
@@ -290,6 +283,9 @@ class Picking(models.Model):
         'Recompute pack operation?', copy=False,
         help='True if reserved quants changed, which mean we might need to recompute the package operations')
     launch_pack_operations = fields.Boolean("Launch Pack Operations", copy=False)
+    show_operations = fields.Boolean(related='picking_type_id.show_operations')
+    
+    
 
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per company!'),
