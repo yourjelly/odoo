@@ -119,13 +119,7 @@ class StockMove(models.Model):
     scrapped = fields.Boolean('Scrapped', related='location_dest_id.scrap_location', readonly=True, store=True)
     quant_ids = fields.Many2many('stock.quant', 'stock_quant_move_rel', 'move_id', 'quant_id', 'Moved Quants', copy=False)
     reserved_quant_ids = fields.One2many('stock.quant', 'reservation_id', 'Reserved quants')
-    linked_move_operation_ids = fields.One2many(
-        'stock.move.operation.link', 'move_id', 'Linked Operations', readonly=True,
-        help='Operations that impact this move for the computation of the remaining quantities')
-    remaining_qty = fields.Float(
-        'Remaining Quantity', compute='_get_remaining_qty',
-        digits=0, states={'done': [('readonly', True)]},
-        help="Remaining Quantity in default UoM according to operations matched with this move")
+    operation_ids = fields.One2many('stock.pack.operation', 'move_id', 'Operations')
     procurement_id = fields.Many2one('procurement.order', 'Procurement')
     group_id = fields.Many2one('procurement.group', 'Procurement Group', default=_default_group_id)
     rule_id = fields.Many2one('procurement.rule', 'Procurement Rule', ondelete='restrict', help='The procurement rule that created this stock move')
@@ -164,11 +158,6 @@ class StockMove(models.Model):
         for `product_qty`, where the same write should set the `product_uom_qty` field instead, in order to
         detect errors. """
         raise UserError(_('The requested operation cannot be processed because of a programming error setting the `product_qty` field instead of the `product_uom_qty`.'))
-
-    @api.one
-    @api.depends('linked_move_operation_ids.qty')
-    def _get_remaining_qty(self):
-        self.remaining_qty = float_round(self.product_qty - sum(self.mapped('linked_move_operation_ids').mapped('qty')), precision_rounding=self.product_id.uom_id.rounding)
 
     @api.one
     @api.depends('state', 'quant_ids.lot_id', 'reserved_quant_ids.lot_id')
