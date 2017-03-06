@@ -368,77 +368,118 @@
         <record model="pos.config" id="pos_config_main">
             <field name="customer_facing_display_html">
                 <![CDATA[
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-xs-12">
-            <div>
-                <img src="/logo" alt="Your Company Logo" class="pull-right img-responsive"/>
+<div class="pos-customer_facing_display" contenteditable="false">
+    <div class="pos-customer_products">
+        <div class="pos_orderlines">
+            <div class="pos_orderlines_item pos_orderlines_header">
+                <div/>
+                <div/>
+                <div>Quantity</div>
+                <div>Price</div>
+            </div>
+            <div class="pos_orderlines_list">
+                <div class="pos_orderlines_item">
+                    <div><div style="background-image:url(/pos_data_drinks/static/img/th-water.jpg)"/></div>
+                    <div>Water</div>
+                    <div>2</div>
+                    <div>$ 4.40</div>
+                </div>
+                <div class="pos_orderlines_item">
+                    <div><div style="background-image:url(/pos_data_drinks/static/img/th-fanta.jpg)"/></div>
+                    <div>Fanta</div>
+                    <div>3</div>
+                    <div>$ 3.12</div>
+                </div>
+                <div class="pos_orderlines_item">
+                    <div><div style="background-image:url(/pos_data_drinks/static/img/th-gordon.jpg)"/></div>
+                    <div>Gordon</div>
+                    <div>3</div>
+                    <div>$ 8.50</div>
+                </div>
+                <div class="pos_orderlines_item">
+                    <div><div style="background-image:url(/pos_data_drinks/static/img/th-malibu.jpg)"/></div>
+                    <div>Malibu Drink</div>
+                    <div>1</div>
+                    <div>$ 4.50</div>
+                </div>
+                <div class="pos_orderlines_item">
+                    <div><div style="background-image:url(/pos_data_drinks/static/img/th-margarita.jpg)"/></div>
+                    <div>Margarita</div>
+                    <div>2</div>
+                    <div>$ 4.40</div>
+                </div>
+                <div class="pos_orderlines_item">
+                    <div><div style="background-image:url(/pos_data_drinks/static/img/th-martini.jpg)"/></div>
+                    <div>Martini</div>
+                    <div>3</div>
+                    <div>$ 3.12</div>
+                </div>
+                <div class="pos_orderlines_item">
+                    <div><div style="background-image:url(/pos_data_drinks/static/img/th-cosmopolitan.jpg)"/></div>
+                    <div>Cosmopolitanon</div>
+                    <div>3</div>
+                    <div>$ 8.50</div>
+                </div>
+                <div class="pos_orderlines_item">
+                    <div><div style="background-image:url(/pos_data_drinks/static/img/th-beers.jpg)"/></div>
+                    <div>Beers</div>
+                    <div>1</div>
+                    <div>$ 4.50</div>
+                </div>
+                <div class="pos_orderlines_item">
+                    <div><div style="background-image:url(/pos_data_drinks/static/img/th-efes.jpg)"/></div>
+                    <div>Efes</div>
+                    <div>2</div>
+                    <div>$ 4.40</div>
+                </div>
+                <div class="pos_orderlines_item">
+                    <div><div style="background-image:url(/pos_data_drinks/static/img/th-green_tea.jpg)"/></div>
+                    <div>Green Tea</div>
+                    <div>3</div>
+                    <div>$ 3.12</div>
+                </div>
+                <div class="pos_orderlines_item">
+                    <div><div style="background-image:url(/pos_data_drinks/static/img/th-jim_beam.jpg)"/></div>
+                    <div>Jim Beam</div>
+                    <div>3</div>
+                    <div>$ 8.50</div>
+                </div>
+                <div class="pos_orderlines_item">
+                    <div><div style="background-image:url(/pos_data_drinks/static/img/th-coffee.jpg)"/></div>
+                    <div>Coffe</div>
+                    <div>1</div>
+                    <div>$ 4.50</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-xs-4 ad-space">
-            <img src="/point_of_sale/static/src/img/odoo_ad.png" class="img-responsive" alt=""/>
-        </div>
+    <div class="pos-payment_info">
+        <img src="http://placehold.it/300x350?text=ADV" class="pos-adv" alt=""/>
+        <hr/>
+        <div class="pos-company_logo oe_image_bg" style="background-image:url(http://placehold.it/300x100?text=COMPANY+LOGO)"/>
 
-        <div class="col-xs-8">
-            <h2>The following items are in your basket:</h2>
-            <div class="scroll-orderlines">
-                <table>
-                    <thead>
-                        <tr class="product-cell">
-                            <td>Image</td>
-                            <td>Product name</td>
-                            <td class="text-right">Quantity</td>
-                            <td class="text-right">Price</td>
-                        </tr>
-                    </thead>
-                    <tbody id="orderlines">
-                        <tr class="product-cell">
-                            <td class="text-center">
-                                <img alt="" class="img" src="/pos_data_drinks/static/img/th-water.jpg"/>
-                            </td>
-                            <td>Water</td>
-                            <td class="text-right">2.000</td>
-                            <td class="text-right">$ 4.40</td>
-                        </tr>
-
-                        <tr class="product-cell">
-                            <td>
-                                <img alt="" class="img" src="/point_of_sale/static/img/oranges-image.jpg"/>
-                            </td>
-                            <td>Oranges</td>
-                            <td class="text-right">3.000</td>
-                            <td class="text-right">$ 3.12</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <!-- We use absolute positioning to get this div
-                 at the bottom of the screen.  because of this
-                 bootstrap behaves like we're not in a row
-                 anymore, hence the offsets -->
-            <div class="payment-info">
-                <div class="col-xs-offset-4 col-xs-4">
+        <div class="pos-payment_info_details">
+            <div class="pos-total">
+                <div>
                     <span class="total-amount-formatting">TOTAL:</span>
                 </div>
-                <div class="col-xs-4 text-right">
-                    <span id="total-amount" class="total-amount-formatting">$ 4.14</span>
+                <div>
+                    <span id="total-amount" class="pos_total-amount">$ 4269.14</span>
                 </div>
-                <div id="paymentlines">
-                    <div class="col-xs-offset-4 col-xs-4">
-                        <span>Cash (USD)</span>
-                    </div>
-                    <div class="col-xs-4 text-right">
-                        <span>$ 5.00</span>
-                    </div>
-                    <div class="col-xs-offset-4 col-xs-4">
-                        <span>CHANGE:</span>
-                    </div>
-                    <div class="col-xs-4 text-right">
-                        <span>$ 0.86</span>
-                    </div>
+            </div>
+            <div class="pos-paymentlines">
+                <div>
+                    <span>Cash (USD):</span>
+                </div>
+                <div>
+                    <span>$ 5.00</span>
+                </div>
+                <div>
+                    <span>Change:</span>
+                </div>
+                <div>
+                    <span>$ 0.86</span>
                 </div>
             </div>
         </div>

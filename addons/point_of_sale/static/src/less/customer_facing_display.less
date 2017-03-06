@@ -1,0 +1,232 @@
+// out: ../css/customer_facing_display.css, sourcemap: false, compress: false
+
+@color_gray_lighter: #f6f6f6;
+@color_gray_dark: #3E3E3E;
+@font_size_base: 2vmin;
+
+@keyframes item_in {
+    0% {
+        opacity: 0;
+        margin-top: -30px;
+    }
+    50% {
+        margin-top: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: geometricPrecision;
+    font-smooth: always;
+
+    .pos-customer_facing_display {
+        background-color: @color_gray_lighter;
+        font-size: 2vw;
+        font-family: Futura, Helvetica, Arial, "Lucida Grande", sans-serif;
+        font-weight: 300;
+        display: flex;
+        width: 100%;
+        height: 100%;
+        flex-direction: row;
+
+        .pos-customer_products, .pos-payment_info {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            padding: 2%;
+        }
+
+        .pos_orderlines {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+
+            .pos_orderlines_list {
+                overflow-y: scroll;
+                padding-right: 1.5vw;
+            }
+
+            .pos_orderlines_item {
+                flex: 1 0 100%;
+                display: flex;
+                flex-direction: row;
+                background-color: white;
+                margin-bottom: 1vw;
+                padding: 1%;
+                align-items: center;
+                border-radius: 0.3vw;
+                box-shadow: 0 .1vw .1vw darken(@color_gray_lighter, 10%);
+                animation: item_in 1s ease;
+
+                &.pos_orderlines_header {
+                    height: 3vh;
+                    background-color: transparent;
+                    box-shadow: none;
+                    animation: none;
+                    color: darken(@color_gray_lighter, 30%);
+                    > div, > div:last-child {
+                        border-left-width: 0;
+                        text-align: center;
+                        font-size: 70%;
+                        font-weight: normal;
+                    }
+                    > div:last-child {
+                        text-align: left;
+                    }
+                }
+                > div {
+                    width: 5%;
+                    text-align: left;
+                    flex-grow: 1;
+                    margin-right: 4%;
+                    font-size: 80%;
+
+                    &:first-child {
+                        flex: 1 1;
+                        width: 5%;
+                        margin-right: 2%;
+                    }
+                    &:nth-child(2) {
+                        width: 40%;
+                        border-left: 1px solid darken(@color_gray_lighter, 10%);
+                        padding-left: 2%;
+                    }
+                    &:nth-child(3) {
+                        text-align: center;
+                    }
+
+                    &:last-child {
+                        margin-right: 0;
+                        font-weight: bold;
+                    }
+                    div {
+                        background-position: center;
+                        background-size: cover;
+                        padding-top: 75%;
+                        display: block;
+                    }
+                }
+            }
+        }
+        .pos-payment_info {
+            max-width: 30%;
+            background-color: @color_gray_dark;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            .pos-adv {
+                max-width: 100%;
+                max-height: 100%;
+                border: .5vw solid @color_gray_lighter;
+            }
+            hr {
+                width: 100%;
+                border-color: fade(@color_gray_lighter, 20%);
+            }
+            .pos-company_logo {
+                width: 100%;
+                padding-bottom: 35%;
+                background-size: contain;
+                background-position: center;
+                background-repeat: no-repeat;
+                height: auto;
+            }
+            .pos-payment_info_details{
+                .pos-total, .pos-paymentlines {
+                    flex-direction: row;
+                    display: flex;
+                    flex-wrap: wrap;
+                    justify-content: space-between;
+                    align-items: baseline;
+                    > div {
+                        flex: 1 0 48%;
+                    }
+                }
+                .pos-total {
+                    font-size: 2.5vw;
+                    .pos_total-amount {
+                        font-weight: bold;
+                        font-size: 2.4vw;
+                    }
+                }
+                .pos-paymentlines {
+                    margin-top: 2%;
+                    font-size: 80%;
+                    line-height: 1.6;
+                }
+            }
+        }
+        > .pos-adv {
+            display: none;
+        }
+    }
+
+    @media all and (orientation: portrait) {
+        .pos-customer_facing_display {
+            font-size: 2vh;
+            flex-direction: column;
+
+            > .pos-adv {
+                display: flex;
+                height: 15vh;
+                width: 100%;
+                border: .5vh solid @color_gray_dark;
+            }
+
+            .pos-payment_info {
+                max-width: 100%;
+                flex-grow: 0;
+                height: 20vh;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+
+                hr, .pos-adv {
+                    display: none;
+                }
+
+                .pos-company_logo {
+                    margin: 0;
+                    flex: 1 1 20%;
+                    background-position: left;
+                    margin-right: 5%;
+                    height: 100%;
+                    padding: 0;
+                }
+                .pos-payment_info_details {
+                    flex: 0 1 50%;
+                    flex-direction: column;
+                    .pos-total {
+                        font-size: 3vw;
+                        .pos_total-amount {
+                            font-size: 3.5vw;
+                        }
+                    }
+                    .pos-paymentlines {
+                        margin-top: 2%;
+                        font-size: 80%;
+                        line-height: 1.6;
+                    }
+                }
+            }
+
+            .pos_orderlines_list {
+                padding-right: 1.5vh;
+            }
+
+            .pos_orderlines {
+                .pos_orderlines_item {
+                    box-shadow: 0 .1vh .1vh darken(@color_gray_lighter, 10%);
+                    margin-bottom: 1vh;
+                }
+            }
+
+        }
+    }
+}
+

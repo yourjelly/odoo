@@ -1,55 +1,209 @@
+@keyframes item_in {
+  0% {
+    opacity: 0;
+    margin-top: -30px;
+  }
+  50% {
+    margin-top: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 body {
-    background-color: #efefef;
-    font-size: 16px;
-    font-family: Helvetica, Arial, "Lucida Grande", sans-serif;
-    font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+  font-smooth: always;
 }
-
-table {
+body .pos-customer_facing_display {
+  background-color: #f6f6f6;
+  font-size: 2vw;
+  font-family: Futura, Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-weight: 300;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: row;
+}
+body .pos-customer_facing_display .pos-customer_products,
+body .pos-customer_facing_display .pos-payment_info {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 2%;
+}
+body .pos-customer_facing_display .pos_orderlines {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+body .pos-customer_facing_display .pos_orderlines .pos_orderlines_list {
+  overflow-y: scroll;
+  padding-right: 1.5vw;
+}
+body .pos-customer_facing_display .pos_orderlines .pos_orderlines_item {
+  flex: 1 0 100%;
+  display: flex;
+  flex-direction: row;
+  background-color: white;
+  margin-bottom: 1vw;
+  padding: 1%;
+  align-items: center;
+  border-radius: 0.3vw;
+  box-shadow: 0 0.1vw 0.1vw #dddddd;
+  animation: item_in 1s ease;
+}
+body .pos-customer_facing_display .pos_orderlines .pos_orderlines_item.pos_orderlines_header {
+  height: 3vh;
+  background-color: transparent;
+  box-shadow: none;
+  animation: none;
+  color: #aaaaaa;
+}
+body .pos-customer_facing_display .pos_orderlines .pos_orderlines_item.pos_orderlines_header > div,
+body .pos-customer_facing_display .pos_orderlines .pos_orderlines_item.pos_orderlines_header > div:last-child {
+  border-left-width: 0;
+  text-align: center;
+  font-size: 70%;
+  font-weight: normal;
+}
+body .pos-customer_facing_display .pos_orderlines .pos_orderlines_item.pos_orderlines_header > div:last-child {
+  text-align: left;
+}
+body .pos-customer_facing_display .pos_orderlines .pos_orderlines_item > div {
+  width: 5%;
+  text-align: left;
+  flex-grow: 1;
+  margin-right: 4%;
+  font-size: 80%;
+}
+body .pos-customer_facing_display .pos_orderlines .pos_orderlines_item > div:first-child {
+  flex: 1 1;
+  width: 5%;
+  margin-right: 2%;
+}
+body .pos-customer_facing_display .pos_orderlines .pos_orderlines_item > div:nth-child(2) {
+  width: 40%;
+  border-left: 1px solid #dddddd;
+  padding-left: 2%;
+}
+body .pos-customer_facing_display .pos_orderlines .pos_orderlines_item > div:nth-child(3) {
+  text-align: center;
+}
+body .pos-customer_facing_display .pos_orderlines .pos_orderlines_item > div:last-child {
+  margin-right: 0;
+  font-weight: bold;
+}
+body .pos-customer_facing_display .pos_orderlines .pos_orderlines_item > div div {
+  background-position: center;
+  background-size: cover;
+  padding-top: 75%;
+  display: block;
+}
+body .pos-customer_facing_display .pos-payment_info {
+  max-width: 30%;
+  background-color: #3E3E3E;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+body .pos-customer_facing_display .pos-payment_info .pos-adv {
+  max-width: 100%;
+  max-height: 100%;
+  border: 0.5vw solid #f6f6f6;
+}
+body .pos-customer_facing_display .pos-payment_info hr {
+  width: 100%;
+  border-color: rgba(246, 246, 246, 0.2);
+}
+body .pos-customer_facing_display .pos-payment_info .pos-company_logo {
+  width: 100%;
+  padding-bottom: 35%;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: auto;
+}
+body .pos-customer_facing_display .pos-payment_info .pos-payment_info_details .pos-total,
+body .pos-customer_facing_display .pos-payment_info .pos-payment_info_details .pos-paymentlines {
+  flex-direction: row;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+}
+body .pos-customer_facing_display .pos-payment_info .pos-payment_info_details .pos-total > div,
+body .pos-customer_facing_display .pos-payment_info .pos-payment_info_details .pos-paymentlines > div {
+  flex: 1 0 48%;
+}
+body .pos-customer_facing_display .pos-payment_info .pos-payment_info_details .pos-total {
+  font-size: 2.5vw;
+}
+body .pos-customer_facing_display .pos-payment_info .pos-payment_info_details .pos-total .pos_total-amount {
+  font-weight: bold;
+  font-size: 2.4vw;
+}
+body .pos-customer_facing_display .pos-payment_info .pos-payment_info_details .pos-paymentlines {
+  margin-top: 2%;
+  font-size: 80%;
+  line-height: 1.6;
+}
+body .pos-customer_facing_display > .pos-adv {
+  display: none;
+}
+@media all and (orientation: portrait) {
+  body .pos-customer_facing_display {
+    font-size: 2vh;
+    flex-direction: column;
+  }
+  body .pos-customer_facing_display > .pos-adv {
+    display: flex;
+    height: 15vh;
     width: 100%;
-}
-
-thead {
-    font-size: 13px;
-    border-bottom: 5px solid #adadad;
-}
-
-.product-cell img {
-    height: 45px;
-}
-
-/* restrict width of image column of table */
-tr.product-cell > td:first-child {
-    width: 12%;
-}
-
-tr.product-cell > td:nth-child(2) {
-    width: 68%;
-}
-
-tr.product-cell > td:nth-child(3) {
-    width: 10%;
-}
-
-tr.product-cell > td:nth-child(4) {
-    width: 10%;
-}
-
-.scroll-orderlines {
-    overflow-y: auto;
-    padding-right: 5px;
-}
-
-.payment-info {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    background-color: #3E3E3E;
-    color: white;
-    width: 100%;
-}
-
-.total-amount-formatting {
-    color: #1fb496;
-    font-size: 24px;
+    border: 0.5vh solid #3E3E3E;
+  }
+  body .pos-customer_facing_display .pos-payment_info {
+    max-width: 100%;
+    flex-grow: 0;
+    height: 20vh;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  body .pos-customer_facing_display .pos-payment_info hr,
+  body .pos-customer_facing_display .pos-payment_info .pos-adv {
+    display: none;
+  }
+  body .pos-customer_facing_display .pos-payment_info .pos-company_logo {
+    margin: 0;
+    flex: 1 1 20%;
+    background-position: left;
+    margin-right: 5%;
+    height: 100%;
+    padding: 0;
+  }
+  body .pos-customer_facing_display .pos-payment_info .pos-payment_info_details {
+    flex: 0 1 50%;
+    flex-direction: column;
+  }
+  body .pos-customer_facing_display .pos-payment_info .pos-payment_info_details .pos-total {
+    font-size: 3vw;
+  }
+  body .pos-customer_facing_display .pos-payment_info .pos-payment_info_details .pos-total .pos_total-amount {
+    font-size: 3.5vw;
+  }
+  body .pos-customer_facing_display .pos-payment_info .pos-payment_info_details .pos-paymentlines {
+    margin-top: 2%;
+    font-size: 80%;
+    line-height: 1.6;
+  }
+  body .pos-customer_facing_display .pos_orderlines_list {
+    padding-right: 1.5vh;
+  }
+  body .pos-customer_facing_display .pos_orderlines .pos_orderlines_item {
+    box-shadow: 0 0.1vh 0.1vh #dddddd;
+    margin-bottom: 1vh;
+  }
 }
