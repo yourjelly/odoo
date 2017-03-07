@@ -73,10 +73,6 @@ class PackOperation(models.Model):
         else:
             self.lots_visible = self.product_id.tracking != 'none'
 
-    @api.onchange('pack_lot_ids')
-    def _onchange_packlots(self):
-        self.qty_done = sum([x.qty for x in self.pack_lot_ids])
-
     @api.multi
     @api.onchange('product_id', 'product_uom_id')
     def onchange_product_id(self):
