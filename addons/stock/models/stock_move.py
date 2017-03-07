@@ -145,6 +145,12 @@ class StockMove(models.Model):
     restrict_partner_id = fields.Many2one('res.partner', 'Owner ', help="Technical field used to depict a restriction on the ownership of quants to consider when marking this move as 'done'")
     route_ids = fields.Many2many('stock.location.route', 'stock_location_route_move', 'move_id', 'route_id', 'Destination route', help="Preferred route to be followed by the procurement order")
     warehouse_id = fields.Many2one('stock.warehouse', 'Warehouse', help="Technical field depicting the warehouse to consider for the route selection on the next procurement (if any).")
+    has_tracking = fields.Selection(related='product_id.tracking', string='Product with Tracking')
+    quantity_done_store = fields.Float('Quantity', digits=0)
+    quantity_done = fields.Float(
+        'Quantity', compute='_qty_done_compute', inverse='_qty_done_set',
+        digits=dp.get_precision('Product Unit of Measure'))
+
 
     @api.one
     @api.depends('product_id', 'product_uom', 'product_uom_qty')
@@ -158,6 +164,21 @@ class StockMove(models.Model):
         for `product_qty`, where the same write should set the `product_uom_qty` field instead, in order to
         detect errors. """
         raise UserError(_('The requested operation cannot be processed because of a programming error setting the `product_qty` field instead of the `product_uom_qty`.'))
+
+    @api.multi
+    @api.depends('pack_operation_ids.qty_done', 'quantity_done_store')
+    def _qty_done_compute(self):
+        for move in self:
+            #if move.has_tracking != 'none':
+            move.quantity_done = sum(move.pack_operation_ids.mapped('qty_done'))
+            #else:
+            #    move.quantity_done = move.quantity_done_store
+
+    @api.multi
+    def _qty_done_set(self):
+        for move in self:
+            if move.has_tracking == 'none':
+                move.quantity_done_store = move.quantity_done
 
     @api.one
     @api.depends('state', 'quant_ids.lot_id', 'reserved_quant_ids.lot_id')
