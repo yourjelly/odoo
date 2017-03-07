@@ -130,6 +130,7 @@ class StockMove(models.Model):
     picking_type_id = fields.Many2one('stock.picking.type', 'Operation Type')
     inventory_id = fields.Many2one('stock.inventory', 'Inventory')
     lot_ids = fields.Many2many('stock.production.lot', string='Lots/Serial Numbers', compute='_compute_lot_ids')
+    pack_operation_ids = fields.One2many('stock.pack.operation', 'move_id')
     origin_returned_move_id = fields.Many2one('stock.move', 'Origin return move', copy=False, help='Move that created the return move')
     returned_move_ids = fields.One2many('stock.move', 'origin_returned_move_id', 'All returned moves', help='Optional: all returned moves created from this move')
     reserved_availability = fields.Float(
@@ -349,6 +350,34 @@ class StockMove(models.Model):
         forgot some of them, use this tool instead. """
         return self.filtered(lambda move: move.state not in ('done', 'cancel'))
 
+    @api.multi
+    def split_move_operation(self):
+        ctx = dict(self.env.context)
+        self.ensure_one()
+        view = self.env.ref('stock.view_stock_move_operations')
+#         serial = (self.has_tracking == 'serial')
+#         only_create = False  # Check operation type in theory
+#         show_reserved = any([x for x in self.pack_operation_ids if x.product_qty > 0.0])
+#         ctx.update({
+#             'serial': serial,
+#             'only_create': only_create,
+#             'create_lots': True,
+#             'state_done': self.is_done,
+#             'show_reserved': show_reserved,
+#         })
+        result = {
+            'name': _('Register Operations'),
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'stock.move',
+            'views': [(view.id, 'form')],
+            'view_id': view.id,
+            'target': 'new',
+            'res_id': self.id,
+            'context': ctx,
+        }
+        return result
 
     # Main actions
     # ------------------------------------------------------------
@@ -604,48 +633,13 @@ class StockMove(models.Model):
                 # if the move is returned from another, restrict the choice of quants to the ones that follow the returned move
                 if move.origin_returned_move_id:
                     main_domain[move.id] += [('history_ids', 'in', move.origin_returned_move_id.id)]
-                for link in move.linked_move_operation_ids:
-                    operations |= link.operation_id
-
-        # Check all ops and sort them: we want to process first the packages, then operations with lot then the rest
-        operations = operations.sorted(key=lambda x: ((x.package_id and not x.product_id) and -4 or 0) + (x.package_id and -2 or 0) + (x.pack_lot_ids and -1 or 0))
-        for ops in operations:
-            # TDE FIXME: this code seems to be in action_done, isn't it ?
-            # first try to find quants based on specific domains given by linked operations for the case where we want to rereserve according to existing pack operations
-            if not (ops.product_id and ops.pack_lot_ids):
-                for record in ops.linked_move_operation_ids:
-                    move = record.move_id
-                    if move.id in main_domain:
-                        qty = record.qty
-                        domain = main_domain[move.id]
-                        if qty:
-                            quants = Quant.quants_get_preferred_domain(qty, move, ops=ops, domain=domain, preferred_domain_list=[])
-                            Quant.quants_reserve(quants, move, record)
-            else:
-                lot_qty = {}
-                rounding = ops.product_id.uom_id.rounding
-                for pack_lot in ops.pack_lot_ids:
-                    lot_qty[pack_lot.lot_id.id] = ops.product_uom_id._compute_quantity(pack_lot.qty, ops.product_id.uom_id)
-                for record in ops.linked_move_operation_ids:
-                    move_qty = record.qty
-                    move = record.move_id
-                    domain = main_domain[move.id]
-                    for lot in lot_qty:
-                        if float_compare(lot_qty[lot], 0, precision_rounding=rounding) > 0 and float_compare(move_qty, 0, precision_rounding=rounding) > 0:
-                            qty = min(lot_qty[lot], move_qty)
-                            quants = Quant.quants_get_preferred_domain(qty, move, ops=ops, lot_id=lot, domain=domain, preferred_domain_list=[])
-                            Quant.quants_reserve(quants, move, record)
-                            lot_qty[lot] -= qty
-                            move_qty -= qty
 
         # Sort moves to reserve first the ones with ancestors, in case the same product is listed in
         # different stock moves.
         for move in sorted(moves_to_do, key=lambda x: -1 if ancestors_list.get(x.id) else 0):
             # then if the move isn't totally assigned, try to find quants without any specific domain
             if move.state != 'assigned' and not self.env.context.get('reserve_only_ops'):
-                qty_already_assigned = move.reserved_availability
-                qty = move.product_qty - qty_already_assigned
-
+                qty = move.product_qty
                 quants = Quant.quants_get_preferred_domain(qty, move, domain=main_domain[move.id], preferred_domain_list=[])
                 Quant.quants_reserve(quants, move)
 
