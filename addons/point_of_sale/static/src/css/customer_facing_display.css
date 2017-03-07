@@ -46,13 +46,16 @@ body .pos-customer_facing_display .pos_orderlines .pos_orderlines_item {
   flex: 1 0 100%;
   display: flex;
   flex-direction: row;
-  background-color: white;
   margin-bottom: 1vw;
   padding: 1%;
   align-items: center;
   border-radius: 0.3vw;
-  box-shadow: 0 0.1vw 0.1vw #dddddd;
+}
+body .pos-customer_facing_display .pos_orderlines .pos_orderlines_item:last-of-type {
   animation: item_in 1s ease;
+}
+body .pos-customer_facing_display .pos_orderlines .pos_orderlines_item:not(.pos_orderlines_header) {
+  color: initial;
 }
 body .pos-customer_facing_display .pos_orderlines .pos_orderlines_item.pos_orderlines_header {
   height: 3vh;
@@ -109,22 +112,25 @@ body .pos-customer_facing_display .pos-payment_info {
   flex-direction: column;
   justify-content: space-between;
 }
-body .pos-customer_facing_display .pos-payment_info .pos-adv {
-  max-width: 100%;
-  max-height: 100%;
-  border: 0.5vw solid #f6f6f6;
+body .pos-customer_facing_display .pos-payment_info .pos-adv,
+body .pos-customer_facing_display .pos-payment_info .pos-company_logo {
+  background-position: center top;
+  background-size: contain;
+  background-repeat: no-repeat;
 }
-body .pos-customer_facing_display .pos-payment_info hr {
-  width: 100%;
-  border-color: rgba(246, 246, 246, 0.2);
+body .pos-customer_facing_display .pos-payment_info .pos-adv[style*="url(http://placehold.it"],
+body .pos-customer_facing_display .pos-payment_info .pos-company_logo[style*="url(http://placehold.it"] {
+  background-color: #ccc;
 }
 body .pos-customer_facing_display .pos-payment_info .pos-company_logo {
-  width: 100%;
-  padding-bottom: 35%;
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-  height: auto;
+  background-image: url(/logo);
+  flex: 0 0 20%;
+  margin-bottom: 10%;
+}
+body .pos-customer_facing_display .pos-payment_info .pos-adv {
+  flex: 1 1 60%;
+  margin-bottom: 5%;
+  border-bottom: 1px solid rgba(246, 246, 246, 0.2);
 }
 body .pos-customer_facing_display .pos-payment_info .pos-payment_info_details .pos-total,
 body .pos-customer_facing_display .pos-payment_info .pos-payment_info_details .pos-paymentlines {
@@ -167,12 +173,11 @@ body .pos-customer_facing_display > .pos-adv {
   body .pos-customer_facing_display .pos-payment_info {
     max-width: 100%;
     flex-grow: 0;
-    height: 20vh;
+    height: 28vw;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
   }
-  body .pos-customer_facing_display .pos-payment_info hr,
   body .pos-customer_facing_display .pos-payment_info .pos-adv {
     display: none;
   }
@@ -205,5 +210,156 @@ body .pos-customer_facing_display > .pos-adv {
   body .pos-customer_facing_display .pos_orderlines .pos_orderlines_item {
     box-shadow: 0 0.1vh 0.1vh #dddddd;
     margin-bottom: 1vh;
+  }
+}
+body .pos-hidden {
+  opacity: 0;
+}
+body.editor_enable .pos-hidden {
+  opacity: 0.1;
+  background: repeating-linear-gradient(45deg, #f6f6f6, #f6f6f6 5px, #3E3E3E 5px, #3E3E3E 10px) !important;
+}
+body.editor_enable #oe_manipulators .oe_overlay > .oe_overlay_options > .btn-group > .oe_options .snippet-option-pos_colorpicker > ul {
+  background: black;
+  padding: 10px;
+}
+body.editor_enable #oe_manipulators .oe_overlay > .oe_overlay_options > .btn-group > .oe_options .snippet-option-pos_colorpicker > ul li {
+  margin-bottom: 8px;
+  border: 1px solid #c1c1c1;
+}
+body.editor_enable #oe_manipulators .oe_overlay > .oe_overlay_options > .btn-group > .oe_options .snippet-option-pos_colorpicker > ul li.active {
+  border-color: #05eb05;
+}
+body.editor_enable #oe_manipulators .oe_overlay > .oe_overlay_options > .btn-group > .oe_options .snippet-option-pos_colorpicker > ul li.active a:before {
+  color: #05eb05;
+}
+.pos-bg_01 {
+  background-color: #3E3E3E !important;
+  color: #f6f6f6 !important;
+}
+.pos-bg_01 .pos_orderlines_item {
+  box-shadow: 0 0.1vw 0.1vw black;
+  background-color: #f6f6f6;
+}
+@media all and (orientation: portrait) {
+  .pos-bg_01 .pos_orderlines_item {
+    box-shadow: 0 0.1vh 0.1vh black;
+  }
+}
+.pos-bg_02 {
+  background-color: #f6f6f6 !important;
+  color: #3E3E3E !important;
+}
+.pos-bg_02 .pos_orderlines_item {
+  box-shadow: 0 0.1vw 0.1vw #dddddd;
+  background-color: white;
+}
+@media all and (orientation: portrait) {
+  .pos-bg_02 .pos_orderlines_item {
+    box-shadow: 0 0.1vh 0.1vh #dddddd;
+  }
+}
+.pos-bg_03 {
+  background-color: #212a33 !important;
+  color: #f6f6f6 !important;
+}
+.pos-bg_03 .pos_orderlines_item {
+  box-shadow: 0 0.1vw 0.1vw red;
+  background-color: #f6f6f6;
+}
+@media all and (orientation: portrait) {
+  .pos-bg_03 .pos_orderlines_item {
+    box-shadow: 0 0.1vh 0.1vh red;
+  }
+}
+.pos-bg_04 {
+  background-color: #576777 !important;
+  color: #f6f6f6 !important;
+}
+.pos-bg_04 .pos_orderlines_item {
+  box-shadow: 0 0.1vw 0.1vw red;
+  background-color: #f6f6f6;
+}
+@media all and (orientation: portrait) {
+  .pos-bg_04 .pos_orderlines_item {
+    box-shadow: 0 0.1vh 0.1vh red;
+  }
+}
+.pos-bg_05 {
+  background-color: #54756e !important;
+  color: white !important;
+}
+.pos-bg_05 .pos_orderlines_item {
+  box-shadow: 0 0.1vw 0.1vw red;
+  background-color: #f6f6f6;
+}
+@media all and (orientation: portrait) {
+  .pos-bg_05 .pos_orderlines_item {
+    box-shadow: 0 0.1vh 0.1vh red;
+  }
+}
+.pos-bg_06 {
+  background-color: #344844 !important;
+  color: #f6f6f6 !important;
+}
+.pos-bg_06 .pos_orderlines_item {
+  box-shadow: 0 0.1vw 0.1vw red;
+  background-color: #f6f6f6;
+}
+@media all and (orientation: portrait) {
+  .pos-bg_06 .pos_orderlines_item {
+    box-shadow: 0 0.1vh 0.1vh red;
+  }
+}
+.pos-bg_07 {
+  background-color: #388076 !important;
+  color: white !important;
+}
+.pos-bg_07 .pos_orderlines_item {
+  box-shadow: 0 0.1vw 0.1vw red;
+  background-color: #f6f6f6;
+}
+@media all and (orientation: portrait) {
+  .pos-bg_07 .pos_orderlines_item {
+    box-shadow: 0 0.1vh 0.1vh red;
+  }
+}
+.pos-bg_08 {
+  background-color: #d35400 !important;
+  color: white !important;
+}
+.pos-bg_08 .pos_orderlines_item {
+  box-shadow: 0 0.1vw 0.1vw red;
+  background-color: #f6f6f6;
+}
+@media all and (orientation: portrait) {
+  .pos-bg_08 .pos_orderlines_item {
+    box-shadow: 0 0.1vh 0.1vh red;
+  }
+}
+.pos-bg_09 {
+  background-color: #462f45 !important;
+  color: white !important;
+}
+.pos-bg_09 .pos_orderlines_item {
+  box-shadow: 0 0.1vw 0.1vw red;
+  background-color: #f6f6f6;
+}
+@media all and (orientation: portrait) {
+  .pos-bg_09 .pos_orderlines_item {
+    box-shadow: 0 0.1vh 0.1vh red;
+  }
+}
+.pos-bg_10 {
+  background-color: #775476 !important;
+  color: white !important;
+}
+.pos-bg_10 .pos_orderlines_item {
+  box-shadow: 0 0.1vw 0.1vw red;
+  background-color: #f6f6f6;
+}
+@media all and (orientation: portrait) {
+  .pos-bg_10 .pos_orderlines_item {
+    box-shadow: 0 0.1vh 0.1vh red;
   }
 }

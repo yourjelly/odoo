@@ -1,6 +1,7 @@
 // out: ../css/customer_facing_display.css, sourcemap: false, compress: false
 
 @color_gray_lighter: #f6f6f6;
+@color_gray_light: darken(@color_gray_lighter, 10%);
 @color_gray_dark: #3E3E3E;
 @font_size_base: 2vmin;
 
@@ -14,6 +15,19 @@
     }
     to {
         opacity: 1;
+    }
+}
+
+.pos-bg() {
+    background-position: center top;
+    background-size: contain;
+    background-repeat: no-repeat;
+
+    &[style*="url(http://placehold.it"] {
+        // Add a bg-color in case we are using a pleceholder.
+        // This will help the user to identify the right image dimension
+        // before apply customizations.
+        background-color: #ccc;
     }
 }
 
@@ -54,13 +68,17 @@ body {
                 flex: 1 0 100%;
                 display: flex;
                 flex-direction: row;
-                background-color: white;
                 margin-bottom: 1vw;
                 padding: 1%;
                 align-items: center;
                 border-radius: 0.3vw;
-                box-shadow: 0 .1vw .1vw darken(@color_gray_lighter, 10%);
-                animation: item_in 1s ease;
+                &:last-of-type {
+                    animation: item_in 1s ease;
+                }
+
+                &:not(.pos_orderlines_header) {
+                    color: initial;
+                }
 
                 &.pos_orderlines_header {
                     height: 3vh;
@@ -119,22 +137,18 @@ body {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            .pos-adv {
-                max-width: 100%;
-                max-height: 100%;
-                border: .5vw solid @color_gray_lighter;
-            }
-            hr {
-                width: 100%;
-                border-color: fade(@color_gray_lighter, 20%);
+            .pos-adv, .pos-company_logo {
+                .pos-bg();
             }
             .pos-company_logo {
-                width: 100%;
-                padding-bottom: 35%;
-                background-size: contain;
-                background-position: center;
-                background-repeat: no-repeat;
-                height: auto;
+                background-image: url(/logo);
+                flex: 0 0 20%;
+                margin-bottom: 10%;
+            }
+            .pos-adv {
+                flex: 1 1 60%;
+                margin-bottom: 5%;
+                border-bottom: 1px solid fade(@color_gray_lighter, 20%);
             }
             .pos-payment_info_details{
                 .pos-total, .pos-paymentlines {
@@ -172,6 +186,7 @@ body {
             flex-direction: column;
 
             > .pos-adv {
+                // For this layout, show the ADV cloned using js.
                 display: flex;
                 height: 15vh;
                 width: 100%;
@@ -181,12 +196,13 @@ body {
             .pos-payment_info {
                 max-width: 100%;
                 flex-grow: 0;
-                height: 20vh;
+                height: 28vw;
                 flex-direction: row;
                 align-items: center;
                 justify-content: space-between;
 
-                hr, .pos-adv {
+                .pos-adv {
+                    // Hide ADV in payment_info.
                     display: none;
                 }
 
@@ -230,3 +246,63 @@ body {
     }
 }
 
+// EDIT MODE
+body {
+    .pos-hidden {
+        opacity: 0;
+    }
+
+    &.editor_enable {
+        .pos-hidden {
+            opacity: 0.1;
+            background: repeating-linear-gradient(
+                45deg,
+                @color_gray_lighter,
+                @color_gray_lighter 5px,
+                @color_gray_dark 5px,
+                @color_gray_dark 10px
+            )!important;
+        }
+
+        #oe_manipulators .oe_overlay >
+        .oe_overlay_options > .btn-group > .oe_options
+        .snippet-option-pos_colorpicker > ul {
+            background: black;
+            padding: 10px;
+            li {
+                margin-bottom: 8px;
+                border: 1px solid #c1c1c1;
+                &.active {
+                    border-color: #05eb05;
+                    a:before {
+                        color: #05eb05;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.color_variant(@bg, @text, @shadows, @card: @color_gray_lighter) {
+    background-color: @bg!important;
+    color: @text!important;
+
+    .pos_orderlines_item {
+        box-shadow: 0 0.1vw 0.1vw @shadows;
+        background-color: @card;
+        @media all and (orientation: portrait) {
+            box-shadow: 0 .1vh .1vh @shadows;
+        }
+    }
+}
+
+.pos-bg_01  { .color_variant(@color_gray_dark, @color_gray_lighter, black); }
+.pos-bg_02  { .color_variant(@color_gray_lighter, @color_gray_dark, @color_gray_light, white) }
+.pos-bg_03  { .color_variant(#212a33, @color_gray_lighter, red); }
+.pos-bg_04  { .color_variant(#576777, @color_gray_lighter, red); }
+.pos-bg_05  { .color_variant(#54756e, white, red); }
+.pos-bg_06  { .color_variant(#344844, @color_gray_lighter, red); }
+.pos-bg_07  { .color_variant(#388076, white, red); }
+.pos-bg_08  { .color_variant(#d35400, white, red); }
+.pos-bg_09  { .color_variant(#462f45, white, red); }
+.pos-bg_10  { .color_variant(#775476, white, red); }

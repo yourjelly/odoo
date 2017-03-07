@@ -368,8 +368,8 @@
         <record model="pos.config" id="pos_config_main">
             <field name="customer_facing_display_html">
                 <![CDATA[
-<div class="pos-customer_facing_display" contenteditable="false">
-    <div class="pos-customer_products">
+<div class="pos-customer_facing_display">
+    <div class="pos-customer_products pos-bg_02" name="Products list">
         <div class="pos_orderlines">
             <div class="pos_orderlines_item pos_orderlines_header">
                 <div/>
@@ -454,10 +454,9 @@
         </div>
     </div>
 
-    <div class="pos-payment_info">
-        <img src="http://placehold.it/300x350?text=ADV" class="pos-adv" alt=""/>
-        <hr/>
-        <div class="pos-company_logo oe_image_bg" style="background-image:url(http://placehold.it/300x100?text=COMPANY+LOGO)"/>
+    <div class="pos-payment_info pos-bg_01">
+        <div class="pos-adv" style="background-image:url(http://placehold.it/300x350?text=ADV)"/>
+        <div class="pos-company_logo"/>
 
         <div class="pos-payment_info_details">
             <div class="pos-total">
@@ -465,7 +464,7 @@
                     <span class="total-amount-formatting">TOTAL:</span>
                 </div>
                 <div>
-                    <span id="total-amount" class="pos_total-amount">$ 4269.14</span>
+                    <span id="total-amount" class="pos_total-amount">$ 469.14</span>
                 </div>
             </div>
             <div class="pos-paymentlines">
@@ -473,7 +472,7 @@
                     <span>Cash (USD):</span>
                 </div>
                 <div>
-                    <span>$ 5.00</span>
+                    <span>$ 470.00</span>
                 </div>
                 <div>
                     <span>Change:</span>

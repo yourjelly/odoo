@@ -72,119 +72,49 @@
     </script>
 </template>
 
+<template id="pos_editor_assets" inherit_id="web_editor.assets_editor">
+    <xpath expr="//script[last()]" position="after">
+        <script type="text/javascript" src="/point_of_sale/static/src/js/pos.web_editor.js"/>
+    </xpath>
+</template>
+
+
 <template id="customer_facing_display_snippets">
     <!-- web_editor needs a ul (normally contains the header, body, extra buttons)-->
     <ul/>
-
-    <div id="o_scroll">
-        <div class="o_panel">
-            <div class="o_panel_body">
-                <div name="Text-Image" class="basic_theme o_user_facing_display_snippet">
-                    <div class="container-fluid">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <h2 class="text-center">Fill in text here</h2>
-                            </div>
-                            <div class="col-xs-12">
-                                <img src="/point_of_sale/static/src/img/odoo_ad.png" alt="" class="img-responsive"/>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div name="Text Block" class="basic_theme o_user_facing_display_snippet">
-                    <div class="container-fluid">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <h2 class="text-center">Fill in text here</h2>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div name="Orders Block" class="basic_theme o_user_facing_display_snippet">
-                    <div class="container-fluid">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <h2>The following items are in your basket:</h2>
-                                <div class="scroll-orderlines">
-                                    <table>
-                                        <thead>
-                                            <tr class="product-cell">
-                                                <td>Image</td>
-                                                <td>Product name</td>
-                                                <td class="text-right">Quantity</td>
-                                                <td class="text-right">Price</td>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="orderlines">
-                                            <tr class="product-cell">
-                                                <td class="text-center">
-                                                    <img alt="" class="img" src="/pos_data_drinks/static/img/th-water.jpg"/>
-                                                </td>
-                                                <td>Water</td>
-                                                <td class="text-right">2.000</td>
-                                                <td class="text-right">$ 4.40</td>
-                                            </tr>
-
-                                            <tr class="product-cell">
-                                                <td class="text-center">
-                                                    <img alt="" class="img" src="/point_of_sale/static/img/oranges-image.jpg"/>
-                                                </td>
-                                                <td>Oranges</td>
-                                                <td class="text-right">3.000</td>
-                                                <td class="text-right">$ 3.12</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div name="Payment Info Block" class="basic_theme o_user_facing_display_snippet">
-                    <div class="container-fluid">
-                        <div class="row">
-                            <div class="pos-payment-info">
-                                <div class="col-xs-offset-4 col-xs-4">
-                                    <span class="total-amount-formatting">TOTAL:</span>
-                                </div>
-                                <div class="col-xs-4 text-right">
-                                    <span id="total-amount" class="total-amount-formatting">$ 4.14</span>
-                                </div>
-                                <div id="paymentlines">
-                                    <div class="col-xs-offset-4 col-xs-4">
-                                        <span>Cash (USD)</span>
-                                    </div>
-                                    <div class="col-xs-4 text-right">
-                                        <span>$ 5.00</span>
-                                    </div>
-                                    <div class="col-xs-offset-4 col-xs-4">
-                                        <span>CHANGE:</span>
-                                    </div>
-                                    <div class="col-xs-4 text-right">
-                                        <span>$ 0.86</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div id="o_scroll" class="hidden"/>
 
     <div id="snippet_options" class="hidden">
         <t t-call="web_editor.snippet_options"/>
-        <div data-js='background' data-selector=".pos-company_logo">
-            <li data-choose_image="choose_image"><a href="#"><b>Set Custom Image...</b></a></li>
+
+        <div data-js='pos_no_remove' data-selector=".pos-company_logo, .pos-adv, .pos-customer_products, .pos-payment_info"/>
+        <div data-js='pos_full_height' data-selector=".pos-customer_products, .pos-payment_info"/>
+        <div data-js='pos_company_logo' data-selector=".pos-company_logo"/>
+
+        <div data-js='pos_colorpicker' data-selector=".pos-customer_products, .pos-payment_info">
+            <li class="dropdown-submenu">
+                <a tabindex="-1" href="#"><i class="fa fa-paint-brush"/>Section colours</a>
+                <ul class="dropdown-menu">
+                    <li data-select_class="pos-bg_01"><a href="#" class="pos-bg_01">Dark</a></li>
+                    <li data-select_class="pos-bg_02"><a href="#" class="pos-bg_02">Dark</a></li>
+                    <li data-select_class="pos-bg_03"><a href="#" class="pos-bg_03">Dark</a></li>
+                    <li data-select_class="pos-bg_04"><a href="#" class="pos-bg_04">Dark</a></li>
+                    <li data-select_class="pos-bg_05"><a href="#" class="pos-bg_05">Dark</a></li>
+                    <li data-select_class="pos-bg_06"><a href="#" class="pos-bg_06">Dark</a></li>
+                    <li data-select_class="pos-bg_07"><a href="#" class="pos-bg_07">Dark</a></li>
+                    <li data-select_class="pos-bg_08"><a href="#" class="pos-bg_08">Dark</a></li>
+                    <li data-select_class="pos-bg_09"><a href="#" class="pos-bg_09">Dark</a></li>
+                    <li data-select_class="pos-bg_10"><a href="#" class="pos-bg_10">Dark</a></li>
+                </ul>
+            </li>
         </div>
 
-        <div data-js='content' class="hidden"
-             data-selector="[data-oe-field='customer_facing_display_html'] > div, .oe_snippet_body"
-             data-drop-near="[data-oe-field='customer_facing_display_html'] > *"
-             data-drop-in="[data-oe-field='customer_facing_display_html'], .ad-space, div.row > div[class^='col-xs-']">
+
+        <div data-js='pos_background' data-selector=".pos-company_logo, .pos-adv">
+            <li data-choose_image="choose_image"><a href="#"><b>Set Custom Image...</b></a></li>
+            <li class="hidden pos-use_default_logo" data-background=""><a href="#">Default company logo</a></li>
+            <li class="divider"/>
+            <li data-toggle_class="pos-hidden"><a href="#"><i class="fa fa-eye-slash"/>Hide</a></li>
         </div>
     </div>
 </template>
