@@ -843,7 +843,7 @@ class StockMove(models.Model):
                         raise UserError(_('You need to supply a lot/serial number.'))
                     qty = move.product_uom._compute_quantity(packop.qty_done, move.product_id.uom_id)
                     quants = quant_obj.quants_get_preferred_domain(qty, move, ops=packop, domain=main_domain, preferred_domain_list=preferred_domain_list)
-                    self.env['stock.quant'].quants_move(quants, move, move.location_dest_id, lot_id = packop.lot_id.id)
+                    self.env['stock.quant'].quants_move(quants, move, packop.location_dest_id, lot_id = packop.lot_id.id)
             moves_to_unreserve |= move
             # Next move in production order
             if move.move_dest_id:
