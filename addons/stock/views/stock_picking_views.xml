@@ -265,8 +265,8 @@
                                     <field name="location_dest_id" invisible="1"/>
                                     <field name="has_tracking" invisible="1"/>
                                     <field name="state"/>
+                                    <field name="quantity_done"/>
                                     <button name="split_move_operation" string="Register lots, packs, location" type="object" icon="fa-list"/>
-                                    
                                 </tree>
                             </field>
                         </page>
