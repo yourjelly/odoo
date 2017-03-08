@@ -381,6 +381,9 @@ class StockMove(models.Model):
 
     # Main actions
     # ------------------------------------------------------------
+    @api.multi
+    def save(self):
+        return True
 
     @api.multi
     def do_unreserve(self):
@@ -783,8 +786,8 @@ class StockMove(models.Model):
             quantity_to_split = self.quantity_done - self.product_uom_qty
             uom_qty_to_split = quantity_to_split # + no need to change existing self.product_uom_qty 
         if quantity_to_split:
-            extra_move = self.copy(default={'quantity_done': quantity_to_split, 'product_uom_qty': uom_qty_to_split, 'production_id': self.production_id.id, 
-                                            'raw_material_production_id': self.raw_material_production_id.id, })
+            extra_move = self.copy(default={'quantity_done': quantity_to_split, 'product_uom_qty': uom_qty_to_split,
+                                            'picking_id': self.picking_id.id})
             extra_move.action_confirm()
             qty_todo = self.quantity_done - quantity_to_split
             for packop in self.pack_operation_ids:
@@ -808,7 +811,7 @@ class StockMove(models.Model):
         quant_obj = self.env['stock.quant']
         moves_todo = self.env['stock.move']
         moves_to_unreserve = self.env['stock.move']
-        moves_to_backorder = self.env['stock.move']
+        moves_to_backorder = []
         # Create extra moves where necessary
         for move in moves:
             # Here, the `quantity_done` was already rounded to the product UOM by the `do_produce` wizard. However,
@@ -829,9 +832,9 @@ class StockMove(models.Model):
                 # Need to do some kind of conversion here
                 qty_split = move.product_uom._compute_quantity(move.product_uom_qty - move.quantity_done, move.product_id.uom_id)
                 new_move = move.split(qty_split)
-                moves_to_backorder |= new_move
+                moves_to_backorder.append(new_move)
                 # If you were already putting stock.move.lots on the next one in the work order, transfer those to the new move
-                move.pack_operation_ids.filtered(lambda x: x.quantity_done == 0.0).write({'move_id': new_move})
+                move.pack_operation_ids.filtered(lambda x: x.qty_done == 0.0).write({'move_id': new_move})
                 self.browse(new_move).quantity_done = 0.0
             main_domain = [('qty', '>', 0)]
             preferred_domain = [('reservation_id', '=', move.id)]
@@ -839,10 +842,10 @@ class StockMove(models.Model):
             fallback_domain2 = ['&', ('reservation_id', '!=', move.id), ('reservation_id', '!=', False)]
             preferred_domain_list = [preferred_domain] + [fallback_domain] + [fallback_domain2]
             for packop in move.pack_operation_ids:
-                if float_compare(packop.quantity_done, 0, precision_rounding=rounding) > 0:
-                    if not packop.lot_id and move.product_id.has_tracking != 'none':
+                if float_compare(packop.qty_done, 0, precision_rounding=rounding) > 0:
+                    if not packop.lot_id and move.has_tracking != 'none':
                         raise UserError(_('You need to supply a lot/serial number.'))
-                    qty = move.product_uom._compute_quantity(packop.quantity_done, move.product_id.uom_id)
+                    qty = move.product_uom._compute_quantity(packop.qty_done, move.product_id.uom_id)
                     quants = quant_obj.quants_get_preferred_domain(qty, move, ops=packop, domain=main_domain, preferred_domain_list=preferred_domain_list)
                     self.env['stock.quant'].quants_move(quants, move, move.location_dest_id, lot_id = packop.lot_id.id)
             moves_to_unreserve |= move
@@ -858,7 +861,7 @@ class StockMove(models.Model):
                 'pack_operation_ids': [],
                 'backorder_id': picking.id
             })
-        moves_to_backorder.write({'picking_id': backorder_picking.id})
+        self.env['stock.move'].browse(moves_to_backorder).write({'picking_id': backorder_picking.id})
         return moves_todo
 
     @api.multi
