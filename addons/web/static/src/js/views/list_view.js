@@ -282,8 +282,7 @@ var ListView = View.extend({
                             self.current_selection = [];
                             break;
                     }
-                })
-                .focus();
+                });
         }
 
         this.trigger('list_view_loaded', data, this.grouped);
@@ -316,6 +315,7 @@ var ListView = View.extend({
                     if (event.which == $.ui.keyCode.ENTER) {
                         self.$buttons.find('.o_list_button_add').trigger("click");
                     } else if (event.which == $.ui.keyCode.ESCAPE) {
+                        $(this).tooltip('hide'); //forcefully hide tooltip as firefox doesn't hide it when element get hidden
                         self.history_back();
                     }
                 });
@@ -450,12 +450,13 @@ var ListView = View.extend({
         if (this.dataset.size() === 0) {
             return false;
         }
+        this.$(".o_list_view").focus(); // Set focus to listview table
         var previous_row_selected = this.current_selected_row;
         if (!this.current_selected_row) {
             this.current_selected_row = direction == 'down' ? this.$('tbody tr').filter("[data-id]").first() : this.$('tbody tr').filter("[data-id]").last();
         } else {
             var $row = direction == 'down' ? this.current_selected_row.next() : this.current_selected_row.prev();
-            if (!$row.length) {
+            if (!$row.length || !$row.attr("data-id")) {
                 return;
             }
             this.current_selected_row = $row.attr("data-id") ? $row : false;
@@ -548,6 +549,7 @@ var ListView = View.extend({
         var self = this;
         this.setup_columns(this.fields_view.fields, this.grouped);
         this.$('tbody .o_list_record_selector input').prop('checked', false);
+        this.current_selected_row = false;
         this.records.reset();
         var reloaded = $.Deferred();
         this.groups.render(function () {

@@ -189,6 +189,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
                     var is_shiftkey = e.shiftKey ? true : false;
                     self.set_next_tabindex({focus_first_button: !is_shiftkey, reverse: is_shiftkey});
                 } else if (e.which == $.ui.keyCode.ESCAPE) {
+                    $(this).tooltip('hide'); //forcefully hide tooltip as firefox doesn't hide it when element get hidden
                     self.trigger('history_back');
                 }
             });
@@ -218,6 +219,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
             })
             .on('keydown', function(e) {
                 if (e.which == $.ui.keyCode.ESCAPE) {
+                    $(this).tooltip('hide'); //forcefully hide tooltip as firefox doesn't hide it when element get hidden
                     self.trigger('history_back');
                 }
             });
