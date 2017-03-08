@@ -7,7 +7,7 @@ odoo.define('point_of_sale.editor', function (require) {
     // Clone default web_editor background image functionalities
     s_options.registry.pos_background = s_options.registry.background;
 
-    // Clone default web_editor functionalities
+    // Show reset button for company logo
     s_options.registry.pos_company_logo = s_options.Class.extend({
         start: function () {
             var self = this;
@@ -17,16 +17,26 @@ odoo.define('point_of_sale.editor', function (require) {
         }
     });
 
+    s_options.registry.pos_no_parent = s_options.Class.extend({
+        start:function() {
+            this.$overlay.find('.oe_options').addClass('no_parent_options');
+            this.$overlay.find('.oe_overlay_options').css({'top':'0px'});
+        }
+    });
+
     // Hide 'remove' buttun for element that should not be removed
     s_options.registry.pos_no_remove = s_options.Class.extend({
         start:function() {
             this.$overlay.find('.oe_snippet_remove').addClass('hidden');
         }
     });
-    // Full
-    s_options.registry.pos_full_height = s_options.Class.extend({
+
+    // Palette
+    s_options.registry.pos_palette = s_options.Class.extend({
         start:function() {
-            this.$overlay.find('.oe_overlay_options').css('top','0px');
+            this.$overlay.find('.oe_overlay_options').css({'top':'0px', 'left': 'calc(50% - 45px)'}).end()
+                         .find('.oe_options').addClass('snippet-option-pos_palette')
+                         .find('> a').text('Palette').prepend('<i style="margin-right:5px" class="fa fa-paint-brush"/>');
         }
     });
 

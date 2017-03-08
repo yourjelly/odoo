@@ -368,8 +368,8 @@
         <record model="pos.config" id="pos_config_main">
             <field name="customer_facing_display_html">
                 <![CDATA[
-<div class="pos-customer_facing_display">
-    <div class="pos-customer_products pos-bg_02" name="Products list">
+<div class="pos-customer_facing_display pos-palette_01">
+    <div class="pos-customer_products" name="Products list">
         <div class="pos_orderlines">
             <div class="pos_orderlines_item pos_orderlines_header">
                 <div/>
@@ -454,7 +454,7 @@
         </div>
     </div>
 
-    <div class="pos-payment_info pos-bg_01">
+    <div class="pos-payment_info">
         <div class="pos-adv" style="background-image:url(http://placehold.it/300x350?text=ADV)"/>
         <div class="pos-company_logo"/>
 

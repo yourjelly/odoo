@@ -62,14 +62,6 @@
 
 <template id="extra_head">
     <link href="/point_of_sale/static/src/css/customer_facing_display.css" rel="stylesheet"/>
-    <script type="text/javascript">
-        $(document).ready(function(){
-            var $adv = $('.pos-adv');
-            if ($adv.length > 0) {
-                $adv.clone().prependTo('.pos-customer_facing_display');
-            }
-        })
-    </script>
 </template>
 
 <template id="pos_editor_assets" inherit_id="web_editor.assets_editor">
@@ -87,28 +79,25 @@
     <div id="snippet_options" class="hidden">
         <t t-call="web_editor.snippet_options"/>
 
-        <div data-js='pos_no_remove' data-selector=".pos-company_logo, .pos-adv, .pos-customer_products, .pos-payment_info"/>
-        <div data-js='pos_full_height' data-selector=".pos-customer_products, .pos-payment_info"/>
+        <div data-js='pos_no_remove' data-selector=".pos-company_logo, .pos-adv, .pos-customer_facing_display"/>
+        <div data-js='pos_no_parent' data-selector=".pos-company_logo, .pos-adv"/>
         <div data-js='pos_company_logo' data-selector=".pos-company_logo"/>
 
-        <div data-js='pos_colorpicker' data-selector=".pos-customer_products, .pos-payment_info">
-            <li class="dropdown-submenu">
-                <a tabindex="-1" href="#"><i class="fa fa-paint-brush"/>Section colours</a>
-                <ul class="dropdown-menu">
-                    <li data-select_class="pos-bg_01"><a href="#" class="pos-bg_01">Dark</a></li>
-                    <li data-select_class="pos-bg_02"><a href="#" class="pos-bg_02">Dark</a></li>
-                    <li data-select_class="pos-bg_03"><a href="#" class="pos-bg_03">Dark</a></li>
-                    <li data-select_class="pos-bg_04"><a href="#" class="pos-bg_04">Dark</a></li>
-                    <li data-select_class="pos-bg_05"><a href="#" class="pos-bg_05">Dark</a></li>
-                    <li data-select_class="pos-bg_06"><a href="#" class="pos-bg_06">Dark</a></li>
-                    <li data-select_class="pos-bg_07"><a href="#" class="pos-bg_07">Dark</a></li>
-                    <li data-select_class="pos-bg_08"><a href="#" class="pos-bg_08">Dark</a></li>
-                    <li data-select_class="pos-bg_09"><a href="#" class="pos-bg_09">Dark</a></li>
-                    <li data-select_class="pos-bg_10"><a href="#" class="pos-bg_10">Dark</a></li>
-                </ul>
-            </li>
+        <div data-js='pos_palette' data-selector=".pos-customer_facing_display">
+            <li data-select_class="pos-palette_01"><a href="#" class="pos-palette_01"/></li>
+            <li data-select_class="pos-palette_02"><a href="#" class="pos-palette_02"/></li>
+            <li data-select_class="pos-palette_03"><a href="#" class="pos-palette_03"/></li>
+            <li data-select_class="pos-palette_04"><a href="#" class="pos-palette_04"/></li>
+            <li data-select_class="pos-palette_05"><a href="#" class="pos-palette_05"/></li>
+            <li data-select_class="pos-palette_06"><a href="#" class="pos-palette_06"/></li>
+            <li data-select_class="pos-palette_07"><a href="#" class="pos-palette_07"/></li>
+            <li data-select_class="pos-palette_08"><a href="#" class="pos-palette_08"/></li>
+            <li data-select_class="pos-palette_09"><a href="#" class="pos-palette_09"/></li>
+            <li data-select_class="pos-palette_10"><a href="#" class="pos-palette_10"/></li>
+            <li data-select_class="pos-palette_11"><a href="#" class="pos-palette_11"/></li>
+            <li data-select_class="pos-palette_12"><a href="#" class="pos-palette_12"/></li>
+            <li data-select_class="pos-palette_13"><a href="#" class="pos-palette_13"/></li>
         </div>
-
 
         <div data-js='pos_background' data-selector=".pos-company_logo, .pos-adv">
             <li data-choose_image="choose_image"><a href="#"><b>Set Custom Image...</b></a></li>
