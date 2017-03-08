@@ -519,6 +519,7 @@ class Picking(models.Model):
                     PackOperation.create({'picking_id': move.picking_id.id,
                                           'move_id': move.id,
                                           'product_qty': quant.qty, 
+                                          'product_id': move.product_id.id, 
                                           'lot_id': quant.lot_id.id, 
                                           'package_id':quant.package_id.id,
                                           'location_id': quant.location_id.id, 
@@ -526,6 +527,7 @@ class Picking(models.Model):
                                           'owner_id': quant.owner_id.id,})
                 if forced_qty:
                     PackOperation.create({'picking_id': move.picking_id.id, 
+                                          'product_id': move.product_id.id,
                                           'move_id': move.id, 
                                           'product_qty': forced_qty, 
                                           'location_id': move.location_id.id, 

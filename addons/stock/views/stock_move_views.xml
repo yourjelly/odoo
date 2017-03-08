@@ -114,7 +114,7 @@
                         </group>
                     </group>
                     <field name="pack_operation_ids" context="{'default_move_id': id, 'default_product_id': product_id}">
-                        <tree editable="bottom" decoration-succes="product_qty==quantity_done" decoration-danger="(product_qty &gt; 0) and (quantity_done&gt;product_qty)">
+                        <tree editable="bottom" decoration-succes="product_qty==qty_done" decoration-danger="(product_qty &gt; 0) and (qty_done&gt;product_qty)">
                             <field name="location_id" domain="[('id', 'child_of', parent.location_id)])"/>
                             <field name="package_id" groups="stock.group_tracking_lot"/>
                             <field name="lot_id" domain="[('product_id', '=', parent.product_id)]" context="{'default_product_id': parent.product_id}"/>
