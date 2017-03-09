@@ -449,7 +449,7 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
             }
             $.when(controller.do_search(results.domain, results.context, groupby || [])).then(function() {
                 self.active_search.resolve();
-                self.searchview.set_input_focus();
+                self.searchview.set_input_focus(); // Forcefully set focus to searhview input after searchview is added in DOM
             });
         });
     },

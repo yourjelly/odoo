@@ -923,6 +923,7 @@ var FormView = View.extend(common.FieldManagerMixin, {
             });
         }).fail(function(){
             self.enable_button();
+            self.$buttons.find('.o_form_button_edit:visible') ? self.$buttons.find('.o_form_button_edit').focus() : self.$buttons.find('.o_form_button_save').focus();
         });
     },
     on_button_cancel: function() {
