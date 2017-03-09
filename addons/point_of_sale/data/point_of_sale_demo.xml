@@ -481,6 +481,9 @@
                     <span>$ 0.86</span>
                 </div>
             </div>
+            <div class="pos-odoo_logo_container">
+                <img src="/web/static/src/img/logo_inverse_white_206px.png" alt="Odoo Logo"/>
+            </div>
         </div>
     </div>
 </div>
