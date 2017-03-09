@@ -4,6 +4,10 @@
     max-width: 250px;
 }
 
+.select2-results .select2-result-label{
+    padding: 1px !important;
+}
+
 .o_searchview {
     .o-flex-display();
     .o-flex-flow(row, wrap);
@@ -175,6 +179,10 @@
     // Group By
     .o_group_by_menu {
         .o-selected-li;
+
+        .o_group_selector {
+            display: none !important;
+        }
 
         .divider {display: none;} // hide the divider by default (no group)
         .o_add_group { // add button

@@ -465,7 +465,9 @@ return Widget.extend({
             self.$add_group_menu.toggle(is_open);
             if (self.$add_group.hasClass('o_open_menu')) {
                 self.$group_selector.focus();
+                self.$group_selector.select2();
             }
+            self.$group_selector.toggleClass('o_group_selector', !(_.isUndefined(is_open)) ? !is_open : undefined);
         });
     },
     add_groupby_to_menu: function (field_name) {

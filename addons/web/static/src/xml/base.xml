@@ -1203,7 +1203,7 @@
     </ul>
 </div>
 <t t-name="GroupByMenuSelector">
-    <li><select class="o_add_group o_group_selector">
+    <li><select class="o_add_group o_group_selector" style="min-width: 150px">
         <t t-foreach="groupable_fields" t-as="field">
             <option t-att-data-name="field.name"><t t-esc="field.string"/></option>
         </t>
