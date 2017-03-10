@@ -350,6 +350,13 @@ return Widget.extend({
                 .toggleClass('o_open_menu', self.custom_filters_open);
             self.$add_filter_menu.toggle(self.custom_filters_open);
             self.$('.o_filter_condition').toggle(self.custom_filters_open);
+            var select2_div = self.$('.select2-container.o_searchview_extended_prop_field');
+            if (self.$add_filter.hasClass('o_open_menu')){
+                if (select2_div.hasClass('o_searchview_extended_prop_field')) {
+                    select2_div.remove();
+                }
+                self.$('.o_searchview_extended_prop_field').select2();
+            }
         });
     },
     append_proposition: function () {

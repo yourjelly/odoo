@@ -40,7 +40,7 @@ var ExtendedSearchProposition = Widget.extend(/** @lends instance.web.search.Ext
         return this._super().done(this.proxy('changed'));
     },
     changed: function() {
-        var nval = this.$(".o_searchview_extended_prop_field").val();
+        var nval = this.$("select.o_searchview_extended_prop_field").val();
         if(this.attrs.selected === null || this.attrs.selected === undefined || nval != this.attrs.selected.name) {
             this.select_field(_.detect(this.fields, function(x) {return x.name == nval;}));
         }

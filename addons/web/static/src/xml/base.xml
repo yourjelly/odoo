@@ -1163,7 +1163,7 @@
     <li class="o_filter_condition">
         <span class="o_or_filter">or</span>
         <span>
-            <select class="o_searchview_extended_prop_field">
+            <select class="o_searchview_extended_prop_field" style="min-width:190px">
                 <t t-foreach="widget.attrs.fields" t-as="field">
                     <option t-att="{'selected': field === widget.attrs.selected ? 'selected' : null}"
                             t-att-value="field.name">
