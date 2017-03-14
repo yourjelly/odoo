@@ -619,7 +619,8 @@ class PurchaseOrderLine(models.Model):
                 if line.product_id == move.product_id: #Treat case of phantom BoMs
                     qty += move.product_qty
                 else:
-                    move.action_cancel()
+                    qty = line._origin.product_qty
+                    break
             template = {
                 'name': line.name or '',
                 'product_id': line.product_id.id,
