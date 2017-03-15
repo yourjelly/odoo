@@ -141,7 +141,7 @@ var Dialog = Widget.extend({
             self.$modal.modal('show');
             setTimeout(function() {
                 self.$modal.find("button[autofocus]").focus(); //FIXME: Need to set focus explicitly after shown(bind shown.bs.modal)
-            }, 0);
+            }, 50);
             self._opened.resolve();
         });
 

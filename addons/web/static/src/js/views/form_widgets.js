@@ -130,7 +130,6 @@ var WidgetButton = common.FormWidget.extend({
         };
     },
     set_focus: function() {
-        this.$el.focus();
         if (this.node.attrs.on_focus_tip) {
             var content = this.node.attrs.on_focus_tip;
         } else {
@@ -139,6 +138,7 @@ var WidgetButton = common.FormWidget.extend({
             content = this.string ? _.str.sprintf(content, this.string) : _.str.sprintf(content, this.get_string(this.node));
         }
         utils.show_tabindex_tip({attach_to: this.$el, title: content, trigger: 'focus'});
+        this.$el.focus();
     },
     keydown_ENTER: function(e) {
         var self = this;

@@ -101,6 +101,7 @@
             </t>
             <t t-esc="widget.string"/>
         </div>
+        <p t-if="widget.node.attrs.on_focus_tip || widget.string || (widget.get_string(widget.node))" class="oe_tooltip_help">Press ENTER to <t t-esc="widget.node.attrs.on_focus_tip || widget.string || (widget.get_string(widget.node))"/></p>
     </t>
     <t t-jquery="ul.oe_tooltip_technical" t-operation="append">
         <li t-if="widget.node.attrs.special" data-item="special">

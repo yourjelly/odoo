@@ -486,11 +486,11 @@
 </form>
 
 <t t-name="FormRenderingForm">
-    <div t-attf-class="#{classnames}">
+    <div t-attf-class="#{classnames}" tabindex="0">
     </div>
 </t>
 <t t-name="FormRenderingSheet">
-    <div class="o_form_sheet_bg">
+    <div class="o_form_sheet_bg" tabindex="0">
         <div t-attf-class="o_form_sheet #{classnames}"/>
     </div>
 </t>
