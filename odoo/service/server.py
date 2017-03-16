@@ -22,6 +22,12 @@ import pytest
 import werkzeug.serving
 from werkzeug.debug import DebuggedApplication
 
+import odoo
+from odoo.modules.registry import Registry
+from odoo.release import nt_service_name
+from odoo.tools import config
+from odoo.tools import stripped_sys_argv, dumpstacks, log_ormcache_stats, pycompat
+
 if os.name == 'posix':
     # Unix only for workers
     import fcntl
@@ -37,12 +43,6 @@ try:
 except ImportError:
     setproctitle = lambda x: None
 
-import odoo
-from odoo import tests
-from odoo.modules.registry import Registry
-from odoo.release import nt_service_name
-from odoo.tools import config
-from odoo.tools import stripped_sys_argv, dumpstacks, log_ormcache_stats, pycompat
 
 _logger = logging.getLogger(__name__)
 
@@ -879,6 +879,7 @@ def _reexec(updated_modules=None):
 def preload_registries(dbnames):
     """ Preload a registries, possibly run a test file."""
     # TODO: move all config checks to args dont check tools.config here
+    from odoo import tests
     dbnames = dbnames or []
     rc = 0
     for dbname in dbnames:
@@ -906,10 +907,10 @@ def preload_registries(dbnames):
                 _logger.log(25, "All post-tested in %.2fs, %d queries",
                             time.time() - t0, odoo.sql_db.sql_counter - t0_sql)
 
-            reporter.log_results()
-            if reporter.failures:
-                _logger.error('At least one test failed when loading the modules.')
-                rc += 1
+                reporter.log_results()
+                if reporter.failures:
+                    _logger.error('At least one test failed when loading the modules.')
+                    rc += 1
 
             # match runbot's check that build is done
             _logger.getChild('modules.loading').info("Modules loaded...")

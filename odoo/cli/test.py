@@ -8,7 +8,7 @@ import uuid
 import os
 import sys
 
-from .. import api, netsvc
+from .. import api, netsvc, tools
 from .command import Command
 from ..modules import get_modules, get_module_path, initialize_sys_path, registry
 from ..sql_db import db_connect, close_db
@@ -82,6 +82,7 @@ class Test(Command):
                 dblogger.info('Using existing db...')
 
         initialize_sys_path()
+        tools.config['test_enable'] = True
         try:
             modules = set(get_modules())
 
@@ -93,10 +94,8 @@ class Test(Command):
             ]
 
             dblogger.info("Running tests...")
-            # TODO: duplicates RegistryManager.new something fierce
-            with registry.RegistryManager.lock(), api.Environment.manage():
-                registry.RegistryManager.delete(db)
-                reg = registry.RegistryManager.registries[db] = registry.Registry(db)
+            with api.Environment.manage():
+                reg = registry.Registry.new(db)
                 # no multiprocess
                 pytest.main(params, plugins=[
                     support.OdooTests(reg),

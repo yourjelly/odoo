@@ -12,7 +12,6 @@ from lxml import etree
 import yaml
 
 import odoo
-from . import assertion_report
 from . import yaml_tag, pycompat
 from .config import config
 from .misc import file_open, DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT

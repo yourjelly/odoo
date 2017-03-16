@@ -17,7 +17,7 @@ import threading
 import time
 
 import odoo
-from .. import api, tests, SUPERUSER_ID
+from .. import SUPERUSER_ID
 from odoo.tools import (config, existing_tables,
                         lazy_classproperty, lazy_property, table_exists,
                         convert_file, ustr, lru,
@@ -26,9 +26,6 @@ from . import db, graph, migration, module
 
 
 _logger = logging.getLogger(__name__)
-_test_logger = logging.getLogger('odoo.tests')
-
-
 
 class Registry(collections.Mapping):
     """ Model registry for a particular database.
@@ -106,24 +103,24 @@ class Registry(collections.Mapping):
 
                             # closing will rollback & close instead of commit & close
                             with contextlib.closing(registry.cursor()) as cr:
-                                env = api.Environment(cr, SUPERUSER_ID, {})
+                                env = odoo.api.Environment(cr, SUPERUSER_ID, {})
                                 # Python tests
                                 env['ir.http']._clear_routing_map()     # force routing map to be rebuilt
 
-                        # magically defines current module as installed for
-                        # purpose of routing map generation, maybe test should
-                        # run after that's been done but before thingy has
-                        # been thingied
-                        module.current_test = data.name
+                            # magically defines current module as installed for
+                            # purpose of routing map generation, maybe test should
+                            # run after that's been done but before thingy has
+                            # been thingied
+                            module.current_test = data.name
 
-                        pytest.main(support.test_args + [module.get_module_path(data.name)], plugins=[
-                            support.ModuleTest('at_install'),
-                            support.DataTests(registry, data),
-                            fixtures,
-                            reporter,
-                        ])
+                            pytest.main(support.test_args + [module.get_module_path(data.name)], plugins=[
+                                support.ModuleTest('at_install'),
+                                support.DataTests(registry, data),
+                                fixtures,
+                                reporter,
+                            ])
 
-                        module.current_test = None
+                            module.current_test = None
 
                 except Exception:
                     _logger.exception('Failed to load registry')
@@ -533,7 +530,7 @@ class Registry(collections.Mapping):
                 if not config['without_demo']:
                     config["demo"]['all'] = 1
 
-            env = api.Environment(cr, SUPERUSER_ID, {})
+            env = odoo.api.Environment(cr, SUPERUSER_ID, {})
 
             if 'base' in config['update'] or 'all' in config['update']:
                 cr.execute("update ir_module_module set state=%s where name=%s and state=%s", ('to upgrade', 'base', 'installed'))
@@ -679,7 +676,7 @@ class Registry(collections.Mapping):
                     # modules to remove next time
                     cr.commit()
                     _logger.info('Reloading registry once more after uninstalling modules')
-                    api.Environment.reset()
+                    odoo.api.Environment.reset()
                     self.new(cr.dbname, force_demo=force_demo, update_module=update_module)
                     return
 
@@ -721,18 +718,6 @@ class Registry(collections.Mapping):
                 elif event == 'module_processed':
                     processed_any = True
                 yield event, data
-
-    def _load_test(self, cr, package, idref, mode):
-        try:
-            self._load_data(cr, package, idref, mode=mode, kind='test')
-            return True
-        except Exception:
-            _test_logger.exception(
-                'module %s: an exception occurred in a test', package.name)
-            return False
-        finally:
-            # avoid keeping stale xml_id, etc. in cache
-            self.clear_caches()
 
     def _get_files_of_kind(self, kind, package):
         if kind == 'demo':
@@ -826,7 +811,7 @@ class Registry(collections.Mapping):
             # models loaded in python (ish), why not setup_models?
             yield "module_loaded", package
             if hasattr(package, 'init') or hasattr(package, 'update') or package.state in ('to install', 'to upgrade'):
-                env = api.Environment(cr, SUPERUSER_ID, {})
+                env = odoo.api.Environment(cr, SUPERUSER_ID, {})
                 self.setup_models(cr)
                 # db alterations + possible DB hooks (init)
                 self.init_models(cr, model_names, {'module': package.name})

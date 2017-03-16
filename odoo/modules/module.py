@@ -18,7 +18,6 @@ from os.path import join as opj
 import odoo
 import odoo.tools as tools
 import odoo.release as release
-from odoo import SUPERUSER_ID, api
 from odoo.tools import pycompat
 
 MANIFEST_NAMES = ('__manifest__.py', '__openerp__.py')
@@ -385,7 +384,7 @@ def get_modules():
 
         return (
             clean(name) for name in os.listdir(directory)
-            if any(os.path.isfile(opj(directory, name, mnane)) for mname in MANIFEST_NAMES)
+            if any(os.path.isfile(opj(directory, name, mname)) for mname in MANIFEST_NAMES)
         )
 
     initialize_sys_path()
