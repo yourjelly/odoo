@@ -125,7 +125,7 @@
 
     <t t-name="SetFiscalPositionButton">
         <div class='control-button'>
-            <i class='fa fa-book' /> <t t-esc='widget.get_current_fiscal_position_name()'/>
+            <i class='fa fa-book' /> Tax
         </div>
     </t>
 
@@ -1110,7 +1110,7 @@
                 <p class="title"><t t-esc=" widget.options.title || 'Select' " /></p>
                 <div class='selection scrollable-y touch-scrollable'>
                     <t t-foreach="widget.list || []" t-as="item">
-                        <div class='selection-item' t-att-data-item-index='item_index'>
+                        <div t-attf-class="selection-item {{ widget.is_selected.call(widget, item.item) ? 'selected' : '' }}" t-att-data-item-index='item_index'>
                             <t t-esc='item.label'/>
                         </div>
                     </t>

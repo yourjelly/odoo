@@ -2037,23 +2037,12 @@ var set_fiscal_position_button = ActionButtonWidget.extend({
                 var order = self.pos.get_order();
                 order.fiscal_position = fiscal_position;
                 order.trigger('change');
+            },
+            is_selected: function (fiscal_position) {
+                return fiscal_position === self.pos.get_order().fiscal_position;
             }
         });
     },
-    get_current_fiscal_position_name: function () {
-        var name = _t('Tax');
-        var order = this.pos.get_order();
-
-        if (order) {
-            var fiscal_position = order.fiscal_position;
-
-            if (fiscal_position) {
-                name = fiscal_position.display_name;
-            }
-        }
-
-        return name;
-    }
 });
 
 define_action_button({
