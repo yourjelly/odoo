@@ -47,6 +47,7 @@ var WidgetButton = common.FormWidget.extend({
         if (this.node.attrs.help || session.debug) {
             this.do_attach_tooltip();
         }
+        this.do_attach_focus_tooltip();
         this.setupFocus(this.$el);
     },
     on_click: function() {
@@ -129,7 +130,7 @@ var WidgetButton = common.FormWidget.extend({
             }
         };
     },
-    set_focus: function() {
+    get_focus_tip: function() {
         if (this.node.attrs.on_focus_tip) {
             var content = this.node.attrs.on_focus_tip;
         } else {
@@ -137,7 +138,24 @@ var WidgetButton = common.FormWidget.extend({
             var content = _t("Press ENTER to %s");
             content = this.string ? _.str.sprintf(content, this.string) : _.str.sprintf(content, this.get_string(this.node));
         }
-        utils.show_tabindex_tip({attach_to: this.$el, title: content, trigger: 'focus'});
+        return content;
+    },
+    do_attach_focus_tooltip: function() {
+        // Note: utils.show_tabindex_tip is not working here on state button as value changes dynamically for some stat buttons like active boolean button
+        // calling function will work, so we can make show_tabindex_tip in misc and call function to get string of tooltip to make it work
+        var self = this;
+        var options = _.extend({
+                delay: { show: 1000, hide: 0 },
+                trigger: 'focus',
+                title: function() {
+                    return QWeb.render('FocusTooltip', {
+                        widget: self
+                    });
+                }
+            }, {});
+        this.$el.tooltip(options);
+    },
+    set_focus: function() {
         this.$el.focus();
     },
     keydown_ENTER: function(e) {
