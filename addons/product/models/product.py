@@ -166,6 +166,8 @@ class ProductProduct(models.Model):
     packaging_ids = fields.One2many(
         'product.packaging', 'product_id', 'Packaging',
         help="Gives the different ways to package the same product.")
+    
+    seller_variant_ids = fields.One2many('product.supplierinfo', 'product_id')
 
     _sql_constraints = [
         ('barcode_uniq', 'unique(barcode)', "A barcode can only be assigned to one product !"),

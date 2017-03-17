@@ -636,7 +636,7 @@
             <field name="arch" type="xml">
                 <group name="inventory" position="after">
                     <separator string="Vendors"/>
-                    <field name="seller_ids" domain="['|', ('product_id', '=', False), ('product_id', '=', id)]" context="{'default_product_tmpl_id': product_tmpl_id}"/>
+                    <field name="seller_variant_ids" context="{'default_product_tmpl_id': product_tmpl_id}"/>
                 </group>
             </field>
         </record>
