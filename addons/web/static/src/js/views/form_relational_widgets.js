@@ -765,6 +765,7 @@ var FieldX2Many = AbstractManyField.extend({
                 _.extend(view.options, {
                     action_buttons: true,
                     confirm_on_delete: false,
+                    import_enabled: false,
                 });
                 if (self.get("effective_readonly")) {
                     _.extend(view.options, {
