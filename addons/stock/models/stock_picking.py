@@ -264,14 +264,20 @@ class Picking(models.Model):
         default=lambda self: self.env['res.company']._company_default_get('stock.picking'),
         index=True, required=True,
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
-    # TDE FIXME: separate those two kind of pack operations
     pack_operation_ids = fields.One2many(
         'stock.pack.operation', 'picking_id', 'Packing Operations',
+        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
+    pack_operation_product_ids = fields.One2many(
+        'stock.pack.operation', 'picking_id', 'Product pack operations', 
+        domain="[('part_of_pack', '=', False)]",
+        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
+    pack_operation_pack_ids = fields.One2many(
+        'stock.pack.operation', 'picking_id', 'Product pack operations',
+        domain="[('first_pack', '=', True)]", 
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
     pack_operation_exist = fields.Boolean(
         'Has Pack Operations', compute='_compute_pack_operation_exist',
         help='Check the existence of pack operation on the picking')
-
     owner_id = fields.Many2one(
         'res.partner', 'Owner',
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
@@ -284,8 +290,6 @@ class Picking(models.Model):
         help='True if reserved quants changed, which mean we might need to recompute the package operations')
     launch_pack_operations = fields.Boolean("Launch Pack Operations", copy=False)
     show_operations = fields.Boolean(related='picking_type_id.show_operations')
-    
-    
 
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per company!'),
@@ -494,6 +498,7 @@ class Picking(models.Model):
         return True
 
 
+
     @api.multi
     def do_prepare_partial(self):
         # TDE CLEANME: oh dear ...
@@ -505,10 +510,13 @@ class Picking(models.Model):
             forced_qties = {}  # Quantity remaining after calculating reserved quants
             picking_quants = self.env['stock.quant']
             # Calculate packages, reserved quants, qtys of this picking's moves
+            quants_ops = {}
+            total_quants = self.env['stock.quant']
             for move in picking.move_lines:
                 if move.state not in ('assigned', 'confirmed', 'waiting'):
                     continue
                 move_quants = move.reserved_quant_ids
+                total_quants |= move_quants
                 picking_quants += move_quants
                 forced_qty = 0.0
                 if move.state == 'assigned':
@@ -516,7 +524,7 @@ class Picking(models.Model):
                     forced_qty = qty - sum([x.qty for x in move_quants])
                 # if we used force_assign() on the move, or if the move is incoming, forced_qty > 0
                 for quant in move_quants:
-                    PackOperation.create({'picking_id': move.picking_id.id,
+                    new_op = PackOperation.create({'picking_id': move.picking_id.id,
                                           'move_id': move.id,
                                           'product_qty': quant.qty, 
                                           'product_id': move.product_id.id, 
@@ -525,6 +533,7 @@ class Picking(models.Model):
                                           'location_id': quant.location_id.id, 
                                           'location_dest_id': move.location_dest_id.id,
                                           'owner_id': quant.owner_id.id,})
+                    quants_ops[quant.id] = new_op
                 if forced_qty:
                     PackOperation.create({'picking_id': move.picking_id.id, 
                                           'product_id': move.product_id.id,

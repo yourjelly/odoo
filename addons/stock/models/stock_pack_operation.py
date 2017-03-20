@@ -20,7 +20,7 @@ class PackOperation(models.Model):
     move_id = fields.Many2one(
         'stock.move', 'Stock Move', 
         help="Change to a better name") 
-    product_id = fields.Many2one('product.product', 'Product', required=True, ondelete="cascade") #might be a related with the move also
+    product_id = fields.Many2one('product.product', 'Product', ondelete="cascade") #might be a related with the move also
     product_uom_id = fields.Many2one('product.uom', 'Unit of Measure')
     product_qty = fields.Float('To Do', default=0.0, digits=dp.get_precision('Product Unit of Measure'), required=True)
     qty_done = fields.Float('Done', default=0.0, digits=dp.get_precision('Product Unit of Measure'))
@@ -50,6 +50,8 @@ class PackOperation(models.Model):
         ('partially_available', 'Partially Available'),
         ('assigned', 'Available'),
         ('done', 'Done')], related='picking_id.state')
+    part_of_pack = fields.Boolean('Is part of pack', default=False)
+    first_pack = fields.Boolean('Is first of pack', default=False)
 
     @api.onchange('is_done')
     def on_change_is_done(self):
