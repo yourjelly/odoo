@@ -41,6 +41,9 @@
     }
     .oe_dashboard_column {
         vertical-align: top;
+        @media (max-width: @screen-md-max){
+            width: 100% !important;  // overwrite layout in mobile view
+        }
     }
 
     // Layout selector
@@ -87,12 +90,6 @@
                     content: "+";
                     margin-left: 4px;
                 }
-                .oe_header_text {
-                    width: auto;
-                    visibility: hidden;
-                    display: inline-block;
-                    cursor: text;
-                }
                 span {
                     cursor: pointer;
                 }
@@ -122,6 +119,13 @@
             .o_graph {
                 height: 500px;
             }
+        }
+    }
+
+    // Break table in mobile view, similar to .form-break-table mixin
+    @media (max-width: @screen-md-max){
+        table, tbody, tr, td {
+            display: block;
         }
     }
 }
