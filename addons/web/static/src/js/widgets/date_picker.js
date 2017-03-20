@@ -41,6 +41,7 @@ var DateWidget = Widget.extend({
         });
     },
     start: function() {
+        var self = this;
         this.$input = this.$('input.o_datepicker_input');
         this.$input.focus(function(e) {
             e.stopImmediatePropagation();
@@ -48,6 +49,11 @@ var DateWidget = Widget.extend({
         this.$input.datetimepicker(this.options);
         this.picker = this.$input.data('DateTimePicker');
         this.$input.click(this.picker.toggle.bind(this.picker));
+        this.$input.on("keydown", function(e) {
+            if (e.which == $.ui.keyCode.DOWN && !self.$el.find(".bootstrap-datetimepicker-widget.dropdown-menu").length) {
+                self.picker.toggle.bind(self.picker)
+            }
+        });
         this.set_readonly(false);
         this.set_value(false);
     },
