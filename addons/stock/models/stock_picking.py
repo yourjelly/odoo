@@ -267,13 +267,9 @@ class Picking(models.Model):
     pack_operation_ids = fields.One2many(
         'stock.pack.operation', 'picking_id', 'Packing Operations',
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
-    pack_operation_product_ids = fields.One2many(
+    active_pack_operation_ids = fields.One2many(
         'stock.pack.operation', 'picking_id', 'Product pack operations', 
-        domain=[('part_of_pack', '=', False)],
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
-    pack_operation_pack_ids = fields.One2many(
-        'stock.pack.operation', 'picking_id', 'Product pack operations',
-        domain=[('first_pack', '=', True)], 
+        domain=['|', ('part_of_pack', '=', False), ('first_pack', '=', True)],
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
     pack_operation_exist = fields.Boolean(
         'Has Pack Operations', compute='_compute_pack_operation_exist',
