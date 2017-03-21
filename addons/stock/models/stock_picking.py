@@ -269,11 +269,11 @@ class Picking(models.Model):
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
     pack_operation_product_ids = fields.One2many(
         'stock.pack.operation', 'picking_id', 'Product pack operations', 
-        domain="[('part_of_pack', '=', False)]",
+        domain=[('part_of_pack', '=', False)],
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
     pack_operation_pack_ids = fields.One2many(
         'stock.pack.operation', 'picking_id', 'Product pack operations',
-        domain="[('first_pack', '=', True)]", 
+        domain=[('first_pack', '=', True)], 
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
     pack_operation_exist = fields.Boolean(
         'Has Pack Operations', compute='_compute_pack_operation_exist',
@@ -497,7 +497,36 @@ class Picking(models.Model):
         todo_moves.action_done()
         return True
 
-
+    def _set_top_level_packages(self, quants_to_check):
+        """ This method searches for as much possible higher level packages that
+        can be moved as a single operation and will tag the operations concerned in 
+        order to be able to . """
+        self.ensure_one()
+        top_lvl_packages = self.env['stock.quant.package']
+        for package in self.pack_operation_ids.mapped('package_id'):
+            all_in = True
+            top_package = self.env['stock.quant.package']
+            while package:
+                quants_package = [quant.id for quant in package.get_content()]
+                if any(quant not in quants_to_check.keys() for quant in quants_package):
+                    all_in = False
+                if all_in:
+                    destinations = set([quants_to_check[x].location_id for x in quants_package])
+                    if len(destinations) > 1:
+                        all_in = False
+                if all_in:
+                    top_package = package
+                    package = package.parent_id
+                else:
+                    package = False
+            top_lvl_packages |= top_package
+            total_ops = self.env['stock.pack.operation']
+            if top_package:
+                for quant in top_package.get_content():
+                    total_ops |= quants_to_check[quant.id]
+                total_ops[0].first_pack = True
+                total_ops.write({'part_of_pack': True})
+        return top_lvl_packages
 
     @api.multi
     def do_prepare_partial(self):
@@ -524,23 +553,26 @@ class Picking(models.Model):
                     forced_qty = qty - sum([x.qty for x in move_quants])
                 # if we used force_assign() on the move, or if the move is incoming, forced_qty > 0
                 for quant in move_quants:
+                    # TODO: add putaway strategy
                     new_op = PackOperation.create({'picking_id': move.picking_id.id,
                                           'move_id': move.id,
                                           'product_qty': quant.qty, 
                                           'product_id': move.product_id.id, 
                                           'lot_id': quant.lot_id.id, 
-                                          'package_id':quant.package_id.id,
+                                          'package_id': quant.package_id.id,
                                           'location_id': quant.location_id.id, 
-                                          'location_dest_id': move.location_dest_id.id,
+                                          'location_dest_id': move.location_dest_id.id, # Apply putaway
                                           'owner_id': quant.owner_id.id,})
                     quants_ops[quant.id] = new_op
                 if forced_qty:
+                    # TODO: add putaway strategy or maybe apply on pack operation now
                     PackOperation.create({'picking_id': move.picking_id.id, 
                                           'product_id': move.product_id.id,
                                           'move_id': move.id, 
                                           'product_qty': forced_qty, 
                                           'location_id': move.location_id.id, 
-                                          'location_dest_id': move.location_dest_id.id})
+                                          'location_dest_id': move.location_dest_id.id}) # Apply Putaway
+            self._set_top_level_packages(quants_ops)
         self.write({'recompute_pack_op': False})
 
     @api.multi
@@ -808,26 +840,24 @@ class Picking(models.Model):
                 op = operation
                 if operation.qty_done < operation.product_qty:
                     new_operation = operation.copy({'product_qty': operation.qty_done,'qty_done': operation.qty_done})
-
                     operation.write({'product_qty': operation.product_qty - operation.qty_done,'qty_done': 0})
-                    if operation.pack_lot_ids:
-                        packlots_transfer = [(4, x.id) for x in operation.pack_lot_ids]
-                        new_operation.write({'pack_lot_ids': packlots_transfer})
-
-                        # the stock.pack.operation.lot records now belong to the new, packaged stock.pack.operation
-                        # we have to create new ones with new quantities for our original, unfinished stock.pack.operation
-                        new_operation._copy_remaining_pack_lot_ids(operation)
+#                     if operation.pack_lot_ids:
+#                         packlots_transfer = [(4, x.id) for x in operation.pack_lot_ids]
+#                         new_operation.write({'pack_lot_ids': packlots_transfer})
+# 
+#                         # the stock.pack.operation.lot records now belong to the new, packaged stock.pack.operation
+#                         # we have to create new ones with new quantities for our original, unfinished stock.pack.operation
+#                         new_operation._copy_remaining_pack_lot_ids(operation)
 
                     op = new_operation
                 pack_operation_ids |= op
             if operations:
-                pack_operation_ids.check_tracking()
+                #TODO: pack_operation_ids.check_tracking()
                 package = QuantPackage.create({})
                 pack_operation_ids.write({'result_package_id': package.id})
             else:
                 raise UserError(_('Please process some quantities to put in the pack first!'))
         return package
-
 
     @api.multi
     def put_in_pack(self):

@@ -12,7 +12,6 @@ from odoo.exceptions import UserError
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from odoo.tools.float_utils import float_compare, float_round, float_is_zero
 
-
 class StockMove(models.Model):
     _name = "stock.move"
     _description = "Stock Move"
@@ -847,7 +846,9 @@ class StockMove(models.Model):
                         raise UserError(_('You need to supply a lot/serial number.'))
                     qty = move.product_uom._compute_quantity(packop.qty_done, move.product_id.uom_id)
                     quants = quant_obj.quants_get_preferred_domain(qty, move, ops=packop, domain=main_domain, preferred_domain_list=preferred_domain_list)
-                    self.env['stock.quant'].quants_move(quants, move, packop.location_dest_id, lot_id = packop.lot_id.id)
+                    self.env['stock.quant'].quants_move(quants, move, packop.location_dest_id, location_from=packop.location_id, lot_id=packop.lot_id.id, 
+                                                        src_package_id=packop.package_id.id, dest_package_id=packop.result_package_id.id, 
+                                                        owner_id=packop.owner_id.id) # TODO: need to see for entire pack
             moves_to_unreserve |= move
             # Next move in production order
             if move.move_dest_id:
