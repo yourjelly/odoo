@@ -52,6 +52,7 @@ class PackOperation(models.Model):
         ('done', 'Done')], related='picking_id.state')
     part_of_pack = fields.Boolean('Is part of pack', default=False)
     first_pack = fields.Boolean('Is first of pack', default=False)
+    first_product = fields.Boolean('Is first of product', default=True)
 
     @api.onchange('is_done')
     def on_change_is_done(self):
