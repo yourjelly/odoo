@@ -526,7 +526,6 @@ class Picking(models.Model):
 
     @api.multi
     def do_prepare_partial(self):
-        # TDE CLEANME: oh dear ...
         PackOperation = self.env['stock.pack.operation']
 
         # get list of existing operations and delete them
@@ -548,6 +547,7 @@ class Picking(models.Model):
                     qty = move.product_uom._compute_quantity(move.product_uom_qty, move.product_id.uom_id, round=False)
                     forced_qty = qty - sum([x.qty for x in move_quants])
                 # if we used force_assign() on the move, or if the move is incoming, forced_qty > 0
+                first_product_op = True
                 for quant in move_quants:
                     # TODO: add putaway strategy
                     new_op = PackOperation.create({'picking_id': move.picking_id.id,
@@ -558,7 +558,9 @@ class Picking(models.Model):
                                           'package_id': quant.package_id.id,
                                           'location_id': quant.location_id.id, 
                                           'location_dest_id': move.location_dest_id.id, # Apply putaway
-                                          'owner_id': quant.owner_id.id,})
+                                          'owner_id': quant.owner_id.id,
+                                          'first_product': first_product_op,})
+                    first_product_op = False
                     quants_ops[quant.id] = new_op
                 if forced_qty:
                     # TODO: add putaway strategy or maybe apply on pack operation now
