@@ -284,20 +284,13 @@ class Picking(models.Model):
     recompute_pack_op = fields.Boolean(
         'Recompute pack operation?', copy=False,
         help='True if reserved quants changed, which mean we might need to recompute the package operations')
-    launch_pack_operations = fields.Boolean("Launch Pack Operations", copy=False)
+    launch_pack_operations = fields.Boolean("Launch Pack Operations", copy=False, 
+                                default=lambda self: self.env['stock.picking.type'].browse(self._context.get('default_picking_type_id')).show_operations)
     show_operations = fields.Boolean(related='picking_type_id.show_operations')
 
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per company!'),
     ]
-    
-    @api.model
-    def default_get(self, fields):
-        res = super(Picking, self).default_get(fields)
-        if res.get('picking_type_id'):
-            if self.env['stock.picking.type'].browse(res['picking_type_id']).show_operations:
-                res['launch_pack_operations'] = True #Launch pack operations
-        return res
     
     @api.depends('move_type', 'launch_pack_operations', 'move_lines.state', 'move_lines.picking_id', 'move_lines.partially_available')
     @api.one
@@ -405,10 +398,10 @@ class Picking(models.Model):
 
     @api.model
     def create(self, vals):
-        # TDE FIXME: clean that brol
         defaults = self.default_get(['name', 'picking_type_id'])
         if vals.get('name', '/') == '/' and defaults.get('name', '/') == '/' and vals.get('picking_type_id', defaults.get('picking_type_id')):
             vals['name'] = self.env['stock.picking.type'].browse(vals.get('picking_type_id', defaults.get('picking_type_id'))).sequence_id.next_by_id()
+        import pdb; pdb.set_trace()
 
         # TDE FIXME: what ?
         # As the on_change in one2many list is WIP, we will overwrite the locations on the stock moves here
