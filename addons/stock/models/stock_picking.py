@@ -506,12 +506,12 @@ class Picking(models.Model):
             # Link existing moves or add moves when no one is related
             for ops in self.pack_operation_ids.filtered(lambda x: not x.move_id):
                 # Search move with this product
-                moves = pick.filtered(lambda x: x.product_id == ops.product_id) 
+                moves = pick.move_lines.filtered(lambda x: x.product_id == ops.product_id) 
                 if moves: #could search move that needs it the most (that has some quantities left)
                     ops.move_id = moves[0].id
                 else:
                     new_move = self.env['stock.move'].create({
-                                                    'name': _('New Move') + ops.product_id.display_name,
+                                                    'name': _('New Move:') + ops.product_id.display_name,
                                                     'product_id': ops.product_id.id,
                                                     'product_uom_qty': ops.qty_done,
                                                     'product_uom': ops.product_uom_id.id,
