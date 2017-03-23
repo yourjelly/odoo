@@ -218,15 +218,6 @@ class IrValues(models.Model):
             # should be company-specific, need to get company id
             company_id = self.env.user.company_id.id
 
-        # check consistency of model, field_name and value
-        try:
-            field = self.env[model]._fields[field_name]
-            field.convert_to_cache(value, self.browse())
-        except KeyError:
-            raise ValidationError(_("Invalid field %s.%s") % (model, field_name))
-        except Exception:
-            raise ValidationError(_("Invalid value for %s.%s: %s") % (model, field_name, value))
-
         # remove existing defaults for the same scope
         search_criteria = [
             ('key', '=', 'default'),
