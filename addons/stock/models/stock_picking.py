@@ -290,7 +290,15 @@ class Picking(models.Model):
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per company!'),
     ]
-
+    
+    @api.model
+    def default_get(self, fields):
+        res = super(Picking, self).default_get(fields)
+        if res.get('picking_type_id'):
+            if self.env['stock.picking.type'].browse(res['picking_type_id']).show_operations:
+                res['launch_pack_operations'] = True #Launch pack operations
+        return res
+    
     @api.depends('move_type', 'launch_pack_operations', 'move_lines.state', 'move_lines.picking_id', 'move_lines.partially_available')
     @api.one
     def _compute_state(self):
