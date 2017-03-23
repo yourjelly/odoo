@@ -485,11 +485,39 @@ class Picking(models.Model):
         Normally that happens when the button "Done" is pressed on a Picking view.
         @return: True
         """
-        # TDE FIXME: remove decorator when migration the remaining
-        # TDE FIXME: draft -> automatically done, if waiting ?? CLEAR ME
         draft_moves = self.mapped('move_lines').filtered(lambda self: self.state == 'draft')
         todo_moves = self.mapped('move_lines').filtered(lambda self: self.state in ['draft', 'assigned', 'confirmed'])
         draft_moves.action_confirm()
+        # Check if there are ops not linked to moves yet
+        for pick in self:
+            # Explode manually added packages
+            for ops in self.operation_ids.filtered(lambda x: not x.move_id and not x.product_id):
+                for quant in ops.package_id.quant_ids: #Or use get_content for multiple levels
+                    self.operation_ids.create({'product_id': quant.product_id.id, 
+                                               'package_id': quant.package_id.id, 
+                                               'result_package_id': ops.result_package_id,
+                                               'lot_id': quant.lot_id.id, 
+                                               'owner_id': quant.owner_id.id,
+                                               'product_uom_id': quant.product_id.uom_id.id,
+                                               'product_qty': quant.qty, 
+                                               'qty_done': quant.qty,
+                                               'location_id': quant.location_id.id, # Could be ops too
+                                               'location_dest_id': ops.location_dest_id.id,
+                                               }) # Might change first element
+            # Link existing moves or add moves when no one is related
+            for ops in self.operation_ids.filtered(lambda x: not x.move_id):
+                # Search move with this product
+                moves = pick.filtered(lambda x: x.product_id == ops.product_id) 
+                if moves: #could search move that needs it the most
+                    ops.move_id = moves[0].id
+                else:
+                    todo_moves |= self.env['stock.move'].create({'product_id': ops.product_id.id,
+                                                   'product_uom_qty': ops.product_qty, 
+                                                   'product_uom': ops.product_uom_id.id, 
+                                                   'location_id': pick.location_id.id, 
+                                                   'location_dest_id': pick.location_dest_id.id, 
+                                                   })
+                    #'qty_done': ops.qty_done})
         todo_moves.action_done()
         return True
 
