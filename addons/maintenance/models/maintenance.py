@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 from odoo import api, fields, models, SUPERUSER_ID, _
 from odoo.exceptions import UserError
-from odoo.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
+from odoo.addons.calendar.models.calendar import VIRTUALID_DATETIME_FORMAT
+
+import pytz
 
 
 class MaintenanceStage(models.Model):
@@ -139,55 +141,29 @@ class MaintenanceEquipment(models.Model):
     maintenance_ids = fields.One2many('maintenance.request', 'equipment_id')
     maintenance_count = fields.Integer(compute='_compute_maintenance_count', string="Maintenance", store=True)
     maintenance_open_count = fields.Integer(compute='_compute_maintenance_count', string="Current Maintenance", store=True)
-    period = fields.Integer('Days between each preventive maintenance')
-    next_action_date = fields.Date(compute='_compute_next_maintenance', string='Date of the next preventive maintenance', store=True)
+    next_action_date = fields.Date(compute='_compute_next_maintenance', string='Date of the next preventive maintenance')
     maintenance_team_id = fields.Many2one('maintenance.team', string='Maintenance Team')
-    maintenance_duration = fields.Float(help="Maintenance Duration in hours.")
 
-    @api.depends('period', 'maintenance_ids.request_date', 'maintenance_ids.close_date')
-    def _compute_next_maintenance(self):
+    preventive_maintenance_request_id = fields.Many2one('maintenance.request', string='Actual preventive maintenance')
+    period = fields.Integer('Days between each preventive maintenance', related='preventive_maintenance_request_id.maintenance_event_id.interval')
+    maintenance_duration = fields.Float(help="Maintenance Duration in hours.", related='preventive_maintenance_request_id.maintenance_event_id.duration')
+    maintenance_start_date = fields.Datetime('Start date of the maintenance', related='preventive_maintenance_request_id.maintenance_event_id.start')
+    maintenance_final_date = fields.Date('End date of the maintenance', related='preventive_maintenance_request_id.maintenance_event_id.final_date')
 
-        date_now = fields.Date.context_today(self)
-        for equipment in self.filtered(lambda x: x.period > 0):
-            next_maintenance_todo = self.env['maintenance.request'].search([
-                ('equipment_id', '=', equipment.id),
-                ('maintenance_type', '=', 'preventive'),
-                ('stage_id.done', '!=', True),
-                ('close_date', '=', False)], order="request_date asc", limit=1)
-            last_maintenance_done = self.env['maintenance.request'].search([
-                ('equipment_id', '=', equipment.id),
-                ('maintenance_type', '=', 'preventive'),
-                ('stage_id.done', '=', True),
-                ('close_date', '!=', False)], order="close_date desc", limit=1)
-            if next_maintenance_todo and last_maintenance_done:
-                next_date = next_maintenance_todo.request_date
-                date_gap = fields.Date.from_string(next_maintenance_todo.request_date) - fields.Date.from_string(last_maintenance_done.close_date)
-                # If the gap between the last_maintenance_done and the next_maintenance_todo one is bigger than 2 times the period and next request is in the future
-                # We use 2 times the period to avoid creation too closed request from a manually one created
-                if date_gap > timedelta(0) and date_gap > timedelta(days=equipment.period) * 2 and fields.Date.from_string(next_maintenance_todo.request_date) > fields.Date.from_string(date_now):
-                    # If the new date still in the past, we set it for today
-                    if fields.Date.from_string(last_maintenance_done.close_date) + timedelta(days=equipment.period) < fields.Date.from_string(date_now):
-                        next_date = date_now
-                    else:
-                        next_date = fields.Date.to_string(fields.Date.from_string(last_maintenance_done.close_date) + timedelta(days=equipment.period))
-            elif next_maintenance_todo:
-                next_date = next_maintenance_todo.request_date
-                date_gap = fields.Date.from_string(next_maintenance_todo.request_date) - fields.Date.from_string(date_now)
-                # If next maintenance to do is in the future, and in more than 2 times the period, we insert an new request
-                # We use 2 times the period to avoid creation too closed request from a manually one created
-                if date_gap > timedelta(0) and date_gap > timedelta(days=equipment.period) * 2:
-                    next_date = fields.Date.to_string(fields.Date.from_string(date_now)+timedelta(days=equipment.period))
-            elif last_maintenance_done:
-                next_date = fields.Date.from_string(last_maintenance_done.close_date)+timedelta(days=equipment.period)
-                # If when we add the period to the last maintenance done and we still in past, we plan it for today
-                if next_date < fields.Date.from_string(date_now):
-                    next_date = date_now
-            else:
-                next_date = fields.Date.to_string(fields.Date.from_string(date_now) + timedelta(days=equipment.period))
-
-            equipment.next_action_date = next_date
     @api.one
-    @api.depends('maintenance_ids.stage_id.done')
+    def _compute_next_maintenance(self):
+        " Give the next maintenance date among all maintenance request linked to this equipment. "
+        maintenance_request = self.env['maintenance.request'].search([
+            ('equipment_id', '=',  self.id),
+            ('stage_id.done', '!=', True),
+        ])
+        maintenance_request = maintenance_request.filtered(lambda r: r.schedule_date is not False)
+        if maintenance_request.exists():
+            maintenance_request = maintenance_request.sorted(key=lambda r: r.schedule_date)
+            self.next_action_date = maintenance_request[0].schedule_date
+
+    @api.one
+    @api.depends('maintenance_ids.stage_id.done', 'maintenance_ids.active')
     def _compute_maintenance_count(self):
         self.maintenance_count = len(self.maintenance_ids)
         self.maintenance_open_count = len(self.maintenance_ids.filtered(lambda x: not x.stage_id.done))
@@ -203,6 +179,9 @@ class MaintenanceEquipment(models.Model):
     @api.model
     def create(self, vals):
         equipment = super(MaintenanceEquipment, self).create(vals)
+        if any(vals.get(k, False) for k in ('period', 'maintenance_duration', 'maintenance_final_date', 'maintenance_start_date')):
+            vals = equipment._manage_request_maintenance(vals)
+            equipment.preventive_maintenance_request_id = vals['preventive_maintenance_request_id']
         if equipment.owner_user_id:
             equipment.message_subscribe_users(user_ids=[equipment.owner_user_id.id])
         return equipment
@@ -211,7 +190,28 @@ class MaintenanceEquipment(models.Model):
     def write(self, vals):
         if vals.get('owner_user_id'):
             self.message_subscribe_users(user_ids=[vals['owner_user_id']])
-        return super(MaintenanceEquipment, self).write(vals)
+        if any(k in vals for k in ('period', 'maintenance_duration', 'maintenance_final_date', 'maintenance_start_date')):
+            vals = self._manage_request_maintenance(vals)
+        # Clean all link between preventive maintenance request and equipment.
+        if vals.get('period', True) is False or vals.get('maintenance_start_date', True) is False:
+            if self.preventive_maintenance_request_id.maintenance_event_id:
+                self.preventive_maintenance_request_id.maintenance_event_id.recurrency = False
+            vals['preventive_maintenance_request_id'] = False
+        equipment = super(MaintenanceEquipment, self).write(vals)
+        return equipment
+
+    @api.multi
+    def unlink(self):
+        if self.preventive_maintenance_request_id.maintenance_event_id.recurrency:
+            self.preventive_maintenance_request_id.maintenance_event_id.recurrency = False
+        super(MaintenanceEquipment, self).unlink()
+
+    @api.multi
+    def toggle_active(self):
+        super(MaintenanceEquipment, self).toggle_active()
+        if not self.active:
+            if self.preventive_maintenance_request_id.maintenance_event_id.recurrency:
+                self.preventive_maintenance_request_id.maintenance_event_id.recurrency = False
 
     @api.model
     def _read_group_category_ids(self, categories, domain, order):
@@ -221,33 +221,31 @@ class MaintenanceEquipment(models.Model):
         category_ids = categories._search([], order=order, access_rights_uid=SUPERUSER_ID)
         return categories.browse(category_ids)
 
-    def _create_new_request(self, date):
+    @api.multi
+    def _manage_request_maintenance(self, vals):
         self.ensure_one()
-        self.env['maintenance.request'].create({
-            'name': _('Preventive Maintenance - %s') % self.name,
-            'request_date': date,
-            'schedule_date': date,
-            'category_id': self.category_id.id,
-            'equipment_id': self.id,
-            'maintenance_type': 'preventive',
-            'owner_user_id': self.owner_user_id.id,
-            'technician_user_id': self.technician_user_id.id,
-            'maintenance_team_id': self.maintenance_team_id.id,
-            'duration': self.maintenance_duration,
+        if not self.preventive_maintenance_request_id.exists():
+            request = self.env['maintenance.request'].create({
+                'name': _('Preventive Maintenance - %s') % self.name,
+                'equipment_id': self.id,
+                'category_id': self.category_id.id,
+                'maintenance_type': 'preventive',
+                'owner_user_id': self.owner_user_id.id,
+                'technician_user_id': self.technician_user_id.id,
+                'schedule_date': vals.get('maintenance_start_date', self.maintenance_start_date),
+                'duration': vals.get('maintenance_duration', self.maintenance_duration),
+                'maintenance_team_id': vals.get('maintenance_team_id', self.maintenance_team_id),
             })
+            request.maintenance_event_id.write({
+                'recurrency': True,
+                'end_type': 'end_date',
+                'rrule_type': 'daily',
+                'interval': vals.get('period', self.period),
+                'final_date': vals.get('maintenance_final_date', self.maintenance_final_date),
+            })
+            vals['preventive_maintenance_request_id'] = request.id
+        return vals
 
-    @api.model
-    def _cron_generate_requests(self):
-        """
-            Generates maintenance request on the next_action_date or today if none exists
-        """
-        for equipment in self.search([('period', '>', 0)]):
-            next_requests = self.env['maintenance.request'].search([('stage_id.done', '=', False),
-                                                    ('equipment_id', '=', equipment.id),
-                                                    ('maintenance_type', '=', 'preventive'),
-                                                    ('request_date', '=', equipment.next_action_date)])
-            if not next_requests:
-                equipment._create_new_request(equipment.next_action_date)
 
 class MaintenanceRequest(models.Model):
     _name = 'maintenance.request'
@@ -277,7 +275,7 @@ class MaintenanceRequest(models.Model):
                                help="Date requested for the maintenance to happen")
     owner_user_id = fields.Many2one('res.users', string='Created by', default=lambda s: s.env.uid)
     category_id = fields.Many2one('maintenance.equipment.category', related='equipment_id.category_id', string='Category', store=True, readonly=True)
-    equipment_id = fields.Many2one('maintenance.equipment', string='Equipment', index=True)
+    equipment_id = fields.Many2one('maintenance.equipment', string='Equipment', index=True, ondelete='restrict')
     technician_user_id = fields.Many2one('res.users', string='Owner', track_visibility='onchange', oldname='user_id')
     stage_id = fields.Many2one('maintenance.stage', string='Stage', track_visibility='onchange',
                                group_expand='_read_group_stage_ids', default=_default_stage)
@@ -286,23 +284,14 @@ class MaintenanceRequest(models.Model):
     close_date = fields.Date('Close Date', help="Date the maintenance was finished. ")
     kanban_state = fields.Selection([('normal', 'In Progress'), ('blocked', 'Blocked'), ('done', 'Ready for next stage')],
                                     string='Kanban State', required=True, default='normal', track_visibility='onchange')
-    # active = fields.Boolean(default=True, help="Set active to false to hide the maintenance request without deleting it.")
-    archive = fields.Boolean(default=False, help="Set archive to true to hide the maintenance request without deleting it.")
+    active = fields.Boolean(default=True, help="Set active to false to hide the maintenance request without deleting it.")
     maintenance_type = fields.Selection([('corrective', 'Corrective'), ('preventive', 'Preventive')], string='Maintenance Type', default="corrective")
-    schedule_date = fields.Datetime('Scheduled Date', help="Date the maintenance team plans the maintenance.  It should not differ much from the Request Date. ")
     maintenance_team_id = fields.Many2one('maintenance.team', string='Team', required=True, default=_get_default_team_id)
-    duration = fields.Float(help="Duration in minutes and seconds.")
+    schedule_date_count = fields.Integer(string="Number of Meeting", compute='_compute_count_meeting')
 
-    @api.multi
-    def archive_equipment_request(self):
-        self.write({'archive': True})
-
-    @api.multi
-    def reset_equipment_request(self):
-        """ Reinsert the maintenance request into the maintenance pipe in the first stage"""
-        first_stage_obj = self.env['maintenance.stage'].search([], order="sequence asc", limit=1)
-        # self.write({'active': True, 'stage_id': first_stage_obj.id})
-        self.write({'archive': False, 'stage_id': first_stage_obj.id})
+    maintenance_event_id = fields.Many2one('maintenance.event', string='Related Maintenance event')
+    schedule_date = fields.Datetime('Scheduled Date', help="Date the maintenance team plans the maintenance.  It should not differ much from the Request Date. ", related='maintenance_event_id.start')
+    duration = fields.Float(related='maintenance_event_id.duration', help="Duration in minutes and seconds")
 
     @api.onchange('equipment_id')
     def onchange_equipment_id(self):
@@ -317,11 +306,38 @@ class MaintenanceRequest(models.Model):
         if not self.technician_user_id or not self.equipment_id or (self.technician_user_id and not self.equipment_id.technician_user_id):
             self.technician_user_id = self.category_id.technician_user_id
 
+    @api.multi
+    def generate_next_request(self):
+        """ If the linked maintenance event is recurrent. It will automatically creates a new request for the user.
+        """
+        if self.maintenance_event_id.exists() and self.maintenance_event_id.recurrency and fields.Datetime.now() < self.maintenance_event_id.final_date:
+            timezone = pytz.timezone(self._context.get('tz') or 'UTC')
+            now = datetime.now(timezone)
+            event_start = pytz.UTC.localize(fields.Datetime.from_string(self.maintenance_event_id.start)).astimezone(timezone)
+            for event in self.maintenance_event_id._get_recurrent_date_by_event():
+                # Try to find the next maintenance date, we search for a maintenance that has a date greater than the event we finished and the actual date.
+                if event > now and event > event_start:
+                    # We should get the virtual id of the calendar in order to split it.
+                    virtual_id = '%s-%s' % (self.maintenance_event_id.id, event.strftime(VIRTUALID_DATETIME_FORMAT))
+                    virtual_event = self.env['maintenance.event'].browse(virtual_id)
+                    future_calendar = virtual_event.with_context(create_request=False).get_split_recurring_event()
+                    data = {
+                        'maintenance_event_id': future_calendar.id,
+                        'stage_id': self._default_stage().id,
+                        'kanban_state': 'normal',
+                    }
+                    new_event = self.copy(default=data)
+                    if self.equipment_id.preventive_maintenance_request_id == self:
+                        self.equipment_id.preventive_maintenance_request_id = new_event.id
+                    return new_event
+
     @api.model
     def create(self, vals):
         # context: no_log, because subtype already handle this
         self = self.with_context(mail_create_nolog=True)
         request = super(MaintenanceRequest, self).create(vals)
+        if vals.get('schedule_date') and vals.get('duration') and not vals.get('maintenance_event_id', False):
+            request._manage_calendar(vals)
         if request.owner_user_id or request.technician_user_id:
             request._add_followers()
         if request.equipment_id and not request.maintenance_team_id:
@@ -335,16 +351,42 @@ class MaintenanceRequest(models.Model):
         if vals and 'kanban_state' not in vals and 'stage_id' in vals:
             vals['kanban_state'] = 'normal'
         res = super(MaintenanceRequest, self).write(vals)
-        if vals.get('owner_user_id') or vals.get('technician_user_id'):
+        if all(k in vals for k in ('schedule_date', 'duration')) and 'maintenance_event_id' not in vals:
+            vals = self._manage_calendar(vals)
+        if vals.get('owner_user_id') or vals.get('technician_user_id', False):
             self._add_followers()
         if self.stage_id.done and 'stage_id' in vals:
             self.write({'close_date': fields.Date.today()})
+            # Should create the next request if linked to a calendar recurring event
+            self.generate_next_request()
         return res
 
     def _add_followers(self):
         for request in self:
             user_ids = (request.owner_user_id + request.technician_user_id).ids
             request.message_subscribe_users(user_ids=user_ids)
+
+    @api.multi
+    def cancel_request_and_generate_next(self):
+        """ Generate the next request if it exists and delete the event linked to the current request."""
+        self.generate_next_request()
+        if self.maintenance_event_id.exists():
+            self.maintenance_event_id.unlink()
+
+    @api.multi
+    def unlink(self):
+        for request in self:
+            # The only way to remove recurrency should be by the equipment maintenance section.
+            request.cancel_request_and_generate_next()
+            super(MaintenanceRequest, request).unlink()
+
+    @api.multi
+    def toggle_active(self):
+        for request in self:
+            # The only way to remove recurrency should be by the equipment maintenance section.
+            if request.active:
+                request.cancel_request_and_generate_next()
+            return super(MaintenanceRequest, request).toggle_active()
 
     @api.model
     def _read_group_stage_ids(self, stages, domain, order):
@@ -353,6 +395,41 @@ class MaintenanceRequest(models.Model):
         """
         stage_ids = stages._search([], order=order, access_rights_uid=SUPERUSER_ID)
         return stages.browse(stage_ids)
+
+    def _manage_calendar(self, vals):
+        """ Function called in write or create in order to manage informations related to the linked
+            maintenance event.
+        """
+        # update calendar
+        start = vals.get('schedule_date', self.schedule_date)
+        # The user want to create/modify the linked event.
+        if start is not False:
+            name = vals.get('name', self.name)
+            duration = vals.get('duration', self.duration)
+            start = fields.Datetime.from_string(start)
+            # Compute the mandatory stop.
+            stop = fields.Datetime.to_string(start + timedelta(hours=duration))
+            # Create the calendar.
+            if not self.maintenance_event_id.exists():
+                maintenance_event = self.env['maintenance.event'].with_context(create_request=False).create({
+                    'name': name,
+                    'start': start,
+                    'stop': stop,
+                    'duration': duration,
+                    'maintenance_id': [(6, 0, [self.id])],
+                })
+                vals['maintenance_event_id'] = maintenance_event.id
+        # The user want to remove the event and set the schedule_date to empty.
+        elif self.maintenance_event_id.exists():
+            self.maintenance_event_id.unlink()
+        return vals
+
+    def _compute_count_meeting(self):
+        for record in self:
+            if record.schedule_date is not False:
+                record.schedule_date_count = 1
+            else:
+                record.schedule_date_count = 0
 
 
 class MaintenanceTeam(models.Model):
@@ -376,9 +453,9 @@ class MaintenanceTeam(models.Model):
     @api.one
     @api.depends('request_ids.stage_id.done')
     def _compute_todo_requests(self):
-        self.todo_request_ids = self.request_ids.filtered(lambda e: e.stage_id.done==False)
+        self.todo_request_ids = self.request_ids.filtered(lambda e: e.stage_id.done is False)
         self.todo_request_count = len(self.todo_request_ids)
-        self.todo_request_count_date = len(self.todo_request_ids.filtered(lambda e: e.schedule_date != False))
+        self.todo_request_count_date = len(self.todo_request_ids.filtered(lambda e: e.schedule_date is not False))
         self.todo_request_count_high_priority = len(self.todo_request_ids.filtered(lambda e: e.priority == '3'))
         self.todo_request_count_block = len(self.todo_request_ids.filtered(lambda e: e.kanban_state == 'blocked'))
         self.todo_request_count_unscheduled = len(self.todo_request_ids.filtered(lambda e: not e.schedule_date))

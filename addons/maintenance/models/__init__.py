@@ -1,3 +1,4 @@
 # -*- coding: utf-8 -*-
 
-from . import maintenance
+import maintenance
+import maintenance_event
