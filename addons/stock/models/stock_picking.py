@@ -230,13 +230,11 @@ class Picking(models.Model):
     location_id = fields.Many2one(
         'stock.location', "Source Location Zone",
         default=lambda self: self.env['stock.picking.type'].browse(self._context.get('default_picking_type_id')).default_location_src_id,
-        readonly=True, required=True,
-        states={'draft': [('readonly', False)]})
+        required=True) # Need to put readonly logic back
     location_dest_id = fields.Many2one(
         'stock.location', "Destination Location Zone",
         default=lambda self: self.env['stock.picking.type'].browse(self._context.get('default_picking_type_id')).default_location_dest_id,
-        readonly=True, required=True,
-        states={'draft': [('readonly', False)]})
+        required=True) # Need to put readonly logic back
     move_lines = fields.One2many('stock.move', 'picking_id', string="Stock Moves", copy=True)
     has_scrap_move = fields.Boolean(
         'Has Scrap Moves', compute='_has_scrap_move')
@@ -284,8 +282,8 @@ class Picking(models.Model):
     recompute_pack_op = fields.Boolean(
         'Recompute pack operation?', copy=False,
         help='True if reserved quants changed, which mean we might need to recompute the package operations')
-    launch_pack_operations = fields.Boolean("Launch Pack Operations", copy=False, 
-                                default=lambda self: self.env['stock.picking.type'].browse(self._context.get('default_picking_type_id')).show_operations)
+    launch_pack_operations = fields.Boolean("Launch Pack Operations", copy=False,
+                                            default=lambda self: self.env['stock.picking.type'].browse(self._context.get('default_picking_type_id')).show_operations)
     show_operations = fields.Boolean(related='picking_type_id.show_operations')
 
     _sql_constraints = [
@@ -401,7 +399,6 @@ class Picking(models.Model):
         defaults = self.default_get(['name', 'picking_type_id'])
         if vals.get('name', '/') == '/' and defaults.get('name', '/') == '/' and vals.get('picking_type_id', defaults.get('picking_type_id')):
             vals['name'] = self.env['stock.picking.type'].browse(vals.get('picking_type_id', defaults.get('picking_type_id'))).sequence_id.next_by_id()
-        import pdb; pdb.set_trace()
 
         # TDE FIXME: what ?
         # As the on_change in one2many list is WIP, we will overwrite the locations on the stock moves here
@@ -492,9 +489,9 @@ class Picking(models.Model):
         # Check if there are ops not linked to moves yet
         for pick in self:
             # Explode manually added packages
-            for ops in self.operation_ids.filtered(lambda x: not x.move_id and not x.product_id):
+            for ops in self.pack_operation_ids.filtered(lambda x: not x.move_id and not x.product_id):
                 for quant in ops.package_id.quant_ids: #Or use get_content for multiple levels
-                    self.operation_ids.create({'product_id': quant.product_id.id, 
+                    self.pack_operation_ids.create({'product_id': quant.product_id.id, 
                                                'package_id': quant.package_id.id, 
                                                'result_package_id': ops.result_package_id,
                                                'lot_id': quant.lot_id.id, 
@@ -506,7 +503,7 @@ class Picking(models.Model):
                                                'location_dest_id': ops.location_dest_id.id,
                                                }) # Might change first element
             # Link existing moves or add moves when no one is related
-            for ops in self.operation_ids.filtered(lambda x: not x.move_id):
+            for ops in self.pack_operation_ids.filtered(lambda x: not x.move_id):
                 # Search move with this product
                 moves = pick.filtered(lambda x: x.product_id == ops.product_id) 
                 if moves: #could search move that needs it the most
