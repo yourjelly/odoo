@@ -222,6 +222,12 @@
     </xpath>
 </template>
 
+<template id="menu_to_top" inherit_id="website.layout" active="False" customize_show="True" name="Absolute Menu">
+    <xpath expr="//header" position="attributes">
+        <attribute name="class">o_menu_to_top</attribute>
+    </xpath>
+</template>
+
 <!-- Features template -->
 <template id="login_layout" inherit_id="web.login_layout" name="Website Login Layout">
     <xpath expr="t" position="replace">
