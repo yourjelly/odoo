@@ -501,20 +501,27 @@ class Picking(models.Model):
                                                'qty_done': quant.qty,
                                                'location_id': quant.location_id.id, # Could be ops too
                                                'location_dest_id': ops.location_dest_id.id,
+                                               'picking_id': pick.id
                                                }) # Might change first element
             # Link existing moves or add moves when no one is related
             for ops in self.pack_operation_ids.filtered(lambda x: not x.move_id):
                 # Search move with this product
                 moves = pick.filtered(lambda x: x.product_id == ops.product_id) 
-                if moves: #could search move that needs it the most
+                if moves: #could search move that needs it the most (that has some quantities left)
                     ops.move_id = moves[0].id
                 else:
-                    todo_moves |= self.env['stock.move'].create({'product_id': ops.product_id.id,
-                                                   'product_uom_qty': ops.product_qty, 
-                                                   'product_uom': ops.product_uom_id.id, 
-                                                   'location_id': pick.location_id.id, 
-                                                   'location_dest_id': pick.location_dest_id.id, 
+                    new_move = self.env['stock.move'].create({
+                                                    'name': _('New Move') + ops.product_id.display_name,
+                                                    'product_id': ops.product_id.id,
+                                                    'product_uom_qty': ops.qty_done,
+                                                    'product_uom': ops.product_uom_id.id,
+                                                    'location_id': pick.location_id.id,
+                                                    'location_dest_id': pick.location_dest_id.id,
+                                                    'picking_id': pick.id,
                                                    })
+                    ops.move_id = new_move.id
+                    new_move.action_confirm()
+                    todo_moves |= new_move
                     #'qty_done': ops.qty_done})
         todo_moves.action_done()
         return True
