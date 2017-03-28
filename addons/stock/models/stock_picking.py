@@ -42,6 +42,7 @@ class PickingType(models.Model):
         help="If this is checked, you will be able to choose the Lots/Serial Numbers. You can also decide to not put lots in this operation type.  This means it will create stock with no lot or not put a restriction on the lot taken. ")
     show_operations = fields.Boolean(
         'Show operations', default=False)
+    merge_moves = fields.Boolean('Merge Moves')
 
     # Statistics for the kanban view
     last_done_picking = fields.Char('Last 10 Done Pickings', compute='_compute_last_done_picking')
@@ -794,40 +795,6 @@ class Picking(models.Model):
             moves.with_context(skip_check=True).action_confirm()
         return moves
 
-    @api.model
-    def _prepare_values_extra_move(self, op, product, remaining_qty):
-        """
-        Creates an extra move when there is no corresponding original move to be copied
-        """
-        Uom = self.env["product.uom"]
-        uom_id = product.uom_id.id
-        qty = remaining_qty
-        if op.product_id and op.product_uom_id and op.product_uom_id.id != product.uom_id.id:
-            if op.product_uom_id.factor > product.uom_id.factor:  # If the pack operation's is a smaller unit
-                uom_id = op.product_uom_id.id
-                # HALF-UP rounding as only rounding errors will be because of propagation of error from default UoM
-                qty = product.uom_id._compute_quantity(remaining_qty, op.product_uom_id, rounding_method='HALF-UP')
-        picking = op.picking_id
-        ref = product.default_code
-        name = '[' + ref + ']' + ' ' + product.name if ref else product.name
-        proc_id = False
-        for m in op.linked_move_operation_ids:
-            if m.move_id.procurement_id:
-                proc_id = m.move_id.procurement_id.id
-                break
-        return {
-            'picking_id': picking.id,
-            'location_id': picking.location_id.id,
-            'location_dest_id': picking.location_dest_id.id,
-            'product_id': product.id,
-            'procurement_id': proc_id,
-            'product_uom': uom_id,
-            'product_uom_qty': qty,
-            'name': _('Extra Move: ') + name,
-            'state': 'draft',
-            'restrict_partner_id': op.owner_id.id,
-            'group_id': picking.group_id.id,
-        }
 
     @api.multi
     def _create_backorder(self, backorder_moves=[]):

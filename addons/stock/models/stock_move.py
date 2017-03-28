@@ -80,12 +80,12 @@ class StockMove(models.Model):
         'res.partner', 'Destination Address ',
         states={'done': [('readonly', True)]},
         help="Optional address where goods are to be delivered, specifically used for allotment")
-    move_dest_id = fields.Many2one(
-        'stock.move', 'Destination Move',
+    move_dest_ids = fields.Many2many(
+        'stock.move', 'stock_move_move_rel', 'move_orig_id', 'move_dest_id', 'Destination Moves',
         copy=False, index=True,
         help="Optional: next stock move when chaining them")
-    move_orig_ids = fields.One2many(
-        'stock.move', 'move_dest_id', 'Original Move',
+    move_orig_ids = fields.Many2many(
+        'stock.move', 'stock_move_move_rel', 'move_dest_id', 'move_orig_id', 'Original Move',
         help="Optional: previous stock move when chaining them")
     picking_id = fields.Many2one('stock.picking', 'Transfer Reference', index=True, states={'done': [('readonly', True)]})
     picking_partner_id = fields.Many2one('res.partner', 'Transfer Destination Address', related='picking_id.partner_id')
@@ -119,7 +119,7 @@ class StockMove(models.Model):
     quant_ids = fields.Many2many('stock.quant', 'stock_quant_move_rel', 'move_id', 'quant_id', 'Moved Quants', copy=False)
     reserved_quant_ids = fields.One2many('stock.quant', 'reservation_id', 'Reserved quants')
     operation_ids = fields.One2many('stock.pack.operation', 'move_id', 'Operations')
-    procurement_id = fields.Many2one('procurement.order', 'Procurement')
+    procurement_ids = fields.Many2many('procurement.order', 'stock_move_procurement_rel', 'move_id', 'procurement_id', 'Procurements')
     group_id = fields.Many2one('procurement.group', 'Procurement Group', default=_default_group_id)
     rule_id = fields.Many2one('procurement.rule', 'Procurement Rule', ondelete='restrict', help='The procurement rule that created this stock move')
     push_rule_id = fields.Many2one('stock.location.path', 'Push Rule', ondelete='restrict', help='The push rule that created this stock move')
@@ -283,7 +283,8 @@ class StockMove(models.Model):
         if not self._context.get('do_not_propagate', False) and (propagated_date_field or propagated_changes_dict):
             #any propagation is (maybe) needed
             for move in self:
-                if move.move_dest_id and move.propagate:
+                if move.move_dest_ids and move.propagate:
+                    move_dest_id = move.move_dest_ids[0] # TODO: do it for all move_dest_ids (with a for instead)
                     if 'date_expected' in propagated_changes_dict:
                         propagated_changes_dict.pop('date_expected')
                     if propagated_date_field:
@@ -291,13 +292,13 @@ class StockMove(models.Model):
                         new_date = datetime.strptime(vals.get(propagated_date_field), DEFAULT_SERVER_DATETIME_FORMAT)
                         delta = new_date - current_date
                         if abs(delta.days) >= move.company_id.propagation_minimum_delta:
-                            old_move_date = datetime.strptime(move.move_dest_id.date_expected, DEFAULT_SERVER_DATETIME_FORMAT)
+                            old_move_date = datetime.strptime(move_dest_id.date_expected, DEFAULT_SERVER_DATETIME_FORMAT)
                             new_move_date = (old_move_date + relativedelta.relativedelta(days=delta.days or 0)).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
                             propagated_changes_dict['date_expected'] = new_move_date
                     #For pushed moves as well as for pulled moves, propagate by recursive call of write().
                     #Note that, for pulled moves we intentionally don't propagate on the procurement.
                     if propagated_changes_dict:
-                        move.move_dest_id.write(propagated_changes_dict)
+                        move_dest_id.write(propagated_changes_dict)
         track_pickings = not self._context.get('mail_notrack') and any(field in vals for field in ['state', 'picking_id', 'partially_available'])
         if track_pickings:
             to_track_picking_ids = set([move.picking_id.id for move in self if move.picking_id])
@@ -399,7 +400,7 @@ class StockMove(models.Model):
         Push = self.env['stock.location.path']
         for move in self:
             # if the move is already chained, there is no need to check push rules
-            if move.move_dest_id:
+            if move.move_dest_ids:
                 continue
             # if the move is a returned move, we don't want to check push rules, as returning a returned move is the only decent way
             # to receive goods without triggering the push rules again (which would duplicate chained operations)
@@ -557,7 +558,7 @@ class StockMove(models.Model):
             'product_qty': self.product_uom_qty,
             'product_uom': self.product_uom.id,
             'location_id': self.location_id.id,
-            'move_dest_id': self.id,
+            'move_dest_ids': [self.id],
             'group_id': group_id,
             'route_ids': [(4, x.id) for x in self.route_ids],
             'warehouse_id': self.warehouse_id.id or (self.picking_type_id and self.picking_type_id.warehouse_id.id or False),
@@ -674,8 +675,8 @@ class StockMove(models.Model):
                     elif move.move_dest_id.state == 'waiting':
                         # If waiting, the chain will be broken and we are not sure if we can still wait for it (=> could take from stock instead)
                         move.move_dest_id.write({'state': 'confirmed'})
-                if move.procurement_id:
-                    procurements |= move.procurement_id
+                if move.procurement_ids:
+                    procurements |= move.procurement_ids
 
         self.write({'state': 'cancel', 'move_dest_id': False})
         if procurements:
@@ -851,8 +852,8 @@ class StockMove(models.Model):
                                                         owner_id=packop.owner_id.id) # TODO: need to see for entire pack
             moves_to_unreserve |= move
             # Next move in production order
-            if move.move_dest_id:
-                move.move_dest_id.action_assign()
+            if move.move_dest_ids:
+                move.move_dest_ids.action_assign()
         moves_to_unreserve.quants_unreserve()
         picking = self[0].picking_id
         moves_todo.write({'state': 'done', 'date': fields.Datetime.now()})
@@ -896,8 +897,8 @@ class StockMove(models.Model):
             'procure_method': 'make_to_stock',
             'restrict_lot_id': restrict_lot_id,
             'split_from': self.id,
-            'procurement_id': self.procurement_id.id,
-            'move_dest_id': self.move_dest_id.id,
+            'procurement_ids': self.procurement_ids.ids, #TODO: more logic needed here
+            'move_dest_ids': self.move_dest_ids.ids,
             'origin_returned_move_id': self.origin_returned_move_id.id,
         }
         if restrict_partner_id:
@@ -912,9 +913,9 @@ class StockMove(models.Model):
         # ctx['do_not_propagate'] = True
         self.with_context(do_not_propagate=True).write({'product_uom_qty': self.product_uom_qty - uom_qty})
 
-        if self.move_dest_id and self.propagate and self.move_dest_id.state not in ('done', 'cancel'):
-            new_move_prop = self.move_dest_id.split(qty)
-            new_move.write({'move_dest_id': new_move_prop})
+        if self.move_dest_ids and self.propagate and self.move_dest_ids.mapped('state') not in ('done', 'cancel'):
+            new_move_prop = self.move_dest_ids[0].split(qty)
+            new_move.write({'move_dest_ids': [new_move_prop]})
         # returning the first element of list returned by action_confirm is ok because we checked it wouldn't be exploded (and
         # thus the result of action_confirm should always be a list of 1 element length)
         new_move.action_confirm()

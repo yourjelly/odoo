@@ -355,7 +355,7 @@ class PurchaseOrder(models.Model):
                 procurements = order.order_line.mapped('procurement_ids')
                 procurements.filtered(lambda r: r.state not in ('cancel', 'exception') and r.rule_id.propagate).write({'state': 'cancel'})
                 procurements.filtered(lambda r: r.state not in ('cancel', 'exception') and not r.rule_id.propagate).write({'state': 'exception'})
-                moves = procurements.filtered(lambda r: r.rule_id.propagate).mapped('move_dest_id')
+                moves = procurements.filtered(lambda r: r.rule_id.propagate).mapped('move_dest_ids')
                 moves.filtered(lambda r: r.state != 'cancel').action_cancel()
 
         self.write({'state': 'cancel'})
@@ -630,7 +630,7 @@ class PurchaseOrderLine(models.Model):
             'location_dest_id': self.order_id._get_destination_location(),
             'picking_id': picking.id,
             'partner_id': self.order_id.dest_address_id.id,
-            'move_dest_id': False,
+            'move_dest_ids': False,
             'state': 'draft',
             'purchase_line_id': self.id,
             'company_id': self.order_id.company_id.id,
@@ -653,7 +653,7 @@ class PurchaseOrderLine(models.Model):
                 tmp = template.copy()
                 tmp.update({
                     'product_uom_qty': min(procurement_qty, diff_quantity),
-                    'move_dest_id': procurement.move_dest_id.id,  # move destination is same as procurement destination
+                    'move_dest_ids': procurement.move_dest_ids.ids,  # move destination is same as procurement destination
                     'procurement_id': procurement.id,
                     'propagate': procurement.rule_id.propagate,
                 })
