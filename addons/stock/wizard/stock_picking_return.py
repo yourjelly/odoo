@@ -44,7 +44,7 @@ class ReturnPicking(models.TransientModel):
             for move in picking.move_lines:
                 if move.scrapped:
                     continue
-                if move.move_dest_id:
+                if move.move_dest_ids:
                     move_dest_exists = True
                 # Sum the quants in that location that can be returned (they should have been moved by the moves that were included in the returned picking)
                 quantity = sum(quant.qty for quant in Quant.search([
@@ -115,10 +115,10 @@ class ReturnPicking(models.TransientModel):
             new_qty = return_line.quantity
             if new_qty:
                 # The return of a return should be linked with the original's destination move if it was not cancelled
-                if return_line.move_id.origin_returned_move_id.move_dest_id.id and return_line.move_id.origin_returned_move_id.move_dest_id.state != 'cancel':
-                    move_dest_id = return_line.move_id.origin_returned_move_id.move_dest_id.id
+                if return_line.move_id.origin_returned_move_id.move_dest_ids and return_line.move_id.origin_returned_move_id.move_dest_ids.mapped('state') not in ('cancel',):
+                    move_dest_ids = return_line.move_id.origin_returned_move_id.move_dest_ids.ids
                 else:
-                    move_dest_id = False
+                    move_dest_ids = []
 
                 returned_lines += 1
                 return_line.move_id.copy({
@@ -132,7 +132,7 @@ class ReturnPicking(models.TransientModel):
                     'warehouse_id': picking.picking_type_id.warehouse_id.id,
                     'origin_returned_move_id': return_line.move_id.id,
                     'procure_method': 'make_to_stock',
-                    'move_dest_id': move_dest_id,
+                    'move_dest_ids': move_dest_ids,
                 })
 
         if not returned_lines:

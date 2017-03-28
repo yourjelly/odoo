@@ -276,8 +276,8 @@ class StockMove(models.Model):
                         self.env['stock.quant'].quants_move(quants, move, move.location_dest_id, lot_id = movelot.lot_id.id)
             moves_to_unreserve |= move
             # Next move in production order
-            if move.move_dest_id:
-                move.move_dest_id.action_assign()
+            if move.move_dest_ids:
+                move.move_dest_ids.action_assign()
         moves_to_unreserve.quants_unreserve()
         moves_todo.write({'state': 'done', 'date': fields.Datetime.now()})
         return moves_todo

@@ -225,7 +225,7 @@ class PushedFlow(models.Model):
                 'propagate': self.propagate,
                 'push_rule_id': self.id,
                 'warehouse_id': self.warehouse_id.id,
-                'procurement_id': False,
+                'procurement_ids': False,
             })
-            move.write({'move_dest_id': new_move.id})
+            move.write({'move_dest_ids': [new_move.id]}) #Might need extra logic in function of picking type too
             new_move.action_confirm()
