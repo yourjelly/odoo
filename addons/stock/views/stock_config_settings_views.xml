@@ -271,7 +271,7 @@
                             </div>
                         </div>
                         <h2 id="schedule_info">Advanced Scheduling</h2>
-                        <div class="row mt16 o_settings_container">
+                        <!-- <div class="row mt16 o_settings_container">
                             <div id="sale_security_lead"/>
                             <div id="purchase_po_lead"/>
                             <div class="col-xs-12 col-md-6 o_setting_box" id="propagation_info" title="Rescheduling applies to any chain of operations (e.g. Make To Order, Pick Pack Ship). In the case of MTO sales, a vendor delay (updated incoming date) impacts the expected delivery date to the customer. This option allows to not propagate the rescheduling if the change is not critical.">
@@ -290,7 +290,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div>-->
                         <h2>Recommended Apps</h2>
                         <div class="row mt16 o_settings_container">
                             <div class="col-xs-12 col-md-6 o_setting_box">
