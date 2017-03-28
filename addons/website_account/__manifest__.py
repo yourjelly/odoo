@@ -17,10 +17,12 @@ Your customers will be able to connect to their portal to see the list (and the 
     'data': [
         'views/website_account_templates.xml',
         'views/account_invoice_views.xml',
+        'views/payment_acquirer_views.xml',
         'security/ir.model.access.csv',
         'security/account_invoice_security.xml',
     ],
     'demo': [
+        'data/email_template_data_invoice.xml'
     ],
     'installable': True,
 }
