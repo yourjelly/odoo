@@ -205,7 +205,7 @@ class StockMove(models.Model):
                 #move.quantity_done_store = move.quantity_done
 
     @api.one
-    @api.depends('state', 'quant_ids.lot_id', 'reserved_quant_ids.lot_id')
+    # @api.depends('state', 'quant_ids.lot_id', 'reserved_quant_ids.lot_id')
     def _compute_lot_ids(self):
         if self.state == 'done':
             self.lot_ids = self.mapped('quant_ids').mapped('lot_id').ids
@@ -213,7 +213,7 @@ class StockMove(models.Model):
             self.lot_ids = self.mapped('reserved_quant_ids').mapped('lot_id').ids
 
     @api.one
-    @api.depends('reserved_quant_ids.qty')
+    # @api.depends('reserved_quant_ids.qty')
     def _compute_reserved_availability(self):
         self.reserved_availability = sum(self.mapped('reserved_quant_ids').mapped('qty'))
 
@@ -342,17 +342,6 @@ class StockMove(models.Model):
     def get_price_unit(self):
         """ Returns the unit price to store on the quant """
         return self.price_unit or self.product_id.standard_price
-
-    def get_removal_strategy(self):
-        ''' Returns the removal strategy to consider for the given move/ops '''
-        if self.product_id.categ_id.removal_strategy_id:
-            return self.product_id.categ_id.removal_strategy_id.method
-        loc = self.location_id
-        while loc:
-            if loc.removal_strategy_id:
-                return loc.removal_strategy_id.method
-            loc = loc.location_id
-        return 'fifo'
 
     def _filter_closed_moves(self):
         """ Helper methods when having to avoid working on moves that are

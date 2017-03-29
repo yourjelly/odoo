@@ -16,6 +16,7 @@ import stock_pack_operation
 import stock_production_lot
 import stock_picking
 import stock_quant
+import stock_quant_package
 import stock_warehouse
 import stock_scrap
 import web_planner
