@@ -873,9 +873,9 @@ var chat_manager = {
     },
     bus: new Bus(),
 
-    create_channel: function (name, type) {
-        var method = type === "dm" ? "channel_get" : "channel_create";
-        var args = type === "dm" ? [[name]] : [name, type];
+    create_channel: function (name, privacy, type) {
+        var method = privacy === "dm" ? "channel_get" : "channel_create";
+        var args = privacy === "dm" ? [[name]] : [name, privacy, type];
 
         return ChannelModel
             .call(method, args)

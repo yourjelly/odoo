@@ -310,7 +310,7 @@ var ChatAction = Widget.extend(ControlPanelMixin, {
         this.$('.o_mail_add_channel[data-type=public]').find("input").autocomplete({
             source: function(request, response) {
                 self.last_search_val = _.escape(request.term);
-                self.do_search_channel(self.last_search_val).done(function(result){
+                self.do_search_channel(self.last_search_val, 'channel').done(function(result){
                     result.push({
                         'label':  _.str.sprintf('<strong>'+_t("Create %s")+'</strong>', '<em>"#'+self.last_search_val+'"</em>'),
                         'value': '_create',
@@ -321,7 +321,7 @@ var ChatAction = Widget.extend(ControlPanelMixin, {
             select: function(event, ui) {
                 if (self.last_search_val) {
                     if (ui.item.value === '_create') {
-                        chat_manager.create_channel(self.last_search_val, "public");
+                        chat_manager.create_channel(self.last_search_val, "public", "channel");
                     } else {
                         chat_manager.join_channel(ui.item.id);
                     }
@@ -358,7 +358,7 @@ var ChatAction = Widget.extend(ControlPanelMixin, {
         this.$('.o_mail_add_channel[data-type=private]').find("input").on('keyup', this, function (event) {
             var name = _.escape($(event.target).val());
             if(event.which === $.ui.keyCode.ENTER && name) {
-                chat_manager.create_channel(name, "private");
+                chat_manager.create_channel(name, "private", "channel");
             }
         });
     },
@@ -379,9 +379,9 @@ var ChatAction = Widget.extend(ControlPanelMixin, {
         setTimeout(function() { $snackbar.fadeOut(); }, timeout);
     },
 
-    do_search_channel: function(search_val){
+    do_search_channel: function(search_val, channel_type){
         var Channel = new Model("mail.channel");
-        return Channel.call('channel_search_to_join', [search_val]).then(function(result){
+        return Channel.call('channel_search_to_join', [search_val, channel_type]).then(function(result){
             var values = [];
             _.each(result, function(channel){
                 var escaped_name = _.escape(channel.name);

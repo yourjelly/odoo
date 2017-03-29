@@ -527,7 +527,7 @@ class Channel(models.Model):
         return values
 
     @api.model
-    def channel_search_to_join(self, name=None, domain=None):
+    def channel_search_to_join(self, name=None, channel_type=None, domain=None):
         """ Return the channel info of the channel the current partner can join
             :param name : the name of the researched channels
             :param domain : the base domain of the research
@@ -535,8 +535,10 @@ class Channel(models.Model):
         """
         if not domain:
             domain = []
+        if not channel_type:
+            channel_type = 'channel'
         domain = expression.AND([
-            [('channel_type', '=', 'channel')],
+            [('channel_type', '=', channel_type)],
             [('channel_partner_ids', 'not in', [self.env.user.partner_id.id])],
             [('public', '!=', 'private')],
             domain
@@ -558,7 +560,7 @@ class Channel(models.Model):
         return channel_info
 
     @api.model
-    def channel_create(self, name, privacy='public'):
+    def channel_create(self, name, privacy='public', channel_type='channel'):
         """ Create a channel and add the current partner, broadcast it (to make the user directly
             listen to it when polling)
             :param name : the name of the channel to create
@@ -569,6 +571,7 @@ class Channel(models.Model):
         new_channel = self.create({
             'name': name,
             'public': privacy,
+            'channel_type': channel_type,
             'email_send': False,
             'channel_partner_ids': [(4, self.env.user.partner_id.id)]
         })
