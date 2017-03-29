@@ -1884,7 +1884,7 @@ exports.Order = Backbone.Model.extend({
         }, this));
         return {
             name: this.get_name(),
-            amount_paid: this.get_total_paid(),
+            amount_paid: this.get_total_paid() - this.get_change(),
             amount_total: this.get_total_with_tax(),
             amount_tax: this.get_total_tax(),
             amount_return: this.get_change(),
