@@ -309,7 +309,7 @@ class Picking(models.Model):
         if not self.move_lines and self.launch_pack_operations:
             self.state = 'assigned'
         elif not self.move_lines:
-            self.state = 'confirmed'
+            self.state = 'draft'
         elif any(move.state == 'draft' for move in self.move_lines):  # TDE FIXME: should be all ?
             self.state = 'draft'
         elif all(move.state == 'cancel' for move in self.move_lines):
@@ -356,7 +356,8 @@ class Picking(models.Model):
     @api.one
     def _compute_quant_reserved_exist(self):
         # TDE TODO: chould probably be cleaned with a search in quants
-        self.quant_reserved_exist = any(move.reserved_quant_ids for move in self.mapped('move_lines'))
+        pass
+        #self.quant_reserved_exist = any(move.reserved_quant_ids for move in self.mapped('move_lines'))
 
     @api.one
     def _compute_pack_operation_exist(self):
@@ -561,35 +562,33 @@ class Picking(models.Model):
         return top_lvl_packages
 
     @api.multi
-    def do_prepare_partial(self):
+    def do_prepare_partial(self, quants_chosen):
         PackOperation = self.env['stock.pack.operation']
 
         # get list of existing operations and delete them
         self.mapped('pack_operation_ids').unlink()
         for picking in self:
-            forced_qties = {}  # Quantity remaining after calculating reserved quants
             picking_reserved = picking.picking_type_id.show_reserved
-            picking_quants = self.env['stock.quant']
             # Calculate packages, reserved quants, qtys of this picking's moves
             quants_ops = {}
-            total_quants = self.env['stock.quant']
             for move in picking.move_lines:
                 if move.state not in ('assigned', 'confirmed', 'waiting'):
                     continue
-                move_quants = move.reserved_quant_ids
-                total_quants |= move_quants
-                picking_quants += move_quants
+                move_quants = quants_chosen.get(move.id, [])
+                #move_quants = move.reserved_quant_ids
+                
                 forced_qty = 0.0
                 if move.state == 'assigned':
                     qty = move.product_uom._compute_quantity(move.product_uom_qty, move.product_id.uom_id, round=False)
-                    forced_qty = qty - sum([x.qty for x in move_quants])
+                    forced_qty = qty - sum([x[0] and x[1] or 0 for x in move_quants])
                 # if we used force_assign() on the move, or if the move is incoming, forced_qty > 0
                 first_product_op = True
-                for quant in move_quants:
-                    # TODO: add putaway strategy
+                for quant_tuple in [x for x in move_quants if x[0]]:
+                    quant = quant_tuple[0]
+                    # TODO: add putaway strategy (qty + product?)
                     new_op = PackOperation.create({'picking_id': move.picking_id.id,
                                           'move_id': move.id,
-                                          'product_qty': quant.qty, 
+                                          'product_qty': quant_tuple[1], 
                                           'product_id': move.product_id.id, 
                                           'lot_id': picking_reserved and quant.lot_id.id or False, #Should be grouping them? 
                                           'package_id': quant.package_id.id,

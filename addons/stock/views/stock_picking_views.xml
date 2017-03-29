@@ -241,9 +241,9 @@
                         <group>
                             <field name="min_date"/>
                             <field name="origin" placeholder="e.g. PO0032" class="oe_inline"/>
-                            <label for="owner_id" groups="stock.group_tracking_owner"/>
+                            <!--<label for="owner_id" groups="stock.group_tracking_owner"/>-->
                             <div groups="stock.group_tracking_owner">
-                                <field name="owner_id"/>
+                                <!--<field name="owner_id"/>-->
                                 <button name="action_assign_owner" string="Assign Owner" type="object" attrs="{'invisible': ['|',('pack_operation_exist', '=', False),('state', 'not in', ('draft','assigned','confirmed'))]}"
                                     class="oe_link oe_edit_only"/>
                             </div>
@@ -251,7 +251,7 @@
                     </group>
                     <notebook>
                         <page string="MovesOperations" attrs="{'invisible': [('show_operations', '=', True)]}">
-                            <field name="move_lines" context="{'address_in_id': partner_id, 'default_picking_type_id': picking_type_id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_state': 'confirmed'}">
+                            <field name="move_lines" context="{'address_in_id': partner_id, 'default_picking_type_id': picking_type_id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id}">
                                 <tree decoration-muted="scrapped == True" string="Stock Moves" editable="bottom">
                                     <field name="product_id"/>
                                     <field name="name" invisible="1"/>
