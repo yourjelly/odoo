@@ -28,7 +28,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
 
         # I create a PoS order with 2 units of PCSC234 at 450 EUR (Tax Incl)
         # and 3 units of PCSC349 at 300 EUR. (Tax Excl)
-        self.pos_order_pos0 = self.PosOrder.create({
+        order_id = self.PosOrder.create_from_ui({'data':{
             'company_id': self.company_id,
             'pricelist_id': self.partner1.property_product_pricelist.id,
             'partner_id': self.partner1.id,
@@ -39,6 +39,8 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
                 'discount': 0.0,
                 'qty': 2.0,
                 'tax_ids': [(6, 0, self.product3.taxes_id.ids)],
+                'price_subtotal': 450 * 2,
+                'price_subtotal_inc': 450 * 2 * 1.05,
             }), (0, 0, {
                 'name': "OL/0002",
                 'product_id': self.product4.id,
@@ -46,8 +48,15 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
                 'discount': 0.0,
                 'qty': 3.0,
                 'tax_ids': [(6, 0, self.product4.taxes_id.ids)],
-            })]
-        })
+                'price_subtotal': 300 * 3,
+                'price_subtotal_inc': 300 * 3 * 1.05,
+            })],
+            'amount_total': 1890.0,
+            'amount_tax': 90.0,
+            'amount_paid': 1890.0,
+            'amount_return': 0.0,
+        }})
+        self.pos_order_pos0 = self.PosOrder.browse(order_id[0])
 
         # I check that the total of the order is equal to 450*2 + 300*3*1.05
         # and the tax of the order is equal to 900 -(450 * 2 / 1.1) +
@@ -129,6 +138,8 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
                 'discount': 5.0,
                 'qty': 2.0,
                 'tax_ids': [(6, 0, self.product3.taxes_id.ids)],
+                'price_subtotal': 450 * (1 - 5/100.0) * 2,
+                'price_subtotal_inc': 450 * (1 - 5/100.0) * 2,
             }), (0, 0, {
                 'name': "OL/0002",
                 'product_id': self.product4.id,
@@ -136,7 +147,13 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
                 'discount': 5.0,
                 'qty': 3.0,
                 'tax_ids': [(6, 0, self.product4.taxes_id.ids)],
-            })]
+                'price_subtotal': 300 * (1 - 5/100.0) * 3,
+                'price_subtotal_inc': 300 * (1 - 5/100.0) * 3,
+            })],
+            'amount_total': 1710.0,
+            'amount_tax': 0.0,
+            'amount_paid': 1710.0,
+            'amount_return': 0.0,
         })
 
         # I create a refund
