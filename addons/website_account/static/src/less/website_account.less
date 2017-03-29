@@ -1,0 +1,13 @@
+#invoice_pdfviewer {
+	display: block;
+	.o_pdf_preview {
+		width: 100%;
+		height: 500px;
+	}
+}
+/*didn't show invoice pdf preview in mobile*/
+@media (max-width: @screen-sm-max){
+	#invoice_pdfviewer {
+		display: none;
+	}
+}
