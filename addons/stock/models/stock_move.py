@@ -851,7 +851,6 @@ class StockMove(models.Model):
                                                         src_package_id=packop.package_id.id, dest_package_id=packop.result_package_id.id, 
                                                         owner_id=packop.owner_id.id) # TODO: need to see for entire pack
             moves_to_unreserve |= move
-            # Next move in production order
             if move.move_dest_ids:
                 move.move_dest_ids.action_assign()
         moves_to_unreserve.quants_unreserve()
@@ -900,7 +899,7 @@ class StockMove(models.Model):
             'restrict_lot_id': restrict_lot_id,
             'split_from': self.id,
             'procurement_ids': self.procurement_ids.ids, #TODO: more logic needed here
-            'move_dest_ids': self.move_dest_ids.ids,
+            'move_dest_ids': [(4, x) for x in self.move_dest_ids.ids if x.state not in ('done', 'cancel')],
             'origin_returned_move_id': self.origin_returned_move_id.id,
         }
         if restrict_partner_id:
@@ -914,10 +913,6 @@ class StockMove(models.Model):
         # TDE CLEANME: used only in write in this file, to clean
         # ctx['do_not_propagate'] = True
         self.with_context(do_not_propagate=True).write({'product_uom_qty': self.product_uom_qty - uom_qty})
-
-        if self.move_dest_ids and self.propagate and self.move_dest_ids.mapped('state') not in ('done', 'cancel'):
-            new_move_prop = self.move_dest_ids[0].split(qty)
-            new_move.write({'move_dest_ids': [new_move_prop]})
         # returning the first element of list returned by action_confirm is ok because we checked it wouldn't be exploded (and
         # thus the result of action_confirm should always be a list of 1 element length)
         new_move.action_confirm()
