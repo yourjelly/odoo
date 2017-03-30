@@ -168,7 +168,7 @@ class ProcurementOrder(models.Model):
             'partner_id': self.rule_id.partner_address_id.id or (self.group_id and self.group_id.partner_id.id) or False,
             'location_id': self.rule_id.location_src_id.id,
             'location_dest_id': self.location_id.id,
-            'move_dest_ids': self.move_dest_ids.ids,
+            'move_dest_ids': [(4, x) for x in self.move_dest_ids.ids],
             'procurement_ids': [(4, self.id)],
             'rule_id': self.rule_id.id,
             'procure_method': self.rule_id.procure_method,
@@ -193,8 +193,13 @@ class ProcurementOrder(models.Model):
             #Search if picking with move for it exists already:
             added_to_existing = False
             if self.rule_id.picking_type_id.merge_moves:
+                group_id = False
+                if self.rule_id.group_propagation_option == 'propagate':
+                    group_id = self.group_id.id
+                elif self.rule_id.group_propagation_option == 'fixed':
+                    group_id = self.rule_id.group_id.id
                 moves = self.env['stock.move'].search([
-                    ('group_id', '=', self.group_id.id), #extra logic?
+                    ('group_id', '=', group_id), #extra logic?
                     ('location_id', '=', self.rule_id.location_src_id.id),
                     ('location_dest_id', '=', self.location_id.id),
                     ('picking_type_id', '=', self.rule_id.picking_type_id.id),
