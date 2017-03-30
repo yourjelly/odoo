@@ -604,7 +604,7 @@ class Picking(models.Model):
                                           'product_qty': forced_qty, 
                                           'location_id': move.location_id.id, 
                                           'location_dest_id': move.location_dest_id.id}) # Apply Putaway
-            self._set_top_level_packages(quants_ops)
+            picking._set_top_level_packages(quants_ops)
         self.write({'recompute_pack_op': False})
 
     @api.multi
