@@ -81,19 +81,12 @@ class ReturnPicking(models.TransientModel):
         return_moves = self.product_return_moves.mapped('move_id')
         unreserve_moves = self.env['stock.move']
         for move in return_moves:
-            to_check_moves = self.env['stock.move'] | move.move_dest_id
-            while to_check_moves:
-                current_move = to_check_moves[-1]
-                to_check_moves = to_check_moves[:-1]
-                if current_move.state not in ('done', 'cancel') and current_move.reserved_quant_ids:
-                    unreserve_moves |= current_move
-                split_move_ids = self.env['stock.move'].search([('split_from', '=', current_move.id)])
-                to_check_moves |= split_move_ids
+            unreserve_moves |= move.move_dest_ids.filtered(lambda x: x.state not in ('done', 'cancel') and x.reserved_quant_ids)
 
         if unreserve_moves:
             unreserve_moves.do_unreserve()
             # break the link between moves in order to be able to fix them later if needed
-            unreserve_moves.write({'move_orig_ids': False})
+            unreserve_moves.write({'move_orig_ids': False}) #TODO: not too 
 
         # create new picking for returned products
         picking_type_id = picking.picking_type_id.return_picking_type_id.id or picking.picking_type_id.id

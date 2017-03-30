@@ -104,7 +104,6 @@ class StockMove(models.Model):
     price_unit = fields.Float(
         'Unit Price', help="Technical field used to record the product cost set by the user during a picking confirmation (when costing "
                            "method used is 'average price' or 'real'). Value given in company currency and in product uom.")  # as it's a technical field, we intentionally don't provide the digits attribute
-    split_from = fields.Many2one('stock.move', "Move Split From", copy=False, help="Technical field used to track the origin of a split move, which can be useful in case of debug")
     backorder_id = fields.Many2one('stock.picking', 'Back Order of', related='picking_id.backorder_id', index=True)
     origin = fields.Char("Source Document")
     procure_method = fields.Selection([
@@ -330,18 +329,6 @@ class StockMove(models.Model):
             loc = loc.location_id
         return 'fifo'
 
-    @api.returns('self')
-    @api.multi  # TDE: DECORATOR to remove
-    def get_ancestors(self):
-        '''Find the first level ancestors of given move '''
-        ancestors = self.env['stock.move']
-        move = self
-        while move:
-            ancestors |= move.move_orig_ids
-            move = not move.move_orig_ids and move.split_from or False
-        return ancestors
-    find_move_ancestors = get_ancestors
-
     def _filter_closed_moves(self):
         """ Helper methods when having to avoid working on moves that are
         already done or canceled. In a lot of cases you may handle a batch
@@ -391,7 +378,7 @@ class StockMove(models.Model):
             raise UserError(_('Cannot unreserve a done move'))
         self.quants_unreserve()
         if not self.env.context.get('no_state_change'):
-            waiting = self.filtered(lambda move: move.get_ancestors())
+            waiting = self.filtered(lambda move: move.move_orig_ids)
             waiting.write({'state': 'waiting'})
             (self - waiting).write({'state': 'confirmed'})
 
@@ -499,20 +486,11 @@ class StockMove(models.Model):
             # if the move is preceeded, then it's waiting (if preceeding move is done, then action_assign has been called already and its state is already available)
             if move.move_orig_ids:
                 move_waiting |= move
-            # if the move is split and some of the ancestor was preceeded, then it's waiting as well
             else:
-                inner_move = move.split_from
-                while inner_move:
-                    if inner_move.move_orig_ids:
-                        move_waiting |= move
-                        break
-                    inner_move = inner_move.split_from
+                if move.procure_method == 'make_to_order':
+                    move_create_proc |= move
                 else:
-                    if move.procure_method == 'make_to_order':
-                        move_create_proc |= move
-                    else:
-                        move_to_confirm |= move
-
+                    move_to_confirm |= move
             if not move.picking_id and move.picking_type_id:
                 key = (move.group_id.id, move.location_id.id, move.location_dest_id.id)
                 if key not in to_assign:
@@ -616,7 +594,7 @@ class StockMove(models.Model):
                 if not move.origin_returned_move_id:
                     continue
             # if the move is preceeded, restrict the choice of quants in the ones moved previously in original move
-            ancestors = move.find_move_ancestors()
+            ancestors = move.move_orig_ids #find_move_ancestors()
             if move.product_id.type == 'consu' and not ancestors:
                 moves_to_assign |= move
                 continue
@@ -694,7 +672,7 @@ class StockMove(models.Model):
             if len(reserved_quant_ids) == 0 and move.partially_available:
                 vals['partially_available'] = False
             if move.state == 'assigned':
-                if move.find_move_ancestors():
+                if move.move_orig_ids:
                     vals['state'] = 'waiting'
                 else:
                     vals['state'] = 'confirmed'
@@ -897,7 +875,6 @@ class StockMove(models.Model):
             'product_uom_qty': uom_qty,
             'procure_method': 'make_to_stock',
             'restrict_lot_id': restrict_lot_id,
-            'split_from': self.id,
             'procurement_ids': self.procurement_ids.ids, #TODO: more logic needed here
             'move_dest_ids': [(4, x) for x in self.move_dest_ids.ids if x.state not in ('done', 'cancel')],
             'origin_returned_move_id': self.origin_returned_move_id.id,
@@ -917,7 +894,7 @@ class StockMove(models.Model):
         # thus the result of action_confirm should always be a list of 1 element length)
         new_move.action_confirm()
         # TDE FIXME: due to action confirm change
-        return new_move.id
+        return new_move.id #TODO: better to have an ID
 
     @api.multi
     def action_show_picking(self):
