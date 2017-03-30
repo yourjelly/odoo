@@ -15,6 +15,14 @@ class StockWarehouse(models.Model):
     manu_type_id = fields.Many2one(
         'stock.picking.type', 'Manufacturing Operation Type',
         domain=[('code', '=', 'mrp_operation')])
+    manufacture_steps = fields.Selection([
+        ('manu_only', 'Manufacture: stock -> manufacture -> stock (step 1)'),
+        ('pick_manu', 'Manufacture: stock -> input -> manufacture -> stock (step 2)'),
+        ('pick_manu_out', 'Manufacture: stock -> input -> manufacture -> output -> stock (step 3)')],
+        'Manufacture', default='manu_only', required=True,
+        help="Default manufacture route to follow")
+    wh_input_manu_loc_id = fields.Many2one("stock.location", "Input Manufacture Location")
+    wh_output_manu_loc_id = fields.Many2one("stock.location", "Output Manufacture Location")
 
     def create_sequences_and_picking_types(self):
         res = super(StockWarehouse, self).create_sequences_and_picking_types()
@@ -25,6 +33,14 @@ class StockWarehouse(models.Model):
     def get_routes_dict(self):
         result = super(StockWarehouse, self).get_routes_dict()
         for warehouse in self:
+            result[warehouse.id]['manu_only'] = [self.Routing(warehouse.lot_stock_id, warehouse.lot_stock_id, warehouse.int_type_id)]
+            result[warehouse.id]['pick_manu'] = [
+                self.Routing(warehouse.lot_stock_id, warehouse.wh_input_manu_loc_id, warehouse.int_type_id),
+                self.Routing(warehouse.wh_input_manu_loc_id, warehouse.lot_stock_id, warehouse.int_type_id)]
+            result[warehouse.id]['pick_manu_out'] = [
+                self.Routing(warehouse.lot_stock_id, warehouse.wh_input_manu_loc_id, warehouse.int_type_id),
+                self.Routing(warehouse.wh_input_manu_loc_id, warehouse.wh_output_manu_loc_id, warehouse.int_type_id),
+                self.Routing(warehouse.wh_output_manu_loc_id, warehouse.lot_stock_id, warehouse.int_type_id)]
             result[warehouse.id]['manufacture'] = [self.Routing(warehouse.lot_stock_id, warehouse.lot_stock_id, warehouse.int_type_id)]
         return result
 
@@ -93,8 +109,29 @@ class StockWarehouse(models.Model):
         res['manufacture_pull_id'] = manufacture_pull.id
         return res
 
+    def _create_or_update_locations(self):
+        StockLocation = self.env['stock.location'].with_context(active_test=False)
+        for wh in self.filtered(lambda w: not w.wh_input_manu_loc_id or not w.wh_output_manu_loc_id):
+            if not wh.wh_input_manu_loc_id:
+                prod_in = StockLocation.search([('name', '=', 'PROD IN'), ('location_id', '=', wh.view_location_id.id), ('usage', '=', 'internal'), '|', ('company_id', '=', wh.company_id.id), ('company_id', '=', False)])
+                if not prod_in:
+                    prod_in = StockLocation.create({'name': 'PROD IN', 'location_id': wh.view_location_id.id, 'usage': 'internal', 'company_id': wh.company_id.id, 'active': wh.manufacture_steps != 'manu_only'})
+            if not wh.wh_output_manu_loc_id:
+                prod_out = StockLocation.search([('name', '=', 'PROD OUT'), ('location_id', '=', wh.view_location_id.id), ('usage', '=', 'internal'), '|', ('company_id', '=', wh.company_id.id), ('company_id', '=', False)])
+                if not prod_out:
+                    prod_out = StockLocation.create({'name': 'PROD OUT', 'location_id': wh.view_location_id.id, 'usage': 'internal', 'company_id': wh.company_id.id, 'active': wh.manufacture_steps == 'pick_manu_out'})
+            vals = {}
+            if prod_in:
+                vals['wh_input_manu_loc_id'] = prod_in.id
+            if prod_out:
+                vals['wh_output_manu_loc_id'] = prod_out.id
+            if vals:
+                wh.write(vals)
+
     @api.multi
     def write(self, vals):
+        if not ('wh_input_manu_loc_id' in vals or 'wh_output_manu_loc_id' in vals) and self.filtered(lambda w: not w.wh_input_manu_loc_id or not w.wh_output_manu_loc_id):
+            self._create_or_update_locations()
         if 'manufacture_to_resupply' in vals:
             if vals.get("manufacture_to_resupply"):
                 for warehouse in self.filtered(lambda warehouse: not warehouse.manufacture_pull_id):
