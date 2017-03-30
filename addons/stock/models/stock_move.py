@@ -811,7 +811,7 @@ class StockMove(models.Model):
         quant_obj = self.env['stock.quant']
         moves_todo = self.env['stock.move']
         moves_to_unreserve = self.env['stock.move']
-        moves_to_backorder = []
+        #moves_to_backorder = []
         # Create extra moves where necessary
         for move in moves:
             # Here, the `quantity_done` was already rounded to the product UOM by the `do_produce` wizard. However,
@@ -832,7 +832,7 @@ class StockMove(models.Model):
                 # Need to do some kind of conversion here
                 qty_split = move.product_uom._compute_quantity(move.product_uom_qty - move.quantity_done, move.product_id.uom_id)
                 new_move = move.split(qty_split)
-                moves_to_backorder.append(new_move)
+                #moves_to_backorder.append(new_move)
                 # If you were already putting stock.move.lots on the next one in the work order, transfer those to the new move
                 move.pack_operation_ids.filtered(lambda x: x.qty_done == 0.0).write({'move_id': new_move})
                 self.browse(new_move).quantity_done = 0.0
@@ -857,13 +857,15 @@ class StockMove(models.Model):
         moves_to_unreserve.quants_unreserve()
         picking = self[0].picking_id
         moves_todo.write({'state': 'done', 'date': fields.Datetime.now()})
+        moves_to_backorder = picking.move_lines.filtered(lambda x: x.state not in ('done', 'cancel'))
         backorder_picking = picking.copy({
                 'name': '/',
                 'move_lines': [],
                 'pack_operation_ids': [],
                 'backorder_id': picking.id
             })
-        self.env['stock.move'].browse(moves_to_backorder).write({'picking_id': backorder_picking.id})
+        picking.message_post('Backorder Created') #message needs to be improved
+        moves_to_backorder.write({'picking_id': backorder_picking.id})
         return moves_todo
 
     @api.multi
