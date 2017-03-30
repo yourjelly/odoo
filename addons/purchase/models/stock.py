@@ -56,14 +56,9 @@ class StockMove(models.Model):
             return self.price_unit
         return super(StockMove, self).get_price_unit()
 
-    @api.multi
-    def copy(self, default=None):
-        self.ensure_one()
-        default = default or {}
-        if not default.get('split_from'):
-            #we don't want to propagate the link to the purchase order line except in case of move split
-            default['purchase_line_id'] = False
-        return super(StockMove, self).copy(default)
+    def split(self, qty, restrict_lot_id=False, restrict_partner_id=False):
+        new_move = super(StockMove, self).split(qty, restrict_lot_id=restrict_lot_id, restrict_partner_id=restrict_partner_id)
+        self.browse(new_move).write({'purchase_line_id': self.purchase_line_id.id})
 
 
 class StockWarehouse(models.Model):
