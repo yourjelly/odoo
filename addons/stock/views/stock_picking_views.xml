@@ -263,7 +263,7 @@
                                     <field name="picking_type_id" invisible="1"/>
                                     <field name="scrapped" invisible="1"/>
                                     <field name="availability" invisible="1"/>
-                                    <field name="reserved_availability" invisible="1"/>
+                                    <field name="reserved_availability"/>
                                     <field name="location_dest_id" invisible="1"/>
                                     <field name="has_tracking" invisible="1"/>
                                     <field name="state"/>
