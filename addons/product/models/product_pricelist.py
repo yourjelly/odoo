@@ -142,15 +142,13 @@ class Pricelist(models.Model):
         self._cr.execute(
             'SELECT item.id '
             'FROM product_pricelist_item AS item '
-            'LEFT JOIN product_category AS categ '
-            'ON item.categ_id = categ.id '
             'WHERE (item.product_tmpl_id IS NULL OR item.product_tmpl_id = any(%s))'
             'AND (item.product_id IS NULL OR item.product_id = any(%s))'
             'AND (item.categ_id IS NULL OR item.categ_id = any(%s)) '
             'AND (item.pricelist_id = %s) '
             'AND (item.date_start IS NULL OR item.date_start<=%s) '
             'AND (item.date_end IS NULL OR item.date_end>=%s)'
-            'ORDER BY item.applied_on, item.min_quantity desc, categ.parent_left desc',
+            'ORDER BY item.applied_on, item.min_quantity desc, categ_id_parent_left desc',
             (prod_tmpl_ids, prod_ids, categ_ids, self.id, date, date))
 
         item_ids = [x[0] for x in self._cr.fetchall()]
@@ -335,7 +333,7 @@ class ResCountryGroup(models.Model):
 class PricelistItem(models.Model):
     _name = "product.pricelist.item"
     _description = "Pricelist item"
-    _order = "applied_on, min_quantity desc, categ_id desc"
+    _order = "applied_on, min_quantity desc, categ_id_parent_left desc"
 
     product_tmpl_id = fields.Many2one(
         'product.template', 'Product Template', ondelete='cascade',
@@ -346,6 +344,7 @@ class PricelistItem(models.Model):
     categ_id = fields.Many2one(
         'product.category', 'Product Category', ondelete='cascade',
         help="Specify a product category if this rule only applies to products belonging to this category or its children categories. Keep empty otherwise.")
+    categ_id_parent_left = fields.Integer(related='categ_id.parent_left', store=True)
     min_quantity = fields.Integer(
         'Min. Quantity', default=1,
         help="For the rule to apply, bought/sold quantity must be greater "
