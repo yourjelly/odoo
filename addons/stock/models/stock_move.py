@@ -647,12 +647,15 @@ class StockMove(models.Model):
                     pass
                     # procurements.search([('move_dest_id', '=', move.id)]).cancel()
             else:
-                if move.move_dest_id:
+                if move.move_dest_ids:
+                    # Check if all moves corresponds to next
+                    
                     if move.propagate:
-                        move.move_dest_id.action_cancel()
-                    elif move.move_dest_id.state == 'waiting':
+                        if float_compare(sum(x.product_qty for x in move.move_dest_ids), move.product_qty, precision_rounding=move.product_id.uom_id.rounding) == 0:
+                            move.move_dest_ids.action_cancel()
+                    else:
                         # If waiting, the chain will be broken and we are not sure if we can still wait for it (=> could take from stock instead)
-                        move.move_dest_id.write({'state': 'confirmed'})
+                        move.move_dest_ids.filtered(lambda x: x.state == 'waiting').write({'state': 'confirmed'})
                 if move.procurement_ids:
                     procurements |= move.procurement_ids
 
