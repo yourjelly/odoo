@@ -876,7 +876,7 @@ class StockMove(models.Model):
             'procure_method': 'make_to_stock',
             'restrict_lot_id': restrict_lot_id,
             'procurement_ids': self.procurement_ids.ids, #TODO: more logic needed here
-            'move_dest_ids': [(4, x) for x in self.move_dest_ids.ids if x.state not in ('done', 'cancel')],
+            'move_dest_ids': [(4, x.id) for x in self.move_dest_ids if x.state not in ('done', 'cancel')],
             'origin_returned_move_id': self.origin_returned_move_id.id,
         }
         if restrict_partner_id:
