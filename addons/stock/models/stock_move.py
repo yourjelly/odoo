@@ -644,9 +644,8 @@ class StockMove(models.Model):
                 move.quants_unreserve()
             if not self.env.context.get('cancel_procurement'):
                 if move.move_dest_ids:
-                    # Check if all moves corresponds to next
-                    
                     if move.propagate:
+                        # Check if the destination corresponds to all quantities, otherwise you are not sure which one to cancel
                         if float_compare(sum(x.product_qty for x in move.move_dest_ids), move.product_qty, precision_rounding=move.product_id.uom_id.rounding) == 0:
                             move.move_dest_ids.action_cancel() # TODO: logic for when it is not 
                     else:
