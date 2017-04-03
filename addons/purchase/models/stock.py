@@ -59,6 +59,7 @@ class StockMove(models.Model):
     def split(self, qty, restrict_lot_id=False, restrict_partner_id=False):
         new_move = super(StockMove, self).split(qty, restrict_lot_id=restrict_lot_id, restrict_partner_id=restrict_partner_id)
         self.browse(new_move).write({'purchase_line_id': self.purchase_line_id.id})
+        return new_move
 
 
 class StockWarehouse(models.Model):

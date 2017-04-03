@@ -255,7 +255,7 @@
                                 <tree decoration-muted="scrapped == True" string="Stock Moves" editable="bottom">
                                     <field name="product_id"/>
                                     <field name="name" invisible="1"/>
-                                    <field name="product_uom_qty"/>
+                                    <field name="product_uom_qty" string="To Do"/>
                                     <field name="product_uom" options="{'no_open': True, 'no_create': True}" string="Unit of Measure" groups="product.group_uom"/>
                                     <field name="location_id" invisible="1"/>
                                     <field name="create_date" invisible="1" />
@@ -263,11 +263,11 @@
                                     <field name="picking_type_id" invisible="1"/>
                                     <field name="scrapped" invisible="1"/>
                                     <field name="availability" invisible="1"/>
-                                    <field name="reserved_availability"/>
+                                    <field name="reserved_availability" string="Available"/>
                                     <field name="location_dest_id" invisible="1"/>
                                     <field name="has_tracking" invisible="1"/>
-                                    <field name="state"/>
-                                    <field name="quantity_done"/>
+                                    <field name="state" invisible="1"/>
+                                    <field name="quantity_done" string="Done"/>
                                     <button name="split_move_operation" string="Register lots, packs, location" type="object" icon="fa-list"/>
                                 </tree>
                             </field>
