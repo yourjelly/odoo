@@ -642,17 +642,13 @@ class StockMove(models.Model):
         for move in self:
             if move.reserved_quant_ids:
                 move.quants_unreserve()
-            if self.env.context.get('cancel_procurement'):
-                if move.propagate:
-                    pass
-                    # procurements.search([('move_dest_id', '=', move.id)]).cancel()
-            else:
+            if not self.env.context.get('cancel_procurement'):
                 if move.move_dest_ids:
                     # Check if all moves corresponds to next
                     
                     if move.propagate:
                         if float_compare(sum(x.product_qty for x in move.move_dest_ids), move.product_qty, precision_rounding=move.product_id.uom_id.rounding) == 0:
-                            move.move_dest_ids.action_cancel()
+                            move.move_dest_ids.action_cancel() # TODO: logic for when it is not 
                     else:
                         # If waiting, the chain will be broken and we are not sure if we can still wait for it (=> could take from stock instead)
                         move.move_dest_ids.filtered(lambda x: x.state == 'waiting').write({'state': 'confirmed'})
