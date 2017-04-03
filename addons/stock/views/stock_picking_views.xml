@@ -267,8 +267,10 @@
                                     <field name="location_dest_id" invisible="1"/>
                                     <field name="has_tracking" invisible="1"/>
                                     <field name="state" invisible="1"/>
-                                    <field name="quantity_done" string="Done"/>
-                                    <button name="split_move_operation" string="Register lots, packs, location" type="object" icon="fa-list"/>
+                                    <field name="quantity_done" string="Done" attrs="{'readonly': [('detail_visible', '=', True)]}"/>
+                                    <field name="detail_visible" invisible="1"/>
+                                    <button name="split_move_operation" string="Register lots, packs, location" type="object" icon="fa-list"
+                                            attrs="{'invisible': [('detail_visible', '=', False)]}"/>
                                 </tree>
                             </field>
                         </page>

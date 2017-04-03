@@ -149,7 +149,22 @@ class StockMove(models.Model):
     quantity_done = fields.Float(
         'Quantity', compute='_qty_done_compute', inverse='_qty_done_set',
         digits=dp.get_precision('Product Unit of Measure'))
+    detail_visible = fields.Boolean('Details Visible', compute='_compute_detail_visible')
 
+    @api.multi
+    @api.depends('product_id', 'pack_operation_ids', 'picking_id.location_id', 'picking_id.location_dest_id')
+    def _compute_detail_visible(self):
+        locations = self.mapped('location_id') | self.mapped('location_dest_id')
+        locations_children = self.env['stock.location'].search([('id', 'child_of', locations.ids), ('id', 'not in', locations.ids)]) 
+        if locations_children:
+            for move in self:
+                move.detail_visible = True
+        else:
+            for move in self:
+                if move.has_tracking != 'none' or len(move.pack_operation_ids.ids) > 1:
+                    move.detail_visible = True
+                else:
+                    move.detail_visible = False
 
     @api.one
     @api.depends('product_id', 'product_uom', 'product_uom_qty')
