@@ -41,7 +41,9 @@ class PickingType(models.Model):
         'Use Existing Lots/Serial Numbers', default=True,
         help="If this is checked, you will be able to choose the Lots/Serial Numbers. You can also decide to not put lots in this operation type.  This means it will create stock with no lot or not put a restriction on the lot taken. ")
     show_operations = fields.Boolean(
-        'Show operations', default=False)
+        'Show Operations', default=False)
+    show_reserved = fields.Boolean(
+        'Show Reserved', default=True)
     merge_moves = fields.Boolean('Merge Moves')
 
     # Statistics for the kanban view
@@ -566,6 +568,7 @@ class Picking(models.Model):
         self.mapped('pack_operation_ids').unlink()
         for picking in self:
             forced_qties = {}  # Quantity remaining after calculating reserved quants
+            picking_reserved = picking.picking_type_id.show_reserved
             picking_quants = self.env['stock.quant']
             # Calculate packages, reserved quants, qtys of this picking's moves
             quants_ops = {}
@@ -588,7 +591,7 @@ class Picking(models.Model):
                                           'move_id': move.id,
                                           'product_qty': quant.qty, 
                                           'product_id': move.product_id.id, 
-                                          'lot_id': quant.lot_id.id, 
+                                          'lot_id': picking_reserved and quant.lot_id.id or False, #Should be grouping them? 
                                           'package_id': quant.package_id.id,
                                           'location_id': quant.location_id.id, 
                                           'location_dest_id': move.location_dest_id.id, # Apply putaway
