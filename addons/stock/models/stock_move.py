@@ -829,6 +829,10 @@ class StockMove(models.Model):
             moves_to_unreserve |= move
             if move.move_dest_ids:
                 move.move_dest_ids.action_assign()
+            if move.move_orig_ids:
+                # As you can not link the moves 
+                moves_filtered = move.move_orig_ids.filtered(lambda x: x.state != 'done')
+                moves_filtered.write({'move_dest_ids': [(3, move.id)]})
         moves_to_unreserve.quants_unreserve()
         picking = self[0].picking_id
         moves_todo.write({'state': 'done', 'date': fields.Datetime.now()})
