@@ -26,6 +26,7 @@ class PackOperation(models.Model):
     is_done = fields.Boolean(compute='_compute_is_done', string='Done', readonly=False, oldname='processed_boolean')
     package_id = fields.Many2one('stock.quant.package', 'Source Package')
     lot_id = fields.Many2one('stock.production.lot', 'Lot')
+    lot_name = fields.Char('Lot/Serial Number')
     result_package_id = fields.Many2one(
         'stock.quant.package', 'Destination Package',
         ondelete='cascade', required=False,
