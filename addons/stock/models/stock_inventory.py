@@ -405,7 +405,6 @@ class InventoryLine(models.Model):
                                            'lot_id': self.prod_lot_id.id, 
                                            'product_qty': qty,
                                            'product_uom_id': self.product_uom_id.id,
-                                           'company_id': self.inventory_id.company_id.id,
                                            'package_id': out and self.package_id.id or False,
                                            'result_package_id': (not out) and self.package_id.id or False,
                                            'location_id': location_id, #TODO: owner stuff
