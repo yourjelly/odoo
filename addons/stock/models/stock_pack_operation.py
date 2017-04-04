@@ -15,12 +15,11 @@ class PackOperation(models.Model):
 
     picking_id = fields.Many2one(
         'stock.picking', 'Stock Picking',
-        required=True,
         help='The stock operation where the packing has been made')
     move_id = fields.Many2one(
         'stock.move', 'Stock Move', 
         help="Change to a better name") 
-    product_id = fields.Many2one('product.product', 'Product', ondelete="cascade") #might be a related with the move also
+    product_id = fields.Many2one('product.product', 'Product', ondelete="cascade") #might be a related with the move also --> no, because you can put them next to each other
     product_uom_id = fields.Many2one('product.uom', 'Unit of Measure')
     product_qty = fields.Float('To Do', default=0.0, digits=dp.get_precision('Product Unit of Measure'), required=True)
     qty_done = fields.Float('Done', default=0.0, digits=dp.get_precision('Product Unit of Measure'))

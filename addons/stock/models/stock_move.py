@@ -797,7 +797,10 @@ class StockMove(models.Model):
 
     @api.multi
     def action_done(self):
-        ''' Validate moves based on a production order. '''
+        ''' Validate moves based on a production order.
+            We assume for the moment that the function is either called by the 
+        
+        '''
         moves = self.filtered(lambda x: x.state not in ('done', 'cancel'))
         quant_obj = self.env['stock.quant']
         moves_todo = self.env['stock.move']
@@ -851,15 +854,16 @@ class StockMove(models.Model):
         moves_to_unreserve.quants_unreserve()
         picking = self[0].picking_id
         moves_todo.write({'state': 'done', 'date': fields.Datetime.now()})
-        moves_to_backorder = picking.move_lines.filtered(lambda x: x.state not in ('done', 'cancel'))
-        backorder_picking = picking.copy({
-                'name': '/',
-                'move_lines': [],
-                'pack_operation_ids': [],
-                'backorder_id': picking.id
-            })
-        picking.message_post('Backorder Created') #message needs to be improved
-        moves_to_backorder.write({'picking_id': backorder_picking.id})
+        if picking:
+            moves_to_backorder = picking.move_lines.filtered(lambda x: x.state not in ('done', 'cancel'))
+            backorder_picking = picking.copy({
+                    'name': '/',
+                    'move_lines': [],
+                    'pack_operation_ids': [],
+                    'backorder_id': picking.id
+                })
+            picking.message_post('Backorder Created') #message needs to be improved
+            moves_to_backorder.write({'picking_id': backorder_picking.id})
         return moves_todo
 
     @api.multi
