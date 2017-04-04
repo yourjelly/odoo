@@ -692,75 +692,6 @@ class StockMove(models.Model):
             if vals:
                 move.write(vals)
 
-    @api.model
-    def _move_quants_by_lot(self, ops, lot_qty, quants_taken, false_quants, lot_move_qty, quant_dest_package_id):
-        """
-        This function is used to process all the pack operation lots of a pack operation
-        For every move:
-            First, we check the quants with lot already reserved (and those are already subtracted from the lots to do)
-            Then go through all the lots to process:
-                Add reserved false lots lot by lot
-                Check if there are not reserved quants or reserved elsewhere with that lot or without lot (with the traditional method)
-        """
-        return self.browse(lot_move_qty.keys())._move_quants_by_lot_v10(quants_taken, false_quants, ops, lot_qty, lot_move_qty, quant_dest_package_id)
-
-    @api.multi
-    def _move_quants_by_lot_v10(self, quants_taken, false_quants, pack_operation, lot_quantities, lot_move_quantities, dest_package_id):
-        Quant = self.env['stock.quant']
-        rounding = pack_operation.product_id.uom_id.rounding
-        preferred_domain_list = [[('reservation_id', '=', False)], ['&', ('reservation_id', 'not in', self.ids), ('reservation_id', '!=', False)]]
-
-        for move_rec_updateme in self:
-            from collections import defaultdict
-            lot_to_quants = defaultdict(list)
-
-            # Assign quants already reserved with lot to the correct
-            for quant in quants_taken:
-                if quant[0] <= move_rec_updateme.reserved_quant_ids:
-                    lot_to_quants[quant[0].lot_id.id].append(quant)
-
-            false_quants_move = [x for x in false_quants if x[0].reservation_id.id == move_rec_updateme.id]
-            for lot_id in lot_quantities.keys():
-                redo_false_quants = False
-
-                # Take remaining reserved quants with  no lot first
-                # (This will be used mainly when incoming had no lot and you do outgoing with)
-                while false_quants_move and float_compare(lot_quantities[lot_id], 0, precision_rounding=rounding) > 0 and float_compare(lot_move_quantities[move_rec_updateme.id], 0, precision_rounding=rounding) > 0:
-                    qty_min = min(lot_quantities[lot_id], lot_move_quantities[move_rec_updateme.id])
-                    if false_quants_move[0].qty > qty_min:
-                        lot_to_quants[lot_id] += [(false_quants_move[0], qty_min)]
-                        qty = qty_min
-                        redo_false_quants = True
-                    else:
-                        qty = false_quants_move[0].qty
-                        lot_to_quants[lot_id] += [(false_quants_move[0], qty)]
-                        false_quants_move.pop(0)
-                    lot_quantities[lot_id] -= qty
-                    lot_move_quantities[move_rec_updateme.id] -= qty
-
-                # Search other with first matching lots and then without lots
-                if float_compare(lot_move_quantities[move_rec_updateme.id], 0, precision_rounding=rounding) > 0 and float_compare(lot_quantities[lot_id], 0, precision_rounding=rounding) > 0:
-                    # Search if we can find quants with that lot
-                    qty = min(lot_quantities[lot_id], lot_move_quantities[move_rec_updateme.id])
-                    quants = Quant.quants_get_preferred_domain(
-                        qty, move_rec_updateme, ops=pack_operation, lot_id=lot_id, domain=[('qty', '>', 0)],
-                        preferred_domain_list=preferred_domain_list)
-                    lot_to_quants[lot_id] += quants
-                    lot_quantities[lot_id] -= qty
-                    lot_move_quantities[move_rec_updateme.id] -= qty
-
-                # Move all the quants related to that lot/move
-                if lot_to_quants[lot_id]:
-                    Quant.quants_move(
-                        lot_to_quants[lot_id], move_rec_updateme, pack_operation.location_dest_id,
-                        location_from=pack_operation.location_id, lot_id=lot_id,
-                        owner_id=pack_operation.owner_id.id, src_package_id=pack_operation.package_id.id,
-                        dest_package_id=dest_package_id)
-                    if redo_false_quants:
-                        false_quants_move = [x for x in move_rec_updateme.reserved_quant_ids if (not x.lot_id) and (x.owner_id.id == pack_operation.owner_id.id) and
-                                             (x.location_id.id == pack_operation.location_id.id) and (x.package_id.id == pack_operation.package_id.id)]
-        return True
-
     @api.multi
     def _create_extra_move(self):
         ''' Creates an extra move if necessary depending on extra quantities than foreseen or extra moves'''
@@ -799,7 +730,7 @@ class StockMove(models.Model):
     def action_done(self):
         ''' Validate moves based on a production order.
             We assume for the moment that the function is either called by the 
-        
+            
         '''
         moves = self.filtered(lambda x: x.state not in ('done', 'cancel'))
         quant_obj = self.env['stock.quant']
