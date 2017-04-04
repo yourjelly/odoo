@@ -492,7 +492,7 @@ class Picking(models.Model):
         # Check if there are ops not linked to moves yet
         for pick in self:
             # Explode manually added packages
-            for ops in self.pack_operation_ids.filtered(lambda x: not x.move_id and not x.product_id):
+            for ops in pick.pack_operation_ids.filtered(lambda x: not x.move_id and not x.product_id):
                 for quant in ops.package_id.quant_ids: #Or use get_content for multiple levels
                     self.pack_operation_ids.create({'product_id': quant.product_id.id, 
                                                'package_id': quant.package_id.id, 
@@ -507,7 +507,7 @@ class Picking(models.Model):
                                                'picking_id': pick.id
                                                }) # Might change first element
             # Link existing moves or add moves when no one is related
-            for ops in self.pack_operation_ids.filtered(lambda x: not x.move_id):
+            for ops in pick.pack_operation_ids.filtered(lambda x: not x.move_id):
                 # Search move with this product
                 moves = pick.move_lines.filtered(lambda x: x.product_id == ops.product_id) 
                 if moves: #could search move that needs it the most (that has some quantities left)
@@ -719,67 +719,19 @@ class Picking(models.Model):
 
     @api.multi
     def do_transfer(self):
-        """ If no pack operation, we do simple action_done of the picking.
-        Otherwise, do the pack operations. """
-        # TDE CLEAN ME: reclean me, please
+        """"Now, the only difference with the picking is the """
         self._create_lots_for_picking()
-
-        no_pack_op_pickings = self.filtered(lambda picking: not picking.pack_operation_ids)
-        no_pack_op_pickings.action_done()
-        other_pickings = self - no_pack_op_pickings
-        for picking in other_pickings:
-            need_rereserve, all_op_processed = picking.picking_recompute_remaining_quantities()
-            todo_moves = self.env['stock.move']
-            toassign_moves = self.env['stock.move']
-
-            # create extra moves in the picking (unexpected product moves coming from pack operations)
-            if not all_op_processed:
-                todo_moves |= picking._create_extra_moves()
-
-            if need_rereserve or not all_op_processed:
-                moves_reassign = any(x.origin_returned_move_id or x.move_orig_ids for x in picking.move_lines if x.state not in ['done', 'cancel'])
-                if moves_reassign and picking.location_id.usage not in ("supplier", "production", "inventory"):
-                    # unnecessary to assign other quants than those involved with pack operations as they will be unreserved anyways.
-                    picking.with_context(reserve_only_ops=True, no_state_change=True).rereserve_quants(move_ids=picking.move_lines.ids)
-                picking.do_recompute_remaining_quantities()
-
-            # split move lines if needed
-            for move in picking.move_lines:
-                rounding = move.product_id.uom_id.rounding
-                remaining_qty = move.remaining_qty
-                if move.state in ('done', 'cancel'):
-                    # ignore stock moves cancelled or already done
-                    continue
-                elif move.state == 'draft':
-                    toassign_moves |= move
-                if float_compare(remaining_qty, 0,  precision_rounding=rounding) == 0:
-                    if move.state in ('draft', 'assigned', 'confirmed'):
-                        todo_moves |= move
-                elif float_compare(remaining_qty, 0, precision_rounding=rounding) > 0 and float_compare(remaining_qty, move.product_qty, precision_rounding=rounding) < 0:
-                    # TDE FIXME: shoudl probably return a move - check for no track key, by the way
-                    new_move_id = move.split(remaining_qty)
-                    new_move = self.env['stock.move'].with_context(mail_notrack=True).browse(new_move_id)
-                    todo_moves |= move
-                    # Assign move as it was assigned before
-                    toassign_moves |= new_move
-
-            # TDE FIXME: do_only_split does not seem used anymore
-            if todo_moves and not self.env.context.get('do_only_split'):
-                todo_moves.action_done()
-            elif self.env.context.get('do_only_split'):
-                picking = picking.with_context(split=todo_moves.ids)
-
-            picking._create_backorder()
+        self.action_done()
         return True
 
     def _create_lots_for_picking(self):
         Lot = self.env['stock.production.lot']
-        for pack_op_lot in self.mapped('pack_operation_ids').mapped('pack_lot_ids'):
-            if not pack_op_lot.lot_id:
-                lot = Lot.create({'name': pack_op_lot.lot_name, 'product_id': pack_op_lot.operation_id.product_id.id})
-                pack_op_lot.write({'lot_id': lot.id})
-        # TDE FIXME: this should not be done here
-        self.mapped('pack_operation_ids').mapped('pack_lot_ids').filtered(lambda op_lot: op_lot.qty == 0.0).unlink()
+        for pack_op in self.mapped('pack_operation_ids'):
+            if pack_op.lot_name and not pack_op.lot_id:
+                lot = Lot.create({'name': pack_op.lot_name, 'product_id': pack_op.product_id.id})
+                pack_op.write({'lot_id': lot.id})
+        self.mapped('pack_operation_ids').filtered(lambda x: x.product_qty == 0.0).unlink()
+
     create_lots_for_picking = _create_lots_for_picking
 
     def _create_extra_moves(self):
