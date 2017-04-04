@@ -37,7 +37,6 @@ class PackOperation(models.Model):
     location_dest_id = fields.Many2one('stock.location', 'Destination Location', required=True)
     picking_source_location_id = fields.Many2one('stock.location', related='picking_id.location_id')
     picking_destination_location_id = fields.Many2one('stock.location', related='picking_id.location_dest_id')
-    # TDE FIXME: unnecessary fields IMO, to remove
     from_loc = fields.Char(compute='_compute_location_description', string='From')
     to_loc = fields.Char(compute='_compute_location_description', string='To')
     fresh_record = fields.Boolean('Newly created pack operation', default=True)
