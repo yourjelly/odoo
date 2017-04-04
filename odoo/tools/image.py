@@ -6,7 +6,7 @@ try:
 except ImportError:
     import StringIO
 
-from PIL import Image
+from PIL import Image, ImageOps
 from PIL import ImageEnhance
 from random import randrange
 
@@ -90,14 +90,12 @@ def image_resize_and_sharpen(image, size, preserve_aspect_ratio=False, factor=2.
     """
     if image.mode != 'RGBA':
         image = image.convert('RGBA')
-    image.thumbnail(size, Image.ANTIALIAS)
     if preserve_aspect_ratio:
         size = image.size
     sharpener = ImageEnhance.Sharpness(image)
     resized_image = sharpener.enhance(factor)
-    # create a transparent image for background and paste the image on it
-    image = Image.new('RGBA', size, (255, 255, 255, 0))
-    image.paste(resized_image, ((size[0] - resized_image.size[0]) / 2, (size[1] - resized_image.size[1]) / 2))
+    # crop image to square
+    image = ImageOps.fit(resized_image, size, Image.ANTIALIAS)
     return image
 
 def image_save_for_web(image, fp=None, format=None):
