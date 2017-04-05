@@ -783,7 +783,7 @@ class StockMove(models.Model):
                 moves_filtered = move.move_orig_ids.filtered(lambda x: x.state != 'done')
                 moves_filtered.write({'move_dest_ids': [(3, move.id)]})
         moves_to_unreserve.quants_unreserve()
-        picking = self[0].picking_id
+        picking = self and self[0].picking_id or False
         moves_todo.write({'state': 'done', 'date': fields.Datetime.now()})
         if picking:
             moves_to_backorder = picking.move_lines.filtered(lambda x: x.state not in ('done', 'cancel'))
