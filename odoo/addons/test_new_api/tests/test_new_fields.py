@@ -633,6 +633,19 @@ class TestFields(common.TransactionCase):
         self.assertNotEqual(message.sudo().env, message.env)
         self.assertEqual(message.discussion_name, discussion.name)
 
+    def test_43_related_parent_store(self):
+        """ test the behavior of related fields on parent_left. """
+        Category = self.env['test_new_api.category']
+        Related = self.env['test_new_api.related']
+
+        child_category = Category.create({'name': 'child'})
+        related = Related.create({'category': child_category.id})
+        self.assertEqual(child_category.parent_left, related.related_parent_left)
+
+        parent_category = Category.create({'name': 'parent'})
+        child_category.parent = parent_category
+        self.assertEqual(child_category.parent_left, related.related_parent_left)
+
     def test_50_defaults(self):
         """ test default values. """
         fields = ['discussion', 'body', 'author', 'size']

@@ -3223,7 +3223,7 @@ class BaseModel(object):
                                       WHERE %%s<=parent_left AND parent_left<%%s''' % self._table,
                                    (pleft0 - pleft1 + width, pleft0 - pleft1 + width, pleft0 + width, pright0 + width))
 
-                self.invalidate_cache(['parent_left', 'parent_right'])
+                self.modified(['parent_left', 'parent_right'])
 
         # recompute new-style fields
         if self.env.recompute and self._context.get('recompute', True):
@@ -3420,7 +3420,7 @@ class BaseModel(object):
                            (pleft,))
                 cr.execute("UPDATE %s SET parent_left=%%s, parent_right=%%s WHERE id=%%s" % self._table,
                            (pleft, pleft + 1, id_new))
-                self.invalidate_cache(['parent_left', 'parent_right'])
+                self.modified(['parent_left', 'parent_right'])
 
         with self.env.protecting(protected_fields, self):
             # invalidate and mark new-style fields to recompute; do this before

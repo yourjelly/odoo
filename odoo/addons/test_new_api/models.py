@@ -9,15 +9,19 @@ from odoo.exceptions import AccessError, ValidationError
 
 class Category(models.Model):
     _name = 'test_new_api.category'
+    _parent_store = True
+    _parent_name = 'parent'
 
     name = fields.Char(required=True)
     color = fields.Integer('Color Index')
-    parent = fields.Many2one('test_new_api.category')
+    parent = fields.Many2one('test_new_api.category', ondelete='cascade')
     root_categ = fields.Many2one(_name, compute='_compute_root_categ')
     display_name = fields.Char(compute='_compute_display_name', inverse='_inverse_display_name')
     dummy = fields.Char(store=False)
     discussions = fields.Many2many('test_new_api.discussion', 'test_new_api_discussion_category',
                                    'category', 'discussion')
+    parent_left = fields.Integer('Left Parent', index=True)
+    parent_right = fields.Integer('Right Parent', index=True)
 
     @api.one
     @api.depends('name', 'parent.display_name')     # this definition is recursive
@@ -308,9 +312,11 @@ class Related(models.Model):
     _name = 'test_new_api.related'
 
     name = fields.Char()
+    category = fields.Many2one('test_new_api.category')
     # related fields with a single field
     related_name = fields.Char(related='name')
     related_related_name = fields.Char(related='related_name')
+    related_parent_left = fields.Integer(related='category.parent_left', store=True)
 
 
 class ComputeInverse(models.Model):
