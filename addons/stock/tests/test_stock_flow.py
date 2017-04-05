@@ -94,7 +94,7 @@ class TestStockFlow(TestStockCommon):
             'location_id': self.supplier_location,
             'location_dest_id': self.stock_location,
             'picking_id': picking_in.id,
-            'pack_lot_ids': [(0, 0, {'lot_id': lot2_productC.id, 'qty': 2.0})],
+            'lot_id': lot2_productC.id,
             })
         self.StockPackObj.create({
             'product_id': self.productD.id,
@@ -237,7 +237,7 @@ class TestStockFlow(TestStockCommon):
             'location_dest_id': self.customer_location,
             'picking_id': picking_out.id})
         self.StockPackObj.search([('product_id', '=', self.productC.id), ('picking_id', '=', picking_out.id)]).write({
-            'product_qty': 2.0, 'pack_lot_ids': [(0, 0, {'lot_id': lot2_productC.id, 'qty': 2.0})],})
+            'product_qty': 2.0, 'lot_id': lot2_productC.id,})
         self.StockPackObj.create({
             'product_id': self.productC.id,
             'product_qty': 3,
@@ -322,7 +322,7 @@ class TestStockFlow(TestStockCommon):
         back_order_in.do_prepare_partial()
         packD = self.StockPackObj.search([('product_id', '=', self.productD.id), ('picking_id', '=', back_order_in.id)])
         self.assertEqual(len(packD), 1, 'Wrong number of pack operation.')
-        packD.write({'product_qty': 4, 'pack_lot_ids': [(0, 0, {'lot_id': lot1_productD.id, 'qty': 4.0})],})
+        packD.write({'product_qty': 4, 'lot_id': lot1_productD.id,})
         self.StockPackObj.create({
             'product_id': self.productD.id,
             'product_qty': 4,
@@ -330,10 +330,11 @@ class TestStockFlow(TestStockCommon):
             'location_id': self.supplier_location,
             'location_dest_id': self.stock_location,
             'picking_id': back_order_in.id,
-            'pack_lot_ids': [(0, 0, {'lot_id': lot1_productD.id, 'qty': 4.0})],})
+            'lot_id': lot1_productD.id,
+            })
         packCs = self.StockPackObj.search([('product_id', '=', self.productC.id), ('picking_id', '=', back_order_in.id)], limit=1)
         packCs.write({'product_qty': 1,
-                      'pack_lot_ids': [(0, 0, {'lot_id': lot3_productC.id, 'qty': 1.0})]
+                      'lot_id': lot3_productC.id,
                       })
         self.StockPackObj.create({
             'product_id': self.productC.id,
@@ -342,7 +343,7 @@ class TestStockFlow(TestStockCommon):
             'location_id': self.supplier_location,
             'location_dest_id': self.stock_location,
             'picking_id': back_order_in.id,
-            'pack_lot_ids': [(0, 0, {'lot_id': lot4_productC.id, 'qty': 1.0})]})
+            'lot_id': lot4_productC.id,})
         self.StockPackObj.create({
             'product_id': self.productC.id,
             'product_qty': 2,
@@ -350,7 +351,7 @@ class TestStockFlow(TestStockCommon):
             'location_id': self.supplier_location,
             'location_dest_id': self.stock_location,
             'picking_id': back_order_in.id,
-            'pack_lot_ids': [(0, 0, {'lot_id': lot5_productC.id, 'qty': 2.0})]})
+            'lot_id': lot5_productC.id,})
         self.StockPackObj.create({
             'product_id': self.productC.id,
             'product_qty': 2,
@@ -358,7 +359,7 @@ class TestStockFlow(TestStockCommon):
             'location_id': self.supplier_location,
             'location_dest_id': self.stock_location,
             'picking_id': back_order_in.id,
-            'pack_lot_ids': [(0, 0, {'lot_id': lot6_productC.id, 'qty': 2.0})]})
+            'lot_id': lot6_productC.id,})
         self.StockPackObj.create({
             'product_id': self.productA.id,
             'product_qty': 10,
@@ -1263,10 +1264,9 @@ class TestStockFlow(TestStockCommon):
         lot1 = self.LotObj.create({'product_id': self.productA.id, 'name': 'LOT1'})
         lot2 = self.LotObj.create({'product_id': self.productA.id, 'name': 'LOT2'})
         lot3 = self.LotObj.create({'product_id': self.productA.id, 'name': 'LOT3'})
-        self.env['stock.pack.operation.lot'].create({'operation_id': pack_opt.id, 'lot_id': lot1.id, 'qty': 1.0})
-        self.env['stock.pack.operation.lot'].create({'operation_id': pack_opt.id,'lot_id': lot2.id, 'qty': 1.0})
-        self.env['stock.pack.operation.lot'].create({'operation_id': pack_opt.id, 'lot_id': lot3.id, 'qty': 2.0})
-        pack_opt.qty_done = 4.0
+        pack_opt.write({'lot_id': lot1.id, 'qty': 1.0})
+        pack_opt.copy(default={'lot_id': lot2.id, 'qty': 1.0})
+        pack_opt.copy(default={'lot_id': lot3.id, 'qty': 2.0})
         picking_out.do_new_transfer()
         quants = self.StockQuantObj.search([('product_id', '=', self.productA.id), ('location_id', '=', self.stock_location)])
         self.assertFalse(quants, 'Should not have any quants in stock anymore')
