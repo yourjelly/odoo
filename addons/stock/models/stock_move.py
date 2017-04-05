@@ -357,6 +357,8 @@ class StockMove(models.Model):
         ctx = dict(self.env.context)
         self.ensure_one()
         view = self.env.ref('stock.view_stock_move_operations')
+        ctx.update({'show_lots_inv': not(self.has_tracking != 'none' and self.picking_type_id.use_existing_lots), 
+                    'show_lots_name_inv': not(self.has_tracking != 'none' and self.picking_type_id.use_create_lots and not self.picking_type_id.use_existing_lots),})
 #         serial = (self.has_tracking == 'serial')
 #         only_create = False  # Check operation type in theory
 #         show_reserved = any([x for x in self.pack_operation_ids if x.product_qty > 0.0])

@@ -127,7 +127,7 @@ class TestStockFlow(TestStockCommon):
         moves = self.MoveObj.search([('product_id', '=', self.productA.id), ('picking_id', '=', picking_in.id)])
         a_done_qty = [move.product_uom_qty for move in moves]
         self.assertEqual(set(a_done_qty), set([1.0, 3.0]), 'Wrong move quantity for product A.')
-        # Check product B done quantity must be 4 and 1d
+        # Check product B done quantity must be 4 and 1
         moves = self.MoveObj.search([('product_id', '=', self.productB.id), ('picking_id', '=', picking_in.id)])
         b_done_qty = [move.product_uom_qty for move in moves]
         self.assertEqual(set(b_done_qty), set([4.0, 1.0]), 'Wrong move quantity for product B.')
