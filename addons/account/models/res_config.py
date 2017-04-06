@@ -52,6 +52,7 @@ class AccountConfigSettings(models.TransientModel):
     module_print_docsaway = fields.Boolean(string="Docsaway")
     module_product_margin = fields.Boolean(string="Allow Product Margin")
     module_l10n_eu_service = fields.Boolean(string="EU Digital Goods VAT")
+    module_website_account = fields.Boolean(string="Website Portal for Invoices")
 
     @api.model
     def get_default_tax_fields(self, fields):
