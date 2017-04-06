@@ -199,10 +199,12 @@ var Activity = form_common.AbstractField.extend({
                 content : function() {
                     var $popover = $(QWeb.render("mail.activity_feedback_form", {}));
                     $popover.on('click', '.o_activity_popover_done_next', function (e) {
+                        $(this).attr("disabled", "disabled");
                         self.set_done(activity_id, _.escape($popover.find('#activity_feedback').val()));
                         self.on_activity_schedule(e);
                     });
                     $popover.on('click', '.o_activity_popover_done', function () {
+                        $(this).attr("disabled", "disabled");
                         self.set_done(activity_id, _.escape($popover.find('#activity_feedback').val()));
                     });
                     $popover.on('click', '.o_activity_popover_discard', function () {
