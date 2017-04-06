@@ -309,7 +309,7 @@ class Picking(models.Model):
         if not self.move_lines and self.launch_pack_operations:
             self.state = 'assigned'
         elif not self.move_lines:
-            self.state = 'draft'
+            self.state = 'confirmed'
         elif any(move.state == 'draft' for move in self.move_lines):  # TDE FIXME: should be all ?
             self.state = 'draft'
         elif all(move.state == 'cancel' for move in self.move_lines):
