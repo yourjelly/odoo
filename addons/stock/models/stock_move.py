@@ -191,8 +191,9 @@ class StockMove(models.Model):
     @api.multi
     def _qty_done_set(self):
         for move in self:
-            if move.has_tracking == 'none':
-                move.quantity_done_store = move.quantity_done
+            if not move.detail_visible and move.pack_operation_ids:
+                move.pack_operation_ids[0].qty_done = move.quantity_done
+                #move.quantity_done_store = move.quantity_done
 
     @api.one
     @api.depends('state', 'quant_ids.lot_id', 'reserved_quant_ids.lot_id')
@@ -789,14 +790,15 @@ class StockMove(models.Model):
         moves_todo.write({'state': 'done', 'date': fields.Datetime.now()})
         if picking:
             moves_to_backorder = picking.move_lines.filtered(lambda x: x.state not in ('done', 'cancel'))
-            backorder_picking = picking.copy({
-                    'name': '/',
-                    'move_lines': [],
-                    'pack_operation_ids': [],
-                    'backorder_id': picking.id
-                })
-            picking.message_post('Backorder Created') #message needs to be improved
-            moves_to_backorder.write({'picking_id': backorder_picking.id})
+            if moves_to_backorder:
+                backorder_picking = picking.copy({
+                        'name': '/',
+                        'move_lines': [],
+                        'pack_operation_ids': [],
+                        'backorder_id': picking.id
+                    })
+                picking.message_post('Backorder Created') #message needs to be improved
+                moves_to_backorder.write({'picking_id': backorder_picking.id})
         return moves_todo
 
     @api.multi
