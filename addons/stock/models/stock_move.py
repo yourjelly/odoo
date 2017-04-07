@@ -150,6 +150,15 @@ class StockMove(models.Model):
         'Quantity', compute='_qty_done_compute', inverse='_qty_done_set',
         digits=dp.get_precision('Product Unit of Measure'))
     detail_visible = fields.Boolean('Details Visible', compute='_compute_detail_visible')
+    from_supplier = fields.Boolean('From Supplier', compute='_compute_from_supplier')
+
+    @api.depends('location_id')
+    def _compute_from_supplier(self):
+        for move in self:
+            if move.location_id.usage == 'supplier':
+                move.from_supplier = True
+            else:
+                move.from_supplier = False
 
     @api.multi
     @api.depends('product_id', 'pack_operation_ids', 'picking_id.location_id', 'picking_id.location_dest_id')
