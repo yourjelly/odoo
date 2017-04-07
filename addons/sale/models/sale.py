@@ -643,6 +643,7 @@ class SaleOrderLine(models.Model):
         Create procurements based on quantity ordered. If the quantity is increased, new
         procurements are created. If the quantity is decreased, no automated action is taken.
         """
+        self = self.with_context(recompute=False)
         precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
         new_procs = self.env['procurement.order']  # Empty recordset
         for line in self:
@@ -666,6 +667,7 @@ class SaleOrderLine(models.Model):
                 subtype_id=self.env.ref('mail.mt_note').id)
             new_procs += new_proc
         new_procs.run()
+        self.recompute()
         return new_procs
 
     @api.model
