@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="account_move_opening_tree" model="ir.ui.view">
+        <field name="name">account.move.line.opening</field>
+        <field name="model">account.move.line</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="account_id" options="{'no_open': True}" attrs="{'readonly':[('user_type','in', ('receivable','payable'))]}"/>
+                <field name="opening_debit" attrs="{'readonly':[('user_type','in', ('receivable','payable'))]}"/>
+                <field name="opening_credit" attrs="{'readonly':[('user_type','in', ('receivable','payable'))]}"/>
+                <field name="user_type" invisible="1"/>
+                <button name="open_opening_receivable_balance" type="object" string="Outstanding Transactions"
+                    attrs="{'invisible':[('user_type','not in', ('receivable','payable'))]}"/>
+            </tree>
+        </field>
+    </record>
+    <record id="account_move_opening_receivable_tree" model="ir.ui.view">
+        <field name="name">account.move.line.opening</field>
+        <field name="model">account.move.line</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="date"/>
+                <field name="partner_id"/>
+                <field name="name"/>
+                <field name="opening_debit"/>
+                <field name="opening_credit"/>
+                <field name="date_maturity" required="0"/>
+                <field name="move_id" invisible="1"/>
+                <field name="account_id" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_open_opening_balance" model="ir.actions.server">
+        <field name="name">Initial Balance</field>
+        <field name="model_id" ref="account.model_account_move_line"/>
+        <field name="state">code</field>
+        <field name="code">action = model.open_opening_balance()</field>
+    </record>
+
+</odoo>

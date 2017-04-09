@@ -20,7 +20,12 @@ It assigns manager and user access rights to the Administrator for the accountin
         'data/account_accountant_tour.xml',
         'security/account_accountant_security.xml',
         'views/account_accountant_templates.xml',
+        'views/account_dashboard.xml',
+        'views/account_move_view.xml',
         'views/res_config_view.xml',
+    ],
+    'qweb': [
+        "static/src/xml/account_dashboard.xml",
     ],
     'demo': ['data/account_accountant_demo.xml'],
     'test': [],

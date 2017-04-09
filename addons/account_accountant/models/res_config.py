@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models
+from odoo import fields, models, _
+import datetime
 
 
 class AccountConfigSettings(models.TransientModel):
@@ -33,3 +34,5 @@ class AccountConfigSettings(models.TransientModel):
         'account.journal',
         related='company_id.tax_cash_basis_journal_id',
         string="Tax Cash Basis Journal",)
+
+
