@@ -27,7 +27,7 @@
                         Configuration Steps:
                     </button>
                 </div>
-                <div class="pull-right">
+                <div class="pull-right" style="padding: 7px;">
                     <button aria-hidden="true" class="close" data-dismiss="modal" type="button">×</button>
                 </div>
             </div>
