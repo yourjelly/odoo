@@ -236,20 +236,20 @@
                         </div>
                         <!-- On the right, show other common informations/actions -->
                         <div class="col-xs-6 o_kanban_primary_right">
-                            <div class="row" name="latest_statement" t-if="dashboard.account_balance &amp;&amp; dashboard.last_balance">
-                                <div class="col-xs-6">
-                                    <span title="Latest Statement">Latest Statement</span>
-                                </div>
-                                <div class="col-xs-6 text-right">
-                                    <span><t t-esc="dashboard.last_balance"/></span>
-                                </div>
-                            </div>
                             <div class="row" t-if="dashboard.account_balance != dashboard.last_balance">
                                 <div class="col-xs-6">
                                     <span title="Balance in Odoo">Balance in GL</span>
                                 </div>
                                 <div class="col-xs-6 text-right">
                                     <span><t t-esc="dashboard.account_balance"/></span>
+                                </div>
+                            </div>
+                            <div class="row" name="latest_statement" t-if="dashboard.account_balance &amp;&amp; dashboard.last_balance">
+                                <div class="col-xs-6">
+                                    <span title="Latest Statement">Latest Statement</span>
+                                </div>
+                                <div class="col-xs-6 text-right">
+                                    <span><t t-esc="dashboard.last_balance"/></span>
                                 </div>
                             </div>
                         </div>
