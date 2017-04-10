@@ -263,7 +263,8 @@
                                     <field name="picking_type_id" invisible="1"/>
                                     <field name="scrapped" invisible="1"/>
                                     <field name="availability" invisible="1"/>
-                                    <field name="reserved_availability" string="Available"/>
+                                    <field name="from_supplier" invisible="1"/>
+                                    <field name="reserved_availability" string="Available" attrs="{'invisible': [('from_supplier', '=', True)]}"/>
                                     <field name="location_dest_id" invisible="1"/>
                                     <field name="has_tracking" invisible="1"/>
                                     <field name="state" invisible="1"/>
