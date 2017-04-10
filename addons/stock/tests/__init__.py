@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from . import test_stock_flow
-from . import test_product
-from . import test_warehouse
-from . import test_shipment
+import test_product
+import test_warehouse
+import test_shipment
+import test_procrule
+import test_packing
+
