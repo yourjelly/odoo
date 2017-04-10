@@ -23,7 +23,7 @@ class account_journal(models.Model):
 
     kanban_dashboard = fields.Text(compute='_kanban_dashboard')
     kanban_dashboard_graph = fields.Text(compute='_kanban_dashboard_graph')
-    show_on_dashboard = fields.Boolean(string='Show journal on dashboard', help="Whether this journal should be displayed on the dashboard or not", default=True)
+    show_on_dashboard = fields.Boolean(string='Show in Dashboard', help="Whether this journal should be displayed on the dashboard or not", default=True)
 
     @api.multi
     def get_line_graph_datas(self):

@@ -269,7 +269,7 @@
                                         <field name="group_invoice_lines" attrs="{'invisible': [('type', 'not in', ['sale', 'purchase'])]}"/>
                                         <field name="profit_account_id" attrs="{'invisible': [('type', '!=', 'cash')]}"/>
                                         <field name="loss_account_id" attrs="{'invisible': [('type', '!=', 'cash')]}"/>
-                                        <field name="show_on_dashboard" groups="base.group_no_one"/>
+                                        <field name="show_on_dashboard"/>
                                     </group>
                                 </group>
                             </page>
