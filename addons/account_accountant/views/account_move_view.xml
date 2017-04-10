@@ -15,11 +15,10 @@
         </field>
     </record>
     <record id="account_move_opening_receivable_tree" model="ir.ui.view">
-        <field name="name">account.move.line.opening</field>
+        <field name="name">account.move.line.receivable.opening</field>
         <field name="model">account.move.line</field>
         <field name="arch" type="xml">
             <tree editable="bottom">
-                <field name="date"/>
                 <field name="partner_id"/>
                 <field name="name"/>
                 <field name="opening_debit"/>

@@ -6,6 +6,7 @@ import datetime
 
 class account_move_line(models.Model):
     _inherit = 'account.move.line'
+
     user_type = fields.Selection(related='account_id.user_type_id.type', string='Account Type', readonly=True)
 
     opening_debit = fields.Float(compute='_get_opening_debit_credit', inverse='_set_opening_debit')
@@ -30,7 +31,7 @@ class account_move_line(models.Model):
             if not diff:
                 return True
 
-            # TODO: if no account: raise
+            # TODO: if no account: raise Warning
             account = self.env.user.company_id.expense_currency_exchange_account_id
             line = record.search([('move_id','=',record.move_id.id), ('account_id','=',account.id)])
             if line:
@@ -70,8 +71,8 @@ class account_move_line(models.Model):
     def open_opening_balance(self):
         company = self.env.user.company_id
         if not company.opening_balance_move_id or company.opening_balance_move_id.state=='posted':
-            date = datetime.date.today()
             journal = self.env['account.journal'].search([('type', '=', 'general')], limit=1).id
+            date = datetime.date.today()
             date.replace(day=1)
             move_id = self.env['account.move'].create({
                 'date': date,
