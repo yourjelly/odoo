@@ -51,6 +51,7 @@ class account_move_line(models.Model):
         return True
 
     def open_opening_receivable_balance(self):
+        # TODO: load this from an actual action, and update domain afterwards
         return {
             'name': _('Outstanding Invoices & Payments'),
             'view_type': 'form',
@@ -59,6 +60,16 @@ class account_move_line(models.Model):
             'res_model': 'account.move.line',
             'type': 'ir.actions.act_window',
             'domain': [('move_id', '=', self.move_id.id), ('opening_link_id','=',self.id)],
+            'help': """
+            <p class="oe_view_nocontent_create">
+                Register all your outstanding invoices & payments.
+            </p><p>
+                A journal entry will be created for each line, in the account "%s". That way,
+                your customer statements will be up to date, and you will be
+                able to reconcile future payments with these open journal
+                items..
+            </p>
+            """,
             'context': {
                 'default_move_id': self.move_id.id,
                 'default_opening_link_id':self.id,
@@ -135,4 +146,7 @@ class AccountJournal(models.Model):
                 break
 
         data['initial'] = bool(self.env.user.company_id.opening_balance_move_id.amount)
+
+         # Todo: wizard to set End of Year date
+        data['fy'] = False
         return data

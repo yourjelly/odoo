@@ -7,6 +7,9 @@
         <div class="o_account_dashboard_header o_form_view" t-if="values['open']">
             <div class="o_form_statusbar">
                 <div class="o_statusbar_status" data-original-title="" title="">
+                    <button t-attf-class="btn btn-sm o_arrow_button btn-default">
+                        <i class="fa fa-gift fa-2x" style="color: #cccccc"/>
+                    </button>
                     <button t-attf-class="btn btn-sm o_arrow_button btn-default o_dashboard_action #{values['initial'] and 'o_action_done' or ''}" name="account_accountant.action_open_opening_balance">
                         <i class="fa fa-check" t-if="values['initial']"/>
                         Initial Balances
@@ -18,6 +21,10 @@
                     <button name="account.action_account_bank_journal_form" t-attf-class="btn btn-sm o_arrow_button btn-default o_dashboard_action #{values['banks'] and 'o_action_done' or ''}">
                         <i class="fa fa-check" t-if="values['banks']"/>
                         Bank Accounts
+                    </button>
+                    <button name="base.action_res_company_form" t-attf-class="btn btn-sm o_arrow_button btn-default o_dashboard_action #{values['fy'] and 'o_action_done' or ''}">
+                        <i class="fa fa-check" t-if="values['fy']"/>
+                        Fiscal Year Opening
                     </button>
                     <button name="base.action_res_company_form" t-attf-class="btn btn-sm o_arrow_button btn-default o_dashboard_action #{values['company'] and 'o_action_done' or ''}">
                         <i class="fa fa-check" t-if="values['company']"/>
