@@ -198,6 +198,7 @@ class ProcurementOrder(models.Model):
                     group_id = self.group_id.id
                 elif self.rule_id.group_propagation_option == 'fixed':
                     group_id = self.rule_id.group_id.id
+                # TODO: add recompute -> might be more logical to reuse code of picking_assign
                 moves = self.env['stock.move'].search([
                     ('group_id', '=', group_id), #extra logic?
                     ('location_id', '=', self.rule_id.location_src_id.id),
@@ -212,6 +213,12 @@ class ProcurementOrder(models.Model):
                                     'procurement_ids': [(4, self.id)], 
                                     'move_dest_ids': [(4, x.id) for x in self.move_dest_ids],
                                     })
+                    #Need to add a procurement if the move is mto again
+                    if self.rule_id.procure_method == 'make_to_order':
+                        self.copy(default={'location_id': moves[0].location_id.id, 
+                                          'move_dest_ids': [(6, 0, [moves[0].id])], 
+                                          'move_ids': [(5)], 
+                                          'rule_id': False})
                     #Might need to change state
             if not added_to_existing:
                 self.env['stock.move'].sudo().create(self._get_stock_move_values())
