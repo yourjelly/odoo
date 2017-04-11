@@ -39,7 +39,7 @@ class StockQuant(models.Model):
     quantity = fields.Float(
         'Quantity',
         help='Quantity of products in this quant, in the default unit of measure of the product',
-        readonly=True, required=True)
+        readonly=True, required=True) #old_name=qty?
     reserved_quantity = fields.Float(
         'Quantity',
         default=0.0,
