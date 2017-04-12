@@ -90,6 +90,7 @@ var AbstractActivityField = AbstractField.extend({
             context: {
                 default_res_id: this.res_id,
                 default_res_model: this.model,
+                default_previous_activity_type_id: this.previous_activity_type_id,
             },
             res_id: id || false,
         };
@@ -135,7 +136,7 @@ var Activity = AbstractActivityField.extend({
 
     // public
     scheduleActivity: function () {
-        var callback = this._reload.bind(this, {activity: true, thread: true});
+        var callback = this._reload.bind(this, {activity: true, thread: true, previous_activity_type_id: this.previous_activity_type_id});
         return this._scheduleActivity(false, callback);
     },
     // private
@@ -185,15 +186,17 @@ var Activity = AbstractActivityField.extend({
         var self = this;
         var $popover_el = $(event.currentTarget);
         var activity_id = $popover_el.data('activity-id');
+        var previous_activity_type_id = $popover_el.data('previous-activity-type-id');
         if (!$popover_el.data('bs.popover')) {
             $popover_el.popover({
                 title : _t('Feedback'),
                 html: 'true',
                 trigger:'click',
                 content : function() {
-                    var $popover = $(QWeb.render("mail.activity_feedback_form", {}));
+                    var $popover = $(QWeb.render("mail.activity_feedback_form", {'previous_activity_type_id': previous_activity_type_id}));
                     $popover.on('click', '.o_activity_popover_done_next', function () {
                         var feedback = _.escape($popover.find('#activity_feedback').val());
+                        self.previous_activity_type_id = $popover_el.data('previous-activity-type-id');
                         self._markActivityDone(activity_id, feedback)
                             .then(self.scheduleActivity.bind(self));
                     });
