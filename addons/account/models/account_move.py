@@ -832,6 +832,7 @@ class AccountMoveLine(models.Model):
         global seconds
         if not self.ids:
             return self
+        self = self.with_context(prefetch_fields=False)
         _logger.warning('%s remaining (took %s seconds)' % (len(self.ids), time.time() - seconds))
         seconds = time.time()
         sm_debit_move, sm_credit_move = self._get_pair_to_reconcile()
