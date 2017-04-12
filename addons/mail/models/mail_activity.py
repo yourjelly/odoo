@@ -107,6 +107,7 @@ class MailActivity(models.Model):
     def create(self, values):
         activity = super(MailActivity, self).create(values)
         self.env[activity.res_model].browse(activity.res_id).message_subscribe(partner_ids=[activity.user_id.partner_id.id])
+        print '\n\n On create', activity
         return activity
 
     @api.multi

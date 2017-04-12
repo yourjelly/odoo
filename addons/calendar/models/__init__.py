@@ -6,3 +6,4 @@ import ir_http
 import res_partner
 import mail_message
 import calendar
+import mail_activity
