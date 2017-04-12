@@ -598,7 +598,14 @@ class AccountInvoice(models.Model):
         line_to_reconcile = self.env['account.move.line']
         for inv in self:
             line_to_reconcile += inv.move_id.line_ids.filtered(lambda r: not r.reconciled and r.account_id.internal_type in ('payable', 'receivable'))
-        return (line_to_reconcile + payment_line).reconcile(writeoff_acc_id, writeoff_journal_id)
+
+        lines_to_reconcile = line_to_reconcile + payment_line
+
+        res = lines_to_reconcile.reconcile(writeoff_acc_id, writeoff_journal_id)
+        _logger.warning('batch full reconcile start')
+        lines_to_reconcile.compute_full_after_batch_reconcile()
+        _logger.warning('batch full reconcile end')
+        return res
 
     @api.v7
     def assign_outstanding_credit(self, cr, uid, id, credit_aml_id, context=None):

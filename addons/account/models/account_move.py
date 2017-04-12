@@ -14,7 +14,9 @@ from collections import OrderedDict
 # Entries
 #----------------------------------------------------------
 
+import logging; _logger = logging.getLogger(__name__)
 
+seconds = 0
 class AccountMove(models.Model):
     _name = "account.move"
     _description = "Account Entry"
@@ -796,35 +798,55 @@ class AccountMoveLine(models.Model):
             field = 'amount_residual'
         elif self._context.get('skip_full_reconcile_check') == 'amount_currency_only':
             field = 'amount_residual_currency'
+
+        # try to avoid prefetch of all fields?
+        _logger.warning('read start')
+        data_dict = self.read(['date', field])
+        _logger.warning('read end')
+
         #target the pair of move in self that are the oldest
-        sorted_moves = sorted(self, key=lambda a: a.date)
+        sorted_moves = self.sorted(lambda a: a.date)
+        # sorted_moves = sorted(sorted_moves, key=lambda a: -a.credit)
+        # sorted_moves = self
         debit = credit = False
-        for aml in sorted_moves:
+
+        c = 0
+        _logger.warning('before loop')
+        for data in data_dict:
             if credit and debit:
                 break
-            if float_compare(aml[field], 0, precision_rounding=rounding) == 1 and not debit:
-                debit = aml
-            elif float_compare(aml[field], 0, precision_rounding=rounding) == -1 and not credit:
-                credit = aml
-        return debit, credit
+            if float_compare(data[field], 0, precision_rounding=rounding) == 1 and not debit:
+                _logger.warning('took %s iterations to find debit', c)
+                debit = self.browse(data['id'])
+            elif float_compare(data[field], 0, precision_rounding=rounding) == -1 and not credit:
+                _logger.warning('took %s iterations to find credit', c)
+                credit = self.browse(data['id'])
+            c += 1
+        return debit.with_context(prefetch_fields=False), credit.with_context(prefetch_fields=False)
 
     def auto_reconcile_lines(self):
         """ This function iterates recursively on the recordset given as parameter as long as it
             can find a debit and a credit to reconcile together. It returns the recordset of the
             account move lines that were not reconciled during the process.
         """
+        global seconds
         if not self.ids:
             return self
+        _logger.warning('%s remaining (took %s seconds)' % (len(self.ids), time.time() - seconds))
+        seconds = time.time()
         sm_debit_move, sm_credit_move = self._get_pair_to_reconcile()
+        _logger.warning('got pair')
         #there is no more pair to reconcile so return what move_line are left
         if not sm_credit_move or not sm_debit_move:
             return self
 
-        field = self[0].account_id.currency_id and 'amount_residual_currency' or 'amount_residual'
+        first_record = self.with_context(prefetch_fields=False)[0]
+
+        field = first_record.account_id.currency_id and 'amount_residual_currency' or 'amount_residual'
         if not sm_debit_move.debit and not sm_debit_move.credit:
             #both debit and credit field are 0, consider the amount_residual_currency field because it's an exchange difference entry
             field = 'amount_residual_currency'
-        if self[0].currency_id and all([x.currency_id == self[0].currency_id for x in self]):
+        if first_record.currency_id and all([x.currency_id == first_record.currency_id for x in self]):
             #all the lines have the same currency, so we consider the amount_residual_currency field
             field = 'amount_residual_currency'
         if self._context.get('skip_full_reconcile_check') == 'amount_currency_excluded':
@@ -834,6 +856,7 @@ class AccountMoveLine(models.Model):
         #Reconcile the pair together
         amount_reconcile = min(sm_debit_move[field], -sm_credit_move[field])
         #Remove from recordset the one(s) that will be totally reconciled
+
         if amount_reconcile == sm_debit_move[field]:
             self -= sm_debit_move
         if amount_reconcile == -sm_credit_move[field]:
@@ -854,13 +877,15 @@ class AccountMoveLine(models.Model):
         elif self._context.get('skip_full_reconcile_check') == 'amount_currency_only':
             currency = self._context.get('manual_full_reconcile_currency')
 
-        self.env['account.partial.reconcile'].create({
+        _logger.warning('account.partial.reconcile create start')
+        self.env['account.partial.reconcile'].with_context(skip_full_reconcile_check=True).create({
             'debit_move_id': sm_debit_move.id,
             'credit_move_id': sm_credit_move.id,
             'amount': amount_reconcile,
             'amount_currency': amount_reconcile_currency,
             'currency_id': currency,
         })
+        _logger.warning('account.partial.reconcile create end')
 
         #Iterate process again on self
         return self.auto_reconcile_lines()
