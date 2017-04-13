@@ -25,7 +25,6 @@ class TestDropship(common.TransactionCase):
         self.route_drop_shipping = self.ref('stock_dropshipping.route_drop_shipping')
         self.location_id = self.ref('stock.stock_location_customers')
         self.supplier_dropship = self.ResPartner.create({'name': 'Vendor of Dropshipping test'})
-        print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Vendor Created", self.supplier_dropship
 
         self.drop_shop_product = self.Product.create({
                 'name': 'Pen drive',
@@ -46,7 +45,6 @@ class TestDropship(common.TransactionCase):
                 'uom_po_id': self.uom_unit_id,
 
             })
-        print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Product Created", self.drop_shop_product.name
              
         self.sale_order_drp_shpng = self.SaleOrder.create({
                 'partner_id': self.partner_id,
@@ -66,7 +64,6 @@ class TestDropship(common.TransactionCase):
                     ],
 
             })
-        print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SO Created"
     
     def test_00_dropship(self):
         """Check for Confirm sales order"""
