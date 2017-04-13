@@ -72,9 +72,8 @@ class ResConfigConfigurable(models.TransientModel):
             return next.action_launch()
 
         return {
-            'type': 'ir.actions.act_url',
-            'target': 'self',
-            'url': '/web',
+            'type': 'ir.actions.client',
+            'tag': 'reload_context'
         }
 
     @api.multi
