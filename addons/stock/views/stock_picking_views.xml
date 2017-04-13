@@ -251,7 +251,7 @@
                     </group>
                     <notebook>
                         <page string="MovesOperations" attrs="{'invisible': [('show_operations', '=', True)]}">
-                            <field name="move_lines" context="{'address_in_id': partner_id, 'default_picking_type_id': picking_type_id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_state': 'confirmed'}">
+                            <field name="move_lines" context="{'address_in_id': partner_id, 'default_picking_type_id': picking_type_id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id}">
                                 <tree decoration-muted="scrapped == True" string="Stock Moves" editable="bottom">
                                     <field name="product_id"/>
                                     <field name="name" invisible="1"/>

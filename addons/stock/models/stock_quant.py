@@ -156,7 +156,7 @@ class StockQuant(models.Model):
 
     @api.model
     def decrease_reserved_quantity(self, product_id, location_id, quantity, lot_id=False, package_id=False, owner_id=False):
-        return self.decrease_reserved_quantity(product_id, location_id, -quantity, lot_id=lot_id,
+        return self.increase_reserved_quantity(product_id, location_id, -quantity, lot_id=lot_id,
                                                 package_id=package_id, owner_id=owner_id)
 
     @api.multi        

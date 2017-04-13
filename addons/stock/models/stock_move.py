@@ -598,10 +598,11 @@ class StockMove(models.Model):
         ancestors_list = {}
             
 
+        
         # work only on in progress moves
         moves = self.filtered(lambda move: move.state in ['confirmed', 'waiting', 'assigned'])
         #moves.filtered(lambda move: move.reserved_quant_ids).do_unreserve()
-        quants_chosen = []
+        quants_chosen = {}
         for move in moves:
             if move.location_id.usage in ('supplier', 'inventory', 'production') or move.product_id.type == "consu":
                 moves_to_assign |= move
@@ -613,7 +614,8 @@ class StockMove(models.Model):
                     moves_to_assign |= move
         
         # Do do_prepare_partial with the quants chosen
-        self.do_prepare_partial(quants_chosen)
+        for pick in self.mapped('picking_id'):
+            pick.do_prepare_partial(quants_chosen)
             
             
                 # TDE FIXME: what ?
