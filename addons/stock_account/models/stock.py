@@ -57,7 +57,7 @@ class StockQuant(models.Model):
     def _compute_inventory_value(self):
         real_value_quants = self.filtered(lambda quant: quant.product_id.cost_method == 'real')
         for quant in real_value_quants:
-            quant.inventory_value = quant.cost * quant.qty
+            quant.inventory_value = quant.cost * quant.quantity
         return super(StockQuant, self - real_value_quants)._compute_inventory_value()
 
     @api.multi
@@ -86,7 +86,7 @@ class StockQuant(models.Model):
         if move.product_id.type != 'product' or move.product_id.valuation != 'real_time':
             # no stock valuation for consumable products
             return False
-        if any(quant.owner_id or quant.qty <= 0 for quant in self):
+        if any(quant.owner_id or quant.quantity <= 0 for quant in self):
             # if the quant isn't owned by the company, we don't make any valuation en
             # we don't make any stock valuation for negative quants because the valuation is already made for the counterpart.
             # At that time the valuation will be made at the product cost price and afterward there will be new accounting entries
@@ -124,7 +124,7 @@ class StockQuant(models.Model):
         # group quants by cost
         quant_cost_qty = defaultdict(lambda: 0.0)
         for quant in self:
-            quant_cost_qty[quant.cost] += quant.qty
+            quant_cost_qty[quant.cost] += quant.quantity
 
         AccountMove = self.env['account.move']
         for cost, qty in quant_cost_qty.iteritems():
@@ -159,10 +159,10 @@ class StockQuant(models.Model):
             cost_rounded = float_round(quant.cost, precision_rounding=curr_rounding)
             cost_correct = cost_rounded
             if float_compare(quant.product_id.uom_id.rounding, 1.0, precision_digits=1) == 0\
-                    and float_compare(quant.qty * quant.cost, quant.qty * cost_rounded, precision_rounding=curr_rounding) != 0\
-                    and float_compare(quant.qty, 2.0, precision_rounding=quant.product_id.uom_id.rounding) >= 0:
-                quant_correct = quant._quant_split(quant.qty - 1.0)
-                cost_correct += (quant.qty * quant.cost) - (quant.qty * cost_rounded)
+                    and float_compare(quant.quantity * quant.cost, quant.quantity * cost_rounded, precision_rounding=curr_rounding) != 0\
+                    and float_compare(quant.quantity, 2.0, precision_rounding=quant.product_id.uom_id.rounding) >= 0:
+                quant_correct = quant._quant_split(quant.quantity - 1.0)
+                cost_correct += (quant.quantity * quant.cost) - (quant.quantity * cost_rounded)
                 quant.sudo().write({'cost': cost_rounded})
                 quant_correct.sudo().write({'cost': cost_correct})
         return quant

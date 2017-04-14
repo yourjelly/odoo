@@ -605,11 +605,30 @@ class StockMove(models.Model):
             if move.location_id.usage in ('supplier', 'inventory', 'production') or move.product_id.type == "consu":
                 moves_to_assign |= move
             else:
-                quants = Quant.increase_reserved_quantity(move.product_id, move.location_id, move.product_qty)
-                quants_chosen[move.id] = quants
-                # TODO: it should change the state of the move
-                if sum(x[0] and x[1] or 0 for x in quants) == move.product_qty:
+                if not move.move_orig_ids: #TODO: return logic
+                    if move.procure_method == 'make_to_order':
+                        continue
+                    quants = Quant.increase_reserved_quantity(move.product_id, move.location_id, move.product_qty)
+                    quants_chosen[move.id] = quants
+                else:
+                    packops = move.move_orig_ids.filtered(lambda x: x.state == 'done').mapped('pack_operation_ids')
+                    if not packops:
+                        continue
+                    quants_chosen[move.id] = []
+                    for ops in packops:
+                        # Possible problem here with location / UoM conversion
+                        qty_reserved = 0
+                        # We should limit ops.product_qty to the only
+                        qty = min(ops.product_qty, move.product_qty - qty_reserved)
+                        quants = Quant.increase_reserved_quantity(move.product_id, ops.location_dest_id, qty, 
+                                                                  lot_id=ops.lot_id, package_id=ops.package_id, owner_id=move.owner_id)
+                        qty_reserved += sum([x[1] for x in quants])
+                        quants_chosen[move.id] += quants
+                
+                # TODO: it should change the state of the move -> check with reserved_quants
+                if sum(x[1] for x in quants) > 0:
                     moves_to_assign |= move
+            
         
         # Do do_prepare_partial with the quants chosen
         for pick in self.mapped('picking_id'):

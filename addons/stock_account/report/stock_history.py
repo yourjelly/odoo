@@ -91,7 +91,7 @@ class StockHistory(models.Model):
                     stock_move.product_id AS product_id,
                     product_template.id AS product_template_id,
                     product_template.categ_id AS product_categ_id,
-                    quant.qty AS quantity,
+                    quant.quantity AS quantity,
                     stock_move.date AS date,
                     quant.cost as price_unit_on_quant,
                     stock_move.origin AS source,
@@ -112,7 +112,7 @@ class StockHistory(models.Model):
                     product_product ON product_product.id = stock_move.product_id
                 JOIN
                     product_template ON product_template.id = product_product.product_tmpl_id
-                WHERE quant.qty>0 AND stock_move.state = 'done' AND dest_location.usage in ('internal', 'transit')
+                WHERE quant.quantity>0 AND stock_move.state = 'done' AND dest_location.usage in ('internal', 'transit')
                 AND (
                     not (source_location.company_id is null and dest_location.company_id is null) or
                     source_location.company_id != dest_location.company_id or
@@ -126,7 +126,7 @@ class StockHistory(models.Model):
                     stock_move.product_id AS product_id,
                     product_template.id AS product_template_id,
                     product_template.categ_id AS product_categ_id,
-                    - quant.qty AS quantity,
+                    - quant.quantity AS quantity,
                     stock_move.date AS date,
                     quant.cost as price_unit_on_quant,
                     stock_move.origin AS source,
@@ -147,7 +147,7 @@ class StockHistory(models.Model):
                     product_product ON product_product.id = stock_move.product_id
                 JOIN
                     product_template ON product_template.id = product_product.product_tmpl_id
-                WHERE quant.qty>0 AND stock_move.state = 'done' AND source_location.usage in ('internal', 'transit')
+                WHERE quant.quantity>0 AND stock_move.state = 'done' AND source_location.usage in ('internal', 'transit')
                 AND (
                     not (dest_location.company_id is null and source_location.company_id is null) or
                     dest_location.company_id != source_location.company_id or
