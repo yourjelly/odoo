@@ -4,3 +4,4 @@
 import test_move_explode
 import test_sale_mrp_flow
 import test_sale_mrp_lead_time
+import test_cancellation_propagated
