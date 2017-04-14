@@ -63,18 +63,18 @@ class TestCrossdock(TestStockDropshippingCommon):
 
         sale_order_crossdock.action_confirm()
         # Run Procurement.
-        self.Procurement.run_scheduler()
+        self.ProcurementOrder.run_scheduler()
         # Procurement should be in exception state.
-        procs = self.search([('group_id.name', '=', sale_order_crossdock.name), ('state', '=', 'exception')])
+        procs = self.ProcurementOrder.search([('group_id.name', '=', sale_order_crossdock.name), ('state', '=', 'exception')])
         self.assertTrue(procs, 'No Procurement!')
         # Set the at least one supplier on the product.
         product_with_no_seller.write({'seller_ids': [(0, 0, {'delay': 1, 'name': self.partner.id, 'min_qty': 2.0})]})
         # Run procurement again
         procs.run()
         # Check the status changed there is no procurement order in exception any more from that procurement group
-        procs = self.search([('group_id.name', '=', sale_order_crossdock.name), ('state', '=', 'exception')])
+        procs = self.ProcurementOrder.search([('group_id.name', '=', sale_order_crossdock.name), ('state', '=', 'exception')])
         self.assertFalse(procs, 'Procurement should be in running state!')
         # Check a purchase quotation was created.
-        procs = self.search([('group_id.name', '=', sale_order_crossdock.name)])
+        procs = self.ProcurementOrder.search([('group_id.name', '=', sale_order_crossdock.name)])
         purchase_ids = procs.mapped('purchase_line_id').mapped('order_id').ids
         self.assertTrue(purchase_ids, 'No Purchase order!')
