@@ -51,8 +51,15 @@ return BasicRenderer.extend({
         var defs = [];
 
         function markWidget(widget, isValid) {
+            // console.log("widget",widget);
             if (!isValid) {
+                // console.log("widget",widget);
+                // if(!widget.$el.hasClass('o_form_invisible') && widget.$el.hasClass('o_form_required'))
+                    // widget.$el.after("<i class='err_icon fa fa-exclamation-triangle '></i>");
+
+            // console.log("widget>>>..isValid",isValid);
                 invalidFields.push(widget.name);
+            // console.log("invalidd>>>>>>.", invalidFields)
             }
             widget.$el.toggleClass('o_form_invalid', !isValid);
             var idForLabel = self.idsForLabels[widget.name];
@@ -338,6 +345,7 @@ return BasicRenderer.extend({
             idForLabel: this._getIDForLabel(name),
             viewType: 'form',
         };
+        // console.log('options>>>>>>>..',options)
         var attrs = this.state.fieldsInfo.form[name];
         var widget = new attrs.Widget(this, name, this.state, options);
         this.widgets.push(widget);

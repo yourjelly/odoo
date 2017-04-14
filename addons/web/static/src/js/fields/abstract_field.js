@@ -38,6 +38,8 @@ var AbstractField = Widget.extend({
     className: 'o_field_widget',
     events: {
         'keydown': '_onKeydown',
+        'focus': '_onFocus',
+        'focusout': '_onFocusout',
     },
     /**
      * if this flag is set to true, the rest of the web client will assume that
@@ -227,6 +229,9 @@ var AbstractField = Widget.extend({
         if ('required' in this.modifiers) {
             is_required = new Domain(this.modifiers.required).compute(this.recordData);
         }
+        if(is_required && $(this.$el).val()==''){
+            $(this.$input).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
+        }
         return this._isValid && !(is_required && !this.isSet());
     },
     /**
@@ -378,6 +383,18 @@ var AbstractField = Widget.extend({
             event.preventDefault();
         }
     },
+
+    _onFocus: function (event) {
+        if (!$(event.target).hasClass('o_form_invisible') && $(event.target).hasClass('o_form_required')) {
+            $(event.target).nextAll('i').remove();
+        }
+    },
+    _onFocusout:function (event) {
+        if (!$(event.target).hasClass('o_form_invisible') && $(event.target).hasClass('o_form_required') && $(event.target).val()=='') {
+            $(event.target).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
+        }
+    },
+
 });
 
 return AbstractField;

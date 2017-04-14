@@ -672,7 +672,7 @@ var FieldFloatTime = FieldFloat.extend({
     },
 });
 
-var FieldText = DebouncedField.extend({
+var FieldText = AbstractField.extend({
     supportedFieldTypes: ['text'],
 
     /**
