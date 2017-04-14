@@ -12,6 +12,7 @@ class HrRecruitmentTestCase(common.TransactionCase):
         self.User = self.env['res.users']
         self.Mail = self.env['mail.thread']
         self.HR = self.env['hr.applicant']
+        self.Attachment = self.env['ir.attachment']
         self.company_id = self.ref('base.main_company')
         self.group_hr_recruitment_user = self.ref('hr_recruitment.group_hr_recruitment_user')
         self.job_id = self.ref('hr.job_developer')
@@ -32,7 +33,7 @@ class HrRecruitmentTestCase(common.TransactionCase):
 
         applicant = self.HR.search([('email_from', '=', 'Mr. Richard Anderson <Richard_Anderson@yahoo.com>')])[0]
         self.assertTrue(applicant, "Applicant is not created after getting the mail")
-        resume_ids = self.env['ir.attachment'].search([('datas_fname','=','resume.pdf'),('res_model','=',self.HR._name), ('res_id','=', applicant.id)])
+        resume_ids = self.Attachment.search([('datas_fname','=','resume.pdf'),('res_model','=',self.HR._name), ('res_id','=', applicant.id)])
         self.assertEquals(applicant.name, 'Application for the post of Jr.application Programmer.', 'Applicant name does not match.')
         self.assertEquals(applicant.stage_id.id, self.job_stage, "Stage should be 'Initial qualification' and is '%s'." % (applicant.stage_id.name))
         self.assertEquals(applicant.stage_id.sequence, 1, 'Applicant stage sequence should be 1.')
