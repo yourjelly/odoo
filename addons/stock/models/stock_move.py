@@ -596,9 +596,7 @@ class StockMove(models.Model):
         moves_to_do = self.env['stock.move']
         operations = self.env['stock.pack.operation']
         ancestors_list = {}
-            
 
-        
         # work only on in progress moves
         moves = self.filtered(lambda move: move.state in ['confirmed', 'waiting', 'assigned'])
         #moves.filtered(lambda move: move.reserved_quant_ids).do_unreserve()

@@ -75,6 +75,8 @@ class StockQuant(models.Model):
     def increase_available_quantity(self, product_id, location_id, quantity, lot_id=False, package_id=False, owner_id=False):
         quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id)
         for quant in quants:
+            quant.quantity += quantity
+            break
             try:
                 cr2 = self.env.registry.cursor()
                 cr2.execute("SELECT 1 FROM stock_quant WHERE id = %s FOR UPDATE NOWAIT", [quant.id])
