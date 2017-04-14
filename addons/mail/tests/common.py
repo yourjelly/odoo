@@ -5,6 +5,7 @@ from odoo.tests import common
 
 
 class BaseFunctionalTest(common.SavepointCase):
+
     @classmethod
     def setUpClass(cls):
         super(BaseFunctionalTest, cls).setUpClass()

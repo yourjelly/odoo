@@ -1,10 +1,10 @@
-from odoo.tests import common
+from odoo.addons.stock_dropshipping.tests.common import TestStockDropshippingCommon
 import time
 from odoo import tools
 from odoo.modules.module import get_module_resource
 
 
-class TestLifoPrice(common.TransactionCase):
+class TestLifoPrice(TestStockDropshippingCommon):
 
     def _load(self, module, *args):
         tools.convert_file(
@@ -17,7 +17,7 @@ class TestLifoPrice(common.TransactionCase):
                 'name': product.name,
                 'product_id': product.id,
                 'product_qty': product_qty,
-                'product_uom': self.uom_id,
+                'product_uom': self.uom_kg_id,
                 'price_unit': price_unit,
                 'date_planned': time.strftime('%Y-%m-%d'),
                 'property_stock_account_input': self.ref('stock_dropshipping.o_expense'),
@@ -28,6 +28,7 @@ class TestLifoPrice(common.TransactionCase):
     def test_lifoprice(self):
         """ Test that create Product and Purchase order to test LIFO category of Product."""
 
+        self._load('account', 'test', 'account_minimal_test.xml')
         self._load('stock_account', 'test', 'stock_valuation_account.xml')
 
         # ======================================================================
