@@ -13,9 +13,10 @@ Sale Courses'
  * Course Management
  * Lecture Management
  * Course Registration
+ * Quizzes
  * Supported document types : PDF, images, YouTube videos and Google Drive documents)
 """,
-    'depends': ['website_slides', 'website_sale'],
+    'depends': ['website_slides', 'website_sale', 'survey'],
     'data': [
         'views/website_slides_sale_backend.xml'
     ],
