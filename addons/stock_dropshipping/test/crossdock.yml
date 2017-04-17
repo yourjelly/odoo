@@ -6,6 +6,12 @@
 -
     Use the warehouse created in cancellation_propagated.yml.
 -
+    !record {model: stock.warehouse, id: wh_pps}:
+        name: WareHouse PickPackShip 
+        code: whpps
+        reception_steps: 'two_steps'
+        delivery_steps: 'pick_pack_ship' 
+-
     !python {model: stock.warehouse, id: wh_pps}: |
         assert self.crossdock_route_id.active, 'Crossdock route is not active'
 -
