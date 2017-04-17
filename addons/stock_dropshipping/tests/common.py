@@ -1,10 +1,24 @@
 # -*- coding: utf-8 -*-
 
-
 from odoo.tests import common
 
 
 class TestStockDropshippingCommon(common.TransactionCase):
+
+    def _create_sale_order(self, partner_id, product_id, product_qty, uom_id):
+        values = {
+            'partner_id': partner_id,
+            'note': 'Create sale order for product iPad Retina Display',
+            'warehouse_id': self.warehouse.id,
+            'pricelist_id': self.ref('product.list0'),
+            'order_line': [(0, 0, {
+                'product_id': product_id,
+                'name': "product_mto",
+                'product_uom_qty': product_qty,
+                'product_uom': uom_id
+             })]
+        }
+        return self.SaleOrder.create(values)
 
     def setUp(self):
         super(TestStockDropshippingCommon, self).setUp()
@@ -34,7 +48,8 @@ class TestStockDropshippingCommon(common.TransactionCase):
         self.partner = self.Partner.create({'name': "Crossdocking supplier"})
 
         # Creating Warehouse
-        self.warehouse = self.StockWarehouse.create({'name': 'WareHouse PickPackShip',
+        self.warehouse = self.StockWarehouse.create({
+            'name': 'WareHouse PickPackShip',
             'code': 'whpps',
             'reception_steps': 'two_steps',
             'delivery_steps': 'pick_pack_ship', })

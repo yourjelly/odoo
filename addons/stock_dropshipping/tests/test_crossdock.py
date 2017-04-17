@@ -16,14 +16,11 @@ class TestCrossdock(TestStockDropshippingCommon):
             'seller_ids': [(0, 0, {'delay': 1, 'name': self.partner.id, 'min_qty': 2.0})]})
 
         # Creating Sale Order
-        sale_order_crossdock = self.SaleOrder.create({
-            'partner_id': self.partner.id,
-            'note': "Create Sales order",
-            'warehouse_id': self.warehouse.id,
-            'order_line': [(0, 0, {
-                'product_id': self.product.id,
-                'product_uom_qty': 100.0})],
-            })
+        sale_order_crossdock = self._create_sale_order(
+                                        partner_id=self.partner.id,
+                                        product_id=self.product.id,
+                                        product_qty=100,
+                                        uom_id=self.uom_unit.id)
 
         # Check that crossdock route active or not.
         self.assertTrue(self.warehouse.crossdock_route_id.active, "Crossdock Should be acivated...")
@@ -44,6 +41,7 @@ class TestCrossdock(TestStockDropshippingCommon):
 
     def test_01_procurement_exceptions(self):
         """ Test procurement exception when no supplier define on product with cross dock. """
+
         product_with_no_seller = self.Product.create({
             'name': 'product with no seller',
             'list_price': 20.0,
@@ -51,16 +49,14 @@ class TestCrossdock(TestStockDropshippingCommon):
             'categ_id': self.category_all.id})
 
         # Creating Sale Order
-        sale_order_crossdock = self.SaleOrder.create({
-            'partner_id': self.partner.id,
-            'note': "Create Sales order",
-            'warehouse_id': self.warehouse.id,
-            'order_line': [(0, 0, {
-                'product_id': product_with_no_seller.id,
-                'product_uom_qty': 1,
-                'route_id': self.warehouse.crossdock_route_id.id})],
-            })
-
+        sale_order_crossdock = self._create_sale_order(
+                                        partner_id=self.partner.id,
+                                        product_id=product_with_no_seller.id,
+                                        product_qty=1,
+                                        uom_id=self.uom_unit.id)
+        # Set route on sale order line
+        sale_order_crossdock.order_line.route_id = self.warehouse.crossdock_route_id.id
+        # Confirm sale order
         sale_order_crossdock.action_confirm()
         # Run Procurement.
         self.ProcurementOrder.run_scheduler()

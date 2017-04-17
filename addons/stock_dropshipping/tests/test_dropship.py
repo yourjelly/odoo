@@ -21,16 +21,14 @@ class TestDropship(TestStockDropshippingCommon):
             'seller_ids': [(0, 0, {'delay': 1, 'name': self.supplier_dropship.id, 'min_qty': 2.0})]})
 
         # Creating Sale Order
-        self.sale_order_drp_shpng = self.SaleOrder.create({
-            'partner_id': self.partner.id,
-            'note': "Create Sales order",
-            'warehouse_id': self.warehouse.id,
-            'order_line': [(0, 0, {
-                'product_id': self.product.id,
-                'product_uom_qty': 200.0,
-                'route_id': self.route_drop_shipping})],
-            })
-
+        self.sale_order_drp_shpng = self._create_sale_order(
+                                        partner_id=self.partner.id,
+                                        product_id=self.product.id,
+                                        product_qty=200,
+                                        uom_id=self.uom_unit.id)
+        # Set route on sale order line
+        self.sale_order_drp_shpng.order_line.route_id = self.route_drop_shipping
+        # Confirm sale order
         self.sale_order_drp_shpng.action_confirm()
 
         # Check the sales order created a procurement group which has a procurement of 200 pieces

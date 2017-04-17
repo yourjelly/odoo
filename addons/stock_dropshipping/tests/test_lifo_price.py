@@ -39,6 +39,7 @@ class TestLifoPrice(TestStockDropshippingCommon):
         # NOW PRODUCT PRICE SHOULD BE ( 80 Euro instead of 70 Euro )
         # ======================================================================
 
+
         # Set the company currency as EURO for the sake of repeatibility
         self.env.ref('base.main_company').write({'currency_id': self.ref('base.EUR')})
 
