@@ -239,7 +239,7 @@
                                 <label for="description"/>
                                 <field name="description" colspan="4" nolabel="1"/>
                             </page>
-                            <page string="Security">
+                            <page string="Security" name="security">
                                 <group>
                                     <field name="upload_group_ids" widget="many2many_tags"/>
                                     <field name="visibility" string="Channel visibility" widget="radio"/>

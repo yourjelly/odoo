@@ -1,6 +1,157 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-    	
+        <!-- Slide Channel Views -->
+        <record id="slide_channel_view_search_inherit_slides_sale" model="ir.ui.view">
+            <field name="name">slide.channel.search.inherit.slides.sale</field>
+            <field name="model">slide.channel</field>
+            <field name="inherit_id" ref="website_slides.slide_channel_view_search"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='inactive']" position="after">
+                    <filter name="filter_course_channels" string="Courses" domain="[('is_course', '=', True)]"/>
+                    <filter name="filter_channels" string="Channels" domain="[('is_course', '=', False)]"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_slide_channel_form_course_inherited">
+            <field name="name">slide.channel.form</field>
+            <field name="model">slide.channel</field>
+            <field name="inherit_id" ref="website_slides.view_slide_channel_form"/>
+            <field name="arch" type="xml">
+                <field name="category_ids" position="after">
+                    <div class="oe_title">
+                        <label for="is_course" string="Course"/>
+                        <field name="is_course" no_label="1"/>
+                    </div>
+                </field>
+                <xpath expr="//notebook/page[@name='security']" position="after">
+                    <page string="Course" attrs="{'invisible': [('is_course', '!=', False)]}">
+                        <group>
+                            <group>
+                                <field name="language"/>
+                                <field name="instructor_ids" widget="many2many_tags"/>
+                            </group>
+                            <group>
+                                <field name="product_id"/>
+                                <field name="course_price"/>
+                            </group>
+                        </group>
+                        <label for="course_html" string="Course HTML Content"></label>
+                        <div>
+                            <field name="course_html" no_label="1"/>
+                        </div>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Slide Views -->
+        <record id="view_slide_slide_form_course_inherited" model="ir.ui.view">
+            <field name="name">slide.slide.form</field>
+            <field name="model">slide.slide</field>
+            <field name="inherit_id" ref="website_slides.view_slide_slide_form"/>
+            <field name="arch" type="xml">
+                <field name="slide_type" position="after">
+                    <field name="slide_type"/>
+                </field>
+            </field>
+        </record>
+
+        <!-- Product Template Views -->
+        <record id="product_template_search_view_inherit_slides_sale" model="ir.ui.view">
+            <field name="name">product.template.search.slides.sale.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_search_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='filter_to_sell']" position="after">
+                    <filter name="filter_course" string="Course Products" domain="[('is_course', '=', True)]"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="product_template_view_form_inherit_slide_sale" model="ir.ui.view">
+            <field name="name">slide.sale.product.template.form.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='sale']" position="inside">
+                    <group>
+                        <field name="is_course"/>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Course Regiostration Views -->
+        <record id="view_course_registration_search" model="ir.ui.view">
+            <field name="name">course.registration.filter</field>
+            <field name="model">course.registration</field>
+            <field name="arch" type="xml">
+                <search string="Search Registrations">
+                    <field name="name"/>
+                    <field name="partner_id"/>
+                    <field name="course_id"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Partner" domain="[]" context="{'group_by': 'partner_id'}"/>
+                        <filter string="Course" domain="[]" context="{'group_by': 'course_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="view_course_registration_tree" model="ir.ui.view">
+            <field name="name">course.registration.tree</field>
+            <field name="model">course.registration</field>
+            <field name="arch" type="xml">
+                <tree string="Registrations">
+                    <field name="name"/>
+                    <field name="partner_id" invisible="1"/>
+                    <field name="course_id"/>
+                    <field name="course_start_date"/>
+                    <field name="course_end_date"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_course_registration_form" model="ir.ui.view">
+            <field name="name">course.registration.form</field>
+            <field name="model">course.registration</field>
+            <field name="arch" type="xml">
+                <form string="Course Registration">
+                    <sheet>
+                        <div class="oe_title">
+                            <div class="oe_edit_only">
+                                <label for="name" string="Name"/>
+                            </div>
+                            <h1>
+                                <field name="name" readonly="1"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="partner_id"/>
+                                <field name="course_start_date"/>
+                                <field name="last_view" attrs="{'invisible': [('last_view', '=', False)]}"/>
+                            </group>
+                            <group>
+                                <field name="course_id"/>
+                                <field name="course_end_date"/>
+                                <field name="viewed_slides" attrs="{'invisible': [('viewed_slides', '=', 0)]}"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_course_registrations" model="ir.actions.act_window">
+            <field name="name">Course Registrations</field>
+            <field name="res_model">course.registration</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <menuitem action="action_course_registrations" id="submenu_action_course_registrations" parent="website_slides.menu_website_slides_root" sequence="3"/>
+
     </data>
 </odoo>
