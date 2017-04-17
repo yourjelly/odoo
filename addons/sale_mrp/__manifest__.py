@@ -20,6 +20,7 @@ from sales order. It adds sales name and sales Reference on production order.
     ],
     'demo': [],
     'test':[
+        'test/cancellation_propagated.yml',
         'test/sale_mrp.yml',
         ],
     'installable': True,
