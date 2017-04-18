@@ -15,4 +15,7 @@ class TestUi(odoo.tests.HttpCase):
     def test_03_demo_checkout(self):
         self.phantom_js("/", "odoo.__DEBUG__.services['web_tour.tour'].run('shop_buy_product')", "odoo.__DEBUG__.services['web_tour.tour'].tours.shop_buy_product.ready", login="demo")
 
+    def test_04_admin_tour_customize_shop(self):
+        self.phantom_js("/", "odoo.__DEBUG__.services['web_tour.tour'].run('customize_shop_product')", "odoo.__DEBUG__.services['web_tour.tour'].tours.customize_shop_product.ready", login='admin')
+
     # TO DO - add public test with new address when convert to web.tour format.
