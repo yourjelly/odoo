@@ -95,7 +95,6 @@ Dashboard / Reports for Inventory Management will include:
         'test/stock_users.yml',
         'test/packing.yml',
         'test/packingneg.yml',
-        'test/wiseoperator.yml',
     ],
     'installable': True,
     'application': True,
