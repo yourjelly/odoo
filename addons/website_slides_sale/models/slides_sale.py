@@ -3,23 +3,51 @@
 
 from odoo import api, fields, models, _
 
-class Course(models.Model):
-	_name = "slide.channel"
-	_inherit = ['slide.channel', 'rating.mixin']
+class Channel(models.Model):
+	_inherit = "slide.channel"
 
 	is_course = fields.Boolean("Is Course") # To identify whether it is normal channel or used as a course
+
+class Course(models.Model):
+	_name = "course.course"
+	_inherits = {'slide.channel': 'channel_id'}
+	_inherit = ['rating.mixin']
+
 	course_html = fields.Html("Course Details", help="This will be displayed on Course Details page, user can design it.")
 	language = fields.Many2one("res.lang", "Language")
 	instructor_ids = fields.Many2many("res.partner", string="Instructors")
 	product_id = fields.Many2one("product.template", "Product")
 	course_price = fields.Float(related="product_id.list_price", string="Course Price")
+	channel_id = fields.Many2one('slide.channel', 'Channel',
+        auto_join=True, index=True, ondelete="cascade", required=True)
 
 class Lecture(models.Model):
-	_inherit = "slide.slide"
+	_name = "course.lecture"
+	_inherits = {'slide.slide': 'slide_id'}
 
-	attendee_ids = fields.Many2many("res.partner", "Attendees")
+	# attendee_ids = fields.Many2many("res.partner", "Attendees")
 	# TODO: we can use Download Security field for this OR download security is used for security and this gonna be used for showing slide type(icons)
-	slide_type = fields.Selection([('preview', 'Preview'), ('free', 'Free')], string="Slide Type")
+	slide_view_type = fields.Selection([('preview', 'Preview'), ('free', 'Free')], string="Slide Type")
+	slide_id = fields.Many2one('slide.slide', 'Slide',
+        auto_join=True, index=True, ondelete="cascade", required=True)
+
+class LectureAttendee(models.Model):
+	_name = 'lecture.attendee'
+
+	name = fields.Char()
+	partner_id = fields.Many2one("res.partner", "Attendee")
+	slide_id = fields.Many2one("course.lecture")
+	date_view = fields.Datetime("View Date")
+
+	@api.onchange("partner_id")
+	def _onchange_partner(self):
+		if self.partner_id:
+			contact_id = self.partner_id.address_get().get('contact', False)
+			if contact_id:
+				contact = self.env['res.partner'].browse(contact_id)
+				self.name = contact.name or self.name
+		else:
+			self.name = Falses
 
 
 class Instructor(models.Model):
@@ -43,6 +71,9 @@ class ProductTemplate(models.Model):
 class CourseRegistration(models.Model):
 	_name = "course.registration"
 
+	def _get_last_view_slide(self):
+		return 1
+
 	def _get_total_viewed_slides(self):
 		return 0
 
@@ -51,6 +82,7 @@ class CourseRegistration(models.Model):
 	course_id = fields.Many2one("slide.channel", string="Course")
 	course_start_date = fields.Date("Course Start Date")
 	course_end_date = fields.Date("Course End Date")
-	last_view = fields.Many2one("slide.slide", string="Last View", readonly=True)
-	viewed_slide_ids = fields.Many2many("slide.slide", string="Viewed Lectures")
+	# last_view = fields.Many2one("slide.slide", string="Last View", readonly=True)
+	last_view = fields.Many2one(compute="_get_last_view_slide", relation="course.lecture", string="Last View", readonly=True)
+	# viewed_slide_ids = fields.Many2many("slide.slide", string="Viewed Lectures")
 	viewed_slides = fields.Integer(compute="_get_total_viewed_slides", string="Total Viewed Lectures")

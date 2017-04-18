@@ -1,10 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
+
+        <menuitem name="Courses"
+            id="menu_website_course_root"
+            sequence="32"
+            parent="website.menu_website_configuration"
+            groups="website.group_website_designer"/>
+
         <!-- Slide Channel Views -->
-        <record id="slide_channel_view_search_inherit_slides_sale" model="ir.ui.view">
-            <field name="name">slide.channel.search.inherit.slides.sale</field>
+        <record id="view_slides_channel_form_inherit_slides_sale" model="ir.ui.view">
+            <field name="name">slides.channel.form.inherit.slides.sale</field>
             <field name="model">slide.channel</field>
+            <field name="inherit_id" ref="website_slides.view_slide_channel_form"/>
+            <field name="arch" type="xml">
+                <field name="share_template_id" position="after">
+                    <field name="is_course"/>
+                </field>
+            </field>
+        </record>
+
+        <!-- Course Views -->
+         <record id="view_course_course_search" model="ir.ui.view">
+            <field name="name">course.course.search</field>
+            <field name="model">course.course</field>
+            <field name="mode">primary</field>
             <field name="inherit_id" ref="website_slides.slide_channel_view_search"/>
             <field name="arch" type="xml">
                 <xpath expr="//filter[@name='inactive']" position="after">
@@ -14,17 +34,25 @@
             </field>
         </record>
 
-        <record model="ir.ui.view" id="view_slide_channel_form_course_inherited">
-            <field name="name">slide.channel.form</field>
-            <field name="model">slide.channel</field>
+        <record id="view_course_course_tree" model="ir.ui.view">
+            <field name="name">course.course.tree</field>
+            <field name="model">course.course</field>
+            <field name="mode">primary</field>
+            <field name="inherit_id" ref="website_slides.view_slide_channel_tree"/>
+            <field name="arch" type="xml">
+                <field name="promote_strategy" position="after">
+                    <field name="language"/>
+                    <field name="course_price"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="view_course_course_form" model="ir.ui.view">
+            <field name="name">course.course.form</field>
+            <field name="model">course.course</field>
+            <field name="mode">primary</field>
             <field name="inherit_id" ref="website_slides.view_slide_channel_form"/>
             <field name="arch" type="xml">
-                <field name="category_ids" position="after">
-                    <div class="oe_title">
-                        <label for="is_course" string="Course"/>
-                        <field name="is_course" no_label="1"/>
-                    </div>
-                </field>
                 <xpath expr="//notebook/page[@name='security']" position="after">
                     <page string="Course" attrs="{'invisible': [('is_course', '!=', False)]}">
                         <group>
@@ -46,15 +74,93 @@
             </field>
         </record>
 
-        <!-- Slide Views -->
-        <record id="view_slide_slide_form_course_inherited" model="ir.ui.view">
-            <field name="name">slide.slide.form</field>
-            <field name="model">slide.slide</field>
+        <record id="action_course_course" model="ir.actions.act_window">
+            <field name="name">Courses</field>
+            <field name="res_model">course.course</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <menuitem action="action_course_course" id="submenu_action_course_course" parent="menu_website_course_root" sequence="3"/>
+
+
+        <!-- Lecture Views -->
+        <record id="view_course_lecture_tree" model="ir.ui.view">
+            <field name="name">course.lecture.tree</field>
+            <field name="model">course.lecture</field>
+            <field name="mode">primary</field>
+            <field name="inherit_id" ref="website_slides.view_slide_slide_tree"/>
+            <field name="arch" type="xml">
+                <field name="slide_type">
+                    <field name="slide_view_type"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="view_course_lecture_form" model="ir.ui.view">
+            <field name="name">course.lecture.form</field>
+            <field name="model">course.lecture</field>
+            <field name="mode">primary</field>
             <field name="inherit_id" ref="website_slides.view_slide_slide_form"/>
             <field name="arch" type="xml">
                 <field name="slide_type" position="after">
-                    <field name="slide_type"/>
+                    <field name="slide_view_type"/>
                 </field>
+            </field>
+        </record>
+        <record id="view_course_lecture_search" model="ir.ui.view">
+            <field name="name">course.lecture.filter</field>
+            <field name="model">course.lecture</field>
+            <field name="mode">primary</field>
+            <field name="inherit_id" ref="website_slides.view_slide_slide_search"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='inactive']" position="after">
+                    <filter string="Preview" name="preview_slides" domain="[('slide_view_type','=','preview')]"/>
+                    <filter string="Free" name="free_slides" domain="[('slide_view_type','=','free')]"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="action_course_lecture" model="ir.actions.act_window">
+            <field name="name">Lectures</field>
+            <field name="res_model">course.lecture</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <menuitem action="action_course_lecture" id="submenu_action_course_lecture" parent="menu_website_course_root" sequence="4"/>
+
+
+        <!-- Lecture Attendee: Will opened through stat buttons -->
+        <record id="view_lecture_attendee_tree" model="ir.ui.view">
+            <field name="name">lecture.attendee.tree</field>
+            <field name="model">lecture.attendee</field>
+            <field name="arch" type="xml">
+                <tree string="Lecture Attendees">
+                    <field name="name"/>
+                    <field name="partner_id" invisible="1"/>
+                    <field name="slide_id"/>
+                    <field name="date_view"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_lecture_attendee_form" model="ir.ui.view">
+            <field name="name">lecture_attendee.form</field>
+            <field name="model">lecture.attendee</field>
+            <field name="arch" type="xml">
+                <form string="Lecture Attendees">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="partner_id"/>
+                            </group>
+                            <group>
+                                <field name="slide_id"/>
+                                <field name="date_view"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
             </field>
         </record>
 
@@ -71,7 +177,7 @@
         </record>
 
         <record id="product_template_view_form_inherit_slide_sale" model="ir.ui.view">
-            <field name="name">slide.sale.product.template.form.inherit</field>
+            <field name="name">product.template.form.slide.sale.inherit</field>
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="arch" type="xml">
@@ -151,7 +257,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
         </record>
-        <menuitem action="action_course_registrations" id="submenu_action_course_registrations" parent="website_slides.menu_website_slides_root" sequence="3"/>
+        <menuitem action="action_course_registrations" id="submenu_action_course_registrations" parent="menu_website_course_root" sequence="5"/>
 
     </data>
 </odoo>
