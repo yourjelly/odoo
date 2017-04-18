@@ -621,7 +621,7 @@ class StockMove(models.Model):
                         # We should limit ops.product_qty to the only
                         qty = min(ops.product_qty, move.product_qty - qty_reserved)
                         quants = Quant.increase_reserved_quantity(move.product_id, ops.location_dest_id, qty, 
-                                                                  lot_id=ops.lot_id, package_id=ops.package_id, owner_id=move.owner_id)
+                                                                  lot_id=ops.lot_id, package_id=ops.package_id, owner_id=ops.owner_id)
                         qty_reserved += sum([x[1] for x in quants])
                         quants_chosen[move.id] += quants
                 
@@ -806,8 +806,6 @@ class StockMove(models.Model):
                     quant_obj.decrease_available_quantity(packop.product_id, packop.location_id, qty, lot_id=packop.lot_id, package_id=packop.package_id, owner_id=packop.owner_id)
                     quant_obj.increase_available_quantity(packop.product_id, packop.location_dest_id, qty, lot_id=packop.lot_id, package_id=packop.part_of_pack and packop.package_id or packop.result_package_id, owner_id=packop.owner_id)
             #moves_to_unreserve |= move
-            if move.move_dest_ids:
-                move.move_dest_ids.action_assign()
             if move.move_orig_ids:
                 # As you can not link the moves 
                 moves_filtered = move.move_orig_ids.filtered(lambda x: x.state != 'done')
@@ -817,10 +815,10 @@ class StockMove(models.Model):
         for ops in ops_entire_pack_in_pack: 
             ops.package_id.write({'package_id': ops.result_package_id.id})
         
-        
         #moves_to_unreserve.quants_unreserve()
         picking = self and self[0].picking_id or False
         moves_todo.write({'state': 'done', 'date': fields.Datetime.now()})
+        moves_todo.mapped('move_dest_ids').action_assign()
         if picking:
             moves_to_backorder = picking.move_lines.filtered(lambda x: x.state not in ('done', 'cancel'))
             if moves_to_backorder:
