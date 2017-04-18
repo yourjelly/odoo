@@ -296,6 +296,10 @@ FormRenderer.include({
             if (!$button.hasClass('o_form_invisible')) {
                 $button.click();
             }
+            else if ($button.hasClass('o_form_invisible')) {
+                var operation = node.attrs.barcode_trigger;
+                this.do_warn(_t("Operation Error"), _.str.sprintf(_t("Could not perform operation %s due to button/link not visible on page."), _.str.capitalize(operation)));
+            }
             return $.when();
         };
         this.trigger_up('activeBarcode', {
