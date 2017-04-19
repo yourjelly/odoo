@@ -154,7 +154,7 @@ class Warehouse(models.Model):
         res = super(Warehouse, self).write(vals)
 
         # check if we need to delete and recreate route
-        if vals.get('reception_steps') or vals.get('delivery_steps'):
+        if vals.get('reception_steps') or vals.get('delivery_steps') or vals.get('manufacture_steps'):
             warehouses._update_routes()
 
         if vals.get('resupply_wh_ids') and not vals.get('resupply_route_ids'):

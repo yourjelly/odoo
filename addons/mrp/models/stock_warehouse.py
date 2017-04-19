@@ -109,6 +109,14 @@ class StockWarehouse(models.Model):
         res['manufacture_pull_id'] = manufacture_pull.id
         return res
 
+    @api.multi
+    def _update_routes(self):
+        res = super(StockWarehouse, self)._update_routes()
+        self.ensure_one()
+        routes_data = self.get_routes_dict()
+        manufacture_pull = self._create_or_update_manufaturing_location(routes_data)
+        return res
+
     def _create_or_update_locations(self):
         StockLocation = self.env['stock.location'].with_context(active_test=False)
         for wh in self.filtered(lambda w: not w.wh_input_manu_loc_id or not w.wh_output_manu_loc_id):
@@ -127,6 +135,56 @@ class StockWarehouse(models.Model):
                 vals['wh_output_manu_loc_id'] = prod_out.id
             if vals:
                 wh.write(vals)
+
+    def _create_or_update_manufaturing_location(self, routes_data):
+        StockLocation = self.env['stock.location']
+        StockLocationRoute = self.env['stock.location.route']
+        loc_prod_in = StockLocation.search([('name', '=', 'PROD IN'), ('location_id', '=', self.view_location_id.id), ('usage', '=', 'internal'), '|', ('company_id', '=', self.company_id.id), ('company_id', '=', False)])
+        loc_prod_out = StockLocation.search([('name', '=', 'PROD OUT'), ('location_id', '=', self.view_location_id.id), ('usage', '=', 'internal'), '|', ('company_id', '=', self.company_id.id), ('company_id', '=', False)])
+        loc_stock = StockLocation.search([('name', '=', 'Stock'), ('location_id', '=', self.view_location_id.id), ('usage', '=', 'internal'), '|', ('company_id', '=', self.company_id.id), ('company_id', '=', False)])
+        loc_virtual_production = StockLocation.search([('name', '=', 'Production'), ('usage', '=', 'production'), '|', ('company_id', '=', self.company_id.id), ('company_id', '=', False)])
+        manufacture_route = StockLocationRoute.search([('name', 'like', _('Manufacture'))], limit=1)
+        manu_push_rule_vals = {'name': 'Prod OUT -> Stock',
+                                'location_from_id': loc_prod_out.id,
+                                'location_dest_id': loc_stock.id,
+                                'auto': 'manual',
+                                'picking_type_id': self.int_type_id.id}
+        # manu_pull_rule_vals = []
+        manu_pull_rule_vals = [{'name': 'Prod OUT -> Stock1',
+                                'action': 'move',
+                                'location_src_id': loc_prod_out.id,
+                                'location_id': loc_stock.id,
+                                'procure_method': 'make_to_order',
+                                'picking_type_id': self.int_type_id.id}]
+        manu_pull_rule_vals.append({'name': 'YourCompany: manufacture_route1',
+                                'action': 'manufacture',
+                                'location_src_id': loc_prod_in.id,
+                                'location_id': loc_prod_out.id,
+                                'picking_type_id': self.manu_type_id.id})
+        self.int_type_id.write({'default_location_src_id': loc_prod_in.id, 'default_location_dest_id': loc_prod_out.id})
+        for each_pull_rule in manu_pull_rule_vals:
+            manufacture_route.write({'pull_ids': [(0, 0, each_pull_rule)]})
+        # Create new route
+        all_keys = StockLocationRoute.fields_get([])
+        nw_route_default_vals = StockLocationRoute.default_get(all_keys.keys())
+        nw_route_default_vals['name'] = 'Multi Step Manufacturing'
+        nw_route_rec = StockLocationRoute.create(nw_route_default_vals)
+        # Pull Rule value for new route
+        nw_route_pull_rules_vals = [{'name': 'Prod IN -> Productionsss',
+                                    'action': 'move',
+                                    'location_src_id': loc_prod_in.id,
+                                    'location_id': loc_virtual_production.id,
+                                    'procure_method': 'make_to_order',
+                                    'picking_type_id': self.int_type_id.id}]
+        nw_route_pull_rules_vals.append({'name': 'Stock -> Prod IN',
+                                        'action': 'move',
+                                        'location_src_id': loc_stock.id,
+                                        'location_id': loc_prod_in.id,
+                                        'procure_method': 'make_to_order',
+                                        'picking_type_id': self.int_type_id.id})
+        for each_pull_rule in nw_route_pull_rules_vals:
+            nw_route_rec.write({'pull_ids': [(0, 0, each_pull_rule)]})
+        return True
 
     @api.multi
     def write(self, vals):
