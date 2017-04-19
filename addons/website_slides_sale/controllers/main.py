@@ -6,6 +6,8 @@ import logging
 from odoo import http, _
 from odoo.exceptions import AccessError, UserError
 from odoo.http import request
+from odoo.addons.website.models.website import slug
+
 
 _logger = logging.getLogger(__name__)
 
@@ -103,3 +105,16 @@ class WebsiteSlidesSale(http.Controller):
 				'category_datas': category_datas,
 			})
 		return request.render('website_slides_sale.course_details', values)
+
+	@http.route(['/course/new/<model("course.course"):course>'], type='http', auth="user", website=True)
+	def course_new(self, course=None, **post):
+		return request.render('website_slides_sale.course_new_form', {'course': course})
+
+	@http.route(['/shop/add_course'], type='http', auth="user", methods=['POST'], website=True)
+	def add_course(self, name=None, category=0, **post):
+		course = request.env['course.course'].create({
+			'name': name or _("New Course"),
+		})
+
+		return request.redirect("/course/new/%s" % slug(course))
+

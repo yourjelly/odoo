@@ -3,9 +3,24 @@
 <data>
 
 <!-- assets -->
+<template id="assets_editor" inherit_id="website.assets_editor" name="Course Editor">
+    <xpath expr="." position="inside">
+        <script type="text/javascript" src="/website_slides_sale/static/src/js/website_slides_sale.editor.js"></script>
+    </xpath>
+</template>
+
 <template id="assets_frontend_course" inherit_id="website.assets_frontend" name="Course">
     <xpath expr="." position="inside">
         <link type="text/less" href="/website_slides_sale/static/src/less/website_slides_sale.less" rel="stylesheet" t-ignore="true"/>
+        <script type="text/javascript" src="/website_slides_sale/static/src/js/website_slides_sale.js"></script>
+    </xpath>
+</template>
+
+
+<!-- User Navbar -->
+<template id="content_new_course" inherit_id="website.user_navbar">
+    <xpath expr="//div[@id='o_website_add_page_modal']//ul" position="inside">
+        <li groups="website.group_website_designer"><a href="#" data-action="new_course"><i class="fa fa-book"/><p>New Course</p></a></li>
     </xpath>
 </template>
 
@@ -255,6 +270,50 @@
                             <div t-if="instructor.about_details" t-esc="instructor.about_details"></div>
                             <div t-else=""><h5><strong>No details available about instrucotr</strong></h5></div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</template>
+
+<template id="course_new_form" name="New Course">
+    <t t-call="website.layout">
+        <div class="container new_course_form">
+            <div class="row">
+                <div class="col-xs-3">
+                    <div class="sidebar">
+                        <ul role="menu" style="list-style: none; padding: 0px; margin: 0px;">
+                            <li class="active">
+                                <a href="#course_basic_details">
+                                    <span class="fa fa-info-circle">Course Basic Details</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#course_other_information">
+                                    <span class="fa fa-info-circle">Course Other Information</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#course_security">
+                                    <span class="fa fa-info-circle">Course Security</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-xs-9">
+                    <div id="course_basic_details" class="course_page">
+                        <h1>Course Basic Information</h1>
+                        <p>Enter your basic course information like course description, category(on which category it belongs).</p>
+                    </div>
+                    <div id="course_other_information" class="course_page">
+                        <h1>Course Other Information</h1>
+                        <p>Enter your other course information like course language(course explanation language), Intructors of the course, Price of the course.</p>
+                    </div>
+                    <div id="course_security" class="course_page">
+                        <h1>Course Security</h1>
+                        <p>Enter course security information.</p>
                     </div>
                 </div>
             </div>
