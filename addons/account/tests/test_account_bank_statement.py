@@ -23,7 +23,6 @@ class TestAccountBankStatement(common.TransactionCase):
         journal = self.AccBankState.with_context({'lang': u'en_US', 'tz': False, 'active_model': 'ir.ui.menu',
         'journal_type': 'bank','journal_id':10,
         'date': time.strftime("%Y/%m/%d")})._default_journal()
-        assert journal
 
         #create a bank statement with Opening and Closing balance 0.
         self.account_statement = self.AccBankState.create({
