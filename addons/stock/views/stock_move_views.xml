@@ -99,17 +99,17 @@
             <field name="arch" type="xml">
                 <form string="Lots">
                     <field name="state" invisible="1"/>
-                    <field name="product_id" readonly="1"/><field name="product_uom" readonly="1" class="oe_inline" groups="product.group_uom"/>
+                    <h1><field name="product_id" readonly="1"/><field name="product_uom" readonly="1" class="oe_inline" groups="product.group_uom"/></h1>
                     <field name="location_id" invisible="1"/>
                     <field name="location_dest_id" invisible="1"/>
-                    <field name="pack_operation_ids" context="{'default_move_id': id, 'default_product_id': product_id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id}">
+                    <field name="pack_operation_ids" attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}" context="{'default_move_id': id, 'default_product_id': product_id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id}">
                         <tree editable="bottom" decoration-succes="product_qty==qty_done" decoration-danger="(product_qty &gt; 0) and (qty_done&gt;product_qty)">
-                            <field name="location_id" domain="[('id', 'child_of', parent.location_id)])"/>
-                            <field name="package_id" groups="stock.group_tracking_lot"/>
+                            <field name="location_id" invisible="context.get('hide_source')" domain="[('id', 'child_of', parent.location_id)])" groups="stock.group_stock_multi_locations"/>
+                            <field name="package_id" groups="stock.group_tracking_lot" invisible="context.get('from_supplier')"/>
                             <field name="lot_id" domain="[('product_id', '=', parent.product_id)]" invisible="context.get('show_lots_inv', True)" context="{'default_product_id': parent.product_id}"/>
                             <field name="lot_name" invisible="context.get('show_lots_name_inv', True)"/>
                             <field name="product_qty" readonly="1" sum="Total Qty To Do"/>
-                            <field name="location_dest_id" domain="[('id', 'child_of', parent.location_dest_id)]"/>
+                            <field name="location_dest_id" invisible="context.get('hide_dest')" domain="[('id', 'child_of', parent.location_dest_id)]" groups="stock.group_stock_multi_locations"/>
                             <field name="qty_done" sum="Total Qty Done"/>
                             <field name="result_package_id" groups="stock.group_tracking_lot"/>
                         </tree>

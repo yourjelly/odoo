@@ -149,6 +149,8 @@ class StockMove(models.Model):
         'Quantity', compute='_qty_done_compute', inverse='_qty_done_set',
         digits=dp.get_precision('Product Unit of Measure'))
     detail_visible = fields.Boolean('Details Visible', compute='_compute_detail_visible')
+    source_multi = fields.Boolean('Multiple source locations', compute='_compute_detail_visible')
+    dest_multi = fields.Boolean('Multiple destination locations', compute='_compute_detail_visible')
     from_supplier = fields.Boolean('From Supplier', compute='_compute_from_supplier')
 
     @api.depends('location_id')
@@ -162,9 +164,14 @@ class StockMove(models.Model):
     @api.multi
     @api.depends('product_id', 'pack_operation_ids', 'picking_id.location_id', 'picking_id.location_dest_id')
     def _compute_detail_visible(self):
-        locations = self.mapped('location_id') | self.mapped('location_dest_id')
-        locations_children = self.env['stock.location'].search([('id', 'child_of', locations.ids), ('id', 'not in', locations.ids)]) 
-        if locations_children:
+        src_locations = self.mapped('location_id')
+        dest_locations = self.mapped('location_dest_id')
+        src_locations_children = self.env['stock.location'].search([('id', 'child_of', src_locations.ids), ('id', 'not in', src_locations.ids)])
+        dest_locations_children = self.env['stock.location'].search([('id', 'child_of', dest_locations.ids), ('id', 'not in', dest_locations.ids)])
+        for move in self:
+            move.source_multi = src_locations_children and True or False
+            move.dest_multi = dest_locations_children and True or False
+        if src_locations_children or dest_locations_children:
             for move in self:
                 move.detail_visible = True
         else:
@@ -357,17 +364,11 @@ class StockMove(models.Model):
         self.ensure_one()
         view = self.env.ref('stock.view_stock_move_operations')
         ctx.update({'show_lots_inv': not(self.has_tracking != 'none' and self.picking_type_id.use_existing_lots), 
-                    'show_lots_name_inv': not(self.has_tracking != 'none' and self.picking_type_id.use_create_lots and not self.picking_type_id.use_existing_lots),})
-#         serial = (self.has_tracking == 'serial')
-#         only_create = False  # Check operation type in theory
-#         show_reserved = any([x for x in self.pack_operation_ids if x.product_qty > 0.0])
-#         ctx.update({
-#             'serial': serial,
-#             'only_create': only_create,
-#             'create_lots': True,
-#             'state_done': self.is_done,
-#             'show_reserved': show_reserved,
-#         })
+                    'show_lots_name_inv': not(self.has_tracking != 'none' and self.picking_type_id.use_create_lots and not self.picking_type_id.use_existing_lots),
+                    'hide_source': not self.source_multi,
+                    'hide_dest': not self.dest_multi,
+                    'state_done': self.state in ('done', 'cancel'),
+                    'from_supplier': self.from_supplier,})
         result = {
             'name': _('Register Operations'),
             'type': 'ir.actions.act_window',
