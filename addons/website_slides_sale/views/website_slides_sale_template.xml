@@ -20,106 +20,246 @@
 
 <!-- Channels: no channel found -->
 <template id="course_not_found" inherit_id="website_slides.channel_not_found" primary="True">
-	<xpath expr="//h2" position="replace">
-		<h2>No course created or published yet.</h2>
-	</xpath>
+    <xpath expr="//h2" position="replace">
+        <h2>No course created or published yet.</h2>
+    </xpath>
 </template>
 
 <!-- TODO Note: We can use channel's view and use primary=True here -->
 <template id="courses" name="Courses">
-	<t t-call="website.layout">
-		<div class="container mt32">
-			<div class="row course_filters">
-		        <form action="/courses" method="POST" id="search-form" class="form-inline">
-		        	<input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-		            <div class="col-sm-6">
-		                <select name="category" id="category" class="form-control">
-		                    <option value="" selected="">
-		                      Filter by category
-		                    </option>
-		                    <option value="all">All Courses</option>
-		                </select>
-		            </div>
-		            <div class="col-sm-4 scol-sm-offset-2">
-		                <input type="search" name="search" placeholder="Search" value="" class="form-control"/>
-		            </div>
-		        </form>
-			</div>
-			<div class="row">
-				<t t-foreach="courses" t-as="course">
-	                <div t-if="course_index % 4 == 0" class="clearfix"/>
-	                <div class="col-sm-3 mt16 mb16">
-	                    <div class="well well-sm">
-	                        <div>
-	                            <a t-attf-href="/courses/#{slug(course)}">
-	                                <img t-if="course.promoted_slide_id" t-attf-src="/web/image/course.lecture/#{course.promoted_slide_id.id}/image_medium" class="img-responsive oe_slides_channel_thumbnail"/>
-	                                <img t-if="not course.promoted_slide_id" src="/website_slides/static/src/img/channel-default.jpg" class="img-responsive oe_slides_opacity"/>
-	                            </a>
-	                        </div>
-	                        <div>
-	                            <div class="mt4 pull-right">
-	                                <t t-call="website.publish_management">
-	                                    <t t-set="object" t-value="course"/>
-	                                    <t t-set="publish_edit" t-value="True"/>
-	                                    <t t-set="action" t-value="'website_slides_sale.action_course_course'"/>
-	                                </t>
-	                            </div>
-	                            <h4 class="mt4 mb4" t-att-title="course.name" style="width:55%">
-	                                <a t-attf-href="/courses/#{slug(course)}" t-esc="course.name"/>
-	                            </h4>
-	                            <span class="label label-warning" t-if="not course.can_see_full">Private course</span>
-	                        </div>
-	                        <div>
-	                            <p class="text-muted oe_no_empty" t-field="course.description"/>
-	                        </div>
-	                    </div>
-	                </div>
-	            </t>
-			</div>
-			<div class="row text-center">
+    <t t-call="website.layout">
+        <div class="container mt32">
+            <div class="row course_filters">
+                <form action="/courses" method="POST" id="search-form" class="form-inline">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div class="col-sm-6">
+                        <select name="category" id="category" class="form-control">
+                            <option value="" selected="">
+                              Filter by category
+                            </option>
+                            <option value="all">All Courses</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-4 scol-sm-offset-2">
+                        <input type="search" name="search" placeholder="Search" value="" class="form-control"/>
+                    </div>
+                </form>
+            </div>
+            <div class="row">
+                <t t-foreach="courses" t-as="course">
+                    <div t-if="course_index % 4 == 0" class="clearfix"/>
+                    <div class="col-sm-3 mt16 mb16">
+                        <div class="well well-sm">
+                            <div>
+                                <a t-attf-href="/courses/#{slug(course)}">
+                                    <img t-if="course.promoted_slide_id" t-attf-src="/web/image/course.lecture/#{course.promoted_slide_id.id}/image_medium" class="img-responsive oe_slides_channel_thumbnail"/>
+                                    <img t-if="not course.promoted_slide_id" src="/website_slides/static/src/img/channel-default.jpg" class="img-responsive oe_slides_opacity"/>
+                                </a>
+                            </div>
+                            <div>
+                                <div class="mt4 pull-right">
+                                    <t t-call="website.publish_management">
+                                        <t t-set="object" t-value="course"/>
+                                        <t t-set="publish_edit" t-value="True"/>
+                                        <t t-set="action" t-value="'website_slides_sale.action_course_course'"/>
+                                    </t>
+                                </div>
+                                <h4 class="mt4 mb4" t-att-title="course.name" style="width:55%">
+                                    <a t-attf-href="/courses/#{slug(course)}" t-esc="course.name"/>
+                                </h4>
+                                <span class="label label-warning" t-if="not course.can_see_full">Private course</span>
+                            </div>
+                            <div>
+                                <p class="text-muted oe_no_empty" t-field="course.description"/>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+            <div class="row text-center">
                 <t t-call="website.pager"/>
             </div>
-		</div>
-	</t>
+        </div>
+    </t>
 </template>
 
 <template id="course_details" name="Course Details">
-	<t t-call="website.layout">
-		<div style="width: 100%; background: linear-gradient(#333,#333,rgba(51,51,51,0)); color: #FFFFFF;">
-			<div class="container">
-				<div class="row">
-					<div class="col-xs-8">
-						<div>
-							<h1><t t-esc="course.name"/></h1>
-						</div>
-						<div t-esc="course.course_subtitle"></div>
-						<div>
-							<!-- TODO: Open partner details on anchor tag -->
-							<div>
-								<span>Created By: 
-									<t t-foreach="course.instructor_ids" t-as="instructor">
-										<a href="#" t-esc="instructor.name"></a>
-										<t t-if="instructor_index != len(course.instructor_ids)-1">,</t>
-									</t>
-								</span>
-							</div>
-							<div t-esc="course.language.name"></div>
-						</div>
-					</div>
-					<div class="col-xs-4">
-						<a t-attf-href="/courses/#{slug(course)}">
-							<div class="course_play">
-			                    <div class="course_play_button"></div>
-			                    <span class="introduction_asset__text">Preview This Course</span>
-			                </div>
-                            <img t-if="course.promoted_slide_id" t-attf-src="/web/image/course.lecture/#{course.promoted_slide_id.id}/image_medium" class="img-responsive oe_slides_channel_thumbnail"/>
-                            <img t-if="not course.promoted_slide_id" src="/website_slides/static/src/img/channel-default.jpg" class="img-responsive oe_slides_opacity"/>
-                        </a>
-					</div>
-				</div>
-			</div>
-		</div>
-	</t>
+    <t t-call="website.layout">
+        <div style="width: 100%; background: linear-gradient(#333,#333,rgba(51,51,51,0)); background-color: rgba(0,0,0,.8); color: #FFFFFF;">
+            <div class="container" style="padding-bottom: 15px;">
+                <div class="row">
+                    <div class="col-xs-8">
+                        <div>
+                            <h1><t t-esc="course.name"/></h1>
+                        </div>
+                        <div t-esc="course.course_subtitle"></div>
+                        <div>
+                            <!-- TODO: Open partner details on anchor tag -->
+                            <div>
+                                <span>Created By: 
+                                    <t t-foreach="course.instructor_ids" t-as="instructor">
+                                        <a href="#" t-esc="instructor.name"></a>
+                                        <t t-if="instructor_index != len(course.instructor_ids)-1">,</t>
+                                    </t>
+                                </span>
+                            </div>
+                            <div t-esc="course.language.name"></div>
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        <div class="course_right_column" style="width: 360px; left: auto; top: 10px; background-color: #FFF; border: 1px solid #dedede; border-radius: 4px; color: #333; margin-top: 18px; padding: 3px; z-index: 20; position: absolute; ">
+                            <div style="display: flex; flex-direction: column; border: none; position: relative;">
+                                <a t-attf-href="/courses/#{slug(course)}">
+                                    <div class="course_play">
+                                        <div class="course_play_button"></div>
+                                        <span class="introduction_asset__text">Preview This Course</span>
+                                    </div>
+                                    <img t-if="course.promoted_slide_id" t-attf-src="/web/image/course.lecture/#{course.promoted_slide_id.id}/image_medium" class="img-responsive oe_slides_channel_thumbnail"/>
+                                    <img t-if="not course.promoted_slide_id" src="/website_slides/static/src/img/channel-default.jpg" class="img-responsive oe_slides_opacity"/>
+                                </a>
+                            </div>
+                            <div class="course_right_column_inner" style="padding: 15px 30px;">
+                                <div>
+                                    <div>
+                                        <span t-if="course.visibility == 'public'"><h3>Free</h3></span>
+                                        <span t-else="">
+                                            <h3 t-field="course.course_price"></h3>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <button t-if="course.visibility == 'public'" class="btn btn-primary" style="width: 100%;">Enroll Now</button>
+                                        <div t-else="">
+                                            <button style="width: 100%;" class="btn btn-primary">Buy Now</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div><strong>Includes:</strong></div>
+                                    <ul style="list-style: none; margin: 0px; padding:0px;">
+                                        <li>
+                                            <i class="fa fa-file-video-o"></i>
+                                            <span>10 hours of videos</span>
+                                        </li>
+                                        <li>
+                                            <i class="fa fa-slideshare"></i>
+                                            <span>20 Slides</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="left-content container mb32">
+            <div class="row">
+                <div class="col-xs-8">
+                    <!-- Put html field snippet here, for now it is static -->
+                    <div style="margin-top: 40px;">
+                        <div style="background-color: #f9f9f9; border: 1px solid #dedede; padding: 10px 15px;">
+                            <div style="max-height: 300px;">
+                                <div>What you will get?</div>
+                                <div style="display: flex; justify-content: space-between; flex-wrap: wrap; align-items: flex-start;">
+                                    <div style="width: 45%; display: flex; align-items: center; margin-bottom: 10px;">
+                                        <i class="fa fa-check-circle-o"></i>
+                                        <span style="margin-left: 15px;">Over 20 highly detailed manuals &amp; 20 video tutorials with step-by-step "connect-the-dots" instructions.</span>
+                                    </div>
+                                    <div style="width: 45%; display: flex; align-items: center; margin-bottom: 10px;">
+                                        <i class="fa fa-check-circle-o"></i>
+                                        <span style="margin-left: 15px;">Over 20 highly detailed manuals &amp; 20 video tutorials with step-by-step "connect-the-dots" instructions.</span>
+                                    </div>
+                                    <div style="width: 45%; display: flex; align-items: center; margin-bottom: 10px;">
+                                        <i class="fa fa-check-circle-o"></i>
+                                        <span style="margin-left: 15px;">Over 20 highly detailed manuals &amp; 20 video tutorials with step-by-step "connect-the-dots" instructions.</span>
+                                    </div>
+                                    <div style="width: 45%; display: flex; align-items: center; margin-bottom: 10px;">
+                                        <i class="fa fa-check-circle-o"></i>
+                                        <span style="margin-left: 15px;">Over 20 highly detailed manuals &amp; 20 video tutorials with step-by-step "connect-the-dots" instructions.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-8">
+                    <div><h3><strong>Description</strong></h3></div>
+                    <div class="description">
+                        <div t-if="course.description" t-field="course.description"></div>
+                        <div t-else=""><strong>No description given on this course.</strong></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-8">
+                    <div><h3><strong>Curriculam For This Course</strong></h3></div>
+                    <div class="panel-group">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">
+                                     <i class="expand_collapse glyphicon glyphicon-plus"></i>
+                                    <a data-toggle="collapse" href="#collapse1">Collapsible panel</a>
+                                </h4>
+                            </div>
+                            <div id="collapse1" class="panel-collapse collapse in" aria-expanded="true">
+                                <div class="panel-body">Panel Body</div>
+                            </div>
+                        </div>
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">
+                                     <i class="expand_collapse glyphicon glyphicon-plus"></i>
+                                    <a data-toggle="collapse" href="#collapse2">Collapsible panel</a>
+                                </h4>
+                            </div>
+                            <div id="collapse2" class="panel-collapse collapse">
+                                <div class="panel-body">Panel Body</div>
+                            </div>
+                        </div>
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">
+                                     <i class="expand_collapse glyphicon glyphicon-plus"></i>
+                                    <a data-toggle="collapse" href="#collapse3">Collapsible panel</a>
+                                </h4>
+                            </div>
+                            <div id="collapse3" class="panel-collapse collapse">
+                                <div class="panel-body">Panel Body</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-8">
+                    <div><h3><strong>About Instructor</strong></h3></div>
+                    <div t-foreach="course.instructor_ids" t-as="instructor" style="display: flex; margin-top: 20px;">
+                        <div class="instructor_left">
+                            <!-- TODO: move use to instructor page -->
+                            <a t-attf-href="#">
+                                <img t-if="instructor.image" t-attf-src="/web/image/res.partner/#{instructor.id}/image_medium" class="img-responsive"/>
+                                <img t-if="not instructor.image" src="/web/static/src/img/placeholder.png" class="img-responsive"/>
+                            </a>
+                        </div>
+                        <div class="instructor_right" style="margin-left: 30px;">
+                            <div>
+                                <a href="#" t-esc="instructor.name"></a>
+                            </div>
+                            <div t-if="instructor.about_details" t-esc="instructor.about_details"></div>
+                            <div t-else=""><h5><strong>No details available about instrucotr</strong></h5></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
 </template>
 
 </data>
