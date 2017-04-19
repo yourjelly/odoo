@@ -36,7 +36,7 @@ odoo.define('payment_stripe.stripe', function(require) {
             $(this).attr('disabled','disabled');
 
         var $form = $(e.currentTarget).parents('form');
-        var acquirer_id = $(e.currentTarget).closest('div.oe_sale_acquirer_button,div.oe_quote_acquirer_button,div.o_website_payment_new_payment');
+        var acquirer_id = $(e.currentTarget).closest('div.oe_sale_acquirer_button,div.oe_quote_acquirer_button,div.o_invoice_payment_acquirer_button,div.o_website_payment_new_payment');
         acquirer_id = acquirer_id.data('id') || acquirer_id.data('acquirer_id');
         if (! acquirer_id) {
             return false;
@@ -47,9 +47,28 @@ odoo.define('payment_stripe.stripe', function(require) {
         if (so_id) {
             so_id = parseInt(so_id[1]);
         }
+        var payment_request_token = $("input[name='access_token']").val();
+        var payment_request_id = $("input[name='return_url']").val().match(/payment\/([0-9]+)/) || undefined;
+        if (payment_request_id) {
+            payment_request_id = parseInt(payment_request_id[1]);
+        }
 
         e.preventDefault();
-        if ($('.o_website_payment').length !== 0) {
+        if ($('.o_website_invoice_payment').length !== 0){
+            ajax.jsonRpc('/invoice/payment/transaction/' + acquirer_id, 'call', {
+                    payment_request_id: payment_request_id,
+                    access_token: payment_request_token
+                }).then(function (data) {
+                $form.html(data);
+                handler.open({
+                    name: $("input[name='merchant']").val(),
+                    description: $("input[name='invoice_num']").val(),
+                    currency: $("input[name='currency']").val(),
+                    amount: $("input[name='amount']").val()*100
+                });
+            });
+        }
+        else if ($('.o_website_payment').length !== 0) {
             ajax.jsonRpc('/website_payment/transaction', 'call', {
                     reference: $("input[name='invoice_num']").val(),
                     amount: $("input[name='amount']").val(),
