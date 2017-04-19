@@ -8,10 +8,13 @@
             icon="fa-wrench"
             web_icon="mrp,static/description/icon.png"
             sequence="35"/>
-
-        <menuitem id="menu_mrp_manufacturing"
+        <menuitem id="menu_mrp_manuf"
             name="Operations"
             parent="menu_mrp_root"
+            sequence="10"/>
+        <menuitem id="menu_mrp_manufacturing"
+            name="Orders"
+            parent="menu_mrp_manuf"
             sequence="10"/>
 
         <menuitem id="mrp_planning_menu_root"

@@ -54,10 +54,14 @@
           action="stock.action_production_lot_form"
           groups="stock.group_production_lot"
           sequence="10"/>
-
-    <menuitem id="menu_mrp_scrap"
+ 
+<menuitem id="menu_mrp_scrap"
             name="Scrap"
-            parent="menu_mrp_manufacturing"
+            parent="menu_mrp_manuf"
+            sequence="10"/>
+    <menuitem id="menu_mrp_scrap_order"
+            name="Scrap Orders"
+            parent="menu_mrp_scrap"
             action="stock.action_stock_scrap"
             sequence="25"/>
 
