@@ -3,16 +3,19 @@
 
 from odoo import api, fields, models, _
 
+
 class Channel(models.Model):
 	_inherit = "slide.channel"
 
 	is_course = fields.Boolean("Is Course") # To identify whether it is normal channel or used as a course
 
+
 class Course(models.Model):
 	_name = "course.course"
 	_inherits = {'slide.channel': 'channel_id'}
-	_inherit = ['rating.mixin']
+	_inherit = ['rating.mixin', 'mail.thread', 'website.seo.metadata', 'website.published.mixin']
 
+	course_subtitle = fields.Char(string="Course Subtitle")
 	course_html = fields.Html("Course Details", help="This will be displayed on Course Details page, user can design it.")
 	language = fields.Many2one("res.lang", "Language")
 	instructor_ids = fields.Many2many("res.partner", string="Instructors")
@@ -21,15 +24,19 @@ class Course(models.Model):
 	channel_id = fields.Many2one('slide.channel', 'Channel',
         auto_join=True, index=True, ondelete="cascade", required=True)
 
+
 class Lecture(models.Model):
 	_name = "course.lecture"
 	_inherits = {'slide.slide': 'slide_id'}
+	_inherit = ['mail.thread', 'website.seo.metadata', 'website.published.mixin']
 
 	# attendee_ids = fields.Many2many("res.partner", "Attendees")
 	# TODO: we can use Download Security field for this OR download security is used for security and this gonna be used for showing slide type(icons)
 	slide_view_type = fields.Selection([('preview', 'Preview'), ('free', 'Free')], string="Slide Type")
 	slide_id = fields.Many2one('slide.slide', 'Slide',
         auto_join=True, index=True, ondelete="cascade", required=True)
+	is_course_slide = fields.Boolean(related="slide_id.channel_id.is_course", string="Is Course Lecture")
+
 
 class LectureAttendee(models.Model):
 	_name = 'lecture.attendee'
@@ -60,6 +67,7 @@ class Instructor(models.Model):
 	total_course = fields.Integer(compute="_get_total_numbers")
 	total_subscribers = fields.Integer(compute="_get_total_numbers")
 	total_reviews = fields.Integer(compute="_get_total_numbers")
+
 
 class ProductTemplate(models.Model):
 	_inherit = "product.template"

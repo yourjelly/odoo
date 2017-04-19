@@ -18,7 +18,11 @@ Sale Courses'
 """,
     'depends': ['website_slides', 'website_sale', 'survey'],
     'data': [
-        'views/website_slides_sale_backend.xml'
+        'data/website_slides_sale_data.xml',
+        'security/website_slides_sale_security.xml',
+        'security/ir.model.access.csv',
+        'views/website_slides_sale_backend.xml',
+        'views/website_slides_sale_template.xml'
     ],
     'demo': [
     ],

@@ -1,0 +1,126 @@
+<?xml version="1.0" ?>
+<odoo>
+<data>
+
+<!-- assets -->
+<template id="assets_frontend_course" inherit_id="website.assets_frontend" name="Course">
+    <xpath expr="." position="inside">
+        <link type="text/less" href="/website_slides_sale/static/src/less/website_slides_sale.less" rel="stylesheet" t-ignore="true"/>
+    </xpath>
+</template>
+
+<!-- add link to the standard footer -->
+<template id="course_footer" inherit_id="website.footer_default" name="Footer Course Link">
+    <xpath expr="//div[@id='info']//ul[@class='list-unstyled']" position="inside">
+        <li>
+            <a href="/courses">Courses</a>
+        </li>
+    </xpath>
+</template>
+
+<!-- Channels: no channel found -->
+<template id="course_not_found" inherit_id="website_slides.channel_not_found" primary="True">
+	<xpath expr="//h2" position="replace">
+		<h2>No course created or published yet.</h2>
+	</xpath>
+</template>
+
+<!-- TODO Note: We can use channel's view and use primary=True here -->
+<template id="courses" name="Courses">
+	<t t-call="website.layout">
+		<div class="container mt32">
+			<div class="row course_filters">
+		        <form action="/courses" method="POST" id="search-form" class="form-inline">
+		        	<input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+		            <div class="col-sm-6">
+		                <select name="category" id="category" class="form-control">
+		                    <option value="" selected="">
+		                      Filter by category
+		                    </option>
+		                    <option value="all">All Courses</option>
+		                </select>
+		            </div>
+		            <div class="col-sm-4 scol-sm-offset-2">
+		                <input type="search" name="search" placeholder="Search" value="" class="form-control"/>
+		            </div>
+		        </form>
+			</div>
+			<div class="row">
+				<t t-foreach="courses" t-as="course">
+	                <div t-if="course_index % 4 == 0" class="clearfix"/>
+	                <div class="col-sm-3 mt16 mb16">
+	                    <div class="well well-sm">
+	                        <div>
+	                            <a t-attf-href="/courses/#{slug(course)}">
+	                                <img t-if="course.promoted_slide_id" t-attf-src="/web/image/course.lecture/#{course.promoted_slide_id.id}/image_medium" class="img-responsive oe_slides_channel_thumbnail"/>
+	                                <img t-if="not course.promoted_slide_id" src="/website_slides/static/src/img/channel-default.jpg" class="img-responsive oe_slides_opacity"/>
+	                            </a>
+	                        </div>
+	                        <div>
+	                            <div class="mt4 pull-right">
+	                                <t t-call="website.publish_management">
+	                                    <t t-set="object" t-value="course"/>
+	                                    <t t-set="publish_edit" t-value="True"/>
+	                                    <t t-set="action" t-value="'website_slides_sale.action_course_course'"/>
+	                                </t>
+	                            </div>
+	                            <h4 class="mt4 mb4" t-att-title="course.name" style="width:55%">
+	                                <a t-attf-href="/courses/#{slug(course)}" t-esc="course.name"/>
+	                            </h4>
+	                            <span class="label label-warning" t-if="not course.can_see_full">Private course</span>
+	                        </div>
+	                        <div>
+	                            <p class="text-muted oe_no_empty" t-field="course.description"/>
+	                        </div>
+	                    </div>
+	                </div>
+	            </t>
+			</div>
+			<div class="row text-center">
+                <t t-call="website.pager"/>
+            </div>
+		</div>
+	</t>
+</template>
+
+<template id="course_details" name="Course Details">
+	<t t-call="website.layout">
+		<div style="width: 100%; background: linear-gradient(#333,#333,rgba(51,51,51,0)); color: #FFFFFF;">
+			<div class="container">
+				<div class="row">
+					<div class="col-xs-8">
+						<div>
+							<h1><t t-esc="course.name"/></h1>
+						</div>
+						<div t-esc="course.course_subtitle"></div>
+						<div>
+							<!-- TODO: Open partner details on anchor tag -->
+							<div>
+								<span>Created By: 
+									<t t-foreach="course.instructor_ids" t-as="instructor">
+										<a href="#" t-esc="instructor.name"></a>
+										<t t-if="instructor_index != len(course.instructor_ids)-1">,</t>
+									</t>
+								</span>
+							</div>
+							<div t-esc="course.language.name"></div>
+						</div>
+					</div>
+					<div class="col-xs-4">
+						<a t-attf-href="/courses/#{slug(course)}">
+							<div class="course_play">
+			                    <div class="course_play_button"></div>
+			                    <span class="introduction_asset__text">Preview This Course</span>
+			                </div>
+                            <img t-if="course.promoted_slide_id" t-attf-src="/web/image/course.lecture/#{course.promoted_slide_id.id}/image_medium" class="img-responsive oe_slides_channel_thumbnail"/>
+                            <img t-if="not course.promoted_slide_id" src="/website_slides/static/src/img/channel-default.jpg" class="img-responsive oe_slides_opacity"/>
+                        </a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</t>
+</template>
+
+</data>
+</odoo>
