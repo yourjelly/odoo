@@ -19,7 +19,8 @@ class TestAccountVoucherCommon(common.SavepointCase):
 
         # User-groups and References
         cls.group_partner_manager_id = cls.env.ref('base.group_partner_manager')
-        cls.group_account_user_id = cls.env.ref('account.group_account_manager')
+        cls.group_account_user_id = cls.env.ref('account.group_account_user')
+        cls.group_account_manager_id = cls.env.ref('account.group_account_manager')
         cls.company_id = cls.env.ref('base.main_company')
         account_type_receivable_id = cls.env.ref('account.data_account_type_receivable').id
         account_type_revenue_id = cls.env.ref('account.data_account_type_revenue').id
@@ -33,6 +34,14 @@ class TestAccountVoucherCommon(common.SavepointCase):
             'groups_id': [(6, 0, [cls.group_partner_manager_id.id, cls.group_account_user_id.id])] 
             })
 
+        cls.res_users_account_voucher_manager = cls.ResUsers.create({
+            'company_id': cls.company_id.id,
+            'name': 'Financial Manager for voucher',
+            'login': 'fmv',
+            'email': 'finmanager@yourcompany.com',
+            'groups_id': [(6, 0, [cls.group_partner_manager_id.id, cls.group_account_manager_id.id])]
+        })
+
         cls.account_receivable = cls.Account.create({
             'code': 'X1012',
             'name': 'Debtors - (test)',
@@ -40,19 +49,19 @@ class TestAccountVoucherCommon(common.SavepointCase):
             'user_type_id': account_type_receivable_id
             })
 
-        cls.account_sale = cls.Account.sudo(cls.res_users_account_voucher_user.id).create({
+        cls.account_sale = cls.Account.create({
             'code': 'X1020',
             'name': 'Product Sales - (test)',
             'user_type_id': account_type_revenue_id
             })
 
-        cls.account_cash = cls.Account.sudo(cls.res_users_account_voucher_user.id).create({
+        cls.account_cash = cls.Account.create({
             'code': 'X1015',
             'name': 'Cash - (test)',
             'user_type_id': account_type_liquidity_id
             })
 
-        cls.sales_journal = cls.Journal.sudo(cls.res_users_account_voucher_user.id).create({
+        cls.sales_journal = cls.Journal.create({
             'name': 'Sales Journal - (test)',
             'code': 'TSAJ',
             'type': 'sale',
@@ -61,7 +70,7 @@ class TestAccountVoucherCommon(common.SavepointCase):
             'default_credit_account_id': cls.account_sale.id
             })
 
-        cls.cash_journal = cls.Journal.sudo(cls.res_users_account_voucher_user).create({
+        cls.cash_journal = cls.Journal.create({
             'code': 'VCSH',
             'name': 'Cash Journal - (test)',
             'type': 'cash',
