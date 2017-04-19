@@ -229,9 +229,10 @@ var AbstractField = Widget.extend({
         if ('required' in this.modifiers) {
             is_required = new Domain(this.modifiers.required).compute(this.recordData);
         }
-        if(is_required && $(this.$el).val()==''){
-            $(this.$input).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
-        }
+        // console.log("abst......",$(this.$el).val())
+        // if (is_required && $(this.$el).val()=='') {
+        //     $(this.$input).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
+        // }
         return this._isValid && !(is_required && !this.isSet());
     },
     /**
@@ -386,7 +387,7 @@ var AbstractField = Widget.extend({
 
     _onFocus: function (event) {
         if (!$(event.target).hasClass('o_form_invisible') && $(event.target).hasClass('o_form_required')) {
-            $(event.target).nextAll('i').remove();
+            $(event.target).nextAll('i.err_icon').remove();
         }
     },
     _onFocusout:function (event) {

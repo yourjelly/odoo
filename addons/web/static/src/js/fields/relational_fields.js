@@ -110,17 +110,12 @@ var FieldMany2One = AbstractField.extend({
 
         this.$input = this.$('.o_form_input');
         this.$external_button = this.$('.o_external_button');
-        // console.log("many2one", this.$el)
-        // this.$el.on('focus', function(){
-        //     console.log("thsiddddddddd",this);
-        // });
         return this._super.apply(this, arguments);
     },
 
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
-
     activate: function () {
         this.$input.focus();
         setTimeout(this.$input.select.bind(this.$input), 0);
@@ -129,7 +124,6 @@ var FieldMany2One = AbstractField.extend({
      * Focuses the input.
      */
     focus: function () {
-       console.log("----------------->many2one>>>>>>>>>>>>>>>>>>>>>this",this);
         if (this.mode === "edit") {
             this.$input.focus();
         }
@@ -454,17 +448,15 @@ var FieldMany2One = AbstractField.extend({
      * @private
      */
     _onInputFocusout: function () {
-        console.log("Many2one___focusout______thisssssssssd>>>><<<>>>",this)
-       if(this.required && !$(this.$el).hasClass('o_form_invisible') && $(this.$input).val()==''){
+       if (this.required && !$(this.$el).hasClass('o_form_invisible') && $(this.$input).val()=='') {
             $(this.$input).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
-       }
+        }
         if (this.can_create && this.floating) {
             new M2ODialog(this, this.string, this.$input.val()).open();
         }
     },
     _onInputFocus: function(){
-       console.log("focus___many2one>>>>>>>>>>>>>>>>>>>>>this",this,"ffffffffffffffff\n",$(this.$input).val());
-        if(!$(this.$el).hasClass('o_form_invisible') && this.required){
+        if (!$(this.$el).hasClass('o_form_invisible') && this.required) {
             $(this.$input).nextAll('i').remove();
         }
     },
@@ -592,6 +584,10 @@ var FieldX2Many = AbstractField.extend({
         if (!this.renderer) {
             return this._super.apply(this, arguments);
         }
+        // console.log("$(this.$input).val()",this);
+        // if (this.required && $(this.$el).val()=='') {
+        //     $(this.$input).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
+        // }
         var def = $.Deferred();
         this.renderer.canBeSaved()
             .then(def.resolve.bind(def, true))
@@ -996,15 +992,23 @@ var FieldMany2ManyTags = AbstractField.extend({
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
+    /**
+     * Called on focus -> removes error icon.
+     *
+     * @private
+     */
     _onFocus: function(){
-        console.log("focus many2many tags",$(this.$el).val())
-        if(!$(this.$el).hasClass('o_form_invisible') && this.required){
+        if (!$(this.$el).hasClass('o_form_invisible') && this.required) {
             $(this.$input).nextAll('i').remove();
         }
     },
+    /**
+     * Called on focusout -> adds error icon for required field.
+     *
+     * @private
+     */
     _onFocusout: function(){
-        console.log("focus out many2many tags",$(this.$el).val())
-        if(this.required && $(this.$el).val()==''){
+        if (this.required && $(this.$el).val()=='') {
             $(this.$el).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
         }
     },
