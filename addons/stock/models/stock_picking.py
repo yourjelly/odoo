@@ -740,6 +740,7 @@ class Picking(models.Model):
             if pack_op.lot_name and not pack_op.lot_id:
                 lot = Lot.create({'name': pack_op.lot_name, 'product_id': pack_op.product_id.id})
                 pack_op.write({'lot_id': lot.id})
+                
         self.mapped('pack_operation_ids').filtered(lambda x: x.product_qty == 0.0).unlink()
 
     create_lots_for_picking = _create_lots_for_picking
