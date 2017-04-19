@@ -14,6 +14,14 @@
             </tree>
         </field>
     </record>
+    <!--
+    TODO OCO
+    pour le truc du dessus et celui du dessous, les zigouiller et ne PAS
+    utiliser les account.move.line (je comprends ce qui gênait Quentin)
+
+        ==> Utiliser account.account (et plus que certainement un TransientModel
+        qui en référencie chaque fois un)
+    -->
     <record id="account_move_opening_receivable_tree" model="ir.ui.view">
         <field name="name">account.move.line.receivable.opening</field>
         <field name="model">account.move.line</field>
@@ -35,6 +43,6 @@
         <field name="model_id" ref="account.model_account_move_line"/>
         <field name="state">code</field>
         <field name="code">action = model.open_opening_balance()</field>
-    </record>
+    </record> <!--TODO OCO: c'est pas un peu louche de faire ça comme ça ? Une act-window standard, ça ne le ferait pas ? (c'est lié à un bouton dans account_dashboard.xml)-->
 
 </odoo>

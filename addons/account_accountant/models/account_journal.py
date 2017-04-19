@@ -125,17 +125,20 @@ class res_company(models.Model):
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
+    #TODO OCO renommer cette fonction, là ça ne veut rien dire (quoique en fait ... elle s'appelle via JS au moment de "retrieve" ... mouais)
+    #Cette fonction sert en fait à choper les données du dashboard, en l'occurrence la "barre de mise en route"
     @api.model
     def retrieve_account_dashboard(self):
         company = self.env.user.company_id
         if company.account_config_close:
             return {'open': False}
 
+        #TODO OCO renommer les clés du dictionnaire
         data = {'open':True}
-        data['company'] = bool(company.street)
+        data['company'] = bool(company.street)#TODO OCO bof bof, il faut qqch de plus complet
         data['banks'] = bool(self.env['account.journal'].search([
             ('company_id', '=', company.id), ('bank_acc_number','<>',False)],
-            limit=1))
+            limit=1))#TODO OCO c'est vraiment pas générique, et s'il passe par une autre chemin que celui de base (genre, en recréant un nouveau journal), c'est niqué ... faire cette vérification autrement, même si on est d'accord que c'est le setting standard
         data['chart'] = False
 
         accounts = self.env['account.account'].search([
@@ -148,5 +151,7 @@ class AccountJournal(models.Model):
         data['initial'] = bool(self.env.user.company_id.opening_balance_move_id.amount)
 
          # Todo: wizard to set End of Year date
-        data['fy'] = False
+        data['fy'] = False #TODO OCO: ? fiscal year ?
+
+
         return data

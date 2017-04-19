@@ -3,6 +3,8 @@
     <!--
         This template is the ribbon at the top of the accounting dashboard
     -->
+    <!--TODO OCO: ce serait p-ê pas mal de bouger ça ailleurs ?-->
+    <!-- TODO OCO: le dashboard est sur enterprise, et ceci dans commuunity ; c'est pas un peu louche ?-->
     <t t-name="account_accountant.AccountDashboard">
         <div class="o_account_dashboard_header o_form_view" t-if="values['open']">
             <div class="o_form_statusbar">
@@ -26,7 +28,7 @@
                         <i class="fa fa-check" t-if="values['fy']"/>
                         Fiscal Year Opening
                     </button>
-                    <button name="base.action_res_company_form" t-attf-class="btn btn-sm o_arrow_button btn-default o_dashboard_action #{values['company'] and 'o_action_done' or ''}">
+                    <button name="account_accountant.action_res_company_popup" t-attf-class="btn btn-sm o_arrow_button btn-default account_company_setting_action #{values['company'] and 'o_action_done' or ''}">
                         <i class="fa fa-check" t-if="values['company']"/>
                         Company Data
                     </button>

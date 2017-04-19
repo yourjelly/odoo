@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record model="ir.actions.act_window" id="action_res_company_popup">
+            <field name="name">account.accountant.res.company.popup</field>
+            <field name="res_model">res.company</field>
+            <field name="target">new</field>
+            <field name="view_mode">form</field>
+        </record>
+
+        <record id="init_view_company_form" model="ir.ui.view">
+            <field name="name">account.accountant.init.company.form</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="mode">primary</field>
+            <field name="arch" type="xml">
+                <xpath expr="//form/sheet" position="after">
+                    <footer>
+                        <button string="Save" type="object" name="save_init_company_data"/>
+                    </footer>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

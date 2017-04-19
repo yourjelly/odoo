@@ -7,6 +7,7 @@ var Model = require('web.Model');
 var session = require('web.session');
 var KanbanView = require('web_kanban.KanbanView');
 var data = require('web.data');
+var web_client = require('web.web_client');
 
 var QWeb = core.qweb;
 
@@ -18,7 +19,14 @@ var AccountDashboardView = KanbanView.extend({
     icon: 'fa-dashboard',
     searchview_hidden: true,
     events: {
-        'click .o_dashboard_action': 'on_dashboard_action_clicked',
+        'click .o_dashboard_action': 'on_dashboard_action_clicked', //TODO OCO supprimer
+        'click .account_company_setting_action': 'account_company_setting_action_clicked',
+    },
+
+    account_company_setting_action_clicked: function(ev) {
+        new Model('res.company').call('setting_init_company_action', []).then(function(rslt_action){
+            web_client.action_manager.do_action(rslt_action);
+        });
     },
 
     fetch_data: function() {
@@ -40,7 +48,7 @@ var AccountDashboardView = KanbanView.extend({
         });
     },
 
-    on_dashboard_action_clicked: function(ev) {
+    on_dashboard_action_clicked: function(ev) { //TODO OCO supprimer
         ev.preventDefault();
         var $action = $(ev.currentTarget);
         var action_name = $action.attr('name');
