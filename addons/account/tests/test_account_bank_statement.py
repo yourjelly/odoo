@@ -1,8 +1,15 @@
 from odoo.tests import common
 import time
+from odoo import tools
+from odoo.modules.module import get_resource_path
 
 
 class TestAccountBankStatement(common.TransactionCase):
+
+    def _load(self, module, *args):
+        tools.convert_file(self.cr, 'account_asset',
+                           get_resource_path(module, *args),
+                           {}, 'init', False, 'test', self.registry._assertion_report)
 
     def setUp(self):
         super(TestAccountBankStatement, self).setUp()
@@ -19,6 +26,7 @@ class TestAccountBankStatement(common.TransactionCase):
         """   In order to test Bank Statement feature of account I create a bank statement line and confirm it and check it's move created
         """
         #select the period and journal for the bank statement
+        self._load('account', 'test', 'account_minimal_test.xml')
         journal_type = "bank"
         journal = self.AccBankState.with_context({'lang': u'en_US', 'tz': False, 'active_model': 'ir.ui.menu',
         'journal_type': 'bank','journal_id':10,
