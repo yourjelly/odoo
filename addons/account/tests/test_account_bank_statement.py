@@ -26,7 +26,7 @@ class TestAccountBankStatement(common.TransactionCase):
         """   In order to test Bank Statement feature of account I create a bank statement line and confirm it and check it's move created
         """
         #select the period and journal for the bank statement
-        self._load('account', 'test', 'account_minimal_test.xml')
+        # self._load('account', 'test', 'account_minimal_test.xml')
         journal_type = "bank"
         journal = self.AccBankState.with_context({'lang': u'en_US', 'tz': False, 'active_model': 'ir.ui.menu',
         'journal_type': 'bank','journal_id':10,
