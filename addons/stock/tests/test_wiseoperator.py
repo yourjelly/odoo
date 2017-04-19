@@ -27,20 +27,5 @@ class TestWiseOperator(TestStockCommon):
             'uom_id': self.uom_id,
             'uom_po_id': self.uom_id
             })
-        self.pick_wise = self.Picking.create({
-            'name': 'Incoming picking (wise unit)',
-            'partner_id': self.partner_id,
-            'picking_type_id': self.picking_type_id,
-            'move_lines': [
-                (0, 0,
-                    {
-                        'product_id': self.product_wise.id,
-                        'product_uom_qty': 10.00,
-                        'location_id':  self.location_id,
-                        'location_dest_id': self.location_dest_id
-                    })]
-            })
-                    
     def test_00_wiseoperator(self):
-        self.pick_wise.action_confirm()
-        self.pick_wise.do_prepare_partial()
+        print "--------", self
