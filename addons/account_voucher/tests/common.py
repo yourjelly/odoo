@@ -26,6 +26,7 @@ class TestAccountVoucherCommon(common.SavepointCase):
         account_type_revenue_id = cls.env.ref('account.data_account_type_revenue').id
         account_type_liquidity_id = cls.env.ref('account.data_account_type_liquidity').id
 
+        #AccountVoucher User creation
         cls.res_users_account_voucher_user = cls.ResUsers.create({
             'company_id': cls.company_id.id,
             'name': 'Voucher Accountant',
@@ -34,6 +35,7 @@ class TestAccountVoucherCommon(common.SavepointCase):
             'groups_id': [(6, 0, [cls.group_partner_manager_id.id, cls.group_account_user_id.id])] 
             })
 
+        #AccountVoucher Manager creation
         cls.res_users_account_voucher_manager = cls.ResUsers.create({
             'company_id': cls.company_id.id,
             'name': 'Financial Manager for voucher',
@@ -42,6 +44,7 @@ class TestAccountVoucherCommon(common.SavepointCase):
             'groups_id': [(6, 0, [cls.group_partner_manager_id.id, cls.group_account_manager_id.id])]
         })
 
+        #Account for Receiveable
         cls.account_receivable = cls.Account.create({
             'code': 'X1012',
             'name': 'Debtors - (test)',
@@ -49,18 +52,21 @@ class TestAccountVoucherCommon(common.SavepointCase):
             'user_type_id': account_type_receivable_id
             })
 
+        #Account for Sale
         cls.account_sale = cls.Account.create({
             'code': 'X1020',
             'name': 'Product Sales - (test)',
             'user_type_id': account_type_revenue_id
             })
 
+        #Account for Cash
         cls.account_cash = cls.Account.create({
             'code': 'X1015',
             'name': 'Cash - (test)',
             'user_type_id': account_type_liquidity_id
             })
 
+        #Journal for Sales
         cls.sales_journal = cls.Journal.create({
             'name': 'Sales Journal - (test)',
             'code': 'TSAJ',
@@ -70,6 +76,7 @@ class TestAccountVoucherCommon(common.SavepointCase):
             'default_credit_account_id': cls.account_sale.id
             })
 
+        #Journal for Cash
         cls.cash_journal = cls.Journal.create({
             'code': 'VCSH',
             'name': 'Cash Journal - (test)',
