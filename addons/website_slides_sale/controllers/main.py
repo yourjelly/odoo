@@ -124,3 +124,9 @@ class WebsiteSlidesSale(http.Controller):
 
 		return request.redirect("/course/new/%s" % slug(course))
 
+	@http.route(['/course/dashboard'], type='http', auth='user', website=True)
+	def instructor_course_dashboard(self, **kw):
+		Course = request.env['course.course']
+		courses = Course.search([('user_id', '=', request.env.user.id)])
+		return request.render('website_slides_sale.course_instructor_dashboard', {'courses': courses})
+

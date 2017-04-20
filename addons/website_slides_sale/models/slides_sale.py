@@ -23,6 +23,7 @@ class Course(models.Model):
 	course_price = fields.Float(related="product_id.list_price", string="Course Price")
 	channel_id = fields.Many2one('slide.channel', 'Channel',
         auto_join=True, index=True, ondelete="cascade", required=True)
+	user_id = fields.Many2one("res.users", "Posted User", default=lambda self: self.env.user.id)
 
 
 class Lecture(models.Model):

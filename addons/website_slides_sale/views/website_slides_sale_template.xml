@@ -17,10 +17,16 @@
 </template>
 
 
-<!-- User Navbar -->
+<!-- User Navbar TODO: Move this link inside instructor dashboard because if user is not website designer then he/she will not be able to create course -->
 <template id="content_new_course" inherit_id="website.user_navbar">
     <xpath expr="//div[@id='o_website_add_page_modal']//ul" position="inside">
         <li groups="website.group_website_designer"><a href="#" data-action="new_course"><i class="fa fa-book"/><p>New Course</p></a></li>
+    </xpath>
+</template>
+
+<template id="course_dashboard_link" name="Link to frontend portal" inherit_id="website.layout">
+    <xpath expr="//li[@id='o_logout']" position="before">
+        <li><a href="/course/dashboard" role="menuitem">Course Dashboard</a></li>
     </xpath>
 </template>
 
@@ -38,6 +44,84 @@
     <xpath expr="//h2" position="replace">
         <h2>No course created or published yet.</h2>
     </xpath>
+</template>
+
+<template id="course_instructor_dashboard" name="Insructor Dashboard">
+    <t t-call="website.layout">
+        <div class="container mt32 mb32">
+            <div class="row course_filters">
+                <form action="/course/search_instructor_courses" method="POST" id="search-form" class="form-inline">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div class="col-sm-6">
+                        <div class="input-group">
+                            <input type="text" name="course_name" class="form-control" placeholder="Search your course"/>
+                            <span class="input-group-btn">
+                                <button class="btn btn-secondary" type="button">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 scol-sm-offset-2">
+                        <div class="dropdown btn-group dropdown_sorty_by">
+                            <a href="#" class="dropdown-toggle btn btn-default" data-toggle="dropdown">
+                                <span>Sort by</span>
+                                <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li>
+                                    <a href="/course/search_instructor_courses?sort=asc">
+                                        <span><i class="fa fa-sort-alpha-asc"></i></span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/course/search_instructor_courses?sort=dsc">
+                                        <span><i class="fa fa-sort-alpha-desc"></i></span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="row mt32">
+                <div class="course_card" style="display: flex; border: 1px solid rgba(0,0,0,.25); background-color: #FFFFFF; min-height: 120px; max-height: 120px;" t-foreach="courses" t-as="course">
+                    <div class="col-md-2">
+                        <img t-if="course.promoted_slide_id" t-attf-src="/web/image/course.lecture/#{course.promoted_slide_id.id}/image_medium" class="img-responsive oe_slides_channel_thumbnail"/>
+                        <img t-if="not course.promoted_slide_id" src="/website_slides/static/src/img/channel-default.jpg" class="img-responsive oe_slides_opacity"/>
+                    </div>
+                    <div class="col-md-6" style="padding: 10px;">
+                        <div>
+                            <strong>
+                                <span t-esc="course.name"></span>
+                            </strong>
+                        </div>
+                        <div class="text-muted">
+                            <t t-foreach="course.instructor_ids" t-as="instructor">
+                                <span href="#" t-esc="instructor.name"></span>
+                                <t t-if="instructor_index != len(course.instructor_ids)-1">,</t>
+                            </t>
+                        </div>
+                        <div class="text-muted">
+                            <span class="pull-left" t-if="course.website_published">Published</span>
+                            <span class="pull-left" t-if="not course.website_published">Draft</span>
+                            <span class="pull-right" t-if="course.visibility == 'public'">Free-Public</span>
+                            <span class="pull-right" t-if="course.visibility != 'public'"><t t-esc="course.course_price"/></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-muted" style="border-left: 1px solid rgba(0,0,0,.25)">
+                        <div>
+                            <span>
+                                Published Curriculam Items
+                            </span>
+                            <!-- TODO: Get numbers -->
+                            <span style="font-size: 24px;">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
 </template>
 
 <!-- TODO Note: We can use channel's view and use primary=True here -->
