@@ -108,7 +108,13 @@ class WebsiteSlidesSale(http.Controller):
 
 	@http.route(['/course/new/<model("course.course"):course>'], type='http', auth="user", website=True)
 	def course_new(self, course=None, **post):
-		return request.render('website_slides_sale.course_new_form', {'course': course})
+		languages = request.env['res.lang'].search([])
+		values = {
+			'course': course,
+			'user': request.env.user,
+			'languages': languages
+		}
+		return request.render('website_slides_sale.course_new_form', values)
 
 	@http.route(['/shop/add_course'], type='http', auth="user", methods=['POST'], website=True)
 	def add_course(self, name=None, category=0, **post):

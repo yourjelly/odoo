@@ -279,24 +279,54 @@
 
 <template id="course_new_form" name="New Course">
     <t t-call="website.layout">
-        <div class="container new_course_form">
+        <div class="container new_course_form mt32 mb32">
             <div class="row">
+                <div class="col-xs-2">
+                    <a t-attf-href="/courses/#{slug(course)}">
+                        <img t-if="course.promoted_slide_id" t-attf-src="/web/image/course.lecture/#{course.promoted_slide_id.id}/image_medium" class="img-responsive oe_slides_channel_thumbnail"/>
+                        <img t-if="not course.promoted_slide_id" src="/website_slides/static/src/img/channel-default.jpg" class="img-responsive oe_slides_opacity"/>
+                    </a>
+                </div>
+                <div class="col-xs-8">
+                    <h3><span t-esc="course.name"></span></h3>
+                    <h4>
+                        <t t-foreach="course.instructor_ids" t-as="instructor">
+                            <span>
+                                <a href="#" t-esc="instructor.name"></a>
+                                <t t-if="instructor_index != len(course.instructor_ids)-1">, </t>
+                            </span>
+                        </t>
+                    </h4>
+                    <!-- <span>DRAFT</span> -->
+                    <t t-call="website.publish_management">
+                        <t t-set="object" t-value="course"/>
+                        <t t-set="publish_edit" t-value="True"/>
+                        <t t-set="action" t-value="'website_slides_sale.action_course_course'"/>
+                    </t>
+                </div>
+            </div>
+            <div class="row mt32">
                 <div class="col-xs-3">
-                    <div class="sidebar">
-                        <ul role="menu" style="list-style: none; padding: 0px; margin: 0px;">
+                    <div class="sidebar" style="border-right: 1px solid #e6e6e6;">
+                        <ul role="menu" class="menu" style="list-style: none; padding: 0px; margin: 0px;">
                             <li class="active">
-                                <a href="#course_basic_details">
-                                    <span class="fa fa-info-circle">Course Basic Details</span>
+                                <a disable_anchor="true" href="#course_basic_details">
+                                    <span>Course Basic Details</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#course_other_information">
-                                    <span class="fa fa-info-circle">Course Other Information</span>
+                                <a disable_anchor="true" href="#course_preview_video">
+                                    <span>Course Preview Video</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#course_security">
-                                    <span class="fa fa-info-circle">Course Security</span>
+                                <a disable_anchor="true" href="#course_curriculam">
+                                    <span>Course Curriculam</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a disable_anchor="true" href="#course_security">
+                                    <span>Course Security</span>
                                 </a>
                             </li>
                         </ul>
@@ -304,17 +334,100 @@
                 </div>
                 <div class="col-xs-9">
                     <div id="course_basic_details" class="course_page">
-                        <h1>Course Basic Information</h1>
-                        <p>Enter your basic course information like course description, category(on which category it belongs).</p>
+                        <div style="font-size: 36px; font-weight: 500; border-bottom: 1px solid #bfbfbf;" class="mb16">
+                            <span>Course Basic Information</span>
+                        </div>
+                        <p>Enter your basic course information like Course Pre-requisite, Target Audience etc.</p>
+                        <div>
+                            <div class="form-group">
+                                <label for="course_subtitle">Course Substitle</label>
+                                <input type="text" name="course_subtitle" id="course_subtitle" placeholder="Master in Odoo" required="True" class="form-control" t-att-value="course.course_subtitle"/>
+                            </div>
+                            <div class="form-group">
+                                <label for="promote_strategy">Promote Strategy</label>
+                                <select name="promote_strategy" id="promote_strategy" required="True" class="form-control">
+                                    <option value="" t-att-selected="course.promote_strategy == False">Select</option>
+                                    <option value="none" t-att-selected="course.promote_strategy == 'none'">No Featured Presentation</option>
+                                    <option value="latest" t-att-selected="course.promote_strategy == 'latest'">Latest Published</option>
+                                    <option value="most_voted" t-att-selected="course.promote_strategy == 'most_voted'">Most Voted</option>
+                                    <option value="most_viewed" t-att-selected="course.promote_strategy == 'most_viewed'">Most Viewed</option>
+                                    <option value="custom" t-att-selected="course.promote_strategy == 'custom'">Featured Presentation</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="language">Language</label>
+                                <select name="language" id="language" required="True" class="form-control">
+                                    <option value="" t-att-selected="not course.language">Select</option>
+                                    <t t-foreach="languages" t-as="l">
+                                        <option t-att-value="l.id" t-att-selected="l.id == course.language.id"><t t-esc="l.name"/></option>
+                                    </t>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="description">Write your Pre-requisite, Target Audience and Result of Course</label>
+                                <textarea name="description" id="description" required="True" class="form-control load_editor">
+                                    <t t-esc="course.description"/>
+                                </textarea>
+                            </div>
+                        </div>
                     </div>
-                    <div id="course_other_information" class="course_page">
-                        <h1>Course Other Information</h1>
-                        <p>Enter your other course information like course language(course explanation language), Intructors of the course, Price of the course.</p>
+                    <div id="course_preview_video" class="course_page">
+                        <div style="font-size: 36px; font-weight: 500; border-bottom: 1px solid #bfbfbf;" class="mb16">
+                            <span>Course Preview Video</span>
+                        </div>
+                        <div class="panel-group">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        Read this Preview Video Requirements
+                                        <i class="expand_collapse fa fa-infor-circle"></i>
+                                        <a data-toggle="collapse" href="#preview_video_info">
+                                            <i class="pull-right expand_collapse fa fa-chevron-down"></i>
+                                        </a>
+                                    </h4>
+                                </div>
+                                <div id="preview_video_info" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <p>A preview video should be small in terms of duration, it should be recorded in good quality, qualituy of recoding, sound must be good.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="form-group" t-if="not course.promoted_slide_id">
+                                <label for="usr">Upload Your Preview Lecture</label>
+                                <div class="input-group">
+                                    <input type="file" name="promoted_slide_id" class="form-control" placeholder="Upload Preview File"/>
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-secondary" type="button">Upload</button>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="form-group" t-if="course.promoted_slide_id">
+                                <img t-if="course.promoted_slide_id" t-attf-src="/web/image/course.lecture/#{course.promoted_slide_id.id}/image_medium" class="img-responsive oe_slides_channel_thumbnail"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="course_curriculam" class="course_page">
+                        <div style="font-size: 36px; font-weight: 500; border-bottom: 1px solid #bfbfbf;" class="mb16">
+                            <span>Course Curriculam</span>
+                        </div>
+                        <p>Enter your Curriculam here, course slides</p>
                     </div>
                     <div id="course_security" class="course_page">
-                        <h1>Course Security</h1>
+                        <div style="font-size: 36px; font-weight: 500; border-bottom: 1px solid #bfbfbf;" class="mb16">
+                            <span>Course Security</span>
+                        </div>
                         <p>Enter course security information.</p>
                     </div>
+                </div>
+            </div>
+
+            <div class="row mt32">
+                <div class="col-xs-12 text-center">
+                    <a href="/courses/save_course_details/#{slug(course)}" class="btn btn-primary btn_update_course">
+                        Update Course
+                    </a>
                 </div>
             </div>
         </div>
