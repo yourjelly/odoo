@@ -45,6 +45,12 @@ var EventRegistrationForm = Widget.extend({
 });
 
 web_editor_base.ready().then(function(){
+    _.each($('.event_date[data-render-type=visitor]'), function (el) {
+        var element = $(el);
+        var time = element.text();
+        var g = moment.utc(time).toDate();
+        element.text(g);
+    });
     var event_registration_form = new EventRegistrationForm().appendTo($('#registration_form'));
 });
 

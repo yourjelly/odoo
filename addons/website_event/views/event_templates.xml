@@ -66,7 +66,13 @@
                                     </t>
                                 </div>
                                 <div>
-                                    <i class="fa fa-clock-o"></i> <span itemprop="startDate" t-field="event.with_context(tz=event.date_tz).date_begin" t-options='{"hide_seconds":"True"}'> </span> <i>to</i> <span itemprop="endDate" t-field="event.with_context(tz=event.date_tz).date_end" t-options='{"hide_seconds":"True"}'> </span>
+                                    <t t-if="event.visitor_timezone == 'custom'">
+                                        <i class="fa fa-clock-o"></i> <span class="event_date" itemprop="startDate" t-field="event.with_context(tz=event.date_tz).date_begin"> </span> <i>to</i> <span class="event_date" itemprop="endDate" t-field="event.with_context(tz=event.date_tz).date_end"> </span>
+                                    </t>
+                                    <t t-if="event.visitor_timezone == 'visitor'">
+                                        <i class="fa fa-clock-o"></i> <span class="event_date" itemprop="startDate" t-att-data-render-type="event.visitor_timezone" t-esc="event.with_context(tz='UTC').date_begin"> </span> <i>to</i> <span class="event_date" t-att-data-render-type="event.visitor_timezone" itemprop="endDate" t-esc="event.with_context(tz='UTC').date_end"> </span>
+                                    </t>
+                                    
                                 </div>
                                 <div itemprop="location" t-field="event.address_id" t-options='{
                                     "widget": "contact",

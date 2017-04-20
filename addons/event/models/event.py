@@ -139,13 +139,16 @@ class EventEvent(models.Model):
         'event.registration', 'event_id', string='Attendees',
         readonly=False, states={'done': [('readonly', True)]})
     # Date fields
-    date_tz = fields.Selection('_tz_get', string='Timezone', required=True, default=lambda self: self.env.user.tz)
+    date_tz = fields.Selection('_tz_get', string=' ', required=True, default=lambda self: self.env.user.tz)
     date_begin = fields.Datetime(
         string='Start Date', required=True,
         track_visibility='onchange', states={'done': [('readonly', True)]})
     date_end = fields.Datetime(
         string='End Date', required=True,
         track_visibility='onchange', states={'done': [('readonly', True)]})
+    visitor_timezone = fields.Selection(
+        [('visitor', 'Visitor Timezone'), ('custom', 'Custom Timezone')],
+        'Timezone', required=True, default='visitor')
     date_begin_located = fields.Char(string='Start Date Located', compute='_compute_date_begin_tz')
     date_end_located = fields.Char(string='End Date Located', compute='_compute_date_end_tz')
 
