@@ -19,7 +19,6 @@ Install some generic chart of accounts.
         'data/account_chart_template_data.yml',
     ],
     'test': [
-        '../account/test/account_bank_statement.yml',
         '../account/test/account_invoice_state.yml',
     ],
     'demo': [
