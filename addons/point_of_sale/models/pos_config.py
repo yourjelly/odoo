@@ -120,7 +120,9 @@ class PosConfig(models.Model):
     pos_session_username = fields.Char(compute='_compute_current_session_user')
     group_by = fields.Boolean(string='Group Journal Items', default=True,
         help="Check this if you want to group the Journal Items by Product while closing a Session")
-    pricelist_id = fields.Many2one('product.pricelist', string='Pricelist', required=True, default=_default_pricelist)
+    pricelist_id = fields.Many2one('product.pricelist', string='Default Pricelist', required=True, default=_default_pricelist,
+        help="The pricelist used if no customer is selected or if the customer has no Sale Pricelist configured.")
+    available_pricelist_ids = fields.Many2many('product.pricelist', default=_default_pricelist)
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
     barcode_nomenclature_id = fields.Many2one('barcode.nomenclature', string='Barcodes', required=True, default=_get_default_nomenclature,
         help='Defines what kind of barcodes are available and how they are assigned to products, customers and cashiers')
@@ -198,6 +200,13 @@ class PosConfig(models.Model):
     def _check_default_fiscal_position(self):
         if self.default_fiscal_position_id and self.default_fiscal_position_id not in self.fiscal_position_ids:
             raise UserError(_("The default fiscal position must be included in the available fiscal positions of the point of sale"))
+
+    @api.constrains('pricelist_id', 'available_pricelist_ids')
+    def _check_default_pricelist(self):
+        if self.pricelist_id not in self.available_pricelist_ids:
+            raise UserError(_("The default pricelist must be included in the available pricelists."))
+        if any(self.available_pricelist_ids.mapped(lambda pricelist: pricelist.currency_id != self.currency_id)):
+            raise UserError(_("All available pricelists must be in the same currency as the Sales Journal."))
 
     @api.onchange('iface_print_via_proxy')
     def _onchange_iface_print_via_proxy(self):
