@@ -57,3 +57,24 @@
 .sidebar li a:hover {
     color: #21b799;
 }
+
+.course_right_column {
+    width: 360px;
+    left: auto;
+    top: 10px;
+    background-color: #FFF;
+    border: 1px solid #dedede;
+    border-radius: 4px;
+    color: #333;
+    margin-top: 18px;
+    padding: 3px;
+    z-index: 20;
+    position: absolute; 
+}
+
+@media screen and (max-width: @screen-xs-max) {
+    .course_right_column {
+        position: relative;
+        width: auto;
+    }
+}
