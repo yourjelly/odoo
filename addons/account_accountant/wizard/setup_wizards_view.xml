@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    <data>
+
+        <record id="init_financial_year_opening_form" model="ir.ui.view">
+            <field name="name">account.accountant.financial.year.op.wizard.form</field>
+            <field name="model">account.accountant.financial.year.op.wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <div class="row">
+                        <div class="col-xs-4">
+                            <label for="opening_date"/>
+                        </div>
+                        <div class="col-xs-8">
+                            <field name="opening_date"/>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xs-4">
+                            <strong>End of fiscal year</strong>
+                        </div>
+                        <div class="col-xs-4">
+                            <field name="fiscalyear_last_day"/>
+                        </div>
+                        <div class="col-xs-4">
+                            <field name="fiscalyear_last_month"/>
+                        </div>
+                    </div>
+                    <footer>
+                        <button string="Save" type="action" name="account_accountant.init_wizard_refresh_view"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="init_wizard_refresh_view" model="ir.actions.client">
+            <!--
+            TODO OCO
+
+            we reload everything instead of just closing the wizard, because the
+            status doesn't get updated otherwise ... any other way to do that ?
+
+            'ir.actions.act_window_close' < TODO OCO just closes, does not update status bar
+            -->
+            <field name="name">account.accountant.init.wizard.refresh.action</field>
+            <field name="tag">reload</field>
+        </record>
+
+    </data>
+</odoo>

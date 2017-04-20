@@ -24,6 +24,7 @@ It assigns manager and user access rights to the Administrator for the accountin
         'views/account_move_view.xml',
         'views/res_config_view.xml',
         'views/res_company_view.xml',
+        'wizard/setup_wizards_view.xml',
     ],
     'qweb': [
         "static/src/xml/account_dashboard.xml",

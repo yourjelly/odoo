@@ -6,6 +6,8 @@ from odoo import api, fields, models
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
+    account_accountant_setup_opening_date = fields.Date(string='Accounting opening date', help="Date of the opening accounting entries.")
+
     @api.model
     def setting_init_company_action(self):
         current_company = self.env['res.company']._company_default_get()
@@ -19,7 +21,18 @@ class ResCompany(models.Model):
                 'views': [[view_id, 'form']],
         }
 
-    def save_init_company_data(self):
-        #return {'type': 'ir.actions.act_window_close'} < TODO OCO just closes, does not update status bar
-        #TODO OCO we reload everything instead of just closing the wizard, because the status doesn't get updated otherwise ... any other way to do that ?
-        return {'type': 'ir.actions.client', 'tag': 'reload'}
+    @api.model
+    def setting_init_fiscal_year_action(self):
+        current_company = self.env['res.company']._company_default_get()
+
+        new_wizard = self.env['account.accountant.financial.year.op.wizard'].create({'company_id': current_company.id})
+        view_id = self.env.ref('account_accountant.init_financial_year_opening_form').id
+
+        return {
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'account.accountant.financial.year.op.wizard',
+            'target': 'new',
+            'res_id': new_wizard.id,
+            'views': [[view_id, 'form']],
+        }

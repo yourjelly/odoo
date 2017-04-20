@@ -2,15 +2,15 @@
 
 from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 
 class ResCompany(models.Model):
     _inherit = "res.company"
 
     #TODO check all the options/fields are in the views (settings + company form view)
-    fiscalyear_last_day = fields.Integer(default=31, required=True)
-    fiscalyear_last_month = fields.Selection([(1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'), (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'), (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')], default=12, required=True)
+    fiscalyear_last_day = fields.Integer(default=31, required=True, help="Last day of the fiscal year")
+    fiscalyear_last_month = fields.Selection([(1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'), (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'), (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')], default=12, required=True, help="Last month of the fiscal year")
     period_lock_date = fields.Date(string="Lock Date for Non-Advisers", help="Only users with the 'Adviser' role can edit accounts prior to and inclusive of this date. Use it for period locking inside an open fiscal year, for example.")
     fiscalyear_lock_date = fields.Date(string="Lock Date", help="No users, including Advisers, can edit accounts prior to and inclusive of this date. Use it for fiscal year locking for example.")
     transfer_account_id = fields.Many2one('account.account',
@@ -62,6 +62,16 @@ Best Regards,''')
         date_from = date + timedelta(days=1)
         date_from = date_from.replace(year=date_from.year - 1)
         return {'date_from': date_from, 'date_to': date_to}
+
+    @api.constrains("fiscalyear_last_day")
+    def validate_fiscalyear_last_day(self):
+        for record in self:
+            try:
+                datetime(day=record.fiscalyear_last_day, month=record.fiscalyear_last_month, year=2017)
+                #2017 is selected arbitrarily among non-leap years, so that we ensure February 29th cannot be selected.
+            except ValueError:
+                #Since the month comes from a fields.Selection, the error comes from the selected day.
+                raise ValidationError("The last day you selected for the fiscal year does not exist in the month you chose.")
 
     def get_new_account_code(self, current_code, old_prefix, new_prefix, digits):
         return new_prefix + current_code.replace(old_prefix, '', 1).lstrip('0').rjust(digits-len(new_prefix), '0')

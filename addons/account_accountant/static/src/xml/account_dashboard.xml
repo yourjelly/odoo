@@ -24,11 +24,11 @@
                         <i class="fa fa-check" t-if="values['banks']"/>
                         Bank Accounts
                     </button>
-                    <button name="base.action_res_company_form" t-attf-class="btn btn-sm o_arrow_button btn-default o_dashboard_action #{values['fy'] and 'o_action_done' or ''}">
+                    <button t-attf-class="btn btn-sm o_arrow_button btn-default account_fiscal_year_setting_action #{values['fy'] and 'o_action_done' or ''}">
                         <i class="fa fa-check" t-if="values['fy']"/>
                         Fiscal Year Opening
                     </button>
-                    <button name="account_accountant.action_res_company_popup" t-attf-class="btn btn-sm o_arrow_button btn-default account_company_setting_action #{values['company'] and 'o_action_done' or ''}">
+                    <button t-attf-class="btn btn-sm o_arrow_button btn-default account_company_setting_action #{values['company'] and 'o_action_done' or ''}">
                         <i class="fa fa-check" t-if="values['company']"/>
                         Company Data
                     </button>

@@ -135,7 +135,7 @@ class AccountJournal(models.Model):
 
         #TODO OCO renommer les clés du dictionnaire
         data = {'open':True}
-        data['company'] = bool(company.street)#TODO OCO bof bof, il faut qqch de plus complet
+        data['company'] = (company.street or company.street2) and company.name and company.city and company.zip and company.country_id.code
         data['banks'] = bool(self.env['account.journal'].search([
             ('company_id', '=', company.id), ('bank_acc_number','<>',False)],
             limit=1))#TODO OCO c'est vraiment pas générique, et s'il passe par une autre chemin que celui de base (genre, en recréant un nouveau journal), c'est niqué ... faire cette vérification autrement, même si on est d'accord que c'est le setting standard
@@ -150,8 +150,7 @@ class AccountJournal(models.Model):
 
         data['initial'] = bool(self.env.user.company_id.opening_balance_move_id.amount)
 
-         # Todo: wizard to set End of Year date
-        data['fy'] = False #TODO OCO: ? fiscal year ?
+        data['fy'] = bool(company.account_accountant_setup_opening_date)
 
 
         return data
