@@ -432,48 +432,43 @@
 
 <template id="my_course_details" name="My Course Details">
     <t t-call="website.layout">
-        <div class="course_content mb32">
-            <div class="o_course_navigation col-md-3" style="background-color: #8e6383;">
-                <nav class="navbar" role="navigation">
-                    <div class="course_top_nav" style="color: #FFFFFF;">
-                        <div>
-                            <a href="/courses">
-                                <i class="fa fa-angle-left"></i>
-                                <span style="margin-left: 10px;"><strong>Dashboard</strong></span>
-                            </a>
-                        </div>
-                        <div>
-                            <h2 t-esc="course.name"></h2>
-                        </div>
-                        <ul style="list-style: none; margin: 0px; padding: 5px;">
-                            <li class="course_achievements">
-                                <a href="#" style="display: block;">
-                                    <i class="fa fa-trophy"></i>
-                                    <span><strong>Achievemnts &amp; Progress</strong></span>
-                                    <!-- TODO: add server value -->
-                                    <span class="pull-right badge"><strong>0/40</strong></span>
-                                </a>
-                            </li>
-                        </ul>
+        <div class="course_content" style="height: 100%; display: flex;">
+            <div class="o_course_navigation col-md-3" style="background-color: #8e6383; padding-right: 0px; padding-left: 0px;">
+                <div class="course_top_nav" style="color: #FFFFFF; padding-left: 10px;">
+                    <div>
+                        <a href="/courses">
+                            <i class="fa fa-angle-left"></i>
+                            <span style="margin-left: 10px;"><strong>Dashboard</strong></span>
+                        </a>
                     </div>
                     <div>
-                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
-                            <span class="sr-only">Toggle navigation</span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </button>
+                        <h2 t-esc="course.name"></h2>
                     </div>
-                    <div class="o_course_index navbar-collapse collapse sidebar-navbar-collapse">
-                      <ul class="nav navbar-nav">
+                    <ul style="list-style: none; margin: 0px; padding: 5px;">
+                        <li class="course_achievements">
+                            <a href="#" style="display: block;">
+                                <i class="fa fa-trophy"></i>
+                                <span><strong>Achievemnts &amp; Progress</strong></span>
+                                <!-- TODO: add server value -->
+                                <span class="pull-right badge"><strong>0/40</strong></span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="o_course_index">
+                    <ul class="" style="list-style: none; padding: 0px; margin: 0px;">
                         <li class="active"><a href="#">Menu Item 1</a></li>
-                        <li><a href="#">Menu Item 2</a></li>
+                        <li>
+                            <a href="#" style="padding: 10px 1.7em 10px 1.6em; display: flex;">
+                                <div style="display: inline-block;" class="col-xs-10">Menu Item 2</div>
+                                <div style="display: inline-block;" class="col-xs-2"><i class="fa fa-circle"></i></div>
+                            </a>
+                        </li>
                         <li><a href="#">Menu Item 3</a></li>
                         <li><a href="#">Menu Item 4</a></li>
                         <li><a href="#">Reviews <span class="badge">1,118</span></a></li>
-                      </ul>
-                    </div><!--/.nav-collapse -->
-                </nav>
+                    </ul>
+                </div>
             </div>
             <div class="o_course_body col-md-9 col-xs-12" style="padding-left: 0px; padding-right: 0px;">
                 <div class="o_lecture_header" style="display: flex; padding-left: 5px;">
