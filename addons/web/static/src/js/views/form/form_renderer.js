@@ -51,16 +51,18 @@ return BasicRenderer.extend({
         var defs = [];
 
         function markWidget(widget, isValid) {
+            if (widget.required){
+                // console.log('widget>->>>>>>',widget,'>>>>>>>>>>>',$(widget.$el).val(),$(widget.$input).val())
+            }
             if (!isValid) {
                 invalidFields.push(widget.name);
-                if(widget.$input && $(widget.$input).val()=='' || $(widget.$input).val()=='false'){
+                if(widget.$input && ($(widget.$input).val()=='' || $(widget.$input).val()=='false')){
                     widget.$input.after("<i class='err_icon fa fa-exclamation-triangle '></i>");
                 }
-                else{
-                    if($(widget.$el).val()=='' || $(widget.$el).val()=='false'){
+                else if($(widget.$el).val()=='' || $(widget.$el).val()=='false' || $(widget.$textarea).val()==''){
                         widget.$el.after("<i class='err_icon fa fa-exclamation-triangle '></i>");
-                    }
                 }
+
             }
             widget.$el.toggleClass('o_form_invalid', !isValid);
             var idForLabel = self.idsForLabels[widget.name];
@@ -346,7 +348,6 @@ return BasicRenderer.extend({
             idForLabel: this._getIDForLabel(name),
             viewType: 'form',
         };
-        // console.log('options>>>>>>>..',options)
         var attrs = this.state.fieldsInfo.form[name];
         var widget = new attrs.Widget(this, name, this.state, options);
         this.widgets.push(widget);

@@ -30,6 +30,8 @@ var DebouncedField = AbstractField.extend({
     events: _.extend({}, AbstractField.prototype.events, {
         'input': '_onInput',
         'change': '_onChange',
+        'focusout': '_onFocusout',
+        'focus': '_onFocus',
     }),
     /**
      * for field widgets that may have a large number of field changes quickly,
@@ -101,6 +103,18 @@ var DebouncedField = AbstractField.extend({
      */
     _onInput: function () {
         this._doDebouncedAction();
+    },
+    _onFocus: function (){
+        console.log('deb-->>focus',this,">>>>>>>>>>>>>>>>>>--val",$(this.$el).val(),"this.required",this.required);
+        if(!$(this.$el).hasClass('o_form_invisible') && this.required){
+            $(this.$el).nextAll('i').remove();
+        }
+    },
+    _onFocusout: function () {
+        console.log('deb-->>focusout',this,"----------value------",$(this.$el).val(),"this.required",this.required);
+        if(!$(this.$el).hasClass('o_form_invisible') && this.required && $(this.$el).val()==''){
+            $(this.$el).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
+        }
     },
 });
 
@@ -255,6 +269,12 @@ var FieldDate = InputField.extend({
     tagName: "span",
     replace_element: true,
     supportedFieldTypes: ['date'],
+    events: _.extend({}, AbstractField.prototype.events, {
+        'input': '_onInput',
+        'change': '_onChange',
+        'focusout': '_onDateInputFocusout',
+        'focus .o_datepicker_input': '_onDateInputFocus',
+    }),
 
     /**
      * In edit mode, instantiates a DateWidget datepicker and listen to changes.
@@ -285,7 +305,16 @@ var FieldDate = InputField.extend({
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
-
+    _onDateInputFocus: function() {
+        if(!$(this.$el).hasClass('o_form_invisible') && this.required){
+            $(this.$el).nextAll('i').remove();
+        }
+    },
+    _onDateInputFocusout: function() {
+        if(!$(this.$el).hasClass('o_form_invisible') && this.required && $(this.$input).val()==''){
+            $(this.$el).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
+        }
+    },
     /**
      * return the datepicker value
      *
@@ -674,7 +703,22 @@ var FieldFloatTime = FieldFloat.extend({
 
 var FieldText = DebouncedField.extend({
     supportedFieldTypes: ['text'],
-
+     events: _.extend({}, AbstractField.prototype.events, {
+        'focus textarea': '_onFocus',
+        'focusout': '_onFocusout',
+    }),
+     _onFocus: function(){
+        console.log("field textarea focu-->",this)
+        if(!$(this.$el).hasClass('o_form_invisible') && this.required){
+            $(this.$el).nextAll('i').remove();
+        }
+     },
+     _onFocusout:function(){
+        console.log("field textarea focusout-->",this)
+        if(!$(this.$el).hasClass('o_form_invisible') && this.required && $(this.$textarea).val()==''){
+            $(this.$el).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
+        }
+     },
     /**
      * In edit mode, the text widget contains a textarea. We append it in
      * start() instead of _renderEdit() to keep the same textarea even
@@ -701,7 +745,6 @@ var FieldText = DebouncedField.extend({
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
-
     /**
      * Automatically selects the content of the field.
      *

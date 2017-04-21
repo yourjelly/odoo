@@ -998,8 +998,10 @@ var FieldMany2ManyTags = AbstractField.extend({
      * @private
      */
     _onFocus: function(){
+        console.log("many2many_tags----->> focus",this);
+        console.log("many2many_tags----->> focus Val",$(this.$el).val());
         if (!$(this.$el).hasClass('o_form_invisible') && this.required) {
-            $(this.$input).nextAll('i').remove();
+            $(this.$el).nextAll('i.err_icon').remove();
         }
     },
     /**
@@ -1008,7 +1010,7 @@ var FieldMany2ManyTags = AbstractField.extend({
      * @private
      */
     _onFocusout: function(){
-        if (this.required && $(this.$el).val()=='') {
+        if (this.required && this.value.count==0) {
             $(this.$el).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
         }
     },
