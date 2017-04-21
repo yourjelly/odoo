@@ -107,7 +107,40 @@ class WebsiteSlidesSale(http.Controller):
 			})
 		return request.render('website_slides_sale.course_details', values)
 
-	@http.route(['/course/new/<model("course.course"):course>'], type='http', auth="user", website=True)
+	@http.route(['/course/learn/<model("course.course"):course>'], type='http', auth="public", website=True)
+	def my_course_open(self, course=None, category=None, slide_type=None, **kw): # TODO: We will not have slide_type and  category so remove it and improve method
+		Lecture = request.env['course.lecture']
+		user = request.env.user
+		values = {
+			'course': course,
+			'user': user,
+			'is_public_user': user == request.website.user_id,
+			#'display_channel_settings': not request.httprequest.cookies.get('slides_channel_%s' % (channel.id), False) and channel.can_see_full,
+		}
+
+		# Display uncategorized slides
+		if not slide_type and not category:
+			category_datas = []
+			domain = [
+				'|',
+				('name', 'ilike', course.name),
+				('description', 'ilike', course.description)]
+			for category in Lecture.read_group(domain, ['category_id'], ['category_id']):
+				category_id, name = category.get('category_id') or (False, _('Uncategorized'))
+				category_datas.append({
+					'id': category_id,
+					'name': name,
+					'total': category['category_id_count'],
+					'lectures': Lecture.search(category['__domain'], limit=4, offset=0, order=order), # TODO: Order by
+				})
+			values.update({
+				'category_datas': category_datas,
+				'current_lecture': Lecture.search([], limit=1, offset=0),
+			})
+		return request.render('website_slides_sale.my_course_details', values)
+
+
+	@http.route(['/course/manage/<model("course.course"):course>'], type='http', auth="user", website=True)
 	def course_new(self, course=None, **post):
 		languages = request.env['res.lang'].search([])
 		values = {
@@ -117,13 +150,14 @@ class WebsiteSlidesSale(http.Controller):
 		}
 		return request.render('website_slides_sale.course_new_form', values)
 
+
 	@http.route(['/shop/add_course'], type='http', auth="user", methods=['POST'], website=True)
 	def add_course(self, name=None, category=0, **post):
 		course = request.env['course.course'].create({
 			'name': name or _("New Course"),
 		})
 
-		return request.redirect("/course/new/%s" % slug(course))
+		return request.redirect("/course/manage/%s" % slug(course))
 
 	@http.route(['/course/dashboard'], type='http', auth='user', website=True)
 	def instructor_course_dashboard(self, **kw):
