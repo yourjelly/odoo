@@ -137,20 +137,20 @@ class AccountJournal(models.Model):
         data = {'open':True}
         data['company'] = (company.street or company.street2) and company.name and company.city and company.zip and company.country_id.code
         data['banks'] = bool(self.env['account.journal'].search([
-            ('company_id', '=', company.id), ('bank_acc_number','<>',False)],
+            ('company_id', '=', company.id), ('bank_acc_number','!=',False), ('bank_id','!=',False)],
             limit=1))#TODO OCO c'est vraiment pas générique, et s'il passe par une autre chemin que celui de base (genre, en recréant un nouveau journal), c'est niqué ... faire cette vérification autrement, même si on est d'accord que c'est le setting standard
-        data['chart'] = False
+        data['chart'] = False #TODO OCO: pas sûr de saisir ce qu'il y a à faire avec le Chart of Accounts
 
         accounts = self.env['account.account'].search([
-            ('company_id', '=', company.id), ('user_type_id.type','<>','liquidity')])
+            ('company_id', '=', company.id), ('user_type_id.type','!=','liquidity')])
         for a in accounts:
-            if a.create_date <> accounts[0].create_date:
+            if a.create_date != accounts[0].create_date:
                 data['chart'] = True
                 break
 
         data['initial'] = bool(self.env.user.company_id.opening_balance_move_id.amount)
 
-        data['fy'] = bool(company.account_accountant_setup_opening_date)
+        data['fy'] = bool(company.account_accountant_opening_date)
 
 
         return data

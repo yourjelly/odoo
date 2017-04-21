@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, _
+from odoo import fields, models, api, _
 import datetime
 
 
@@ -34,5 +34,19 @@ class AccountConfigSettings(models.TransientModel):
         'account.journal',
         related='company_id.tax_cash_basis_journal_id',
         string="Tax Cash Basis Journal",)
+    account_accountant_opening_move = fields.Many2one(string='Opening journal entry', comodel_name='account.move', related='company_id.account_accountant_opening_move')
+    account_accountant_opening_journal = fields.Many2one(string='Opening journal', comodel_name='account.journal', related='company_id.account_accountant_opening_journal')
+    account_accountant_opening_date = fields.Date(string='Accounting opening date', related='company_id.account_accountant_opening_date')
+    account_accountant_opening_move_state =fields.Char(compute="_compute_opening_move_state")
+
+    @api.depends('account_accountant_opening_move.state')
+    def _compute_opening_move_state(self):
+        #TODO OCO DEBUG
+        import logging
+        logger=logging.getLogger()
+        logger.warn("papa a vu le fifi de lolo")
+
+        for record in self:
+            record.account_accountant_opening_move_state = record.account_accountant_opening_move and record.account_accountant_opening_move.state or False
 
 

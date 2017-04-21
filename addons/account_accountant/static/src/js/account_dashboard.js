@@ -22,6 +22,7 @@ var AccountDashboardView = KanbanView.extend({
         'click .o_dashboard_action': 'on_dashboard_action_clicked', //TODO OCO supprimer
         'click .account_company_setting_action': 'account_company_setting_action_clicked',
         'click .account_fiscal_year_setting_action': 'account_fiscal_year_setting_action_clicked',
+        'click .account_bank_account_setting_action': 'account_bank_account_setting_action_clicked',
     },
 
     account_company_setting_action_clicked: function(ev) {
@@ -32,6 +33,12 @@ var AccountDashboardView = KanbanView.extend({
 
     account_fiscal_year_setting_action_clicked: function(ev) {
         new Model('res.company').call('setting_init_fiscal_year_action', []).then(function(rslt_action){
+            web_client.action_manager.do_action(rslt_action);
+        });
+    },
+
+    account_bank_account_setting_action_clicked: function(ev) {
+        new Model('res.company').call('setting_init_bank_account_action', []).then(function(rslt_action){
             web_client.action_manager.do_action(rslt_action);
         });
     },

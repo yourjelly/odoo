@@ -35,6 +35,20 @@
             </field>
         </record>
 
+        <record id="init_bank_journal_form" model="ir.ui.view">
+            <field name="name">account.accountant.init.bank.journal.form</field>
+            <field name="model">account.journal</field>
+            <field name="inherit_id" ref="account.view_account_bank_journal_form"/>
+            <field name="mode">primary</field>
+            <field name="arch" type="xml">
+                <xpath expr="//form/sheet" position="after">
+                    <footer>
+                        <button string="Save" type="action" name="account_accountant.init_wizard_refresh_view"/>
+                    </footer>
+                </xpath>
+            </field>
+        </record>
+
         <record id="init_wizard_refresh_view" model="ir.actions.client">
             <!--
             TODO OCO

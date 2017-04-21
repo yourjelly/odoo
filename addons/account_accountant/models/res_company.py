@@ -6,7 +6,9 @@ from odoo import api, fields, models
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
-    account_accountant_setup_opening_date = fields.Date(string='Accounting opening date', help="Date of the opening accounting entries.")
+    account_accountant_opening_move = fields.Many2one(string='Opening journal entry', comodel_name='account.move', help="The journal entry containing all the opening journal items of this company's accounting.")
+    account_accountant_opening_journal = fields.Many2one(string='Opening journal', comodel_name='account.journal', help="Journal when the opening moves of this company's accounting will be posted.")
+    account_accountant_opening_date = fields.Date(string='Accounting opening date', help="Date of the opening entries of this company's accounting.")
 
     @api.model
     def setting_init_company_action(self):
@@ -34,5 +36,21 @@ class ResCompany(models.Model):
             'res_model': 'account.accountant.financial.year.op.wizard',
             'target': 'new',
             'res_id': new_wizard.id,
+            'views': [[view_id, 'form']],
+        }
+
+    @api.model
+    def setting_init_bank_account_action(self):
+        current_company = self.env['res.company']._company_default_get()
+        bank_journal = self.env['account.journal'].search([('company_id','=',current_company.id), ('type','=','bank')], limit=1)
+
+        view_id = self.env.ref('account_accountant.init_bank_journal_form').id
+
+        return {
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'account.journal',
+            'target': 'new',
+            'res_id': bank_journal.id,
             'views': [[view_id, 'form']],
         }

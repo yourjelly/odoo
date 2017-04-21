@@ -20,9 +20,9 @@
                         <i class="fa fa-check" t-if="values['chart']"/>
                         Chart of Accounts
                     </button>
-                    <button name="account.action_account_bank_journal_form" t-attf-class="btn btn-sm o_arrow_button btn-default o_dashboard_action #{values['banks'] and 'o_action_done' or ''}">
+                    <button name="account.action_account_bank_journal_form" t-attf-class="btn btn-sm o_arrow_button btn-default account_bank_account_setting_action #{values['banks'] and 'o_action_done' or ''}">
                         <i class="fa fa-check" t-if="values['banks']"/>
-                        Bank Accounts
+                        Bank Account
                     </button>
                     <button t-attf-class="btn btn-sm o_arrow_button btn-default account_fiscal_year_setting_action #{values['fy'] and 'o_action_done' or ''}">
                         <i class="fa fa-check" t-if="values['fy']"/>

@@ -14,7 +14,7 @@ class FinancialYearOpeningWizard(models.TransientModel):
         return today + relativedelta(day=1, hour=0, minute=0, second=0, microsecond=0)
 
     company_id = fields.Many2one(comodel_name='res.company')
-    opening_date = fields.Date(required=True,default=_default_opening_date, related='company_id.account_accountant_setup_opening_date')
+    opening_date = fields.Date(required=True,default=_default_opening_date, related='company_id.account_accountant_opening_date')
     fiscalyear_last_day = fields.Integer(related="company_id.fiscalyear_last_day", required=True)
     fiscalyear_last_month = fields.Selection(selection=[(1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'), (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'), (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')],
                                              related="company_id.fiscalyear_last_month",
