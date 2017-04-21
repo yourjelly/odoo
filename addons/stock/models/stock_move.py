@@ -599,9 +599,11 @@ class StockMove(models.Model):
         ancestors_list = {}
 
         # work only on in progress moves
-        moves = self.filtered(lambda move: move.state in ['confirmed', 'waiting', 'assigned'])
+        moves = self.filtered(lambda move: move.state in ['confirmed', 'waiting', 'assigned']).sorted(key = lambda x: x.state in )
         #moves.filtered(lambda move: move.reserved_quant_ids).do_unreserve()
         quants_chosen = {}
+        # sort moves by ancestors / return
+        
         for move in moves:
             if move.location_id.usage in ('supplier', 'inventory', 'production') or move.product_id.type == "consu":
                 moves_to_assign |= move
@@ -612,24 +614,28 @@ class StockMove(models.Model):
                     quants = Quant.increase_reserved_quantity(move.product_id, move.location_id, move.product_qty)
                     quants_chosen[move.id] = quants
                 else:
-                    packops = move.move_orig_ids.filtered(lambda x: x.state == 'done').mapped('pack_operation_ids')
-                    if not packops:
-                        continue
+                    # First action
+                    src_lines = move.move_orig_ids.filtered(lambda x: x.state == 'done').mapped('pack_operation_ids')
+                    dest_moves = move.move_orig_ids.mapped('move_dest_ids')
+                    dest_lines = dest_moves.mapped('pack_operation_ids')
+                    # TODO: could use named tuple here instead
+                    key_qty = {}
+                    for line in src_lines:
+                        key = (line.product_id, line.location_dest_id, line.lot_id, line.package_id)
+                        key_qty.setdefault(key, 0)
+                        key_qty[key] += line.product_qty
+                    for line in dest_lines:
+                        key = (line.product_id, line.location_id, line.lot_id, line.package_id)
+                        key_qty.set_default(key, 0)
+                        key_qty[key] -= line.product_qty
+                    qty_reserved = 0
                     quants_chosen[move.id] = []
-                    for ops in packops:
-                        # Possible problem here with location / UoM conversion
-                        qty_reserved = 0
-                        # We should limit ops.product_qty to the only
-                        qty = min(ops.product_qty, move.product_qty - qty_reserved)
-                        quants = Quant.increase_reserved_quantity(move.product_id, ops.location_dest_id, qty, 
-                                                                  lot_id=ops.lot_id, package_id=ops.package_id, owner_id=ops.owner_id)
+                    for key in key_qty.keys().filtered(lambda x: key_qty[x] > 0):
+                        qty = min(key_qty[key], move.product_qty - qty_reserved)
+                        quants = Quant.increase_reserved_quantity(key[0], key[1], qty, 
+                                                                  lot_id=key[2], package_id=key[3]) #TOOD owner
                         qty_reserved += sum([x[1] for x in quants])
                         quants_chosen[move.id] += quants
-                
-                # TODO: it should change the state of the move -> check with reserved_quants
-                if sum(x[1] for x in quants) > 0:
-                    moves_to_assign |= move
-            
         
         # Do do_prepare_partial with the quants chosen
         for pick in self.mapped('picking_id'):
@@ -671,7 +677,6 @@ class StockMove(models.Model):
 #                 qty = move.product_qty
 #                 quants = Quant.quants_get_preferred_domain(qty, move, domain=main_domain[move.id], preferred_domain_list=[])
 #                 Quant.quants_reserve(quants, move)
-            
 
 
         # force assignation of consumable products and incoming from supplier/inventory/production
