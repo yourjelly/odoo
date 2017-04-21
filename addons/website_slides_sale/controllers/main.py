@@ -7,6 +7,7 @@ from odoo import http, _
 from odoo.exceptions import AccessError, UserError
 from odoo.http import request
 from odoo.addons.website.models.website import slug
+from odoo.addons.website_portal.controllers.main import website_account, get_records_pager
 
 
 _logger = logging.getLogger(__name__)
@@ -130,3 +131,68 @@ class WebsiteSlidesSale(http.Controller):
 		courses = Course.search([('user_id', '=', request.env.user.id)])
 		return request.render('website_slides_sale.course_instructor_dashboard', {'courses': courses})
 
+
+class WebsiteAccount(website_account):
+
+	def _prepare_portal_layout_values(self):
+		Course = request.env['course.course']
+		values = super(WebsiteAccount, self)._prepare_portal_layout_values()
+		partner = request.env.user.partner_id
+		course_count = Course.search_count([
+			('message_partner_ids', 'child_of', [partner.commercial_partner_id.id])
+		])
+		values.update({
+			'course_count': course_count,
+		})
+		return values
+
+	@http.route(['/my/courses', '/my/courses/page/<int:page>'], type='http', auth="user", website=True)
+	def portal_my_courses(self, page=1, date_begin=None, date_end=None, sortby=None, **kw):
+		Course = request.env['course.course']
+		values = self._prepare_portal_layout_values()
+		partner = request.env.user.partner_id
+
+		domain = [
+			('message_partner_ids', 'child_of', [partner.commercial_partner_id.id]),
+		]
+
+		searchbar_sortings = {
+			'name': {'label': _('Name'), 'order': 'name asc'},
+			'course_price': {'label': _('Price'), 'order': 'course_price'},
+		}
+		# default sortby order
+		if not sortby:
+			sortby = 'name'
+		sort_order = searchbar_sortings[sortby]['order']
+
+		archive_groups = self._get_archive_groups('course.course', domain)
+		if date_begin and date_end:
+			domain += [('create_date', '>', date_begin), ('create_date', '<=', date_end)]
+
+		# count for pager
+		course_count = Course.search_count(domain)
+		print "\n\ncourse_count ::: ", course_count
+		# pager
+		pager = request.website.pager(
+			url="/my/courses",
+			url_args={'date_begin': date_begin, 'date_end': date_end, 'sortby': sortby},
+			total=course_count,
+			page=page,
+			step=self._items_per_page
+		)
+		# content according to pager and archive selected
+		courses = Course.search(domain, order=sort_order, limit=self._items_per_page, offset=pager['offset'])
+		print "\n\ncourses and domain are ::: ", courses, domain
+		request.session['my_orders_history'] = courses.ids[:100]
+
+		values.update({
+			'date': date_begin,
+			'courses': courses.sudo(),
+			'page_name': 'courses',
+			'pager': pager,
+			'archive_groups': archive_groups,
+			'default_url': '/my/courses',
+			'searchbar_sortings': searchbar_sortings,
+			'sortby': sortby,
+		})
+		return request.render("website_slides_sale.portal_my_courses", values)

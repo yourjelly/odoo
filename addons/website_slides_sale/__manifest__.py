@@ -16,7 +16,7 @@ Sale Courses'
  * Quizzes
  * Supported document types : PDF, images, YouTube videos and Google Drive documents)
 """,
-    'depends': ['website_slides', 'website_sale', 'survey'],
+    'depends': ['website_slides', 'website_sale', 'website_portal', 'survey'],
     'data': [
         'data/website_slides_sale_data.xml',
         'security/website_slides_sale_security.xml',
