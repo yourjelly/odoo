@@ -3,7 +3,7 @@
 
 import uuid
 
-from odoo import api, fields, models
+from odoo import fields, models
 
 
 class AccountPaymentRequest(models.Model):
