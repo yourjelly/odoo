@@ -34,7 +34,6 @@ class ReturnPicking(models.TransientModel):
             raise UserError("You may only return one picking at a time!")
         res = super(ReturnPicking, self).default_get(fields)
 
-        Quant = self.env['stock.quant']
         move_dest_exists = False
         product_return_moves = []
         picking = self.env['stock.picking'].browse(self.env.context.get('active_id'))
@@ -46,14 +45,7 @@ class ReturnPicking(models.TransientModel):
                     continue
                 if move.move_dest_ids:
                     move_dest_exists = True
-                # Sum the quants in that location that can be returned (they should have been moved by the moves that were included in the returned picking)
-                quantity = sum(quant.qty for quant in Quant.search([
-                    ('history_ids', 'in', move.id),
-                    ('qty', '>', 0.0), ('location_id', 'child_of', move.location_dest_id.id)
-                ]).filtered(
-                    lambda quant: not quant.reservation_id or quant.reservation_id.origin_returned_move_id != move)
-                )
-                quantity = move.product_id.uom_id._compute_quantity(quantity, move.product_uom)
+                quantity = 0.0
                 product_return_moves.append((0, 0, {'product_id': move.product_id.id, 'quantity': quantity, 'move_id': move.id}))
 
             if not product_return_moves:
@@ -77,16 +69,6 @@ class ReturnPicking(models.TransientModel):
     def _create_returns(self):
         # TDE FIXME: store it in the wizard, stupid
         picking = self.env['stock.picking'].browse(self.env.context['active_id'])
-
-        return_moves = self.product_return_moves.mapped('move_id')
-        unreserve_moves = self.env['stock.move']
-        for move in return_moves:
-            unreserve_moves |= move.move_dest_ids.filtered(lambda x: x.state not in ('done', 'cancel') and x.reserved_quant_ids)
-
-        if unreserve_moves:
-            unreserve_moves.do_unreserve()
-            # break the link between moves in order to be able to fix them later if needed
-            unreserve_moves.write({'move_orig_ids': False}) #TODO: not too 
 
         # create new picking for returned products
         picking_type_id = picking.picking_type_id.return_picking_type_id.id or picking.picking_type_id.id
@@ -124,6 +106,7 @@ class ReturnPicking(models.TransientModel):
                     'picking_type_id': picking_type_id,
                     'warehouse_id': picking.picking_type_id.warehouse_id.id,
                     'origin_returned_move_id': return_line.move_id.id,
+                    'move_orig_ids': [(4, return_line.move_id.id)],
                     'procure_method': 'make_to_stock',
                     'move_dest_ids': move_dest_ids,
                 })

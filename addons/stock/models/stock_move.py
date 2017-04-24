@@ -609,7 +609,11 @@ class StockMove(models.Model):
                 else:
                     # First action
                     src_lines = move.move_orig_ids.filtered(lambda x: x.state == 'done').mapped('pack_operation_ids')
-                    dest_moves = move.move_orig_ids.mapped('move_dest_ids')
+                    # src_lines_extra are needed for return
+                    total_moves = move.move_orig_ids.mapped('move_dest_ids').mapped('move_orig_ids')
+                    src_lines_extra = (total_moves - move.move_orig_ids).mapped('pack_operation_ids') #return
+                    
+                    dest_moves = total_moves.mapped('move_dest_ids')
                     dest_lines = dest_moves.mapped('pack_operation_ids')
                     # TODO: could use named tuple here instead
                     key_qty = {}
@@ -617,9 +621,13 @@ class StockMove(models.Model):
                         key = (line.product_id, line.location_dest_id, line.lot_id, line.package_id)
                         key_qty.setdefault(key, 0)
                         key_qty[key] += line.product_qty
+                    for line in src_lines_extra: #In case of return
+                        key = (line.product_id, line.location_dest_id, line.lot_id, line.package_id)
+                        if key in key_qty:
+                            key_qty[key] += line.product_qty
                     for line in dest_lines:
                         key = (line.product_id, line.location_id, line.lot_id, line.package_id)
-                        key_qty.set_default(key, 0)
+                        key_qty.setdefault(key, 0)
                         key_qty[key] -= line.product_qty
                     qty_reserved = 0
                     quants_chosen[move.id] = []
