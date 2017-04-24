@@ -207,7 +207,8 @@ class ProcurementOrder(models.Model):
                     ('picking_id.printed', '=', False),
                     ('picking_id.state', 'in', ['draft', 'confirmed', 'waiting', 'partially_available', 'assigned']),
                     ('product_id', '=', self.product_id.id)], limit=1)
-                if moves:
+                # We should not add it to an existing
+                if moves and not moves[0].move_dest_ids.mapped('move_orig_ids').filtered(lambda x: x.state == 'done'):
                     added_to_existing = True
                     moves[0].write({'product_uom_qty': moves[0].product_uom_qty + self.product_qty, #TODO: UoM conversion...
                                     'procurement_ids': [(4, self.id)], 
