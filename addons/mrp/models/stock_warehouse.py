@@ -33,15 +33,18 @@ class StockWarehouse(models.Model):
     @api.multi
     def get_routes_dict(self):
         result = super(StockWarehouse, self).get_routes_dict()
+        production_location = self.env['ir.model.data'].sudo().get_object('stock', 'location_production')
         for warehouse in self:
             result[warehouse.id]['manu_only'] = [
                 self.Routing(warehouse.lot_stock_id, warehouse.lot_stock_id, warehouse.int_type_id)]
             result[warehouse.id]['pick_manu'] = [
                 self.Routing(warehouse.lot_stock_id, warehouse.wh_input_manu_loc_id, warehouse.int_type_id),
-                self.Routing(warehouse.wh_input_manu_loc_id, warehouse.lot_stock_id, warehouse.int_type_id)]
+                self.Routing(warehouse.wh_input_manu_loc_id, production_location, warehouse.int_type_id)]
+                # self.Routing(warehouse.wh_input_manu_loc_id, warehouse.lot_stock_id, warehouse.int_type_id)]
             result[warehouse.id]['pick_manu_out'] = [
                 self.Routing(warehouse.lot_stock_id, warehouse.wh_input_manu_loc_id, warehouse.int_type_id),
-                self.Routing(warehouse.wh_input_manu_loc_id, warehouse.wh_output_manu_loc_id, warehouse.int_type_id),
+                self.Routing(warehouse.wh_input_manu_loc_id, production_location, warehouse.int_type_id),
+                # self.Routing(warehouse.wh_input_manu_loc_id, warehouse.wh_output_manu_loc_id, warehouse.int_type_id),
                 self.Routing(warehouse.wh_output_manu_loc_id, warehouse.lot_stock_id, warehouse.int_type_id)]
             result[warehouse.id]['manufacture'] = [
                 self.Routing(warehouse.lot_stock_id, warehouse.lot_stock_id, warehouse.int_type_id)]
@@ -144,24 +147,22 @@ class StockWarehouse(models.Model):
                 manufcture_route = self.env['stock.location.route'].search([('name', 'like', _('Manufacture'))], limit=1)
                 manufcture_route.pull_ids.write({'active': False})
             else:
-                manufcture_route = self.env['stock.location.route'].create(warehouse._get_reception_delivery_route_values(warehouse.manufacture_steps))
+                manufcture_route = self.env['stock.location.route'].create(warehouse._get_manufacturing_route_values(warehouse.manufacture_steps))
             routings = routes_data[warehouse.id][warehouse.delivery_steps]
             dummy, pull_rules_list = warehouse._get_push_pull_rules_values(
                 routings, values={'active': True, 'route_id': manufcture_route.id})
             if warehouse.manufacture_pull_id.route_id.push_ids:
+                vals = warehouse._get_manufacture_push_rules_values(routes_data)[0]
                 for push_id in warehouse.manufacture_pull_id.route_id.push_ids:
                     existing_push = self.env['stock.location.path'].search([
-                        ('picking_type_id', '=', push_id.picking_type_id.id),
-                        ('location_dest_id', '=', push_id.location_dest_id.id),
-                        ('location_from_id', '=', push_id.location_from_id.id),
-                        ('route_id', '=', push_id.route_id.id or manufcture_route.id),
-                        ('active', '=', False),
+                        ('location_from_id', '=',  vals['location_id']),
+                        ('location_dest_id', '=',  vals['location_src_id']),
+                        ('picking_type_id', '=', vals['picking_type_id'])
                     ])
                     if existing_push:
                         existing_push.write({'active': True})
                         break
                     else:
-                        vals = warehouse._get_manufacture_push_rules_values(routes_data)[0]
                         self.env['stock.location.path'].create({
                             'name': vals['name'],
                             'location_from_id': vals['location_id'],
@@ -169,6 +170,7 @@ class StockWarehouse(models.Model):
                             'picking_type_id': vals['picking_type_id'],
                             'route_id': manufcture_route.id,
                             })
+                        break
             else:
                 vals = warehouse._get_manufacture_push_rules_values(routes_data)[0]
                 self.env['stock.location.path'].create({
