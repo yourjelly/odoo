@@ -229,10 +229,6 @@ var AbstractField = Widget.extend({
         if ('required' in this.modifiers) {
             is_required = new Domain(this.modifiers.required).compute(this.recordData);
         }
-        // console.log("abst......",$(this.$el).val())
-        // if (is_required && $(this.$el).val()=='') {
-        //     $(this.$input).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
-        // }
         return this._isValid && !(is_required && !this.isSet());
     },
     /**

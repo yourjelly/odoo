@@ -51,16 +51,16 @@ return BasicRenderer.extend({
         var defs = [];
 
         function markWidget(widget, isValid) {
-            if (widget.required){
-                // console.log('widget>->>>>>>',widget,'>>>>>>>>>>>',$(widget.$el).val(),$(widget.$input).val())
-            }
             if (!isValid) {
                 invalidFields.push(widget.name);
                 if(widget.$input && ($(widget.$input).val()=='' || $(widget.$input).val()=='false')){
                     widget.$input.after("<i class='err_icon fa fa-exclamation-triangle '></i>");
                 }
-                else if($(widget.$el).val()=='' || $(widget.$el).val()=='false' || $(widget.$textarea).val()==''){
-                        widget.$el.after("<i class='err_icon fa fa-exclamation-triangle '></i>");
+                else if (widget.$el.hasClass('oe_form_field_html_text') && $(widget.$textarea).val()=='') {
+                        widget.$content.after("<i class='err_icon fa fa-exclamation-triangle '></i>");
+                }
+                else if($(widget.$el).val()=='' || $(widget.$el).val()=='false' || $(widget.$textarea).val()=='' && !widget.$el.hasClass('oe_form_field_html_text')){
+                    widget.$el.after("<i class='err_icon fa fa-exclamation-triangle '></i>");
                 }
 
             }

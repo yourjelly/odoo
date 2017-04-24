@@ -105,13 +105,11 @@ var DebouncedField = AbstractField.extend({
         this._doDebouncedAction();
     },
     _onFocus: function (){
-        console.log('deb-->>focus',this,">>>>>>>>>>>>>>>>>>--val",$(this.$el).val(),"this.required",this.required);
         if(!$(this.$el).hasClass('o_form_invisible') && this.required){
             $(this.$el).nextAll('i').remove();
         }
     },
     _onFocusout: function () {
-        console.log('deb-->>focusout',this,"----------value------",$(this.$el).val(),"this.required",this.required);
         if(!$(this.$el).hasClass('o_form_invisible') && this.required && $(this.$el).val()==''){
             $(this.$el).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
         }
@@ -708,13 +706,11 @@ var FieldText = DebouncedField.extend({
         'focusout': '_onFocusout',
     }),
      _onFocus: function(){
-        console.log("field textarea focu-->",this)
         if(!$(this.$el).hasClass('o_form_invisible') && this.required){
             $(this.$el).nextAll('i').remove();
         }
      },
      _onFocusout:function(){
-        console.log("field textarea focusout-->",this)
         if(!$(this.$el).hasClass('o_form_invisible') && this.required && $(this.$textarea).val()==''){
             $(this.$el).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
         }
@@ -1064,6 +1060,16 @@ var FieldBinaryFile = AbstractFieldBinary.extend({
         },
         'click .o_form_input': function () { // eq[0]
             this.$('.o_form_input_file').click();
+        },
+        'focus .o_form_input': function(){
+            if (!$(this.$el).hasClass('o_form_invisible') && this.required) {
+                $(this.$el).nextAll('i').remove();
+            }
+        },
+        'focusout': function(){
+            if (this.required && !$(this.$el).hasClass('o_form_invisible') && !this.value) {
+                $(this.$el).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
+            }
         },
     }),
     supportedFieldTypes: ['binary'],
