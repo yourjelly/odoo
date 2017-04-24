@@ -9,7 +9,7 @@ from odoo import api, fields, models, _
 from odoo.tools import float_is_zero, float_compare
 from odoo.tools.misc import formatLang
 
-from odoo.exceptions import UserError, RedirectWarning, ValidationError, Warning
+from odoo.exceptions import UserError, RedirectWarning, ValidationError, Warning, AccessError
 
 import odoo.addons.decimal_precision as dp
 import logging
@@ -325,6 +325,9 @@ class AccountInvoice(models.Model):
     outstanding_credits_debits_widget = fields.Text(compute='_get_outstanding_info_JSON')
     payments_widget = fields.Text(compute='_get_payment_info_JSON')
     has_outstanding = fields.Boolean(compute='_get_outstanding_info_JSON')
+    payment_acquirer_id = fields.Many2one('payment.acquirer', string='Payment Acquirer', copy=False)
+    payment_tx_id = fields.Many2one('payment.transaction', string='Transaction', copy=False)
+    payment_request_id = fields.Many2one('account.payment.request', string='Request for Online Payment', copy=False)
 
     _sql_constraints = [
         ('number_uniq', 'unique(number, company_id, journal_id, type)', 'Invoice Number must be unique per Company!'),
@@ -587,7 +590,51 @@ class AccountInvoice(models.Model):
             raise UserError(_("You cannot validate an invoice with a negative total amount. You should create a credit note instead."))
         to_open_invoices.action_date_assign()
         to_open_invoices.action_move_create()
-        return to_open_invoices.invoice_validate()
+        result = to_open_invoices.invoice_validate()
+        if result:
+            # create record for online payment request and record use for view
+            PaymentRequest = self.env['account.payment.request']
+            for invoice in self:
+                if not invoice.payment_request_id:
+                    invoice.payment_request_id = PaymentRequest.create({
+                        'invoice_id': invoice.id,
+                        'due_date': invoice.date_due,
+                        'currency_id': invoice.currency_id.id,
+                        'company_id': invoice.company_id.id,
+                        'partner_id': invoice.partner_id.id,
+                        'reference': invoice.number,
+                        'invoiced_amount': invoice.amount_total,
+                    })
+        return result
+
+    @api.multi
+    def get_access_action(self):
+        """ Instead of the classic form view, redirect to the online invoice. """
+        self.ensure_one()
+        if self.env.user.share or self.env.context.get('force_website'):
+            try:
+                self.check_access_rule('read')
+            except AccessError:
+                pass
+            else:
+                if not self.payment_request_id:
+                    self.payment_request_id = self.env['account.payment.request'].create({
+                        'invoice_id': self.id,
+                        'due_date': self.date_due,
+                        'currency_id': self.currency_id.id,
+                        'company_id': self.company_id.id,
+                        'partner_id': self.partner_id.id,
+                        'reference': self.number,
+                        'invoiced_amount': self.amount_total,
+                    })
+
+                return {
+                    'type': 'ir.actions.act_url',
+                    'url': '/invoice/payment/%s' % self.payment_request_id.access_token,
+                    'target': 'self',
+                    'res_id': self.id,
+                }
+        return super(AccountInvoice, self).get_access_action()
 
     @api.multi
     def action_invoice_paid(self):
