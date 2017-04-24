@@ -121,22 +121,20 @@ class WebsiteSlidesSale(http.Controller):
 		# Display uncategorized slides
 		if not slide_type and not category:
 			category_datas = []
-			domain = [
-				'|',
-				('name', 'ilike', course.name),
-				('description', 'ilike', course.description)]
+			domain = [('channel_id', '=', course.id)]
 			for category in Lecture.read_group(domain, ['category_id'], ['category_id']):
 				category_id, name = category.get('category_id') or (False, _('Uncategorized'))
 				category_datas.append({
 					'id': category_id,
 					'name': name,
 					'total': category['category_id_count'],
-					'lectures': Lecture.search(category['__domain'], limit=4, offset=0, order=order), # TODO: Order by
+					'lectures': Lecture.search(category['__domain'], limit=4, offset=0), # TODO: Order by
 				})
 			values.update({
 				'category_datas': category_datas,
 				'current_lecture': Lecture.search([], limit=1, offset=0),
 			})
+		print "\n\nvalues ::: ", values
 		return request.render('website_slides_sale.my_course_details', values)
 
 

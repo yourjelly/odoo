@@ -58,6 +58,10 @@
     color: #21b799;
 }
 
+.o_hidden {
+    display: none;
+}
+
 .course_right_column {
     width: 360px;
     left: auto;
@@ -114,13 +118,55 @@
 .o_course_navigation .course_top_nav a {
     color: #FFFFFF;
 }
-.o_course_navigation .o_course_index li:not(.section) {
+.o_course_navigation .o_course_index li:not(.o_category_menu) {
     background-color: #f2f2f2;
 }
-.o_course_navigation .o_course_index li:not(.section).active {
+.o_course_navigation .o_course_index li:not(.o_category_menu).active {
     background-color: #d9d9d9;
     box-shadow: 0 1px 3px 0 transparent,inset 0 1px 5px 0 rgba(0,0,0,.1);
 }
+
 .o_course_navigation .o_course_index li {
     border-bottom: 1px solid rgba(128,128,128,.2)
+}
+.o_course_index ul {
+    list-style: none;
+    padding: 0px;
+    margin: 0px;
+}
+
+.course_content .o_course_index .o_category_menu a, .course_content .o_course_index .o_lecture_menu a {
+    padding: 10px 1.7em 10px 1.6em;
+    display: flex;
+}
+
+.course_content .o_course_index .o_category_menu a:hover, .course_content .o_course_index .o_lecture_menu a:hover {
+    background-color: rgba(191,191,191,.4);
+}
+
+.course_content .o_course_index .o_lecture_name {
+    -webkit-box-flex: 3;
+    -webkit-flex: 3;
+    box-flex: 3;
+    flex: 3;
+}
+.course_content .o_course_index {
+    .o_lecture_status {
+        -webkit-box-flex: 1;
+        -webkit-flex: 1;
+        box-flex: 1;
+        flex: 1;
+    }
+}
+
+.course_content .o_course_index li:not(.active) .o_lecture_status {
+    display: none;
+}
+
+.o_lecture_header {
+    padding-top: 5px;
+    .o_course_title {
+        font-weight: 400;
+        color: #5b5b5b;
+    }
 }

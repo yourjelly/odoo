@@ -444,35 +444,38 @@
                     <div>
                         <h2 t-esc="course.name"></h2>
                     </div>
-                    <ul style="list-style: none; margin: 0px; padding: 5px;">
+                    <ul style="list-style: none; margin: 0px; padding: 0px; margin-bottom: 10px; margin-right: 10px;">
                         <li class="course_achievements">
                             <a href="#" style="display: block;">
                                 <i class="fa fa-trophy"></i>
                                 <span><strong>Achievemnts &amp; Progress</strong></span>
                                 <!-- TODO: add server value -->
-                                <span class="pull-right badge"><strong>0/40</strong></span>
+                                <span class="pull-right badge" style="background-color: rgba(255,255,255,.1); box-shadow: inset 0 1px 0 0 rgba(0,0,0,.1); padding: 5px 7px;"><strong>0/40</strong></span>
                             </a>
                         </li>
                     </ul>
                 </div>
                 <div class="o_course_index">
-                    <ul class="" style="list-style: none; padding: 0px; margin: 0px;">
-                        <li class="active"><a href="#">Menu Item 1</a></li>
-                        <li>
-                            <a href="#" style="padding: 10px 1.7em 10px 1.6em; display: flex;">
-                                <div style="display: inline-block;" class="col-xs-10">Menu Item 2</div>
-                                <div style="display: inline-block;" class="col-xs-2"><i class="fa fa-circle"></i></div>
-                            </a>
-                        </li>
-                        <li><a href="#">Menu Item 3</a></li>
-                        <li><a href="#">Menu Item 4</a></li>
-                        <li><a href="#">Reviews <span class="badge">1,118</span></a></li>
+                    <ul t-if="category_datas" class="" style="list-style: none; padding: 0px; margin: 0px;">
+                        <t t-foreach="category_datas" t-as="categ_data">
+                            <li class="o_category_menu">
+                                <a href="#" t-att-data-category_id="categ_data.get('id')" t-esc="categ_data.get('name')"></a>
+                            </li>
+                            <t t-foreach="categ_data.get('lectures')" t-as="lecture">
+                                <li t-attf-class="o_lecture_menu #{lecture.id == current_lecture.id and 'active' or ''}" t-att-data-lecture_id="lecture.id">
+                                    <a href="#">
+                                        <div class="o_lecture_name" t-esc="lecture.name"></div>
+                                        <div class="o_lecture_status text-right"><i class="fa fa-circle"></i></div>
+                                    </a>
+                                </li>
+                            </t>
+                        </t>
                     </ul>
                 </div>
             </div>
             <div class="o_course_body col-md-9 col-xs-12" style="padding-left: 0px; padding-right: 0px;">
-                <div class="o_lecture_header" style="display: flex; padding-left: 5px;">
-                    <div>
+                <div class="o_lecture_header">
+                    <div class="col-xs-hidden col-md-1">
                         <button class="toggle_fullscreen">
                             <i class="fa fa-arrows-alt fa-2x"></i>
                         </button>
@@ -480,12 +483,12 @@
                             <i class="fa fa-chevron-circle-right"></i>
                         </button>
                     </div>
-                    <div>
+                    <div class="col-xs-10 col-md-11 text-center o_course_title">
                         <span t-esc="current_lecture.name"></span>
                     </div>
                 </div>
-                <div class="course_lecture_content" style="padding-left: 5px;">
-                    Here lecture content will appear!
+                <div class="course_lecture_content col-xs-12" style="margin-top: 15px;">
+                    <!-- Here content of the lecture will come -->
                 </div>
             </div>
         </div>
