@@ -261,17 +261,9 @@ class Picking(models.Model):
         default=lambda self: self.env['res.company']._company_default_get('stock.picking'),
         index=True, required=True,
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
-    # TDE FIXME: separate those two kind of pack operations
+
     pack_operation_ids = fields.One2many(
         'stock.pack.operation', 'picking_id', 'Related Packing Operations',
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
-    pack_operation_product_ids = fields.One2many(
-        'stock.pack.operation', 'picking_id', 'Non pack',
-        domain=[('product_id', '!=', False)],
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
-    pack_operation_pack_ids = fields.One2many(
-        'stock.pack.operation', 'picking_id', 'Pack',
-        domain=[('product_id', '=', False)],
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
 
     pack_operation_exist = fields.Boolean(
@@ -288,13 +280,12 @@ class Picking(models.Model):
     recompute_pack_op = fields.Boolean(
         'Recompute pack operation?', copy=False,
         help='True if reserved quants changed, which mean we might need to recompute the package operations')
-    launch_pack_operations = fields.Boolean("Launch Pack Operations", copy=False)
 
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per company!'),
     ]
 
-    @api.depends('move_type', 'launch_pack_operations', 'move_lines.state', 'move_lines.picking_id', 'move_lines.partially_available')
+    @api.depends('move_type', 'move_lines.state', 'move_lines.picking_id')
     @api.one
     def _compute_state(self):
         ''' State of a picking depends on the state of its related stock.move
@@ -307,9 +298,8 @@ class Picking(models.Model):
           - one of the move is assigned or partially available: partially available
           - otherwise in waiting or confirmed state
         '''
-        if not self.move_lines and self.launch_pack_operations:
-            self.state = 'assigned'
-        elif not self.move_lines:
+        # FIXME: goes in 3 times at each write?
+        if not self.move_lines:
             self.state = 'draft'
         elif any(move.state == 'draft' for move in self.move_lines):  # TDE FIXME: should be all ?
             self.state = 'draft'
@@ -325,7 +315,7 @@ class Picking(models.Model):
                 .sorted(key=lambda move: (move.state == 'assigned' and 2) or (move.state == 'waiting' and 1) or 0)
             if self.move_type == 'one':
                 self.state = moves_todo[0].state
-            elif moves_todo[0].state != 'assigned' and any(x.partially_available or x.state == 'assigned' for x in moves_todo):
+            elif moves_todo[0].state != 'assigned' and any(x.state in ['assigned', 'partially_available'] for x in moves_todo):
                 self.state = 'partially_available'
             else:
                 self.state = moves_todo[-1].state
@@ -443,10 +433,14 @@ class Picking(models.Model):
 
     @api.multi
     def action_confirm(self):
-        self.filtered(lambda picking: not picking.move_lines).write({'launch_pack_operations': True})
-        # TDE CLEANME: use of launch pack operation, really useful ?
-        self.mapped('move_lines').filtered(lambda move: move.state == 'draft').action_confirm()
-        self.filtered(lambda picking: picking.location_id.usage in ('supplier', 'inventory', 'production')).force_assign()
+        # call `action_confirm` on every draft move
+        self.mapped('move_lines')\
+            .filtered(lambda move: move.state == 'draft')\
+            .action_confirm()
+        # call `action_assign` on every confirmed move which location_id bypasses the reservation
+        self.filtered(lambda picking: picking.location_id.usage in ('supplier', 'inventory', 'production'))\
+            .filtered(lambda move: move.state == 'confirmed')\
+            .move_lines.action_assign()
         return True
 
     @api.multi
@@ -468,7 +462,7 @@ class Picking(models.Model):
         """ Changes state of picking to available if moves are confirmed or waiting.
         @return: True
         """
-        self.mapped('move_lines').filtered(lambda move: move.state in ['confirmed', 'waiting']).force_assign()
+        self.mapped('move_lines').filtered(lambda move: move.state in ['confirmed', 'waiting', 'partially_available']).force_assign()
         return True
 
     @api.multi
@@ -608,7 +602,10 @@ class Picking(models.Model):
 
     @api.multi
     def do_unreserve(self):
-        return True
+        for move in self:
+            for move_line in move.move_lines:
+                move_line.do_unreserve()
+        self.write({'state': 'confirmed'})
 
     def recompute_remaining_qty(self, done_qtys=False):
         # TODO: sle jco: wtf?
