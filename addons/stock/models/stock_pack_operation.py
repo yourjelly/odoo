@@ -25,21 +25,20 @@ class PackOperation(models.Model):
         if default_loc:
             return self.env['stock.location'].browse(default_loc).name
 
-    picking_id = fields.Many2one(
-        'stock.picking', 'Stock Picking',
-        required=True,
-        help='The stock operation where the packing has been made')
+    picking_id = fields.Many2one('stock.picking', 'Stock Picking', related='move_id.picking_id', help='The stock operation where the packing has been made')  # not related, we should be able to create a packop without a move
+    move_id = fields.Many2one('stock.move', 'Stock Move', required=True)
     product_id = fields.Many2one('product.product', 'Product', ondelete="cascade")
     product_uom_id = fields.Many2one('product.uom', 'Unit of Measure')
     product_qty = fields.Float('To Do', default=0.0, digits=dp.get_precision('Product Unit of Measure'), required=True)
     ordered_qty = fields.Float('Ordered Quantity', digits=dp.get_precision('Product Unit of Measure'))
-    qty_done = fields.Float('Done', default=0.0, digits=dp.get_precision('Product Unit of Measure'))
+    qty_done = fields.Float('Done', default=0.0, digits=dp.get_precision('Product Unit of Measure'), copy=False)
     is_done = fields.Boolean(compute='_compute_is_done', string='Done', readonly=False, oldname='processed_boolean')
     package_id = fields.Many2one('stock.quant.package', 'Source Package')
     result_package_id = fields.Many2one(
         'stock.quant.package', 'Destination Package',
         ondelete='cascade', required=False,
         help="If set, the operations are packed into this package")
+    lot_id = fields.Many2one('stock.production.lot', 'Lot')
     date = fields.Datetime('Date', default=fields.Date.context_today, required=True)
     owner_id = fields.Many2one('res.partner', 'Owner', help="Owner of the quants")
     location_id = fields.Many2one('stock.location', 'Source Location', required=True)
@@ -49,7 +48,6 @@ class PackOperation(models.Model):
     # TDE FIXME: unnecessary fields IMO, to remove
     from_loc = fields.Char(compute='_compute_location_description', default=_get_default_from_loc, string='From')
     to_loc = fields.Char(compute='_compute_location_description', default=_get_default_to_loc, string='To')
-    fresh_record = fields.Boolean('Newly created pack operation', default=True)
     lots_visible = fields.Boolean(compute='_compute_lots_visible')
     state = fields.Selection(selection=[
         ('draft', 'Draft'),
@@ -103,15 +101,20 @@ class PackOperation(models.Model):
         return super(PackOperation, self).create(vals)
 
     @api.multi
-    def write(self, values):
-        # TDE FIXME: weird stuff, protectin pack op ?
-        values['fresh_record'] = False
-        return super(PackOperation, self).write(values)
-
-    @api.multi
     def unlink(self):
-        if any([operation.state in ('done', 'cancel') for operation in self]):
-            raise UserError(_('You can not delete pack operations of a done picking'))
+        for pack_operation in self:
+            if pack_operation.state in ('done', 'cancel'):
+                raise UserError(_('You can not delete pack operations of a done picking'))
+            # Unlinking a pack operation should unreserve.
+            if pack_operation.product_qty:  # FIXME: float_is_zero
+                self.env['stock.quant'].decrease_reserved_quantity(
+                    pack_operation.product_id,
+                    pack_operation.location_id,
+                    pack_operation.product_qty,
+                    lot_id=pack_operation.lot_id,
+                    package_id=pack_operation.package_id,
+                    owner_id=pack_operation.owner_id,
+                )
         return super(PackOperation, self).unlink()
 
     @api.multi

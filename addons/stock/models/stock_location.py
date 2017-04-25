@@ -215,7 +215,7 @@ class PushedFlow(models.Model):
         else:
             new_move_vals = self._prepare_move_copy_values(move, new_date)
             new_move = move.copy(new_move_vals)
-            move.write({'move_dest_id': new_move.id})
+            move.write({'move_dest_ids': [(4, new_move.id)]})
             new_move.action_confirm()
 
     def _prepare_move_copy_values(self, move_to_copy, new_date):
