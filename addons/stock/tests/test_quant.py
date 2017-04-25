@@ -44,7 +44,7 @@ class StockQuant(TransactionCase):
             'name': 'Product A',
             'type': 'product',
         })
-        for i in pycompat.range(3):
+        for i in range(3):
             self.env['stock.quant'].create({
                 'product_id': product1.id,
                 'location_id': stock_location.id,
@@ -60,7 +60,7 @@ class StockQuant(TransactionCase):
             'name': 'Product A',
             'type': 'product',
         })
-        for i in pycompat.range(3):
+        for i in range(3):
             self.env['stock.quant'].create({
                 'product_id': product1.id,
                 'location_id': stock_location.id,
@@ -197,7 +197,7 @@ class StockQuant(TransactionCase):
             'name': 'Product A',
             'type': 'product',
         })
-        for i in pycompat.range(2):
+        for i in range(2):
             self.env['stock.quant'].create({
                 'product_id': product1.id,
                 'location_id': stock_location.id,
@@ -261,7 +261,7 @@ class StockQuant(TransactionCase):
             'name': 'Product A',
             'type': 'product',
         })
-        for i in pycompat.range(2):
+        for i in range(2):
             self.env['stock.quant'].create({
                 'product_id': product1.id,
                 'location_id': stock_location.id,
@@ -340,7 +340,7 @@ class StockQuant(TransactionCase):
             'name': 'Product A',
             'type': 'product',
         })
-        for i in pycompat.range(2):
+        for i in range(2):
             self.env['stock.quant'].create({
                 'product_id': product1.id,
                 'location_id': stock_location.id,
