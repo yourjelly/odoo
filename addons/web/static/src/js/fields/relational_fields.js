@@ -83,10 +83,11 @@ var FieldMany2One = AbstractField.extend({
     events: _.extend({}, AbstractField.prototype.events, {
         'click .o_form_input': '_onInputClick',
         'focusout .o_form_input': '_onInputFocusout',
+        'focusout': 'onFocusout',
         'keyup .o_form_input': '_onInputKeyup',
         'click .o_external_button': '_onExternalButtonClick',
         'click': '_onClick',
-        'focus .o_form_input': '_onInputFocus', 
+        'focus .o_form_input': 'onFocus', 
     }),
     supported_field_types: ['many2one'],
 
@@ -448,18 +449,18 @@ var FieldMany2One = AbstractField.extend({
      * @private
      */
     _onInputFocusout: function () {
-       if (this.required && !$(this.$el).hasClass('o_form_invisible') && $(this.$input).val()=='') {
-            $(this.$input).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
-        }
+       // if (this.required && !$(this.$el).hasClass('o_form_invisible') && $(this.$input).val()=='') {
+       //      $(this.$input).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
+       //  }
         if (this.can_create && this.floating) {
             new M2ODialog(this, this.string, this.$input.val()).open();
         }
     },
-    _onInputFocus: function(){
-        if (!$(this.$el).hasClass('o_form_invisible') && this.required) {
-            $(this.$input).nextAll('i').remove();
-        }
-    },
+    // _onInputFocus: function(){
+        // if (!$(this.$el).hasClass('o_form_invisible') && this.required) {
+        //     $(this.$input).nextAll('i').remove();
+        // }
+    // },
     /**
      * @private
      */
@@ -961,8 +962,8 @@ var FieldMany2ManyTags = AbstractField.extend({
     events: _.extend({}, AbstractField.prototype.events, {
         'click .o_delete': '_onDeleteTag',
         'keydown .o_form_field_many2one input': '_onKeyDown',
-        'focus .o_form_input': '_onFocus',
-        'focusout .o_form_input': '_onFocusout',
+        'focus .o_form_input_dropdown input': 'onFocus',
+        'focusout .o_form_input': 'onFocusout',
     }),
 
     fetchSubFields: true,
@@ -997,23 +998,6 @@ var FieldMany2ManyTags = AbstractField.extend({
      *
      * @private
      */
-    _onFocus: function(){
-        console.log("many2many_tags----->> focus",this);
-        console.log("many2many_tags----->> focus Val",$(this.$el).val());
-        if (!$(this.$el).hasClass('o_form_invisible') && this.required) {
-            $(this.$el).nextAll('i.err_icon').remove();
-        }
-    },
-    /**
-     * Called on focusout -> adds error icon for required field.
-     *
-     * @private
-     */
-    _onFocusout: function(){
-        if (this.required && this.value.count==0) {
-            $(this.$el).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
-        }
-    },
     /**
      * @private
      * @param {any} data
@@ -1377,8 +1361,8 @@ var FieldSelection = AbstractField.extend({
     supportedFieldTypes: ['selection', 'many2one'],
     events: _.extend({}, AbstractField.prototype.events, {
         'change': '_onChange',
-        'focus':'_onFocus',
-        'focusout':'_onFocusout',
+        'focus':'onFocus',
+        'focusout':'onFocusout',
     }),
     replace_element: true,
     /**
@@ -1399,16 +1383,16 @@ var FieldSelection = AbstractField.extend({
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
-    _onFocus: function(){
-        if(!$(this.$el).hasClass('o_form_invisible') && this.required){
-            $(this.$el).nextAll('i').remove();
-        }
-    },
-    _onFocusout: function(){
-        if(!$(this.$el).hasClass('o_form_invisible') && this.required && $(this.$el).val()=='false'){
-                $(this.$el).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
-        }
-    },
+    // _onFocus: function(){
+    //     if(!$(this.$el).hasClass('o_form_invisible') && this.required){
+    //         $(this.$el).nextAll('i').remove();
+    //     }
+    // },
+    // _onFocusout: function(){
+    //     if(!$(this.$el).hasClass('o_form_invisible') && this.required && $(this.$el).val()=='false'){
+    //             $(this.$el).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
+    //     }
+    // },
     /**
      * @override
      * @private

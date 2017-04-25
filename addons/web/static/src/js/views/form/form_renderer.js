@@ -358,6 +358,23 @@ return BasicRenderer.extend({
         widget.$el.addClass(FIELD_CLASSES[field.type]);
         this._handleAttributes(widget.$el, node);
         this._addFieldClassNames(widget, field);
+        // console.log("widget------->>>>>",widget,"<<<<<<<<<<<",field);
+        // console.log("widget----------->> function", field.string,"widget",widget);
+        // widget.$el["0"].focus(function(){
+        //     console.log("widget----------->> function", widget, "event---->>---",this);
+        // });
+        // $(widget.$content).focus(function () {
+        //     console.log("widget content focussed", widget, "event---->>---",this)
+        // });
+        // $(widget.$el).focusout(function () {
+        //     console.log("widget el focussed out", widget, "event---->>---",this)
+        // });
+        // $(widget.$input).focus(function () {
+        //     console.log("widget input focussed", widget, "event---->>---",this)
+        // });
+        // $(widget.$textarea).focus(function () {
+        //     console.log("widget textarea focussed", widget, "event---->>---",this)
+        // });
 
         return widget;
     },
@@ -366,6 +383,12 @@ return BasicRenderer.extend({
      * @param {Object} node
      * @returns {jQueryElement}
      */
+    _fieldFocused: function() {
+        console.log("widget focussed", this)
+    },
+    _fieldBlurred: function() {
+        console.log("widget blurred", this)
+    },
     _renderGenericTag: function (node) {
         var $result = $('<' + node.tag + '>');
         _.each(node.attrs, function (attr, name) {

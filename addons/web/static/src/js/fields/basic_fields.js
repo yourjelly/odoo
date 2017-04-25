@@ -30,8 +30,8 @@ var DebouncedField = AbstractField.extend({
     events: _.extend({}, AbstractField.prototype.events, {
         'input': '_onInput',
         'change': '_onChange',
-        'focusout': '_onFocusout',
-        'focus': '_onFocus',
+        'focusout': 'onFocusout',
+        'focus': 'onFocus',
     }),
     /**
      * for field widgets that may have a large number of field changes quickly,
@@ -104,16 +104,16 @@ var DebouncedField = AbstractField.extend({
     _onInput: function () {
         this._doDebouncedAction();
     },
-    _onFocus: function (){
-        if(!$(this.$el).hasClass('o_form_invisible') && this.required){
-            $(this.$el).nextAll('i').remove();
-        }
-    },
-    _onFocusout: function () {
-        if(!$(this.$el).hasClass('o_form_invisible') && this.required && $(this.$el).val()==''){
-            $(this.$el).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
-        }
-    },
+    // _onFocus: function (){
+    //     if(!$(this.$el).hasClass('o_form_invisible') && this.required){
+    //         $(this.$el).nextAll('i').remove();
+    //     }
+    // },
+    // _onFocusout: function () {
+    //     if(!$(this.$el).hasClass('o_form_invisible') && this.required && $(this.$el).val()==''){
+    //         $(this.$el).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
+    //     }
+    // },
 });
 
 var InputField = DebouncedField.extend({
@@ -702,19 +702,9 @@ var FieldFloatTime = FieldFloat.extend({
 var FieldText = DebouncedField.extend({
     supportedFieldTypes: ['text'],
      events: _.extend({}, AbstractField.prototype.events, {
-        'focus textarea': '_onFocus',
-        'focusout': '_onFocusout',
+        'focus textarea': 'onFocus',
+        'focusout': 'onFocusout',
     }),
-     _onFocus: function(){
-        if(!$(this.$el).hasClass('o_form_invisible') && this.required){
-            $(this.$el).nextAll('i').remove();
-        }
-     },
-     _onFocusout:function(){
-        if(!$(this.$el).hasClass('o_form_invisible') && this.required && $(this.$textarea).val()==''){
-            $(this.$el).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
-        }
-     },
     /**
      * In edit mode, the text widget contains a textarea. We append it in
      * start() instead of _renderEdit() to keep the same textarea even
@@ -1061,16 +1051,8 @@ var FieldBinaryFile = AbstractFieldBinary.extend({
         'click .o_form_input': function () { // eq[0]
             this.$('.o_form_input_file').click();
         },
-        'focus .o_form_input': function(){
-            if (!$(this.$el).hasClass('o_form_invisible') && this.required) {
-                $(this.$el).nextAll('i').remove();
-            }
-        },
-        'focusout': function(){
-            if (this.required && !$(this.$el).hasClass('o_form_invisible') && !this.value) {
-                $(this.$el).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
-            }
-        },
+        'focus .o_form_input': 'onFocus',
+        'focusout': 'onFocusout',
     }),
     supportedFieldTypes: ['binary'],
     init: function () {

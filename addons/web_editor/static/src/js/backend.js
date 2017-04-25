@@ -25,8 +25,8 @@ var QWeb = core.qweb;
 var FieldTextHtmlSimple = DebouncedField.extend({
     className: 'oe_form_field oe_form_field_html_text',
     events: _.extend({}, AbstractField.prototype.events, {
-        'focus .note-editable': '_onFocus',
-        'focusout': '_onFocusout',
+        'focus .note-editable': 'onFocus',
+        'focusout': 'onFocusout',
     }),
 
     //--------------------------------------------------------------------------
@@ -168,16 +168,6 @@ var FieldTextHtmlSimple = DebouncedField.extend({
      * @param {string} text
      * @returns {string} the text converted to html
      */
-     _onFocus: function (event) {
-        if (!this.$el.hasClass('o_form_invisible') && this.required) {
-            this.$content.nextAll('i.err_icon').remove();
-        }
-    },
-    _onFocusout:function () {
-        if (!this.$el.hasClass('o_form_invisible') && this.required && $(this.$textarea).val()=='') {
-            this.$content.after("<i class='err_icon fa fa-exclamation-triangle '></i>");
-        }
-    },
     _textToHtml: function (text) {
         var value = text || "";
         try {

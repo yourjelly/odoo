@@ -38,8 +38,8 @@ var AbstractField = Widget.extend({
     className: 'o_field_widget',
     events: {
         'keydown': '_onKeydown',
-        'focus': '_onFocus',
-        'focusout': '_onFocusout',
+        'focus': 'onFocus',
+        'focusout': 'onFocusout',
     },
     /**
      * if this flag is set to true, the rest of the web client will assume that
@@ -249,6 +249,18 @@ var AbstractField = Widget.extend({
         this._reset(record, event);
         return this._render();
     },
+    onFocus: function (event) {
+        console.log("focus->>>>>>>>",event,">>>>..",this,">>>>>>>>>>>>>><<",this.value,"event.target", event.target);
+        if (!$(event.target).hasClass('o_form_invisible') && $(event.target).hasClass('o_form_required')) {
+            $(event.target).nextAll('i.err_icon').remove();
+        }
+    },
+    onFocusout:function (event) {
+        if (!$(event.target).hasClass('o_form_invisible') && this.required && (!this.value || this.value.count == '0')) {
+        console.log("focus--->out===>event", event, "this", this,"this.value",this.value,"event.target",$(event.target).val())
+            $(event.target).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
+        }
+    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -373,6 +385,7 @@ var AbstractField = Widget.extend({
      */
     _onKeydown: function (event) {
         if (event.which === $.ui.keyCode.TAB) {
+        console.log("on keydown-??>>", event);
             // the event needs to be stopped, to prevent other field widgets
             // to retrigger a move event
             event.stopPropagation();
@@ -380,18 +393,6 @@ var AbstractField = Widget.extend({
             event.preventDefault();
         }
     },
-
-    _onFocus: function (event) {
-        if (!$(event.target).hasClass('o_form_invisible') && $(event.target).hasClass('o_form_required')) {
-            $(event.target).nextAll('i.err_icon').remove();
-        }
-    },
-    _onFocusout:function (event) {
-        if (!$(event.target).hasClass('o_form_invisible') && $(event.target).hasClass('o_form_required') && $(event.target).val()=='') {
-            $(event.target).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
-        }
-    },
-
 });
 
 return AbstractField;
