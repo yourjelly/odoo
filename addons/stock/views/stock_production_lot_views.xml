@@ -33,16 +33,6 @@
                         <field name="ref"/>
                     </group>
                 </group>
-                <notebook>
-                    <page string="Products">
-                        <field name="quant_ids">
-                            <tree string="Stock Moves">
-                                <field name="location_id" groups="stock.group_stock_multi_locations"/>
-                                <field name="qty"/>
-                            </tree>
-                         </field>
-                    </page>
-                </notebook>
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids" widget="mail_followers"/>
