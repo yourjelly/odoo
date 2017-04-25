@@ -38,9 +38,8 @@ class ProductionLot(models.Model):
         return super(ProductionLot, self).create(vals)
 
     @api.one
-    @api.depends('quant_ids.qty')
     def _product_qty(self):
-        self.product_qty = sum(self.quant_ids.mapped('qty'))
+        pass
 
     @api.multi
     def action_traceability(self):
