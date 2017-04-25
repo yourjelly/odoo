@@ -271,12 +271,12 @@
                                     </t>
                                 </span>
                             </div>
-                            <div t-field="course.language"></div>
+                            <div t-field="course.language" placeholder="Language"></div>
                         </div>
                     </div>
                     <div class="col-md-4 col-xs-12">
                         <div class="course_right_column">
-                            <div style="display: flex; flex-direction: column; border: none; position: relative;">
+                            <div class="css_editable_mode_hidden" style="display: flex; flex-direction: column; border: none; position: relative;">
                                 <a t-attf-href="/courses/#{slug(course)}">
                                     <div class="course_play">
                                         <div class="course_play_button"></div>
@@ -288,6 +288,9 @@
                                     <img t-if="course.promoted_slide_id" t-attf-src="/web/image/course.lecture/#{course.promoted_slide_id.id}/image_medium" class="img-responsive oe_slides_channel_thumbnail"/>
                                     <img t-if="not course.promoted_slide_id" src="/website_slides/static/src/img/channel-default.jpg" class="img-responsive oe_slides_opacity"/>
                                 </a>
+                            </div>
+                            <div class="css_non_editable_mode_hidden">
+                                <div t-field="course.promoted_slide_id" placeholder="Promote Video"></div>
                             </div>
                             <div class="course_right_column_inner" style="padding: 15px 30px;">
                                 <div>
@@ -328,6 +331,8 @@
                 <div class="col-md-8 col-xs-12">
                     <!-- Put html field snippet here, for now it is static -->
                     <div style="margin-top: 40px;">
+                        <div t-field="course.course_html" placeholder="Design/Write your Requisite and Audience data here..."></div>
+                        <!--
                         <div style="background-color: #f9f9f9; border: 1px solid #dedede; padding: 10px 15px;">
                             <div>
                                 <div>What you will get?</div>
@@ -351,6 +356,7 @@
                                 </div>
                             </div>
                         </div>
+                        -->
                     </div>
                 </div>
             </div>
@@ -359,8 +365,8 @@
                 <div class="col-md-8 col-xs-12">
                     <div><h3><strong>Description</strong></h3></div>
                     <div class="description">
-                        <div t-if="course.description or enable_editor" t-field="course.description"></div>
-                        <div t-else=""><strong>No description given on this course.</strong></div>
+                        <div t-field="course.description" placeholder="Write Course Description..."></div>
+                        <div class="css_editable_mode_hidden" t-if="not course.description"><strong>No description given on this course.</strong></div>
                     </div>
                 </div>
             </div>
