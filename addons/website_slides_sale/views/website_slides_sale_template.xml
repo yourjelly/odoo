@@ -258,9 +258,9 @@
                 <div class="row">
                     <div class="col-md-8 col-xs-12">
                         <div>
-                            <h1><t t-esc="course.name"/></h1>
+                            <h1 t-field="course.name"></h1>
                         </div>
-                        <div t-esc="course.course_subtitle"></div>
+                        <div t-field="course.course_subtitle"></div>
                         <div>
                             <!-- TODO: Open partner details on anchor tag -->
                             <div>
@@ -271,7 +271,7 @@
                                     </t>
                                 </span>
                             </div>
-                            <div t-esc="course.language.name"></div>
+                            <div t-field="course.language"></div>
                         </div>
                     </div>
                     <div class="col-md-4 col-xs-12">
@@ -282,6 +282,9 @@
                                         <div class="course_play_button"></div>
                                         <span class="introduction_asset__text">Preview This Course</span>
                                     </div>
+                                    <!--
+                                    <span itemprop="image" t-field="course.promoted_slide_id.image" t-options="{'widget': 'image', 'alt-field': 'course.promoted_slide_id.name', 'zoom': 'image'}"></span>
+                                    -->
                                     <img t-if="course.promoted_slide_id" t-attf-src="/web/image/course.lecture/#{course.promoted_slide_id.id}/image_medium" class="img-responsive oe_slides_channel_thumbnail"/>
                                     <img t-if="not course.promoted_slide_id" src="/website_slides/static/src/img/channel-default.jpg" class="img-responsive oe_slides_opacity"/>
                                 </a>
@@ -356,7 +359,7 @@
                 <div class="col-md-8 col-xs-12">
                     <div><h3><strong>Description</strong></h3></div>
                     <div class="description">
-                        <div t-if="course.description" t-field="course.description"></div>
+                        <div t-if="course.description or enable_editor" t-field="course.description"></div>
                         <div t-else=""><strong>No description given on this course.</strong></div>
                     </div>
                 </div>

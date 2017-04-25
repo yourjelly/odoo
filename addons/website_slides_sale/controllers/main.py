@@ -155,7 +155,7 @@ class WebsiteSlidesSale(http.Controller):
 			'name': name or _("New Course"),
 		})
 
-		return request.redirect("/course/manage/%s" % slug(course))
+		return request.redirect("/courses/%s?enable_editor=1" % slug(course))
 
 	@http.route(['/course/dashboard'], type='http', auth='user', website=True)
 	def instructor_course_dashboard(self, **kw):

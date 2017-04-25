@@ -22,4 +22,12 @@ contentMenu.TopBar.include({
         });
     },
 });
+
+website.TopBar.include({
+    edit: function function_name() {
+        this._super.apply(this, arguments);
+        var editor_enable = $('body').hasClass('editor_enable');
+    }
+});
+
 });

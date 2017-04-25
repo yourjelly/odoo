@@ -93,6 +93,9 @@
                 <field name="slide_type">
                     <field name="slide_view_type"/>
                 </field>
+                <field name="channel_id" position="replace">
+                    <field name="course_id"/>
+                </field>
             </field>
         </record>
 
@@ -104,6 +107,13 @@
             <field name="arch" type="xml">
                 <field name="slide_type" position="after">
                     <field name="slide_view_type"/>
+                </field>
+                <field name="category_id" position="attributes">
+                    <attribute name="context">{}</attribute>
+                    <attribute name="domain">[]</attribute>
+                </field>
+                <field name="channel_id" position="replace">
+                    <field name="course_id"/>
                 </field>
             </field>
         </record>

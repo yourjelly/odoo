@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 
 
 class Channel(models.Model):
@@ -24,6 +25,7 @@ class Course(models.Model):
 	channel_id = fields.Many2one('slide.channel', 'Channel',
         auto_join=True, index=True, ondelete="cascade", required=True)
 	user_id = fields.Many2one("res.users", "Posted User", default=lambda self: self.env.user.id)
+	lecture_ids = fields.One2many('course.lecture', 'course_id', string="Slides")
 
 
 class Lecture(models.Model):
@@ -37,6 +39,15 @@ class Lecture(models.Model):
 	slide_id = fields.Many2one('slide.slide', 'Slide',
         auto_join=True, index=True, ondelete="cascade", required=True)
 	is_course_slide = fields.Boolean(related="slide_id.channel_id.is_course", string="Is Course Lecture")
+	course_id = fields.Many2one("course.course", string="Course", required=True, ondelete='cascade')
+
+	@api.model
+	def create(self, vals):
+		if not vals.get('course_id'):
+			raise UserError(_("Lecture must be linked with Course"))
+		course = self.env['course.course'].browse(vals['course_id']) # Maybe Use Exist
+		vals['channel_id'] = course.channel_id.id
+		return super(Lecture, self).create(vals)
 
 
 class LectureAttendee(models.Model):
