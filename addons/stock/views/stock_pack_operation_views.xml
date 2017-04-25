@@ -79,39 +79,10 @@
                         <field name="state" invisible="1"/>
                     </span>
                 </group>
-                <group>
-                    <field name="pack_lot_ids" nolabel="1" attrs="{'readonly': [('state', '=', 'done')]}">
-                        <tree editable="bottom" decoration-success="qty_todo==qty" decoration-danger="(qty_todo &gt; 0) and (qty&gt;qty_todo)">
-                            <field name="lot_name" invisible="not context.get('only_create', False)"/>
-                            <field name="lot_id" invisible="context.get('only_create', False)"
-                                   domain="[('product_id','=', parent.product_id)]"
-                                   context="{'default_product_id': parent.product_id, 'active_pack_operation': parent.id}"/>
-                            <field name="qty_todo" invisible="not context.get('show_reserved') or context.get('serial') or context.get('state_done')" readonly="1"/>
-                            <field name="qty" invisible="context.get('serial')"/>
-                            <button name="do_minus" type="object" icon="fa-minus-square" attrs="{'invisible': [('qty', '&lt;=', 0.99)]}" invisible="not context.get('show_reserved') or context.get('state_done')"/>
-                            <button name="do_plus" type="object" icon="fa-plus-square" attrs="{'invisible': [('plus_visible', '=', False)]}" invisible="not context.get('show_reserved') or context.get('state_done')"/>
-                            <field name="plus_visible" invisible="1"/>
-                        </tree>
-                    </field>
-                </group>
                 <footer>
                     <button name="save" type="object" string="Save" class="oe_highlight" attrs="{'invisible':[('state','=','done')]}"/>
                     <button string="Discard" special="cancel"/>
                 </footer>
-            </form>
-        </field>
-    </record>
-
-    <record id="view_pack_operation_lot_lot_form" model="ir.ui.view">
-        <field name="name">stock.pack.operation.lots.form</field>
-        <field name="model">stock.pack.operation.lot</field>
-        <field eval="20" name="priority"/>
-        <field name="arch" type="xml">
-            <form>
-                <group>
-                    <field name="lot_id"/>
-                    <field name="qty"/>
-                </group>
             </form>
         </field>
     </record>
