@@ -5,3 +5,4 @@ from . import test_product
 from . import test_warehouse
 from . import test_shipment
 from . import test_stock_location_search
+from . import test_quant
