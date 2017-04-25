@@ -45,8 +45,8 @@ class PackOperation(models.Model):
     picking_source_location_id = fields.Many2one('stock.location', related='picking_id.location_id')
     picking_destination_location_id = fields.Many2one('stock.location', related='picking_id.location_dest_id')
     # TDE FIXME: unnecessary fields IMO, to remove
-    from_loc = fields.Char(compute='_compute_location_description', default=_get_default_from_loc, string='From')
-    to_loc = fields.Char(compute='_compute_location_description', default=_get_default_to_loc, string='To')
+    from_loc = fields.Char(compute='_compute_location_description', string='From')
+    to_loc = fields.Char(compute='_compute_location_description', string='To')
     lots_visible = fields.Boolean(compute='_compute_lots_visible')
     state = fields.Selection(related='move_id.state')
 
