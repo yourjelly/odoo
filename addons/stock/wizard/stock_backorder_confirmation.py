@@ -21,7 +21,7 @@ class StockBackorderConfirmation(models.TransientModel):
     def _process(self, cancel_backorder=False):
         for pack in self.pick_id.pack_operation_ids:
             if pack.qty_done > 0:
-                pack.product_qty = pack.qty_done
+                pack.product_qty = pack.qty_done  # the packop could already be fulfilled at this time
             else:
                 pack.unlink()
         self.pick_id.do_transfer()
