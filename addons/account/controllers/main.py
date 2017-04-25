@@ -48,16 +48,16 @@ class InvoicePayment(http.Controller):
         env = request.env
         reference = env['payment.transaction'].get_next_reference(payment_request.reference)
         # transaction = payment_request.payment_transaction_id
-        # if pdf and token:
-        #     # print report as sudo, since it require access to taxes, payment term, ... and portal
-        #     # does not have those access rights.
-        #     pdf = env['report'].sudo().get_pdf([payment_request.invoice_id.id], 'account.report_invoice')
+        if pdf and token:
+            # print report as sudo, since it require access to taxes, payment term, ... and portal
+            # does not have those access rights.
+            pdf = env['report'].sudo().get_pdf([payment_request.invoice_id.id], 'account.report_invoice')
 
-        #     pdfhttpheaders = [
-        #         ('Content-Type', 'application/pdf'),
-        #         ('Content-Length', len(pdf)),
-        #     ]
-        #     return request.make_response(pdf, headers=pdfhttpheaders)
+            pdfhttpheaders = [
+                ('Content-Type', 'application/pdf'),
+                ('Content-Length', len(pdf)),
+            ]
+            return request.make_response(pdf, headers=pdfhttpheaders)
 
         # if transaction.state == 'pending':
         #     payment_request_status = 'pending'
