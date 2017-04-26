@@ -35,21 +35,18 @@ class StockWarehouse(models.Model):
         result = super(StockWarehouse, self).get_routes_dict()
         production_location = self.env['ir.model.data'].sudo().get_object('stock', 'location_production')
         for warehouse in self:
-            result[warehouse.id]['manu_only'] = [
-                self.Routing(warehouse.lot_stock_id, warehouse.lot_stock_id, warehouse.int_type_id)]
+            result[warehouse.id]['manu_only'] = []
             result[warehouse.id]['pick_manu'] = [
                 self.Routing(warehouse.lot_stock_id, warehouse.wh_input_manu_loc_id, warehouse.int_type_id),
                 self.Routing(warehouse.wh_input_manu_loc_id, production_location, warehouse.int_type_id)]
-                # self.Routing(warehouse.wh_input_manu_loc_id, warehouse.lot_stock_id, warehouse.int_type_id)]
             result[warehouse.id]['pick_manu_out'] = [
                 self.Routing(warehouse.lot_stock_id, warehouse.wh_input_manu_loc_id, warehouse.int_type_id),
                 self.Routing(warehouse.wh_input_manu_loc_id, production_location, warehouse.int_type_id),
-                # self.Routing(warehouse.wh_input_manu_loc_id, warehouse.wh_output_manu_loc_id, warehouse.int_type_id),
-                self.Routing(warehouse.wh_output_manu_loc_id, warehouse.lot_stock_id, warehouse.int_type_id)]
+                self.Routing(production_location, warehouse.wh_output_manu_loc_id, warehouse.int_type_id)]
             result[warehouse.id]['manufacture'] = [
-                self.Routing(warehouse.lot_stock_id, warehouse.lot_stock_id, warehouse.int_type_id)]
-            result[warehouse.id]['manufacture_push'] = [
                 self.Routing(warehouse.wh_output_manu_loc_id, warehouse.lot_stock_id, warehouse.int_type_id)]
+            result[warehouse.id]['manufacture_push'] = [
+                self.Routing(warehouse.lot_stock_id, warehouse.wh_output_manu_loc_id, warehouse.int_type_id)]
         return result
 
     def _get_manufacture_route_id(self):
@@ -90,7 +87,6 @@ class StockWarehouse(models.Model):
         picking_type_obj = self.env['stock.picking.type']
         seq_obj = self.env['ir.sequence']
         for warehouse in self:
-            #man_seq_id = seq_obj.sudo().create('name': warehouse.name + _(' Sequence Manufacturing'), 'prefix': warehouse.code + '/MANU/', 'padding')
             wh_stock_loc = warehouse.lot_stock_id
             seq = seq_obj.search([('code', '=', 'mrp.production')], limit=1)
             other_pick_type = picking_type_obj.search([('warehouse_id', '=', warehouse.id)], order = 'sequence desc', limit=1)
@@ -120,6 +116,7 @@ class StockWarehouse(models.Model):
             else:
                 manufacturing_route = self.env['stock.location.route'].create(warehouse._get_manufacturing_route_values(warehouse.manufacture_steps))
                 warehouse.multistep_manu_route_id = manufacturing_route.id
+                manufacturing_route.company_id = warehouse.company_id.id
             # push / procurement (pull) rules for reception
             routings = routes_data[warehouse.id][warehouse.manufacture_steps]
             push_rules_list, pull_rules_list = warehouse._get_push_pull_rules_values(
@@ -134,6 +131,8 @@ class StockWarehouse(models.Model):
                     ('active', '=', False),
                 ])
                 if not existing_pull:
+                    pull_vals['company_id'] = warehouse.company_id.id
+                    pull_vals['procure_method'] = 'make_to_order'
                     self.env['procurement.rule'].create(pull_vals)
                 else:
                     existing_pull.write({'active': True})
@@ -146,11 +145,12 @@ class StockWarehouse(models.Model):
             if warehouse.wh_input_manu_loc_id:
                 manufcture_route = self.env['stock.location.route'].search([('name', 'like', _('Manufacture'))], limit=1)
                 manufcture_route.pull_ids.write({'active': False})
+                manufcture_route.push_ids.write({'active': False})
             else:
                 manufcture_route = self.env['stock.location.route'].create(warehouse._get_manufacturing_route_values(warehouse.manufacture_steps))
-            routings = routes_data[warehouse.id][warehouse.delivery_steps]
+            routings = routes_data[warehouse.id]['manufacture']
             dummy, pull_rules_list = warehouse._get_push_pull_rules_values(
-                routings, values={'active': True, 'route_id': manufcture_route.id})
+                routings, values={'active': True, 'procure_method': 'make_to_order', 'route_id': manufcture_route.id})
             if warehouse.manufacture_pull_id.route_id.push_ids:
                 vals = warehouse._get_manufacture_push_rules_values(routes_data)[0]
                 for push_id in warehouse.manufacture_pull_id.route_id.push_ids:
@@ -169,6 +169,7 @@ class StockWarehouse(models.Model):
                             'location_dest_id': vals['location_src_id'],
                             'picking_type_id': vals['picking_type_id'],
                             'route_id': manufcture_route.id,
+                            'company_id': warehouse.company_id.id
                             })
                         break
             else:
@@ -189,6 +190,7 @@ class StockWarehouse(models.Model):
                     ('active', '=', False),
                 ])
                 if not existing_pull:
+                    pull_vals['company_id'] = warehouse.company_id.id
                     self.env['procurement.rule'].create(pull_vals)
                 else:
                     existing_pull.write({'active': True})
@@ -198,8 +200,8 @@ class StockWarehouse(models.Model):
     def _get_manufacturing_route_values(self, route_type):
         return {
             'name': self._format_routename(route_type=route_type),
-            'product_categ_selectable': True,
-            'product_selectable': False,
+            'product_categ_selectable': False,
+            'product_selectable': True,
             'sequence': 10,
         }
 
@@ -209,7 +211,8 @@ class StockWarehouse(models.Model):
             routings = routes_data[warehouse.id][warehouse.manufacture_steps]
             if warehouse.manufacture_pull_id:
                 manufacture_pull = warehouse.manufacture_pull_id
-                manufacture_pull.write(warehouse._get_manufacture_pull_rules_values(routings)[0])
+                if warehouse._get_manufacture_pull_rules_values(routings) and warehouse._get_manufacture_pull_rules_values(routings)[0]:
+                    manufacture_pull.write(warehouse._get_manufacture_pull_rules_values(routings)[0])
             else:
                 manufacture_pull = self.env['procurement.rule'].create(warehouse._get_manufacture_pull_rules_values(routings)[0])
         return manufacture_pull
@@ -221,7 +224,6 @@ class StockWarehouse(models.Model):
         routes_data = self.get_routes_dict()
         manufacture_route = self._create_or_update_manufacturing_route(routes_data)
         manufacture_pull = self._create_or_update_manufacture_pull(routes_data)
-        manufacture_push = self._create_or_update_manufacture_push(routes_data)
         nw_manu_route = self._create_or_update_new_multistep_manufacturing_route(routes_data)
         res['manufacture_pull_id'] = manufacture_pull.id
         return res
@@ -253,11 +255,11 @@ class StockWarehouse(models.Model):
             if not wh.wh_input_manu_loc_id:
                 prod_in = StockLocation.search([('name', '=', 'PROD IN'), ('location_id', '=', wh.view_location_id.id), ('usage', '=', 'internal'), '|', ('company_id', '=', wh.company_id.id), ('company_id', '=', False)])
                 if not prod_in:
-                    prod_in = StockLocation.create({'name': 'PROD IN', 'location_id': wh.view_location_id.id, 'usage': 'internal', 'company_id': wh.company_id.id, 'active': wh.manufacture_steps != 'manu_only'})
+                    prod_in = StockLocation.create({'name': 'PROD IN', 'location_id': wh.view_location_id.id, 'usage': 'internal', 'company_id': wh.company_id.id, 'active': True})
             if not wh.wh_output_manu_loc_id:
                 prod_out = StockLocation.search([('name', '=', 'PROD OUT'), ('location_id', '=', wh.view_location_id.id), ('usage', '=', 'internal'), '|', ('company_id', '=', wh.company_id.id), ('company_id', '=', False)])
                 if not prod_out:
-                    prod_out = StockLocation.create({'name': 'PROD OUT', 'location_id': wh.view_location_id.id, 'usage': 'internal', 'company_id': wh.company_id.id, 'active': wh.manufacture_steps == 'pick_manu_out'})
+                    prod_out = StockLocation.create({'name': 'PROD OUT', 'location_id': wh.view_location_id.id, 'usage': 'internal', 'company_id': wh.company_id.id, 'active': True})
             vals = {}
             if prod_in:
                 vals['wh_input_manu_loc_id'] = prod_in.id
@@ -266,12 +268,38 @@ class StockWarehouse(models.Model):
             if vals:
                 wh.write(vals)
 
+    def _update_existing_manufacture_route(self, manufacture_steps):
+        routes_data = self.get_routes_dict()
+        if manufacture_steps == 'pick_manu':
+            self._create_or_update_manufacture_pull(routes_data)
+            self.manufacture_pull_id.route_id.push_ids.write({'active': False})
+            self.manufacture_pull_id.route_id.pull_ids.write({'active': False})
+            return self.manufacture_pull_id.write({'location_id': self.lot_stock_id.id,
+                                            'location_src_id': self.wh_input_manu_loc_id.id,
+                                            'picking_type_id': self.manu_type_id.id,
+                                            'active': True})
+        if manufacture_steps == 'pick_manu_out':
+            self._create_or_update_manufacture_pull(routes_data)
+            self.manufacture_pull_id.route_id.push_ids.write({'active': True})
+            self.manufacture_pull_id.route_id.pull_ids.write({'active': True})
+            return self.manufacture_pull_id.write({'location_id': self.wh_output_manu_loc_id.id,
+                                            'location_src_id': self.wh_input_manu_loc_id.id,
+                                            'picking_type_id': self.manu_type_id.id})
+        else:
+            self._create_or_update_manufacture_pull(routes_data)
+            self.manufacture_pull_id.route_id.push_ids.write({'active': False})
+            self.manufacture_pull_id.route_id.pull_ids.write({'active': False})
+            return self.manufacture_pull_id.write({'location_id': self.lot_stock_id.id,
+                                            'location_src_id': False,
+                                            'picking_type_id': self.manu_type_id.id,
+                                            'active': True})
+        # return True
+
     @api.multi
     def write(self, vals):
+        res = super(StockWarehouse, self).write(vals)
         if not ('wh_input_manu_loc_id' in vals or 'wh_output_manu_loc_id' in vals) and self.filtered(lambda w: not w.wh_input_manu_loc_id or not w.wh_output_manu_loc_id):
             self._create_or_update_locations()
-        if not self.manufacture_pull_id.route_id.push_ids:
-            self._create_or_update_manufacture_pull(self.get_routes_dict())
         if 'manufacture_to_resupply' in vals:
             if vals.get("manufacture_to_resupply"):
                 for warehouse in self.filtered(lambda warehouse: not warehouse.manufacture_pull_id):
@@ -286,7 +314,9 @@ class StockWarehouse(models.Model):
                     if warehouse.manu_type_id:
                         warehouse.manu_type_id.active = False
                 self.mapped('manufacture_pull_id').unlink()
-        return super(StockWarehouse, self).write(vals)
+        if vals.get('manufacture_steps'):
+            self._update_existing_manufacture_route(vals.get('manufacture_steps'))
+        return res
 
     @api.multi
     def _get_all_routes(self):
