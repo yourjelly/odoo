@@ -133,5 +133,7 @@
         <ul class="dropdown-menu" role="menu"/>
     </li>
 </t>
-
+<t t-name="ErrorIcon">
+    <i class='err_icon fa fa-exclamation-triangle '></i>
+</t>
 </templates>

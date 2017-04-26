@@ -26,7 +26,7 @@ var FieldTextHtmlSimple = DebouncedField.extend({
     className: 'oe_form_field oe_form_field_html_text',
     events: _.extend({}, AbstractField.prototype.events, {
         'focus .note-editable': 'onFocus',
-        'focusout': 'onFocusout',
+        'focusout .note-editable': 'onFocusout',
     }),
 
     //--------------------------------------------------------------------------

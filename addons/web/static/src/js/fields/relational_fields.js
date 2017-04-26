@@ -83,7 +83,7 @@ var FieldMany2One = AbstractField.extend({
     events: _.extend({}, AbstractField.prototype.events, {
         'click .o_form_input': '_onInputClick',
         'focusout .o_form_input': '_onInputFocusout',
-        'focusout': 'onFocusout',
+        'focusout input': 'onFocusout',
         'keyup .o_form_input': '_onInputKeyup',
         'click .o_external_button': '_onExternalButtonClick',
         'click': '_onClick',
@@ -963,7 +963,7 @@ var FieldMany2ManyTags = AbstractField.extend({
         'click .o_delete': '_onDeleteTag',
         'keydown .o_form_field_many2one input': '_onKeyDown',
         'focus .o_form_input_dropdown input': 'onFocus',
-        'focusout .o_form_input': 'onFocusout',
+        'focusout .o_form_input_dropdown': 'onFocusout',
     }),
 
     fetchSubFields: true,

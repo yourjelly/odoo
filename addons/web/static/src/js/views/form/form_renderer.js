@@ -49,18 +49,19 @@ return BasicRenderer.extend({
         var self = this;
         var invalidFields = [];
         var defs = [];
-
         function markWidget(widget, isValid) {
+        var $erricon = $(qweb.render("ErrorIcon", self));
             if (!isValid) {
+                console.log("widget>>>>>>>>>>>",widget,">>>>>>>>>>>>");
                 invalidFields.push(widget.name);
                 if(widget.$input && ($(widget.$input).val()=='' || $(widget.$input).val()=='false')){
-                    widget.$input.after("<i class='err_icon fa fa-exclamation-triangle '></i>");
+                    widget.$input.after($erricon);
                 }
                 else if (widget.$el.hasClass('oe_form_field_html_text') && $(widget.$textarea).val()=='') {
-                        widget.$content.after("<i class='err_icon fa fa-exclamation-triangle '></i>");
+                        widget.$content.after($erricon);
                 }
                 else if($(widget.$el).val()=='' || $(widget.$el).val()=='false' || $(widget.$textarea).val()=='' && !widget.$el.hasClass('oe_form_field_html_text')){
-                    widget.$el.after("<i class='err_icon fa fa-exclamation-triangle '></i>");
+                    widget.$el.after($erricon);
                 }
 
             }
@@ -358,23 +359,6 @@ return BasicRenderer.extend({
         widget.$el.addClass(FIELD_CLASSES[field.type]);
         this._handleAttributes(widget.$el, node);
         this._addFieldClassNames(widget, field);
-        // console.log("widget------->>>>>",widget,"<<<<<<<<<<<",field);
-        // console.log("widget----------->> function", field.string,"widget",widget);
-        // widget.$el["0"].focus(function(){
-        //     console.log("widget----------->> function", widget, "event---->>---",this);
-        // });
-        // $(widget.$content).focus(function () {
-        //     console.log("widget content focussed", widget, "event---->>---",this)
-        // });
-        // $(widget.$el).focusout(function () {
-        //     console.log("widget el focussed out", widget, "event---->>---",this)
-        // });
-        // $(widget.$input).focus(function () {
-        //     console.log("widget input focussed", widget, "event---->>---",this)
-        // });
-        // $(widget.$textarea).focus(function () {
-        //     console.log("widget textarea focussed", widget, "event---->>---",this)
-        // });
 
         return widget;
     },
@@ -383,12 +367,6 @@ return BasicRenderer.extend({
      * @param {Object} node
      * @returns {jQueryElement}
      */
-    _fieldFocused: function() {
-        console.log("widget focussed", this)
-    },
-    _fieldBlurred: function() {
-        console.log("widget blurred", this)
-    },
     _renderGenericTag: function (node) {
         var $result = $('<' + node.tag + '>');
         _.each(node.attrs, function (attr, name) {

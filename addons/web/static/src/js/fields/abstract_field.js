@@ -34,6 +34,9 @@ var field_utils = require('web.field_utils');
 var Widget = require('web.Widget');
 var Domain = require('web.Domain');
 
+var core = require('web.core');
+var QWeb = core.qweb;
+
 var AbstractField = Widget.extend({
     className: 'o_field_widget',
     events: {
@@ -85,7 +88,7 @@ var AbstractField = Widget.extend({
     init: function (parent, name, record, options) {
         this._super(parent);
         options = options || {};
-
+        // console.log(options)
         // 'name' is the field name displayed by this widget
         this.name = name;
 
@@ -154,7 +157,6 @@ var AbstractField = Widget.extend({
         // and saved.  For example, a float field can only use a number and not
         // a string.
         this._isValid = true;
-
         // the 'required' flag is basically only needed to determine if the widget
         // is in a valid state (not valid if empty and required)
         this.required = options.required || this.field.required;
@@ -250,15 +252,17 @@ var AbstractField = Widget.extend({
         return this._render();
     },
     onFocus: function (event) {
-        console.log("focus->>>>>>>>",event,">>>>..",this,">>>>>>>>>>>>>><<",this.value,"event.target", event.target);
-        if (!$(event.target).hasClass('o_form_invisible') && $(event.target).hasClass('o_form_required')) {
+        console.log("focus->>>>>>>>",event,"\n>>>>>>>>>>>..",this,"\n>>>>>>>>>>>>>><<",this.value,"\nevent.target", event.target,">>>>>>>>field",this.isSet(),">>>>>>>>>isValid",this.isValid());
+        if (this.required) {
             $(event.target).nextAll('i.err_icon').remove();
         }
     },
     onFocusout:function (event) {
-        if (!$(event.target).hasClass('o_form_invisible') && this.required && (!this.value || this.value.count == '0')) {
-        console.log("focus--->out===>event", event, "this", this,"this.value",this.value,"event.target",$(event.target).val())
-            $(event.target).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
+        var $erricon = $(QWeb.render("ErrorIcon", this));
+            console.log("$erricon>>>",$erricon);
+        if (!this.isValid()) {
+        console.log("focus--->out===>event", event, "this", this,"\nthis.value",this.value,"event.target",event.target)
+            $(event.target).after($erricon);
         }
     },
 

@@ -270,8 +270,8 @@ var FieldDate = InputField.extend({
     events: _.extend({}, AbstractField.prototype.events, {
         'input': '_onInput',
         'change': '_onChange',
-        'focusout': '_onDateInputFocusout',
-        'focus .o_datepicker_input': '_onDateInputFocus',
+        'focusout': 'onFocusout',
+        'focus .o_datepicker_input': 'onFocus',
     }),
 
     /**
@@ -303,16 +303,6 @@ var FieldDate = InputField.extend({
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
-    _onDateInputFocus: function() {
-        if(!$(this.$el).hasClass('o_form_invisible') && this.required){
-            $(this.$el).nextAll('i').remove();
-        }
-    },
-    _onDateInputFocusout: function() {
-        if(!$(this.$el).hasClass('o_form_invisible') && this.required && $(this.$input).val()==''){
-            $(this.$el).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
-        }
-    },
     /**
      * return the datepicker value
      *
