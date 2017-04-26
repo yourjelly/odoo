@@ -258,22 +258,25 @@
                 <div class="container o_invoice_payment mt16">
                     <div class="oe_structure"/>
                     <div class="container mt16">
-                        <div id="introduction" class="page-header mt16">
-                                <span style="float:left;margin-right:15px;width: 18em;" t-field="payment_request.company_id.logo" t-options="{'widget': 'image'}" t-att-alt="'Logo of %s' % payment_request.company_id.name" t-att-title="payment_request.company_id.name"/>
-                            <div>
-                                <h3 style="float:left;margin-right:18%;margin-top:11px">
+                        <div class="row" style="border-bottom: 1px solid grey; margin-bottom:16px; margin-top: 32px;">
+                            <div class="col-md-3">
+                                <span t-field="payment_request.company_id.logo" t-options="{'widget': 'image'}" t-att-alt="'Logo of %s' % payment_request.company_id.name" t-att-title="payment_request.company_id.name"/>
+                            </div>
+                            <div class="col-md-3">
+                                <h3>
                                     Your Invoice<br></br>
                                     <em t-esc="payment_request.reference"/>
                                     <small t-field="payment_request.state"/>
                                 </h3>
-                                <div class="text-left">
-                                <h2>
+                            </div>
+                            <div class="col-md-3 text-right">
+                                <h3>
                                     <span t-esc="payment_request.invoiced_amount" t-options="{'widget': 'monetary', 'display_currency': payment_request.currency_id}"/>
-                                </h2>
-                                <strong>Due by <span class="ml16" t-esc="payment_request.due_date" t-options='{"widget": "date"}'/></strong>
-                                <span class="hidden-print" style="padding-top: 40px;border-left: 1px solid grey;margin-left: 3%;"/>
-                                </div>
-                                <div class="hidden-print" t-ignore="true" style="margin-top: -50px;padding-left: 76%;">
+                                </h3>
+                                Due by <span class="ml16" t-esc="payment_request.due_date" t-options='{"widget": "date"}'/>
+                            </div>
+                            <div class="col-md-3" style="border-left: 1px solid grey;">
+                                <div class="hidden-print" t-ignore="true">
                                     <ul class="list-inline">
                                         <li>
                                             <a target="_blank" style="font-size:" t-att-href="'/invoice/payment/%s' % payment_request.access_token+'?pdf=True'" t-att-title="payment_request.reference">
@@ -286,17 +289,19 @@
                                             </a>
                                         </li>
                                         <li>
-                                            <t t-if="payment_request.state != 'paid'">
-                                                <a class="btn btn-primary btn-lg"  data-toggle="modal" data-target="#modalpayment">
-                                                    <i class="fa fa-arrow fa-5x" aria-hidden="true"/>Pay Now
-                                                </a>
-                                            </t>
+                                            <h3>
+                                                <t t-if="payment_request.state != 'paid'">
+                                                    <a class="btn btn-primary btn-lg"  data-toggle="modal" data-target="#modalpayment">
+                                                        <i class="fa fa-arrow fa-5x" aria-hidden="true"/>Pay Now
+                                                    </a>
+                                                </t>
+                                            </h3>
                                         </li>
                                     </ul>
                                 </div>
                             </div>
                         </div>
-                        <div class="row mt32">
+                        <div class="row">
                             <div class="col-md-12">
                                 <t t-call="account.invoice_payment_detail"/>
                             </div>
