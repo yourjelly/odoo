@@ -145,24 +145,26 @@
 
     <template id="invoice_payment_detail" name="Payment Detail">
         <div id="wrap">
-            <div t-att-class="payment_request.state == 'paid' and 'panel panel-success' or 'panel panel-default'">
-                <t t-if="payment_request.state == 'paid'">
+            <div t-att-class="payment_request.state == 'paid' and 'panel panel-success' or payment_request.state == 'pending' and 'panel panel-warning' or 'panel panel-default'">
+                <t t-if="payment_request.state != 'open'">
                     <div class="panel-heading">
-                        <div t-attf-class="alert alert-#{status}" t-raw="message"/>
+                        <div class="row">
+                            <h4>
+                                <div class="col-md-6" t-raw="message"/>
+                            </h4>
+                        </div>
                     </div>
                 </t>
                 <div class="panel-body">
                     <div class="mb8" style="margin-bottom:10px;">
                           <strong>Invoice Date:</strong> <span t-field="payment_request.invoice_id.date_invoice" t-options='{"widget": "date"}'/>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                          <div>
+                    <div>
+                        <div>
                             <strong>Invoicing Address</strong>
-                          </div>
-                          <div>
+                        </div>
+                        <div>
                             <address t-field="payment_request.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>
-                          </div>
                         </div>
                     </div>
                     <hr/>
@@ -182,13 +184,13 @@
                     </div>
                     <t t-foreach="payment_request.invoice_id.invoice_line_ids" t-as="invoice_line">
                         <div class="row orders_vertical_align">
-                            <div class="visible-lg col-lg-1 text-center">
+                            <div class="visible-lg hidden-sm hidden-xs col-md-1 text-center">
                                 <span t-field="invoice_line.product_id.image" t-options="{'widget': 'image', 'class': 'img-rounded', 'style':'width: 48px;height:48px'}" />
                             </div>
-                            <div id='product_name' class="col-lg-4 col-sm-6 col-xs-4">
+                            <div id='product_name' class="col-md-5 col-sm-6 col-xs-4">
                                 <span t-esc="invoice_line.product_id.name"/>
                             </div>
-                            <div class="col-xs-3 text-right">
+                            <div class="col-sm-2 col-xs-3 text-right">
                                 <span t-field="invoice_line.price_unit" t-options='{"widget": "monetary", "display_currency": payment_request.currency_id}'/>
                             </div>
                             <div class="col-xs-2 text-right">
@@ -278,7 +280,7 @@
                                             </a>
                                         </li>
                                         <li>
-                                            <a t-att-title="payment_request.reference" onclick="javascript:window.print();">
+                                            <a class="hidden-sm hidden-xs" t-att-title="payment_request.reference" onclick="javascript:window.print();">
                                                 <i class="fa fa-print fa-2x" aria-hidden="true"/>
                                             </a>
                                         </li>
