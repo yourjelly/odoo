@@ -86,10 +86,11 @@ class TestStockCommon(common.TestProductCommon):
         cls.existing_inventories = cls.env['stock.inventory'].search([])
         cls.existing_quants = cls.env['stock.quant'].search([])
 
-        # Inventory
-        inventory_wizard = cls.env['stock.change.product.qty'].create({
-            'product_id': cls.product_1.id,
-            'new_quantity': 50.0,
-            'location_id': cls.warehouse_1.lot_stock_id.id,
-        })
-        inventory_wizard.change_product_qty()
+        # TODO: cannot create inventories for consumable products, but is this code even useful?
+        # # Inventory
+        # inventory_wizard = cls.env['stock.change.product.qty'].create({
+        #     'product_id': cls.product_1.id,
+        #     'new_quantity': 50.0,
+        #     'location_id': cls.warehouse_1.lot_stock_id.id,
+        # })
+        # inventory_wizard.change_product_qty()
