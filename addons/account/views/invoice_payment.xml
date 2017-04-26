@@ -4,6 +4,7 @@
     <template id="online_invoice_assets" name="Online Invoice Results assets">
         <script src="/web/static/lib/nvd3/d3.v3.js"></script>
         <script src="/web/static/lib/nvd3/nv.d3.js"></script>
+        <link type="image/x-icon" rel="shortcut icon" t-att-href="x_icon or '/web/static/src/img/favicon.ico'"/>
         <script type="text/javascript" src="/web/static/src/js/services/session.js"></script>
         <link href="/web/static/lib/nvd3/nv.d3.css" rel="stylesheet" type="text/css"></link>
         <link rel="stylesheet" type="text/less" href="/web/static/src/less/import_bootstrap.less"/>
