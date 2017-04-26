@@ -6,3 +6,4 @@
 # import test_shipment
 
 from . import test_quant
+from . import test_move2
