@@ -645,7 +645,8 @@ class PurchaseOrderLine(models.Model):
         # Fullfill all related procurements with this po line
         diff_quantity = self.product_qty - qty
         procurements = self.procurement_ids
-        if not self.order_id.picking_type_id.merge_moves:
+        merge_moves = procurements[0].rule_id.merge_moves
+        if procurements and not merge_moves:
             for procurement in self.procurement_ids:
                 # If the procurement has some moves already, we should deduct their quantity
                 sum_existing_moves = sum(x.product_qty for x in procurement.move_ids if x.state != 'cancel')
@@ -656,7 +657,7 @@ class PurchaseOrderLine(models.Model):
                     tmp.update({
                         'product_uom_qty': min(procurement_qty, diff_quantity),
                         'move_dest_ids': [(4, x) for x in procurement.move_dest_ids.ids],  # move destination is same as procurement destination
-                        'procurement_id': procurement.id,
+                        'procurement_ids': [(4, procurement.id)],
                         'propagate': procurement.rule_id.propagate,
                     })
                     res.append(tmp)
@@ -665,7 +666,9 @@ class PurchaseOrderLine(models.Model):
                     diff_quantity -= min(procurement_qty, diff_quantity)
         if float_compare(diff_quantity, 0.0,  precision_rounding=self.product_uom.rounding) > 0:
             template['product_uom_qty'] = diff_quantity
-            template['move_dest_ids'] = [(4, x) for x in procurements.mapped('move_dest_ids').ids]
+            if merge_moves:
+                template['move_dest_ids'] = [(4, x) for x in procurements.mapped('move_dest_ids').ids]
+                template['procurement_ids'] = [(4, x) for x in procurements.ids]
             res.append(template)
         return res
 

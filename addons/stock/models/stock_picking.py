@@ -44,7 +44,6 @@ class PickingType(models.Model):
         'Show Operations', default=False)
     show_reserved = fields.Boolean(
         'Show Reserved', default=True)
-    merge_moves = fields.Boolean('Merge Moves')
 
     # Statistics for the kanban view
     last_done_picking = fields.Char('Last 10 Done Pickings', compute='_compute_last_done_picking')

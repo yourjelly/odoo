@@ -46,6 +46,7 @@ class ProcurementRule(models.Model):
     propagate_warehouse_id = fields.Many2one(
         'stock.warehouse', 'Warehouse to Propagate',
         help="The warehouse to propagate on the created move/procurement, which can be different of the warehouse this rule is for (e.g for resupplying rules from another warehouse)")
+    merge_moves = fields.Boolean('Merge Moves')
 
     @api.model
     def _get_action(self):
@@ -192,7 +193,7 @@ class ProcurementOrder(models.Model):
             # create the move as SUPERUSER because the current user may not have the rights to do it (mto product launched by a sale for example)
             #Search if picking with move for it exists already:
             added_to_existing = False
-            if self.rule_id.picking_type_id.merge_moves:
+            if self.rule_id.merge_moves: # Or maybe also if it is the same orderpoint or client, ... (or original procurement group == ...)
                 group_id = False
                 if self.rule_id.group_propagation_option == 'propagate':
                     group_id = self.group_id.id
