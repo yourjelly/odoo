@@ -25,5 +25,3 @@ class AccountPaymentRequest(models.Model):
     company_id = fields.Many2one('res.company', string="Company")
     partner_id = fields.Many2one('res.partner', string="Customer")
     invoiced_amount = fields.Float(string="Total")
-    payment_transaction_id = fields.Many2one(
-        'payment.transaction', string="Payment Transaction")

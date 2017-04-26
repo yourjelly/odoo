@@ -59,3 +59,10 @@ class AccountPayment(models.Model):
             raise ValidationError(_("Payment transaction failed (%s)") % tx.state_message)
 
         self.payment_transaction_id = tx
+
+
+class AccountPaymentRequest(models.Model):
+    _inherit = "account.payment.request"
+
+    payment_transaction_id = fields.Many2one(
+        'payment.transaction', string="Payment Transaction")
