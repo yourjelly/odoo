@@ -92,15 +92,8 @@ class TestStockMove(TestStockCommon):
         self.env['stock.quant'].increase_available_quantity(self.productA, self.stock_location, 10.0)
         self.env['stock.quant'].increase_available_quantity(self.productA, self.pack_location, 5.0)
         
-        self.MoveObj.create({
-            'name': self.productA.name,
-            'product_id': self.productA.id,
-            'product_uom_qty': 10,
-            'product_uom': self.productA.uom_id.id,
-            'picking_id': picking_pick.id,
-            'location_id': self.stock_location,
-            'location_dest_id': self.pack_location,
-            'move_dest_ids': [(4, dest.id)]
-            })
+        picking_pick.action_assign()
+        self.assertEqual(picking_pick.state, 'waiting', 'The picking should not assign what it does not have')
+        
         
         
