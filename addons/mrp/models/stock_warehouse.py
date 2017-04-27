@@ -35,7 +35,8 @@ class StockWarehouse(models.Model):
         result = super(StockWarehouse, self).get_routes_dict()
         production_location = self.env['ir.model.data'].sudo().get_object('stock', 'location_production')
         for warehouse in self:
-            result[warehouse.id]['manu_only'] = []
+            result[warehouse.id]['manu_only'] = [
+                self.Routing(warehouse.lot_stock_id, warehouse.lot_stock_id, warehouse.int_type_id)]
             result[warehouse.id]['pick_manu'] = [
                 self.Routing(warehouse.lot_stock_id, warehouse.wh_input_manu_loc_id, warehouse.int_type_id),
                 self.Routing(warehouse.wh_input_manu_loc_id, production_location, warehouse.int_type_id)]
@@ -211,8 +212,7 @@ class StockWarehouse(models.Model):
             routings = routes_data[warehouse.id][warehouse.manufacture_steps]
             if warehouse.manufacture_pull_id:
                 manufacture_pull = warehouse.manufacture_pull_id
-                if warehouse._get_manufacture_pull_rules_values(routings) and warehouse._get_manufacture_pull_rules_values(routings)[0]:
-                    manufacture_pull.write(warehouse._get_manufacture_pull_rules_values(routings)[0])
+                manufacture_pull.write(warehouse._get_manufacture_pull_rules_values(routings)[0])
             else:
                 manufacture_pull = self.env['procurement.rule'].create(warehouse._get_manufacture_pull_rules_values(routings)[0])
         return manufacture_pull
@@ -293,13 +293,12 @@ class StockWarehouse(models.Model):
                                             'location_src_id': False,
                                             'picking_type_id': self.manu_type_id.id,
                                             'active': True})
-        # return True
 
     @api.multi
     def write(self, vals):
-        res = super(StockWarehouse, self).write(vals)
         if not ('wh_input_manu_loc_id' in vals or 'wh_output_manu_loc_id' in vals) and self.filtered(lambda w: not w.wh_input_manu_loc_id or not w.wh_output_manu_loc_id):
             self._create_or_update_locations()
+        res = super(StockWarehouse, self).write(vals)
         if 'manufacture_to_resupply' in vals:
             if vals.get("manufacture_to_resupply"):
                 for warehouse in self.filtered(lambda warehouse: not warehouse.manufacture_pull_id):
