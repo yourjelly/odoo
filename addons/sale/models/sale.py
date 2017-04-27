@@ -62,19 +62,22 @@ class SaleOrder(models.Model):
                     refund_ids += refund_ids.search([('type', '=', 'out_refund'), ('origin', '=', inv.number), ('origin', '!=', False), ('journal_id', '=', inv.journal_id.id)])
 
             # Ignore the status of the deposit product
+            total_amount = sum(order.order_line.filtered(lambda x : x.product_id.name == 'Down payment').mapped('price_unit'))
+            print "total_amount", total_amount, order.amount_total
             deposit_product_id = self.env['sale.advance.payment.inv']._default_product_id()
             line_invoice_status = [line.invoice_status for line in order.order_line if line.product_id != deposit_product_id]
 
             if order.state not in ('sale', 'done'):
                 invoice_status = 'no'
-            elif any(invoice_status == 'to invoice' for invoice_status in line_invoice_status):
+            elif any(invoice_status == 'to invoice' for invoice_status in line_invoice_status) or (total_amount != order.amount_total):
                 invoice_status = 'to invoice'
-            elif all(invoice_status == 'invoiced' for invoice_status in line_invoice_status):
+            elif all(invoice_status == 'invoiced' for invoice_status in line_invoice_status) or (total_amount >= order.amount_total):
                 invoice_status = 'invoiced'
             elif all(invoice_status in ['invoiced', 'upselling'] for invoice_status in line_invoice_status):
                 invoice_status = 'upselling'
             else:
                 invoice_status = 'no'
+
 
             order.update({
                 'invoice_count': len(set(invoice_ids.ids + refund_ids.ids)),
