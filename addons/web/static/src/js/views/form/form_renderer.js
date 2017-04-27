@@ -52,18 +52,18 @@ return BasicRenderer.extend({
         function markWidget(widget, isValid) {
         var $erricon = $(qweb.render("ErrorIcon", self));
             if (!isValid) {
-                console.log("widget>>>>>>>>>>>",widget,">>>>>>>>>>>>");
                 invalidFields.push(widget.name);
-                if(widget.$input && ($(widget.$input).val()=='' || $(widget.$input).val()=='false')){
-                    widget.$input.after($erricon);
+                if (!('invisible' in widget.modifiers)) {
+                    if(widget.$input){
+                        widget.$input.after($erricon);
+                    }
+                    if(widget.$textarea){ 
+                        widget.$textarea.after($erricon);
+                    }
+                    else {
+                        widget.$el.after($erricon);
+                    }
                 }
-                else if (widget.$el.hasClass('oe_form_field_html_text') && $(widget.$textarea).val()=='') {
-                        widget.$content.after($erricon);
-                }
-                else if($(widget.$el).val()=='' || $(widget.$el).val()=='false' || $(widget.$textarea).val()=='' && !widget.$el.hasClass('oe_form_field_html_text')){
-                    widget.$el.after($erricon);
-                }
-
             }
             widget.$el.toggleClass('o_form_invalid', !isValid);
             var idForLabel = self.idsForLabels[widget.name];

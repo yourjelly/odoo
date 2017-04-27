@@ -449,18 +449,10 @@ var FieldMany2One = AbstractField.extend({
      * @private
      */
     _onInputFocusout: function () {
-       // if (this.required && !$(this.$el).hasClass('o_form_invisible') && $(this.$input).val()=='') {
-       //      $(this.$input).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
-       //  }
         if (this.can_create && this.floating) {
             new M2ODialog(this, this.string, this.$input.val()).open();
         }
     },
-    // _onInputFocus: function(){
-        // if (!$(this.$el).hasClass('o_form_invisible') && this.required) {
-        //     $(this.$input).nextAll('i').remove();
-        // }
-    // },
     /**
      * @private
      */
@@ -585,10 +577,6 @@ var FieldX2Many = AbstractField.extend({
         if (!this.renderer) {
             return this._super.apply(this, arguments);
         }
-        // console.log("$(this.$input).val()",this);
-        // if (this.required && $(this.$el).val()=='') {
-        //     $(this.$input).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
-        // }
         var def = $.Deferred();
         this.renderer.canBeSaved()
             .then(def.resolve.bind(def, true))
@@ -963,7 +951,7 @@ var FieldMany2ManyTags = AbstractField.extend({
         'click .o_delete': '_onDeleteTag',
         'keydown .o_form_field_many2one input': '_onKeyDown',
         'focus .o_form_input_dropdown input': 'onFocus',
-        'focusout .o_form_input_dropdown': 'onFocusout',
+        'focusout': 'onFocusout',
     }),
 
     fetchSubFields: true,
@@ -976,7 +964,9 @@ var FieldMany2ManyTags = AbstractField.extend({
         this.many2one.focus();
     },
     isSet: function () {
-        return !!this.value && this.value.count;
+        if(this.value.count!=0){
+        return !!this.value && true;
+        }
     },
     /**
      * Reset the focus on this field if it was the origin of the onchange call.
@@ -1383,16 +1373,6 @@ var FieldSelection = AbstractField.extend({
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
-    // _onFocus: function(){
-    //     if(!$(this.$el).hasClass('o_form_invisible') && this.required){
-    //         $(this.$el).nextAll('i').remove();
-    //     }
-    // },
-    // _onFocusout: function(){
-    //     if(!$(this.$el).hasClass('o_form_invisible') && this.required && $(this.$el).val()=='false'){
-    //             $(this.$el).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
-    //     }
-    // },
     /**
      * @override
      * @private

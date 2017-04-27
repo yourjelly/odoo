@@ -104,16 +104,6 @@ var DebouncedField = AbstractField.extend({
     _onInput: function () {
         this._doDebouncedAction();
     },
-    // _onFocus: function (){
-    //     if(!$(this.$el).hasClass('o_form_invisible') && this.required){
-    //         $(this.$el).nextAll('i').remove();
-    //     }
-    // },
-    // _onFocusout: function () {
-    //     if(!$(this.$el).hasClass('o_form_invisible') && this.required && $(this.$el).val()==''){
-    //         $(this.$el).after("<i class='err_icon fa fa-exclamation-triangle '></i>");
-    //     }
-    // },
 });
 
 var InputField = DebouncedField.extend({
@@ -761,6 +751,14 @@ var FieldText = DebouncedField.extend({
      */
     _renderReadonly: function () {
         this.$el.text(this._formatValue(this.value));
+    },
+    isSet: function () {
+        if (this.$textarea.val()==''){
+        return false;
+        }
+        else{
+            return true
+        }
     },
 });
 

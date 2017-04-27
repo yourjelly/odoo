@@ -88,7 +88,6 @@ var AbstractField = Widget.extend({
     init: function (parent, name, record, options) {
         this._super(parent);
         options = options || {};
-        // console.log(options)
         // 'name' is the field name displayed by this widget
         this.name = name;
 
@@ -252,16 +251,13 @@ var AbstractField = Widget.extend({
         return this._render();
     },
     onFocus: function (event) {
-        console.log("focus->>>>>>>>",event,"\n>>>>>>>>>>>..",this,"\n>>>>>>>>>>>>>><<",this.value,"\nevent.target", event.target,">>>>>>>>field",this.isSet(),">>>>>>>>>isValid",this.isValid());
         if (this.required) {
             $(event.target).nextAll('i.err_icon').remove();
         }
     },
     onFocusout:function (event) {
         var $erricon = $(QWeb.render("ErrorIcon", this));
-            console.log("$erricon>>>",$erricon);
         if (!this.isValid()) {
-        console.log("focus--->out===>event", event, "this", this,"\nthis.value",this.value,"event.target",event.target)
             $(event.target).after($erricon);
         }
     },
@@ -389,7 +385,6 @@ var AbstractField = Widget.extend({
      */
     _onKeydown: function (event) {
         if (event.which === $.ui.keyCode.TAB) {
-        console.log("on keydown-??>>", event);
             // the event needs to be stopped, to prevent other field widgets
             // to retrigger a move event
             event.stopPropagation();
