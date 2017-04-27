@@ -138,13 +138,9 @@ class SaleAdvancePaymentInv(models.TransientModel):
             sale_line_obj = self.env['sale.order.line']
             for order in sale_orders:
                 if self.advance_payment_method == 'percentage':
-                    amount = order.amount_untaxed * self.amount / 100
-                    if amount == order.amount_untaxed:
-                        order.write({'invoice_status': 'invoiced'})
+                    amount = order.amount_total * self.amount / 100
                 else:
                     amount = self.amount
-                    if amount == order.amount_untaxed:
-                        order.write({'invoice_status': 'invoiced'})
                 if self.product_id.invoice_policy != 'order':
                     raise UserError(_('The product used to invoice a down payment should have an invoice policy set to "Ordered quantities". Please update your deposit product to be able to create a deposit invoice.'))
                 if self.product_id.type != 'service':
@@ -165,6 +161,22 @@ class SaleAdvancePaymentInv(models.TransientModel):
                     'is_downpayment': True,
                 })
                 self._create_invoice(order, so_line, amount)
+                if self.advance_payment_method == 'percentage':
+                    if int(self.amount) == 100:
+                        order.write({'invoice_status': 'invoiced'})
+                    else:
+                        consider_amount = 0
+                        for so in order.order_line:
+                            if so.product_id.name == 'Down payment':
+                                consider_amount += so.price_unit
+                            
+                else:
+                    if amount == order.amount_total:
+                        order.write({'invoice_status': 'invoiced'})
+                    else:
+                        consider_amount = 0
+                        for so in order.order_line:
+                            consider_amount += so.price_unit
         if self._context.get('open_invoices', False):
             return sale_orders.action_view_invoice()
         return {'type': 'ir.actions.act_window_close'}
