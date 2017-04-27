@@ -637,6 +637,8 @@ class StockMove(models.Model):
                                                                   lot_id=key[2], package_id=key[3]) #TODO: owner
                         qty_reserved += sum([x[1] for x in quants])
                         quants_chosen[move.id] += quants
+                if sum(x[1] for x in quants_chosen[move.id] if x[0]) == move.product_qty:
+                    moves_to_assign |= move
         # Do do_prepare_partial with the quants chosen
         for pick in self.mapped('picking_id'):
             pick.do_prepare_partial(quants_chosen)
@@ -754,6 +756,11 @@ class StockMove(models.Model):
                 # Need to do some kind of conversion here
                 qty_split = move.product_uom._compute_quantity(move.product_uom_qty - move.quantity_done, move.product_id.uom_id)
                 new_move = move.split(qty_split)
+                # TODO: Could also split packops maybe -> need to see what to do here
+                for ops in move.pack_operation_ids:
+                    ops.write({'product_qty': ops.qty_done})
+                # On the quants where you need to change the 
+                
                 #moves_to_backorder.append(new_move)
                 # If you were already putting stock.move.lots on the next one in the work order, transfer those to the new move
                 move.pack_operation_ids.filtered(lambda x: x.qty_done == 0.0).write({'move_id': new_move})
@@ -764,13 +771,14 @@ class StockMove(models.Model):
                         raise UserError(_('You need to supply a lot/serial number.'))
                     qty = move.product_uom._compute_quantity(packop.qty_done, move.product_id.uom_id)
                     # Here, it should remove the quantity reserved on the move, not just everything (actually, you don't know which one was reserved)
-                    quant_obj.decrease_reserved_quantity(packop.product_id, packop.location_id, qty, lot_id=packop.lot_id, package_id=packop.package_id, owner_id=packop.owner_id)
+                    #This should be reserved quantity so the sum of the move lines
+                    quant_obj.decrease_reserved_quantity(packop.product_id, packop.location_id, move.product_qty, lot_id=packop.lot_id, package_id=packop.package_id, owner_id=packop.owner_id)
                     # Decrease quantity in source and increment in destination
                     quant_obj.decrease_available_quantity(packop.product_id, packop.location_id, qty, lot_id=packop.lot_id, package_id=packop.package_id, owner_id=packop.owner_id)
                     quant_obj.increase_available_quantity(packop.product_id, packop.location_dest_id, qty, lot_id=packop.lot_id, package_id=packop.part_of_pack and packop.package_id or packop.result_package_id, owner_id=packop.owner_id)
             #moves_to_unreserve |= move
             #if move.move_orig_ids:
-            #    # As you can not link the moves 
+            #    # As you can not link the moves
             #    moves_filtered = move.move_orig_ids.filtered(lambda x: x.state != 'done')
             #    moves_filtered.write({'move_dest_ids': [(3, move.id)]})
         #TODO: might filter only on first_pack or something similar
@@ -793,6 +801,7 @@ class StockMove(models.Model):
                     })
                 picking.message_post('Backorder Created') #message needs to be improved
                 moves_to_backorder.write({'picking_id': backorder_picking.id})
+            moves_to_backorder.action_assign()
         return moves_todo
 
     @api.multi
