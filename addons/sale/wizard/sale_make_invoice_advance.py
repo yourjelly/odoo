@@ -137,6 +137,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
             'comment': order.note,
         })
         invoice.compute_taxes()
+        # self._change_invoice_status(order, amount)
         invoice.message_post_with_view('mail.message_origin_link',
                     values={'self': invoice, 'origin': order},
                     subtype_id=self.env.ref('mail.mt_note').id)
