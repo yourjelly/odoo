@@ -37,15 +37,8 @@ class WebsiteConfigSettings(models.TransientModel):
     module_website_form_editor = fields.Boolean("Custom Forms")
     module_website_version = fields.Boolean("A/B Testing")
     module_website_twitter = fields.Boolean("Twitter Roller")
-    module_website_blog = fields.Boolean("Blogs")
     module_website_livechat = fields.Boolean("Live Chat")
-    module_website_forum = fields.Boolean("Forum")
-    module_website_crm = fields.Boolean("Contact Form")
     module_website_slides = fields.Boolean("Slides")
-    module_website_hr_recruitment = fields.Boolean("Jobs")
-    module_website_sale = fields.Boolean("eCommerce")
-    module_website_contract = fields.Boolean("Subscriptions")
-    module_website_event_sale = fields.Boolean("Event Tickets")
 
     favicon = fields.Binary('Favicon', related='website_id.favicon')
     # Set as global config parameter since methods using it are not website-aware. To be changed
