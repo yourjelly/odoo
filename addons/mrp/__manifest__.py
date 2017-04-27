@@ -65,6 +65,7 @@ Dashboard / Reports for MRP will include:
     ],
     'demo': [
         'data/mrp_demo.xml',
+        'data/mrp_manufacture_demo.yml',
         'data/mrp_lot_demo.yml'],
     'qweb': ['static/src/xml/mrp.xml'],
     'test': [],
