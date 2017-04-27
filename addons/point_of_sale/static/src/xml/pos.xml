@@ -384,6 +384,17 @@
                         <span class='label'>Tax ID</span>
                         <input class='detail vat'           name='vat'     t-att-value='partner.vat || ""'></input>
                     </div>
+                    <div class='client-detail'>
+                        <span class='label'>Pricelist</span>
+                        <select class='detail needsclick' name='property_product_pricelist'>
+                            <t t-foreach='widget.pos.pricelists' t-as='pricelist'>
+                                <option t-att-value='pricelist.id'
+                                        t-att-selected="partner.property_product_pricelist ? (pricelist.id === partner.property_product_pricelist[0] ? true : undefined) : undefined"> 
+                                    <t t-esc='pricelist.display_name'/>
+                                </option>
+                            </t>
+                        </select>
+                    </div>
                 </div>
             </div>
         </section>
