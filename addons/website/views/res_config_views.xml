@@ -230,10 +230,10 @@
                                 </div>
                             </div>
 
-                            <h2>Communication</h2>
+                            <h2 groups="base.group_no_one">Communication</h2>
 
-                            <div class="row mt16 o_settings_container" id="communication_settings">
-                                <div class="col-xs-12 col-md-6 o_setting_box" id="custom_forms_install_setting" groups="base.group_no_one">
+                            <div class="row mt16 o_settings_container" id="communication_settings" groups="base.group_no_one">
+                                <div class="col-xs-12 col-md-6 o_setting_box" id="custom_forms_install_setting">
                                     <div title="Build up your own forms and get requests as emails, leads or issues.
 You can also edit the fields of the Extra Step page in eCommerce checkout.">
                                         <div class="o_setting_left_pane">
