@@ -16,28 +16,6 @@ class SaleAdvancePaymentInv(models.TransientModel):
     def _count(self):
         return len(self._context.get('active_ids', []))
 
-    def _change_invoice_status(self, order, amount):
-        for line in order.order_line:
-            print "\n line->", line.invoice_status, line.product_id.name, line.price_unit, order.amount_total
-        if self.advance_payment_method == 'percentage' and int(self.amount) == 100:
-            order.write({'invoice_status': 'invoiced'})
-        elif self.advance_payment_method == 'percentage':
-            consider_amount = 0
-            for so_line in order.order_line:
-                if so_line.product_id.name == 'Down payment':
-                    consider_amount += so_line.price_unit
-            if round(consider_amount) >= round(order.amount_total):
-                order.write({'invoice_status': 'invoiced'})
-        elif self.advance_payment_method == 'fixed' and amount >= order.amount_total:
-            order.write({'invoice_status': 'invoiced'})
-        else:
-            consider_amount = 0
-            for so_line in order.order_line:
-                if so_line.product_id.name == 'Down payment':
-                    consider_amount += so_line.price_unit
-            if round(consider_amount) >= round(order.amount_total):
-                order.write({'invoice_status': 'invoiced'})
-
     @api.model
     def _get_advance_payment_method(self):
         if self._count() == 1:
@@ -184,7 +162,6 @@ class SaleAdvancePaymentInv(models.TransientModel):
                     'is_downpayment': True,
                 })
                 self._create_invoice(order, so_line, amount)
-                self._change_invoice_status(order, amount)
         if self._context.get('open_invoices', False):
             return sale_orders.action_view_invoice()
         return {'type': 'ir.actions.act_window_close'}
