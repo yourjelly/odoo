@@ -25,7 +25,7 @@ Odoo E-Commerce
         'views/payment_views.xml',
         'views/snippets.xml',
         'views/report_shop_saleorder.xml',
-        # 'views/res_config_view.xml',
+        'views/res_config_view.xml',
     ],
     'demo': [
         'data/demo.xml',

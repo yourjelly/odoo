@@ -3,8 +3,10 @@
 
 from odoo import api, models, fields
 
-class WebsiteConfigSettings(models.TransientModel):
-    _inherit = 'website.config.settings'
+class EcommerceConfigSettings(models.TransientModel):
+
+    _name = 'ecommerce.config.settings'
+    _inherit = 'res.config.settings'
 
     def _default_order_mail_template(self):
         if self.env['ir.module.module'].search([('name', '=', 'website_quote')]).state in ('installed', 'to upgrade'):
@@ -12,8 +14,8 @@ class WebsiteConfigSettings(models.TransientModel):
         else:
             return self.env.ref('sale.email_template_edi_sale').id
 
-    salesperson_id = fields.Many2one('res.users', related='website_id.salesperson_id', string='Salesperson')
-    salesteam_id = fields.Many2one('crm.team', related='website_id.salesteam_id', string='Sales Channel', domain=[('team_type', '!=', 'pos')])
+    # salesperson_id = fields.Many2one('res.users', related='website_id.salesperson_id', string='Salesperson')
+    # salesteam_id = fields.Many2one('crm.team', related='website_id.salesteam_id', string='Sales Channel', domain=[('team_type', '!=', 'pos')])
     module_delivery = fields.Boolean("Manage shipping internally")
     module_website_sale_delivery = fields.Boolean("Shipping Costs")
     # field used to have a nice radio in form view, resuming the 2 fields above
