@@ -86,6 +86,8 @@ var FieldMany2One = AbstractField.extend({
         'keyup input': '_onInputKeyup',
         'click .o_external_button': '_onExternalButtonClick',
         'click': '_onClick',
+        'focusout input': 'onFocusout',
+        'focus .o_form_input': 'onFocus',
     }),
 
     init: function () {
@@ -1215,6 +1217,8 @@ var FieldMany2ManyTags = AbstractField.extend({
     events: _.extend({}, AbstractField.prototype.events, {
         'click .o_delete': '_onDeleteTag',
         'keydown .o_field_many2one input': '_onKeyDown',
+        'focus .o_field_many2manytags input': 'onFocus',
+        'focusout .o_field_many2one input' : 'onFocusout',
     }),
     fieldsToFetch: {
         color: {type: 'integer'},
@@ -1254,7 +1258,12 @@ var FieldMany2ManyTags = AbstractField.extend({
      * @returns {boolean}
      */
     isSet: function () {
-        return !!this.value && this.value.count;
+        if (this.value.count == 0){
+            return false;
+        }
+        else {
+            return true;
+        }
     },
     /**
      * Reset the focus on this field if it was the origin of the onchange call.
@@ -1322,8 +1331,6 @@ var FieldMany2ManyTags = AbstractField.extend({
             mode: 'edit',
             viewType: this.viewType,
         });
-        // to prevent the M2O to take the value of the M2M
-        this.many2one.value = false;
         // to prevent the M2O to take the relational values of the M2M
         this.many2one.m2o_value = '';
 
@@ -1636,6 +1643,8 @@ var FieldSelection = AbstractField.extend({
     supportedFieldTypes: ['selection', 'many2one'],
     events: _.extend({}, AbstractField.prototype.events, {
         'change': '_onChange',
+        'focus':'onFocus',
+        'focusout':'onFocusout',
     }),
     /**
      * @override

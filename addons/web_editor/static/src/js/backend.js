@@ -23,6 +23,10 @@ var QWeb = core.qweb;
  */
 var FieldTextHtmlSimple = basic_fields.DebouncedField.extend({
     className: 'oe_form_field oe_form_field_html_text',
+    events: _.extend({}, AbstractField.prototype.events, {
+        'focus .note-editable': 'onFocus',
+        'focusout .note-editable': 'onFocusout',
+    }),
 
     //--------------------------------------------------------------------------
     // Public

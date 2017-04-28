@@ -68,6 +68,12 @@ var TranslatableFieldMixin = {
 };
 
 var DebouncedField = AbstractField.extend({
+    events: _.extend({}, AbstractField.prototype.events, {
+        'input': '_onInput',
+        'change': '_onChange',
+        'focusout': 'onFocusout',
+        'focus': 'onFocus',
+    }),
     /**
      * For field widgets that may have a large number of field changes quickly,
      * it could be a good idea to debounce the changes. In that case, this is
@@ -345,6 +351,10 @@ var FieldDate = InputField.extend({
     className: "o_field_date",
     tagName: "span",
     supportedFieldTypes: ['date'],
+    events: _.extend({}, AbstractField.prototype.events, {
+        'focusout': 'onFocusout',
+        'focus input': 'onFocus',
+    }),
 
     /**
      * In edit mode, instantiates a DateWidget datepicker and listen to changes.
@@ -817,9 +827,21 @@ var FieldText = InputField.extend(TranslatableFieldMixin, {
      * @override
      */
     start: function () {
+        this.$el.addClass('o_list_text o_form_textarea');
+
         if (this.mode === 'edit') {
             dom.autoresize(this.$el, {parent: this});
-
+            this.$textarea = this.$el;
+            $(this.$textarea).focus(function(event){
+                var $divtextarea = $(this).parent()
+                if ($divtextarea.hasClass('o_required_modifier')) {
+                    $(event.target).nextAll('i.err_icon').remove();
+                }
+            });
+            if (this.attrs.placeholder) {
+                this.$textarea.attr('placeholder', this.attrs.placeholder);
+            }
+            dom.autoresize(this.$textarea, {parent: this});
             this.$el = this.$el.add(this._renderTranslateButton());
         }
         return this._super();
@@ -961,6 +983,8 @@ var AbstractFieldBinary = AbstractField.extend({
             this.$('.o_input_file').click();
         },
         'click .o_clear_file_button': 'on_clear',
+        'click input': 'onFocus',
+        'focusout input': 'onFocusout',
     }),
     init: function (parent, name, record) {
         this._super.apply(this, arguments);

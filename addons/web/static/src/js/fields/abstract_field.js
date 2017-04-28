@@ -32,10 +32,14 @@ odoo.define('web.AbstractField', function (require) {
 
 var field_utils = require('web.field_utils');
 var Widget = require('web.Widget');
+var core = require('web.core');
+var QWeb = core.qweb;
 
 var AbstractField = Widget.extend({
     events: {
         'keydown': '_onKeydown',
+        'focus': 'onFocus',
+        'focusout': 'onFocusout',
     },
     /**
      * If this flag is set to true, the field widget will be reset on every
@@ -368,7 +372,17 @@ var AbstractField = Widget.extend({
             changes: changes,
         });
     },
-
+    onFocus: function (event) {
+        if (this.attrs.required || $(this.$el).hasClass('o_required_modifier') || this.$el.find('o_required_modifier')) {
+            $(event.target).nextAll('i.err_icon').remove();
+        }
+    },
+    onFocusout:function (event) {
+        var $erricon = $(QWeb.render("ErrorIcon", this));
+        if ((this.attrs.required || $(this.$el).hasClass('o_required_modifier')) && !this.isSet()) {
+            $(event.target).after($erricon);
+        }
+    },
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------

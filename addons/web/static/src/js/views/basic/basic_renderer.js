@@ -49,8 +49,29 @@ var BasicRenderer = AbstractRenderer.extend({
         var invalidFields = [];
         _.each(this.allFieldWidgets[recordID], function (widget) {
             var canBeSaved = self._canWidgetBeSaved(widget);
+            var $erricon = $(qweb.render("ErrorIcon", self));
             if (!canBeSaved) {
                 invalidFields.push(widget.name);
+                if (!widget.$el.hasClass('o_invisible_modifier')) {
+                    if (widget.$input) {
+                        widget.$input.after($erricon);
+                    }
+                    else if (widget.$el.hasClass('o_field_many2manytags')) {
+                        widget.$el.find("input").after($erricon);
+                    }
+                    else if (widget.$el.hasClass('o_field_binary_file')) {
+                        widget.$el.find("button").after($erricon);
+                    }
+                    else if (widget.$content) {
+                        widget.$content.after($erricon);
+                    }
+                    else if (widget.$textarea) {
+                        widget.$textarea.after($erricon);
+                    }
+                    else if (!widget.$input) {
+                        widget.$el.after($erricon);
+                    }
+                }
             }
             widget.$el.toggleClass('o_field_invalid', !canBeSaved);
         });
