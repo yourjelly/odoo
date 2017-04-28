@@ -71,10 +71,12 @@ class SaleOrder(models.Model):
                 invoice_status = 'no'
             elif any(invoice_status == 'to invoice' for invoice_status in line_invoice_status):
                 invoice_status = 'to invoice'
-            elif all(invoice_status == 'invoiced' for invoice_status in line_invoice_status) or float_compare(invoices_amount_total, order.amount_total, precision_digits=precision) >= 0:
+            elif all(invoice_status == 'invoiced' for invoice_status in line_invoice_status):
                 invoice_status = 'invoiced'
             elif all(invoice_status in ['invoiced', 'upselling'] for invoice_status in line_invoice_status):
                 invoice_status = 'upselling'
+            elif float_compare(invoices_amount_total, order.amount_total, precision_digits=precision) >= 0:
+                invoice_status = 'invoiced'
             else:
                 invoice_status = 'no'
 
