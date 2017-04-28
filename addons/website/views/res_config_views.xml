@@ -293,7 +293,7 @@ You can also edit the fields of the Extra Step page in eCommerce checkout.">
 
         <menuitem id="menu_website_global_configuration" parent="menu_website_configuration"
             sequence="100" name="Configuration" groups="base.group_system"/>
-        <menuitem name="Settings"
+        <menuitem name="Website Settings"
             id="menu_website_website_settings"
             action="action_website_configuration"
             parent="menu_website_global_configuration"
