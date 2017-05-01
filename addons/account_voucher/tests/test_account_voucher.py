@@ -27,6 +27,10 @@ class TestAccountVoucher(common.TransactionCase):
         self.group_account_user_id = self.env.ref('account.group_account_user')
         self.company_id = self.env.ref('base.main_company')
         self.partner_id = self.env.ref('base.res_partner_12')
+        self.account_id = self.env.ref('account_voucher.cash')
+        self.cash_journal = self.env.ref('account_voucher.cash_journal')
+        self.sales_journal = self.env.ref('account_voucher.sales_journal')
+        self.account_receivable = self.env.ref('account_voucher.a_recv')
 
         # Create a Account Voucher User
         self.res_users_account_voucher_user = self.ResUsers.create({
@@ -43,8 +47,8 @@ class TestAccountVoucher(common.TransactionCase):
             'voucher_type': 'sale',
             'partner_id': self.partner_id.id,
             'company_id': self.company_id.id,
-            'account_id': self.env.ref('account_voucher.cash').id,
-            'journal_id': self.env.ref('account_voucher.sales_journal').id,
+            'account_id': self.account_id.id,
+            'journal_id': self.sales_journal.id,
             'date': time.strftime('%Y-%m-%d'),
             'name': 'Voucher for Axelor',
             'amount': 1000.0,
@@ -52,7 +56,7 @@ class TestAccountVoucher(common.TransactionCase):
             'reference': 'none',
             'line_ids': [
                 (0, 0, {
-                    'account_id': self.env.ref('account_voucher.a_recv').id,
+                    'account_id': self.account_receivable.id,
                     'price_unit': 1000.0,
                     'name': 'Voucher for Axelor',
                     })]
@@ -63,30 +67,26 @@ class TestAccountVoucher(common.TransactionCase):
         # Validate Customer voucher
         self.account_voucher_voucherforaxelor0.proforma_voucher()
         # Check for Journal Entry of customer voucher
-        self.assertTrue(self.account_voucher_voucherforaxelor0.move_id, 'Journal Entry should be posted')
+        self.assertTrue(self.account_voucher_voucherforaxelor0.move_id, 'No journal entry created !.')
         # Find related account move line for Customer Voucher.
-        customer_voucher_move_line = self.account_voucher_voucherforaxelor0.move_id
+        customer_voucher_move = self.account_voucher_voucherforaxelor0.move_id
 
         # Check state of Account move line.
-        self.assertEquals(customer_voucher_move_line.state, 'posted', 'Account move state is incorrect.')
+        self.assertEquals(customer_voucher_move.state, 'posted', 'Account move state is incorrect.')
         # Check partner of Account move line.
-        self.assertEquals(customer_voucher_move_line.partner_id, self.partner_id, 'Partner is incorrect.')
-        # Check company of Account move line.
-        self.assertEquals(customer_voucher_move_line.company_id, self.company_id, 'Company is incorrect.')
+        self.assertEquals(customer_voucher_move.partner_id, self.partner_id, 'Partner is incorrect on account move.')
         # Check journal in Account move line.
-        self.assertEquals(customer_voucher_move_line.journal_id, self.env.ref('account_voucher.sales_journal'), 'Journal is incorrect.')
+        self.assertEquals(customer_voucher_move.journal_id, self.sales_journal, 'Journal is incorrect on account move.')
         # Check amount in Account move line.
-        self.assertEquals(customer_voucher_move_line.amount, 1000.0, 'Amount is incorrect.')
-        # Check narration in Account move line.
-        self.assertEquals(customer_voucher_move_line.narration, 'Basic Pc', 'Narration is incorrect.')
+        self.assertEquals(customer_voucher_move.amount, 1000.0, 'Amount is incorrect in account move.')
 
         # Create Vendor Voucher
         self.account_voucher_voucheraxelor0 = self.Voucher.sudo(self.res_users_account_voucher_user).create({
             'voucher_type': 'purchase',
             'partner_id': self.partner_id.id,
             'company_id': self.company_id.id,
-            'account_id': self.env.ref('account_voucher.cash').id,
-            'journal_id': self.env.ref('account_voucher.cash_journal').id,
+            'account_id': self.account_id.id,
+            'journal_id': self.cash_journal.id,
             'date': time.strftime('%Y-%m-%d'),
             'name': 'Voucher Axelor',
             'amount': 1000.0,
@@ -94,7 +94,7 @@ class TestAccountVoucher(common.TransactionCase):
             'reference': 'none',
             'line_ids': [
                 (0, 0, {
-                    'account_id': self.env.ref('account_voucher.a_recv').id,
+                    'account_id': self.account_receivable.id,
                     'price_unit': 1000.0,
                     'name': 'Voucher Axelor',
                     })]
@@ -104,20 +104,16 @@ class TestAccountVoucher(common.TransactionCase):
 
         # Validate Vendor voucher
         self.account_voucher_voucheraxelor0.proforma_voucher()
-        # Check for Journal Entry of customer voucher
-        self.assertTrue(self.account_voucher_voucheraxelor0.move_id, 'Journal Entry should be posted')
+        # Check for Journal Entry of vendor voucher
+        self.assertTrue(self.account_voucher_voucheraxelor0.move_id, 'No journal entry created !.')
         # Find related account move line for Vendor Voucher.
-        vendor_voucher_move_line = self.account_voucher_voucheraxelor0.move_id
+        vendor_voucher_move = self.account_voucher_voucheraxelor0.move_id
 
         # Check state of Account move line.
-        self.assertEquals(vendor_voucher_move_line.state, 'posted', 'Account move state is incorrect.')
+        self.assertEquals(vendor_voucher_move.state, 'posted', 'Account move state is incorrect.')
         # Check partner of Account move line.
-        self.assertEquals(vendor_voucher_move_line.partner_id, self.partner_id, 'Partner is incorrect.')
-        # Check company of Account move line.
-        self.assertEquals(vendor_voucher_move_line.company_id, self.company_id, 'Company is incorrect.')
+        self.assertEquals(vendor_voucher_move.partner_id, self.partner_id, 'Partner is incorrect on account move.')
         # Check journal in Account move line.
-        self.assertEquals(vendor_voucher_move_line.journal_id, self.env.ref('account_voucher.cash_journal'), 'Journal is incorrect.')
+        self.assertEquals(vendor_voucher_move.journal_id, self.cash_journal, 'Journal is incorrect on account move.')
         # Check amount in Account move line.
-        self.assertEquals(vendor_voucher_move_line.amount, 1000.0, 'Amount is incorrect.')
-        # Check narration in Account move line.
-        self.assertEquals(vendor_voucher_move_line.narration, 'PC Assemble SC234', 'Narration is incorrect.')
+        self.assertEquals(vendor_voucher_move.amount, 1000.0, 'Amount is incorrect in acccount move.')
