@@ -61,7 +61,6 @@ class SaleOrder(models.Model):
                 for inv in invoice_ids:
                     refund_ids += refund_ids.search([('type', '=', 'out_refund'), ('origin', '=', inv.number), ('origin', '!=', False), ('journal_id', '=', inv.journal_id.id)])
 
-            precision = self.env['decimal.precision'].precision_get('Product Price')
             invoices_amount_total = sum(invoice_ids.filtered(lambda x : x.state != 'cancel').mapped('amount_total_signed'))
             # Ignore the status of the deposit product
             deposit_product_id = self.env['sale.advance.payment.inv']._default_product_id()
@@ -75,7 +74,7 @@ class SaleOrder(models.Model):
                 invoice_status = 'invoiced'
             elif all(invoice_status in ['invoiced', 'upselling'] for invoice_status in line_invoice_status):
                 invoice_status = 'upselling'
-            elif float_compare(invoices_amount_total, order.amount_total, precision_digits=precision) >= 0:
+            elif float_compare(invoices_amount_total, order.amount_total, precision_rounding=order.company_id.currency_id.rounding) >= 0:
                 invoice_status = 'invoiced'
             else:
                 invoice_status = 'no'
