@@ -77,7 +77,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
         if self.amount <= 0.00:
             raise UserError(_('The value of the down payment amount must be positive.'))
         if self.advance_payment_method == 'percentage':
-            amount = order.amount_total * self.amount / 100
+            amount = order.amount_untaxed * self.amount / 100
             name = _("Down payment of %s%%") % (self.amount,)
         else:
             amount = self.amount
@@ -115,7 +115,6 @@ class SaleAdvancePaymentInv(models.TransientModel):
             'comment': order.note,
         })
         invoice.compute_taxes()
-        # self._change_invoice_status(order, amount)
         invoice.message_post_with_view('mail.message_origin_link',
                     values={'self': invoice, 'origin': order},
                     subtype_id=self.env.ref('mail.mt_note').id)
@@ -139,7 +138,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
             sale_line_obj = self.env['sale.order.line']
             for order in sale_orders:
                 if self.advance_payment_method == 'percentage':
-                    amount = order.amount_total * self.amount / 100
+                    amount = order.amount_untaxed * self.amount / 100
                 else:
                     amount = self.amount
                 if self.product_id.invoice_policy != 'order':
