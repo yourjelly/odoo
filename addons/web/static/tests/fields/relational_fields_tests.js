@@ -2500,6 +2500,7 @@ QUnit.module('relational_fields', {
                                     '<t t-name="kanban-box">' +
                                         '<div><field name="display_name"/></div>' +
                                         '<div><field name="turtle_foo"/></div>' +
+                                        '<div><field name="condition"/></div>' +
                                         '<div> <a type="edit"> Edit </a> </div>' +
                                     '</t>' +
                                 '</templates>' +
