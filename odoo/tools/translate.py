@@ -127,9 +127,7 @@ class UNIX_LINE_TERMINATOR(csv.excel):
 csv.register_dialect("UNIX", UNIX_LINE_TERMINATOR)
 
 
-#
-# Helper functions for translating fields
-#
+# FIXME: holy shit this whole thing needs to be cleaned up hard it's a mess
 def encode(s):
     if isinstance(s, unicode):
         return s.encode('utf8')
@@ -282,17 +280,17 @@ def xml_translate(callback, value):
         return value
 
     try:
-        root = etree.fromstring(encode(value))
+        root = etree.fromstring(value)
         result = translate_xml_node(root, callback, 'xml')
-        return etree.tostring(result, method='xml', encoding='utf8').decode('utf8')
+        return etree.tostring(result, method='xml', encoding='unicode')
     except etree.ParseError:
         # fallback for translated terms: use an HTML parser and wrap the term
-        wrapped = "<div>%s</div>" % encode(value)
+        wrapped = b"<div>%s</div>" % value.encode('utf-8')
         root = etree.fromstring(wrapped, etree.HTMLParser(encoding='utf-8'))
         # root is html > body > div; translate the div only
         result = translate_xml_node(root[0][0], callback, 'xml')
         # remove tags <div> and </div> from result
-        return etree.tostring(result, method='xml', encoding='utf8').decode('utf8')[5:-6]
+        return etree.tostring(result, method='xml', encoding='unicode')[5:-6]
 
 def html_translate(callback, value):
     """ Translate an HTML value (string), using `callback` for translating text
@@ -304,12 +302,12 @@ def html_translate(callback, value):
     try:
         parser = etree.HTMLParser(encoding='utf-8')
         # value may be some HTML fragment, wrap it into a div
-        wrapped = "<div>%s</div>" % encode(value)
+        wrapped = b"<div>%s</div>" % value.encode('utf-8')
         root = etree.fromstring(wrapped, parser)
         # root is html > body > div; translate the div only
         result = translate_xml_node(root[0][0], callback, 'html', parser)
         # remove tags <div> and </div> from result
-        value = etree.tostring(result, method='html', encoding='utf8').decode('utf8')[5:-6]
+        value = etree.tostring(result, method='html', encoding='unicode')[5:-6]
     except ValueError:
         _logger.exception("Cannot translate malformed HTML, using source value instead")
 
@@ -474,7 +472,7 @@ class PoFile(object):
         lines = self.buffer.readlines()
         # remove the BOM (Byte Order Mark):
         if len(lines):
-            lines[0] = unicode(lines[0], 'utf8').lstrip(unicode( codecs.BOM_UTF8, "utf8"))
+            lines[0] = pycompat.to_text(lines[0]).lstrip(u'\ufeff')
 
         lines.append('') # ensure that the file ends with at least an empty line
         return lines
@@ -622,14 +620,10 @@ class PoFile(object):
             # only strings in python code are python formated
             self.buffer.write("#, python-format\n")
 
-        if not isinstance(trad, unicode):
-            trad = unicode(trad, 'utf8')
-        if not isinstance(source, unicode):
-            source = unicode(source, 'utf8')
-
-        msg = "msgid %s\n"      \
-              "msgstr %s\n\n"   \
-                  % (quote(source), quote(trad))
+        msg = (
+            u"msgid %s\n"
+            u"msgstr %s\n\n"
+        ) % (quote(pycompat.text_type(source)), quote(pycompat.text_type(trad)))
         self.buffer.write(msg.encode('utf8'))
 
 
@@ -1088,7 +1082,7 @@ def trans_load_data(cr, fileobj, fileformat, lang, lang_name=None, verbose=True,
                 return
 
             if isinstance(res_id, pycompat.integer_types) or \
-                    (isinstance(res_id, basestring) and res_id.isdigit()):
+                    (isinstance(res_id, pycompat.string_types) and res_id.isdigit()):
                 dic['res_id'] = int(res_id)
                 if module_name:
                     dic['module'] = module_name
