@@ -5,6 +5,7 @@ import time
 
 from odoo import api, fields, models, _
 import odoo.addons.decimal_precision as dp
+from odoo.tools import float_compare
 from odoo.exceptions import UserError
 
 
@@ -86,6 +87,8 @@ class SaleAdvancePaymentInv(models.TransientModel):
             tax_ids = order.fiscal_position_id.map_tax(self.product_id.taxes_id).ids
         else:
             tax_ids = self.product_id.taxes_id.ids
+        if float_compare(amount, order.amount_untaxed, precision_rounding=order.company_id.currency_id.rounding) >= 0:
+            raise UserError(_('You cannot invoice the total amount of the SO as a downpayment. You must also invoice the lines of the sale order.'))
 
         invoice = inv_obj.create({
             'name': order.client_order_ref or order.name,
