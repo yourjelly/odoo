@@ -40,6 +40,10 @@ class PickingType(models.Model):
     use_existing_lots = fields.Boolean(
         'Use Existing Lots/Serial Numbers', default=True,
         help="If this is checked, you will be able to choose the Lots/Serial Numbers. You can also decide to not put lots in this operation type.  This means it will create stock with no lot or not put a restriction on the lot taken. ")
+    show_operations = fields.Boolean(
+        'Show Operations', default=False)
+    show_reserved = fields.Boolean(
+        'Show Reserved', default=True)
 
     # Statistics for the kanban view
     last_done_picking = fields.Char('Last 10 Done Pickings', compute='_compute_last_done_picking')
@@ -263,8 +267,12 @@ class Picking(models.Model):
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
 
     pack_operation_ids = fields.One2many(
-        'stock.pack.operation', 'picking_id', 'Related Packing Operations',
+        'stock.pack.operation', 'picking_id', 'Operations',
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
+    active_pack_operation_ids = fields.One2many(
+        'stock.pack.operation', 'picking_id', 'Active Operations', 
+        domain=['|', ('part_of_pack', '=', False), ('first_pack', '=', True)],)
+
 
     pack_operation_exist = fields.Boolean(
         'Has Pack Operations', compute='_compute_pack_operation_exist',
@@ -277,6 +285,8 @@ class Picking(models.Model):
     printed = fields.Boolean('Printed')
     # Used to search on pickings
     product_id = fields.Many2one('product.product', 'Product', related='move_lines.product_id')
+    show_operations = fields.Boolean(related='picking_type_id.show_operations')
+
     recompute_pack_op = fields.Boolean(
         'Recompute pack operation?', copy=False,
         help='True if reserved quants changed, which mean we might need to recompute the package operations')
@@ -501,7 +511,6 @@ class Picking(models.Model):
             #                                    'picking_id': pick.id
             #                                    }) # Might change first element
             # # Link existing moves or add moves when no one is related
-
             for ops in pick.pack_operation_ids.filtered(lambda x: not x.move_id):
                 # Search move with this product
                 moves = pick.move_lines.filtered(lambda x: x.product_id == ops.product_id) 
@@ -525,6 +534,38 @@ class Picking(models.Model):
         return True
 
     do_transfer = action_done #TODO:replace later
+
+    def _set_top_level_packages(self):
+        """ This method searches for as much possible higher level packages that
+        can be moved as a single operation and will tag the operations concerned in 
+        order to be able to . """
+        # TODO: replace quants_to_check by pack operations
+        self.ensure_one()
+        top_lvl_packages = self.env['stock.quant.package']
+        for package in self.pack_operation_ids.mapped('package_id'):
+            all_in = True
+            top_package = self.env['stock.quant.package']
+            while package:
+                quants_package = [quant.id for quant in package.get_content()]
+                if any(quant not in quants_to_check.keys() for quant in quants_package):
+                    all_in = False
+                if all_in:
+                    destinations = set([quants_to_check[x].location_id for x in quants_package])
+                    if len(destinations) > 1:
+                        all_in = False
+                if all_in:
+                    top_package = package
+                    package = package.parent_id
+                else:
+                    package = False
+            top_lvl_packages |= top_package
+            total_ops = self.env['stock.pack.operation']
+            if top_package:
+                for quant in top_package.get_content():
+                    total_ops |= quants_to_check[quant.id]
+                total_ops[0].first_pack = True
+                total_ops.write({'part_of_pack': True})
+        return top_lvl_packages
 
     def _prepare_pack_ops(self, quants, forced_qties):
         """ Prepare pack_operations, returns a list of dict to give at create """
@@ -617,6 +658,7 @@ class Picking(models.Model):
             existing_packages.unlink()
         for picking in self:
             forced_qties = {}  # Quantity remaining after calculating reserved quants
+            picking_reserved = picking.picking_type_id.show_reserved
             picking_quants = self.env['stock.quant']
             # Calculate packages, reserved quants, qtys of this picking's moves
             for move in picking.move_lines:
