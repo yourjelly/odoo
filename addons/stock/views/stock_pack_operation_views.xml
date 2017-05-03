@@ -26,7 +26,7 @@
                     </group>
                     <group string="Packages" groups="stock.group_tracking_lot">
                         <field name="package_id" attrs="{'required': [('product_id', '=', False)]}" domain="[('location_id', '=', location_id)]" context="{'default_location_id': location_id}"/>
-                        <field name="result_package_id" domain="['|', ('location_id', '=', False), ('location_id', '=', location_dest_id)]" context="{'default_location_id': location_dest_id}"/>
+                        <field name="result_package_id" readonly="1" domain="['|', ('location_id', '=', False), ('location_id', '=', location_dest_id)]" context="{'default_location_id': location_dest_id}"/>
                     </group>
                 </group>
             </form>
@@ -61,29 +61,5 @@
         <field name="view_mode">form</field>
         <field name="target">new</field>
         <field name="context">{}</field>
-    </record>
-
-    <record id="view_pack_operation_lot_form" model="ir.ui.view">
-        <field name="name">stock.pack.operation.lots.form</field>
-        <field name="model">stock.pack.operation</field>
-        <field eval="20" name="priority"/>
-        <field name="arch" type="xml">
-            <form>
-                <group>
-                    <field name="product_id" readonly="1"/>
-                    <label for="qty_done"/>
-                    <span>
-                        <field name="qty_done" class="oe_inline" readonly="1"/> of
-                        <field name="product_qty" class="oe_inline" readonly="1"/>
-                        <field name="product_uom_id" class="oe_inline" groups="product.group_uom" readonly="1"/>
-                        <field name="state" invisible="1"/>
-                    </span>
-                </group>
-                <footer>
-                    <button name="save" type="object" string="Save" class="oe_highlight" attrs="{'invisible':[('state','=','done')]}"/>
-                    <button string="Discard" special="cancel"/>
-                </footer>
-            </form>
-        </field>
     </record>
 </odoo>
