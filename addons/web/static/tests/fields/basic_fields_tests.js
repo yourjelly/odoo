@@ -563,6 +563,56 @@ QUnit.module('basic_fields', {
 
     QUnit.module('FieldChar');
 
+    QUnit.test('field char required', function (assert) {
+        assert.expect(6);
+
+        var form = createView ({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<sheet>' +
+                        '<group>' +
+                            '<field name="foo" required="1"/>' +
+                        '</group>' +
+                    '</sheet>' +
+                '</form>',
+            res_id: 1,
+        });
+
+        assert.strictEqual(form.$('.o_field_widget').text(), 'yop',
+            "the value should be displayed properly");
+
+        // switch to edit mode and check the result
+        form.$buttons.find('.o_form_button_edit').click();
+        assert.strictEqual(form.$('input[type="text"].o_field_widget').length, 1,
+            "should have an input for the char field");
+        assert.strictEqual(form.$('input[type="text"].o_field_widget').val(), 'yop',
+            "input should contain field value in edit mode");
+
+        // change value in edit mode
+        form.$('input[type="text"].o_field_widget').val('').trigger('input');
+
+        // focus out required field in edit mode
+        form.$('input[type="text"].o_field_widget').trigger('focusout');
+        assert.strictEqual(form.$('input[type="text"].o_field_widget').next().hasClass('err_icon'), true,
+            "on focusout empty value field should have error icon");
+
+        // focus required field in edit mode
+        form.$('input[type="text"].o_field_widget').trigger('focus');
+        assert.strictEqual(form.$('input[type="text"].o_field_widget').next().hasClass('err_icon'), false,
+            "on focus field should not have error icon");
+
+        // save
+        form.$buttons.find('.o_form_button_save').click();
+        assert.strictEqual(form.$('input[type="text"].o_field_widget').next().hasClass('err_icon'), true,
+            "on save invalid field next should be error icon");
+
+        //form destroy
+        form.destroy();
+    }),
+
+
     QUnit.test('char widget isValid method works', function (assert) {
         assert.expect(1);
 
