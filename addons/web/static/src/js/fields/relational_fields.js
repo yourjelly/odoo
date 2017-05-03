@@ -86,8 +86,8 @@ var FieldMany2One = AbstractField.extend({
         'keyup input': '_onInputKeyup',
         'click .o_external_button': '_onExternalButtonClick',
         'click': '_onClick',
-        'focusout input': 'onFocusout',
-        'focus .o_form_input': 'onFocus',
+        'focusout .o_input': 'onFocusout',
+        'focus .o_input': 'onFocus',
     }),
 
     init: function () {
