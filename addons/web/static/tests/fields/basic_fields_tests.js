@@ -844,7 +844,6 @@ QUnit.module('basic_fields', {
         list.destroy();
     });
 
-
     QUnit.module('FieldText');
 
     QUnit.test('text fields are correctly rendered', function (assert) {
@@ -966,6 +965,57 @@ QUnit.module('basic_fields', {
 
         _t.database.multi_lang = multi_lang;
     });
+
+    QUnit.test('field text required', function (assert) {
+        assert.expect(7);
+
+        this.data.partner.fields.foo.type = 'text';
+        var form = createView ({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<sheet>' +
+                        '<group>' +
+                            '<field name="foo" required="1"/>' +
+                        '</group>' +
+                    '</sheet>' +
+                '</form>',
+            res_id: 1,
+        });
+
+        assert.ok(form.$('div.o_field_text').length, "should have a text area");
+        assert.strictEqual(form.$('div.o_field_text').text(), 'yop', 'should be "yop" in readonly');
+
+        // switch to edit mode and check the result
+        form.$buttons.find('.o_form_button_edit').click();
+
+        var $textarea = form.$('textarea.o_field_text');
+        assert.ok($textarea.length, "should have a text area");
+        assert.strictEqual($textarea.val(), 'yop', 'should still be "yop" in edit');
+
+        // change value in edit mode
+        $textarea.val('').trigger('input');
+
+        // focus out required field in edit mode
+        $textarea.trigger('focusout');
+        assert.strictEqual($textarea.next().hasClass('err_icon'), true,
+            'on focusout empty value field should have error icon');
+
+
+        // focus required field in edit mode
+        $textarea.trigger('focus');
+        assert.strictEqual($textarea.next().hasClass('err_icon'), false,
+            'on focusout empty value field should have error icon');
+
+        //save
+        form.$buttons.find('.o_form_button_save').click();
+        assert.strictEqual($textarea.next().hasClass('err_icon'), true,
+            'on save empty value field should have error icon');
+
+        //destroy
+        form.destroy();
+    }),
 
     QUnit.module('FieldBinary');
 
