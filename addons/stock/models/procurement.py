@@ -48,6 +48,7 @@ class ProcurementRule(models.Model):
     propagate_warehouse_id = fields.Many2one(
         'stock.warehouse', 'Warehouse to Propagate',
         help="The warehouse to propagate on the created move/procurement, which can be different of the warehouse this rule is for (e.g for resupplying rules from another warehouse)")
+    merge_moves = fields.Boolean('Merge Moves')
 
     @api.model
     def _get_action(self):

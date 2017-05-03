@@ -9,25 +9,17 @@ from odoo.tools.float_utils import float_round, float_compare
 
 
 class PackOperation(models.Model):
-    _name = "stock.pack.operation"
+    _name = "stock.pack.operation" #TODO: change to stock.move.operation
     _description = "Packing Operation"
     _order = "result_package_id desc, id"
 
-    # TDE FIXME: strange, probably to remove
-    def _get_default_from_loc(self):
-        default_loc = self.env.context.get('default_location_id')
-        if default_loc:
-            return self.env['stock.location'].browse(default_loc).name
-
-    # TDE FIXME: strange, probably to remove
-    def _get_default_to_loc(self):
-        default_loc = self.env.context.get('default_location_dest_id')
-        if default_loc:
-            return self.env['stock.location'].browse(default_loc).name
-
-    picking_id = fields.Many2one('stock.picking', 'Stock Picking', related='move_id.picking_id', help='The stock operation where the packing has been made')  # not related, we should be able to create a packop without a move
-    move_id = fields.Many2one('stock.move', 'Stock Move', required=True)
-    product_id = fields.Many2one('product.product', 'Product', ondelete="cascade")
+    picking_id = fields.Many2one(
+        'stock.picking', 'Stock Picking',
+        help='The stock operation where the packing has been made')
+    move_id = fields.Many2one(
+        'stock.move', 'Stock Move', 
+        help="Change to a better name") 
+    product_id = fields.Many2one('product.product', 'Product', ondelete="cascade") #might be a related with the move also --> no, because you can put them next to each other
     product_uom_id = fields.Many2one('product.uom', 'Unit of Measure')
     product_qty = fields.Float('To Do', default=0.0, digits=dp.get_precision('Product Unit of Measure'), required=True)
     product_reserved_qty = fields.Float('Reserved', default=0.0, digits=dp.get_precision('Product Unit of Measure'), readonly=True)
@@ -35,11 +27,12 @@ class PackOperation(models.Model):
     qty_done = fields.Float('Done', default=0.0, digits=dp.get_precision('Product Unit of Measure'), copy=False)
     is_done = fields.Boolean(compute='_compute_is_done', string='Done', readonly=False, oldname='processed_boolean')
     package_id = fields.Many2one('stock.quant.package', 'Source Package')
+    lot_id = fields.Many2one('stock.production.lot', 'Lot')
+    lot_name = fields.Char('Lot/Serial Number')
     result_package_id = fields.Many2one(
         'stock.quant.package', 'Destination Package',
         ondelete='cascade', required=False,
         help="If set, the operations are packed into this package")
-    lot_id = fields.Many2one('stock.production.lot', 'Lot')
     date = fields.Datetime('Date', default=fields.Date.context_today, required=True)
     owner_id = fields.Many2one('res.partner', 'Owner', help="Owner of the quants")
     location_id = fields.Many2one('stock.location', 'Source Location', required=True)
@@ -58,6 +51,9 @@ class PackOperation(models.Model):
         ('partially_available', 'Partially Available'),
         ('assigned', 'Available'),
         ('done', 'Done')], related='picking_id.state')
+    part_of_pack = fields.Boolean('Is part of pack', default=False)
+    first_pack = fields.Boolean('Is first of pack', default=False)
+    first_product = fields.Boolean('Is first of product', default=True)
 
     @api.one
     def _compute_is_done(self):
@@ -77,9 +73,10 @@ class PackOperation(models.Model):
         self.to_loc = '%s%s' % (self.location_dest_id.name, self.result_package_id.name or '')
 
     @api.one
+    @api.depends('picking_id.picking_type_id', 'product_id.tracking')
     def _compute_lots_visible(self):
-        if self.picking_id.picking_type_id and self.product_id.tracking != 'none':  # TDE FIXME: not sure correctly migrated
-            picking = self.picking_id
+        picking = self.picking_id
+        if picking.picking_type_id and self.product_id.tracking != 'none':  # TDE FIXME: not sure correctly migrated
             self.lots_visible = picking.picking_type_id.use_existing_lots or picking.picking_type_id.use_create_lots
         else:
             self.lots_visible = self.product_id.tracking != 'none'

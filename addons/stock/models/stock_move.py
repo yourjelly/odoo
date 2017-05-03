@@ -119,10 +119,6 @@ class StockMove(models.Model):
              "its current stock) to gather products. If we want to chain moves and have this one to wait for the previous,"
              "this second option should be chosen.")
     scrapped = fields.Boolean('Scrapped', related='location_dest_id.scrap_location', readonly=True, store=True)
-    remaining_qty = fields.Float(
-        'Remaining Quantity', compute='_get_remaining_qty',
-        digits=0, states={'done': [('readonly', True)]},
-        help="Remaining Quantity in default UoM according to operations matched with this move")
     procurement_id = fields.Many2one('procurement.order', 'Procurement')
     group_id = fields.Many2one('procurement.group', 'Procurement Group', default=_default_group_id)
     rule_id = fields.Many2one('procurement.rule', 'Procurement Rule', ondelete='restrict', help='The procurement rule that created this stock move')
@@ -133,6 +129,7 @@ class StockMove(models.Model):
     picking_type_id = fields.Many2one('stock.picking.type', 'Operation Type')
     inventory_id = fields.Many2one('stock.inventory', 'Inventory')
     pack_operation_ids = fields.One2many('stock.pack.operation', 'move_id')
+    pack_operation_nosuggest_ids = fields.One2many('stock.pack.operation', 'move_id', domain=[('product_reserved_qty', '=', 0.0)])
     origin_returned_move_id = fields.Many2one('stock.move', 'Origin return move', copy=False, help='Move that created the return move')
     returned_move_ids = fields.One2many('stock.move', 'origin_returned_move_id', 'All returned moves', help='Optional: all returned moves created from this move')
     reserved_availability = fields.Float(
@@ -149,8 +146,32 @@ class StockMove(models.Model):
     route_ids = fields.Many2many('stock.location.route', 'stock_location_route_move', 'move_id', 'route_id', 'Destination route', help="Preferred route to be followed by the procurement order")
     warehouse_id = fields.Many2one('stock.warehouse', 'Warehouse', help="Technical field depicting the warehouse to consider for the route selection on the next procurement (if any).")
     has_tracking = fields.Selection(related='product_id.tracking', string='Product with Tracking')
-    quantity_done = fields.Float('Quantity', compute='_qty_done_compute', digits=dp.get_precision('Product Unit of Measure'))
+    quantity_done = fields.Float('Quantity', compute='_qty_done_compute', digits=dp.get_precision('Product Unit of Measure'), inverse='_qty_done_set', 
+                                 states={'done': [('readonly', True)]})
+    detail_visible = fields.Boolean('Details Visible', compute='_compute_detail_visible')
+    from_supplier = fields.Boolean('From Supplier', compute='_compute_from_supplier')
 
+    @api.depends('location_id')
+    def _compute_from_supplier(self):
+        for move in self:
+            if move.location_id.usage == 'supplier': #TODO: could be partner address too
+                move.from_supplier = True
+            else:
+                move.from_supplier = False
+
+    @api.multi
+    @api.depends('product_id', 'pack_operation_ids', 'picking_id.location_id', 'picking_id.location_dest_id')
+    def _compute_detail_visible(self):
+        locations = self.mapped('location_id') | self.mapped('location_dest_id')
+        locations_children = self.env['stock.location'].search([('id', 'child_of', locations.ids), ('id', 'not in', locations.ids)])
+        for move in self:
+            if not move.pack_operation_ids:
+                move.detail_visible = False
+            elif locations_children or move.has_tracking != 'none' or len(move.pack_operation_ids.ids) > 1:
+                move.detail_visible = True
+            else: 
+                move.detail_visible = False
+    
     @api.one
     @api.depends('product_id', 'product_uom', 'product_uom_qty')
     def _compute_product_qty(self):
@@ -163,17 +184,18 @@ class StockMove(models.Model):
         for move in self:
             move.quantity_done = sum(move.pack_operation_ids.mapped('qty_done'))
 
+    @api.multi
+    def _qty_done_set(self):
+        for move in self:
+            if not move.detail_visible and move.pack_operation_ids:
+                move.pack_operation_ids[0].qty_done = move.quantity_done
+
     def _set_product_qty(self):
         """ The meaning of product_qty field changed lately and is now a functional field computing the quantity
         in the default product UoM. This code has been added to raise an error if a write is made given a value
         for `product_qty`, where the same write should set the `product_uom_qty` field instead, in order to
         detect errors. """
         raise UserError(_('The requested operation cannot be processed because of a programming error setting the `product_qty` field instead of the `product_uom_qty`.'))
-
-    @api.one
-    def _get_remaining_qty(self):
-        # TODO: sle jco
-        pass
 
 
     @api.one
@@ -328,6 +350,9 @@ class StockMove(models.Model):
 
     # Main actions
     # ------------------------------------------------------------
+    @api.multi
+    def save(self):
+        return True
 
     @api.multi
     def do_unreserve(self):
@@ -499,7 +524,7 @@ class StockMove(models.Model):
             'product_qty': self.product_uom_qty,
             'product_uom': self.product_uom.id,
             'location_id': self.location_id.id,
-            'move_dest_ids': [(4, self.id)],
+            'move_dest_id': [(4, self.id)],
             'group_id': group_id,
             'route_ids': [(4, x.id) for x in self.route_ids],
             'warehouse_id': self.warehouse_id.id or (self.picking_type_id and self.picking_type_id.warehouse_id.id or False),
@@ -518,7 +543,6 @@ class StockMove(models.Model):
                     'move_id': move.id,
                     'product_id': move.product_id.id,
                     'product_qty': move.product_uom_qty,
-                    'product_reserved_qty': 0.0,
                     'product_uom_id': move.product_uom.id,
                     'location_id': move.location_id.id,
                     'location_dest_id': move.location_dest_id.get_putaway_strategy(move.product_id) or move.location_dest_id.id,
@@ -583,7 +607,7 @@ class StockMove(models.Model):
                     or move.product_id.type == 'consu':
                 # Bypass actual quants reservation and directly create move lines as these
                 # moves are either in virtual locations or their product are consumables.
-                self.env['stock.pack.operation'].create(dict(move._prepare_move_line_vals(), product_reserved_qty=0.0))
+                self.env['stock.pack.operation'].create(dict(move._prepare_move_line_vals()))
                 move.write({'state': 'assigned'})
             else:
                 if not move.move_orig_ids:
@@ -841,3 +865,32 @@ class StockMove(models.Model):
             'res_id': self.id}
     show_picking = action_show_picking
 
+    @api.multi
+    def split_move_operation(self):
+        ctx = dict(self.env.context)
+        self.ensure_one()
+        if self.picking_id.picking_type_id.show_reserved:
+            view = self.env.ref('stock.view_stock_move_operations')
+        else:
+            view = self.env.ref('stock.view_stock_move_nosuggest_operations')
+        src_locations_children = self.env['stock.location'].search([('id', 'child_of', self.location_id.id), ('id', '!=', self.location_id.id)])
+        dest_locations_children = self.env['stock.location'].search([('id', 'child_of', self.location_dest_id.id), ('id', '!=', self.location_dest_id.id)])
+        ctx.update({'show_lots_inv': not(self.has_tracking != 'none' and self.picking_type_id.use_existing_lots),
+                    'show_lots_name_inv': not(self.has_tracking != 'none' and self.picking_type_id.use_create_lots and not self.picking_type_id.use_existing_lots),
+                    'hide_source': not src_locations_children,
+                    'hide_dest': not dest_locations_children,
+                    'state_done': self.state in ('done', 'cancel'),
+                    'from_supplier': self.from_supplier,})
+        result = {
+            'name': _('Register Operations'),
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'stock.move',
+            'views': [(view.id, 'form')],
+            'view_id': view.id,
+            'target': 'new',
+            'res_id': self.id,
+            'context': ctx,
+        }
+        return result
