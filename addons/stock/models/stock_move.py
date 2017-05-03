@@ -50,7 +50,7 @@ class StockMove(models.Model):
         digits=0, store=True,
         help='Quantity in the default UoM of the product')
     product_uom_qty = fields.Float(
-        'Quantity',
+        'Initial Demand',
         digits=dp.get_precision('Product Unit of Measure'),
         default=1.0, required=True, states={'done': [('readonly', True)]},
         help="This is the quantity of products from an inventory "
@@ -118,10 +118,6 @@ class StockMove(models.Model):
              "its current stock) to gather products. If we want to chain moves and have this one to wait for the previous,"
              "this second option should be chosen.")
     scrapped = fields.Boolean('Scrapped', related='location_dest_id.scrap_location', readonly=True, store=True)
-    remaining_qty = fields.Float(
-        'Remaining Quantity', compute='_get_remaining_qty',
-        digits=0, states={'done': [('readonly', True)]},
-        help="Remaining Quantity in default UoM according to operations matched with this move")
     procurement_id = fields.Many2one('procurement.order', 'Procurement')
     group_id = fields.Many2one('procurement.group', 'Procurement Group', default=_default_group_id)
     rule_id = fields.Many2one('procurement.rule', 'Procurement Rule', ondelete='restrict', help='The procurement rule that created this stock move')
@@ -132,10 +128,12 @@ class StockMove(models.Model):
     picking_type_id = fields.Many2one('stock.picking.type', 'Operation Type')
     inventory_id = fields.Many2one('stock.inventory', 'Inventory')
     pack_operation_ids = fields.One2many('stock.pack.operation', 'move_id')
+    pack_operation_nosuggest_ids = fields.One2many('stock.pack.operation', 'move_id', domain=[('product_qty', '=', 0.0)])
     origin_returned_move_id = fields.Many2one('stock.move', 'Origin return move', copy=False, help='Move that created the return move')
     returned_move_ids = fields.One2many('stock.move', 'origin_returned_move_id', 'All returned moves', help='Optional: all returned moves created from this move')
     reserved_availability = fields.Float(
         'Quantity Reserved', compute='_compute_reserved_availability',
+        digits=dp.get_precision('Product Unit of Measure'),
         readonly=True, help='Quantity that has already been reserved for this move')
     availability = fields.Float(
         'Forecasted Quantity', compute='_compute_product_availability',
@@ -148,7 +146,44 @@ class StockMove(models.Model):
     route_ids = fields.Many2many('stock.location.route', 'stock_location_route_move', 'move_id', 'route_id', 'Destination route', help="Preferred route to be followed by the procurement order")
     warehouse_id = fields.Many2one('stock.warehouse', 'Warehouse', help="Technical field depicting the warehouse to consider for the route selection on the next procurement (if any).")
     has_tracking = fields.Selection(related='product_id.tracking', string='Product with Tracking')
-    quantity_done = fields.Float('Quantity', compute='_qty_done_compute', digits=dp.get_precision('Product Unit of Measure'))
+    quantity_done = fields.Float('Quantity Done', compute='_quantity_done_compute', digits=dp.get_precision('Product Unit of Measure'), inverse='_quantity_done_set',
+                                 states={'done': [('readonly', True)]})
+    show_operations = fields.Boolean(related='picking_id.picking_type_id.show_operations')
+    show_details_visible = fields.Boolean('Details Visible', compute='_compute_show_details_visible')
+    show_reserved_availability = fields.Boolean('From Supplier', compute='_compute_show_reserved_availability')
+    picking_code = fields.Selection(related='picking_id.picking_type_id.code', readonly=True)
+    product_type = fields.Selection(related='product_id.type', readonly=True)
+    additional = fields.Boolean("Whether the move was added after the picking's confirmation", default=False)
+
+    @api.multi
+    @api.depends('has_tracking', 'pack_operation_ids', 'location_id', 'location_dest_id')
+    def _compute_show_details_visible(self):
+        """ According to this field, the button that calls `action_show_details` will be displayed
+        to work on a move from its picking form view, or not.
+        """
+        for move in self:
+            if not move.product_id:
+                move.show_details_visible = False
+                continue
+
+            multi_locations_enabled = False
+            if self.user_has_groups('stock.group_stock_multi_locations'):
+                multi_locations_enabled = move.location_id.child_ids or move.location_dest_id.child_ids
+
+            if move.picking_id.picking_type_id.show_operations is False\
+                    and move.state not in ['cancel', 'draft', 'confirmed']\
+                    and (multi_locations_enabled or move.has_tracking != 'none' or len(move.pack_operation_ids) > 1):
+                move.show_details_visible = True
+            else:
+                move.show_details_visible = False
+
+    @api.multi
+    def _compute_show_reserved_availability(self):
+        """ This field is only of use in an attrs in the picking view, in order to hide the
+        "available" column if the move is coming from a supplier.
+        """
+        for move in self:
+            move.show_reserved_availability = not move.location_id.usage == 'supplier'
 
     @api.one
     @api.depends('product_id', 'product_uom', 'product_uom_qty')
@@ -158,7 +193,7 @@ class StockMove(models.Model):
 
     @api.multi
     @api.depends('pack_operation_ids.qty_done')
-    def _qty_done_compute(self):
+    def _quantity_done_compute(self):
         for move in self:
             move.quantity_done = sum(move.pack_operation_ids.mapped('qty_done'))
 
@@ -181,11 +216,6 @@ class StockMove(models.Model):
         for `product_qty`, where the same write should set the `product_uom_qty` field instead, in order to
         detect errors. """
         raise UserError(_('The requested operation cannot be processed because of a programming error setting the `product_qty` field instead of the `product_uom_qty`.'))
-
-    @api.one
-    def _get_remaining_qty(self):
-        # TODO: sle jco
-        pass
 
 
     @api.one
@@ -248,6 +278,20 @@ class StockMove(models.Model):
         self._cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = %s', ('stock_move_product_location_index',))
         if not self._cr.fetchone():
             self._cr.execute('CREATE INDEX stock_move_product_location_index ON stock_move (product_id, location_id, location_dest_id, company_id, state)')
+
+    @api.model
+    def default_get(self, fields_list):
+        # We override the default_get to make stock moves created after the picking was confirmed
+        # directly as available (like a force_assign). This allows to create extra move lines in
+        # the fp view.
+        defaults = super(StockMove, self).default_get(fields_list)
+        if self.env.context.get('default_picking_id'):
+            picking_id = self.env['stock.picking'].browse(self.env.context['default_picking_id'])
+            if picking_id.state not in ['draft', 'confirmed']:
+                defaults['state'] = 'assigned'
+                defaults['product_uom_qty'] = 0.0
+                defaults['additional'] = True
+        return defaults
 
     @api.multi
     def name_get(self):
@@ -322,6 +366,44 @@ class StockMove(models.Model):
             pickings.message_track(pickings.fields_get(['state']), initial_values)
         return res
 
+    @api.multi
+    def action_show_details(self):
+        """ Returns an action that will open a form view (in a popup) allowing to work on all the
+        move lines of a particular move. This form view is used when "show operations" is not
+        checked on the picking type.
+        """
+        self.ensure_one()
+
+        # If "show suggestions" is not checked on the picking type, we have to filter out the
+        # reserved move lines. We do this by displaying `pack_operation_nosuggest_ids`. We use
+        # different views to display one field or another so that the webclient doesn't have to
+        # fetch both.
+        if self.picking_id.picking_type_id.show_reserved:
+            view = self.env.ref('stock.view_stock_move_operations')
+        else:
+            view = self.env.ref('stock.view_stock_move_nosuggest_operations')
+
+        return {
+            'name': _('Detailed Operations'),
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'stock.move',
+            'views': [(view.id, 'form')],
+            'view_id': view.id,
+            'target': 'new',
+            'res_id': self.id,
+            'context': dict(
+                self.env.context,
+                show_lots_m2o=self.has_tracking != 'none' and self.picking_type_id.use_existing_lots,  # able to create lots, whatever the value of ` use_create_lots`.
+                show_lots_text=self.has_tracking != 'none' and self.picking_type_id.use_create_lots and not self.picking_type_id.use_existing_lots,
+                show_source_location=self.location_id.child_ids,
+                show_destination_location=self.location_dest_id.child_ids,
+                show_package=not self.location_id.usage == 'supplier',
+                show_reserved=not self.location_id.usage == 'supplier'
+            ),
+        }
+
     # Misc tools
     # ------------------------------------------------------------
 
@@ -336,10 +418,6 @@ class StockMove(models.Model):
         under computation. Instead of having to use filtered everywhere and
         forgot some of them, use this tool instead. """
         return self.filtered(lambda move: move.state not in ('done', 'cancel'))
-
-
-    # Main actions
-    # ------------------------------------------------------------
 
     @api.multi
     def do_unreserve(self):
@@ -390,7 +468,8 @@ class StockMove(models.Model):
         product = self.product_id.with_context(lang=self.partner_id.lang or self.env.user.lang)
         self.name = product.partner_ref
         self.product_uom = product.uom_id.id
-        self.product_uom_qty = 1.0
+        if self.product_uom_qty:
+            self.product_uom_qty = 1.0
         return {'domain': {'product_uom': [('category_id', '=', product.uom_id.category_id.id)]}}
 
     @api.onchange('date')
@@ -511,7 +590,7 @@ class StockMove(models.Model):
             'product_qty': self.product_uom_qty,
             'product_uom': self.product_uom.id,
             'location_id': self.location_id.id,
-            'move_dest_ids': [(4, self.id)],
+            'move_dest_id': [(4, self.id)],
             'group_id': group_id,
             'route_ids': [(4, x.id) for x in self.route_ids],
             'warehouse_id': self.warehouse_id.id or (self.picking_type_id and self.picking_type_id.warehouse_id.id or False),
@@ -842,4 +921,3 @@ class StockMove(models.Model):
             'target': 'new',
             'res_id': self.id}
     show_picking = action_show_picking
-
