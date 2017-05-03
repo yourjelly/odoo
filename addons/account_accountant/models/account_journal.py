@@ -4,6 +4,7 @@
 from odoo import fields, models, api, _
 import datetime
 
+
 class account_move_line(models.Model):
     _inherit = 'account.move.line'
 

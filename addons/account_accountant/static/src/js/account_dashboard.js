@@ -14,33 +14,14 @@ var QWeb = core.qweb;
 var _t = core._t;
 var _lt = core._lt;
 
+const COMPANY_METHOD_TYPE = "company_object";
+
 var AccountDashboardView = KanbanView.extend({
     display_name: _lt('Dashboard'),
     icon: 'fa-dashboard',
     searchview_hidden: true,
     events: {
-        'click .o_dashboard_action': 'on_dashboard_action_clicked', //TODO OCO supprimer
-        'click .account_company_setting_action': 'account_company_setting_action_clicked',
-        'click .account_fiscal_year_setting_action': 'account_fiscal_year_setting_action_clicked',
-        'click .account_bank_account_setting_action': 'account_bank_account_setting_action_clicked',
-    },
-
-    account_company_setting_action_clicked: function(ev) {
-        new Model('res.company').call('setting_init_company_action', []).then(function(rslt_action){
-            web_client.action_manager.do_action(rslt_action);
-        });
-    },
-
-    account_fiscal_year_setting_action_clicked: function(ev) {
-        new Model('res.company').call('setting_init_fiscal_year_action', []).then(function(rslt_action){
-            web_client.action_manager.do_action(rslt_action);
-        });
-    },
-
-    account_bank_account_setting_action_clicked: function(ev) {
-        new Model('res.company').call('setting_init_bank_account_action', []).then(function(rslt_action){
-            web_client.action_manager.do_action(rslt_action);
-        });
+        'click .o_dashboard_action': 'on_dashboard_action_clicked', //TODO OCO renommer
     },
 
     fetch_data: function() {
@@ -62,14 +43,25 @@ var AccountDashboardView = KanbanView.extend({
         });
     },
 
-    on_dashboard_action_clicked: function(ev) { //TODO OCO supprimer
+    on_dashboard_action_clicked: function(ev) {
         ev.preventDefault();
         var $action = $(ev.currentTarget);
-        var action_name = $action.attr('name');
+        var name_attr = $action.attr('name');
+        var type_attr = $action.attr('type');
         var action_context = $action.data('context');
-        this.do_action(action_name, {
-            additional_context: action_context
-        });
+
+        if(type_attr == COMPANY_METHOD_TYPE) {
+            new Model('res.company').call(name_attr, []).then(function(rslt_action) {
+                    web_client.action_manager.do_action(rslt_action, {
+                        additional_context: action_context
+                    });
+            });
+        }
+        else { //By default, we consider the content of 'name' as an action.
+            this.do_action(name_attr, {
+                    additional_context: action_context
+            });
+        }
     },
 
 });

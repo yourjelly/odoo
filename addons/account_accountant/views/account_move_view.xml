@@ -22,6 +22,7 @@
         ==> Utiliser account.account (et plus que certainement un TransientModel
         qui en référencie chaque fois un)
     -->
+    <!--TODO OCO: quand tu auras fini, ne pas oublier de faire le ménage ici-->
     <record id="account_move_opening_receivable_tree" model="ir.ui.view">
         <field name="name">account.move.line.receivable.opening</field>
         <field name="model">account.move.line</field>
