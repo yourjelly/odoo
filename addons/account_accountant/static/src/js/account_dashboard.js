@@ -21,7 +21,7 @@ var AccountDashboardView = KanbanView.extend({
     icon: 'fa-dashboard',
     searchview_hidden: true,
     events: {
-        'click .o_dashboard_action': 'on_dashboard_action_clicked', //TODO OCO renommer
+        'click .account_accountant_dasboard_action': 'on_dashboard_action_clicked',
     },
 
     fetch_data: function() {
@@ -44,6 +44,13 @@ var AccountDashboardView = KanbanView.extend({
     },
 
     on_dashboard_action_clicked: function(ev) {
+        /* This functions allows the buttons of the setup bar to trigger Python
+        * code defined in api.model functions, in res.company, and then to execute
+        * the action returned by those.
+        * It uses the 'type' attributes on buttons : if 'company_object', it will
+        * run Python function 'name' of company, otherwise, it will directly execute
+        * the action matching 'name'.
+        */
         ev.preventDefault();
         var $action = $(ev.currentTarget);
         var name_attr = $action.attr('name');

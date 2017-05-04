@@ -3,6 +3,21 @@
 <odoo>
     <data>
 
+        <record id="init_view_company_form" model="ir.ui.view">
+            <field name="name">account.accountant.init.company.form</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="mode">primary</field>
+            <field name="arch" type="xml">
+                <xpath expr="//form/sheet" position="after">
+                    <footer>
+                        <button string="Mark as done" type="object" name="mark_company_setup_as_done_action" class="oe_highlight"/>
+                        <button string="Save" type="action" name="account_accountant.init_wizard_refresh_view"/>
+                    </footer>
+                </xpath>
+            </field>
+        </record>
+
         <record id="init_financial_year_opening_form" model="ir.ui.view">
             <field name="name">account.accountant.financial.year.op.wizard.form</field>
             <field name="model">accountant.financial.year.op</field>
@@ -13,7 +28,8 @@
                             <label for="opening_date"/>
                         </div>
                         <div class="col-xs-8">
-                            <field name="opening_date"/>
+                            <field name="opening_move_posted" invisible="1"/>
+                            <field name="opening_date" attrs="{'readonly': [('opening_move_posted', '=', True)]}"/>
                         </div>
                     </div>
 
@@ -29,7 +45,7 @@
                         </div>
                     </div>
                     <footer>
-                        <button string="Save" type="action" name="account_accountant.init_wizard_refresh_view"/>
+                        <button string="Save" type="action" name="account_accountant.init_wizard_refresh_view" class="oe_highlight"/>
                     </footer>
                 </form>
             </field>
@@ -43,12 +59,12 @@
             <field name="arch" type="xml">
                 <xpath expr="//form/sheet" position="after">
                     <footer>
+                    <button string="Mark as done" type="object" name="mark_bank_setup_as_done_action" class="oe_highlight"/>
                         <button string="Save" type="action" name="account_accountant.init_wizard_refresh_view"/>
                     </footer>
                 </xpath>
             </field>
         </record>
-
 
         <record id="init_opening_move_wizard_form" model="ir.ui.view">
             <field name="name">account.accountant.init.opening.move.wizard.form</field>
@@ -71,7 +87,7 @@
                     <field name="opening_move_line_ids" context="{'tree_view_ref': 'account_accountant.init_opening_move_lines_tree'}"/>
 
                     <footer>
-                        <button string="Post" name="validate" class="oe_highlight"/>
+                        <button string="Post" name="validate" type="object" class="oe_highlight"/>
                     </footer>
                 </form>
             </field>
@@ -97,8 +113,9 @@
             <field name="model">account.account</field>
             <field name="arch" type="xml">
                 <tree editable="top" create="1" delete="1">
-                    <field name="code" readonly="1"/>
-                    <field name="name" readonly="1"/>
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="user_type_id"/>
                     <field name="company_id" readonly="1" groups="base.group_multi_company"/>
                     <field name="opening_debit"/>
                     <field name="opening_credit"/>
@@ -115,17 +132,9 @@
             <field name="view_id" ref="init_accounts_tree"/>
         </record>
 
-
-
         <record id="init_wizard_refresh_view" model="ir.actions.client">
-            <!--
-            TODO OCO
-
-            we reload everything instead of just closing the wizard, because the
-            status doesn't get updated otherwise ... any other way to do that ?
-
-            'ir.actions.act_window_close' < TODO OCO just closes, does not update status bar
-            -->
+            <!-- We reload everything instead of just closing the wizard, because the
+            setup bar needs to be refreshed. -->
             <field name="name">account.accountant.init.wizard.refresh.action</field>
             <field name="tag">reload</field>
         </record>

@@ -1,22 +1,19 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 
-import logging
-_logger=logging.getLogger(__name__)#TODO OCO DEBUG
 
 class AccountAccount(models.Model):
     _inherit = 'account.account'
 
-    opening_debit = fields.Monetary(string="Opening debit", compute='_compute_opening_debit_credit', inverse='_set_opening_debit')
-    opening_credit = fields.Monetary(string="Opening credit", compute='_compute_opening_debit_credit', inverse='_set_opening_credit')
+    opening_debit = fields.Monetary(string="Opening debit", compute='_compute_opening_debit_credit', inverse='_set_opening_debit', help="Opening debit value for this account")
+    opening_credit = fields.Monetary(string="Opening credit", compute='_compute_opening_debit_credit', inverse='_set_opening_credit', help="Opening debit value for this account")
 
     def _compute_opening_debit_credit(self):
-        #TODO OCO empêcher que l'opening move contienne plusieurs fois la même ligne (selon la façon dont tu le codes, ça peut arriver)
         for record in self:
-            opening_move = record.company_id.account_accountant_opening_move
+            opening_move = record.company_id.account_accountant_opening_move_id
             opening_move_lines = record.env['account.move.line'].search([('account_id','=',record.id), ('move_id','=',opening_move and opening_move.id or False)])
             record.opening_debit = 0.0
             record.opening_credit = 0.0
@@ -33,7 +30,7 @@ class AccountAccount(models.Model):
         self._set_opening_debit_credit(self.opening_credit, 'credit')
 
     def _set_opening_debit_credit(self, amount, field):#TODO OCO DOC : field, c'est "debit" ou "credit", le champ sur les account.move.line
-        opening_move = self.company_id.account_accountant_opening_move
+        opening_move = self.company_id.account_accountant_opening_move_id
 
         if not opening_move:
             raise UserError("No opening move defined !")
@@ -52,7 +49,7 @@ class AccountAccount(models.Model):
             elif amount:
                 # Then, we create a new line, as none existed before
                 self.env['account.move.line'].with_context({'check_move_validity': False}).create({
-                        'name': "Opening writing",
+                        'name': _('Opening writing'),
                         field: amount,
                         'move_id': opening_move.id,
                         'account_id': self.id,

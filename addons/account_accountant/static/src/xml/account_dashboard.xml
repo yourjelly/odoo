@@ -1,34 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates>
-    <!--
-        This template is the ribbon at the top of the accounting dashboard
-    -->
-    <!--TODO OCO: ce serait p-ê pas mal de bouger ça ailleurs ?-->
-    <!-- TODO OCO: le dashboard est sur enterprise, et ceci dans community ; c'est pas un peu louche ?-->
+    <!-- This template defines the setup bar, at the top of account module's dashboard -->
     <t t-name="account_accountant.AccountDashboard">
-        <div class="o_account_dashboard_header o_form_view" t-if="values['open']">
+        <div class="o_account_dashboard_header o_form_view" t-if="values['show_setup_bar']">
             <div class="o_form_statusbar">
                 <div class="o_statusbar_status" data-original-title="" title="">
                     <button t-attf-class="btn btn-sm o_arrow_button btn-default">
                         <i class="fa fa-gift fa-2x" style="color: #cccccc"/>
                     </button>
-                    <button name="setting_opening_move_action" type="company_object" t-attf-class="btn btn-sm o_arrow_button btn-default o_dashboard_action #{values['initial'] and 'o_action_done' or ''}">
-                        <i class="fa fa-check" t-if="values['initial']"/>
+                    <button name="setting_opening_move_action" type="company_object" t-attf-class="btn btn-sm o_arrow_button btn-default account_accountant_dasboard_action #{values['initial_balance'] and 'o_action_done' or ''}">
+                        <i class="fa fa-check" t-if="values['initial_balance']"/>
                         Initial Balances
                     </button>
-                    <button name="setting_chart_of_accounts_action" type="company_object" t-attf-class="btn btn-sm o_arrow_button btn-default o_dashboard_action #{values['chart'] and 'o_action_done' or ''}" >
-                        <i class="fa fa-check" t-if="values['chart']"/>
+                    <button name="setting_chart_of_accounts_action" type="company_object" t-attf-class="btn btn-sm o_arrow_button btn-default account_accountant_dasboard_action #{values['chart_of_accounts'] and 'o_action_done' or ''}" >
+                        <i class="fa fa-check" t-if="values['chart_of_accounts']"/>
                         Chart of Accounts
                     </button>
-                    <button name="setting_init_bank_account_action" type="company_object" t-attf-class="btn btn-sm o_arrow_button btn-default o_dashboard_action #{values['banks'] and 'o_action_done' or ''}">
-                        <i class="fa fa-check" t-if="values['banks']"/>
-                        Bank Account
-                    </button>
-                    <button name="setting_init_fiscal_year_action" type="company_object" t-attf-class="btn btn-sm o_arrow_button btn-default o_dashboard_action #{values['fy'] and 'o_action_done' or ''}">
-                        <i class="fa fa-check" t-if="values['fy']"/>
+                    <button name="setting_init_fiscal_year_action" type="company_object" t-attf-class="btn btn-sm o_arrow_button btn-default account_accountant_dasboard_action #{values['fiscal_year'] and 'o_action_done' or ''}">
+                        <i class="fa fa-check" t-if="values['fiscal_year']"/>
                         Fiscal Year Opening
                     </button>
-                    <button name="setting_init_company_action" type="company_object" t-attf-class="btn btn-sm o_arrow_button btn-default o_dashboard_action #{values['company'] and 'o_action_done' or ''}">
+                    <button name="setting_init_bank_account_action" type="company_object" t-attf-class="btn btn-sm o_arrow_button btn-default account_accountant_dasboard_action #{values['bank'] and 'o_action_done' or ''}">
+                        <i class="fa fa-check" t-if="values['bank']"/>
+                        Bank Account
+                    </button>
+                    <button name="setting_init_company_action" type="company_object" t-attf-class="btn btn-sm o_arrow_button btn-default account_accountant_dasboard_action #{values['company'] and 'o_action_done' or ''}">
                         <i class="fa fa-check" t-if="values['company']"/>
                         Company Data
                     </button>
@@ -37,7 +33,7 @@
                     </button>
                 </div>
                 <div class="pull-right" style="padding: 7px;">
-                    <button aria-hidden="true" class="close" data-dismiss="modal" type="button">×</button>
+                    <button aria-hidden="true" data-dismiss="modal" type="company_object" name="setting_hide_setup_bar" class="account_accountant_dasboard_action close">×</button>
                 </div>
             </div>
         </div>

@@ -34,23 +34,18 @@ class AccountConfigSettings(models.TransientModel):
         'account.journal',
         related='company_id.tax_cash_basis_journal_id',
         string="Tax Cash Basis Journal",)
-    account_accountant_opening_move = fields.Many2one(string='Opening journal entry', comodel_name='account.move', related='company_id.account_accountant_opening_move')
-    account_accountant_opening_journal = fields.Many2one(string='Opening journal', comodel_name='account.journal', related='company_id.account_accountant_opening_journal')
+    account_accountant_opening_move_id = fields.Many2one(string='Opening journal entry', comodel_name='account.move', related='company_id.account_accountant_opening_move')
+    account_accountant_opening_journal_id = fields.Many2one(string='Opening journal', comodel_name='account.journal', related='company_id.account_accountant_opening_journal_id')
     account_accountant_opening_date = fields.Date(string='Accounting opening date', related='company_id.account_accountant_opening_date')
-    account_accountant_setup_opening_move_done = fields.Boolean(string='Opening move set', related="company_id.account_accountant_setup_opening_move_done")
-    account_accountant_opening_move_adjustment = fields.Monetary(string='Adjustment difference', related="company_id.account_accountant_opening_move_adjustment")
-    account_accountant_opening_adjustment_account = fields.Many2one(string='Adjustment account', comodel_name='account.account', related='company_id.account_accountant_opening_adjustment_account')
+    account_accountant_opening_move_adjustment_amount = fields.Monetary(string='Adjustment difference', related="company_id.account_accountant_opening_move_adjustment_amount")
+    account_accountant_opening_adjustment_account_id = fields.Many2one(string='Adjustment account', comodel_name='account.account', related='company_id.account_accountant_opening_adjustment_account_id')
+    account_accountant_setup_opening_move_done = fields.Boolean(string='Opening move set', compute='_compute_account_accountant_setup_opening_move_done')
+
+    @api.depends('company_id.account_accountant_opening_move_id.state')
+    def _compute_account_accountant_setup_opening_move_done(self):
+        for record in self:
+            record.account_accountant_setup_opening_move_done = record.company_id.opening_move_posted()
 
     def define_opening_move_action(self):
         action = self.env.ref(self.company_id.setting_chart_of_accounts_action())
-
-        #Any cleaner whay to do that ? There should be one ! TODO OCO (not __dict__ from Python !)
-        return {
-            'type': action.type,
-            'name': action.name,
-            'res_model': action.res_model,
-            'view_type': action.view_type,
-            'view_mode': action.view_mode,
-            'search_view_id': action.search_view_id.id,
-            'view_id': action.view_id.id,
-        }
+        return action.read([])[0] # Element at position 0 always exists, as it is defined in XML
