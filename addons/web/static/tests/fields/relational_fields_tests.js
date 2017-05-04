@@ -310,6 +310,74 @@ QUnit.module('relational_fields', {
         form.destroy();
     });
 
+    QUnit.test('field many2one required', function (assert) {
+        assert.expect(4);
+
+        // create 10 partners to have the 'Search More' option in the autocomplete dropdown
+        for (var i=0; i<10; i++) {
+            var id = 20 + i;
+            this.data.partner.records.push({id: id, display_name: "Partner " + id});
+        }
+
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<sheet>' +
+                        '<group>' +
+                            '<field name="trululu" required="1"/>' +
+                        '</group>' +
+                    '</sheet>' +
+                '</form>',
+            res_id: 1,
+            archs: {
+                'partner,false,list': '<tree string="Partners"><field name="display_name"/></tree>',
+                'partner,false,search': '<search string="Partners">' +
+                                            '<field name="display_name" string="Name"/>' +
+                                        '</search>',
+            },
+            mockRPC: function (route, args) {
+                if (route === '/web/dataset/call_kw/partner/write') {
+                    assert.strictEqual(args.args[1].trululu, 20, "should write the correct id");
+                }
+                return this._super.apply(this, arguments);
+            },
+        });
+        // the SelectCreateDialog requests the session, so intercept its custom
+        // event to specify a fake session to prevent it from crashing
+        testUtils.intercept(form, 'get_session', function (event) {
+            event.data.callback({user_context: {}});
+        });
+        form.$buttons.find('.o_form_button_edit').click();
+        var $dropdown = form.$('.o_form_field_many2one input').autocomplete('widget');
+
+        form.$('.o_field_many2one input').click();
+        assert.ok($dropdown.is(':visible'),
+                    'clicking on the m2o input should open the dropdown if it is not open yet');
+        form.$('.o_field_many2one input').val('');
+        form.$('.o_field_many2one input').click();
+
+
+        //focusout
+        form.$('.o_field_many2one input').trigger('focusout');
+        assert.strictEqual(form.$('.o_field_many2one input').next().hasClass('err_icon'), true,
+                'error icon next to invalid field');
+
+        //focus
+        form.$('.o_field_many2one input').trigger('focus');
+        assert.strictEqual(form.$('.o_field_many2one input').next().hasClass('err_icon'), false,
+                'error icon next to invalid field');
+
+        //save
+        form.$buttons.find('.o_form_button_save').click();
+        assert.strictEqual(form.$('input.o_field_many2one').next().hasClass('err_icon'), true,
+                'error icon should be displayed');
+
+        //destroy 
+        form.destroy();
+    });
+
     QUnit.test('many2one field with option always_reload', function (assert) {
         assert.expect(4);
         var count = 0;
@@ -4050,6 +4118,70 @@ QUnit.module('relational_fields', {
         // makes it difficult to test
         form.destroy();
     });
+
+    QUnit.test('fieldmany2many tags required', function (assert) {
+        assert.expect(11);
+
+        this.data.partner.records[0].timmy = [12, 14];
+        this.data.partner_type.records.push({id: 13, display_name: "red", color: 8});
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch:'<form string="Partners">' +
+                    '<field name="timmy" widget="many2many_tags" required="1" options="{\'no_create_edit\': True}"/>' +
+                '</form>',
+            res_id: 1,
+        });
+        assert.strictEqual(form.$('.o_field_many2manytags > span').length, 2,
+            "should contain 2 tags");
+        assert.ok(form.$('span:contains(gold)').length,
+            'should have fetched and rendered gold partner tag');
+        assert.ok(form.$('span:contains(silver)').length,
+            'should have fetched and rendered silver partner tag');
+        assert.strictEqual(form.$('span:first()').data('color'), 2,
+            'should have correctly fetched the color');
+
+        form.$buttons.find('.o_form_button_edit').click();
+
+        assert.strictEqual(form.$('.o_field_many2manytags > span').length, 2,
+            "should still contain 2 tags in edit mode");
+        assert.ok(form.$('.o_tag_color_2 .o_badge_text:contains(gold)').length,
+            'first tag should still contain "gold" and be color 2 in edit mode');
+        assert.strictEqual(form.$('.o_field_many2manytags .o_delete').length, 2,
+            "tags should contain a delete button");
+
+        form.$('.o_field_many2manytags .o_delete').trigger("click");
+        form.$('.o_field_many2manytags .o_delete').trigger("click");
+
+        assert.strictEqual(form.$('.o_field_many2manytags > span').length, 0,
+            "should be 0 tags in edit mode");
+
+        var $input = form.$('.o_field_many2manytags input');
+        $input.click(); // opens the dropdown
+
+        //focusout 
+        $input.trigger("focusout");
+        assert.strictEqual($input.next().hasClass('err_icon'), true,
+            "error icon should display on invalid field focusout");
+
+        //focus 
+        $input.trigger("focus");
+        assert.strictEqual($input.next().hasClass('err_icon'), false,
+            "error icon should remove on focus");
+        $input.trigger("focusout");
+
+        //form save
+        form.$buttons.find('.o_form_button_save').click();
+
+        assert.strictEqual($input.next().hasClass('err_icon'), true,
+            "error icon should display on invalid field");
+
+        //form destroy
+        form.destroy();
+    });
+
+
 
     QUnit.test('fieldmany2many tags view a domain', function (assert) {
         assert.expect(7);

@@ -1217,7 +1217,7 @@ var FieldMany2ManyTags = AbstractField.extend({
     events: _.extend({}, AbstractField.prototype.events, {
         'click .o_delete': '_onDeleteTag',
         'keydown .o_field_many2one input': '_onKeyDown',
-        'focus .o_field_many2manytags input': 'onFocus',
+        'focus .o_field_many2one input': 'onFocus',
         'focusout .o_field_many2one input' : 'onFocusout',
     }),
     fieldsToFetch: {
