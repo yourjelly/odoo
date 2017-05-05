@@ -57,7 +57,7 @@ class StockQuant(models.Model):
     def _compute_inventory_value(self):
         real_value_quants = self.filtered(lambda quant: quant.product_id.cost_method == 'real')
         for quant in real_value_quants:
-            quant.inventory_value = quant.cost * quant.qty
+            quant.inventory_value = quant.cost * quant.quantity
         return super(StockQuant, self - real_value_quants)._compute_inventory_value()
 
     @api.multi
@@ -156,10 +156,10 @@ class StockQuant(models.Model):
             cost_rounded = float_round(quant.cost, precision_rounding=curr_rounding)
             cost_correct = cost_rounded
             if float_compare(quant.product_id.uom_id.rounding, 1.0, precision_digits=1) == 0\
-                    and float_compare(quant.qty * quant.cost, quant.qty * cost_rounded, precision_rounding=curr_rounding) != 0\
-                    and float_compare(quant.qty, 2.0, precision_rounding=quant.product_id.uom_id.rounding) >= 0:
-                quant_correct = quant._quant_split(quant.qty - 1.0)
-                cost_correct += (quant.qty * quant.cost) - (quant.qty * cost_rounded)
+                    and float_compare(quant.quantity * quant.cost, quant.quantity * cost_rounded, precision_rounding=curr_rounding) != 0\
+                    and float_compare(quant.quantity, 2.0, precision_rounding=quant.product_id.uom_id.rounding) >= 0:
+                quant_correct = quant._quant_split(quant.quantity - 1.0)
+                cost_correct += (quant.quantity * quant.cost) - (quant.quantity * cost_rounded)
                 quant.sudo().write({'cost': cost_rounded})
                 quant_correct.sudo().write({'cost': cost_correct})
         return quant
