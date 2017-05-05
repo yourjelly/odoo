@@ -8,8 +8,8 @@ from odoo.exceptions import UserError
 class AccountAccount(models.Model):
     _inherit = 'account.account'
 
-    opening_debit = fields.Monetary(string="Opening debit", compute='_compute_opening_debit_credit', inverse='_set_opening_debit', help="Opening debit value for this account")
-    opening_credit = fields.Monetary(string="Opening credit", compute='_compute_opening_debit_credit', inverse='_set_opening_credit', help="Opening debit value for this account")
+    opening_debit = fields.Monetary(string="Opening debit", compute='_compute_opening_debit_credit', inverse='_set_opening_debit', help="Opening debit value for this account.")
+    opening_credit = fields.Monetary(string="Opening credit", compute='_compute_opening_debit_credit', inverse='_set_opening_credit', help="Opening credit value for this account.")
 
     def _compute_opening_debit_credit(self):
         for record in self:
@@ -29,7 +29,12 @@ class AccountAccount(models.Model):
     def _set_opening_credit(self):
         self._set_opening_debit_credit(self.opening_credit, 'credit')
 
-    def _set_opening_debit_credit(self, amount, field):#TODO OCO DOC : field, c'est "debit" ou "credit", le champ sur les account.move.line
+    def _set_opening_debit_credit(self, amount, field):
+        """ Generic function called by both opening_debit and opening_credit's
+        inverse function. 'Amount' parameter is the value to be set, and field
+        either 'debit' or 'credit', depending on wich one of these two fields
+        got assigned.
+        """
         opening_move = self.company_id.account_accountant_opening_move_id
 
         if not opening_move:

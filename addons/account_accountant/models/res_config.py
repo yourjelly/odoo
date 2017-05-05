@@ -34,7 +34,7 @@ class AccountConfigSettings(models.TransientModel):
         'account.journal',
         related='company_id.tax_cash_basis_journal_id',
         string="Tax Cash Basis Journal",)
-    account_accountant_opening_move_id = fields.Many2one(string='Opening journal entry', comodel_name='account.move', related='company_id.account_accountant_opening_move')
+    account_accountant_opening_move_id = fields.Many2one(string='Opening journal entry', comodel_name='account.move', related='company_id.account_accountant_opening_move_id')
     account_accountant_opening_journal_id = fields.Many2one(string='Opening journal', comodel_name='account.journal', related='company_id.account_accountant_opening_journal_id')
     account_accountant_opening_date = fields.Date(string='Accounting opening date', related='company_id.account_accountant_opening_date')
     account_accountant_opening_move_adjustment_amount = fields.Monetary(string='Adjustment difference', related="company_id.account_accountant_opening_move_adjustment_amount")

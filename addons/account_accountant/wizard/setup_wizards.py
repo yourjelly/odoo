@@ -14,7 +14,7 @@ class FinancialYearOpeningWizard(models.TransientModel):
 
     company_id = fields.Many2one(comodel_name='res.company')
     opening_move_posted = fields.Boolean(string='Opening move posted', compute='_compute_opening_move_posted')
-    opening_date = fields.Date(required=True, related='company_id.account_accountant_opening_date')
+    opening_date = fields.Date(string='Opening date', required=True, related='company_id.account_accountant_opening_date')
     fiscalyear_last_day = fields.Integer(related="company_id.fiscalyear_last_day", required=True)
     fiscalyear_last_month = fields.Selection(selection=[(1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'), (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'), (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')],
                                              related="company_id.fiscalyear_last_month",
@@ -54,6 +54,8 @@ class OpeningAccountMoveWizard(models.TransientModel):
             return (smallest, value)
 
     def validate(self):
+        """ Called by this wizard's 'save' button.
+        """
         (method, value) = self.get_adjustment_difference()
 
         if not float_is_zero(value, precision_rounding=self.currency_id.rounding):
