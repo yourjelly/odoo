@@ -851,7 +851,7 @@ class Picking(models.Model):
             'location_id': picking.location_id.id,
             'location_dest_id': picking.location_dest_id.id,
             'product_id': product.id,
-            'procurement_id': proc_id,
+            'procurement_ids': [(4, proc_id)],
             'product_uom': uom_id,
             'product_uom_qty': qty,
             'name': _('Extra Move: ') + name,

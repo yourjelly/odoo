@@ -119,7 +119,7 @@ class StockMove(models.Model):
              "its current stock) to gather products. If we want to chain moves and have this one to wait for the previous,"
              "this second option should be chosen.")
     scrapped = fields.Boolean('Scrapped', related='location_dest_id.scrap_location', readonly=True, store=True)
-    procurement_id = fields.Many2one('procurement.order', 'Procurement')
+    procurement_ids = fields.Many2many('procurement.order', 'stock_move_procurement_rel', 'move_id', 'procurement_id', 'Procurements')
     group_id = fields.Many2one('procurement.group', 'Procurement Group', default=_default_group_id)
     rule_id = fields.Many2one('procurement.rule', 'Procurement Rule', ondelete='restrict', help='The procurement rule that created this stock move')
     push_rule_id = fields.Many2one('stock.location.path', 'Push Rule', ondelete='restrict', help='The push rule that created this stock move')
@@ -524,7 +524,7 @@ class StockMove(models.Model):
             'product_qty': self.product_uom_qty,
             'product_uom': self.product_uom.id,
             'location_id': self.location_id.id,
-            'move_dest_id': [(4, self.id)],
+            'move_dest_id': self.id,
             'group_id': group_id,
             'route_ids': [(4, x.id) for x in self.route_ids],
             'warehouse_id': self.warehouse_id.id or (self.picking_type_id and self.picking_type_id.warehouse_id.id or False),
@@ -825,7 +825,7 @@ class StockMove(models.Model):
             'product_uom_qty': uom_qty,
             'procure_method': 'make_to_stock',
             'restrict_lot_id': restrict_lot_id,
-            'procurement_ids': self.procurement_ids.ids,  # TODO: more logic needed here
+            'procurement_ids': [(4, x.id) for x in self.procurement_ids],
             'move_dest_ids': [(4, x.id) for x in self.move_dest_ids if x.state not in ('done', 'cancel')],
             'origin_returned_move_id': self.origin_returned_move_id.id,
         }
