@@ -48,6 +48,7 @@ class ProcurementRule(models.Model):
     propagate_warehouse_id = fields.Many2one(
         'stock.warehouse', 'Warehouse to Propagate',
         help="The warehouse to propagate on the created move/procurement, which can be different of the warehouse this rule is for (e.g for resupplying rules from another warehouse)")
+    merge_moves = fields.Boolean('Merge Moves')
 
     @api.model
     def _get_action(self):
@@ -60,7 +61,7 @@ class ProcurementOrder(models.Model):
 
     location_id = fields.Many2one('stock.location', 'Procurement Location')  # not required because task may create procurements that aren't linked to a location with sale_service
     partner_dest_id = fields.Many2one('res.partner', 'Customer Address', help="In case of dropshipping, we need to know the destination address more precisely")
-    move_ids = fields.One2many('stock.move', 'procurement_id', 'Moves', help="Moves created by the procurement")
+    move_ids = fields.Many2many('stock.move', 'stock_move_procurement_rel', 'procurement_id', 'move_id', string='Original Moves', help="Moves created by the procurement")
     move_dest_id = fields.Many2one('stock.move', 'Destination Move', help="Move which caused (created) the procurement")
     route_ids = fields.Many2many(
         'stock.location.route', 'stock_location_route_procurement', 'procurement_id', 'route_id', 'Preferred Routes',
@@ -161,8 +162,8 @@ class ProcurementOrder(models.Model):
             'partner_id': self.rule_id.partner_address_id.id or (self.group_id and self.group_id.partner_id.id) or False,
             'location_id': self.rule_id.location_src_id.id,
             'location_dest_id': self.location_id.id,
-            'move_dest_id': self.move_dest_id and self.move_dest_id.id or False,
-            'procurement_id': self.id,
+            'move_dest_ids': self.move_dest_id and [(4, self.move_dest_id.id)] or [],
+            'procurement_ids': [(4, self.id)],
             'rule_id': self.rule_id.id,
             'procure_method': self.rule_id.procure_method,
             'origin': self.origin,
@@ -183,7 +184,40 @@ class ProcurementOrder(models.Model):
                 self.message_post(body=_('No source location defined!'))
                 return False
             # create the move as SUPERUSER because the current user may not have the rights to do it (mto product launched by a sale for example)
-            self.env['stock.move'].sudo().create(self._get_stock_move_values())
+            #Search if picking with move for it exists already:
+            added_to_existing = False
+            if self.rule_id.merge_moves: # Or maybe also if it is the same orderpoint or client, ... (or original procurement group == ...)
+                group_id = False
+                if self.rule_id.group_propagation_option == 'propagate':
+                    group_id = self.group_id.id
+                elif self.rule_id.group_propagation_option == 'fixed':
+                    group_id = self.rule_id.group_id.id
+                # TODO: add recompute -> might be more logical to reuse code of picking_assign
+                # TODO: create function find_picking and add it also to picking_assign
+                moves = self.env['stock.move'].search([
+                    ('group_id', '=', group_id), #extra logic?
+                    ('location_id', '=', self.rule_id.location_src_id.id),
+                    ('location_dest_id', '=', self.location_id.id),
+                    ('picking_type_id', '=', self.rule_id.picking_type_id.id),
+                    ('picking_id.printed', '=', False),
+                    ('picking_id.state', 'in', ['draft', 'confirmed', 'waiting', 'partially_available', 'assigned']),
+                    ('product_id', '=', self.product_id.id)], limit=1)
+                # We should not add it to an existing if the move is already backordered.  Otherwise we would get a big tree of move_dest_ids dependencies
+                if moves and not moves[0].move_dest_ids.mapped('move_orig_ids').filtered(lambda x: x.state == 'done'):
+                    added_to_existing = True
+                    moves[0].write({'product_uom_qty': moves[0].product_uom_qty + self.product_qty, #TODO: UoM conversion...
+                                    'procurement_ids': [(4, self.id)], 
+                                    'move_dest_ids': [(4, x.id) for x in self.move_dest_ids],
+                                    })
+                    #Need to add a procurement if the move is mto again
+                    if self.rule_id.procure_method == 'make_to_order':
+                        self.copy(default={'location_id': moves[0].location_id.id, 
+                                          'move_dest_id': moves[0].id, 
+                                          'move_ids': [(5)], 
+                                          'rule_id': False})
+                    #Might need to change state
+            if not added_to_existing:
+                self.env['stock.move'].sudo().create(self._get_stock_move_values())
             return True
         return super(ProcurementOrder, self)._run()
 
@@ -199,7 +233,7 @@ class ProcurementOrder(models.Model):
 
         # TDE FIXME: action_confirm in stock_move already call run() ... necessary ??
         # If procurements created other procurements, run the created in batch
-        new_procurements = self.search([('move_dest_id.procurement_id', 'in', new_self.ids)], order='id')
+        new_procurements = self.search([('move_dest_id.procurement_ids', 'in', new_self.ids)], order='id')
         if new_procurements:
             res = new_procurements.run(autocommit=autocommit)
         return res
