@@ -75,6 +75,7 @@
                             <div groups="stock.group_adv_location" attrs="{'invisible': [('action', '!=', 'move')]}">
                                <field name="delay" class="oe_inline"/>days
                             </div>
+                            <field name="merge_moves" groups="stock.group_adv_location"/>
                         </group>
                     </group>
                 </xpath>
