@@ -1250,6 +1250,35 @@ QUnit.module('basic_fields', {
         form.destroy();
     });
 
+    QUnit.test('date field is required', function (assert) {
+        assert.expect(4);
+
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch:'<form string="Partners"><field name="date" required="1"/></form>',
+            res_id: 4,
+        });
+        var $span = form.$('span.o_field_widget');
+        var $input = form.$('.o_field_date input');
+        assert.strictEqual($span.length, 1, "should have one span in the form view");
+        assert.strictEqual($span.text(), "", "and it should be empty");
+
+        //focusout date field
+        $span.trigger("focusout");
+        assert.strictEqual($span.next().hasClass("err_icon"), true,
+            "on focusout invalid field has error icon next");
+
+        //focus date field
+        $input.trigger("focus");
+        assert.strictEqual($input.next().hasClass("err_icon"), false,
+            "on focus field should not have error icon");
+
+        //form destroy
+        form.destroy();
+    });
+
     QUnit.test('date field in form view', function (assert) {
         assert.expect(7);
 
