@@ -350,14 +350,13 @@ QUnit.module('relational_fields', {
             event.data.callback({user_context: {}});
         });
         form.$buttons.find('.o_form_button_edit').click();
-        var $dropdown = form.$('.o_form_field_many2one input').autocomplete('widget');
+        var $dropdown = form.$('.o_field_many2one input').autocomplete('widget');
 
         form.$('.o_field_many2one input').click();
         assert.ok($dropdown.is(':visible'),
                     'clicking on the m2o input should open the dropdown if it is not open yet');
         form.$('.o_field_many2one input').val('');
         form.$('.o_field_many2one input').click();
-
 
         //focusout
         form.$('.o_field_many2one input').trigger('focusout');
@@ -371,7 +370,7 @@ QUnit.module('relational_fields', {
 
         //save
         form.$buttons.find('.o_form_button_save').click();
-        assert.strictEqual(form.$('input.o_field_many2one').next().hasClass('err_icon'), true,
+        assert.strictEqual(form.$('.o_field_many2one input').next().hasClass('err_icon'), true,
                 'error icon should be displayed');
 
         //destroy 

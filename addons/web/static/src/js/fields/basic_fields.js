@@ -831,6 +831,7 @@ var FieldText = InputField.extend(TranslatableFieldMixin, {
 
         if (this.mode === 'edit') {
             dom.autoresize(this.$el, {parent: this});
+
             this.$textarea = this.$el;
             $(this.$textarea).focus(function(event){
                 var $divtextarea = $(this).parent()

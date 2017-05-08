@@ -55,6 +55,48 @@ QUnit.test('field html widget', function (assert) {
     }, 0);
 });
 
+QUnit.test('field html widget required', function (assert) {
+    var done = assert.async();
+    assert.expect(4);
+
+    var form = testUtils.createView({
+        View: FormView,
+        model: 'mass.mailing',
+        data: this.data,
+        arch: '<form string="Partners">' +
+                '<field name="body" widget="html" required="1" style="height: 100px"/>' +
+            '</form>',
+        res_id: 1,
+    });
+    assert.strictEqual(form.$('.field_body').text(), 'yep',
+        "should have rendered a div with correct content in readonly");
+
+    //edit form view
+    form.$buttons.find('.o_form_button_edit').click();
+
+    //clear input
+    form.$('.note-editable').html('').trigger('input');
+    assert.strictEqual(form.$('.note-editable').html(), '',
+            "edit input value to blank");
+
+    //focusout
+    form.$('.note-editable').trigger('focusout');
+    assert.strictEqual(form.$('.note-editable').next().hasClass('err_icon'), true,
+            "empty field should have error icon on focusout");
+
+    //save
+    form.$buttons.find('.o_form_button_save').click();
+    assert.strictEqual(form.$('.note-editable').next().hasClass('err_icon'), true,
+            'on save empty value field should have error icon');
+
+    //destroy
+    setTimeout(function () {
+        form.destroy();
+        done();
+    }, 0);
+});
+
+
 QUnit.test('field html widget (with options inline-style)', function (assert) {
     var done = assert.async();
     assert.expect(3);

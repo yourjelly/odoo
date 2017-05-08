@@ -844,6 +844,7 @@ QUnit.module('basic_fields', {
         list.destroy();
     });
 
+
     QUnit.module('FieldText');
 
     QUnit.test('text fields are correctly rendered', function (assert) {
