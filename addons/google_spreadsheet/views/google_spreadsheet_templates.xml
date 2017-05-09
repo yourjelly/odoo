@@ -6,5 +6,9 @@
                 <script type="text/javascript" src="/google_spreadsheet/static/src/js/search.js"></script>
             </xpath>
         </template>
-
+	  <template id="qunit_suite" name="google spreadsheets form view test" inherit_id="web.qunit_suite">
+	            <xpath expr="//script[contains(@src, '/web/static/tests/views/form_tests.js')]" position="after">
+	                <script type="text/javascript" src="/google_spreadsheet/static/tests/search_tests.js"></script>
+	            </xpath>
+	   </template>
 </odoo>
