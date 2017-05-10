@@ -20,12 +20,6 @@ QUnit.module('google_spreadsheet', {
                         name: "spread sheet 1", 
                         url: "https://docs.google.com/spreadsheets/d/1WwC02z1JgngU8J6M08kZQkMZ3DI_XR7SwF5QSfjxFsE/edit#gid=0", 
                         description: "Demo spread sheet"
-                    },
-                    {
-                        id: 2, 
-                        name: "spreadsheet 2", 
-                        url: "invalid url", 
-                        description: "google demo spreadsheet"
                     }]
             },
         };
@@ -43,11 +37,10 @@ QUnit.module('google_spreadsheet', {
             data:this.data,
             arch:'<tree string="Google Spreadsheets">'+
                     '<field name="name" string="Name"/>'+
-                    '<field name="url" widget="url"/>'+
+                    '<field name="url"/>'+
                  '</tree>',
         }).then(function (form) {
-            console.log('form --->>>>>>' , form.$el.contents().find('.o_data_row'));
-            assert.strictEqual(1, 1,"should contain a 1 button with some html");
+            assert.strictEqual(form.$('.o_data_row').length, 1,"should contain one url");
             form.destroy();
             done();
         });
