@@ -19,7 +19,7 @@ class AccountPaymentRequest(models.Model):
         ('pending', 'Pending'),
         ('paid', 'Paid')],
         required=True, default='open')
-    invoice_id = fields.Many2one('account.invoice', string='Invoice', readonly=True, copy=False)
+    invoice_id = fields.Many2one('account.invoice', string='Invoice', required=True, readonly=True)
     due_date = fields.Date(string="Due Date")
     reference = fields.Char(string="Reference")
     currency_id = fields.Many2one('res.currency', string="currency")
