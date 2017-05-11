@@ -245,7 +245,8 @@
                             <group>
                                 <field name="date_begin"/>
                                 <field name="date_end"/>
-                                <field name="date_tz"/>
+                                <field name="visitor_timezone" widget='radio'/>
+                                <field name="date_tz" attrs="{'required': [('visitor_timezone', '=', 'custom')], 'invisible': [('visitor_timezone', '=', 'visitor')]}"/>
                             </group>
                             <group>
                                 <field name="seats_min"/>

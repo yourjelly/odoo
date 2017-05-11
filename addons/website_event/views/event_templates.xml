@@ -66,7 +66,22 @@
                                     </t>
                                 </div>
                                 <div>
-                                    <i class="fa fa-clock-o"></i> <span itemprop="startDate" t-field="event.with_context(tz=event.date_tz).date_begin" t-options='{"hide_seconds":"True"}'> </span> <i>to</i> <span itemprop="endDate" t-field="event.with_context(tz=event.date_tz).date_end" t-options='{"hide_seconds":"True"}'> </span>
+                                     <t t-if="event.visitor_timezone == 'custom'">    
+                                        <i class="fa fa-clock-o"></i> <span class="event_date" itemprop="startDate" t-field="event.with_context(tz=event.date_tz).date_begin"
+                                        t-options='{"hide_seconds":"True"}'> </span> <i>to</i> <span class="event_date" itemprop="endDate" t-field="event.with_context(tz=event.date_tz).date_end"
+                                        t-options='{"hide_seconds":"True"}'></span>
+                                   </t>
+                                        <t t-if="event.visitor_timezone == 'visitor'">
+                                            <t t-if="request.env.user.name == 'Public user'">
+                                            <i class="fa fa-clock-o"></i> <span class="event_date" itemprop="startDate" t-att-data-render-type="event.visitor_timezone" t-field="event.with_context(tz='UTC').date_begin"
+                                            > </span> <i>to</i> <span class="event_date" t-att-data-render-type="event.visitor_timezone" itemprop="endDate" t-field="event.with_context(tz='UTC').date_end"> </span>
+                                            </t>
+                                            <t t-if="request.env.user.name != 'Public user'">     
+                                            <i class="fa fa-clock-o"></i> <span class="event_date" itemprop="startDate" t-field="event.with_context(tz=request.env.user.tz).date_begin"
+                                            t-options='{"hide_seconds":"True"}'> </span> <i>to</i> <span class="event_date" itemprop="endDate" t-field="event.with_context(tz=request.env.user.tz).date_end"
+                                            t-options='{"hide_seconds":"True"}'></span>
+                                            </t>
+                                    </t>
                                 </div>
                                 <div itemprop="location" t-field="event.address_id" t-options='{
                                     "widget": "contact",
@@ -276,9 +291,17 @@
                 <small t-if="event.is_participating" class="label label-info">Participating</small>
             </div>
             <h4 class="text-center text-muted">
+                
+                <t t-if="event.visitor_timezone == 'visitor'">
+                <i class="fa fa-clock-o"></i><span class="event_date" itemprop="startDate" t-att-data-render-type="event.visitor_timezone" t-field="event.with_context(tz='UTC').date_begin"
+                > </span> <i>to</i> <span class="event_date" t-att-data-render-type="event.visitor_timezone" itemprop="endDate" t-field="event.with_context(tz='UTC').date_end"> </span>
+                </t>
+                <t t-if="event.visitor_timezone == 'custom'"> 
+
                 <i class="fa fa-clock-o"></i> <span itemprop="startDate" t-field="event.with_context(tz=event.date_tz).date_begin" t-options='{"hide_seconds":"True"}'/> to
                 <span itemprop="endDate" t-field="event.with_context(tz=event.date_tz).date_end" t-options='{"hide_seconds":"True"}'/>
                 <t t-if="event.date_tz">(<span t-field="event.date_tz"/>)</t>
+            </t>
             </h4>
             <h4 class="text-center text-muted"
                 t-field="event.address_id" t-options='{
