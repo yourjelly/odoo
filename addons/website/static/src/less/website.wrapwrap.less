@@ -3,6 +3,13 @@
 /// snippets-specific rules.
 ///
 
+
+// Resize and vertically align navbar’s items relative to @navbar-height
+.o-w-fill-navbar (@height: @navbar-height, @ratio : 0.8) {
+    height: floor(@height*@ratio);
+    margin-top: floor(@height * ((1 - @ratio)/2));
+}
+
 #wrapwrap {
     position: relative;
     display: table;
@@ -22,10 +29,10 @@
 header a.navbar-brand {
     &.logo {
         padding: 0 15px;
-    }
-    img {
-        max-height: 35px;
-        margin-top: 8px;
+
+        img {
+            .o-w-fill-navbar();
+        }
     }
 }
 footer {
@@ -174,9 +181,8 @@ hr {
 .navbar.navbar-static-top {
     margin-bottom: 0;
     ul.nav > li.divider {
-        margin-top: 15px;
-        padding-top: 20px;
-        border-right: 1px solid grey;
+        border-right: 1px solid @navbar-default-link-disabled-color;
+        .o-w-fill-navbar();
     }
 }
 ul.nav-stacked > li > a {
