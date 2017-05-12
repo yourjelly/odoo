@@ -53,8 +53,44 @@ odoo.define("website.tour.banner", function (require) {
         content: _t("<p><b>That's it.</b> Your homepage is live.</p><p>Continue adding more pages to your site or edit this page to make it even more awesome.</p>"),
         position: "bottom",
     }]);
-});
 
+    tour._consume_tour('banner', '');
+    
+    tour._consume_current_tour(function (tour_name='banner', error) {
+        // console.log("disabling tour....", tour_name);
+        delete this.active_tooltips[tour_name];
+        this.tours[tour_name].current_step = 0;
+        local_storage.removeItem(get_step_key(tour_name));
+        if (this.running_tour === tour_name) {
+            this._stop_running_tour_timeout();
+            local_storage.removeItem(get_running_key());
+            local_storage.removeItem(get_running_delay_key());
+            this.running_tour = undefined;
+            this.running_step_delay = undefined;
+            if (error) {
+                _.each(this._log, function (log) {
+                    console.log(log);
+                });
+                console.log(document.body.outerHTML);
+                console.log("error " + error); // phantomJS wait for message starting by error
+            } else {
+                console.log(_.str.sprintf("Tour %s succeeded", tour_name));
+                console.log("ok"); // phantomJS wait for exact message "ok"
+            }
+            this._log = [];
+        } else {
+            var self = this;
+            this._rpc({
+                    model: 'web_tour.tour',
+                    method: 'consume',
+                    args: [[tour_name]],
+                })
+                .then(function () {
+                    self.consumed_tours.push(tour_name);
+                });
+        }
+    });
+});
 
 odoo.define("website.tour.contact", function (require) {
     "use strict";
