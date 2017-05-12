@@ -37,6 +37,11 @@ class TestPyLint(TransactionCase):
         'dict-view-method',
 
         'long-suffix',
+        'old-ne-operator',
+        'old-octal-operator',
+        'parameter-unpacking',
+
+        'metaclass-assignment',
     ]
 
     BAD_FUNCTIONS = [
@@ -54,9 +59,9 @@ class TestPyLint(TransactionCase):
         'map',
         'filter',
         'zip',
-        # TODO: enable once report has been removed
-        # 'file',
-        # 'reduce',
+
+        'file',
+        'reduce',
     ]
 
     def _skip_test(self, reason):

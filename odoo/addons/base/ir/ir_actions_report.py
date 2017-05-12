@@ -19,7 +19,7 @@ import re
 
 from collections import namedtuple
 from contextlib import closing
-from pyPdf import PdfFileWriter, PdfFileReader
+from PyPDF2 import PdfFileWriter, PdfFileReader
 from distutils.version import LooseVersion
 from reportlab.graphics.barcode import createBarcodeDrawing
 
@@ -82,9 +82,9 @@ def _merge_pdf(documents):
     writer = PdfFileWriter()
     streams = []  # We have to close the streams *after* PdfFilWriter's call to write()
     for document in documents:
-        pdfreport = file(document, 'rb')
+        pdfreport = open(document, 'rb')
         streams.append(pdfreport)
-        reader = PdfFileReader(pdfreport)
+        reader = PdfFileReader(pdfreport, overwriteWarnings=False)
         for page in range(0, reader.getNumPages()):
             writer.addPage(reader.getPage(page))
 
