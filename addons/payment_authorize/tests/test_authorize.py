@@ -39,7 +39,7 @@ class AuthorizeForm(AuthorizeCommon):
             values['x_fp_timestamp'],
             values['x_amount'],
         ]) + '^'
-        return hmac.new(str(values['x_trans_key']), data, hashlib.md5).hexdigest()
+        return hmac.new(bytes(values['x_trans_key']), data.encode('utf-8'), hashlib.md5).hexdigest()
 
     def test_10_Authorize_form_render(self):
         self.assertEqual(self.authorize.environment, 'test', 'test without test environment')

@@ -548,7 +548,7 @@ class PaymentTransaction(models.Model):
         self.ensure_one()
         secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
         token = '%s%s%s' % (self.callback_model_id.model, self.callback_res_id, self.callback_method)
-        return hmac.new(str(secret), token, hashlib.sha256).hexdigest()
+        return hmac.new(bytes(secret), token.encode('utf-8'), hashlib.sha256).hexdigest()
 
     # --------------------------------------------------
     # FORM RELATED METHODS
