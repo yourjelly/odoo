@@ -947,7 +947,12 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         # new-style constraint methods
         for check in self._constraint_methods:
             if set(check._constrains) & field_names:
-                check(self)
+                try:
+                    check(self)
+                except ValidationError as e:
+                    raise
+                except Exception as e:
+                    raise ValidationError("%s\n\n%s" % (_("Error while validating constraint"), tools.ustr(e)))
 
     @api.model
     def default_get(self, fields_list):
