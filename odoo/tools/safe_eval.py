@@ -86,7 +86,7 @@ def _get_opcodes(codeobj):
     i = 0
     byte_codes = codeobj.co_code
     while i < len(byte_codes):
-        code = ord(byte_codes[i])
+        code = ord(byte_codes[i:i+1])
         yield code
 
         if code >= HAVE_ARGUMENT:
