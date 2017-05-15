@@ -190,7 +190,6 @@ def _eval_xml(self, node, env):
                 args.append(return_val)
         model = env[node.get('model')]
         method = node.get('name')
-        print(model, method, args)
         # this one still depends on the old API
         return odoo.api.call_kw(model, method, args, {})
     elif node.tag == "test":
