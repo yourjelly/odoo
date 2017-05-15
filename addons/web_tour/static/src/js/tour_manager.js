@@ -451,7 +451,6 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
             }
             this._log = [];
         } else {
-            var self = this;
             this._rpc({
                     model: 'web_tour.tour',
                     method: 'consume',

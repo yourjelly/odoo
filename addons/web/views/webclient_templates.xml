@@ -80,6 +80,7 @@
         <script type="text/javascript" src="/web/static/src/js/core/dialog.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/local_storage.js"></script>
         <script type="text/javascript" src="/web/static/src/js/services/local_storage_service.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/services/ajax_service.js"></script>
     </template>
 
     <template id="web.assets_backend" name="Backend Assets (used in backend interface)">
@@ -145,7 +146,7 @@
         <script type="text/javascript" src="/web/static/src/js/_deprecated/data.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/context.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/misc.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/services/ajax_service.js"></script>
+        
         <script type="text/javascript" src="/web/static/src/js/services/crash_manager.js"></script>
         <script type="text/javascript" src="/web/static/src/js/services/data_manager.js"></script>
         <script type="text/javascript" src="/web/static/src/js/services/session.js"></script>
