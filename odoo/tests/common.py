@@ -136,6 +136,9 @@ class BaseCase(unittest.TestCase):
         doc = self._testMethodDoc
         return doc and ' '.join(l.strip() for l in doc.splitlines() if not l.isspace()) or None
 
+    def assertItemsEqual(self, a, b, msg=None):
+        self.assertEqual(sorted(a), sorted(b), msg)
+
 
 class TransactionCase(BaseCase):
     """ TestCase in which each test method is run in its own transaction,
