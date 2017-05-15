@@ -741,6 +741,7 @@ class Field(MetaField('DummyField', (object,), {})):
         """ Convert ``value`` from the ``write`` format to the SQL format. """
         if value is None or value is False:
             return None
+        print(self.name, value, record)
         return pycompat.to_native(value)
 
     def convert_to_cache(self, value, record, validate=True):

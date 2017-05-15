@@ -947,12 +947,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         # new-style constraint methods
         for check in self._constraint_methods:
             if set(check._constrains) & field_names:
-                try:
-                    check(self)
-                except ValidationError as e:
-                    raise
-                except Exception as e:
-                    raise ValidationError("%s\n\n%s" % (_("Error while validating constraint"), tools.ustr(e)))
+                check(self)
 
     @api.model
     def default_get(self, fields_list):
@@ -2584,7 +2579,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         param_ids = object()
         query = Query(['"%s"' % self._table], ['"%s".id IN %%s' % self._table], [param_ids])
         self._apply_ir_rules(query, 'read')
-        order_str = self._generate_order_by(None, query)
 
         # determine the fields that are stored as columns in tables;
         fields = [self._fields[n] for n in (field_names + inherited_field_names)]
@@ -2609,12 +2603,11 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         # determine the actual query to execute
         from_clause, where_clause, params = query.get_sql()
         query_str = """ SELECT %(qual_names)s FROM %(from_clause)s
-                        WHERE %(where_clause)s %(order_str)s
+                        WHERE %(where_clause)s
                     """ % {
                         'qual_names': ",".join(qual_names),
                         'from_clause': from_clause,
                         'where_clause': where_clause,
-                        'order_str': order_str,
                     }
 
         result = []
