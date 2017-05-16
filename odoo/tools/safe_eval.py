@@ -15,7 +15,7 @@ condition/math builtins.
 #  - safe_eval in lp:~xrg/openobject-server/optimize-5.0
 #  - safe_eval in tryton http://hg.tryton.org/hgwebdir.cgi/trytond/rev/bbb5f73319ad
 
-from opcode import HAVE_ARGUMENT, opmap
+from opcode import HAVE_ARGUMENT, opmap, opname
 
 import functools
 from psycopg2 import OperationalError
@@ -63,8 +63,8 @@ _SAFE_OPCODES = _EXPR_OPCODES.union(set(opmap[x] for x in [
     'LOAD_NAME', 'CALL_FUNCTION', 'COMPARE_OP', 'LOAD_ATTR',
     'STORE_NAME', 'GET_ITER', 'FOR_ITER', 'LIST_APPEND', 'DELETE_NAME',
     'JUMP_FORWARD', 'JUMP_IF_TRUE', 'JUMP_IF_FALSE', 'JUMP_ABSOLUTE',
-    'MAKE_FUNCTION', 'SLICE+0', 'SLICE+1', 'SLICE+2', 'SLICE+3', 'BREAK_LOOP',
-    'CONTINUE_LOOP', 'RAISE_VARARGS', 'YIELD_VALUE',
+    'MAKE_FUNCTION', 'SLICE+0', 'SLICE+1', 'SLICE+2', 'SLICE+3', 'BUILD_SLICE',
+    'BREAK_LOOP', 'CONTINUE_LOOP', 'RAISE_VARARGS', 'YIELD_VALUE',
     # New in Python 2.7 - http://bugs.python.org/issue4715 :
     'JUMP_IF_FALSE_OR_POP', 'JUMP_IF_TRUE_OR_POP', 'POP_JUMP_IF_FALSE',
     'POP_JUMP_IF_TRUE', 'SETUP_EXCEPT', 'END_FINALLY',
@@ -139,8 +139,9 @@ def assert_valid_codeobj(allowed_codes, code_obj, expr):
 
     # almost twice as fast as a manual iteration + condition when loading
     # /web according to line_profiler
-    if set(_get_opcodes(code_obj)) - allowed_codes:
-        raise ValueError("forbidden opcode(s) in %r" % expr)
+    codes = set(_get_opcodes(code_obj)) - allowed_codes
+    if codes:
+        raise ValueError("forbidden opcode(s) in %r: %s" % (expr, ', '.join(opname[x] for x in codes)))
 
     for const in code_obj.co_consts:
         if isinstance(const, CodeType):
