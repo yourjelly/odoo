@@ -18,7 +18,7 @@ class StockMove(models.Model):
         result = super(StockMove, self).action_done()
 
         # Update delivered quantities on sales order lines
-        sale_order_lines = self.filtered(lambda move: move.procurement_id.sale_line_id and move.product_id.expense_policy == 'no').mapped('procurement_id.sale_line_id')
+        sale_order_lines = self.filtered(lambda move: move.procurement_ids.mapped('sale_line_id') and move.product_id.expense_policy == 'no').mapped('procurement_ids.sale_line_id')
         for line in sale_order_lines:
             line.qty_delivered = line._get_delivered_qty()
         return result
@@ -43,12 +43,11 @@ class StockPicking(models.Model):
     sale_id = fields.Many2one('sale.order', "Sales Order", compute='_compute_sale_id', store=True)
 
     @api.one
-    @api.depends('move_lines.procurement_id.sale_line_id.order_id')
+    @api.depends('move_lines.procurement_ids.sale_line_id.order_id')
     def _compute_sale_id(self):
         for move in self.move_lines:
-            if move.procurement_id.sale_line_id:
-                self.sale_id = move.procurement_id.sale_line_id.order_id
-                return
+            if move.procurement_ids.mapped('sale_line_id'):
+                self.sale_id = move.procurement_ids[0].sale_line_id.order_id
 
     @api.multi
     def _create_backorder(self, backorder_moves=[]):
