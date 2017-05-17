@@ -7,7 +7,6 @@ import collections
 import io
 import sys
 
-
 PY2 = sys.version_info[0] == 2
 
 _Writer = collections.namedtuple('_Writer', 'writerow writerows')
@@ -26,6 +25,7 @@ if PY2:
         return str(source)
 
     integer_types = (int, long)
+    round = round
 
     keys = lambda d: iter(d.iterkeys())
     values = lambda d: iter(d.itervalues())
@@ -59,6 +59,7 @@ if PY2:
             )
         )
 else:
+    import builtins, math
     # pylint: disable=bad-functions
     unichr = chr
     text_type = str
@@ -73,6 +74,13 @@ else:
         return str(source)
 
     integer_types = (int,)
+    def round(f):
+        if builtins.round(f + 1) - builtins.round(f) != 1:
+            return f + abs(f) / f * 0.5
+        # In P3, round(-0.) returns 0 rather than -0. so copy sign (which also
+        # ensures the result is a float, as round(v) will return an int
+        # otherwise)
+        return math.copysign(builtins.round(f), f)
 
     keys = lambda d: iter(d.keys())
     values = lambda d: iter(d.values())
