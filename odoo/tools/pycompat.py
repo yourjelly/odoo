@@ -100,7 +100,7 @@ else:
     def csv_writer(stream, **params):
         assert not isinstance(stream, io.TextIOBase), \
             "For cross-compatibility purposes, csv_writer takes a bytes stream"
-        return csv.writer(io.TextIOWrapper(stream), encoding='utf-8')
+        return csv.writer(io.TextIOWrapper(stream, encoding='utf-8', line_buffering=True))
 
 def to_text(source):
     """ Generates a text value (an instance of text_type) from an arbitrary 
