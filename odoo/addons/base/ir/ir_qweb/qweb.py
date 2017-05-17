@@ -34,6 +34,18 @@ unsafe_eval = eval
 
 _logger = logging.getLogger(__name__)
 
+# in Python 2, arguments (within the ast.arguments structure) are expressions
+# (since they can be tuples), generally
+# ast.Name(id: identifyer, ctx=ast.Param()), whereas in Python 3 they are
+# ast.arg(arg: identifier, annotation: expr?) provide a toplevel arg()
+# function which matches ast.arg producing the relevant ast.Name in Python 2.
+arg = getattr(ast, 'arg', lambda arg, annotation: ast.Name(id=arg, ctx=ast.Param()))
+# also Python 3's arguments has grown *2* new mandatory arguments, kwonlyargs
+# and kw_defaults for keyword-only arguments and their default values (if any)
+# so add a shim for *that* based on the signature of Python 3 I guess?
+arguments = ast.arguments
+if pycompat.PY2:
+    arguments = lambda args, vararg, kwonlyargs, kw_defaults, kwarg, defaults: ast.arguments(args=args, vararg=vararg, kwarg=kwarg, defaults=defaults)
 ####################################
 ###          qweb tools          ###
 ####################################
@@ -82,11 +94,15 @@ class Contextifier(ast.NodeTransformer):
         if args.kwarg: names.append(args.kwarg)
         # remap defaults in case there's any
         return ast.copy_location(ast.Lambda(
-            args=ast.arguments(
+            args=arguments(
                 args=args.args,
                 defaults=[self.visit(default) for default in args.defaults],
                 vararg=args.vararg,
                 kwarg=args.kwarg,
+                # assume we don't have any, not sure it's even possible to
+                # handle that cross-version
+                kwonlyargs=[],
+                kw_defaults=[],
             ),
             body=Contextifier(self._safe_names + tuple(names)).visit(node.body)
         ), node)
@@ -290,7 +306,7 @@ class QWeb(object):
         except Exception as e:
             path = _options['last_path_node']
             node = element.getroottree().xpath(path)
-            raise QWebException("Error when compiling AST", e, path, etree.tostring(node[0]), name)
+            raise QWebException("Error when compiling AST", e, path, etree.tostring(node[0], encoding='unicode'), name)
         astmod.body.extend(_options['ast_calls'])
 
         if 'profile' in options:
@@ -310,28 +326,29 @@ class QWeb(object):
         except Exception as e:
             path = _options['last_path_node']
             node = element.getroottree().xpath(path)
-            raise QWebException("Error when compiling AST", e, path, node and etree.tostring(node[0]), name)
+            raise QWebException("Error when compiling AST", e, path, node and etree.tostring(node[0], encoding='unicode'), name)
 
         # return the wrapped function
 
         def _compiled_fn(self, append, values):
             log = {'last_path_node': None}
-            values = dict(self.default_values(), **values)
+            new = self.default_values()
+            new.update(values)
             try:
-                return compiled(self, append, values, options, log)
+                return compiled(self, append, new, options, log)
             except QWebException as e:
                 raise e
             except Exception as e:
                 path = log['last_path_node']
                 element, document = self.get_template(template, options)
                 node = element.getroottree().xpath(path)
-                raise QWebException("Error to render compiling AST", e, path, node and etree.tostring(node[0]), name)
+                raise QWebException("Error to render compiling AST", e, path, node and etree.tostring(node[0], encoding='unicode'), name)
 
         return _compiled_fn
 
     def default_values(self):
         """ Return attributes added to the values for each computed template. """
-        return dict(format=self.format)
+        return {'format': self.format}
 
     def get_template(self, template, options):
         """ Retrieve the given template, and return it as a pair ``(element,
@@ -525,13 +542,13 @@ class QWeb(object):
         # def $name(self, append, values, options, log)
         fn = ast.FunctionDef(
             name=name,
-            args=ast.arguments(args=[
-                ast.Name(id='self', ctx=ast.Param()),
-                ast.Name(id='append', ctx=ast.Param()),
-                ast.Name(id='values', ctx=ast.Param()),
-                ast.Name(id='options', ctx=ast.Param()),
-                ast.Name(id='log', ctx=ast.Param()),
-            ], defaults=[], vararg=None, kwarg=None),
+            args=arguments(args=[
+                arg(arg='self', annotation=None),
+                arg(arg='append', annotation=None),
+                arg(arg='values', annotation=None),
+                arg(arg='options', annotation=None),
+                arg(arg='log', annotation=None),
+            ], defaults=[], vararg=None, kwarg=None, kwonlyargs=[], kw_defaults=[]),
             body=body or [ast.Return()],
             decorator_list=[])
         if lineno is not None:
@@ -598,7 +615,7 @@ class QWeb(object):
                     ]
                 ),
                 # append(escape($content))
-                body=body,
+                body=body or [ast.Pass()],
                 # append(body default value)
                 orelse=orelse,
             )
@@ -664,7 +681,7 @@ class QWeb(object):
 
         # all directives have been compiled, there should be none left
         if any(att.startswith('t-') for att in el.attrib):
-            raise NameError("Unknown directive on %s" % etree.tostring(el))
+            raise NameError("Unknown directive on %s" % etree.tostring(el, encoding='unicode'))
         return []
 
     def _values_var(self, varname, ctx):
@@ -747,8 +764,8 @@ class QWeb(object):
             # since `options['nsmap']` is a dict (and therefore mutable) and we do **not**
             # want changes done in deeper recursion to bevisible in earlier ones, we'll pass
             # a copy before continuing the recursion and restore the original afterwards.
-            original_nsmap = options['nsmap']
-            options['nsmap'] = dict(options['nsmap'], **el.nsmap)
+            original_nsmap = dict(options['nsmap'])
+            options['nsmap'].update(el.nsmap)
             content = self._compile_directive_content(el, options)
             options['nsmap'] = original_nsmap
 
@@ -961,9 +978,9 @@ class QWeb(object):
         # since `options['nsmap']` is a dict (and therefore mutable) and we do **not**
         # want changes done in deeper recursion to bevisible in earlier ones, we'll pass
         # a copy before continuing the recursion and restore the original afterwards.
+        original_nsmap = dict(options['nsmap'])
         if el.nsmap:
-            original_nsmap = options['nsmap']
-            options['nsmap'] = dict(options['nsmap'], **el.nsmap)
+            options['nsmap'].update(el.nsmap)
         content = self._compile_directives(el, options)
         if el.nsmap:
             options['nsmap'] = original_nsmap
@@ -1066,7 +1083,7 @@ class QWeb(object):
             #    $t-else
             ast.If(
                 test=self._compile_expr(el.attrib.pop('t-if')),
-                body=self._compile_directives(el, options),
+                body=self._compile_directives(el, options) or [ast.Pass()],
                 orelse=orelse
             )
         ]
@@ -1085,7 +1102,7 @@ class QWeb(object):
                     args=[ast.Str(el.attrib.pop('t-groups'))], keywords=[],
                     starargs=None, kwargs=None
                 ),
-                body=self._compile_directives(el, options),
+                body=self._compile_directives(el, options) or [ast.Pass()],
                 orelse=[]
             )
         ]
@@ -1259,7 +1276,7 @@ class QWeb(object):
         #    display the tag without content
         orelse = [ast.If(
             test=ast.Name(id='force_display', ctx=ast.Load()),
-            body=self._compile_tag(el, [], options, True),
+            body=self._compile_tag(el, [], options, True) or [ast.Pass()],
             orelse=[],
         )]
 
@@ -1303,7 +1320,7 @@ class QWeb(object):
                 #    display the tag without content
                 ast.If(
                     test=ast.Name(id=default_content, ctx=ast.Load()),
-                    body=self._compile_tag(el, [self._append(ast.Name(id=default_content, ctx=ast.Load()))], options, True),
+                    body=self._compile_tag(el, [self._append(ast.Name(id=default_content, ctx=ast.Load()))], options, True) or [ast.Pass()],
                     orelse=orelse,
                 )
             ]
