@@ -171,14 +171,14 @@ class TestSanitizer(unittest.TestCase):
         for ext in test_mail_examples.QUOTE_BLOCKQUOTE_IN:
             self.assertIn(ext, html)
         for ext in test_mail_examples.QUOTE_BLOCKQUOTE_OUT:
-            self.assertIn('<span data-o-mail-quote="1">%s' % misc.html_escape(ext.decode('utf-8')), html)
+            self.assertIn('<span data-o-mail-quote="1">%s' % misc.html_escape(ext), html)
 
     def test_quote_thunderbird(self):
         html = html_sanitize(test_mail_examples.QUOTE_THUNDERBIRD_1)
         for ext in test_mail_examples.QUOTE_THUNDERBIRD_1_IN:
             self.assertIn(ext, html)
         for ext in test_mail_examples.QUOTE_THUNDERBIRD_1_OUT:
-            self.assertIn('<span data-o-mail-quote="1">%s</span>' % misc.html_escape(ext.decode('utf-8')), html)
+            self.assertIn('<span data-o-mail-quote="1">%s</span>' % misc.html_escape(ext), html)
 
     def test_quote_hotmail_html(self):
         html = html_sanitize(test_mail_examples.QUOTE_HOTMAIL_HTML)
@@ -264,7 +264,7 @@ class TestSanitizer(unittest.TestCase):
         for ext in test_mail_examples.BUG_1_IN:
             self.assertIn(ext, html)
         for ext in test_mail_examples.BUG_1_OUT:
-            self.assertIn('<span data-o-mail-quote="1">%s</span>' % misc.html_escape(ext.decode('utf-8')), html)
+            self.assertIn('<span data-o-mail-quote="1">%s</span>' % misc.html_escape(ext), html)
 
     def test_misc(self):
         # False / void should not crash
