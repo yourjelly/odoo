@@ -3,7 +3,7 @@
 
 from functools import partial
 try:
-    from itertools import zip_longest as izip_longuest
+    from itertools import zip_longest as izip_longest
 except ImportError:
     from itertools import izip_longest
 
