@@ -2,7 +2,7 @@
 import io
 import requests
 from lxml import etree, objectify
-import xml.etree.ElementTree as ET
+from xml.etree import ElementTree as ET
 from uuid import uuid4
 
 from odoo.exceptions import ValidationError, UserError

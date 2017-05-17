@@ -4,7 +4,7 @@
 import logging
 
 import collections
-import lxml.html.clean as clean
+from lxml.html import clean
 import random
 import re
 import socket
