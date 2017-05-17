@@ -15,7 +15,8 @@ from odoo.tools import pycompat, misc, ustr
 
 
 def dedent_and_strip(string):
-    return ''.join([line.strip() for line in string.splitlines()])
+    # YOLO
+    return string[0:0].join(line.strip() for line in string.splitlines())
 
 
 class TestQWebTField(TransactionCase):
@@ -30,7 +31,7 @@ class TestQWebTField(TransactionCase):
 
         result = self.engine.render(field, {'company': company})
         self.assertEqual(
-            result,
+            result.decode('utf-8'),
             '<span data-oe-model="res.company" data-oe-id="%d" '
                   'data-oe-field="name" data-oe-type="char" '
                   'data-oe-expression="company.name">%s</span>' % (
@@ -46,7 +47,7 @@ class TestQWebTField(TransactionCase):
 
         result = self.engine.render(field, {'company': company})
         self.assertEqual(
-            ustr(result),
+            result.decode('utf-8'),
             '<span data-oe-model="res.company" data-oe-id="%d" '
                   'data-oe-field="name" data-oe-type="char" '
                   'data-oe-expression="company.name">%s</span>' % (
@@ -94,7 +95,7 @@ class TestQWebNS(TransactionCase):
             """ % expected_result
         })
 
-        self.assertEquals(dedent_and_strip(view1.render()), dedent_and_strip(expected_result))
+        self.assertEquals(dedent_and_strip(view1.render().decode('utf-8')), dedent_and_strip(expected_result))
 
     def test_render_static_xml_with_namespace_2(self):
         """ Test the rendering on a namespaced view with no static content. The resulting string should be untouched.
@@ -132,7 +133,7 @@ class TestQWebNS(TransactionCase):
             """ % expected_result
         })
 
-        self.assertEquals(dedent_and_strip(view1.render()), dedent_and_strip(expected_result))
+        self.assertEquals(dedent_and_strip(view1.render()).decode('utf-8'), dedent_and_strip(expected_result))
 
     def test_render_static_xml_with_useless_distributed_namespace(self):
         """ Test that redundant namespaces are stripped upon rendering.
@@ -165,7 +166,7 @@ class TestQWebNS(TransactionCase):
             </root>
         """
 
-        self.assertEquals(dedent_and_strip(view1.render()), dedent_and_strip(expected_result))
+        self.assertEquals(dedent_and_strip(view1.render().decode('utf-8')), dedent_and_strip(expected_result))
 
     def test_render_static_xml_with_namespace_3(self):
         expected_result = """
@@ -180,7 +181,7 @@ class TestQWebNS(TransactionCase):
             """ % expected_result
         })
 
-        self.assertEquals(dedent_and_strip(view1.render()), dedent_and_strip(expected_result))
+        self.assertEquals(dedent_and_strip(view1.render()).decode('utf-8'), dedent_and_strip(expected_result))
 
     def test_render_dynamic_xml_with_namespace_t_esc(self):
         """ Test that rendering a template containing a node having both an ns declaration and a t-esc attribute correctly
@@ -198,7 +199,7 @@ class TestQWebNS(TransactionCase):
 
         expected_result = """<Invoice xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">test</Invoice>"""
 
-        self.assertEquals(dedent_and_strip(view1.render()), dedent_and_strip(expected_result))
+        self.assertEquals(dedent_and_strip(view1.render().decode('utf-8')), dedent_and_strip(expected_result))
 
     def test_render_dynamic_xml_with_namespace_t_esc_with_useless_distributed_namespace(self):
         """ Test that rendering a template containing a node having both an ns declaration and a t-esc attribute correctly
@@ -222,7 +223,7 @@ class TestQWebNS(TransactionCase):
             </Invoice>
         """
 
-        self.assertEquals(dedent_and_strip(view1.render()), dedent_and_strip(expected_result))
+        self.assertEquals(dedent_and_strip(view1.render().decode('utf-8')), dedent_and_strip(expected_result))
 
     def test_render_dynamic_xml_with_namespace_t_attf(self):
         """ Test that rendering a template containing a node having both an ns declaration and a t-attf attribute correctly
@@ -262,7 +263,7 @@ class TestQWebNS(TransactionCase):
             </root>
         """
 
-        self.assertEquals(dedent_and_strip(view1.render()), dedent_and_strip(expected_result))
+        self.assertEquals(dedent_and_strip(view1.render().decode('utf-8')), dedent_and_strip(expected_result))
 
     def test_render_dynamic_xml_with_namespace_t_attf_with_useless_distributed_namespace(self):
         """ Test that rendering a template containing a node having both an ns declaration and a t-attf attribute correctly
@@ -304,7 +305,7 @@ class TestQWebNS(TransactionCase):
 
         """
 
-        self.assertEquals(dedent_and_strip(view1.render()), dedent_and_strip(expected_result))
+        self.assertEquals(dedent_and_strip(view1.render().decode('utf-8')), dedent_and_strip(expected_result))
 
     def test_render_dynamic_xml_with_namespace_2(self):
         view1 = self.env['ir.ui.view'].create({
@@ -337,7 +338,7 @@ class TestQWebNS(TransactionCase):
             </Invoice>
         """
 
-        self.assertEquals(dedent_and_strip(view1.render(dict(version_id=1.0))), dedent_and_strip(expected_result))
+        self.assertEquals(dedent_and_strip(view1.render(dict(version_id=1.0)).decode('utf-8')), dedent_and_strip(expected_result))
 
     def test_render_static_xml_with_namespaced_attributes(self):
         view1 = self.env['ir.ui.view'].create({
@@ -352,7 +353,7 @@ class TestQWebNS(TransactionCase):
 
         expected_result = """<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd">abc</cfdi:Comprobante>"""
 
-        self.assertEquals(dedent_and_strip(view1.render()), dedent_and_strip(expected_result))
+        self.assertEquals(dedent_and_strip(view1.render().decode('utf-8')), dedent_and_strip(expected_result))
 
     def test_render_dynamic_xml_with_namespaced_attributes(self):
         view1 = self.env['ir.ui.view'].create({
@@ -367,7 +368,7 @@ class TestQWebNS(TransactionCase):
 
         expected_result = """<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd">abc</cfdi:Comprobante>"""
 
-        self.assertEquals(dedent_and_strip(view1.render()), dedent_and_strip(expected_result))
+        self.assertEquals(dedent_and_strip(view1.render().decode('utf-8')), dedent_and_strip(expected_result))
 
     def test_render_static_xml_with_t_call(self):
         view1 = self.env['ir.ui.view'].create({
@@ -415,10 +416,10 @@ class TestQWebNS(TransactionCase):
         # check that the t-call did its work
         cac_lines = result_etree.findall('.//cac:line', namespaces={'cac': 'urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2'})
         self.assertEquals(len(cac_lines), 2)
-        self.assertEquals(result.count('Appel'), 2)
+        self.assertEquals(result.count(b'Appel'), 2)
 
         # check that the t-call dit not output again the xmlns declaration
-        self.assertEquals(result.count('xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"'), 1)
+        self.assertEquals(result.count(b'xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"'), 1)
 
     def test_render_static_xml_with_extension(self):
         """ Test the extension of a view by an xpath expression on a ns prefixed element.
@@ -464,7 +465,7 @@ class TestQWebNS(TransactionCase):
             </root>
         """
 
-        self.assertEquals(dedent_and_strip(view1.with_context(check_view_ids=[view1.id, view2.id]).render()), dedent_and_strip(expected_result))
+        self.assertEquals(dedent_and_strip(view1.with_context(check_view_ids=[view1.id, view2.id]).render().decode('utf-8')), dedent_and_strip(expected_result))
 
 
 from copy import deepcopy
@@ -485,7 +486,7 @@ class FileSystemLoader(object):
             if node.get('t-name') == name:
                 root = etree.Element('templates')
                 root.append(deepcopy(node))
-                arch = etree.tostring(root, encoding='utf-8')
+                arch = etree.tostring(root, encoding='unicode')
                 return arch
 
 
