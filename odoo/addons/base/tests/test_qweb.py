@@ -11,13 +11,7 @@ from lxml import etree
 from odoo.modules import get_module_resource
 from odoo.tests.common import TransactionCase
 from odoo.addons.base.ir.ir_qweb import QWebException
-from odoo.tools import pycompat, misc, ustr
-
-
-def dedent_and_strip(string):
-    # YOLO
-    return string[0:0].join(line.strip() for line in string.splitlines())
-
+from odoo.tools import pycompat, misc
 
 class TestQWebTField(TransactionCase):
     def setUp(self):
@@ -31,13 +25,13 @@ class TestQWebTField(TransactionCase):
 
         result = self.engine.render(field, {'company': company})
         self.assertEqual(
-            result.decode('utf-8'),
-            '<span data-oe-model="res.company" data-oe-id="%d" '
-                  'data-oe-field="name" data-oe-type="char" '
-                  'data-oe-expression="company.name">%s</span>' % (
+            etree.fromstring(result),
+            etree.fromstring(u'<span data-oe-model="res.company" data-oe-id="%d" '
+                  u'data-oe-field="name" data-oe-type="char" '
+                  u'data-oe-expression="company.name">%s</span>' % (
                 company.id,
-                "My Test Company",
-            ),
+                u"My Test Company",
+            )),
         )
 
     def test_i18n(self):
@@ -47,13 +41,13 @@ class TestQWebTField(TransactionCase):
 
         result = self.engine.render(field, {'company': company})
         self.assertEqual(
-            result.decode('utf-8'),
-            '<span data-oe-model="res.company" data-oe-id="%d" '
-                  'data-oe-field="name" data-oe-type="char" '
-                  'data-oe-expression="company.name">%s</span>' % (
+            etree.fromstring(result),
+            etree.fromstring(u'<span data-oe-model="res.company" data-oe-id="%d" '
+                  u'data-oe-field="name" data-oe-type="char" '
+                  u'data-oe-expression="company.name">%s</span>' % (
                 company.id,
                 misc.html_escape(s),
-            ),
+            )),
         )
 
     def test_reject_crummy_tags(self):
@@ -73,7 +67,7 @@ class TestQWebNS(TransactionCase):
     def test_render_static_xml_with_namespace(self):
         """ Test the rendering on a namespaced view with no static content. The resulting string should be untouched.
         """
-        expected_result = """
+        expected_result = u"""
             <root>
                 <h:table xmlns:h="http://www.example.org/table">
                     <h:tr>
@@ -90,17 +84,17 @@ class TestQWebNS(TransactionCase):
         view1 = self.env['ir.ui.view'].create({
             'name': "dummy",
             'type': 'qweb',
-            'arch': """
+            'arch': u"""
                 <t t-name="base.dummy">%s</t>
             """ % expected_result
         })
 
-        self.assertEquals(dedent_and_strip(view1.render().decode('utf-8')), dedent_and_strip(expected_result))
+        self.assertEqual(etree.fromstring(view1.render()), etree.fromstring(expected_result))
 
     def test_render_static_xml_with_namespace_2(self):
         """ Test the rendering on a namespaced view with no static content. The resulting string should be untouched.
         """
-        expected_result = """
+        expected_result = u"""
             <html xmlns="http://www.w3.org/HTML/1998/html4" xmlns:xdc="http://www.xml.com/books">
                 <head>
                     <title>Book Review</title>
@@ -128,12 +122,12 @@ class TestQWebNS(TransactionCase):
         view1 = self.env['ir.ui.view'].create({
             'name': "dummy",
             'type': 'qweb',
-            'arch': """
+            'arch': u"""
                 <t t-name="base.dummy">%s</t>
             """ % expected_result
         })
 
-        self.assertEquals(dedent_and_strip(view1.render()).decode('utf-8'), dedent_and_strip(expected_result))
+        self.assertEqual(etree.fromstring(view1.render()), etree.fromstring(expected_result))
 
     def test_render_static_xml_with_useless_distributed_namespace(self):
         """ Test that redundant namespaces are stripped upon rendering.
@@ -141,7 +135,7 @@ class TestQWebNS(TransactionCase):
         view1 = self.env['ir.ui.view'].create({
             'name': "dummy",
             'type': 'qweb',
-            'arch': """
+            'arch': u"""
                 <t t-name="base.dummy">
                     <root>
                         <h:table xmlns:h="http://www.example.org/table">
@@ -155,7 +149,7 @@ class TestQWebNS(TransactionCase):
             """
         })
 
-        expected_result = """
+        expected_result = etree.fromstring(u"""
             <root>
                 <h:table xmlns:h="http://www.example.org/table">
                     <h:tr>
@@ -164,24 +158,24 @@ class TestQWebNS(TransactionCase):
                     </h:tr>
                 </h:table>
             </root>
-        """
+        """)
 
-        self.assertEquals(dedent_and_strip(view1.render().decode('utf-8')), dedent_and_strip(expected_result))
+        self.assertEqual(etree.fromstring(view1.render()), expected_result)
 
     def test_render_static_xml_with_namespace_3(self):
-        expected_result = """
+        expected_result = u"""
             <cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd"></cfdi:Comprobante>
         """
 
         view1 = self.env['ir.ui.view'].create({
             'name': "dummy",
             'type': 'qweb',
-            'arch': """
+            'arch': u"""
                 <t t-name="base.dummy">%s</t>
             """ % expected_result
         })
 
-        self.assertEquals(dedent_and_strip(view1.render()).decode('utf-8'), dedent_and_strip(expected_result))
+        self.assertEqual(etree.fromstring(view1.render()), etree.fromstring(expected_result))
 
     def test_render_dynamic_xml_with_namespace_t_esc(self):
         """ Test that rendering a template containing a node having both an ns declaration and a t-esc attribute correctly
@@ -190,16 +184,16 @@ class TestQWebNS(TransactionCase):
         view1 = self.env['ir.ui.view'].create({
             'name': "dummy",
             'type': 'qweb',
-            'arch': """
+            'arch': u"""
                 <t t-name="base.dummy">
                     <Invoice xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" t-esc="'test'"/>
                 </t>
             """
         })
 
-        expected_result = """<Invoice xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">test</Invoice>"""
+        expected_result = etree.fromstring(u"""<Invoice xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">test</Invoice>""")
 
-        self.assertEquals(dedent_and_strip(view1.render().decode('utf-8')), dedent_and_strip(expected_result))
+        self.assertEqual(etree.fromstring(view1.render()), expected_result)
 
     def test_render_dynamic_xml_with_namespace_t_esc_with_useless_distributed_namespace(self):
         """ Test that rendering a template containing a node having both an ns declaration and a t-esc attribute correctly
@@ -208,7 +202,7 @@ class TestQWebNS(TransactionCase):
         view1 = self.env['ir.ui.view'].create({
             'name': "dummy",
             'type': 'qweb',
-            'arch': """
+            'arch': u"""
                 <t t-name="base.dummy">
                     <Invoice xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" t-attf-test="test">
                         <cac:Test xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">blabla</cac:Test>
@@ -217,13 +211,13 @@ class TestQWebNS(TransactionCase):
             """
         })
 
-        expected_result = """
+        expected_result = etree.fromstring(u"""
             <Invoice xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" test="test">
                 <cac:Test>blabla</cac:Test>
             </Invoice>
-        """
+        """)
 
-        self.assertEquals(dedent_and_strip(view1.render().decode('utf-8')), dedent_and_strip(expected_result))
+        self.assertEqual(etree.fromstring(view1.render()), expected_result)
 
     def test_render_dynamic_xml_with_namespace_t_attf(self):
         """ Test that rendering a template containing a node having both an ns declaration and a t-attf attribute correctly
@@ -232,7 +226,7 @@ class TestQWebNS(TransactionCase):
         view1 = self.env['ir.ui.view'].create({
             'name': "dummy",
             'type': 'qweb',
-            'arch': """
+            'arch': u"""
                 <t t-name="base.dummy">
                     <root>
                         <h:table xmlns:h="http://www.example.org/table">
@@ -249,7 +243,7 @@ class TestQWebNS(TransactionCase):
             """
         })
 
-        expected_result = """
+        expected_result = etree.fromstring(u"""
             <root>
                 <h:table xmlns:h="http://www.example.org/table">
                     <h:tr>
@@ -261,9 +255,9 @@ class TestQWebNS(TransactionCase):
                     <f:width test="1">80</f:width>
                 </f:table>
             </root>
-        """
+        """)
 
-        self.assertEquals(dedent_and_strip(view1.render().decode('utf-8')), dedent_and_strip(expected_result))
+        self.assertEqual(etree.fromstring(view1.render()), expected_result)
 
     def test_render_dynamic_xml_with_namespace_t_attf_with_useless_distributed_namespace(self):
         """ Test that rendering a template containing a node having both an ns declaration and a t-attf attribute correctly
@@ -272,7 +266,7 @@ class TestQWebNS(TransactionCase):
         view1 = self.env['ir.ui.view'].create({
             'name': "dummy",
             'type': 'qweb',
-            'arch': """
+            'arch': u"""
                 <t t-name="base.dummy">
                 <root>
                     <h:table xmlns:h="http://www.example.org/table">
@@ -290,7 +284,7 @@ class TestQWebNS(TransactionCase):
             """
         })
 
-        expected_result = """
+        expected_result = etree.fromstring(u"""
                 <root>
                     <h:table xmlns:h="http://www.example.org/table">
                         <h:tr>
@@ -303,15 +297,15 @@ class TestQWebNS(TransactionCase):
                     </f:table>
                 </root>
 
-        """
+        """)
 
-        self.assertEquals(dedent_and_strip(view1.render().decode('utf-8')), dedent_and_strip(expected_result))
+        self.assertEqual(etree.fromstring(view1.render()), expected_result)
 
     def test_render_dynamic_xml_with_namespace_2(self):
         view1 = self.env['ir.ui.view'].create({
             'name': "dummy",
             'type': 'qweb',
-            'arch': """
+            'arch': u"""
                 <t t-name="base.dummy">
                     <Invoice xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2">
                         <cbc:UBLVersionID t-esc="version_id"/>
@@ -323,7 +317,7 @@ class TestQWebNS(TransactionCase):
             """
         })
 
-        expected_result = """
+        expected_result = etree.fromstring(u"""
             <Invoice xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2">
                 <cbc:UBLVersionID>1.0</cbc:UBLVersionID>
 
@@ -336,45 +330,45 @@ class TestQWebNS(TransactionCase):
                     Oasis <cac:Test>4</cac:Test>
 
             </Invoice>
-        """
+        """)
 
-        self.assertEquals(dedent_and_strip(view1.render(dict(version_id=1.0)).decode('utf-8')), dedent_and_strip(expected_result))
+        self.assertEqual(etree.fromstring(view1.render({'version_id': 1.0})), expected_result)
 
     def test_render_static_xml_with_namespaced_attributes(self):
         view1 = self.env['ir.ui.view'].create({
             'name': "dummy",
             'type': 'qweb',
-            'arch': """
+            'arch': u"""
                 <t t-name="base.dummy">
                     <cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd">abc</cfdi:Comprobante>
                 </t>
             """
         })
 
-        expected_result = """<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd">abc</cfdi:Comprobante>"""
+        expected_result = etree.fromstring(u"""<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd">abc</cfdi:Comprobante>""")
 
-        self.assertEquals(dedent_and_strip(view1.render().decode('utf-8')), dedent_and_strip(expected_result))
+        self.assertEqual(etree.fromstring(view1.render()), expected_result)
 
     def test_render_dynamic_xml_with_namespaced_attributes(self):
         view1 = self.env['ir.ui.view'].create({
             'name': "dummy",
             'type': 'qweb',
-            'arch': """
+            'arch': u"""
                 <t t-name="base.dummy">
                     <cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd" t-esc="'abc'"/>
                 </t>
             """
         })
 
-        expected_result = """<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd">abc</cfdi:Comprobante>"""
+        expected_result = etree.fromstring("""<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd">abc</cfdi:Comprobante>""")
 
-        self.assertEquals(dedent_and_strip(view1.render().decode('utf-8')), dedent_and_strip(expected_result))
+        self.assertEqual(etree.fromstring(view1.render()), expected_result)
 
     def test_render_static_xml_with_t_call(self):
         view1 = self.env['ir.ui.view'].create({
             'name': "dummy",
             'type': 'qweb',
-            'arch': """
+            'arch': u"""
                 <t t-name="base.dummy">
                     <cac:fruit xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
                                xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
@@ -387,13 +381,13 @@ class TestQWebNS(TransactionCase):
             """
         })
         self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
-                            "VALUES ('dummy', 'ir.ui.view', %s, 'base')" % view1.id)
+                            "VALUES ('dummy', 'ir.ui.view', %s, 'base')", [view1.id])
 
         # view2 will t-call view1
         view2 = self.env['ir.ui.view'].create({
             'name': "dummy2",
             'type': 'qweb',
-            'arch': """
+            'arch': u"""
                 <t t-name="base.dummy2">
                     <root xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
                         <cac:line t-foreach="[1, 2]" t-as="i" t-call="base.dummy"/>
@@ -407,19 +401,19 @@ class TestQWebNS(TransactionCase):
 
         # check that the root tag has all its xmlns
         expected_ns = {
-            None: 'urn:oasis:names:specification:ubl:schema:xsd:Invoice-2',
-            'cac': 'urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2',
-            'cbc': 'urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2'
+            (None, 'urn:oasis:names:specification:ubl:schema:xsd:Invoice-2'),
+            ('cac', 'urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2'),
+            ('cbc', 'urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2'),
         }
-        self.assertSetEqual(set(pycompat.items(expected_ns)) - set(pycompat.items(result_etree.nsmap)), set())
+        self.assertEqual(set(pycompat.items(result_etree.nsmap)), expected_ns)
 
         # check that the t-call did its work
         cac_lines = result_etree.findall('.//cac:line', namespaces={'cac': 'urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2'})
-        self.assertEquals(len(cac_lines), 2)
-        self.assertEquals(result.count(b'Appel'), 2)
+        self.assertEqual(len(cac_lines), 2)
+        self.assertEqual(result.count(b'Appel'), 2)
 
         # check that the t-call dit not output again the xmlns declaration
-        self.assertEquals(result.count(b'xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"'), 1)
+        self.assertEqual(result.count(b'xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"'), 1)
 
     def test_render_static_xml_with_extension(self):
         """ Test the extension of a view by an xpath expression on a ns prefixed element.
@@ -428,7 +422,7 @@ class TestQWebNS(TransactionCase):
         view1 = self.env['ir.ui.view'].create({
             'name': "dummy",
             'type': 'qweb',
-            'arch': """
+            'arch': u"""
                 <t t-name="base.dummy">
                     <root>
                         <h:table xmlns:h="http://www.example.org/table">
@@ -446,14 +440,14 @@ class TestQWebNS(TransactionCase):
             'name': "dummy_ext",
             'type': 'qweb',
             'inherit_id': view1.id,
-            'arch': """
+            'arch': u"""
                 <xpath expr="//{http://www.example.org/table}table/{http://www.example.org/table}tr">
                         <h:td xmlns:h="http://www.example.org/table">Oranges</h:td>
                 </xpath>
             """
         })
 
-        expected_result = """
+        expected_result = etree.fromstring(u"""
             <root>
                 <h:table xmlns:h="http://www.example.org/table">
                     <h:tr>
@@ -463,9 +457,12 @@ class TestQWebNS(TransactionCase):
                     </h:tr>
                 </h:table>
             </root>
-        """
+        """)
 
-        self.assertEquals(dedent_and_strip(view1.with_context(check_view_ids=[view1.id, view2.id]).render().decode('utf-8')), dedent_and_strip(expected_result))
+        self.assertEqual(
+            etree.fromstring(view1.with_context(check_view_ids=[view1.id, view2.id]).render()),
+            expected_result
+        )
 
 
 from copy import deepcopy
