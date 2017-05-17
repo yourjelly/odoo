@@ -193,7 +193,7 @@ def crop_image(data, type='top', ratio=False, thumbnail_ratio=None, image_format
     # TDE FIXME: should not have a ratio, makes no sense -> should have maximum width (std: 64; 256 px)
     if thumbnail_ratio:
         thumb_image = Image.open(io.BytesIO(output_stream.getvalue()))
-        thumb_image.thumbnail((new_w / thumbnail_ratio, new_h / thumbnail_ratio), Image.ANTIALIAS)
+        thumb_image.thumbnail((new_w // thumbnail_ratio, new_h // thumbnail_ratio), Image.ANTIALIAS)
         thumb_image.save(output_stream, image_format)
     return base64.b64encode(output_stream.getvalue())
 
