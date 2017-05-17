@@ -130,8 +130,7 @@ csv.register_dialect("UNIX", UNIX_LINE_TERMINATOR)
 
 # FIXME: holy shit this whole thing needs to be cleaned up hard it's a mess
 def encode(s):
-    if isinstance(s, unicode):
-        return s.encode('utf8')
+    assert isinstance(s, pycompat.text_type)
     return s
 
 # which elements are translated inline
@@ -180,7 +179,7 @@ def translate_xml_node(node, callback, method, parser=None):
     def translate_content(node):
         """ Return ``node`` with its content translated inline. """
         # serialize the node that contains the stuff to translate
-        text = etree.tostring(node, method=method, encoding='utf8').decode('utf8')
+        text = etree.tostring(node, method=method, encoding='unicode')
         # retrieve the node's content and translate it
         match = node_pattern.match(text)
         trans = translate_text(match.group(1))
@@ -188,7 +187,7 @@ def translate_xml_node(node, callback, method, parser=None):
             # replace the content, and convert it back to an XML node
             text = text[:match.start(1)] + trans + text[match.end(1):]
             try:
-                node = etree.fromstring(encode(text), parser=parser)
+                node = etree.fromstring(text.encode('utf-8'), parser=parser)
             except etree.ParseError:
                 # fallback: escape the translation as text
                 node = etree.Element(node.tag, node.attrib, node.nsmap)
@@ -784,9 +783,9 @@ def trans_generate(lang, modules, cr):
         try:
             # verify the minimal size without eventual xml tags
             # wrap to make sure html content like '<a>b</a><c>d</c>' is accepted by lxml
-            wrapped = "<div>%s</div>" % sanitized_term
+            wrapped = u"<div>%s</div>" % sanitized_term
             node = etree.fromstring(wrapped)
-            sanitized_term = etree.tostring(node, encoding='UTF-8', method='text')
+            sanitized_term = etree.tostring(node, encoding='unicode', method='text')
         except etree.ParseError:
             pass
         # remove non-alphanumeric chars
@@ -821,12 +820,10 @@ def trans_generate(lang, modules, cr):
     cr.execute(query, query_param)
 
     for (xml_name, model, res_id, module) in cr.fetchall():
-        module = encode(module)
-        model = encode(model)
-        xml_name = "%s.%s" % (module, encode(xml_name))
+        xml_name = "%s.%s" % (module, xml_name)
 
         if model not in env:
-            _logger.error("Unable to find object %r", model)
+            _logger.error(u"Unable to find object %r", model)
             continue
 
         record = env[model].browse(res_id)
@@ -835,14 +832,14 @@ def trans_generate(lang, modules, cr):
             continue
 
         if not record.exists():
-            _logger.warning("Unable to find object %r with id %d", model, res_id)
+            _logger.warning(u"Unable to find object %r with id %d", model, res_id)
             continue
 
-        if model=='ir.model.fields':
+        if model==u'ir.model.fields':
             try:
-                field_name = encode(record.name)
+                field_name = record.name
             except AttributeError as exc:
-                _logger.error("name error in %s: %s", xml_name, str(exc))
+                _logger.error(u"name error in %s: %s", xml_name, str(exc))
                 continue
             field_model = env.get(record.model)
             if (field_model is None or not field_model._translate or
@@ -851,9 +848,9 @@ def trans_generate(lang, modules, cr):
             field = field_model._fields[field_name]
 
             if isinstance(getattr(field, 'selection', None), (list, tuple)):
-                name = "%s,%s" % (encode(record.model), field_name)
+                name = "%s,%s" % (record.model, field_name)
                 for dummy, val in field.selection:
-                    push_translation(module, 'selection', name, 0, encode(val))
+                    push_translation(module, 'selection', name, 0, val)
 
         for field_name, field in record._fields.iteritems():
             if field.translate:
@@ -863,13 +860,13 @@ def trans_generate(lang, modules, cr):
                 except Exception:
                     continue
                 for term in set(field.get_trans_terms(value)):
-                    push_translation(module, 'model', name, xml_name, encode(term))
+                    push_translation(module, 'model', name, xml_name, term)
 
         # End of data for ir.model.data query results
 
     def push_constraint_msg(module, term_type, model, msg):
         if not callable(msg):
-            push_translation(encode(module), term_type, encode(model), 0, encode(msg))
+            push_translation(encode(module), term_type, encode(model), 0, msg)
 
     def push_local_constraints(module, model, cons_type='sql_constraints'):
         """ Climb up the class hierarchy and ignore inherited constraints from other modules. """
