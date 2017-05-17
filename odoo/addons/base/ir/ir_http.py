@@ -297,7 +297,7 @@ class IrHttp(models.AbstractModel):
                 status = 301
                 content = module_resource_path
         else:
-            content = obj[field] or ''
+            content = obj[field] or b''
 
         # filename
         if not filename:
