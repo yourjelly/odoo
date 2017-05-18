@@ -90,8 +90,8 @@ class TestMessagePost(TestMail):
         _body, _body_alt = '<p>Test Body</p>', 'Test Body'
         _subject = 'Test Subject'
         _attachments = [
-            ('List1', 'My first attachment'),
-            ('List2', 'My second attachment')
+            ('List1', b'My first attachment'),
+            ('List2', b'My second attachment')
         ]
         _attach_1 = self.env['ir.attachment'].sudo(self.user_employee).create({
             'name': 'Attach1', 'datas_fname': 'Attach1',
