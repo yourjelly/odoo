@@ -18,7 +18,7 @@ class EventStand(http.Controller):
     @http.route(['''/event/<model("event.event", "[('website_exhibitors','=',1)]"):event>/exhibitors/register'''], type='http', auth="public", website=True)
     def exhibitor_form(self, event, conflict=0, **post):
         types = request.env['event_stand.stand.type'].sudo().search([('event_id','=',event.id)])
-        stands = request.env['event_stand.stand'].sudo().search([('event_id','=',event.id)])
+        stands = request.env['event_stand.stand'].sudo().search([('event_id','=',event.id), ('state','=','available')])
         return request.render("event_stand.exhibitor-buy", {
             'event': event,
             'types': types,
@@ -38,11 +38,11 @@ class EventStand(http.Controller):
         if stand.type_id.slot_all:
             slots = stand.slot_ids
         else:
-            slots = []
+            # TODO: change by selected slots
+            slots = stand.slot_ids
 
-        for slot in slots:
-            if slot.state <> 'available':
-                result = request.redirect("/event/"+str(event.id)+"/register?conflict=1")
+        if (stand.state <> 'available') or slots.filtered(lambda x: x.state<>'available'):
+            return request.redirect("/event/"+str(event.id)+"/exhibitors/register?conflict=1")
 
         if cart_values.get('line_id'):
             line = request.env['sale.order.line'].sudo().browse(cart_values.get('line_id'))
