@@ -1,0 +1,112 @@
+<odoo>
+    <data>
+
+        <!-- Stand Type -->
+
+        <record id="type_basic" model="event_stand.stand.type">
+            <field name="name">4 Hours Stand</field>
+            <field name="price">490</field>
+            <field name="price_upsell">390</field>
+            <field name="sequence">1</field>
+            <field name="slot_all" eval="False"/>
+            <field name="event_id" ref="event.event_0"/>
+        </record>
+        <record id="type_brand" model="event_stand.stand.type">
+            <field name="name">3 Days Stand</field>
+            <field name="event_id" ref="event.event_0"/>
+            <field name="price">2000</field>
+            <field name="sequence">2</field>
+            <field name="slot_all" eval="1"/>
+            <field name="main" eval="1"/>
+        </record>
+        <record id="type_vip" model="event_stand.stand.type">
+            <field name="name">VIP</field>
+            <field name="event_id" ref="event.event_0"/>
+            <field name="slot_all" eval="1"/>
+            <field name="sequence">3</field>
+            <field name="price">6000</field>
+        </record>
+
+        <!-- Stands -->
+
+        <record id="stand_basic1" model="event_stand.stand">
+            <field name="name">B1</field>
+            <field name="type_id" ref="type_basic"/>
+        </record>
+
+        <record id="stand_a1" model="event_stand.stand">
+            <field name="name">A1</field>
+            <field name="type_id" ref="type_brand"/>
+        </record>
+        <record id="stand_a2" model="event_stand.stand">
+            <field name="name">A2</field>
+            <field name="type_id" ref="type_brand"/>
+        </record>
+        <record id="stand_a3" model="event_stand.stand">
+            <field name="name">A3</field>
+            <field name="type_id" ref="type_brand"/>
+        </record>
+
+        <record id="stand_vip1" model="event_stand.stand">
+            <field name="name">VIP 1</field>
+            <field name="type_id" ref="type_vip"/>
+        </record>
+
+        <!-- Slots -->
+
+        <record id="stand_slot1" model="event_stand.stand.slot">
+            <field name="name">Web 10am-2pm</field>
+            <field name="stand_id" ref="stand_basic1"/>
+        </record>
+        <record id="stand_slot2" model="event_stand.stand.slot">
+            <field name="name">Web 2pm-6pm</field>
+            <field name="stand_id" ref="stand_basic1"/>
+        </record>
+        <record id="stand_slot3" model="event_stand.stand.slot">
+            <field name="name">Thu 9am-2pm</field>
+            <field name="stand_id" ref="stand_basic1"/>
+            <field name="subject">Odoo-Magento Connector</field>
+            <field name="partner_name">Camptocamp</field>
+            <field name="state">sold</field>
+        </record>
+        <record id="stand_slot4" model="event_stand.stand.slot">
+            <field name="name">Thu 9am-2pm</field>
+            <field name="stand_id" ref="stand_basic1"/>
+            <field name="subject">Microsoft 365 Integration</field>
+            <field name="partner_name">Vauxoo</field>
+            <field name="state">sold</field>
+        </record>
+        <record id="stand_slot5" model="event_stand.stand.slot">
+            <field name="name">Fri 9am-2pm</field>
+            <field name="stand_id" ref="stand_basic1"/>
+            <field name="subject">Mass Mailing Themes</field>
+            <field name="partner_name">Bista</field>
+            <field name="state">sold</field>
+        </record>
+
+        <record id="stand_slot6" model="event_stand.stand.slot">
+            <field name="name">Web 10am-2pm</field>
+            <field name="stand_id" ref="stand_a1"/>
+            <field name="subject">Odoo-Magento Connector</field>
+            <field name="partner_name">Bista</field>
+            <field name="state">sold</field>
+        </record>
+        <record id="stand_slot7" model="event_stand.stand.slot">
+            <field name="name">Web 2pm-6pm</field>
+            <field name="stand_id" ref="stand_a1"/>
+        </record>
+        <record id="stand_slot8" model="event_stand.stand.slot">
+            <field name="name">Thu 9am-2pm</field>
+            <field name="stand_id" ref="stand_a1"/>
+        </record>
+        <record id="stand_slot9" model="event_stand.stand.slot">
+            <field name="name">Thu 9am-2pm</field>
+            <field name="stand_id" ref="stand_a1"/>
+        </record>
+        <record id="stand_slot10" model="event_stand.stand.slot">
+            <field name="name">Fri 9am-2pm</field>
+            <field name="stand_id" ref="stand_a1"/>
+        </record>
+
+    </data>
+</odoo>

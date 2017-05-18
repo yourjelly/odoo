@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_event_stand.stand_type,event_stand.stand.type manager,model_event_stand_stand_type,event.group_event_manager,1,1,1,1
+access_event_stand.stand,event_stand.stand manager,model_event_stand_stand,event.group_event_manager,1,1,1,1
+access_event_stand.stand_slot,event_stand.stand.slot manager,model_event_stand_stand_slot,event.group_event_manager,1,1,1,1
