@@ -70,6 +70,8 @@ _SAFE_OPCODES = _EXPR_OPCODES.union(set(opmap[x] for x in [
     'POP_JUMP_IF_TRUE', 'SETUP_EXCEPT', 'END_FINALLY',
     'LOAD_FAST', 'STORE_FAST', 'DELETE_FAST', 'UNPACK_SEQUENCE',
     'LOAD_GLOBAL', # Only allows access to restricted globals
+    # Python 3 bytecodes?
+    'POP_EXCEPT', # TDOO: maybe should be const? Seems to be a special-case of POP_BLOCK
 ] if x in opmap))
 
 _logger = logging.getLogger(__name__)
