@@ -108,6 +108,7 @@ class SaleOrder(models.Model):
         if self.state != 'draft':
             request.session['sale_order_id'] = None
             raise UserError(_('It is forbidden to modify a sales order which is not in draft status'))
+        print '1'
         if line_id is not False:
             order_lines = self._cart_find_product_line(product_id, line_id, **kwargs)
             order_line = order_lines and order_lines[0]
@@ -117,7 +118,6 @@ class SaleOrder(models.Model):
             values = self._website_product_id_change(self.id, product_id, qty=1)
             values['name'] = self._get_line_description(self.id, product_id, attributes=attributes)
             order_line = SaleOrderLineSudo.create(values)
-
             try:
                 order_line._compute_tax_id()
             except ValidationError as e:

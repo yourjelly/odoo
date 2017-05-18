@@ -30,23 +30,6 @@ class event_event(models.Model):
     def _slot_count(self):
         return self._stand_count(key='slot')
 
-class sale_order_line(models.Model):
-    _inherit = "sale.order.line"
-    # If these fields are set, it's a sale.order related to an exhibitor event
-    stand_id = fields.Many2one('event_stand.stand', string='Stand')
-    slot_id  = fields.Many2one('event_stand.stand.slot', string="Slot")
-
-class sale_order(models.Model):
-    _inherit = "sale.order"
-
-    # todo: if stand_id is set on a sale orde line:
-    #    - Set stand and Slot_id to "Sold" state
-    #
-    @api.multi
-    def action_confirm(self):
-        return super(sale_order, self).action_confirm()
-
-
 class event_stand_type(models.Model):
     _name = 'event_stand.stand.type'
     _order = "sequence"
@@ -78,7 +61,6 @@ class event_stand(models.Model):
     event_id   = fields.Many2one(string='Event', related='type_id.event_id', readonly=True, relation="event.event", store=True)
 
     # Fields to fill only when the Stand is sold
-    sale_id    = fields.Many2one('sale.order', "Sale Order")
     partner_id = fields.Many2one('res.partner', "Exhibitor")
 
 
@@ -92,7 +74,43 @@ class event_stand_slot(models.Model):
 
     subject      = fields.Char('Topic')
     partner_name = fields.Char('Topic')
-    so_line_id = fields.Many2one('sale.order', 'Sale Order Line')
+    so_line_id = fields.Many2one('sale.order.line', 'Sale Order Line')
     state      = fields.Selection([('available','Available'),('sold','Sold'),('unavailable','Unavailable')],
         string='State', required=True, default='available')
+
+class sale_order_line(models.Model):
+    _inherit = "sale.order.line"
+    # If these fields are set, it's a sale.order related to an exhibitor event
+    stand_id = fields.Many2one('event_stand.stand', string='Stand')
+    slot_ids  = fields.Many2many('event_stand.stand.slot', 'sale_line_id', 'slot_id', string="Slot")
+
+class sale_order(models.Model):
+    _inherit = "sale.order"
+
+    # todo: if stand_id is set on a sale orde line:
+    #    - Set stand and Slot_id to "Sold" state
+    #
+    def action_confirm(self):
+        result = super(sale_order, self).action_confirm()
+        for line in self.order_line:
+            if line.stand_id and line.slot_ids:
+                for slot in line.slot_ids:
+                    slot.state = 'sold'
+                    slot.partner_name = self.partner_id.name
+                    slot.so_line_id = line.id
+
+                # if all slots are sold or unavailable (and min 1 sold), stand is sold
+                sold = None
+                for slot in line.stand_id.slot_ids:
+                    if slot.state == 'available':
+                        line.stand_id.state = 'available'
+                        sold = False
+                        break
+                    if (slot is None) and slot.state=='sold':
+                        sold = True
+                if sold is True:
+                    line.stand_id.state = 'sold'
+        return result
+
+
 

@@ -3,11 +3,14 @@
   <template id="exhibitor-list">
     <t t-call="website_event.layout">
       <section class="container">
-          <h1 class="text-center" t-field="event.name"/>
-          <h2 class="text-center">Exhibitors Tracks</h2>
+          <div class="pull-right mt16" t-if="event.state == 'confirm'">
+            <a t-attf-href="/event/#{slug(event)}/exhibitors/register" class="btn btn-primary btn-lg">Become an Exhibitor</a>
+          </div>
+          <h1 t-field="event.name"/>
+          <h2 class="mb48">Exhibitors Tracks</h2>
 
           <t t-foreach="slots.items()" t-as="slot">
-              <h3 class="page-header" t-esc="slot[0]"/>
+              <h3 t-esc="slot[0]"/>
               <table class="table table-striped table-hover">
               <tr>
                   <th>Topic</th>
@@ -15,9 +18,9 @@
                   <th>Stand</th>
               </tr>
               <tr t-foreach="slot[1]" t-as="track">
-                  <th t-esc="track.subject"/>
-                  <th t-esc="track.partner_name"/>
-                  <th t-esc="track.stand_id.name"/>
+                  <td t-esc="track.subject"/>
+                  <td t-esc="track.partner_name"/>
+                  <td t-esc="track.stand_id.name"/>
               </tr>
               </table>
           </t>
@@ -28,9 +31,16 @@
   <template id="exhibitor-buy">
     <t t-call="website_event.layout">
       <section class="container">
-          <h1 class="text-center" t-field="event.name"/>
-          <h2 class="text-center">Become an Exhibitor</h2>
-          <form class="form-horizontal mt64" id="exhibitor-registration" t-attf-action="/event/#{slug(event)}/exhibitors/confirm" method="post">
+          <h1 t-field="event.name"/>
+          <h2>Become an Exhibitor</h2>
+          <p t-if="event.state &lt;&gt; 'confirm'">
+            This event is done, check our <a href="/event">list of future events</a>.
+          </p>
+          <div class="alert alert-danger" role="alert" t-if="conflict">
+              <strong>Oh snap!</strong> Someone just purchased your stand/slot.
+              Please choose another one.
+          </div>
+          <form class="form-horizontal mt64" id="exhibitor-registration" t-attf-action="/event/#{slug(event)}/exhibitors/confirm" method="post" t-if="event.state == 'confirm'">
               <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
               <div class="form-group">
                 <label for="type_id" class="col-sm-2 control-label">Your Stand</label>

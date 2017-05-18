@@ -1,10 +1,26 @@
 <odoo>
     <data>
+        <record id="service_exhibitor" model="product.product">
+            <field name="name">Exhibitor Stand</field>
+            <field name="categ_id" ref="product.product_category_5"/>
+            <field name="standard_price">150.0</field>
+            <field name="list_price">150.0</field>
+            <field name="type">service</field>
+            <field name="uom_id" ref="product.product_uom_unit"/>
+            <field name="uom_po_id" ref="product.product_uom_unit"/>
+            <field name="default_code">EXHIB</field>
+        </record>
+
+        <record id="event.event_0" model="event.event">
+            <field name="website_exhibitors" eval="True"/>
+        </record>
 
         <!-- Stand Type -->
 
+
         <record id="type_basic" model="event_stand.stand.type">
             <field name="name">4 Hours Stand</field>
+            <field name="product_id" ref="service_exhibitor"/>
             <field name="price">490</field>
             <field name="price_upsell">390</field>
             <field name="sequence">1</field>
@@ -14,6 +30,7 @@
         <record id="type_brand" model="event_stand.stand.type">
             <field name="name">3 Days Stand</field>
             <field name="event_id" ref="event.event_0"/>
+            <field name="product_id" ref="service_exhibitor"/>
             <field name="price">2000</field>
             <field name="sequence">2</field>
             <field name="slot_all" eval="1"/>
@@ -22,6 +39,7 @@
         <record id="type_vip" model="event_stand.stand.type">
             <field name="name">VIP</field>
             <field name="event_id" ref="event.event_0"/>
+            <field name="product_id" ref="service_exhibitor"/>
             <field name="slot_all" eval="1"/>
             <field name="sequence">3</field>
             <field name="price">6000</field>
