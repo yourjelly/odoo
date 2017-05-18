@@ -173,11 +173,11 @@ def crop_image(data, type='top', ratio=False, thumbnail_ratio=None, image_format
 
     if ratio:
         w_ratio, h_ratio = ratio
-        new_h = (w * h_ratio) / w_ratio
+        new_h = (w * h_ratio) // w_ratio
         new_w = w
         if new_h > h:
             new_h = h
-            new_w = (h * w_ratio) / h_ratio
+            new_w = (h * w_ratio) // h_ratio
 
     if type == "top":
         cropped_image = image_stream.crop((0, 0, new_w, new_h))
