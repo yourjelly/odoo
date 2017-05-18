@@ -124,11 +124,20 @@ def encode_rfc2822_address_header(header_text):
     """
     def encode_addr(addr):
         name, email = addr
-        if not try_coerce_ascii(name):
-            name = str(Header(name, 'utf-8'))
+        # If s is a <text string>, then charset is a hint specifying the
+        # character set of the characters in the string. The Unicode string
+        # will be encoded using the following charsets in order: us-ascii,
+        # the charset hint, utf-8. The first character set to not provoke a
+        # UnicodeError is used.
+        # -> always pass a text string to Header
+
+        # also Header.__str__ in Python 3 "Returns an approximation of the
+        # Header as a string, using an unlimited line length.", the old one
+        # was "A synonym for Header.encode()." so call encode() directly?
+        name = Header(pycompat.to_text(name), charset='utf-8').encode()
         return formataddr((name, email))
 
-    addresses = getaddresses([ustr(header_text).encode('utf-8')])
+    addresses = getaddresses([pycompat.to_native(ustr(header_text))])
     return COMMASPACE.join(encode_addr(a) for a in addresses)
 
 
