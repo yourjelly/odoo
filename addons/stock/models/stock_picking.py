@@ -465,6 +465,8 @@ class Picking(models.Model):
         if not moves:
             raise UserError(_('Nothing to check the availability for.'))
         moves.action_assign()
+        for pick in self:
+            pick._set_top_level_packages()
         return True
 
     @api.multi
@@ -536,36 +538,33 @@ class Picking(models.Model):
     do_transfer = action_done #TODO:replace later
 
     def _set_top_level_packages(self):
-        """ This method searches for as much possible higher level packages that
-        can be moved as a single operation and will tag the operations concerned in 
-        order to be able to . """
+        """ This method searches for as much as possible higher level packages that
+        can be moved as a single operation and will tag the operations concerned"""
         # TODO: replace quants_to_check by pack operations
-        self.ensure_one()
-        top_lvl_packages = self.env['stock.quant.package']
+        top_lvl_packages = self.env['stock.quant.package'] #TODO: Pack in pack
         for package in self.pack_operation_ids.mapped('package_id'):
             all_in = True
             top_package = self.env['stock.quant.package']
-            while package:
-                quants_package = [quant.id for quant in package.get_content()]
-                if any(quant not in quants_to_check.keys() for quant in quants_package):
-                    all_in = False
-                if all_in:
-                    destinations = set([quants_to_check[x].location_id for x in quants_package])
-                    if len(destinations) > 1:
-                        all_in = False
-                if all_in:
-                    top_package = package
-                    package = package.parent_id
+            quant_dict = {}
+    
+            packops = self.pack_operation_ids.filtered(lambda x: x.package_id == package)
+            for q in package.quant_ids:
+                key = (q.product_id, q.lot_id, q.package_id, q.location_id)
+                if not quant_dict.get(q):
+                    quant_dict[q] = q.quantity
                 else:
-                    package = False
-            top_lvl_packages |= top_package
-            total_ops = self.env['stock.pack.operation']
-            if top_package:
-                for quant in top_package.get_content():
-                    total_ops |= quants_to_check[quant.id]
-                total_ops[0].first_pack = True
-                total_ops.write({'part_of_pack': True})
-        return top_lvl_packages
+                    quant_dict[q] += q.quantity
+            for ops in packops:
+                key = (ops.product_id, ops.lot_id, ops.package_id, ops.location_id)
+                if not quant_dict.get(key):
+                    all_in = False
+                    continue
+                quant_dict[key] -= ops.product_qty
+            if any(quant_dict[x] != 0.0 for x in quant_dict):
+                all_in = False
+            if all_in and packops:
+                packops[0].first_pack=True
+                packops.write({'part_of_pack': True})
 
     def _prepare_pack_ops(self, quants, forced_qties):
         """ Prepare pack_operations, returns a list of dict to give at create """
@@ -891,7 +890,7 @@ class Picking(models.Model):
 
     @api.multi
     def _put_in_pack(self):
-        # TDE FIXME: reclean me
+        # TODO: should 
         QuantPackage = self.env["stock.quant.package"]
         package = False
         for pick in self:
@@ -908,7 +907,7 @@ class Picking(models.Model):
                     op = new_operation
                 pack_operation_ids |= op
             if operations:
-                pack_operation_ids.check_tracking()
+                #pack_operation_ids.check_tracking()
                 package = QuantPackage.create({})
                 pack_operation_ids.write({'result_package_id': package.id})
             else:
