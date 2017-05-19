@@ -58,7 +58,7 @@ class event_stand(models.Model):
     state = fields.Selection([('available','Available'),('sold','Sold'),('unavailable','Unavailable')],
         string='State', required=True, default='available')
     slot_ids = fields.One2many('event_stand.stand.slot', 'stand_id', string="Slots")
-    event_id   = fields.Many2one(string='Event', related='type_id.event_id', readonly=True, relation="event.event", store=True)
+    event_id   = fields.Many2one(string='Event', related='type_id.event_id', relation="event.event", store=True)
 
     # Fields to fill only when the Stand is sold
     partner_id = fields.Many2one('res.partner', "Exhibitor")

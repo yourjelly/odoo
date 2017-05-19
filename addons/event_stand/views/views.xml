@@ -144,7 +144,7 @@
                         <group>
                             <field name="main"/>
                             <field name="slot_all"/>
-                            <field name="photo"/>
+                            <field name="photo" widget="image"/>
                         </group>
                     </group>
                     <separator string="Public Description"/>

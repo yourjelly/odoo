@@ -49,27 +49,26 @@
           </div>
           <form class="form-horizontal mt64" id="exhibitor-registration" t-attf-action="/event/#{slug(event)}/exhibitors/confirm" method="post" t-if="event.state == 'confirm'">
               <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+              <input type="hidden" name="slot_number" id="slot_number" value="1"/>
               <div class="form-group">
                 <label for="type_id" class="col-sm-2 control-label">Your Stand</label>
 
                 <div class="col-sm-10">
                     <div class="pull-left text-center" t-foreach="types" t-as="type_id" style="border: 1px solid #ccc; padding-right: 10px; width: 150px;">
                         <div t-esc="type_id.name"/>
-                        <div t-if="type_id.photo" t-field="type_id.photo" class="img img-responsive"/>
+                        <div t-if="type_id.photo" t-field="type_id.photo" class="img img-responsive"  t-options="{'widget': 'image'}"/>
                         <div t-field="type_id.price" t-options="{'widget': 'monetary', 'display_currency': type_id.currency_id}"/>
                         <input type="radio" name="type_id" t-attf-id="type_id_#{type_id.id}" t-att-value="type_id.id" t-att-checked="type_id.main or None" class="o_type_id"/>
                     </div>
                     <div class="pull-left" style="border-left: 1px solid #ddd; margin-left: 20px; padding-left: 10px;">
-                        <t t-foreach="types" t-as="type_id">
-                            <div id="stand-description" t-raw="type_id.description" t-if="type_id.main"/>
-                        </t>
+                        <div id="stand-description"/>
                     </div>
                 </div>
 
               </div>
-              <div class="form-group">
+              <div class="form-group o_slot">
                 <label for="stand_id" class="col-sm-2 control-label">Your Booth</label>
-                <div class="col-sm-5">
+                <div class="col-sm-3">
                     <select class="form-control" id="stand_id" name="stand_id">
                         <t t-foreach="stands" t-as="stand">
                             <option t-att-value="stand.id" t-esc="stand.name"
@@ -97,39 +96,36 @@
                     </div>
                 </div>
               </div>
-              <div class="form-group" id="slots">
-                <label for="slot_id" class="col-sm-2 control-label">Slots</label>
-                <div class="col-sm-3">
-                    <select class="form-control" id="track_id">
-                        <option>Web 9am-2pm</option>
-                        <option>Web 2am-6pm</option>
-                        <option>Thu 9am-2pm</option>
-                        <option>Thu 2pm-6pm</option>
-                        <option>Fri 9am-2pm</option>
-                        <option>Fri 2pm-6pm</option>
-                    </select>
-                </div>
-                <label for="partner_name" class="col-sm-2 control-label">Topic in Agenda:</label>
-                <div class="col-sm-5">
-                  <input type="text" class="form-control" name="track1_title" placeholder="e.g. Odoo-Magento Connector"/>
-                  <span class="text-muted">You will be able to set or update it later</span>
-                </div>
-                <div class="col-sm-3 col-sm-offset-2 mt8">
-                    <a href="/">Add a track</a> &amp;nbsp; &amp;nbsp; (<span style="text-decoration: line-through; color:red;">390€</span> <b>250€</b>, 30% discount)
+              <div id="main_slot">
+                  <div class="form-group slots">
+                    <label for="slot_id_0" class="col-sm-2 control-label">Choose a Slot</label>
+                    <div class="col-sm-3">
+                        <select class="form-control slot_id" name="slot_id_0">
+                        </select>
+                    </div>
+                    <div class="col-sm-4">
+                      <input type="text" class="form-control track_title" name="track_title_0" placeholder="Topic in Agenda (e.g. Odoo-Magento Connector)" maxlength="50"/>
+                    </div>
+                  </div>
+              </div>
+              <div class="row o_add">
+                <div class="col-sm-3 col-sm-offset-2 mb8">
+                    <a href="#" id="o_add_track">Add a slot</a> &amp;nbsp; &amp;nbsp;
+                    (<span style="text-decoration: line-through; color:red;"><span class="o_total_one">390</span>€</span> <b>+<span class="o_total_upsell">250</span>€</b>)
                 </div>
               </div>
 
               <div class="form-group">
                 <label class="col-sm-2 control-label">Total</label>
                 <div class="col-sm-10 mt8">
-                    <b>390€</b> <br/>
-                    <span class="text-muted">(150€ down payment, 240€ before Sep 1)</span>
+                    <b class="o_total">390</b>€ <br/>
+                    <span class="text-muted">(<span class="o_product_price">150</span>€ down payment, <span class="o_total_balance">240</span>€, before Sep 1)</span>
                 </div>
               </div>
 
               <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
-                  <button type="submit" class="btn btn-primary btn-lg">Book My Stand <span style="color: #eee">(150€)</span></button>
+                  <button type="submit" class="btn btn-primary btn-lg">Book My Stand <span style="color: #eee">(<span class="o_product_price">150</span>€)</span></button>
                 </div>
               </div>
           </form>
