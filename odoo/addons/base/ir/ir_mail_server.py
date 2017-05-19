@@ -111,7 +111,7 @@ def extract_rfc2822_addresses(text):
     """
     if not text:
         return []
-    candidates = address_pattern.findall(ustr(text).encode('utf-8'))
+    candidates = address_pattern.findall(pycompat.to_native(ustr(text)))
     return [c for c in candidates if try_coerce_ascii(c)]
 
 
