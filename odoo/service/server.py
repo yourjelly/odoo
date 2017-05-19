@@ -402,6 +402,9 @@ class PreforkServer(CommonServer):
         self.address = config['xmlrpc'] and \
             (config['xmlrpc_interface'] or '0.0.0.0', config['xmlrpc_port'])
         self.population = config['workers']
+        self.burst_population = 0
+        self.burst = config['workers']
+        self.soft_timeout = 15
         self.timeout = config['limit_time_real']
         self.limit_request = config['limit_request']
         self.cron_timeout = config['limit_time_real_cron'] or None
@@ -413,6 +416,7 @@ class PreforkServer(CommonServer):
         self.pid = os.getpid()
         self.socket = None
         self.workers_http = {}
+        self.workers_http_long = {}
         self.workers_cron = {}
         self.workers = {}
         self.generation = 0
@@ -469,6 +473,11 @@ class PreforkServer(CommonServer):
         if pid in self.workers:
             _logger.debug("Worker (%s) unregistered", pid)
             try:
+                if pid in self.workers_http_long:
+                    # long running worker dies
+                    # previously spawned burst worker is now considered normal
+                    self.burst_population -= 1
+                    self.workers_http_long.pop(pid, None)
                 self.workers_http.pop(pid, None)
                 self.workers_cron.pop(pid, None)
                 u = self.workers.pop(pid)
@@ -526,6 +535,18 @@ class PreforkServer(CommonServer):
         now = time.time()
         for (pid, worker) in self.workers.items():
             if worker.watchdog_timeout is not None and \
+                    self.burst_population < self.burst and \
+                    pid not in self.workers_http_long and \
+                    (now - worker.watchdog_time) >= worker.watchdog_soft_timeout and \
+                    (now - worker.watchdog_time) < worker.watchdog_timeout:
+                _logger.warning("%s (%s) soft timeout after %ss",
+                                worker.__class__.__name__,
+                                pid,
+                                worker.watchdog_soft_timeout)
+                self.worker_kill(pid, signal.SIGINT)
+                self.workers_http_long[pid] = worker
+                self.burst_population += 1
+            elif worker.watchdog_timeout is not None and \
                     (now - worker.watchdog_time) >= worker.watchdog_timeout:
                 _logger.error("%s (%s) timeout after %ss",
                               worker.__class__.__name__,
@@ -535,7 +556,7 @@ class PreforkServer(CommonServer):
 
     def process_spawn(self):
         if config['xmlrpc']:
-            while len(self.workers_http) < self.population:
+            while len(self.workers_http) < self.population + self.burst_population:
                 self.worker_spawn(WorkerHTTP, self.workers_http)
             if not self.long_polling_pid:
                 self.long_polling_spawn()
@@ -650,6 +671,7 @@ class Worker(object):
         self.watchdog_pipe = multi.pipe_new()
         # Can be set to None if no watchdog is desired.
         self.watchdog_timeout = multi.timeout
+        self.watchdog_soft_timeout = multi.soft_timeout
         self.ppid = os.getpid()
         self.pid = None
         self.alive = True
