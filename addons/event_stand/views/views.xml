@@ -143,6 +143,7 @@
                         </group>
                         <group>
                             <field name="main"/>
+                            <field name="slot_all"/>
                             <field name="photo"/>
                         </group>
                     </group>

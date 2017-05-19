@@ -1,5 +1,12 @@
 <odoo>
 <data>
+
+  <template id="event_stand_script" inherit_id="website.assets_frontend" name="Event Stand Registration">
+      <xpath expr="/t" position="inside">
+          <script type="text/javascript" src="/event_stand/static/src/js/event_stand.js"></script>
+      </xpath>
+  </template>
+
   <template id="exhibitor-list">
     <t t-call="website_event.layout">
       <section class="container">
@@ -50,11 +57,11 @@
                         <div t-esc="type_id.name"/>
                         <div t-if="type_id.photo" t-field="type_id.photo" class="img img-responsive"/>
                         <div t-field="type_id.price" t-options="{'widget': 'monetary', 'display_currency': type_id.currency_id}"/>
-                        <input type="radio" name="type_id" t-attf-id="type_id_#{type_id.id}" t-att-value="type_id.id" t-att-checked="type_id.main or None"/>
+                        <input type="radio" name="type_id" t-attf-id="type_id_#{type_id.id}" t-att-value="type_id.id" t-att-checked="type_id.main or None" class="o_type_id"/>
                     </div>
                     <div class="pull-left" style="border-left: 1px solid #ddd; margin-left: 20px; padding-left: 10px;">
                         <t t-foreach="types" t-as="type_id">
-                            <div t-attf-id="stand-#{type_id.id}" t-raw="type_id.description" t-att-class="not type_id.main and 'hide' or 'show'" t-att-data-type-id="type_id.id"/>
+                            <div id="stand-description" t-raw="type_id.description" t-if="type_id.main"/>
                         </t>
                     </div>
                 </div>
@@ -90,7 +97,7 @@
                     </div>
                 </div>
               </div>
-              <div class="form-group">
+              <div class="form-group" id="slots">
                 <label for="slot_id" class="col-sm-2 control-label">Slots</label>
                 <div class="col-sm-3">
                     <select class="form-control" id="track_id">
