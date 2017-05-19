@@ -93,7 +93,7 @@ class sale_order(models.Model):
     def action_confirm(self):
         result = super(sale_order, self).action_confirm()
         for line in self.order_line:
-            if line.stand_id and line.slot_ids:
+            if line.stand_id:
                 for slot in line.slot_ids:
                     slot.state = 'sold'
                     slot.partner_name = self.partner_id.name
@@ -108,7 +108,7 @@ class sale_order(models.Model):
                         break
                     if (slot is None) and slot.state=='sold':
                         sold = True
-                if sold is True:
+                if (sold is True) or not line.stand_id.slot_ids:
                     line.stand_id.state = 'sold'
         return result
 

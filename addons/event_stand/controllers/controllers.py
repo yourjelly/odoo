@@ -28,7 +28,10 @@ class EventStand(http.Controller):
 
     @http.route(['''/event/<model("event.event", "[('website_exhibitors','=',1)]"):event>/exhibitors/confirm'''], type='http', auth="public", website=True)
     def exhibitor_confirm(self, event, **post):
-        stand = request.env['event_stand.stand'].sudo().browse(int(post['stand_id']))
+        stand_id = int(post.get('stand_id', 0))
+        if not stand_id:
+            return request.redirect("/event/"+str(event.id)+"/exhibitors/register?conflict=1")
+        stand = request.env['event_stand.stand'].sudo().browse(stand_id)
         slot_obj = request.env['event_stand.stand.slot'].sudo()
         order = request.website.sale_get_order(force_create=1)
         cart_values = order.with_context(fixed_price=True)._cart_update(
@@ -60,8 +63,9 @@ class EventStand(http.Controller):
         result = request.redirect("/shop/checkout")
         return result
 
-    @http.route(['''/event/exhibitors/onchange'''], type='json', auth="public", website=True)
+    @http.route(['''/event/exhibitors/onchange'''], type='json', auth="public")
     def exhibitor_onchange(self, type_id, stand_id=False, **kwargs):
+        if not type_id: return {}
         sobj = request.env['event_stand.stand'].sudo()
         type_id = request.env['event_stand.stand.type'].sudo().browse(int(type_id))
         event = type_id.event_id

@@ -16,9 +16,11 @@ odoo.define('website_event_track.website_event_track', function (require) {
     }
     function update_total() {
         var type_id = $("input[type=radio][name=type_id]:checked");
-        ajax.jsonRpc("/event/exhibitors/onchange", 'call', {
-            'type_id': parseInt(type_id.val()), 'stand_id': false
-        }).then(update_total_data);
+        if (type_id) {
+            ajax.jsonRpc("/event/exhibitors/onchange", 'call', {
+                'type_id': parseInt(type_id.val()), 'stand_id': false
+            }).then(update_total_data);
+        }
     }
 
     function update_data(event){
@@ -29,6 +31,8 @@ odoo.define('website_event_track.website_event_track', function (require) {
         } else {
             stand_id = parseInt($("select#stand_id").val());
         }
+        if (! parseInt(type_id.val()))
+            return false;
         ajax.jsonRpc("/event/exhibitors/onchange", 'call', {'type_id': parseInt(type_id.val()), 'stand_id': stand_id})
             .then(function (data) {
                 $('#stand-description').html(data.description);
