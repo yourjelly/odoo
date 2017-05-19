@@ -52,3 +52,21 @@ class EventStand(http.Controller):
         result = request.redirect("/shop/checkout")
         return result
 
+    @http.route(['''/event/<model("event.event", "[('website_exhibitors','=',1)]"):event>/exhibitors/onchange'''], type='json', auth="public", website=True)
+    def exhibitor_onchange(self, event, type_id, stand_id=False, **kwargs):
+        sobj = request.env['event_stand.stand'].sudo()
+        stands = sobj.search([('event_id','=',event.id), ('type_id','=',int(type_id)), ('state','=','available')]).name_get()
+        type_id = request.env['event_stand.stand.type'].sudo().browse(int(type_id))
+        slots = []
+        if stand_id:
+            for slot in stands.slot_ids:
+                if slot.state=='available':
+                    slots.append((slot.id, slot.name))
+        return {
+            'stands': stands, 
+            'slots': slots,
+            'description': type_id.description,
+            'has_slot': not type_id.slot_all,
+
+        }
+

@@ -52,15 +52,10 @@
                         <div t-field="type_id.price" t-options="{'widget': 'monetary', 'display_currency': type_id.currency_id}"/>
                         <input type="radio" name="type_id" t-attf-id="type_id_#{type_id.id}" t-att-value="type_id.id" t-att-checked="type_id.main or None"/>
                     </div>
-                    <div class="pull-left" id="stand_description" style="border-left: 1px solid #ddd; margin-left: 20px; padding-left: 10px;">
-                        <b>1/2 Day Stand</b>
-                        <ul>
-                            <li>Showcase 1 app</li>
-                            <li>Duration: 0.5 Day</li>
-                            <li>Furnished Stand</li>
-                            <li>46' Display Screen</li>
-                            <li>Visibility: 1 track</li>
-                        </ul>
+                    <div class="pull-left" style="border-left: 1px solid #ddd; margin-left: 20px; padding-left: 10px;">
+                        <t t-foreach="types" t-as="type_id">
+                            <div t-attf-id="stand-#{type_id.id}" t-raw="type_id.description" t-att-class="not type_id.main and 'hide' or 'show'" t-att-data-type-id="type_id.id"/>
+                        </t>
                     </div>
                 </div>
 
@@ -69,8 +64,10 @@
                 <label for="stand_id" class="col-sm-2 control-label">Your Booth</label>
                 <div class="col-sm-5">
                     <select class="form-control" id="stand_id" name="stand_id">
-                        <t  t-foreach="stands" t-as="stand">
-                            <option t-att-value="stand.id" t-esc="stand.name"/>
+                        <t t-foreach="stands" t-as="stand">
+                            <option t-att-value="stand.id" t-esc="stand.name"
+                                t-att-class="not stand.type_id.main and 'hide' or 'show'"
+                                t-att-data-type-id="stand.type_id.id"/>
                         </t>
                     </select>
                 </div>
