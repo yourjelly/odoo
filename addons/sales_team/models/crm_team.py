@@ -80,6 +80,28 @@ class CrmTeam(models.Model):
         ('month', 'Last Month'),
         ('year', 'Last Year'),
     ], string='Scale', default='month', help="The time period this channel's dashboard graph will consider.")
+    temp = fields.Char(compute='_compute_member_ids')
+
+    @api.depends('member_ids')
+    def _compute_member_ids(self):
+        print "selff", self, self.member_ids
+        for member in self.member_ids:
+            self.temp = member
+
+    @api.onchange('member_ids')
+    def _onchange_member_ids(self):
+        msg = ""
+        print "self", self.favorite_user_ids
+        for member in self.member_ids:
+            print member
+            team = self.env['crm.team'].search([('member_ids', 'in', member.ids)])
+            msg += _('\n "%s" is already member of the "%s" channel') % (member.name, team.name)
+        print "messsage", msg
+        return {'warning': {
+            'title': _("Warning!"),
+            'message': msg,
+            }
+        }
 
     @api.depends('dashboard_graph_group', 'dashboard_graph_model', 'dashboard_graph_period')
     def _compute_dashboard_graph(self):
@@ -284,6 +306,7 @@ class CrmTeam(models.Model):
         res = super(CrmTeam, self).write(values)
         if values.get('member_ids'):
             self._add_members_to_favorites()
+            self._compute_member_ids()
         return res
 
     @api.multi
