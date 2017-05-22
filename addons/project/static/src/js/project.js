@@ -61,9 +61,11 @@ KanbanRecord.include({
             var dialog = new Dialog(self, {
                 title: _t("Set a Cover Image"),
                 buttons: [{text: _t("Select"), classes: 'btn-primary', close: true, disabled: !cover_id, click: function () {
-                    self._updateRecord({displayed_image_id: $imgs.filter('.o_selected').data('id')});
+                    var selected_img = $imgs.filter('.o_selected');
+                    var data = {'id': selected_img.data('id'), 'display_name': selected_img.data('name')};
+                    self._updateRecord({displayed_image_id: data});
                 }}, {text: _t("Remove Cover Image"), close: true, click: function () {
-                    self._updateRecord({displayed_image_id: 0});
+                    self._updateRecord({displayed_image_id: false});
                 }}, {text: _t("Discard"), close: true}],
                 $content: $content,
             }).open();
@@ -75,7 +77,9 @@ KanbanRecord.include({
             });
 
             $content.on('dblclick', 'img', function (ev) {
-                self._updateRecord({displayed_image_id: $(ev.currentTarget).data('id')});
+                var selected_img = $(ev.currentTarget);
+                var data = {'id': selected_img.data('id'), 'display_name': selected_img.data('name')};
+                self._updateRecord({displayed_image_id: data});
                 dialog.close();
             });
         }

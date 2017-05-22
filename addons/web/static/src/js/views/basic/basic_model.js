@@ -981,6 +981,7 @@ var BasicModel = AbstractModel.extend({
         if (rel_data.display_name === undefined) {
             var field = record.fields[fieldName];
             // TODO: refactor this to use _fetchNameGet
+            console.log(data);
             def = this._rpc({
                     model: field.relation,
                     method: 'name_get',
@@ -988,6 +989,7 @@ var BasicModel = AbstractModel.extend({
                     context: record.context,
                 })
                 .then(function (result) {
+                    console.log(result);
                     rel_data.display_name = result[0][1];
                 });
         }
@@ -999,6 +1001,7 @@ var BasicModel = AbstractModel.extend({
                 fieldsInfo: {},
                 modelName: record.fields[fieldName].relation,
             });
+            console.log(rec);
             record._changes[fieldName] = rec.id;
         });
     },

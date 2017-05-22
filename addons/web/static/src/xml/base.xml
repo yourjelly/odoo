@@ -836,7 +836,7 @@
 </t>
 <t t-name="AttachmentImage">
     <div class="o_attachment_image">
-        <img t-att-src="'/web/image/' + widget.value + '?unique=1'"/>
+        <img t-att-src="'/web/image/' + widget.value.data.id + '?unique=1'"/>
     </div>
 </t>
 <t t-name="FieldBinaryFile">
