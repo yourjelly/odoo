@@ -682,6 +682,9 @@ class StockMove(models.Model):
                             break
                         if move.state != 'partially_available':
                             move.state = 'partially_available'
+        pickings = self.filtered(lambda m: m.state in ['confirmed', 'waiting', 'partially_available', 'assigned']).mapped('picking_id')
+        for pick in pickings:
+            pick._set_top_level_packages()
 
     @api.multi
     def action_cancel(self):

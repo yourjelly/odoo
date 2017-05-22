@@ -465,8 +465,6 @@ class Picking(models.Model):
         if not moves:
             raise UserError(_('Nothing to check the availability for.'))
         moves.action_assign()
-        for pick in self:
-            pick._set_top_level_packages()
         return True
 
     @api.multi
@@ -546,15 +544,14 @@ class Picking(models.Model):
             all_in = True
             top_package = self.env['stock.quant.package']
             quant_dict = {}
-    
             packops = self.pack_operation_ids.filtered(lambda x: x.package_id == package)
             for q in package.quant_ids:
                 key = (q.product_id, q.lot_id, q.package_id, q.location_id)
-                if not quant_dict.get(q):
-                    quant_dict[q] = q.quantity
+                if not quant_dict.get(key):
+                    quant_dict[key] = q.quantity
                 else:
-                    quant_dict[q] += q.quantity
-            for ops in packops:
+                    quant_dict[key] += q.quantity
+            for ops in packops: 
                 key = (ops.product_id, ops.lot_id, ops.package_id, ops.location_id)
                 if not quant_dict.get(key):
                     all_in = False
