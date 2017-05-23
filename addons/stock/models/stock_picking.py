@@ -10,6 +10,8 @@ from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, pycompat
 from odoo.tools.float_utils import float_compare
 from odoo.addons.procurement.models import procurement
 from odoo.exceptions import UserError
+from itertools import groupby
+from operator import itemgetter
 
 
 class PickingType(models.Model):
@@ -543,21 +545,15 @@ class Picking(models.Model):
         for package in self.pack_operation_ids.mapped('package_id'):
             all_in = True
             top_package = self.env['stock.quant.package']
-            quant_dict = {}
             packops = self.pack_operation_ids.filtered(lambda x: x.package_id == package)
-            for q in package.quant_ids:
-                key = (q.product_id, q.lot_id, q.package_id, q.location_id)
-                if not quant_dict.get(key):
-                    quant_dict[key] = q.quantity
-                else:
-                    quant_dict[key] += q.quantity
-            for ops in packops: 
-                key = (ops.product_id, ops.lot_id, ops.package_id, ops.location_id)
-                if not quant_dict.get(key):
-                    all_in = False
-                    continue
-                quant_dict[key] -= ops.product_qty
-            if any(quant_dict[x] != 0.0 for x in quant_dict):
+            keys = ['product_id', 'lot_id', 'location_id']
+            grouped_quants = {}
+            for k, g in groupby(sorted(package.quant_ids, key=itemgetter(*keys)), key=itemgetter(*keys)):
+                grouped_quants[k] = sum(self.env['stock.quant'].concat(*list(g)).mapped('quantity'))
+            grouped_ops = {}
+            for k, g in groupby(sorted(packops, key=itemgetter(*keys)), key=itemgetter(*keys)):
+                grouped_ops[k] = sum(self.env['stock.pack.operation'].concat(*list(g)).mapped('product_qty'))
+            if any(grouped_quants[key]- grouped_ops.get(key, 0) != 0 for key in grouped_quants) or any(grouped_ops[key] - grouped_quants[key]!=0 for key in grouped_ops):
                 all_in = False
             if all_in and packops:
                 packops[0].first_pack=True
