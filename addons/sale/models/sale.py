@@ -157,6 +157,7 @@ class SaleOrder(models.Model):
     procurement_group_id = fields.Many2one('procurement.group', 'Procurement Group', copy=False)
 
     product_id = fields.Many2one('product.product', related='order_line.product_id', string='Product')
+    payment_request_id = fields.Many2one('account.payment.request', string='Request for Online Payment', copy=False)
 
     @api.model
     def _get_customer_lead(self, product_tmpl_id):
@@ -386,6 +387,29 @@ class SaleOrder(models.Model):
                 values={'self': invoice, 'origin': references[invoice]},
                 subtype_id=self.env.ref('mail.mt_note').id)
         return [inv.id for inv in pycompat.values(invoices)]
+
+    @api.multi
+    def get_access_action(self):
+        """ Instead of the classic form view, redirect to the online quote if it exists. """
+        self.ensure_one()
+        if not self.env.user.share and not self.env.context.get('force_website'):
+            return super(SaleOrder, self).get_access_action()
+        if not self.payment_request_id:
+            self.payment_request_id = self.env['account.payment.request'].create({
+                'order_id': self.id,
+                'due_date': self.validity_date,
+                'currency_id': self.pricelist_id.currency_id.id,
+                'company_id': self.company_id.id,
+                'partner_id': self.partner_id.id,
+                'reference': self.name,
+                'amount_total': self.amount_total,
+            })
+        return {
+            'type': 'ir.actions.act_url',
+            'url': '/quote/%s/' % self.payment_request_id.access_token,
+            'target': 'self',
+            'res_id': self.id,
+        }
 
     @api.multi
     def action_draft(self):
