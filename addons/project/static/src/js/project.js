@@ -74,22 +74,31 @@ KanbanRecord.include({
                 $content: $content,
             }).open();
 
-            function cover_image_upload() {
-                var self = this;
-                var $upload_input = $('<input type="file" name="files[]"/>');
-                $upload_input.on('change', function (e) {
-                    var attachment = e.target.files[0];
-                    var reader = new FileReader();
-                    try {
-                        reader.readAsDataURL(attachment);
-                    } catch (e) {
-                        console.warn(e);
-                    }
-                }.bind(this));
-                this.set('attachment_ids', attachment_ids);
+        function cover_image_upload() {
+            var self = this;
+            var $upload_input = $('<input type="file" name="files[]"/>');
+            $upload_input.on('change', function (e) {
+                var f = e.target.files[0];
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    console.log(e);
+                    console.log(self.model);
+                    self._rpc({
+                            route: '/web/binary/upload_attachment',
+                            method: 'upload_attachment',
+                            params: {model:'project.task' ,id: 0,ufile: f.name},
+                    })
+                    .then(open_cover_images_dialog);
+                };
+                try {
+                    reader.readAsDataURL(f);
+                } catch (e) {
+                    console.warn(e);
+                }
+            });
 
-                $upload_input.click();
-            }
+             $upload_input.click();
+        }
 
             var $selectBtn = dialog.$footer.find('.btn-primary');
             $content.on('click', 'img', function (ev) {
