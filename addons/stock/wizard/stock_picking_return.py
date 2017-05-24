@@ -4,6 +4,8 @@
 from odoo import api, fields, models, _
 from odoo.addons import decimal_precision as dp
 from odoo.exceptions import UserError
+from itertools import groupby
+from operator import itemgetter
 
 
 class ReturnPickingLine(models.TransientModel):
@@ -47,7 +49,8 @@ class ReturnPicking(models.TransientModel):
                     continue
                 if move.move_dest_ids:
                     move_dest_exists = True
-                quantity = move.product_uom_qty  # TODO sle: consider return of return (count move lines out?) anyway it's only a default values
+                quantity = move.product_qty - sum(move.move_dest_ids.filtered(lambda x: x.state in ['partially_available', 'assigned', 'done']).\
+                                                  mapped('pack_operation_ids').mapped('product_qty'))
                 product_return_moves.append((0, 0, {'product_id': move.product_id.id, 'quantity': quantity, 'move_id': move.id}))
 
             if not product_return_moves:
