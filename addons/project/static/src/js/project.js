@@ -8,6 +8,7 @@ var KanbanRecord = require('web.KanbanRecord');
 var QWeb = core.qweb;
 var _t = core._t;
 
+
 KanbanRecord.include({
     //--------------------------------------------------------------------------
     // Private
@@ -50,6 +51,7 @@ KanbanRecord.include({
             this._super.apply(this, arguments, ev);
         }
 
+
         function open_cover_images_dialog(attachment_ids) {
             var cover_id = self.record.displayed_image_id.raw_value[0];
             var $content = $(QWeb.render("project.SetCoverModal", {
@@ -66,9 +68,28 @@ KanbanRecord.include({
                     self._updateRecord({displayed_image_id: data});
                 }}, {text: _t("Remove Cover Image"), close: true, click: function () {
                     self._updateRecord({displayed_image_id: false});
-                }}, {text: _t("Discard"), close: true}],
+                }}, {text: _t("Discard"), close: true},
+                {text: _t("Upload and Set"), close: true, click: function(){ cover_image_upload.call(self);
+                }}],
                 $content: $content,
             }).open();
+
+            function cover_image_upload() {
+                var self = this;
+                var $upload_input = $('<input type="file" name="files[]"/>');
+                $upload_input.on('change', function (e) {
+                    var attachment = e.target.files[0];
+                    var reader = new FileReader();
+                    try {
+                        reader.readAsDataURL(attachment);
+                    } catch (e) {
+                        console.warn(e);
+                    }
+                }.bind(this));
+                this.set('attachment_ids', attachment_ids);
+
+                $upload_input.click();
+            }
 
             var $selectBtn = dialog.$footer.find('.btn-primary');
             $content.on('click', 'img', function (ev) {
