@@ -72,7 +72,7 @@ class ReturnPicking(models.TransientModel):
         # TODO sle: the unreserve of the next moves could be less brutal
         for return_move in self.product_return_moves.mapped('move_id'):
             for move_dest in return_move.move_dest_ids:
-                if move_dest.reserved_availability:
+                if move_dest.reserved_availability and move_dest.state not in ('done', 'cancel'):
                     move_dest.do_unreserve()
 
         # create new picking for returned products
