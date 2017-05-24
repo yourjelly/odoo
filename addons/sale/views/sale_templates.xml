@@ -1,9 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-        <!-- inherits from sales_team.assets_backend to override certain attributes defined in sales_team -->
-        <template id="assets_backend" name="project assets" inherit_id="sales_team.assets_backend">
-            <xpath expr="." position="inside">
-                <script type="text/javascript" src="/sale/static/src/js/sale.js"></script>
-            </xpath>
-        </template>
+    <!-- inherits from sales_team.assets_backend to override certain attributes defined in sales_team -->
+    <template id="assets_backend" name="project assets" inherit_id="sales_team.assets_backend">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/sale/static/src/js/sale.js"></script>
+        </xpath>
+    </template>
+
+    <template id="so_quotation" name="Quotation">
+        <span class="o_quotation_extend_layout">
+            <t t-call="payment.layout">
+                <t t-call="sale.so_quotation_payment"/>
+            </t>
+        </span>
+    </template>
+
+    <template id="so_quotation_detail" name="Quotation Detail">
+        <div id="wrap">
+            <div t-att-class="payment_request.state == 'paid' and 'panel panel-success' or payment_request.state == 'pending' and 'panel panel-warning' or 'panel panel-default'">
+                <t t-if="payment_request.state not in ['open', 'paid'] and message">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <h4>
+                                <div class="col-md-6" t-raw="message"/>
+                            </h4>
+                        </div>
+                    </div>
+                </t>
+                <div class="panel-body">
+                    <div class="o_quotation_report_html">
+                        <iframe id="print_quotation"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="so_quotation_payment" name="Quotation Payment">
+        <div id="wrap">
+            <div class="o_so_quotation">
+                <div class="oe_structure"/>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <h2>
+                                Your Quotation<br></br>
+                                <em t-esc="quotation.name"/>
+                                <small t-field="payment_request.state"/>
+                            </h2>
+                        </div>
+                        <div class="col-md-6 col-sm-6 col-xs-10 hidden-print text-right" id="pay_button" t-ignore="true">
+                            <div>
+                                <ul class="list-inline pull-right">
+                                    <li class="o_divider">
+                                         <h2>
+                                            <span t-esc="payment_request.amount_total" t-options="{'widget': 'monetary', 'display_currency': payment_request.currency_id}"/>
+                                        </h2>
+                                        <t t-if="payment_request.due_date">
+                                            <h4>Due by<span class="ml4" t-esc="payment_request.due_date" t-options='{"widget": "date"}'/></h4>
+                                        </t>
+                                    </li>
+                                    <li>
+                                        <a target="_blank" t-att-href="'/payment/%s' % payment_request.access_token+'?pdf=True'" t-att-title="payment_request.reference">
+                                            <i class="fa fa-download fa-2x" aria-hidden="true"/>
+                                        </a><br></br>
+                                    </li>
+                                    <li>
+                                        <a id="print_iframe" t-att-title="payment_request.reference">
+                                            <i class="fa fa-print fa-2x" aria-hidden="true"/>
+                                        </a>
+                                    </li>
+                                    <li t-if="payment_request.state != 'paid'">
+                                        <h3>
+                                            <a class="btn btn-primary btn-lg o_paynow_button"  data-toggle="modal" data-target="#modalpayment">
+                                                <i class="fa fa-arrow fa-5x" aria-hidden="true"/>Pay Now
+                                            </a>
+                                        </h3>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb16">
+                        <div class="col-md-12 hidden-sm hidden-xs">
+                            <t t-call="sale.so_quotation_detail"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
 </odoo>
