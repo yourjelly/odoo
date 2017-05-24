@@ -72,21 +72,18 @@ class StockScrap(models.Model):
     @api.multi
     def do_scrap(self):
         for scrap in self:
-            moves = scrap._get_origin_moves() or self.env['stock.move']
             move = self.env['stock.move'].create(scrap._prepare_move_values())
-            quants = self.env['stock.quant'].quants_get_preferred_domain(
-                move.product_qty, move,
-                domain=[
-                    ('qty', '>', 0),
-                    ('lot_id', '=', self.lot_id.id),
-                    ('package_id', '=', self.package_id.id)],
-                preferred_domain_list=scrap._get_preferred_domain())
-            if any([not x[0] for x in quants]):
+            quants = self.env['stock.quant'].search([('quantity', '>', 0), 
+                                                     ('product_id', '=', scrap.product_id.id),
+                                                     ('lot_id', '=', scrap.lot_id.id), 
+                                                     ('package_id', '=', scrap.package_id.id), 
+                                                     ('location_id', '=', scrap.location_id.id), 
+                                                     ('owner_id', '=', scrap.owner_id.id)])
+            if sum(x.quantity for x in quants) < move.product_qty:
                 raise UserError(_('You cannot scrap a move without having available stock for %s. You can correct it with an inventory adjustment.') % move.product_id.name)
-            self.env['stock.quant'].quants_reserve(quants, move)
             move.action_done()
             scrap.write({'move_id': move.id, 'state': 'done'})
-            moves.recalculate_move_state()
+            #TODO: still necessary? : moves.recalculate_move_state()
         return True
 
     def _prepare_move_values(self):
@@ -101,14 +98,13 @@ class StockScrap(models.Model):
             'scrapped': True,
             'location_dest_id': self.scrap_location_id.id,
             'pack_operation_ids': [(0, 0, {'product_id': self.product_id.id,
-                                           'product_qty': self.product_qty,
+                                           'product_qty': self.scrap_qty,
                                            'product_uom_id': self.product_uom_id.id, 
                                            'location_id': self.location_id.id, 
                                            'location_dest_id': self.scrap_location_id.id,
                                            'package_id': self.package_id.id, 
                                            'lot_id': self.lot_id.id, })],
-#             'restrict_lot_id': self.lot_id.id,
-#             'restrict_partner_id': self.owner_id.id,
+            'restrict_partner_id': self.owner_id.id,
             'picking_id': self.picking_id.id
         }
 

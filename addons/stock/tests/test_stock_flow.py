@@ -39,7 +39,7 @@ class TestStockFlow(TestStockCommon):
             'picking_id': picking_in.id,
             'location_id': self.supplier_location,
             'location_dest_id': self.stock_location})
-        self.MoveObj.create({
+        self.MoveObj.create({ 
             'name': self.productC.name,
             'product_id': self.productC.id,
             'product_uom_qty': 10,

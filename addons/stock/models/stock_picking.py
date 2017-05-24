@@ -922,7 +922,7 @@ class Picking(models.Model):
             'res_model': 'stock.scrap',
             'view_id': self.env.ref('stock.stock_scrap_form_view2').id,
             'type': 'ir.actions.act_window',
-            'context': {'default_picking_id': self.id, 'product_ids': self.pack_operation_product_ids.mapped('product_id').ids},
+            'context': {'default_picking_id': self.id, 'product_ids': self.pack_operation_ids.mapped('product_id').ids},
             'target': 'new',
         }
 
