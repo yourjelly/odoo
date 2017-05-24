@@ -406,7 +406,7 @@ class SaleOrder(models.Model):
             })
         return {
             'type': 'ir.actions.act_url',
-            'url': '/quote/%s/' % self.payment_request_id.access_token,
+            'url': '/quote/%s' % self.payment_request_id.access_token,
             'target': 'self',
             'res_id': self.id,
         }
