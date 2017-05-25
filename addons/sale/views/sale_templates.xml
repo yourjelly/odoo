@@ -7,6 +7,12 @@
         </xpath>
     </template>
 
+    <template id="assets_frontend" name="quotation assets" inherit_id="web.assets_frontend">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/sale/static/src/js/quotation_view.js"></script>
+        </xpath>
+    </template>
+
     <template id="so_quotation" name="Quotation">
         <span class="o_quotation_extend_layout">
             <t t-call="payment.layout">
@@ -28,8 +34,8 @@
                     </div>
                 </t>
                 <div class="panel-body">
-                    <div class="o_quotation_report_html">
-                        <iframe id="print_quotation"/>
+                    <div class="o_quote_report_html">
+                        <iframe id="print_quote"/>
                     </div>
                 </div>
             </div>
