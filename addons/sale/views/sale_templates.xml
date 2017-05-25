@@ -70,7 +70,7 @@
                                     <li>
                                         <a target="_blank" t-att-href="'/quote/%s' % payment_request.access_token+'?pdf=True'" t-att-title="payment_request.reference">
                                             <i class="fa fa-download fa-2x" aria-hidden="true"/>
-                                        </a><br></br>
+                                        </a>
                                     </li>
                                     <li>
                                         <a id="print_quote_iframe" t-att-title="payment_request.reference">
