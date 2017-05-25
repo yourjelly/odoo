@@ -6,7 +6,7 @@ from odoo.http import request
 from odoo.addons.payment.controllers.main import Payment
 
 
-class sale_quote(Payment):
+class SaleQuotation(Payment):
 
     def _get_quotation_value(self, order_sudo, transaction, token=None, **post):
         days = 0
@@ -23,6 +23,8 @@ class sale_quote(Payment):
             'need_payment': order_sudo.invoice_status == 'to invoice' and transaction.state in ['draft', 'cancel', 'error'],
             'token': token,
             'show_button_modal_cancel': True,
+            'quotation_pay': True,
+
         }
         return values
 
@@ -62,15 +64,15 @@ class sale_quote(Payment):
         values['message'] = message and int(message) or False,
         values['payment_request'] = payment_request
 
-        # if order_sudo.require_payment or values['need_payment']:
-        #     render_values = {
-        #         'return_url': '/quote/%s' % token if token else '/quote/%s' % payment_request_id,
-        #         'type': 'form',
-        #         'alias_usage': _('If we store your payment information on our server, subscription payments will be made automatically.'),
-        #         'partner_id': order_sudo.partner_id.id,
-        #     }
+        if order_sudo:
+            render_values = {
+                'return_url': '/quote/%s' % token if token else '/quote/%s' % payment_request_id,
+                'type': 'form',
+                'alias_usage': _('If we store your payment information on our server, subscription payments will be made automatically.'),
+                'partner_id': order_sudo.partner_id.id,
+            }
 
-        #     values.update(order_sudo.with_context(submit_class="btn btn-primary", submit_txt=_('Pay & Confirm'))._prepare_payment_acquirer(values=render_values))
-        #     values['save_option'] = False
+            values.update(order_sudo.with_context(submit_class="btn btn-primary", submit_txt=_('Pay & Confirm'))._prepare_payment_acquirer(values=render_values))
+            values['save_option'] = False
 
         return request.render('sale.so_quotation', values)

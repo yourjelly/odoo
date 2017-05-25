@@ -2,8 +2,14 @@ odoo.define('sale.quotation_view', function (require) {
 'use strict';
 
     var ajax = require('web.ajax');
+    var QuotationPayment = require('payment.payment_method');
 
     $(document).ready(function () {
+        if($("#online_qoutation_payment").length){
+            var quotation_payment = new QuotationPayment();
+            quotation_payment.attachTo($("#online_qoutation_payment"));
+        }
+
         if($(".o_quote_report_html").length){
             var href = $(location).attr("href"),
                 payment_request_id = href.match(/quote\/([0-9]+)/),

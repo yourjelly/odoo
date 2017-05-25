@@ -93,9 +93,36 @@
                             <t t-call="sale.so_quotation_detail"/>
                         </div>
                     </div>
+                     <div id="online_qoutation_payment">
+                        <input type='hidden' name="access_token" t-att-value="payment_request.access_token" t-if="payment_request.access_token"/>
+                        <t t-call="payment.payment"/>
+                    </div>
                 </div>
             </div>
         </div>
     </template>
+
+    <template id="qoutation_sign-dialog" name="Qoutation Sign Dialog" inherit_id="payment.payment">
+        <xpath expr="//div[@id='sign-dialog']" position="inside">
+            <t t-if="quotation_pay">
+                <p>
+                    <span>I agree that by paying this proposal, I
+                    accept it on the behalf of </span><b t-field="payment_request.partner_id.commercial_partner_id"/><span>, for an amount of </span>
+                    <b data-id="total_amount" t-field="payment_request.amount_total"
+                    t-options='{"widget": "monetary", "display_currency": payment_request.currency_id}'/>
+                    <t t-if="payment_request.order_id.payment_term_id">
+                        <span>with payment terms: </span><b t-field="payment_request.order_id.payment_term_id"/>.
+                    </t>
+                </p>
+            </t>
+        </xpath>
+        <xpath expr="//div[@id='payment_method']" position="inside">
+            <t t-if="quotation_pay">
+                <div class="col-md-6">
+                    <t t-call="payment.save_payment_data"/>
+                </div>
+            </t>
+        </xpath>
+  </template>
 
 </odoo>
