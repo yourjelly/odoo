@@ -25,7 +25,7 @@
                         class="oe_highlight"/>
                     <button name="action_pos_session_validate" type="object" string="Validate Closing &amp; Post Entries" states="closing_control"
                         class="oe_highlight"/>
-                    
+                        
                     <field name="state" widget="statusbar" statusbar_visible="opening_control,opened,closing_control,closed" nolabel="1" />
                     
                 </header>
@@ -166,18 +166,15 @@
                                         'opened': 'success', 'closing_control': 'warning', 'closed': 'warning'}}"/>
                                 </div>
                             </div>
-                            <div class="mb4">
+                            <div class="row">
+                            <div class="col-xs-8 mb4">
                                 <field name="name" />
                             </div>
-                            <div class="row">
-                                <div class="col-xs-8">
-                                    <span><strong>Start Date: </strong><field name="start_at" /></span>
-                                </div>
-                                <div class="col-xs-4">
-                                    <span class="pull-right">
-                                        <img t-att-src="kanban_image('res.users', 'image_small', record.user_id.raw_value)" t-att-title="record.user_id.value" width="24" height="24" class="oe_kanban_avatar pull-right"/>
-                                    </span>
-                                </div>
+                            <div class="col-xs-4">
+                                <span class="pull-right">
+                                    <img t-att-src="kanban_image('res.users', 'image_small', record.user_id.raw_value)" t-att-title="record.user_id.value" width="24" height="24" class="oe_kanban_avatar pull-right"/>
+                                </span>
+                            </div>
                             </div>
                         </div>
                     </t>

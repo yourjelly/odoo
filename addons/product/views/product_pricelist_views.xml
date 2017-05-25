@@ -117,7 +117,7 @@
                     <templates>
                         <t t-name="kanban-box">
                             <div t-attf-class="oe_kanban_global_click">
-                                <div>
+                                <div id="product_pricelist">
                                     <strong><span><field name="name"/></span></strong>
                                     <span class="text-primary pull-right">
                                         <strong><i class="fa fa-money" aria-hidden="true"></i> <field name="currency_id"/></strong>

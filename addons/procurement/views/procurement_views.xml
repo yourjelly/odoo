@@ -31,6 +31,7 @@
                     <field name="date_planned"/>
                     <field name="priority"/>
                     <field name="state"/>
+                    <field name="product_qty"/>
                     <templates>
                         <t t-name="kanban-box">
                             <div t-attf-class="oe_kanban_global_click">
@@ -47,16 +48,7 @@
                                 </div>
                                 <div class="mb4">
                                     <i class="fa fa-pencil-square-o"/> <field name="name"/>
-                                </div>
-                                <div class="row">
-                                    <div class="col-xs-4">
-                                        <strong><span><field name="priority" widget="priority"/></span></strong>
-                                    </div>
-                                    <div class="col-xs-8">
-                                        <span class="pull-right">
-                                            <i class="fa fa-clock-o"/> <field name="date_planned"/>
-                                        </span>
-                                    </div>
+                                    <span class="pull-right"><field name="product_qty"/></span>
                                 </div>
                             </div>
                         </t>
@@ -128,9 +120,9 @@
             <field name="res_model">procurement.order</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="domain">[('group_id','=',active_id)]</field>            
+            <field name="domain">[('group_id','=',active_id)]</field>
         </record>
-        
+
         <record id="procurement_group_form_view" model="ir.ui.view">
             <field name="name">procurement.group.form</field>
             <field name="model">procurement.group</field>
@@ -143,12 +135,12 @@
                         <group>
                             <field name="name"/>
                             <field name="move_type"/>
-                        </group>                        
+                        </group>
                     </sheet>
                 </form>
             </field>
         </record>
-        
+
         <record id="view_procurement_filter" model="ir.ui.view">
             <field name="name">procurement.order.select</field>
             <field name="model">procurement.order</field>
@@ -169,7 +161,7 @@
                 </search>
             </field>
         </record>
-        
+
         <record id="procurement_order_action_exceptions" model="ir.actions.act_window">
             <field name="name">Procurement Exceptions</field>
             <field name="type">ir.actions.act_window</field>

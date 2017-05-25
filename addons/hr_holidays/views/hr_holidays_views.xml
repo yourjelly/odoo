@@ -1,5 +1,10 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <odoo>
+    <template id="assets_backend" name="leaves assets" inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+            <link rel="stylesheet" href="/hr_holidays/static/src/less/hr_holidays_kanban.less"/>
+        </xpath>
+    </template>
 
         <!-- Graph report -->
         <record id="view_evaluation_report_graph" model="ir.ui.view">
@@ -215,11 +220,11 @@
                                         <div>
                                             <strong><t t-esc="record.employee_id.value"/></strong>
                                         </div>
-                                        <div class="text-muted">
+                                        <div class="wrap_kanban_desc text-muted">
                                             <t t-esc="record.name.value"/>
                                         </div>
                                     </span>
-                                    <span class="pull-right mt8">
+                                    <span class="pull-right mt8 label label-default">
                                         <field name="state" widget="kanban_label_selection" options="{'classes': {'draft': 'default', 'validate': 'success','confirm': 'default', 'cancel': 'danger'}}"/>
                                     </span>
                                 </div>
@@ -230,7 +235,7 @@
                                     - <t t-esc="record.date_to.value"/>
                                 </div>
                                 <div>
-                                    <t t-esc="record.number_of_days.value"/> days
+                                    <span class="badge"><t t-esc="record.number_of_days.value"/> days</span>
                                 </div>
                             </div>
                         </t>
@@ -647,6 +652,33 @@
             </field>
         </record>
 
+        <record id="holiday_status_view_kanban" model="ir.ui.view">
+            <field name="name">hr.holidays.status.kanban</field>
+            <field name="model">hr.holidays.status</field>
+            <field name="priority">35</field>
+            <field name="arch" type="xml">
+                <kanban>
+                    <field name="name"/>
+                    <field name="max_leaves"/>
+                    <field name="leaves_taken"/>
+                    <field name="remaining_leaves"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_global_click">
+                                <div>
+                                    <strong><field name="name"/></strong>
+                                </div>
+                                <div>
+                                    <span>Max Leaves: <field name="max_leaves"/></span>
+                                    <span class="pull-right">Leaves Taken: <field name="leaves_taken"/></span>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
         <record id="view_holiday_status_normal_tree" model="ir.ui.view">
             <field name="name">hr.holidays.status.normal.tree</field>
             <field name="model">hr.holidays.status</field>
@@ -675,8 +707,8 @@
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">hr.holidays.status</field>
             <field name="view_type">form</field>
-            <field name="view_mode">tree,form</field>
-            <field name="view_id" eval="view_holiday_status_normal_tree"/>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_id" eval="holiday_status_view_kanban"/>
             <field name="search_view_id" ref="view_hr_holidays_status_search"/>
         </record>
 
