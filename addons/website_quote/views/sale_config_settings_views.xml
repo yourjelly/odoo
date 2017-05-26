@@ -14,6 +14,7 @@
                 <div attrs="{'invisible': [('module_website_quote','=',False)]}">
                     <button name="%(website_quote.action_sale_quotation_template)d" icon="fa-arrow-right" type="action" string="Quotation Templates" class="btn-link"/>
                 </div>
+            </xpath>
         </field>
     </record>
 

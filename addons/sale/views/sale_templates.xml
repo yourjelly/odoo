@@ -123,7 +123,7 @@
                                     <li t-if="payment_request.state != 'paid'">
                                         <h3>
                                             <a class="btn btn-primary btn-lg o_paynow_button"  data-toggle="modal" data-target="#modalpayment">
-                                                <i class="fa fa-arrow fa-5x" aria-hidden="true"/> <t t-if="quotation_pay">Pay Now</t><t t-if="not quotation_pay">Accept</t>
+                                                <i class="fa fa-arrow fa-5x" aria-hidden="true"/><t t-if="quotation_pay">Pay Now</t><t t-if="not quotation_pay">Accept</t>
                                             </a>
                                         </h3>
                                     </li>
