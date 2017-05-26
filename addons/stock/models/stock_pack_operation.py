@@ -22,6 +22,10 @@ class PackOperation(models.Model):
     product_id = fields.Many2one('product.product', 'Product', ondelete="cascade") #might be a related with the move also --> no, because you can put them next to each other
     product_uom_id = fields.Many2one('product.uom', 'Unit of Measure')
     product_qty = fields.Float('To Do', default=0.0, digits=dp.get_precision('Product Unit of Measure'), required=True)
+    product_qty_uom = fields.Float(
+        'Product UoM Quantity', compute='_compute_product_qty', inverse='_set_product_qty',
+        digits=0, store=True,
+        help='Quantity in the default UoM of the product')
     product_reserved_qty = fields.Float('Reserved', default=0.0, digits=dp.get_precision('Product Unit of Measure'), readonly=True)
     ordered_qty = fields.Float('Ordered Quantity', digits=dp.get_precision('Product Unit of Measure'))
     qty_done = fields.Float('Done', default=0.0, digits=dp.get_precision('Product Unit of Measure'), copy=False)
@@ -54,6 +58,19 @@ class PackOperation(models.Model):
     part_of_pack = fields.Boolean('Is part of pack', default=False)
     first_pack = fields.Boolean('Is first of pack', default=False)
     first_product = fields.Boolean('Is first of product', default=True)
+
+    @api.depends('product_id', 'product_uom_id', 'product_qty')
+    def _compute_product_qty(self):
+        for ops in self:
+            if ops.product_uom_id:
+                ops.product_qty_uom = ops.product_uom_id._compute_quantity(ops.product_qty, ops.product_id.uom_id)
+
+    def _set_product_qty(self):
+        """ The meaning of product_qty field changed lately and is now a functional field computing the quantity
+        in the default product UoM. This code has been added to raise an error if a write is made given a value
+        for `product_qty`, where the same write should set the `product_uom_qty` field instead, in order to
+        detect errors. """
+        raise UserError(_('The requested operation cannot be processed because of a programming error setting the `product_qty_uom` field instead of the `product_qty`.'))
 
     @api.one
     def _compute_is_done(self):
