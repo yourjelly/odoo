@@ -743,6 +743,35 @@ class StockMove(models.Model):
         moves = self.filtered(lambda x: x.state not in ('done', 'cancel'))
         quant_obj = self.env['stock.quant']
         moves_todo = self.env['stock.move']
+        extra_moves = self.env['stock.move']
+        #Unreserve maybe even more than necessary
+        for move in moves:
+            for packop in move.pack_operation_ids:
+                qty = packop.product_qty_uom
+                quant_obj.decrease_reserved_quantity(packop.product_id, packop.location_id, qty, lot_id=packop.lot_id, package_id=packop.package_id, owner_id=packop.owner_id)
+                if packop.qty_done > packop.product_qty: 
+                    # Check if there is unreserved stuff available
+                    # TODO: the problem is that you risk to use twice the same thing
+                    qty_to_find = packop.product_uom_id._compute_quantity(packop.qty_done - packop.product_qty, packop.product_id.uom_id)
+                    available_quantity = self.env['stock.quant'].get_available_quantity(move.product_id, move.location_id)
+                    if available_quantity < qty_to_find:
+                        reserved_ops = self.env['stock.pack.operation'].search([('move_id.state', 'not in', ['done', 'cancel']), 
+                                                                 ('product_id', '=', packop.product_id.id),
+                                                                 ('lot_id', '=', packop.lot_id.id),
+                                                                 ('location_id', '=', packop.location_id.id), 
+                                                                 ('owner_id', '=', packop.owner_id.id), 
+                                                                 ('package_id', '=', packop.package_id.id), 
+                                                                 ('product_qty', '>', 0.0)]) # TODO: order : date desc stock move?
+                        qty_todo = qty_to_find - available_quantity
+                        for ops in reserved_ops:
+                            #ops_qty = ops.product_uom_id._compute_quantity(ops.product_qty, ops.product_id.uom_id)
+                            qty_subtract = min(ops.product_qty_uom, qty_todo)
+                            ops.write({'product_qty': ops.product_qty - qty_subtract}) #TODO: UoM conversion
+                            qty_todo -= qty_subtract
+                            quant_obj.decrease_reserved_quantity(packop.product_id, packop.location_id, qty_subtract, lot_id=packop.lot_id, package_id=packop.package_id, owner_id=packop.owner_id)
+                            if qty_todo <= 0:
+                                break
+        
         # Create extra moves where necessary
         for move in moves:
             # Here, the `quantity_done` was already rounded to the product UOM by the `do_produce` wizard. However,
@@ -755,7 +784,8 @@ class StockMove(models.Model):
             if move.quantity_done <= 0:
                 continue
             moves_todo |= move
-            moves_todo |= move._create_extra_move()
+            extra_moves |= move._create_extra_move()
+        moves_todo |= extra_moves
         # Split moves where necessary and move quants
         for move in moves_todo:
             rounding = move.product_uom.rounding
@@ -777,8 +807,9 @@ class StockMove(models.Model):
                     if not packop.lot_id and move.has_tracking != 'none':
                         raise UserError(_('You need to supply a lot/serial number.'))
                     qty = move.product_uom._compute_quantity(packop.qty_done, move.product_id.uom_id)
+                    
                     if packop.location_id.usage not in ('supplier', 'inventory', 'production', 'customer'):
-                        quant_obj.decrease_reserved_quantity(packop.product_id, packop.location_id, qty, lot_id=packop.lot_id, package_id=packop.package_id, owner_id=packop.owner_id)
+                        # quant_obj.decrease_reserved_quantity(packop.product_id, packop.location_id, qty, lot_id=packop.lot_id, package_id=packop.package_id, owner_id=packop.owner_id)
                         # Decrease quantity in source and increment in destination
                         quant_obj.decrease_available_quantity(packop.product_id, packop.location_id, qty, lot_id=packop.lot_id, package_id=packop.package_id, owner_id=packop.owner_id)
                     if packop.location_dest_id.usage not in ('supplier', 'inventory', 'production', 'customer'):
