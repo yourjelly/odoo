@@ -109,6 +109,15 @@ class SaleConfiguration(models.TransientModel):
             'multi_sales_price_method': multi_sales_price and sale_pricelist_setting or False
         }
 
+    @api.model
+    def get_default_sale_quote_pay(self, fields):
+        sale_quote_pay = self.env['ir.config_parameter'].sudo().get_param('sale.sale_quote_pay', default=False)
+        return dict(sale_quote_pay=sale_quote_pay)
+
+    @api.multi
+    def set_default_sale_quote_pay(self):
+        self.env['ir.config_parameter'].sudo().set_param("sale.sale_quote_pay", self.sale_quote_pay)
+
     @api.onchange('multi_sales_price', 'multi_sales_price_method')
     def _onchange_sale_price(self):
         if self.multi_sales_price and not self.multi_sales_price_method:
@@ -151,6 +160,9 @@ class SaleConfiguration(models.TransientModel):
 
     def set_sale_tax_defaults(self):
         return self.env['ir.values'].sudo().set_default('sale.config.settings', 'sale_show_tax', self.sale_show_tax)
+
+    def set_quote_mode_type_defaults(self):
+        return self.env['ir.values'].sudo().set_default('sale.config.settings', 'quote_mode_type', self.quote_mode_type)
 
     @api.onchange('sale_show_tax')
     def _onchange_sale_tax(self):
