@@ -635,7 +635,7 @@ class StockMove(models.Model):
                     keys_in = ['location_dest_id', 'lot_id', 'result_package_id', 'owner_id']
                     grouped_move_lines_in = {}
                     for k, g in groupby(sorted(move_lines_in, key=itemgetter(*keys_in)), key=itemgetter(*keys_in)):
-                        grouped_move_lines_in[k] = sum(self.env['stock.pack.operation'].concat(*list(g)).mapped('product_qty'))
+                        grouped_move_lines_in[k] = sum(self.env['stock.pack.operation'].concat(*list(g)).mapped('product_qty_uom'))
 
                     move_lines_out = (move.move_orig_ids.mapped('move_dest_ids') - move)\
                         .filtered(lambda m: m.state in ['partially_available', 'assigned', 'done'])\
@@ -643,7 +643,7 @@ class StockMove(models.Model):
                     keys_out = ['location_id', 'lot_id', 'package_id', 'owner_id']
                     grouped_move_lines_out = {}
                     for k, g in groupby(sorted(move_lines_out, key=itemgetter(*keys_out)), key=itemgetter(*keys_out)):
-                        grouped_move_lines_out[k] = sum(self.env['stock.pack.operation'].concat(*list(g)).mapped('product_qty'))
+                        grouped_move_lines_out[k] = sum(self.env['stock.pack.operation'].concat(*list(g)).mapped('product_qty_uom'))
 
                     available_move_lines = {key: grouped_move_lines_in[key] - grouped_move_lines_out.get(key, 0) for key in grouped_move_lines_in.keys()}
 
@@ -652,7 +652,7 @@ class StockMove(models.Model):
                             move.state = 'confirmed'  # TODO: starved MTO move handling, implement a fallback
                         continue
                     for (location_id, lot_id, package_id, owner_id), quantity in available_move_lines.items():
-                        need = move.product_qty - sum(move.pack_operation_ids.mapped('product_qty'))
+                        need = move.product_qty - sum(move.pack_operation_ids.mapped('product_qty_uom'))
                         taken_quantity = min(quantity, need)
 
                         # Find a candidate move line to update or create a new one.
@@ -665,10 +665,11 @@ class StockMove(models.Model):
                         else:
                             move_line_id = self.env['stock.pack.operation'].create({
                                 'move_id': move.id,
+                                'product_uom_id': move.product_uom.id,
                                 'picking_id': move.picking_id.id,
                                 'product_id': move.product_id.id,
                                 'location_dest_id': move.location_dest_id.id,
-                                'product_qty': taken_quantity,
+                                'product_qty': move.product_id.uom_id._compute_quantity(taken_quantity, move.product_uom),
                                 'product_reserved_qty': taken_quantity,
                                 'location_id': location_id.id,
                                 'lot_id': lot_id.id,
