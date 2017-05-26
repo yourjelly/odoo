@@ -654,13 +654,14 @@ class StockMove(models.Model):
                     for (location_id, lot_id, package_id, owner_id), quantity in available_move_lines.items():
                         need = move.product_qty - sum(move.pack_operation_ids.mapped('product_qty_uom'))
                         taken_quantity = min(quantity, need)
+                        taken_quantity_uom = move.product_id.uom_id._compute_quantity(taken_quantity, move.product_uom)
 
                         # Find a candidate move line to update or create a new one.
                         to_update = move.pack_operation_ids.filtered(lambda m: m.location_id.id == location_id.id and m.lot_id.id == lot_id.id\
                                                                      and m.package_id.id == package_id.id and m.owner_id.id == owner_id.id)
                         to_update = to_update and to_update[0] or False
                         if to_update:
-                            to_update.product_qty += taken_quantity
+                            to_update.product_qty += taken_quantity_uom
                             to_update.product_reserved_qty += taken_quantity
                         else:
                             move_line_id = self.env['stock.pack.operation'].create({
@@ -669,7 +670,7 @@ class StockMove(models.Model):
                                 'picking_id': move.picking_id.id,
                                 'product_id': move.product_id.id,
                                 'location_dest_id': move.location_dest_id.id,
-                                'product_qty': move.product_id.uom_id._compute_quantity(taken_quantity, move.product_uom),
+                                'product_qty': taken_quantity_uom,
                                 'product_reserved_qty': taken_quantity,
                                 'location_id': location_id.id,
                                 'lot_id': lot_id.id,
