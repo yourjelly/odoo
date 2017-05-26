@@ -23,8 +23,7 @@ class SaleQuotation(Payment):
             'need_payment': order_sudo.invoice_status == 'to invoice' and transaction.state in ['draft', 'cancel', 'error'],
             'token': token,
             'show_button_modal_cancel': True,
-            'quotation_pay': True,
-
+            'quotation_pay': False,
         }
         return values
 

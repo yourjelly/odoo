@@ -43,6 +43,39 @@
         </div>
     </template>
 
+    <template id="quotation_sign_modal" name="Quotation Sign and Confirm">
+        <div class="modal fade" id="modalpayment" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+              <form id="accept" method="POST" t-att-data-order-id="quotation.id" t-att-data-token="payment_request.access_token" class="js_accept_json modal-content js_website_submit_form">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&amp;times;</button>
+                  <h4 class="modal-title">Validate Order</h4>
+                </div>
+                <div class="modal-body" id="sign-dialog">
+                  <p>
+                      <span>I agree that by signing this proposal, I
+                      accept it on the behalf of </span><b t-field="quotation.partner_id.commercial_partner_id"/><span>, for an amount of </span>
+                      <b data-id="total_amount" t-field="quotation.amount_total"
+                        t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/>
+                      <span>with payment terms: </span><b t-field="quotation.payment_term_id"/>.
+                  </p>
+                  <div id="signer" class="form-group">
+                      <label class="control-label" for="name">Your Name:</label>
+                      <input type="text" name="signer" id="name" class="form-control"/>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                    <div t-if="not acquirers">
+                      <button type="submit" t-attf-class="btn btn-primary">Sign &amp; Confirm</button>
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+              </form>
+            </div>
+        </div>
+    </template>
+
     <template id="so_quotation_payment" name="Quotation Payment">
         <div id="wrap">
             <div class="o_so_quotation">
@@ -80,7 +113,7 @@
                                     <li t-if="payment_request.state != 'paid'">
                                         <h3>
                                             <a class="btn btn-primary btn-lg o_paynow_button"  data-toggle="modal" data-target="#modalpayment">
-                                                <i class="fa fa-arrow fa-5x" aria-hidden="true"/>Pay Now
+                                                <i class="fa fa-arrow fa-5x" aria-hidden="true"/> <t t-if="quotation_pay">Pay Now</t><t t-if="not quotation_pay">Accept</t>
                                             </a>
                                         </h3>
                                     </li>
@@ -93,10 +126,15 @@
                             <t t-call="sale.so_quotation_detail"/>
                         </div>
                     </div>
-                     <div id="online_qoutation_payment">
-                        <input type='hidden' name="access_token" t-att-value="payment_request.access_token" t-if="payment_request.access_token"/>
-                        <t t-call="payment.payment"/>
-                    </div>
+                    <t t-if="not quotation_pay">
+                        <t t-call="sale.quotation_sign_modal"/>
+                    </t>
+                    <t t-if="quotation_pay">
+                        <div id="online_qoutation_payment">
+                            <input type='hidden' name="access_token" t-att-value="payment_request.access_token" t-if="payment_request.access_token"/>
+                            <t t-call="payment.payment"/>
+                        </div>
+                    </t>
                 </div>
             </div>
         </div>
