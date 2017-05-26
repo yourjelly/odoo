@@ -4,8 +4,6 @@
 from odoo import api, fields, models, _
 from odoo.addons import decimal_precision as dp
 from odoo.exceptions import UserError
-from itertools import groupby
-from operator import itemgetter
 
 
 class ReturnPickingLine(models.TransientModel):
@@ -49,7 +47,7 @@ class ReturnPicking(models.TransientModel):
                     continue
                 if move.move_dest_ids:
                     move_dest_exists = True
-                quantity = move.product_qty - sum(move.move_dest_ids.filtered(lambda x: x.state in ['partially_available', 'assigned', 'done']).\
+                quantity = move.product_qty - sum(move.move_dest_ids.filtered(lambda m: m.state in ['partially_available', 'assigned', 'done']).\
                                                   mapped('pack_operation_ids').mapped('product_qty'))
                 product_return_moves.append((0, 0, {'product_id': move.product_id.id, 'quantity': quantity, 'move_id': move.id}))
 
@@ -74,9 +72,7 @@ class ReturnPicking(models.TransientModel):
     def _create_returns(self):
         # TODO sle: the unreserve of the next moves could be less brutal
         for return_move in self.product_return_moves.mapped('move_id'):
-            for move_dest in return_move.move_dest_ids:
-                if move_dest.reserved_availability and move_dest.state not in ('done', 'cancel'):
-                    move_dest.do_unreserve()
+            return_move.move_dest_ids.filtered(lambda m: m.state not in ('done', 'cancel')).do_unreserve()
 
         # create new picking for returned products
         picking_type_id = self.picking_id.picking_type_id.return_picking_type_id.id or self.picking_id.picking_type_id.id
