@@ -50,7 +50,7 @@ class SaleQuotation(Payment):
         # taxes, required to compute the total_amout of SO.
         order_sudo = payment_request.order_id.sudo()
         if pdf:
-            return self._print_invoice_pdf(payment_request.order_id.id, 'sale.action_report_saleorder')
+            return self._print_invoice_pdf(order_sudo.id, 'sale.action_report_saleorder')
 
         transaction_id = request.session.get('quote_%s_transaction_id' % order_sudo.id)
         if not transaction_id:

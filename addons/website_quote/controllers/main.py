@@ -7,6 +7,53 @@ from odoo import fields, http, _
 from odoo.http import request
 from odoo.addons.website_mail.controllers.main import _message_post_helper
 from odoo.addons.website_portal.controllers.main import get_records_pager
+from odoo.addons.sale.controllers.main import SaleQuotation
+
+
+class WebsiteSaleQuotation(SaleQuotation):
+
+    def _get_quotation_value(self, order_sudo, transaction, token=None, **post):
+        values = super(SaleQuotation, self)._get_quotation_value(
+            order_sudo, transaction, token, **post)
+
+        history = request.session.get('my_quotes_history', [])
+        values.update(get_records_pager(history, order_sudo))
+        values.update({
+            'breadcrumb': request.env.user.partner_id == order_sudo.partner_id,
+            'option': any(not x.line_id for x in order_sudo.options),
+            'need_payment': order_sudo.invoice_status == 'to invoice' and transaction.state in ['draft', 'cancel', 'error'],
+        })
+        return values
+
+    @http.route()
+    def view(self, payment_request_id=None, pdf=None, token=None, message=False, **post):
+        # use sudo to allow accessing/viewing orders for public user
+        # only if he knows the private token
+        payment_request = self._get_invoice_payment_request(payment_request_id, token, **post)
+
+        if not payment_request or (payment_request and not payment_request.order_id):
+            return request.render('website.404')
+
+        Order = payment_request.order_id
+        now = fields.Date.today()
+
+        if Order and request.session.get('view_quote') != now and request.env.user.share:
+            request.session['view_quote'] = now
+            body = _('Quotation viewed by customer')
+            _message_post_helper(
+                res_model='sale.order', res_id=Order.id,
+                message=body, token=token, token_field="access_token",
+                message_type='notification', subtype="mail.mt_note",
+                partner_ids=Order.user_id.sudo().partner_id.ids)
+
+        # Token or not, sudo the order, since portal user has not access on
+        # taxes, required to compute the total_amout of SO.
+        order_sudo = Order.sudo()
+
+        if pdf:
+            return self._print_invoice_pdf(order_sudo.id, 'website_quote.report_web_quote')
+
+        return super(WebsiteSaleQuotation, self).view(payment_request_id=payment_request_id, pdf=pdf, token=token, **post)
 
 
 class sale_quote(http.Controller):
