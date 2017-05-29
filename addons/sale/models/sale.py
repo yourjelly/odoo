@@ -158,6 +158,35 @@ class SaleOrder(models.Model):
 
     product_id = fields.Many2one('product.product', related='order_line.product_id', string='Product')
     payment_request_id = fields.Many2one('account.payment.request', string='Request for Online Payment', copy=False)
+    quote_mode_type = fields.Selection([
+        ('signature', 'Signature'),
+        ('payment', 'Payment'),
+    ], string="Quotation Signature & Payment", default='signature', compute='_get_quotation_mode_type')
+    require_payment = fields.Selection([
+        (0, 'Not mandatory on online quote validation'),
+        (1, 'Immediate after online order validation'),
+    ], 'Payment', help="Require immediate payment by the customer when validating the order from the online quote")
+
+    @api.multi
+    def _get_quotation_mode_type(self):
+        """ Get Quotation mode type, which is define in sale config.
+            that configuration use for set payment require option in quotation
+            and also update frontend view(if we choose payment then
+            show all published payment method for payment process else just
+            open modal for confirmation process with sign option for quotation.
+        """
+        sale_quote_pay = self.env['ir.config_parameter'].get_param('sale.sale_quote_pay')
+        if sale_quote_pay:
+            modetype = self.env['ir.values'].sudo().get_default('sale.config.settings', 'quote_mode_type')
+            self.quote_mode_type = modetype
+
+    @api.multi
+    def _get_payment_type(self):
+        self.ensure_one()
+        if self.require_payment == 2:
+            return 'form_save'
+        else:
+            return 'form'
 
     @api.model
     def _get_customer_lead(self, product_tmpl_id):

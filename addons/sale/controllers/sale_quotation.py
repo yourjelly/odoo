@@ -20,10 +20,9 @@ class SaleQuotation(Payment):
             'tx_id': transaction.id if transaction else False,
             'tx_state': transaction.state if transaction else False,
             'tx_post_msg': transaction.acquirer_id.post_msg if transaction else False,
-            'need_payment': order_sudo.invoice_status == 'to invoice' and transaction.state in ['draft', 'cancel', 'error'],
+            'need_payment': transaction.state in ['draft', 'cancel', 'error'],
             'token': token,
             'show_button_modal_cancel': True,
-            'quotation_pay': False,
         }
         return values
 
@@ -63,7 +62,7 @@ class SaleQuotation(Payment):
         values['message'] = message and int(message) or False,
         values['payment_request'] = payment_request
 
-        if order_sudo:
+        if order_sudo.require_payment or values['need_payment']:
             render_values = {
                 'return_url': '/quote/%s' % token if token else '/quote/%s' % payment_request_id,
                 'type': 'form',
