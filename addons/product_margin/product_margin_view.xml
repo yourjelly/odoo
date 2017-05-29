@@ -8,8 +8,7 @@
             <field name="arch" type="xml">
                 <graph string="Product Margins" type="bar">
                     <field name="product_tmpl_id"/>
-                    <field name="turnover" operator="+"/>
-                    <field name="total_cost" operator="+"/>
+                    <field name="turnover" type="measure" operator="+"/>
                 </graph>
             </field>
     </record>
