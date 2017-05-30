@@ -579,10 +579,8 @@
                     <sheet>
                         <group>
                             <field name="vehicle_id"/>
-                                <div>
-                                    <field name="value" class="oe_inline"/>
-                                    <field name="unit" class="oe_inline"/>
-                                </div>
+                            <field name="value" class="oe_inline"/>
+                            <field name="unit" class="oe_inline"/>
                             <field name="date" />
                         </group>
                     </sheet>
@@ -634,7 +632,7 @@
             <field name="name">Vehicles Odometer</field>
             <field name="res_model">fleet.vehicle.odometer</field>
             <field name="view_type">form</field>
-            <field name="view_mode">tree,graph</field>
+            <field name="view_mode">tree,form,graph</field>
             <field name="context">{"search_default_groupby_vehicle" : True}</field>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
