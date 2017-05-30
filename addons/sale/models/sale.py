@@ -178,7 +178,15 @@ class SaleOrder(models.Model):
         sale_quote_pay = self.env['ir.config_parameter'].get_param('sale.sale_quote_pay')
         if sale_quote_pay:
             modetype = self.env['ir.values'].sudo().get_default('sale.config.settings', 'quote_mode_type')
-            self.quote_mode_type = modetype
+            if modetype == 'signature':
+                val = {
+                    'quote_mode_type': modetype,
+                    'require_payment': 0
+                }
+            else:
+                val = {'quote_mode_type': modetype}
+
+            self.write(val)
 
     @api.model
     def _get_customer_lead(self, product_tmpl_id):
