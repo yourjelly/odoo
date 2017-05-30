@@ -117,8 +117,7 @@ odoo.define('sale.payment_method', function (require) {
             if($("#online_qoutation_payment").length || $("#website_quote_payment").length){
                 var href = $(location).attr("href"),
                     payment_request_id = href.match(/quote\/([0-9]+)/),
-                    access_token = href.match(/quote+\/([^\/?]*)/),
-                    params = {};
+                    access_token = href.match(/quote+\/([^\/?]*)/);
 
                 params.access_token = access_token ? access_token[1] : '';
                 params.payment_request_id = payment_request_id ? payment_request_id[1] :
