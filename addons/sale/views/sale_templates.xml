@@ -152,25 +152,33 @@
 
     <template id="qoutation_sign-dialog" name="Qoutation Sign Dialog" inherit_id="payment.payment">
         <xpath expr="//div[@id='sign-dialog']" position="inside">
-            <t t-if="quotation.require_payment or need_payment">
+            <t t-if="quotation and quotation.require_payment or need_payment">
                 <p>
                     <span>I agree that by paying this proposal, I
-                    accept it on the behalf of </span><b t-field="payment_request.partner_id.commercial_partner_id"/><span>, for an amount of </span>
-                    <b data-id="total_amount" t-field="payment_request.amount_total"
-                    t-options='{"widget": "monetary", "display_currency": payment_request.currency_id}'/>
+                    accept it on the behalf of </span><b t-field="quotation.partner_id.commercial_partner_id"/><span>, for an amount of </span>
+                    <b data-id="total_amount" t-field="quotation.amount_total"
+                    t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/>
                     <t t-if="payment_request.order_id.payment_term_id">
-                        <span>with payment terms: </span><b t-field="payment_request.order_id.payment_term_id"/>.
+                        <span>with payment terms: </span><b t-field="quotation.payment_term_id"/>.
                     </t>
                 </p>
             </t>
         </xpath>
         <xpath expr="//div[@id='payment_method']" position="inside">
-            <t t-if="quotation.require_payment or need_payment">
+            <t t-if="quotation and quotation.require_payment or need_payment">
                 <div class="col-md-6">
                     <t t-call="payment.save_payment_data"/>
                 </div>
             </t>
         </xpath>
-  </template>
+    </template>
+
+    <template id="save_payment_data" inherit_id="payment.save_payment_data">
+        <xpath expr="//div[@id='payment_data']" position="inside">
+            <t t-if="show_button_modal_cancel">
+                <button type="button" class="btn btn-link" data-dismiss="modal" style="padding: 0">Cancel</button>
+            </t>
+        </xpath>
+    </template>
 
 </odoo>

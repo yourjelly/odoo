@@ -248,5 +248,13 @@
         <div class="oe_structure" />
     </template>
 
+    <template id="quotation_website_layout" inherit_id="sale.so_quotation" name="Quotation">
+        <xpath expr="//span[contains(@class,'o_quotation_extend_layout')]" position="replace">
+            <t t-call="website.layout">
+                <t t-call="sale.so_quotation_payment"/>
+            </t>
+        </xpath>
+    </template>
+
     </data>
 </odoo>
