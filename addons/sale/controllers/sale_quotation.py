@@ -22,6 +22,7 @@ class SaleQuotation(Payment):
             'tx_post_msg': transaction.acquirer_id.post_msg if transaction else False,
             'need_payment': transaction.state in ['draft', 'cancel', 'error'],
             'token': token,
+            'save_option': False,
             'show_button_modal_cancel': True,
         }
         return values
@@ -71,7 +72,6 @@ class SaleQuotation(Payment):
             }
 
             values.update(order_sudo.with_context(submit_class="btn btn-primary", submit_txt=_('Pay & Confirm'))._prepare_payment_acquirer(values=render_values))
-            values['save_option'] = False
 
         return request.render('sale.so_quotation', values)
 
