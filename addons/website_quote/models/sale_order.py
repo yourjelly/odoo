@@ -167,7 +167,7 @@ class SaleOrder(models.Model):
         return {
             'type': 'ir.actions.act_url',
             'target': 'self',
-            'url': '/quote/%s/%s' % (self.id, self.access_token)
+            'url': '/quote/%s' % self.access_token
         }
 
     @api.multi
@@ -178,7 +178,7 @@ class SaleOrder(models.Model):
             return super(SaleOrder, self).get_access_action()
         return {
             'type': 'ir.actions.act_url',
-            'url': '/quote/%s/%s' % (self.id, self.access_token),
+            'url': '/quote/%s' % self.access_token,
             'target': 'self',
             'res_id': self.id,
         }

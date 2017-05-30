@@ -13,7 +13,7 @@ from odoo.addons.website_payment.controllers.main import SaleQuotation
 class WebsiteSaleQuotation(SaleQuotation):
 
     def _get_quotation_value(self, order_sudo, transaction, token=None, **post):
-        values = super(SaleQuotation, self)._get_quotation_value(
+        values = super(WebsiteSaleQuotation, self)._get_quotation_value(
             order_sudo, transaction, token, **post)
 
         history = request.session.get('my_quotes_history', [])
@@ -26,7 +26,7 @@ class WebsiteSaleQuotation(SaleQuotation):
         return values
 
     @http.route()
-    def view(self, payment_request_id=None, pdf=None, token=None, message=False, **post):
+    def quote_view(self, payment_request_id=None, pdf=None, token=None, message=False, **post):
         # use sudo to allow accessing/viewing orders for public user
         # only if he knows the private token
         payment_request = self._get_invoice_payment_request(payment_request_id, token, **post)
@@ -53,7 +53,7 @@ class WebsiteSaleQuotation(SaleQuotation):
         if pdf:
             return self._print_invoice_pdf(order_sudo.id, 'website_quote.report_web_quote')
 
-        return super(WebsiteSaleQuotation, self).view(payment_request_id=payment_request_id, pdf=pdf, token=token, **post)
+        return super(WebsiteSaleQuotation, self).quote_view(payment_request_id=payment_request_id, pdf=pdf, token=token, **post)
 
 
 class sale_quote(http.Controller):
