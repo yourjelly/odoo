@@ -189,7 +189,7 @@ var FieldTextHtml = AbstractField.extend({
         };
         window.odoo[this.callback+"_updown"] = null;
         window.odoo[this.callback+"_downup"] = function (value) {
-            self.set_value(value);
+            self._setValue(value);
             self.resize();
         };
 
@@ -249,9 +249,7 @@ var FieldTextHtml = AbstractField.extend({
         if (session.debug) {
             attr.debug = session.debug;
         }
-
         attr.lang = attr.enable_editor ? 'en_US' : this.getSession().user_context.lang;
-
         for (k in _attr) {
             attr[k] = _attr[k];
         }
@@ -291,18 +289,17 @@ var FieldTextHtml = AbstractField.extend({
         this._dirty_flag = false;
         this.render();
         setTimeout(function () {
-            self.trigger_up('perform_model_rpc', {
+            self._rpc({
                 model: 'res.lang',
                 method: 'search_read',
                 args: [
                     [['code', '!=', 'en_US']],
-                    ["name", "code"]
+                    ["name", "code"],
                 ],
-                on_success: function (res) {
-                    self.languages = res;
-                    self.add_button();
-                    setTimeout(self.resize,0);
-                }
+            }).then(function (res) {
+                self.languages = res;
+                self.add_button();
+                setTimeout(self.resize,0);
             });
         }, 0);
     },
@@ -319,12 +316,11 @@ var FieldTextHtml = AbstractField.extend({
     add_button: function () {
         var self = this;
         var $to = this.$body.find("#web_editor-top-edit, #wrapwrap").first();
-
-        $(QWeb.render('FieldTextHtml.translate', {'widget': this}))
+        $(QWeb.render('web_editor.FieldTextHtml.translate', {'widget': this}))
             .appendTo($to)
             .on('change', 'select', function () {
                 var lang = $(this).val();
-                var edit = self. mode === "edit";
+                var edit = self.mode === "edit";
                 var trans = lang !== 'en_US';
                 self.$iframe.attr("src", self.get_url({
                     'edit_translations': edit && trans,

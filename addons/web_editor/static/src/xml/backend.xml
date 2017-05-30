@@ -22,7 +22,7 @@
     </t>
 
     <t t-name="web_editor.FieldTextHtml.translate">
-        <div t-if="widget.recordData.id &amp;&amp; widget.languages.length" style="margin: 5px; position: fixed; top: 0; left: 0; z-index: 2000;">
+        <div t-if="widget.recordData.id &amp;&amp; widget.languages.length &amp;&amp; widget.mode !== 'readonly'" style="margin: 5px; position: fixed; top: 0; left: 0; z-index: 2000;">
             <select style="
                     width: 148px;
                     height: 22px;
@@ -33,9 +33,9 @@
                     border-radius: 3px;
                     background: white;">
                 <option value="en_US" t-att-selected="'en_US' == widget.lang ? 'selected' : null">
-                    <t t-if="!widget.get('effective_readonly')">English (edit mode)</t>
-                    <t t-if="widget.get('effective_readonly')">English</t>
-                </option>
+                    <t t-if="widget.mode !== 'readonly'">English (edit mode)</t>
+<!--                     <t t-if="widget.mode === 'readonly'">English</t>
+ -->                </option>
                 <t t-foreach="widget.languages" t-as="lang">
                     <option t-att-value="lang.code" t-att-selected="lang.code == widget.lang ? 'selected' : null"><t t-esc="lang.name"/></option>
                 </t>
