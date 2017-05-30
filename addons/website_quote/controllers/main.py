@@ -7,7 +7,7 @@ from odoo import fields, http, _
 from odoo.http import request
 from odoo.addons.website_mail.controllers.main import _message_post_helper
 from odoo.addons.website_portal.controllers.main import get_records_pager
-from odoo.addons.sale.controllers.main import SaleQuotation
+from odoo.addons.sale.controllers.sale_quotation import SaleQuotation
 
 
 class WebsiteSaleQuotation(SaleQuotation):

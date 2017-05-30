@@ -114,7 +114,7 @@ odoo.define('sale.payment_method', function (require) {
     saleQuotePayment.include({
         payment_transaction_action: function(acquirer_id, params){
             // override this function as per controllers(route) of module wise
-            if($("#website_quote_payment").length){
+            if($("#online_qoutation_payment").length || $("#website_quote_payment").length){
                 var href = $(location).attr("href"),
                     payment_request_id = href.match(/quote\/([0-9]+)/),
                     access_token = href.match(/quote+\/([^\/?]*)/),
@@ -131,9 +131,14 @@ odoo.define('sale.payment_method', function (require) {
     });
 
      $(document).ready(function () {
-        if($("#website_quote_payment").length){
+        if($("#online_qoutation_payment").length || $("#website_quote_payment").length){
             var sale_quote_payment = new saleQuotePayment();
-            sale_quote_payment.attachTo($("#website_quote_payment"));
+            if ($("#online_qoutation_payment").length){
+                sale_quote_payment.attachTo($("#online_qoutation_payment"));
+            }
+            if ($("#website_quote_payment").length){
+                sale_quote_payment.attachTo($("#website_quote_payment"));
+            }
         }
     });
 });
