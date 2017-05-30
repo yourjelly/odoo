@@ -27,18 +27,18 @@ class SaleQuotation(Payment):
         return values
 
     @http.route("/quote/report/html", type='json', auth="public", website=True)
-    def html_report(self, payment_request_id=None, token=None, **kwargs):
+    def quote_html_report(self, payment_request_id=None, token=None, **kwargs):
         # the real invoice report (displayed in HTML format)
         access_token = token if token != payment_request_id else None
         payment_request = self._get_invoice_payment_request(payment_request_id, access_token, **kwargs)
         return request.env.ref('sale.action_report_saleorder').sudo().render_qweb_html([payment_request.order_id.id])[0]
 
     @http.route("/quote/<int:payment_request_id>", type='http', auth="user", website=True)
-    def view_user(self, *args, **kwargs):
-        return self.view(*args, **kwargs)
+    def quote_view_user(self, *args, **kwargs):
+        return self.quote_view(*args, **kwargs)
 
     @http.route("/quote/<token>", type='http', auth="public", website=True)
-    def view(self, payment_request_id=None, pdf=None, token=None, message=False, **post):
+    def quote_view(self, payment_request_id=None, pdf=None, token=None, message=False, **post):
         # use sudo to allow accessing/viewing orders for public user
         # only if he knows the private token
         payment_request = self._get_invoice_payment_request(payment_request_id, token, **post)
@@ -74,3 +74,49 @@ class SaleQuotation(Payment):
             values['save_option'] = False
 
         return request.render('sale.so_quotation', values)
+
+    @http.route(['/quote/transaction/<int:acquirer_id>'], type='json', auth="public", website=True)
+    def quote_payment_transaction(self, acquirer_id, tx_type='form', token=None, **kwargs):
+        """ Json method that creates a payment.transaction, used to create a
+        transaction when the user clicks on 'pay now' button. After having
+        created the transaction, the event continues and the user is redirected
+        to the acquirer website.
+
+        :param int acquirer_id: id of a payment.acquirer record. If not set the
+                                user is redirected to the checkout page
+        """
+        # In case the route is called directly from the JS (as done in Stripe payment method)
+        payment_request_id = kwargs.get('payment_request_id')
+        access_token = kwargs.get('access_token') if kwargs.get('access_token') != kwargs.get('payment_request_id') else None
+        payment_request = self._get_invoice_payment_request(payment_request_id, access_token)
+
+        Order = payment_request.order_id.sudo()
+        if not Order or not Order.order_line or acquirer_id is None:
+            return request.redirect("/quote/%s" % payment_request.id)
+
+        # find an already existing transaction
+        Transaction = request.env['payment.transaction'].sudo().search([
+            ('reference', '=', Order.name),
+            ('sale_order_id', '=', Order.id)
+        ])
+        Transaction = Order._prepare_payment_transaction(acquirer_id, transaction=Transaction, token=token)
+
+        if not Transaction.callback_model_id:
+            Transaction.write({
+                'callback_model_id': request.env['ir.model'].sudo().search([('model', '=', Order._name)], limit=1).id,
+                'callback_res_id': Order.id,
+                'callback_method': '_confirm_online_quote',
+            })
+        request.session['quote_%s_transaction_id' % Order.id] = Transaction.id
+        return Transaction.acquirer_id.with_context(submit_class='btn btn-primary', submit_txt=_('Pay & Confirm')).render(
+            Transaction.reference,
+            Order.amount_total,
+            Order.pricelist_id.currency_id.id,
+            values={
+                'return_url': '/quote/%s' % token if token else '/quote/%s' % payment_request.id,
+                'type': Order._get_payment_type(),
+                'alias_usage': _('If we store your payment information on our server, subscription payments will be made automatically.'),
+                'partner_id': Order.partner_shipping_id.id or Order.partner_invoice_id.id,
+                'billing_partner_id': Order.partner_invoice_id.id,
+            },
+        )
