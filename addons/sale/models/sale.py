@@ -180,14 +180,6 @@ class SaleOrder(models.Model):
             modetype = self.env['ir.values'].sudo().get_default('sale.config.settings', 'quote_mode_type')
             self.quote_mode_type = modetype
 
-    @api.multi
-    def _get_payment_type(self):
-        self.ensure_one()
-        if self.require_payment == 2:
-            return 'form_save'
-        else:
-            return 'form'
-
     @api.model
     def _get_customer_lead(self, product_tmpl_id):
         return False
@@ -581,6 +573,25 @@ class SaleOrder(models.Model):
     # ==============
     # Payment #
     # ==============
+
+    @api.multi
+    def _get_payment_type(self):
+        self.ensure_one()
+        if self.require_payment == 2:
+            return 'form_save'
+        else:
+            return 'form'
+
+    @api.multi
+    def _confirm_online_quote(self, transaction):
+        """ Payment callback: validate the order and write transaction details in chatter """
+        # create draft invoice if transaction is ok
+        if transaction and transaction.state == 'done':
+            transaction._confirm_so()
+            message = _('Order paid by %s. Transaction: %s. Amount: %s.') % (transaction.partner_id.name, transaction.acquirer_reference, transaction.amount)
+            self.message_post(body=message)
+            return True
+        return False
 
     @api.multi
     def _prepare_payment_acquirer(self, values=None):
