@@ -6,6 +6,7 @@ from . import account_payment_request
 from . import procurement_order
 from . import product_pricelist
 from . import product_product
+from . import payment
 from . import product_template
 from . import res_company
 from . import res_partner
