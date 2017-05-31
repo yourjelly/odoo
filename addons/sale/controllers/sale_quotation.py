@@ -92,7 +92,7 @@ class SaleQuotation(Payment):
 
         Order = payment_request.order_id.sudo()
         if not Order or not Order.order_line or acquirer_id is None:
-            return request.redirect("/quote/%s" % payment_request.id)
+            return request.redirect("/quote/%s" % access_token if access_token else '/quote/%s' % payment_request.id)
 
         # find an already existing transaction
         Transaction = request.env['payment.transaction'].sudo().search([
@@ -113,7 +113,7 @@ class SaleQuotation(Payment):
             Order.amount_total,
             Order.pricelist_id.currency_id.id,
             values={
-                'return_url': '/quote/%s' % token if token else '/quote/%s' % payment_request.id,
+                'return_url': '/quote/%s' % access_token if access_token else '/quote/%s' % payment_request.id,
                 'type': Order._get_payment_type(),
                 'alias_usage': _('If we store your payment information on our server, subscription payments will be made automatically.'),
                 'partner_id': Order.partner_shipping_id.id or Order.partner_invoice_id.id,

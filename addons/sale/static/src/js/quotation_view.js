@@ -71,15 +71,38 @@ odoo.define('sale.quotation_view', function (require) {
         },
     });
 
+    QuotationPayment.include({
+        payment_transaction_action: function(acquirer_id, params){
+            // override this function as per controllers(route) of module wise
+            if($("#online_qoutation_payment").length || $("#website_quote_payment").length){
+                var href = $(location).attr("href"),
+                    payment_request_id = href.match(/quote\/([0-9]+)/),
+                    access_token = href.match(/quote+\/([^\/?]*)/);
+
+                params.access_token = access_token ? access_token[1] : '';
+                params.payment_request_id = payment_request_id ? payment_request_id[1] :
+                ajax.jsonRpc('/quote/transaction/' + acquirer_id, 'call', params).then(function (data) {
+                    debugger;
+                    $(data).appendTo('body').submit();
+                });
+            }
+            this._super(acquirer_id, params)
+        },
+    });
+
     $(document).ready(function () {
 
         var accept_modal = new AcceptModal();
         accept_modal.setElement($('#modalpayment'));
         accept_modal.start();
-
-        if($("#online_qoutation_payment").length){
-            var quotation_payment = new QuotationPayment();
-            quotation_payment.attachTo($("#online_qoutation_payment"));
+        if($("#online_qoutation_payment").length || $("#website_quote_payment").length){
+            var quote_payment = new QuotationPayment();
+            if ($("#online_qoutation_payment").length){
+                quote_payment.attachTo($("#online_qoutation_payment"));
+            }
+            if ($("#website_quote_payment").length){
+                quote_payment.attachTo($("#website_quote_payment"));
+            }
         }
 
         if($(".o_quote_report_html").length){
@@ -101,43 +124,5 @@ odoo.define('sale.quotation_view', function (require) {
             event.stopPropagation();
             $('iframe#print_quote')[0].contentWindow.print();
         });
-    });
-});
-
-
-odoo.define('sale.payment_method', function (require) {
-'use strict';
-
-    var ajax = require('web.ajax');
-    var saleQuotePayment = require('payment.payment_method');
-
-    saleQuotePayment.include({
-        payment_transaction_action: function(acquirer_id, params){
-            // override this function as per controllers(route) of module wise
-            if($("#online_qoutation_payment").length || $("#website_quote_payment").length){
-                var href = $(location).attr("href"),
-                    payment_request_id = href.match(/quote\/([0-9]+)/),
-                    access_token = href.match(/quote+\/([^\/?]*)/);
-
-                params.access_token = access_token ? access_token[1] : '';
-                params.payment_request_id = payment_request_id ? payment_request_id[1] :
-                ajax.jsonRpc('/quote/transaction/' + acquirer_id, 'call', params).then(function (data) {
-                    $(data).appendTo('body').submit();
-                });
-            }
-            this._super(acquirer_id, params)
-        },
-    });
-
-     $(document).ready(function () {
-        if($("#online_qoutation_payment").length || $("#website_quote_payment").length){
-            var sale_quote_payment = new saleQuotePayment();
-            if ($("#online_qoutation_payment").length){
-                sale_quote_payment.attachTo($("#online_qoutation_payment"));
-            }
-            if ($("#website_quote_payment").length){
-                sale_quote_payment.attachTo($("#website_quote_payment"));
-            }
-        }
     });
 });

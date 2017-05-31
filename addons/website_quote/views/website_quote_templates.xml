@@ -253,46 +253,7 @@
                   </div>
                   <!-- Page content -->
                   <div id="quote_content" class="col-md-9">
-
-                      <div class="alert alert-success alert-dismissable" t-if="message==1">
-                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
-                          Your message has been successfully sent!
-                      </div>
-                      <div class="alert alert-warning alert-dismissable" t-if="message==2">
-                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
-                          This quotation has been rejected. <a href="#discussion">Contact us</a> if you want a new one.
-                      </div>
-                      <div class="alert alert-warning alert-dismissable" t-if="message==3">
-                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
-                          This order has been validated. Thanks for your trust
-                          and do not hesitate to <a href="#discussion">contact us</a> for
-                          any question.
-                      </div>
-                      <div class="alert alert-warning alert-dismissable" t-if="tx_id and tx_state == 'done'">
-                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
-                          Your payment has been received, thank you for your trust.
-                          <span t-if='tx_post_msg' t-raw="tx_post_msg"/>
-                      </div>
-                      <div class="alert alert-warning alert-dismissable" t-if="tx_id and tx_state == 'pending'">
-                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
-                          Your transaction is waiting confirmation.
-                          <span t-if='tx_post_msg' t-raw="tx_post_msg"/>
-                      </div>
-                      <div class="alert alert-warning alert-dismissable" t-if="tx_id and tx_state == 'authorized'">
-                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
-                          Your payment has been authorized.
-                          <span t-if='tx_post_msg' t-raw="tx_post_msg"/>
-                      </div>
-                      <div class="alert alert-warning alert-dismissable" t-if="message==4 and quotation.state != 'sent'">
-                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
-                          This order
-                            <t t-if="quotation.state=='draft'">has not yet been sent</t>
-                            <t t-if="quotation.state=='cancel'">has already been cancelled</t>
-                            <t t-if="quotation.state not in ('cancel','draft')">has already been validated</t>
-                          ! You can <a href="#discussion">contact us</a> for
-                          any question.
-                      </div>
-
+                      <t t-call="sale.quote_status_message"/>
                       <!-- modal relative to the actions Accept/Reject/Cancel -->
                       <t t-if="not quotation.require_payment and not need_payment">
                         <div class="modal fade" id="modalpayment" role="dialog" aria-hidden="true">

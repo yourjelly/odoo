@@ -23,18 +23,50 @@
         </span>
     </template>
 
+    <template id="quote_status_message" name="Quotation Content">
+        <div class="alert alert-success alert-dismissable" t-if="message==1">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
+                Your message has been successfully sent!
+        </div>
+        <div class="alert alert-warning alert-dismissable" t-if="message==2">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
+                This quotation has been rejected. <a href="#discussion">Contact us</a> if you want a new one.
+        </div>
+        <div class="alert alert-warning alert-dismissable" t-if="message==3">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
+                This order has been validated. Thanks for your trust
+                and do not hesitate to <a href="#discussion">contact us</a> for
+                any question.
+        </div>
+        <div class="alert alert-warning alert-dismissable" t-if="tx_id and tx_state == 'done'">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
+                Your payment has been received, thank you for your trust.
+            <span t-if='tx_post_msg' t-raw="tx_post_msg"/>
+        </div>
+        <div class="alert alert-warning alert-dismissable" t-if="tx_id and tx_state == 'pending'">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
+                Your transaction is waiting confirmation.
+            <span t-if='tx_post_msg' t-raw="tx_post_msg"/>
+        </div>
+        <div class="alert alert-warning alert-dismissable" t-if="tx_id and tx_state == 'authorized'">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
+                Your payment has been authorized.
+            <span t-if='tx_post_msg' t-raw="tx_post_msg"/>
+        </div>
+        <div class="alert alert-warning alert-dismissable" t-if="message==4 and quotation.state != 'sent'">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
+                This order
+            <t t-if="quotation.state=='draft'">has not yet been sent</t>
+            <t t-if="quotation.state=='cancel'">has already been cancelled</t>
+            <t t-if="quotation.state not in ('cancel','draft')">has already been validated</t>
+            ! You can <a href="#discussion">contact us</a> for
+            any question.
+        </div>
+    </template>
+
     <template id="so_quotation_detail" name="Quotation Detail">
         <div id="wrap">
-            <div t-att-class="payment_request.state == 'paid' and 'panel panel-success' or payment_request.state == 'pending' and 'panel panel-warning' or 'panel panel-default'">
-                <t t-if="payment_request.state not in ['open', 'paid'] and message">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <h4>
-                                <div class="col-md-6" t-raw="message"/>
-                            </h4>
-                        </div>
-                    </div>
-                </t>
+            <div class="panel panel-default">
                 <div class="panel-body">
                     <div class="o_quote_report_html">
                         <iframe id="print_quote"/>
@@ -96,7 +128,7 @@
                             <h2>
                                 Your Quotation<br></br>
                                 <em t-esc="quotation.name"/>
-                                <small t-field="payment_request.state"/>
+                                <small t-field="quotation.state"/>
                             </h2>
                         </div>
                         <div class="col-md-6 col-sm-6 col-xs-10 hidden-print text-right" id="pay_button" t-ignore="true">
@@ -129,6 +161,11 @@
                                     </li>
                                 </ul>
                             </div>
+                        </div>
+                    </div>
+                    <div class="row mb4">
+                        <div class="col-md-12">
+                            <t t-call="sale.quote_status_message"/>
                         </div>
                     </div>
                     <div class="row mb16">
