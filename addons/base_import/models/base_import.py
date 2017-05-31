@@ -681,5 +681,4 @@ class Import(models.TransientModel):
                 self._cr.execute('RELEASE SAVEPOINT import')
         except psycopg2.InternalError:
             pass
-
-        return import_result['messages']
+        return {'message': import_result['messages']}

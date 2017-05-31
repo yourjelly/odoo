@@ -482,23 +482,28 @@ var DataImport = Widget.extend(ControlPanelMixin, {
     },
     onimport: function () {
         var self = this;
-        return this.call_import({ dryrun: false }).done(function (message) {
+        return this.call_import({ dryrun: false }).done(function (result) {
+            var message = result['message']
+            var redirect_action = result['redirect_action']
             if (!_.any(message, function (message) {
                     return message.type === 'error'; })) {
-                self['import_succeeded']();
+                self['import_succeeded'](redirect_action);
                 return;
             }
             self['import_failed'](message);
         });
     },
-    onimported: function () {
-        this.exit();
+    onimported: function (event, from, to, redirect_action) {
+        this.exit(redirect_action);
     },
-    exit: function () {
-        this.do_action({
-            type: 'ir.actions.client',
-            tag: 'history_back'
-        });
+    exit: function (redirect_action=false) {
+        if (!redirect_action){
+            redirect_action = {
+                type: 'ir.actions.client',
+                tag: 'history_back'
+            }
+        };
+        this.do_action(redirect_action);
     },
     onresults: function (event, from, to, message) {
         var no_messages = _.isEmpty(message);
