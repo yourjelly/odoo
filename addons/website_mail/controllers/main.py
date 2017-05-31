@@ -5,6 +5,7 @@ from time import time
 
 from odoo import http
 from odoo.http import request
+from odoo.addons.payment.controllers.main import _message_post_helper
 
 def _message_post_helper(res_model='', res_id=None, message='', token='', token_field='token', nosubscribe=True, **kw):
     """ Generic chatter function, allowing to write on *any* object that inherits mail.thread.
