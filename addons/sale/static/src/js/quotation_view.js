@@ -64,7 +64,7 @@ odoo.define('sale.quotation_view', function (require) {
                 }).then(function (data) {
                     var message_id = (data) ? 3 : 4;
                     self.$el.modal('hide');
-                    window.location.href = '/quote/'+order_id.toString()+'/'+token+'?message='+message_id;
+                    window.location.href = '/quote/'+token+'?message='+message_id;
                 });
                 return false;
             }

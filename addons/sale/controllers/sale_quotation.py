@@ -3,6 +3,7 @@
 
 from odoo import fields, http, _
 from odoo.http import request
+from odoo.addons.payment.controllers.main import _message_post_helper
 from odoo.addons.payment.controllers.main import Payment
 
 
@@ -60,7 +61,7 @@ class SaleQuotation(Payment):
             transaction = request.env['payment.transaction'].sudo().browse(transaction_id)
 
         values = self._get_quotation_value(order_sudo, transaction, **post)
-        values['message'] = message and int(message) or False,
+        values['message'] = message and int(message) or False
         values['payment_request'] = payment_request
 
         if order_sudo.require_payment or values['need_payment']:
@@ -120,3 +121,16 @@ class SaleQuotation(Payment):
                 'billing_partner_id': Order.partner_invoice_id.id,
             },
         )
+
+    @http.route(['/quote/accept'], type='json', auth="public", website=True)
+    def accept(self, order_id, token=None, signer=None, sign=None, **post):
+        Order = request.env['sale.order'].sudo().browse(order_id)
+        if token != Order.payment_request_id.access_token or Order.require_payment:
+            return request.render('payment.404')
+        if Order.state != 'sent':
+            return False
+        attachments = [('signature.png', sign.decode('base64'))] if sign else []
+        Order.action_confirm()
+        message = _('Order signed by %s') % (signer,)
+        _message_post_helper(message=message, res_id=order_id, res_model='sale.order', attachments=attachments, **({'token': token, 'token_field': 'access_token'} if token else {}))
+        return True
