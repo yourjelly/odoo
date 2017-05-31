@@ -58,31 +58,18 @@ class WebsiteSaleQuotation(SaleQuotation):
 
 class sale_quote(http.Controller):
 
-    @http.route(['/quote/accept'], type='json', auth="public", website=True)
-    def accept(self, order_id, token=None, signer=None, sign=None, **post):
-        Order = request.env['sale.order'].sudo().browse(order_id)
-        if token != Order.access_token or Order.require_payment:
-            return request.render('website.404')
-        if Order.state != 'sent':
-            return False
-        attachments = [('signature.png', sign.decode('base64'))] if sign else []
-        Order.action_confirm()
-        message = _('Order signed by %s') % (signer,)
-        _message_post_helper(message=message, res_id=order_id, res_model='sale.order', attachments=attachments, **({'token': token, 'token_field': 'access_token'} if token else {}))
-        return True
-
     @http.route(['/quote/<int:order_id>/<token>/decline'], type='http', auth="public", methods=['POST'], website=True)
     def decline(self, order_id, token, **post):
         Order = request.env['sale.order'].sudo().browse(order_id)
         if token != Order.access_token:
             return request.render('website.404')
         if Order.state != 'sent':
-            return werkzeug.utils.redirect("/quote/%s/%s?message=4" % (order_id, token))
+            return werkzeug.utils.redirect("/quote/%s?message=4" % token)
         Order.action_cancel()
         message = post.get('decline_message')
         if message:
             _message_post_helper(message=message, res_id=order_id, res_model='sale.order', **{'token': token, 'token_field': 'access_token'} if token else {})
-        return werkzeug.utils.redirect("/quote/%s/%s?message=2" % (order_id, token))
+        return werkzeug.utils.redirect("/quote/%s?message=2" % token)
 
     @http.route(['/quote/update_line'], type='json', auth="public", website=True)
     def update(self, line_id, remove=False, unlink=False, order_id=None, token=None, **post):
