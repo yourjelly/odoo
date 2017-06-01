@@ -399,9 +399,7 @@ class test_convert_import_data(TransactionCase):
         )
 
         # if results empty, no errors
-        self.assertItemsEqual(results, [])
-
-
+        self.assertItemsEqual(results['message'], [])
 
     def test_filtered(self):
         """ If ``False`` is provided as field mapping for a column,
@@ -529,7 +527,6 @@ class test_failures(TransactionCase):
         """
         import csv, cStringIO
         from PIL import Image
-
         im = Image.new('RGB', (1920, 1080))
         fout = cStringIO.StringIO()
 
@@ -547,4 +544,4 @@ class test_failures(TransactionCase):
         results = import_wizard.do(
             ['name', 'db_datas'],
             {'headers': True, 'separator': ',', 'quoting': '"'})
-        self.assertFalse(results, "results should be empty on successful import")
+        self.assertFalse(results['message'], "results should be empty on successful import")
