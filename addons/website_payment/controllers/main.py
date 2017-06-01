@@ -6,7 +6,6 @@ from odoo.http import request
 from odoo.exceptions import AccessError
 
 from odoo.addons.payment.controllers.main import Payment
-from odoo.addons.sale.controllers.sale_quotation import SaleQuotation
 
 
 class Payment(Payment):
@@ -24,14 +23,6 @@ class Payment(Payment):
         if not payment_request:
             return request.render("website.403")
         return super(Payment, self).pay(payment_request_id=payment_request_id, token=token, pdf=pdf, **kwargs)
-
-
-class SaleQuotation(SaleQuotation):
-
-    def _get_quotation_value(self, order_sudo, transaction, token=None, **post):
-        values = super(SaleQuotation, self)._get_quotation_value(order_sudo, transaction, token, **post)
-        values['save_option'] = True
-        return values
 
 
 class WebsitePayment(http.Controller):

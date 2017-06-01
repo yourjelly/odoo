@@ -164,6 +164,12 @@
       </xpath>
   </template>
 
+    <template id="website_quote_template_layout" inherit_id="sale.so_quotation" name="Quotation Template">
+        <xpath expr="//span[contains(@class,'o_quotation_extend_layout')]" position="replace">
+            <t t-call="website_quote.so_quotation"/>
+        </xpath>
+    </template>
+
   <!-- Complete page of the quotation -->
   <template id="so_quotation" name="Product Quotation">
       <t t-call="website.layout">

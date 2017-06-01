@@ -82,7 +82,6 @@ odoo.define('sale.quotation_view', function (require) {
                 params.access_token = access_token ? access_token[1] : '';
                 params.payment_request_id = payment_request_id ? payment_request_id[1] :
                 ajax.jsonRpc('/quote/transaction/' + acquirer_id, 'call', params).then(function (data) {
-                    debugger;
                     $(data).appendTo('body').submit();
                 });
             }

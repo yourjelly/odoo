@@ -7,7 +7,7 @@ from odoo import fields, http, _
 from odoo.http import request
 from odoo.addons.payment.controllers.main import _message_post_helper
 from odoo.addons.website_portal.controllers.main import get_records_pager
-from odoo.addons.website_payment.controllers.main import SaleQuotation
+from odoo.addons.sale.controllers.sale_quotation import SaleQuotation
 
 
 class WebsiteSaleQuotation(SaleQuotation):
@@ -22,6 +22,7 @@ class WebsiteSaleQuotation(SaleQuotation):
             'breadcrumb': request.env.user.partner_id == order_sudo.partner_id,
             'option': any(not x.line_id for x in order_sudo.options),
             'need_payment': order_sudo.invoice_status == 'to invoice' and transaction.state in ['draft', 'cancel', 'error'],
+            'save_option': True,
         })
         return values
 
