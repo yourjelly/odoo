@@ -53,8 +53,8 @@ class SaleOrder(models.Model):
                 so.website_url = '/quote/%s' % (so.id)
 
     access_token = fields.Char(
-        'Security Token', copy=False, default=lambda self: str(uuid.uuid4()),
-        required=True)
+        related="payment_request_id.access_token",
+        string='Security Token', copy=False, required=True)
     template_id = fields.Many2one(
         'sale.quote.template', 'Quotation Template',
         readonly=True,
