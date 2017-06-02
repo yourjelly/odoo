@@ -163,7 +163,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row mb4">
+                    <div class="row mb4" t-if="message">
                         <div class="col-md-12">
                             <t t-call="sale.quote_status_message"/>
                         </div>
