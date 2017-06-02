@@ -483,8 +483,14 @@ var DataImport = Widget.extend(ControlPanelMixin, {
     onimport: function () {
         var self = this;
         return this.call_import({ dryrun: false }).done(function (result) {
-            var message = result['message']
-            var redirect_action = result['redirect_action']
+            var redirect_action = []
+            var message = []
+            if (result['message']) {
+                message = result['message']
+            }
+            if (result['redirect_action']) {
+                redirect_action = result['redirect_action']
+            }
             if (!_.any(message, function (message) {
                     return message.type === 'error'; })) {
                 self['import_succeeded'](redirect_action);
