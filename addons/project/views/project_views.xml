@@ -605,9 +605,11 @@ action = model.activate_sample_project()
 
         <record id="action_view_task" model="ir.actions.act_window">
             <field name="name">Tasks</field>
+            <field name="type">ir.actions.act_window</field>
             <field name="res_model">project.task</field>
-            <field name="view_mode">kanban,tree,form,calendar,pivot,graph</field>
-            <field name="context">{'search_default_my_tasks': 1}</field>
+            <field name="view_id" ref="view_task_tree2"/>
+            <field name="view_mode">tree,kanban,form,calendar,pivot,graph</field>
+            <field name="context">{}</field>
             <field name="search_view_id" ref="view_task_search_form"/>
             <field name="help" type="html">
                 <p>
@@ -615,14 +617,14 @@ action = model.activate_sample_project()
                 </p>
             </field>
         </record>
-        <record id="open_view_task_list_kanban" model="ir.actions.act_window.view">
+        <record id="open_view_task_list_tree" model="ir.actions.act_window.view">
             <field name="sequence" eval="0"/>
-            <field name="view_mode">kanban</field>
+            <field name="view_mode">tree</field>
             <field name="act_window_id" ref="action_view_task"/>
         </record>
-        <record id="open_view_task_list_tree" model="ir.actions.act_window.view">
+        <record id="open_view_task_list_kanban" model="ir.actions.act_window.view">
             <field name="sequence" eval="1"/>
-            <field name="view_mode">tree</field>
+            <field name="view_mode">kanban</field>
             <field name="act_window_id" ref="action_view_task"/>
         </record>
 

@@ -460,7 +460,6 @@ var ManyToOneField = CharField.extend({
             value = value[0];
         }
         var context = pyeval.eval('contexts', [this.searchview.dataset.get_context()]);
-
         return this._rpc({
                 model: this.attrs.relation,
                 method: 'name_get',
