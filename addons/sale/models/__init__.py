@@ -3,6 +3,7 @@
 
 from . import account_invoice
 from . import account_payment_request
+from . import payment
 from . import procurement_order
 from . import product_pricelist
 from . import product_product
