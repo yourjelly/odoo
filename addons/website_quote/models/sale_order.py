@@ -64,8 +64,6 @@ class SaleOrder(models.Model):
         'sale.order.option', 'order_id', 'Optional Products Lines',
         copy=True, readonly=True,
         states={'draft': [('readonly', False)], 'sent': [('readonly', False)]})
-    amount_undiscounted = fields.Float(
-        'Amount Before Discount', compute='_compute_amount_undiscounted', digits=0)
     quote_viewed = fields.Boolean('Quotation Viewed')
     require_payment = fields.Selection([
         (0, 'Not mandatory on website quote validation'),
@@ -79,13 +77,6 @@ class SaleOrder(models.Model):
             default = dict(default or {})
             default['validity_date'] = fields.Date.to_string(datetime.now() + timedelta(self.template_id.number_of_days))
         return super(SaleOrder, self).copy(default=default)
-
-    @api.one
-    def _compute_amount_undiscounted(self):
-        total = 0.0
-        for line in self.order_line:
-            total += line.price_subtotal + line.price_unit * ((line.discount or 0.0) / 100.0) * line.product_uom_qty  # why is there a discount in a field named amount_undiscounted ??
-        self.amount_undiscounted = total
 
     @api.onchange('partner_id')
     def onchange_partner_id(self):

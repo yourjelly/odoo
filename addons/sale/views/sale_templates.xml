@@ -138,9 +138,47 @@
                                          <h2>
                                             <span t-esc="payment_request.amount_total" t-options="{'widget': 'monetary', 'display_currency': payment_request.currency_id}"/>
                                         </h2>
-                                        <t t-if="payment_request.due_date">
-                                            <h4>Due by<span class="ml4" t-esc="payment_request.due_date" t-options='{"widget": "date"}'/></h4>
-                                        </t>
+                                        <div class="o_highlight_text" t-if="not order_valid and quotation.state in ['draft', 'sent']">
+                                            <strong>This offer expired! Contact us for new quote.</strong>
+                                        </div>
+                                        <div class="o_highlight_text" t-if="order_valid and quotation.state in ['draft', 'sent']">
+                                            <input type="hidden" t-att-value="quotation.validity_date" id="validity_date"/>
+                                            <div class="mt8" t-if="days_valid &gt; 0">
+                                                <strong>This offer expires in</strong>
+                                                <span class="day_counter mt8 mb16">
+                                                    <i class="fa fa-clock-o"></i>
+                                                    <t t-esc="days_valid"/>
+                                                    <t t-if="days_valid &gt; 1">
+                                                        days
+                                                    </t>
+                                                    <t t-if="days_valid &lt;= 1">
+                                                        day
+                                                    </t>
+                                                </span>
+                                            </div>
+                                            <div t-if="quotation.amount_undiscounted &gt; quotation.amount_untaxed">
+                                                <strong>Your advantage:</strong>
+                                                <t t-if="quotation.amount_untaxed == quotation.amount_total">
+                                                    <strong t-field="quotation.amount_total"
+                                                          t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/>
+                                                    <strong t-field="quotation.amount_undiscounted"
+                                                          t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'
+                                                          style="text-decoration: line-through"
+                                                          class="text-danger"/>
+                                                </t>
+                                                <t t-if="quotation.amount_untaxed != quotation.amount_total">
+                                                    <strong t-field="quotation.amount_untaxed"
+                                                      t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/>
+                                                    <strong t-field="quotation.amount_undiscounted"
+                                                      t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'
+                                                      style="text-decoration: line-through"
+                                                      class="text-danger"/>
+                                                    <br />
+                                                    (<span t-field="quotation.amount_total"
+                                                      t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/> Incl. tax)
+                                                </t>
+                                            </div>
+                                        </div>
                                     </li>
                                     <li>
                                         <a target="_blank" t-att-href="'/quote/%s' % payment_request.access_token+'?pdf=True'" t-att-title="payment_request.reference">
@@ -152,7 +190,7 @@
                                             <i class="fa fa-print fa-2x" aria-hidden="true"/>
                                         </a>
                                     </li>
-                                    <li t-if="payment_request.state != 'paid'">
+                                    <li t-if="payment_request.state != 'paid' and order_valid">
                                         <h3>
                                             <a class="btn btn-primary btn-lg o_paynow_button"  data-toggle="modal" data-target="#modalpayment">
                                                 <i class="fa fa-arrow fa-5x" aria-hidden="true"/><t t-if="order_valid and quotation.require_payment">Pay Now</t><t t-if="order_valid and not quotation.require_payment">Confirm</t>

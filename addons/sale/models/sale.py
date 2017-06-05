@@ -157,6 +157,8 @@ class SaleOrder(models.Model):
     procurement_group_id = fields.Many2one('procurement.group', 'Procurement Group', copy=False)
 
     product_id = fields.Many2one('product.product', related='order_line.product_id', string='Product')
+    amount_undiscounted = fields.Float(
+        'Amount Before Discount', compute='_compute_amount_undiscounted', digits=0)
     payment_request_id = fields.Many2one('account.payment.request', string='Request for Online Payment', copy=False)
     quote_mode_type = fields.Selection([
         ('signature', 'Signature'),
@@ -167,6 +169,13 @@ class SaleOrder(models.Model):
         (1, 'Immediate after online order validation'),
     ], 'Payment', help="Require immediate payment by the customer when validating the order from the online quote")
 
+    @api.one
+    def _compute_amount_undiscounted(self):
+        total = 0.0
+        for line in self.order_line:
+            total += line.price_subtotal + line.price_unit * ((line.discount or 0.0) / 100.0) * line.product_uom_qty  # why is there a discount in a field named amount_undiscounted ??
+        self.amount_undiscounted = total
+
     @api.multi
     def _get_quotation_mode_type(self):
         """ Get Quotation mode type, which is define in sale config.
@@ -176,17 +185,13 @@ class SaleOrder(models.Model):
             open modal for confirmation process with sign option for quotation.
         """
         sale_quote_pay = self.env['ir.config_parameter'].get_param('sale.sale_quote_pay')
-        if sale_quote_pay:
-            modetype = self.env['ir.values'].sudo().get_default('sale.config.settings', 'quote_mode_type')
-            if modetype == 'signature':
-                val = {
-                    'quote_mode_type': modetype,
-                    'require_payment': 0
-                }
+        modetype = self.env['ir.values'].sudo().get_default('sale.config.settings', 'quote_mode_type')
+        for order in self:
+            if modetype == 'signature' and sale_quote_pay:
+                order.quote_mode_type = modetype
+                order.require_payment = False
             else:
-                val = {'quote_mode_type': modetype}
-
-            self.write(val)
+                order.quote_mode_type = modetype
 
     @api.model
     def _get_customer_lead(self, product_tmpl_id):
@@ -424,7 +429,7 @@ class SaleOrder(models.Model):
         if not self.env.user.share and not self.env.context.get('force_website'):
             return super(SaleOrder, self).get_access_action()
         if not self.payment_request_id:
-            self.payment_request_id = self.env['account.payment.request'].create({
+            payment_request = self.env['account.payment.request'].create({
                 'order_id': self.id,
                 'due_date': self.validity_date,
                 'currency_id': self.pricelist_id.currency_id.id,
@@ -433,6 +438,10 @@ class SaleOrder(models.Model):
                 'reference': self.name,
                 'amount_total': self.amount_total,
             })
+            # when we use self.payment_request_id = payment_request
+            # in that case record doesn't update with payment_request_id
+            # so that, we call write method to store the payment request into the sale order
+            self.write({'payment_request_id': payment_request.id})
         return {
             'type': 'ir.actions.act_url',
             'url': '/quote/%s' % self.payment_request_id.access_token,
