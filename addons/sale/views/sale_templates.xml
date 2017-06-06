@@ -201,7 +201,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row mb4" t-if="message">
+                    <div class="row mb4" t-if="message or (tx_id and tx_state)">
                         <div class="col-md-12">
                             <t t-call="sale.quote_status_message"/>
                         </div>

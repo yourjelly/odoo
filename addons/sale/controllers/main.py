@@ -58,7 +58,7 @@ class SaleQuotation(Payment):
         if not transaction_id:
             transaction = request.env['payment.transaction'].sudo().search([('reference', '=', order_sudo.name)])
         else:
-            transaction = request.env['payment.transaction'].sudo().browse(transaction_id)
+            transaction = request.env['payment.transaction'].sudo().search([('id', '=', transaction_id)])
 
         values = self._get_quotation_value(order_sudo, transaction, **post)
         values['message'] = message and int(message) or False
