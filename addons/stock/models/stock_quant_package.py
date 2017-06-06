@@ -35,6 +35,7 @@ class QuantPackage(models.Model):
     owner_id = fields.Many2one(
         'res.partner', 'Owner', compute='_compute_package_info', search='_search_owner',
         index=True, readonly=True)
+    move_line_ids = fields.One2many('stock.pack.operation', 'result_package_id')
 
     @api.one
     @api.depends('parent_id', 'children_ids')
@@ -123,10 +124,9 @@ class QuantPackage(models.Model):
     @api.multi
     def unpack(self):
         for package in self:
-            # TDE FIXME: why superuser ?
             package.mapped('quant_ids').sudo().write({'package_id': package.parent_id.id})
             package.mapped('children_ids').write({'parent_id': package.parent_id.id})
-        return self.env['ir.actions.act_window'].for_xml_id('stock', 'action_package_view')
+            package.mapped('move_line_ids').write({'result_package_id': package.parent_id.id})
 
     def action_view_picking(self):
         action = self.env.ref('stock.action_picking_tree_all').read()[0]
