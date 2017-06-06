@@ -7,7 +7,7 @@ import time
 
 from odoo import api, fields, models, _
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, pycompat
-from odoo.tools.float_utils import float_compare
+from odoo.tools.float_utils import float_compare, float_round
 from odoo.addons.procurement.models import procurement
 from odoo.exceptions import UserError
 
@@ -840,26 +840,26 @@ class Picking(models.Model):
 
     @api.multi
     def _put_in_pack(self):
-        # TDE FIXME: reclean me
-        QuantPackage = self.env["stock.quant.package"]
         package = False
         for pick in self:
-            operations = [x for x in pick.pack_operation_ids if x.qty_done > 0 and (not x.result_package_id)]
-            pack_operation_ids = self.env['stock.pack.operation']
-            for operation in operations:
-                # If we haven't done all qty in operation, we have to split into 2 operation
-                op = operation
-                if operation.qty_done < operation.product_qty:
-                    new_operation = operation.copy({'product_qty': operation.qty_done,'qty_done': operation.qty_done})
-
-                    operation.write({'product_qty': operation.product_qty - operation.qty_done,'qty_done': 0})
-
-                    op = new_operation
-                pack_operation_ids |= op
+            operations = pick.pack_operation_ids.filtered(lambda o: o.qty_done > 0 and not o.result_package_id)
+            operation_ids = self.env['stock.pack.operation']
             if operations:
-                pack_operation_ids.check_tracking()
-                package = QuantPackage.create({})
-                pack_operation_ids.write({'result_package_id': package.id})
+                package = self.env['stock.quant.package'].create({})
+                for operation in operations:
+                    if float_compare(operation.qty_done, operation.product_qty, precision_rounding=operation.product_uom_id.rounding) >= 0:
+                        operation_ids |= operation
+                    else:
+                        quantity_left_todo = float_round(
+                            operation.product_qty - operation.qty_done,
+                            precision_rounding=operation.product_uom_id.rounding,
+                            rounding_method='UP')
+                        new_operation = operation.copy(
+                            default={'product_qty': operation.qty_done, 'qty_done': operation.qty_done})
+                        operation.write({'product_qty': quantity_left_todo, 'qty_done': 0.0})
+                        operation_ids |= new_operation
+
+                operation_ids.write({'result_package_id': package.id})
             else:
                 raise UserError(_('Please process some quantities to put in the pack first!'))
         return package
@@ -891,4 +891,12 @@ class Picking(models.Model):
         action = self.env.ref('stock.action_stock_scrap').read()[0]
         scraps = self.env['stock.scrap'].search([('picking_id', '=', self.id)])
         action['domain'] = [('id', 'in', scraps.ids)]
+        return action
+
+    @api.multi
+    def action_see_packages(self):
+        self.ensure_one()
+        action = self.env.ref('stock.action_package_view').read()[0]
+        packages = self.pack_operation_ids.mapped('result_package_id')
+        action['domain'] = [('id', 'in', packages.ids)]
         return action
