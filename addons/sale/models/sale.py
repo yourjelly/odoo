@@ -167,7 +167,7 @@ class SaleOrder(models.Model):
     require_payment = fields.Selection([
         (0, 'Not mandatory on online quote validation'),
         (1, 'Immediate after online order validation'),
-    ], 'Payment', help="Require immediate payment by the customer when validating the order from the online quote")
+    ], string="Payment", help="Require immediate payment by the customer when validating the order from the online quote")
 
     @api.one
     def _compute_amount_undiscounted(self):
@@ -191,7 +191,7 @@ class SaleOrder(models.Model):
                 order.quote_mode_type = modetype
                 order.require_payment = False
             else:
-                order.quote_mode_type = modetype
+                order.quote_mode_type = modetype or 'signature'
 
     @api.model
     def _get_customer_lead(self, product_tmpl_id):

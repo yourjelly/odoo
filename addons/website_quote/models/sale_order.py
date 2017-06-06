@@ -65,11 +65,10 @@ class SaleOrder(models.Model):
         copy=True, readonly=True,
         states={'draft': [('readonly', False)], 'sent': [('readonly', False)]})
     quote_viewed = fields.Boolean('Quotation Viewed')
-    require_payment = fields.Selection([
+    require_payment = fields.Selection(selection_add=[
         (0, 'Not mandatory on website quote validation'),
         (1, 'Immediate after website order validation'),
-        (2, 'Immediate after website order validation and save a token'),
-    ], 'Payment', help="Require immediate payment by the customer when validating the order from the website quote")
+        (2, 'Immediate after website order validation and save a token')])
 
     @api.multi
     def copy(self, default=None):
