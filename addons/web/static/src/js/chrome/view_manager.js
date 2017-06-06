@@ -476,6 +476,10 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
             if (match) {
                 search_defaults[match[1]] = value;
             }
+            if(key === 'group_by'){
+                search_defaults[key] = value;
+                console.log("sdfcds", search_defaults[key])
+            }
         });
 
         var options = {
