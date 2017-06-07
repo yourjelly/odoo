@@ -52,6 +52,13 @@ class StockQuant(models.Model):
         if any(elem.product_id.type == 'consu' for elem in self):
             raise ValidationError(_('Quants cannot be created for consumables.'))
 
+    @api.multi
+    @api.constrains('quantity')
+    def check_product_id(self):
+        for quant in self:
+            if quant.quantity > 1 and quant.product_id.tracking == 'serial':
+                raise ValidationError(_('A serial number should only be linked to a single product.'))
+
     @api.one
     def _compute_name(self):
         self.name = '%s: %s%s' % (self.lot_id.name or self.product_id.code or '', self.quantity, self.product_id.uom_id.name)
