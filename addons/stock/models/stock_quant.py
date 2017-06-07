@@ -54,7 +54,7 @@ class StockQuant(models.Model):
 
     @api.multi
     @api.constrains('quantity')
-    def check_product_id(self):
+    def check_quantity(self):
         for quant in self:
             if quant.quantity > 1 and quant.product_id.tracking == 'serial':
                 raise ValidationError(_('A serial number should only be linked to a single product.'))
