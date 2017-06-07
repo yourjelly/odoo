@@ -13,7 +13,7 @@ class AssetAssetReport(models.Model):
     depreciation_date = fields.Date(string='Depreciation Date', readonly=True)
     asset_id = fields.Many2one('account.asset.asset', string='Asset', readonly=True)
     asset_category_id = fields.Many2one('account.asset.category', string='Asset category', readonly=True)
-    partner_id = fields.Many2one('res.partner', string='customer', readonly=True)
+    partner_id = fields.Many2one('res.partner', string='Partner', readonly=True)
     state = fields.Selection([('draft', 'Draft'), ('open', 'Running'), ('close', 'Close')], string='Status', readonly=True)
     depreciation_value = fields.Float(string='Amount of Depreciation Lines', readonly=True)
     installment_value = fields.Float(string='Amount of Installment Lines', readonly=True)
