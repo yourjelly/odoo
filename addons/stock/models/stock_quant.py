@@ -98,6 +98,11 @@ class StockQuant(models.Model):
         return self.search(domain, order=removal_strategy_order)
 
     @api.model
+    def get_quantity(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None):
+        quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id)
+        return sum(quants.mapped('quantity'))
+
+    @api.model
     def get_available_quantity(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None):
         quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id)
         return sum(quants.mapped('quantity')) - sum(quants.mapped('reserved_quantity'))
