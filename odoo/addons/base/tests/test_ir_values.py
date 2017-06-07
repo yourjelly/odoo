@@ -84,13 +84,12 @@ class TestIrValues(TransactionCase):
         self.assertTrue(isinstance(actions[1][2], dict) and actions[1][2]['id'] == act_id_1,
                         'Bound action does not match definition')
 
-        # actions = ir_values.get_actions(action_slot='client_action_multi', model='res.partner', res_id=False)
-        # print '<innnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn',actions
-        # self.assertEqual(len(actions), 1, "Mismatching number of bound actions")
-        # self.assertEqual(len(actions[0]), 3, "Malformed action definition")
-        # self.assertEqual(actions[0][1], 'Side Wizard', 'Bound action does not match definition')
-        # self.assertTrue(isinstance(actions[0][2], dict) and actions[0][2]['id'] == act_id_3,
-        #                 'Bound action does not match definition')
+        actions = ir_values.get_actions(action_slot='client_action_multi', model='res.partner', res_id=False)
+        self.assertEqual(len(actions), 1, "Mismatching number of bound actions")
+        self.assertEqual(len(actions[0]), 3, "Malformed action definition")
+        self.assertEqual(actions[0][1], 'Side Wizard', 'Bound action does not match definition')
+        self.assertTrue(isinstance(actions[0][2], dict) and actions[0][2]['id'] == act_id_3,
+                        'Bound action does not match definition')
 
         actions = ir_values.get_actions(action_slot='client_print_multi', model='res.partner', res_id=False)
         self.assertEqual(len(actions), 1, "Mismatching number of bound actions")
