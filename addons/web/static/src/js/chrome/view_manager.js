@@ -470,17 +470,25 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
     setup_search_view: function() {
         var self = this;
         var search_defaults = {};
+        var groupby_defaults = [];
         var context = this.action.context || [];
         _.each(context, function (value, key) {
             var match = /^search_default_(.*)$/.exec(key);
             if (match) {
                 search_defaults[match[1]] = value;
             }
-            if(key === 'group_by'){
-                search_defaults[key] = value;
-                console.log("sdfcds", search_defaults[key])
+            // when group_by applied on context
+            var match = /^group_by$/.exec(key)
+            if(match) {
+                groupby_defaults.push(value)
             }
         });
+        // When default_group_by applied on view
+        var default_view = this.first_view || this.default_view;
+        var default_group_by = default_view.fields_view.arch.attrs.default_group_by
+        if (default_group_by) {
+            groupby_defaults.push(default_group_by);
+        }
 
         var options = {
             hidden: this.flags.search_view === false,
@@ -488,6 +496,7 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
             $buttons: $("<div>"),
             action: this.action,
             search_defaults: search_defaults,
+            groupby_defaults: groupby_defaults
         };
         // Instantiate the SearchView, but do not append it nor its buttons to the DOM as this will
         // be done later, simultaneously to all other ControlPanel elements

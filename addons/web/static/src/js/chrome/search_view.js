@@ -77,7 +77,6 @@ var SearchQuery = Backbone.Collection.extend({
         } else if (!(values instanceof Array)) {
             values = [values];
         }
-
         _(values).each(function (value) {
             var model = this._prepareModel(value, options);
             var previous = this.detect(function (facet) {
@@ -286,6 +285,7 @@ var SearchView = Widget.extend({
         this.visible_filters = (visibleSearchMenu === 'true');
         this.input_subviews = []; // for user input in searchbar
         this.search_defaults = this.options.search_defaults || {};
+        this.groupby_defaults = this.options.groupby_defaults || [];
         this.headless = this.options.hidden &&  _.isEmpty(this.search_defaults);
         this.$buttons = this.options.$buttons;
 
@@ -338,6 +338,7 @@ var SearchView = Widget.extend({
         return this.title;
     },
     set_default_filters: function () {
+        var search_defaults = []
         var self = this,
             default_custom_filter = this.$buttons && this.favorite_menu.get_default_filter();
         if (!self.options.disable_custom_filters && default_custom_filter) {
@@ -346,6 +347,24 @@ var SearchView = Widget.extend({
         if (!_.isEmpty(this.search_defaults)) {
             var inputs = this.search_fields.concat(this.filters, this.groupbys),
                 search_defaults = _.invoke(inputs, 'facet_for_defaults', this.search_defaults);
+        }
+        if (!_.isEmpty(this.groupby_defaults)) {
+            var self = this;
+            var groupby_inputs = _.map(this.groupby_defaults, function (group_by) {
+                var filter = _.map(self.groupbys, function (groupby) {
+                    var filterObj = _.filter(groupby.filters, function(filter) {
+                        return filter.attrs.fieldName === group_by;
+                    });
+                    if (filterObj[0]) {
+                        var value = groupby.make_value(filterObj[0]);
+                        return groupby.make_facet(value);
+                    }
+                });
+                return _.compact(filter)[0];
+            });
+            _.extend(search_defaults, groupby_inputs);
+        }
+        if(!_.isEmpty(search_defaults)) {
             return $.when.apply(null, search_defaults).then(function () {
                 self.query.reset(_(arguments).compact(), {preventSearch: true});
             });
@@ -556,11 +575,13 @@ var SearchView = Widget.extend({
         }));
         function eval_item (item) {
             var category = 'filters';
+            var fieldName = item.attrs.name;
             if (item.attrs.context) {
                 try {
                     var context = pyeval.eval('context', item.attrs.context);
                     if (context.group_by) {
                         category = 'group_by';
+                        item.attrs.fieldName = context.group_by
                     }
                 } catch (e) {}
             }
@@ -591,7 +612,6 @@ var SearchView = Widget.extend({
                 if (field.type === "many2one" && attrs.widget === "selection") {
                     attrs.widget = undefined;
                 }
-
                 var Obj = core.search_widgets_registry.getAny([attrs.widget, field.type]);
                 if (Obj) {
                     self.search_fields.push(new (Obj) (filter.item, field, self));

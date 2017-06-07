@@ -23,7 +23,6 @@ var KanbanView = BasicView.extend({
     viewType: 'kanban',
     init: function (viewInfo, params) {
         this._super.apply(this, arguments);
-
         var arch = viewInfo.arch;
 
         this.loadParams.limit = this.loadParams.limit || 40;
