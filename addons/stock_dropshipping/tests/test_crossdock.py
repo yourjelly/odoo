@@ -23,7 +23,7 @@ class TestCrossdock(TestStockDropshippingCommon):
                                         uom_id=self.uom_unit.id)
 
         # Check that crossdock route active or not.
-        self.assertTrue(self.warehouse.crossdock_route_id.active, "Crossdock Should be acivated...")
+        self.assertTrue(self.warehouse.crossdock_route_id.active, "Crossdock route should be active ...")
         # Set cross dock route on order line.
         sale_order_crossdock.order_line.write({'route_id': self.warehouse.crossdock_route_id.id})
 
@@ -33,11 +33,12 @@ class TestCrossdock(TestStockDropshippingCommon):
         # Run Scheduler
         self.ProcurementOrder.run_scheduler()
 
-        # Searching Purchase Order by their     state
-        po = self.PurchaseOrder.search([('id', '=', self.partner.id), ('state', '=', 'draft')])
-
+        # Searching purchase Order by their partner.
+        purchase_order = self.PurchaseOrder.search([('partner_id', '=', self.partner.id), ('state', '=', 'draft')])
+        # Check purchase order created or not.
+        self.assertTrue(purchase_order, 'No Purchase order!')
         # Confirming Purchase Order
-        po.button_confirm()
+        purchase_order.button_confirm()
 
     def test_01_procurement_exceptions(self):
         """ Test procurement exception when no supplier define on product with cross dock. """
@@ -65,12 +66,12 @@ class TestCrossdock(TestStockDropshippingCommon):
         self.assertTrue(procs, 'No Procurement!')
         # Set the at least one supplier on the product.
         product_with_no_seller.write({'seller_ids': [(0, 0, {'delay': 1, 'name': self.partner.id, 'min_qty': 2.0})]})
-        # Run procurement again
+        # Run procurement again.
         procs.run()
         # Check the status changed there is no procurement order in exception any more from that procurement group
         procs = self.ProcurementOrder.search([('group_id.name', '=', sale_order_crossdock.name), ('state', '=', 'exception')])
         self.assertFalse(procs, 'Procurement should be in running state!')
-        # Check a purchase quotation was created.
+        # Check a purchase quotation was created or not.
         procs = self.ProcurementOrder.search([('group_id.name', '=', sale_order_crossdock.name)])
         purchase_ids = procs.mapped('purchase_line_id').mapped('order_id').ids
         self.assertTrue(purchase_ids, 'No Purchase order!')
