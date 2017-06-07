@@ -806,14 +806,23 @@ class Orderpoint(models.Model):
 
     @api.multi
     def subtract_procurements_from_orderpoints(self):
-        '''This function returns quantity of product that needs to be deducted from the orderpoint computed quantity because there's already a procurement created with aim to fulfill it.
+        ''' This function returns quantity of product that needs to be deducted from the orderpoint computed quantity because there's already a procurement created with aim to fulfill it.
+            return a dict(OP, quantity to add)
+            res[OP] = Sum(qty for OP.procurement) - Sum(qty for OP.procurement.move_qty)
+        '''
+        '''This SQL request get:
+            -All the procurement related to provided order points.
+            -Product UOM for each procurement.
+            -Quantity for each procurement.
+            -Quantity used by stock move related to each procurement
         '''
         self._cr.execute("""SELECT orderpoint.id, procurement.id, procurement.product_uom, procurement.product_qty, template.uom_id, move.product_qty
             FROM stock_warehouse_orderpoint orderpoint
             JOIN procurement_order AS procurement ON procurement.orderpoint_id = orderpoint.id
             JOIN product_product AS product ON product.id = procurement.product_id
             JOIN product_template AS template ON template.id = product.product_tmpl_id
-            LEFT JOIN stock_move AS move ON move.procurement_id = procurement.id
+            LEFT JOIN stock_move_procurement_rel AS move_rel ON move_rel.procurement_id = procurement.id --> LEFT JOIN In order to get procurement without stock_move
+            LEFT JOIN stock_move AS move ON move.id = move_rel.move_id
             WHERE procurement.state not in ('done', 'cancel')
                 AND (move.state IS NULL OR move.state != 'draft')
                 AND orderpoint.id IN %s
