@@ -84,10 +84,11 @@ class StockMove(models.Model):
         help="Optional address where goods are to be delivered, specifically used for allotment")
     move_dest_ids = fields.Many2many(
         'stock.move', 'stock_move_move_rel', 'move_orig_id', 'move_dest_id', 'Destination Moves',
-        copy=False, index=True,
+        copy=False,
         help="Optional: next stock move when chaining them")
     move_orig_ids = fields.Many2many(
         'stock.move', 'stock_move_move_rel', 'move_dest_id', 'move_orig_id', 'Original Move',
+        copy=False,
         help="Optional: previous stock move when chaining them")
     picking_id = fields.Many2one('stock.picking', 'Transfer Reference', index=True, states={'done': [('readonly', True)]})
     picking_partner_id = fields.Many2one('res.partner', 'Transfer Destination Address', related='picking_id.partner_id')
@@ -884,6 +885,7 @@ class StockMove(models.Model):
             'restrict_lot_id': restrict_lot_id,
             'procurement_ids': [(4, x.id) for x in self.procurement_ids],
             'move_dest_ids': [(4, x.id) for x in self.move_dest_ids if x.state not in ('done', 'cancel')],
+            'move_orig_ids': [(4, x.id) for x in self.move_orig_ids],
             'origin_returned_move_id': self.origin_returned_move_id.id,
         }
         if restrict_partner_id:
