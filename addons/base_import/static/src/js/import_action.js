@@ -485,16 +485,16 @@ var DataImport = Widget.extend(ControlPanelMixin, {
         return this.call_import({ dryrun: false }).done(function (message) {
             if (!_.any(message, function (message) {
                     return message.type === 'error'; })) {
-                self['import_succeeded']();
+                self['import_succeeded'](message);
                 return;
             }
             self['import_failed'](message);
         });
     },
-    onimported: function () {
-        this.exit();
+    onimported: function (event, from, to, result) {
+        this.exit(result);
     },
-    exit: function () {
+    exit: function (result=false) {
         this.do_action({
             type: 'ir.actions.client',
             tag: 'history_back'
