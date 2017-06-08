@@ -477,14 +477,20 @@ var DataImport = Widget.extend(ControlPanelMixin, {
             }) ;
     },
     onvalidate: function () {
+        var self = this;
         return this.call_import({ dryrun: true, tracking_disable: true })
-            .done(this.proxy('validated'));
+            .done(function (result) {
+                var message = result['message'];
+                self['validated'](message);
+                //this.proxy('validated')
+            });
     },
+    
     onimport: function () {
         var self = this;
         return this.call_import({ dryrun: false }).done(function (result) {
-            var redirect_action = result['redirect_action']
-            var message = result['message']
+            var redirect_action = result['redirect_action'];
+            var message = result['message'];
             if (!_.any(message, function (message) {
                     return message.type === 'error'; })) {
                 self['import_succeeded'](redirect_action);
@@ -505,14 +511,14 @@ var DataImport = Widget.extend(ControlPanelMixin, {
         };
         this.do_action(redirect_action);
     },
-    onresults: function (event, from, to, result) {
-        var no_messages = _.isEmpty(result['message']);
+    onresults: function (event, from, to, message) {
+        var no_messages = _.isEmpty(message);
         this.$buttons.filter('.o_import_import').toggleClass('btn-primary', no_messages);
         this.$buttons.filter('.o_import_import').toggleClass('btn-default', !no_messages);
         this.$buttons.filter('.o_import_validate').toggleClass('btn-primary', !no_messages);
         this.$buttons.filter('.o_import_validate').toggleClass('btn-default', no_messages);
         if (no_messages) {
-            result['message'].push({
+            message.push({
                 type: 'info',
                 message: _t("Everything seems valid.")
             });
@@ -526,7 +532,7 @@ var DataImport = Widget.extend(ControlPanelMixin, {
         this.$el.addClass('oe_import_error');
         this.$('.oe_import_error_report').html(
             QWeb.render('ImportView.error', {
-                errors: _(result['message']).groupBy(result['message']),
+                errors: _(message).groupBy('message'),
                 at: function (rows) {
                     var from = rows.from + offset;
                     var to = rows.to + offset;

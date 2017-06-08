@@ -657,11 +657,11 @@ class Import(models.TransientModel):
             # Parse date and float field
             data = self._parse_import_data(data, import_fields, options)
         except ValueError as error:
-            return {
+            return {'message': [{
                 'type': 'error',
                 'message': unicode(error),
                 'record': False,
-            }
+            }]}
 
         _logger.info('importing %d rows...', len(data))
         import_result = self.env[self.res_model].with_context(import_file=True).load(import_fields, data)
