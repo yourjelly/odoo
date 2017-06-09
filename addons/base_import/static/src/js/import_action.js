@@ -494,7 +494,7 @@ var DataImport = Widget.extend(ControlPanelMixin, {
     onimported: function (event, from, to, result) {
         this.exit(result);
     },
-    exit: function (result=false) {
+    exit: function (result) {
         this.do_action({
             type: 'ir.actions.client',
             tag: 'history_back'
