@@ -407,7 +407,7 @@ class PurchaseOrder(models.Model):
                     picking = pickings[0]
                 moves = order.order_line._create_stock_moves(picking)
                 moves = moves.filtered(lambda x: x.state not in ('done', 'cancel')).action_confirm()
-                moves.force_assign()
+                moves.action_assign()
                 picking.message_post_with_view('mail.message_origin_link',
                     values={'self': picking, 'origin': order},
                     subtype_id=self.env.ref('mail.mt_note').id)
