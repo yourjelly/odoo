@@ -5,7 +5,7 @@ from odoo import api, fields, models, _
 
 from odoo.addons import decimal_precision as dp
 from odoo.exceptions import UserError
-from odoo.tools.float_utils import float_round, float_compare
+from odoo.tools.float_utils import float_round, float_compare, float_is_zero
 
 
 class PackOperation(models.Model):
@@ -81,37 +81,64 @@ class PackOperation(models.Model):
         vals['ordered_qty'] = vals.get('product_qty')
         return super(PackOperation, self).create(vals)
 
+    def _decrease_reserved_quantity(self, quantity):
+        self.ensure_one()
+        if self.location_id.should_impact_quants():
+            self.env['stock.quant'].decrease_reserved_quantity(
+                self.product_id,
+                self.location_id,
+                quantity,
+                lot_id=self.lot_id,
+                package_id=self.package_id,
+                owner_id=self.owner_id,
+            )
+
     @api.multi
     def write(self, vals):
-        if 'product_qty' in vals:
-            for move_line in self:
-                if move_line.location_id.should_impact_quants():
-                    self.env['stock.quant'].decrease_reserved_quantity(
+        # We forbid to change the reserved quantity in the interace, but it is needed in the
+        # case of stock.move's split.
+        if 'product_qty' in vals and not self.env.context.get('dont_change_reservation'):
+            for move_line in self.filtered(lambda ml: ml.state != 'done'):
+                if self.state != 'draft':
+                    self._decrease_reserved_quantity(move_line.product_qty - vals['product_qty'])
+
+        # Through the interface, we allow users to change the source location, the lot, the package
+        # and owner of a move line. If a quantity has been reserved for this move line, we try to
+        # impact the reservation directly to free the old quants and allocate new ones.
+        updates = {}
+        for key, model in [('location_id', 'stock.location'), ('lot_id', 'stock.production.lot'), ('package_id', 'stock.quant.package'), ('owner_id', 'res.partner')]:
+            if key in vals:
+                updates[key] = self.env[model].browse(vals[key])
+        if updates:
+            for move_line in self.filtered(lambda ml: ml.state != 'done'):
+                self._decrease_reserved_quantity(move_line.product_qty)
+                # FIXME: we guard the reservation the same way in stock.move and the code looks
+                #        crappy because of it, there must be a better way
+                available_quantity = self.env['stock.quant'].get_available_quantity(move_line.product_id, updates.get('location_id', move_line.location_id), lot_id=updates.get('lot_id', move_line.lot_id), package_id=updates.get('package_id', move_line.package_id), owner_id=updates.get('owner_id', move_line.owner_id))
+                if available_quantity <= 0:
+                    continue
+                elif available_quantity < move_line.product_qty:
+                    move_line.with_context(dont_change_reservation=True).product_qty = 0
+                else:
+                    quants = self.env['stock.quant'].increase_reserved_quantity(
                         move_line.product_id,
-                        move_line.location_id,
-                        move_line.product_qty - vals['product_qty'],
-                        lot_id=move_line.lot_id,
-                        package_id=move_line.package_id,
-                        owner_id=move_line.owner_id,
-                    )
+                        updates.get('location_id', move_line.location_id),
+                        move_line.product_qty,
+                        lot_id=updates.get('lot_id', move_line.lot_id),
+                        package_id=updates.get('package_id', move_line.package_id),
+                        owner_id=updates.get('owner_id', move_line.owner_id))
+                    move_line.with_context(dont_change_reservation=True).product_qty = sum([q[1] for q in quants])
         return super(PackOperation, self).write(vals)
 
     @api.multi
     def unlink(self):
-        for pack_operation in self:
-            if pack_operation.state in ('done', 'cancel'):
+        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+        for move_line in self:
+            if move_line.state in ('done', 'cancel'):
                 raise UserError(_('You can not delete pack operations of a done picking'))
             # Unlinking a pack operation should unreserve.
-            if pack_operation.product_qty:  # FIXME: float_is_zero
-                if pack_operation.location_id.should_impact_quants():
-                    self.env['stock.quant'].decrease_reserved_quantity(
-                        pack_operation.product_id,
-                        pack_operation.location_id,
-                        pack_operation.product_qty,
-                        lot_id=pack_operation.lot_id,
-                        package_id=pack_operation.package_id,
-                        owner_id=pack_operation.owner_id,
-                    )
+            if not float_is_zero(move_line.product_qty, precision_digits=precision):
+                self._decrease_reserved_quantity(move_line.product_qty)
         return super(PackOperation, self).unlink()
 
     def _find_similar(self):
