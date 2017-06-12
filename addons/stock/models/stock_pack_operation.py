@@ -200,7 +200,7 @@ class PackOperation(models.Model):
                 if move_line.location_id.should_impact_quants():
                     self.env['stock.quant'].decrease_available_quantity(move_line.product_id, move_line.location_id, quantity, lot_id=move_line.lot_id, package_id=move_line.package_id, owner_id=move_line.owner_id)
                 if move_line.location_dest_id.should_impact_quants():
-                    self.env['stock.quant'].increase_available_quantity(move_line.product_id, move_line.location_dest_id, quantity, lot_id=move_line.lot_id, package_id=move_line.package_id, owner_id=move_line.owner_id)
+                    self.env['stock.quant'].increase_available_quantity(move_line.product_id, move_line.location_dest_id, quantity, lot_id=move_line.lot_id, package_id=move_line.result_package_id, owner_id=move_line.owner_id)
 
     @api.multi
     def split_quantities(self):
