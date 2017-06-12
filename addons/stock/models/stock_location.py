@@ -201,7 +201,7 @@ class PushedFlow(models.Model):
     route_sequence = fields.Integer('Route Sequence', related='route_id.sequence', store=True)
     sequence = fields.Integer('Sequence')
 
-    def _apply(self, move):
+    def _apply(self, move, qty=0.0):
         new_date = (datetime.strptime(move.date_expected, DEFAULT_SERVER_DATETIME_FORMAT) + relativedelta.relativedelta(days=self.delay)).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         if self.auto == 'transparent':
             move.write({
@@ -215,6 +215,8 @@ class PushedFlow(models.Model):
         else:
             new_move_vals = self._prepare_move_copy_values(move, new_date)
             new_move = move.copy(new_move_vals)
+            if qty:
+                new_move.write({'product_uom_qty': qty})
             move.write({'move_dest_ids': [(4, new_move.id)]})
             new_move.action_confirm()
 

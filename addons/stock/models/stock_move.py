@@ -431,29 +431,61 @@ class StockMove(models.Model):
             move.state = 'confirmed'  # TODO: should be adapated once MTO/MTS is implemented
         return True
 
+    def _search_suitable_push_rule(self):
+        self.ensure_one()
+        Push = self.env['stock.location.path']
+        domain = [('location_from_id', '=', self.location_dest_id.id)]
+        # priority goes to the route defined on the product and product category
+        routes = self.product_id.route_ids | self.product_id.categ_id.total_route_ids
+        rules = Push.search(domain + [('route_id', 'in', routes.ids)], order='route_sequence, sequence', limit=1)
+        if not rules:
+            # TDE FIXME/ should those really be in a if / elif ??
+            # then we search on the warehouse if a rule can apply
+            if self.warehouse_id:
+                rules = Push.search(domain + [('route_id', 'in', self.warehouse_id.route_ids.ids)], order='route_sequence, sequence', limit=1)
+            elif self.picking_id.picking_type_id.warehouse_id:
+                rules = Push.search(domain + [('route_id', 'in', self.picking_id.picking_type_id.warehouse_id.route_ids.ids)], order='route_sequence, sequence', limit=1)
+        return rules
+
     def _push_apply(self):
         # TDE CLEANME: I am quite sure I already saw this code somewhere ... in routing ??
-        Push = self.env['stock.location.path']
+        
         for move in self:
             # if the move is already chained, there is no need to check push rules
             if move.move_dest_ids:
                 continue
+            rules = move._search_suitable_push_rule()
             # if the move is a returned move, we don't want to check push rules, as returning a returned move is the only decent way
             # to receive goods without triggering the push rules again (which would duplicate chained operations)
-            domain = [('location_from_id', '=', move.location_dest_id.id)]
-            # priority goes to the route defined on the product and product category
-            routes = move.product_id.route_ids | move.product_id.categ_id.total_route_ids
-            rules = Push.search(domain + [('route_id', 'in', routes.ids)], order='route_sequence, sequence', limit=1)
-            if not rules:
-                # TDE FIXME/ should those really be in a if / elif ??
-                # then we search on the warehouse if a rule can apply
-                if move.warehouse_id:
-                    rules = Push.search(domain + [('route_id', 'in', move.warehouse_id.route_ids.ids)], order='route_sequence, sequence', limit=1)
-                elif move.picking_id.picking_type_id.warehouse_id:
-                    rules = Push.search(domain + [('route_id', 'in', move.picking_id.picking_type_id.warehouse_id.route_ids.ids)], order='route_sequence, sequence', limit=1)
             # Make sure it is not returning the return
             if rules and (not move.origin_returned_move_id or move.origin_returned_move_id.location_dest_id.id != rules.location_dest_id.id):
                 rules._apply(move)
+
+    def compare_with_procurements(self):
+        self.ensure_one()
+        quantities = self.move_dest_ids.mapped('move_orig_ids').mapped('product_qty')
+        
+
+    def _push_adapt(self, qty):
+        self.ensure_one()
+        # TODO: adapt to normal UoM
+        rules = self._search_suitable_push_rule()
+        while rules:
+            move_dests = self.move_dest_ids.filtered(lambda x: x.state not in ('done', 'cancel') and x.location_dest_id.id == rules[0].location_dest_id.id)
+            if move_dests:
+                adapted_move = move_dests[-1]
+                if qty > 0:
+                    adapted_move.product_uom_qty += qty
+                else:
+                    qty_todo = -qty
+                    for move_dest in move_dests:
+                        to_subtract = min(move_dest.product_uom_qty, qty_todo)
+                        move_dest.product_uom_qty -= to_subtract
+                        qty_todo -= to_subtract
+                rules = adapted_move._search_suitable_push_rule()
+            else:
+                rules[0]._apply(self, qty)
+                rules = self.move_dest_ids[0]._search_suitable_push_rule()
 
     @api.onchange('product_id', 'product_qty')
     def onchange_quantity(self):
