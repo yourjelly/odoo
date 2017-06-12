@@ -144,7 +144,6 @@ class TestSinglePicking(TestStockCommon):
             'picking_id': delivery_order.id,
             'location_id': self.pack_location,
             'location_dest_id': self.customer_location,
-            'state': 'waiting',
         })
 
         # make some stock
@@ -152,6 +151,7 @@ class TestSinglePicking(TestStockCommon):
         self.env['stock.quant'].increase_available_quantity(self.productA, pack_location, 2)
 
         # assign
+        delivery_order.action_confirm()
         delivery_order.action_assign()
         self.assertEqual(delivery_order.state, 'assigned')
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 0.0)
@@ -181,7 +181,6 @@ class TestSinglePicking(TestStockCommon):
             'picking_id': delivery_order.id,
             'location_id': self.pack_location,
             'location_dest_id': self.customer_location,
-            'state': 'waiting',
         })
 
         # make some stock
@@ -189,6 +188,7 @@ class TestSinglePicking(TestStockCommon):
         self.env['stock.quant'].increase_available_quantity(self.productA, pack_location, 1)
 
         # assign to partially available
+        delivery_order.action_confirm()
         delivery_order.action_assign()
         self.assertEqual(delivery_order.state, 'partially_available')
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 0.0)
@@ -200,3 +200,161 @@ class TestSinglePicking(TestStockCommon):
 
         backorder = self.env['stock.picking'].search([('backorder_id', '=', delivery_order.id)])
         self.assertEqual(backorder.state, 'confirmed')
+
+    def test_extra_move_1(self):
+        """ Check the good behavior of creating an extra move in a delivery order. This usecase
+        simulates the delivery of 2 item while the initial stock move had to move 1 and there's
+        only 1 in stock.
+        """
+        delivery_order = self.env['stock.picking'].create({
+            'location_id': self.pack_location,
+            'location_dest_id': self.customer_location,
+            'partner_id': self.partner_delta_id,
+            'picking_type_id': self.picking_type_out,
+        })
+        move1 = self.MoveObj.create({
+            'name': self.productA.name,
+            'product_id': self.productA.id,
+            'product_uom_qty': 1,
+            'product_uom': self.productA.uom_id.id,
+            'picking_id': delivery_order.id,
+            'location_id': self.pack_location,
+            'location_dest_id': self.customer_location,
+        })
+
+        # make some stock
+        pack_location = self.env['stock.location'].browse(self.pack_location)
+        self.env['stock.quant'].increase_available_quantity(self.productA, pack_location, 1)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 1.0)
+
+        # assign to available
+        delivery_order.action_confirm()
+        delivery_order.action_assign()
+        self.assertEqual(delivery_order.state, 'assigned')
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 0.0)
+
+        # valid with backorder creation
+        delivery_order.move_lines[0].pack_operation_ids[0].qty_done = 2
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 0.0)
+        delivery_order.with_context(debug=True).do_transfer()
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), -1.0)
+
+        extra_move = delivery_order.move_lines - move1
+        extra_move_line = extra_move.pack_operation_ids[0]
+
+        # self.assertEqual(move1.product_qty, 1.0)
+        # self.assertEqual(move1.quantity_done, 1.0)
+        self.assertEqual(move1.reserved_availability, 1.0)
+        self.assertEqual(move1.pack_operation_ids.product_qty, 1.0)  # should keep the reservation
+        self.assertEqual(move1.pack_operation_ids.qty_done, 1.0)
+        self.assertEqual(move1.state, 'done')
+
+        self.assertEqual(extra_move.product_qty, 1.0)
+        self.assertEqual(extra_move.quantity_done, 1.0)
+        self.assertEqual(extra_move.reserved_availability, 0.0)
+        self.assertEqual(extra_move_line.product_qty, 0.0)  # should not be able to reserve
+        self.assertEqual(extra_move_line.qty_done, 1.0)
+        self.assertEqual(extra_move.state, 'done')
+
+    def test_extra_move_2(self):
+        """ Check the good behavior of creating an extra move in a delivery order. This usecase
+        simulates the delivery of 3 item while the initial stock move had to move 1 and there's
+        only 1 in stock.
+        """
+        delivery_order = self.env['stock.picking'].create({
+            'location_id': self.pack_location,
+            'location_dest_id': self.customer_location,
+            'partner_id': self.partner_delta_id,
+            'picking_type_id': self.picking_type_out,
+        })
+        move1 = self.MoveObj.create({
+            'name': self.productA.name,
+            'product_id': self.productA.id,
+            'product_uom_qty': 1,
+            'product_uom': self.productA.uom_id.id,
+            'picking_id': delivery_order.id,
+            'location_id': self.pack_location,
+            'location_dest_id': self.customer_location,
+        })
+
+        # make some stock
+        pack_location = self.env['stock.location'].browse(self.pack_location)
+        self.env['stock.quant'].increase_available_quantity(self.productA, pack_location, 1)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 1.0)
+
+        # assign to available
+        delivery_order.action_confirm()
+        delivery_order.action_assign()
+        self.assertEqual(delivery_order.state, 'assigned')
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 0.0)
+
+        # valid with backorder creation
+        delivery_order.move_lines[0].pack_operation_ids[0].qty_done = 3
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 0.0)
+        delivery_order.with_context(debug=True).do_transfer()
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), -2.0)
+
+        extra_move = delivery_order.move_lines - move1
+        extra_move_line = extra_move.pack_operation_ids[0]
+
+        self.assertEqual(move1.product_qty, 1.0)
+        self.assertEqual(move1.quantity_done, 1.0)
+        self.assertEqual(move1.reserved_availability, 1.0)
+        self.assertEqual(move1.pack_operation_ids.product_qty, 1.0)  # should keep the reservation
+        self.assertEqual(move1.pack_operation_ids.qty_done, 1.0)
+        self.assertEqual(move1.state, 'done')
+
+        self.assertEqual(extra_move.product_qty, 2.0)
+        self.assertEqual(extra_move.quantity_done, 2.0)
+        self.assertEqual(extra_move.reserved_availability, 0.0)
+        self.assertEqual(extra_move_line.product_qty, 0.0)  # should not be able to reserve
+        self.assertEqual(extra_move_line.qty_done, 2.0)
+        self.assertEqual(extra_move.state, 'done')
+
+    def test_extra_move_3(self):
+        """ Check the good behavior of creating an extra move in a receipt. This usecase simulates
+         the receipt of 2 item while the initial stock move had to move 1.
+        """
+        receipt = self.env['stock.picking'].create({
+            'location_id': self.supplier_location,
+            'location_dest_id': self.stock_location,
+            'partner_id': self.partner_delta_id,
+            'picking_type_id': self.picking_type_in,
+        })
+        move1 = self.MoveObj.create({
+            'name': self.productA.name,
+            'product_id': self.productA.id,
+            'product_uom_qty': 1,
+            'product_uom': self.productA.uom_id.id,
+            'picking_id': receipt.id,
+            'location_id': self.supplier_location,
+            'location_dest_id': self.stock_location,
+        })
+        stock_location = self.env['stock.location'].browse(self.stock_location)
+
+        # assign to available
+        receipt.action_confirm()
+        receipt.action_assign()
+        self.assertEqual(receipt.state, 'assigned')
+
+        # valid with backorder creation
+        receipt.move_lines[0].pack_operation_ids[0].qty_done = 2
+        receipt.with_context(debug=True).do_transfer()
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, stock_location), 2.0)
+
+        extra_move = receipt.move_lines - move1
+        extra_move_line = extra_move.pack_operation_ids[0]
+
+        self.assertEqual(move1.product_qty, 1.0)
+        self.assertEqual(move1.quantity_done, 1.0)
+        self.assertEqual(move1.reserved_availability, 1.0)
+        self.assertEqual(move1.pack_operation_ids.product_qty, 1.0)  # should keep the reservation
+        self.assertEqual(move1.pack_operation_ids.qty_done, 1.0)
+        self.assertEqual(move1.state, 'done')
+
+        self.assertEqual(extra_move.product_qty, 1.0)
+        self.assertEqual(extra_move.quantity_done, 1.0)
+        self.assertEqual(extra_move.reserved_availability, 0.0)
+        self.assertEqual(extra_move_line.product_qty, 0.0)  # should not be able to reserve
+        self.assertEqual(extra_move_line.qty_done, 1.0)
+        self.assertEqual(extra_move.state, 'done')
