@@ -145,7 +145,7 @@ class MassMailingCampaign(models.Model):
              'This lets you send different mailings to randomly selected recipients and test '
              'the effectiveness of the mailings, without causing duplicate messages.')
     color = fields.Integer(string='Color Index')
-    clicks_ratio = fields.Integer(compute="_compute_clicks_ratio", string="Number of clicks")
+    clicks_ratio = fields.Float(compute="_compute_clicks_ratio", string="Number of clicks")
     # stat fields
     total = fields.Integer(compute="_compute_statistics")
     scheduled = fields.Integer(compute="_compute_statistics")
@@ -310,7 +310,7 @@ class MassMailing(models.Model):
                                 help="This is the link source, e.g. Search Engine, another domain, or name of email list")
     medium_id = fields.Many2one('utm.medium', string='Medium',
                                 help="This is the delivery method, e.g. Postcard, Email, or Banner Ad", default=lambda self: self.env.ref('utm.utm_medium_email'))
-    clicks_ratio = fields.Integer(compute="_compute_clicks_ratio", string="Number of Clicks")
+    clicks_ratio = fields.Float(compute="_compute_clicks_ratio", string="Number of Clicks")
     state = fields.Selection([('draft', 'Draft'), ('in_queue', 'In Queue'), ('sending', 'Sending'), ('done', 'Sent')],
         string='Status', required=True, copy=False, default='draft')
     color = fields.Integer(string='Color Index')
@@ -342,6 +342,9 @@ class MassMailing(models.Model):
     received_ratio = fields.Integer(compute="_compute_statistics", string='Received Ratio')
     opened_ratio = fields.Integer(compute="_compute_statistics", string='Opened Ratio')
     replied_ratio = fields.Integer(compute="_compute_statistics", string='Replied Ratio')
+    unsubscribed = fields.Integer(compute="_compute_unsubscribed", string='Unsubscribed')
+    clicked = fields.Integer(compute="_compute_clicks_ratio", string='Clicked')
+    unsubscribed_ratio = fields.Float(compute="_compute_unsubscribed", string='Unsubscribed Ratio')
     bounced_ratio = fields.Integer(compute="_compute_statistics", String='Bounced Ratio')
     next_departure = fields.Datetime(compute="_compute_next_departure", string='Next Departure')
     #Exclude blacklisted email globally
@@ -363,11 +366,25 @@ class MassMailing(models.Model):
         mapped_data = dict([(m['id'], 100 * m['nb_clicks'] / m['nb_mails']) for m in mass_mailing_data])
         for mass_mailing in self:
             mass_mailing.clicks_ratio = mapped_data.get(mass_mailing.id, 0)
+        
+        mapped_clicks = dict([(m['id'], m['nb_clicks']) for m in mass_mailing_data])
+        for mass_mailing in self:
+            mass_mailing.clicked = mapped_clicks.get(mass_mailing.id, 0)
 
     @api.depends('mailing_model')
     def _compute_model(self):
         for record in self:
             record.mailing_model_real = (record.mailing_model != 'mail.mass_mailing.list') and record.mailing_model or 'mail.mass_mailing.contact'
+
+    def _compute_unsubscribed(self):
+        for rec in self:
+            target = self.env[rec.mailing_model_real]
+            mail_field = 'email' if 'email' in target._fields else 'email_from'
+            all_email_list = self.env[rec.mailing_model_real].search(safe_eval(rec.mailing_domain)).mapped(mail_field)
+            blacklisted = self.env['mail.blacklist'].search_count([('email', 'in', all_email_list)])
+            rec.unsubscribed = blacklisted
+            if not (len(all_email_list) == 0 and blacklisted == 0):
+                rec.unsubscribed_ratio = 100.0 * blacklisted / len(all_email_list)
 
     def _compute_statistics(self):
         """ Compute statistics of the mass mailing """

@@ -320,7 +320,8 @@
                     <field name="sent"/>
                     <field name="delivered"/>
                     <field name="opened"/>
-                    <field name="replied"/>
+                    <field name="clicked"/>
+                    <field name="unsubscribed" string="Unsubscribed"/>
                     <field name="mass_mailing_campaign_id"
                         groups="mass_mailing.group_mass_mailing_campaign"/>
                 </tree>
@@ -499,10 +500,10 @@
                                             </div>
                                             <div class="row">
                                                 <div class="col-xs-8">
-                                                    <a>Replied</a>
+                                                    <a>Unsubscribed</a>
                                                 </div>
                                                 <div class="col-xs-4 text-right">
-                                                    <field name="replied_ratio"/> %
+                                                    <field name="unsubscribed_ratio"/> %
                                                 </div>
                                             </div>
                                             <div class="row">
