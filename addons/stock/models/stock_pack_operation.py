@@ -115,9 +115,7 @@ class PackOperation(models.Model):
                 # FIXME: we guard the reservation the same way in stock.move and the code looks
                 #        crappy because of it, there must be a better way
                 available_quantity = self.env['stock.quant'].get_available_quantity(move_line.product_id, updates.get('location_id', move_line.location_id), lot_id=updates.get('lot_id', move_line.lot_id), package_id=updates.get('package_id', move_line.package_id), owner_id=updates.get('owner_id', move_line.owner_id))
-                if available_quantity <= 0:
-                    continue
-                elif available_quantity < move_line.product_qty:
+                if available_quantity < move_line.product_qty:
                     move_line.with_context(dont_change_reservation=True).product_qty = 0
                 else:
                     quants = self.env['stock.quant'].increase_reserved_quantity(

@@ -834,6 +834,7 @@ class StockMove(TransactionCase):
 
         move1.pack_operation_ids.location_id = shelf2_location.id
 
+        self.assertEqual(move1.reserved_availability, 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf2_location), 0.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
@@ -867,12 +868,14 @@ class StockMove(TransactionCase):
         move1.action_confirm()
         move1.action_assign()
 
+        self.assertEqual(move1.reserved_availability, 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, lot_id=lot1), 0.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, lot_id=lot2), 1.0)
 
         move1.pack_operation_ids.lot_id = lot2.id
 
+        self.assertEqual(move1.reserved_availability, 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, lot_id=lot1), 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, lot_id=lot2), 0.0)
@@ -907,6 +910,7 @@ class StockMove(TransactionCase):
 
         move1.pack_operation_ids.package_id = package2.id
 
+        self.assertEqual(move1.reserved_availability, 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, package_id=package1), 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, package_id=package2), 0.0)
@@ -941,6 +945,7 @@ class StockMove(TransactionCase):
 
         move1.pack_operation_ids.owner_id = owner2.id
 
+        self.assertEqual(move1.reserved_availability, 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, owner_id=owner1), 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, owner_id=owner2), 0.0)
@@ -983,6 +988,7 @@ class StockMove(TransactionCase):
         move_line = move1.pack_operation_ids[0]
         move_line.write({'package_id': False, 'lot_id': lot2.id})
 
+        self.assertEqual(move1.reserved_availability, 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, lot_id=lot1, package_id=package1), 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, lot_id=lot2), 0.0)
@@ -1024,6 +1030,7 @@ class StockMove(TransactionCase):
 
         move1.pack_operation_ids.location_id = shelf2_location.id
 
+        self.assertEqual(move1.reserved_availability, 0.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf2_location), 0.0)
