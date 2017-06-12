@@ -240,5 +240,13 @@ class SaleOrderLine(models.Model):
                         pull_rule.picking_type_id.sudo().default_location_dest_id.usage == 'customer':
                     is_available = True
                     break
-
         return is_available
+    
+    def write(self, vals):
+        res = super(SaleOrderLine, self).write(vals)
+        for line in self:
+            moves = line.mapped('procurement_ids').mapped('move_ids')
+            pickings = moves.mapped('picking_id')
+            for pick in pickings:
+                pick.message_post(_('Quantity diminished for product %s') % (line.product_id.name,))
+        return res

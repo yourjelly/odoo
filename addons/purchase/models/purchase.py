@@ -394,24 +394,91 @@ class PurchaseOrder(models.Model):
             'company_id': self.company_id.id,
         }
 
-    @api.multi
     def _create_picking(self):
         StockPicking = self.env['stock.picking']
         for order in self:
             if any([ptype in ['product', 'consu'] for ptype in order.order_line.mapped('product_id.type')]):
-                pickings = order.picking_ids.filtered(lambda x: x.state not in ('done','cancel'))
-                if not pickings:
-                    res = order._prepare_picking()
-                    picking = StockPicking.create(res)
-                else:
-                    picking = pickings[0]
-                moves = order.order_line._create_stock_moves(picking)
-                moves = moves.filtered(lambda x: x.state not in ('done', 'cancel')).action_confirm()
-                moves.action_assign()
+                res = order._prepare_picking()
+                picking = StockPicking.create(res) #TODO: could even wait creating this, would be a lot faster
+                move_vals = []
+                for line in order.order_line:
+                    move_vals += line._prepare_stock_moves(picking)
+                picking.write({'move_lines': [(0, 0, x) for x in move_vals]})
+                picking.move_lines.action_confirm()
+                # Need to put procurements with too little into exception
                 picking.message_post_with_view('mail.message_origin_link',
                     values={'self': picking, 'origin': order},
                     subtype_id=self.env.ref('mail.mt_note').id)
-        return True
+
+    def _update_picking(self):
+        for order in self:
+            for line in order.order_line:
+                if line.product_id.type not in ('product', 'consu'):
+                    continue
+                total_qty = sum([x.product_qty for x in line.move_ids.filtered(lambda x: x.location_id.usage == 'supplier')])
+                total_qty -= sum([x.product_qty for x in line.move_ids.filtered(lambda x: x.location_dest_id.usage == 'supplier')])
+                # TODO: it should take into account return quantities too
+                ordered_qty = line.product_uom._compute_quantity(line.product_qty, line.product_id.uom_id)
+                if line.product_qty < line.qty_invoiced:
+                    activity = self.env['mail.activity'].sudo().create({
+                        'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
+                        'note': _('The quantities on your purchase order indicate less than billed. You should ask for a refund. '),
+                        'res_id': line.invoice_lines[0].invoice_id.id,
+                        'res_model_id': self.env.ref('account.model_account_invoice').id,
+                        })
+                    activity._onchange_activity_type_id()
+                diff = ordered_qty - total_qty #qty to add
+                if not diff:
+                    continue
+                if diff < 0:
+                    # Try to diminish quantities on open stock moves, if not, raise error
+                    open_moves = line.move_ids.filtered(lambda m: m.state not in ('done', 'cancel'))
+                    product_qty = sum(open_moves.mapped('product_qty'))
+                    if -diff > product_qty:
+                        raise UserError(_('You can not change quantity under the quantity received.  If necessary, do a return first. '))
+                    todo_qty = -diff
+                    sorted(open_moves, key = lambda m: m.procurement_ids and 1 or 0)
+                    for move in open_moves:
+                        #TODO: could take first of where procurements have left overs..., but that is already a very special case
+                        to_subtract = min(move.product_qty, todo_qty)
+                        move.product_uom_qty -= move.product_id.uom_id._compute_quantity(to_subtract, move.product_uom)
+                        todo_qty -= to_subtract
+                        if todo_qty <= 0:
+                            break
+                else:
+                    # Check first to add to moves that miss for a certain picking
+                    # Quantities can be added to anything
+                    open_moves = line.move_ids.filtered(lambda m: m.state not in ('done', 'cancel'))
+                    sorted(open_moves, key=lambda m: m.procurement_ids and 1 or 0)
+                    todo_qty = diff
+                    for move in open_moves:
+                        quantities = sum([x.product_qty for x in move.move_dest_ids.mapped('move_orig_ids')]) #filter on cancel
+                        procs = move.move_dest_ids.mapped('move_orig_ids').mapped('procurement_ids')
+                        proc_quantities = sum([p.product_qty for p in procs])
+                        if proc_quantities - quantities > 0:
+                            # Add as much as possible there first
+                            min_qty = min(proc_quantities - quantities, todo_qty)
+                            move.product_uom_qty += move.product_id.uom_id._compute_quantity(min_qty, move.product_uom)
+                            #self._add_and_propagate_on_move(move, min_qty)
+                            todo_qty -= min_qty
+                        elif not move.procurement_ids:
+                            #add the rest
+                            move.product_uom_qty += move.product_id.uom_id._compute_quantity(todo_qty, move.product_uom)
+                            todo_qty = 0
+                            break
+                    # TODO: check first the quantities are out of the existing procurements (otherwise, nothing need to be done)
+                    # add to product_qty of existing move
+                    if todo_qty > 0:
+                        # Check if there is still an open picking
+                        pickings = order.picking_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
+                        picking = pickings and pickings[0] or False
+                        if not picking:
+                            res = order._prepare_picking()
+                            picking = self.env['stock.picking'].create(res)
+                        res = line._prepare_stock_move_template(picking)
+                        res['product_uom_qty'] = line.product_id.uom_id._compute_quantity(todo_qty, line.product_uom)
+                        move = self.env['stock.move'].create(res)
+                        move.action_confirm()
 
     @api.multi
     def _add_supplier_to_product(self):
@@ -553,7 +620,7 @@ class PurchaseOrderLine(models.Model):
     def create(self, values):
         line = super(PurchaseOrderLine, self).create(values)
         if line.order_id.state == 'purchase':
-            line.order_id._create_picking()
+            line.order_id._update_picking()
             msg = _("Extra line with %s ") % (line.product_id.display_name,)
             line.order_id.message_post(body=msg)
         return line
@@ -586,7 +653,7 @@ class PurchaseOrderLine(models.Model):
             ]).write({'date_expected': values['date_planned']})
         result = super(PurchaseOrderLine, self).write(values)
         if orders:
-            orders._create_picking()
+            orders._update_picking()
         return result
 
     name = fields.Text(string='Description', required=True)
@@ -635,18 +702,11 @@ class PurchaseOrderLine(models.Model):
         return price_unit
 
     @api.multi
-    def _prepare_stock_moves(self, picking):
+    def _prepare_stock_move_template(self, picking):
         """ Prepare the stock moves data for one order line. This function returns a list of
         dictionary ready to be used in stock.move's create()
         """
-        self.ensure_one()
-        res = []
-        if self.product_id.type not in ['product', 'consu']:
-            return res
-        qty = 0.0
         price_unit = self._get_stock_move_price_unit()
-        for move in self.move_ids.filtered(lambda x: x.state != 'cancel' and not x.location_dest_id.usage == "supplier"):
-            qty += move.product_qty
         template = {
             'name': self.name or '',
             'product_id': self.product_id.id,
@@ -669,44 +729,61 @@ class PurchaseOrderLine(models.Model):
             'route_ids': self.order_id.picking_type_id.warehouse_id and [(6, 0, [x.id for x in self.order_id.picking_type_id.warehouse_id.route_ids])] or [],
             'warehouse_id': self.order_id.picking_type_id.warehouse_id.id,
         }
-        # Fullfill all related procurements with this po line
-        diff_quantity = self.product_qty - qty
+        return template
+
+    def _prepare_stock_moves(self, picking):
+        """
+            Match procurements related to purchase line with stock moves
+        """
+        self.ensure_one()
+        res = []
+        if self.product_id.type not in ['product', 'consu']:
+            return res
+
+        template = self._prepare_stock_move_template(picking)
+        qty = 0.0
+        for move in self.move_ids.filtered(lambda x: x.state != 'cancel' and not x.location_dest_id.usage == "supplier"):
+            qty += move.product_qty
+        diff_quantity = self.product_qty
+        
         procurements = self.procurement_ids
-        merge_moves = procurements and procurements[0].rule_id.merge_moves or False
-        if procurements and not merge_moves:
-            for procurement in self.procurement_ids:
-                # If the procurement has some moves already, we should deduct their quantity
-                sum_existing_moves = sum(x.product_qty for x in procurement.move_ids if x.state != 'cancel')
-                existing_proc_qty = procurement.product_id.uom_id._compute_quantity(sum_existing_moves, procurement.product_uom)
-                procurement_qty = procurement.product_uom._compute_quantity(procurement.product_qty, self.product_uom) - existing_proc_qty
-                if float_compare(procurement_qty, 0.0, precision_rounding=procurement.product_uom.rounding) > 0 and float_compare(diff_quantity, 0.0, precision_rounding=self.product_uom.rounding) > 0:
+        merge_moves = True
+        
+        if procurements:
+            merge_moves = procurements and procurements[0].rule_id.merge_moves
+            
+        merge_procurements = self.env['procurement.order']
+        for procurement in self.procurement_ids:
+            # If the procurement has some moves already, we should deduct their quantity
+            sum_existing_moves = sum(x.product_qty for x in procurement.move_ids if x.state != 'cancel')
+            existing_proc_qty = procurement.product_id.uom_id._compute_quantity(sum_existing_moves, procurement.product_uom)
+            procurement_qty = procurement.product_uom._compute_quantity(procurement.product_qty, self.product_uom) - existing_proc_qty
+            if float_compare(procurement_qty, 0.0, precision_rounding=procurement.product_uom.rounding) > 0 and float_compare(diff_quantity, 0.0, precision_rounding=self.product_uom.rounding) > 0:
+                if not merge_moves:
                     tmp = template.copy()
                     tmp.update({
                         'product_uom_qty': min(procurement_qty, diff_quantity),
-                        'move_dest_ids': [(4, x) for x in procurement.move_dest_ids.ids],  # move destination is same as procurement destination
+                        'move_dest_ids': [(4, x) for x in procurement.move_dest_id.ids],  # move destination is same as procurement destination
                         'procurement_ids': [(4, procurement.id)],
                         'propagate': procurement.rule_id.propagate,
                     })
                     res.append(tmp)
-                    if procurement_qty > diff_quantity: #Not even necessary
-                        procurements -= procurement
-                    diff_quantity -= min(procurement_qty, diff_quantity)
-        if float_compare(diff_quantity, 0.0,  precision_rounding=self.product_uom.rounding) > 0:
-            template['product_uom_qty'] = diff_quantity
-            if merge_moves:
-                template['move_dest_ids'] = [(4, x) for x in procurements.mapped('move_dest_ids').ids]
-                template['procurement_ids'] = [(4, x) for x in procurements.ids]
+                merge_procurements |= procurement
+                diff_quantity -= min(procurement_qty, diff_quantity)
+        if float_compare(diff_quantity, 0.0,  precision_rounding=self.product_uom.rounding) > 0 or merge_moves:
+            if not merge_moves:
+                template['product_uom_qty'] = diff_quantity
+            else:
+                template['product_uom_qty'] = self.product_qty
+                #link the procurements you can link with it
+                template['move_dest_ids'] = [(4, x) for x in merge_procurements.mapped('move_dest_id').ids]
+                template['procurement_ids'] = [(4, x) for x in merge_procurements.ids]
             res.append(template)
+        # What is not linked in any way should go out of it
+        (self.procurement_ids - merge_procurements).write({'purchase_line_id': False, 
+                                                            'purchase_id': False,
+                                                            'state': 'exception',})
         return res
-
-    @api.multi
-    def _create_stock_moves(self, picking):
-        moves = self.env['stock.move']
-        done = self.env['stock.move'].browse()
-        for line in self:
-            for val in line._prepare_stock_moves(picking):
-                done += moves.create(val)
-        return done
 
     @api.multi
     def unlink(self):

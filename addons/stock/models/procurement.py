@@ -151,7 +151,7 @@ class ProcurementOrder(models.Model):
         date_expected = (datetime.strptime(self.date_planned, DEFAULT_SERVER_DATETIME_FORMAT) - relativedelta(days=self.rule_id.delay or 0)).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         # it is possible that we've already got some move done, so check for the done qty and create
         # a new move with the correct qty
-        qty_done = sum(self.move_ids.filtered(lambda move: move.state == 'done').mapped('product_uom_qty'))
+        qty_done = sum(self.move_ids.filtered(lambda move: move.state != 'cancel').mapped('product_uom_qty'))
         qty_left = max(self.product_qty - qty_done, 0)
         return {
             'name': self.name,
