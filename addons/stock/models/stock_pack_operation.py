@@ -155,8 +155,10 @@ class PackOperation(models.Model):
             ('owner_id', '=', self.owner_id.id),
             ('package_id', '=', self.package_id.id),
             ('product_qty', '>', 0.0),
+            ('qty_done', '=', 0.0),
             ('id', '!=', self.id),
         ]
+        # FIXME: should also exclude printed_picking
         return self.env['stock.pack.operation'].search(domain)
 
     def action_done(self):

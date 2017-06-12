@@ -780,7 +780,7 @@ class StockMove(models.Model):
                         precision_rounding=self.product_uom.rounding,
                         rounding_method='UP')
                     move_line.qty_done = quantity_split
-                    move_line.copy(default={'move_id': extra_move.id, 'qty_done': extra_move_quantity})
+                    move_line.copy(default={'move_id': extra_move.id, 'qty_done': extra_move_quantity, 'product_qty': 0})
                     extra_move_quantity -= extra_move_quantity
                 if extra_move_quantity == 0.0:
                     break
