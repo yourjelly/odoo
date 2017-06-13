@@ -1034,3 +1034,347 @@ class StockMove(TransactionCase):
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf2_location), 0.0)
+
+    def test_edit_done_move_line_1(self):
+        """ Test that editing a done stock move line linked to an untracked product correctly and
+        directly adapts the transfer. In this case, we edit the sublocation where we take the
+        product to another sublocation where a product is available.
+        """
+        shelf1_location = self.env['stock.location'].create({
+            'name': 'shelf1',
+            'usage': 'internal',
+            'location_id': self.stock_location.id,
+        })
+        shelf2_location = self.env['stock.location'].create({
+            'name': 'shelf1',
+            'usage': 'internal',
+            'location_id': self.stock_location.id,
+        })
+        self.env['stock.quant'].increase_available_quantity(self.product1, shelf1_location, 1.0)
+        self.env['stock.quant'].increase_available_quantity(self.product1, shelf2_location, 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf2_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 2.0)
+
+        # move from shelf1
+        move1 = self.env['stock.move'].create({
+            'name': 'test_edit_moveline_1',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product1.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 1.0,
+        })
+        move1.action_confirm()
+        move1.action_assign()
+        move1.pack_operation_ids.qty_done = 1
+        move1.action_done()
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf2_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
+
+        # edit once done, we actually moved from shelf2
+        move1.pack_operation_ids.location_id = shelf2_location.id
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf2_location), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
+
+    def test_edit_done_move_line_2(self):
+        """ Test that editing a done stock move line linked to a tracked product correctly and directly
+        adapts the transfer. In this case, we edit the lot to another available one.
+        """
+        lot1 = self.env['stock.production.lot'].create({
+            'name': 'lot1',
+            'product_id': self.product1.id,
+        })
+        lot2 = self.env['stock.production.lot'].create({
+            'name': 'lot2',
+            'product_id': self.product1.id,
+        })
+        self.env['stock.quant'].increase_available_quantity(self.product1, self.stock_location, 1.0, lot_id=lot1)
+        self.env['stock.quant'].increase_available_quantity(self.product1, self.stock_location, 1.0, lot_id=lot2)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 2.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, lot_id=lot1), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, lot_id=lot2), 1.0)
+
+        move1 = self.env['stock.move'].create({
+            'name': 'test_edit_moveline_1',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product1.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 1.0,
+        })
+        move1.action_confirm()
+        move1.action_assign()
+        move1.pack_operation_ids.qty_done = 1
+        move1.action_done()
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, lot_id=lot1), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, lot_id=lot2), 1.0)
+
+        move1.pack_operation_ids.lot_id = lot2.id
+
+        self.assertEqual(move1.reserved_availability, 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, lot_id=lot1), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, lot_id=lot2), 0.0)
+
+    def test_edit_done_move_line_3(self):
+        """ Test that editing a done stock move line linked to a packed product correctly and directly
+        adapts the transfer. In this case, we edit the package to another available one.
+        """
+        package1 = self.env['stock.quant.package'].create({'name': 'test_edit_reserved_move_line_3'})
+        package2 = self.env['stock.quant.package'].create({'name': 'test_edit_reserved_move_line_3'})
+
+        self.env['stock.quant'].increase_available_quantity(self.product1, self.stock_location, 1.0, package_id=package1)
+        self.env['stock.quant'].increase_available_quantity(self.product1, self.stock_location, 1.0, package_id=package2)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 2.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, package_id=package1), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, package_id=package2), 1.0)
+
+        move1 = self.env['stock.move'].create({
+            'name': 'test_edit_moveline_1',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product1.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 1.0,
+        })
+        move1.action_confirm()
+        move1.action_assign()
+        move1.pack_operation_ids.qty_done = 1
+        move1.action_done()
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, package_id=package1), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, package_id=package2), 1.0)
+
+        move1.pack_operation_ids.package_id = package2.id
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, package_id=package1), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, package_id=package2), 0.0)
+
+    def test_edit_done_move_line_4(self):
+        """ Test that editing a done stock move line linked to an owned product correctly and directly
+        adapts the transfer. In this case, we edit the owner to another available one.
+        """
+        owner1 = self.env['res.partner'].create({'name': 'test_edit_reserved_move_line_4_1'})
+        owner2 = self.env['res.partner'].create({'name': 'test_edit_reserved_move_line_4_2'})
+
+        self.env['stock.quant'].increase_available_quantity(self.product1, self.stock_location, 1.0, owner_id=owner1)
+        self.env['stock.quant'].increase_available_quantity(self.product1, self.stock_location, 1.0, owner_id=owner2)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 2.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, owner_id=owner1), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, owner_id=owner2), 1.0)
+
+        move1 = self.env['stock.move'].create({
+            'name': 'test_edit_moveline_1',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product1.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 1.0,
+        })
+        move1.action_confirm()
+        move1.action_assign()
+        move1.pack_operation_ids.qty_done = 1
+        move1.action_done()
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, owner_id=owner1), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, owner_id=owner2), 1.0)
+
+        move1.pack_operation_ids.owner_id = owner2.id
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, owner_id=owner1), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, owner_id=owner2), 0.0)
+
+    def test_edit_done_move_line_5(self):
+        """ Test that editing a done stock move line linked to a packed and tracked product correctly
+        and directly adapts the transfer. In this case, we edit the lot to another available one
+        that is not in a pack.
+        """
+        lot1 = self.env['stock.production.lot'].create({
+            'name': 'lot1',
+            'product_id': self.product1.id,
+        })
+        lot2 = self.env['stock.production.lot'].create({
+            'name': 'lot2',
+            'product_id': self.product1.id,
+        })
+        package1 = self.env['stock.quant.package'].create({'name': 'test_edit_reserved_move_line_5'})
+
+        self.env['stock.quant'].increase_available_quantity(self.product1, self.stock_location, 1.0, lot_id=lot1, package_id=package1)
+        self.env['stock.quant'].increase_available_quantity(self.product1, self.stock_location, 1.0, lot_id=lot2)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 2.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, lot_id=lot1, package_id=package1), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, lot_id=lot2), 1.0)
+
+        move1 = self.env['stock.move'].create({
+            'name': 'test_edit_moveline_1',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product1.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 1.0,
+        })
+        move1.action_confirm()
+        move1.action_assign()
+        move1.pack_operation_ids.qty_done = 1
+        move1.action_done()
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, lot_id=lot1, package_id=package1), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, lot_id=lot2), 1.0)
+        move_line = move1.pack_operation_ids[0]
+        move_line.write({'package_id': False, 'lot_id': lot2.id})
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, lot_id=lot1, package_id=package1), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location, lot_id=lot2), 0.0)
+
+    def test_edit_done_move_line_6(self):
+        """ Test that editing a done stock move line linked to an untracked product correctly and
+        directly adapts the transfer. In this case, we edit the sublocation where we take the
+        product to another sublocation where a product is NOT available.
+        """
+        shelf1_location = self.env['stock.location'].create({
+            'name': 'shelf1',
+            'usage': 'internal',
+            'location_id': self.stock_location.id,
+        })
+        shelf2_location = self.env['stock.location'].create({
+            'name': 'shelf1',
+            'usage': 'internal',
+            'location_id': self.stock_location.id,
+        })
+        self.env['stock.quant'].increase_available_quantity(self.product1, shelf1_location, 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf2_location), 0.0)
+
+        move1 = self.env['stock.move'].create({
+            'name': 'test_edit_moveline_1',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product1.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 1.0,
+        })
+        move1.action_confirm()
+        move1.action_assign()
+        move1.pack_operation_ids.qty_done = 1
+        move1.action_done()
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf2_location), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 0.0)
+
+        move1.pack_operation_ids.location_id = shelf2_location.id
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf2_location), -1.0)
+
+    def test_edit_done_move_line_7(self):
+        """ Test that editing a done stock move line linked to an untracked product correctly and
+        directly adapts the transfer. In this case, we edit the sublocation where we take the
+        product to another sublocation where a product is NOT available because it has been reserved
+        by another move.
+        """
+        shelf1_location = self.env['stock.location'].create({
+            'name': 'shelf1',
+            'usage': 'internal',
+            'location_id': self.stock_location.id,
+        })
+        shelf2_location = self.env['stock.location'].create({
+            'name': 'shelf1',
+            'usage': 'internal',
+            'location_id': self.stock_location.id,
+        })
+        self.env['stock.quant'].increase_available_quantity(self.product1, shelf1_location, 1.0)
+        self.env['stock.quant'].increase_available_quantity(self.product1, shelf2_location, 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 2.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf2_location), 1.0)
+
+        move1 = self.env['stock.move'].create({
+            'name': 'test_edit_moveline_1',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product1.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 1.0,
+        })
+        move1.action_confirm()
+        move1.action_assign()
+        move1.pack_operation_ids.qty_done = 1
+        move1.action_done()
+
+        move2 = self.env['stock.move'].create({
+            'name': 'test_edit_moveline_1',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product1.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 1.0,
+        })
+        move2.action_confirm()
+        move2.action_assign()
+
+        self.assertEqual(move2.state, 'assigned')
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf2_location), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 0.0)
+
+        move1.pack_operation_ids.location_id = shelf2_location.id
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf2_location), 0.0)
+        self.assertEqual(move2.state, 'confirmed')
+
+    def test_edit_done_move_line_8(self):
+        """ Test that editing a done stock move line linked to an untracked product correctly and
+        directly adapts the transfer. In this case, we increment the quantity done (and we do not
+        have more in stock.
+        """
+        shelf1_location = self.env['stock.location'].create({
+            'name': 'shelf1',
+            'usage': 'internal',
+            'location_id': self.stock_location.id,
+        })
+        self.env['stock.quant'].increase_available_quantity(self.product1, shelf1_location, 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
+
+        # move from shelf1
+        move1 = self.env['stock.move'].create({
+            'name': 'test_edit_moveline_1',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product1.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 1.0,
+        })
+        move1.action_confirm()
+        move1.action_assign()
+        move1.pack_operation_ids.qty_done = 1
+        move1.action_done()
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 0.0)
+
+        # edit once done, we actually moved 2 products
+        move1.pack_operation_ids.qty_done = 2
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), -1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), -1.0)
+
+# todo att test addig moveline when done

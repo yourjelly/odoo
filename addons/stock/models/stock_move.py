@@ -155,9 +155,10 @@ class StockMove(models.Model):
     picking_code = fields.Selection(related='picking_id.picking_type_id.code', readonly=True)
     product_type = fields.Selection(related='product_id.type', readonly=True)
     additional = fields.Boolean("Whether the move was added after the picking's confirmation", default=False)
+    is_editable = fields.Boolean('Is editable when done', compute='_compute_is_editable')
 
     @api.multi
-    @api.depends('has_tracking', 'pack_operation_ids', 'location_id', 'location_dest_id')
+    @api.depends('has_tracking', 'pack_operation_ids', 'location_id', 'location_dest_id', 'is_editable')
     def _compute_show_details_visible(self):
         """ According to this field, the button that calls `action_show_details` will be displayed
         to work on a move from its picking form view, or not.
@@ -165,6 +166,10 @@ class StockMove(models.Model):
         for move in self:
             if not move.product_id:
                 move.show_details_visible = False
+                continue
+
+            if move.is_editable:
+                move.show_details_visible = True
                 continue
 
             multi_locations_enabled = False
@@ -185,6 +190,14 @@ class StockMove(models.Model):
         """
         for move in self:
             move.show_reserved_availability = not move.location_id.usage == 'supplier'
+
+    @api.multi
+    def _compute_is_editable(self):
+        """ This field is only of use in an attrs in the picking view, in order to show
+        the button to edit move when they're done.
+        """
+        for move in self:
+            move.is_editable = move.state == 'done' and self.user_has_groups('stock.group_stock_manager')
 
     @api.one
     @api.depends('product_id', 'product_uom', 'product_uom_qty')
