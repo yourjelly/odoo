@@ -114,7 +114,7 @@ class PackOperation(models.Model):
                 self._decrease_reserved_quantity(move_line.product_qty)
                 # FIXME: we guard the reservation the same way in stock.move and the code looks
                 #        crappy because of it, there must be a better way
-                available_quantity = self.env['stock.quant'].get_available_quantity(move_line.product_id, updates.get('location_id', move_line.location_id), lot_id=updates.get('lot_id', move_line.lot_id), package_id=updates.get('package_id', move_line.package_id), owner_id=updates.get('owner_id', move_line.owner_id))
+                available_quantity = self.env['stock.quant'].get_available_quantity(move_line.product_id, updates.get('location_id', move_line.location_id), lot_id=updates.get('lot_id', move_line.lot_id), package_id=updates.get('package_id', move_line.package_id), owner_id=updates.get('owner_id', move_line.owner_id), strict=True)
                 if available_quantity < move_line.product_qty:
                     move_line.with_context(dont_change_reservation=True).product_qty = 0
                 else:
@@ -124,7 +124,8 @@ class PackOperation(models.Model):
                         move_line.product_qty,
                         lot_id=updates.get('lot_id', move_line.lot_id),
                         package_id=updates.get('package_id', move_line.package_id),
-                        owner_id=updates.get('owner_id', move_line.owner_id))
+                        owner_id=updates.get('owner_id', move_line.owner_id),
+                        strict=True)
                     move_line.with_context(dont_change_reservation=True).product_qty = sum([q[1] for q in quants])
         return super(PackOperation, self).write(vals)
 
@@ -172,7 +173,7 @@ class PackOperation(models.Model):
                 # if this move line is force assigned, unreserve elsewhere if needed
                 if float_compare(move_line.qty_done, move_line.product_qty, precision_rounding=rounding) > 0:
                     extra_qty = move_line.qty_done - move_line.product_qty
-                    available_quantity = self.env['stock.quant'].get_available_quantity(move_line.product_id, move_line.location_id, lot_id=move_line.lot_id, package_id=move_line.package_id, owner_id=move_line.owner_id)
+                    available_quantity = self.env['stock.quant'].get_available_quantity(move_line.product_id, move_line.location_id, lot_id=move_line.lot_id, package_id=move_line.package_id, owner_id=move_line.owner_id, strict=True)
                     if extra_qty > available_quantity:
                         move_to_recompute_state = self.env['stock.move']
                         for candidate in move_line._find_similar():

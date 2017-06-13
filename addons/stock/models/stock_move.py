@@ -724,7 +724,8 @@ class StockMove(models.Model):
                                 'owner_id': owner_id.id,
                             })
                             move.write({'pack_operation_ids': [(4, move_line_id.id, 0)]})
-                            self.env['stock.quant'].increase_reserved_quantity(move.product_id, location_id, taken_quantity)
+                            self.env['stock.quant'].increase_reserved_quantity(move.product_id, location_id, taken_quantity, lot_id=lot_id,
+                                                                               package_id=package_id, owner_id=owner_id, strict=True)
                         if need - taken_quantity == 0.0:
                             move.state = 'assigned'
                             break

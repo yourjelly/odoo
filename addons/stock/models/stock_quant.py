@@ -56,7 +56,7 @@ class StockQuant(models.Model):
     @api.constrains('quantity')
     def check_quantity(self):
         for quant in self:
-            if quant.quantity > 1 and quant.product_id.tracking == 'serial':
+            if quant.quantity > 1 and quant.lot_id and quant.product_id.tracking == 'serial':
                 raise ValidationError(_('A serial number should only be linked to a single product.'))
 
     @api.one
@@ -82,19 +82,25 @@ class StockQuant(models.Model):
             return 'in_date desc, id desc'
         raise UserError(_('Removal strategy %s not implemented.') % (removal_strategy,))
 
-    def _gather(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None):
+    def _gather(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False):
         removal_strategy = self._get_removal_strategy(product_id, location_id)
         removal_strategy_order = self._get_removal_strategy_order(removal_strategy)
         domain = [
             ('product_id', '=', product_id.id),
             ('location_id', 'child_of', location_id.id),
         ]
-        if lot_id:
-            domain = expression.AND([[('lot_id', '=', lot_id.id)], domain])
-        if package_id:
-            domain = expression.AND([[('package_id', '=', package_id.id)], domain])
-        if owner_id:
-            domain = expression.AND([[('owner_id', '=', owner_id.id)], domain])
+        if not strict:
+            if lot_id:
+                domain = expression.AND([[('lot_id', '=', lot_id.id)], domain])
+            if package_id:
+                domain = expression.AND([[('package_id', '=', package_id.id)], domain])
+            if owner_id:
+                domain = expression.AND([[('owner_id', '=', owner_id.id)], domain])
+        else:
+            domain = expression.AND([[('lot_id', '=', lot_id and lot_id.id or False)], domain])
+            domain = expression.AND([[('package_id', '=', package_id and package_id.id or False)], domain])
+            domain = expression.AND([[('owner_id', '=', owner_id and owner_id.id or False)], domain])
+
         return self.search(domain, order=removal_strategy_order)
 
     @api.model
@@ -103,13 +109,30 @@ class StockQuant(models.Model):
         return sum(quants.mapped('quantity'))
 
     @api.model
-    def get_available_quantity(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None):
-        quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id)
+    def get_available_quantity(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False):
+        """ Return the available quantity, i.e. the sum of `quantity` minus the sum of
+        `reserved_quantity`, for the set of quants sharing the combination of `product_id,
+        location_id` if `strict` is set to False or sharing the *exact same characteristics*
+        otherwise.
+        This method is called in the following usecases:
+            - when a stock move checks its availability
+            - when a stock move actually assign
+            - when editing a move line, to check if the new value is forced or not
+            - when validating a move line with some forced values and have to potentially unlink an
+              equivalent move line in another picking
+        In the two first usecases, `strict` should be set to `False`, as we don't know what exact
+        quants we'll reserve, and the characteristics are meaningless in this context.
+        In the last ones, `strict` should be set to `True`, as we work on a specific set of
+        characteristics.
+
+        :return: available quantity as a float
+        """
+        quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
         return sum(quants.mapped('quantity')) - sum(quants.mapped('reserved_quantity'))
 
     @api.model
     def increase_available_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None):
-        quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id)
+        quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True)
         for quant in quants:
             try:
                 with self._cr.savepoint():
@@ -139,13 +162,20 @@ class StockQuant(models.Model):
         self.increase_available_quantity(product_id, location_id, -quantity, lot_id=lot_id, package_id=package_id, owner_id=owner_id)
 
     @api.model
-    def increase_reserved_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None):
-        """
+    def increase_reserved_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=False):
+        """ Increase the reserved quantity, i.e. increase `reserved_quantity` for the set of quants
+        sharing the combination of `product_id, location_id` if `strict` is set to False or sharing
+        the *exact same characteristics* otherwise. Typically, this method is called when reserving
+        a move or updating a reserved move line. When reserving a chained move, the strict flag
+        should be enabled (to reserve exactly what was brought). When the move is MTS,it could take
+        anything from the stock, so we disable the flag. When editing a move line, we naturally
+        enable the flag, to reflect the reservation according to the edition.
+
         :return: a list of tuples (quant, quantity_reserved) showing on which quant the reservation
             was done and how much the system was able to reserve on it
         """
         reserved_quants = []
-        quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id)
+        quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
         available_quantity = self.get_available_quantity(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id)
         if quantity > available_quantity:
             raise UserError(_('It is not possible to reserve more products than you have in stock.'))
@@ -169,10 +199,14 @@ class StockQuant(models.Model):
         return reserved_quants
 
     @api.model
-    def decrease_reserved_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None):
-        """
+    def decrease_reserved_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=True):
+        """ Decrease the reserved quantity, i.e. decrease `reserved_quantity`, for the set of
+        quants sharing the *exact same characteristics* if `strict` is set to True or sharing the
+        combination of `product_id, location_id` otherwise. Typically, this method is called during
+        a move line's validation or a move line's unlink and `strict` should be `True` in these
+        cases, because the characteristics are known.
+
         :return: a list of tuples (quant, quantity_unreserved) showing on which quant the decrease
             of reservation was done and how much the system was able to unreserve on it
         """
-        return self.increase_reserved_quantity(product_id, location_id, -quantity, lot_id=lot_id, package_id=package_id, owner_id=owner_id)
-
+        return self.increase_reserved_quantity(product_id, location_id, -quantity, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
