@@ -1377,4 +1377,40 @@ class StockMove(TransactionCase):
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), -1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), -1.0)
 
+    def test_edit_done_move_line_9(self):
+        """ Test that editing a done stock move line linked to an untracked product correctly and
+        directly adapts the transfer. In this case, we "cancel" the move by zeroing the qty done.
+        """
+        shelf1_location = self.env['stock.location'].create({
+            'name': 'shelf1',
+            'usage': 'internal',
+            'location_id': self.stock_location.id,
+        })
+        self.env['stock.quant'].increase_available_quantity(self.product1, shelf1_location, 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
+
+        # move from shelf1
+        move1 = self.env['stock.move'].create({
+            'name': 'test_edit_moveline_1',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product1.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 1.0,
+        })
+        move1.action_confirm()
+        move1.action_assign()
+        move1.pack_operation_ids.qty_done = 1
+        move1.action_done()
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 0.0)
+
+        # edit once done, we actually moved 2 products
+        move1.pack_operation_ids.qty_done = 0
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
+
 # todo att test addig moveline when done
