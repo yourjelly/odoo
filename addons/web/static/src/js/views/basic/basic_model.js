@@ -735,7 +735,7 @@ var BasicModel = AbstractModel.extend({
                 // id never changes, and should not be written
                 delete record._changes.id;
             }
-            var changes = self._generateChanges(record, options.viewType);
+            var changes = self._generateChanges(record, {viewType: options.viewType});
 
             if (method === 'create') {
                 var fieldNames = record.getFieldNames();
@@ -1876,18 +1876,28 @@ var BasicModel = AbstractModel.extend({
      *
      * @private
      * @param {Object} record
-     * @param {string} [viewType] current viewType. If not set, we will assume
-     *   main viewType from the record. Note that if an editionViewType is
+     * @param {Object} [options]
+     * @param {boolean} [options.changesOnly=true] option passed to calls to
+     *   _generateX2ManyCommands
+     * @param {boolean} [options.withReadonly=false] if false, doesn't generate
+     *   changes for readonly fields
+     * @param {string} [options.viewType] current viewType. If not set, we will
+     *   assume main viewType from the record. Note that if an editionViewType is
      *   specified for a field, it will take the priority over the viewType arg.
      * @returns {Object} a map from changed fields to their new value
      */
-    _generateChanges: function (record, viewType) {
-        viewType = viewType || record.viewType;
+    _generateChanges: function (record, options) {
+        options = options || {};
+        var viewType = options.viewType || record.viewType;
         var changes = _.extend({}, record._changes);
-        var commands = this._generateX2ManyCommands(record, true);
+        var withReadonly = options.withReadonly || false;
+        var commands = this._generateX2ManyCommands(record, {
+            changesOnly: 'changesOnly' in options ? options.changesOnly : true,
+            withReadonly: withReadonly,
+        });
         for (var fieldName in record.fields) {
             // remove readonly fields from the list of changes
-            if (fieldName in changes || fieldName in commands) {
+            if (!withReadonly && fieldName in changes || fieldName in commands) {
                 var editionViewType = record._editionViewType[fieldName] || viewType;
                 if (this._isFieldReadonly(record, fieldName, editionViewType)) {
                     delete changes[fieldName];
@@ -1922,7 +1932,7 @@ var BasicModel = AbstractModel.extend({
      * @returns {Object} the data
      */
     _generateOnChangeData: function (record) {
-        var commands = this._generateX2ManyCommands(record, false);
+        var commands = this._generateX2ManyCommands(record, {withReadonly: true});
         var data = _.extend(this.get(record.id, {raw: true}).data, commands);
 
         // one2many records have a parentID
@@ -1945,12 +1955,16 @@ var BasicModel = AbstractModel.extend({
      * or write them...
      *
      * @param {Object} record
+     * @param {Object} [options]
      * @param {boolean} [changesOnly=false] if true, only generates commands for
      *   fields that have changed
+     * @param {boolean} [options.withReadonly] option passed to calls to
+     *   _generateChanges
      * @returns {Object} a map from some field names to commands
      */
-    _generateX2ManyCommands: function (record, changesOnly) {
+    _generateX2ManyCommands: function (record, options) {
         var self = this;
+        options = options || {};
         var commands = {};
         var data = _.extend({}, record.data, record._changes);
         var type;
@@ -1964,7 +1978,7 @@ var BasicModel = AbstractModel.extend({
                     continue;
                 }
                 var list = this.localData[data[fieldName]];
-                if (changesOnly && !list._changes) {
+                if (options.changesOnly && !list._changes) {
                     // if only changes are requested, skip if there is no change
                     continue;
                 }
@@ -1982,7 +1996,7 @@ var BasicModel = AbstractModel.extend({
                     // generate update commands for records that have been
                     // updated (it may happen with editable lists)
                     _.each(relData, function (relRecord) {
-                        var changes = self._generateChanges(relRecord);
+                        var changes = self._generateChanges(relRecord, options);
                         if (!_.isEmpty(changes)) {
                             var command = x2ManyCommands.update(relRecord.res_id, changes);
                             commands[fieldName].push(command);
@@ -2001,7 +2015,7 @@ var BasicModel = AbstractModel.extend({
                         if (_.contains(keptIds, relIds[i])) {
                             // this is an id that already existed
                             relRecord = _.findWhere(relData, {res_id: relIds[i]});
-                            changes = this._generateChanges(relRecord);
+                            changes = this._generateChanges(relRecord, options);
                             if (!_.isEmpty(changes)) {
                                 command = x2ManyCommands.update(relRecord.res_id, changes);
                                 didChange = true;
@@ -2012,11 +2026,11 @@ var BasicModel = AbstractModel.extend({
                         } else if (_.contains(addedIds, relIds[i])) {
                             // this is a new id
                             relRecord = _.findWhere(relData, {res_id: relIds[i]});
-                            changes = this._generateChanges(relRecord);
+                            changes = this._generateChanges(relRecord, options);
                             commands[fieldName].push(x2ManyCommands.create(changes));
                         }
                     }
-                    if (changesOnly && !didChange && addedIds.length === 0 && removedIds.length === 0) {
+                    if (options.changesOnly && !didChange && addedIds.length === 0 && removedIds.length === 0) {
                         // in this situation, we have no changed ids, no added
                         // ids and no removed ids, so we can safely ignore the
                         // last changes
