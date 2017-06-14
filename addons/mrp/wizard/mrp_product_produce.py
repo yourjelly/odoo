@@ -29,15 +29,14 @@ class MrpProductProduce(models.TransientModel):
             lines = []
             existing_lines = []
             for move in production.move_raw_ids.filtered(lambda x: (x.product_id.tracking != 'none') and x.state not in ('done', 'cancel')):
-                if not move.move_lot_ids.filtered(lambda x: not x.lot_produced_id):
+                if not move.pack_operation_ids.filtered(lambda x: not x.lot_produced_id):
                     qty = quantity / move.bom_line_id.bom_id.product_qty * move.bom_line_id.product_qty
                     if move.product_id.tracking == 'serial':
                         while float_compare(qty, 0.0, precision_rounding=move.product_uom.rounding) > 0:
                             lines.append({
                                 'move_id': move.id,
-                                'quantity': min(1,qty),
-                                'quantity_done': 0.0,
-                                'plus_visible': True,
+                                'product_qty': min(1,qty),
+                                'qty_done': 0.0,
                                 'product_id': move.product_id.id,
                                 'production_id': production.id,
                             })
@@ -45,14 +44,13 @@ class MrpProductProduce(models.TransientModel):
                     else:
                         lines.append({
                             'move_id': move.id,
-                            'quantity': qty,
-                            'quantity_done': 0.0,
-                            'plus_visible': True,
+                            'product_qty': qty,
+                            'qty_done': 0.0,
                             'product_id': move.product_id.id,
                             'production_id': production.id,
                         })
                 else:
-                    existing_lines += move.move_lot_ids.filtered(lambda x: not x.lot_produced_id).ids
+                    existing_lines += move.pack_operation_ids.filtered(lambda x: not x.lot_produced_id).ids
 
             res['serial'] = serial
             res['production_id'] = production.id
@@ -105,7 +103,7 @@ class MrpProductProduce(models.TransientModel):
         if produce_move and produce_move.product_id.tracking != 'none':
             if not self.lot_id:
                 raise UserError(_('You need to provide a lot for the finished product'))
-            existing_move_lot = produce_move.move_lot_ids.filtered(lambda x: x.lot_id == self.lot_id)
+            existing_move_lot = produce_move.pack_operation_ids.filtered(lambda x: x.lot_id == self.lot_id)
             if existing_move_lot:
                 existing_move_lot.quantity += self.product_qty
                 existing_move_lot.quantity_done += self.product_qty
@@ -120,7 +118,7 @@ class MrpProductProduce(models.TransientModel):
                 }
                 lots.create(vals)
             for move in self.production_id.move_raw_ids:
-                for movelots in move.move_lot_ids.filtered(lambda x: not x.lot_produced_id):
+                for movelots in move.pack_operation_ids.filtered(lambda x: not x.lot_produced_id):
                     if movelots.quantity_done and self.lot_id:
                         #Possibly the entire move is selected
                         remaining_qty = movelots.quantity - movelots.quantity_done
