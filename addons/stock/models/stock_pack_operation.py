@@ -185,21 +185,6 @@ class PackOperation(models.Model):
                         package_id=updates.get('package_id', move_line.package_id),
                         owner_id=updates.get('owner_id', move_line.owner_id)
                     )
-                    self.env['stock.quant'].decrease_available_quantity(
-                        move_line.product_id, updates.get('location_id', move_line.location_id), vals.get('qty_done', move_line.qty_done),
-                        lot_id=updates.get('lot_id', move_line.lot_id), package_id=updates.get('package_id', move_line.package_id),
-                        owner_id=updates.get('owner_id', move_line.owner_id)
-                    )
-                # increase the update in destination location
-                quantity_to_increase = vals.get('qty_done', move_line.qty_done)
-                if quantity_to_increase != 0:
-                    if updates.get('location_dest_id', move_line.location_dest_id).should_impact_quants():
-                        # if the new quantity is 0, do nothing
-                            self.env['stock.quant'].increase_available_quantity(
-                                move_line.product_id, updates.get('location_dest_id', move_line.location_dest_id), quantity_to_increase,
-                                lot_id=updates.get('lot_id', move_line.lot_id), package_id=updates.get('package_id', move_line.package_id),
-                                owner_id=updates.get('owner_id', move_line.owner_id)
-                            )
         return super(PackOperation, self).write(vals)
 
     @api.multi
