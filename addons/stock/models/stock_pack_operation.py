@@ -132,7 +132,7 @@ class PackOperation(models.Model):
                         strict=True)
                     move_line.with_context(dont_change_reservation=True).product_qty = sum([q[1] for q in quants])
 
-        if updates or vals.get('qty_done'):
+        if updates or 'qty_done' in vals:
             for move_line in self.filtered(lambda ml: ml.move_id.state == 'done'):
                 # decrease the original in destination location
                 if move_line.location_dest_id.should_impact_quants():
