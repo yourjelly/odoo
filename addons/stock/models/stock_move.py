@@ -752,7 +752,10 @@ class StockMove(models.Model):
         for move in self:
             move.do_unreserve()
             if move.propagate:
-                move.move_dest_ids.action_cancel()
+                # only cancel the next move if all my siblings are also cancelled
+                siblings_states = (move.move_dest_ids.mapped('move_orig_ids') - move).mapped('state')
+                if all(state == 'cancel' for state in siblings_states):
+                    move.move_dest_ids.action_cancel()
         self.write({'state': 'cancel', 'move_orig_ids': [(5, 0, 0)]})
         self.mapped('procurement_ids').check()
         return True

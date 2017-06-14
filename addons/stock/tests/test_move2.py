@@ -125,6 +125,32 @@ class TestPickShip(TestStockCommon):
         # the client picking should not be assigned anymore, as we returned partially what we took
         self.assertEqual(picking_client.state, 'confirmed')
 
+    def test_no_backorder_1(self):
+        """ Check the behavior of doing less than asked in the picking pick and chosing not to
+        create a backorder. In this behavior, the second picking should obviously only be able to
+        reserve what was brought, but its initial demand should stay the same and the system will
+        ask the user will have to consider again if he wants to create a backorder or not.
+        """
+        picking_pick, picking_client = self.create_pick_ship()
+        location = self.env['stock.location'].browse(self.stock_location)
+
+        # make some stock
+        self.env['stock.quant'].increase_available_quantity(self.productA, location, 10.0)
+        picking_pick.action_assign()
+        picking_pick.move_lines[0].pack_operation_ids[0].qty_done = 5.0
+
+        # create a backorder
+        picking_pick.do_transfer()
+        picking_pick_backorder = self.env['stock.picking'].search([('backorder_id', '=', picking_pick.id)])
+        self.assertEqual(picking_pick_backorder.state, 'assigned')
+        self.assertEqual(picking_pick_backorder.pack_operation_ids.product_qty, 5.0)
+
+        self.assertEqual(picking_client.state, 'partially_available')
+
+        # cancel the backorder
+        picking_pick_backorder.action_cancel()
+        self.assertEqual(picking_client.state, 'partially_available')
+
 
 class TestSinglePicking(TestStockCommon):
     def test_backorder_1(self):
