@@ -10,7 +10,7 @@ class ReturnPickingLine(models.TransientModel):
     _name = "stock.return.picking.line"
     _rec_name = 'product_id'
 
-    product_id = fields.Many2one('product.product', string="Product", required=True)
+    product_id = fields.Many2one('product.product', string="Product", required=True, domain="[('id', '=', product_id)]")
     quantity = fields.Float("Quantity", digits=dp.get_precision('Product Unit of Measure'), required=True)
     wizard_id = fields.Many2one('stock.return.picking', string="Wizard")
     move_id = fields.Many2one('stock.move', "Move")
