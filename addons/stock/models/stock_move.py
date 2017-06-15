@@ -814,10 +814,11 @@ class StockMove(models.Model):
             # rounded according to the move's UOM. In this specific case, we chose to round up the value, because it
             # is what is expected by the user (if i consumed/produced a little more, the whole UOM unit should be
             # consumed/produced and the moves are split correctly).
-            rounding = move.product_uom.rounding
-            move.quantity_done = float_round(move.quantity_done, precision_rounding=rounding, rounding_method ='UP')
-            if move.quantity_done <= 0:
-                continue
+            # FIXME: move rounding to move line
+            # rounding = move.product_uom.rounding
+            # move.quantity_done = float_round(move.quantity_done, precision_rounding=rounding, rounding_method ='UP')
+            # if move.quantity_done <= 0:
+            #     continue
             moves_todo |= move
             moves_todo |= move._create_extra_move()
         # Split moves where necessary and move quants
