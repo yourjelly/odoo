@@ -192,8 +192,8 @@ class MrpWorkorder(models.Model):
                 continue
             new_qty = move.unit_factor * self.qty_producing
             if move.product_id.tracking == 'lot':
-                move_lots[0].quantity = new_qty
-                move_lots[0].quantity_done = new_qty
+                move_lots[0].product_qty = new_qty
+                move_lots[0].qty_done = new_qty
             elif move.product_id.tracking == 'serial':
                 # Create extra pseudo record
                 qty_todo = new_qty - sum(move_lots.mapped('quantity'))
@@ -218,11 +218,11 @@ class MrpWorkorder(models.Model):
                             qty_todo = qty_todo - move_lot.quantity
                             self.active_move_line_ids -= move_lot  # Difference operator
                         else:
-                            move_lot.quantity = move_lot.quantity - qty_todo
-                            if move_lot.quantity_done - qty_todo > 0:
-                                move_lot.quantity_done = move_lot.quantity_done - qty_todo
+                            move_lot.product_qty = move_lot.product_qty - qty_todo
+                            if move_lot.qty_done - qty_todo > 0:
+                                move_lot.qty_done = move_lot.qty_done - qty_todo
                             else:
-                                move_lot.quantity_done = 0
+                                move_lot.qty_done = 0
                             qty_todo = 0
 
     @api.multi
@@ -303,7 +303,7 @@ class MrpWorkorder(models.Model):
             self.next_work_order_id.final_lot_id = self.final_lot_id.id
 
         self.move_line_ids.filtered(
-            lambda move_line: not move_line.done_move and not move_line.lot_produced_id and move_line.quantity_done > 0
+            lambda move_line: not move_line.done_move and not move_line.lot_produced_id and move_line.qty_done > 0
         ).write({
             'lot_produced_id': self.final_lot_id.id,
             'lot_produced_qty': self.qty_producing

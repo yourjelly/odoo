@@ -18,14 +18,14 @@ class StockPackOperation(models.Model):
     done_move = fields.Boolean('Move Done', related='move_id.is_done', store=True)  # TDE FIXME: naming
 
     @api.one
-    @api.constrains('lot_id', 'quantity_done')
+    @api.constrains('lot_id', 'qty_done')
     def _check_lot_id(self):
         if self.move_id.product_id.tracking == 'serial':
             lots = set([])
             for move_lot in self.move_id.active_move_line_ids.filtered(lambda r: not r.lot_produced_id and r.lot_id):
                 if move_lot.lot_id in lots:
                     raise exceptions.UserError(_('You cannot use the same serial number in two different lines.'))
-                if float_compare(move_lot.quantity_done, 1.0, precision_rounding=move_lot.product_id.uom_id.rounding) == 1:
+                if float_compare(move_lot.qty_done, 1.0, precision_rounding=move_lot.product_id.uom_id.rounding) == 1:
                     raise exceptions.UserError(_('You can only produce 1.0 %s for products with unique serial number.') % move_lot.product_id.uom_id.name)
                 lots.add(move_lot.lot_id)
 
