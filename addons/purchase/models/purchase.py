@@ -683,7 +683,7 @@ class PurchaseOrderLine(models.Model):
                     tmp = template.copy()
                     tmp.update({
                         'product_uom_qty': min(procurement_qty, diff_quantity),
-                        'move_dest_ids': [(4, x) for x in procurement.move_dest_ids.ids],  # move destination is same as procurement destination
+                        'move_dest_ids': [(4, procurement.move_dest_id.id)],  # move destination is same as procurement destination
                         'procurement_ids': [(4, procurement.id)],
                         'propagate': procurement.rule_id.propagate,
                     })
@@ -694,7 +694,7 @@ class PurchaseOrderLine(models.Model):
         if float_compare(diff_quantity, 0.0,  precision_rounding=self.product_uom.rounding) > 0:
             template['product_uom_qty'] = diff_quantity
             if merge_moves:
-                template['move_dest_ids'] = [(4, x) for x in procurements.mapped('move_dest_ids').ids]
+                template['move_dest_ids'] = [(4, x) for x in procurements.mapped('move_dest_id').ids]
                 template['procurement_ids'] = [(4, x) for x in procurements.ids]
             res.append(template)
         return res
