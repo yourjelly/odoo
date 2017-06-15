@@ -115,6 +115,9 @@ class PackOperation(models.Model):
             #        is probably useless and should be remove. take care that some packop could be added without
             #        move id in the details operations view, and they should not reserve and not come here
             for move_line in self.filtered(lambda ml: ml.move_id.state in ['partially_available', 'assigned']):
+                if not move_line.location_id.should_impact_quants():
+                    continue
+
                 self._decrease_reserved_quantity(move_line.product_qty)
                 # FIXME: we guard the reservation the same way in stock.move and the code looks
                 #        crappy because of it, there must be a better way
