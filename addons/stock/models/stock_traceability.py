@@ -29,11 +29,12 @@ class MrpStockReport(models.TransientModel):
                     lambda m: m.lot_id.id == move_line.lot_id.id)
             # if MTS
             else:
-                res |= self.env['stock.pack.operation'].search([
-                    ('product_id', '=', move_line.product_id.id),
-                    ('lot_id', '=', move_line.lot_id.id),
-                    ('location_dest_id', '=', move_line.location_id.id),
-                ])
+                if move_line.location_id.usage == 'internal':
+                    res |= self.env['stock.pack.operation'].search([
+                        ('product_id', '=', move_line.product_id.id),
+                        ('lot_id', '=', move_line.lot_id.id),
+                        ('location_dest_id', '=', move_line.location_id.id),
+                    ])
         if res:
             res |= self.get_move_lines_upstream(res)
         return res
@@ -48,11 +49,12 @@ class MrpStockReport(models.TransientModel):
                     lambda m: m.lot_id.id == move_line.lot_id.id)
             # if MTS
             else:
-                res |= self.env['stock.pack.operation'].search([
-                    ('product_id', '=', move_line.product_id.id),
-                    ('lot_id', '=', move_line.lot_id.id),
-                    ('location_id', '=', move_line.location_dest_id.id),
-                ])
+                if move_line.location_dest_id.usage == 'internal':
+                    res |= self.env['stock.pack.operation'].search([
+                        ('product_id', '=', move_line.product_id.id),
+                        ('lot_id', '=', move_line.lot_id.id),
+                        ('location_id', '=', move_line.location_dest_id.id),
+                    ])
         if res:
             res |= self.get_move_lines_downstream(res)
         return res
