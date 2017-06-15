@@ -185,7 +185,7 @@ class PackOperation(models.Model):
                 raise UserError(_('You can not delete pack operations of a done picking'))
             # Unlinking a pack operation should unreserve.
             if not float_is_zero(move_line.product_qty, precision_digits=precision):
-                self._decrease_reserved_quantity(move_line.product_qty)
+                move_line._decrease_reserved_quantity(move_line.product_qty)
         return super(PackOperation, self).unlink()
 
     def action_done(self):
