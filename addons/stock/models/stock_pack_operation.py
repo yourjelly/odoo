@@ -79,7 +79,30 @@ class PackOperation(models.Model):
     @api.model
     def create(self, vals):
         vals['ordered_qty'] = vals.get('product_qty')
-        return super(PackOperation, self).create(vals)
+        move_line = super(PackOperation, self).create(vals)
+        if move_line.move_id.state == 'done':
+            if move_line.location_id.should_impact_quants():
+                # free potential move lines that aren't reserved anymore now that we took their product
+                move_line._free_reservation(
+                    move_line.product_id,
+                    move_line.location_id,
+                    move_line.qty_done,
+                    lot_id=move_line.lot_id,
+                    package_id=move_line.package_id,
+                    owner_id=move_line.owner_id
+                )
+                # increase the original in source location
+                self.env['stock.quant'].decrease_available_quantity(move_line.product_id, move_line.location_id,
+                                                                    move_line.qty_done, lot_id=move_line.lot_id,
+                                                                    package_id=move_line.package_id, owner_id=move_line.owner_id)
+            # increase the update in destination location
+            if move_line.location_dest_id.should_impact_quants():
+                self.env['stock.quant'].increase_available_quantity(
+                    move_line.product_id, move_line.location_dest_id, move_line.qty_done,
+                    lot_id=move_line.lot_id, package_id=move_line.package_id,
+                    owner_id=move_line.owner_id
+                )
+        return move_line
 
     def _decrease_reserved_quantity(self, quantity):
         self.ensure_one()
@@ -101,7 +124,6 @@ class PackOperation(models.Model):
             for move_line in self.filtered(lambda ml: ml.state != 'done'):
                 if self.state != 'draft':
                     self._decrease_reserved_quantity(move_line.product_qty - vals['product_qty'])
-
         # Through the interface, we allow users to change the source location, the lot, the package
         # and owner of a move line. If a quantity has been reserved for this move line, we try to
         # impact the reservation directly to free the old quants and allocate new ones.
