@@ -70,11 +70,11 @@ class StockMove(models.Model):
             move.is_done = (move.state in ('done', 'cancel'))
 
     @api.multi
-    def action_assign(self, no_prepare=False):
-        res = super(StockMove, self).action_assign(no_prepare=no_prepare)
+    def action_assign(self):
+        res = super(StockMove, self).action_assign()
         for move in self.filtered(lambda x: x.production_id or x.raw_material_production_id):
             if move.pack_operation_ids:
-                move.pack_operation_ids.write({'production_id': move.raw_material_production_id, 
+                move.pack_operation_ids.write({'production_id': move.raw_material_production_id.id, 
                                                'workorder_id': move.workorder_id.id,})
         return res
 
@@ -83,12 +83,6 @@ class StockMove(models.Model):
         if any(move.quantity_done for move in self): #TODO: either put in stock, or check there is a production order related to it
             raise exceptions.UserError(_('You cannot cancel a stock move having already consumed material'))
         return super(StockMove, self).action_cancel()
-
-    @api.multi
-    def action_done(self):
-        production_moves = self.filtered(lambda move: (move.production_id or move.raw_material_production_id) and not move.scrapped)
-        production_moves.move_validate()
-        return super(StockMove, self-production_moves).action_done()
 
     @api.multi
     # Could use split_move_operation from stock here

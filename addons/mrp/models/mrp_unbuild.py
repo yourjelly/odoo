@@ -111,7 +111,7 @@ class MrpUnbuild(models.Model):
                 })
             else:
                 produce_move.quantity_done = produce_move.product_uom_qty
-        produce_moves.move_validate()
+        produce_moves.action_done()
         produced_quant_ids = produce_moves.mapped('quant_ids').filtered(lambda quant: quant.qty > 0)
         consume_move.quant_ids.sudo().write({'produced_quant_ids': [(6, 0, produced_quant_ids.ids)]})
 

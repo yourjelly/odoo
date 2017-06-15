@@ -168,7 +168,9 @@ class PackOperation(models.Model):
                         package_id=updates.get('package_id', move_line.package_id),
                         owner_id=updates.get('owner_id', move_line.owner_id)
                     )
+                
                 # move_line.with_context(dont_change_reservation=True).product_qty = 0
+                
         return super(PackOperation, self).write(vals)
 
     @api.multi
