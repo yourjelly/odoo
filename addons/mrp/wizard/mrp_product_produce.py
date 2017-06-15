@@ -115,6 +115,8 @@ class MrpProductProduce(models.TransientModel):
                   'product_qty': self.product_qty,
                   'qty_done': self.product_qty,
                   'lot_id': self.lot_id.id,
+                  'location_id': produce_move.location_id.id, 
+                  'location_dest_id': produce_move.location_dest_id.id,
                 }
                 packs.create(vals)
             for move in self.production_id.move_raw_ids:
