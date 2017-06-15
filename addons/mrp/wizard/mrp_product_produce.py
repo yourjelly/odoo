@@ -66,7 +66,7 @@ class MrpProductProduce(models.TransientModel):
     product_qty = fields.Float(string='Quantity', digits=dp.get_precision('Product Unit of Measure'), required=True)
     product_uom_id = fields.Many2one('product.uom', 'Unit of Measure')
     lot_id = fields.Many2one('stock.production.lot', string='Lot')
-    consume_line_ids = fields.Many2many('stock.move.lots', 'mrp_produce_stock_move_lots', string='Product to Track')
+    consume_line_ids = fields.Many2many('stock.pack.operation', 'mrp_produce_stock_pack_operation', string='Product to Track')
     product_tracking = fields.Selection(related="product_id.tracking")
 
     @api.multi
@@ -79,15 +79,15 @@ class MrpProductProduce(models.TransientModel):
         for move in moves.filtered(lambda x: x.product_id.tracking == 'none' and x.state not in ('done', 'cancel')):
             if move.unit_factor:
                 rounding = move.product_uom.rounding
-                move.quantity_done_store += float_round(quantity * move.unit_factor, precision_rounding=rounding)
+                move.quantity_done += float_round(quantity * move.unit_factor, precision_rounding=rounding)
         moves = self.production_id.move_finished_ids.filtered(lambda x: x.product_id.tracking == 'none' and x.state not in ('done', 'cancel'))
         for move in moves:
             rounding = move.product_uom.rounding
             if move.product_id.id == self.production_id.product_id.id:
-                move.quantity_done_store += float_round(quantity, precision_rounding=rounding)
+                move.quantity_done += float_round(quantity, precision_rounding=rounding)
             elif move.unit_factor:
                 # byproducts handling
-                move.quantity_done_store += float_round(quantity * move.unit_factor, precision_rounding=rounding)
+                move.quantity_done += float_round(quantity * move.unit_factor, precision_rounding=rounding)
         self.check_finished_move_lots()
         if self.production_id.state == 'confirmed':
             self.production_id.write({
@@ -98,34 +98,34 @@ class MrpProductProduce(models.TransientModel):
 
     @api.multi
     def check_finished_move_lots(self):
-        lots = self.env['stock.move.lots']
+        packs = self.env['stock.pack.operation']
         produce_move = self.production_id.move_finished_ids.filtered(lambda x: x.product_id == self.product_id and x.state not in ('done', 'cancel'))
         if produce_move and produce_move.product_id.tracking != 'none':
             if not self.lot_id:
                 raise UserError(_('You need to provide a lot for the finished product'))
-            existing_move_lot = produce_move.pack_operation_ids.filtered(lambda x: x.lot_id == self.lot_id)
-            if existing_move_lot:
-                existing_move_lot.quantity += self.product_qty
-                existing_move_lot.quantity_done += self.product_qty
+            existing_move_line = produce_move.pack_operation_ids.filtered(lambda x: x.lot_id == self.lot_id)
+            if existing_move_line:
+                existing_move_line.product_qty += self.product_qty
+                existing_move_line.qty_done += self.product_qty
             else:
                 vals = {
                   'move_id': produce_move.id,
                   'product_id': produce_move.product_id.id,
                   'production_id': self.production_id.id,
-                  'quantity': self.product_qty,
-                  'quantity_done': self.product_qty,
+                  'product_qty': self.product_qty,
+                  'qty_done': self.product_qty,
                   'lot_id': self.lot_id.id,
                 }
-                lots.create(vals)
+                packs.create(vals)
             for move in self.production_id.move_raw_ids:
-                for movelots in move.pack_operation_ids.filtered(lambda x: not x.lot_produced_id):
-                    if movelots.quantity_done and self.lot_id:
+                for moveline in move.pack_operation_ids.filtered(lambda x: not x.lot_produced_id):
+                    if moveline.qty_done and self.lot_id:
                         #Possibly the entire move is selected
-                        remaining_qty = movelots.quantity - movelots.quantity_done
+                        remaining_qty = moveline.product_qty - moveline.qty_done
                         if remaining_qty > 0:
-                            default = {'quantity': movelots.quantity_done, 'lot_produced_id': self.lot_id.id}
-                            new_move_lot = movelots.copy(default=default)
-                            movelots.write({'quantity': remaining_qty, 'quantity_done': 0})
+                            default = {'product_qty': moveline.quantity_done, 'lot_produced_id': self.lot_id.id}
+                            new_move_line = moveline.copy(default=default)
+                            moveline.write({'product_qty': remaining_qty, 'qty_done': 0})
                         else:
-                            movelots.write({'lot_produced_id': self.lot_id.id})
+                            moveline.write({'lot_produced_id': self.lot_id.id})
         return True

@@ -302,7 +302,7 @@ class MrpWorkorder(models.Model):
         if self.next_work_order_id and self.final_lot_id and not self.next_work_order_id.final_lot_id:
             self.next_work_order_id.final_lot_id = self.final_lot_id.id
 
-        self.pack_operation_ids.filtered(
+        self.move_line_ids.filtered(
             lambda move_line: not move_line.done_move and not move_line.lot_produced_id and move_line.quantity_done > 0
         ).write({
             'lot_produced_id': self.final_lot_id.id,
@@ -313,16 +313,19 @@ class MrpWorkorder(models.Model):
         # TODO: should be same as checking if for every workorder something has been done?
         if not self.next_work_order_id:
             production_move = self.production_id.move_finished_ids.filtered(lambda x: (x.product_id.id == self.production_id.product_id.id) and (x.state not in ('done', 'cancel')))
-            move_line = production_move.pack_operation_ids.filtered(lambda x: x.lot_id.id == self.final_lot_id.id)
-            if move_line:
-                move_line.product_qty += self.qty_producing
-            else:
-                move_line.create({'move_id': production_move.id,
+            if production_move.has_tracking != 'none':
+                move_line = production_move.pack_operation_ids.filtered(lambda x: x.lot_id.id == self.final_lot_id.id)
+                if move_line:
+                    move_line.product_qty += self.qty_producing
+                else:
+                    move_line.create({'move_id': production_move.id,
                                  'lot_id': self.final_lot_id.id,
                                  'product_qty': self.qty_producing,
                                  'qty_done': self.qty_producing,
                                  'workorder_id': self.id,
                                  })
+            else:
+                production_move.quantity_done += self.qty_producing
         # Update workorder quantity produced
         self.qty_produced += self.qty_producing
 
