@@ -183,7 +183,7 @@ class MrpProduction(models.Model):
             production.workorder_done_count = count_data.get(production.id, 0)
 
     @api.multi
-    @api.depends('move_raw_ids.state', 'move_raw_ids.partially_available', 'workorder_ids.move_raw_ids', 'bom_id.ready_to_produce')
+    @api.depends('move_raw_ids.state', 'workorder_ids.move_raw_ids', 'bom_id.ready_to_produce')
     def _compute_availability(self):
         for order in self:
             if not order.move_raw_ids:
@@ -192,7 +192,7 @@ class MrpProduction(models.Model):
             if order.bom_id.ready_to_produce == 'all_available':
                 order.availability = any(move.state not in ('assigned', 'done', 'cancel') for move in order.move_raw_ids) and 'waiting' or 'assigned'
             else:
-                partial_list = [x.partially_available and x.state in ('waiting', 'confirmed', 'assigned') for x in order.move_raw_ids]
+                partial_list = [x.state in ('partially_available', 'assigned') for x in order.move_raw_ids]
                 assigned_list = [x.state in ('assigned', 'done', 'cancel') for x in order.move_raw_ids]
                 order.availability = (all(assigned_list) and 'assigned') or (any(partial_list) and 'partially_available') or 'waiting'
 
