@@ -17,6 +17,18 @@ class StockMove(TransactionCase):
             'type': 'product',
             'categ_id': self.env.ref('product.product_category_all').id,
         })
+        self.product2 = self.env['product.product'].create({
+            'name': 'Product A',
+            'type': 'product',
+            'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_all').id,
+        })
+        self.product3 = self.env['product.product'].create({
+            'name': 'Product A',
+            'type': 'product',
+            'tracking': 'lot',
+            'categ_id': self.env.ref('product.product_category_all').id,
+        })
 
     def test_in_1(self):
         """ Receive products from a supplier. Check that a move line is created and that the
@@ -56,6 +68,47 @@ class StockMove(TransactionCase):
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 100.0)
         self.assertEqual(len(self.env['stock.quant']._gather(self.product1, self.supplier_location)), 0.0)
         self.assertEqual(len(self.env['stock.quant']._gather(self.product1, self.stock_location)), 1.0)
+
+    def test_in_2(self):
+        """ Receive 5 tracked products from a supplier. The create move line should have 5
+        reserved. If i assign the 5 items to lot1, the reservation should not change. Once
+        i validate, the reception correctly increase a single quant in stock.
+        """
+        # creation
+        move1 = self.env['stock.move'].create({
+            'name': 'test_in_1',
+            'location_id': self.supplier_location.id,
+            'location_dest_id': self.stock_location.id,
+            'product_id': self.product3.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 5.0,
+            'picking_type_id': self.env.ref('stock.picking_type_in').id,
+        })
+        self.assertEqual(move1.state, 'draft')
+
+        # confirmation
+        move1.action_confirm()
+        self.assertEqual(move1.state, 'confirmed')
+
+        # assignment
+        move1.action_assign()
+        self.assertEqual(move1.state, 'assigned')
+        self.assertEqual(len(move1.pack_operation_ids), 1)
+        move_line = move1.pack_operation_ids[0]
+        self.assertEqual(move_line.product_qty, 5)
+        move_line.lot_name = 'lot1'
+        move_line.qty_done = 5.0
+        self.assertEqual(move_line.product_qty, 5)  # don't change reservation
+
+        move1.action_done()
+        self.assertEqual(move_line.product_qty, 5)  # don't change reservation
+        self.assertEqual(move1.state, 'done')
+
+        # no quants are created in the supplier location
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product3, self.supplier_location), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product3, self.stock_location), 5.0)
+        self.assertEqual(len(self.env['stock.quant']._gather(self.product3, self.supplier_location)), 0.0)
+        self.assertEqual(len(self.env['stock.quant']._gather(self.product3, self.stock_location)), 1.0)
 
     def test_out_1(self):
         """ Send products to a client. Check that a move line is created reserving products in
