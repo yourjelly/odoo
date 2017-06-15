@@ -1466,4 +1466,31 @@ class StockMove(TransactionCase):
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
 
+    def test_edit_done_move_line_10(self):
+        """ Edit the quantity done for an incoming move shoudld also remove the quant if there
+            are no product in stock.
+        """
+        # move from shelf1
+        move1 = self.env['stock.move'].create({
+            'name': 'test_edit_moveline_1',
+            'location_id': self.supplier_location.id,
+            'location_dest_id': self.stock_location.id,
+            'product_id': self.product1.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 10.0,
+        })
+        move1.action_confirm()
+        move1.action_assign()
+        move1.pack_operation_ids.qty_done = 10
+        move1.action_done()
+
+        quant = self.env['stock.quant']._gather(self.product1, self.stock_location)
+        self.assertEqual(len(quant), 1.0)
+
+        # edit once done, we actually moved 2 products
+        move1.pack_operation_ids.qty_done = 0
+
+        quant = self.env['stock.quant']._gather(self.product1, self.stock_location)
+        self.assertEqual(len(quant), 0.0)
+
 # todo att test addig moveline when done
