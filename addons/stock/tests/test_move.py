@@ -1632,4 +1632,39 @@ class StockMove(TransactionCase):
         quant = self.env['stock.quant']._gather(self.product1, self.stock_location)
         self.assertEqual(len(quant), 0.0)
 
-# todo att test addig moveline when done
+    def test_edit_done_move_line_11(self):
+        """ Add a move line and check if the quant is updated
+        """
+        owner = self.env['res.partner'].create({'name': 'Jean'})
+        picking = self.env['stock.picking'].create({
+            'location_id': self.supplier_location.id,
+            'location_dest_id': self.stock_location.id,
+            'partner_id': owner.id,
+            'picking_type_id': self.env.ref('stock.picking_type_in').id,
+        })
+        # move from shelf1
+        move1 = self.env['stock.move'].create({
+            'name': 'test_edit_moveline_1',
+            'location_id': self.supplier_location.id,
+            'location_dest_id': self.stock_location.id,
+            'picking_id': picking.id,
+            'product_id': self.product1.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 10.0,
+        })
+        picking.action_confirm()
+        picking.action_assign()
+        move1.pack_operation_ids.qty_done = 10
+        picking.action_done()
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 10.0)
+        self.env['stock.pack.operation'].create({
+            'picking_id': move1.pack_operation_ids.picking_id.id,
+            'move_id': move1.pack_operation_ids.move_id.id,
+            'product_id': move1.pack_operation_ids.product_id.id,
+            'qty_done': move1.pack_operation_ids.qty_done,
+            'location_id': move1.pack_operation_ids.location_id.id,
+            'location_dest_id': move1.pack_operation_ids.location_dest_id.id,
+        })
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 20.0)
+        move1.pack_operation_ids[1].qty_done = 5
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 15.0)
