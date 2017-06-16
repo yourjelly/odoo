@@ -190,7 +190,7 @@ class MrpStockReport(models.TransientModel):
             moves = self.env['stock.pack.operation'].search([
                 ('location_dest_id', '=', model_obj.location_id.id),
                 ('lot_id', '=', model_obj.lot_id.id),
-                ('date', '<', model_obj.write_date),
+                ('date', '<=', model_obj.write_date),
                 ('state', '=', 'done'),
             ])
             moves |= self.get_move_lines_upstream(moves)
@@ -204,6 +204,16 @@ class MrpStockReport(models.TransientModel):
         final_vals = []
         if model == 'stock.pack.operation':
             moves = self.get_move_lines_downstream(model_obj)
+            for move in moves.sorted(key=lambda r: r.date):
+                final_vals += self.make_dict_move(level, stream=stream, parent_id=line_id, move_line=move)
+        elif model == 'stock.quant':
+            moves = self.env['stock.pack.operation'].search([
+                ('location_id', '=', model_obj.location_id.id),
+                ('lot_id', '=', model_obj.lot_id.id),
+                ('date', '>=', model_obj.write_date),
+                ('state', '=', 'done'),
+            ])
+            moves |= self.get_move_lines_downstream(moves)
             for move in moves.sorted(key=lambda r: r.date):
                 final_vals += self.make_dict_move(level, stream=stream, parent_id=line_id, move_line=move)
         return final_vals
