@@ -158,6 +158,29 @@ class StockMove(TransactionCase):
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 0.0)
         self.assertEqual(len(self.env['stock.quant']._gather(self.product1, self.stock_location)), 0.0)
 
+    def test_mixed_tracking_reservation_1(self):
+        lot1 = self.env['stock.production.lot'].create({
+            'name': 'lot1',
+            'product_id': self.product3.id,
+        })
+        self.env['stock.quant'].increase_available_quantity(self.product3, self.stock_location, 2)
+        self.env['stock.quant'].increase_available_quantity(self.product3, self.stock_location, 3, lot_id=lot1)
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product3, self.stock_location), 5.0)
+        # creation
+        move1 = self.env['stock.move'].create({
+            'name': 'test_in_1',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product3.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 5.0,
+        })
+        move1.action_confirm()
+        move1.action_assign()
+
+        self.assertEqual(len(move1.pack_operation_ids), 2)
+
     def test_putaway_1(self):
         """ Receive products from a supplier. Check that putaway rules are rightly applied on
         the receipt move line.
@@ -1087,6 +1110,122 @@ class StockMove(TransactionCase):
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf1_location), 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, shelf2_location), 0.0)
+
+    def test_edit_reserved_move_line_7(self):
+        """ Send 5 tracked products to a client, but these products do not have any lot set in our
+        inventory yet: we only set them at delivery time. The created move line should have 5 items
+        without any lot set, if we edit to set them to lot1, the reservation should not change.
+        Validating the stock move should should not create a negative quant for this lot in stock
+        location.
+        """
+        lot1 = self.env['stock.production.lot'].create({
+            'name': 'lot1',
+            'product_id': self.product3.id,
+        })
+        # make some stock without assigning a lot id
+        self.env['stock.quant'].increase_available_quantity(self.product3, self.stock_location, 5)
+
+        # creation
+        move1 = self.env['stock.move'].create({
+            'name': 'test_in_1',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product3.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 5.0,
+        })
+        self.assertEqual(move1.state, 'draft')
+
+        # confirmation
+        move1.action_confirm()
+        self.assertEqual(move1.state, 'confirmed')
+
+        # assignment
+        move1.action_assign()
+        self.assertEqual(move1.state, 'assigned')
+        self.assertEqual(len(move1.pack_operation_ids), 1)
+        move_line = move1.pack_operation_ids[0]
+        self.assertEqual(move_line.product_qty, 5)
+        move_line.qty_done = 5.0
+        self.assertEqual(move_line.product_qty, 5)  # don't change reservation
+        move_line.lot_id = lot1
+        self.assertEqual(move_line.product_qty, 5)  # don't change reservation when assgning a lot now
+
+        move1.action_done()
+        self.assertEqual(move_line.product_qty, 5)  # don't change reservation
+        self.assertEqual(move1.state, 'done')
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product3, self.stock_location), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product3, self.stock_location, lot_id=lot1, strict=True), 0.0)
+        self.assertEqual(len(self.env['stock.quant']._gather(self.product3, self.stock_location)), 0.0)
+        self.assertEqual(len(self.env['stock.quant']._gather(self.product3, self.stock_location, lot_id=lot1, strict=True)), 0.0)
+
+    def test_edit_reserved_move_line_8(self):
+        """ Send 5 tracked products to a client, but some of these products do not have any lot set
+        in our inventory yet: we only set them at delivery time. Adding a lot_id on the move line
+        that does not have any should not change its reservation, and validating should not create
+        a negative quant for this lot in stock.
+        """
+        lot1 = self.env['stock.production.lot'].create({
+            'name': 'lot1',
+            'product_id': self.product3.id,
+        })
+        lot2 = self.env['stock.production.lot'].create({
+            'name': 'lot2',
+            'product_id': self.product3.id,
+        })
+        # make some stock without assigning a lot id
+        self.env['stock.quant'].increase_available_quantity(self.product3, self.stock_location, 3)
+        self.env['stock.quant'].increase_available_quantity(self.product3, self.stock_location, 2, lot_id=lot1)
+
+        # creation
+        move1 = self.env['stock.move'].create({
+            'name': 'test_in_1',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product3.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 5.0,
+        })
+        self.assertEqual(move1.state, 'draft')
+
+        # confirmation
+        move1.action_confirm()
+        self.assertEqual(move1.state, 'confirmed')
+
+        # assignment
+        move1.action_assign()
+        self.assertEqual(move1.state, 'assigned')
+        self.assertEqual(len(move1.pack_operation_ids), 2)
+
+        tracked_move_line = None
+        untracked_move_line = None
+        for move_line in move1.pack_operation_ids:
+            if move_line.lot_id:
+                tracked_move_line = move_line
+            else:
+                untracked_move_line = move_line
+
+        self.assertEqual(tracked_move_line.product_qty, 2)
+        tracked_move_line.qty_done = 2
+
+        self.assertEqual(untracked_move_line.product_qty, 3)
+        untracked_move_line.lot_id = lot2
+        self.assertEqual(untracked_move_line.product_qty, 3)  # don't change reservation
+        untracked_move_line.qty_done = 3
+        self.assertEqual(untracked_move_line.product_qty, 3)  # don't change reservation
+
+        move1.action_done()
+        self.assertEqual(untracked_move_line.product_qty, 3)  # don't change reservation
+        self.assertEqual(tracked_move_line.product_qty, 2)  # don't change reservation
+        self.assertEqual(move1.state, 'done')
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product3, self.stock_location), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product3, self.stock_location, lot_id=lot1, strict=True), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product3, self.stock_location, lot_id=lot2, strict=True), 0.0)
+        self.assertEqual(len(self.env['stock.quant']._gather(self.product3, self.stock_location)), 0.0)
+        self.assertEqual(len(self.env['stock.quant']._gather(self.product3, self.stock_location, lot_id=lot1, strict=True)), 0.0)
+        self.assertEqual(len(self.env['stock.quant']._gather(self.product3, self.stock_location, lot_id=lot2, strict=True)), 0.0)
 
     def test_edit_done_move_line_1(self):
         """ Test that editing a done stock move line linked to an untracked product correctly and

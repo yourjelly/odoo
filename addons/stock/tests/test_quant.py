@@ -461,7 +461,8 @@ class StockQuant(TransactionCase):
         with self.assertRaises(UserError):
             self.env['stock.quant'].increase_reserved_quantity(product1, stock_location, 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 0.0)
-        self.env['stock.quant'].decrease_reserved_quantity(product1, stock_location, 1.0)
+        with self.assertRaises(UserError):
+            self.env['stock.quant'].decrease_reserved_quantity(product1, stock_location, 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 0.0)
 
     def test_action_done_1(self):
