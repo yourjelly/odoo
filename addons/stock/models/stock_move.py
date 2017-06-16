@@ -217,7 +217,7 @@ class StockMove(models.Model):
             if move.quantity_done:
                 if not move.pack_operation_ids:
                     # do not impact reservation here
-                    move_line = self.env['stock.pack.operation'].create(self._prepare_move_line_vals())
+                    move_line = self.env['stock.pack.operation'].create(dict(self._prepare_move_line_vals(), qty_done=move.quantity_done))
                     move.write({'pack_operation_ids': [(4, move_line.id)]})
                 elif len(move.pack_operation_ids) == 1:
                     move.pack_operation_ids[0].qty_done = move.quantity_done
