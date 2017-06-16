@@ -217,12 +217,12 @@ class StockMove(models.Model):
             if move.quantity_done:
                 if not move.pack_operation_ids:
                     # do not impact reservation here
-                    move_line = self.env['stock.pack.operation'].create(self._prepare_move_line_vals())
+                    move_line = self.env['stock.pack.operation'].create(self._prepare_move_line_vals(quantity=move.quantity_done))
                     move.write({'pack_operation_ids': [(4, move_line.id)]})
                 elif len(move.pack_operation_ids) >= 1:
                     move.pack_operation_ids[0].qty_done = move.quantity_done
-                #else: TODO: temp fix mrp
-                #    raise UserError("blabla")
+                else:
+                    raise UserError("blabla")
 
     def _set_product_qty(self):
         """ The meaning of product_qty field changed lately and is now a functional field computing the quantity
@@ -643,7 +643,7 @@ class StockMove(models.Model):
             'picking_id': self.picking_id.id,
         }
         if quantity:
-            vals = dict(vals, product_qty=quantity)
+            vals = dict(vals)
         if reserved_quant:
             vals = dict(
                 vals,

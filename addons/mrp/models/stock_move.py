@@ -62,6 +62,27 @@ class StockMove(models.Model):
         'Done', compute='_compute_is_done',
         store=True,
         help='Technical Field to order moves')
+    quantity_done = fields.Float('Quantity Done', compute='_quantity_done_compute', digits=dp.get_precision('Product Unit of Measure'), inverse='_quantity_done_set',
+                                 states={'done': [('readonly', True)]})
+    
+    @api.multi
+    @api.depends('pack_operation_ids.qty_done')
+    def _quantity_done_compute(self):
+        for move in self:
+            move.quantity_done = sum(move.active_move_line_ids.mapped('qty_done'))
+
+    @api.multi
+    def _quantity_done_set(self):
+        for move in self:
+            if move.quantity_done:
+                if not move.active_move_line_ids:
+                    # do not impact reservation here
+                    move_line = self.env['stock.pack.operation'].create(self._prepare_move_line_vals(quantity=move.quantity_done))
+                    move.write({'pack_operation_ids': [(4, move_line.id)]})
+                elif len(move.active_move_line_ids) == 1:
+                    move.active_move_line_ids[0].qty_done = move.quantity_done
+                else:
+                    raise UserError("blabla")
 
     @api.multi
     @api.depends('state')
@@ -92,7 +113,7 @@ class StockMove(models.Model):
         view = self.env.ref('mrp.view_stock_move_lots')
         serial = (self.has_tracking == 'serial')
         only_create = False  # Check operation type in theory
-        show_reserved = any([x for x in self.pack_operation_ids if x.quantity > 0.0])
+        show_reserved = any([x for x in self.pack_operation_ids if x.product_qty > 0.0])
         ctx.update({
             'serial': serial,
             'only_create': only_create,

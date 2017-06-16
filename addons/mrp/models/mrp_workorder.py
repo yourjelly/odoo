@@ -203,7 +203,7 @@ class MrpWorkorder(models.Model):
                             'move_id': move.id,
                             'product_id': move.product_id.id,
                             'lot_id': False,
-                            'product_qty': min(1.0, qty_todo),
+                            'product_qty': 0.0,
                             'qty_done': min(1.0, qty_todo),
                             'workorder_id': self.id,
                             'done_wo': False
@@ -218,7 +218,7 @@ class MrpWorkorder(models.Model):
                             qty_todo = qty_todo - move_lot.quantity
                             self.active_move_line_ids -= move_lot  # Difference operator
                         else:
-                            move_lot.product_qty = move_lot.product_qty - qty_todo
+                            #move_lot.product_qty = move_lot.product_qty - qty_todo
                             if move_lot.qty_done - qty_todo > 0:
                                 move_lot.qty_done = move_lot.qty_done - qty_todo
                             else:
@@ -243,23 +243,27 @@ class MrpWorkorder(models.Model):
                 while float_compare(qty, 0.0, precision_rounding=move.product_uom.rounding) > 0:
                     MoveLine.create({
                         'move_id': move.id,
-                        'product_qty': min(1, qty),
+                        'product_qty': 0,
                         'qty_done': min(1, qty),
                         'production_id': self.production_id.id,
                         'workorder_id': self.id,
                         'product_id': move.product_id.id,
                         'done_wo': False,
+                        'location_id': move.location_id.id,
+                        'location_dest_id': move.location_dest_id.id,
                     })
                     qty -= 1
             else:
                 MoveLine.create({
                     'move_id': move.id,
-                    'product_qty': qty,
+                    'product_qty': 0,
                     'qty_done': qty,
                     'product_id': move.product_id.id,
                     'production_id': self.production_id.id,
                     'workorder_id': self.id,
                     'done_wo': False,
+                    'location_id': move.location_id.id,
+                    'location_dest_id': move.location_dest_id.id,
                     })
 
     @api.multi
@@ -281,15 +285,15 @@ class MrpWorkorder(models.Model):
         # Transfer quantities from temporary to final move lots or make them final
         for move_line in self.active_move_line_ids:
             # Check if move_line already exists
-            if move_line.quantity_done <= 0:  # rounding...
+            if move_line.qty_done <= 0:  # rounding...
                 move_line.unlink()
                 continue
             if not move_line.lot_id:
                 raise UserError(_('You should provide a lot for a component'))
             # Search other move_line where it could be added:
-            lots = self.pack_operation_ids.filtered(lambda x: (x.lot_id.id == move_line.lot_id.id) and (not x.lot_produced_id) and (not x.done_move))
+            lots = self.move_line_ids.filtered(lambda x: (x.lot_id.id == move_line.lot_id.id) and (not x.lot_produced_id) and (not x.done_move))
             if lots:
-                lots[0].quantity_done += move_line.quantity_done
+                lots[0].qty_done += move_line.qty_done
                 lots[0].lot_produced_id = self.final_lot_id.id
                 move_line.unlink()
             else:
@@ -312,6 +316,7 @@ class MrpWorkorder(models.Model):
         # If last work order, then post lots used
         # TODO: should be same as checking if for every workorder something has been done?
         if not self.next_work_order_id:
+            import pdb; pdb.set_trace()
             production_move = self.production_id.move_finished_ids.filtered(lambda x: (x.product_id.id == self.production_id.product_id.id) and (x.state not in ('done', 'cancel')))
             if production_move.has_tracking != 'none':
                 move_line = production_move.pack_operation_ids.filtered(lambda x: x.lot_id.id == self.final_lot_id.id)
