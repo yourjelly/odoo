@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
+    <data>
 
         <!--Email template -->
         <record id="email_template_edi_sale" model="mail.template">
@@ -14,50 +14,99 @@
             <field name="report_name">${(object.name or '').replace('/','_')}${object.state == 'draft' and '_draft' or ''}</field>
             <field name="lang">${object.partner_id.lang}</field>
             <field name="body_html"><![CDATA[
-<p>Dear ${object.partner_id.name}
-% set access_action = object.with_context(force_website=True).get_access_action()
-% set is_online = access_action and access_action['type'] == 'ir.actions.act_url'
-% set pay_sign_name =  ('require_payment' in object and object.require_payment and 'pay') or 'sign'
-% set access_name = is_online and object.template_id and object.state in ('draft', 'sent')  and 'Accept and %s online' % pay_sign_name or 'View %s' % doc_name
-% set access_url = is_online and access_action['url'] or ''
+                <table cellspacing="0" cellpadding="0" width="100%" style="font-family: 'Helvetica'; background-color: #EEE; color:#666666; border-collapse: collapse;">
+                    <tr>
+                        <td valign="top" align="center">
+                            <table cellspacing="0" cellpadding="0" width="600" style="margin: 0 auto; width: 600px;">
+                                <tr>
+                                    <td>
+                                        <!-- Header -->
+                                        <table cellspacing="0" cellpadding="0" width="100%">
+                                            <tr>
+                                                <td valign="middle" align="left" style="padding:15px">
+                                                    % if object.company_id.name:
+                                                        <img src="/web/image?model=res.company&field=logo&id=${object.company_id.id}" />
+                                                    % else:
+                                                        <span style="font-size:12px;color:#AAAAAA">${ object.company_id.name },</span>
+                                                    % endif
+                                                </td>
+                                            </tr>
+                                        </table>
 
-% if object.partner_id.parent_id:
-    (<i>${object.partner_id.parent_id.name}</i>)
-% endif
-,</p>
-<p>
-Here is
-% if ctx.get('proforma')
-in attachment, your pro-forma
-% else
-the ${doc_name} <strong>${object.name}</strong>
-% endif
-% if object.origin:
-(with reference: ${object.origin} )
-% endif
-amounting in <strong>${object.amount_total} ${object.pricelist_id.currency_id.name}</strong>
-from ${object.company_id.name}.
-</p>
+                                        <!-- Content -->
+                                        <table cellspacing="0" cellpadding="0" width="100%" bgcolor="#fff" style="background-color:#fff;">
+                                            <tr>
+                                                <td width="100%" style="padding: 15px;">
+                                                    <table cellspacing="0" cellpadding="0" width="100%">
+                                                        <tr>
+                                                            <td style="margin-bottom: 30px;">
+                                                                <h1 style="color:#666666;">Dear ${object.partner_id.name},
+                                                                    % set access_action = object.with_context(force_website=True).get_access_action()
+                                                                    % set is_online = access_action and access_action['type'] == 'ir.actions.act_url'
+                                                                    % set pay_sign_name =  ('require_payment' in object and object.require_payment and 'pay') or 'sign'
+                                                                    % set access_name = is_online and object.template_id and object.state in ('draft', 'sent')  and 'Accept and %s online' % pay_sign_name or 'View %s' % doc_name
+                                                                    % set access_url = is_online and access_action['url'] or ''
 
-% if is_online and not ctx.get('proforma'):
-    <br/><br/>
-    <center>
-        <a href="${access_url}" style="background-color: #1abc9c; padding: 20px; text-decoration: none; color: #fff; border-radius: 5px; font-size: 16px;" class="o_default_snippet_text">${access_name}</a>
-        <br/><br/><br/>
-        <span style="color:#888888">(or view attached PDF)</span>
-    </center>
-    <br/>
-% endif
+                                                                    % if object.partner_id.parent_id:
+                                                                        (<i>${object.partner_id.parent_id.name}</i>)
+                                                                    % endif
+                                                                </h1>
 
-<p>You can reply to this email if you have any questions.</p>
-<p>Thank you,</p>
+                                                                <p style="padding: 20px 0 0;color:#666666;">
+                                                                    Here is
+                                                                    % if ctx.get('proforma')
+                                                                    in attachment, your pro-forma
+                                                                    % else
+                                                                    the ${doc_name} <strong style="color:#9A6C8E;">${object.name}</strong>
+                                                                    % endif
+                                                                    % if object.origin:
+                                                                    (with reference: ${object.origin} )
+                                                                    % endif
+                                                                    amounting in <strong style="color:#9A6C8E;">${object.amount_total} ${object.pricelist_id.currency_id.name}</strong>
+                                                                    from ${object.company_id.name}.
+                                                                </p>
 
-<p style="color:#888888;">
-% if object.user_id and object.user_id.signature:
-    ${object.user_id.signature | safe}
-% endif
-</p>
-]]></field>
+                                                                % if is_online and not ctx.get('proforma'):
+                                                                    <br/><br/>
+                                                                        <a href="${access_url}" style="padding:10px;border:1px solid #1CC5A9; text-decoration: none; color: #1CC5A9;font-size: 16px;" class="o_default_snippet_text">${access_name}</a>
+                                                                        <p style="color:#888888">(or view attached PDF)</p>
+                                                                    <br/>
+                                                                % endif
+
+                                                                <div style="width:100%; height:1px; background-color:#9A6C8E;margin:20px 0;"></div>
+
+                                                                <p style="color:#666666;">You can reply to this email if you have any questions.
+                                                                    <span>Thank you,</span>
+                                                                </p>
+
+                                                                <p style="color:#666666;font-size:10px;">
+                                                                % if object.user_id and object.user_id.signature:
+                                                                    ${object.user_id.signature | safe}
+                                                                % endif
+                                                                </p>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <!-- Footer -->
+                                        <table cellspacing="0" cellpadding="0" width="100%" style="padding: 15px;">
+                                            <tr>
+                                                <td align="center" style="padding: 30px 15px;">
+                                                    <p style="font-size:12px;color:#666666">${ object.company_id.name } - Tel.: ${ object.company_id.phone }</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+        ]]></field>
         </record>
 
         <!--Default Notification Email template for invoices-->
@@ -66,77 +115,57 @@ from ${object.company_id.name}.
             <field name="subject">${object.subject}</field>
             <field name="model_id" ref="mail.model_mail_message"/>
             <field name="auto_delete" eval="True"/>
-            <field name="body_html"><![CDATA[<html>
-                <head></head>
+            <field name="body_html"><![CDATA[
                 % set record = ctx.get('record')
                 % set company = record and record.company_id or user.company_id
-                <body style="margin: 0; padding: 0;">
-                <table border="0" width="100%" cellpadding="0" bgcolor="#ededed" style="padding: 20px; background-color: #ededed" summary="o_mail_notification">
-                    <tbody>
+                <table cellspacing="0" cellpadding="0" width="100%" style="font-family: 'Helvetica'; background-color: #EEE; color:#666666; border-collapse: collapse;" summary="o_mail_notification">
+                    <tr>
+                        <td valign="top" align="center">
+                            <table cellspacing="0" cellpadding="0" width="600" style="margin: 0 auto; width: 600px;">
+                                <tr>
+                                    <td>
+                                        <!-- Header -->
+                                        <table cellspacing="0" cellpadding="0" width="100%">
+                                            <tr>
+                                                <td valign="middle" align="left" style="padding:15px">
+                                                    % if object.company_id.name:
+                                                        <img src="/web/image?model=res.company&field=logo&id=${object.company_id.id}"  style="max-width:100px;" />
+                                                    % else:
+                                                        <span style="font-size:12px;color:#AAAAAA">${ object.company_id.name },</span>
+                                                    % endif
+                                                </td>
+                                            </tr>
+                                        </table>
 
-                      <!-- HEADER -->
-                      <tr>
-                        <td align="center" style="min-width: 590px;">
-                          <table width="590" border="0" cellpadding="0" bgcolor="#875A7B" style="min-width: 590px; background-color: rgb(135,90,123); padding: 20px;">
-                            <tr>
-                              <td valign="middle">
-                                  <span style="font-size:20px; color:white; font-weight: bold;">
-                                      ${object.record_name}
-                                  </span>
-                              </td>
-                              <td valign="middle" align="right">
-                                  <img src="/logo.png?company=${company.id}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" alt="${company.name}">
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
-                      </tr>
+                                        <!-- Content -->
+                                        <table cellspacing="0" cellpadding="0" width="100%" bgcolor="#fff" style="background-color:#fff;">
+                                            <tr>
+                                                <td width="100%" style="padding: 15px;">
+                                                    <table cellspacing="0" cellpadding="0" width="100%">
+                                                        <tr>
+                                                            <td style="margin-bottom: 30px;">
+                                                                ${object.body | safe}
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
 
-                      <!-- CONTENT -->
-                      <tr>
-                        <td align="center" style="min-width: 590px;">
-                          <table width="590" border="0" cellpadding="0" bgcolor="#ffffff" style="min-width: 590px; background-color: rgb(255, 255, 255); padding: 20px;">
-                            <tbody>
-                              <td valign="top" style="font-family:Arial,Helvetica,sans-serif; color: #555; font-size: 14px;">
-                                ${object.body | safe}
-                              </td>
-                            </tbody>
-                          </table>
+                                        <!-- Footer -->
+                                        <table cellspacing="0" cellpadding="0" width="100%" style="padding: 15px;">
+                                            <tr>
+                                                <td align="center" style="padding: 30px 15px;">
+                                                    <p style="font-size:12px;color:#AAAAAA">${ object.company_id.name } - ${ object.company_id.address }</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
                         </td>
-                      </tr>
-
-                      <!-- FOOTER -->
-                      <tr>
-                        <td align="center" style="min-width: 590px;">
-                          <table width="590" border="0" cellpadding="0" bgcolor="#875A7B" style="min-width: 590px; background-color: rgb(135,90,123); padding: 20px;">
-                            <tr>
-                              <td valign="middle" align="left" style="color: #fff; padding-top: 10px; padding-bottom: 10px; font-size: 12px;">
-                                ${company.name}<br/>
-                                ${company.phone or ''}
-                              </td>
-                              <td valign="middle" align="right" style="color: #fff; padding-top: 10px; padding-bottom: 10px; font-size: 12px;">
-                                % if company.email:
-                                <a href="mailto:${company.email}" style="text-decoration:none; color: white;">${company.email}</a><br/>
-                                % endif
-                                % if company.website:
-                                    <a href="${company.website}" style="text-decoration:none; color: white;">
-                                        ${company.website}
-                                    </a>
-                                % endif
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td align="center">
-                            Powered by <a target="_blank" href="https://www.odoo.com">Odoo</a>.
-                        </td>
-                      </tr>
-                    </tbody>
+                    </tr>
                 </table>
-                </body>
-                </html>
             ]]></field>
         </record>
 
