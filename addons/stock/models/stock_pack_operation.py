@@ -31,7 +31,7 @@ class PackOperation(models.Model):
         'stock.quant.package', 'Destination Package',
         ondelete='cascade', required=False,
         help="If set, the operations are packed into this package")
-    date = fields.Datetime('Date', default=fields.Date.context_today, required=True)
+    date = fields.Datetime('Date', default=fields.Datetime.now(), required=True)
     owner_id = fields.Many2one('res.partner', 'Owner', help="Owner of the quants")
     location_id = fields.Many2one('stock.location', 'From', required=True)
     location_dest_id = fields.Many2one('stock.location', 'To', required=True)
@@ -41,14 +41,7 @@ class PackOperation(models.Model):
     from_loc = fields.Char(compute='_compute_location_description')
     to_loc = fields.Char(compute='_compute_location_description')
     lots_visible = fields.Boolean(compute='_compute_lots_visible')
-    state = fields.Selection(selection=[
-        ('draft', 'Draft'),
-        ('cancel', 'Cancelled'),
-        ('waiting', 'Waiting Another Operation'),
-        ('confirmed', 'Waiting Availability'),
-        ('partially_available', 'Partially Available'),
-        ('assigned', 'Available'),
-        ('done', 'Done')], related='picking_id.state')
+    state = fields.Selection(related='move_id.state')
 
     @api.one
     def _compute_location_description(self):
