@@ -20,8 +20,11 @@ import re
 from collections import namedtuple
 from contextlib import closing
 from PyPDF2 import PdfFileWriter, PdfFileReader
+from PyPDF2.utils import PdfReadError
+from PIL import Image
 from distutils.version import LooseVersion
 from reportlab.graphics.barcode import createBarcodeDrawing
+from StringIO import StringIO
 
 
 _logger = logging.getLogger(__name__)
@@ -136,6 +139,9 @@ class IrActionsReport(models.Model):
                                     help='If you check this, then the second time the user prints with same attachment name, it returns the previous report.')
     attachment = fields.Char(string='Save as Attachment Prefix',
                              help='This is the filename of the attachment used to store the printing result. Keep empty to not save the printed reports. You can use a python expression with the object and time variables.')
+    pdf_watermark = fields.Binary('Watermark11')
+    show_watermark = fields.Boolean(default=True)
+    watermark_id = fields.Many2one('ir.attachment', string='Watermark', help="Attach watermark image for pdf report")
 
 
     @api.multi
@@ -631,14 +637,64 @@ class IrActionsReport(models.Model):
         html_data = self.with_context(context)._extract_wkhtmltopdf_data_from_html(res_ids, html)
         wkhtmltopdf_objs = html_data.get('wkhtmltopdf_objs', [])
         specific_paperformat_args = html_data.get('specific_paperformat_args', None)
-
-        return self._run_wkhtmltopdf(
+        result = self._run_wkhtmltopdf(
             wkhtmltopdf_objs,
             context.get('landscape'),
             paperformat,
             specific_paperformat_args=specific_paperformat_args,
             set_viewport_size=context.get('set_viewport_size'),
         ), 'pdf'
+
+        if self.show_watermark:
+            watermark_img = self.watermark_id.datas or self.env.user.company_id.watermark_id.datas or self.env.user.company_id.logo
+            watermark = base64.b64decode(watermark_img)
+        else:
+            return result
+
+        pdf = PdfFileWriter()
+        pdf_watermark = None
+        try:
+            pdf_watermark = PdfFileReader(StringIO(watermark))
+        except PdfReadError:
+            # let's see if we can convert this with pillow
+            try:
+                image = Image.open(StringIO(watermark))
+                pdf_buffer = StringIO()
+                if image.mode != 'RGB':
+                    image = image.convert('RGB')
+                resolution = image.info.get(
+                    'dpi', self.paperformat_id.dpi or 90
+                )
+                if isinstance(resolution, tuple):
+                    resolution = resolution[0]
+                image.save(pdf_buffer, 'pdf', resolution=resolution)
+                pdf_watermark = PdfFileReader(pdf_buffer)
+            except:
+                _logger.exception('Failed to load watermark')
+
+        if not pdf_watermark:
+            _logger.error(
+                'No usable watermark found, got %s...', watermark[:100]
+            )
+            return result
+
+        if pdf_watermark.numPages < 1:
+            _logger.error('Your watermark pdf does not contain any pages')
+            return result
+        if pdf_watermark.numPages > 1:
+            _logger.debug('Your watermark pdf contains more than one page, '
+                         'all but the first one will be ignored')
+
+        for page in PdfFileReader(StringIO(result[0])).pages:
+            watermark_page = pdf.addBlankPage(
+                page.mediaBox.getWidth(), page.mediaBox.getHeight()
+            )
+            watermark_page.mergePage(pdf_watermark.getPage(0))
+            watermark_page.mergePage(page)
+
+        pdf_content = StringIO()
+        pdf.write(pdf_content)
+        return (pdf_content.getvalue(), result[1])
 
     @api.model
     def render_qweb_html(self, docids, data=None):
