@@ -121,10 +121,7 @@ class PackOperation(models.Model):
                 self._decrease_reserved_quantity(move_line.product_qty)
                 # FIXME: we guard the reservation the same way in stock.move and the code looks
                 #        crappy because of it, there must be a better way
-                available_quantity = self.env['stock.quant'].get_available_quantity(move_line.product_id, updates.get('location_id', move_line.location_id), lot_id=updates.get('lot_id', move_line.lot_id), package_id=updates.get('package_id', move_line.package_id), owner_id=updates.get('owner_id', move_line.owner_id), strict=True)
-                if available_quantity < move_line.product_qty:
-                    move_line.with_context(dont_change_reservation=True).product_qty = 0
-                else:
+                try:
                     quants = self.env['stock.quant'].increase_reserved_quantity(
                         move_line.product_id,
                         updates.get('location_id', move_line.location_id),
@@ -134,6 +131,21 @@ class PackOperation(models.Model):
                         owner_id=updates.get('owner_id', move_line.owner_id),
                         strict=True)
                     move_line.with_context(dont_change_reservation=True).product_qty = sum([q[1] for q in quants])
+                except UserError:
+                    if updates.get('lot_id', move_line.lot_id):
+                        try:
+                            quants = self.env['stock.quant'].increase_reserved_quantity(
+                                move_line.product_id,
+                                updates.get('location_id', move_line.location_id),
+                                move_line.product_qty,
+                                package_id=updates.get('package_id', move_line.package_id),
+                                owner_id=updates.get('owner_id', move_line.owner_id),
+                                strict=False)
+                            move_line.with_context(dont_change_reservation=True).product_qty = sum([q[1] for q in quants])
+                        except UserError:
+                            move_line.with_context(dont_change_reservation=True).product_qty = 0
+                    else:
+                        move_line.with_context(dont_change_reservation=True).product_qty = 0
 
         if updates or 'qty_done' in vals:
             for move_line in self.filtered(lambda ml: ml.move_id.state == 'done'):
@@ -148,7 +160,16 @@ class PackOperation(models.Model):
                                                                         move_line.qty_done, lot_id=move_line.lot_id,
                                                                         package_id=move_line.package_id, owner_id=move_line.owner_id)
                 # decrease the update in source location
+                # free potential move lines that aren't reserved anymore now that we took their product
                 if updates.get('location_id', move_line.location_id).should_impact_quants():
+                    move_line._free_reservation(
+                        move_line.product_id,
+                        updates.get('location_id', move_line.location_id),
+                        vals.get('qty_done', move_line.qty_done),
+                        lot_id=updates.get('lot_id', move_line.lot_id),
+                        package_id=updates.get('package_id', move_line.package_id),
+                        owner_id=updates.get('owner_id', move_line.owner_id)
+                    )
                     self.env['stock.quant'].decrease_available_quantity(
                         move_line.product_id, updates.get('location_id', move_line.location_id), vals.get('qty_done', move_line.qty_done),
                         lot_id=updates.get('lot_id', move_line.lot_id), package_id=updates.get('package_id', move_line.package_id),
@@ -164,17 +185,6 @@ class PackOperation(models.Model):
                                 lot_id=updates.get('lot_id', move_line.lot_id), package_id=updates.get('package_id', move_line.package_id),
                                 owner_id=updates.get('owner_id', move_line.owner_id)
                             )
-                    # free potential move lines that aren't reserved anymore now that we took their product
-                    if updates.get('location_id', move_line.location_id).should_impact_quants():
-                        move_line._free_reservation(
-                            move_line.product_id,
-                            updates.get('location_id', move_line.location_id),
-                            vals.get('qty_done', move_line.qty_done),
-                            lot_id=updates.get('lot_id', move_line.lot_id),
-                            package_id=updates.get('package_id', move_line.package_id),
-                            owner_id=updates.get('owner_id', move_line.owner_id)
-                        )
-                    # move_line.with_context(dont_change_reservation=True).product_qty = 0
         return super(PackOperation, self).write(vals)
 
     @api.multi
@@ -204,12 +214,23 @@ class PackOperation(models.Model):
                         package_id=move_line.package_id, owner_id=move_line.owner_id
                     )
                 # unreserve what's been reserved
+                was_reserved_on_tracked_untracked_mix = False
                 if move_line.location_id.should_impact_quants() and move_line.product_qty:
-                    self.env['stock.quant'].decrease_reserved_quantity(move_line.product_id, move_line.location_id, move_line.product_qty, lot_id=move_line.lot_id, package_id=move_line.package_id, owner_id=move_line.owner_id)
+                    try:
+                        self.env['stock.quant'].decrease_reserved_quantity(move_line.product_id, move_line.location_id, move_line.product_qty, lot_id=move_line.lot_id, package_id=move_line.package_id, owner_id=move_line.owner_id)
+                    except UserError:
+                        if move_line.lot_id:
+                            self.env['stock.quant'].decrease_reserved_quantity(move_line.product_id, move_line.location_id, move_line.product_qty, package_id=move_line.package_id, owner_id=move_line.owner_id, strict=False)
+                            was_reserved_on_tracked_untracked_mix = True
+                        else:
+                            raise
                 # move what's been actually done
                 quantity = move_line.move_id.product_uom._compute_quantity(move_line.qty_done, move_line.move_id.product_id.uom_id)
                 if move_line.location_id.should_impact_quants():
-                    self.env['stock.quant'].decrease_available_quantity(move_line.product_id, move_line.location_id, quantity, lot_id=move_line.lot_id, package_id=move_line.package_id, owner_id=move_line.owner_id)
+                    if not was_reserved_on_tracked_untracked_mix:
+                        self.env['stock.quant'].decrease_available_quantity(move_line.product_id, move_line.location_id, quantity, lot_id=move_line.lot_id, package_id=move_line.package_id, owner_id=move_line.owner_id)
+                    else:
+                        self.env['stock.quant'].decrease_available_quantity(move_line.product_id, move_line.location_id, quantity, package_id=move_line.package_id, owner_id=move_line.owner_id, strict=False)
                 if move_line.location_dest_id.should_impact_quants():
                     self.env['stock.quant'].increase_available_quantity(move_line.product_id, move_line.location_dest_id, quantity, lot_id=move_line.lot_id, package_id=move_line.result_package_id, owner_id=move_line.owner_id)
 
