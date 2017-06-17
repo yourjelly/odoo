@@ -55,8 +55,8 @@ class TestCreatePicking(common.TestProductCommon):
         # Validate first shipment
         self.picking = self.po.picking_ids[0]
         self.picking.force_assign()
-        self.picking.pack_operation_product_ids.write({'qty_done': 7.0})
-        self.picking.do_new_transfer()
+        self.picking.pack_operation_ids.write({'qty_done': 7.0})
+        self.picking.action_done()
         self.assertEqual(self.po.order_line.mapped('qty_received'), [7.0], 'Purchase: all products should be received')
 
         # create new order line

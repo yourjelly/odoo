@@ -72,7 +72,6 @@ class ProductTemplate(models.Model):
         inverse='_set_standard_price', search='_search_standard_price',
         digits=dp.get_precision('Product Price'), groups="base.group_user",
         help="Cost of the product, in the default unit of measure of the product.")
-
     volume = fields.Float(
         'Volume', compute='_compute_volume', inverse='_set_volume',
         help="The volume in m3.", store=True)
@@ -183,6 +182,13 @@ class ProductTemplate(models.Model):
                 template.write({'list_price': value})
         else:
             self.write({'list_price': self.price})
+
+    def _compute_average_price(self):
+        unique_variants = self.filtered(lambda template: len(template.product_variant_ids) == 1)
+        for template in unique_variants:
+            template.average_price = template.product_variant_ids.average_price
+        for template in (self - unique_variants):
+            template.average_price = 0.0
 
     @api.depends('product_variant_ids', 'product_variant_ids.standard_price')
     def _compute_standard_price(self):

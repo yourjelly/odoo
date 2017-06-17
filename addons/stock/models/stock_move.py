@@ -419,10 +419,6 @@ class StockMove(models.Model):
     # Misc tools
     # ------------------------------------------------------------
 
-    def get_price_unit(self):
-        """ Returns the unit price to store on the quant """
-        return self.price_unit or self.product_id.standard_price
-
     def _filter_closed_moves(self):
         """ Helper methods when having to avoid working on moves that are
         already done or canceled. In a lot of cases you may handle a batch
@@ -548,7 +544,6 @@ class StockMove(models.Model):
         move_waiting = self.env['stock.move']
 
         to_assign = {}
-        self.set_default_price_unit_from_product()
         for move in self:
             # if the move is preceeded, then it's waiting (if preceeding move is done, then action_assign has been called already and its state is already available)
             if move.move_orig_ids:
@@ -579,15 +574,6 @@ class StockMove(models.Model):
             moves.assign_picking()
         self._push_apply()
         return self
-
-    def _set_default_price_moves(self):
-        return self.filtered(lambda move: not move.price_unit)
-
-    def set_default_price_unit_from_product(self):
-        """ Set price to move, important in inter-company moves or receipts with only one partner """
-        for move in self._set_default_price_moves():
-            move.write({'price_unit': move.product_id.standard_price})
-    attribute_price = set_default_price_unit_from_product
 
     def _prepare_procurement_from_move(self):
         self.ensure_one()
@@ -829,7 +815,7 @@ class StockMove(models.Model):
         moves = self.filtered(lambda x: x.state not in ('done', 'cancel'))
         moves_todo = self.env['stock.move']
         # Create extra moves where necessary
-        for move in moves:
+        for move in moves.filtered(lambda x:x.quantity_done > 0):
             # Here, the `quantity_done` was already rounded to the product UOM by the `do_produce` wizard. However,
             # it is possible that the user changed the value before posting the inventory by a value that should be
             # rounded according to the move's UOM. In this specific case, we chose to round up the value, because it
