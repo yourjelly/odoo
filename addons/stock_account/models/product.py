@@ -19,8 +19,8 @@ class ProductTemplate(models.Model):
     valuation = fields.Char(compute='_compute_valuation_type', inverse='_set_valuation_type')
     property_cost_method = fields.Selection([
         ('standard', 'Standard Price'),
-        ('average', 'Average Price'),
-        ('real', 'Real Price')], string='Costing Method',
+        ('fifo', '(financial) FIFO'),
+        ('average', 'AVCO')], string='Costing Method',
         company_dependent=True, copy=True,
         help="""Standard Price: The cost price is manually updated at the end of a specific period (usually once a year).
                 Average Price: The cost price is recomputed at each incoming shipment and used for the product valuation.
@@ -159,8 +159,8 @@ class ProductCategory(models.Model):
              "moves for incoming and outgoing products.")
     property_cost_method = fields.Selection([
         ('standard', 'Standard Price'),
-        ('average', 'Average Price'),
-        ('real', 'Real Price')], string="Costing Method",
+        ('fifo', '(financial) FIFO)'),
+        ('average', 'AVCO')], string="Costing Method",
         company_dependent=True, copy=True, required=True,
         help="Standard Price: The cost price is manually updated at the end "
              "of a specific period (usually once a year).\nAverage Price: "

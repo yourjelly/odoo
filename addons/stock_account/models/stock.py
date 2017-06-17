@@ -179,182 +179,247 @@ class StockMove(models.Model):
     to_refund = fields.Boolean(string="To Refund (update SO/PO)",
                                help='Trigger a decrease of the delivered/received quantity in the associated Sale Order/Purchase Order')
 
-    def _set_default_price_moves(self):
-        # When the cost method is in real or average price, the price can be set to 0.0 on the PO
-        # So the price doesn't have to be updated
-        moves = super(StockMove, self)._set_default_price_moves()
-        return moves.filtered(lambda m: m.product_id.cost_method not in ('real', 'average'))
+    unit_cost = fields.Float()
+    value = fields.Float()
+    cumulated_value = fields.Float()
+    remaining_qty = fields.Float()
+
+    # TODO: add contstrains remaining_qty > 0
+    # TODO: add constrain unit_cost = 0 on done move?
+
+    def _get_latest_cumulated_value(self):
+        self.ensure_one()
+        # TODO: only filter on IN and OUT stock.move
+        latest = self.env['stock.move'].search([
+            ('product_id', '=', self.product_id.id),
+            ('id', '!=', self.id),
+        ], order='create_date, id desc', limit=1)
+        return latest.cumulated_value
+
+    def _get_candidates_move(self):
+        self.ensure_one()
+        # TODO: filter at start of period
+        candidates = self.env['stock.move'].search([
+            ('product_id', '=', self.product_id.id),
+            ('location_id', '=', self.env.ref('stock.stock_location_suppliers').id),
+            ('remaining_qty', '>', 0),
+        ], order='create_date, id asc')
+        return candidates
 
     @api.multi
     def action_done(self):
-        self.product_price_update_before_done()
+        qty_available = {}
+        for move in self:
+            if move.product_id.cost_method == 'average':
+                qty_available[move.product_id.id] = self.env['stock.quant'].get_quantity(move.product_id, move.location_id)
         res = super(StockMove, self).action_done()
-        self.product_price_update_after_done()
+        for move in res:
+            if move.location_id.id == self.env.ref('stock.stock_location_suppliers').id:
+                if move.product_id.cost_method in ['fifo', 'average']:
+                    move.value = move.unit_cost * move.product_qty
+                    move.cumulated_value = move._get_latest_cumulated_value() + move.value
+                    move.remaining_qty = move.product_qty
+            elif move.location_dest_id.id == self.env.ref('stock.stock_location_customers').id:
+                if move.product_id.cost_method == 'fifo':
+                    qty_to_take = move.product_qty
+                    tmp_value = 0
+                    candidates = self._get_candidates_move()
+                    for candidate in candidates:
+                        if candidate.remaining_qty <= qty_to_take:
+                            qty_taken_on_candidate = candidate.remaining_qty
+                        else:
+                            qty_taken_on_candidate = qty_to_take
+                        tmp_value += qty_taken_on_candidate * candidate.unit_cost
+                        candidate.remaining_qty -= qty_taken_on_candidate
+                        qty_to_take -= qty_taken_on_candidate
+                        if qty_to_take == 0:
+                            break
+                    move.value = -tmp_value
+                    move.cumulated_value = move._get_latest_cumulated_value() + move.value
+                elif move.product_id.cost_method == 'average':
+                    curr_rounding = move.company_id.currency_id.rounding
+                    avg_unit_cost = float_round(move._get_latest_cumulated_value() / qty_available[move.product_id.id], precision_rounding=curr_rounding)
+                    move.value = float_round(-avg_unit_cost * move.product_qty, precision_rounding=curr_rounding)
+                    move.remaining_qty = 0
+                    move.cumulated_value = move._get_latest_cumulated_value() + move.value
         return res
 
-    @api.multi
-    def product_price_update_before_done(self):
-        tmpl_dict = defaultdict(lambda: 0.0)
-        # adapt standard price on incomming moves if the product cost_method is 'average'
-        std_price_update = {}
-        for move in self.filtered(lambda move: move.location_id.usage in ('supplier', 'production') and move.product_id.cost_method == 'average'):
-            product_tot_qty_available = move.product_id.qty_available + tmpl_dict[move.product_id.id]
-
-            # if the incoming move is for a purchase order with foreign currency, need to call this to get the same value that the quant will use.
-            if product_tot_qty_available <= 0:
-                new_std_price = move.get_price_unit()
-            else:
-                # Get the standard price
-                amount_unit = std_price_update.get((move.company_id.id, move.product_id.id)) or move.product_id.standard_price
-                new_std_price = ((amount_unit * product_tot_qty_available) + (move.get_price_unit() * move.product_qty)) / (product_tot_qty_available + move.product_qty)
-
-            tmpl_dict[move.product_id.id] += move.product_qty
-            # Write the standard price, as SUPERUSER_ID because a warehouse manager may not have the right to write on products
-            move.product_id.with_context(force_company=move.company_id.id).sudo().write({'standard_price': new_std_price})
-            std_price_update[move.company_id.id, move.product_id.id] = new_std_price
-
-    @api.multi
-    def product_price_update_after_done(self):
-        ''' Adapt standard price on outgoing moves, so that a
-        return or an inventory loss is made using the last value used for an outgoing valuation. '''
-        to_update_moves = self.filtered(lambda move: move.location_dest_id.usage != 'internal')
-        to_update_moves._store_average_cost_price()
-
-    def _store_average_cost_price(self):
-        """ Store the average price of the move on the move and product form (costing method 'real')"""
-        for move in self.filtered(lambda move: move.product_id.cost_method == 'real'):
-            # product_obj = self.pool.get('product.product')
-            if any(q.qty <= 0 for q in move.quant_ids) or move.product_qty == 0:
-                # if there is a negative quant, the standard price shouldn't be updated
-                return
-            # Note: here we can't store a quant.cost directly as we may have moved out 2 units
-            # (1 unit to 5€ and 1 unit to 7€) and in case of a product return of 1 unit, we can't
-            # know which of the 2 costs has to be used (5€ or 7€?). So at that time, thanks to the
-            # average valuation price we are storing we will valuate it at 6€
-            valuation_price = sum(q.qty * q.cost for q in move.quant_ids)
-            average_valuation_price = valuation_price / move.product_qty
-
-            move.product_id.with_context(force_company=move.company_id.id).sudo().write({'standard_price': average_valuation_price})
-            move.write({'price_unit': average_valuation_price})
-
-        for move in self.filtered(lambda move: move.product_id.cost_method != 'real' and not move.origin_returned_move_id):
-            # Unit price of the move should be the current standard price, taking into account
-            # price fluctuations due to products received between move creation (e.g. at SO
-            # confirmation) and move set to done (delivery completed).
-            move.write({'price_unit': move.product_id.standard_price})
-
-    @api.multi
-    def _get_accounting_data_for_valuation(self):
-        """ Return the accounts and journal to use to post Journal Entries for
-        the real-time valuation of the quant. """
-        self.ensure_one()
-        accounts_data = self.product_id.product_tmpl_id.get_product_accounts()
-
-        if self.location_id.valuation_out_account_id:
-            acc_src = self.location_id.valuation_out_account_id.id
-        else:
-            acc_src = accounts_data['stock_input'].id
-
-        if self.location_dest_id.valuation_in_account_id:
-            acc_dest = self.location_dest_id.valuation_in_account_id.id
-        else:
-            acc_dest = accounts_data['stock_output'].id
-
-        acc_valuation = accounts_data.get('stock_valuation', False)
-        if acc_valuation:
-            acc_valuation = acc_valuation.id
-        if not accounts_data.get('stock_journal', False):
-            raise UserError(_('You don\'t have any stock journal defined on your product category, check if you have installed a chart of accounts'))
-        if not acc_src:
-            raise UserError(_('Cannot find a stock input account for the product %s. You must define one on the product category, or on the location, before processing this operation.') % (self.product_id.name))
-        if not acc_dest:
-            raise UserError(_('Cannot find a stock output account for the product %s. You must define one on the product category, or on the location, before processing this operation.') % (self.product_id.name))
-        if not acc_valuation:
-            raise UserError(_('You don\'t have any stock valuation account defined on your product category. You must define one before processing this operation.'))
-        journal_id = accounts_data['stock_journal'].id
-        return journal_id, acc_src, acc_dest, acc_valuation
-
-    def _prepare_account_move_line(self, qty, cost, credit_account_id, debit_account_id):
-        """
-        Generate the account.move.line values to post to track the stock valuation difference due to the
-        processing of the given quant.
-        """
-        self.ensure_one()
-
-        if self._context.get('force_valuation_amount'):
-            valuation_amount = self._context.get('force_valuation_amount')
-        else:
-            if self.product_id.cost_method == 'average':
-                valuation_amount = cost if self.location_id.usage == 'supplier' and self.location_dest_id.usage == 'internal' else self.product_id.standard_price
-            else:
-                valuation_amount = cost if self.product_id.cost_method == 'real' else self.product_id.standard_price
-        # the standard_price of the product may be in another decimal precision, or not compatible with the coinage of
-        # the company currency... so we need to use round() before creating the accounting entries.
-        debit_value = self.company_id.currency_id.round(valuation_amount * qty)
-
-        # check that all data is correct
-        if self.company_id.currency_id.is_zero(debit_value):
-            if self.product_id.cost_method == 'standard':
-                raise UserError(_("The found valuation amount for product %s is zero. Which means there is probably a configuration error. Check the costing method and the standard price") % (self.product_id.name,))
-            return []
-        credit_value = debit_value
-
-        if self.product_id.cost_method == 'average' and self.company_id.anglo_saxon_accounting:
-            # in case of a supplier return in anglo saxon mode, for products in average costing method, the stock_input
-            # account books the real purchase price, while the stock account books the average price. The difference is
-            # booked in the dedicated price difference account.
-            if self.location_dest_id.usage == 'supplier' and self.origin_returned_move_id and self.origin_returned_move_id.purchase_line_id:
-                debit_value = self.origin_returned_move_id.price_unit * qty
-            # in case of a customer return in anglo saxon mode, for products in average costing method, the stock valuation
-            # is made using the original average price to negate the delivery effect.
-            if self.location_id.usage == 'customer' and self.origin_returned_move_id:
-                debit_value = self.origin_returned_move_id.price_unit * qty
-                credit_value = debit_value
-        partner_id = (self.picking_id.partner_id and self.env['res.partner']._find_accounting_partner(self.picking_id.partner_id).id) or False
-        debit_line_vals = {
-            'name': self.name,
-            'product_id': self.product_id.id,
-            'quantity': qty,
-            'product_uom_id': self.product_id.uom_id.id,
-            'ref': self.picking_id.name,
-            'partner_id': partner_id,
-            'debit': debit_value,
-            'credit': 0,
-            'account_id': debit_account_id,
-        }
-        credit_line_vals = {
-            'name': self.name,
-            'product_id': self.product_id.id,
-            'quantity': qty,
-            'product_uom_id': self.product_id.uom_id.id,
-            'ref': self.picking_id.name,
-            'partner_id': partner_id,
-            'credit': credit_value,
-            'debit': 0,
-            'account_id': credit_account_id,
-        }
-        res = [(0, 0, debit_line_vals), (0, 0, credit_line_vals)]
-        if credit_value != debit_value:
-            # for supplier returns of product in average costing method, in anglo saxon mode
-            diff_amount = debit_value - credit_value
-            price_diff_account = self.product_id.property_account_creditor_price_difference
-            if not price_diff_account:
-                price_diff_account = self.product_id.categ_id.property_account_creditor_price_difference_categ
-            if not price_diff_account:
-                raise UserError(_('Configuration error. Please configure the price difference account on the product or its category to process this operation.'))
-            price_diff_line = {
-                'name': self.name,
-                'product_id': self.product_id.id,
-                'quantity': qty,
-                'product_uom_id': self.product_id.uom_id.id,
-                'ref': self.picking_id.name,
-                'partner_id': partner_id,
-                'credit': diff_amount > 0 and diff_amount or 0,
-                'debit': diff_amount < 0 and -diff_amount or 0,
-                'account_id': price_diff_account.id,
-            }
-            res.append((0, 0, price_diff_line))
-        return res
+    # def _set_default_price_moves(self):
+    #     # When the cost method is in real or average price, the price can be set to 0.0 on the PO
+    #     # So the price doesn't have to be updated
+    #     moves = super(StockMove, self)._set_default_price_moves()
+    #     return moves.filtered(lambda m: m.product_id.cost_method not in ('real', 'average'))
+    #
+    # @api.multi
+    # def action_done(self):
+    #     self.product_price_update_before_done()
+    #     res = super(StockMove, self).action_done()
+    #     self.product_price_update_after_done()
+    #     return res
+    #
+    # @api.multi
+    # def product_price_update_before_done(self):
+    #     tmpl_dict = defaultdict(lambda: 0.0)
+    #     # adapt standard price on incomming moves if the product cost_method is 'average'
+    #     std_price_update = {}
+    #     for move in self.filtered(lambda move: move.location_id.usage in ('supplier', 'production') and move.product_id.cost_method == 'average'):
+    #         product_tot_qty_available = move.product_id.qty_available + tmpl_dict[move.product_id.id]
+    #
+    #         # if the incoming move is for a purchase order with foreign currency, need to call this to get the same value that the quant will use.
+    #         if product_tot_qty_available <= 0:
+    #             new_std_price = move.get_price_unit()
+    #         else:
+    #             # Get the standard price
+    #             amount_unit = std_price_update.get((move.company_id.id, move.product_id.id)) or move.product_id.standard_price
+    #             new_std_price = ((amount_unit * product_tot_qty_available) + (move.get_price_unit() * move.product_qty)) / (product_tot_qty_available + move.product_qty)
+    #
+    #         tmpl_dict[move.product_id.id] += move.product_qty
+    #         # Write the standard price, as SUPERUSER_ID because a warehouse manager may not have the right to write on products
+    #         move.product_id.with_context(force_company=move.company_id.id).sudo().write({'standard_price': new_std_price})
+    #         std_price_update[move.company_id.id, move.product_id.id] = new_std_price
+    #
+    # @api.multi
+    # def product_price_update_after_done(self):
+    #     ''' Adapt standard price on outgoing moves, so that a
+    #     return or an inventory loss is made using the last value used for an outgoing valuation. '''
+    #     to_update_moves = self.filtered(lambda move: move.location_dest_id.usage != 'internal')
+    #     to_update_moves._store_average_cost_price()
+    #
+    # def _store_average_cost_price(self):
+    #     """ Store the average price of the move on the move and product form (costing method 'real')"""
+    #     for move in self.filtered(lambda move: move.product_id.cost_method == 'real'):
+    #         # product_obj = self.pool.get('product.product')
+    #         if any(q.qty <= 0 for q in move.quant_ids) or move.product_qty == 0:
+    #             # if there is a negative quant, the standard price shouldn't be updated
+    #             return
+    #         # Note: here we can't store a quant.cost directly as we may have moved out 2 units
+    #         # (1 unit to 5€ and 1 unit to 7€) and in case of a product return of 1 unit, we can't
+    #         # know which of the 2 costs has to be used (5€ or 7€?). So at that time, thanks to the
+    #         # average valuation price we are storing we will valuate it at 6€
+    #         valuation_price = sum(q.qty * q.cost for q in move.quant_ids)
+    #         average_valuation_price = valuation_price / move.product_qty
+    #
+    #         move.product_id.with_context(force_company=move.company_id.id).sudo().write({'standard_price': average_valuation_price})
+    #         move.write({'price_unit': average_valuation_price})
+    #
+    #     for move in self.filtered(lambda move: move.product_id.cost_method != 'real' and not move.origin_returned_move_id):
+    #         # Unit price of the move should be the current standard price, taking into account
+    #         # price fluctuations due to products received between move creation (e.g. at SO
+    #         # confirmation) and move set to done (delivery completed).
+    #         move.write({'price_unit': move.product_id.standard_price})
+    #
+    # @api.multi
+    # def _get_accounting_data_for_valuation(self):
+    #     """ Return the accounts and journal to use to post Journal Entries for
+    #     the real-time valuation of the quant. """
+    #     self.ensure_one()
+    #     accounts_data = self.product_id.product_tmpl_id.get_product_accounts()
+    #
+    #     if self.location_id.valuation_out_account_id:
+    #         acc_src = self.location_id.valuation_out_account_id.id
+    #     else:
+    #         acc_src = accounts_data['stock_input'].id
+    #
+    #     if self.location_dest_id.valuation_in_account_id:
+    #         acc_dest = self.location_dest_id.valuation_in_account_id.id
+    #     else:
+    #         acc_dest = accounts_data['stock_output'].id
+    #
+    #     acc_valuation = accounts_data.get('stock_valuation', False)
+    #     if acc_valuation:
+    #         acc_valuation = acc_valuation.id
+    #     if not accounts_data.get('stock_journal', False):
+    #         raise UserError(_('You don\'t have any stock journal defined on your product category, check if you have installed a chart of accounts'))
+    #     if not acc_src:
+    #         raise UserError(_('Cannot find a stock input account for the product %s. You must define one on the product category, or on the location, before processing this operation.') % (self.product_id.name))
+    #     if not acc_dest:
+    #         raise UserError(_('Cannot find a stock output account for the product %s. You must define one on the product category, or on the location, before processing this operation.') % (self.product_id.name))
+    #     if not acc_valuation:
+    #         raise UserError(_('You don\'t have any stock valuation account defined on your product category. You must define one before processing this operation.'))
+    #     journal_id = accounts_data['stock_journal'].id
+    #     return journal_id, acc_src, acc_dest, acc_valuation
+    #
+    # def _prepare_account_move_line(self, qty, cost, credit_account_id, debit_account_id):
+    #     """
+    #     Generate the account.move.line values to post to track the stock valuation difference due to the
+    #     processing of the given quant.
+    #     """
+    #     self.ensure_one()
+    #
+    #     if self._context.get('force_valuation_amount'):
+    #         valuation_amount = self._context.get('force_valuation_amount')
+    #     else:
+    #         if self.product_id.cost_method == 'average':
+    #             valuation_amount = cost if self.location_id.usage == 'supplier' and self.location_dest_id.usage == 'internal' else self.product_id.standard_price
+    #         else:
+    #             valuation_amount = cost if self.product_id.cost_method == 'real' else self.product_id.standard_price
+    #     # the standard_price of the product may be in another decimal precision, or not compatible with the coinage of
+    #     # the company currency... so we need to use round() before creating the accounting entries.
+    #     debit_value = self.company_id.currency_id.round(valuation_amount * qty)
+    #
+    #     # check that all data is correct
+    #     if self.company_id.currency_id.is_zero(debit_value):
+    #         if self.product_id.cost_method == 'standard':
+    #             raise UserError(_("The found valuation amount for product %s is zero. Which means there is probably a configuration error. Check the costing method and the standard price") % (self.product_id.name,))
+    #         return []
+    #     credit_value = debit_value
+    #
+    #     if self.product_id.cost_method == 'average' and self.company_id.anglo_saxon_accounting:
+    #         # in case of a supplier return in anglo saxon mode, for products in average costing method, the stock_input
+    #         # account books the real purchase price, while the stock account books the average price. The difference is
+    #         # booked in the dedicated price difference account.
+    #         if self.location_dest_id.usage == 'supplier' and self.origin_returned_move_id and self.origin_returned_move_id.purchase_line_id:
+    #             debit_value = self.origin_returned_move_id.price_unit * qty
+    #         # in case of a customer return in anglo saxon mode, for products in average costing method, the stock valuation
+    #         # is made using the original average price to negate the delivery effect.
+    #         if self.location_id.usage == 'customer' and self.origin_returned_move_id:
+    #             debit_value = self.origin_returned_move_id.price_unit * qty
+    #             credit_value = debit_value
+    #     partner_id = (self.picking_id.partner_id and self.env['res.partner']._find_accounting_partner(self.picking_id.partner_id).id) or False
+    #     debit_line_vals = {
+    #         'name': self.name,
+    #         'product_id': self.product_id.id,
+    #         'quantity': qty,
+    #         'product_uom_id': self.product_id.uom_id.id,
+    #         'ref': self.picking_id.name,
+    #         'partner_id': partner_id,
+    #         'debit': debit_value,
+    #         'credit': 0,
+    #         'account_id': debit_account_id,
+    #     }
+    #     credit_line_vals = {
+    #         'name': self.name,
+    #         'product_id': self.product_id.id,
+    #         'quantity': qty,
+    #         'product_uom_id': self.product_id.uom_id.id,
+    #         'ref': self.picking_id.name,
+    #         'partner_id': partner_id,
+    #         'credit': credit_value,
+    #         'debit': 0,
+    #         'account_id': credit_account_id,
+    #     }
+    #     res = [(0, 0, debit_line_vals), (0, 0, credit_line_vals)]
+    #     if credit_value != debit_value:
+    #         # for supplier returns of product in average costing method, in anglo saxon mode
+    #         diff_amount = debit_value - credit_value
+    #         price_diff_account = self.product_id.property_account_creditor_price_difference
+    #         if not price_diff_account:
+    #             price_diff_account = self.product_id.categ_id.property_account_creditor_price_difference_categ
+    #         if not price_diff_account:
+    #             raise UserError(_('Configuration error. Please configure the price difference account on the product or its category to process this operation.'))
+    #         price_diff_line = {
+    #             'name': self.name,
+    #             'product_id': self.product_id.id,
+    #             'quantity': qty,
+    #             'product_uom_id': self.product_id.uom_id.id,
+    #             'ref': self.picking_id.name,
+    #             'partner_id': partner_id,
+    #             'credit': diff_amount > 0 and diff_amount or 0,
+    #             'debit': diff_amount < 0 and -diff_amount or 0,
+    #             'account_id': price_diff_account.id,
+    #         }
+    #         res.append((0, 0, price_diff_line))
+    #     return res
 
 
 class StockReturnPicking(models.TransientModel):
