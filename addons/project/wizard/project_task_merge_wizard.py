@@ -15,6 +15,7 @@ class ProjectTaskMergeWizard(models.TransientModel):
 
     @api.multi
     def merge_tasks(self):
+
         values = {
             'user_id': self.user_id.id,
             'description': self.merge_description(),
@@ -39,6 +40,10 @@ class ProjectTaskMergeWizard(models.TransientModel):
             subtype_id=self.env.ref('mail.mt_comment').id
         )
         (self.task_ids - self.target_task_id).write({'active': False})
+        return {
+        'type': 'ir.actions.client',
+        'tag': 'reload',
+        }
         return {
             "type": "ir.actions.act_window",
             "res_model": "project.task",
