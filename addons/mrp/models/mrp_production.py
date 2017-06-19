@@ -207,7 +207,7 @@ class MrpProduction(models.Model):
                 order.post_visible = any((x.quantity_done > 0 and x.state not in ['done', 'cancel']) for x in order.move_raw_ids) or \
                     any((x.quantity_done > 0 and x.state not in ['done' 'cancel']) for x in order.move_finished_ids)
             else:
-                order.post_visible = any((x.quantity_done > 0 and x.state not in ['done' 'cancel']) for x in order.move_finished_ids)
+                order.post_visible = any((x.quantity_done > 0 and x.state not in ['done', 'cancel']) for x in order.move_finished_ids)
 
     @api.multi
     @api.depends('workorder_ids.state', 'move_finished_ids')
