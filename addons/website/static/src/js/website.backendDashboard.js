@@ -188,6 +188,11 @@ var Dashboard = Widget.extend(ControlPanelMixin, {
                 container: $analytics_auth[0],
                 clientid: client_id
             });
+
+            window.onerror = function(message, file, line, col, error) {
+                self.do_warn(_t("Can't load Google Analytics"), _t('The Google Analytics Could not be loaded.'));
+            }
+
             $analytics_auth.appendTo($analytics_components);
 
             self.handle_analytics_auth($analytics_components);
