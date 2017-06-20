@@ -5,7 +5,7 @@ from odoo import api, fields, models, _
 
 from odoo.addons import decimal_precision as dp
 from odoo.exceptions import UserError
-from odoo.tools.float_utils import float_round, float_compare
+from odoo.tools.float_utils import float_round, float_compare, float_is_zero
 
 
 class PackOperation(models.Model):
@@ -25,22 +25,20 @@ class PackOperation(models.Model):
         if default_loc:
             return self.env['stock.location'].browse(default_loc).name
 
-    picking_id = fields.Many2one(
-        'stock.picking', 'Stock Picking',
-        required=True,
-        help='The stock operation where the packing has been made')
+    picking_id = fields.Many2one('stock.picking', 'Stock Picking', related='move_id.picking_id', help='The stock operation where the packing has been made')  # not related, we should be able to create a packop without a move
+    move_id = fields.Many2one('stock.move', 'Stock Move', required=True)
     product_id = fields.Many2one('product.product', 'Product', ondelete="cascade")
     product_uom_id = fields.Many2one('product.uom', 'Unit of Measure')
     product_qty = fields.Float('To Do', default=0.0, digits=dp.get_precision('Product Unit of Measure'), required=True)
     ordered_qty = fields.Float('Ordered Quantity', digits=dp.get_precision('Product Unit of Measure'))
-    qty_done = fields.Float('Done', default=0.0, digits=dp.get_precision('Product Unit of Measure'))
-    is_done = fields.Boolean(compute='_compute_is_done', string='Done', readonly=False, oldname='processed_boolean')
+    qty_done = fields.Float('Done', default=0.0, digits=dp.get_precision('Product Unit of Measure'), copy=False)
     package_id = fields.Many2one('stock.quant.package', 'Source Package')
     result_package_id = fields.Many2one(
         'stock.quant.package', 'Destination Package',
         ondelete='cascade', required=False,
         help="If set, the operations are packed into this package")
-    date = fields.Datetime('Date', default=fields.Date.context_today, required=True)
+    lot_id = fields.Many2one('stock.production.lot', 'Lot')
+    date = fields.Datetime('Date', default=fields.Datetime.now(), required=True)
     owner_id = fields.Many2one('res.partner', 'Owner', help="Owner of the quants")
     location_id = fields.Many2one('stock.location', 'Source Location', required=True)
     location_dest_id = fields.Many2one('stock.location', 'Destination Location', required=True)
@@ -49,28 +47,8 @@ class PackOperation(models.Model):
     # TDE FIXME: unnecessary fields IMO, to remove
     from_loc = fields.Char(compute='_compute_location_description', default=_get_default_from_loc, string='From')
     to_loc = fields.Char(compute='_compute_location_description', default=_get_default_to_loc, string='To')
-    fresh_record = fields.Boolean('Newly created pack operation', default=True)
     lots_visible = fields.Boolean(compute='_compute_lots_visible')
-    state = fields.Selection(selection=[
-        ('draft', 'Draft'),
-        ('cancel', 'Cancelled'),
-        ('waiting', 'Waiting Another Operation'),
-        ('confirmed', 'Waiting Availability'),
-        ('partially_available', 'Partially Available'),
-        ('assigned', 'Available'),
-        ('done', 'Done')], related='picking_id.state')
-
-    @api.one
-    def _compute_is_done(self):
-        self.is_done = self.qty_done > 0.0
-
-    @api.onchange('is_done')
-    def on_change_is_done(self):
-        if not self.product_id:
-            if self.is_done and self.qty_done == 0:
-                self.qty_done = 1.0
-            if not self.is_done and self.qty_done != 0:
-                self.qty_done = 0.0
+    state = fields.Selection(related='move_id.state')
 
     @api.one
     def _compute_location_description(self):
@@ -100,19 +78,233 @@ class PackOperation(models.Model):
     @api.model
     def create(self, vals):
         vals['ordered_qty'] = vals.get('product_qty')
-        return super(PackOperation, self).create(vals)
+        move_line = super(PackOperation, self).create(vals)
+        if move_line.move_id.state == 'done':
+            if move_line.location_id.should_impact_quants():
+                # free potential move lines that aren't reserved anymore now that we took their product
+                move_line._free_reservation(
+                    move_line.product_id,
+                    move_line.location_id,
+                    move_line.qty_done,
+                    lot_id=move_line.lot_id,
+                    package_id=move_line.package_id,
+                    owner_id=move_line.owner_id
+                )
+                # increase the original in source location
+                self.env['stock.quant'].decrease_available_quantity(move_line.product_id, move_line.location_id,
+                                                                    move_line.qty_done, lot_id=move_line.lot_id,
+                                                                    package_id=move_line.package_id, owner_id=move_line.owner_id)
+            # increase the update in destination location
+            if move_line.location_dest_id.should_impact_quants():
+                self.env['stock.quant'].increase_available_quantity(
+                    move_line.product_id, move_line.location_dest_id, move_line.qty_done,
+                    lot_id=move_line.lot_id, package_id=move_line.package_id,
+                    owner_id=move_line.owner_id
+                )
+        return move_line
+
+    def _decrease_reserved_quantity(self, quantity):
+        self.ensure_one()
+        if self.location_id.should_impact_quants():
+            self.env['stock.quant'].decrease_reserved_quantity(
+                self.product_id,
+                self.location_id,
+                quantity,
+                lot_id=self.lot_id,
+                package_id=self.package_id,
+                owner_id=self.owner_id,
+            )
 
     @api.multi
-    def write(self, values):
-        # TDE FIXME: weird stuff, protectin pack op ?
-        values['fresh_record'] = False
-        return super(PackOperation, self).write(values)
+    def write(self, vals):
+        # We forbid to change the reserved quantity in the interace, but it is needed in the
+        # case of stock.move's split.
+        if 'product_qty' in vals and not self.env.context.get('dont_change_reservation'):
+            for move_line in self.filtered(lambda ml: ml.state != 'done'):
+                if self.state != 'draft':
+                    self._decrease_reserved_quantity(move_line.product_qty - vals['product_qty'])
+        # Through the interface, we allow users to change the source location, the lot, the package
+        # and owner of a move line. If a quantity has been reserved for this move line, we try to
+        # impact the reservation directly to free the old quants and allocate new ones.
+        updates = {}
+        for key, model in [('location_id', 'stock.location'), ('location_dest_id', 'stock.location'), ('lot_id', 'stock.production.lot'), ('package_id', 'stock.quant.package'), ('owner_id', 'res.partner')]:
+            if key in vals:
+                updates[key] = self.env[model].browse(vals[key])
+        # note: qty done could change, but it only matters in state done?
+        if updates:
+            # FIXME: the state we have to look is the move's state, nit the picking's one. So the `state` field
+            #        is probably useless and should be remove. take care that some packop could be added without
+            #        move id in the details operations view, and they should not reserve and not come here
+            for move_line in self.filtered(lambda ml: ml.move_id.state in ['partially_available', 'assigned']):
+                if not move_line.location_id.should_impact_quants():
+                    continue
+
+                self._decrease_reserved_quantity(move_line.product_qty)
+                # FIXME: we guard the reservation the same way in stock.move and the code looks
+                #        crappy because of it, there must be a better way
+                try:
+                    quants = self.env['stock.quant'].increase_reserved_quantity(
+                        move_line.product_id,
+                        updates.get('location_id', move_line.location_id),
+                        move_line.product_qty,
+                        lot_id=updates.get('lot_id', move_line.lot_id),
+                        package_id=updates.get('package_id', move_line.package_id),
+                        owner_id=updates.get('owner_id', move_line.owner_id),
+                        strict=True)
+                    move_line.with_context(dont_change_reservation=True).product_qty = sum([q[1] for q in quants])
+                except UserError:
+                    if updates.get('lot_id', move_line.lot_id):
+                        try:
+                            quants = self.env['stock.quant'].increase_reserved_quantity(
+                                move_line.product_id,
+                                updates.get('location_id', move_line.location_id),
+                                move_line.product_qty,
+                                package_id=updates.get('package_id', move_line.package_id),
+                                owner_id=updates.get('owner_id', move_line.owner_id),
+                                strict=False)
+                            move_line.with_context(dont_change_reservation=True).product_qty = sum([q[1] for q in quants])
+                        except UserError:
+                            move_line.with_context(dont_change_reservation=True).product_qty = 0
+                    else:
+                        move_line.with_context(dont_change_reservation=True).product_qty = 0
+
+        if updates or 'qty_done' in vals:
+            for move_line in self.filtered(lambda ml: ml.move_id.state == 'done'):
+                # decrease the original in destination location
+                if move_line.location_dest_id.should_impact_quants():
+                    self.env['stock.quant'].decrease_available_quantity(move_line.product_id, move_line.location_dest_id,
+                                                                        move_line.qty_done, lot_id=move_line.lot_id,
+                                                                        package_id=move_line.package_id, owner_id=move_line.owner_id)
+                # increase the original in source location
+                if move_line.location_id.should_impact_quants():
+                    self.env['stock.quant'].increase_available_quantity(move_line.product_id, move_line.location_id,
+                                                                        move_line.qty_done, lot_id=move_line.lot_id,
+                                                                        package_id=move_line.package_id, owner_id=move_line.owner_id)
+                # decrease the update in source location
+                # free potential move lines that aren't reserved anymore now that we took their product
+                if updates.get('location_id', move_line.location_id).should_impact_quants():
+                    move_line._free_reservation(
+                        move_line.product_id,
+                        updates.get('location_id', move_line.location_id),
+                        vals.get('qty_done', move_line.qty_done),
+                        lot_id=updates.get('lot_id', move_line.lot_id),
+                        package_id=updates.get('package_id', move_line.package_id),
+                        owner_id=updates.get('owner_id', move_line.owner_id)
+                    )
+                    self.env['stock.quant'].decrease_available_quantity(
+                        move_line.product_id, updates.get('location_id', move_line.location_id), vals.get('qty_done', move_line.qty_done),
+                        lot_id=updates.get('lot_id', move_line.lot_id), package_id=updates.get('package_id', move_line.package_id),
+                        owner_id=updates.get('owner_id', move_line.owner_id)
+                    )
+                # increase the update in destination location
+                quantity_to_increase = vals.get('qty_done', move_line.qty_done)
+                if quantity_to_increase != 0:
+                    if updates.get('location_dest_id', move_line.location_dest_id).should_impact_quants():
+                        # if the new quantity is 0, do nothing
+                            self.env['stock.quant'].increase_available_quantity(
+                                move_line.product_id, updates.get('location_dest_id', move_line.location_dest_id), quantity_to_increase,
+                                lot_id=updates.get('lot_id', move_line.lot_id), package_id=updates.get('package_id', move_line.package_id),
+                                owner_id=updates.get('owner_id', move_line.owner_id)
+                            )
+        return super(PackOperation, self).write(vals)
 
     @api.multi
     def unlink(self):
-        if any([operation.state in ('done', 'cancel') for operation in self]):
-            raise UserError(_('You can not delete pack operations of a done picking'))
+        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+        for move_line in self:
+            if move_line.state in ('done', 'cancel'):
+                raise UserError(_('You can not delete pack operations of a done picking'))
+            # Unlinking a pack operation should unreserve.
+            if not float_is_zero(move_line.product_qty, precision_digits=precision):
+                move_line._decrease_reserved_quantity(move_line.product_qty)
         return super(PackOperation, self).unlink()
+
+    def action_done(self):
+        """ This method will finalize the work with a move line by "moving" quants to the
+        destination location.
+        """
+        for move_line in self:
+            if move_line.product_id.type != 'consu':
+                rounding = move_line.product_uom_id.rounding
+
+                # if this move line is force assigned, unreserve elsewhere if needed
+                if float_compare(move_line.qty_done, move_line.product_qty, precision_rounding=rounding) > 0:
+                    extra_qty = move_line.qty_done - move_line.product_qty
+                    move_line._free_reservation(
+                        move_line.product_id, move_line.location_id, extra_qty, lot_id=move_line.lot_id,
+                        package_id=move_line.package_id, owner_id=move_line.owner_id
+                    )
+                # unreserve what's been reserved
+                was_reserved_on_tracked_untracked_mix = False
+                if move_line.location_id.should_impact_quants() and move_line.product_qty:
+                    try:
+                        self.env['stock.quant'].decrease_reserved_quantity(move_line.product_id, move_line.location_id, move_line.product_qty, lot_id=move_line.lot_id, package_id=move_line.package_id, owner_id=move_line.owner_id)
+                    except UserError:
+                        if move_line.lot_id:
+                            self.env['stock.quant'].decrease_reserved_quantity(move_line.product_id, move_line.location_id, move_line.product_qty, package_id=move_line.package_id, owner_id=move_line.owner_id, strict=False)
+                            was_reserved_on_tracked_untracked_mix = True
+                        else:
+                            raise
+                # move what's been actually done
+                quantity = move_line.move_id.product_uom._compute_quantity(move_line.qty_done, move_line.move_id.product_id.uom_id)
+                if move_line.location_id.should_impact_quants():
+                    if not was_reserved_on_tracked_untracked_mix:
+                        self.env['stock.quant'].decrease_available_quantity(move_line.product_id, move_line.location_id, quantity, lot_id=move_line.lot_id, package_id=move_line.package_id, owner_id=move_line.owner_id)
+                    else:
+                        self.env['stock.quant'].decrease_available_quantity(move_line.product_id, move_line.location_id, quantity, package_id=move_line.package_id, owner_id=move_line.owner_id, strict=False)
+                if move_line.location_dest_id.should_impact_quants():
+                    self.env['stock.quant'].increase_available_quantity(move_line.product_id, move_line.location_dest_id, quantity, lot_id=move_line.lot_id, package_id=move_line.result_package_id, owner_id=move_line.owner_id)
+
+    def _free_reservation(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None):
+        """ When editing a done move line or validating one with some forced quantities, it is
+        possible to impact quants that were not reserved. It is therefore necessary to edit or
+        unlink the move lines that reserved a quantity now unavailable.
+        """
+        self.ensure_one()
+
+        # Check the available quantity, with the `strict` kw set to `True`. If the available
+        # quantity is greather than the quantity now unavailable, there is nothing to do.
+        available_quantity = self.env['stock.quant'].get_available_quantity(
+            product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True
+        )
+        if quantity > available_quantity:
+            # We now have to find the move lines that reserved our now unavailable quantity. We
+            # take care to exclude ourselves and the move lines were work had already been done.
+            oudated_move_lines_domain = [
+                ('move_id.state', 'not in', ['done', 'cancel']),
+                ('product_id', '=', product_id.id),
+                ('lot_id', '=', lot_id.id),
+                ('location_id', '=', location_id.id),
+                ('owner_id', '=', owner_id.id),
+                ('package_id', '=', package_id.id),
+                ('product_qty', '>', 0.0),
+                ('qty_done', '=', 0.0),
+                ('id', '!=', self.id),
+            ]
+            oudated_candidates = self.env['stock.pack.operation'].search(oudated_move_lines_domain)
+
+            # As the move's state is not computed over the move lines, we'll have to manually
+            # recompute the moves which we adapted their lines.
+            move_to_recompute_state = self.env['stock.move']
+
+            rounding = self.product_uom_id.rounding
+            for candidate in oudated_candidates:
+                if float_compare(candidate.product_qty, quantity, precision_rounding=rounding) <= 0:
+                    quantity -= candidate.product_qty
+                    move_to_recompute_state |= candidate.move_id
+                    candidate.unlink()
+                else:
+                    # split this move line and assign the new part to our extra move
+                    quantity_split = float_round(
+                        candidate.product_qty - quantity,
+                        precision_rounding=self.product_uom.rounding,
+                        rounding_method='UP')
+                    candidate.product_qty = quantity_split
+                    quantity -= quantity_split
+                    move_to_recompute_state |= candidate.move_id
+                if quantity == 0.0:
+                    break
+            move_to_recompute_state._recompute_state()
 
     @api.multi
     def split_quantities(self):
