@@ -44,7 +44,7 @@ class StockQuant(TransactionCase):
             'name': 'Product A',
             'type': 'product',
         })
-        for i in pycompat.range(3):
+        for i in range(3):
             self.env['stock.quant'].create({
                 'product_id': product1.id,
                 'location_id': stock_location.id,
@@ -60,7 +60,7 @@ class StockQuant(TransactionCase):
             'name': 'Product A',
             'type': 'product',
         })
-        for i in pycompat.range(3):
+        for i in range(3):
             self.env['stock.quant'].create({
                 'product_id': product1.id,
                 'location_id': stock_location.id,
@@ -197,7 +197,7 @@ class StockQuant(TransactionCase):
             'name': 'Product A',
             'type': 'product',
         })
-        for i in pycompat.range(2):
+        for i in range(2):
             self.env['stock.quant'].create({
                 'product_id': product1.id,
                 'location_id': stock_location.id,
@@ -261,7 +261,7 @@ class StockQuant(TransactionCase):
             'name': 'Product A',
             'type': 'product',
         })
-        for i in pycompat.range(2):
+        for i in range(2):
             self.env['stock.quant'].create({
                 'product_id': product1.id,
                 'location_id': stock_location.id,
@@ -340,7 +340,7 @@ class StockQuant(TransactionCase):
             'name': 'Product A',
             'type': 'product',
         })
-        for i in pycompat.range(2):
+        for i in range(2):
             self.env['stock.quant'].create({
                 'product_id': product1.id,
                 'location_id': stock_location.id,
@@ -461,7 +461,8 @@ class StockQuant(TransactionCase):
         with self.assertRaises(UserError):
             self.env['stock.quant'].increase_reserved_quantity(product1, stock_location, 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 0.0)
-        self.env['stock.quant'].decrease_reserved_quantity(product1, stock_location, 1.0)
+        with self.assertRaises(UserError):
+            self.env['stock.quant'].decrease_reserved_quantity(product1, stock_location, 1.0)
         self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 0.0)
 
     def test_action_done_1(self):
