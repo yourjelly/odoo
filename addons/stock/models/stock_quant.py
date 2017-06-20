@@ -131,8 +131,8 @@ class StockQuant(models.Model):
         return sum(quants.mapped('quantity')) - sum(quants.mapped('reserved_quantity'))
 
     @api.model
-    def increase_available_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None):
-        quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True)
+    def increase_available_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=True):
+        quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
         for quant in quants:
             try:
                 with self._cr.savepoint():
@@ -175,10 +175,11 @@ class StockQuant(models.Model):
         :return: a list of tuples (quant, quantity_reserved) showing on which quant the reservation
             was done and how much the system was able to reserve on it
         """
-        reserved_quants = []
         quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
-        available_quantity = self.get_available_quantity(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id)
-        if quantity > available_quantity:
+
+        quants_quantity = sum(quants.mapped('quantity'))
+        available_quantity = quants_quantity - sum(quants.mapped('reserved_quantity'))
+        if quantity > 0 and quantity > available_quantity:
             raise UserError(_('It is not possible to reserve more products than you have in stock.'))
         elif quantity < 0 and abs(quantity) > sum(quants.mapped('reserved_quantity')):
             raise UserError(_('It is not possible to unreserve more products than you have in stock.'))
