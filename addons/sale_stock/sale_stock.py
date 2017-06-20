@@ -337,8 +337,8 @@ class AccountInvoiceLine(models.Model):
                 # Beyond qty_done we need to calculate the average of the price_unit
                 # on the moves we encounter.
                 average_price_unit = self._compute_average_price(qty_done, quantity, moves)
-                price_unit = average_price_unit or price_unit
-                price_unit = self.product_id.uom_id._compute_price(self.product_id.uom_id.id, price_unit, to_uom_id=self.uom_id.id)
+                if average_price_unit:
+                    price_unit = self.product_id.uom_id._compute_price(self.product_id.uom_id.id, average_price_unit, to_uom_id=self.uom_id.id)
         return price_unit
 
     def _compute_average_price(self, qty_done, quantity, moves):
