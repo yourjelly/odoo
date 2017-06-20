@@ -180,8 +180,10 @@ class StockQuant(models.Model):
         """
         self = self.sudo()
         quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
-        available_quantity = self.get_available_quantity(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id)
-        if quantity > available_quantity:
+
+        quants_quantity = sum(quants.mapped('quantity'))
+        available_quantity = quants_quantity - sum(quants.mapped('reserved_quantity'))
+        if quantity > 0 and quantity > available_quantity:
             raise UserError(_('It is not possible to reserve more products than you have in stock.'))
         elif quantity < 0 and abs(quantity) > sum(quants.mapped('reserved_quantity')):
             raise UserError(_('It is not possible to unreserve more products than you have in stock.'))

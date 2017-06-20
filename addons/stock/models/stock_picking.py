@@ -261,17 +261,9 @@ class Picking(models.Model):
         default=lambda self: self.env['res.company']._company_default_get('stock.picking'),
         index=True, required=True,
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
-    # TDE FIXME: separate those two kind of pack operations
+
     pack_operation_ids = fields.One2many(
         'stock.pack.operation', 'picking_id', 'Related Packing Operations',
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
-    pack_operation_product_ids = fields.One2many(
-        'stock.pack.operation', 'picking_id', 'Non pack',
-        domain=[('product_id', '!=', False)],
-        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
-    pack_operation_pack_ids = fields.One2many(
-        'stock.pack.operation', 'picking_id', 'Pack',
-        domain=[('product_id', '=', False)],
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
 
     pack_operation_exist = fields.Boolean(
@@ -288,13 +280,12 @@ class Picking(models.Model):
     recompute_pack_op = fields.Boolean(
         'Recompute pack operation?', copy=False,
         help='True if reserved quants changed, which mean we might need to recompute the package operations')
-    launch_pack_operations = fields.Boolean("Launch Pack Operations", copy=False)
 
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per company!'),
     ]
 
-    @api.depends('move_type', 'launch_pack_operations', 'move_lines.state', 'move_lines.picking_id', 'move_lines.partially_available')
+    @api.depends('move_type', 'move_lines.state', 'move_lines.picking_id')
     @api.one
     def _compute_state(self):
         ''' State of a picking depends on the state of its related stock.move
@@ -307,9 +298,8 @@ class Picking(models.Model):
           - one of the move is assigned or partially available: partially available
           - otherwise in waiting or confirmed state
         '''
-        if not self.move_lines and self.launch_pack_operations:
-            self.state = 'assigned'
-        elif not self.move_lines:
+        # FIXME: goes in 3 times at each write?
+        if not self.move_lines:
             self.state = 'draft'
         elif any(move.state == 'draft' for move in self.move_lines):  # TDE FIXME: should be all ?
             self.state = 'draft'
@@ -318,16 +308,34 @@ class Picking(models.Model):
         elif all(move.state in ['cancel', 'done'] for move in self.move_lines):
             self.state = 'done'
         else:
-            # We sort our moves by importance of state: "confirmed" should be first, then we'll have
-            # "waiting" and finally "assigned" at the end.
+            # We sort our moves by importance of state:
+            #     ------------- 0
+            #     | Confirmed |
+            #     -------------
+            #     |  Partial  |
+            #     -------------
+            #     |  Waiting  |
+            #     -------------
+            #     |  Assigned |
+            #     ------------- len - 1
+            sort_map = {
+                'assigned': 4,
+                'waiting': 3,
+                'partially_available': 2,
+                'confirmed': 1,
+            }
             moves_todo = self.move_lines\
                 .filtered(lambda move: move.state not in ['cancel', 'done'])\
-                .sorted(key=lambda move: (move.state == 'assigned' and 2) or (move.state == 'waiting' and 1) or 0)
+                .sorted(key=lambda move: sort_map.get(move.state, 0))
             if self.move_type == 'one':
-                self.state = moves_todo[0].state
-            elif moves_todo[0].state != 'assigned' and any(x.partially_available or x.state == 'assigned' for x in moves_todo):
+                if moves_todo[0].state in ('partially_available', 'confirmed'):
+                    self.state = 'confirmed'
+                else:
+                    self.state = moves_todo[0].state
+            elif moves_todo[0].state != 'assigned' and any(x.state in ['assigned', 'partially_available'] for x in moves_todo):
                 self.state = 'partially_available'
             else:
+                # take the less important state among all move_lines.
                 self.state = moves_todo[-1].state
 
     @api.one
@@ -443,10 +451,14 @@ class Picking(models.Model):
 
     @api.multi
     def action_confirm(self):
-        self.filtered(lambda picking: not picking.move_lines).write({'launch_pack_operations': True})
-        # TDE CLEANME: use of launch pack operation, really useful ?
-        self.mapped('move_lines').filtered(lambda move: move.state == 'draft').action_confirm()
-        self.filtered(lambda picking: picking.location_id.usage in ('supplier', 'inventory', 'production')).force_assign()
+        # call `action_confirm` on every draft move
+        self.mapped('move_lines')\
+            .filtered(lambda move: move.state == 'draft')\
+            .action_confirm()
+        # call `action_assign` on every confirmed move which location_id bypasses the reservation
+        self.filtered(lambda picking: picking.location_id.usage in ('supplier', 'inventory', 'production'))\
+            .filtered(lambda move: move.state == 'confirmed')\
+            .move_lines.action_assign()
         return True
 
     @api.multi
@@ -468,7 +480,7 @@ class Picking(models.Model):
         """ Changes state of picking to available if moves are confirmed or waiting.
         @return: True
         """
-        self.mapped('move_lines').filtered(lambda move: move.state in ['confirmed', 'waiting']).force_assign()
+        self.mapped('move_lines').filtered(lambda move: move.state in ['confirmed', 'waiting', 'partially_available']).force_assign()
         return True
 
     @api.multi
@@ -485,11 +497,49 @@ class Picking(models.Model):
         """
         # TDE FIXME: remove decorator when migration the remaining
         # TDE FIXME: draft -> automatically done, if waiting ?? CLEAR ME
-        draft_moves = self.mapped('move_lines').filtered(lambda self: self.state == 'draft')
-        todo_moves = self.mapped('move_lines').filtered(lambda self: self.state in ['draft', 'assigned', 'confirmed'])
-        draft_moves.action_confirm()
+        todo_moves = self.mapped('move_lines').filtered(lambda self: self.state in ['draft', 'partially_available', 'assigned', 'confirmed'])
+        # Check if there are ops not linked to moves yet
+        for pick in self:
+            # # Explode manually added packages
+            # for ops in pick.pack_operation_ids.filtered(lambda x: not x.move_id and not x.product_id):
+            #     for quant in ops.package_id.quant_ids: #Or use get_content for multiple levels
+            #         self.pack_operation_ids.create({'product_id': quant.product_id.id,
+            #                                    'package_id': quant.package_id.id,
+            #                                    'result_package_id': ops.result_package_id,
+            #                                    'lot_id': quant.lot_id.id,
+            #                                    'owner_id': quant.owner_id.id,
+            #                                    'product_uom_id': quant.product_id.uom_id.id,
+            #                                    'product_qty': quant.qty,
+            #                                    'qty_done': quant.qty,
+            #                                    'location_id': quant.location_id.id, # Could be ops too
+            #                                    'location_dest_id': ops.location_dest_id.id,
+            #                                    'picking_id': pick.id
+            #                                    }) # Might change first element
+            # # Link existing moves or add moves when no one is related
+
+            for ops in pick.pack_operation_ids.filtered(lambda x: not x.move_id):
+                # Search move with this product
+                moves = pick.move_lines.filtered(lambda x: x.product_id == ops.product_id) 
+                if moves: #could search move that needs it the most (that has some quantities left)
+                    ops.move_id = moves[0].id
+                else:
+                    new_move = self.env['stock.move'].create({
+                                                    'name': _('New Move:') + ops.product_id.display_name,
+                                                    'product_id': ops.product_id.id,
+                                                    'product_uom_qty': ops.qty_done,
+                                                    'product_uom': ops.product_uom_id.id,
+                                                    'location_id': pick.location_id.id,
+                                                    'location_dest_id': pick.location_dest_id.id,
+                                                    'picking_id': pick.id,
+                                                   })
+                    ops.move_id = new_move.id
+                    new_move.action_confirm()
+                    todo_moves |= new_move
+                    #'qty_done': ops.qty_done})
         todo_moves.action_done()
         return True
+
+    do_transfer = action_done #TODO:replace later
 
     def _prepare_pack_ops(self, quants, forced_qties):
         """ Prepare pack_operations, returns a list of dict to give at create """
@@ -600,7 +650,6 @@ class Picking(models.Model):
                     else:
                         forced_qties[move.product_id] = forced_qty
             for vals in picking._prepare_pack_ops(picking_quants, forced_qties):
-                vals['fresh_record'] = False
                 PackOperation.create(vals)
         # recompute the remaining quantities all at once
         self.do_recompute_remaining_quantities()
@@ -608,7 +657,10 @@ class Picking(models.Model):
 
     @api.multi
     def do_unreserve(self):
-        return True
+        for move in self:
+            for move_line in move.move_lines:
+                move_line.do_unreserve()
+        self.write({'state': 'confirmed'})
 
     def recompute_remaining_qty(self, done_qtys=False):
         # TODO: sle jco: wtf?
@@ -641,135 +693,82 @@ class Picking(models.Model):
             moves.action_assign(no_prepare=True)
 
     @api.multi
-    def do_new_transfer(self):
-        for pick in self:
-            pack_operations_delete = self.env['stock.pack.operation']
-            if not pick.move_lines and not pick.pack_operation_ids:
-                raise UserError(_('Please create some Initial Demand or Mark as Todo and create some Operations. '))
-            # In draft or with no pack operations edited yet, ask if we can just do everything
-            if pick.state == 'draft' or all([x.qty_done == 0.0 for x in pick.pack_operation_ids]):
-                # If no lots when needed, raise error
-                picking_type = pick.picking_type_id
-                if (picking_type.use_create_lots or picking_type.use_existing_lots):
-                    for pack in pick.pack_operation_ids:
-                        if pack.product_id and pack.product_id.tracking != 'none':
-                            raise UserError(_('Some products require lots/serial numbers, so you need to specify those first!'))
-                view = self.env.ref('stock.view_immediate_transfer')
-                wiz = self.env['stock.immediate.transfer'].create({'pick_id': pick.id})
-                # TDE FIXME: a return in a loop, what a good idea. Really.
-                return {
-                    'name': _('Immediate Transfer?'),
-                    'type': 'ir.actions.act_window',
-                    'view_type': 'form',
-                    'view_mode': 'form',
-                    'res_model': 'stock.immediate.transfer',
-                    'views': [(view.id, 'form')],
-                    'view_id': view.id,
-                    'target': 'new',
-                    'res_id': wiz.id,
-                    'context': self.env.context,
-                }
+    def button_validate(self):
+        self.ensure_one()
+        pack_operations_delete = self.env['stock.pack.operation']
+        if not self.move_lines and not self.pack_operation_ids:
+            raise UserError(_('Please add some lines to move'))
+        # In draft or with no pack operations edited yet, ask if we can just do everything
+        if self.state == 'draft' or all([x.qty_done == 0.0 for x in self.pack_operation_ids]):
+            # If no lots when needed, raise error
+            picking_type = self.picking_type_id
+            if (picking_type.use_create_lots or picking_type.use_existing_lots):
+                for pack in self.pack_operation_ids:
+                    if pack.product_id and pack.product_id.tracking != 'none':
+                        raise UserError(_('Some products require lots/serial numbers, so you need to specify those first!'))
+            view = self.env.ref('stock.view_immediate_transfer')
+            wiz = self.env['stock.immediate.transfer'].create({'pick_id': self.id})
+            return {
+                'name': _('Immediate Transfer?'),
+                'type': 'ir.actions.act_window',
+                'view_type': 'form',
+                'view_mode': 'form',
+                'res_model': 'stock.immediate.transfer',
+                'views': [(view.id, 'form')],
+                'view_id': view.id,
+                'target': 'new',
+                'res_id': wiz.id,
+                'context': self.env.context,
+            }
 
-            # Check backorder should check for other barcodes
-            if pick.check_backorder():
-                view = self.env.ref('stock.view_backorder_confirmation')
-                wiz = self.env['stock.backorder.confirmation'].create({'pick_id': pick.id})
-                # TDE FIXME: same reamrk as above actually
-                return {
-                    'name': _('Create Backorder?'),
-                    'type': 'ir.actions.act_window',
-                    'view_type': 'form',
-                    'view_mode': 'form',
-                    'res_model': 'stock.backorder.confirmation',
-                    'views': [(view.id, 'form')],
-                    'view_id': view.id,
-                    'target': 'new',
-                    'res_id': wiz.id,
-                    'context': self.env.context,
-                }
-            for operation in pick.pack_operation_ids:
-                if operation.qty_done < 0:
-                    raise UserError(_('No negative quantities allowed'))
-                if operation.qty_done > 0:
-                    operation.write({'product_qty': operation.qty_done})
-                else:
-                    pack_operations_delete |= operation
-            if pack_operations_delete:
-                pack_operations_delete.unlink()
-        self.do_transfer()
+        # Check backorder should check for other barcodes
+        if self.check_backorder():
+            view = self.env.ref('stock.view_backorder_confirmation')
+            wiz = self.env['stock.backorder.confirmation'].create({'pick_id': self.id})
+            return {
+                'name': _('Create Backorder?'),
+                'type': 'ir.actions.act_window',
+                'view_type': 'form',
+                'view_mode': 'form',
+                'res_model': 'stock.backorder.confirmation',
+                'views': [(view.id, 'form')],
+                'view_id': view.id,
+                'target': 'new',
+                'res_id': wiz.id,
+                'context': self.env.context,
+            }
+        for operation in self.pack_operation_ids:
+            if operation.qty_done < 0:
+                raise UserError(_('No negative quantities allowed'))
+            if operation.qty_done > 0:
+                pass
+                #operation.write({'product_qty': operation.qty_done})
+            else:
+                pack_operations_delete |= operation
+        if pack_operations_delete:
+            pack_operations_delete.unlink()
+        self.action_done()
         return
 
+    do_new_transfer = button_validate #TODO: replace later
+
     def check_backorder(self):
-        need_rereserve, all_op_processed = self.picking_recompute_remaining_quantities(done_qtys=True)
+        self.ensure_one()
+        quantity_todo = {}
+        quantity_done = {}
         for move in self.move_lines:
-            if float_compare(move.remaining_qty, 0, precision_rounding=move.product_id.uom_id.rounding) != 0:
-                return True
-        return False
-
-    @api.multi
-    def do_transfer(self):
-        """ If no pack operation, we do simple action_done of the picking.
-        Otherwise, do the pack operations. """
-        # TDE CLEAN ME: reclean me, please
-        self._create_lots_for_picking()
-
-        no_pack_op_pickings = self.filtered(lambda picking: not picking.pack_operation_ids)
-        no_pack_op_pickings.action_done()
-        other_pickings = self - no_pack_op_pickings
-        for picking in other_pickings:
-            need_rereserve, all_op_processed = picking.picking_recompute_remaining_quantities()
-            todo_moves = self.env['stock.move']
-            toassign_moves = self.env['stock.move']
-
-            # create extra moves in the picking (unexpected product moves coming from pack operations)
-            if not all_op_processed:
-                todo_moves |= picking._create_extra_moves()
-
-            if need_rereserve or not all_op_processed:
-                moves_reassign = any(x.origin_returned_move_id or x.move_orig_ids for x in picking.move_lines if x.state not in ['done', 'cancel'])
-                if moves_reassign and picking.location_id.usage not in ("supplier", "production", "inventory"):
-                    # unnecessary to assign other quants than those involved with pack operations as they will be unreserved anyways.
-                    picking.with_context(reserve_only_ops=True, no_state_change=True).rereserve_quants(move_ids=picking.move_lines.ids)
-                picking.do_recompute_remaining_quantities()
-
-            # split move lines if needed
-            for move in picking.move_lines:
-                rounding = move.product_id.uom_id.rounding
-                remaining_qty = move.remaining_qty
-                if move.state in ('done', 'cancel'):
-                    # ignore stock moves cancelled or already done
-                    continue
-                elif move.state == 'draft':
-                    toassign_moves |= move
-                if float_compare(remaining_qty, 0,  precision_rounding=rounding) == 0:
-                    if move.state in ('draft', 'assigned', 'confirmed'):
-                        todo_moves |= move
-                elif float_compare(remaining_qty, 0, precision_rounding=rounding) > 0 and float_compare(remaining_qty, move.product_qty, precision_rounding=rounding) < 0:
-                    # TDE FIXME: shoudl probably return a move - check for no track key, by the way
-                    new_move_id = move.split(remaining_qty)
-                    new_move = self.env['stock.move'].with_context(mail_notrack=True).browse(new_move_id)
-                    todo_moves |= move
-                    # Assign move as it was assigned before
-                    toassign_moves |= new_move
-
-            # TDE FIXME: do_only_split does not seem used anymore
-            if todo_moves and not self.env.context.get('do_only_split'):
-                todo_moves.action_done()
-            elif self.env.context.get('do_only_split'):
-                picking = picking.with_context(split=todo_moves.ids)
-
-            picking._create_backorder()
-        return True
-
-    def _create_lots_for_picking(self):
-        Lot = self.env['stock.production.lot']
-        for pack_op_lot in self.mapped('pack_operation_ids').mapped('pack_lot_ids'):
-            if not pack_op_lot.lot_id:
-                lot = Lot.create({'name': pack_op_lot.lot_name, 'product_id': pack_op_lot.operation_id.product_id.id})
-                pack_op_lot.write({'lot_id': lot.id})
-        # TDE FIXME: this should not be done here
-        self.mapped('pack_operation_ids').mapped('pack_lot_ids').filtered(lambda op_lot: op_lot.qty == 0.0).unlink()
-    create_lots_for_picking = _create_lots_for_picking
+            quantity_todo.setdefault(move.product_id.id, 0)
+            quantity_done.setdefault(move.product_id.id, 0)
+            quantity_todo[move.product_id.id] += move.product_qty
+            quantity_done[move.product_id.id] += move.quantity_done #TODO: convert to base units
+        for ops in self.pack_operation_ids.filtered(lambda x: x.package_id and not x.product_id and not x.move_id):
+            for quant in ops.package_id.quant_ids:
+                quantity_done.setdefault(quant.product_id.id, 0)
+                quantity_done[quant.product_id.id] += quant.qty
+        for pack in self.pack_operation_ids.filtered(lambda x: x.product_id and not x.move_id):
+            quantity_done.setdefault(pack.product_id.id, 0)
+            quantity_done[pack.product_id.id] += pack.qty_done
+        return any(quantity_done[x] < quantity_todo.get(x, 0) for x in quantity_done)
 
     def _create_extra_moves(self):
         '''This function creates move lines on a picking, at the time of do_transfer, based on
