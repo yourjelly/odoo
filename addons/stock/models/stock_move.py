@@ -219,7 +219,7 @@ class StockMove(models.Model):
                     # do not impact reservation here
                     move_line = self.env['stock.pack.operation'].create(dict(self._prepare_move_line_vals(), qty_done=move.quantity_done))
                     move.write({'pack_operation_ids': [(4, move_line.id)]})
-                elif len(move.pack_operation_ids) >= 1:
+                elif len(move.pack_operation_ids) == 1:
                     move.pack_operation_ids[0].qty_done = move.quantity_done
                 else:
                     raise UserError("blabla")
@@ -643,7 +643,7 @@ class StockMove(models.Model):
             'picking_id': self.picking_id.id,
         }
         if quantity:
-            vals = dict(vals)
+            vals = dict(vals, product_qty=quantity)
         if reserved_quant:
             vals = dict(
                 vals,
@@ -744,6 +744,7 @@ class StockMove(models.Model):
                             break
                         if move.state != 'partially_available':
                             move.state = 'partially_available'
+                
 
     @api.multi
     def action_cancel(self):
