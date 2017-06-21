@@ -206,7 +206,9 @@ class MrpWorkorder(models.Model):
                             'product_qty': 0.0,
                             'qty_done': min(1.0, qty_todo),
                             'workorder_id': self.id,
-                            'done_wo': False
+                            'done_wo': False,
+                            'location_id': move.location_id.id,
+                            'location_dest_id': move.location_dest_id.id,
                         })
                         qty_todo -= 1
                 elif float_compare(qty_todo, 0.0, precision_rounding=move.product_uom.rounding) < 0:
@@ -323,10 +325,13 @@ class MrpWorkorder(models.Model):
                     move_line.product_qty += self.qty_producing
                 else:
                     move_line.create({'move_id': production_move.id,
+                                 'product_id': production_move.product_id.id,
                                  'lot_id': self.final_lot_id.id,
                                  'product_qty': self.qty_producing,
                                  'qty_done': self.qty_producing,
                                  'workorder_id': self.id,
+                                 'location_id': production_move.location_id.id, 
+                                 'location_dest_id': production_move.location_dest_id.id,
                                  })
             else:
                 production_move.quantity_done += self.qty_producing

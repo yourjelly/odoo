@@ -39,6 +39,8 @@ class MrpProductProduce(models.TransientModel):
                                 'qty_done': 0.0,
                                 'product_id': move.product_id.id,
                                 'production_id': production.id,
+                                'location_id': move.location_id.id,
+                                'location_dest_id': move.location_dest_id.id,
                             })
                             qty -= 1
                     else:
@@ -48,6 +50,8 @@ class MrpProductProduce(models.TransientModel):
                             'qty_done': 0.0,
                             'product_id': move.product_id.id,
                             'production_id': production.id,
+                            'location_id': move.location_id.id,
+                            'location_dest_id': move.location_dest_id.id,
                         })
                 else:
                     existing_lines += move.pack_operation_ids.filtered(lambda x: not x.lot_produced_id).ids

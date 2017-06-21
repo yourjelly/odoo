@@ -894,7 +894,6 @@ class StockMove(models.Model):
         defaults = {
             'product_uom_qty': uom_qty,
             'procure_method': 'make_to_stock',
-            'restrict_lot_id': restrict_lot_id,
             'procurement_ids': [(4, x.id) for x in self.procurement_ids],
             'move_dest_ids': [(4, x.id) for x in self.move_dest_ids if x.state not in ('done', 'cancel')],
             'move_orig_ids': [(4, x.id) for x in self.move_orig_ids],

@@ -99,6 +99,7 @@ class StockScrap(models.Model):
             'location_dest_id': self.scrap_location_id.id,
             'pack_operation_ids': [(0, 0, {'product_id': self.product_id.id,
                                            'product_qty': self.scrap_qty,
+                                           'qty_done': self.scrap_qty,
                                            'product_uom_id': self.product_uom_id.id, 
                                            'location_id': self.location_id.id, 
                                            'location_dest_id': self.scrap_location_id.id,
