@@ -12,6 +12,7 @@ from odoo.addons.procurement.models import procurement
 from odoo.exceptions import UserError
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, pycompat
 from odoo.tools.float_utils import float_compare, float_round, float_is_zero
+from odoo.osv import expression
 
 
 class StockMove(models.Model):
@@ -96,9 +97,11 @@ class StockMove(models.Model):
     # TODO: state should be computed according to the move lines
     state = fields.Selection([
         ('draft', 'New'), ('cancel', 'Cancelled'),
-        ('waiting', 'Waiting Another Move'), ('confirmed', 'Waiting Availability'),
+        ('waiting', 'Waiting Another Move'),
+        ('confirmed', 'Waiting Availability'),
         ('partially_available', 'Partially Available'),
-        ('assigned', 'Available'), ('done', 'Done')], string='Status',
+        ('assigned', 'Available'),
+        ('done', 'Done')], string='Status',
         copy=False, default='draft', index=True, readonly=True,
         help="* New: When the stock move is created and not yet confirmed.\n"
              "* Waiting Another Move: This state can be seen when a move is waiting for another one, for example in a chained flow.\n"
@@ -676,17 +679,12 @@ class StockMove(models.Model):
                     available_quantity = self.env['stock.quant'].get_available_quantity(move.product_id, move.location_id)
                     if available_quantity <= 0:
                         continue
-
-                    if available_quantity >= move.product_qty:
-                        quants = self.env['stock.quant'].increase_reserved_quantity(move.product_id, move.location_id, move.product_qty)
-                        for reserved_quant, quantity in quants:
-                            self.env['stock.pack.operation'].create(move._prepare_move_line_vals(quantity=quantity, reserved_quant=reserved_quant))
-                        move.write({'state': 'assigned'})
+                    need = move.product_qty - move.reserved_availability
+                    taken_quantity = move._increase_reserved_quantity(need, available_quantity, move.location_id, strict=False)
+                    if need - taken_quantity == 0.0:
+                        move.state = 'assigned'
                     else:
-                        quants = self.env['stock.quant'].increase_reserved_quantity(move.product_id, move.location_id, available_quantity)
-                        for reserved_quant, quantity in quants:
-                            self.env['stock.pack.operation'].create(move._prepare_move_line_vals(quantity=quantity, reserved_quant=reserved_quant))
-                        move.write({'state': 'partially_available'})
+                        move.state = 'partially_available'
                 else:
                     # Check what our parents brought and what our siblings took in order to
                     # determine what we can distribute.
@@ -716,35 +714,34 @@ class StockMove(models.Model):
                         continue
                     for (location_id, lot_id, package_id, owner_id), quantity in available_move_lines.items():
                         need = move.product_qty - sum(move.pack_operation_ids.mapped('product_qty'))
-                        taken_quantity = min(quantity, need)
-
-                        # Find a candidate move line to update or create a new one.
-                        to_update = move.pack_operation_ids.filtered(lambda m: m.location_id.id == location_id.id and m.lot_id.id == lot_id.id\
-                                                                     and m.package_id.id == package_id.id and m.owner_id.id == owner_id.id)
-                        to_update = to_update and to_update[0] or False
-                        if to_update:
-                            to_update.product_qty += taken_quantity
-                        else:
-                            move_line_id = self.env['stock.pack.operation'].create({
-                                'move_id': move.id,
-                                'picking_id': move.picking_id.id,
-                                'product_id': move.product_id.id,
-                                'location_dest_id': move.location_dest_id.id,
-                                'product_qty': taken_quantity,
-                                'location_id': location_id.id,
-                                'lot_id': lot_id.id,
-                                'package_id': package_id.id,
-                                'owner_id': owner_id.id,
-                            })
-                            move.write({'pack_operation_ids': [(4, move_line_id.id, 0)]})
-                            self.env['stock.quant'].increase_reserved_quantity(move.product_id, location_id, taken_quantity, lot_id=lot_id,
-                                                                               package_id=package_id, owner_id=owner_id, strict=True)
+                        taken_quantity = move._increase_reserved_quantity(need, quantity, location_id, lot_id, package_id, owner_id)
                         if need - taken_quantity == 0.0:
                             move.state = 'assigned'
                             break
                         if move.state != 'partially_available':
                             move.state = 'partially_available'
                 
+
+    def _increase_reserved_quantity(self, need, available_quantity, location_id, lot_id=None, package_id=None, owner_id=None, strict=True):
+        taken_quantity = min(available_quantity, need)
+
+        # Find a candidate move line to update or create a new one.
+        quants = self.env['stock.quant'].increase_reserved_quantity(self.product_id, location_id, taken_quantity, lot_id=lot_id,
+                                                                    package_id=package_id, owner_id=owner_id, strict=strict)
+        for reserved_quant, quantity in quants:
+            to_update = self.pack_operation_ids.filtered(lambda m: m.location_id == location_id)
+            if reserved_quant.lot_id:
+                to_update = to_update.filtered(lambda m: m.lot_id.id == reserved_quant.lot_id.id)
+            if reserved_quant.package_id:
+                to_update = to_update.filtered(lambda m: m.package_id.id == reserved_quant.package_id.id)
+            if reserved_quant.owner_id:
+                to_update = to_update.filtered(lambda m: m.owner_id.id == reserved_quant.owner_id.id)
+            to_update = to_update and to_update[0] or False
+            if to_update:
+                to_update.with_context(dont_change_reservation=True).product_qty += taken_quantity
+            else:
+                self.env['stock.pack.operation'].create(self._prepare_move_line_vals(quantity=quantity, reserved_quant=reserved_quant))
+        return taken_quantity
 
     @api.multi
     def action_cancel(self):
