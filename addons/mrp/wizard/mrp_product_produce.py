@@ -57,7 +57,7 @@ class MrpProductProduce(models.TransientModel):
             res['product_qty'] = quantity
             res['product_id'] = production.product_id.id
             res['product_uom_id'] = production.product_uom_id.id
-            res['consume_line_ids'] = (existing_lines and [(6, 0, [x for x in existing_lines])] or []) + [(0,0,x) for x in lines]
+            res['consume_line_ids'] = (existing_lines and [(6, 0, [x for x in existing_lines])] or []) + [(0, 0, x) for x in lines]
         return res
 
     serial = fields.Boolean('Requires Serial')
