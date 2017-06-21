@@ -10,7 +10,7 @@ from odoo.tools import float_utils
 class Inventory(models.Model):
     _name = "stock.inventory"
     _description = "Inventory"
-
+            
     @api.model
     def _default_location_id(self):
         company_user = self.env.user.company_id
@@ -332,16 +332,17 @@ class InventoryLine(models.Model):
         'Theoretical Quantity', compute='_compute_theoretical_qty',
         digits=dp.get_precision('Product Unit of Measure'), readonly=True, store=True)
 
-    @api.one
+    @api.multi
     @api.depends('location_id', 'product_id', 'package_id', 'product_uom_id', 'company_id', 'prod_lot_id', 'partner_id')
     def _compute_theoretical_qty(self):
-        if not self.product_id:
-            self.theoretical_qty = 0
-            return
-        theoretical_qty = sum([x.qty for x in self._get_quants()])
-        if theoretical_qty and self.product_uom_id and self.product_id.uom_id != self.product_uom_id:
-            theoretical_qty = self.product_id.uom_id._compute_quantity(theoretical_qty, self.product_uom_id)
-        self.theoretical_qty = theoretical_qty
+        for inv_line in self:
+            if not inv_line.product_id:
+                inv_line.theoretical_qty = 0
+            else:
+                theoretical_qty = sum([x.qty for x in inv_line._get_quants()])
+                if theoretical_qty and inv_line.product_uom_id and inv_line.product_id.uom_id != inv_line.product_uom_id:
+                    theoretical_qty = inv_line.product_id.uom_id._compute_quantity(theoretical_qty, inv_line.product_uom_id)
+                inv_line.theoretical_qty = theoretical_qty
 
     @api.onchange('product_id')
     def onchange_product(self):
@@ -355,7 +356,6 @@ class InventoryLine(models.Model):
     @api.onchange('product_id', 'location_id', 'product_uom_id', 'prod_lot_id', 'partner_id', 'package_id')
     def onchange_quantity_context(self):
         if self.product_id and self.location_id and self.product_id.uom_id.category_id == self.product_uom_id.category_id:  # TDE FIXME: last part added because crash
-            self._compute_theoretical_qty()
             self.product_qty = self.theoretical_qty
 
     @api.model
