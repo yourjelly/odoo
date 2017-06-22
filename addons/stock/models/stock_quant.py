@@ -174,6 +174,7 @@ class StockQuant(models.Model):
         :return: a list of tuples (quant, quantity_reserved) showing on which quant the reservation
             was done and how much the system was able to reserve on it
         """
+        self=self.sudo()
         quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
 
         quants_quantity = sum(quants.mapped('quantity'))
