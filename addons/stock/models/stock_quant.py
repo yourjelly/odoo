@@ -104,8 +104,8 @@ class StockQuant(models.Model):
         return self.search(domain, order=removal_strategy_order)
 
     @api.model
-    def get_quantity(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None):
-        quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id)
+    def get_quantity(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False):
+        quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
         return sum(quants.mapped('quantity'))
 
     @api.model
@@ -156,10 +156,11 @@ class StockQuant(models.Model):
                 'package_id': package_id and package_id.id,
                 'owner_id': owner_id and owner_id.id,
             })
+        return self.get_available_quantity(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
 
     @api.model
     def decrease_available_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=True):
-        self.increase_available_quantity(product_id, location_id, -quantity, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
+        return self.increase_available_quantity(product_id, location_id, -quantity, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
 
     @api.model
     def increase_reserved_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=False):
@@ -180,7 +181,7 @@ class StockQuant(models.Model):
         available_quantity = quants_quantity - sum(quants.mapped('reserved_quantity'))
         if quantity > 0 and quantity > available_quantity:
             raise UserError(_('It is not possible to reserve more products than you have in stock.'))
-        elif quantity < 0 and abs(quantity) > sum(quants.mapped('quantity')):
+        elif quantity < 0 and abs(quantity) > sum(quants.mapped('reserved_quantity')):
             raise UserError(_('It is not possible to unreserve more products than you have in stock.'))
 
         reserved_quants = []
