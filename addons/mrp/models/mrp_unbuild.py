@@ -101,6 +101,7 @@ class MrpUnbuild(models.Model):
             consume_move.quantity_done = consume_move.product_uom_qty
         consume_move.action_done()
         original_quants = consume_move.quant_ids.mapped('consumed_quant_ids')
+        #TODO: needs to be replaced by checking the different stock.move.lots
 
         for produce_move in produce_moves:
             if produce_move.has_tracking != 'none':
