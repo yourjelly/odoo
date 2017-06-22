@@ -77,7 +77,7 @@ class MrpUnbuild(models.Model):
 
     @api.model
     def create(self, vals):
-        if vals['name'] == _('New'):
+        if not vals.get('name') or vals['name'] == _('New'):
             vals['name'] = self.env['ir.sequence'].next_by_code('mrp.unbuild') or _('New')
         return super(MrpUnbuild, self).create(vals)
 
@@ -94,7 +94,9 @@ class MrpUnbuild(models.Model):
                 'move_id': consume_move.id,
                 'lot_id': self.lot_id.id,
                 'qty_done': consume_move.product_uom_qty,
-                'product_qty': consume_move.product_uom_qty})
+                'product_qty': consume_move.product_uom_qty, 
+                'location_id': consume_move.location_id.id,
+                'location_dest_id': consume_move.location_dest_id.id,})
         else:
             consume_move.quantity_done = consume_move.product_uom_qty
         consume_move.action_done()
@@ -106,8 +108,10 @@ class MrpUnbuild(models.Model):
                 self.env['stock.pack.operation'].create({
                     'move_id': produce_move.id,
                     'lot_id': original.lot_id.id,
-                    'quantity_done': produce_move.product_uom_qty,
-                    'quantity': produce_move.product_uom_qty
+                    'qty_done': produce_move.product_uom_qty,
+                    'product_qty': produce_move.product_uom_qty,
+                    'location_id': produce_move.location_id.id,
+                    'location_dest_id': produce_move.location_dest_id.id,
                 })
             else:
                 produce_move.quantity_done = produce_move.product_uom_qty
