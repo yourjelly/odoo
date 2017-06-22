@@ -132,6 +132,7 @@ class StockQuant(models.Model):
 
     @api.model
     def increase_available_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=True):
+        self = self.sudo() #TODO: method should be made private anyways
         quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
         for quant in quants:
             try:
