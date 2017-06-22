@@ -208,6 +208,10 @@ class StockMove(TransactionCase):
         self.assertEqual(len(self.env['stock.quant']._gather(self.product1, self.stock_location)), 0.0)
 
     def test_mixed_tracking_reservation_1(self):
+        """ Send products tracked by lot to a customer. In your stock, there are tracked and
+        untracked quants. Two moves lines should be created: one for the tracked ones, another
+        for the untracked ones.
+        """
         lot1 = self.env['stock.production.lot'].create({
             'name': 'lot1',
             'product_id': self.product3.id,
@@ -229,6 +233,259 @@ class StockMove(TransactionCase):
         move1.action_assign()
 
         self.assertEqual(len(move1.pack_operation_ids), 2)
+
+    def test_mixed_tracking_reservation_2(self):
+        """ Send products tracked by lot to a customer. In your stock, there two tracked and
+        mulitple untracked quants. There should be as many move lines as there are quants
+        reserved. Edit the reserve move lines to set them to new serial numbers, the reservation
+        should stay. Validate and the final quantity in stock should be 0, not negative.
+        """
+        lot1 = self.env['stock.production.lot'].create({
+            'name': 'lot1',
+            'product_id': self.product2.id,
+        })
+        lot2 = self.env['stock.production.lot'].create({
+            'name': 'lot2',
+            'product_id': self.product2.id,
+        })
+        self.env['stock.quant'].increase_available_quantity(self.product2, self.stock_location, 2)
+        self.env['stock.quant'].increase_available_quantity(self.product2, self.stock_location, 1, lot_id=lot1)
+        self.env['stock.quant'].increase_available_quantity(self.product2, self.stock_location, 1, lot_id=lot2)
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location), 4.0)
+        # creation
+        move1 = self.env['stock.move'].create({
+            'name': 'test_in_1',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product2.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 4.0,
+        })
+        move1.action_confirm()
+        move1.action_assign()
+        self.assertEqual(len(move1.pack_operation_ids), 4)
+        for ml in move1.pack_operation_ids:
+            self.assertEqual(ml.product_qty, 1.0)
+
+        # assign lot3 and lot 4 to both untracked move lines
+        lot3 = self.env['stock.production.lot'].create({
+            'name': 'lot3',
+            'product_id': self.product2.id,
+        })
+        lot4 = self.env['stock.production.lot'].create({
+            'name': 'lot4',
+            'product_id': self.product2.id,
+        })
+        untracked_move_line = move1.pack_operation_ids.filtered(lambda ml: not ml.lot_id)
+        untracked_move_line[0].lot_id = lot3
+        untracked_move_line[1].lot_id = lot4
+        for ml in move1.pack_operation_ids:
+            self.assertEqual(ml.product_qty, 1.0)
+
+        # no changes on quants, even if i made some move lines with a lot id whom reserved on untracked quants
+        self.assertEqual(len(self.env['stock.quant']._gather(self.product2, self.stock_location, strict=True)), 1.0)  # with a qty of 2
+        self.assertEqual(len(self.env['stock.quant']._gather(self.product2, self.stock_location, lot_id=lot1, strict=True)), 1.0)
+        self.assertEqual(len(self.env['stock.quant']._gather(self.product2, self.stock_location, lot_id=lot2, strict=True)), 1.0)
+        self.assertEqual(len(self.env['stock.quant']._gather(self.product2, self.stock_location, lot_id=lot3, strict=True)), 0)
+        self.assertEqual(len(self.env['stock.quant']._gather(self.product2, self.stock_location, lot_id=lot4, strict=True)), 0)
+
+        move1.pack_operation_ids.write({'qty_done': 1.0})
+
+        move1.action_done()
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location, lot_id=lot1, strict=True), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location, lot_id=lot2, strict=True), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location, lot_id=lot3, strict=True), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location, lot_id=lot4, strict=True), 0.0)
+
+    def test_mixed_tracking_reservation_3(self):
+        """ Send two products tracked by lot to a customer. In your stock, there two tracked quants
+        and two untracked. Once the move is validated, add move lines to also move the two untracked
+        ones and assign them serial numbers on the fly. The final quantity in stock should be 0, not
+        negative.
+        """
+        lot1 = self.env['stock.production.lot'].create({
+            'name': 'lot1',
+            'product_id': self.product2.id,
+        })
+        lot2 = self.env['stock.production.lot'].create({
+            'name': 'lot2',
+            'product_id': self.product2.id,
+        })
+        self.env['stock.quant'].increase_available_quantity(self.product2, self.stock_location, 1, lot_id=lot1)
+        self.env['stock.quant'].increase_available_quantity(self.product2, self.stock_location, 1, lot_id=lot2)
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location), 2.0)
+        # creation
+        move1 = self.env['stock.move'].create({
+            'name': 'test_in_1',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product2.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 2.0,
+        })
+        move1.action_confirm()
+        move1.action_assign()
+        move1.pack_operation_ids.write({'qty_done': 1.0})
+        move1.action_done()
+
+        self.env['stock.quant'].increase_available_quantity(self.product2, self.stock_location, 2)
+        lot3 = self.env['stock.production.lot'].create({
+            'name': 'lot3',
+            'product_id': self.product2.id,
+        })
+        lot4 = self.env['stock.production.lot'].create({
+            'name': 'lot4',
+            'product_id': self.product2.id,
+        })
+
+        self.env['stock.pack.operation'].create({
+            'move_id': move1.id,
+            'product_id': move1.product_id.id,
+            'qty_done': 1,
+            'location_id': move1.location_id.id,
+            'location_dest_id': move1.location_dest_id.id,
+            'lot_id': lot3.id
+        })
+        self.env['stock.pack.operation'].create({
+            'move_id': move1.id,
+            'product_id': move1.product_id.id,
+            'qty_done': 1,
+            'location_id': move1.location_id.id,
+            'location_dest_id': move1.location_dest_id.id,
+            'lot_id': lot4.id
+        })
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location, lot_id=lot1, strict=True), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location, lot_id=lot2, strict=True), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location, lot_id=lot3, strict=True), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location, lot_id=lot4, strict=True), 0.0)
+
+    def test_mixed_tracking_reservation_4(self):
+        """ Send two products tracked by lot to a customer. In your stock, there two tracked quants
+        and on untracked. Once the move is validated, edit one of the done move line to change the
+        serial number to one that is not in stock. The original serial should go back to stock and
+        the untracked quant should be tracked on the fly and sent instead.
+        """
+        lot1 = self.env['stock.production.lot'].create({
+            'name': 'lot1',
+            'product_id': self.product2.id,
+        })
+        lot2 = self.env['stock.production.lot'].create({
+            'name': 'lot2',
+            'product_id': self.product2.id,
+        })
+        self.env['stock.quant'].increase_available_quantity(self.product2, self.stock_location, 1, lot_id=lot1)
+        self.env['stock.quant'].increase_available_quantity(self.product2, self.stock_location, 1, lot_id=lot2)
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location), 2.0)
+        # creation
+        move1 = self.env['stock.move'].create({
+            'name': 'test_in_1',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product2.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 2.0,
+        })
+        move1.action_confirm()
+        move1.action_assign()
+        move1.pack_operation_ids.write({'qty_done': 1.0})
+        move1.action_done()
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location, lot_id=lot1, strict=True), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location, lot_id=lot2, strict=True), 0.0)
+
+        self.env['stock.quant'].increase_available_quantity(self.product2, self.stock_location, 1)
+        lot3 = self.env['stock.production.lot'].create({
+            'name': 'lot3',
+            'product_id': self.product2.id,
+        })
+
+        move1.with_context(debug=True).pack_operation_ids[1].lot_id = lot3
+
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location, lot_id=lot1, strict=True), 0.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location, lot_id=lot2, strict=True), 1.0)
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location, lot_id=lot3, strict=True), 0.0)
+
+    def test_mixed_tracking_reservation_5(self):
+        move1 = self.env['stock.move'].create({
+            'name': 'test_jenaimarre_1',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product2.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 1.0,
+        })
+        move1.action_confirm()
+        move1.action_assign()
+        self.assertEqual(move1.state, 'confirmed')
+
+        # create an untracked quant
+        self.env['stock.quant'].increase_available_quantity(self.product2, self.stock_location, 1.0)
+        lot1 = self.env['stock.production.lot'].create({
+            'name': 'lot1',
+            'product_id': self.product2.id,
+        })
+
+        # create a new move line with a lot not assigned to any quant
+        self.env['stock.pack.operation'].create({
+            'move_id': move1.id,
+            'product_id': move1.product_id.id,
+            'qty_done': 1,
+            'location_id': move1.location_id.id,
+            'location_dest_id': move1.location_dest_id.id,
+            'lot_id': lot1.id
+        })
+        self.assertEqual(len(move1.pack_operation_ids), 1)
+        self.assertEqual(move1.reserved_availability, 0)
+
+        # validating the move line should move the lot, not create a negative quant in stock
+        move1.action_done()
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location), 0.0)
+        self.assertEqual(len(self.env['stock.quant']._gather(self.product2, self.stock_location)), 0.0)
+
+    def test_mixed_tracking_reservation_6(self):
+        # create an untracked quant
+        self.env['stock.quant'].increase_available_quantity(self.product2, self.stock_location, 1.0)
+        move1 = self.env['stock.move'].create({
+            'name': 'test_jenaimarre_1',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product2.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 1.0,
+        })
+        move1.action_confirm()
+        move1.action_assign()
+        self.assertEqual(move1.state, 'assigned')
+
+        lot1 = self.env['stock.production.lot'].create({
+            'name': 'lot1',
+            'product_id': self.product2.id,
+        })
+        lot2 = self.env['stock.production.lot'].create({
+            'name': 'lot2',
+            'product_id': self.product2.id,
+        })
+
+        move_line = move1.pack_operation_ids
+        move_line.lot_id = lot1
+        self.assertEqual(move_line.product_qty, 1.0)
+        move_line.lot_id = lot2
+        self.assertEqual(move_line.product_qty, 1.0)
+        move_line.qty_done = 1
+
+        # validating the move line should move the lot, not create a negative quant in stock
+        move1.action_done()
+        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location), 0.0)
+        self.assertEqual(len(self.env['stock.quant']._gather(self.product2, self.stock_location)), 0.0)
 
     def test_putaway_1(self):
         """ Receive products from a supplier. Check that putaway rules are rightly applied on
@@ -1166,7 +1423,7 @@ class StockMove(TransactionCase):
         without any lot set, if we edit to set them to lot1, the reservation should not change.
         Validating the stock move should should not create a negative quant for this lot in stock
         location.
-        """
+        # """
         lot1 = self.env['stock.production.lot'].create({
             'name': 'lot1',
             'product_id': self.product3.id,
@@ -1197,7 +1454,7 @@ class StockMove(TransactionCase):
         self.assertEqual(move_line.product_qty, 5)
         move_line.qty_done = 5.0
         self.assertEqual(move_line.product_qty, 5)  # don't change reservation
-        move_line.lot_id = lot1
+        move_line.with_context(debug=True).lot_id = lot1
         self.assertEqual(move_line.product_qty, 5)  # don't change reservation when assgning a lot now
 
         move1.action_done()

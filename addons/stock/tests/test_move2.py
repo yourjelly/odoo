@@ -317,7 +317,7 @@ class TestSinglePicking(TestStockCommon):
         # valid with backorder creation
         delivery_order.move_lines[0].pack_operation_ids[0].qty_done = 3
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 0.0)
-        delivery_order.with_context(debug=True).do_transfer()
+        delivery_order.do_transfer()
         self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), -2.0)
 
         extra_move = delivery_order.move_lines - move1
@@ -384,3 +384,246 @@ class TestSinglePicking(TestStockCommon):
         self.assertEqual(extra_move_line.product_qty, 0.0)  # should not be able to reserve
         self.assertEqual(extra_move_line.qty_done, 1.0)
         self.assertEqual(extra_move.state, 'done')
+
+    def test_recheck_availability_1(self):
+        """ Check the good behavior of check availability. I create a DO for 2 unit with
+        only one in stock. After the first check availability, I should have 1 reserved
+        product with one move line. After adding a second unit in stock and recheck availability.
+        The DO should have 2 reserved unit, be in available state and have only one move line.
+        """
+        self.env['stock.quant'].increase_available_quantity(self.productA, self.env['stock.location'].browse(self.stock_location), 1.0)
+        delivery_order = self.env['stock.picking'].create({
+            'location_id': self.stock_location,
+            'location_dest_id': self.customer_location,
+            'partner_id': self.partner_delta_id,
+            'picking_type_id': self.picking_type_out,
+        })
+        move1 = self.MoveObj.create({
+            'name': self.productA.name,
+            'product_id': self.productA.id,
+            'product_uom_qty': 2,
+            'product_uom': self.productA.uom_id.id,
+            'picking_id': delivery_order.id,
+            'location_id': self.stock_location,
+            'location_dest_id': self.customer_location,
+        })
+        delivery_order.action_confirm()
+        delivery_order.action_assign()
+        # Check State
+        self.assertEqual(delivery_order.state, 'partially_available')
+        self.assertEqual(move1.state, 'partially_available')
+
+        # Check reserved quantity
+        self.assertEqual(move1.reserved_availability, 1.0)
+        self.assertEqual(len(move1.pack_operation_ids), 1)
+        self.assertEqual(move1.pack_operation_ids.product_qty, 1)
+
+        inventory = self.env['stock.inventory'].create({
+            'name': 'remove product1',
+            'filter': 'product',
+            'location_id': self.stock_location,
+            'product_id': self.productA.id,
+        })
+        inventory.prepare_inventory()
+        inventory.line_ids.product_qty = 2
+        inventory.action_done()
+        delivery_order.action_assign()
+        self.assertEqual(delivery_order.state, 'assigned')
+        self.assertEqual(move1.state, 'assigned')
+
+        # Check reserved quantity
+        self.assertEqual(move1.reserved_availability, 2.0)
+        self.assertEqual(len(move1.pack_operation_ids), 1)
+        self.assertEqual(move1.pack_operation_ids.product_qty, 2)
+
+    def test_recheck_availability_2(self):
+        """ Same check than test_recheck_availability_1 but with lot this time.
+        If the new product has the same lot that already reserved one, the move lines
+        reserved quantity should be updated.
+        Otherwise a new move lines with the new lot should be added.
+        """
+        self.productA.tracking = 'lot'
+        lot1 = self.env['stock.production.lot'].create({
+            'name': 'lot1',
+            'product_id': self.productA.id,
+        })
+        stock_location = self.env['stock.location'].browse(self.stock_location)
+        self.env['stock.quant'].increase_available_quantity(self.productA, stock_location, 1.0, lot_id=lot1)
+        delivery_order = self.env['stock.picking'].create({
+            'location_id': self.stock_location,
+            'location_dest_id': self.customer_location,
+            'partner_id': self.partner_delta_id,
+            'picking_type_id': self.picking_type_out,
+        })
+        move1 = self.MoveObj.create({
+            'name': self.productA.name,
+            'product_id': self.productA.id,
+            'product_uom_qty': 2,
+            'product_uom': self.productA.uom_id.id,
+            'picking_id': delivery_order.id,
+            'location_id': self.stock_location,
+            'location_dest_id': self.customer_location,
+        })
+        delivery_order.action_confirm()
+        delivery_order.action_assign()
+        # Check State
+        self.assertEqual(delivery_order.state, 'partially_available')
+        self.assertEqual(move1.state, 'partially_available')
+
+        # Check reserved quantity
+        self.assertEqual(move1.reserved_availability, 1.0)
+        self.assertEqual(len(move1.pack_operation_ids), 1)
+        self.assertEqual(move1.pack_operation_ids.product_qty, 1)
+
+        inventory = self.env['stock.inventory'].create({
+            'name': 'remove product1',
+            'filter': 'product',
+            'location_id': self.stock_location,
+            'product_id': self.productA.id,
+        })
+        inventory.prepare_inventory()
+        inventory.line_ids.prod_lot_id = lot1
+        inventory.line_ids.product_qty = 2
+        inventory.action_done()
+        delivery_order.action_assign()
+        self.assertEqual(delivery_order.state, 'assigned')
+        self.assertEqual(move1.state, 'assigned')
+
+        # Check reserved quantity
+        self.assertEqual(move1.reserved_availability, 2.0)
+        self.assertEqual(len(move1.pack_operation_ids), 1)
+        self.assertEqual(move1.pack_operation_ids.lot_id.id, lot1.id)
+        self.assertEqual(move1.pack_operation_ids.product_qty, 2)
+
+    def test_recheck_availability_3(self):
+        """ Same check than test_recheck_availability_2 but with different lots.
+        """
+        self.productA.tracking = 'lot'
+        lot1 = self.env['stock.production.lot'].create({
+            'name': 'lot1',
+            'product_id': self.productA.id,
+        })
+        lot2 = self.env['stock.production.lot'].create({
+            'name': 'lot2',
+            'product_id': self.productA.id,
+        })
+        stock_location = self.env['stock.location'].browse(self.stock_location)
+        self.env['stock.quant'].increase_available_quantity(self.productA, stock_location, 1.0, lot_id=lot1)
+        delivery_order = self.env['stock.picking'].create({
+            'location_id': self.stock_location,
+            'location_dest_id': self.customer_location,
+            'partner_id': self.partner_delta_id,
+            'picking_type_id': self.picking_type_out,
+        })
+        move1 = self.MoveObj.create({
+            'name': self.productA.name,
+            'product_id': self.productA.id,
+            'product_uom_qty': 2,
+            'product_uom': self.productA.uom_id.id,
+            'picking_id': delivery_order.id,
+            'location_id': self.stock_location,
+            'location_dest_id': self.customer_location,
+        })
+        delivery_order.action_confirm()
+        delivery_order.action_assign()
+        # Check State
+        self.assertEqual(delivery_order.state, 'partially_available')
+        self.assertEqual(move1.state, 'partially_available')
+
+        # Check reserved quantity
+        self.assertEqual(move1.reserved_availability, 1.0)
+        self.assertEqual(len(move1.pack_operation_ids), 1)
+        self.assertEqual(move1.pack_operation_ids.product_qty, 1)
+
+        inventory = self.env['stock.inventory'].create({
+            'name': 'remove product1',
+            'filter': 'product',
+            'location_id': self.stock_location,
+            'product_id': self.productA.id,
+        })
+        inventory.prepare_inventory()
+        self.env['stock.inventory.line'].create({
+            'inventory_id': inventory.id,
+            'location_id': inventory.location_id.id,
+            'partner_id': inventory.partner_id.id,
+            'prod_lot_id': lot2.id,
+            'product_id': self.productA.id,
+            'product_qty': 1,
+        })
+        inventory.action_done()
+        delivery_order.action_assign()
+        self.assertEqual(delivery_order.state, 'assigned')
+        self.assertEqual(move1.state, 'assigned')
+
+        # Check reserved quantity
+        self.assertEqual(move1.reserved_availability, 2.0)
+        self.assertEqual(len(move1.pack_operation_ids), 2)
+        self.assertEqual(move1.pack_operation_ids[0].lot_id.id, lot1.id)
+        self.assertEqual(move1.pack_operation_ids[1].lot_id.id, lot2.id)
+
+    def test_recheck_availability_4(self):
+        """ Same check than test_recheck_availability_2 but with serial number this time.
+        Serial number reservation should always create a new move line.
+        """
+        self.productA.tracking = 'serial'
+        serial1 = self.env['stock.production.lot'].create({
+            'name': 'serial1',
+            'product_id': self.productA.id,
+        })
+        serial2 = self.env['stock.production.lot'].create({
+            'name': 'serial2',
+            'product_id': self.productA.id,
+        })
+        stock_location = self.env['stock.location'].browse(self.stock_location)
+        self.env['stock.quant'].increase_available_quantity(self.productA, stock_location, 1.0, lot_id=serial1)
+        delivery_order = self.env['stock.picking'].create({
+            'location_id': self.stock_location,
+            'location_dest_id': self.customer_location,
+            'partner_id': self.partner_delta_id,
+            'picking_type_id': self.picking_type_out,
+        })
+        move1 = self.MoveObj.create({
+            'name': self.productA.name,
+            'product_id': self.productA.id,
+            'product_uom_qty': 2,
+            'product_uom': self.productA.uom_id.id,
+            'picking_id': delivery_order.id,
+            'location_id': self.stock_location,
+            'location_dest_id': self.customer_location,
+        })
+        delivery_order.action_confirm()
+        delivery_order.action_assign()
+        # Check State
+        self.assertEqual(delivery_order.state, 'partially_available')
+        self.assertEqual(move1.state, 'partially_available')
+
+        # Check reserved quantity
+        self.assertEqual(move1.reserved_availability, 1.0)
+        self.assertEqual(len(move1.pack_operation_ids), 1)
+        self.assertEqual(move1.pack_operation_ids.product_qty, 1)
+
+        inventory = self.env['stock.inventory'].create({
+            'name': 'remove product1',
+            'filter': 'product',
+            'location_id': self.stock_location,
+            'product_id': self.productA.id,
+        })
+        inventory.prepare_inventory()
+        self.env['stock.inventory.line'].create({
+            'inventory_id': inventory.id,
+            'location_id': inventory.location_id.id,
+            'partner_id': inventory.partner_id.id,
+            'prod_lot_id': serial2.id,
+            'product_id': self.productA.id,
+            'product_qty': 1,
+        })
+        inventory.action_done()
+        delivery_order.action_assign()
+        self.assertEqual(delivery_order.state, 'assigned')
+        self.assertEqual(move1.state, 'assigned')
+
+        # Check reserved quantity
+        self.assertEqual(move1.reserved_availability, 2.0)
+        self.assertEqual(len(move1.pack_operation_ids), 2)
+        self.assertEqual(move1.pack_operation_ids[0].lot_id.id, serial1.id)
+        self.assertEqual(move1.pack_operation_ids[1].lot_id.id, serial2.id)
