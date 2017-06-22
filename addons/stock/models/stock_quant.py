@@ -31,7 +31,7 @@ class StockQuant(models.Model):
         ondelete='restrict', readonly=True)
     package_id = fields.Many2one(
         'stock.quant.package', 'Package',
-        help='The package containing this quant', readonly=True)
+        help='The package containing this quant', readonly=True, ondelete='restrict')
     owner_id = fields.Many2one(
         'res.partner', 'Owner',
         help='This is the owner of the quant', readonly=True)

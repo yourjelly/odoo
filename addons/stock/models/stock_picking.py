@@ -5,11 +5,13 @@ from collections import namedtuple
 import json
 import time
 
+from itertools import groupby
 from odoo import api, fields, models, _
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, pycompat
 from odoo.tools.float_utils import float_compare, float_round
 from odoo.addons.procurement.models import procurement
 from odoo.exceptions import UserError
+from operator import itemgetter
 
 
 class PickingType(models.Model):
@@ -274,6 +276,10 @@ class Picking(models.Model):
         'Has Pack Operations', compute='_compute_pack_operation_exist',
         help='Check the existence of pack operation on the picking')
 
+    has_packages = fields.Boolean(
+        'Has Packages', compute='_compute_has_packages',
+        help='Check the existence of destination packages on move lines')
+
     owner_id = fields.Many2one(
         'res.partner', 'Owner',
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
@@ -352,6 +358,15 @@ class Picking(models.Model):
     @api.one
     def _compute_pack_operation_exist(self):
         self.pack_operation_exist = bool(self.pack_operation_ids)
+
+    @api.one
+    def _compute_has_packages(self):
+        has_packages = False
+        for pack_op in self.pack_operation_ids:
+            if pack_op.result_package_id:
+                has_packages = True
+                break
+        self.has_packages = has_packages
 
     @api.onchange('picking_type_id', 'partner_id')
     def onchange_picking_type(self):
@@ -460,6 +475,7 @@ class Picking(models.Model):
         if not moves:
             raise UserError(_('Nothing to check the availability for.'))
         moves.action_assign()
+        self._check_entire_pack()
         return True
 
     @api.multi
@@ -526,6 +542,30 @@ class Picking(models.Model):
         return True
 
     do_transfer = action_done #TODO:replace later
+
+    @api.multi
+    def _check_entire_pack(self):
+        """ This function check if entire packs are moved in the picking"""
+        for picking in self:
+            origin_packages = picking.pack_operation_ids.mapped("package_id")
+            for pack in origin_packages:
+                all_in = True
+                packops = picking.pack_operation_ids.filtered(lambda x: x.package_id == pack)
+                keys = ['product_id', 'lot_id']
+
+                grouped_quants = {}
+                for k, g in groupby(sorted(pack.quant_ids, key=itemgetter(*keys)), key=itemgetter(*keys)):
+                    grouped_quants[k] = sum(self.env['stock.quant'].concat(*list(g)).mapped('quantity'))
+
+                grouped_ops = {}
+                for k, g in groupby(sorted(packops, key=itemgetter(*keys)), key=itemgetter(*keys)):
+                    grouped_ops[k] = sum(self.env['stock.pack.operation'].concat(*list(g)).mapped('product_qty'))
+                if any(grouped_quants[key] - grouped_ops.get(key, 0) != 0 for key in grouped_quants)\
+                        or any(grouped_ops[key] - grouped_quants[key] != 0 for key in grouped_ops):
+                    all_in = False
+                if all_in and packops:
+                    packops.write({'result_package_id': pack.id})
+
 
     def _prepare_pack_ops(self, quants, forced_qties):
         """ Prepare pack_operations, returns a list of dict to give at create """
@@ -899,4 +939,5 @@ class Picking(models.Model):
         action = self.env.ref('stock.action_package_view').read()[0]
         packages = self.pack_operation_ids.mapped('result_package_id')
         action['domain'] = [('id', 'in', packages.ids)]
+        action['context'] = {'picking_id': self.id}
         return action

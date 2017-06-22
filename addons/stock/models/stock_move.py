@@ -749,6 +749,7 @@ class StockMove(models.Model):
                             break
                         if move.state != 'partially_available':
                             move.state = 'partially_available'
+            self.mapped('picking_id')._check_entire_pack()
 
     @api.multi
     def action_cancel(self):
