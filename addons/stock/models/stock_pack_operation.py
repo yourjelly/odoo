@@ -197,7 +197,7 @@ class PackOperation(models.Model):
             if ml.state in ('done', 'cancel'):
                 raise UserError(_('You can not delete pack operations of a done picking'))
             # Unlinking a pack operation should unreserve.
-            if not float_is_zero(ml.product_qty, precision_digits=precision):
+            if ml.location_id.should_impact_quants() and not float_is_zero(ml.product_qty, precision_digits=precision):
                 self.env['stock.quant'].decrease_reserved_quantity(ml.product_id, ml.location_id, ml.product_qty, lot_id=ml.lot_id,
                                                                    package_id=ml.package_id, owner_id=ml.owner_id)
         return super(PackOperation, self).unlink()
