@@ -170,11 +170,11 @@ class StockMove(models.Model):
 
         for new_move in phantom_moves:
             processed_moves |= new_move.action_explode()
-        if not self.split_from and self.procurement_id:
-            # Check if procurements have been made to wait for
-            moves = self.procurement_id.move_ids
-            if len(moves) == 1:
-                self.procurement_id.write({'state': 'done'})
+#         if not self.split_from and self.procurement_id:
+#             # Check if procurements have been made to wait for
+#             moves = self.procurement_id.move_ids
+#             if len(moves) == 1:
+#                 self.procurement_id.write({'state': 'done'})
         if processed_moves and self.state == 'assigned':
             # Set the state of resulting moves according to 'assigned' as the original move is assigned
             processed_moves.write({'state': 'assigned'})
@@ -191,7 +191,7 @@ class StockMove(models.Model):
                 'product_uom_qty': quantity,
                 'state': 'draft',  # will be confirmed below
                 'name': self.name,
-                'procurement_id': self.procurement_id.id,
+                'procurement_ids': [(6, 0, self.procurement_ids.ids)],
                 'split_from': self.id,  # Needed in order to keep sale connection, but will be removed by unlink
             })
         return self.env['stock.move']
