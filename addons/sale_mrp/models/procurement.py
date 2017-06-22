@@ -16,7 +16,7 @@ class ProcurementOrder(models.Model):
             if production_id:
                 production = self.env['mrp.production'].browse(production_id)
                 move = production._get_parent_move(production.move_finished_ids[0])
-                sale_order = move.procurements_ids and move.procurement_ids[0].sale_line_id.order_id or False
+                sale_order = move.procurement_ids and move.procurement_ids[0].sale_line_id.order_id or False
                 if sale_order:
                     production.message_post_with_view('mail.message_origin_link',
                             values={'self': production, 'origin': sale_order},

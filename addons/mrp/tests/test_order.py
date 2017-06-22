@@ -39,6 +39,8 @@ class TestMrpOrder(TestMrpCommon):
 
     def test_basic(self):
         """ Basic order test: no routing (thus no workorders), no lot """
+        self.product_1.type = 'product'
+        self.product_2.type = 'product'
         inventory = self.env['stock.inventory'].create({
             'name': 'Initial inventory',
             'filter': 'partial',
