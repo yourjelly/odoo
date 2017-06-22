@@ -319,16 +319,34 @@ class Picking(models.Model):
         elif all(move.state in ['cancel', 'done'] for move in self.move_lines):
             self.state = 'done'
         else:
-            # We sort our moves by importance of state: "confirmed" should be first, then we'll have
-            # "waiting" and finally "assigned" at the end.
+            # We sort our moves by importance of state:
+            #     ------------- 0
+            #     | Confirmed |
+            #     -------------
+            #     |  Partial  |
+            #     -------------
+            #     |  Waiting  |
+            #     -------------
+            #     |  Assigned |
+            #     ------------- len - 1
+            sort_map = {
+                'assigned': 4,
+                'waiting': 3,
+                'partially_available': 2,
+                'confirmed': 1,
+            }
             moves_todo = self.move_lines\
                 .filtered(lambda move: move.state not in ['cancel', 'done'])\
-                .sorted(key=lambda move: (move.state == 'assigned' and 2) or (move.state == 'waiting' and 1) or 0)
+                .sorted(key=lambda move: sort_map.get(move.state, 0))
             if self.move_type == 'one':
-                self.state = moves_todo[0].state
+                if moves_todo[0].state in ('partially_available', 'confirmed'):
+                    self.state = 'confirmed'
+                else:
+                    self.state = moves_todo[0].state
             elif moves_todo[0].state != 'assigned' and any(x.state in ['assigned', 'partially_available'] for x in moves_todo):
                 self.state = 'partially_available'
             else:
+                # take the less important state among all move_lines.
                 self.state = moves_todo[-1].state
 
     @api.one
