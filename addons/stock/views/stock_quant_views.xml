@@ -154,11 +154,9 @@
                     </div>
                     <group>
                         <group>
-                           <field name='company_id' groups="base.group_multi_company"/>
-                           <field name='owner_id' groups="stock.group_tracking_owner"/>
-                        </group>
-                        <group>
-                        <field name="location_id"/>
+                            <field name='company_id' groups="base.group_multi_company"/>
+                            <field name='owner_id' groups="stock.group_tracking_owner"/>
+                            <field name="location_id"/>
                         </group>
                     </group>
                     <notebook>
