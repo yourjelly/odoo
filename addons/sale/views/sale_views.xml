@@ -20,7 +20,7 @@
             active="False"/>
 
         <menuitem id="product_menu_catalog" name="Catalog" action="product.product_template_action" parent="sales_team.menu_base_partner" sequence="7" active="False"/>
-        <menuitem id="menu_product" name="Product Variants" parent="product_menu_catalog" sequence="2" groups="product.group_product_variant" active="False"/>
+        <menuitem id="menu_product" name="Product Variants" parent="product_menu_catalog" sequence="2" groups="base.group_no_one" active="False"/>
         <menuitem id="sales_team.menu_sales" name="Sales" parent="sales_team.menu_base_partner" sequence="4"/>
         <menuitem action="product.product_template_action" id="menu_product_template_action" parent="product_menu_catalog" sequence="1" active="False"/>
         <menuitem id="sale.prod_config_main" name="Products" parent="sales_team.menu_sale_config" sequence="5" active="False"/>

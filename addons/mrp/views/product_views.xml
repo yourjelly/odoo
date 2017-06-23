@@ -36,7 +36,8 @@
         <menuitem id="menu_mrp_product_form"
             name="Products"
             action="product_template_action"
-            parent="menu_mrp_bom"/>
+            parent="menu_mrp_bom"
+            groups="base.group_no_one"/>
 
         <record id="product_template_form_view_bom_button" model="ir.ui.view">
             <field name="name">product.template.procurement</field>
