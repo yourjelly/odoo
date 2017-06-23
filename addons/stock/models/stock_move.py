@@ -216,15 +216,15 @@ class StockMove(models.Model):
     @api.multi
     def _quantity_done_set(self):
         for move in self:
-            if move.quantity_done:
-                if not move.pack_operation_ids:
+            if not move.pack_operation_ids:
+                if move.quantity_done:
                     # do not impact reservation here
                     move_line = self.env['stock.pack.operation'].create(dict(self._prepare_move_line_vals(), qty_done=move.quantity_done))
                     move.write({'pack_operation_ids': [(4, move_line.id)]})
-                elif len(move.pack_operation_ids) == 1:
-                    move.pack_operation_ids[0].qty_done = move.quantity_done
-                else:
-                    raise UserError("blabla")
+            elif len(move.pack_operation_ids) == 1:
+                move.pack_operation_ids[0].qty_done = move.quantity_done
+            else:
+                raise UserError("Cannot set the done quantity from this stock move, work directly with the move lines.")
 
     def _set_product_qty(self):
         """ The meaning of product_qty field changed lately and is now a functional field computing the quantity
