@@ -395,8 +395,7 @@ class MrpProduction(models.Model):
     @api.multi
     def action_assign(self):
         for production in self:
-            move_to_assign = production.move_raw_ids.filtered(lambda x: x.state in ('confirmed', 'waiting', 'assigned'))
-            move_to_assign.action_assign()
+            production.move_raw_ids.action_assign()
         return True
 
     @api.multi
