@@ -617,7 +617,8 @@ class PurchaseOrderLine(models.Model):
     partner_id = fields.Many2one('res.partner', related='order_id.partner_id', string='Partner', readonly=True, store=True)
     currency_id = fields.Many2one(related='order_id.currency_id', store=True, string='Currency', readonly=True)
     date_order = fields.Datetime(related='order_id.date_order', string='Order Date', readonly=True)
-    procurement_ids = fields.One2many('procurement.order', 'purchase_line_id', string='Associated Procurements', copy=False)
+
+    orderpoint_id = fields.Many2one('stock.warehouse.orderpoint', 'Orderpoint')
 
     @api.multi
     def _get_stock_move_price_unit(self):
@@ -843,9 +844,7 @@ class PurchaseOrderLine(models.Model):
 class ProcurementRule(models.Model):
     _inherit = 'procurement.rule'
 
-    @api.model
-    def _get_action(self):
-        return [('buy', _('Buy'))] + super(ProcurementRule, self)._get_action()
+    action = fields.Selection(selection_add=[('buy', 'Buy')])
 
 
 class ProcurementOrder(models.Model):

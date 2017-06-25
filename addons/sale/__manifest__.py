@@ -9,7 +9,7 @@
     'description': """
 This module contains all the common features of Sales Management and eCommerce.
     """,
-    'depends': ['sales_team', 'account', 'procurement'],
+    'depends': ['sales_team', 'account'],
     'data': [
         'data/ir_sequence_data.xml',
         'data/sale_data.xml',

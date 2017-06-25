@@ -32,7 +32,7 @@ Dashboard / Reports for Inventory Management will include:
 * Moves Analysis
     """,
     'website': 'https://www.odoo.com/page/warehouse',
-    'depends': ['product', 'procurement', 'barcodes', 'web_planner'],
+    'depends': ['product', 'barcodes', 'web_planner'],
     'category': 'Warehouse',
     'sequence': 13,
     'demo': [
@@ -51,6 +51,7 @@ Dashboard / Reports for Inventory Management will include:
         'security/ir.model.access.csv',
         'views/stock_menu_views.xml',
         'data/stock_traceability_report_data.xml',
+        'data/procurement_data.xml',
 
         'report/report_stock_forecast.xml',
         'report/stock_report_views.xml',

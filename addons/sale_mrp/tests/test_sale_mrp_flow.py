@@ -30,7 +30,6 @@ class TestSaleMrpFlow(common.TransactionCase):
         self.categ_kgm = self.env.ref('product.product_uom_categ_kgm')
         self.stock_location = self.env.ref('stock.stock_location_stock')
         self.warehouse = self.env.ref('stock.warehouse0')
-        self.procurement_jit = self.env.ref('base.module_procurement_jit')
 
     def test_00_sale_mrp_flow(self):
         """ Test sale to mrp flow with diffrent unit of measure."""

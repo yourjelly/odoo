@@ -8,10 +8,7 @@ from odoo import api, fields, models, _
 
 class ProcurementRule(models.Model):
     _inherit = 'procurement.rule'
-
-    @api.model
-    def _get_action(self):
-        return [('manufacture', _('Manufacture'))] + super(ProcurementRule, self)._get_action()
+    action = fields.Selection(selection_add=[('manufacture', 'Manufacture')])
 
 
 class ProcurementOrder(models.Model):
