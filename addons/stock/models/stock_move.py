@@ -512,7 +512,7 @@ class StockMove(models.Model):
                 ('location_dest_id', '=', move.location_dest_id.id),
                 ('picking_type_id', '=', move.picking_type_id.id),
                 ('printed', '=', False),
-                ('state', 'in', ['draft', 'confirmed', 'waiting', 'partially_available', 'assigned'])], limit=1)
+                ('state', 'in', ['confirmed', 'waiting', 'partially_available', 'assigned'])], limit=1)
             if not picking:
                 recompute = True
                 picking = Picking.create(move._get_new_picking_values())
@@ -525,6 +525,7 @@ class StockMove(models.Model):
             # record won't be found.
             if recompute:
                 move.recompute()
+            picking.action_confirm()
         return True
     _picking_assign = assign_picking
 

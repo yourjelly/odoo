@@ -96,10 +96,11 @@ class SaleOrderLine(models.Model):
     @api.multi
     def write(self, values):
         result = super(SaleOrderLine, self).write(values)
-        lines = self.filtered(
-            lambda r: r.state == 'sale' and float_compare(r.product_uom_qty, values['product_uom_qty'], precision_digits=precision) == -1)
-        if lines:
-            lines._action_procurement_create()
+        if 'product_uom_qty' in values:
+            lines = self.filtered(
+                lambda r: r.state == 'sale' and float_compare(r.product_uom_qty, values['product_uom_qty'], precision_digits=precision) == -1)
+            if lines:
+                lines._action_procurement_create()
         return result
 
     @api.depends('order_id.state')
@@ -247,8 +248,8 @@ class SaleOrderLine(models.Model):
 
             if not line.order_id.procurement_group_id:
                 line.order_id.procurement_group_id = self.env["procurement.group"].create({
-                    'name': self.name, 'move_type': self.order_id.picking_policy,
-                    'sale_id': self.order_id.id
+                    'name': line.name, 'move_type': line.order_id.picking_policy,
+                    'sale_id': line.order_id.id
                 })
             vals = line._prepare_order_line_procurement(group_id=line.order_id.procurement_group_id)
             vals['product_qty'] = line.product_uom_qty - qty
