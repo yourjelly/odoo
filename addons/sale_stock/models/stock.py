@@ -21,11 +21,27 @@ class StockMove(models.Model):
             line.qty_delivered = line._get_delivered_qty()
         return result
 
+class ProcurementGroup(models.Model):
+    _inherit = 'procurement.group'
+
+    sale_id = fields.Many2one('sale.order', 'Sale Order')
+
+    def _get_stock_move_values(self, values, rule, group_id):
+        result = super(ProcurementGroup, self)._get_stock_move_values(values, rule, group_id)
+        if values.get('sale_line_id', False):
+            result['sale_line_id'] = values['sale_line_id']
+        return result
+
+    def _merge_domain(self, values, rule, group_id):
+        result = super(ProcurementGroup, self)._merge_domain(values, rule, group_id)
+        if values.get('sale_line_id', False):
+            result = result + [('sale_line_id', '=', values['sale_line_id'].id)]
+        return result
 
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
-    sale_id = fields.Many2one('sale.order', "Sales Order")
+    sale_id = fields.Many2one(related="group_id.sale_id", string="Sales Order", store=True)
 
     @api.multi
     def _create_backorder(self, backorder_moves=[]):
@@ -38,3 +54,4 @@ class StockPicking(models.Model):
                     values={'self': backorder, 'origin': backorder.sale_id},
                     subtype_id=self.env.ref('mail.mt_note').id)
         return res
+

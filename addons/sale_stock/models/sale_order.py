@@ -58,10 +58,7 @@ class SaleOrder(models.Model):
         view, if there is only one delivery order to show.
         '''
         action = self.env.ref('stock.action_picking_tree_all').read()[0]
-        if len(self.pickings) > 1:
-            action['domain'] = [('id', 'in', self.pickings.ids)]
-        elif self.pickings:
-            action['views'] = [(self.env.ref('stock.view_picking_form').id, 'form')]
+        action['domain'] = [('id', 'in', self.picking_ids.ids)]
         return action
 
     @api.multi
@@ -249,9 +246,11 @@ class SaleOrderLine(models.Model):
                 continue
 
             if not line.order_id.procurement_group_id:
-                line.order_id.procurement_group_id = self.env["procurement.group"].create({'name': self.name})
-
-            vals = line._prepare_order_line_procurement(group_id=line.order_id.procurement_group_id.id)
+                line.order_id.procurement_group_id = self.env["procurement.group"].create({
+                    'name': self.name, 'move_type': self.order_id.picking_policy,
+                    'sale_id': self.order_id.id
+                })
+            vals = line._prepare_order_line_procurement(group_id=line.order_id.procurement_group_id)
             vals['product_qty'] = line.product_uom_qty - qty
 
             new_proc = self.env["procurement.group"].run(vals)

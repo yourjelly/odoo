@@ -567,11 +567,8 @@ class StockMove(models.Model):
                 to_assign[key] |= move
 
         # create procurements for make to order moves
-        procurements = self.env['procurement.order']
         for move in move_create_proc:
-            procurements |= procurements.create(move._prepare_procurement_from_move())
-        if procurements:
-            procurements.run()
+            self.env['procurement.group'].run(move._prepare_procurement_from_move())
 
         move_to_confirm.write({'state': 'confirmed'})
         (move_waiting | move_create_proc).write({'state': 'waiting'})
@@ -594,25 +591,25 @@ class StockMove(models.Model):
     def _prepare_procurement_from_move(self):
         self.ensure_one()
         origin = (self.group_id and (self.group_id.name + ":") or "") + (self.rule_id and self.rule_id.name or self.origin or self.picking_id.name or "/")
-        group_id = self.group_id and self.group_id.id or False
+        group_id = self.group_id or False
         if self.rule_id:
             if self.rule_id.group_propagation_option == 'fixed' and self.rule_id.group_id:
-                group_id = self.rule_id.group_id.id
+                group_id = self.rule_id.group_id
             elif self.rule_id.group_propagation_option == 'none':
                 group_id = False
         return {
             'name': self.rule_id and self.rule_id.name or "/",
             'origin': origin,
-            'company_id': self.company_id.id,
+            'company_id': self.company_id,
             'date_planned': self.date,
-            'product_id': self.product_id.id,
+            'product_id': self.product_id,
             'product_qty': self.product_uom_qty,
-            'product_uom': self.product_uom.id,
-            'location_id': self.location_id.id,
-            'move_dest_id': self.id,
+            'product_uom': self.product_uom,
+            'location_id': self.location_id,
+            'move_dest_id': self,
             'group_id': group_id,
-            'route_ids': [(4, x.id) for x in self.route_ids],
-            'warehouse_id': self.warehouse_id.id or (self.picking_type_id and self.picking_type_id.warehouse_id.id or False),
+            'route_ids': self.route_ids,
+            'warehouse_id': self.warehouse_id or (self.picking_type_id and self.picking_type_id.warehouse_id or False),
             'priority': self.priority,
         }
 
@@ -947,17 +944,3 @@ class StockMove(models.Model):
                 else:
                     move.state = 'confirmed'
 
-    @api.multi
-    def action_show_picking(self):
-        view = self.env.ref('stock.view_picking_form')
-        return {
-            'name': _('Transfer'),
-            'type': 'ir.actions.act_window',
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_model': 'stock.picking',
-            'views': [(view.id, 'form')],
-            'view_id': view.id,
-            'target': 'new',
-            'res_id': self.id}
-    show_picking = action_show_picking

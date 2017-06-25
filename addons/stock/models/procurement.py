@@ -48,12 +48,10 @@ class ProcurementGroup(models.Model):
         'Reference',
         default=lambda self: self.env['ir.sequence'].next_by_code('procurement.group') or '',
         required=True)
-
-    # move this to stock, or sale_stock
-    # move_type = fields.Selection([
-    #     ('direct', 'Partial'),
-    #     ('one', 'All at once')], string='Delivery Type', default='direct',
-    #     required=True)
+    move_type = fields.Selection([
+        ('direct', 'Partial'),
+        ('one', 'All at once')], string='Delivery Type', default='direct',
+        required=True)
 
     @api.model
     def run(self, values):
@@ -116,7 +114,7 @@ class ProcurementGroup(models.Model):
             'partner_id': rule.partner_address_id.id or (values['group_id'] and values['group_id'].partner_id.id) or False,
             'location_id': rule.location_src_id.id,
             'location_dest_id': values['location_id'].id,
-            'move_dest_ids': values['move_dest_id'] and [(4, values['move_dest_id'].id)] or [],
+            'move_dest_ids': values.get('move_dest_id', False) and [(4, values['move_dest_id'].id)] or [],
             'rule_id': rule.id,
             'procure_method': rule.procure_method,
             'origin': values['origin'],
@@ -127,8 +125,18 @@ class ProcurementGroup(models.Model):
             'date': date_expected,
             'date_expected': date_expected,
             'propagate': rule.propagate,
-            'priority': values['priority'],
+            'priority': values.get('priority', "1"),
         }
+
+    def _merge_domain(self, values, rule, group_id):
+        return [
+            ('group_id', '=', group_id), #extra logic?
+            ('location_id', '=', rule.location_src_id.id),
+            ('location_dest_id', '=', values['location_id'].id),
+            ('picking_type_id', '=', rule.picking_type_id.id),
+            ('picking_id.printed', '=', False),
+            ('picking_id.state', 'in', ['draft', 'confirmed', 'waiting', 'partially_available', 'assigned']),
+            ('product_id', '=', values['product_id'].id)]
 
     @api.multi
     def _run(self, values, rule):
@@ -144,17 +152,9 @@ class ProcurementGroup(models.Model):
                 group_id = values.get('group_id', False) and values['group_id'].id
             elif rule.group_propagation_option == 'fixed':
                 group_id = rule.group_id.id
-            if rule.merge_moves: # Or maybe also if it is the same orderpoint or client, ... (or original procurement group == ...)
-                # TODO: add recompute -> might be more logical to reuse code of picking_assign
-                # TODO: create function find_picking and add it also to picking_assign
-                moves = self.env['stock.move'].search([
-                    ('group_id', '=', group_id), #extra logic?
-                    ('location_id', '=', rule.location_src_id.id),
-                    ('location_dest_id', '=', values['location_id'].id),
-                    ('picking_type_id', '=', rule.picking_type_id.id),
-                    ('picking_id.printed', '=', False),
-                    ('picking_id.state', 'in', ['draft', 'confirmed', 'waiting', 'partially_available', 'assigned']),
-                    ('product_id', '=', values['product_id'].id)], limit=1)
+
+            if rule.merge_moves:
+                moves = self.env['stock.move'].search(self._merge_domain(values, rule, group_id), limit=1)
 
                 if moves:
                     added_to_existing = True
@@ -162,8 +162,6 @@ class ProcurementGroup(models.Model):
                         'product_uom_qty': moves[0].product_uom_qty + values['product_qty'],
                         'move_dest_ids': [(4, x.id) for x in values.get('move_dest_ids', [])],
                     }
-                    if values.get('sale_line_id', False):
-                        data['sale_line_id'] = values['sale_line_id']
                     moves[0].write(data)
                     #Need to add a procurement if the move is mto again
                     if rule.procure_method == 'make_to_order':
@@ -177,7 +175,7 @@ class ProcurementGroup(models.Model):
 
             if not added_to_existing:
                 data = self._get_stock_move_values(values, rule, group_id)
-                self.env['stock.move'].sudo().create(data)
+                self.env['stock.move'].sudo().create(data).assign_picking()
             return True
         return False
 
