@@ -6,7 +6,6 @@ from odoo import api, fields, models
 
 class StockLocationRoute(models.Model):
     _inherit = "stock.location.route"
-
     sale_selectable = fields.Boolean("Selectable on Sales Order Line")
 
 
