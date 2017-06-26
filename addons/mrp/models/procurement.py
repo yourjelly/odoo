@@ -21,7 +21,7 @@ class ProcurementGroup(models.Model):
             ProductionSudo = Production.sudo().with_context(force_company=values['company_id'].id)
             bom = self._get_matching_bom(values, rule)
             if not bom:
-                raise UserError(_('No Bill of Material found for product %f.') % (values['product_id'].display_name(),)
+                raise UserError(_('No Bill of Material found for product %f.') % (values['product_id'].display_name(),))
 
             # create the MO as SUPERUSER because the current user may not have the rights to do it (mto product launched by a sale for example)
             production = ProductionSudo.create(self._prepare_mo_vals(values, rule, bom))

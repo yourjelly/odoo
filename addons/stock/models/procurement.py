@@ -57,6 +57,9 @@ class ProcurementGroup(models.Model):
     def run(self, values):
         for key in ('product_id','product_qty','location_id', 'date_planned', 'name'):
             assert key in values
+        values.setdefault('company_id', self.env['res.company']._company_default_get('procurement.group'))
+        values.setdefault('priority', 1)
+        values.setdefault('date_planned', fields.Datetime.now())
         rule = self._get_rule(values)
         if not rule:
             raise UserError(_('No procurement rule found.'))
