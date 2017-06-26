@@ -474,20 +474,12 @@ class MrpProduction(models.Model):
         orders in exception """
         if any(workorder.state == 'progress' for workorder in self.mapped('workorder_ids')):
             raise UserError(_('You can not cancel production order, a work order is still in progress.'))
-        ProcurementOrder = self.env['procurement.order']
         for production in self:
             production.workorder_ids.filtered(lambda x: x.state != 'cancel').action_cancel()
 
             finish_moves = production.move_finished_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
             raw_moves = production.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
             (finish_moves | raw_moves).action_cancel()
-
-            procurements = ProcurementOrder.search([('move_dest_id', 'in', (finish_moves | raw_moves).ids)])
-            if procurements:
-                procurements.cancel()
-
-        # Put relatfinish_to_canceled procurements in exception -> I agree
-        ProcurementOrder.search([('production_id', 'in', self.ids)]).write({'state': 'exception'})
 
         self.write({'state': 'cancel'})
         return True

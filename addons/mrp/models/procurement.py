@@ -40,7 +40,6 @@ class ProcurementGroup(models.Model):
 
     @api.multi
     def _get_matching_bom(self, values, rule):
-        """ Finds the bill of material for the product from procurement order. """
         if values.get('bom_id', False):
             return values['bom_id']
         return self.env['mrp.bom'].with_context(

@@ -251,9 +251,9 @@ class ProcurementGroup(models.Model):
                 cr = registry(self._cr.dbname).cursor()
                 self = self.with_env(self.env(cr=cr))
             OrderPoint = self.env['stock.warehouse.orderpoint']
-            Procurement = self.env['procurement.order']
-            ProcurementAutorundefer = Procurement.with_context(procurement_autorun_defer=True)
-            procurement_list = []
+            # Procurement = self.env['procurement.order']
+            # ProcurementAutorundefer = Procurement.with_context(procurement_autorun_defer=True)
+            # procurement_list = []
 
             orderpoints = OrderPoint.browse(orderpoints_noprefetch[:1000])
             orderpoints_noprefetch = orderpoints_noprefetch[1000:]
@@ -295,12 +295,8 @@ class ProcurementGroup(models.Model):
                                 qty -= substract_quantity[orderpoint.id]
                                 qty_rounded = float_round(qty, precision_rounding=orderpoint.product_uom.rounding)
                                 if qty_rounded > 0:
-                                    new_procurement = ProcurementAutorundefer.create(
+                                    new_procurement = self.env['procurement.group'].run(
                                         orderpoint._prepare_procurement_values(qty_rounded, **group['procurement_values']))
-                                    procurement_list.append(new_procurement)
-                                    new_procurement.message_post_with_view('mail.message_origin_link',
-                                        values={'self': new_procurement, 'origin': orderpoint},
-                                        subtype_id=self.env.ref('mail.mt_note').id)
                                     self._procurement_from_orderpoint_post_process([orderpoint.id])
                                 if use_new_cursor:
                                     cr.commit()
@@ -314,12 +310,6 @@ class ProcurementGroup(models.Model):
                                 raise
 
             try:
-                # TDE CLEANME: use record set ?
-                procurement_list.reverse()
-                procurements = self.env['procurement.order']
-                for p in procurement_list:
-                    procurements += p
-                procurements.run()
                 if use_new_cursor:
                     cr.commit()
             except OperationalError:
