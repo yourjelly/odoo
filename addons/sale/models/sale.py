@@ -154,8 +154,8 @@ class SaleOrder(models.Model):
 
     note = fields.Text('Terms and conditions', default=_default_note)
 
-    amount_untaxed = fields.Monetary(string='Untaxed Amount', store=True, readonly=True, compute='_amount_all', track_visibility='always')
-    amount_tax = fields.Monetary(string='Taxes', store=True, readonly=True, compute='_amount_all', track_visibility='always')
+    amount_untaxed = fields.Monetary(string='Untaxed Amount', store=True, readonly=True, compute='_amount_all', track_visibility='onchange')
+    amount_tax = fields.Monetary(string='Taxes', store=True, readonly=True, compute='_amount_all')
     amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_amount_all', track_visibility='always')
 
     payment_term_id = fields.Many2one('account.payment.term', string='Payment Terms', oldname='payment_term')
@@ -480,11 +480,12 @@ class SaleOrder(models.Model):
     def action_confirm(self):
         for order in self.filtered(lambda order: order.partner_id not in order.message_partner_ids):
             order.message_subscribe([order.partner_id.id])
-        for order in self:
-            order.state = 'sale'
-            order.confirmation_date = fields.Datetime.now()
-            if self.env.context.get('send_email'):
-                self.force_quotation_send()
+        self.write({
+            'state': 'sale',
+            'confirmation_date': fields.Datetime.now()
+        })
+        if self.env.context.get('send_email'):
+            self.force_quotation_send()
         if self.env['ir.config_parameter'].get_param('sale.auto_done_setting'):
             self.action_done()
         return True
