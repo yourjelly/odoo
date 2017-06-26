@@ -84,9 +84,6 @@
                 <field name="requisition_id"
                     domain="[('state', 'in', ('in_progress', 'open')), ('vendor_id', 'in', (partner_id, False))]"/>
             </field>
-            <xpath expr="//field[@name='order_line']/tree" position="inside">
-                <field name="procurement_ids" invisible="1"/>
-            </xpath>
         </field>
     </record>
 

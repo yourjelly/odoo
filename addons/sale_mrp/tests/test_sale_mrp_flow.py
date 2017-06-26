@@ -20,7 +20,6 @@ class TestSaleMrpFlow(common.TransactionCase):
         self.ProductUom = self.env['product.uom']
         self.MrpProduction = self.env['mrp.production']
         self.Product = self.env['product.product']
-        self.ProcurementOrder = self.env['procurement.order']
         self.Inventory = self.env['stock.inventory']
         self.InventoryLine = self.env['stock.inventory.line']
         self.ProductProduce = self.env['mrp.product.produce']
@@ -162,12 +161,6 @@ class TestSaleMrpFlow(common.TransactionCase):
         # Check manufacturing order for product A.
         # <><><><><><><><><><><><><><><><><><><><>
 
-        # Run procurement.
-        # ----------------
-        self.ProcurementOrder.run_scheduler()
-
-        mnf_product_a = self.ProcurementOrder.search([('product_id', '=', product_a.id), ('group_id', '=', order.procurement_group_id.id), ('production_id', '!=', False)]).production_id
-
         # Check quantity, unit of measure and state of manufacturing order.
         # -----------------------------------------------------------------
 
@@ -225,11 +218,8 @@ class TestSaleMrpFlow(common.TransactionCase):
         # Manufacturing order for product D (20 unit).
         # <><><><><><><><><><><><><><><><><><><><><><>
 
-        procurement_d = self.ProcurementOrder.search([('product_id', '=', product_d.id), ('group_id', '=', order.procurement_group_id.id)])
-        # Check total consume line with product c and uom kg.
-        self.assertEqual(len(procurement_d), 1, 'Procurement order not generated.')
-        self.assertTrue(procurement_d.production_id, 'Production order not generated from procurement.')
-        mnf_product_d = procurement_d.production_id
+        # FP Todo: find a better way to look for the production order
+        mnf_product_d = self.MrpProduction.search(order='id desc', limit=1)
         # Check state of production order D.
         self.assertEqual(mnf_product_d.state, 'confirmed', 'Manufacturing order should be confirmed.')
 
