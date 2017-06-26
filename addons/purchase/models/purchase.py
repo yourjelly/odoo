@@ -661,33 +661,9 @@ class PurchaseOrderLine(models.Model):
             'route_ids': self.order_id.picking_type_id.warehouse_id and [(6, 0, [x.id for x in self.order_id.picking_type_id.warehouse_id.route_ids])] or [],
             'warehouse_id': self.order_id.picking_type_id.warehouse_id.id,
         }
-        # Fullfill all related procurements with this po line
         diff_quantity = self.product_qty - qty
-        procurements = self.procurement_ids
-        merge_moves = procurements and procurements[0].rule_id.merge_moves or False
-        if procurements and not merge_moves:
-            for procurement in self.procurement_ids:
-                # If the procurement has some moves already, we should deduct their quantity
-                sum_existing_moves = sum(x.product_qty for x in procurement.move_ids if x.state != 'cancel')
-                existing_proc_qty = procurement.product_id.uom_id._compute_quantity(sum_existing_moves, procurement.product_uom)
-                procurement_qty = procurement.product_uom._compute_quantity(procurement.product_qty, self.product_uom) - existing_proc_qty
-                if float_compare(procurement_qty, 0.0, precision_rounding=procurement.product_uom.rounding) > 0 and float_compare(diff_quantity, 0.0, precision_rounding=self.product_uom.rounding) > 0:
-                    tmp = template.copy()
-                    tmp.update({
-                        'product_uom_qty': min(procurement_qty, diff_quantity),
-                        'move_dest_ids': [(4, procurement.move_dest_id.id)],  # move destination is same as procurement destination
-                        'procurement_ids': [(4, procurement.id)],
-                        'propagate': procurement.rule_id.propagate,
-                    })
-                    res.append(tmp)
-                    if procurement_qty > diff_quantity: #Not even necessary
-                        procurements -= procurement
-                    diff_quantity -= min(procurement_qty, diff_quantity)
         if float_compare(diff_quantity, 0.0,  precision_rounding=self.product_uom.rounding) > 0:
             template['product_uom_qty'] = diff_quantity
-            if merge_moves:
-                template['move_dest_ids'] = [(4, x) for x in procurements.mapped('move_dest_id').ids]
-                template['procurement_ids'] = [(4, x) for x in procurements.ids]
             res.append(template)
         return res
 
