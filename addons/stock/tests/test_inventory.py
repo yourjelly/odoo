@@ -26,9 +26,9 @@ class TestInventory(TransactionCase):
         as expected.
         """
         # make some stock
-        self.env['stock.quant'].increase_available_quantity(self.product1, self.stock_location, 100)
+        self.env['stock.quant']._increase_available_quantity(self.product1, self.stock_location, 100)
         self.assertEqual(len(self.env['stock.quant']._gather(self.product1, self.stock_location)), 1.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 100.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product1, self.stock_location), 100.0)
 
         # remove them with an inventory adjustment
         inventory = self.env['stock.inventory'].create({
@@ -44,7 +44,7 @@ class TestInventory(TransactionCase):
         inventory.action_done()
 
         # check
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product1, self.stock_location), 0.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product1, self.stock_location), 0.0)
         self.assertEqual(len(self.env['stock.quant']._gather(self.product1, self.stock_location)), 0.0)
 
     def test_inventory_2(self):
@@ -72,7 +72,7 @@ class TestInventory(TransactionCase):
         inventory.action_done()
 
         # check
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location, lot_id=lot1), 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product2, self.stock_location, lot_id=lot1), 1.0)
         self.assertEqual(len(self.env['stock.quant']._gather(self.product2, self.stock_location, lot_id=lot1)), 1.0)
         self.assertEqual(lot1.product_qty, 1.0)
 
@@ -135,9 +135,9 @@ class TestInventory(TransactionCase):
         inventory.action_done()
 
         # check
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location, lot_id=lot1, strict=True), 1.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location, strict=True), 10.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.product2, self.stock_location), 11.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product2, self.stock_location, lot_id=lot1, strict=True), 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product2, self.stock_location, strict=True), 10.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product2, self.stock_location), 11.0)
         self.assertEqual(len(self.env['stock.quant']._gather(self.product2, self.stock_location, lot_id=lot1, strict=True)), 1.0)
         self.assertEqual(len(self.env['stock.quant']._gather(self.product2, self.stock_location, strict=True)), 1.0)
         self.assertEqual(len(self.env['stock.quant']._gather(self.product2, self.stock_location)), 2.0)
