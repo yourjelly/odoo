@@ -294,41 +294,28 @@ class ProductTemplate(models.Model):
         string='Procurement', default='rfq')
 
 
-class ProcurementOrder(models.Model):
-    _inherit = 'procurement.order'
-
-    requisition_id = fields.Many2one('purchase.requisition', string='Latest Requisition')
+class ProcurementGroup(models.Model):
+    _inherit = 'procurement.group'
 
     @api.multi
-    def make_po(self):
+    def _run(self, values, rule):
+        if rule.action != 'tenders':
+            return super(ProcurementGroup, self)._run(values, rule)
+            
         Requisition = self.env['purchase.requisition']
-        procurements = self.env['procurement.order']
         Warehouse = self.env['stock.warehouse']
         res = []
-        for procurement in self:
-            if procurement.product_id.purchase_requisition == 'tenders':
-                warehouse_id = Warehouse.search([('company_id', '=', procurement.company_id.id)], limit=1).id
-                requisition_id = Requisition.create({
-                    'origin': procurement.origin,
-                    'date_end': procurement.date_planned,
-                    'warehouse_id': warehouse_id,
-                    'company_id': procurement.company_id.id,
-                    'procurement_id': procurement.id,
-                    'picking_type_id': procurement.rule_id.picking_type_id.id,
-                    'line_ids': [(0, 0, {
-                        'product_id': procurement.product_id.id,
-                        'product_uom_id': procurement.product_uom.id,
-                        'product_qty': procurement.product_qty
-                    })],
-                })
-                procurement.message_post(body=_("Purchase Requisition created"))
-                requisition_id.message_post_with_view('mail.message_origin_link',
-                    values={'self': requisition_id, 'origin': procurement},
-                    subtype_id=self.env['ir.model.data'].xmlid_to_res_id('mail.mt_note'))
-                procurement.requisition_id = requisition_id
-                procurements += procurement
-                res += [procurement.id]
-        set_others = self - procurements
-        if set_others:
-            res += super(ProcurementOrder, set_others).make_po()
-        return res
+        warehouse_id = Warehouse.search([('company_id', '=', procurement.company_id.id)], limit=1).id
+        requisition_id = Requisition.create({
+            'origin': values.get('origin', False),
+            'date_end': values['date_planned'],
+            'warehouse_id': warehouse_id,
+            'company_id': values['company_id'].id,
+            'picking_type_id': rule.picking_type_id.id,
+            'line_ids': [(0, 0, {
+                'product_id': values['product_id'].id,
+                'product_uom_id': values['product_uom'].id,
+                'product_qty': values['product_qty']
+            })],
+        })
+        return True
