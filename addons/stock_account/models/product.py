@@ -4,6 +4,8 @@
 from odoo import api, fields, models, tools, _
 from odoo.exceptions import UserError
 from odoo.tools import float_is_zero
+from odoo.addons import decimal_precision as dp
+
 
 
 class ProductTemplate(models.Model):
@@ -36,6 +38,10 @@ class ProductTemplate(models.Model):
         company_dependent=True, domain=[('deprecated', '=', False)],
         help="When doing real-time inventory valuation, counterpart journal items for all outgoing stock moves will be posted in this account, unless "
              "there is a specific valuation account set on the destination location. When not set on the product, the one from the product category is used.")
+    average_price = fields.Float(
+        'Average Cost', compute='_compute_average_price',
+        digits=dp.get_precision('Product Price'), groups="base.group_user",
+        help="Average cost of the product, in the default unit of measure of the product.")
 
     @api.one
     @api.depends('property_valuation', 'categ_id.property_valuation')
@@ -90,6 +96,13 @@ class ProductTemplate(models.Model):
 class ProductProduct(models.Model):
     _inherit = 'product.product'
 
+    average_price = fields.Float(
+        'Average Cost', company_dependent=True,
+        digits=dp.get_precision('Product Price'),
+        groups="base.group_user",
+        compute='_compute_average_price',
+        help="Calculated average cost")
+
     @api.onchange('type')
     def onchange_type_valuation(self):
         # TO REMOVE IN MASTER
@@ -141,6 +154,26 @@ class ProductProduct(models.Model):
 
         self.write({'standard_price': new_price})
         return True
+
+    def _get_latest_cumulated_value(self, not_move=False):
+        self.ensure_one()
+        # TODO: only filter on IN and OUT stock.move
+        domain = [
+            ('product_id', '=', self.id),
+            ('state', '=', 'done')]
+        if not_move:
+            domain += [('id', '!=', not_move.id)]
+        latest = self.env['stock.move'].search(domain, order='date desc, id desc', limit=1)
+        return latest.cumulated_value
+
+    @api.multi
+    def _compute_average_price(self):
+        for product in self:
+            if product.qty_available > 0:
+                last_cumulated_value = product._get_latest_cumulated_value()
+                product.average_price = last_cumulated_value / product.qty_available
+            else:
+                product.average_price = 0
 
 
 class ProductCategory(models.Model):

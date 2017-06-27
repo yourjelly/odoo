@@ -74,15 +74,6 @@ class StockMove(models.Model):
     # TODO: add contstrains remaining_qty > 0
     # TODO: add constrain unit_cost = 0 on done move?
 
-    def _get_latest_cumulated_value(self):
-        self.ensure_one()
-        # TODO: only filter on IN and OUT stock.move
-        latest = self.env['stock.move'].search([
-            ('product_id', '=', self.product_id.id),
-            ('id', '!=', self.id),
-        ], order='create_date, id desc', limit=1)
-        return latest.cumulated_value
-
     def _get_candidates_move(self):
         self.ensure_one()
         # TODO: filter at start of period
@@ -90,7 +81,7 @@ class StockMove(models.Model):
             ('product_id', '=', self.product_id.id),
             ('location_id', '=', self.env.ref('stock.stock_location_suppliers').id),
             ('remaining_qty', '>', 0),
-        ], order='create_date, id asc')
+        ], order='date, id')
         return candidates
 
     @api.multi
@@ -104,7 +95,7 @@ class StockMove(models.Model):
             if move.location_id.id == self.env.ref('stock.stock_location_suppliers').id:
                 if move.product_id.cost_method in ['fifo', 'average']:
                     move.value = move.unit_cost * move.product_qty
-                    move.cumulated_value = move._get_latest_cumulated_value() + move.value
+                    move.cumulated_value = move.product_id._get_latest_cumulated_value(not_move=move) + move.value
                     move.remaining_qty = move.product_qty
             elif move.location_dest_id.id == self.env.ref('stock.stock_location_customers').id:
                 if move.product_id.cost_method == 'fifo':
@@ -122,13 +113,13 @@ class StockMove(models.Model):
                         if qty_to_take == 0:
                             break
                     move.value = -tmp_value
-                    move.cumulated_value = move._get_latest_cumulated_value() + move.value
+                    move.cumulated_value = move.product_id._get_latest_cumulated_value(not_move=move) + move.value
                 elif move.product_id.cost_method == 'average':
                     curr_rounding = move.company_id.currency_id.rounding
-                    avg_unit_cost = float_round(move._get_latest_cumulated_value() / qty_available[move.product_id.id], precision_rounding=curr_rounding)
+                    avg_unit_cost = float_round(move.product_id._get_latest_cumulated_value(not_move=move) / qty_available[move.product_id.id], precision_rounding=curr_rounding)
                     move.value = float_round(-avg_unit_cost * move.product_qty, precision_rounding=curr_rounding)
                     move.remaining_qty = 0
-                    move.cumulated_value = move._get_latest_cumulated_value() + move.value
+                    move.cumulated_value = move.product_id._get_latest_cumulated_value(not_move=move) + move.value
         for move in res:
             move._account_entry_move()
         return res
