@@ -7,6 +7,24 @@ from odoo.exceptions import AccessError, UserError
 
 
 class StockQuant(TransactionCase):
+    def setUp(self):
+        super(StockQuant, self).setUp()
+        Users = self.env['res.users'].with_context({'no_reset_password': True, 'mail_create_nosubscribe': True})
+        self.demo_user = Users.create({
+            'name': 'Pauline Poivraisselle',
+            'login': 'pauline',
+            'email': 'p.p@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [self.env.ref('base.group_user').id])]
+        })
+        self.stock_user = Users.create({
+            'name': 'Pauline Poivraisselle',
+            'login': 'pauline2',
+            'email': 'p.p@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [self.env.ref('stock.group_stock_user').id])]
+        })
+
     def test_get_available_quantity_1(self):
         """ Quantity availability with only one quant in a location.
         """
@@ -20,7 +38,7 @@ class StockQuant(TransactionCase):
             'location_id': stock_location.id,
             'quantity': 1.0,
         })
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 1.0)
 
     def test_get_available_quantity_2(self):
         """ Quantity availability with multiple quants in a location.
@@ -36,7 +54,7 @@ class StockQuant(TransactionCase):
                 'location_id': stock_location.id,
                 'quantity': 1.0,
             })
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 3.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 3.0)
 
     def test_get_available_quantity_3(self):
         """ Quantity availability with multiple quants (including negatives ones) in a location.
@@ -57,7 +75,7 @@ class StockQuant(TransactionCase):
             'location_id': stock_location.id,
             'quantity': -3.0,
         })
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 0.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 0.0)
 
     def test_get_available_quantity_4(self):
         """ Quantity availability with no quants in a location.
@@ -67,7 +85,7 @@ class StockQuant(TransactionCase):
             'name': 'Product A',
             'type': 'product',
         })
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 0.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 0.0)
 
     def test_get_available_quantity_5(self):
         """ Quantity availability with multiple partially reserved quants in a location.
@@ -89,7 +107,7 @@ class StockQuant(TransactionCase):
             'quantity': 1.0,
             'reserved_quantity': 1.0,
         })
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 1.0)
 
     def test_get_available_quantity_6(self):
         """ Quantity availability with multiple partially reserved quants in a location.
@@ -111,7 +129,7 @@ class StockQuant(TransactionCase):
             'quantity': 5.0,
             'reserved_quantity': 0.0,
         })
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), -5.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), -5.0)
 
     def test_get_available_quantity_7(self):
         """ Quantity availability with only one tracked quant in a location.
@@ -133,7 +151,7 @@ class StockQuant(TransactionCase):
             'reserved_quantity': 20.0,
             'lot_id': lot1.id,
         })
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location, lot_id=lot1), -10.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location, lot_id=lot1), -10.0)
 
     def test_get_available_quantity_8(self):
         """ Quantity availability with a consumable product.
@@ -143,10 +161,10 @@ class StockQuant(TransactionCase):
             'name': 'Product A',
             'type': 'consu',
         })
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 0.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 0.0)
         self.assertEqual(len(self.env['stock.quant']._gather(product1, stock_location)), 0)
         with self.assertRaises(ValidationError):
-            self.env['stock.quant'].increase_available_quantity(product1, stock_location, 1.0)
+            self.env['stock.quant']._increase_available_quantity(product1, stock_location, 1.0)
 
     def test_get_available_quantity_9(self):
         """ Quantity availability by a demo user with access rights/rules.
@@ -162,7 +180,7 @@ class StockQuant(TransactionCase):
             'quantity': 1.0,
         })
         self.env = self.env(user=self.env.ref('base.user_demo'))
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 1.0)
 
     def test_increase_available_quantity_1(self):
         """ Increase the available quantity when no quants are already in a location.
@@ -172,8 +190,8 @@ class StockQuant(TransactionCase):
             'name': 'Product A',
             'type': 'product',
         })
-        self.env['stock.quant'].increase_available_quantity(product1, stock_location, 1.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 1.0)
+        self.env['stock.quant']._increase_available_quantity(product1, stock_location, 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 1.0)
 
     def test_increase_available_quantity_2(self):
         """ Increase the available quantity when multiple quants are already in a location.
@@ -189,9 +207,9 @@ class StockQuant(TransactionCase):
                 'location_id': stock_location.id,
                 'quantity': 1.0,
             })
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 2.0)
-        self.env['stock.quant'].increase_available_quantity(product1, stock_location, 1.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 3.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 2.0)
+        self.env['stock.quant']._increase_available_quantity(product1, stock_location, 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 3.0)
         self.assertEqual(len(self.env['stock.quant']._gather(product1, stock_location)), 2)
 
     def test_increase_available_quantity_3(self):
@@ -201,7 +219,7 @@ class StockQuant(TransactionCase):
         stock_location = self.env.ref('stock.stock_location_stock')
         product = self.env.ref('stock.test_quant_product')
         product.type = 'product'  # product 12 is a consumable by default
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product, stock_location), 10.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product, stock_location), 10.0)
 
         # opens a new cursor and SELECT FOR UPDATE the quant, to simulate another concurrent reserved
         # quantity increase
@@ -210,10 +228,10 @@ class StockQuant(TransactionCase):
         quant_id = cr2.fetchone()
         cr2.execute("SELECT 1 FROM stock_quant WHERE id=%s FOR UPDATE", quant_id)
 
-        self.env['stock.quant'].increase_available_quantity(product, stock_location, 1.0)
+        self.env['stock.quant']._increase_available_quantity(product, stock_location, 1.0)
         cr2.rollback()
         cr2.close()
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product, stock_location), 11.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product, stock_location), 11.0)
         self.assertEqual(len(self.env['stock.quant']._gather(product, stock_location)), 2)
 
     def test_increase_available_quantity_4(self):
@@ -226,7 +244,7 @@ class StockQuant(TransactionCase):
         })
         self.env = self.env(user=self.env.ref('base.user_demo'))
         with self.assertRaises(AccessError):
-            self.env['stock.quant'].increase_available_quantity(product1, stock_location, 1.0)
+            self.env['stock.quant']._increase_available_quantity(product1, stock_location, 1.0)
 
     def test_decrease_available_quantity_1(self):
         """ Decrease the available quantity when no quants are already in a location.
@@ -236,8 +254,8 @@ class StockQuant(TransactionCase):
             'name': 'Product A',
             'type': 'product',
         })
-        self.env['stock.quant'].decrease_available_quantity(product1, stock_location, 1.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), -1.0)
+        self.env['stock.quant']._decrease_available_quantity(product1, stock_location, 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), -1.0)
 
     def test_decrease_available_quantity_2(self):
         """ Decrease the available quantity when multiple quants are already in a location.
@@ -253,10 +271,10 @@ class StockQuant(TransactionCase):
                 'location_id': stock_location.id,
                 'quantity': 1.0,
             })
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 2.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 2.0)
         self.assertEqual(len(self.env['stock.quant']._gather(product1, stock_location)), 2)
-        self.env['stock.quant'].decrease_available_quantity(product1, stock_location, 1.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 1.0)
+        self.env['stock.quant']._decrease_available_quantity(product1, stock_location, 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 1.0)
         self.assertEqual(len(self.env['stock.quant']._gather(product1, stock_location)), 1)
 
     def test_decrease_available_quantity_3(self):
@@ -265,7 +283,7 @@ class StockQuant(TransactionCase):
         """
         stock_location = self.env.ref('stock.stock_location_stock')
         product = self.env.ref('stock.test_quant_product')
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product, stock_location), 10.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product, stock_location), 10.0)
         quants = self.env['stock.quant']._gather(product, stock_location)
         self.assertEqual(len(quants), 1)
 
@@ -273,10 +291,10 @@ class StockQuant(TransactionCase):
         # quantity increase
         cr2 = self.registry.cursor()
         cr2.execute("SELECT 1 FROM stock_quant WHERE id = %s FOR UPDATE", quants.ids)
-        self.env['stock.quant'].decrease_available_quantity(product, stock_location, 1.0)
+        self.env['stock.quant']._decrease_available_quantity(product, stock_location, 1.0)
         cr2.rollback()
         cr2.close()
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product, stock_location), 9.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product, stock_location), 9.0)
         self.assertEqual(len(self.env['stock.quant']._gather(product, stock_location)), 2)
 
     def test_decrease_available_quantity_4(self):
@@ -295,7 +313,7 @@ class StockQuant(TransactionCase):
         })
         self.env = self.env(user=self.env.ref('base.user_demo'))
         with self.assertRaises(AccessError):
-            self.env['stock.quant'].decrease_available_quantity(product1, stock_location, 1.0)
+            self.env['stock.quant']._decrease_available_quantity(product1, stock_location, 1.0)
 
     def test_increase_reserved_quantity_1(self):
         """ Increase the reserved quantity of quantity x when there's a single quant in a given
@@ -311,10 +329,10 @@ class StockQuant(TransactionCase):
             'location_id': stock_location.id,
             'quantity': 10.0,
         })
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 10.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 10.0)
         self.assertEqual(len(self.env['stock.quant']._gather(product1, stock_location)), 1)
-        self.env['stock.quant'].increase_reserved_quantity(product1, stock_location, 10.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 0.0)
+        self.env['stock.quant']._increase_reserved_quantity(product1, stock_location, 10.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 0.0)
         self.assertEqual(len(self.env['stock.quant']._gather(product1, stock_location)), 1)
 
     def test_increase_reserved_quantity_2(self):
@@ -332,10 +350,10 @@ class StockQuant(TransactionCase):
                 'location_id': stock_location.id,
                 'quantity': 5.0,
             })
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 10.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 10.0)
         self.assertEqual(len(self.env['stock.quant']._gather(product1, stock_location)), 2)
-        self.env['stock.quant'].increase_reserved_quantity(product1, stock_location, 10.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 0.0)
+        self.env['stock.quant']._increase_reserved_quantity(product1, stock_location, 10.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 0.0)
         self.assertEqual(len(self.env['stock.quant']._gather(product1, stock_location)), 2)
 
     def test_increase_reserved_quantity_3(self):
@@ -373,10 +391,10 @@ class StockQuant(TransactionCase):
         })
         # total quantity: 58
         # total reserved quantity: 29
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 29.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 29.0)
         self.assertEqual(len(self.env['stock.quant']._gather(product1, stock_location)), 4)
-        self.env['stock.quant'].increase_reserved_quantity(product1, stock_location, 10.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 19.0)
+        self.env['stock.quant']._increase_reserved_quantity(product1, stock_location, 10.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 19.0)
         self.assertEqual(len(self.env['stock.quant']._gather(product1, stock_location)), 4)
 
     def test_increase_reserved_quantity_4(self):
@@ -400,11 +418,11 @@ class StockQuant(TransactionCase):
             'quantity': 12.0,
             'reserved_quantity': 10.0,
         })
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 0.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 0.0)
         self.assertEqual(len(self.env['stock.quant']._gather(product1, stock_location)), 2)
         with self.assertRaises(UserError):
-            self.env['stock.quant'].increase_reserved_quantity(product1, stock_location, 10.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 0.0)
+            self.env['stock.quant']._increase_reserved_quantity(product1, stock_location, 10.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 0.0)
 
     def test_increase_reserved_quantity_5(self):
         """ Decrease the available quantity when no quant are in a location.
@@ -415,8 +433,8 @@ class StockQuant(TransactionCase):
             'type': 'product',
         })
         with self.assertRaises(UserError):
-            self.env['stock.quant'].increase_reserved_quantity(product1, stock_location, 1.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 0.0)
+            self.env['stock.quant']._increase_reserved_quantity(product1, stock_location, 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 0.0)
 
     def test_decrease_reserved_quantity_1(self):
         stock_location = self.env.ref('stock.stock_location_stock')
@@ -430,10 +448,10 @@ class StockQuant(TransactionCase):
             'quantity': 10.0,
             'reserved_quantity': 10.0,
         })
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 0.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 0.0)
         self.assertEqual(len(self.env['stock.quant']._gather(product1, stock_location)), 1)
-        self.env['stock.quant'].decrease_reserved_quantity(product1, stock_location, 10.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 10.0)
+        self.env['stock.quant']._decrease_reserved_quantity(product1, stock_location, 10.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 10.0)
         self.assertEqual(len(self.env['stock.quant']._gather(product1, stock_location)), 1)
 
     def test_increase_decrease_reserved_quantity_1(self):
@@ -445,11 +463,11 @@ class StockQuant(TransactionCase):
             'type': 'product',
         })
         with self.assertRaises(UserError):
-            self.env['stock.quant'].increase_reserved_quantity(product1, stock_location, 1.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 0.0)
+            self.env['stock.quant']._increase_reserved_quantity(product1, stock_location, 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 0.0)
         with self.assertRaises(UserError):
-            self.env['stock.quant'].decrease_reserved_quantity(product1, stock_location, 1.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 0.0)
+            self.env['stock.quant']._decrease_reserved_quantity(product1, stock_location, 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 0.0)
 
     def test_action_done_1(self):
         stock_location = self.env.ref('stock.stock_location_stock')
@@ -458,16 +476,16 @@ class StockQuant(TransactionCase):
             'name': 'Product A',
             'type': 'product',
         })
-        self.env['stock.quant'].increase_available_quantity(product1, stock_location, 2.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 2.0)
-        self.env['stock.quant'].increase_reserved_quantity(product1, stock_location, 2.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 0.0)
-        self.env['stock.quant'].decrease_reserved_quantity(product1, stock_location, 2.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 2.0)
-        self.env['stock.quant'].decrease_available_quantity(product1, stock_location, 2.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 0.0)
-        self.env['stock.quant'].increase_available_quantity(product1, pack_location, 2.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, pack_location), 2.0)
+        self.env['stock.quant']._increase_available_quantity(product1, stock_location, 2.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 2.0)
+        self.env['stock.quant']._increase_reserved_quantity(product1, stock_location, 2.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 0.0)
+        self.env['stock.quant']._decrease_reserved_quantity(product1, stock_location, 2.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 2.0)
+        self.env['stock.quant']._decrease_available_quantity(product1, stock_location, 2.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 0.0)
+        self.env['stock.quant']._increase_available_quantity(product1, pack_location, 2.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, pack_location), 2.0)
 
     def test_mix_tracked_untracked_1(self):
         stock_location = self.env.ref('stock.stock_location_stock')
@@ -482,28 +500,66 @@ class StockQuant(TransactionCase):
         })
 
         # add one tracked, one untracked
-        self.env['stock.quant'].increase_available_quantity(product1, stock_location, 1.0)
-        self.env['stock.quant'].increase_available_quantity(product1, stock_location, 1.0, lot_id=lot1)
+        self.env['stock.quant']._increase_available_quantity(product1, stock_location, 1.0)
+        self.env['stock.quant']._increase_available_quantity(product1, stock_location, 1.0, lot_id=lot1)
 
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 2.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location, strict=True), 1.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location, lot_id=lot1), 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 2.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location, strict=True), 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location, lot_id=lot1), 1.0)
 
-        self.env['stock.quant'].increase_reserved_quantity(product1, stock_location, 1.0, lot_id=lot1, strict=True)
+        self.env['stock.quant']._increase_reserved_quantity(product1, stock_location, 1.0, lot_id=lot1, strict=True)
 
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 1.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location, strict=True), 1.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location, lot_id=lot1), 0.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location, strict=True), 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location, lot_id=lot1), 0.0)
 
-        self.env['stock.quant'].decrease_reserved_quantity(product1, stock_location, 1.0, lot_id=lot1, strict=True)
+        self.env['stock.quant']._decrease_reserved_quantity(product1, stock_location, 1.0, lot_id=lot1, strict=True)
 
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 2.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location, strict=True), 1.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location, lot_id=lot1), 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 2.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location, strict=True), 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location, lot_id=lot1), 1.0)
 
         with self.assertRaises(UserError):
-            self.env['stock.quant'].decrease_reserved_quantity(product1, stock_location, 1.0)
+            self.env['stock.quant']._decrease_reserved_quantity(product1, stock_location, 1.0)
 
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location), 2.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location, strict=True), 1.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(product1, stock_location, lot_id=lot1), 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location), 2.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location, strict=True), 1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, stock_location, lot_id=lot1), 1.0)
+
+    def test_access_rights_1(self):
+        """ Directly update the quant with a user with or without stock access rights sould raise
+        an AccessError.
+        """
+        stock_location = self.env.ref('stock.stock_location_stock')
+        product1 = self.env['product.product'].create({
+            'name': 'Product A',
+            'type': 'product',
+        })
+        quant = self.env['stock.quant'].create({
+            'product_id': product1.id,
+            'location_id': stock_location.id,
+            'quantity': 1.0,
+        })
+        self.env = self.env(user=self.demo_user)
+        with self.assertRaises(AccessError):
+            self.env['stock.quant'].create({
+                'product_id': product1.id,
+                'location_id': stock_location.id,
+                'quantity': 1.0,
+            })
+        with self.assertRaises(AccessError):
+            quant.sudo(self.demo_user).write({'quantity': 2.0})
+        with self.assertRaises(AccessError):
+            quant.sudo(self.demo_user).unlink()
+
+        self.env = self.env(user=self.stock_user)
+        with self.assertRaises(AccessError):
+            self.env['stock.quant'].create({
+                'product_id': product1.id,
+                'location_id': stock_location.id,
+                'quantity': 1.0,
+            })
+        with self.assertRaises(AccessError):
+            quant.sudo(self.demo_user).write({'quantity': 2.0})
+        with self.assertRaises(AccessError):
+            quant.sudo(self.demo_user).unlink()
