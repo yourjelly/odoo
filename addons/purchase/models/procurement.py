@@ -96,9 +96,8 @@ class ProcurementGroup(models.Model):
 
         return schedule_date - relativedelta(days=int(seller.delay))
 
+    @api.model
     def _prepare_purchase_order_line(self, values, rule, po, supplier):
-        self.ensure_one()
-
         procurement_uom_po_qty = values['product_uom']._compute_quantity(values['product_qty'], values['product_id'].uom_po_id)
         seller = values['product_id']._select_seller(
             partner_id=supplier.name,
@@ -176,7 +175,7 @@ class ProcurementGroup(models.Model):
             ('state', '=', 'draft'),
             ('picking_type_id', '=', rule.picking_type_id.id),
             ('company_id', '=', values['company_id'].id),
-            ('dest_address_id', '=', values['partner_dest_id'].id))
+            )
         if group:
             domain += (('group_id', '=', group.id),)
         return domain
