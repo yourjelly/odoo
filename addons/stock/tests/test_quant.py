@@ -243,8 +243,7 @@ class StockQuant(TransactionCase):
             'type': 'product',
         })
         self.env = self.env(user=self.env.ref('base.user_demo'))
-        with self.assertRaises(AccessError):
-            self.env['stock.quant']._increase_available_quantity(product1, stock_location, 1.0)
+        self.env['stock.quant']._increase_available_quantity(product1, stock_location, 1.0)
 
     def test_decrease_available_quantity_1(self):
         """ Decrease the available quantity when no quants are already in a location.
@@ -311,9 +310,9 @@ class StockQuant(TransactionCase):
             'location_id': stock_location.id,
             'quantity': 1.0,
         })
-        self.env = self.env(user=self.env.ref('base.user_demo'))
-        with self.assertRaises(AccessError):
-            self.env['stock.quant']._decrease_available_quantity(product1, stock_location, 1.0)
+        self.env = self.env(user=self.demo_user)
+        self.env['stock.quant']._decrease_available_quantity(product1, stock_location, 1.0)
+        self.assertEqual(len(self.env['stock.quant']._gather(product1, stock_location)), 0)
 
     def test_increase_reserved_quantity_1(self):
         """ Increase the reserved quantity of quantity x when there's a single quant in a given
