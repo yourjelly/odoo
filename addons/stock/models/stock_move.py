@@ -256,7 +256,7 @@ class StockMove(models.Model):
             if self.id:
                 # As `get_available_quantity` will perform an sql query directly, do
                 # not run it with a virtual id.
-                total_availability = self.env['stock.quant'].get_available_quantity(self.product_id, self.location_id)
+                total_availability = self.env['stock.quant']._get_available_quantity(self.product_id, self.location_id)
                 self.availability = min(self.product_qty, total_availability)
 
     @api.multi
@@ -676,7 +676,7 @@ class StockMove(models.Model):
         taken_quantity = min(available_quantity, need)
 
         # Find a candidate move line to update or create a new one.
-        quants = self.env['stock.quant'].increase_reserved_quantity(
+        quants = self.env['stock.quant']._increase_reserved_quantity(
             self.product_id, location_id, taken_quantity, lot_id=lot_id,
             package_id=package_id, owner_id=owner_id, strict=strict
         )
@@ -717,7 +717,7 @@ class StockMove(models.Model):
                     if move.procure_method == 'make_to_order':
                         continue
                     # Reserve new quants and create move lines accordingly.
-                    available_quantity = self.env['stock.quant'].get_available_quantity(move.product_id, move.location_id)
+                    available_quantity = self.env['stock.quant']._get_available_quantity(move.product_id, move.location_id)
                     if available_quantity <= 0:
                         continue
                     need = move.product_qty - move.reserved_availability
