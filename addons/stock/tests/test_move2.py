@@ -52,7 +52,7 @@ class TestPickShip(TestStockCommon):
         location = self.env['stock.location'].browse(self.stock_location)
 
         # make some stock
-        self.env['stock.quant'].increase_available_quantity(self.productA, location, 10.0)
+        self.env['stock.quant']._increase_available_quantity(self.productA, location, 10.0)
         picking_pick.action_assign()
         picking_pick.move_lines[0].pack_operation_ids[0].qty_done = 10.0
         picking_pick.do_transfer()
@@ -72,9 +72,9 @@ class TestPickShip(TestStockCommon):
         """
         picking_pick, picking_client = self.create_pick_ship()
         stock_location = self.env['stock.location'].browse(self.stock_location)
-        self.env['stock.quant'].increase_available_quantity(self.productA, stock_location, 10.0)
+        self.env['stock.quant']._increase_available_quantity(self.productA, stock_location, 10.0)
         pack_location = self.env['stock.location'].browse(self.pack_location)
-        self.env['stock.quant'].increase_available_quantity(self.productA, pack_location, 5.0)
+        self.env['stock.quant']._increase_available_quantity(self.productA, pack_location, 5.0)
 
         self.assertEqual(len(self.env['stock.quant']._gather(self.productA, stock_location)), 1.0)
         self.assertEqual(len(self.env['stock.quant']._gather(self.productA, pack_location)), 1.0)
@@ -87,8 +87,8 @@ class TestPickShip(TestStockCommon):
         self.assertEqual(picking_pick.state, 'assigned')
         self.assertEqual(move_cust.state, 'waiting')
         self.assertEqual(picking_client.state, 'waiting', 'The picking should not assign what it does not have')
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, stock_location), 0.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 5.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.productA, stock_location), 0.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.productA, pack_location), 5.0)
 
         move_pick.pack_operation_ids[0].qty_done = 10.0
         picking_pick.do_transfer()
@@ -97,15 +97,15 @@ class TestPickShip(TestStockCommon):
         self.assertEqual(picking_pick.state, 'done')
         self.assertEqual(move_cust.state, 'assigned')
         self.assertEqual(picking_client.state, 'assigned', 'The picking should not assign what it does not have')
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, stock_location), 0.0)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 5.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.productA, stock_location), 0.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.productA, pack_location), 5.0)
         self.assertEqual(len(self.env['stock.quant']._gather(self.productA, stock_location)), 0.0)
         self.assertEqual(len(self.env['stock.quant']._gather(self.productA, pack_location)), 1.0)
 
     def test_mto_moves_return(self):
         picking_pick, picking_client = self.create_pick_ship()
         stock_location = self.env['stock.location'].browse(self.stock_location)
-        self.env['stock.quant'].increase_available_quantity(self.productA, stock_location, 10.0)
+        self.env['stock.quant']._increase_available_quantity(self.productA, stock_location, 10.0)
 
         picking_pick.action_assign()
         picking_pick.move_lines[0].pack_operation_ids[0].qty_done = 10.0
@@ -135,7 +135,7 @@ class TestPickShip(TestStockCommon):
         location = self.env['stock.location'].browse(self.stock_location)
 
         # make some stock
-        self.env['stock.quant'].increase_available_quantity(self.productA, location, 10.0)
+        self.env['stock.quant']._increase_available_quantity(self.productA, location, 10.0)
         picking_pick.action_assign()
         picking_pick.move_lines[0].pack_operation_ids[0].qty_done = 5.0
 
@@ -174,18 +174,18 @@ class TestSinglePicking(TestStockCommon):
 
         # make some stock
         pack_location = self.env['stock.location'].browse(self.pack_location)
-        self.env['stock.quant'].increase_available_quantity(self.productA, pack_location, 2)
+        self.env['stock.quant']._increase_available_quantity(self.productA, pack_location, 2)
 
         # assign
         delivery_order.action_confirm()
         delivery_order.action_assign()
         self.assertEqual(delivery_order.state, 'assigned')
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 0.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.productA, pack_location), 0.0)
 
         # valid with backorder creation
         delivery_order.move_lines[0].pack_operation_ids[0].qty_done = 1
         delivery_order.do_transfer()
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 0.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.productA, pack_location), 0.0)
 
         backorder = self.env['stock.picking'].search([('backorder_id', '=', delivery_order.id)])
         self.assertEqual(backorder.state, 'assigned')
@@ -211,18 +211,18 @@ class TestSinglePicking(TestStockCommon):
 
         # make some stock
         pack_location = self.env['stock.location'].browse(self.pack_location)
-        self.env['stock.quant'].increase_available_quantity(self.productA, pack_location, 1)
+        self.env['stock.quant']._increase_available_quantity(self.productA, pack_location, 1)
 
         # assign to partially available
         delivery_order.action_confirm()
         delivery_order.action_assign()
         self.assertEqual(delivery_order.state, 'partially_available')
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 0.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.productA, pack_location), 0.0)
 
         # valid with backorder creation
         delivery_order.move_lines[0].pack_operation_ids[0].qty_done = 1
         delivery_order.do_transfer()
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 0.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.productA, pack_location), 0.0)
 
         backorder = self.env['stock.picking'].search([('backorder_id', '=', delivery_order.id)])
         self.assertEqual(backorder.state, 'confirmed')
@@ -250,20 +250,20 @@ class TestSinglePicking(TestStockCommon):
 
         # make some stock
         pack_location = self.env['stock.location'].browse(self.pack_location)
-        self.env['stock.quant'].increase_available_quantity(self.productA, pack_location, 1)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 1.0)
+        self.env['stock.quant']._increase_available_quantity(self.productA, pack_location, 1)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.productA, pack_location), 1.0)
 
         # assign to available
         delivery_order.action_confirm()
         delivery_order.action_assign()
         self.assertEqual(delivery_order.state, 'assigned')
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 0.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.productA, pack_location), 0.0)
 
         # valid with backorder creation
         delivery_order.move_lines[0].pack_operation_ids[0].qty_done = 2
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 0.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.productA, pack_location), 0.0)
         delivery_order.with_context(debug=True).do_transfer()
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), -1.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.productA, pack_location), -1.0)
 
         extra_move = delivery_order.move_lines - move1
         extra_move_line = extra_move.pack_operation_ids[0]
@@ -305,20 +305,20 @@ class TestSinglePicking(TestStockCommon):
 
         # make some stock
         pack_location = self.env['stock.location'].browse(self.pack_location)
-        self.env['stock.quant'].increase_available_quantity(self.productA, pack_location, 1)
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 1.0)
+        self.env['stock.quant']._increase_available_quantity(self.productA, pack_location, 1)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.productA, pack_location), 1.0)
 
         # assign to available
         delivery_order.action_confirm()
         delivery_order.action_assign()
         self.assertEqual(delivery_order.state, 'assigned')
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 0.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.productA, pack_location), 0.0)
 
         # valid with backorder creation
         delivery_order.move_lines[0].pack_operation_ids[0].qty_done = 3
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), 0.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.productA, pack_location), 0.0)
         delivery_order.do_transfer()
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, pack_location), -2.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.productA, pack_location), -2.0)
 
         extra_move = delivery_order.move_lines - move1
         extra_move_line = extra_move.pack_operation_ids[0]
@@ -366,7 +366,7 @@ class TestSinglePicking(TestStockCommon):
         # valid with backorder creation
         receipt.move_lines[0].pack_operation_ids[0].qty_done = 2
         receipt.with_context(debug=True).do_transfer()
-        self.assertEqual(self.env['stock.quant'].get_available_quantity(self.productA, stock_location), 2.0)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.productA, stock_location), 2.0)
 
         extra_move = receipt.move_lines - move1
         extra_move_line = extra_move.pack_operation_ids[0]
@@ -391,7 +391,7 @@ class TestSinglePicking(TestStockCommon):
         product with one move line. After adding a second unit in stock and recheck availability.
         The DO should have 2 reserved unit, be in available state and have only one move line.
         """
-        self.env['stock.quant'].increase_available_quantity(self.productA, self.env['stock.location'].browse(self.stock_location), 1.0)
+        self.env['stock.quant']._increase_available_quantity(self.productA, self.env['stock.location'].browse(self.stock_location), 1.0)
         delivery_order = self.env['stock.picking'].create({
             'location_id': self.stock_location,
             'location_dest_id': self.customer_location,
@@ -448,7 +448,7 @@ class TestSinglePicking(TestStockCommon):
             'product_id': self.productA.id,
         })
         stock_location = self.env['stock.location'].browse(self.stock_location)
-        self.env['stock.quant'].increase_available_quantity(self.productA, stock_location, 1.0, lot_id=lot1)
+        self.env['stock.quant']._increase_available_quantity(self.productA, stock_location, 1.0, lot_id=lot1)
         delivery_order = self.env['stock.picking'].create({
             'location_id': self.stock_location,
             'location_dest_id': self.customer_location,
@@ -508,7 +508,7 @@ class TestSinglePicking(TestStockCommon):
             'product_id': self.productA.id,
         })
         stock_location = self.env['stock.location'].browse(self.stock_location)
-        self.env['stock.quant'].increase_available_quantity(self.productA, stock_location, 1.0, lot_id=lot1)
+        self.env['stock.quant']._increase_available_quantity(self.productA, stock_location, 1.0, lot_id=lot1)
         delivery_order = self.env['stock.picking'].create({
             'location_id': self.stock_location,
             'location_dest_id': self.customer_location,
@@ -575,7 +575,7 @@ class TestSinglePicking(TestStockCommon):
             'product_id': self.productA.id,
         })
         stock_location = self.env['stock.location'].browse(self.stock_location)
-        self.env['stock.quant'].increase_available_quantity(self.productA, stock_location, 1.0, lot_id=serial1)
+        self.env['stock.quant']._increase_available_quantity(self.productA, stock_location, 1.0, lot_id=serial1)
         delivery_order = self.env['stock.picking'].create({
             'location_id': self.stock_location,
             'location_dest_id': self.customer_location,
