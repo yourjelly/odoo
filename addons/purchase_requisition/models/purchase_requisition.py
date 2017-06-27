@@ -51,7 +51,6 @@ class PurchaseRequisition(models.Model):
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env['res.company']._company_default_get('purchase.requisition'))
     purchase_ids = fields.One2many('purchase.order', 'requisition_id', string='Purchase Orders', states={'done': [('readonly', True)]})
     line_ids = fields.One2many('purchase.requisition.line', 'requisition_id', string='Products to Purchase', states={'done': [('readonly', True)]}, copy=True)
-    procurement_id = fields.Many2one('procurement.order', string='Procurement', ondelete='set null', copy=False)
     warehouse_id = fields.Many2one('stock.warehouse', string='Warehouse')
     state = fields.Selection([('draft', 'Draft'), ('in_progress', 'Confirmed'),
                                ('open', 'Bid Selection'), ('done', 'Done'),
@@ -114,6 +113,7 @@ class PurchaseRequisitionLine(models.Model):
     company_id = fields.Many2one('res.company', related='requisition_id.company_id', string='Company', store=True, readonly=True, default= lambda self: self.env['res.company']._company_default_get('purchase.requisition.line'))
     account_analytic_id = fields.Many2one('account.analytic.account', string='Analytic Account')
     schedule_date = fields.Date(string='Scheduled Date')
+    move_dest_id = fields.Many2one('stock.move', 'Downstream Move')
 
     @api.multi
     @api.depends('requisition_id.purchase_ids.state')
@@ -150,8 +150,8 @@ class PurchaseRequisitionLine(models.Model):
             'price_unit': price_unit,
             'taxes_id': [(6, 0, taxes_ids)],
             'date_planned': requisition.schedule_date or fields.Date.today(),
-            'procurement_ids': [(6, 0, [requisition.procurement_id.id])] if requisition.procurement_id else False,
             'account_analytic_id': self.account_analytic_id.id,
+            'move_dest_id': self.move_dest_id and self.move_dest_id.id or False
         }
 
 
@@ -235,17 +235,12 @@ class PurchaseOrder(models.Model):
     def button_confirm(self):
         res = super(PurchaseOrder, self).button_confirm()
         for po in self:
+            if not po.requisition_id:
+                continue
             if po.requisition_id.type_id.exclusive == 'exclusive':
                 others_po = po.requisition_id.mapped('purchase_ids').filtered(lambda r: r.id != po.id)
                 others_po.button_cancel()
                 po.requisition_id.action_done()
-
-            for element in po.order_line:
-                if element.product_id == po.requisition_id.procurement_id.product_id:
-                    element.move_ids.write({
-                        'procurement_id': po.requisition_id.procurement_id.id,
-                        'move_dest_id': po.requisition_id.procurement_id.move_dest_id.id,
-                    })
         return res
 
     @api.model
@@ -299,7 +294,7 @@ class ProcurementGroup(models.Model):
 
     @api.multi
     def _run(self, values, rule):
-        if rule.action != 'tenders':
+        if (rule.action != 'buy') or (values['product_id'].purchase_requisition!='tenders'):
             return super(ProcurementGroup, self)._run(values, rule)
             
         Requisition = self.env['purchase.requisition']

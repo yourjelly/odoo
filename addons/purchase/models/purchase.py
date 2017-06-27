@@ -612,6 +612,7 @@ class PurchaseOrderLine(models.Model):
     date_order = fields.Datetime(related='order_id.date_order', string='Order Date', readonly=True)
 
     orderpoint_id = fields.Many2one('stock.warehouse.orderpoint', 'Orderpoint')
+    move_dest_id = fields.Many2one('stock.move', 'Downstream Move')
 
     @api.multi
     def _get_stock_move_price_unit(self):
