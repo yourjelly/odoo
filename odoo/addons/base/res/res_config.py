@@ -386,7 +386,6 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
         ret_val = super(ResConfigSettings, self).fields_view_get(
             view_id=view_id, view_type=view_type,
             toolbar=toolbar, submenu=submenu)
-
         can_install_modules = self.env['ir.module.module'].check_access_rights(
                                     'write', raise_exception=False)
 
@@ -465,11 +464,11 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
         return {}
 
     @api.model
-    def default_get(self, fields):
+    def default_get(self, fields_list):
         IrValues = self.env['ir.values']
         classified = self._get_classified_fields()
 
-        res = super(ResConfigSettings, self).default_get(fields)
+        res = super(ResConfigSettings, self).default_get(fields_list)
 
         # defaults: take the corresponding default value they set
         for name, model, field in classified['default']:
@@ -664,3 +663,56 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
         if (action_id):
             return RedirectWarning(msg % values, action_id, _('Go to the configuration panel'))
         return UserError(msg % values)
+
+
+class ResConfigSettingsSearch(models.AbstractModel):
+    _name = "res.config.settings.search"
+
+    @api.model
+    def fields_get(self, fields=None, attributes=None):
+
+        fields = super(ResConfigSettingsSearch, self).fields_get(fields, attributes=attributes)
+        inherited_env = self.env['ir.model']._fields
+        # inherited_models = inherited_env._inherited_models()
+        for name in inherited_env:
+            if name not in fields:
+                continue
+            fields[name].update(
+                readonly=True,
+                )
+        return fields
+
+    @api.model
+    def default_get(self, fields):
+        ''' If an addon is already installed, check it by default
+        '''
+        defaults = super(ResConfigSettingsSearch, self).default_get(fields)
+        return dict(defaults, **dict.fromkeys(self.env['ir.model']._inheited_models(), True))
+
+    @api.model
+    def fields_view_get(self, view_id=None, view_type='form',
+                        toolbar=False, submenu=False):
+        print ""
+        ret_val = super(ResConfigSettingsSearch, self).fields_view_get(
+            view_id=view_id, view_type=view_type,
+            toolbar=toolbar, submenu=submenu)
+
+        inherited_env = self.env['ir.model']._fields
+        # inherited_models = inherited_env._inherited_models()
+
+        doc = etree.XML(ret_val['arch'])
+
+        for field in ret_val['fields']:
+            if not field.startswith("module_"):
+                continue
+            for node in doc.xpath("//field[@name='%s']" % field):
+                if not inherited_env:
+                    node.set("readonly", "1")
+                    modifiers = json.loads(node.get("modifiers"))
+                    modifiers['readonly'] = True
+                    node.set("modifiers", json.dumps(modifiers))
+                if 'on_change' not in node.attrib:
+                    node.set("on_change", "onchange_module(%s, '%s')" % (field, field))
+
+        ret_val['arch'] = etree.tostring(doc)
+        return ret_val
