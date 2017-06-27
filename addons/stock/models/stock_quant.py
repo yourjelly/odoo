@@ -105,6 +105,7 @@ class StockQuant(models.Model):
 
     @api.model
     def _get_quantity(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False):
+        self = self.sudo()
         quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
         return sum(quants.mapped('quantity'))
 
@@ -127,11 +128,13 @@ class StockQuant(models.Model):
 
         :return: available quantity as a float
         """
+        self = self.sudo()
         quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
         return sum(quants.mapped('quantity')) - sum(quants.mapped('reserved_quantity'))
 
     @api.model
     def _increase_available_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=True):
+        self = self.sudo()
         quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
         for quant in quants:
             try:
@@ -175,6 +178,7 @@ class StockQuant(models.Model):
         :return: a list of tuples (quant, quantity_reserved) showing on which quant the reservation
             was done and how much the system was able to reserve on it
         """
+        self = self.sudo()
         quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
 
         quants_quantity = sum(quants.mapped('quantity'))
