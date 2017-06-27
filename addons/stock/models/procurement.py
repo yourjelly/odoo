@@ -32,9 +32,9 @@ class ProcurementGroup(models.Model):
     Grouping is made only if the source and the destination is the same.
     Suppose you have 4 lines on a picking from Output where 2 lines will need
     to come from Input (crossdock) and 2 lines coming from Stock -> Output As
-    the four procurement orders will have the same group ids from the SO, the
-    move from input will have a stock.picking with 2 grouped lines and the move
-    from stock will have 2 grouped lines also.
+    the four will have the same group ids from the SO, the move from input will
+    have a stock.picking with 2 grouped lines and the move from stock will have
+    2 grouped lines also.
 
     The name is usually the name of the original document (sales order) or a
     sequence computed if created manually.

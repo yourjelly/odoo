@@ -511,7 +511,6 @@ class MrpProduction(models.Model):
         moves_to_cancel = (self.move_raw_ids | self.move_finished_ids).filtered(lambda x: x.state not in ('done', 'cancel'))
         moves_to_cancel.action_cancel()
         self.write({'state': 'done', 'date_finished': fields.Datetime.now()})
-        self.env["procurement.order"].search([('production_id', 'in', self.ids)]).check()
         return self.write({'state': 'done'})
 
     @api.multi
