@@ -79,7 +79,7 @@ class StockScrap(models.Model):
     def do_scrap(self):
         for scrap in self:
             move = self.env['stock.move'].create(scrap._prepare_move_values())
-            if self.env['stock.quant'].get_quantity < move.product_qty:
+            if self.env['stock.quant']._get_quantity < move.product_qty:
                 raise UserError(_('You cannot scrap a move without having available stock for %s. You can correct it with an inventory adjustment.') % move.product_id.name)
             move.action_done()
             scrap.write({'move_id': move.id, 'state': 'done'})
