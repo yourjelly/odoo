@@ -220,8 +220,8 @@
                         </group>
                         <group>
                             <group string="Rules">
-                                <field name="product_min_qty" />
-                                <field name="product_max_qty" />
+                                <field name="product_min_qty"/>
+                                <field name="product_max_qty"/>
                                 <field name="qty_multiple" string="Quantity Multiple"/>
                             </group>
                             <group string="Misc">

@@ -144,7 +144,7 @@ class StockWarehouse(models.Model):
 
 
 class Orderpoint(models.Model):
-    _name = "stock.warehouse.orderpoint"
+    _inherit = "stock.warehouse.orderpoint"
 
     def _quantity_in_progress(self):
         res = super(Orderpoint, self)._quantity_in_progress()
