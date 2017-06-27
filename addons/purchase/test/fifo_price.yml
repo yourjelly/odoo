@@ -110,11 +110,6 @@
   !python {model: stock.picking, id: outgoing_fifo_shipment}: |
      self.do_transfer()
 - 
-  Check product standard price changed to 65.0 (because last outgoing shipment was made of 10 kg at 50€ and 10 kg at 80€)
-- 
-  !python {model: product.product, id: product_fifo_icecream}: |
-    assert self.standard_price == 65.0, "Product price not updated accordingly. %s found instead of 65" % (self.standard_price,)
-- 
   Do a delivery of an extra 500 g (delivery order)
 - 
   !record {model: stock.picking, id: outgoing_fifo_shipment_uom}:
@@ -140,11 +135,6 @@
 - 
   !python {model: stock.picking, id: outgoing_fifo_shipment_uom}: |
     self.do_transfer()
-- 
-  Check product price changed to 80.0 (because last outgoing shipment was made of 0.5 kg at 80€)
-- 
-  !python {model: product.product, id: product_fifo_icecream}: |
-    assert self.standard_price == 80.0, "Product price not updated accordingly. %s found instead of 80" % (self.standard_price,)
 - 
   We will temporarily change the currency rate on the sixth of June to have the same results all year
 - 
@@ -212,11 +202,6 @@
 - 
   !python {model: stock.picking, id: outgoing_fifo_shipment_cur}: |
     self.do_transfer()
-- 
- Check rounded price is 102 euro (because last outgoing shipment was made of 19.5kg at 80€ and 30kg at $150 (rate=1.2834)
-- 
-  !python {model: product.product, id: product_fifo_icecream}: |
-    assert round(self.standard_price) == 102, "Product price not updated accordingly. %s found instead of 102 (rounded values)" %(round(self.standard_price),)
 -
   Do a delivery of an extra 10 kg
 - 
@@ -247,7 +232,6 @@
   Check rounded price is 150.0 / 1.2834
 - 
   !python {model: product.product, id: product_fifo_icecream}: |
-    assert round(self.standard_price) == round(150.0 / 1.2834), "Product price not updated accordingly. %s found instead of %s" %(self.standard_price, round(150.0/1.2834))
     assert self.qty_available == 0.0, 'Wrong quantity in stock after first reception'
 -
   Let us create some outs to get negative stock for a new product using the same config
@@ -340,12 +324,6 @@
     picking = self.picking_ids[0]
     picking.do_transfer()
 - 
-  Assert price on product is still the old price as the out move has not been received fully yet
-- 
-  !python {model: product.product, id: product_fifo_negative}: |
-
-    assert self.standard_price == 70, 'The product price should not have been updated'
-- 
   Receive purchase order with 60 kg FIFO Ice Cream at 80 euro/kg
 - 
   !record {model: purchase.order, id: purchase_order_fifo_neg2}:
@@ -368,8 +346,3 @@
   !python {model: purchase.order, id: purchase_order_fifo_neg2}: |
     picking = self.picking_ids[0]
     picking.do_transfer()
-- 
-  The price of the product should have changed back to 65.0
-- 
-  !python {model: product.product, id: product_fifo_negative}: |
-    assert self.standard_price == 65.0, "Product price not updated accordingly. %s found instead of 65" %(self.standard_price,)

@@ -826,7 +826,7 @@ class StockMove(models.Model):
         moves = self.filtered(lambda x: x.state not in ('done', 'cancel'))
         moves_todo = self.env['stock.move']
         # Create extra moves where necessary
-        for move in moves:
+        for move in moves.filtered(lambda x:x.quantity_done > 0):
             # Here, the `quantity_done` was already rounded to the product UOM by the `do_produce` wizard. However,
             # it is possible that the user changed the value before posting the inventory by a value that should be
             # rounded according to the move's UOM. In this specific case, we chose to round up the value, because it
