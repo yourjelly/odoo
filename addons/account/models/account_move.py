@@ -1453,9 +1453,8 @@ class AccountPartialReconcile(models.Model):
         }
 
     @api.multi
-    def _prepare_exchange_diff_move_line(self, amount_diff, currency, diff_in_currency, move):
+    def _prepare_exchange_diff_move_line(self, amount_diff, currency, diff_in_currency, move, exchange_journal):
         self.ensure_one()
-        exchange_journal = self.company_id.currency_exchange_journal_id
         return {
             'name': _('Currency exchange rate difference'),
             'debit': amount_diff > 0 and amount_diff or 0.0,
@@ -1516,12 +1515,14 @@ class AccountPartialReconcile(models.Model):
             amount_diff = rec.company_id.currency_id.round(amount_diff)
             diff_in_currency = currency.round(diff_in_currency)
             aml_model = rec.env['account.move.line']
+            exchange_journal = rec.company_id.currency_exchange_journal_id
             aml_model.with_context(check_move_validity=False).create(
                 rec._prepare_exchange_diff_move_line(
                     amount_diff=amount_diff,
                     currency=currency,
                     diff_in_currency=diff_in_currency,
-                    move=move))
+                    move=move,
+                    exchange_journal=exchange_journal))
 
             line_to_reconcile = aml_model.create(
                 rec._prepare_exchange_diff_line_to_reconcile(
