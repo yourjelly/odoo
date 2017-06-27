@@ -9,7 +9,8 @@
     categ_id: product.product_category_1
     uom_id: product.product_uom_kgm
     uom_po_id: product.product_uom_kgm
-    cost_method: real
+    
+: fifo
     valuation: real_time
     property_stock_account_input: o_expense
     property_stock_account_output: o_income

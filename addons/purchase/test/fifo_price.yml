@@ -16,7 +16,7 @@
     standard_price: 70.0
     uom_id: product.product_uom_kgm
     uom_po_id: product.product_uom_kgm
-    cost_method: real
+    cost_method: fifo
     valuation: real_time
     property_stock_account_input: o_expense
     property_stock_account_output: o_income
@@ -261,7 +261,7 @@
     standard_price: 70.0
     uom_id: product.product_uom_kgm
     uom_po_id: product.product_uom_kgm
-    cost_method: real
+    cost_method: fifo
     valuation: real_time
     property_stock_account_input: o_expense
     property_stock_account_output: o_income
