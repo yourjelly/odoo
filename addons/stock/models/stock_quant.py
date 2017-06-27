@@ -104,12 +104,12 @@ class StockQuant(models.Model):
         return self.search(domain, order=removal_strategy_order)
 
     @api.model
-    def get_quantity(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False):
+    def _get_quantity(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False):
         quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
         return sum(quants.mapped('quantity'))
 
     @api.model
-    def get_available_quantity(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False):
+    def _get_available_quantity(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False):
         """ Return the available quantity, i.e. the sum of `quantity` minus the sum of
         `reserved_quantity`, for the set of quants sharing the combination of `product_id,
         location_id` if `strict` is set to False or sharing the *exact same characteristics*
@@ -131,7 +131,7 @@ class StockQuant(models.Model):
         return sum(quants.mapped('quantity')) - sum(quants.mapped('reserved_quantity'))
 
     @api.model
-    def increase_available_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=True):
+    def _increase_available_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=True):
         quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
         for quant in quants:
             try:
@@ -156,14 +156,14 @@ class StockQuant(models.Model):
                 'package_id': package_id and package_id.id,
                 'owner_id': owner_id and owner_id.id,
             })
-        return self.get_available_quantity(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
+        return self._get_available_quantity(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
 
     @api.model
-    def decrease_available_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=True):
-        return self.increase_available_quantity(product_id, location_id, -quantity, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
+    def _decrease_available_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=True):
+        return self._increase_available_quantity(product_id, location_id, -quantity, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
 
     @api.model
-    def increase_reserved_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=False):
+    def _increase_reserved_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=False):
         """ Increase the reserved quantity, i.e. increase `reserved_quantity` for the set of quants
         sharing the combination of `product_id, location_id` if `strict` is set to False or sharing
         the *exact same characteristics* otherwise. Typically, this method is called when reserving
@@ -205,7 +205,7 @@ class StockQuant(models.Model):
         return reserved_quants
 
     @api.model
-    def decrease_reserved_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=True):
+    def _decrease_reserved_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=True):
         """ Decrease the reserved quantity, i.e. decrease `reserved_quantity`, for the set of
         quants sharing the *exact same characteristics* if `strict` is set to True or sharing the
         combination of `product_id, location_id` otherwise. Typically, this method is called during
@@ -215,4 +215,4 @@ class StockQuant(models.Model):
         :return: a list of tuples (quant, quantity_unreserved) showing on which quant the decrease
             of reservation was done and how much the system was able to unreserve on it
         """
-        return self.increase_reserved_quantity(product_id, location_id, -quantity, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
+        return self._increase_reserved_quantity(product_id, location_id, -quantity, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
