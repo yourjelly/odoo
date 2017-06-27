@@ -251,9 +251,6 @@ class ProcurementGroup(models.Model):
                 cr = registry(self._cr.dbname).cursor()
                 self = self.with_env(self.env(cr=cr))
             OrderPoint = self.env['stock.warehouse.orderpoint']
-            # Procurement = self.env['procurement.order']
-            # ProcurementAutorundefer = Procurement.with_context(procurement_autorun_defer=True)
-            # procurement_list = []
 
             orderpoints = OrderPoint.browse(orderpoints_noprefetch[:1000])
             orderpoints_noprefetch = orderpoints_noprefetch[1000:]
