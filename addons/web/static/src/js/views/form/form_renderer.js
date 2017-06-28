@@ -381,6 +381,7 @@ var FormRenderer = BasicRenderer.extend({
         var $currentRow = $('<tr/>');
         var currentColspan = 0;
         _.each(node.children, function (child) {
+            if (!child.tag) return;
             if (child.tag === 'newline') {
                 rows.push($currentRow);
                 $currentRow = $('<tr/>');
