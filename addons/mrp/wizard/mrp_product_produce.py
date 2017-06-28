@@ -133,7 +133,7 @@ class MrpProductProduce(models.TransientModel):
                                        'qty_done': moveline.qty_done,
                                        'lot_produced_id': self.lot_id.id}
                             new_move_line = moveline.copy(default=default)
-                            moveline.write({'product_qty': remaining_qty, 'qty_done': 0})
+                            moveline.with_context(bypass_reservation_update=True).write({'product_qty': remaining_qty, 'qty_done': 0})
                         else:
                             moveline.write({'lot_produced_id': self.lot_id.id})
         return True
