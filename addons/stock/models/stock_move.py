@@ -833,8 +833,8 @@ class StockMove(models.Model):
             # FIXME: move rounding to move line
             # rounding = move.product_uom.rounding
             # move.quantity_done = float_round(move.quantity_done, precision_rounding=rounding, rounding_method ='UP')
-            # if move.quantity_done <= 0:
-            #     continue
+            if move.quantity_done <= 0:
+                continue
             moves_todo |= move
             moves_todo |= move._create_extra_move()
         # Split moves where necessary and move quants
