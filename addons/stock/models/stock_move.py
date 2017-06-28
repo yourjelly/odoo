@@ -700,7 +700,6 @@ class StockMove(models.Model):
             if move.location_id.usage in ('supplier', 'inventory', 'production', 'customer')\
                     or move.product_id.type == 'consu':
                 # create the move line(s) but do not impact quants
-                # TODO sle: refactore me, 3 times the same thing here
                 if move.product_id.tracking == 'serial':
                     for i in range(0, int(move.product_qty)):
                         move_line_id = self.env['stock.pack.operation'].create(move._prepare_move_line_vals(quantity=1))
