@@ -74,15 +74,10 @@ class StockMove(models.Model):
     # TODO: add contstrains remaining_qty > 0
     # TODO: add constrain unit_cost = 0 on done move?
 
-    def _get_candidates_move(self):
+    @api.multi
+    def _get_price_unit(self):
         self.ensure_one()
-        # TODO: filter at start of period
-        candidates = self.env['stock.move'].search([
-            ('product_id', '=', self.product_id.id),
-            ('location_id', '=', self.env.ref('stock.stock_location_suppliers').id),
-            ('remaining_qty', '>', 0),
-        ], order='date, id')
-        return candidates
+        return self.product_id.standard_price
 
     @api.multi
     def action_done(self):

@@ -97,11 +97,13 @@ class ProductProduct(models.Model):
     _inherit = 'product.product'
 
     average_price = fields.Float(
-        'Average Cost', company_dependent=True,
+        'Average Cost', 
         digits=dp.get_precision('Product Price'),
         groups="base.group_user",
         compute='_compute_average_price',
         help="Calculated average cost")
+    stock_value = fields.Float(
+        'Value', compute='_compute_stock_value')
 
     @api.onchange('type')
     def onchange_type_valuation(self):
@@ -160,11 +162,24 @@ class ProductProduct(models.Model):
         # TODO: only filter on IN and OUT stock.move
         domain = [
             ('product_id', '=', self.id),
-            ('state', '=', 'done')]
+            ('state', '=', 'done'),
+            ]
         if not_move:
             domain += [('id', '!=', not_move.id)]
         latest = self.env['stock.move'].search(domain, order='date desc, id desc', limit=1)
         return latest.cumulated_value
+
+    def _get_candidates_move(self):
+        self.ensure_one()
+        # TODO: filter at start of period
+        candidates = self.env['stock.move'].search([
+            ('product_id', '=', self.product_id.id),
+            ('location_dest_id.usage', 'in', ('transit', 'internal')),
+            ('location_id.usage', 'not in', ('transit', 'internal')),
+            ('remaining_qty', '>', 0),
+            ('state', '=', 'done')
+        ], order='date, id') #TODO: case where 
+        return candidates
 
     @api.multi
     def _compute_average_price(self):
@@ -174,6 +189,19 @@ class ProductProduct(models.Model):
                 product.average_price = last_cumulated_value / product.qty_available
             else:
                 product.average_price = 0
+    
+    @api.multi
+    def _compute_stock_value(self):
+        for product in self:
+            if product.cost_method == 'standard':
+                product.stock_value = product.standard_price * product.qty_available
+            elif product.cost_method == 'average':
+                product.stock_value = product._get_last_cumulated_value
+            elif product.cost_method == 'fifo': #Could also do same as for average, but it would lead to more rounding errors
+                moves = product._get_canditates_move()
+                for move in moves:
+                    
+                product.stock_value =
 
 
 class ProductCategory(models.Model):
