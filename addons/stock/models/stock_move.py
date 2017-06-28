@@ -820,6 +820,8 @@ class StockMove(models.Model):
 
     @api.multi
     def action_done(self):
+        self.filtered(lambda move: move.state == 'draft').action_confirm()  # MRP allows scrapping draft moves
+
         moves = self.filtered(lambda x: x.state not in ('done', 'cancel'))
         moves_todo = self.env['stock.move']
         # Create extra moves where necessary
