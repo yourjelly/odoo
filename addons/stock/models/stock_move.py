@@ -253,11 +253,8 @@ class StockMove(models.Model):
         if self.state == 'done':
             self.availability = self.product_qty
         else:
-            if self.id:
-                # As `get_available_quantity` will perform an sql query directly, do
-                # not run it with a virtual id.
-                total_availability = self.env['stock.quant']._get_available_quantity(self.product_id, self.location_id)
-                self.availability = min(self.product_qty, total_availability)
+            total_availability = self.env['stock.quant']._get_available_quantity(self.product_id, self.location_id)
+            self.availability = min(self.product_qty, total_availability)
 
     @api.multi
     def _compute_string_qty_information(self):
