@@ -39,5 +39,5 @@ class WizardValuationHistory(models.TransientModel):
             action['name'] = _('Stock Value At Date')
             action['context'] = ctx
         else:
-            action = self.env.ref('stock.quantsact').read()[0]
+            action = self.env.ref('stock_account.product_valuation_action').read()[0]
         return action

@@ -196,12 +196,13 @@ class ProductProduct(models.Model):
             if product.cost_method == 'standard':
                 product.stock_value = product.standard_price * product.qty_available
             elif product.cost_method == 'average':
-                product.stock_value = product._get_last_cumulated_value
+                product.stock_value = product._get_latest_cumulated_value
             elif product.cost_method == 'fifo': #Could also do same as for average, but it would lead to more rounding errors
                 moves = product._get_canditates_move()
+                value = 0
                 for move in moves:
-                    
-                product.stock_value =
+                    value += move.remaining_qty * move.unit_cost
+                product.stock_value = value
 
 
 class ProductCategory(models.Model):
