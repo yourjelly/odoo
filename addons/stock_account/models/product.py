@@ -198,7 +198,7 @@ class ProductProduct(models.Model):
             elif product.cost_method == 'average':
                 product.stock_value = product._get_latest_cumulated_value
             elif product.cost_method == 'fifo': #Could also do same as for average, but it would lead to more rounding errors
-                moves = product._get_canditates_move()
+                moves = product._get_candidates_move()
                 value = 0
                 for move in moves:
                     value += move.remaining_qty * move.unit_cost
