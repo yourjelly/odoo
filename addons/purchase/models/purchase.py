@@ -620,20 +620,6 @@ class PurchaseOrderLine(models.Model):
     procurement_ids = fields.One2many('procurement.order', 'purchase_line_id', string='Associated Procurements', copy=False)
 
     @api.multi
-    def _get_stock_move_price_unit(self):
-        self.ensure_one()
-        line = self[0]
-        order = line.order_id
-        price_unit = line.price_unit
-        if line.taxes_id:
-            price_unit = line.taxes_id.with_context(round=False).compute_all(price_unit, currency=line.order_id.currency_id, quantity=1.0)['total_excluded']
-        if line.product_uom.id != line.product_id.uom_id.id:
-            price_unit *= line.product_uom.factor / line.product_id.uom_id.factor
-        if order.currency_id != order.company_id.currency_id:
-            price_unit = order.currency_id.compute(price_unit, order.company_id.currency_id, round=False)
-        return price_unit
-
-    @api.multi
     def _prepare_stock_moves(self, picking):
         """ Prepare the stock moves data for one order line. This function returns a list of
         dictionary ready to be used in stock.move's create()
@@ -643,7 +629,6 @@ class PurchaseOrderLine(models.Model):
         if self.product_id.type not in ['product', 'consu']:
             return res
         qty = 0.0
-        price_unit = self._get_stock_move_price_unit()
         for move in self.move_ids.filtered(lambda x: x.state != 'cancel' and not x.location_dest_id.usage == "supplier"):
             qty += move.product_qty
         template = {
@@ -660,7 +645,6 @@ class PurchaseOrderLine(models.Model):
             'state': 'draft',
             'purchase_line_id': self.id,
             'company_id': self.order_id.company_id.id,
-            'price_unit': price_unit,
             'picking_type_id': self.order_id.picking_type_id.id,
             'group_id': self.order_id.group_id.id,
             'procurement_ids': [],

@@ -29,7 +29,7 @@ class TestStockValuation(TransactionCase):
             'product_id': self.product1.id,
             'product_uom': self.uom_unit.id,
             'product_uom_qty': 68.0,
-            'unit_cost': 15,
+            'price_unit': 15,
         })
         move1.action_confirm()
         move1.action_assign()
@@ -49,7 +49,7 @@ class TestStockValuation(TransactionCase):
             'product_id': self.product1.id,
             'product_uom': self.uom_unit.id,
             'product_uom_qty': 140.0,
-            'unit_cost': 15.50,
+            'price_unit': 15.50,
         })
         move2.action_confirm()
         move2.action_assign()
@@ -76,7 +76,7 @@ class TestStockValuation(TransactionCase):
         move3.pack_operation_ids.qty_done = 94.0
         move3.action_done()
 
-        self.assertEqual(move3.unit_cost, 0.0)  # unused in out moves
+        self.assertEqual(move3.price_unit, 0.0)  # unused in out moves
 
         # note: it' ll have to get 68 units from the first batch and 26 from the second one
         # so its value should be -((68*15) + (26*15.5)) = -1423
@@ -95,7 +95,7 @@ class TestStockValuation(TransactionCase):
             'product_id': self.product1.id,
             'product_uom': self.uom_unit.id,
             'product_uom_qty': 40.0,
-            'unit_cost': 16,
+            'price_unit': 16,
         })
         move4.action_confirm()
         move4.action_assign()
@@ -118,7 +118,7 @@ class TestStockValuation(TransactionCase):
             'product_id': self.product1.id,
             'product_uom': self.uom_unit.id,
             'product_uom_qty': 78.0,
-            'unit_cost': 16.5,
+            'price_unit': 16.5,
         })
         move5.action_confirm()
         move5.action_assign()
@@ -199,7 +199,7 @@ class TestStockValuation(TransactionCase):
             'product_id': self.product1.id,
             'product_uom': self.uom_unit.id,
             'product_uom_qty': 10.0,
-            'unit_cost': 100,
+            'price_unit': 100,
         })
         move1.action_confirm()
         move1.action_assign()
@@ -219,7 +219,7 @@ class TestStockValuation(TransactionCase):
             'product_id': self.product1.id,
             'product_uom': self.uom_unit.id,
             'product_uom_qty': 10.0,
-            'unit_cost': 80,
+            'price_unit': 80,
         })
         move2.action_confirm()
         move2.action_assign()
@@ -246,7 +246,7 @@ class TestStockValuation(TransactionCase):
         move3.pack_operation_ids.qty_done = 15.0
         move3.action_done()
 
-        self.assertEqual(move3.unit_cost, 0.0)  # unused in out moves
+        self.assertEqual(move3.price_unit, 0.0)  # unused in out moves
 
         # note: it' ll have to get 10 units from move1 and 5 from move2
         # so its value should be -((10*100) + (5*80)) = -1423
@@ -265,7 +265,7 @@ class TestStockValuation(TransactionCase):
             'product_id': self.product1.id,
             'product_uom': self.uom_unit.id,
             'product_uom_qty': 5.0,
-            'unit_cost': 60,
+            'price_unit': 60,
         })
         move4.action_confirm()
         move4.action_assign()
@@ -318,7 +318,7 @@ class TestStockValuation(TransactionCase):
             'product_id': self.product1.id,
             'product_uom': self.uom_unit.id,
             'product_uom_qty': 60.0,
-            'unit_cost': 15,
+            'price_unit': 15,
         })
         move1.action_confirm()
         move1.action_assign()
@@ -338,7 +338,7 @@ class TestStockValuation(TransactionCase):
             'product_id': self.product1.id,
             'product_uom': self.uom_unit.id,
             'product_uom_qty': 140.0,
-            'unit_cost': 15.50,
+            'price_unit': 15.50,
         })
         move2.action_confirm()
         move2.action_assign()
@@ -362,7 +362,7 @@ class TestStockValuation(TransactionCase):
         move3.pack_operation_ids.qty_done = 190.0
         move3.action_done()
 
-        self.assertEqual(move3.unit_cost, 0.0)  # unused in out moves
+        self.assertEqual(move3.price_unit, 0.0)  # unused in out moves
 
         self.assertEqual(move3.value, -2916.5)
         self.assertEqual(move3.cumulated_value, 153.5)
@@ -375,7 +375,7 @@ class TestStockValuation(TransactionCase):
             'product_id': self.product1.id,
             'product_uom': self.uom_unit.id,
             'product_uom_qty': 70.0,
-            'unit_cost': 16.00,
+            'price_unit': 16.00,
         })
         move4.action_confirm()
         move4.action_assign()

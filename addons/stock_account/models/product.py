@@ -173,7 +173,7 @@ class ProductProduct(models.Model):
         self.ensure_one()
         # TODO: filter at start of period
         candidates = self.env['stock.move'].search([
-            ('product_id', '=', self.product_id.id),
+            ('product_id', '=', self.id),
             ('location_dest_id.usage', 'in', ('transit', 'internal')),
             ('location_id.usage', 'not in', ('transit', 'internal')),
             ('remaining_qty', '>', 0),
@@ -201,7 +201,7 @@ class ProductProduct(models.Model):
                 moves = product._get_candidates_move()
                 value = 0
                 for move in moves:
-                    value += move.remaining_qty * move.unit_cost
+                    value += move.remaining_qty * move.price_unit
                 product.stock_value = value
 
 

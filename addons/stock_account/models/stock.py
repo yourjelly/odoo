@@ -66,13 +66,12 @@ class StockMove(models.Model):
     to_refund = fields.Boolean(string="To Refund (update SO/PO)",
                                help='Trigger a decrease of the delivered/received quantity in the associated Sale Order/Purchase Order')
 
-    unit_cost = fields.Float()
     value = fields.Float()
     cumulated_value = fields.Float()
     remaining_qty = fields.Float()
 
-    # TODO: add contstrains remaining_qty > 0
-    # TODO: add constrain unit_cost = 0 on done move?
+    # TODO: add constraints remaining_qty > 0
+    # TODO: add constrain price_unit = 0 on done move?
 
     @api.multi
     def _get_price_unit(self):
@@ -87,22 +86,26 @@ class StockMove(models.Model):
                 qty_available[move.product_id.id] = self.env['stock.quant'].get_quantity(move.product_id, move.location_id)
         res = super(StockMove, self).action_done()
         for move in res:
-            if move.location_id.id == self.env.ref('stock.stock_location_suppliers').id:
+            if move.location_id.usage not in ('internal', 'transit') and move.location_dest_id.usage in ('internal', 'transit'):
                 if move.product_id.cost_method in ['fifo', 'average']:
-                    move.value = move.unit_cost * move.product_qty
+                    if not move.price_unit:
+                        move.price_unit = move._get_price_unit()
                     move.cumulated_value = move.product_id._get_latest_cumulated_value(not_move=move) + move.value
                     move.remaining_qty = move.product_qty
-            elif move.location_dest_id.id == self.env.ref('stock.stock_location_customers').id:
+                else:
+                    move.price_unit = move.product_id.standard_price
+                move.value = move.price_unit * move.product_qty
+            elif move.location_id.usage in ('internal', 'transit') and move.location_dest_id.usage not in ('internal', 'transit'):
                 if move.product_id.cost_method == 'fifo':
                     qty_to_take = move.product_qty
                     tmp_value = 0
-                    candidates = self._get_candidates_move()
+                    candidates = move.product_id._get_candidates_move()
                     for candidate in candidates:
                         if candidate.remaining_qty <= qty_to_take:
                             qty_taken_on_candidate = candidate.remaining_qty
                         else:
                             qty_taken_on_candidate = qty_to_take
-                        tmp_value += qty_taken_on_candidate * candidate.unit_cost
+                        tmp_value += qty_taken_on_candidate * candidate.price_unit
                         candidate.remaining_qty -= qty_taken_on_candidate
                         qty_to_take -= qty_taken_on_candidate
                         if qty_to_take == 0:
@@ -111,23 +114,15 @@ class StockMove(models.Model):
                     move.cumulated_value = move.product_id._get_latest_cumulated_value(not_move=move) + move.value
                 elif move.product_id.cost_method == 'average':
                     curr_rounding = move.company_id.currency_id.rounding
-                    avg_unit_cost = float_round(move.product_id._get_latest_cumulated_value(not_move=move) / qty_available[move.product_id.id], precision_rounding=curr_rounding)
-                    move.value = float_round(-avg_unit_cost * move.product_qty, precision_rounding=curr_rounding)
+                    avg_price_unit = float_round(move.product_id._get_latest_cumulated_value(not_move=move) / qty_available[move.product_id.id], precision_rounding=curr_rounding)
+                    move.value = float_round(-avg_price_unit * move.product_qty, precision_rounding=curr_rounding)
                     move.remaining_qty = 0
                     move.cumulated_value = move.product_id._get_latest_cumulated_value(not_move=move) + move.value
-        for move in res:
+                elif move.product_id.cost_method == 'standard':
+                    move.value = - move.product_id.standard_price * move.product_qty
+        for move in res.filtered(lambda m: m.product_id.valuation == 'real_time'):
             move._account_entry_move()
         return res
-
-    # def _set_default_price_moves(self):
-    #     # When the cost method is in real or average price, the price can be set to 0.0 on the PO
-    #     # So the price doesn't have to be updated
-    #     moves = super(StockMove, self)._set_default_price_moves()
-    #     return moves.filtered(lambda m: m.product_id.cost_method not in ('real', 'average'))
-    #
-    
-    
-    
 
     @api.multi
     def _get_accounting_data_for_valuation(self):
