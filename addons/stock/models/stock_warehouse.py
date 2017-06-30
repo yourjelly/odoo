@@ -784,6 +784,10 @@ class Orderpoint(models.Model):
         ('qty_multiple_check', 'CHECK( qty_multiple >= 0 )', 'Qty Multiple must be greater than or equal to zero.'),
     ]
 
+    @api.multi
+    def _quantity_in_progress(self):
+        return dict(self.mapped(lambda x: (x.id, 0.0)))
+
     @api.constrains('product_id')
     def _check_product_uom(self):
         ''' Check if the UoM has the same category as the product standard UoM '''
@@ -824,13 +828,13 @@ class Orderpoint(models.Model):
         return {
             'name': self.name,
             'date_planned': date or self._get_date_planned(product_qty, datetime.today()),
-            'product_id': self.product_id.id,
+            'product_id': self.product_id,
             'product_qty': product_qty,
-            'company_id': self.company_id.id,
-            'product_uom': self.product_uom.id,
-            'location_id': self.location_id.id,
+            'company_id': self.company_id,
+            'product_uom': self.product_uom,
+            'location_id': self.location_id,
             'origin': self.name,
-            'warehouse_id': self.warehouse_id.id,
-            'orderpoint_id': self.id,
-            'group_id': group or self.group_id.id,
+            'warehouse_id': self.warehouse_id,
+            'orderpoint_id': self,
+            'group_id': group or self.group_id,
         }

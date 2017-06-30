@@ -12,6 +12,8 @@ from odoo.osv import expression
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, float_compare, \
     float_round, pycompat
 
+from odoo.exceptions import UserError
+
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -54,7 +56,7 @@ class ProcurementGroup(models.Model):
         required=True)
 
     @api.model
-    def run(self, values):
+    def run(self, values, doraise=True):
         for key in ('product_id','product_qty','location_id', 'name'):
             assert key in values
         values.setdefault('company_id', self.env['res.company']._company_default_get('procurement.group'))
@@ -62,7 +64,15 @@ class ProcurementGroup(models.Model):
         values.setdefault('date_planned', fields.Datetime.now())
         rule = self._get_rule(values)
         if not rule:
-            raise UserError(_('No procurement rule found.'))
+            if doraise:
+                raise UserError(_('No procurement rule found.'))
+            else:
+                # FP Todo: Should we create a next activity instead of a message post?
+                msg = _('No procurement rule found')
+                if values.get('orderpoint_id', False):
+                    msg =_('No procurement rule found for orderpoint %s.') % (values['orderpoint_id'].name,)
+                values['product_id'].message_post(body=msg)
+                return False
         self._run(values, rule)
         return True
 
