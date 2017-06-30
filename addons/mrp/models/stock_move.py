@@ -191,7 +191,6 @@ class StockMove(models.Model):
                 'product_uom_qty': quantity,
                 'state': 'draft',  # will be confirmed below
                 'name': self.name,
-                'procurement_ids': [(6, 0, self.procurement_ids.ids)],
                 'split_from': self.id,  # Needed in order to keep sale connection, but will be removed by unlink
             })
         return self.env['stock.move']

@@ -85,6 +85,7 @@ Dashboard / Reports for Inventory Management will include:
         'views/stock_config_settings_views.xml',
         'views/report_stock_traceability.xml',
         'views/stock_template.xml',
+        'views/procurement_views.xml',
 
         'data/default_barcode_patterns.xml',
         'data/stock_data.xml',

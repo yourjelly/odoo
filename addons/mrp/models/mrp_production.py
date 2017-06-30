@@ -298,8 +298,6 @@ class MrpProduction(models.Model):
             'product_uom_qty': self.product_qty,
             'location_id': self.product_id.property_stock_production.id,
             'location_dest_id': self.location_dest_id.id,
-            'move_dest_ids': self.procurement_ids and [(4, p) for p in self.procurement_ids.mapped('move_dest_id').ids] or False,
-            'procurement_ids': [(4, p) for p in self.procurement_ids.ids],
             'company_id': self.company_id.id,
             'production_id': self.id,
             'origin': self.name,

@@ -235,7 +235,6 @@ class PushedFlow(models.Model):
                 'propagate': self.propagate,
                 'push_rule_id': self.id,
                 'warehouse_id': self.warehouse_id.id,
-                'procurement_ids': [(5, 0)],
             }
 
         return new_move_vals
