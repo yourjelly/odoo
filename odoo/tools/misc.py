@@ -1020,11 +1020,14 @@ def dumpstacks(sig=None, frame=None):
                     for th in threading.enumerate()}
     for threadId, stack in sys._current_frames().items():
         thread_info = threads_info.get(threadId, {})
-        code.append("\n# Thread: %s (id:%s) (db:%s) (uid:%s)" %
+        werkstack = odoo.http._request_stack._local.__storage__.get(threadId, {'stack': []}).get('stack')
+        url = werkstack[0].httprequest.url if werkstack else ''
+        code.append("\n# Thread: %s (id:%s) (db:%s) (uid:%s) (url:%s)" %
                     (thread_info.get('name', 'n/a'),
                      threadId,
                      thread_info.get('dbname', 'n/a'),
-                     thread_info.get('uid', 'n/a')))
+                     thread_info.get('uid', 'n/a'),
+                     url))
         for line in extract_stack(stack):
             code.append(line)
 
