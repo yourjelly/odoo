@@ -140,6 +140,7 @@ class ProcurementGroup(models.Model):
             'product_uom': values['product_id'].uom_po_id.id,
             'price_unit': price_unit,
             'date_planned': date_planned,
+            'orderpoint_id': values.get('orderpoint_id', False) and values.get('orderpoint_id').id,
             'taxes_id': [(6, 0, taxes_id.ids)],
             'order_id': po.id,
         }
