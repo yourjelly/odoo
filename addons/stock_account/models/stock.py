@@ -90,11 +90,12 @@ class StockMove(models.Model):
                 if move.product_id.cost_method in ['fifo', 'average']:
                     if not move.price_unit:
                         move.price_unit = move._get_price_unit()
+                    move.value = move.price_unit * move.product_qty
                     move.cumulated_value = move.product_id._get_latest_cumulated_value(not_move=move) + move.value
                     move.remaining_qty = move.product_qty
                 else:
                     move.price_unit = move.product_id.standard_price
-                move.value = move.price_unit * move.product_qty
+                    move.value = move.price_unit * move.product_qty
             elif move.location_id.usage in ('internal', 'transit') and move.location_dest_id.usage not in ('internal', 'transit'):
                 if move.product_id.cost_method == 'fifo':
                     qty_to_take = move.product_qty
