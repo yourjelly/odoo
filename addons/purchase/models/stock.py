@@ -149,6 +149,6 @@ class Orderpoint(models.Model):
     def _quantity_in_progress(self):
         res = super(Orderpoint, self)._quantity_in_progress()
         for poline in self.env['purchase.order.line'].search([('state','in',('draft','sent','to approve')),('orderpoint_id','in',self.ids)]):
-            res[orderpoint.id] += poline.product_uom._compute_quantity(poline.product_qty, orderpoint.product_uom, round=False)
+            res[poline.orderpoint_id.id] += poline.product_uom._compute_quantity(poline.product_qty, poline.orderpoint_id.product_uom, round=False)
         return res
 
