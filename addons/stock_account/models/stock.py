@@ -76,12 +76,22 @@ class StockMove(models.Model):
     @api.multi
     def _get_price_unit(self):
         self.ensure_one()
+        if self.cost_method == 'average':
+            return self.product_id.average_price or self.product_id.standard_price
+        if self.cost_method == 'fifo':
+            move = self.search([('product_id', '=', self.product_id.id),
+                         ('state', '=', 'done'), 
+                         ('location_id.usage', '=', 'internal'), 
+                         ('location_dest_id.usage', '!=', 'internal')], order='date desc', limit=1)
+            if move:
+                return move.price_unit or self.product_id.standard_price
         return self.product_id.standard_price
 
     @api.multi
     def action_done(self):
         qty_available = {}
         for move in self:
+            #Should write move.price_unit here maybe, certainly on incoming
             if move.product_id.cost_method == 'average':
                 qty_available[move.product_id.id] = self.env['stock.quant'].get_quantity(move.product_id, move.location_id)
         res = super(StockMove, self).action_done()
