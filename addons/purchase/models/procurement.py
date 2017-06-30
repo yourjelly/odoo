@@ -96,8 +96,6 @@ class ProcurementGroup(models.Model):
     def _get_purchase_order_date(self, values, rule, partner, schedule_date):
         """Return the datetime value to use as Order Date (``date_order``) for the
            Purchase Order created to satisfy the given procurement. """
-        self.ensure_one()
-
         seller = values['product_id']._select_seller(
             partner_id=partner,
             quantity=values['product_qty'],
@@ -147,7 +145,6 @@ class ProcurementGroup(models.Model):
         }
 
     def _prepare_purchase_order(self, values, rule, partner):
-        self.ensure_one()
         schedule_date = self._get_purchase_schedule_date(values, rule)
         purchase_date = self._get_purchase_order_date(values, rule, partner, schedule_date)
         fpos = self.env['account.fiscal.position'].with_context(company_id=values['company_id'].id).get_fiscal_position(partner.id)
@@ -161,7 +158,7 @@ class ProcurementGroup(models.Model):
             'picking_type_id': rule.picking_type_id.id,
             'company_id': values['company_id'].id,
             'currency_id': partner.property_purchase_currency_id.id or self.env.user.company_id.currency_id.id,
-            'dest_address_id': values['partner_dest_id'].id,
+            'dest_address_id': values.get('partner_dest_id', False) and values['partner_dest_id'].id,
             'origin': values['origin'],
             'payment_term_id': partner.property_supplier_payment_term_id.id,
             'date_order': purchase_date.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
