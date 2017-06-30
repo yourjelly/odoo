@@ -368,6 +368,7 @@ class Product(models.Model):
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
+    responsible_id = fields.Many2one('res.users', string='Responsible', default=lambda self: self.env.uid, required=True)
     type = fields.Selection(selection_add=[('product', 'Stockable Product')])
     property_stock_production = fields.Many2one(
         'stock.location', "Production Location",

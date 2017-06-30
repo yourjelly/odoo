@@ -63,17 +63,23 @@ class ProcurementGroup(models.Model):
         values.setdefault('priority', '1')
         values.setdefault('date_planned', fields.Datetime.now())
         rule = self._get_rule(values)
+
         if not rule:
-            if doraise:
+            if doraise and False:
                 raise UserError(_('No procurement rule found.'))
             else:
-                # FP Todo: Should we create a next activity instead of a message post?
-                msg = _('No procurement rule found')
+                msg = _('No procurement rule found. Update the inventory tab of the product form.')
                 if values.get('orderpoint_id', False):
-                    msg =_('No procurement rule found for orderpoint %s.') % (values['orderpoint_id'].name,)
-                values['product_id'].message_post(body=msg)
+                    msg =_('No procurement rule found for orderpoint %s. Update the inventory tab of the product form.') % (values['orderpoint_id'].name,)
+                activity = self.env['mail.activity'].create({
+                    'activity_type_id': self.env.ref('mail_activity_data_todo').id,
+                    'note': msg,
+                    'responsible_id': values['product_id'].responsible_id.id,
+                    'res_id': values['product_id'].product_tmpl_id.id,
+                    'res_model_id': self.env.ref('product.model_product_template').id,
+                })
                 return False
-        self._run(values, rule)
+        self._run(values, rule, doraise)
         return True
 
     @api.model
@@ -151,10 +157,21 @@ class ProcurementGroup(models.Model):
             ('product_id', '=', values['product_id'].id)]
 
     @api.multi
-    def _run(self, values, rule):
+    def _run(self, values, rule, doraise=True):
         if rule.action == 'move':
             if not rule.location_src_id:
-                raise UserError(_('No source location defined on procurement rule!'))
+                msg = _('No source location defined on procurement rule: %s!') % (rule.name, )
+                if doraise:
+                    raise UserError(msg)
+                else:
+                    activity = self.env['mail.activity'].create({
+                        'activity_type_id': self.env.ref('mail_activity_data_todo').id,
+                        'note': msg,
+                        'responsible_id': values['product_id'].responsible_id.id,
+                        'res_id': values['product_id'].product_tmpl_id.id,
+                        'res_model_id': self.env.ref('product.model_product_template').id,
+                    })
+                    return False
 
             # create the move as SUPERUSER because the current user may not have the rights to do it (mto product launched by a sale for example)
             # Search if picking with move for it exists already:

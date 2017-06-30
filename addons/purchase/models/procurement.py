@@ -19,13 +19,23 @@ class ProcurementGroup(models.Model):
     _inherit = 'procurement.group'
 
     @api.multi
-    def _run(self, values, rule):
+    def _run(self, values, rule, doraise=True):
         if rule.action == 'buy':
             cache = {}
             suppliers = values['product_id'].seller_ids\
                 .filtered(lambda r: (not r.company_id or r.company_id == values['company_id']) and (not r.product_id or r.product_id == values['product_id']))
             if not suppliers:
-                raise UserError(_('No vendor associated to product %s. Unable to generate the purchase order.') % (values['product_id'].display_name(),))
+                msg = _('No vendor associated to product %s. Unable to generate the purchase order.') % (values['product_id'].display_name(),)
+                if doraise:
+                    raise UserError(msg)
+                else:
+                    activity = self.env['mail.activity'].sudo(self.crm_salesman.id).create({
+                        'activity_type_id': self.env.ref('mail_activity_data_todo').id,
+                        'note': msg,
+                        'res_id': values['product_id'].product_tmpl_id.id,
+                        'res_model_id': self.env.ref('product.model_product_template').id,
+                    })
+                    return False
             supplier = self._make_po_select_supplier(values, rule, suppliers)
             partner = supplier.name
 
@@ -57,8 +67,8 @@ class ProcurementGroup(models.Model):
                     procurement_uom_po_qty = values['product_uom']._compute_quantity(values['product_qty'], values['product_id'].uom_po_id)
                     seller = values['product_id']._select_seller(
                         partner_id=partner,
-                        quantity=line.product_qty + values['uom_po_qty'],
-                        date=po.date_order and po.date_order[:10],
+                        quantity = line.product_qty + procurement_uom_po_qty,
+                        date = po.date_order and po.date_order[:10],
                         uom_id=values['product_id'].uom_po_id)
 
                     price_unit = self.env['account.tax']._fix_tax_included_price(seller.price, line.product_id.supplier_taxes_id, line.taxes_id) if seller else 0.0
@@ -74,7 +84,7 @@ class ProcurementGroup(models.Model):
                 vals = self._prepare_purchase_order_line(values, rule, po, supplier)
                 self.env['purchase.order.line'].create(vals)
             return True
-        return super(ProcurementGroup, self)._run(values, rule)
+        return super(ProcurementGroup, self)._run(values, rule, doraise=True)
 
     def _get_purchase_schedule_date(self, values, rule):
         """Return the datetime value to use as Schedule Date (``date_planned``) for the

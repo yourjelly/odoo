@@ -293,9 +293,9 @@ class ProcurementGroup(models.Model):
     _inherit = 'procurement.group'
 
     @api.multi
-    def _run(self, values, rule):
+    def _run(self, values, rule, doraise=True):
         if (rule.action != 'buy') or (values['product_id'].purchase_requisition!='tenders'):
-            return super(ProcurementGroup, self)._run(values, rule)
+            return super(ProcurementGroup, self)._run(values, rule, doraise)
             
         Requisition = self.env['purchase.requisition']
         Warehouse = self.env['stock.warehouse']

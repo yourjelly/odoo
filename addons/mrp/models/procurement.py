@@ -14,14 +14,25 @@ class ProcurementGroup(models.Model):
     _inherit = 'procurement.group'
 
     @api.multi
-    def _run(self, values, rule):
+    def _run(self, values, rule, doraise=True):
         if rule.action == 'manufacture':
             res = {}
             Production = self.env['mrp.production']
             ProductionSudo = Production.sudo().with_context(force_company=values['company_id'].id)
             bom = self._get_matching_bom(values, rule)
             if not bom:
-                raise UserError(_('No Bill of Material found for product %f.') % (values['product_id'].display_name(),))
+                msg = _('No Bill of Material found for product %f.') % (values['product_id'].display_name(),)
+                if doraise:
+                    raise UserError(msg)
+                else:
+                    activity = self.env['mail.activity'].create({
+                        'activity_type_id': self.env.ref('mail_activity_data_todo').id,
+                        'note': msg,
+                        'responsible_id': values['product_id'].responsible_id.id,
+                        'res_id': values['product_id'].product_tmpl_id.id,
+                        'res_model_id': self.env.ref('product.model_product_template').id,
+                    })
+                    return False
 
             # create the MO as SUPERUSER because the current user may not have the rights to do it (mto product launched by a sale for example)
             production = ProductionSudo.create(self._prepare_mo_vals(values, rule, bom))
@@ -36,7 +47,7 @@ class ProcurementGroup(models.Model):
                     values={'self': production, 'origin': origin_production.id},
                     subtype_id=self.env.ref('mail.mt_note').id)
             return True
-        return super(ProcurementGroup, self)._run(values, rule)
+        return super(ProcurementGroup, self)._run(values, rule, doraise)
 
     @api.multi
     def _get_matching_bom(self, values, rule):
