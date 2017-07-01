@@ -84,7 +84,7 @@ class ProcurementGroup(models.Model):
 
     @api.model
     def _search_rule(self, values, domain):
-        """ First find a rule among the ones defined on the procurement order
+        """ First find a rule among the ones defined on the procurement 
         group; then try on the routes defined for the product; finally fallback
         on the default behavior """
         if values.get('warehouse_id', False):
