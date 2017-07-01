@@ -12,7 +12,8 @@ class Location(models.Model):
     _name = "stock.location"
     _description = "Inventory Locations"
     _parent_name = "location_id"
-    _parent_store = True
+    # FP TODO: should uncomment here, but ORM seems to bug with parent_left,parent_right
+    # _parent_store = True
     _parent_order = 'name'
     _order = 'parent_left'
     _rec_name = 'complete_name'
