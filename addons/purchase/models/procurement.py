@@ -30,7 +30,7 @@ class ProcurementGroup(models.Model):
                     raise UserError(msg)
                 else:
                     activity = self.env['mail.activity'].sudo(self.crm_salesman.id).create({
-                        'activity_type_id': self.env.ref('mail_activity_data_todo').id,
+                        'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
                         'note': msg,
                         'res_id': values['product_id'].product_tmpl_id.id,
                         'res_model_id': self.env.ref('product.model_product_template').id,

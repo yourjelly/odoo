@@ -72,9 +72,9 @@ class ProcurementGroup(models.Model):
                 if values.get('orderpoint_id', False):
                     msg =_('No procurement rule found for orderpoint %s. Update the inventory tab of the product form.') % (values['orderpoint_id'].name,)
                 activity = self.env['mail.activity'].create({
-                    'activity_type_id': self.env.ref('mail_activity_data_todo').id,
+                    'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
                     'note': msg,
-                    'responsible_id': values['product_id'].responsible_id.id,
+                    'user_id': values['product_id'].responsible_id.id,
                     'res_id': values['product_id'].product_tmpl_id.id,
                     'res_model_id': self.env.ref('product.model_product_template').id,
                 })
@@ -165,9 +165,9 @@ class ProcurementGroup(models.Model):
                     raise UserError(msg)
                 else:
                     activity = self.env['mail.activity'].create({
-                        'activity_type_id': self.env.ref('mail_activity_data_todo').id,
+                        'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
                         'note': msg,
-                        'responsible_id': values['product_id'].responsible_id.id,
+                        'user_id': values['product_id'].responsible_id.id,
                         'res_id': values['product_id'].product_tmpl_id.id,
                         'res_model_id': self.env.ref('product.model_product_template').id,
                     })
