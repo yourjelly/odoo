@@ -116,7 +116,7 @@
                                 <tree editable="bottom" delete="0" default_order="is_done desc,sequence" decoration-muted="is_done" decoration-warning="quantity_done&gt;product_uom_qty" decoration-success="quantity_done==product_uom_qty" decoration-danger="reserved_availability &lt; product_uom_qty" create="0">
                                     <field name="product_id" required="1"/>
                                     <field name="product_uom" groups="product.group_uom"/>
-                                    <field name="has_tracking" invisible="1"/>
+                                    <field name="show_split_visible" invisible="1"/>
                                     <field name="is_done" invisible="1"/>
                                     <field name="sequence" invisible="1"/>
                                     <field name="location_id" domain="[('id', 'child_of', parent.location_id)]" invisible="1"/>
@@ -124,9 +124,9 @@
                                     <field name="state" invisible="1"/>
                                     <field name="reserved_availability" attrs="{'invisible': [('is_done', '=', True)]}"/>
                                     <field name="product_uom_qty" readonly="1" attrs="{'required': [('product_id', '!=', False)]}" string="To Consume"/>
-                                    <field name="quantity_done" attrs="{'readonly': ['|', ('is_done', '=', True), ('has_tracking', 'in', ['lot','serial'])]}" string="Consumed"/>
-                                    <button name="split_move_lot" string="Register lots" type="object" icon="fa-list"
-                                        attrs="{'invisible': [('has_tracking', 'not in', ['lot','serial'])]}"/>
+                                    <field name="quantity_done" attrs="{'readonly': ['|', ('is_done', '=', True), ('show_split_visible', 'in', ['lot','serial'])]}" string="Consumed"/>
+                                    <button name="split_move_line" string="Register lots" type="object" icon="fa-list"
+                                        attrs="{'invisible': [('show_split_visible', '=', False)]}"/>
                                 </tree>
                             </field>
                         </page>
@@ -137,14 +137,14 @@
                                     <field name="product_uom" groups="product.group_uom"/>
                                     <field name="is_done" invisible="1"/>
                                     <field name="sequence" invisible="1"/>
-                                    <field name="has_tracking" invisible="1"/>
+                                    <field name="show_split_visible" invisible="1"/>
                                     <field name="location_id" domain="[('id', 'child_of', parent.location_id)]" invisible="1"/>
                                     <field name="location_dest_id" domain="[('id', 'child_of', parent.location_dest_id)]" invisible="1"/>
                                     <field name="state" invisible="1"/>
                                     <field name="product_uom_qty" readonly="1" attrs="{'required': [('product_id', '!=', False)]}" string="To Produce"/>
-                                    <field name="quantity_done" attrs="{'readonly': ['|', ('is_done', '=', True), ('has_tracking', 'in', ['lot','serial'])]}" string="Produced"/>
-                                    <button name="split_move_lot" string="Register lots" type="object" icon="fa-list"
-                                        attrs="{'invisible': [('has_tracking', 'not in', ['lot','serial'])]}"/>
+                                    <field name="quantity_done" attrs="{'readonly': ['|', ('is_done', '=', True), ('show_split_visible', 'in', ['lot','serial'])]}" string="Produced"/>
+                                    <button name="split_move_line" string="Register lots" type="object" icon="fa-list"
+                                        attrs="{'invisible': [('show_split_visible', 'not in', ['lot','serial'])]}"/>
                                 </tree>
                             </field>
                         </page>

@@ -66,7 +66,31 @@ class StockMove(models.Model):
         help='Technical Field to order moves')
     quantity_done = fields.Float('Quantity Done', compute='_quantity_done_compute', digits=dp.get_precision('Product Unit of Measure'), inverse='_quantity_done_set',
                                  states={'done': [('readonly', True)]})
-    
+    show_split_visible = fields.Boolean('Show split visible', compute='_compute_split_visible')
+
+    def _compute_split_visible(self):
+        """
+            Similar logic as for pickings, but applied to manufacturing orders
+        """
+        for move in self:
+            if not move.product_id:
+                move.show_split_visible = False
+                continue
+
+            if move.is_editable:
+                move.show_split_visible = True
+                continue
+
+            multi_locations_enabled = False
+            if self.user_has_groups('stock.group_stock_multi_locations'):
+                multi_locations_enabled = move.location_id.child_ids or move.location_dest_id.child_ids
+            has_package = move.pack_operation_ids.mapped('package_id') | move.pack_operation_ids.mapped('result_package_id')
+            if move.state not in ['cancel', 'draft', 'confirmed']\
+                    and (multi_locations_enabled or move.has_tracking != 'none' or len(move.pack_operation_ids) > 1 or has_package):
+                move.show_split_visible = True
+            else:
+                move.show_split_visible = False
+
     @api.multi
     @api.depends('pack_operation_ids.qty_done')
     def _quantity_done_compute(self):
@@ -109,26 +133,12 @@ class StockMove(models.Model):
 
     @api.multi
     # Could use split_move_operation from stock here
-    def split_move_lot(self):
-        ctx = dict(self.env.context)
+    def split_move_line(self):
         self.ensure_one()
+
         view = self.env.ref('mrp.view_stock_move_lots')
-        serial = (self.has_tracking == 'serial')
-        only_create = False  # Check operation type in theory
-        show_reserved = any([x for x in self.pack_operation_ids if x.product_qty > 0.0])
-        ctx.update({
-            'serial': serial,
-            'only_create': only_create,
-            'create_lots': True,
-            'state_done': self.is_done,
-            'show_reserved': show_reserved,
-        })
-        if ctx.get('w_production'):
-            action = self.env.ref('mrp.act_mrp_product_produce').read()[0]
-            action['context'] = ctx
-            return action
-        result = {
-            'name': _('Register Lots'),
+        return {
+            'name': _('Detailed Operations'),
             'type': 'ir.actions.act_window',
             'view_type': 'form',
             'view_mode': 'form',
@@ -137,9 +147,15 @@ class StockMove(models.Model):
             'view_id': view.id,
             'target': 'new',
             'res_id': self.id,
-            'context': ctx,
+            'context': dict(
+                self.env.context,
+                show_lots_m2o=self.has_tracking != 'none',# and (self.picking_type_id.use_existing_lots or self.state == 'done'),  # able to create lots, whatever the value of ` use_create_lots`.
+                show_lots_text=False,#self.has_tracking != 'none' and self.picking_type_id.use_create_lots and not self.picking_type_id.use_existing_lots and self.state != 'done',
+show_source_location=False if self.production_id else self.location_id.child_ids,
+                show_destination_location=False if self.raw_material_production_id else self.location_dest_id.child_ids,
+                show_package=not self.location_id.usage == 'production', #not used for the moment
+            ),
         }
-        return result
 
     @api.multi
     def save(self):
