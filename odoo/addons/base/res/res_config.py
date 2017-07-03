@@ -383,6 +383,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
     @api.model
     def fields_view_get(self, view_id=None, view_type='form',
                         toolbar=False, submenu=False):
+
         ret_val = super(ResConfigSettings, self).fields_view_get(
             view_id=view_id, view_type=view_type,
             toolbar=toolbar, submenu=submenu)
@@ -673,7 +674,7 @@ class ResConfigSettingsSearch(models.AbstractModel):
 
         fields = super(ResConfigSettingsSearch, self).fields_get(fields, attributes=attributes)
         inherited_env = self.env['ir.model']._fields
-        # inherited_models = inherited_env._inherited_models()
+
         for name in inherited_env:
             if name not in fields:
                 continue
@@ -683,22 +684,20 @@ class ResConfigSettingsSearch(models.AbstractModel):
         return fields
 
     @api.model
-    def default_get(self, fields):
+    def default_get(self, fields_list):
         ''' If an addon is already installed, check it by default
         '''
-        defaults = super(ResConfigSettingsSearch, self).default_get(fields)
-        return dict(defaults, **dict.fromkeys(self.env['ir.model']._inheited_models(), True))
+        defaults = super(ResConfigSettingsSearch, self).default_get(fields_list)
+        return dict(defaults, **dict.fromkeys(self.env['ir.model']._fields, True))
 
     @api.model
     def fields_view_get(self, view_id=None, view_type='form',
                         toolbar=False, submenu=False):
-        print ""
         ret_val = super(ResConfigSettingsSearch, self).fields_view_get(
             view_id=view_id, view_type=view_type,
             toolbar=toolbar, submenu=submenu)
 
         inherited_env = self.env['ir.model']._fields
-        # inherited_models = inherited_env._inherited_models()
 
         doc = etree.XML(ret_val['arch'])
 

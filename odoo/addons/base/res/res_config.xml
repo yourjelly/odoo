@@ -30,15 +30,15 @@
             </field>
         </record>
 
-        <record id="res_config_view_base" model="ir.ui.view">
-            <field name="name">res.config.view.base</field>
+        <record id="res_config_installer1" model="ir.ui.view">
+            <field name="name">Test</field>
             <field name="model">res.config.settings.search</field>
             <field name="arch" type="xml">
-                <form string="Test">
-                    <group name="res_config_contents"/>
+                <form string="Configuration Settings">
+                    <separator string="title" colspan="4"/>
                     <footer>
-                        <button name="action_next" type="object" string="Apply" class="btn-primary"/>
-                        <button name="action_skip" type="object" special="cancel" string="Cancel" class="btn-default"/>
+                        <button name="action_next" type="object" string="Installed Apps" class="btn-primary"/>
+                        <button string="Skip" class="btn-default" special="cancel" />
                     </footer>
                 </form>
             </field>
