@@ -7,7 +7,7 @@ from odoo import api, fields, models
 class SaleConfigSettings(models.TransientModel):
     _inherit = 'sale.config.settings'
 
-    sale_note = fields.Text(related='company_id.sale_note', string="Terms & Conditions")
+    sale_note = fields.Text(related='company_id.sale_note', string="Terms & Conditions", translate=True)
     use_sale_note = fields.Boolean(
         string='Default Terms & Conditions',
         oldname='default_use_sale_note')
