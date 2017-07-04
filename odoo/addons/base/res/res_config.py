@@ -383,7 +383,6 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
     @api.model
     def fields_view_get(self, view_id=None, view_type='form',
                         toolbar=False, submenu=False):
-
         ret_val = super(ResConfigSettings, self).fields_view_get(
             view_id=view_id, view_type=view_type,
             toolbar=toolbar, submenu=submenu)
@@ -673,8 +672,7 @@ class ResConfigSettingsSearch(models.AbstractModel):
     def fields_get(self, fields=None, attributes=None):
 
         fields = super(ResConfigSettingsSearch, self).fields_get(fields, attributes=attributes)
-        inherited_env = self.env['ir.model']._fields
-
+        inherited_env = list(self.env['sale.config.settings']._inherits)
         for name in inherited_env:
             if name not in fields:
                 continue
@@ -696,8 +694,7 @@ class ResConfigSettingsSearch(models.AbstractModel):
         ret_val = super(ResConfigSettingsSearch, self).fields_view_get(
             view_id=view_id, view_type=view_type,
             toolbar=toolbar, submenu=submenu)
-
-        inherited_env = self.env['ir.model']._fields
+        inherited_env = self._fields
 
         doc = etree.XML(ret_val['arch'])
 

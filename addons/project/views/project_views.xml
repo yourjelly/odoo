@@ -329,6 +329,23 @@ action = model.activate_sample_project()
             </field>
         </record>
 
+        <record id="config_settings_search" model="ir.ui.view">
+            <field name="name">settings.search.test</field>
+            <field name="model">res.config.settings.search</field>
+            <field name="arch" type="xml">
+                <form string="Settings Search">
+                    Search.
+                </form>
+            </field>
+        </record>
+
+        <record id="action_settings_search" model="ir.actions.act_window">
+            <field name="name">Settings</field>
+            <field name="res_model">res.config.settings.search</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="config_settings_search"/>
+        </record>
+
         <record id="open_view_project_all" model="ir.actions.act_window">
             <field name="name">Projects</field>
             <field name="res_model">project.project</field>
@@ -818,6 +835,7 @@ action = model.activate_sample_project()
         <menuitem action="open_task_type_form" id="menu_project_config_project" name="Stages" parent="menu_project_config" sequence="3" groups="base.group_no_one"/>
 
         <menuitem action="open_view_project_all" id="menu_projects" name="Dashboard" parent="menu_main_pm" sequence="1"/>
+        <menuitem action="action_settings_search" id="settings_search" name="Settings Search" parent="menu_main_pm" sequence="4"/>
         <menuitem action="open_view_project_all_config" id="menu_projects_config" name="Projects" parent="menu_project_config" sequence="10"/>
 
         <!-- User Form -->
