@@ -178,7 +178,7 @@ class ProductProduct(models.Model):
             ('location_id.usage', 'in', ('transit', 'internal')),
             ('remaining_qty', '>', 0),
             ('state', '=', 'done')
-        ], order='date, id') #TODO: case where 
+        ], order='date, id') #TODO: case
         return candidates
 
     def _get_candidates_move(self):
