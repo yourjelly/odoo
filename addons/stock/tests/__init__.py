@@ -6,3 +6,5 @@ from . import test_warehouse
 from . import test_shipment
 from . import test_stock_location_search
 from . import test_quant
+from . import test_move
+from . import test_move2
