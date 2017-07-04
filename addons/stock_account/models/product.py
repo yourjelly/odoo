@@ -169,6 +169,18 @@ class ProductProduct(models.Model):
         latest = self.env['stock.move'].search(domain, order='date desc, id desc', limit=1)
         return latest.cumulated_value
 
+    def _get_candidates_out_move(self):
+        self.ensure_one()
+        # TODO: filter at start of period
+        candidates = self.env['stock.move'].search([
+            ('product_id', '=', self.id),
+            ('location_dest_id.usage', 'not in', ('transit', 'internal')),
+            ('location_id.usage', 'in', ('transit', 'internal')),
+            ('remaining_qty', '>', 0),
+            ('state', '=', 'done')
+        ], order='date, id') #TODO: case where 
+        return candidates
+
     def _get_candidates_move(self):
         self.ensure_one()
         # TODO: filter at start of period

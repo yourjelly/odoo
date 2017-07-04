@@ -103,6 +103,14 @@ class StockMove(models.Model):
                     move.value = move.price_unit * move.product_qty
                     move.cumulated_value = move.product_id._get_latest_cumulated_value(not_move=move) + move.value
                     move.remaining_qty = move.product_qty
+                    # If you find an out with qty_remaining, you can change it over there
+                    candidates_out = move.product_id._get_candidates_out_move()
+                    qty_to_take = move.product_qty
+                    for candidate in candidates_out:
+                        if candidate.remaining_qty < qty_to_take:
+                            qty_taken_on_candidate = candidate.remaining_qty
+                        else:
+                            qty_taken_on_candidate = qty_to_take
                 else:
                     move.price_unit = move.product_id.standard_price
                     move.value = move.price_unit * move.product_qty
@@ -119,8 +127,11 @@ class StockMove(models.Model):
                         tmp_value += qty_taken_on_candidate * candidate.price_unit
                         candidate.remaining_qty -= qty_taken_on_candidate
                         qty_to_take -= qty_taken_on_candidate
+                        
                         if qty_to_take == 0:
                             break
+                    if qty_to_take > 0:
+                        move.remaining_qty = qty_to_take # In case there are no candidates to match
                     move.value = -tmp_value
                     move.cumulated_value = move.product_id._get_latest_cumulated_value(not_move=move) + move.value
                 elif move.product_id.cost_method == 'average':
