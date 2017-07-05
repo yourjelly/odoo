@@ -98,6 +98,16 @@ class StockMove(models.Model):
         for move in moves:
             move.value += value
 
+#     def change_move_value_in_the_past(self, value):
+#         self.ensure_one()
+#         if self.product_id.cost_method == 'fifo':
+#             moves = self.search([('state', '=', 'done'),
+#                          ('date', '>',  self.date), 
+#                          ('product_id', '=', self.product_id.id)])
+#             if self.location_id.usage not in ('internal', 'transit'):
+#                 if move.last_done_move_id and move.last_done_remaining_qty:
+
+
     @api.multi
     def action_done(self):
         qty_available = {}
