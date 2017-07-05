@@ -220,7 +220,8 @@ var ViewManagerAction = WidgetAction.extend({
         var self = this;
         return this.widget.view_stack.map(function (view, index) {
             return {
-                title: view.controller && view.controller.get('title') || self.title,
+                title: view.title || self.title,
+                // title: view.controller && view.controller.get('title') || self.title,
                 index: index,
                 action: self,
             };
