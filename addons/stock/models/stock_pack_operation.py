@@ -35,9 +35,6 @@ class PackOperation(models.Model):
     owner_id = fields.Many2one('res.partner', 'Owner', help="Owner of the quants")
     location_id = fields.Many2one('stock.location', 'From', required=True)
     location_dest_id = fields.Many2one('stock.location', 'To', required=True)
-    picking_source_location_id = fields.Many2one('stock.location', related='picking_id.location_id')
-    picking_destination_location_id = fields.Many2one('stock.location', related='picking_id.location_dest_id')
-    # TDE FIXME: unnecessary fields IMO, to remove
     from_loc = fields.Char(compute='_compute_location_description')
     to_loc = fields.Char(compute='_compute_location_description')
     lots_visible = fields.Boolean(compute='_compute_lots_visible')
