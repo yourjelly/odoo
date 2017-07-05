@@ -204,14 +204,15 @@ class StockMove(models.Model):
     @api.one
     @api.depends('product_id', 'product_uom', 'product_uom_qty')
     def _compute_product_qty(self):
-        if self.product_uom:
-            self.product_qty = self.product_uom._compute_quantity(self.product_uom_qty, self.product_id.uom_id)
+        self.product_qty = self.product_uom._compute_quantity(self.product_uom_qty, self.product_id.uom_id)
 
     @api.multi
-    @api.depends('pack_operation_ids.qty_done')
+    @api.depends('pack_operation_ids.qty_done', 'pack_operation_ids.product_uom_id')
     def _quantity_done_compute(self):
         for move in self:
-            move.quantity_done = sum(move.pack_operation_ids.mapped('qty_done'))
+            for move_line in move.pack_operation_ids:
+                # Transform the move_line quantity_done into the move uom.
+                move.quantity_done += move_line.product_uom_id._compute_quantity(move_line.qty_done, move.product_uom)
 
     @api.multi
     def _quantity_done_set(self):
@@ -241,7 +242,7 @@ class StockMove(models.Model):
         and is represented by the aggregated `product_qty` on the linked move lines. If the move
         is force assigned, the value will be 0.
         """
-        self.reserved_availability = sum(self.pack_operation_ids.mapped('product_qty'))
+        self.reserved_availability = self.product_id.uom_id._compute_quantity(sum(self.pack_operation_ids.mapped('product_qty')), self.product_uom, rounding_method='HALF-UP')
 
     @api.one
     @api.depends('state', 'product_id', 'product_qty', 'location_id')
@@ -493,6 +494,19 @@ class StockMove(models.Model):
         if self.date_expected:
             self.date = self.date_expected
 
+    @api.onchange('product_uom')
+    def onchange_product_uom(self):
+        if self.product_uom.factor > self.product_id.uom_id.factor:
+            return {
+                'warning': {
+                    'title': "Unsafe unit of measure",
+                    'message': _("You are using a unit of measure smaller than the one you are using in "
+                                 "order to stock your product. This can lead to rounding problem on reserved quantity! "
+                                 "You should use the smaller unit of measure possible in order to valuate your stock or "
+                                 "change its rounding precision to a smaller value (example: 0.00001)."),
+                }
+            }
+
     # TDE DECORATOR: remove that api.multi when action_confirm is migrated
     @api.multi
     def assign_picking(self):
@@ -624,7 +638,6 @@ class StockMove(models.Model):
 
     def _prepare_move_line_vals(self, quantity=None, reserved_quant=None):
         self.ensure_one()
-
         # apply putaway
         location_dest_id = self.location_dest_id.get_putaway_strategy(self.product_id).id or self.location_dest_id.id
         vals = {
@@ -636,7 +649,8 @@ class StockMove(models.Model):
             'picking_id': self.picking_id.id,
         }
         if quantity:
-            vals = dict(vals, product_qty=quantity)
+            uom_quantity = self.product_id.uom_id._compute_quantity(quantity, self.product_uom, rounding_method='HALF-UP')
+            vals = dict(vals, product_uom_qty=uom_quantity)
         if reserved_quant:
             vals = dict(
                 vals,
@@ -669,7 +683,7 @@ class StockMove(models.Model):
         for reserved_quant, quantity in quants:
             to_update = self.pack_operation_ids.filtered(lambda m: m.location_id.id == reserved_quant.location_id.id and m.lot_id.id == reserved_quant.lot_id.id and m.package_id.id == reserved_quant.package_id.id and m.owner_id.id == reserved_quant.owner_id.id)
             if to_update:
-                to_update[0].with_context(bypass_reservation_update=True).product_qty += taken_quantity
+                to_update[0].with_context(bypass_reservation_update=True).product_uom_qty += self.product_id.uom_id._compute_quantity(taken_quantity, self.product_uom, rounding_method='HALF-UP')
             else:
                 if self.product_id.tracking == 'serial':
                     for i in range(0, int(quantity)):
@@ -805,7 +819,7 @@ class StockMove(models.Model):
                         precision_rounding=self.product_uom.rounding,
                         rounding_method='UP')
                     move_line.qty_done = quantity_split
-                    move_line.copy(default={'move_id': extra_move.id, 'qty_done': extra_move_quantity, 'product_qty': 0})
+                    move_line.copy(default={'move_id': extra_move.id, 'qty_done': extra_move_quantity, 'product_uom_qty': 0})
                     extra_move_quantity -= extra_move_quantity
                 if extra_move_quantity == 0.0:
                     break
@@ -844,7 +858,7 @@ class StockMove(models.Model):
                         # By decreasing `product_qty`, we free the reservation.
                         # FIXME: if qty_done > product_qty, this could raise if nothing is in stock
                         try:
-                            move_line.write({'product_qty': move_line.qty_done})
+                            move_line.write({'product_uom_qty': move_line.qty_done})
                         except UserError:
                             pass
 
