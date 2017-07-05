@@ -672,7 +672,7 @@ class ResConfigSettingsSearch(models.AbstractModel):
     def fields_get(self, fields=None, attributes=None):
 
         fields = super(ResConfigSettingsSearch, self).fields_get(fields, attributes=attributes)
-        inherited_env = list(self.env['sale.config.settings']._inherits)
+        inherited_env = list(self.env['res.config.settings']._inherits)
         for name in inherited_env:
             if name not in fields:
                 continue

@@ -11,6 +11,10 @@
                         <button string="Cancel" type="object" name="cancel" class="oe_link"/>
                     </header>
                     <sheet>
+                        <div class="o_menu_settings_search">
+                            <span class="fa fa-search fa-2x o_menu_search_icon"/>
+                            <input type="text" placeholder="Search..." class="o_menu_settings_search_input" onfocus="this.value = this.value;"/>
+                        </div>
                         <h2>Task Management</h2>
                         <div class="row mt16 o_settings_container" title="This replaces task's description text field by a collaborative rich text pad. This is advised if tasks involve several people.">
                             <div id="use_collaborative_pad" class="col-xs-12 col-md-6 o_setting_box" title="Lets the company customize which Pad installation should be used to link to new pads (for example: http://ietherpad.com/).">

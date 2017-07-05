@@ -4,6 +4,7 @@ odoo.define('web.FormRenderer', function (require) {
 var BasicRenderer = require('web.BasicRenderer');
 var config = require('web.config');
 var core = require('web.core');
+var AppSwitcher = require('web_enterprise.AppSwitcher');
 
 var _t = core._t;
 var qweb = core.qweb;
@@ -11,6 +12,12 @@ var qweb = core.qweb;
 var FormRenderer = BasicRenderer.extend({
     className: "o_form_view",
     events: _.extend({}, BasicRenderer.prototype.events, {
+        'input input.o_menu_settings_search_input': function(e) {
+            if(!e.target.value) {
+                this.state = this.get_initial_state();
+                this.state.is_searching = true;
+            }
+        },
         'click .o_notification_box .oe_field_translate': '_onTranslate',
     }),
     /**
@@ -21,6 +28,13 @@ var FormRenderer = BasicRenderer.extend({
         this.idsForLabels = {};
     },
 
+    get_initial_state: function () {
+        return {
+            apps: _.where(this.menu_data, {is_app: true}),
+            menu_items: [],
+            focus: null,  // index of focused element
+        };
+    },
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
