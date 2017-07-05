@@ -22,7 +22,10 @@ class PackOperation(models.Model):
         help="Change to a better name") 
     product_id = fields.Many2one('product.product', 'Product', ondelete="cascade") #might be a related with the move also --> no, because you can put them next to each other
     product_uom_id = fields.Many2one('product.uom', 'Unit of Measure')
-    product_qty = fields.Float('Reserved', default=0.0, digits=dp.get_precision('Product Unit of Measure'), required=True)
+    product_qty = fields.Float(
+        'Real Reserved Quantity', digits=0,
+        compute='_compute_product_qty', inverse='_set_product_qty', store=True)
+    product_uom_qty = fields.Float('Reserved', default=0.0, digits=dp.get_precision('Product Unit of Measure'), required=True)
     ordered_qty = fields.Float('Ordered Quantity', digits=dp.get_precision('Product Unit of Measure'))
     qty_done = fields.Float('Done', default=0.0, digits=dp.get_precision('Product Unit of Measure'), copy=False)
     package_id = fields.Many2one('stock.quant.package', 'Source Package', ondelete='restrict')
@@ -56,6 +59,22 @@ class PackOperation(models.Model):
         else:
             self.lots_visible = self.product_id.tracking != 'none'
 
+    @api.one
+    @api.depends('product_id', 'product_uom_id', 'product_uom_qty')
+    def _compute_product_qty(self):
+        if self.product_uom_id:
+            self.product_qty = self.product_uom_id._compute_quantity(self.product_uom_qty, self.product_id.uom_id, rounding_method='HALF-UP')
+        else:
+            self.product_qty = self.product_uom_qty
+
+    @api.one
+    def _set_product_qty(self):
+        """ The meaning of product_qty field changed lately and is now a functional field computing the quantity
+        in the default product UoM. This code has been added to raise an error if a write is made given a value
+        for `product_qty`, where the same write should set the `product_uom_qty` field instead, in order to
+        detect errors. """
+        raise UserError(_('The requested operation cannot be processed because of a programming error setting the `product_qty_uom` field instead of the `product_qty`.'))
+
     @api.multi
     @api.onchange('product_id', 'product_uom_id')
     def onchange_product_id(self):
@@ -70,11 +89,11 @@ class PackOperation(models.Model):
 
     @api.model
     def create(self, vals):
-        vals['ordered_qty'] = vals.get('product_qty')
+        vals['ordered_qty'] = vals.get('product_uom_qty')
         ml = super(PackOperation, self).create(vals)
         if ml.state == 'done':
             Quant = self.env['stock.quant']
-            quantity = ml.move_id.product_uom._compute_quantity(ml.qty_done, ml.move_id.product_id.uom_id)
+            quantity = ml.product_uom_id._compute_quantity(ml.qty_done, ml.move_id.product_id.uom_id,rounding_method='HALF-UP')
             if ml.location_id.should_impact_quants() and ml.product_id.type == 'product':
                 available_qty = Quant._decrease_available_quantity(ml.product_id, ml.location_id, quantity, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id)
                 if available_qty < 0 and ml.lot_id:
@@ -101,10 +120,10 @@ class PackOperation(models.Model):
         # We forbid to change the reserved quantity in the interace, but it is needed in the
         # case of stock.move's split.
         # TODO Move me in the update
-        if 'product_qty' in vals:
+        if 'product_uom_qty' in vals:
             for ml in self.filtered(lambda m: m.state in ('partially_available', 'assigned')):
-                if ml.location_id.should_impact_quants() and ml.product_id.type == 'product' and ml.product_id.type == 'product':
-                    qty_to_decrease = ml.product_qty - vals['product_qty']
+                if ml.location_id.should_impact_quants() and ml.product_id.type == 'product':
+                    qty_to_decrease = ml.product_qty - ml.product_uom_id._compute_quantity(vals['product_uom_qty'], ml.product_id.uom_id, rounding_method='HALF-UP')
                     try:
                         Quant._decrease_reserved_quantity(ml.product_id, ml.location_id, qty_to_decrease, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id)
                     except UserError:
@@ -153,7 +172,8 @@ class PackOperation(models.Model):
                             except UserError:
                                 pass
                     if new_product_qty != ml.product_qty:
-                        ml.with_context(bypass_reservation_update=True).product_qty = new_product_qty
+                        new_product_uom_qty = self.product_id.uom_id._compute_quantity(new_product_qty, self.product_uom_id, rounding_method='HALF-UP')
+                        ml.with_context(bypass_reservation_update=True).product_uom_qty = new_product_uom_qty
 
         if updates or 'qty_done' in vals:
             for ml in self.filtered(lambda ml: ml.move_id.state == 'done'):
@@ -173,7 +193,7 @@ class PackOperation(models.Model):
                 package_id = updates.get('package_id', ml.package_id)
                 result_package_id = updates.get('result_package_id', ml.result_package_id)
                 owner_id = updates.get('owner_id', ml.owner_id)
-                quantity = ml.move_id.product_uom._compute_quantity(qty_done, ml.move_id.product_id.uom_id)
+                quantity = ml.move_id.product_uom._compute_quantity(qty_done, ml.move_id.product_id.uom_id, rounding_method='HALF-UP')
                 if location_id.should_impact_quants() and ml.product_id.type == 'product':
                     ml._free_reservation(product_id, location_id, quantity, lot_id=lot_id, package_id=package_id, owner_id=owner_id)
                     available_qty = Quant._decrease_available_quantity(product_id, location_id, quantity, lot_id=lot_id, package_id=package_id, owner_id=owner_id)
@@ -223,7 +243,7 @@ class PackOperation(models.Model):
                         Quant._decrease_reserved_quantity(ml.product_id, ml.location_id, ml.product_qty, lot_id=False, package_id=ml.package_id, owner_id=ml.owner_id)
 
                 # move what's been actually done
-                quantity = ml.move_id.product_uom._compute_quantity(ml.qty_done, ml.move_id.product_id.uom_id)
+                quantity = ml.product_uom_id._compute_quantity(ml.qty_done, ml.move_id.product_id.uom_id, rounding_method='HALF-UP')
                 if ml.location_id.should_impact_quants() and ml.product_id.type == 'product':
                     available_qty = Quant._decrease_available_quantity(ml.product_id, ml.location_id, quantity, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id)
                     if available_qty < 0 and ml.lot_id:
@@ -280,7 +300,7 @@ class PackOperation(models.Model):
                         candidate.product_qty - quantity,
                         precision_rounding=self.product_uom_id.rounding,
                         rounding_method='UP')
-                    candidate.product_qty = quantity_split
+                    candidate.product_uom_qty = self.product_id.uom_id._compute_quantity(quantity_split, self.product_uom_id, rounding_method='HALF-UP')
                     quantity -= quantity_split
                     move_to_recompute_state |= candidate.move_id
                 if quantity == 0.0:

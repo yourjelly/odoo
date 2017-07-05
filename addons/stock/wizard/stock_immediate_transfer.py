@@ -31,7 +31,7 @@ class StockImmediateTransfer(models.TransientModel):
         for move in self.pick_id.move_lines:
             if move.pack_operation_ids:
                 for move_line in move.pack_operation_ids:
-                    move_line.qty_done = move_line.product_qty
+                    move_line.qty_done = move_line.product_uom_qty
             else:
                 move.quantity_done = move.product_uom_qty
         self.pick_id.do_transfer()
