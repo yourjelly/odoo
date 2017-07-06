@@ -136,9 +136,9 @@ class StockMove(models.Model):
                             candidate.remaining_qty -= qty_taken_on_candidate
                             move.remaining_qty -= qty_taken_on_candidate
                             qty_to_take -= qty_taken_on_candidate
-                            candidate.value += move.price_unit * qty_to_take
-                            candidate.cumulated_value += move.price_unit * qty_to_take
-                            candidate._update_future_cumulated_value(move.price_unit * qty_to_take)
+                            candidate.value += move.price_unit * qty_taken_on_candidate
+                            candidate.cumulated_value += move.price_unit * qty_taken_on_candidate
+                            candidate._update_future_cumulated_value(move.price_unit * qty_taken_on_candidate)
                             candidate.price_unit = candidate.value / candidate.product_qty
                     move.last_done_qty = move.product_id.qty_available
                 else:
