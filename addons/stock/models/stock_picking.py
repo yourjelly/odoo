@@ -474,7 +474,7 @@ class Picking(models.Model):
         # call `action_assign` on every confirmed move which location_id bypasses the reservation
         self.filtered(lambda picking: picking.location_id.usage in ('supplier', 'inventory', 'production'))\
             .filtered(lambda move: move.state == 'confirmed')\
-            .move_lines.action_assign()
+            .mapped('move_lines').action_assign()
         return True
 
     @api.multi
