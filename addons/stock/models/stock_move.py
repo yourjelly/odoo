@@ -848,7 +848,11 @@ class StockMove(models.Model):
                     if move_line.product_qty:
                         # FIXME: there will be an issue if the move was partially available
                         # By decreasing `product_qty`, we free the reservation.
-                        move_line.write({'product_qty': move_line.qty_done})
+                        # FIXME: if qty_done > product_qty, this could raise if nothing is in stock
+                        try:
+                            move_line.write({'product_qty': move_line.qty_done})
+                        except UserError:
+                            pass
 
                 # If you were already putting stock.move.lots on the next one in the work order, transfer those to the new move
                 move.pack_operation_ids.filtered(lambda x: x.qty_done == 0.0).write({'move_id': new_move})
@@ -862,7 +866,8 @@ class StockMove(models.Model):
                             packop.write({'lot_id': lot.id})
                         if not packop.lot_id:
                             raise UserError(_('You need to supply a lot/serial number.'))
-                    packop.action_done()
+                # execute `action_done` even if nothing was done, to free the reservation
+                packop.action_done()
         picking = self and self[0].picking_id or False
         moves_todo.write({'state': 'done', 'date': fields.Datetime.now()})
         moves_todo.mapped('move_dest_ids').action_assign()
