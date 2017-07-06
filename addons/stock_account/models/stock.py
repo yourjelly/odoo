@@ -228,7 +228,7 @@ class StockMove(models.Model):
 
         # the standard_price of the product may be in another decimal precision, or not compatible with the coinage of
         # the company currency... so we need to use round() before creating the accounting entries.
-        debit_value = self.company_id.currency_id.round(valuation_amount * qty)
+        debit_value = self.company_id.currency_id.round(valuation_amount)
     
         # check that all data is correct
         if self.company_id.currency_id.is_zero(debit_value):
@@ -297,7 +297,7 @@ class StockMove(models.Model):
     def _create_account_move_line(self, credit_account_id, debit_account_id, journal_id):
         self.ensure_one()
         AccountMove = self.env['account.move']
-        move_lines = self._prepare_account_move_line(self.product_qty, self.value, credit_account_id, debit_account_id)
+        move_lines = self._prepare_account_move_line(self.product_qty, abs(self.value), credit_account_id, debit_account_id)
         if move_lines:
             date = self._context.get('force_period_date', fields.Date.context_today(self))
             new_account_move = AccountMove.create({
