@@ -666,7 +666,7 @@ class PurchaseOrderLine(models.Model):
                     tmp = template.copy()
                     tmp.update({
                         'product_uom_qty': min(procurement_qty, diff_quantity),
-                        'move_dest_ids': [(4, procurement.move_dest_id.id)],  # move destination is same as procurement destination
+                        'move_dest_ids':  procurement.move_dest_id and [(4, procurement.move_dest_id.id)] or [],  # move destination is same as procurement destination
                         'procurement_ids': [(4, procurement.id)],
                         'propagate': procurement.rule_id.propagate,
                     })
