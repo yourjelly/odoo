@@ -57,12 +57,23 @@ class SaleOrder(models.Model):
         refund is not directly linked to the SO.
         """
         for order in self:
-            invoice_ids = order.order_line.mapped('invoice_lines').mapped('invoice_id').filtered(lambda r: r.type in ['out_invoice', 'out_refund'])
-            # Search for invoices which have been 'cancelled' (filter_refund = 'modify' in
-            # 'account.invoice.refund')
-            # use like as origin may contains multiple references (e.g. 'SO01, SO02')
-            refunds = invoice_ids.search([('origin', 'like', order.name)]).filtered(lambda r: r.type in ['out_invoice', 'out_refund'])
-            invoice_ids |= refunds.filtered(lambda r: order.name in [origin.strip() for origin in r.origin.split(',')])
+            invoice_ids = env['account.invoice'].search([
+            '&', ('type', 'in', ['out_invoice', 'out_refund']),
+            '|',
+                #Invoicess directly linkled to the order
+                ('invoice_line_ids.sale_line_ids.order_id', '=', order.id),
+                # Search for invoices which have been 'cancelled' (filter_refund = 'modify' in
+                # 'account.invoice.refund')
+                # use like as origin may contains multiple references (e.g. 'SO01, SO02')
+                '|', '|', '|', '|', '|', 
+                    ('origin', '=', order.name), 
+                    ('origin', '=like', "%s,%%" % order.name), 
+                    ('origin', '=like', "%%,%s" % order.name), 
+                    ('origin', '=like', "%%, %s" % order.name), 
+                    ('origin', 'like', ",%s," % order.name), 
+                    ('origin', 'like', ", %s," % order.name),
+            ])
+            
             # Search for refunds as well
             refund_ids = self.env['account.invoice'].browse()
             if invoice_ids:
