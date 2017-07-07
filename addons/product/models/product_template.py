@@ -183,12 +183,6 @@ class ProductTemplate(models.Model):
         else:
             self.write({'list_price': self.price})
 
-    def _compute_average_price(self):
-        unique_variants = self.filtered(lambda template: len(template.product_variant_ids) == 1)
-        for template in unique_variants:
-            template.average_price = template.product_variant_ids.average_price
-        for template in (self - unique_variants):
-            template.average_price = 0.0
 
     @api.depends('product_variant_ids', 'product_variant_ids.standard_price')
     def _compute_standard_price(self):

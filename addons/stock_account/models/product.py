@@ -43,6 +43,15 @@ class ProductTemplate(models.Model):
         digits=dp.get_precision('Product Price'), groups="base.group_user",
         help="Average cost of the product, in the default unit of measure of the product.")
 
+    @api.multi
+    def _compute_average_price(self):
+        unique_variants = self.filtered(lambda template: len(template.product_variant_ids) == 1)
+        for template in unique_variants:
+            template.average_price = template.product_variant_ids.average_price
+        for template in (self - unique_variants):
+            template.average_price = 0.0
+
+
     @api.one
     @api.depends('property_valuation', 'categ_id.property_valuation')
     def _compute_valuation_type(self):
