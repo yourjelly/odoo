@@ -167,6 +167,8 @@ class ProductProduct(models.Model):
         if not_move:
             domain += [('id', '!=', not_move.id)]
         latest = self.env['stock.move'].search(domain, order='date desc, id desc', limit=1)
+        if not latest:
+            return 0.0
         return latest.cumulated_value
 
     def _get_candidates_out_move(self):
