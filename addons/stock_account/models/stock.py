@@ -60,6 +60,19 @@ class StockQuant(models.Model):
             quant.inventory_value = quant.cost * quant.quantity
         return super(StockQuant, self - real_value_quants)._compute_inventory_value()
 
+
+class StockPackOperation(models.Model):
+    _inherit = 'stock.pack.operation'
+    
+    @api.multi
+    def write(self, vals):
+        super(StockPackOperation, self).write(vals)
+        if 'qty_done' in vals:
+            for move in self.mapped('move_id').filtered(lambda m: m.state == 'done'):
+                move.value = move.quantity_done * move.price_unit
+                move.replay()
+
+
 class StockMove(models.Model):
     _inherit = "stock.move"
 
@@ -116,27 +129,24 @@ class StockMove(models.Model):
                      ('date', '<', self.date)], limit=1, order='date desc') #filter on outgoing/incoming moves
         next_moves = self.search([('product_id', '=', self.product_id.id), 
                      ('state', '=', 'done'), 
-                     ('date', '>', start_move.date)], limit=1, order='date') # filter on outgoing/incoming moves
+                     ('date', '>', start_move.date)], order='date') # filter on outgoing/incoming moves
         if start_move:
             last_cumulated_value = start_move.cumulated_value
-            last_done_qty_available = start_move.last_done_qty_available
+            last_done_qty_available = start_move.last_done_qty
         else:
             last_cumulated_value = 0.0
             last_done_qty_available = 0.0
-        for move in next_moves:
-            #If move is an out:
-            # if qty_changes => qty_available changes
-            move.value = last_cumulated_value / last_done_qty_available
-            if move.location_id.usage in ('internal', 'transit') and move.location_dest_id.usage not in ('internal', 'transit'):
-                if last_done_qty_available:
-                    move.value = - ((last_cumulated_value / last_done_qty_available) * move.product_qty)
-                last_done_qty_available -= move.product_qty
-            else:
-                last_done_qty_available += move.product_qty
-            move.cumulated_value = last_cumulated_value + move.value
-            last_cumulated_value = move.cumulated_value
-        
-        
+        if self.product_id.cost_method == 'average':
+            for move in next_moves:
+                if move.location_id.usage in ('internal', 'transit') and move.location_dest_id.usage not in ('internal', 'transit'):
+                    if last_done_qty_available:
+                        move.value = - ((last_cumulated_value / last_done_qty_available) * move.product_qty)
+                    last_done_qty_available -= move.product_qty
+                else:
+                    last_done_qty_available += move.product_qty
+                move.cumulated_value = last_cumulated_value + move.value
+                last_cumulated_value = move.cumulated_value
+                move.last_done_qty = last_done_qty_available
         
         
         # FIFO: needs dict with qty_remaining to replay algorithm

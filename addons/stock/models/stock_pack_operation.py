@@ -164,7 +164,6 @@ class PackOperation(models.Model):
                 if ml.location_id.should_impact_quants():
                     Quant.increase_available_quantity(ml.product_id, ml.location_id, ml.qty_done, lot_id=ml.lot_id,
                                                       package_id=ml.package_id, owner_id=ml.owner_id)
-
                 # move what's been actually done
                 product_id = ml.product_id
                 location_id = updates.get('location_id', ml.location_id)
@@ -188,7 +187,9 @@ class PackOperation(models.Model):
                             ml._free_reservation(ml.product_id, location_id, untracked_qty, lot_id=False, package_id=package_id, owner_id=owner_id)
                 if location_dest_id.should_impact_quants() and qty_done:
                     Quant.increase_available_quantity(product_id, location_dest_id, quantity, lot_id=lot_id, package_id=result_package_id, owner_id=owner_id)
-        return super(PackOperation, self).write(vals)
+        res = super(PackOperation, self).write(vals)
+        ml.move_id.product_uom_qty = ml.move_id.quantity_done
+        return res
 
     @api.multi
     def unlink(self):
