@@ -116,7 +116,7 @@ class MrpProductProduce(models.TransientModel):
                   'move_id': produce_move.id,
                   'product_id': produce_move.product_id.id,
                   'production_id': self.production_id.id,
-                  'product_qty': self.product_qty,
+                  'product_uom_qty': self.product_qty,
                   'qty_done': self.product_qty,
                   'lot_id': self.lot_id.id,
                   'location_id': produce_move.location_id.id, 
