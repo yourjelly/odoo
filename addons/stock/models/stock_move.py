@@ -158,6 +158,7 @@ class StockMove(models.Model):
     product_type = fields.Selection(related='product_id.type', readonly=True)
     additional = fields.Boolean("Whether the move was added after the picking's confirmation", default=False)
     is_editable = fields.Boolean('Is editable when done', compute='_compute_is_editable')
+    is_initial_demand_editable = fields.Boolean('Is initial demand editable', compute='_compute_is_initial_demand_editable')
 
     @api.multi
     @api.depends('has_tracking', 'pack_operation_ids', 'location_id', 'location_dest_id', 'is_editable')
@@ -200,6 +201,11 @@ class StockMove(models.Model):
         """
         for move in self:
             move.is_editable = move.state == 'done' and self.user_has_groups('stock.group_stock_manager')
+
+    @api.multi
+    def _compute_is_initial_demand_editable(self):
+        for move in self:
+            move.is_initial_demand_editable = move.state not in ['done', 'cancel'] and self.user_has_groups('stock.group_stock_manager')
 
     @api.one
     @api.depends('product_id', 'product_uom', 'product_uom_qty')
