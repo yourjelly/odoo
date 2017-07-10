@@ -338,7 +338,8 @@ class StockMove(models.Model):
 
     @api.multi
     def write(self, vals):
-        if vals.get('product_uom_qty'):
+        # FIXME: pim fix your crap
+        if vals.get('product_uom_qty') and self.env.context.get('do_not_unreserve') is None:
             self.filtered(lambda m: m.state not in ['draft', 'done', 'cancel']).do_unreserve()
 
         # TDE CLEANME: it is a gros bordel + tracking
@@ -947,7 +948,9 @@ class StockMove(models.Model):
         # ctx = context.copy()
         # TDE CLEANME: used only in write in this file, to clean
         # ctx['do_not_propagate'] = True
-        self.with_context(do_not_propagate=True).write({'product_uom_qty': self.product_uom_qty - uom_qty})
+
+        # FIXME: pim fix your crap
+        self.with_context(do_not_propagate=True, do_not_unreserve=True).write({'product_uom_qty': self.product_uom_qty - uom_qty})
 
         # if self.move_dest_id and self.propagate and self.move_dest_id.state not in ('done', 'cancel'):
         #     new_move_prop = self.move_dest_id.split(qty)
