@@ -14,6 +14,10 @@ class PackOperation(models.Model):
     _description = "Packing Operation"
     _order = "result_package_id desc, id"
 
+    def _get_default_uom(self):
+        uom_categ_id = self.env.ref('product.product_uom_categ_unit').id
+        return self.env['product.uom'].search([('category_id', '=', uom_categ_id), ('factor', '=', 1)], limit=1)
+
     picking_id = fields.Many2one(
         'stock.picking', 'Stock Picking',
         help='The stock operation where the packing has been made')
@@ -21,7 +25,7 @@ class PackOperation(models.Model):
         'stock.move', 'Stock Move', 
         help="Change to a better name") 
     product_id = fields.Many2one('product.product', 'Product', ondelete="cascade") #might be a related with the move also --> no, because you can put them next to each other
-    product_uom_id = fields.Many2one('product.uom', 'Unit of Measure', required=True)
+    product_uom_id = fields.Many2one('product.uom', 'Unit of Measure', required=True, default=_get_default_uom)
     product_qty = fields.Float(
         'Real Reserved Quantity', digits=0,
         compute='_compute_product_qty', inverse='_set_product_qty', store=True)
