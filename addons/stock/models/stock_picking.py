@@ -762,8 +762,8 @@ class Picking(models.Model):
                             precision_rounding=operation.product_uom_id.rounding,
                             rounding_method='UP')
                         new_operation = operation.copy(
-                            default={'product_qty': operation.qty_done, 'qty_done': operation.qty_done})
-                        operation.write({'product_qty': quantity_left_todo, 'qty_done': 0.0})
+                            default={'product_uom_qty': operation.qty_done, 'qty_done': operation.qty_done})
+                        operation.write({'product_uom_qty': quantity_left_todo, 'qty_done': 0.0})
                         operation_ids |= new_operation
 
                 operation_ids.write({'result_package_id': package.id})

@@ -21,7 +21,7 @@ class PackOperation(models.Model):
         'stock.move', 'Stock Move', 
         help="Change to a better name") 
     product_id = fields.Many2one('product.product', 'Product', ondelete="cascade") #might be a related with the move also --> no, because you can put them next to each other
-    product_uom_id = fields.Many2one('product.uom', 'Unit of Measure')
+    product_uom_id = fields.Many2one('product.uom', 'Unit of Measure', required=True)
     product_qty = fields.Float(
         'Real Reserved Quantity', digits=0,
         compute='_compute_product_qty', inverse='_set_product_qty', store=True)
@@ -62,10 +62,7 @@ class PackOperation(models.Model):
     @api.one
     @api.depends('product_id', 'product_uom_id', 'product_uom_qty')
     def _compute_product_qty(self):
-        if self.product_uom_id:
-            self.product_qty = self.product_uom_id._compute_quantity(self.product_uom_qty, self.product_id.uom_id, rounding_method='HALF-UP')
-        else:
-            self.product_qty = self.product_uom_qty
+        self.product_qty = self.product_uom_id._compute_quantity(self.product_uom_qty, self.product_id.uom_id, rounding_method='HALF-UP')
 
     @api.one
     def _set_product_qty(self):
@@ -73,7 +70,7 @@ class PackOperation(models.Model):
         in the default product UoM. This code has been added to raise an error if a write is made given a value
         for `product_qty`, where the same write should set the `product_uom_qty` field instead, in order to
         detect errors. """
-        raise UserError(_('The requested operation cannot be processed because of a programming error setting the `product_qty_uom` field instead of the `product_qty`.'))
+        raise UserError(_('The requested operation cannot be processed because of a programming error setting the `product_qty` field instead of the `product_uom_qty`.'))
 
     @api.multi
     @api.onchange('product_id', 'product_uom_id')
