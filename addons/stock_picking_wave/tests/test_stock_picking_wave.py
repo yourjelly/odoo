@@ -14,6 +14,7 @@ class TestStockPickingWave(common.TransactionCase):
         # self.SaleOrder = self.env['sale.order']
         self.StockPickingWave = self.env['stock.picking.wave']
         self.StockPicking = self.env['stock.picking']
+        self.Move = self.env['stock.move']
         # UseFull Reference
         self.partner_id = self.ref('base.res_partner_2')
         # self.wave_ids = self.env.ref('stock_picking_wave_freeze')
@@ -22,7 +23,7 @@ class TestStockPickingWave(common.TransactionCase):
         self.categ_id = self.ref('product.product_category_1')
         self.uom_kgm_id = self.ref('product.product_uom_kgm')
         self.uom_gram_id = self.ref('product.product_uom_gram')
-        self.pick_type_id = self.ref('stock.picking_type_internal')
+        self.pick_type_id = self.ref('stock.picking_type_out')
         self.stock_location_id = self.ref('stock.stock_location_stock')
         self.stock_location_dest_id = self.ref('stock.stock_location_output')
 
@@ -56,25 +57,38 @@ class TestStockPickingWave(common.TransactionCase):
             'name': 'Picking_1',
             'move_type': 'direct',
             'priority': '1',
+            'wave_id': self.pickingwave1.id,
             'picking_type_id': self.pick_type_id,
             'location_id': self.stock_location_id,
             'location_dest_id': self.stock_location_dest_id,
             })
-        # Create picking
+        # create outgoing shipment
+        self.outgoing_shipment_product1= self.Move.create({
+            'name': 'a move',
+            'picking_id': self.picking1.id,
+            'product_id': self.product_1.id,
+            'product_uom': self.uom_kgm_id,
+            'location_id':  self.stock_location_id,
+            'location_dest_id': self.stock_location_dest_id,
+            'product_uom_qty': 20.0,
+            'picking_type_id': self.pick_type_id})
+       # Create picking
         self.picking2 = self.StockPicking.create({
             'name': 'Picking_2',
             'move_type': 'direct',
             'priority': '2',
+            'wave_id': self.pickingwave1.id,
             'picking_type_id': self.pick_type_id,
             'location_id': self.stock_location_id,
             'location_dest_id': self.stock_location_dest_id,
             })
-        # Create Picking Wave
-        self.pickingwave1 = self.StockPickingWave.create({
-            'name': 'Picking Freeze for Mickael',
-            'state': 'in_progress',
-            })
-        self.pickingwave2 = self.StockPickingWave.create({
-            'name': 'Picking Dry for John',
-            'state': 'in_progress',
-            })
+         # create outgoing shipment
+        self.outgoing_shipment_product2= self.Move.create({
+            'name': 'a move',
+            'picking_id': self.picking2.id,
+            'product_id': self.product_1.id,
+            'product_uom': self.uom_kgm_id,
+            'location_id':  self.stock_location_id,
+            'location_dest_id': self.stock_location_dest_id,
+            'product_uom_qty': 00.0,
+            'picking_type_id': self.pick_type_id})
