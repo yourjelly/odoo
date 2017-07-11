@@ -212,11 +212,17 @@ class StockMove(models.Model):
     def _compute_product_qty(self):
         self.product_qty = self.product_uom._compute_quantity(self.product_uom_qty, self.product_id.uom_id)
 
+    def _get_move_lines(self):
+        """ This will return the move lines to consider when applying _quantity_done_compute on a stock.move. 
+        In some context, such as MRP, it is necessary to compute quantity_done on filtered sock.move.line."""
+        self.ensure_one()
+        return self.pack_operation_ids
+
     @api.multi
     @api.depends('pack_operation_ids.qty_done', 'pack_operation_ids.product_uom_id')
     def _quantity_done_compute(self):
         for move in self:
-            for move_line in move.pack_operation_ids:
+            for move_line in move._get_move_lines():
                 # Transform the move_line quantity_done into the move uom.
                 move.quantity_done += move_line.product_uom_id._compute_quantity(move_line.qty_done, move.product_uom)
 
@@ -224,13 +230,14 @@ class StockMove(models.Model):
     def _quantity_done_set(self):
         quantity_done = self[0].quantity_done  # any call to create will invalidate `move.quantity_done`
         for move in self:
-            if not move.pack_operation_ids:
+            move_lines = move._get_move_lines()
+            if not move_lines:
                 if quantity_done:
                     # do not impact reservation here
                     move_line = self.env['stock.pack.operation'].create(dict(move._prepare_move_line_vals(), qty_done=quantity_done))
                     move.write({'pack_operation_ids': [(4, move_line.id)]})
-            elif len(move.pack_operation_ids) == 1:
-                move.pack_operation_ids[0].qty_done = quantity_done
+            elif len(move_lines) == 1:
+                move_lines[0].qty_done = quantity_done
             else:
                 raise UserError("Cannot set the done quantity from this stock move, work directly with the move lines.")
 
