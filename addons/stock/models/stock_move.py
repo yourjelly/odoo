@@ -222,14 +222,15 @@ class StockMove(models.Model):
 
     @api.multi
     def _quantity_done_set(self):
+        quantity_done = self[0].quantity_done  # any call to create will invalidate `move.quantity_done`
         for move in self:
             if not move.pack_operation_ids:
-                if move.quantity_done:
+                if quantity_done:
                     # do not impact reservation here
-                    move_line = self.env['stock.pack.operation'].create(dict(self._prepare_move_line_vals(), qty_done=move.quantity_done))
+                    move_line = self.env['stock.pack.operation'].create(dict(move._prepare_move_line_vals(), qty_done=quantity_done))
                     move.write({'pack_operation_ids': [(4, move_line.id)]})
             elif len(move.pack_operation_ids) == 1:
-                move.pack_operation_ids[0].qty_done = move.quantity_done
+                move.pack_operation_ids[0].qty_done = quantity_done
             else:
                 raise UserError("Cannot set the done quantity from this stock move, work directly with the move lines.")
 
