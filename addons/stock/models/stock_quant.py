@@ -66,7 +66,7 @@ class StockQuant(models.Model):
     @api.model
     def _get_removal_strategy(self, product_id, location_id):
         if product_id.categ_id.removal_strategy_id:
-            return self.product_id.categ_id.removal_strategy_id.method
+            return product_id.categ_id.removal_strategy_id.method
         loc = location_id
         while loc:
             if loc.removal_strategy_id:
