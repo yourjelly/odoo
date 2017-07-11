@@ -14,6 +14,23 @@ var qweb = core.qweb;
 
 ajax.loadXML('/website/static/src/xml/website.contentMenu.xml', qweb);
 
+base.ready().then(function () {
+        var self = $(this),
+        $navbar = $('.navbar'),
+        $first_snippet = $('.container').eq(1),
+        $last_snippet = $('.container').eq(2),
+        $wrap_element = $('#wrap');
+
+        var isSidebarTheme = $("body #menuToggle").is("#menuToggle");
+        if ($navbar.hasClass('absolute_menu') && !isSidebarTheme) {
+            $wrap_element.css('margin-top','-51px');
+            $first_snippet.css('padding-top','51px');
+            if($last_snippet.css('padding-top')=='51px'){
+                $last_snippet.removeAttr( 'style' );
+            }
+        }
+});
+
 var TopBarContent = Widget.extend({
     start: function () {
         var self = this;

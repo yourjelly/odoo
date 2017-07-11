@@ -279,6 +279,12 @@
     </xpath>
 </template>
 
+<template id="absolute_menu" inherit_id="website.layout" customize_show="True" name="Absolute Menu" active="False">
+    <xpath expr="//div[@class='navbar navbar-default navbar-static-top']" position="attributes">
+        <attribute name="class" add="absolute_menu" separator=" "/>
+    </xpath>
+</template>
+
 <template id="language_selector">
     <ul class="list-inline js_language_selector mt16" t-if="(request and request.website_multilang and len(languages) &gt; 1) or (website and (editable or translatable))">
         <li t-foreach="languages" t-as="lg">
