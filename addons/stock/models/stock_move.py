@@ -727,7 +727,7 @@ class StockMove(models.Model):
                     move.write({'pack_operation_ids': [(4, move_line_id.id, 0)]})
                 move.write({'state': 'assigned'})
             else:
-                if not move.move_orig_ids:
+                if not move.move_orig_ids or all(move_orig.state in ('cancel') for move_orig in move.move_orig_ids):
                     if move.procure_method == 'make_to_order':
                         continue
                     # Reserve new quants and create move lines accordingly.
@@ -783,11 +783,14 @@ class StockMove(models.Model):
             raise UserError(_('You cannot cancel a stock move that has been set to \'Done\'.'))
         for move in self:
             move.do_unreserve()
+            siblings_states = (move.move_dest_ids.mapped('move_orig_ids') - move).mapped('state')
             if move.propagate:
                 # only cancel the next move if all my siblings are also cancelled
-                siblings_states = (move.move_dest_ids.mapped('move_orig_ids') - move).mapped('state')
                 if all(state == 'cancel' for state in siblings_states):
                     move.move_dest_ids.action_cancel()
+            else:
+                if all(state in ('done', 'cancel') for state in siblings_states):
+                    move.move_dest_ids.write({'procure_method': 'make_to_stock'})
         self.write({'state': 'cancel', 'move_orig_ids': [(5, 0, 0)]})
         self.mapped('procurement_id').check()
         return True
