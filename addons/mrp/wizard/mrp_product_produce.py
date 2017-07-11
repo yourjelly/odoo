@@ -127,13 +127,13 @@ class MrpProductProduce(models.TransientModel):
                 for moveline in move.pack_operation_ids.filtered(lambda x: not x.lot_produced_id):
                     if moveline.qty_done and self.lot_id:
                         #Possibly the entire move is selected
-                        remaining_qty = moveline.product_qty - moveline.qty_done
+                        remaining_qty = moveline.product_uom_qty - moveline.qty_done
                         if remaining_qty > 0:
-                            default = {'product_qty': moveline.qty_done, 
+                            default = {'product_uom_qty': moveline.qty_done,
                                        'qty_done': moveline.qty_done,
                                        'lot_produced_id': self.lot_id.id}
                             new_move_line = moveline.copy(default=default)
-                            moveline.with_context(bypass_reservation_update=True).write({'product_qty': remaining_qty, 'qty_done': 0})
+                            moveline.with_context(bypass_reservation_update=True).write({'product_uom_qty': remaining_qty, 'qty_done': 0})
                         else:
                             moveline.write({'lot_produced_id': self.lot_id.id})
         return True
