@@ -488,7 +488,7 @@ var StatementModel = BasicModel.extend({
             values.push({
                 "partner_id": line.st_line.partner_id,
                 "counterpart_aml_dicts": _.map(_.filter(props, function (prop) {
-                    return !isNaN(prop.id) && prop.partial_reconcile;
+                    return !isNaN(prop.id) ;
                 }), self._formatToProcessReconciliation.bind(self, line)),
                 "payment_aml_ids": _.pluck(_.filter(props, function (prop) {
                     return !isNaN(prop.id) && !prop.partial_reconcile;
@@ -689,6 +689,9 @@ var StatementModel = BasicModel.extend({
         var self = this;
         if (props.length) {
             _.each(props, function (prop) {
+                var temp = prop.credit;
+                prop.credit = prop.debit;
+                prop.debit = temp;
                 prop.amount = prop.debit || -prop.credit;
                 prop.label = prop.name;
                 prop.account_id = self._formatNameGet(prop.account_id || line.account_id);
