@@ -244,7 +244,7 @@ class SaleOrderLine(models.Model):
         return is_available
 
     def _update_line_quantity(self, values):
-        if values['product_uom_qty'] < max(self.mapped('qty_delivered')):
+        if self.mapped('qty_delivered') and values['product_uom_qty'] < max(self.mapped('qty_delivered')):
             raise UserError('You cannot decrease the ordered quantity below your delivered quantity.\n'
                             'Create a return first.')
         for line in self:
