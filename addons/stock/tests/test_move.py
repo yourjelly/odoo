@@ -395,14 +395,16 @@ class StockMove(TransactionCase):
             'move_id': move1.id,
             'product_id': move1.product_id.id,
             'qty_done': 1,
+            'product_uom_id': move1.product_uom.id,
             'location_id': move1.location_id.id,
             'location_dest_id': move1.location_dest_id.id,
-            'lot_id': lot3.id
+            'lot_id': lot3.id,
         })
         self.env['stock.pack.operation'].create({
             'move_id': move1.id,
             'product_id': move1.product_id.id,
             'qty_done': 1,
+            'product_uom_id': move1.product_uom.id,
             'location_id': move1.location_id.id,
             'location_dest_id': move1.location_dest_id.id,
             'lot_id': lot4.id
@@ -488,6 +490,7 @@ class StockMove(TransactionCase):
             'move_id': move1.id,
             'product_id': move1.product_id.id,
             'qty_done': 1,
+            'product_uom_id': move1.product_uom.id,
             'location_id': move1.location_id.id,
             'location_dest_id': move1.location_dest_id.id,
             'lot_id': lot1.id
@@ -2017,6 +2020,7 @@ class StockMove(TransactionCase):
             'move_id': move1.pack_operation_ids.move_id.id,
             'product_id': move1.pack_operation_ids.product_id.id,
             'qty_done': move1.pack_operation_ids.qty_done,
+            'product_uom_id': move1.product_uom.id,
             'location_id': move1.pack_operation_ids.location_id.id,
             'location_dest_id': move1.pack_operation_ids.location_dest_id.id,
         })
