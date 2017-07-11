@@ -327,7 +327,7 @@ class MrpWorkorder(models.Model):
                     move_line.create({'move_id': production_move.id,
                                  'product_id': production_move.product_id.id,
                                  'lot_id': self.final_lot_id.id,
-                                 'product_qty': self.qty_producing,
+                                 'product_uom_qty': self.qty_producing,
                                  'qty_done': self.qty_producing,
                                  'workorder_id': self.id,
                                  'location_id': production_move.location_id.id, 
