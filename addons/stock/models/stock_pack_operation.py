@@ -14,9 +14,6 @@ class PackOperation(models.Model):
     _description = "Packing Operation"
     _order = "result_package_id desc, id"
 
-    def _get_default_uom(self):
-        uom_categ_id = self.env.ref('product.product_uom_categ_unit').id
-        return self.env['product.uom'].search([('category_id', '=', uom_categ_id), ('factor', '=', 1)], limit=1)
 
     picking_id = fields.Many2one(
         'stock.picking', 'Stock Picking',
@@ -25,7 +22,7 @@ class PackOperation(models.Model):
         'stock.move', 'Stock Move', 
         help="Change to a better name") 
     product_id = fields.Many2one('product.product', 'Product', ondelete="cascade") #might be a related with the move also --> no, because you can put them next to each other
-    product_uom_id = fields.Many2one('product.uom', 'Unit of Measure', required=True, default=_get_default_uom)
+    product_uom_id = fields.Many2one('product.uom', 'Unit of Measure', required=True)
     product_qty = fields.Float(
         'Real Reserved Quantity', digits=0,
         compute='_compute_product_qty', inverse='_set_product_qty', store=True)
@@ -82,7 +79,10 @@ class PackOperation(models.Model):
         if self.product_id:
             self.lots_visible = self.product_id.tracking != 'none'
             if not self.product_uom_id or self.product_uom_id.category_id != self.product_id.uom_id.category_id:
-                self.product_uom_id = self.product_id.uom_id.id
+                if self.move_id.product_uom:
+                    self.product_uom_id = self.move_id.product_uom.id
+                else:
+                    self.product_uom_id = self.product_id.uom_id.id
             res = {'domain': {'product_uom_id': [('category_id', '=', self.product_uom_id.category_id.id)]}}
         else:
             res = {'domain': {'product_uom_id': []}}
