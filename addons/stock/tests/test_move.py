@@ -2175,3 +2175,26 @@ class StockMove(TransactionCase):
         # Check quants data
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product1, self.stock_location), 0.0)
         self.assertEqual(len(self.env['stock.quant']._gather(self.product1, self.stock_location)), 0.0)
+
+    def test_set_quantity_done_1(self):
+        move1 = self.env['stock.move'].create({
+            'name': 'test_set_quantity_done_1',
+            'location_id': self.supplier_location.id,
+            'location_dest_id': self.stock_location.id,
+            'product_id': self.product1.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 2.0,
+        })
+        move2 = self.env['stock.move'].create({
+            'name': 'test_set_quantity_done_2',
+            'location_id': self.supplier_location.id,
+            'location_dest_id': self.stock_location.id,
+            'product_id': self.product1.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 2.0,
+        })
+        (move1 + move2).action_confirm()
+        (move1 + move2).force_assign()
+        (move1 + move2).write({'quantity_done': 1})
+        self.assertEqual(move1.quantity_done, 1)
+        self.assertEqual(move2.quantity_done, 1)
