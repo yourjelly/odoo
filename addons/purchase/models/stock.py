@@ -130,10 +130,10 @@ class StockWarehouse(models.Model):
                 warehouse.buy_pull_id.write({'location_id': warehouse.in_type_id.default_location_dest_id.id})
         return res
 
-class ReturnPickingLine(models.TransientModel):
-    _inherit = "stock.return.picking.line"
+class ReturnPicking(models.TransientModel):
+    _inherit = "stock.return.picking"
 
     def _prepare_move_default_values(self, return_line, new_picking):
-        vals = super(ReturnPickingLine, self)._prepare_move_default_values(return_line, new_picking)
+        vals = super(ReturnPicking, self)._prepare_move_default_values(return_line, new_picking)
         vals['purchase_line_id'] = return_line.move_id.purchase_line_id.id
         return vals
