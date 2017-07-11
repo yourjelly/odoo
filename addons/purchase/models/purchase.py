@@ -564,8 +564,9 @@ class PurchaseOrderLine(models.Model):
         result = super(PurchaseOrderLine, self).write(values)
         # Update expected date of corresponding moves
         if 'date_planned' in values:
-            self.filtered(lambda l: l.state != 'done').write({'date_expected': values['date_planned']})
-
+            self.env['stock.move'].search([
+                ('purchase_line_id', 'in', self.ids), ('state', '!=', 'done')
+            ]).write({'date_expected': values['date_planned']})
         return result
 
     name = fields.Text(string='Description', required=True)
