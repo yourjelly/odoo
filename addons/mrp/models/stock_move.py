@@ -64,27 +64,13 @@ class StockMove(models.Model):
         'Done', compute='_compute_is_done',
         store=True,
         help='Technical Field to order moves')
-    quantity_done = fields.Float('Quantity Done', compute='_quantity_done_compute', digits=dp.get_precision('Product Unit of Measure'), inverse='_quantity_done_set',
-                                 states={'done': [('readonly', True)]})
     
-    @api.multi
-    @api.depends('pack_operation_ids.qty_done')
-    def _quantity_done_compute(self):
-        for move in self:
-            move.quantity_done = sum(move.active_move_line_ids.mapped('qty_done'))
-
-    @api.multi
-    def _quantity_done_set(self):
-        for move in self:
-            if move.quantity_done:
-                if not move.active_move_line_ids:
-                    # do not impact reservation here
-                    move_line = self.env['stock.pack.operation'].create(dict(self._prepare_move_line_vals(), qty_done=move.quantity_done))
-                    move.write({'pack_operation_ids': [(4, move_line.id)]})
-                elif len(move.active_move_line_ids) == 1:
-                    move.active_move_line_ids[0].qty_done = move.quantity_done
-                else:
-                    raise UserError("blabla")
+    def _get_move_lines(self):
+        self.ensure_one()
+        if self.raw_material_production_id:
+            return self.active_move_line_ids
+        else:
+            return super(StockMove, self)._get_move_lines()
 
     @api.multi
     @api.depends('state')
@@ -194,7 +180,6 @@ class StockMove(models.Model):
                 'state': 'draft',  # will be confirmed below
                 'name': self.name,
                 'procurement_id': self.procurement_id.id,
-                'split_from': self.id,  # Needed in order to keep sale connection, but will be removed by unlink
             })
         return self.env['stock.move']
 
