@@ -165,7 +165,7 @@ class StockMove(models.Model):
         for move in self:
             #Should write move.price_unit here maybe, certainly on incoming
             if move.product_id.cost_method == 'average':
-                qty_available[move.product_id.id] = self.env['stock.quant'].get_quantity(move.product_id, move.location_id)
+                qty_available[move.product_id.id] = move.product_id.qty_available
         res = super(StockMove, self).action_done()
         for move in res:
             if move.location_id.usage not in ('internal', 'transit') and move.location_dest_id.usage in ('internal', 'transit'):
