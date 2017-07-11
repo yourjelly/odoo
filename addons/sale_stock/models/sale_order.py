@@ -158,6 +158,10 @@ class SaleOrderLine(models.Model):
     @api.onchange('product_uom_qty')
     def _onchange_product_uom_qty(self):
         if self.state == 'sale' and self.product_id.type in ['product', 'consu'] and self.product_uom_qty < self._origin.product_uom_qty:
+            # Do not display this warning if the new quantity is below the delivered
+            # one; the `write` will raise an `UserError` anyway.
+            if self.product_uom_qty < self.qty_delivered:
+                return {}
             warning_mess = {
                 'title': _('Ordered quantity decreased!'),
                 'message' : _('You are decreasing the ordered quantity! Do not forget to manually update the delivery order if needed.'),
