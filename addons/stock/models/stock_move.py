@@ -727,7 +727,7 @@ class StockMove(models.Model):
                     move.write({'pack_operation_ids': [(4, move_line_id.id, 0)]})
                 move.write({'state': 'assigned'})
             else:
-                if not move.move_orig_ids or all(move_orig.state in ('cancel') for move_orig in move.move_orig_ids):
+                if not move.move_orig_ids:
                     if move.procure_method == 'make_to_order':
                         continue
                     # Reserve new quants and create move lines accordingly.
@@ -791,6 +791,7 @@ class StockMove(models.Model):
             else:
                 if all(state in ('done', 'cancel') for state in siblings_states):
                     move.move_dest_ids.write({'procure_method': 'make_to_stock'})
+                    move.move_dest_ids.write({'move_orig_ids': [(3, move.id, 0)]})
         self.write({'state': 'cancel', 'move_orig_ids': [(5, 0, 0)]})
         self.mapped('procurement_id').check()
         return True
