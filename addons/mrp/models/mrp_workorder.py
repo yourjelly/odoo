@@ -245,7 +245,7 @@ class MrpWorkorder(models.Model):
                 while float_compare(qty, 0.0, precision_rounding=move.product_uom.rounding) > 0:
                     MoveLine.create({
                         'move_id': move.id,
-                        'product_qty': 0,
+                        'product_uom_qty': 0,
                         'qty_done': min(1, qty),
                         'production_id': self.production_id.id,
                         'workorder_id': self.id,
@@ -258,7 +258,7 @@ class MrpWorkorder(models.Model):
             else:
                 MoveLine.create({
                     'move_id': move.id,
-                    'product_qty': 0,
+                    'product_uom_qty': 0,
                     'qty_done': qty,
                     'product_id': move.product_id.id,
                     'production_id': self.production_id.id,
