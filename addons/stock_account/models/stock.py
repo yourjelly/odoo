@@ -92,9 +92,9 @@ class StockMove(models.Model):
     @api.multi
     def _get_price_unit(self):
         self.ensure_one()
-        if self.cost_method == 'average':
+        if self.product_id.cost_method == 'average':
             return self.product_id.average_price or self.product_id.standard_price
-        if self.cost_method == 'fifo':
+        if self.product_id.cost_method == 'fifo':
             move = self.search([('product_id', '=', self.product_id.id),
                          ('state', '=', 'done'), 
                          ('location_id.usage', '=', 'internal'), 
