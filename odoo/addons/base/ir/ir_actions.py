@@ -112,6 +112,8 @@ class IrActionsActWindow(models.Model):
 
     @api.depends('res_model', 'search_view_id')
     def _compute_search_view(self):
+        env = api.Environment(self._cr, self._uid, self._context)
+        self.env = env
         for act in self:
             fvg = self.env[act.res_model].fields_view_get(act.search_view_id.id, 'search')
             act.search_view = str(fvg)
