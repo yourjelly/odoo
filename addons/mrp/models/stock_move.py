@@ -16,8 +16,6 @@ class StockMoveLine(models.Model):
     lot_produced_qty = fields.Float('Quantity Finished Product', help="Informative, not used in matching")
     done_wo = fields.Boolean('Done for Work Order', default=True, help="Technical Field which is False when temporarily filled in in work order")  # TDE FIXME: naming
     done_move = fields.Boolean('Move Done', related='move_id.is_done', store=True)  # TDE FIXME: naming
-    consume_line_ids = fields.Many2many('stock.move.line', 'stock_move_line_consume_rel', 'consume_line_id', 'produce_line_id', help="Technical link to see who consumed what. ")
-    produce_line_ids = fields.Many2many('stock.move.line', 'stock_move_line_consume_rel', 'produce_line_id', 'consume_line_id', help="Technical link to see which line was produced with this. ")
 
     @api.one
     @api.constrains('lot_id', 'qty_done')
