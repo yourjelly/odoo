@@ -58,8 +58,12 @@ class StockMoveLine(models.Model):
         super(StockMoveLine, self).write(vals)
         if 'qty_done' in vals:
             for move in self.mapped('move_id').filtered(lambda m: m.state == 'done'):
-                move.value = move.quantity_done * move.price_unit
-                move.replay()
+                if move.location_id.usage not in ('internal', 'transit') and move.location_dest_id.usage in ('internal', 'transit'):
+                    move.value = move.quantity_done * move.price_unit
+                if move.product_id.cost_method == 'average':
+                    move.replay_average()
+                elif move.product_id.cost_method == 'fifo':
+                    move.replay_fifo()
 
 
 class StockMove(models.Model):
@@ -87,7 +91,8 @@ class StockMove(models.Model):
             move = self.search([('product_id', '=', self.product_id.id),
                          ('state', '=', 'done'), 
                          ('location_id.usage', '=', 'internal'), 
-                         ('location_dest_id.usage', '!=', 'internal')], order='date desc', limit=1)
+                         ('location_dest_id.usage', '!=', 'internal'),
+                         ('company_id', '=', self.company_id.id)], order='date desc', limit=1)
             if move:
                 return move.price_unit or self.product_id.standard_price
         return self.product_id.standard_price
@@ -96,57 +101,119 @@ class StockMove(models.Model):
         self.ensure_one()
         moves = self.search([('state', '=', 'done'), 
                      ('date', '>',  self.date), 
-                     ('product_id', '=', self.product_id.id)])
+                     ('product_id', '=', self.product_id.id), 
+                     ('company_id', '=', self.company_id.id)])
         for move in moves:
             move.value += value
 
-#     def change_move_value_in_the_past(self, value):
-#         self.ensure_one()
-#         if self.product_id.cost_method == 'fifo':
-#             moves = self.search([('state', '=', 'done'),
-#                          ('date', '>',  self.date), 
-#                          ('product_id', '=', self.product_id.id)])
-#             if self.location_id.usage not in ('internal', 'transit'):
-#                 if move.last_done_move_id and move.last_done_remaining_qty:
-
     @api.multi
-    def replay(self):
+    def replay_average(self):
         # Easy scenario: avergae /done
         # search last move before this one
+        
+        # This should be an in or out move
         start_move = self.search([('product_id', '=', self.product_id.id), 
                      ('state', '=', 'done'), 
-                     ('date', '<', self.date)], limit=1, order='date desc') #filter on outgoing/incoming moves
+                     ('date', '<=', self.date), 
+                     ('id', '<', self.id),
+                     ('company_id', '=', self.company_id.id), 
+                     '|', '&', ('location_id.usage', 'in', ('internal', 'transit')), 
+                        ('location_dest_id.usage', 'not in', ('internal', 'transit')), 
+                        '&', ('location_id.usage', 'not in', ('internal', 'transit')), 
+                        ('location_dest_id.usage', 'in', ('internal', 'transit'))], limit=1, order='date desc') #filter on outgoing/incoming moves
         next_moves = self.search([('product_id', '=', self.product_id.id), 
                      ('state', '=', 'done'), 
-                     ('date', '>', start_move.date)], order='date') # filter on outgoing/incoming moves
+                     ('date', '>=', start_move.date),
+                     ('id', '>', start_move.id), 
+                     ('company_id', '=', self.company_id.id),
+                     '|', '&', ('location_id.usage', 'in', ('internal', 'transit')), 
+                        ('location_dest_id.usage', 'not in', ('internal', 'transit')), 
+                        '&', ('location_id.usage', 'not in', ('internal', 'transit')), 
+                        ('location_dest_id.usage', 'in', ('internal', 'transit'))], order='date') # filter on outgoing/incoming moves
         if start_move:
             last_cumulated_value = start_move.cumulated_value
             last_done_qty_available = start_move.last_done_qty
         else:
             last_cumulated_value = 0.0
             last_done_qty_available = 0.0
-        if self.product_id.cost_method == 'average':
-            for move in next_moves:
-                if move.location_id.usage in ('internal', 'transit') and move.location_dest_id.usage not in ('internal', 'transit'):
-                    if last_done_qty_available:
-                        move.value = - ((last_cumulated_value / last_done_qty_available) * move.product_qty)
-                    last_done_qty_available -= move.product_qty
-                else:
-                    last_done_qty_available += move.product_qty
-                move.cumulated_value = last_cumulated_value + move.value
-                last_cumulated_value = move.cumulated_value
-                move.last_done_qty = last_done_qty_available
-        
-        
-        # FIFO: needs dict with qty_remaining to replay algorithm
-        
-        
-        # update cumulated_value according to value
-        
-        # update outs according to values
-        
-        # update 
+        for move in next_moves:
+            if move.location_id.usage in ('internal', 'transit') and move.location_dest_id.usage not in ('internal', 'transit'):
+                if last_done_qty_available:
+                    move.value = - ((last_cumulated_value / last_done_qty_available) * move.product_qty)
+                last_done_qty_available -= move.product_qty
+            else:
+                last_done_qty_available += move.product_qty
+            last_cumulated_value = move.cumulated_value + move.value
+            move.write({'cumulated_value': last_cumulated_value, 
+                        'last_done_qty': last_done_qty_available})
+            
 
+    def replay_fifo(self):
+        # Easy scenario: average /done
+        # search last move before this one
+        start_move = self.search([('product_id', '=', self.product_id.id), 
+                     ('state', '=', 'done'), 
+                     ('date', '<=', self.date),
+                     ('id', '<', self.id), 
+                     ('location_id.usage', 'in', ('internal', 'transit')), 
+                     ('location_dest_id.usage', 'not in', ('internal', 'transit'))], limit=1, order='date desc') #filter on outgoing/incoming moves
+        in_domain = [('product_id', '=', self.product_id.id), 
+                     ('state', '=', 'done'), 
+                     ('location_id.usage', 'not in', ('internal', 'transit')), 
+                     ('location_dest_id.usage', 'in', ('internal', 'transit'))]
+        out_date = False
+        out_id = False
+        if start_move:
+            first_in_move = start_move.last_done_move_id
+            first_in_remaining_qty = start_move.last_done_remaining_qty
+            in_domain += [('date', '>=', start_move.last_done_move_id.date), ('id', '>', start_move.last_done_move_id.id)]
+            out_date = start_move.date
+            out_id = start_move.id
+        else:
+            first_in_remaining_qty = 0
+            first_in_move = False
+            if self.location_id.usage in ('internal', 'transit') and self.location_dest_id.usage not in ('internal', 'transit'):
+                out_date = self.date
+                out_id = self.id
+            else:
+                out_move = self.search([('product_id', '=', self.product_id.id),
+                                        ('state', '=', 'done'),
+                                        ('location_id.usage', 'in', ('internal', 'transit')), 
+                                        ('location_dest_id.usage', 'not in', ('internal', 'transit'))], order='date', limit=1)
+                if out_move:
+                    out_date = out_move.date
+                    out_id = out_move.id
+        in_moves_needed = self.search(in_domain)
+        if out_date:
+            next_out_moves = self.search([('product_id', '=', self.product_id.id), 
+                         ('state', '=', 'done'), 
+                         ('date', '>=', out_date),
+                         ('id', '>=', out_id),
+                         ('location_id.usage', 'in', ('internal', 'transit')), 
+                         ('location_dest_id.usage', 'not in', ('internal', 'transit'))], order='date, id') # filter on outgoing/incoming moves
+            last_in_move = first_in_move
+            last_remaining_qty = first_in_remaining_qty
+            if not first_in_move or last_remaining_qty == 0.0 and in_moves_needed:
+                last_in_move = in_moves_needed[0]
+                in_moves_needed -= in_moves_needed[0]
+                last_remaining_qty = last_in_move.product_qty
+            for out_move in next_out_moves:
+                total_qty = out_move.product_qty
+                total_value = 0
+                while(total_qty > 0): # and in_moves_needed:
+                    if last_remaining_qty <= total_qty:
+                        total_qty -= last_remaining_qty
+                        total_value += last_remaining_qty * last_in_move.price_unit
+                        last_in_move = in_moves_needed[0]
+                        in_moves_needed -= in_moves_needed[0]
+                        last_remaining_qty = last_in_move.product_qty
+                    else:
+                        total_value += total_qty * last_in_move.price_unit
+                        last_remaining_qty -= total_qty
+                        total_qty = 0
+                out_move.write({'last_done_remaining_qty': last_remaining_qty, 
+                                'last_done_move_id': last_in_move.id, 
+                                'value': -total_value})
 
     @api.multi
     def action_done(self):

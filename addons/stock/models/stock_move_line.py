@@ -209,7 +209,12 @@ class StockMoveLine(models.Model):
                             ml._free_reservation(ml.product_id, location_id, untracked_qty, lot_id=False, package_id=package_id, owner_id=owner_id)
                 if location_dest_id.should_impact_quants() and ml.product_id.type == 'product' and qty_done:
                     Quant._increase_available_quantity(product_id, location_dest_id, quantity, lot_id=lot_id, package_id=result_package_id, owner_id=owner_id)
-        return super(StockMoveLine, self).write(vals)
+        res = super(StockMoveLine, self).write(vals)
+        if updates or 'qty_done' in vals:
+            for ml in self.filtered(lambda ml: ml.move_id.state == 'done'):
+                ml.move_id.product_uom_qty = ml.move_id.quantity_done
+                ml.product_uom_qty = ml.qty_done
+        return res
 
     @api.multi
     def unlink(self):
