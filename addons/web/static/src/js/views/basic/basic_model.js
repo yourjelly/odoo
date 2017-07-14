@@ -2991,7 +2991,6 @@ var BasicModel = AbstractModel.extend({
                         title: result.warning.title,
                         type: 'dialog',
                     });
-                    record._warning = true;
                 }
                 if (result.domain) {
                     var fieldsInfo = record.fieldsInfo[viewType || record.viewType];
