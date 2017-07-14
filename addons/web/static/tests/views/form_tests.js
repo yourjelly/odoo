@@ -2509,8 +2509,8 @@ QUnit.module('Views', {
         // go to edit mode, click to add a record in the o2m
         form.$buttons.find('.o_form_button_edit').click();
         form.$('.o_field_x2many_list_row_add a').click();
-        assert.strictEqual(form.$('tr.o_data_row').length, 0,
-            "should not have added a line");
+        assert.strictEqual(form.$('tr.o_data_row').length, 1,
+            "should have added a line");
         form.destroy();
     });
 
