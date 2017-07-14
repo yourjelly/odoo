@@ -19,10 +19,9 @@ class StockQuant(models.Model):
     product_uom_id = fields.Many2one(
         'product.uom', 'Unit of Measure',
         readonly=True, related='product_id.uom_id')
-    company_id = fields.Many2one(
-        'res.company', 'Company',
+    company_id = fields.Many2one(related='location_id.company_id',
+        string='Company',
         default=lambda self: self.env['res.company']._company_default_get('stock.quant'),
-        help='The company to which the quants belong',
         readonly=True, required=True)
     location_id = fields.Many2one(
         'stock.location', 'Location',
@@ -50,8 +49,8 @@ class StockQuant(models.Model):
     @api.multi
     @api.constrains('product_id')
     def check_product_id(self):
-        if any(elem.product_id.type == 'consu' for elem in self):
-            raise ValidationError(_('Quants cannot be created for consumables.'))
+        if any(elem.product_id.type != 'product' for elem in self):
+            raise ValidationError(_('Quants cannot be created for consumables or services.'))
 
     @api.multi
     @api.constrains('quantity')
