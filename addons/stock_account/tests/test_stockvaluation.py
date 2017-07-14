@@ -186,6 +186,8 @@ class TestStockValuation(TransactionCase):
         self.assertEqual(move5.remaining_qty, 54.0)
         self.assertEqual(move6.remaining_qty, 0.0)  # unused in out moves
         self.assertEqual(move7.remaining_qty, 0.0)  # unused in out moves
+        
+        # Test what happens when we change the stock in the past
         move3.quantity_done = 10
         self.assertEqual(move1.value, 1020.0)
         self.assertEqual(move2.value, 2170.0)
@@ -194,6 +196,8 @@ class TestStockValuation(TransactionCase):
         self.assertEqual(move5.value, 1287.0)
         self.assertEqual(move6.value, -1769.0)
         self.assertEqual(move7.value, -961.0)
+        self.assertEqual(move7.cumulated_value, 2237.0)
+        self.assertEqual(move7.last_done_qty, 138.0)
 
     def test_fifo_perpetual_2(self):
         # https://docs.google.com/spreadsheets/d/1NI0u9N1gFByXxYHfdiXuxQCrycXXOh76TpPQ3CWeyDw/edit?ts=58da749b#gid=0

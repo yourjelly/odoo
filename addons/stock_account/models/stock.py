@@ -102,7 +102,11 @@ class StockMove(models.Model):
         moves = self.search([('state', '=', 'done'), 
                      ('date', '>',  self.date), 
                      ('product_id', '=', self.product_id.id), 
-                     ('company_id', '=', self.company_id.id)])
+                     ('company_id', '=', self.company_id.id),
+                     '|', '&', ('location_id.usage', 'in', ('internal', 'transit')), 
+                    ('location_dest_id.usage', 'not in', ('internal', 'transit')), 
+                    '&', ('location_id.usage', 'not in', ('internal', 'transit')), 
+                    ('location_dest_id.usage', 'in', ('internal', 'transit'))])
         for move in moves:
             move.value += value
 
@@ -214,6 +218,26 @@ class StockMove(models.Model):
                 out_move.write({'last_done_remaining_qty': last_remaining_qty, 
                                 'last_done_move_id': last_in_move.id, 
                                 'value': -total_value})
+                
+        next_moves = self.search([('product_id', '=', self.product_id.id), 
+                     ('state', '=', 'done'), 
+                     ('date', '>=', self.date),
+                     ('id', '>', self.id), 
+                     ('company_id', '=', self.company_id.id),
+                     '|', '&', ('location_id.usage', 'in', ('internal', 'transit')), 
+                        ('location_dest_id.usage', 'not in', ('internal', 'transit')), 
+                        '&', ('location_id.usage', 'not in', ('internal', 'transit')), 
+                        ('location_dest_id.usage', 'in', ('internal', 'transit'))], order='date') # filter on outgoing/incoming moves
+        cumulated_value = self.cumulated_value
+        qty_available = self.last_done_qty
+        for move in next_moves:
+            if move.location_id.usage in ('internal', 'transit'):
+                qty_available += move.product_qty
+            else:
+                qty_available -= move.product_qty
+            cumulated_value += move.value
+            move.write({'last_done_qty': qty_available,
+                        'cumulated_value': cumulated_value})
 
     @api.multi
     def action_done(self):
@@ -243,10 +267,11 @@ class StockMove(models.Model):
                             candidate.remaining_qty -= qty_taken_on_candidate
                             move.remaining_qty -= qty_taken_on_candidate
                             qty_to_take -= qty_taken_on_candidate
-                            candidate.value += move.price_unit * qty_taken_on_candidate
-                            candidate.cumulated_value += move.price_unit * qty_taken_on_candidate
+                            candidate_value = candidate.value + move.price_unit * qty_taken_on_candidate
+                            candidate.write({'value': candidate_value, 
+                                             'cumulated_value': candidate.cumulated_value + move.price_unit * qty_taken_on_candidate, 
+                                             'price_unit': candidate_value / candidate.product_qty})
                             candidate._update_future_cumulated_value(move.price_unit * qty_taken_on_candidate)
-                            candidate.price_unit = candidate.value / candidate.product_qty
                     move.last_done_qty = move.product_id.qty_available
                 else:
                     move.price_unit = move.product_id.standard_price
@@ -279,10 +304,11 @@ class StockMove(models.Model):
                 elif move.product_id.cost_method == 'average':
                     curr_rounding = move.company_id.currency_id.rounding
                     avg_price_unit = float_round(move.product_id._get_latest_cumulated_value(not_move=move) / qty_available[move.product_id.id], precision_rounding=curr_rounding)
-                    move.value = float_round(-avg_price_unit * move.product_qty, precision_rounding=curr_rounding)
-                    move.remaining_qty = 0
-                    move.cumulated_value = move.product_id._get_latest_cumulated_value(not_move=move) + move.value
-                    move.last_done_qty = move.product_id.qty_available
+                    move_value = float_round(-avg_price_unit * move.product_qty, precision_rounding=curr_rounding)
+                    move.write({'value': move_value,
+                                'cumulated_value': move.product_id._get_latest_cumulated_value(not_move=move) + move_value,
+                                'last_done_qty': move.product_id.qty_available,
+                                })
                 elif move.product_id.cost_method == 'standard':
                     move.value = - move.product_id.standard_price * move.product_qty
                 
