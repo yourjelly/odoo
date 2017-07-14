@@ -17,6 +17,69 @@ class TestStockValuation(TransactionCase):
             'categ_id': self.env.ref('product.product_category_all').id,
         })
 
+    def test_fifo_negative_1(self):
+        self.product1.product_tmpl_id.cost_method = 'fifo'
+        # Beginning Inventory: 68 units @ 15.00 per unit
+        move1 = self.env['stock.move'].create({
+            'name': '50 out',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product1.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 50.0,
+            'price_unit': 0,
+            'move_line_ids': [(0, 0, {'product_id': self.product1.id,
+                                      'location_id': self.stock_location.id,
+                                      'location_dest_id': self.customer_location.id,
+                                      'product_uom_id': self.uom_unit.id,
+                                      'qty_done': 50.0})]
+        })
+        move1.action_confirm()
+        move1.action_done()
+        
+        move2 = self.env['stock.move'].create({
+            'name': '40 in @15',
+            'location_id': self.supplier_location.id,
+            'location_dest_id': self.stock_location.id,
+            'product_id': self.product1.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 40.0,
+            'price_unit': 15.0,
+            'move_line_ids': [(0, 0, {'product_id': self.product1.id,
+                                      'location_id': self.supplier_location.id,
+                                      'location_dest_id': self.stock_location.id,
+                                      'product_uom_id': self.uom_unit.id,
+                                      'qty_done': 40.0})]
+        })
+        move2.action_confirm()
+        move2.action_done()
+        move3 = self.env['stock.move'].create({
+            'name': '20 in @25',
+            'location_id': self.supplier_location.id,
+            'location_dest_id': self.stock_location.id,
+            'product_id': self.product1.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 20.0,
+            'price_unit': 25.0,
+            'move_line_ids': [(0, 0, {'product_id': self.product1.id,
+                                      'location_id': self.supplier_location.id,
+                                      'location_dest_id': self.stock_location.id,
+                                      'product_uom_id': self.uom_unit.id,
+                                      'qty_done': 20.0})]
+        })
+        move3.action_confirm()
+        move3.action_done()
+        
+        self.assertEqual(self.product1.stock_value, 250.0, 'Stock value should be 250')
+        self.assertEqual(move1.value, -850.0, 'Stock value should be -850')
+        self.assertEqual(move2.value, 600.0, 'Stock value should be 600')
+        self.assertEqual(move3.value, 500.0, 'Stock value should be 500')
+        #Change stock in the past
+        move1.move_line_ids.qty_done = 20.0
+        self.assertEqual(move3.value, 500.0, 'Stock value should be 500')
+        move1.move_line_ids.qty_done = 60.0
+        move3.move_line_ids.qty_done = 30.0
+
     def test_fifo_perpetual_1(self):
         # http://accountingexplained.com/financial/inventories/fifo-method
         self.product1.product_tmpl_id.cost_method = 'fifo'
@@ -186,6 +249,19 @@ class TestStockValuation(TransactionCase):
         self.assertEqual(move5.remaining_qty, 54.0)
         self.assertEqual(move6.remaining_qty, 0.0)  # unused in out moves
         self.assertEqual(move7.remaining_qty, 0.0)  # unused in out moves
+        
+        # Test what happens when we change the stock in the past
+        move3.quantity_done = 10
+        self.assertEqual(move1.value, 1020.0)
+        self.assertEqual(move2.value, 2170.0)
+        self.assertEqual(move3.value, -150.0)
+        self.assertEqual(move4.value, 640.0)
+        self.assertEqual(move5.value, 1287.0)
+        self.assertEqual(move6.value, -1769.0)
+        self.assertEqual(move7.value, -961.0)
+        self.assertEqual(move7.cumulated_value, 2237.0)
+        self.assertEqual(move7.last_done_qty, 138.0)
+        move6.move_line_ids.qty_done = 120.0
 
     def test_fifo_perpetual_2(self):
         # https://docs.google.com/spreadsheets/d/1NI0u9N1gFByXxYHfdiXuxQCrycXXOh76TpPQ3CWeyDw/edit?ts=58da749b#gid=0
@@ -208,7 +284,6 @@ class TestStockValuation(TransactionCase):
 
         self.assertEqual(move1.value, 1000.0)
         self.assertEqual(move1.cumulated_value, 1000.0)
-
         self.assertEqual(move1.remaining_qty, 10.0)
 
         # in 10 @ 80
