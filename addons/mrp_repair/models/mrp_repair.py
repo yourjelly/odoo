@@ -468,7 +468,7 @@ class Repair(models.Model):
             produced_lines = move.move_line_ids
             moves |= move
             moves.action_done()
-            produced_lines.write({'consumed_line_ids': [(6, 0, consumed_lines.ids)]})
+            produced_lines.write({'consume_line_ids': [(6, 0, consumed_lines.ids)]})
             res[repair.id] = move.id
         return res
 
