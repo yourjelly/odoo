@@ -260,9 +260,10 @@ class StockMove(models.Model):
                 if move.product_id.cost_method in ['fifo', 'average']:
                     if not move.price_unit:
                         move.price_unit = move._get_price_unit()
-                    move.value = move.price_unit * move.product_qty
-                    move.cumulated_value = move.product_id._get_latest_cumulated_value(not_move=move) + move.value
-                    move.remaining_qty = move.product_qty
+                    move_value = move.price_unit * move.product_qty
+                    move.write({'value': move_value, 
+                                'cumulated_value': move.product_id._get_latest_cumulated_value(not_move=move) + move_value, 
+                                'remaining_qty': move.product_qty})
                     if move.product_id.cost_method == 'fifo':
                         # If you find an out with qty_remaining (because of negative stock), you can change it over there
                         candidates_out = move.product_id._get_candidates_out_move()
@@ -280,6 +281,8 @@ class StockMove(models.Model):
                                              'cumulated_value': candidate.cumulated_value + move.price_unit * qty_taken_on_candidate, 
                                              'price_unit': candidate_value / candidate.product_qty})
                             candidate._update_future_cumulated_value(move.price_unit * qty_taken_on_candidate)
+                            if qty_to_take <= 0:
+                                break
                     move.last_done_qty = move.product_id.qty_available
                 else:
                     move.price_unit = move.product_id.standard_price
