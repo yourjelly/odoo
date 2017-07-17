@@ -92,12 +92,16 @@ class LandedCost(models.Model):
             })
             for line in cost.valuation_adjustment_lines.filtered(lambda line: line.move_id):
                 cost_to_add = line.additional_landed_cost
+                old_value = line.move_id.product_id.stock_value
                 line.move_id.landed_cost_value += cost_to_add
-                
+                line.move_id.value += cost_to_add
+                line.move_id.replay()
+                new_value = line.move_id.product_id.stock_value
+                diff = new_value - old_value
 #                 for quant in line.move_id.quant_ids:
 #                     if quant.location_id.usage != 'internal':
 #                         qty_out += quant.qty
-                line._create_accounting_entries(move, 0) #TODO: qty_out like you would do with the different moves
+                line._create_accounting_entries(move, diff) #TODO: qty_out like you would do with the different moves
                 
             move.assert_balanced()
             cost.write({'state': 'done', 'account_move_id': move.id})
@@ -277,8 +281,7 @@ class AdjustmentLines(models.Model):
     def _compute_final_cost(self):
         self.final_cost = self.former_cost + self.additional_landed_cost
 
-    def _create_accounting_entries(self, move, qty_out):
-        # TDE CLEANME: product chosen for computation ?
+    def _create_accounting_entries(self, move, diff):
         cost_product = self.cost_line_id.product_id
         if not cost_product:
             return False
@@ -290,9 +293,9 @@ class AdjustmentLines(models.Model):
         if not credit_account_id:
             raise UserError(_('Please configure Stock Expense Account for product: %s.') % (cost_product.name))
 
-        return self._create_account_move_line(move, credit_account_id, debit_account_id, qty_out, already_out_account_id)
+        return self._create_account_move_line(move, credit_account_id, debit_account_id, diff, already_out_account_id)
 
-    def _create_account_move_line(self, move, credit_account_id, debit_account_id, qty_out, already_out_account_id):
+    def _create_account_move_line(self, move, credit_account_id, debit_account_id, diff, already_out_account_id):
         """
         Generate the account.move.line values to track the landed cost.
         Afterwards, for the goods that are already out of stock, we should create the out moves
@@ -307,7 +310,6 @@ class AdjustmentLines(models.Model):
         }
         debit_line = dict(base_line, account_id=debit_account_id)
         credit_line = dict(base_line, account_id=credit_account_id)
-        diff = self.additional_landed_cost
         if diff > 0:
             debit_line['debit'] = diff
             credit_line['credit'] = diff
@@ -317,47 +319,4 @@ class AdjustmentLines(models.Model):
             credit_line['debit'] = -diff
         AccountMoveLine.create(debit_line)
         AccountMoveLine.create(credit_line)
-
-        # Create account move lines for quants already out of stock
-        if qty_out > 0:
-            debit_line = dict(base_line,
-                              name=(self.name + ": " + str(qty_out) + _(' already out')),
-                              quantity=qty_out,
-                              account_id=already_out_account_id)
-            credit_line = dict(base_line,
-                               name=(self.name + ": " + str(qty_out) + _(' already out')),
-                               quantity=qty_out,
-                               account_id=debit_account_id)
-            diff = diff * qty_out / self.quantity
-            if diff > 0:
-                debit_line['debit'] = diff
-                credit_line['credit'] = diff
-            else:
-                # negative cost, reverse the entry
-                debit_line['credit'] = -diff
-                credit_line['debit'] = -diff
-            AccountMoveLine.create(debit_line)
-            AccountMoveLine.create(credit_line)
-
-            # TDE FIXME: oh dear
-            if self.env.user.company_id.anglo_saxon_accounting:
-                debit_line = dict(base_line,
-                                  name=(self.name + ": " + str(qty_out) + _(' already out')),
-                                  quantity=qty_out,
-                                  account_id=credit_account_id)
-                credit_line = dict(base_line,
-                                   name=(self.name + ": " + str(qty_out) + _(' already out')),
-                                   quantity=qty_out,
-                                   account_id=already_out_account_id)
-
-                if diff > 0:
-                    debit_line['debit'] = diff
-                    credit_line['credit'] = diff
-                else:
-                    # negative cost, reverse the entry
-                    debit_line['credit'] = -diff
-                    credit_line['debit'] = -diff
-                AccountMoveLine.create(debit_line)
-                AccountMoveLine.create(credit_line)
-
         return True
