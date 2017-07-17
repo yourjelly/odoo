@@ -60,10 +60,7 @@ class StockMoveLine(models.Model):
             for move in self.mapped('move_id').filtered(lambda m: m.state == 'done'):
                 if move.location_id.usage not in ('internal', 'transit') and move.location_dest_id.usage in ('internal', 'transit'):
                     move.value = move.quantity_done * move.price_unit
-                if move.product_id.cost_method == 'average':
-                    move.replay_average()
-                elif move.product_id.cost_method == 'fifo':
-                    move.replay_fifo()
+                move.replay()
 
 
 class StockMove(models.Model):
@@ -246,6 +243,12 @@ class StockMove(models.Model):
             cumulated_value += move.value
             move.write({'last_done_qty': qty_available,
                         'cumulated_value': cumulated_value})
+
+    def replay(self):
+        if self.product_id.cost_method == 'fifo':
+            self.replay_fifo()
+        elif self.product_id.cost_method == 'average':
+            self.replay_average()
 
     @api.multi
     def action_done(self):

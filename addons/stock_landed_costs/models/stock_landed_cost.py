@@ -14,12 +14,6 @@ class StockMove(models.Model):
     _inherit = 'stock.move'
 
     landed_cost_value = fields.Float('Landed Cost')
-    total_value = fields.Float('Total Value', compute='_compute_total_value')
-    
-    def _compute_total_value(self):
-        for move in self:
-            move.total_value = move.value + move.landed_cost_value
-
 
 class LandedCost(models.Model):
     _name = 'stock.landed.cost'
