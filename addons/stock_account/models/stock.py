@@ -100,7 +100,8 @@ class StockMove(models.Model):
     def _update_future_cumulated_value(self, value):
         self.ensure_one()
         moves = self.search([('state', '=', 'done'), 
-                     ('date', '>',  self.date), 
+                     ('date', '>=',  self.date),
+                     ('id', '>', self.id), 
                      ('product_id', '=', self.product_id.id), 
                      ('company_id', '=', self.company_id.id),
                      '|', '&', ('location_id.usage', 'in', ('internal', 'transit')), 
@@ -125,15 +126,17 @@ class StockMove(models.Model):
                         ('location_dest_id.usage', 'not in', ('internal', 'transit')), 
                         '&', ('location_id.usage', 'not in', ('internal', 'transit')), 
                         ('location_dest_id.usage', 'in', ('internal', 'transit'))], limit=1, order='date desc') #filter on outgoing/incoming moves
-        next_moves = self.search([('product_id', '=', self.product_id.id), 
+        domain = [('product_id', '=', self.product_id.id), 
                      ('state', '=', 'done'), 
-                     ('date', '>=', start_move.date),
-                     ('id', '>', start_move.id), 
                      ('company_id', '=', self.company_id.id),
                      '|', '&', ('location_id.usage', 'in', ('internal', 'transit')), 
                         ('location_dest_id.usage', 'not in', ('internal', 'transit')), 
                         '&', ('location_id.usage', 'not in', ('internal', 'transit')), 
-                        ('location_dest_id.usage', 'in', ('internal', 'transit'))], order='date') # filter on outgoing/incoming moves
+                        ('location_dest_id.usage', 'in', ('internal', 'transit'))]
+        if start_move:
+            domain = [('date', '>=', start_move.date),
+                     ('id', '>', start_move.id)] + domain
+        next_moves = self.search(domain, order='date, id') # filter on outgoing/incoming moves
         if start_move:
             last_cumulated_value = start_move.cumulated_value
             last_done_qty_available = start_move.last_done_qty
@@ -218,20 +221,25 @@ class StockMove(models.Model):
                 out_move.write({'last_done_remaining_qty': last_remaining_qty, 
                                 'last_done_move_id': last_in_move.id, 
                                 'value': -total_value})
-                
-        next_moves = self.search([('product_id', '=', self.product_id.id), 
+        domain = [('product_id', '=', self.product_id.id), 
                      ('state', '=', 'done'), 
-                     ('date', '>=', self.date),
-                     ('id', '>', self.id), 
                      ('company_id', '=', self.company_id.id),
                      '|', '&', ('location_id.usage', 'in', ('internal', 'transit')), 
                         ('location_dest_id.usage', 'not in', ('internal', 'transit')), 
                         '&', ('location_id.usage', 'not in', ('internal', 'transit')), 
-                        ('location_dest_id.usage', 'in', ('internal', 'transit'))], order='date') # filter on outgoing/incoming moves
-        cumulated_value = self.cumulated_value
-        qty_available = self.last_done_qty
+                        ('location_dest_id.usage', 'in', ('internal', 'transit'))]
+        if start_move:
+            domain = [('date', '>=', start_move.date),
+                     ('id', '>', start_move.id)] + domain
+        next_moves = self.search(domain, order='date, id')
+        if start_move:
+            cumulated_value = start_move.cumulated_value
+            qty_available = start_move.last_done_remaining_qty
+        else:
+            cumulated_value = 0.0
+            qty_available = 0.0
         for move in next_moves:
-            if move.location_id.usage in ('internal', 'transit'):
+            if move.location_dest_id.usage in ('internal', 'transit'):
                 qty_available += move.product_qty
             else:
                 qty_available -= move.product_qty
