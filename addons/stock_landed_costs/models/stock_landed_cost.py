@@ -93,16 +93,14 @@ class LandedCost(models.Model):
             for line in cost.valuation_adjustment_lines.filtered(lambda line: line.move_id):
                 cost_to_add = line.additional_landed_cost
                 old_value = line.move_id.product_id.stock_value
-                line.move_id.landed_cost_value += cost_to_add
-                line.move_id.value += cost_to_add
+                line.move_id.write({'landed_cost_value': line.move_id.landed_cost_value + cost_to_add,
+                                    'value': line.move_id.value + cost_to_add, 
+                                    'price_unit': (line.move_id.value + cost_to_add) / line.move_id.product_qty,})
                 line.move_id.replay()
+                line.move_id.product_id._compute_stock_value()
                 new_value = line.move_id.product_id.stock_value
                 diff = new_value - old_value
-#                 for quant in line.move_id.quant_ids:
-#                     if quant.location_id.usage != 'internal':
-#                         qty_out += quant.qty
-                line._create_accounting_entries(move, diff) #TODO: qty_out like you would do with the different moves
-                
+                line._create_accounting_entries(move, diff) 
             move.assert_balanced()
             cost.write({'state': 'done', 'account_move_id': move.id})
             move.post()
@@ -130,7 +128,7 @@ class LandedCost(models.Model):
 
         for move in self.mapped('picking_ids').mapped('move_lines'):
             # it doesn't make sense to make a landed cost for a product that isn't set as being valuated in real time at real cost
-            if move.product_id.valuation != 'real_time' or move.product_id.cost_method not in ('average', 'fifo'):
+            if move.product_id.cost_method not in ('average', 'fifo'):
                 continue
             vals = {
                 'product_id': move.product_id.id,
@@ -284,6 +282,8 @@ class AdjustmentLines(models.Model):
     def _create_accounting_entries(self, move, diff):
         cost_product = self.cost_line_id.product_id
         if not cost_product:
+            return False
+        if self.product_id.valuation != 'real_time':
             return False
         accounts = self.product_id.product_tmpl_id.get_product_accounts()
         debit_account_id = accounts.get('stock_valuation') and accounts['stock_valuation'].id or False

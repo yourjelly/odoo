@@ -220,7 +220,6 @@ class TestStockValuation(TransactionCase):
 
         self.assertEqual(move1.value, 1000.0)
         self.assertEqual(move1.cumulated_value, 1000.0)
-
         self.assertEqual(move1.remaining_qty, 10.0)
 
         # in 10 @ 80
