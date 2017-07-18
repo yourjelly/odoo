@@ -316,7 +316,6 @@ return AbstractRenderer.extend({
                 self.$calendar.fullCalendar('unselect');
             },
             eventRender: function (event, element) {
-                debugger;
                 var $render = $(self._eventRender(event));
                 event.title = $render.find('.o_field_type_char:first').text();
                 element.find('.fc-content').html($render.html());
