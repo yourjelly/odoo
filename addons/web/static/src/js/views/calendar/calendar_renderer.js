@@ -323,7 +323,7 @@ return AbstractRenderer.extend({
                 var display_hour = '';
                 if (!event.allDay) {
                     display_hour = (event.r_start && event.start.format('HH:mm') === '00:00' ? event.r_start.format('HH:mm') : event.start.format('HH:mm')) + ' - ' +
-                        (event.r_end && event.end.format('HH:mm') === '00:00' ? event.r_end.format('HH:mm') : event.end.format('HH:mm'));
+                        (event.end && event.end.format('HH:mm') !== '00:00' ? event.end.format('HH:mm') : event.r_end && event.r_end.format('HH:mm'));
                     if (display_hour === '00:00 - 00:00') {
                         display_hour = _t('All the day');
                     }
