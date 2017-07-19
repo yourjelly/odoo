@@ -106,7 +106,7 @@ class StockMove(models.Model):
                     '&', ('location_id.usage', 'not in', ('internal', 'transit')), 
                     ('location_dest_id.usage', 'in', ('internal', 'transit'))])
         for move in moves:
-            move.value += value
+            move.cumulated_value += value
 
     @api.multi
     def replay_average(self):
@@ -153,40 +153,37 @@ class StockMove(models.Model):
             
 
     def replay_fifo(self):
-        # Easy scenario: average /done
-        # search last move before this one
+        # search last out move before/equal to this one
         start_move = self.search([('product_id', '=', self.product_id.id), 
-                     ('state', '=', 'done'), 
-                     ('date', '<=', self.date),
-                     ('id', '<', self.id), 
+                     ('state', '=', 'done'),
+                     ('last_done_move_id', '!=', False),
+                     '|', ('date', '<', self.date),
+                     '&', ('date', '=', self.date), ('id', '<', self.id), 
                      ('location_id.usage', 'in', ('internal', 'transit')), 
-                     ('location_dest_id.usage', 'not in', ('internal', 'transit'))], limit=1, order='date desc') #filter on outgoing/incoming moves
+                     ('location_dest_id.usage', 'not in', ('internal', 'transit'))], limit=1, order='date desc, id desc') #filter on outgoing/incoming moves
         in_domain = [('product_id', '=', self.product_id.id), 
                      ('state', '=', 'done'), 
                      ('location_id.usage', 'not in', ('internal', 'transit')), 
                      ('location_dest_id.usage', 'in', ('internal', 'transit'))]
         out_date = False
         out_id = False
-        if start_move:
+        if start_move and (start_move.last_done_move_id.date < start_move.date or (start_move.last_done_move_id.date == start_move.date and start_move.last_done_move_id.id < start_move.id)):
             first_in_move = start_move.last_done_move_id
             first_in_remaining_qty = start_move.last_done_remaining_qty
-            in_domain += [('date', '>=', start_move.last_done_move_id.date), ('id', '>', start_move.last_done_move_id.id)]
+            in_domain += ['|', ('date', '>', start_move.last_done_move_id.date), 
+                          '&', ('id', '>', start_move.last_done_move_id.id), ('date', '=', start_move.last_done_remaining_qty)]
             out_date = start_move.date
             out_id = start_move.id
         else:
-            first_in_remaining_qty = 0
             first_in_move = False
-            if self.location_id.usage in ('internal', 'transit') and self.location_dest_id.usage not in ('internal', 'transit'):
-                out_date = self.date
-                out_id = self.id
-            else:
-                out_move = self.search([('product_id', '=', self.product_id.id),
-                                        ('state', '=', 'done'),
-                                        ('location_id.usage', 'in', ('internal', 'transit')), 
-                                        ('location_dest_id.usage', 'not in', ('internal', 'transit'))], order='date', limit=1)
-                if out_move:
-                    out_date = out_move.date
-                    out_id = out_move.id
+            first_in_remaining_qty = 0
+            out_move = self.search([('product_id', '=', self.product_id.id),
+                                    ('state', '=', 'done'),
+                                    ('location_id.usage', 'in', ('internal', 'transit')), 
+                                    ('location_dest_id.usage', 'not in', ('internal', 'transit'))], order='date, id', limit=1)
+            if out_move:
+                out_date = out_move.date
+                out_id = out_move.id
         in_moves_needed = self.search(in_domain)
         if out_date:
             next_out_moves = self.search([('product_id', '=', self.product_id.id), 
@@ -276,13 +273,15 @@ class StockMove(models.Model):
                                 qty_taken_on_candidate = candidate.remaining_qty
                             else:
                                 qty_taken_on_candidate = qty_to_take
-                            candidate.remaining_qty -= qty_taken_on_candidate
                             move.remaining_qty -= qty_taken_on_candidate
                             qty_to_take -= qty_taken_on_candidate
-                            candidate_value = candidate.value + move.price_unit * qty_taken_on_candidate
+                            candidate_value = candidate.value - move.price_unit * qty_taken_on_candidate
                             candidate.write({'value': candidate_value, 
-                                             'cumulated_value': candidate.cumulated_value + move.price_unit * qty_taken_on_candidate, 
-                                             'price_unit': candidate_value / candidate.product_qty})
+                                             'cumulated_value': candidate.cumulated_value - move.price_unit * qty_taken_on_candidate, 
+                                             'price_unit': - (candidate_value / candidate.product_qty),
+                                             'last_done_move_id': move.id,
+                                             'remaining_qty': candidate.remaining_qty - qty_taken_on_candidate})
+                            # Might be replaced be reusable code
                             candidate._update_future_cumulated_value(move.price_unit * qty_taken_on_candidate)
                             if qty_to_take <= 0:
                                 break
