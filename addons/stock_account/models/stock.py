@@ -153,7 +153,7 @@ class StockMove(models.Model):
             
 
     def replay_fifo(self):
-        # search last out move before/equal to this one
+        # search last out move before this one
         start_move = self.search([('product_id', '=', self.product_id.id), 
                      ('state', '=', 'done'),
                      ('last_done_move_id', '!=', False),
@@ -165,39 +165,34 @@ class StockMove(models.Model):
                      ('state', '=', 'done'), 
                      ('location_id.usage', 'not in', ('internal', 'transit')), 
                      ('location_dest_id.usage', 'in', ('internal', 'transit'))]
-        out_date = False
-        out_id = False
-        if start_move and (start_move.last_done_move_id.date < start_move.date or (start_move.last_done_move_id.date == start_move.date and start_move.last_done_move_id.id < start_move.id)):
+        use_start_move = start_move and (start_move.last_done_move_id.date < start_move.date or (start_move.last_done_move_id.date == start_move.date and start_move.last_done_move_id.id < start_move.id))
+        if use_start_move:
             first_in_move = start_move.last_done_move_id
             first_in_remaining_qty = start_move.last_done_remaining_qty
             in_domain += ['|', ('date', '>', start_move.last_done_move_id.date), 
-                          '&', ('id', '>', start_move.last_done_move_id.id), ('date', '=', start_move.last_done_remaining_qty)]
-            out_date = start_move.date
-            out_id = start_move.id
+                          '&', ('id', '>', start_move.last_done_move_id.id), ('date', '=', start_move.last_done_move_id.date)]
+#             out_date = start_move.date
+#             out_id = start_move.id
         else:
             first_in_move = False
             first_in_remaining_qty = 0
-            out_move = self.search([('product_id', '=', self.product_id.id),
-                                    ('state', '=', 'done'),
-                                    ('location_id.usage', 'in', ('internal', 'transit')), 
-                                    ('location_dest_id.usage', 'not in', ('internal', 'transit'))], order='date, id', limit=1)
-            if out_move:
-                out_date = out_move.date
-                out_id = out_move.id
         in_moves_needed = self.search(in_domain)
-        if out_date:
-            next_out_moves = self.search([('product_id', '=', self.product_id.id), 
-                         ('state', '=', 'done'), 
-                         ('date', '>=', out_date),
-                         ('id', '>=', out_id),
-                         ('location_id.usage', 'in', ('internal', 'transit')), 
-                         ('location_dest_id.usage', 'not in', ('internal', 'transit'))], order='date, id') # filter on outgoing/incoming moves
-            last_in_move = first_in_move
-            last_remaining_qty = first_in_remaining_qty
-            if not first_in_move or last_remaining_qty == 0.0 and in_moves_needed:
-                last_in_move = in_moves_needed[0] #TODO: pop(0)?
-                in_moves_needed -= in_moves_needed[0]
-                last_remaining_qty = last_in_move.product_qty
+        
+        out_domain = [('product_id', '=', self.product_id.id), 
+                     ('state', '=', 'done'), 
+                     ('location_id.usage', 'in', ('internal', 'transit')), 
+                     ('location_dest_id.usage', 'not in', ('internal', 'transit'))]
+        if use_start_move:
+            out_domain += ['|', ('date', '>', start_move.date), 
+                           '&', ('date', '=', start_move.date), ('id', '>', start_move.id)]
+        next_out_moves = self.search(out_domain, order='date, id') # filter on outgoing/incoming moves
+        last_in_move = first_in_move
+        last_remaining_qty = first_in_remaining_qty
+        if not first_in_move or last_remaining_qty == 0.0 and in_moves_needed:
+            last_in_move = in_moves_needed[0] #TODO: pop(0)?
+            in_moves_needed -= in_moves_needed[0]
+            last_remaining_qty = last_in_move.product_qty
+        if last_in_move:
             for out_move in next_out_moves:
                 total_qty = out_move.product_qty
                 total_value = 0
@@ -231,7 +226,7 @@ class StockMove(models.Model):
                         ('location_dest_id.usage', 'not in', ('internal', 'transit')), 
                         '&', ('location_id.usage', 'not in', ('internal', 'transit')), 
                         ('location_dest_id.usage', 'in', ('internal', 'transit'))]
-        use_start_move = start_move and (start_move.last_done_move_id.date < start_move.date or (start_move.last_done_move_id.date == start_move.date and start_move.last_done_move_id.id < start_move.id))
+        use_start_move=False
         if use_start_move:
             domain = [('date', '>=', start_move.date),
                      ('id', '>', start_move.id)] + domain

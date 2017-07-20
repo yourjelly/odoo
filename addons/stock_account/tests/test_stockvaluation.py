@@ -75,12 +75,10 @@ class TestStockValuation(TransactionCase):
         self.assertEqual(move2.value, 600.0, 'Stock value should be 600')
         self.assertEqual(move3.value, 500.0, 'Stock value should be 500')
         #Change stock in the past
-        move2.move_line_ids.qty_done = 5
-#         move1.move_line_ids.qty_done = 20.0
-#         self.assertEqual(move3.value, 500.0, 'Stock value should be 500')
-#         move1.move_line_ids.qty_done = 60.0
-#         move3.move_line_ids.qty_done = 30.0
-#         import pdb; pdb.set_trace()
+        move1.move_line_ids.qty_done = 20.0
+        self.assertEqual(move3.value, 500.0, 'Stock value should be 500')
+        move1.move_line_ids.qty_done = 60.0
+        move3.move_line_ids.qty_done = 30.0
 
     def test_fifo_perpetual_1(self):
         # http://accountingexplained.com/financial/inventories/fifo-method
@@ -263,6 +261,7 @@ class TestStockValuation(TransactionCase):
         self.assertEqual(move7.value, -961.0)
         self.assertEqual(move7.cumulated_value, 2237.0)
         self.assertEqual(move7.last_done_qty, 138.0)
+        move6.move_line_ids.qty_done = 120.0
 
     def test_fifo_perpetual_2(self):
         # https://docs.google.com/spreadsheets/d/1NI0u9N1gFByXxYHfdiXuxQCrycXXOh76TpPQ3CWeyDw/edit?ts=58da749b#gid=0
