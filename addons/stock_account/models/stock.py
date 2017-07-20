@@ -231,11 +231,12 @@ class StockMove(models.Model):
                         ('location_dest_id.usage', 'not in', ('internal', 'transit')), 
                         '&', ('location_id.usage', 'not in', ('internal', 'transit')), 
                         ('location_dest_id.usage', 'in', ('internal', 'transit'))]
-        if start_move:
+        use_start_move = start_move and (start_move.last_done_move_id.date < start_move.date or (start_move.last_done_move_id.date == start_move.date and start_move.last_done_move_id.id < start_move.id))
+        if use_start_move:
             domain = [('date', '>=', start_move.date),
                      ('id', '>', start_move.id)] + domain
         next_moves = self.search(domain, order='date, id')
-        if start_move:
+        if use_start_move:
             cumulated_value = start_move.cumulated_value
             qty_available = start_move.last_done_remaining_qty
         else:
