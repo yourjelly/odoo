@@ -75,7 +75,7 @@ class TestStockValuation(TransactionCase):
         self.assertEqual(move2.value, 600.0, 'Stock value should be 600')
         self.assertEqual(move3.value, 500.0, 'Stock value should be 500')
         #Change stock in the past
-        move2.move_line_ids.qty_done = 5)
+        move2.move_line_ids.qty_done = 5
 #         move1.move_line_ids.qty_done = 20.0
 #         self.assertEqual(move3.value, 500.0, 'Stock value should be 500')
 #         move1.move_line_ids.qty_done = 60.0
