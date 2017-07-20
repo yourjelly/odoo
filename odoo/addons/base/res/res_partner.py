@@ -311,7 +311,7 @@ class Partner(models.Model):
                              'was never correctly set. If an existing contact starts working for a new '
                              'company then a new contact should be created under that new '
                              'company. You can use the "Discard" button to abandon this change.')}
-        if partner.type == 'contact' or self.type == 'contact':
+        if partner.type == 'contact':
             # for contacts: copy the parent address, if set (aka, at least one
             # value is set in the address: otherwise, keep the one from the
             # contact)
