@@ -98,7 +98,7 @@ class Product(models.Model):
         for move in self:
             move.delivery_count = res.get(move.id, 0)
 
-    @api.depends('stock_quant_ids', 'stock_move_ids')
+    @api.depends('stock_move_ids.product_qty', 'stock_move_ids.state')
     def _compute_quantities(self):
         res = self._compute_quantities_dict(self._context.get('lot_id'), self._context.get('owner_id'), self._context.get('package_id'), self._context.get('from_date'), self._context.get('to_date'))
         for product in self:
