@@ -195,26 +195,35 @@ class StockMove(models.Model):
             last_in_move = first_in_move
             last_remaining_qty = first_in_remaining_qty
             if not first_in_move or last_remaining_qty == 0.0 and in_moves_needed:
-                last_in_move = in_moves_needed[0]
+                last_in_move = in_moves_needed[0] #TODO: pop(0)?
                 in_moves_needed -= in_moves_needed[0]
                 last_remaining_qty = last_in_move.product_qty
             for out_move in next_out_moves:
                 total_qty = out_move.product_qty
                 total_value = 0
-                while(total_qty > 0): # and in_moves_needed:
-                    if last_remaining_qty <= total_qty:
+                stop = False
+                while(total_qty > 0) and not stop: # only after you cannot 
+                    if last_remaining_qty < total_qty:
                         total_qty -= last_remaining_qty
                         total_value += last_remaining_qty * last_in_move.price_unit
-                        last_in_move = in_moves_needed[0]
-                        in_moves_needed -= in_moves_needed[0]
-                        last_remaining_qty = last_in_move.product_qty
+                        last_in_move.remaining_qty = 0.0
+                        if in_moves_needed:
+                            last_in_move = in_moves_needed[0]
+                            in_moves_needed -= in_moves_needed[0]
+                            last_remaining_qty = last_in_move.product_qty
+                        else:
+                            stop = True
                     else:
                         total_value += total_qty * last_in_move.price_unit
                         last_remaining_qty -= total_qty
+                        last_in_move.remaining_qty = last_remaining_qty
                         total_qty = 0
                 out_move.write({'last_done_remaining_qty': last_remaining_qty, 
                                 'last_done_move_id': last_in_move.id, 
                                 'value': -total_value})
+                out_move.remaining_qty = total_qty
+            for move in in_moves_needed:
+                move.remaining_qty = move.product_qty
         domain = [('product_id', '=', self.product_id.id), 
                      ('state', '=', 'done'), 
                      ('company_id', '=', self.company_id.id),
