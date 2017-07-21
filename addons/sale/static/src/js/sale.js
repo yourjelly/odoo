@@ -2,7 +2,10 @@ odoo.define('sale.sales_team_dashboard', function (require) {
 "use strict";
 
 var core = require('web.core');
+var field_registry = require('web.field_registry');
 var KanbanRecord = require('web.KanbanRecord');
+var relational_fields = require('web.relational_fields');
+var session = require('web.session');
 var _t = core._t;
 
 KanbanRecord.include({
@@ -43,5 +46,34 @@ KanbanRecord.include({
         });
     },
 });
+
+var FieldRadioVisible = relational_fields.FieldRadio.extend({
+    supportedFieldTypes: ['selection', 'many2one'],
+    /**
+     * @override
+     * @private
+     */
+
+    willStart: function () {
+        var self = this;
+        return this._super.apply(this, arguments).then(function(){
+            return session.user_has_group('sale.group_delivery_invoice_address').then(function(has_group){
+                self.has_group = has_group;
+                self._setValues();
+            });
+        });
+    },
+
+    _setValues: function () {
+        if(!this.has_group && this.field.type === 'selection'){
+            var selection = this.field.selection;
+            this.values = selection.slice(0,2);
+            return;
+        }
+        this._super.apply(this, arguments);
+    },
+});
+
+field_registry.add('radio_visible', FieldRadioVisible);
 
 });

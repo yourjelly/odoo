@@ -12,6 +12,7 @@ class ResPartner(models.Model):
     sale_order_ids = fields.One2many('sale.order', 'partner_id', 'Sales Order')
     sale_warn = fields.Selection(WARNING_MESSAGE, 'Sales Order', default='no-message', help=WARNING_HELP, required=True)
     sale_warn_msg = fields.Text('Message for Sales Order')
+    type = fields.Selection(selection_add=[('invoice', 'Invoice address'), ('delivery', 'Shipping address')])
 
     def _compute_sale_order_count(self):
         sale_data = self.env['sale.order'].read_group(domain=[('partner_id', 'child_of', self.ids)],
