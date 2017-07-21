@@ -81,12 +81,16 @@ function transformQwebTemplate(node, fields) {
     }
 }
 
+console.log(KanbanColumn);
 var KanbanRenderer = BasicRenderer.extend({
+
     className: 'o_kanban_view',
     /**
      * @override
      */
     init: function (parent, state, params) {
+        this._kanbanColumn = KanbanColumn;
+        this._kanbanRecord = KanbanRecord;
         this._super.apply(this, arguments);
 
         this.widgets = [];
@@ -138,7 +142,7 @@ var KanbanRenderer = BasicRenderer.extend({
     updateColumn: function (localID, columnState) {
         var column = _.findWhere(this.widgets, {db_id: localID});
         this.widgets.splice(_.indexOf(this.widgets, column), 1); // remove column from widgets' list
-        var newColumn = new KanbanColumn(this, columnState, this.columnOptions, this.recordOptions);
+        var newColumn = new this._kanbanColumn(this, columnState, this.columnOptions, this.recordOptions);
         this.widgets.push(newColumn);
         return newColumn.insertAfter(column.$el).then(column.destroy.bind(column));
     },
@@ -218,7 +222,7 @@ var KanbanRenderer = BasicRenderer.extend({
 
         // Render columns
         _.each(this.state.data, function (group) {
-            var column = new KanbanColumn(self, group, self.columnOptions, self.recordOptions);
+            var column = new self._kanbanColumn(self, group, self.columnOptions, self.recordOptions);
             if (!group.value) {
                 column.prependTo(fragment); // display the 'Undefined' group first
                 self.widgets.unshift(column);
@@ -265,7 +269,7 @@ var KanbanRenderer = BasicRenderer.extend({
     _renderUngrouped: function (fragment) {
         var self = this;
         _.each(this.state.data, function (record) {
-            var kanbanRecord = new KanbanRecord(self, record, self.recordOptions);
+            var kanbanRecord = new self._kanbanRecord(self, record, self.recordOptions);
             self.widgets.push(kanbanRecord);
             kanbanRecord.appendTo(fragment);
         });
