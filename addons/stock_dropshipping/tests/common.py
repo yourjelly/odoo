@@ -48,4 +48,4 @@ class TestStockDropshippingCommon(common.TransactionCase):
             'name': 'WareHouse PickPackShip',
             'code': 'whpps',
             'reception_steps': 'two_steps',
-            'delivery_steps': 'pick_pack_ship', })
+            'delivery_steps': 'ship_only', })

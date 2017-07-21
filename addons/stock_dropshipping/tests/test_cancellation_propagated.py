@@ -75,20 +75,23 @@ class TestCancellationPropagated(TestStockDropshippingCommon):
         self.assertEquals(len(purchases.ids), 1, 'No purchase order found !')
         # Check the two purchase order lines
         self.assertEquals(len(purchases.order_line), 1, 'No purchase order found !')
+        self.assertEquals(len(purchases.order_line.procurement_ids), 2, 'Wrong procurement on order line !')
         purchase_line = purchases.order_line
         self.assertEquals(purchase_line.product_qty, 29.0, "The product quantity of the order line should be 29 and not %s" % (purchase_line.product_qty,))
         self.assertEquals(purchase_line.product_uom.id, self.uom_unit.id, "'The product uom of the order line should be %s and not %s'" % (self.uom_unit.name, purchase_line.product_uom.name,))
 
         # Cancel the sales order of 2 dozen.
-        procurement2 = self.so_product_mto2.order_line.procurement_ids
-        procurement2.cancel()
-        self.assertEquals(procurement2.state, 'cancel', "Procurement should be cancelled !")
+        self.so_product_mto2.action_cancel()
+        procurements2 = self.ProcurementOrder.search([('group_id', '=', self.so_product_mto2.procurement_group_id.id), ('purchase_line_id', '!=', False)])
+        self.assertEquals(self.so_product_mto2.state, 'cancel', "Sale order should be cancelled !")
+        self.assertEquals(procurements2.mapped('state'), ['cancel'], "Procurement related sale order should be cancelled !")
         self.assertEquals(purchase_line.product_qty, 5.0, "'The product quantity of the order line should be 5 and not %s'" % (purchase_line.product_qty,))
 
         # Cancel procurement first sales order.
-        procurement = self.so_product_mto.order_line.procurement_ids
-        procurement.cancel()
-        self.assertEquals(procurement.state, 'cancel', "Procurement should be cancelled !")
+        self.so_product_mto.action_cancel()
+        procurements = self.so_product_mto.order_line.procurement_ids
+        self.assertEquals(self.so_product_mto.state, 'cancel', "Sale order should be cancelled !")
+        self.assertEquals(procurements.mapped('state'), ['cancel'], "Procurement related sale order should be cancelled !")
         self.assertEquals(len(purchases.order_line), 0, "The PO line should have been unlinked!")
 
         # Check that all procurements related are cancelled or not.
