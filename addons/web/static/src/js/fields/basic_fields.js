@@ -1093,13 +1093,21 @@ var FieldBinaryImage = AbstractFieldBinary.extend({
             if (!utils.is_bin_size(this.value)) {
                 url = 'data:image/png;base64,' + this.value;
             } else {
-                url = session.url('/web/image', {
-                    model: this.model,
-                    id: JSON.stringify(this.res_id),
-                    field: this.nodeOptions.preview_image || this.name,
-                    // unique forces a reload of the image when the record has been updated
-                    unique: (this.recordData.__last_update || '').replace(/[^0-9]/g, ''),
-                });
+                if (attrs.name == "logo") {
+                    url = session.url('/logo', {
+                        model: this.model,
+                        field: url = 'data:image/png;base64,' + this.value,
+                    });
+                }
+                else{
+                    url = session.url('/web/image', {
+                        model: this.model,
+                        id: JSON.stringify(this.res_id),
+                        field: this.nodeOptions.preview_image || this.name,
+                        // unique forces a reload of the image when the record has been updated
+                        unique: (this.recordData.__last_update || '').replace(/[^0-9]/g, ''),
+                    });
+                }
             }
         }
         var $img = $('<img>').attr('src', url);
