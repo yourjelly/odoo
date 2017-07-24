@@ -81,7 +81,6 @@ function transformQwebTemplate(node, fields) {
     }
 }
 
-console.log(KanbanColumn);
 var KanbanRenderer = BasicRenderer.extend({
 
     className: 'o_kanban_view',

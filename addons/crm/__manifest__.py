@@ -55,6 +55,7 @@
         'data/crm_lead_demo.xml',
     ],
     'css': ['static/src/css/crm.css'],
+    'qweb': ['static/src/xml/crm.xml'],
     'installable': True,
     'application': True,
     'auto_install': False,
