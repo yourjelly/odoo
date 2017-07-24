@@ -154,8 +154,13 @@ class Product(models.Model):
         It will return all stock locations when no parameters are given
         Possible parameters are shop, warehouse, location, force_company, compute_child
         '''
-        # TDE FIXME: clean that brol, context seems overused
         Warehouse = self.env['stock.warehouse']
+
+        if self.env.context.get('internal', False):
+            company_id = self.env.user.company_id.id
+            return ([('location_id.usage', 'in', ('internal', 'transit')), ('company_id', '=', company_id)], 
+                    [('location_id.usage', 'not in', ('internal', 'transit')), ('location_dest_id.usage', 'in', ('internal', 'transit')), ('company_id', '=', company_id)],
+                    [('location_id.usage', 'in', ('internal', 'transit')), ('location_dest_id.usage', 'not in', ('internal', 'transit')), ('company_id', '=', company_id)])
 
         location_ids = []
         if self.env.context.get('location', False):

@@ -257,7 +257,7 @@ class StockMove(models.Model):
         for move in self:
             #Should write move.price_unit here maybe, certainly on incoming
             if move.product_id.cost_method == 'average':
-                qty_available[move.product_id.id] = move.product_id.qty_available
+                qty_available[move.product_id.id] = move.product_id.with_context(internal=True).qty_available
         res = super(StockMove, self).action_done()
         for move in res:
             if move._is_in_move():
@@ -289,7 +289,7 @@ class StockMove(models.Model):
                             candidate._update_future_cumulated_value(move.price_unit * qty_taken_on_candidate)
                             if qty_to_take <= 0:
                                 break
-                    move.last_done_qty = move.product_id.qty_available
+                    move.last_done_qty = move.product_id.with_context(internal=True).qty_available
                 else:
                     move.price_unit = move.product_id.standard_price
                     move.value = move.price_unit * move.product_qty
@@ -317,14 +317,14 @@ class StockMove(models.Model):
                         move.remaining_qty = qty_to_take # In case there are no candidates to match, put standard price on it
                     move.value = -tmp_value
                     move.cumulated_value = move.product_id._get_latest_cumulated_value(not_move=move) + move.value
-                    move.last_done_qty = move.product_id.qty_available
+                    move.last_done_qty = move.product_id.with_context(internal=True).qty_available
                 elif move.product_id.cost_method == 'average':
                     curr_rounding = move.company_id.currency_id.rounding
                     avg_price_unit = float_round(move.product_id._get_latest_cumulated_value(not_move=move) / qty_available[move.product_id.id], precision_rounding=curr_rounding)
                     move_value = float_round(-avg_price_unit * move.product_qty, precision_rounding=curr_rounding)
                     move.write({'value': move_value,
                                 'cumulated_value': move.product_id._get_latest_cumulated_value(not_move=move) + move_value,
-                                'last_done_qty': move.product_id.qty_available,
+                                'last_done_qty': move.product_id.with_context(internal=True).qty_available,
                                 })
                 elif move.product_id.cost_method == 'standard':
                     move.value = - move.product_id.standard_price * move.product_qty
