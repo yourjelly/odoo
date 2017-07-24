@@ -181,6 +181,7 @@ class Partner(models.Model):
          ('other', 'Other address')], string='Address Type',
         default='contact',
         help="Used to select automatically the right address according to the context in sales and purchases documents.")
+    parent_company_type = fields.Selection(related='parent_id.company_type', readonly=True)
     street = fields.Char()
     street2 = fields.Char()
     zip = fields.Char(change_default=True)

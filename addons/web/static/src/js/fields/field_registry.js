@@ -54,6 +54,7 @@ registry
 registry
     .add('selection', relational_fields.FieldSelection)
     .add('radio', relational_fields.FieldRadio)
+    .add('radio_type', relational_fields.FieldRadioType)
     .add('many2one', relational_fields.FieldMany2One)
     .add('list.many2one', relational_fields.ListFieldMany2One)
     .add('kanban.many2one', relational_fields.KanbanFieldMany2One)

@@ -2008,6 +2008,28 @@ var FieldRadio = FieldSelection.extend({
     },
 });
 
+var FieldRadioType = FieldRadio.extend({
+    supportedFieldTypes: ['selection', 'many2one'],
+    /**
+     * @override
+     * @private
+     */
+
+    _setValues: function () {
+        if (this.field.type === 'selection') {
+            if (this.recordData.parent_company_type === 'person') {
+                this._setValue('other');
+                this.value = 'other';
+                var selection = this.field.selection;
+                this.values = selection.slice(-1);
+                return;
+            } else if (this.recordData.parent_company_type === 'company') {
+                this._super.apply(this, arguments);
+            }
+        }
+    },
+});
+
 /**
  * The FieldReference is a combination of a select (for the model) and
  * a FieldMany2one for its value.
@@ -2123,6 +2145,7 @@ return {
     KanbanFieldMany2ManyTags: KanbanFieldMany2ManyTags,
 
     FieldRadio: FieldRadio,
+    FieldRadioType: FieldRadioType,
     FieldSelection: FieldSelection,
     FieldStatus: FieldStatus,
 

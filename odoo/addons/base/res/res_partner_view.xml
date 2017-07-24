@@ -283,6 +283,7 @@
                                     <field name="state_id"/>
                                     <field name="image_small"/>
                                     <field name="lang"/>
+                                    <field name="parent_company_type"/>
                                     <templates>
                                         <t t-name="kanban-box">
                                             <t t-set="color" t-value="kanban_color(record.color.raw_value)"/>
@@ -323,10 +324,11 @@
                                         <!-- parent_id and type fields needed in attrs in base_address_city module which overwrites
                                         _fields_view_get() of partner. It would be better to put those fields there but the web client
                                         dosen't support when a field is displayed several times in the same view.-->
-                                        <field name="type" required="1" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="type" required="1" widget="radio_type" options="{'horizontal': true}"/>
                                         <field name="parent_id" invisible="1"/>
                                         <hr/>
                                         <group>
+                                            <field name="parent_company_type" invisible="1"/>
                                             <group attrs="{'invisible': [('type','=', 'contact')]}">
                                                 <label for="street" string="Address"/>
                                                 <div>
