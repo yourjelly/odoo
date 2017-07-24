@@ -31,14 +31,14 @@ class TestCancellationPropagated(TestStockDropshippingCommon):
         # Create a sales order of 5 Units "My Product"
         self.so_product_mto = self._create_sale_order(
                                         partner_id=self.ref('base.res_partner_3'),
-                                        product_id=self.product_mto.id,
+                                        product=self.product_mto,
                                         product_qty=5.00,
                                         uom_id=self.uom_unit.id)
 
         # Create another sales order with 2 Dozen of "My Product"
         self.so_product_mto2 = self._create_sale_order(
                                         partner_id=self.ref('base.res_partner_4'),
-                                        product_id=self.product_mto.id,
+                                        product=self.product_mto,
                                         product_qty=2.00,
                                         uom_id=self.uom_dozen_id)
 

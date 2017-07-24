@@ -23,7 +23,7 @@ class TestDropship(TestStockDropshippingCommon):
         # Creating Sale Order
         self.sale_order_drp_shpng = self._create_sale_order(
                                         partner_id=self.partner.id,
-                                        product_id=self.product.id,
+                                        product=self.product,
                                         product_qty=200,
                                         uom_id=self.uom_unit.id)
         # Set route on sale order line
@@ -49,6 +49,4 @@ class TestDropship(TestStockDropshippingCommon):
 
         # Check one quant was created in Customers location with 200 pieces and one move in the history_ids
         quants = self.env['stock.quant'].search([('location_id', '=', self.customer_location_id), ('product_id', '=', self.product.id)])
-        self.assertTrue(quants, 'No quant found!')
-        self.assertEquals(len(quants.ids), 1, 'There should be exactly one quant')
-        self.assertEquals(len(quants[0].history_ids), 1, 'The quant should have exactly 1 move in its history')
+        self.assertFalse(quants, 'No quants shoud found')

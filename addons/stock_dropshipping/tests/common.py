@@ -5,15 +5,15 @@ from odoo.tests import common
 
 class TestStockDropshippingCommon(common.TransactionCase):
 
-    def _create_sale_order(self, partner_id, product_id, product_qty, uom_id):
+    def _create_sale_order(self, partner_id, product, product_qty, uom_id):
         values = {
             'partner_id': partner_id,
             'note': 'Create sale order for product iPad Retina Display',
             'warehouse_id': self.warehouse.id,
             'pricelist_id': self.ref('product.list0'),
             'order_line': [(0, 0, {
-                'product_id': product_id,
-                'name': "product_mto",
+                'product_id': product.id,
+                'name': product.name,
                 'product_uom_qty': product_qty,
                 'product_uom': uom_id
              })]
