@@ -108,32 +108,48 @@ class StockMove(models.Model):
         for move in moves:
             move.cumulated_value += value
 
+    def _get_in_domain(self):
+        return [('product_id', '=', self.product_id.id), 
+                ('state', '=', 'done'), 
+                ('company_id', '=', self.company_id.id), 
+                ('location_id.usage', 'not in', ('internal', 'transit')), 
+                ('location_dest_id.usage', 'in', ('internal', 'transit'))]
+
+    def _get_out_domain(self):
+        return [('product_id', '=', self.product_id.id), 
+                ('state', '=', 'done'), 
+                ('company_id', '=', self.company_id.id), 
+                ('location_id.usage', 'in', ('internal', 'transit')), 
+                ('location_dest_id.usage', 'not in', ('internal', 'transit'))]
+
+    def _get_all_domain(self):
+        return [('product_id', '=', self.product_id.id), 
+                 ('state', '=', 'done'), 
+                 ('company_id', '=', self.company_id.id),
+                 '|', '&', ('location_id.usage', 'in', ('internal', 'transit')), 
+                    ('location_dest_id.usage', 'not in', ('internal', 'transit')), 
+                    '&', ('location_id.usage', 'not in', ('internal', 'transit')), 
+                    ('location_dest_id.usage', 'in', ('internal', 'transit'))]
+        
+    def _is_in_move(self):
+        return self.location_id.usage not in ('internal', 'transit') and self.location_dest_id.usage in ('internal', 'transit')
+
+    def _is_out_move(self):
+        return self.location_id.usage in ('internal', 'transit') and self.location_dest_id.usage not in ('internal', 'transit')
+
     @api.multi
     def replay_average(self):
-        # Easy scenario: avergae /done
-        # search last move before this one
-        
+        """
+            In order to recalculate the average, we recalculate 
+        """
         # This should be an in or out move
-        start_move = self.search([('product_id', '=', self.product_id.id), 
-                     ('state', '=', 'done'), 
-                     ('date', '<=', self.date), 
-                     ('id', '<', self.id),
-                     ('company_id', '=', self.company_id.id), 
-                     '|', '&', ('location_id.usage', 'in', ('internal', 'transit')), 
-                        ('location_dest_id.usage', 'not in', ('internal', 'transit')), 
-                        '&', ('location_id.usage', 'not in', ('internal', 'transit')), 
-                        ('location_dest_id.usage', 'in', ('internal', 'transit'))], limit=1, order='date desc') #filter on outgoing/incoming moves
-        domain = [('product_id', '=', self.product_id.id), 
-                     ('state', '=', 'done'), 
-                     ('company_id', '=', self.company_id.id),
-                     '|', '&', ('location_id.usage', 'in', ('internal', 'transit')), 
-                        ('location_dest_id.usage', 'not in', ('internal', 'transit')), 
-                        '&', ('location_id.usage', 'not in', ('internal', 'transit')), 
-                        ('location_dest_id.usage', 'in', ('internal', 'transit'))]
+        all_domain = self._get_all_domain()
+        start_domain = all_domain + ['|', ('date', '<', self.date), '&', ('date', '=', self.date), ('id', '<', self.id)]
+        start_move = self.search(start_domain, limit=1, order='date desc')
         if start_move:
-            domain = [('date', '>=', start_move.date),
-                     ('id', '>', start_move.id)] + domain
-        next_moves = self.search(domain, order='date, id') # filter on outgoing/incoming moves
+            all_domain = ['|', ('date', '>', start_move.date),
+                     '&', ('date', '=', start_move.date), ('id', '>', start_move.id)] + all_domain
+        next_moves = self.search(all_domain, order='date, id')
         if start_move:
             last_cumulated_value = start_move.cumulated_value
             last_done_qty_available = start_move.last_done_qty
@@ -141,7 +157,7 @@ class StockMove(models.Model):
             last_cumulated_value = 0.0
             last_done_qty_available = 0.0
         for move in next_moves:
-            if move.location_id.usage in ('internal', 'transit') and move.location_dest_id.usage not in ('internal', 'transit'):
+            if move._is_out_move():
                 if last_done_qty_available:
                     move.value = - ((last_cumulated_value / last_done_qty_available) * move.product_qty)
                 last_done_qty_available -= move.product_qty
@@ -150,38 +166,26 @@ class StockMove(models.Model):
             last_cumulated_value = move.cumulated_value + move.value
             move.write({'cumulated_value': last_cumulated_value, 
                         'last_done_qty': last_done_qty_available})
-            
 
     def replay_fifo(self):
-        # search last out move before this one
-        start_move = self.search([('product_id', '=', self.product_id.id), 
-                     ('state', '=', 'done'),
-                     ('last_done_move_id', '!=', False),
-                     '|', ('date', '<', self.date),
+        # check if we can find a valid out move
+        out_domain = self._get_out_domain()
+        out_domain += ['|', ('date', '<', self.date),
                      '&', ('date', '=', self.date), ('id', '<', self.id), 
-                     ('location_id.usage', 'in', ('internal', 'transit')), 
-                     ('location_dest_id.usage', 'not in', ('internal', 'transit'))], limit=1, order='date desc, id desc') #filter on outgoing/incoming moves
-        in_domain = [('product_id', '=', self.product_id.id), 
-                     ('state', '=', 'done'), 
-                     ('location_id.usage', 'not in', ('internal', 'transit')), 
-                     ('location_dest_id.usage', 'in', ('internal', 'transit'))]
+                     ('last_done_move_id', '=', False)]
+        start_move = self.search(out_domain, limit=1, order='date desc, id desc')
+        in_domain = self._get_in_domain()
         use_start_move = start_move and (start_move.last_done_move_id.date < start_move.date or (start_move.last_done_move_id.date == start_move.date and start_move.last_done_move_id.id < start_move.id))
         if use_start_move:
             first_in_move = start_move.last_done_move_id
             first_in_remaining_qty = start_move.last_done_remaining_qty
             in_domain += ['|', ('date', '>', start_move.last_done_move_id.date), 
                           '&', ('id', '>', start_move.last_done_move_id.id), ('date', '=', start_move.last_done_move_id.date)]
-#             out_date = start_move.date
-#             out_id = start_move.id
         else:
             first_in_move = False
             first_in_remaining_qty = 0
         in_moves_needed = self.search(in_domain)
-        
-        out_domain = [('product_id', '=', self.product_id.id), 
-                     ('state', '=', 'done'), 
-                     ('location_id.usage', 'in', ('internal', 'transit')), 
-                     ('location_dest_id.usage', 'not in', ('internal', 'transit'))]
+        out_domain = self._get_out_domain()
         if use_start_move:
             out_domain += ['|', ('date', '>', start_move.date), 
                            '&', ('date', '=', start_move.date), ('id', '>', start_move.id)]
@@ -219,17 +223,12 @@ class StockMove(models.Model):
                 out_move.remaining_qty = total_qty
             for move in in_moves_needed:
                 move.remaining_qty = move.product_qty
-        domain = [('product_id', '=', self.product_id.id), 
-                     ('state', '=', 'done'), 
-                     ('company_id', '=', self.company_id.id),
-                     '|', '&', ('location_id.usage', 'in', ('internal', 'transit')), 
-                        ('location_dest_id.usage', 'not in', ('internal', 'transit')), 
-                        '&', ('location_id.usage', 'not in', ('internal', 'transit')), 
-                        ('location_dest_id.usage', 'in', ('internal', 'transit'))]
-        use_start_move=False
+        # Recalculate last_done_qty and cumulated value on move
+        domain = self._get_all_domain()
+        use_start_move = False
         if use_start_move:
-            domain = [('date', '>=', start_move.date),
-                     ('id', '>', start_move.id)] + domain
+            domain = ['|', ('date', '>', start_move.date),
+                     '&', ('date', '=', start_move.date), ('id', '>', start_move.id)] + domain
         next_moves = self.search(domain, order='date, id')
         if use_start_move:
             cumulated_value = start_move.cumulated_value
@@ -261,7 +260,7 @@ class StockMove(models.Model):
                 qty_available[move.product_id.id] = move.product_id.qty_available
         res = super(StockMove, self).action_done()
         for move in res:
-            if move.location_id.usage not in ('internal', 'transit') and move.location_dest_id.usage in ('internal', 'transit'):
+            if move._is_in_move():
                 if move.product_id.cost_method in ['fifo', 'average']:
                     if not move.price_unit:
                         move.price_unit = move._get_price_unit()
@@ -294,7 +293,7 @@ class StockMove(models.Model):
                 else:
                     move.price_unit = move.product_id.standard_price
                     move.value = move.price_unit * move.product_qty
-            elif move.location_id.usage in ('internal', 'transit') and move.location_dest_id.usage not in ('internal', 'transit'):
+            elif move._is_out_move():
                 if move.product_id.cost_method == 'fifo':
                     qty_to_take = move.product_qty
                     tmp_value = 0
