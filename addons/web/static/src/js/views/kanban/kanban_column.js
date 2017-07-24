@@ -34,7 +34,6 @@ var KanbanColumn = Widget.extend({
      */
     init: function (parent, data, options, recordOptions) {
         this._super(parent);
-        this._kanbanRecord = KanbanRecord;
         this.db_id = data.id;
         this.data_records = data.data;
         this.data = data;
@@ -166,7 +165,7 @@ var KanbanColumn = Widget.extend({
      * @params {Boolean} options.no_update set to true not to update the column
      */
     addRecord: function (recordState, options) {
-        var record = new this._kanbanRecord(this, recordState, this.record_options);
+        var record = this.createKanbanRecord(recordState, this.record_options);
         this.records.push(record);
         if (options.position === 'before') {
             record.insertAfter(this.quickCreateWidget ? this.quickCreateWidget.$el : this.$header);
@@ -188,6 +187,16 @@ var KanbanColumn = Widget.extend({
     isEmpty: function () {
         return !this.records.length;
     },
+    /**
+     * hook for create record
+     *
+     * @param {Object} record
+     * @param {Object} recordOptions
+     */
+    createKanbanRecord: function(record, recordOptions){
+        return new KanbanRecord(this, record, recordOptions);
+    },
+
 
     //--------------------------------------------------------------------------
     // Private

@@ -88,8 +88,6 @@ var KanbanRenderer = BasicRenderer.extend({
      * @override
      */
     init: function (parent, state, params) {
-        this._kanbanColumn = KanbanColumn;
-        this._kanbanRecord = KanbanRecord;
         this._super.apply(this, arguments);
 
         this.widgets = [];
@@ -141,7 +139,7 @@ var KanbanRenderer = BasicRenderer.extend({
     updateColumn: function (localID, columnState) {
         var column = _.findWhere(this.widgets, {db_id: localID});
         this.widgets.splice(_.indexOf(this.widgets, column), 1); // remove column from widgets' list
-        var newColumn = new this._kanbanColumn(this, columnState, this.columnOptions, this.recordOptions);
+        var newColumn = this.createKanbanColumn(columnState, this.columnOptions, this.recordOptions);
         this.widgets.push(newColumn);
         return newColumn.insertAfter(column.$el).then(column.destroy.bind(column));
     },
@@ -169,6 +167,25 @@ var KanbanRenderer = BasicRenderer.extend({
         if (record) {
             record.update(recordState);
         }
+    },
+    /**
+     * hook for create kanban column
+     *
+     * @param {Object} state
+     * @param {Object} columnOptions
+     * @param {Object} recordOptions
+     */
+    createKanbanColumn: function(state, columnOptions, recordOptions){
+        return new KanbanColumn(this, state, columnOptions, recordOptions);
+    },
+    /**
+     * hook for create record
+     *
+     * @param {Object} record
+     * @param {Object} recordOptions
+     */
+    createKanbanRecord: function(record, recordOptions){
+        return new KanbanRecord(this, record, recordOptions);
     },
 
     //--------------------------------------------------------------------------
@@ -221,7 +238,7 @@ var KanbanRenderer = BasicRenderer.extend({
 
         // Render columns
         _.each(this.state.data, function (group) {
-            var column = new self._kanbanColumn(self, group, self.columnOptions, self.recordOptions);
+            var column = self.createKanbanColumn(group, self.columnOptions, self.recordOptions);
             if (!group.value) {
                 column.prependTo(fragment); // display the 'Undefined' group first
                 self.widgets.unshift(column);
@@ -268,7 +285,7 @@ var KanbanRenderer = BasicRenderer.extend({
     _renderUngrouped: function (fragment) {
         var self = this;
         _.each(this.state.data, function (record) {
-            var kanbanRecord = new self._kanbanRecord(self, record, self.recordOptions);
+            var kanbanRecord = self.createKanbanRecord(record, self.recordOptions);
             self.widgets.push(kanbanRecord);
             kanbanRecord.appendTo(fragment);
         });
