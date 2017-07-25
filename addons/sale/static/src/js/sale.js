@@ -47,7 +47,7 @@ KanbanRecord.include({
     },
 });
 
-var FieldRadioVisible = relational_fields.FieldRadio.extend({
+relational_fields.FieldRadioType.include({
     supportedFieldTypes: ['selection', 'many2one'],
     /**
      * @override
@@ -63,17 +63,21 @@ var FieldRadioVisible = relational_fields.FieldRadio.extend({
             });
         });
     },
+    _filterValues: function(){
+        var self = this;
+        var vals = this._super.apply(this, arguments);
+        return _.filter(vals, function(data, index){
+            // logic to filter selection
+            if (!self.has_group && _.indexOf(['invoice','delivery'], data[0]) !== -1) {
+                return false;
+            }
+            return true;
+        });
+    },
 
     _setValues: function () {
-        if(!this.has_group && this.field.type === 'selection'){
-            var selection = this.field.selection;
-            this.values = selection.slice(0,2);
-            return;
-        }
-        this._super.apply(this, arguments);
+        this.values = this._filterValues();
     },
 });
-
-field_registry.add('radio_visible', FieldRadioVisible);
 
 });

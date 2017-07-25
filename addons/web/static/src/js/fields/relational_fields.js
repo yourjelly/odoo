@@ -2009,24 +2009,23 @@ var FieldRadio = FieldSelection.extend({
 });
 
 var FieldRadioType = FieldRadio.extend({
-    supportedFieldTypes: ['selection', 'many2one'],
+    supportedFieldTypes: ['selection'],
     /**
      * @override
      * @private
      */
-
-    _setValues: function () {
-        if (this.field.type === 'selection') {
-            if (this.recordData.parent_company_type === 'person') {
-                this._setValue('other');
-                this.value = 'other';
-                var selection = this.field.selection;
-                this.values = selection.slice(-1);
-                return;
-            } else if (this.recordData.parent_company_type === 'company') {
-                this._super.apply(this, arguments);
+    _filterValues: function(){
+        var parent_type = this.recordData.parent_company_type;
+        return _.filter(this.field.selection, function(data, index){
+            // logic to filter selection
+            if (parent_type == 'person' && data[0] == 'contact'){
+                return false;
             }
-        }
+            return true;
+        });
+    },
+    _setValues: function () {
+        this.values = this._filterValues();
     },
 });
 

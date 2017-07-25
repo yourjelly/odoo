@@ -53,7 +53,7 @@
                     <field name="type" invisible="0" attrs="{'invisible': [('parent_id','=', False)]}"/>
                 </xpath>
                 <xpath expr="//field[@name='child_ids']/form//field[@name='type']" position="attributes">
-                    <attribute name="widget">radio_visible</attribute>
+                    <attribute name="widget">radio_type</attribute>
                 </xpath>
                 <page name="internal_notes" position="inside">
                     <group colspan="2" col="2" groups="sale.group_warning_sale">
