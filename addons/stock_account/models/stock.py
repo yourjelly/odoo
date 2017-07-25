@@ -145,7 +145,7 @@ class StockMove(models.Model):
         # This should be an in or out move
         all_domain = self._get_all_domain()
         start_domain = all_domain + ['|', ('date', '<', self.date), '&', ('date', '=', self.date), ('id', '<', self.id)]
-        start_move = self.search(start_domain, limit=1, order='date desc')
+        start_move = self.search(start_domain, limit=1, order='date desc, id desc')
         if start_move:
             all_domain = ['|', ('date', '>', start_move.date),
                      '&', ('date', '=', start_move.date), ('id', '>', start_move.id)] + all_domain
@@ -159,11 +159,11 @@ class StockMove(models.Model):
         for move in next_moves:
             if move._is_out_move():
                 if last_done_qty_available:
-                    move.value = - ((last_cumulated_value / last_done_qty_available) * move.product_qty)
+                    move.value = - (last_cumulated_value * move.product_qty / last_done_qty_available)
                 last_done_qty_available -= move.product_qty
             else:
                 last_done_qty_available += move.product_qty
-            last_cumulated_value = move.cumulated_value + move.value
+            last_cumulated_value += move.value
             move.write({'cumulated_value': last_cumulated_value, 
                         'last_done_qty': last_done_qty_available})
 

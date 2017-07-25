@@ -477,5 +477,6 @@ class TestStockValuation(TransactionCase):
         self.assertEqual(move5.value, -477.6)
         self.assertEqual(move5.cumulated_value, 795.9)  # fuck you, rounding
         
-        move3.move_line_ids.qty_done = 90
+        move3.move_line_ids.qty_done = 90.0
+        self.assertEqual(round(move5.cumulated_value, 1), 2340.4)
         # self.assertEqual(move5.cumulated_value, 796)
