@@ -58,7 +58,7 @@ class TestLifoPrice(TestStockDropshippingCommon):
                 'uom_id': self.uom_kg_id,
                 'uom_po_id': self.uom_kg_id,
                 'valuation': 'real_time',
-                'cost_method': 'real',
+                'cost_method': 'fifo',
                 'property_stock_account_input': self.ref('stock_dropshipping.o_expense'),
                 'property_stock_account_output': self.ref('stock_dropshipping.o_income'),
             })
@@ -73,7 +73,8 @@ class TestLifoPrice(TestStockDropshippingCommon):
 
         #  I check the 'Approved' status of first purchase order.
         self.assertEqual(self.purchase_order1.state, 'purchase', 'Wrong state of purchase order!')
-
+        wiz = self.env['stock.immediate.transfer'].create({'pick_id': self.purchase_order1.picking_ids[0].id})
+        wiz.process()
         # Process the receipt of first purchase order.
         self.purchase_order1.picking_ids.do_transfer()
 
@@ -82,33 +83,34 @@ class TestLifoPrice(TestStockDropshippingCommon):
 
         # I confirm the second purchase order.
         self.purchase_order2.button_confirm()
+        wiz = self.env['stock.immediate.transfer'].create({'pick_id': self.purchase_order2.picking_ids[0].id})
+        wiz.process()
 
         # Process the receipt of second purchase order.
         self.purchase_order2.picking_ids[0].do_transfer()
 
         # Check the standard price should not have changed.
         self.assertEqual(self.icecream.standard_price, 70.0, 'Standard price should not have changed!')
+        print "Available Quantity", self.icecream.qty_available
 
         # Let us send some goods to customer.
         self.outgoing_shipment = self.Picking.create({
             'picking_type_id': self.pick_type_out_id,
             'location_id': self.stock_location_id,
             'location_dest_id': self.customer_location_id,
-            'move_lines': [(0, 0, {
-                'name': self.icecream.name,
-                'product_id': self.icecream.id,
-                'product_uom': self.uom_kg_id,
-                'product_uom_qty': 20.0,
-                'location_id':  self.stock_location_id,
-                'location_dest_id': self.customer_location_id,
-                'picking_type_id': self.pick_type_out_id})]
+
             })
-
-        # I assign this outgoing shipment.
-        self.outgoing_shipment.action_assign()
-
-        # Process the delivery of the outgoing shipment.
-        self.outgoing_shipment.do_transfer()
-
-        # Check standard price became 80€.
-        self.assertEqual(self.icecream.standard_price, 80.0, 'Price should have been 80€')
+        move = self.env['stock.move'].create({
+            'picking_id': self.outgoing_shipment.id,
+            'name': self.icecream.name,
+            'location_id': self.stock_location_id,
+            'location_dest_id': self.customer_location_id,
+            'product_id': self.icecream.id,
+            'product_uom': self.uom_kg_id,
+            'product_uom_qty': 20.0,
+        })
+        move.action_confirm()
+        move.action_assign()
+        move.move_line_ids.qty_done = 20.0
+        move.action_done()
+        self.assertEqual(move.value, -1400.0, 'Stock move value should have been 1400 euro')
