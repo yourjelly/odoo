@@ -208,7 +208,7 @@ class ProductProduct(models.Model):
             ('remaining_qty', '>', 0),
             ('state', '=', 'done'), 
             ('company_id', '=', self.company_id.id)
-        ], order='date, id') #TODO: case where 
+        ], order='date, id')
         return candidates
 
     @api.multi
@@ -238,6 +238,24 @@ class ProductProduct(models.Model):
 class ProductCategory(models.Model):
     _inherit = 'product.category'
 
+
+    @api.onchange('property_cost_method')
+    def onchange_cost_method(self):
+        #if self.property_cost_method != self.previous_cost_method:
+        if self.property_cost_method == 'fifo':
+            return {'warning': {
+                    'title': _('You can not undo average to FIFO!'),
+                    'message':
+                        _('When you change to FIFO, it is not that easy to return to average!')}}
+
+    def _compute_cost_method(self):
+        for cat in self:
+            cat.previous_cost_method = cat.property_cost_method
+
+    previous_cost_method = fields.Selection([
+        ('standard', 'Standard Price'),
+        ('fifo', '(financial) FIFO)'),
+        ('average', 'AVCO')], compute='_compute_cost_method')
     property_valuation = fields.Selection([
         ('manual_periodic', 'Periodic (manual)'),
         ('real_time', 'Perpetual (automated)')], string='Inventory Valuation',
