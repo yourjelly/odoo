@@ -2,25 +2,23 @@
 @o-kanban-small-record-width: 240px;
 
 
-@-kanban-header-height : 38px;
+@o-kanban-header-height : 38px;
 @o-kanban-counter-font-size: 10px;
 
 
 .o-kanban-icon() {
     // Share the style of `.o_kanban_quick_add` and `o_kanban_config`.
-    height: @-kanban-header-height;
+    height: @o-kanban-header-height;
     width: 30px;
     font-weight: 700;
     line-height: 1.9;
     text-align: right;  
     color: white;
-    padding: @o-kanban-record-margin*2;
+    // padding: @o-kanban-record-margin*2;
     text-align: center;
     font-size: 12px;
     cursor: pointer;
 }
-
-/*Secound time Updatation*/
 
 .o-kanban-css-filter(@class, @accent-color) {
     // Provide CSS reordering and highlight
@@ -87,11 +85,12 @@
         }
     }
 }
-
+.o_kanban_view .o_kanban_group .o_kanban_header {
+    height: @o-kanban-header-height;
+}
 .o_kanban_header {
     color: @odoo-main-text-color;
     margin: 0 @o-kanban-record-margin;
-    height: @-kanban-header-height;
     line-height: 2.2;
     .o-flex-display();
     .o_column_unfold {
@@ -104,17 +103,18 @@
         .o-text-overflow();
         padding-top: 5px;
     }
-    // .o_kanban_quick_add {
-    //     .o-kanban-icon;
-    //     padding: @o-kanban-record-margin*2 0 @o-kanban-record-margin*2 @o-kanban-record-margin;
-    //     width: 14px;
-    //     font-size: 20px;
-    //     line-height: 1;
-    //     opacity: 0.5;
-    //     &:hover {
-    //         opacity: 1;
-    //     }
-    // }
+    .o_kanban_quick_add {
+        .o-kanban-icon;
+        // padding: @o-kanban-record-margin*2 0 @o-kanban-record-margin*2 @o-kanban-record-margin;
+        padding: 0px;
+        width: 14px;
+        font-size: 20px;
+        line-height: 1;
+        opacity: 0.5;
+        &:hover {
+            opacity: 1;
+        }
+    }
      &:hover .o_kanban_config, .o_kanban_config.open {
         margin-left: 4px;
         opacity: 1;
@@ -143,6 +143,7 @@
     border-width: @o-kanban-record-margin 0;
     margin: 0 @o-kanban-record-margin @o-kanban-record-margin*4;
     .o-transition(box-shadow, 0.3s);
+
 
     &.affix {
         position: fixed;
@@ -196,7 +197,9 @@
         font-size: @o-kanban-counter-font-size*1.2;
         font-weight: bold;
         text-align: right;
-        .o-animation(grow, .4s, ease-in);
+        &.o-kanban-grow {
+            .o-animation(grow, .4s, ease-in);
+        }
     }
 
     &.o_counter_number {
@@ -223,7 +226,6 @@
 .o-kanban-css-filter(success, @odoo-brand-optional);
 .o-kanban-css-filter(blocked, @brand-danger);
 .o-kanban-css-filter(warning, @brand-warning);
-
 
 @-webkit-keyframes grow {
   from {

@@ -2,9 +2,7 @@ odoo.define('project.kanban', function (require) {
 "use strict";
 
 var KanbanView = require('web.KanbanView');
-var KanbanModel = require('web.KanbanModel');
 var KanbanRenderer = require('web.KanbanRenderer');
-var KanbanController = require('web.KanbanController');
 var KanbanRecord = require('web.KanbanRecord');
 var KanbanColumn = require('web.KanbanColumn');
 var view_registry = require('web.view_registry');
@@ -168,18 +166,14 @@ var ProjectKanbanRenderer = KanbanRenderer.extend({
 
 var ProjectKanbanView = KanbanView.extend({
     config: _.extend({}, KanbanView.prototype.config, {
-        Model: KanbanModel,
         Renderer: ProjectKanbanRenderer,
-        Controller: KanbanController,
     }),
 });
 
 view_registry.add('project_kanban', ProjectKanbanView);
 
 return {
-    Model: KanbanModel,
     Renderer: ProjectKanbanRenderer,
-    Controller: KanbanController,
 };
 
 
