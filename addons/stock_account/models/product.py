@@ -168,7 +168,6 @@ class ProductProduct(models.Model):
 
     def _get_latest_cumulated_value(self, not_move=False):
         self.ensure_one()
-        # TODO: only filter on IN and OUT stock.move
         domain = [
             ('product_id', '=', self.id),
             ('state', '=', 'done'),
