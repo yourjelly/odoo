@@ -140,9 +140,7 @@ class StockMove(models.Model):
     @api.multi
     def replay_average(self):
         """
-            We try to find a move before this one and use its last done
-            qty and cumulated value to update those of the moves after. 
-            Meanwhile, we recalculate the averages to determine the value of the outgoing moves
+            In order to recalculate the average, we recalculate 
         """
         # This should be an in or out move
         all_domain = self._get_all_domain()
@@ -170,10 +168,7 @@ class StockMove(models.Model):
                         'last_done_qty': last_done_qty_available})
 
     def replay_fifo(self):
-        """
-            We try to find an outgoing move before this one, 
-        """
-        #
+        # check if we can find a valid out move
         out_domain = self._get_out_domain()
         out_domain += ['|', ('date', '<', self.date),
                      '&', ('date', '=', self.date), ('id', '<', self.id), 
@@ -194,24 +189,26 @@ class StockMove(models.Model):
         if use_start_move:
             out_domain += ['|', ('date', '>', start_move.date), 
                            '&', ('date', '=', start_move.date), ('id', '>', start_move.id)]
-        next_out_moves = self.search(out_domain, order='date, id') 
+        next_out_moves = self.search(out_domain, order='date, id') # filter on outgoing/incoming moves
         last_in_move = first_in_move
         last_remaining_qty = first_in_remaining_qty
         if not first_in_move or last_remaining_qty == 0.0 and in_moves_needed:
-            last_in_move = in_moves_needed.pop(0)
+            last_in_move = in_moves_needed[0] #TODO: pop(0)?
+            in_moves_needed -= in_moves_needed[0]
             last_remaining_qty = last_in_move.product_qty
         if last_in_move:
             for out_move in next_out_moves:
                 total_qty = out_move.product_qty
                 total_value = 0
                 stop = False
-                while(total_qty > 0) and not stop:
+                while(total_qty > 0) and not stop: # only after you cannot 
                     if last_remaining_qty < total_qty:
                         total_qty -= last_remaining_qty
                         total_value += last_remaining_qty * last_in_move.price_unit
                         last_in_move.remaining_qty = 0.0
                         if in_moves_needed:
-                            last_in_move = in_moves_needed.pop(0)
+                            last_in_move = in_moves_needed[0]
+                            in_moves_needed -= in_moves_needed[0]
                             last_remaining_qty = last_in_move.product_qty
                         else:
                             stop = True

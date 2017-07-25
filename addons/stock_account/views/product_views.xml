@@ -19,7 +19,6 @@
                     <group>
                         <group string="Inventory Valuation">
                             <field name="property_cost_method"/>
-                            <field name="previous_cost_method" invisible="1"/>
                             <field name="property_valuation"/>
                         </group>
                     </group>
