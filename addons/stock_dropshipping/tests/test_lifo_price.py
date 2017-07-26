@@ -31,15 +31,6 @@ class TestLifoPrice(TestStockDropshippingCommon):
         self._load('account', 'test', 'account_minimal_test.xml')
         self._load('stock_account', 'test', 'stock_valuation_account.xml')
 
-        # ======================================================================
-        # FIRST PO FOR ICE-CREAM  :  10 kg * 60 €
-        # SECOND PO FOR ICE-CREAM :  30 kg * 80 €
-        # DELIVER 20 kg ICE-CREAM
-        # IT WILL CONSUME ICE-CREAM OF ( 80 € price ) BASED ON REMOVAL STRETEGY ( LIFO ).
-        # NOW PRODUCT PRICE SHOULD BE ( 80 € instead of 70 € )
-        # ======================================================================
-
-        # Set the company currency as EURO (€) for the sake of repeatability
         self.env.ref('base.main_company').write({'currency_id': self.ref('base.EUR')})
 
         # Set product category removal strategy as LIFO.

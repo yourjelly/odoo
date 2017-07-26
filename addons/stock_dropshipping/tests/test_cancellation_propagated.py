@@ -71,8 +71,10 @@ class TestCancellationPropagated(TestStockDropshippingCommon):
 
         # Check single purchase order created or not.
         purchases = procus.mapped('purchase_line_id').mapped('order_id')
+
         # Check that one purchase order has been created
         self.assertEquals(len(purchases.ids), 1, 'No purchase order found !')
+
         # Check the two purchase order lines
         self.assertEquals(len(purchases.order_line), 1, 'No purchase order found !')
         self.assertEquals(len(purchases.order_line.procurement_ids), 2, 'Wrong procurement on order line !')
