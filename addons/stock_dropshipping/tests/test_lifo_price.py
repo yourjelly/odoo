@@ -91,7 +91,6 @@ class TestLifoPrice(TestStockDropshippingCommon):
 
         # Check the standard price should not have changed.
         self.assertEqual(self.icecream.standard_price, 70.0, 'Standard price should not have changed!')
-        print "Available Quantity", self.icecream.qty_available
 
         # Let us send some goods to customer.
         self.outgoing_shipment = self.Picking.create({

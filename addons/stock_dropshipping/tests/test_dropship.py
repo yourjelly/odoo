@@ -50,3 +50,7 @@ class TestDropship(TestStockDropshippingCommon):
         # Check one quant was created in Customers location with 200 pieces and one move in the history_ids
         quants = self.env['stock.quant'].search([('location_id', '=', self.customer_location_id), ('product_id', '=', self.product.id)])
         self.assertFalse(quants, 'No quants shoud found')
+
+        # Check one move line was created in Customers location
+        move_line = self.env['stock.move.line'].search([('location_dest_id', '=', self.customer_location_id), ('product_id', '=', self.product.id)])
+        self.assertEquals(len(move_line.ids), 1, 'There should be exactly one move line')
