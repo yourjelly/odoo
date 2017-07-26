@@ -82,7 +82,6 @@ function transformQwebTemplate(node, fields) {
 }
 
 var KanbanRenderer = BasicRenderer.extend({
-
     className: 'o_kanban_view',
     /**
      * @override

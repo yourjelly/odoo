@@ -16,6 +16,7 @@ var AbstractQuickCreate = Widget.extend({
         'keypress input': '_onKeypress',
         'mousedown .o_kanban_add': '_onMousedown',
         'mousedown .o_kanban_cancel': '_onMousedown',
+        'focusout input': '_onCancelFocusOut',
     },
 
     //--------------------------------------------------------------------------
@@ -72,6 +73,15 @@ var AbstractQuickCreate = Widget.extend({
      */
     _onCancelClicked: function () {
         this._cancel();
+    },
+    /**
+     * @private
+     * @param {MouseEvent} event
+     */
+    _onCancelFocusOut: function (event) {
+        if (!$(event.target).val()) {
+            this._cancel();
+        }
     },
     /**
      * Cancels quick creation on escape keydown event

@@ -25,6 +25,7 @@ var KanbanRecord = Widget.extend({
      */
     init: function (parent, state, options) {
         this._super(parent);
+
         this.fields = state.fields;
         this.fieldsInfo = state.fieldsInfo.kanban;
         this.modelName = state.model;
@@ -459,7 +460,6 @@ var KanbanRecord = Widget.extend({
      */
     _onKanbanActionClicked: function (event) {
         event.preventDefault();
-
         var $action = $(event.currentTarget);
         var type = $action.data('type') || 'button';
 

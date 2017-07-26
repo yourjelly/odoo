@@ -1,24 +1,8 @@
 @o-kanban-record-margin: 4px;
 @o-kanban-small-record-width: 240px;
-
-
-@o-kanban-header-height : 38px;
+@o-kanban-header-height : 50px;
 @o-kanban-counter-font-size: 10px;
 
-
-.o-kanban-icon() {
-    // Share the style of `.o_kanban_quick_add` and `o_kanban_config`.
-    height: @o-kanban-header-height;
-    width: 30px;
-    font-weight: 700;
-    line-height: 1.9;
-    text-align: right;  
-    color: white;
-    // padding: @o-kanban-record-margin*2;
-    text-align: center;
-    font-size: 12px;
-    cursor: pointer;
-}
 
 .o-kanban-css-filter(@class, @accent-color) {
     // Provide CSS reordering and highlight
@@ -88,45 +72,6 @@
 .o_kanban_view .o_kanban_group .o_kanban_header {
     height: @o-kanban-header-height;
 }
-.o_kanban_header {
-    color: @odoo-main-text-color;
-    margin: 0 @o-kanban-record-margin;
-    line-height: 2.2;
-    .o-flex-display();
-    .o_column_unfold {
-        display: none;
-    }
-    .o_column_title {
-        font-size: 15px;
-        font-weight: 700;
-        .o-flex(1, 1, auto);
-        .o-text-overflow();
-        padding-top: 5px;
-    }
-    .o_kanban_quick_add {
-        .o-kanban-icon;
-        // padding: @o-kanban-record-margin*2 0 @o-kanban-record-margin*2 @o-kanban-record-margin;
-        padding: 0px;
-        width: 14px;
-        font-size: 20px;
-        line-height: 1;
-        opacity: 0.5;
-        &:hover {
-            opacity: 1;
-        }
-    }
-     &:hover .o_kanban_config, .o_kanban_config.open {
-        margin-left: 4px;
-        opacity: 1;
-    }
-    .o_kanban_config {
-        display: inline-block;
-        opacity: 0;
-        i {
-            .o-kanban-icon;
-        }
-    }
-}
 
 &.o_column_folded {
     > .o_kanban_counter {
@@ -152,13 +97,11 @@
         border-width: @o-kanban-record-margin @o-kanban-record-margin*2;
         box-shadow: 0 4px 4px -2px;
         z-index: 1;
-
-        // TODO: Based on the kanbar header heigth... should be computed
-        margin-top: -38px;
+        margin-top: 0 - @o-kanban-header-height;
 
         & + .o_kanban_record {
             margin-top: 18px + @o-kanban-record-margin*4;
-        }   
+        } 
     }
 
     .o_kanban_counter_progress {
@@ -166,12 +109,12 @@
         background: fade(black, 7%);
         padding: 1px;
         box-shadow: none;
-        .size(90%, 100%);
+        .size(85%, 100%);
 
         .progress-bar {
             box-shadow: none;
             cursor: pointer;
-            .o-linear-gradient(45deg, @odoo-brand-optional, lighten(@odoo-brand-optional, 5%));
+            .o-linear-gradient(45deg, @brand-success, lighten(@brand-success, 10%));
 
             &.o_progress_blocked {
                 .o-linear-gradient(45deg, lighten(desaturate(@brand-danger,20%), 5%), desaturate(@brand-danger,20%));
@@ -193,7 +136,7 @@
     }
 
     .o_kanban_counter_side {
-        color: white;
+        color: @odoo-tooltip-background-color;
         font-size: @o-kanban-counter-font-size*1.2;
         font-weight: bold;
         text-align: right;
@@ -204,7 +147,7 @@
 
     &.o_counter_number {
         .o_kanban_counter_progress {
-            width: 75%;
+            width: 80%;
         }
     }
 }
@@ -221,11 +164,11 @@
         }
     }
 }
-
     
-.o-kanban-css-filter(success, @odoo-brand-optional);
+.o-kanban-css-filter(success, @brand-success);
 .o-kanban-css-filter(blocked, @brand-danger);
 .o-kanban-css-filter(warning, @brand-warning);
+
 
 @-webkit-keyframes grow {
   from {
