@@ -238,8 +238,8 @@ class ProductCategory(models.Model):
     _inherit = 'product.category'
 
     property_valuation = fields.Selection([
-        ('manual_periodic', 'Periodic (manual)'),
-        ('real_time', 'Perpetual (automated)')], string='Inventory Valuation',
+        ('manual_periodic', 'Manual'),
+        ('real_time', 'Automated')], string='Post Journal Entries',
         company_dependent=True, copy=True, required=True,
         help="If perpetual valuation is enabled for a product, the system "
              "will automatically create journal entries corresponding to "
@@ -250,8 +250,8 @@ class ProductCategory(models.Model):
              "moves for incoming and outgoing products.")
     property_cost_method = fields.Selection([
         ('standard', 'Standard Price'),
-        ('fifo', '(financial) FIFO)'),
-        ('average', 'AVCO')], string="Costing Method",
+        ('fifo', 'First In First Out (FIFO)'),
+        ('average', 'Average Cost (AVCO)')], string="Costing Method",
         company_dependent=True, copy=True, required=True,
         help="Standard Price: The cost price is manually updated at the end "
              "of a specific period (usually once a year).\nAverage Price: "
