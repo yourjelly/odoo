@@ -192,34 +192,26 @@ class TestLandedCosts(TestStockLandedCostsCommon):
             ('split by quantity - Microwave Oven', 0.0, 33.33),
             ('equal split - Microwave Oven', 2.5, 0.0),
             ('equal split - Microwave Oven', 0.0, 2.5),
-            #('split by volume - Refrigerator: 2.0 already out', 0.5, 0.0),
-            #('split by volume - Refrigerator: 2.0 already out', 0.0, 0.5),
             ('split by volume - Refrigerator', 0.75, 0.0),
             ('split by volume - Refrigerator', 0.0, 0.75),
-            #('split by weight - Refrigerator: 2.0 already out', 4.0, 0.0),
-            #('split by weight - Refrigerator: 2.0 already out', 0.0, 4.0),
             ('split by weight - Refrigerator', 6.0, 0.0),
             ('split by weight - Refrigerator', 0.0, 6.0),
-            #('split by quantity - Refrigerator: 2.0 already out', 6.67, 0.0),
-            #('split by quantity - Refrigerator: 2.0 already out', 0.0, 6.67),
             ('split by quantity - Refrigerator', 10.0, 0.0),
             ('split by quantity - Refrigerator', 0.0, 10.0),
-#             ('equal split - Refrigerator: 2.0 already out', 1.0, 0.0),
-#             ('equal split - Refrigerator: 2.0 already out', 0.0, 1.0),
             ('equal split - Refrigerator', 1.5, 0.0),
             ('equal split - Refrigerator', 0.0, 1.5)
         ]
-#         if stock_negative_landed_cost.account_move_id.company_id.anglo_saxon_accounting:
-#             move_lines += [
-#                 ('split by volume - Refrigerator: 2.0 already out', 0.5, 0.0),
-#                 ('split by volume - Refrigerator: 2.0 already out', 0.0, 0.5),
-#                 ('split by weight - Refrigerator: 2.0 already out', 4.0, 0.0),
-#                 ('split by weight - Refrigerator: 2.0 already out', 0.0, 4.0),
-#                 ('split by quantity - Refrigerator: 2.0 already out', 6.67, 0.0),
-#                 ('split by quantity - Refrigerator: 2.0 already out', 0.0, 6.67),
-#                 ('equal split - Refrigerator: 2.0 already out', 1.0, 0.0),
-#                 ('equal split - Refrigerator: 2.0 already out', 0.0, 1.0),
-#             ]
+        if stock_negative_landed_cost.account_move_id.company_id.anglo_saxon_accounting:
+            move_lines += [
+                ('split by volume - Refrigerator already out', 0.5, 0.0),
+                ('split by volume - Refrigerator already out', 0.0, 0.5),
+                ('split by weight - Refrigerator already out', 4.0, 0.0),
+                ('split by weight - Refrigerator already out', 0.0, 4.0),
+                ('split by quantity - Refrigerator already out', 6.67, 0.0),
+                ('split by quantity - Refrigerator already out', 0.0, 6.67),
+                ('equal split - Refrigerator already out', 1.0, 0.0),
+                ('equal split - Refrigerator already out', 0.0, 1.0),
+            ]
         self.check_complete_move(stock_negative_landed_cost.account_move_id, move_lines)
 
     def _process_incoming_shipment(self):
