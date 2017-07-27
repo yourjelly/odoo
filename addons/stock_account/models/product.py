@@ -233,9 +233,47 @@ class ProductProduct(models.Model):
                     value += move.remaining_qty * move.price_unit #TODO: might be numerically more stable
                 product.stock_value = value
 
+    def update_remaining_qty(self, price):
+        self.ensure_one()
+        # Reset remaining_qty
+        candidates = self._get_candidates_move()
+        candidates.write({'remaining_qty': 0.0})
+        # Search candidates
+        candidates = self.env['stock.move'].search([
+            ('product_id', '=', self.id),
+            ('location_dest_id.usage', 'in', ('transit', 'internal')),
+            ('location_id.usage', 'not in', ('transit', 'internal')),
+            ('state', '=', 'done'), 
+            ('company_id', '=', self.company_id.id)], order='date desc, id desc')
+        qty_todo = self.with_context(internal=True).qty_available
+        for candidate in candidates:
+            if qty_todo > candidate.product_qty:
+                candidate.remaining_qty = candidate.product_qty
+                qty_todo -= candidate.product_qty
+                candidate.price_unit = price
+                candidate.value = price * candidate.product_qty
+            else:
+                candidate.remaining_qty = qty_todo
+                candidate.value = candidate.value * (candidate.product_qty - qty_todo) / candidate.product_qty + price * qty_todo
+                qty_todo = 0
+                break
+
 
 class ProductCategory(models.Model):
     _inherit = 'product.category'
+    
+    
+    def write(self, vals):
+        if 'property_cost_method' in vals:
+            for cat in self:
+                if cat.property_cost_method != 'fifo' and vals['property_cost_method'] == 'fifo':
+                    products = self.env['product.product'].search([('categ_id', 'child_of', cat.id)])
+                    for product in products:
+                        if cat.property_cost_method == 'standard':
+                            product.update_remaining_qty(product.standard_price)
+                        elif cat.property_cost_method == 'average':
+                            product.update_remaining_qty(product.average_price)
+        return super(ProductCategory, self).write(vals)
 
     property_valuation = fields.Selection([
         ('manual_periodic', 'Manual'),
