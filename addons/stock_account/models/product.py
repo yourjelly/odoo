@@ -267,13 +267,25 @@ class ProductCategory(models.Model):
         if 'property_cost_method' in vals:
             for cat in self:
                 if cat.property_cost_method != 'fifo' and vals['property_cost_method'] == 'fifo':
-                    products = self.env['product.product'].search([('categ_id', 'child_of', cat.id)])
+                    products = self.env['product.product'].search([('categ_id', '=', cat.id)])
                     for product in products:
+                        if product.with_context(internal=True).qty_available < 0: 
+                            raise UserError(_('No changing with negative quantities'))
                         if cat.property_cost_method == 'standard':
                             product.update_remaining_qty(product.standard_price)
                         elif cat.property_cost_method == 'average':
                             product.update_remaining_qty(product.average_price)
         return super(ProductCategory, self).write(vals)
+
+    @api.onchange('property_cost_method')
+    def onchange_cost_method(self):
+        #if self.property_cost_method != self.previous_cost_method:
+        if self.property_cost_method == 'fifo' and self._origin and self._origin.property_cost_method != 'fifo':
+            return {'warning': {
+                    'title': _('You can not undo average to FIFO!'),
+                    'message':
+                        _('When you change to FIFO, it might alter the valuation of the incoming shipments!')}}
+
 
     property_valuation = fields.Selection([
         ('manual_periodic', 'Manual'),
