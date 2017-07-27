@@ -47,5 +47,4 @@ class TestStockDropshippingCommon(common.TransactionCase):
         self.warehouse = self.env['stock.warehouse'].create({
             'name': 'WareHouse PickPackShip',
             'code': 'whpps',
-            'reception_steps': 'two_steps',
-            'delivery_steps': 'ship_only', })
+            'delivery_steps': 'pick_pack_ship', })
