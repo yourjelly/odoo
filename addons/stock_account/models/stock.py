@@ -534,7 +534,7 @@ class StockMove(models.Model):
                     in_move_return = True
                 else:
                     in_move_normal = True
-            elif value_adapt > 0.0 and out_move:
+            elif value_adapt < 0.0 and out_move:
                 if self.location_dest_id.usage == 'supplier':
                     out_move_return = True
                 else:
@@ -544,7 +544,7 @@ class StockMove(models.Model):
                     out_move_normal =True
                 else:
                     out_move_return = True
-            elif value_adapt < 0.0 and out_move:
+            elif value_adapt > 0.0 and out_move:
                 if self.location_dest_id.usage == 'supplier':
                     in_move_normal = True
                 else:
