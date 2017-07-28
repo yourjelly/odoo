@@ -76,8 +76,8 @@ class StockMove(models.Model):
     last_done_remaining_qty = fields.Float()
     last_done_qty = fields.Float()
 
-    # TODO: add constraints remaining_qty > 0
-    # TODO: add constrain price_unit = 0 on done move?
+    # TODO: add constraints remaining_qty >= 0
+    # TODO: add constrain price_unit = 0 on done move? -> no
 
     @api.multi
     def _get_price_unit(self):
@@ -140,9 +140,10 @@ class StockMove(models.Model):
     @api.multi
     def replay_average(self):
         """
-            In order to recalculate the average, we recalculate 
+            We try to find a move before this one and use its last done
+            qty and cumulated value to update those of the moves after. 
+            Meanwhile, we recalculate the averages to determine the value of the outgoing moves
         """
-        # This should be an in or out move
         all_domain = self._get_all_domain()
         start_domain = all_domain + ['|', ('date', '<', self.date), '&', ('date', '=', self.date), ('id', '<', self.id)]
         start_move = self.search(start_domain, limit=1, order='date desc, id desc')
@@ -168,13 +169,20 @@ class StockMove(models.Model):
                         'last_done_qty': last_done_qty_available})
 
     def replay_fifo(self):
-        # check if we can find a valid out move
+        """
+            We try to find an outgoing move before this one that did not 
+            have a negative stock when it was done and has a corresponding in move. 
+            By taking the later in moves and out moves, we recalculate the remaining qties and values on the moves
+            Afterwards, we take both in and out moves chronologically and recalculate cumulated value and qty done
+        """
         out_domain = self._get_out_domain()
         out_domain += ['|', ('date', '<', self.date),
                      '&', ('date', '=', self.date), ('id', '<', self.id), 
-                     ('last_done_move_id', '=', False)]
+                     ('last_done_move_id', '!=', False),
+                     ('last_done_qty', '>=', 0.0)]
         start_move = self.search(out_domain, limit=1, order='date desc, id desc')
         in_domain = self._get_in_domain()
+        # normally, this will be the case as last_done_qty > 0.0
         use_start_move = start_move and start_move.last_done_move_id and (start_move.last_done_move_id.date < start_move.date or (start_move.last_done_move_id.date == start_move.date and start_move.last_done_move_id.id < start_move.id))
         if use_start_move:
             first_in_move = start_move.last_done_move_id
@@ -189,11 +197,11 @@ class StockMove(models.Model):
         if use_start_move:
             out_domain += ['|', ('date', '>', start_move.date), 
                            '&', ('date', '=', start_move.date), ('id', '>', start_move.id)]
-        next_out_moves = self.search(out_domain, order='date, id') # filter on outgoing/incoming moves
+        next_out_moves = self.search(out_domain, order='date, id')
         last_in_move = first_in_move
         last_remaining_qty = first_in_remaining_qty
         if not first_in_move or last_remaining_qty == 0.0 and in_moves_needed:
-            last_in_move = in_moves_needed[0] #TODO: pop(0)?
+            last_in_move = in_moves_needed[0]
             in_moves_needed -= in_moves_needed[0]
             last_remaining_qty = last_in_move.product_qty
         if last_in_move:
@@ -201,7 +209,7 @@ class StockMove(models.Model):
                 total_qty = out_move.product_qty
                 total_value = 0
                 stop = False
-                while(total_qty > 0) and not stop: # only after you cannot 
+                while(total_qty > 0) and not stop:
                     if last_remaining_qty < total_qty:
                         total_qty -= last_remaining_qty
                         total_value += last_remaining_qty * last_in_move.price_unit
@@ -459,7 +467,6 @@ class StockMove(models.Model):
         if not value_adapt:
             value_adapt = self.value
         move_lines = self._prepare_account_move_line(self.product_qty, abs(value_adapt), credit_account_id, debit_account_id)
-        import pdb; pdb.set_trace()
         if move_lines:
             date = self._context.get('force_period_date', fields.Date.context_today(self))
             new_account_move = AccountMove.create({
