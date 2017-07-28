@@ -181,22 +181,22 @@ class StockMove(models.Model):
                      ('last_done_move_id', '!=', False),
                      ('last_done_qty', '>=', 0.0)]
         start_move = self.search(out_domain, limit=1, order='date desc, id desc')
-        in_domain = self._get_in_domain()
         # normally, this will be the case as last_done_qty > 0.0
         use_start_move = start_move and start_move.last_done_move_id and (start_move.last_done_move_id.date < start_move.date or (start_move.last_done_move_id.date == start_move.date and start_move.last_done_move_id.id < start_move.id))
+        
+        in_domain = self._get_in_domain()
+        out_domain = self._get_out_domain()
         if use_start_move:
             first_in_move = start_move.last_done_move_id
             first_in_remaining_qty = start_move.last_done_remaining_qty
             in_domain += ['|', ('date', '>', start_move.last_done_move_id.date), 
                           '&', ('id', '>', start_move.last_done_move_id.id), ('date', '=', start_move.last_done_move_id.date)]
+            out_domain += ['|', ('date', '>', start_move.date), 
+                           '&', ('date', '=', start_move.date), ('id', '>', start_move.id)]
         else:
             first_in_move = False
             first_in_remaining_qty = 0
-        in_moves_needed = self.search(in_domain)
-        out_domain = self._get_out_domain()
-        if use_start_move:
-            out_domain += ['|', ('date', '>', start_move.date), 
-                           '&', ('date', '=', start_move.date), ('id', '>', start_move.id)]
+        in_moves_needed = self.search(in_domain, order='date, id')
         next_out_moves = self.search(out_domain, order='date, id')
         last_in_move = first_in_move
         last_remaining_qty = first_in_remaining_qty
@@ -231,7 +231,7 @@ class StockMove(models.Model):
                 out_move.remaining_qty = total_qty
             for move in in_moves_needed:
                 move.remaining_qty = move.product_qty
-        # Recalculate last_done_qty and cumulated value on move
+        # Recalculate last_done_qty and cumulated value on next moves
         domain = self._get_all_domain()
         use_start_move = False
         if use_start_move:

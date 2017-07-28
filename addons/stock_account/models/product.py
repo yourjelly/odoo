@@ -230,7 +230,7 @@ class ProductProduct(models.Model):
                 moves = product._get_candidates_move()
                 value = 0
                 for move in moves:
-                    value += move.remaining_qty * move.price_unit #TODO: might be numerically more stable
+                    value += move.remaining_qty * move.value / move.product_qty
                 product.stock_value = value
 
     def update_remaining_qty(self, price):
