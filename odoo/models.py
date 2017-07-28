@@ -340,6 +340,12 @@ class BaseModel(object):
                     raise UserError(_("Serialization field `%s` not found for sparse field `%s`!") % (field.sparse, field.name))
                 vals['serialization_field_id'] = serialization_field.id
 
+            for f in 'model name field_description help relation related relation_field relation_table column1 column2'.split():
+                v = vals[f]
+                if v and v != tools.ustr(v):
+                    _logger.warning('[%s] %s#%s UnicodeWarning on %s: %r',
+                                    self._context['module'], self._name, field.name, f, v)
+
             if field.name not in cols:
                 query = "INSERT INTO ir_model_fields (%s) VALUES (%s) RETURNING id" % (
                     ",".join(vals),
