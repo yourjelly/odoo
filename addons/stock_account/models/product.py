@@ -291,24 +291,20 @@ class ProductCategory(models.Model):
         ('manual_periodic', 'Manual'),
         ('real_time', 'Automated')], string='Post Journal Entries',
         company_dependent=True, copy=True, required=True,
-        help="If perpetual valuation is enabled for a product, the system "
-             "will automatically create journal entries corresponding to "
-             "stock moves, with product price as specified by the 'Costing "
-             "Method'. The inventory variation account set on the product "
-             "category will represent the current inventory value, and the "
-             "stock input and stock output account will hold the counterpart "
-             "moves for incoming and outgoing products.")
+        help="Manual: The accounting entries to value "
+             "the inventory are not posted automatically. \n"
+             "Automated: An accounting entry is automatically created "
+             "to value the inventory when a product enters or leaves the company. ")
     property_cost_method = fields.Selection([
         ('standard', 'Standard Price'),
         ('fifo', 'First In First Out (FIFO)'),
         ('average', 'Average Cost (AVCO)')], string="Costing Method",
         company_dependent=True, copy=True, required=True,
-        help="Standard Price: The cost price is manually updated at the end "
-             "of a specific period (usually once a year).\nAverage Price: "
-             "The cost price is recomputed at each incoming shipment and "
-             "used for the product valuation.\nReal Price: The cost price "
-             "displayed is the price of the last outgoing product (will be "
-             "used in case of inventory loss for example).""")
+        help="Standard Price: The products are valued at their standard cost "
+             "defined on the product. \n Average Cost (AVCO): "
+             "The products are valued at weighted average cost. \n"
+             "First In First Out (FIFO): The products are valued "
+             "supposing those that enter the company first will also leave it first. ")
     property_stock_journal = fields.Many2one(
         'account.journal', 'Stock Journal', company_dependent=True,
         help="When doing real-time inventory valuation, this is the Accounting Journal in which entries will be automatically posted when stock moves are processed.")
