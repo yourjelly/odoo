@@ -3561,8 +3561,12 @@ QUnit.module('Views', {
             },
             intercepts: {
                 execute_action: function (e) {
-                    assert.deepEqual(e.data.action_data.context, {test: 2},
-                        "button context should have been evaluated and given to the action, without previous context");
+                    assert.deepEqual(e.data.action_data.context, {
+                        active_id: 2,
+                        active_ids: [2],
+                        active_model: 'partner',
+                        'test': 2
+                    }, "button context should have been evaluated and given to the action, with magicc without previous context");
                 },
             },
         });
@@ -3595,8 +3599,11 @@ QUnit.module('Views', {
             },
             intercepts: {
                 execute_action: function (e) {
-                    assert.deepEqual(e.data.action_data.context, {},
-                        "button context should have been evaluated and given to the action, without previous context");
+                    assert.deepEqual(e.data.action_data.context, {
+                        active_id: 2,
+                        active_ids: [2],
+                        active_model: 'partner'
+                    }, "button context should have been evaluated and given to the action, with magic keys but without previous context");
                 },
             },
         });

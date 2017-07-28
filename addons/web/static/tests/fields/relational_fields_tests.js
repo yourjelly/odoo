@@ -1002,6 +1002,58 @@ QUnit.module('relational_fields', {
         form.destroy();
     });
 
+    QUnit.test('list in form: call button in sub view', function (assert) {
+        assert.expect(3);
+
+        this.data.partner.records[0].p = [2];
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form>' +
+                    '<sheet>' +
+                        '<field name="p">' +
+                            '<tree editable="bottom">' +
+                                '<field name="product_id"/>' +
+                            '</tree>' +
+                        '</field>' +
+                    '</sheet>' +
+                '</form>',
+            res_id: 1,
+            mockRPC: function (route, args) {
+                if (route === '/web/dataset/call_kw/product/get_formview_id') {
+                    return $.when(false);
+                }
+                return this._super.apply(this, arguments);
+            },
+            intercepts: {
+                execute_action: function (event) {
+                    assert.strictEqual(event.data.action_data.context.active_model, 'product',
+                        'should call with correct active_model');
+                    assert.strictEqual(event.data.action_data.context.active_id, 37,
+                        'should call with correct active_id');
+                    assert.deepEqual(event.data.action_data.context.active_ids, [37],
+                        'should call with correct active_ids');
+                },
+            },
+            archs: {
+                'product,false,form': '<form string="Partners">' +
+                                        '<header>' +
+                                            '<button name="action" type="object" string="Just do it !"/>' +
+                                            '<field name="display_name"/>' +
+                                        '</header>' +
+                                      '</form>',
+            },
+        });
+
+        form.$buttons.find('.o_form_button_edit').click();
+        form.$('td.o_data_cell:first').click();  // edit first one2many line
+        form.$('.o_external_button').click();  // open product sub view in modal
+        $('button:contains("Just do it !")').click(); // click on action button
+
+        form.destroy();
+    });
+
     QUnit.test('autocompletion in a many2one, in form view with a domain', function (assert) {
         assert.expect(1);
 
