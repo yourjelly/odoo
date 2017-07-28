@@ -139,8 +139,6 @@ class TestStockValuation(TransactionCase):
         move3.move_line_ids.qty_done = 94.0
         move3.action_done()
 
-        self.assertEqual(move3.price_unit, 0.0)  # unused in out moves
-
         # note: it' ll have to get 68 units from the first batch and 26 from the second one
         # so its value should be -((68*15) + (26*15.5)) = -1423
         self.assertEqual(move3.value, -1423.0)
@@ -321,7 +319,6 @@ class TestStockValuation(TransactionCase):
         move3.move_line_ids.qty_done = 15.0
         move3.action_done()
 
-        self.assertEqual(move3.price_unit, 0.0)  # unused in out moves
 
         # note: it' ll have to get 10 units from move1 and 5 from move2
         # so its value should be -((10*100) + (5*80)) = -1423
@@ -437,7 +434,6 @@ class TestStockValuation(TransactionCase):
         move3.move_line_ids.qty_done = 190.0
         move3.action_done()
 
-        self.assertEqual(move3.price_unit, 0.0)  # unused in out moves
 
         self.assertEqual(move3.value, -2916.5)
         self.assertEqual(move3.cumulated_value, 153.5)
