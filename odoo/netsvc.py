@@ -84,7 +84,7 @@ class ColoredFormatter(DBFormatter):
 
 class TBFilter(logging.Filter):
     def filter(self, record):
-        record.msg += '\n' + ''.join(traceback.format_stack())
+        record.msg += '\n' + (''.join(traceback.format_stack())).replace(r'%', r'%%')
         return True
 
 
