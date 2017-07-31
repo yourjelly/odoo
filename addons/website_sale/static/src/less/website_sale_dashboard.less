@@ -3,7 +3,7 @@
     h2 {
         padding: 15px;
     }
-    h4 { margin: 3px 0 4px 0 !important; }
+    h4 { .margin(3px, 0, 4px, 0) !important; }
     .o_demo_background {
         margin-top: 16px;
         height: 350px;
@@ -21,7 +21,7 @@
     }
     .o_link_enable {
         @media (min-width: @screen-md-min) {
-            border-right: 1px solid #ccc;
+            .border-right(1px solid #ccc);
         }
         height: initial;
         padding: 5px;
@@ -42,7 +42,7 @@
     }
     .o_link_disable {
         @media (min-width: @screen-md-min) {
-            border-right: 1px solid #ccc;
+            .border-right(1px solid #ccc);
         }
         height: initial;
         padding: 5px;
@@ -57,7 +57,7 @@
         }
     }
     .o_invisible_border {
-        border-right: 0px;
+        .border-right(0px);
     }
     .o_top_margin {
         margin-top: 20px;
