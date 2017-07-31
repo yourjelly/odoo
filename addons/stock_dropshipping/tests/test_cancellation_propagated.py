@@ -28,7 +28,7 @@ class TestCancellationPropagated(TestStockDropshippingCommon):
 
         # Create a sales order of 5 Units "My Product"
         saleorder_1 = self._create_sale_order(
-                                        partner_id=self.ref('base.res_partner_3'),
+                                        partner_id=self.partner_id,
                                         product=pendrive,
                                         product_qty=5.00,
                                         uom_id=self.uom_unit.id)

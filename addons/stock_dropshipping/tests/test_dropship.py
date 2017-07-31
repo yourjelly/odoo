@@ -6,9 +6,8 @@ from odoo.addons.stock_dropshipping.tests.common import TestStockDropshippingCom
 class TestDropship(TestStockDropshippingCommon):
 
     def test_00_dropship(self):
-        """Check for dropshipping Flow"""
+        """Test drop shipping Flow"""
 
-        route_drop_shipping = self.ref('stock_dropshipping.route_drop_shipping')
         supplier_dropship = self.Partner.create({'name': 'Vendor of Dropshipping test'})
 
         # Creating Product
@@ -27,7 +26,7 @@ class TestDropship(TestStockDropshippingCommon):
                                         product_qty=200,
                                         uom_id=self.uom_unit.id)
         # Set route on sale order line
-        sale_order_drp_shpng.order_line.route_id = route_drop_shipping
+        sale_order_drp_shpng.order_line.route_id = self.ref('stock_dropshipping.route_drop_shipping')
         # Confirm sale order
         sale_order_drp_shpng.action_confirm()
 

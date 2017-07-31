@@ -61,17 +61,17 @@ class TestLifoPrice(TestStockDropshippingCommon):
         purchase_order1.button_confirm()
         #  I check the 'Approved' status of first purchase order.
         self.assertEqual(purchase_order1.state, 'purchase', 'Wrong state of purchase order!')
-        pickings = purchase_order1[0].picking_ids
+        pickings = purchase_order1.picking_ids
         Wiz = self.env['stock.immediate.transfer'].create({'pick_id': pickings.id})
         Wiz.process()
 
         # Check the standard price of the product (lifo icecream)
         self.assertEqual(icecream.standard_price, 70.0, 'Standard price should not have changed!')
 
-        # I confirm the second purchase order.
+        # I confirm the second purchase order and receive goods.
         purchase_order2.button_confirm()
-        pickings2 = purchase_order2[0].picking_ids
-        Wiz = self.env['stock.immediate.transfer'].create({'pick_id': pickings2.id})
+        pickings = purchase_order2.picking_ids
+        Wiz = self.env['stock.immediate.transfer'].create({'pick_id': pickings.id})
         Wiz.process()
 
         # Let us send some goods to customer.
