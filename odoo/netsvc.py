@@ -9,6 +9,7 @@ import pprint
 from . import release
 import sys
 import threading
+import traceback
 
 import psycopg2
 
@@ -81,6 +82,12 @@ class ColoredFormatter(DBFormatter):
         record.levelname = COLOR_PATTERN % (30 + fg_color, 40 + bg_color, record.levelname)
         return DBFormatter.format(self, record)
 
+class TBFilter(logging.Filter):
+    def filter(self, record):
+        record.msg += '\n' + ''.join(traceback.format_stack())
+        return True
+
+
 _logger_init = False
 def init_logger():
     global _logger_init
@@ -90,6 +97,7 @@ def init_logger():
 
     logging.addLevelName(25, "INFO")
     logging.captureWarnings(True)
+    logging.getLogger('py.warnings').addFilter(TBFilter())
 
     from .tools.translate import resetlocale
     resetlocale()
