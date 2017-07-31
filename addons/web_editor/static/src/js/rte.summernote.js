@@ -23,9 +23,9 @@ ajax.jsonRpc('/web/dataset/call', 'call', {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Summernote Lib (neek change to make accessible: method and object) */
 
-var dom = $.summernote.core.dom;
-var range = $.summernote.core.range;
-var eventHandler = $.summernote.eventHandler;
+var dom = $.summernote.base.core.dom;
+var range = $.summernote.base.core.range;
+var eventHandler = $.summernote;
 var renderer = $.summernote.renderer;
 // var options = $.summernote.options;
 

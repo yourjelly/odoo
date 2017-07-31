@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 <template id="summernote" name="Summernote">
-    <script type="text/javascript">
+    <script>
         (function () {
             "use strict";
             odoo.define('jquery', function () {return $;});
@@ -25,7 +25,7 @@
                         fn += 'a'+uniqId+', ';
                     }
                     fn += 'null);';
-
+                    console.log("next define", odoo.website_next_define);
                     odoo.define(odoo.website_next_define, new Function('require', head + fn));
                 } else {
                     odoo.define(id, factorie);
@@ -33,23 +33,25 @@
             };
         })();
     </script>
-    <t t-set="summer_js_files" t-value="['core/async', 'core/func', 'core/agent', 'core/list',
-        'core/dom', 'core/key', 'core/range', 'editing/Bullet', 'editing/History', 'editing/Style',
-        'editing/Table', 'editing/Typing', 'module/Editor', 'module/Button', 'module/Clipboard',
-        'module/Codeview', 'module/DragAndDrop', 'module/Fullscreen', 'module/Handle',
-        'module/HelpDialog', 'module/ImageDialog', 'module/LinkDialog', 'module/Popover',
-        'module/Statusbar', 'module/Toolbar', 'Renderer', 'EventHandler', 'defaults', 'summernote']" />
+
+    <t t-set="summer_js_files" t-value="['base/core/func', 'base/core/list', 'base/core/agent', 'base/core/dom', 'base/Context', 'base/module/Dropzone', 'base/module/Codeview', 'base/module/Statusbar', 'base/module/Handle', 'base/module/AutoSync', 'base/module/Placeholder', 'bs3/module/Buttons', 'bs3/module/Toolbar', 'bs3/module/LinkPopover', 'bs3/module/ImagePopover', 'bs3/module/TablePopover', 'bs3/module/AirPopover', 'bs3/module/HelpDialog', 'base/renderer', 'bs3/ui', 'base/core/key', 'base/module/Clipboard',
+'bs3/module/LinkDialog', 'bs3/module/ImageDialog', 'bs3/module/VideoDialog', 'base/core/range', 'base/module/AutoLink',
+'bs3/module/HintPopover', 'base/core/async', 'base/editing/History', 'base/editing/Style', 'base/editing/Table', 'base/editing/Bullet', 'base/editing/Typing',
+'base/module/Editor', 'base/module/Fullscreen', 'bs3/settings', 'base/summernote-en-US', 'lite/settings', 'lite/ui', 'lite/module/Toolbar', 'summernote']" />
     <t t-foreach="summer_js_files" t-as="file">
         <script>odoo.website_next_define = 'summernote/<t t-esc="file" />';</script>
         <script type="text/javascript" t-attf-src="/web_editor/static/lib/summernote/src/js/{{ file }}.js"></script>
     </t>
+    <link rel="stylesheet" type="text/less" href="/web_editor/static/lib/summernote/src/less/elements.less"/>
+    <link rel="stylesheet" type="text/less" href="/web_editor/static/lib/summernote/src/less/summernote.less"/>
+    <!-- <link rel="stylesheet" type="text/css" href="/web_editor/static/lib/summernote/src/js/s/summernote.css"/> -->
+    <!-- <script type="text/javascript" src="/web_editor/static/lib/summernote/src/js/s/summernote.js" /> -->
     <script type="text/javascript" src="/web_editor/static/src/js/summernote.js" />
     <script type="text/javascript">
         window.define = odoo.__define__;
         delete odoo.__define__;
         delete odoo.website_next_define;
     </script>
-    <link rel="stylesheet" type="text/less" href="/web_editor/static/lib/summernote/src/less/summernote.less"/>
 </template>
 
 <template id="less_helpers" inherit_id="web.less_helpers">

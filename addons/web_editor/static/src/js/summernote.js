@@ -2,20 +2,20 @@ odoo.define('web_editor.summernote', function (require) {
 'use strict';
 
 var core = require('web.core');
-require('summernote/summernote'); // wait that summernote is loaded
 
+var summernot = require('summernote/summernote'); // wait that summernote is loaded
 var _t = core._t;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Summernote Lib (neek hack to make accessible: method and object) */
-
-var agent = $.summernote.core.agent;
-var dom = $.summernote.core.dom;
-var range = $.summernote.core.range;
-var list = $.summernote.core.list;
-var key = $.summernote.core.key;
-var eventHandler = $.summernote.eventHandler;
-var editor = eventHandler.modules.editor;
+console.log("sss", summernot);
+var agent = $.summernote.base.core.agent;
+var dom = $.summernote.base.core.dom;
+var range = $.summernote.base.core.range;
+var list = $.summernote.base.core.list;
+var key = $.summernote.base.core.key;
+var eventHandler = '';
+var editor = $.summernote.base.module.Editor;
 var renderer = $.summernote.renderer;
 var options = $.summernote.options;
 
