@@ -204,7 +204,6 @@ var CRMKanbanColumn = KanbanColumn.extend({
         $('.o_content').scrollTop(0);
         this.$el.removeClass('o_kanban_group_show_blocked o_kanban_group_show_warning');
         this.$el.toggleClass('o_kanban_group_show_success');
-        $('.o_kanban_group_show_warning').css('border-color', '#68BD68');
     },
     _onHightLightBlocked: function () {
         $('.o_content').scrollTop(0);

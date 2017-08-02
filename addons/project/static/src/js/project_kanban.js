@@ -39,7 +39,6 @@ var ColumnProgressBar =  Widget.extend({
         var progress_bar_length = (92 - (2.1)*parseInt(end).toString().length).toString() + '%';
         this.$('.o_kanban_counter_progress').css('width', progress_bar_length);
         if (end > start && !this.remaining) {
-            console.log('this.remaining',this.remaining,":",end,":",start);
             $el.addClass('o-kanban-grow');
             $({ someValue: start}).animate({ someValue: end || 0 }, {
                 duration: duration,
@@ -92,7 +91,6 @@ var ColumnProgressBar =  Widget.extend({
         });
     },
     _update: function (records, remaining) {
-        console.log("UpdateCounter.....");
         this.$label = this.$('.o_kanban_counter_label');
         this.$side_c = this.$('.o_kanban_counter_side');
         this.$bar_success = this.$('.o_progress_success');
