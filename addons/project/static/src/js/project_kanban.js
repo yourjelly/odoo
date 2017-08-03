@@ -187,12 +187,6 @@ var ProjectKanbanColumn = KanbanColumn.extend({
             this._updateProgressBar();
         }
     },
-    // _onQuickCreateAddRecord: function (event) {
-    //     this.trigger_up('quick_create_record', event.data);
-    //     this._updateProgressBar();
-    //     // this._super.apply(this, arguments).then(function () {
-    //     // });
-    // },
     _updateProgressBar: function () {
         this.progressBar._update(this.records, this.remaining);
     },
