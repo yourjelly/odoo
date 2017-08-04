@@ -9,7 +9,7 @@
                 <form string="Create Menu">
                     <group>
                         <field name="name"/>
-                        <field name="menu_id" domain="[('parent_id','&lt;&gt;',False)]"/>
+                        <field name="menu_id" domain="[('parent_id','!=',False)]"/>
                     </group>
                     <footer>
                         <button name="menu_create" string="Create _Menu" type="object" class="btn-primary"/>
@@ -108,9 +108,6 @@
                                                 </group>
                                             </group>
                                             <group string="Advanced Properties" groups="base.group_no_one">
-                                                <field name="serialization_field_id"
-                                                    domain="[('ttype','=','serialized'), ('model_id', '=', parent.model)]"
-                                                    attrs="{'readonly': [('state','=','base')]}"/>
                                                 <field name="related"/>
                                                 <field name="depends"/>
                                                 <field name="compute" widget="ace" options="{'mode': 'python'}"/>
@@ -221,7 +218,7 @@
         <record id="view_model_fields_form" model="ir.ui.view">
             <field name="model">ir.model.fields</field>
             <field name="arch" type="xml">
-                <form string="Fields">
+                <form string="Fields" duplicate="false">
                     <sheet>
                         <group>
                             <group>
@@ -281,9 +278,6 @@
                                     </group>
                                 </group>
                                 <group string="Advanced Properties" groups="base.group_no_one">
-                                    <field name="serialization_field_id"
-                                        domain="[('ttype','=','serialized'), ('model_id', '=', model_id)]"
-                                        attrs="{'readonly': [('state','=','base')]}"/>
                                     <field name="related"/>
                                     <field name="depends" attrs="{'required': [('compute', '!=', False)] }"/>
                                     <field name="compute" widget="ace" options="{'mode': 'python'}"/>
@@ -333,7 +327,7 @@
         <record id="view_model_fields_tree" model="ir.ui.view">
             <field name="model">ir.model.fields</field>
             <field name="arch" type="xml">
-                <tree string="Fields">
+                <tree string="Fields" duplicate="false">
                     <field name="name"/>
                     <field name="field_description"/>
                     <field name="model_id"/>

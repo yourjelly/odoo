@@ -61,7 +61,7 @@ odoo.define('web_editor.tour', function (require) {
         trigger: ".note-color button.dropdown-toggle",
     }, {
         content: "change text color",
-        trigger: "button[data-event=foreColor]:first",
+        trigger: ".btn-group.open button[data-event=foreColor]:first",
     }, {
         content: "change selection to change text bg-color again",
         trigger: '#editable_area > section .row > div:first h1 font:eq(2)',
@@ -166,19 +166,16 @@ odoo.define('web_editor.tour', function (require) {
         extra_trigger: '#editable_area > section .row > div:first span.fa.pull-right',
     }, {
         content: "click on color style",
-        trigger: '.dropdown:has(.link-style) a[data-toggle="dropdown"]',
+        trigger: '.o_link_dialog_color > .o_link_dialog_color_item.btn-success',
         extra_trigger: 'a#link-preview:containsRegex(/^<span [^>]+><\\/span>$/) > span.fa.fa-3x.pull-right',
     }, {
-        content: "choose success style",
-        trigger: '.dropdown ul label.btn-success',
-    }, {
         content: "insert a link url",
-        trigger: '#link-external',
+        trigger: '#o_link_dialog_url_input',
         extra_trigger: 'a#link-preview.btn',
         run: "text http://www.odoo.com",
     }, {
         content: "change text label",
-        trigger: '#link-text',
+        trigger: '#o_link_dialog_label_input',
         run: "text ABC[IMG] DEF",
     }, {
         content: "save link",
@@ -194,14 +191,11 @@ odoo.define('web_editor.tour', function (require) {
         extra_trigger: '#editable_area > section .row > div:first span.fa.pull-right',
     }, {
         content: "click on color style again",
-        trigger: '.dropdown:has(label.btn-success) a[data-toggle="dropdown"]',
+        trigger: '.o_link_dialog_color > .o_link_dialog_color_item.btn-success',
         extra_trigger: 'a#link-preview:containsRegex(/^<img [^>]+>$/) img',
     }, {
-        content: "choose success style",
-        trigger: '.dropdown ul label.btn-success',
-    }, {
         content: "insert an email",
-        trigger: '#link-external',
+        trigger: '#o_link_dialog_url_input',
         extra_trigger: 'a#link-preview.btn',
         run: "text test@test.test",
     }, {
@@ -224,7 +218,7 @@ odoo.define('web_editor.tour', function (require) {
     }, {
         content: "add ul content",
         trigger: '#editable_area > section .row > div:first',
-        extra_trigger: 'body:not(:has(#editable_area > section .row > div:first p:eq(4), #editable_area > section .row > div:eq(3))) #editable_area > section .row > div:first p:eq(3)',
+        extra_trigger: 'body:not(:has(#editable_area > section .row > div:first p:eq(5), #editable_area > section .row > div:eq(3))) #editable_area > section .row > div:first p:eq(3)',
         run: function () {
             var html = '  <ul>     '+
                 '\n     <li>   <p>Batnae municipium.  </p></li>'+

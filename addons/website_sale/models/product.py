@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import api, fields, models, tools, _
-import odoo.addons.decimal_precision as dp
+from odoo.addons import decimal_precision as dp
+
+from odoo.tools import pycompat
 from odoo.tools.translate import html_translate
 
 
@@ -107,11 +109,6 @@ class ProductTemplate(models.Model):
     _name = 'product.template'
     _mail_post_access = 'read'
 
-    website_message_ids = fields.One2many(
-        'mail.message', 'res_id',
-        domain=lambda self: ['&', ('model', '=', self._name), ('message_type', '=', 'comment')],
-        string='Website Comments',
-    )
     website_description = fields.Html('Description for the website', sanitize_attributes=False, translate=html_translate)
     alternative_product_ids = fields.Many2many('product.template', 'product_alternative_rel', 'src_id', 'dest_id',
                                                string='Alternative Products', help='Suggest more expensive alternatives to '
@@ -197,7 +194,7 @@ class Product(models.Model):
 
         ret = self.env.user.has_group('sale.group_show_price_subtotal') and 'total_excluded' or 'total_included'
 
-        for p, p2 in zip(self, self2):
+        for p, p2 in pycompat.izip(self, self2):
             taxes = partner.property_account_position_id.map_tax(p.taxes_id)
             p.website_price = taxes.compute_all(p2.price, pricelist.currency_id, quantity=qty, product=p2, partner=partner)[ret]
             p.website_public_price = taxes.compute_all(p2.lst_price, quantity=qty, product=p2, partner=partner)[ret]
@@ -210,7 +207,7 @@ class Product(models.Model):
 class ProductAttribute(models.Model):
     _inherit = "product.attribute"
 
-    type = fields.Selection([('radio', 'Radio'), ('select', 'Select'), ('color', 'Color'), ('hidden', 'Hidden')], default='radio')
+    type = fields.Selection([('radio', 'Radio'), ('select', 'Select'), ('color', 'Color')], default='radio')
 
 
 class ProductAttributeValue(models.Model):

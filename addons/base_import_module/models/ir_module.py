@@ -8,7 +8,7 @@ from os.path import join as opj
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.modules import load_information_from_description_file
-from odoo.tools import convert_file, exception_to_unicode
+from odoo.tools import convert_file, exception_to_unicode, pycompat
 from odoo.tools.osutil import tempdir
 
 _logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ class IrModule(models.Model):
     imported = fields.Boolean(string="Imported Module")
 
     @api.multi
-    def import_module(self, module, path, force=False):
+    def _import_module(self, module, path, force=False):
         known_mods = self.search([])
         known_mods_names = {m.name: m for m in known_mods}
         installed_mods = [m.name for m in known_mods if m.state == 'installed']
@@ -110,14 +110,14 @@ class IrModule(models.Model):
                         try:
                             # assert mod_name.startswith('theme_')
                             path = opj(module_dir, mod_name)
-                            self.import_module(mod_name, path, force=force)
+                            self._import_module(mod_name, path, force=force)
                             success.append(mod_name)
-                        except Exception, e:
+                        except Exception as e:
                             _logger.exception('Error while importing module')
                             errors[mod_name] = exception_to_unicode(e)
                 finally:
                     addons.module.ad_paths.remove(module_dir)
         r = ["Successfully imported module '%s'" % mod for mod in success]
-        for mod, error in errors.items():
+        for mod, error in pycompat.items(errors):
             r.append("Error while importing module '%s': %r" % (mod, error))
         return '\n'.join(r), module_names

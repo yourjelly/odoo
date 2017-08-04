@@ -17,7 +17,7 @@ class MailThread(models.AbstractModel):
     @api.model
     def message_route(self, message, message_dict, model=None, thread_id=None, custom_values=None):
         """ Override to udpate mass mailing statistics based on bounce emails """
-        bounce_alias = self.env['ir.config_parameter'].get_param("mail.bounce.alias")
+        bounce_alias = self.env['ir.config_parameter'].sudo().get_param("mail.bounce.alias")
         email_to = decode_message_header(message, 'To')
         email_to_localpart = (tools.email_split(email_to) or [''])[0].split('@', 1)[0].lower()
 
@@ -39,3 +39,13 @@ class MailThread(models.AbstractModel):
             message_ids = [x.strip() for x in decode_smtp_header(message['References']).split()]
             self.env['mail.mail.statistics'].set_replied(mail_message_ids=message_ids)
         return super(MailThread, self).message_route_process(message, message_dict, routes)
+
+    @api.multi
+    def message_post_with_template(self, template_id, **kwargs):
+        # avoid having message send through `message_post*` methods being implicitly considered as
+        # mass-mailing
+        no_massmail = self.with_context(
+            default_mass_mailing_name=False,
+            default_mass_mailing_id=False,
+        )
+        return super(MailThread, no_massmail).message_post_with_template(template_id, **kwargs)

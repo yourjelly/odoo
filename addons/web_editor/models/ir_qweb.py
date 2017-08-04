@@ -14,19 +14,20 @@ import itertools
 import json
 import logging
 import os
-import urllib2
-import urlparse
 import re
 import hashlib
 
 import pytz
+import requests
 from dateutil import parser
 from lxml import etree, html
 from PIL import Image as I
+from werkzeug import urls
+
 import odoo.modules
 
 from odoo import api, models, fields
-from odoo.tools import ustr
+from odoo.tools import ustr, pycompat
 from odoo.tools import html_escape as escape
 from odoo.addons.base.ir import ir_qweb
 
@@ -49,6 +50,18 @@ class QWeb(models.AbstractModel):
         div = u'<div name="%s" data-oe-type="snippet" data-oe-thumbnail="%s">' % (escape(ir_qweb.unicodifier(name)), escape(ir_qweb.unicodifier(thumbnail)))
         return [self._append(ast.Str(div))] + self._compile_node(el, options) + [self._append(ast.Str(u'</div>'))]
 
+    def _compile_directive_install(self, el, options):
+        if self.user_has_groups('base.group_system'):
+            module = self.env['ir.module.module'].search([('name', '=', el.attrib.get('t-install'))])
+            if not module or module.state == 'installed':
+                return []
+            name = el.attrib.get('string') or 'Snippet'
+            thumbnail = el.attrib.pop('t-thumbnail', 'oe-thumbnail')
+            div = u'<div name="%s" data-oe-type="snippet" data-module-id="%s" data-oe-thumbnail="%s"><section/></div>' % (escape(ir_qweb.unicodifier(name)), module.id, escape(ir_qweb.unicodifier(thumbnail)))
+            return [self._append(ast.Str(div))]
+        else:
+            return []
+
     def _compile_directive_tag(self, el, options):
         if el.get('t-placeholder'):
             el.set('t-att-placeholder', el.attrib.pop('t-placeholder'))
@@ -59,6 +72,7 @@ class QWeb(models.AbstractModel):
     def _directives_eval_order(self):
         directives = super(QWeb, self)._directives_eval_order()
         directives.insert(directives.index('call'), 'snippet')
+        directives.insert(directives.index('call'), 'install')
         return directives
 
 
@@ -283,7 +297,7 @@ class Image(models.AbstractModel):
             "hose again."
 
         aclasses = ['img', 'img-responsive'] + options.get('class', '').split()
-        classes = ' '.join(itertools.imap(escape, aclasses))
+        classes = ' '.join(pycompat.imap(escape, aclasses))
 
         max_size = None
         if options.get('resize'):
@@ -319,11 +333,11 @@ class Image(models.AbstractModel):
     def from_html(self, model, field, element):
         url = element.find('img').get('src')
 
-        url_object = urlparse.urlsplit(url)
+        url_object = urls.url_parse(url)
         if url_object.path.startswith('/web/image'):
             # url might be /web/image/<model>/<id>[_<checksum>]/<field>[/<width>x<height>]
             fragments = url_object.path.split('/')
-            query = dict(urlparse.parse_qsl(url_object.query))
+            query = url_object.decode_query()
             if fragments[3].isdigit():
                 model = 'ir.attachment'
                 oid = fragments[3]
@@ -341,7 +355,7 @@ class Image(models.AbstractModel):
         return self.load_remote_url(url)
 
     def load_local_url(self, url):
-        match = self.local_url_re.match(urlparse.urlsplit(url).path)
+        match = self.local_url_re.match(urls.url_parse(url).path)
 
         rest = match.group('rest')
         for sep in os.sep, os.altsep:
@@ -374,9 +388,9 @@ class Image(models.AbstractModel):
             #   linking to HTTP images
             # implement drag & drop image upload to mitigate?
 
-            req = urllib2.urlopen(url, timeout=REMOTE_CONNECTION_TIMEOUT)
-            # PIL needs a seekable file-like image, urllib result is not seekable
-            image = I.open(cStringIO.StringIO(req.read()))
+            req = requests.get(url, timeout=REMOTE_CONNECTION_TIMEOUT)
+            # PIL needs a seekable file-like image so wrap result in IO buffer
+            image = I.open(cStringIO.StringIO(req.content))
             # force a complete load of the image data to validate it
             image.load()
         except Exception:
@@ -496,7 +510,7 @@ def _realize_padding(it):
     requests for at least n newlines of padding. Runs thereof can be collapsed
     into the largest requests and converted to newlines.
     """
-    padding = None
+    padding = 0
     for item in it:
         if isinstance(item, int):
             padding = max(padding, item)
@@ -504,7 +518,7 @@ def _realize_padding(it):
 
         if padding:
             yield '\n' * padding
-            padding = None
+            padding = 0
 
         yield item
     # leftover padding irrelevant as the output will be stripped

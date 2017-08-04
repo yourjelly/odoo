@@ -2,6 +2,7 @@
 
 import time
 from odoo import api, models, _
+from odoo.exceptions import UserError
 from odoo.tools import float_is_zero
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -87,10 +88,10 @@ class ReportAgedPartnerBalance(models.AbstractModel):
             if line.balance == 0:
                 continue
             for partial_line in line.matched_debit_ids:
-                if partial_line.create_date[:10] <= date_from:
+                if partial_line.max_date <= date_from:
                     line_amount += partial_line.amount
             for partial_line in line.matched_credit_ids:
-                if partial_line.create_date[:10] <= date_from:
+                if partial_line.max_date <= date_from:
                     line_amount -= partial_line.amount
             if not self.env.user.company_id.currency_id.is_zero(line_amount):
                 undue_amounts[partner_id] += line_amount
@@ -139,10 +140,10 @@ class ReportAgedPartnerBalance(models.AbstractModel):
                 if line.balance == 0:
                     continue
                 for partial_line in line.matched_debit_ids:
-                    if partial_line.create_date[:10] <= date_from:
+                    if partial_line.max_date <= date_from:
                         line_amount += partial_line.amount
                 for partial_line in line.matched_credit_ids:
-                    if partial_line.create_date[:10] <= date_from:
+                    if partial_line.max_date <= date_from:
                         line_amount -= partial_line.amount
 
                 if not self.env.user.company_id.currency_id.is_zero(line_amount):
@@ -195,7 +196,10 @@ class ReportAgedPartnerBalance(models.AbstractModel):
         return res, total, lines
 
     @api.model
-    def render_html(self, docids, data=None):
+    def get_report_values(self, docids, data=None):
+        if not data.get('form') or not self.env.context.get('active_model') or not self.env.context.get('active_id'):
+            raise UserError(_("Form content is missing, this report cannot be printed."))
+
         total = []
         model = self.env.context.get('active_model')
         docs = self.env[model].browse(self.env.context.get('active_id'))
@@ -211,7 +215,7 @@ class ReportAgedPartnerBalance(models.AbstractModel):
             account_type = ['payable', 'receivable']
 
         movelines, total, dummy = self._get_partner_move_lines(account_type, date_from, target_move, data['form']['period_length'])
-        docargs = {
+        return {
             'doc_ids': self.ids,
             'doc_model': model,
             'data': data['form'],
@@ -220,4 +224,3 @@ class ReportAgedPartnerBalance(models.AbstractModel):
             'get_partner_lines': movelines,
             'get_direction': total,
         }
-        return self.env['report'].render('account.report_agedpartnerbalance', docargs)

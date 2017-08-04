@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from mock import patch
 from odoo.tests.common import TransactionCase
+from odoo.tools import pycompat
 
 
 class TestWebsitePriceList(TransactionCase):
@@ -35,9 +36,9 @@ class TestWebsitePriceList(TransactionCase):
             'country_group_ids': [(6, 0, [ca_group.id])],
             'sequence': 10
         })
-
-        self.patcher = patch('odoo.addons.website_sale.models.sale_order.Website.get_pricelist_available', wraps=self._get_pricelist_available)
-        self.mock_get_pricelist_available = self.patcher.start()
+        patcher = patch('odoo.addons.website_sale.models.website.Website.get_pricelist_available', wraps=self._get_pricelist_available)
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     def get_pl(self, show, current_pl, country):
         pls = self.website._get_pl(
@@ -60,7 +61,7 @@ class TestWebsitePriceList(TransactionCase):
             'CA': ['Canada'],
             'US': ['USD', 'EUR', 'Benelux', 'Canada']
         }
-        for country, result in country_list.items():
+        for country, result in pycompat.items(country_list):
             pls = self.get_pl(show, current_pl, country)
             self.assertEquals(len(set(pls.mapped('name')) & set(result)), len(pls), 'Test failed for %s (%s %s vs %s %s)'
                               % (country, len(pls), pls.mapped('name'), len(result), result))
@@ -77,7 +78,7 @@ class TestWebsitePriceList(TransactionCase):
             'CA': ['Canada']
         }
 
-        for country, result in country_list.items():
+        for country, result in pycompat.items(country_list):
             pls = self.get_pl(show, current_pl, country)
             self.assertEquals(len(set(pls.mapped('name')) & set(result)), len(pls), 'Test failed for %s (%s %s vs %s %s)'
                               % (country, len(pls), pls.mapped('name'), len(result), result))
@@ -98,7 +99,7 @@ class TestWebsitePriceList(TransactionCase):
             'CA': False
         }
 
-        for country, result in country_list.items():
+        for country, result in pycompat.items(country_list):
             self.args['country'] = country
             # mock patch method could not pass env context
             available = self.website.is_pricelist_available(christmas_pl)
@@ -119,11 +120,7 @@ class TestWebsitePriceList(TransactionCase):
             'CA': ['EUR', 'Canada'],
             'US': ['USD', 'EUR', 'Benelux', 'Canada']
         }
-        for country, result in country_list.items():
+        for country, result in pycompat.items(country_list):
             pls = self.get_pl(show, current_pl, country)
             self.assertEquals(len(set(pls.mapped('name')) & set(result)), len(pls), 'Test failed for %s (%s %s vs %s %s)'
                               % (country, len(pls), pls.mapped('name'), len(result), result))
-
-    def tearDown(self):
-        self.patcher.stop()
-        super(TestWebsitePriceList, self).tearDown()

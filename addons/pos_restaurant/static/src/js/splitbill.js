@@ -44,7 +44,7 @@ var SplitbillScreenWidget = screens.ScreenWidget.extend({
         var split = splitlines[line_id] || {'quantity': 0, line: null};
         var line  = order.get_orderline(line_id);
         
-        if( !line.get_unit().groupable ){
+        if( !line.get_unit().is_pos_groupable ){
             if( split.quantity !== line.get_quantity()){
                 split.quantity = line.get_quantity();
             }else{
@@ -52,7 +52,7 @@ var SplitbillScreenWidget = screens.ScreenWidget.extend({
             }
         }else{
             if( split.quantity < line.get_quantity()){
-                split.quantity += line.get_unit().is_unit ? 1 : line.get_unit().rounding;
+                split.quantity += line.get_unit().is_pos_groupable ? 1 : line.get_unit().rounding;
                 if(split.quantity > line.get_quantity()){
                     split.quantity = line.get_quantity();
                 }

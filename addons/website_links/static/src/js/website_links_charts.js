@@ -1,11 +1,13 @@
 odoo.define('website_links.charts', function (require) {
 'use strict';
 
+var rpc = require('web.rpc');
 var Widget = require('web.Widget');
 var base = require('web_editor.base');
+var core = require('web.core');
 var website = require('website.website');
-var Model = require('web.Model');
 
+var _t = core._t;
 var exports = {};
 
 if(!$('.o_website_links_chart').length) {
@@ -48,11 +50,11 @@ if(!$('.o_website_links_chart').length) {
 
             // Set title
             var nb_clicks = _.reduce(clicks_array, function(total, val) { return total + val[1] ; }, 0);
-            $(this.$element + ' .title').html(nb_clicks + ' clicks');
+            $(this.$element + ' .title').html(nb_clicks + _t(' clicks'));
 
             // Fit data into the NVD3 scheme
             var chart_data = [{}];
-                chart_data[0]['key'] = '# of clicks';
+                chart_data[0]['key'] = _t('# of clicks');
                 chart_data[0]['values'] = clicks_array;
 
             nv.addGraph(function() {
@@ -94,12 +96,12 @@ if(!$('.o_website_links_chart').length) {
             // Process country data to fit into the NVD3 scheme
             var processed_data = [];
             for(var i = 0 ; i < this.data.length ; i++) {
-                var country_name = this.data[i]['country_id'] ? this.data[i]['country_id'][1] : 'Undefined';
+                var country_name = this.data[i]['country_id'] ? this.data[i]['country_id'][1] : _t('Undefined');
                 processed_data.push({'label':country_name + ' (' + this.data[i]['country_id_count'] + ')', 'value':this.data[i]['country_id_count']});
             }
 
             // Set title
-            $(this.$element + ' .title').html(this.data.length + ' countries');
+            $(this.$element + ' .title').html(this.data.length + _t(' countries'));
 
             nv.addGraph(function() {
                 var chart = nv.models.pieChart()
@@ -130,33 +132,52 @@ if(!$('.o_website_links_chart').length) {
         // Get the code of the link
         var link_id = $('#link_id').val();
 
-        var clicks = new Model('link.tracker.click');
         var links_domain = ['link_id', '=', parseInt(link_id)];
 
         var total_clicks = function() {
-            return clicks.call('search_count', [[links_domain]]);
+            return rpc.query({
+                    model: 'link.tracker.click',
+                    method: 'search_count',
+                    args: [[links_domain]],
+                });
         };
 
         var clicks_by_day = function() {
-            return clicks.call('read_group', [[links_domain], ['create_date']],
-                               {'groupby':'create_date:day'});
+            return rpc.query({
+                    model: 'link.tracker.click',
+                    method: 'read_group',
+                    args: [[links_domain], ['create_date']],
+                    kwargs: {groupby:'create_date:day'},
+                });
         };
 
         var clicks_by_country = function() {
-            return clicks.call('read_group',  [[links_domain], ['country_id']], 
-                               {'groupby':'country_id'});
+            return rpc.query({
+                    model: 'link.tracker.click',
+                    method: 'read_group',
+                    args: [[links_domain], ['country_id']],
+                    kwargs: {groupby:'country_id'},
+                });
         };
 
         var last_week_clicks_by_country = function() {
             var interval = moment().subtract(7, 'days').format("YYYY-MM-DD");
-            return clicks.call('read_group', [[links_domain, ['create_date', '>', interval]], ['country_id']],
-                               {'groupby':'country_id'});
+            return rpc.query({
+                    model: 'link.tracker.click',
+                    method: 'read_group',
+                    args: [[links_domain, ['create_date', '>', interval]], ['country_id']],
+                    kwargs: {groupby:'country_id'},
+                });
         };
 
         var last_month_clicks_by_country = function() {
             var interval = moment().subtract(30, 'days').format("YYYY-MM-DD");
-            return clicks.call('read_group', [[links_domain, ['create_date', '>', interval]], ['country_id']],
-                               {'groupby':'country_id'});
+            return rpc.query({
+                    model: 'link.tracker.click',
+                    method: 'read_group',
+                    args: [[links_domain, ['create_date', '>', interval]], ['country_id']],
+                    kwargs: {groupby: 'country_id'},
+                });
         };
 
         $.when(total_clicks(), 
@@ -205,9 +226,9 @@ if(!$('.o_website_links_chart').length) {
                 });
             }
             else {
-                $('#all_time_charts').prepend('There is no data to show');
-                $('#last_month_charts').prepend('There is no data to show');
-                $('#last_week_charts').prepend('There is no data to show');
+                $('#all_time_charts').prepend(_t('There is no data to show'));
+                $('#last_month_charts').prepend(_t('There is no data to show'));
+                $('#last_week_charts').prepend(_t('There is no data to show'));
             }
         });
 

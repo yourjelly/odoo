@@ -37,8 +37,8 @@ Wizards provided by this module:
     'author': 'Noviat, Odoo SA',
     'depends': [
         'account',
-        'base_vat',
         'base_iban',
+        'base_vat',
         'l10n_multilang',
     ],
     'data': [

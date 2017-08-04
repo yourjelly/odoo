@@ -25,6 +25,68 @@ class TestPyLint(TransactionCase):
         'E0601',  # using variable before assignment
         'W0123',  # eval used
         'W0101',  # unreachable code
+
+        'misplaced-future',
+        'relative-import',
+        'deprecated-module',
+        'import-star-module-level',
+
+        'bad-builtin',
+
+        'dict-iter-method',
+        'dict-view-method',
+
+        'long-suffix',
+        'old-ne-operator',
+        'old-octal-operator',
+        'parameter-unpacking',
+
+        'metaclass-assignment',
+        'deprecated-module',
+
+        'exception-message-attribute',
+        'indexing-exception',
+        'old-raise-syntax',
+        'raising-string',
+        'unpacking-in-except',
+    ]
+
+    BAD_FUNCTIONS = [
+        'apply',
+        'cmp',
+        'coerce',
+        'execfile',
+        'input',
+        'intern',
+        'long',
+        'raw_input',
+        'reload',
+        'xrange',
+        'long',
+        'map',
+        'filter',
+        'zip',
+
+        'file',
+        'reduce',
+    ]
+
+    BAD_MODULES = [
+        'commands',
+        'cPickle',
+        'md5',
+        'urllib',
+        'urllib2',
+        'urlparse',
+        'sgmllib',
+        'sha',
+        'cgi',
+        'htmlentitydefs',
+        'HTMLParser',
+        'Queue',
+        'UserDict',
+        'UserString',
+        'UserList',
     ]
 
     def _skip_test(self, reason):
@@ -48,14 +110,16 @@ class TestPyLint(TransactionCase):
             '--enable=%s' % ','.join(self.ENABLED_CODES),
             '--reports=n',
             "--msg-template='{msg} ({msg_id}) at {path}:{line}'",
+            '--load-plugins=pylint.extensions.bad_builtin',
+            '--bad-functions=%s' % ','.join(self.BAD_FUNCTIONS),
+            '--deprecated-modules=%s' % ','.join(self.BAD_MODULES)
         ]
 
         try:
-            with open(devnull, 'w') as devnull_file:
-                process = subprocess.Popen(['pylint'] + options + paths, stdout=subprocess.PIPE, stderr=devnull_file)
+            process = subprocess.Popen(['pylint'] + options + paths, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         except (OSError, IOError):
             self._skip_test('pylint executable not found in the path')
         else:
-            out = process.communicate()[0]
+            out, err = process.communicate()
             if process.returncode:
-                self.fail(msg="\n" + out)
+                self.fail("\n" + out + "\n" + err)

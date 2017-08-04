@@ -1,3 +1,6 @@
+///
+/// This file regroups main website UI layout rules (when the user is connected).
+///
 
 // LAYOUTING
 body.o_connected_user {
@@ -26,12 +29,6 @@ body.o_connected_user {
 
             &[data-action="edit"], &[data-action="translate"] {
                 .button-variant(white, @odoo-brand-optional, @odoo-brand-optional);
-
-                @media (max-width: @screen-xs-max) {
-                    &, &:hover, &:focus {
-                        outline: none;
-                    }
-                }
             }
 
             > .fa-plus, > .fa-pencil {

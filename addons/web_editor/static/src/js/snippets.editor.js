@@ -18,15 +18,6 @@ var data = {};
 
 /* ----- SNIPPET SELECTOR ---- */
 
-$.extend($.expr[':'], {
-    hasData: function (node) {
-        return !!_.toArray(node.dataset).length;
-    },
-    data: function (node, i, m) {
-        return $(node).data(m[3]);
-    }
-});
-
 data.globalSelector = {
     closest: function () { return $(); },
     all: function () { return $(); },
@@ -260,12 +251,25 @@ data.Class = Widget.extend({
                         $div.find('.oe_snippet_thumbnail_img').css('background-image', 'url(' + thumbnail + ')');
                     }
                     // end
+
+                    var moduleID = $snippet.data('moduleId');
+                    if (moduleID) {
+                        $snippet.addClass('o_snippet_install');
+                        var $installBtn = $('<a/>', {
+                            class: 'btn btn-primary btn-sm o_install_btn',
+                            target: '_blank',
+                            href: '/web#id=' + moduleID + '&view_type=form&model=ir.module.module&action=base.open_module_tree',
+                            text: _t("Install"),
+                        });
+                        $div.append($installBtn);
+                    }
                 }
                 if (!$snippet.data("selector")) {
                     $("> *:not(.oe_snippet_thumbnail)", this).addClass('oe_snippet_body');
                 }
                 number++;
-            });
+            })
+            .not('[data-module-id]');
 
         // hide scroll if no snippets defined
         if (!number) {
@@ -722,20 +726,8 @@ data.Class = Widget.extend({
     activate_overlay_zones: function ($targets) {
         var self = this;
 
-        function is_visible($el) {
-            return     $el.css('display')    !== 'none'
-                    && $el.css('opacity')    !== '0'
-                    && $el.css('visibility') !== 'hidden';
-        }
-
         // filter out invisible elements
-        $targets = $targets.filter(function () { return is_visible($(this)); });
-
-        // filter out elements with invisible parents
-        $targets = $targets.filter(function () {
-            var parents = $(this).parents().filter(function () { return !is_visible($(this)); });
-            return parents.length === 0;
-        });
+        $targets = $targets.filter(':visible:hasVisibility:hasOpacity');
 
         $targets.each(function () {
             var $target = $(this);
@@ -1010,7 +1002,9 @@ data.Editor = Class.extend({
         this.$target.after($clone);
         this.buildingBlock.call_for_all_snippets($clone, function (editor, $snippet) {
             for (var i in editor.styles) {
-                editor.styles[i].on_clone($snippet);
+                editor.styles[i].on_clone($snippet, {
+                    isCurrent: ($snippet.is($clone)),
+                });
             }
         });
         return false;
@@ -1164,7 +1158,6 @@ editor.Class.include({
  */
 editor.Class.include({
     start: function () {
-        animation.stop();
         return this._super.apply(this, arguments).then(function () {
             animation.start(true);
         });

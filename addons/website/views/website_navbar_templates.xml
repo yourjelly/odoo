@@ -15,7 +15,7 @@
                         <ul class="dropdown-menu">
                             <li t-as="menu" t-foreach="menu_data['children']">
                                 <t t-set="debug_param" t-value="'?&amp;debug=' if debug else ''"/>
-                                <a t-att-class="'oe_menu_toggler' if menu.get('children') else 'oe_menu_leaf'" t-att-data-action-id="menu['action'] and menu['action'].split(',')[1] or None" t-att-data-action-model="menu['action'] and menu['action'].split(',')[0] or None" t-att-data-menu="menu['id']" t-att-href="'/web%s#menu_id=%s&amp;action=%s' % (debug_param, menu['id'], menu['action'] and menu['action'].split(',')[1] or '')">
+                                <a t-att-class="'oe_menu_toggler' if menu.get('children') else 'oe_menu_leaf'" t-att-data-action-id="menu['action'] and menu['action'].split(',')[1] or None" t-att-data-action-model="menu['action'] and menu['action'].split(',')[0] or None" t-att-data-menu="menu['id']" t-att-data-menu-xmlid="menu.get('xmlid')" t-att-href="'/web%s#menu_id=%s&amp;action=%s' % (debug_param, menu['id'], menu['action'] and menu['action'].split(',')[1] or '')">
                                     <i t-attf-class="fa #{menu.get('icon')} fa-lg fa-fw" t-if="menu.get('icon')"/>
                                     <span class="oe_menu_text">
                                         <t t-esc="menu['name']"/>
@@ -27,8 +27,6 @@
                 </ul>
 
                 <button type="button" class="fa fa-bars pull-right visible-xs-block o_mobile_menu_toggle"/>
-
-                <div class="o_menu_brand">Website</div>
 
                 <ul class="o_menu_sections" groups="website.group_website_designer">
                     <!-- Content -->
@@ -47,9 +45,9 @@
                     <li class="dropdown" id="customize-menu">
                         <a class="dropdown-toggle waves" data-toggle="dropdown" href="#" id="customize-menu-button">Customize</a>
                         <ul class="dropdown-menu" role="menu">
-                            <li id="html_editor"><a data-action="ace" href="#advanced-view-editor">HTML Editor</a></li>
                             <li id="theme_customize"><a href="#">Customize Theme</a></li>
-                            <li id="install_apps"><a href="/web#return_label=Website&amp;action=website.action_module_website">Install Apps</a></li>
+                            <li id="html_editor"><a data-action="ace" href="#advanced-view-editor">HTML/CSS Editor</a></li>
+                            <li id="install_apps"><a href="/web#action=website.action_website_configuration">Add Features</a></li>
                             <li class="divider"/>
                         </ul>
                     </li>

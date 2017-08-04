@@ -201,10 +201,6 @@ Possible children elements of the list view are:
     ``type``
         type of button, indicates how it clicking it affects Odoo:
 
-        ``workflow`` (default)
-            sends a signal to a workflow. The button's ``name`` is the
-            workflow signal, the row's record is passed as argument to the
-            signal
         ``object``
             call a method on the list's model. The button's ``name`` is the
             method, which is called with the current row's record id and the
@@ -241,6 +237,11 @@ Possible children elements of the list view are:
 
         Makes the button ``invisible`` if the record is *not* in one of the
         listed states
+
+        .. danger::
+
+            Using ``states`` in combination with ``attrs`` may lead to
+            unexpected results as domains are combined with a logical AND.
     ``context``
         merged into the view's context when performing the button's Odoo call
     ``confirm``
@@ -354,7 +355,13 @@ system. Available semantic components are:
 
 ``button``
   call into the Odoo system, similar to :ref:`list view buttons
-  <reference/views/list/button>`
+  <reference/views/list/button>`. In addition, the following attribute can be
+  specified:
+
+  ``special``
+    for form views opened in dialogs: ``save`` to save the record and close the
+    dialog, ``cancel`` to close the dialog without saving.
+
 ``field``
   renders (and allow edition of, possibly) a single field of the current
   record. Possible attributes are:
@@ -941,7 +948,7 @@ Javascript API
       :returns: an image URL
 
    .. warning::
-   ``kanban_text_ellipsis`` has been removed in Odoo 9. CSS ``text-overflow`` should be used instead.
+      ``kanban_text_ellipsis`` has been removed in Odoo 9. CSS ``text-overflow`` should be used instead.
 
 .. _reference/views/calendar:
 
@@ -960,24 +967,24 @@ calendar view are:
     directly in the calendar
 ``date_delay``
     alternative to ``date_stop``, provides the duration of the event instead of
-    its end date
-
-    .. todo:: what's the unit? Does it allow moving the record?
-
+    its end date (unit: day)
 ``color``
     name of a record field to use for *color segmentation*. Records in the
     same color segment are allocated the same highlight color in the calendar,
     colors are allocated semi-randomly.
+    Displayed the display_name/avatar of the visible record in the sidebar
+``readonly_form_view_id``
+    view to open in readonly mode
+``form_view_id``
+    view to open when the user create or edit an event
 ``event_open_popup``
-    opens the event in a dialog instead of switching to the form view, disabled
-    by default
+    If the option 'event_open_popup' is set to true, then the calendar view will
+    open events (or records) in a FormViewDialog. Otherwise, it will open events
+    in a new form view (with a do_action)
 ``quick_add``
     enables quick-event creation on click: only asks the user for a ``name``
     and tries to create a new event with just that and the clicked event
     time. Falls back to a full form dialog if the quick creation fails
-``display``
-    format string for event display, field names should be within brackets
-    ``[`` and ``]``
 ``all_day``
     name of a boolean field on the record indicating whether the corresponding
     event is flagged as day-long (and duration is irrelevant)
@@ -985,21 +992,53 @@ calendar view are:
     Default display mode when loading the calendar.
     Possible attributes are: ``day``, ``week``, ``month``
 
+``<field>``
+  declares fields to aggregate or to use in kanban *logic*. If the field is
+  simply displayed in the calendar cards.
 
-.. todo::
+  Fields can have additional attributes:
 
-   what's the purpose of ``<field>`` inside a calendar view?
+    ``invisible``
+        use "True" to hide the value in the cards
+    ``avatar_field``
+        only for x2many field, to display the avatar instead the display_name
+        in the cards
+    ``write_model`` and ``write_field``
+        you can add a filter and save the result in the defined model, the
+        filter is added in the sidebar
 
-.. todo::
+``templates``
+  defines the :ref:`reference/qweb` template ``calendar-box``. Cards definition
+  may be split into multiple templates for clarity which will be rendered once
+  for each record.
 
-   calendar code is an unreadable mess, no idea what these things are:
+  The kanban view uses mostly-standard :ref:`javascript qweb
+  <reference/qweb/javascript>` and provides the following context variables:
 
-   * ``attendee``
-   * ``avatar_model``
-   * ``use_contacts``
-
-   calendar code also seems to refer to multiple additional attributes of
-   unknown purpose
+  ``instance``
+    the current :ref:`reference/javascript/client` instance
+  ``widget``
+    the current :js:class:`KanbanRecord`, can be used to fetch some
+    meta-information. These methods are also available directly in the
+    template context and don't need to be accessed via ``widget``
+    ``getColor`` to convert in a color integer
+    ``getAvatars`` to convert in an avatar image
+    ``displayFields`` list of not invisible fields
+  ``record``
+    an object with all the requested fields as its attributes. Each field has
+    two attributes ``value`` and ``raw_value``
+  ``event``
+    the calendar event object
+  ``format``
+    format method to convert values into a readable string with the user
+    parameters
+  ``fields``
+    definition of all model fields
+    parameters
+  ``user_context``
+    self-explanatory
+  ``read_only_mode``
+    self-explanatory
 
 .. _reference/views/gantt:
 

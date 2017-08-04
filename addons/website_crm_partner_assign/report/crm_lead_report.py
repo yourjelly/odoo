@@ -16,7 +16,7 @@ class CrmLeadReportAssign(models.Model):
     grade_id = fields.Many2one('res.partner.grade', 'Grade', readonly=True)
     user_id = fields.Many2one('res.users', 'User', readonly=True)
     country_id = fields.Many2one('res.country', 'Country', readonly=True)
-    team_id = fields.Many2one('crm.team', 'Sales Team', oldname='section_id', readonly=True)
+    team_id = fields.Many2one('crm.team', 'Sales Channel', oldname='section_id', readonly=True)
     company_id = fields.Many2one('res.company', 'Company', readonly=True)
     date_assign = fields.Date('Assign Date', readonly=True)
     create_date = fields.Datetime('Create Date', readonly=True)
@@ -67,7 +67,7 @@ class CrmLeadReportAssign(models.Model):
                     p.grade_id,
                     p.date as partner_date,
                     c.planned_revenue*(c.probability/100) as probable_revenue,
-                    1 as nbr,
+                    1 as nbr_cases,
                     c.create_date as create_date,
                     extract('epoch' from (c.write_date-c.create_date))/(3600*24) as  delay_close,
                     extract('epoch' from (c.date_deadline - c.date_closed))/(3600*24) as  delay_expected,

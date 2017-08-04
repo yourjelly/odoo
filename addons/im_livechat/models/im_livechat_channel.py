@@ -6,6 +6,7 @@ import re
 from datetime import datetime, timedelta
 
 from odoo import api, fields, models, modules, tools
+from odoo.tools import pycompat
 
 
 class ImLivechatChannel(models.Model):
@@ -95,7 +96,7 @@ class ImLivechatChannel(models.Model):
         for record in self:
             dt = fields.Datetime.to_string(datetime.utcnow() - timedelta(days=7))
             repartition = record.channel_ids.rating_get_grades([('create_date', '>=', dt)])
-            total = sum(repartition.values())
+            total = sum(pycompat.values(repartition))
             if total > 0:
                 happy = repartition['great']
                 record.rating_percentage_satisfaction = ((happy*100) / total) if happy > 0 else 0
@@ -132,8 +133,8 @@ class ImLivechatChannel(models.Model):
             :returns : the ir.action 'action_view_rating' with the correct domain
         """
         self.ensure_one()
-        action = self.env['ir.actions.act_window'].for_xml_id('rating', 'action_view_rating')
-        action['domain'] = [('res_id', 'in', [s.id for s in self.channel_ids]), ('res_model', '=', 'mail.channel')]
+        action = self.env['ir.actions.act_window'].for_xml_id('im_livechat', 'rating_rating_action_view_livechat_rating')
+        action['domain'] = [('parent_res_id', '=', self.id), ('parent_res_model', '=', 'im_livechat.channel')]
         return action
 
     # --------------------------
@@ -195,7 +196,7 @@ class ImLivechatChannel(models.Model):
     def get_livechat_info(self, channel_id, username='Visitor'):
         info = {}
         info['available'] = len(self.browse(channel_id).get_available_users()) > 0
-        info['server_url'] = self.env['ir.config_parameter'].get_param('web.base.url')
+        info['server_url'] = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         if info['available']:
             info['options'] = self.sudo().get_channel_infos(channel_id)
             info['options']["default_username"] = username

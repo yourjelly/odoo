@@ -4,12 +4,19 @@
 import itertools
 
 from odoo import models, fields, api
+from odoo.http import request
+from odoo.tools import pycompat
 
-MAGIC_FIELDS = ["id", "create_uid", "create_date", "write_uid", "write_date", "__last_update"]
 
 class website_form_config(models.Model):
     _inherit = 'website'
-    website_form_enable_metadata = fields.Boolean('Write metadata',help="Enable writing metadata on form submit.")
+
+    website_form_enable_metadata = fields.Boolean('Write metadata', help="Enable writing metadata on form submit.")
+
+    def _website_form_last_record(self):
+        if request and request.session.form_builder_model_model:
+            return request.env[request.session.form_builder_model_model].browse(request.session.form_builder_id)
+        return False
 
 
 class website_form_model(models.Model):
@@ -20,12 +27,6 @@ class website_form_model(models.Model):
     website_form_default_field_id = fields.Many2one('ir.model.fields', 'Field for custom form data', domain="[('model', '=', model), ('ttype', '=', 'text')]", help="Specify the field which will contain meta and custom form fields datas.")
     website_form_label = fields.Char("Label for form action", help="Form action label. Ex: crm.lead could be 'Send an e-mail' and project.issue could be 'Create an Issue'.")
 
-    def _all_inherited_model_ids(self):
-        return list(itertools.chain(
-            [self.id],
-            *(m._all_inherited_model_ids() for m in self.inherited_model_ids)
-        ))
-
     def _get_form_writable_fields(self):
         """
         Restriction of "authorized fields" (fields which can be used in the
@@ -33,33 +34,35 @@ class website_form_model(models.Model):
         builders and are writable. By default no field is writable by the
         form builder.
         """
-        excluded = {
+        included = {
             field.name
             for field in self.env['ir.model.fields'].sudo().search([
-                ('model_id', 'in', self._all_inherited_model_ids()),
-                ('website_form_blacklisted', '=', True)
+                ('model_id', '=', self.id),
+                ('website_form_blacklisted', '=', False)
             ])
         }
         return {
-            k: v for k, v in self.get_authorized_fields().iteritems()
-            if k not in excluded
+            k: v for k, v in pycompat.items(self.get_authorized_fields(self.model))
+            if k in included
         }
 
-    @api.multi
-    def get_authorized_fields(self):
-        model = self.env[self.model]
+    @api.model
+    def get_authorized_fields(self, model_name):
+        """ Return the fields of the given model name as a mapping like method `fields_get`. """
+        model = self.env[model_name]
         fields_get = model.fields_get()
 
-        for key, val in model._inherits.iteritems():
-            fields_get.pop(val,None)
+        for key, val in pycompat.items(model._inherits):
+            fields_get.pop(val, None)
 
         # Unrequire fields with default values
-        default_values = model.default_get(fields_get.keys())
+        default_values = model.default_get(list(fields_get))
         for field in [f for f in fields_get if f in default_values]:
             fields_get[field]['required'] = False
 
         # Remove readonly and magic fields
-        for field in fields_get.keys():
+        MAGIC_FIELDS = models.MAGIC_COLUMNS + [model.CONCURRENCY_CHECK_FIELD]
+        for field in list(fields_get):
             if fields_get[field]['readonly'] or field in MAGIC_FIELDS:
                 del fields_get[field]
 
@@ -79,7 +82,7 @@ class website_form_model_fields(models.Model):
                          ' SET website_form_blacklisted=true'
                          ' WHERE website_form_blacklisted IS NULL')
         # add an SQL-level default value on website_form_blacklisted to that
-        # pure-SQL ir.model.field creations (e.g. in _field_create) generate
+        # pure-SQL ir.model.field creations (e.g. in _reflect) generate
         # the right default value for a whitelist (aka fields should be
         # blacklisted by default)
         self._cr.execute('ALTER TABLE ir_model_fields '

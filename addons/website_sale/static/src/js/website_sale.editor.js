@@ -3,7 +3,7 @@ odoo.define('website_sale.editor', function (require) {
 
 var ajax = require('web.ajax');
 var core = require('web.core');
-var Model = require('web.Model');
+var rpc = require('web.rpc');
 var contentMenu = require('website.contentMenu');
 var options = require('web_editor.snippets.options');
 
@@ -29,6 +29,10 @@ if(!$('.js_sale').length) {
     return $.Deferred().reject("DOM doesn't contain '.js_sale'");
 }
 
+$('.oe_website_sale').on('click', '.oe_currency_value:o_editable', function (ev) {
+    $(ev.currentTarget).selectContent();
+});
+
 options.registry.website_sale = options.Class.extend({
     start: function () {
         var self = this;
@@ -44,17 +48,19 @@ options.registry.website_sale = options.Class.extend({
         if (size_y >= 4) $select = $select.add($size.find('tr:eq(3) td:lt('+size_x+')'));
         $select.addClass("selected");
 
-        new Model('product.style')
-            .call('search_read', [[]])
-                .then(function (data) {
-                    var $ul = self.$el.find('ul[name="style"]');
-                    for (var k in data) {
-                        $ul.append(
-                            $('<li data-style="'+data[k]['id']+'" data-toggle_class="'+data[k]['html_class']+'"/>')
-                                .append( $('<a/>').text(data[k]['name']) ));
-                    }
-                    self.set_active();
-                });
+        rpc.query({
+                model: 'product.style',
+                method: 'search_read',
+            })
+            .then(function (data) {
+                var $ul = self.$el.find('ul[name="style"]');
+                for (var k in data) {
+                    $ul.append(
+                        $('<li data-style="'+data[k]['id']+'" data-toggle_class="'+data[k]['html_class']+'"/>')
+                            .append( $('<a/>').text(data[k]['name']) ));
+                }
+                self.set_active();
+            });
 
         this.bind_resize();
     },

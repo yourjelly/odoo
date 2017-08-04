@@ -204,7 +204,8 @@ var EditMenuDialog = widget.Dialog.extend({
         this.flat = this.flatenize(menu);
         this.to_delete = [];
         this._super(parent, _.extend({}, {
-            title: _t("Edit Menu")
+            title: _t("Edit Menu"),
+            size: 'medium',
         }, options || {}));
     },
     start: function () {
@@ -235,7 +236,7 @@ var EditMenuDialog = widget.Dialog.extend({
     },
     add_menu: function () {
         var self = this;
-        var dialog = new MenuEntryDialog(this, {}, undefined, {});
+        var dialog = new MenuEntryDialog(this, {menu_link_options: true}, undefined, {});
         dialog.on('save', this, function (link) {
             var new_menu = {
                 id: _.uniqueId('new-'),
@@ -318,29 +319,34 @@ var MenuEntryDialog = widget.LinkDialog.extend({
         data.text = data.name || '';
         data.isNewWindow = data.new_window;
         this.data = data;
+        this.menu_link_options = options.menu_link_options;
         return this._super.apply(this, arguments);
     },
     start: function () {
         var self = this;
-
-        this.$(".link-style").remove();
-        this.$("label[for=link-new]").text("Menu Label");
-
-        return $.when(this._super.apply(this, arguments)).then(function () {
-            var $link_text = self.$('#link-text').focus();
-            self.$('#link-page').change(function (e) {
-                if ($link_text.val()) { return; }
-                var data = $(this).select2('data');
-                $link_text.val(data.create ? data.id : data.text);
-                $link_text.focus();
+        this.$(".o_link_dialog_preview").remove();
+        this.$(".window-new, .link-style").closest(".form-group").remove();
+        this.$("label[for='o_link_dialog_label_input']").text(_t("Menu Label"));
+        if (this.menu_link_options) { // add menu link option only when adding new menu
+            this.$('#o_link_dialog_label_input').closest('.form-group').after(qweb.render('website.contentMenu.dialog.edit.link_menu_options'));
+            this.$('input[name=link_menu_options]').on('change', function() {
+                self.$('#o_link_dialog_url_input').closest('.form-group').toggle();
             });
-        });
+        }
+        this.$modal.find('.modal-lg').removeClass('modal-lg')
+                   .find('.col-md-8').removeClass('col-md-8').addClass('col-xs-12');
+
+        return this._super.apply(this, arguments);
     },
     save: function () {
-        var $e = this.$('#link-text');
+        var $e = this.$('#o_link_dialog_label_input');
         if (!$e.val() || !$e[0].checkValidity()) {
             $e.closest('.form-group').addClass('has-error');
             $e.focus();
+            return;
+        }
+        if (this.$('input[name=link_menu_options]:checked').val() === 'new_page') {
+            window.location = '/website/add/' + encodeURIComponent($e.val()) + '?add_menu=1';
             return;
         }
         return this._super.apply(this, arguments);

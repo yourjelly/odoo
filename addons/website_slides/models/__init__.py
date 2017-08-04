@@ -1,3 +1,4 @@
 # -*- coding: utf-8 -*-
-import res_config
-import slides
+
+from . import slides
+from . import website_config_settings

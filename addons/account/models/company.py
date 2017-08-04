@@ -20,11 +20,11 @@ class ResCompany(models.Model):
     bank_account_code_prefix = fields.Char(string='Prefix of the bank accounts', oldname="bank_account_code_char")
     cash_account_code_prefix = fields.Char(string='Prefix of the cash accounts')
     accounts_code_digits = fields.Integer(string='Number of digits in an account code')
+    tax_cash_basis_journal_id = fields.Many2one('account.journal', string="Cash Basis Journal")
     tax_calculation_rounding_method = fields.Selection([
         ('round_per_line', 'Round per Line'),
         ('round_globally', 'Round Globally'),
-        ], default='round_per_line', string='Tax Calculation Rounding Method',
-        help="If you select 'Round per Line' : for each tax, the tax amount will first be computed and rounded for each PO/SO/invoice line and then these rounded amounts will be summed, leading to the total amount for that tax. If you select 'Round Globally': for each tax, the tax amount will be computed for each PO/SO/invoice line, then these amounts will be summed and eventually this total tax amount will be rounded. If you sell with tax included, you should choose 'Round per line' because you certainly want the sum of your tax-included line subtotals to be equal to the total amount with taxes.")
+        ], default='round_per_line', string='Tax Calculation Rounding Method')
     currency_exchange_journal_id = fields.Many2one('account.journal', string="Exchange Gain or Loss Journal", domain=[('type', '=', 'general')])
     income_currency_exchange_account_id = fields.Many2one('account.account', related='currency_exchange_journal_id.default_credit_account_id',
         string="Gain Exchange Rate Account", domain="[('internal_type', '=', 'other'), ('deprecated', '=', False), ('company_id', '=', id)]")
@@ -57,10 +57,16 @@ Best Regards,''')
         if (date.month < last_month or (date.month == last_month and date.day <= last_day)):
             date = date.replace(month=last_month, day=last_day)
         else:
-            date = date.replace(month=last_month, day=last_day, year=date.year + 1)
+            if last_month == 2 and last_day == 29 and (date.year + 1) % 4 != 0:
+                date = date.replace(month=last_month, day=28, year=date.year + 1)
+            else:
+                date = date.replace(month=last_month, day=last_day, year=date.year + 1)
         date_to = date
         date_from = date + timedelta(days=1)
-        date_from = date_from.replace(year=date_from.year - 1)
+        if date_from.month == 2 and date_from.day == 29:
+            date_from = date_from.replace(day=28, year=date_from.year - 1)
+        else:
+            date_from = date_from.replace(year=date_from.year - 1)
         return {'date_from': date_from, 'date_to': date_to}
 
     def get_new_account_code(self, current_code, old_prefix, new_prefix, digits):

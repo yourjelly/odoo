@@ -6,11 +6,12 @@ var ajax = require('web.ajax');
 var ControlPanelMixin = require('web.ControlPanelMixin');
 var core = require('web.core');
 var Dialog = require('web.Dialog');
-var Model = require('web.Model');
+var field_utils = require('web.field_utils');
 var session = require('web.session');
-var utils = require('web.utils');
 var web_client = require('web.web_client');
 var Widget = require('web.Widget');
+
+var local_storage = require('web.local_storage');
 
 var _t = core._t;
 var QWeb = core.qweb;
@@ -19,6 +20,9 @@ var Dashboard = Widget.extend(ControlPanelMixin, {
     template: "website.WebsiteDashboardMain",
     events: {
         'click .js_link_analytics_settings': 'on_link_analytics_settings',
+        'click .o_dashboard_action': 'on_dashboard_action',
+        'click .o_dashboard_action_form': 'on_dashboard_action_form',
+        'click .o_dashboard_hide_panel': 'on_dashboard_hide_panel',
     },
 
     init: function(parent, context) {
@@ -27,6 +31,7 @@ var Dashboard = Widget.extend(ControlPanelMixin, {
         this.date_range = 'week';  // possible values : 'week', 'month', year'
         this.date_from = moment().subtract(1, 'week');
         this.date_to = moment();
+        this.hidden_apps = JSON.parse(local_storage.getItem('website_dashboard_hidden_app_ids') || '[]');
 
         this.dashboards_templates = ['website.dashboard_visits'];
         this.graphs = [];
@@ -54,8 +59,8 @@ var Dashboard = Widget.extend(ControlPanelMixin, {
     fetch_data: function() {
         var self = this;
         return ajax.jsonRpc('/website/fetch_dashboard_data', 'call', {
-            'date_from': this.date_from.format('YYYY-MM-DD'),
-            'date_to': this.date_to.format('YYYY-MM-DD'),
+            'date_from': this.date_from.year()+'-'+(this.date_from.month()+1)+'-'+this.date_from.date(),
+            'date_to': this.date_to.year()+'-'+(this.date_to.month()+1)+'-'+this.date_to.date(),
         }).done(function(result) {
             self.data = result;
             self.dashboards_data = result.dashboards;
@@ -71,7 +76,10 @@ var Dashboard = Widget.extend(ControlPanelMixin, {
         var dialog = new Dialog(this, {
             size: 'medium',
             title: _t('Google Analytics'),
-            $content: QWeb.render('website.ga_dialog_content', {ga_key: this.dashboards_data.visits.ga_client_id}),
+            $content: QWeb.render('website.ga_dialog_content', {
+                ga_key: this.dashboards_data.visits.ga_client_id,
+                ga_analytics_key: this.dashboards_data.visits.ga_analytics_key,
+            }),
             buttons: [
                 {
                     text: _t("Save"),
@@ -79,7 +87,8 @@ var Dashboard = Widget.extend(ControlPanelMixin, {
                     close: true,
                     click: function() {
                         var ga_client_id = dialog.$el.find('input[name="ga_client_id"]').val();
-                        self.on_save_ga_client_id(ga_client_id);
+                        var ga_analytics_key = dialog.$el.find('input[name="ga_analytics_key"]').val();
+                        self.on_save_ga_client_id(ga_client_id, ga_analytics_key);
                     },
                 },
                 {
@@ -90,15 +99,19 @@ var Dashboard = Widget.extend(ControlPanelMixin, {
         }).open();
     },
 
-    on_save_ga_client_id: function(ga_client_id) {
-
-        if (!ga_client_id.endsWith(".apps.googleusercontent.com") || ga_client_id.startsWith(" ")) {
-            this.do_warn(_t('Incorrect Client ID'), _t('The Google Analytics Client ID you have entered seems incorrect.'));
-            return;
-        }
-
+    on_save_ga_client_id: function(ga_client_id, ga_analytics_key) {
         var self = this;
-        new Model('ir.config_parameter').call('set_param', ['google_management_client_id', ga_client_id]).then(function(){
+        return this._rpc({
+            route: '/website/dashboard/set_ga_data',
+            params: {
+                'ga_client_id': ga_client_id,
+                'ga_analytics_key': ga_analytics_key,
+            },
+        }).then(function (result) {
+            if (result.error) {
+                self.do_warn(result.error.title, result.error.message);
+                return;
+            }
             self.on_date_range_button('week');
         });
     },
@@ -106,7 +119,7 @@ var Dashboard = Widget.extend(ControlPanelMixin, {
     render_dashboards: function() {
         var self = this;
         _.each(this.dashboards_templates, function(template) {
-            self.$('.o_website_dashboard').append(QWeb.render(template, {widget: self}));
+            self.$('.o_website_dashboard_content').append(QWeb.render(template, {widget: self}));
         });
     },
 
@@ -139,7 +152,7 @@ var Dashboard = Widget.extend(ControlPanelMixin, {
                 .append("svg");
 
             svg
-                .attr("height", '20em')
+                .attr("height", '24em')
                 .datum(chart_values)
                 .call(chart);
 
@@ -205,7 +218,7 @@ var Dashboard = Widget.extend(ControlPanelMixin, {
 
         var self = this;
         $.when(this.fetch_data()).then(function() {
-            self.$('.o_website_dashboard').empty();
+            self.$('.o_website_dashboard_content').empty();
             self.render_dashboards();
             self.render_graphs();
         });
@@ -215,6 +228,49 @@ var Dashboard = Widget.extend(ControlPanelMixin, {
     on_reverse_breadcrumb: function() {
         web_client.do_push_state({});
         this.update_cp();
+    },
+
+    on_dashboard_action: function (ev) {
+        ev.preventDefault();
+        var $action = $(ev.currentTarget);
+        var additional_context = {};
+        if (this.date_range === 'week') {
+            additional_context = {'search_default_week': true}
+        } else if (this.date_range === 'month') {
+            additional_context = {'search_default_month': true}
+        } else if (this.date_range === 'year') {
+            additional_context = {'search_default_year': true}
+        }
+        this.do_action($action.attr('name'), {
+            additional_context: additional_context,
+            on_reverse_breadcrumb: this.on_reverse_breadcrumb
+        });
+    },
+
+    on_dashboard_action_form: function (ev) {
+        ev.preventDefault();
+        var $action = $(ev.currentTarget);
+        this.do_action({
+            name: $action.attr('name'),
+            res_model: $action.data('res_model'),
+            res_id: $action.data('res_id'),
+            views: [[false, 'form']],
+            type: 'ir.actions.act_window',
+        }, {
+            on_reverse_breadcrumb: this.on_reverse_breadcrumb
+        });
+    },
+
+    on_dashboard_hide_panel: function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        var $action = $(ev.currentTarget);
+        // update hidden module list
+        this.hidden_apps = JSON.parse(local_storage.getItem('website_dashboard_hidden_app_ids') || '[]');
+        this.hidden_apps.push(JSON.parse($action.data('module_id')));
+        local_storage.setItem('website_dashboard_hidden_app_ids', JSON.stringify(this.hidden_apps));
+        // remove box
+        $action.closest(".o_box_item").remove();
     },
 
     update_cp: function() {
@@ -517,24 +573,24 @@ var Dashboard = Widget.extend(ControlPanelMixin, {
             return i % keep_one_of === 0;
         });
     },
-    format_number: function(value, symbol) {
-        value = utils.human_number(value);
-        if (symbol === 'currency') {
+    format_number: function(value, type, digits, symbol) {
+        if (type === 'currency') {
             return this.render_monetary_field(value, this.currency_id);
         } else {
-            return value + (symbol || '');
+            return field_utils.format[type](value || 0, {digits: digits}) + ' ' + symbol;
         }
     },
     render_monetary_field: function(value, currency_id) {
         var currency = session.get_currency(currency_id);
+        var formatted_value = field_utils.format.float(value || 0, {digits: currency && currency.digits});
         if (currency) {
             if (currency.position === "after") {
-                value += currency.symbol;
+                formatted_value += currency.symbol;
             } else {
-                value = currency.symbol + value;
+                formatted_value = currency.symbol + formatted_value;
             }
         }
-        return value;
+        return formatted_value;
     },
 
 });

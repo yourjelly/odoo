@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 try:
     import cStringIO as StringIO
 except ImportError:
@@ -75,7 +74,7 @@ def image_resize_image(base64_source, size=(1024, 1024), encoding='base64', file
 
     if image.size != size:
         image = image_resize_and_sharpen(image, size)
-    if image.mode not in ["1", "L", "P", "RGB", "RGBA"]:
+    if image.mode not in ["1", "L", "P", "RGB", "RGBA"] or (filetype == 'JPEG' and image.mode == 'RGBA'):
         image = image.convert("RGB")
 
     background_stream = StringIO.StringIO()
@@ -92,6 +91,7 @@ def image_resize_and_sharpen(image, size, preserve_aspect_ratio=False, factor=2.
         :param preserve_aspect_ratio: boolean (default: False)
         :param factor: Sharpen factor (default: 2.0)
     """
+    origin_mode = image.mode
     if image.mode != 'RGBA':
         image = image.convert('RGBA')
     image.thumbnail(size, Image.ANTIALIAS)
@@ -101,7 +101,9 @@ def image_resize_and_sharpen(image, size, preserve_aspect_ratio=False, factor=2.
     resized_image = sharpener.enhance(factor)
     # create a transparent image for background and paste the image on it
     image = Image.new('RGBA', size, (255, 255, 255, 0))
-    image.paste(resized_image, ((size[0] - resized_image.size[0]) / 2, (size[1] - resized_image.size[1]) / 2))
+    image.paste(resized_image, ((size[0] - resized_image.size[0]) // 2, (size[1] - resized_image.size[1]) // 2))
+    if image.mode != origin_mode:
+        image = image.convert(origin_mode)
     return image
 
 def image_save_for_web(image, fp=None, format=None):
@@ -178,17 +180,17 @@ def crop_image(data, type='top', ratio=False, thumbnail_ratio=None, image_format
 
     if ratio:
         w_ratio, h_ratio = ratio
-        new_h = (w * h_ratio) / w_ratio
+        new_h = (w * h_ratio) // w_ratio
         new_w = w
         if new_h > h:
             new_h = h
-            new_w = (h * w_ratio) / h_ratio
+            new_w = (h * w_ratio) // h_ratio
 
     if type == "top":
         cropped_image = image_stream.crop((0, 0, new_w, new_h))
         cropped_image.save(output_stream, format=image_format)
     elif type == "center":
-        cropped_image = image_stream.crop(((w - new_w) / 2, (h - new_h) / 2, (w + new_w) / 2, (h + new_h) / 2))
+        cropped_image = image_stream.crop(((w - new_w) // 2, (h - new_h) // 2, (w + new_w) // 2, (h + new_h) // 2))
         cropped_image.save(output_stream, format=image_format)
     elif type == "bottom":
         cropped_image = image_stream.crop((0, h - new_h, new_w, h))
@@ -198,7 +200,7 @@ def crop_image(data, type='top', ratio=False, thumbnail_ratio=None, image_format
     # TDE FIXME: should not have a ratio, makes no sense -> should have maximum width (std: 64; 256 px)
     if thumbnail_ratio:
         thumb_image = Image.open(StringIO.StringIO(output_stream.getvalue()))
-        thumb_image.thumbnail((new_w / thumbnail_ratio, new_h / thumbnail_ratio), Image.ANTIALIAS)
+        thumb_image.thumbnail((new_w // thumbnail_ratio, new_h // thumbnail_ratio), Image.ANTIALIAS)
         thumb_image.save(output_stream, image_format)
     return output_stream.getvalue().encode('base64')
 
@@ -262,17 +264,17 @@ def image_get_resized_images(base64_source, return_big=False, return_medium=True
 
 def image_resize_images(vals, big_name='image', medium_name='image_medium', small_name='image_small'):
     """ Update ``vals`` with image fields resized as expected. """
-    if big_name in vals:
+    if vals.get(big_name):
         vals.update(image_get_resized_images(vals[big_name],
                         return_big=True, return_medium=True, return_small=True,
                         big_name=big_name, medium_name=medium_name, small_name=small_name,
                         avoid_resize_big=True, avoid_resize_medium=False, avoid_resize_small=False))
-    elif medium_name in vals:
+    elif vals.get(medium_name):
         vals.update(image_get_resized_images(vals[medium_name],
                         return_big=True, return_medium=True, return_small=True,
                         big_name=big_name, medium_name=medium_name, small_name=small_name,
                         avoid_resize_big=True, avoid_resize_medium=True, avoid_resize_small=False))
-    elif small_name in vals:
+    elif vals.get(small_name):
         vals.update(image_get_resized_images(vals[small_name],
                         return_big=True, return_medium=True, return_small=True,
                         big_name=big_name, medium_name=medium_name, small_name=small_name,
@@ -284,6 +286,6 @@ if __name__=="__main__":
 
     assert len(sys.argv)==3, 'Usage to Test: image.py SRC.png DEST.png'
 
-    img = file(sys.argv[1],'rb').read().encode('base64')
+    img = open(sys.argv[1],'rb').read().encode('base64')
     new = image_resize_image(img, (128,100))
-    file(sys.argv[2], 'wb').write(new.decode('base64'))
+    open(sys.argv[2], 'wb').write(new.decode('base64'))

@@ -1,14 +1,14 @@
 # coding: utf-8
+from werkzeug import urls
 
-from authorize_request import AuthorizeAPI
+from .authorize_request import AuthorizeAPI
 from datetime import datetime
 import hashlib
 import hmac
 import logging
 import time
-import urlparse
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.addons.payment.models.payment_acquirer import ValidationError
 from odoo.addons.payment_authorize.controllers.main import AuthorizeController
 from odoo.tools.float_utils import float_compare
@@ -66,14 +66,14 @@ class PaymentAcquirerAuthorize(models.Model):
             'x_trans_key': self.authorize_transaction_key,
             'x_amount': str(values['amount']),
             'x_show_form': 'PAYMENT_FORM',
-            'x_type': 'AUTH_CAPTURE' if self.auto_confirm != 'authorize' else 'AUTH_ONLY',
+            'x_type': 'AUTH_CAPTURE' if not self.capture_manually else 'AUTH_ONLY',
             'x_method': 'CC',
             'x_fp_sequence': '%s%s' % (self.id, int(time.time())),
             'x_version': '3.1',
             'x_relay_response': 'TRUE',
             'x_fp_timestamp': str(int(time.time())),
-            'x_relay_url': '%s' % urlparse.urljoin(base_url, AuthorizeController._return_url),
-            'x_cancel_url': '%s' % urlparse.urljoin(base_url, AuthorizeController._cancel_url),
+            'x_relay_url': urls.url_join(base_url, AuthorizeController._return_url),
+            'x_cancel_url': urls.url_join(base_url, AuthorizeController._cancel_url),
             'x_currency_code': values['currency'] and values['currency'].name or '',
             'address': values.get('partner_address'),
             'city': values.get('partner_city'),
@@ -246,7 +246,7 @@ class TxAuthorize(models.Model):
     def authorize_s2s_do_transaction(self, **data):
         self.ensure_one()
         transaction = AuthorizeAPI(self.acquirer_id)
-        if self.acquirer_id.auto_confirm != "authorize":
+        if not self.acquirer_id.capture_manually:
             res = transaction.auth_and_capture(self.payment_token_id, self.amount, self.reference)
         else:
             res = transaction.authorize(self.payment_token_id, self.amount, self.reference)
@@ -256,14 +256,14 @@ class TxAuthorize(models.Model):
     def authorize_s2s_capture_transaction(self):
         self.ensure_one()
         transaction = AuthorizeAPI(self.acquirer_id)
-        tree = transaction.capture(self.acquirer_reference, self.amount)
+        tree = transaction.capture(self.acquirer_reference or '', self.amount)
         return self._authorize_s2s_validate_tree(tree)
 
     @api.multi
     def authorize_s2s_void_transaction(self):
         self.ensure_one()
         transaction = AuthorizeAPI(self.acquirer_id)
-        tree = transaction.void(self.acquirer_reference)
+        tree = transaction.void(self.acquirer_reference or '')
         return self._authorize_s2s_validate_tree(tree)
 
     @api.multi
@@ -285,15 +285,14 @@ class TxAuthorize(models.Model):
                     'acquirer_reference': tree.get('x_trans_id'),
                     'date_validate': fields.Datetime.now(),
                 })
-                if self.callback_eval and init_state != 'authorized':
-                    safe_eval(self.callback_eval, {'self': self})
+                if init_state != 'authorized':
+                    self.execute_callback()
             if tree.get('x_type').lower() == 'auth_only':
                 self.write({
                     'state': 'authorized',
                     'acquirer_reference': tree.get('x_trans_id'),
                 })
-                if self.callback_eval:
-                    safe_eval(self.callback_eval, {'self': self})
+                self.execute_callback()
             if tree.get('x_type').lower() == 'void':
                 self.write({
                     'state': 'cancel',

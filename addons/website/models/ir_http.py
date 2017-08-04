@@ -14,7 +14,7 @@ import odoo
 from odoo import api, models
 from odoo import SUPERUSER_ID
 from odoo.http import request
-from odoo.tools import config
+from odoo.tools import config, pycompat
 from odoo.exceptions import QWebException
 from odoo.tools.safe_eval import safe_eval
 
@@ -38,7 +38,6 @@ class Http(models.AbstractModel):
     _inherit = 'ir.http'
 
     rerouting_limit = 10
-    _geoip_resolver = None  # backwards-compatibility
 
     @classmethod
     def _get_converters(cls):
@@ -63,10 +62,8 @@ class Http(models.AbstractModel):
             website = env['website'].get_current_website()
             if website:
                 request.uid = website.user_id.id
-            else:
-                request.uid = env.ref('base.public_user').id
-        else:
-            request.uid = request.session.uid
+        if not request.uid:
+            super(Http, cls)._auth_method_public()
 
     bots = "bot|crawl|slurp|spider|curl|wget|facebookexternalhit".split("|")
 
@@ -95,10 +92,7 @@ class Http(models.AbstractModel):
     @classmethod
     def _geoip_setup_resolver(cls):
         # Lazy init of GeoIP resolver
-        if cls._geoip_resolver is not None:
-            return
         if odoo._geoip_resolver is not None:
-            cls._geoip_resolver = odoo._geoip_resolver
             return
         try:
             import GeoIP
@@ -138,6 +132,13 @@ class Http(models.AbstractModel):
         first_pass = not hasattr(request, 'website')
         request.website = None
         func = None
+
+        # add signup token or login to the session if given
+        if 'auth_signup_token' in request.params:
+            request.session['auth_signup_token'] = request.params['auth_signup_token']
+        if 'auth_login' in request.params:
+            request.session['auth_login'] = request.params['auth_login']
+
         try:
             if request.httprequest.method == 'GET' and '//' in request.httprequest.path:
                 new_url = request.httprequest.path.replace('//', '/') + '?' + request.httprequest.query_string
@@ -179,8 +180,8 @@ class Http(models.AbstractModel):
                 nearest_lang = not func and cls.get_nearest_lang(path[1])
                 url_lang = nearest_lang and path[1]
                 preferred_lang = ((cook_lang if cook_lang in langs else False)
-                                  or request.website.default_lang_code
-                                  or (not is_a_bot and cls.get_nearest_lang(request.lang)))
+                                  or (not is_a_bot and cls.get_nearest_lang(request.lang))
+                                  or request.website.default_lang_code)
 
                 request.lang = context['lang'] = nearest_lang or preferred_lang
                 # if lang in url but not the displayed or default language --> change or remove
@@ -205,7 +206,7 @@ class Http(models.AbstractModel):
                     path.pop(1)
                     request.context = context
                     return cls.reroute('/'.join(path) or '/')
-            if path[1] == request.website.default_lang_code:
+            if request.lang == request.website.default_lang_code:
                 context['edit_translations'] = False
             if not context.get('tz'):
                 context['tz'] = request.session.get('geoip', {}).get('time_zone')
@@ -241,7 +242,7 @@ class Http(models.AbstractModel):
     def _postprocess_args(cls, arguments, rule):
         super(Http, cls)._postprocess_args(arguments, rule)
 
-        for key, val in arguments.items():
+        for key, val in pycompat.items(arguments):
             # Replace uid placeholder by the current request.uid
             if isinstance(val, models.BaseModel) and isinstance(val._uid, RequestUID):
                 arguments[key] = val.sudo(request.uid)
@@ -249,7 +250,7 @@ class Http(models.AbstractModel):
         try:
             _, path = rule.build(arguments)
             assert path is not None
-        except Exception, e:
+        except Exception as e:
             return cls._handle_exception(e, code=404)
 
         if getattr(request, 'website_multilang', False) and request.httprequest.method in ('GET', 'HEAD'):
@@ -276,14 +277,14 @@ class Http(models.AbstractModel):
                 else:
                     # if parent excplicitely returns a plain response, then we don't touch it
                     return response
-            except Exception, e:
+            except Exception as e:
                 if 'werkzeug' in config['dev_mode'] and (not isinstance(exception, QWebException) or not exception.qweb.get('cause')):
                     raise
                 exception = e
 
             values = dict(
                 exception=exception,
-                traceback=traceback.format_exc(exception),
+                traceback=traceback.format_exc(),
             )
 
             if isinstance(exception, werkzeug.exceptions.HTTPException):
@@ -361,10 +362,8 @@ class ModelConverter(ir.ir_http.ModelConverter):
                 record_id = abs(record_id)
         return env[self.model].browse(record_id)
 
-    def generate(self, query=None, args=None):
-        Model = request.env[self.model]
-        if request.context.get('use_public_user'):
-            Model = Model.sudo(request.website.user_id.id)
+    def generate(self, uid, query=None, args=None):
+        Model = request.env[self.model].sudo(uid)
         domain = safe_eval(self.domain, (args or {}).copy())
         if query:
             domain.append((Model._rec_name, 'ilike', '%' + query + '%'))
@@ -376,14 +375,14 @@ class ModelConverter(ir.ir_http.ModelConverter):
 class PageConverter(werkzeug.routing.PathConverter):
     """ Only point of this converter is to bundle pages enumeration logic """
 
-    def generate(self, query=None, args={}):
-        View = request.env['ir.ui.view']
+    def generate(self, uid, query=None, args={}):
+        View = request.env['ir.ui.view'].sudo(uid)
         domain = [('page', '=', True)]
         query = query and query.startswith('website.') and query[8:] or query
         if query:
             domain += [('key', 'like', query)]
-        website_id = request.context.get('website_id') or request.env['website'].search([], limit=1).id
-        domain += ['|', ('website_id', '=', website_id), ('website_id', '=', False)]
+        website = request.env['website'].get_current_website()
+        domain += ['|', ('website_id', '=', website.id), ('website_id', '=', False)]
 
         views = View.search_read(domain, fields=['key', 'priority', 'write_date'], order='name')
         for view in views:

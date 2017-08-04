@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
+import requests
 from lxml import etree, objectify
-from urllib2 import urlopen, Request
 from StringIO import StringIO
-import xml.etree.ElementTree as ET
+from xml.etree import ElementTree as ET
 from uuid import uuid4
 
+from odoo import _
 from odoo.exceptions import ValidationError, UserError
+from odoo import _
 
 XMLNS = 'AnetApi/xml/v1/schema/AnetApiSchema.xsd'
 
@@ -57,12 +59,11 @@ class AuthorizeAPI():
         :param etree._Element data: etree data to process
         """
         data = etree.tostring(data, xml_declaration=True, encoding='utf-8')
-        request = Request(self.url, data)
-        request.add_header('Content-Type', 'text/xml')
-        response = urlopen(request).read()
-        response = strip_ns(response, XMLNS)
+        r = requests.post(self.url, data=data, headers={'Content-Type': 'text/xml'})
+        r.raise_for_status()
+        response = strip_ns(r.content, XMLNS)
         if response.find('messages/resultCode').text == 'Error':
-            messages = map(lambda m: m.text, response.findall('messages/message/text'))
+            messages = [m.text for m in response.findall('messages/message/text')]
             raise ValidationError(_('Authorize.net Error Message(s):\n %s') % '\n'.join(messages))
         return response
 
@@ -109,7 +110,7 @@ class AuthorizeAPI():
         payment_profile = etree.SubElement(profile, "paymentProfiles")
         etree.SubElement(payment_profile, "customerType").text = 'business' if partner.is_company else 'individual'
         billTo = etree.SubElement(payment_profile, "billTo")
-        etree.SubElement(billTo, "address").text = (partner.street + (partner.street2 if partner.street2 else '')) or None
+        etree.SubElement(billTo, "address").text = (partner.street or '' + (partner.street2 if partner.street2 else '')) or None
         etree.SubElement(billTo, "city").text = partner.city
         etree.SubElement(billTo, "state").text = partner.state_id.name or None
         etree.SubElement(billTo, "zip").text = partner.zip

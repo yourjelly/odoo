@@ -3,6 +3,8 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+from odoo.tools import pycompat
+
 
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
@@ -10,27 +12,20 @@ class SaleOrderLine(models.Model):
     @api.multi
     def _compute_analytic(self, domain=None):
         lines = {}
+        force_so_lines = self.env.context.get("force_so_lines")
         if not domain:
+            if not self.ids and not force_so_lines:
+                return True
             # To filter on analyic lines linked to an expense
             expense_type_id = self.env.ref('account.data_account_type_expenses', raise_if_not_found=False)
             expense_type_id = expense_type_id and expense_type_id.id
-            domain = [
-                ('so_line', 'in', self.ids),
-                '|',
-                    ('amount', '<', 0),
-                    '&',
-                        ('amount', '=', 0),
-                        '|',
-                            ('move_id', '=', False),
-                            ('move_id.account_id.user_type_id', '=', expense_type_id)
-            ]
+            domain = [('so_line', 'in', self.ids), ('amount', '<=', 0.0)]
 
         data = self.env['account.analytic.line'].read_group(
             domain,
             ['so_line', 'unit_amount', 'product_uom_id'], ['product_uom_id', 'so_line'], lazy=False
         )
         # If the unlinked analytic line was the last one on the SO line, the qty was not updated.
-        force_so_lines = self.env.context.get("force_so_lines")
         if force_so_lines:
             for line in force_so_lines:
                 lines.setdefault(line, 0.0)
@@ -46,14 +41,14 @@ class SaleOrderLine(models.Model):
                 qty = d['unit_amount']
             lines[line] += qty
 
-        for line, qty in lines.items():
+        for line, qty in pycompat.items(lines):
             line.qty_delivered = qty
         return True
 
 
 class AccountAnalyticLine(models.Model):
     _inherit = "account.analytic.line"
-    so_line = fields.Many2one('sale.order.line', string='Sale Order Line')
+    so_line = fields.Many2one('sale.order.line', string='Sales Order Line')
 
     def _get_invoice_price(self, order):
         if self.product_id.expense_policy == 'sales_price':
@@ -116,7 +111,7 @@ class AccountAnalyticLine(models.Model):
                 result.update({'so_line': so_lines[0].id})
             else:
                 if order.state != 'sale':
-                    raise UserError(_('The Sale Order %s linked to the Analytic Account must be validated before registering expenses.') % order.name)
+                    raise UserError(_('The Sales Order %s linked to the Analytic Account must be validated before registering expenses.') % order.name)
                 order_line_vals = self._get_sale_order_line_vals(order, price)
                 if order_line_vals:
                     so_line = self.env['sale.order.line'].create(order_line_vals)

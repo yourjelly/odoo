@@ -3,15 +3,15 @@
 import hashlib
 import hmac
 import time
-import urlparse
 import unittest
 from lxml import objectify
+from werkzeug import urls
 
 import odoo
 from odoo.addons.payment.models.payment_acquirer import ValidationError
 from odoo.addons.payment.tests.common import PaymentAcquirerCommon
 from odoo.addons.payment_authorize.controllers.main import AuthorizeController
-from odoo.tools import mute_logger
+from odoo.tools import mute_logger, pycompat
 
 
 @odoo.tests.common.at_install(True)
@@ -25,7 +25,7 @@ class AuthorizeCommon(PaymentAcquirerCommon):
         # get the authorize account
         self.authorize = self.env.ref('payment.payment_acquirer_authorize')
         # Be sure to be in 'capture' mode
-        self.authorize.auto_confirm = 'confirm_so'
+        # self.authorize.auto_confirm = 'confirm_so'
 
 
 @odoo.tests.common.at_install(True)
@@ -59,8 +59,8 @@ class AuthorizeForm(AuthorizeCommon):
             'x_version': '3.1',
             'x_relay_response': 'TRUE',
             'x_fp_timestamp': str(int(time.time())),
-            'x_relay_url': '%s' % urlparse.urljoin(base_url, AuthorizeController._return_url),
-            'x_cancel_url': '%s' % urlparse.urljoin(base_url, AuthorizeController._cancel_url),
+            'x_relay_url': urls.url_join(base_url, AuthorizeController._return_url),
+            'x_cancel_url': urls.url_join(base_url, AuthorizeController._cancel_url),
             'return_url': None,
             'x_currency_code': 'USD',
             'x_invoice_num': 'SO004',
@@ -91,7 +91,7 @@ class AuthorizeForm(AuthorizeCommon):
         tree = objectify.fromstring(res)
         self.assertEqual(tree.get('action'), 'https://test.authorize.net/gateway/transact.dll', 'Authorize: wrong form POST url')
         for el in tree.iterfind('input'):
-            values = el.values()
+            values = list(pycompat.values(el.attrib))
             if values[1] in ['submit', 'x_fp_hash', 'return_url', 'x_state', 'x_ship_to_state']:
                 continue
             self.assertEqual(
@@ -219,7 +219,7 @@ class AuthorizeForm(AuthorizeCommon):
 
         # switch to 'authorize only'
         # create authorize only s2s transaction & capture it
-        self.authorize.auto_confirm = 'authorize'
+        self.authorize.capture_manually = True
         transaction = self.env['payment.transaction'].create({
             'amount': 500,
             'acquirer_id': authorize.id,
@@ -236,7 +236,7 @@ class AuthorizeForm(AuthorizeCommon):
         self.assertEqual(transaction.state, 'done')
 
         # create authorize only s2s transaction & void it
-        self.authorize.auto_confirm = 'authorize'
+        self.authorize.capture_manually = True
         transaction = self.env['payment.transaction'].create({
             'amount': 500,
             'acquirer_id': authorize.id,

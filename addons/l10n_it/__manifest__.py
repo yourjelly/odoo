@@ -4,7 +4,11 @@
 {
     'name': 'Italy - Accounting',
     'version': '0.2',
-    'depends': ['base_vat','base_iban'],
+    'depends': [
+        'account',
+        'base_iban',
+        'base_vat',
+    ],
     'author': 'OpenERP Italian Community',
     'description': """
 Piano dei conti italiano di un'impresa generica.

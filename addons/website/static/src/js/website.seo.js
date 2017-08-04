@@ -6,7 +6,7 @@ var ajax = require('web.ajax');
 var Class = require('web.Class');
 var Dialog = require('web.Dialog');
 var mixins = require('web.mixins');
-var Model = require('web.Model');
+var rpc = require("web.rpc");
 var Widget = require('web.Widget');
 var base = require('web_editor.base');
 var website = require('website.website');
@@ -23,10 +23,10 @@ ajax.loadXML('/website/static/src/xml/website.seo.xml', qweb);
 
 function analyzeKeyword(htmlPage, keyword) {
     return  htmlPage.isInTitle(keyword) ? {
-                title: 'label label-primary',
+                title: 'label label-success',
                 description: "This keyword is used in the page title",
             } : htmlPage.isInDescription(keyword) ? {
-                title: 'label label-info',
+                title: 'label label-primary',
                 description: "This keyword is used in the page description",
             } : htmlPage.isInBody(keyword) ? {
                 title: 'label label-info',
@@ -202,6 +202,7 @@ var KeywordList = Widget.extend({
             keyword.on('removed', self, function () {
                self.trigger('list-not-full');
                self.trigger('removed', word);
+               self.trigger('content-updated', true);
             });
             keyword.on('selected', self, function (word, language) {
                 self.trigger('selected', word, language);
@@ -211,6 +212,7 @@ var KeywordList = Widget.extend({
         if (self.isFull()) {
             self.trigger('list-full');
         }
+        self.trigger('content-updated');
     },
 });
 
@@ -392,10 +394,14 @@ var Configurator = Dialog.extend({
         this.keywordList.on('selected', self, function (word, language) {
             self.keywordList.add(word, language);
         });
-        this.keywordList.appendTo(this.$('.js_seo_keywords_list'));
+        this.keywordList.on('content-updated', self, function (removed) {
+            self.updateTable(removed);
+        });
+        this.keywordList.insertAfter(this.$('.table thead'));
         this.disableUnsavableFields();
         this.renderPreview();
         this.getLanguages();
+        this.updateTable();
     },
     getLanguages: function () {
         var self = this;
@@ -453,7 +459,7 @@ var Configurator = Dialog.extend({
         var keyword = _.isString(word) ? word : $input.val();
         var language = $language.val().toLowerCase();
         this.keywordList.add(keyword, language);
-        $input.val("");
+        $input.val("").focus();
     },
     update: function () {
         var self = this;
@@ -491,7 +497,11 @@ var Configurator = Dialog.extend({
             def.resolve(null);
         } else {
             var fields = ['website_meta_title', 'website_meta_description', 'website_meta_keywords'];
-            var model = new Model(obj.model).call('read', [[obj.id], fields, base.get_context()]).then(function (data) {
+            rpc.query({
+                model: obj.model,
+                method: 'read',
+                args: [[obj.id], fields, base.get_context()],
+            }).then(function (data) {
                 if (data.length) {
                     var meta = data[0];
                     meta.model = obj.model;
@@ -510,7 +520,11 @@ var Configurator = Dialog.extend({
         if (!obj) {
             return $.Deferred().reject();
         } else {
-            return new Model(obj.model).call('write', [[obj.id], data, base.get_context()]);
+            return rpc.query({
+                model: obj.model,
+                method: 'write',
+                args: [[obj.id], data, base.get_context()],
+            });
         }
     },
     titleChanged: function () {
@@ -543,12 +557,19 @@ var Configurator = Dialog.extend({
         this.htmlPage.changeKeywords(this.keywordList.keywords());
         this._super.apply(this, arguments);
     },
+    updateTable : function (removed) {
+        var self = this,
+             val = removed ? (this.$el.find('tbody > tr').length - 1) : (this.$el.find('tbody > tr').length);
+        this.$('table').toggleClass('js_seo_has_content', val > 0 );
+        this.$el.scrollTop(self.$el[0].scrollHeight);
+    },
 });
 
 website.TopBar.include({
     start: function () {
+        var self = this;
         this.$el.on('click', 'a[data-action=promote-current-page]', function () {
-            new Configurator(this).open();
+            new Configurator(self).open();
         });
         return this._super();
     }

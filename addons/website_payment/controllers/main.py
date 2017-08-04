@@ -18,7 +18,7 @@ class WebsitePayment(http.Controller):
         }
         return_url = request.params.get('redirect', '/my/payment_method')
         for acquirer in acquirers:
-            acquirer.form = acquirer.sudo()._registration_render(request.env.user.partner_id.id, {'error': {}, 'error_message': [], 'return_url': return_url, 'json': False, 'bootstrap_formatting': True})
+            acquirer.form = acquirer.sudo()._registration_render(request.env.user.partner_id.id, {'error': {}, 'error_message': [], 'return_url': return_url, 'json': False, 'bootstrap_formatting': True, 'verify_validity': True})
         return request.render("website_payment.pay_methods", values)
 
     @http.route(['/website_payment/delete/'], methods=['POST'], type='http', auth="user", website=True)
@@ -78,8 +78,37 @@ class WebsitePayment(http.Controller):
         tx_id = request.session.pop('website_payment_tx_id', False)
         if tx_id:
             tx = request.env['payment.transaction'].browse(tx_id)
-            status = (tx.state == 'done' and 'success') or 'danger'
-            message = (tx.state == 'done' and _('Your payment was successful! It may take some time to be validated on our end.')) or _('Oops! There was a problem with your payment.')
+            if tx.state == 'done':
+                status = 'success'
+                message = tx.acquirer_id.done_msg
+            elif tx.state == 'pending':
+                status = 'warning'
+                message = tx.acquirer_id.pending_msg
+            else:
+                status = 'danger'
+                message = tx.acquirer_id.error_msg
             return request.render('website_payment.confirm', {'tx': tx, 'status': status, 'message': message})
         else:
             return request.redirect('/my/home')
+
+    @http.route(['/website_payment/get_linked_records'], type='json', auth='user', website=True)
+    def get_linked_records(self, payment_token_id):
+        payment_token_id = int(payment_token_id)
+
+        res = []
+        token = request.env['payment.token'].search([('id','=',payment_token_id)])
+        # if the payment token is valid
+        if token:
+            # then we retrieve the description for the model sale.subscription
+            subscription_description = request.env['sale.subscription']._description
+            # we retrieve all the linked records for the token
+            records = token._get_linked_records()
+            # transform the list of tuple into a dict so we can search easily
+            records = dict(records[payment_token_id])
+            # if there's subscriptions linked to that token
+            if records.get(subscription_description):
+                subscriptions = records[subscription_description]
+                # we create our json with all the info needed
+                for r in subscriptions:
+                    res.append({'id': r.id, 'name': r.name})
+        return res

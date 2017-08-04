@@ -82,7 +82,7 @@
                         <div>
                             <button name="button_immediate_install" states="uninstalled" string="Install" type="object" class="btn btn-primary"/>
                             <button name="button_immediate_upgrade" states="installed" string="Upgrade" type="object" class="btn btn-primary"/>
-                            <button name="button_uninstall" states="installed" string="Uninstall" type="object"  class="btn btn-default"/>
+                            <button name="button_uninstall_wizard" states="installed" string="Uninstall" type="object"  class="btn btn-default"/>
                             <button name="button_uninstall_cancel" states="to remove" string="Cancel Uninstall" type="object" class="btn btn-default"/>
                             <button name="button_upgrade_cancel" states="to upgrade" string="Cancel Upgrade" type="object" class="btn btn-default"/>
                             <button name="button_install_cancel" states="to install" string="Cancel Install" type="object" class="btn btn-default"/>
@@ -117,6 +117,14 @@
                             <p class="oe_grey" attrs="{'invisible': [('dependencies_id','not in',[None,False])]}"> -This module does not depends on any other module.</p>
                             <field name="dependencies_id">
                                 <tree string="Dependencies">
+                                    <field name="name"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                            <group string="Exclusions"/>
+                            <p class="oe_grey" attrs="{'invisible': [('exclusion_ids','not in',[None,False])]}"> -This module does not exclude any other module.</p>
+                            <field name="exclusion_ids">
+                                <tree string="Exclusions">
                                     <field name="name"/>
                                     <field name="state"/>
                                 </tree>
@@ -206,7 +214,7 @@
             <field name="tag">apps.updates</field>
             <field name="params">{}</field>
         </record>
-        <menuitem id="menu_module_updates" parent="base.menu_management" sequence="20" action="modules_updates_act_cl"/>
+        <menuitem id="menu_module_updates" parent="base.menu_management" sequence="20" action="modules_updates_act_cl" groups="base.group_no_one"/>
 
     </data>
 </odoo>

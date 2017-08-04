@@ -29,7 +29,7 @@ tour.register('event_buy_tickets', {
         {
             content: "Click on `Order Now` button",
             extra_trigger: 'select:eq(1):has(option:contains(2):propSelected)',
-            trigger: '.btn-primary:contains("Order Now")',
+            trigger: '.btn-primary:contains("Register Now")',
         },
         {
             content: "Fill attendees details",
@@ -86,7 +86,7 @@ tour.register('event_buy_tickets', {
         {
             content: "Pay",
             extra_trigger: '#payment_method label:contains(Wire Transfer) input:checked',
-            trigger: '.oe_sale_acquirer_button .btn[type="submit"]:visible',
+            trigger: '.o_payment_acquirer_button .btn[type="submit"]:visible',
         },
         {
             content: "Last step",

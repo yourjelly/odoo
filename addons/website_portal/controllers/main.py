@@ -4,9 +4,21 @@
 from odoo import http
 from odoo.http import request
 from odoo import tools
+from odoo.tools import pycompat
 from odoo.tools.translate import _
+from odoo.exceptions import ValidationError
 
 from odoo.fields import Date
+
+
+def get_records_pager(ids, current):
+    if current.id in ids:
+        idx = ids.index(current.id)
+        return {
+            'prev_record': idx != 0 and current.browse(ids[idx - 1]).website_url,
+            'next_record': idx < len(ids) - 1 and current.browse(ids[idx + 1]).website_url
+        }
+    return {}
 
 
 class website_account(http.Controller):
@@ -17,7 +29,9 @@ class website_account(http.Controller):
     _items_per_page = 20
 
     def _prepare_portal_layout_values(self):
-        """ prepare the values to render portal layout """
+        """ prepare the values to render portal layout template. This returns the
+            data displayed on every portal pages.
+        """
         partner = request.env.user.partner_id
         # get customer sales rep
         if partner.user_id:
@@ -85,9 +99,12 @@ class website_account(http.Controller):
             'states': states,
             'has_check_vat': hasattr(request.env['res.partner'], 'check_vat'),
             'redirect': redirect,
+            'page_name': 'my_details',
         })
 
-        return request.render("website_portal.details", values)
+        response = request.render("website_portal.details", values)
+        response.headers['X-Frame-Options'] = 'DENY'
+        return response
 
     def details_form_validate(self, data):
         error = dict()
@@ -104,22 +121,23 @@ class website_account(http.Controller):
             error_message.append(_('Invalid Email! Please enter a valid email address.'))
 
         # vat validation
-        if data.get("vat") and hasattr(request.env["res.partner"], "check_vat"):
-            if request.website.company_id.sudo().vat_check_vies:
-                # force full VIES online check
-                check_func = request.env["res.partner"].vies_vat_check
-            else:
-                # quick and partial off-line checksum validation
-                check_func = request.env["res.partner"].simple_vat_check
-            vat_country, vat_number = request.env["res.partner"]._split_vat(data.get("vat"))
-            if not check_func(vat_country, vat_number):  # simple_vat_check
+        partner = request.env["res.partner"]
+        if data.get("vat") and hasattr(partner, "check_vat"):
+            partner_dummy = partner.new({
+                'vat': data['vat'],
+                'country_id': (int(data['country_id'])
+                               if data.get('country_id') else False),
+            })
+            try:
+                partner_dummy.check_vat()
+            except ValidationError:
                 error["vat"] = 'error'
 
         # error message for empty required fields
-        if [err for err in error.values() if err == 'missing']:
+        if [err for err in pycompat.values(error) if err == 'missing']:
             error_message.append(_('Some required fields are empty.'))
 
-        unknown = [k for k in data.iterkeys() if k not in self.MANDATORY_BILLING_FIELDS + self.OPTIONAL_BILLING_FIELDS]
+        unknown = [k for k in data if k not in self.MANDATORY_BILLING_FIELDS + self.OPTIONAL_BILLING_FIELDS]
         if unknown:
             error['common'] = 'Unknown field'
             error_message.append("Unknown field '%s'" % ','.join(unknown))

@@ -2,7 +2,6 @@ odoo.define('web_editor.translate', function (require) {
 'use strict';
 
 var core = require('web.core');
-var Model = require('web.Model');
 var ajax = require('web.ajax');
 var Widget = require('web.Widget');
 var base = require('web_editor.base');
@@ -13,21 +12,6 @@ var _t = core._t;
 
 var translatable = !!$('html').data('translatable');
 var edit_translations = !!$('html').data('edit_translations');
-
-$.fn.extend({
-  prependEvent: function (events, selector, data, handler) {
-    this.on(events, selector, data, handler);
-    events = events.split(' ');
-    this.each(function () {
-        var el = this;
-        _.each(events, function (event) {
-            var handler = $._data(el, 'events')[event].pop();
-            $._data(el, 'events')[event].unshift(handler);
-        });
-    });
-    return this;
-  }
-});
 
 var RTE_Translate = rte.Class.extend({
     saveElement: function ($el, context) {
@@ -106,7 +90,6 @@ var Translate = Widget.extend({
     template: 'web_editor.editorbar',
     init: function (parent, $target, lang) {
         this.parent = parent;
-        this.ir_translation = new Model('ir.translation');
         this.lang = lang || base.get_context().lang;
         this.setTarget($target);
         this._super.apply(this, arguments);
@@ -224,7 +207,7 @@ var Translate = Widget.extend({
             var trans = self.getTranlationObject(this);
             trans.value = (trans.value ? trans.value : $node.html() ).replace(/[ \t\n\r]+/, ' ');
         });
-        this.$target.parent().prependEvent('click', this, this.__unbind_click);
+        this.$target.parent().prependEvent('click.translator', this, this.__unbind_click);
 
         // attributes
 
@@ -238,14 +221,14 @@ var Translate = Widget.extend({
             });
         });
 
-        this.$target_attr.prependEvent('mousedown click mouseup', this, this.__translate_attribute);
+        this.$target_attr.prependEvent('mousedown.translator click.translator mouseup.translator', this, this.__translate_attribute);
 
         console.info('Click on CTRL when you click in an translatable area to have the default behavior');
     },
     unarkTranslatableNode: function () {
         this.$target.removeClass('o_editable').removeAttr('contentEditable');
-        this.$target.parent().off('click', this.__unbind_click);
-        this.$target_attr.off('mousedown click mouseup', this.__translate_attribute);
+        this.$target.parent().off('.translator');
+        this.$target_attr.off('.translator');
     },
     save_and_reload: function () {
         return this.save().then(function () {

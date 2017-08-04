@@ -10,7 +10,10 @@ import signal
 import subprocess
 import tempfile
 import time
-import xmlrpclib
+try:
+    from xmlrpc import client as xmlrpclib
+except ImportError:
+    import xmlrpclib
 from contextlib import contextmanager
 from glob import glob
 from os.path import abspath, dirname, join
@@ -22,7 +25,7 @@ from tempfile import NamedTemporaryFile
 #----------------------------------------------------------
 # Utils
 #----------------------------------------------------------
-execfile(join(dirname(__file__), '..', 'odoo', 'release.py'))
+exec(open(join(dirname(__file__), '..', 'odoo', 'release.py'), 'rb').read())
 version = version.split('-')[0]
 docker_version = version.replace('+', '')
 timestamp = time.strftime("%Y%m%d", time.gmtime())

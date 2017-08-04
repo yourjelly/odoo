@@ -4,16 +4,14 @@
 import base64
 import os
 import random
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+
 from lxml import etree
 from operator import itemgetter
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.release import version_info
+from odoo.tools import pickle
 from odoo.tools.safe_eval import safe_eval
 from odoo.addons.anonymization.models.anonymization import group
 
@@ -207,7 +205,7 @@ class IrModelFieldsAnonymizeWizard(models.TransientModel):
 
         # save pickle:
         fn = open(abs_filepath, 'w')
-        pickle.dump(data, fn, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(data, fn, protocol=-1)
 
         # update the anonymization fields:
         ano_fields.write({'state': 'anonymized'})
@@ -270,7 +268,7 @@ class IrModelFieldsAnonymizeWizard(models.TransientModel):
         data = pickle.loads(base64.decodestring(self.file_import))
 
         fixes = self.env['ir.model.fields.anonymization.migration.fix'].search_read([
-            ('target_version', '=', '.'.join(map(str, version_info[:2])))
+            ('target_version', '=', '.'.join(str(v) for v in version_info[:2]))
         ], ['model_name', 'field_name', 'query', 'query_type', 'sequence'])
         fixes = group(fixes, ('model_name', 'field_name'))
 

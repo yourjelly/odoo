@@ -7,7 +7,7 @@ import shutil
 import tempfile
 import threading
 import traceback
-import xml.etree.ElementTree as ET
+from xml.etree import ElementTree as ET
 import zipfile
 
 from functools import wraps
@@ -21,6 +21,8 @@ from odoo.exceptions import UserError
 import odoo.release
 import odoo.sql_db
 import odoo.tools
+from odoo.sql_db import db_connect
+from odoo.release import version_info
 
 _logger = logging.getLogger(__name__)
 
@@ -71,7 +73,7 @@ def _initialize_db(id, db_name, demo, lang, user_password, login='admin', countr
 
             cr.execute('SELECT login, password FROM res_users ORDER BY login')
             cr.commit()
-    except Exception, e:
+    except Exception as e:
         _logger.exception('CREATE DATABASE failed:')
 
 def _create_empty_database(name):
@@ -143,7 +145,7 @@ def exp_drop(db_name):
 
         try:
             cr.execute('DROP DATABASE "%s"' % db_name)
-        except Exception, e:
+        except Exception as e:
             _logger.info('DROP DB: %s failed:\n%s', db_name, e)
             raise Exception("Couldn't drop database %s: %s" % (db_name, e))
         else:
@@ -285,7 +287,7 @@ def exp_rename(old_name, new_name):
         try:
             cr.execute('ALTER DATABASE "%s" RENAME TO "%s"' % (old_name, new_name))
             _logger.info('RENAME DB: %s -> %s', old_name, new_name)
-        except Exception, e:
+        except Exception as e:
             _logger.info('RENAME DB: %s -> %s failed:\n%s', old_name, new_name, e)
             raise Exception("Couldn't rename database %s to %s: %s" % (old_name, new_name, e))
 
@@ -314,11 +316,24 @@ def exp_migrate_databases(databases):
 @odoo.tools.mute_logger('odoo.sql_db')
 def exp_db_exist(db_name):
     ## Not True: in fact, check if connection to database is possible. The database may exists
-    return bool(odoo.sql_db.db_connect(db_name))
+    try:
+        db = odoo.sql_db.db_connect(db_name)
+        with db.cursor():
+            return True
+    except Exception:
+        return False
 
 def list_dbs(force=False):
     if not odoo.tools.config['list_db'] and not force:
         raise odoo.exceptions.AccessDenied()
+
+    if not odoo.tools.config['dbfilter'] and odoo.tools.config['db_name']:
+        # In case --db-filter is not provided and --database is passed, Odoo will not
+        # fetch the list of databases available on the postgres server and instead will
+        # use the value of --database as comma seperated list of exposed databases.
+        res = sorted(db.strip() for db in odoo.tools.config['db_name'].split(','))
+        return res
+
     chosen_template = odoo.tools.config['db_template']
     templates_list = tuple(set(['postgres', chosen_template]))
     db = odoo.sql_db.db_connect('postgres')
@@ -341,6 +356,33 @@ def list_dbs(force=False):
             res = []
     res.sort()
     return res
+
+def list_db_incompatible(databases):
+    """"Check a list of databases if they are compatible with this version of Odoo
+
+        :param databases: A list of existing Postgresql databases
+        :return: A list of databases that are incompatible
+    """
+    incompatible_databases = []
+    server_version = '.'.join(str(v) for v in version_info[:2])
+    for database_name in databases:
+        with closing(db_connect(database_name).cursor()) as cr:
+            if odoo.tools.table_exists(cr, 'ir_module_module'):
+                cr.execute("SELECT latest_version FROM ir_module_module WHERE name=%s", ('base',))
+                base_version = cr.fetchone()
+                if not base_version or not base_version[0]:
+                    incompatible_databases.append(database_name)
+                else:
+                    # e.g. 10.saas~15
+                    local_version = '.'.join(base_version[0].split('.')[:2])
+                    if local_version != server_version:
+                        incompatible_databases.append(database_name)
+            else:
+                incompatible_databases.append(database_name)
+        # release connection
+        odoo.sql_db.close_db(database_name)
+    return incompatible_databases
+
 
 def exp_list(document=False):
     if not odoo.tools.config['list_db']:
