@@ -23,15 +23,18 @@ ajax.jsonRpc('/web/dataset/call', 'call', {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Summernote Lib (neek change to make accessible: method and object) */
 
-var dom = $.summernote.base.core.dom;
-var range = $.summernote.base.core.range;
-var eventHandler = $.summernote;
-var renderer = $.summernote.renderer;
-// var options = $.summernote.options;
+var dom = $.summernote.dom;
+var range = $.summernote.core.range;
+var options = $.summernote.options;
+var eventHandler = options;
+var renderer = $.summernote.ui.palette;
 
-var tplButton = renderer.getTemplate().button;
-var tplIconButton = renderer.getTemplate().iconButton;
-var tplDropdown = renderer.getTemplate().dropdown;
+// var tplButton = renderer.getTemplate().button;
+// var tplIconButton = renderer.getTemplate().iconButton;
+// var tplDropdown = renderer.getTemplate().dropdown;
+var tplButton = $.summernote.ui.button;
+var tplIconButton = $.summernote.ui.icon;
+var tplDropdown = $.summernote.ui.dropdown;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* update and change the popovers content, and add history button */
@@ -206,206 +209,206 @@ renderer.tplPopovers = function (lang, options) {
     return $popover;
 };
 
-var fn_boutton_update = eventHandler.modules.popover.button.update;
-eventHandler.modules.popover.button.update = function ($container, oStyle) {
-    // stop animation when edit content
-    var previous = $(".note-control-selection").data('target');
-    if (previous) {
-        $(previous).css({"-webkit-animation-play-state": "", "animation-play-state": "", "-webkit-transition": "", "transition": "", "-webkit-animation": "", "animation": ""});
-    }
-    // end
+// var fn_boutton_update = eventHandler.modules.popover.button.update;
+// eventHandler.modules.popover.button.update = function ($container, oStyle) {
+//     // stop animation when edit content
+//     var previous = $(".note-control-selection").data('target');
+//     if (previous) {
+//         $(previous).css({"-webkit-animation-play-state": "", "animation-play-state": "", "-webkit-transition": "", "transition": "", "-webkit-animation": "", "animation": ""});
+//     }
+//     // end
 
-    fn_boutton_update.call(this, $container, oStyle);
+//     fn_boutton_update.call(this, $container, oStyle);
 
-    $container.find('.note-color').removeClass("hidden");
+//     $container.find('.note-color').removeClass("hidden");
 
-    if (oStyle.image) {
-        $container.find('[data-event]').parent().removeClass("active");
+//     if (oStyle.image) {
+//         $container.find('[data-event]').parent().removeClass("active");
 
-        $container.find('a[data-event="padding"][data-value="small"]').parent().toggleClass("active", $(oStyle.image).hasClass("padding-small"));
-        $container.find('a[data-event="padding"][data-value="medium"]').parent().toggleClass("active", $(oStyle.image).hasClass("padding-medium"));
-        $container.find('a[data-event="padding"][data-value="large"]').parent().toggleClass("active", $(oStyle.image).hasClass("padding-large"));
-        $container.find('a[data-event="padding"][data-value="xl"]').parent().toggleClass("active", $(oStyle.image).hasClass("padding-xl"));
-        $container.find('a[data-event="padding"][data-value=""]').parent().toggleClass("active", !$container.find('.active a[data-event="padding"]').length);
+//         $container.find('a[data-event="padding"][data-value="small"]').parent().toggleClass("active", $(oStyle.image).hasClass("padding-small"));
+//         $container.find('a[data-event="padding"][data-value="medium"]').parent().toggleClass("active", $(oStyle.image).hasClass("padding-medium"));
+//         $container.find('a[data-event="padding"][data-value="large"]').parent().toggleClass("active", $(oStyle.image).hasClass("padding-large"));
+//         $container.find('a[data-event="padding"][data-value="xl"]').parent().toggleClass("active", $(oStyle.image).hasClass("padding-xl"));
+//         $container.find('a[data-event="padding"][data-value=""]').parent().toggleClass("active", !$container.find('.active a[data-event="padding"]').length);
 
-        if (dom.isImgFont(oStyle.image)) {
+//         if (dom.isImgFont(oStyle.image)) {
 
-            $container.find('.btn-group:not(.only_fa):has(button[data-event="resize"],button[data-value="img-thumbnail"])').addClass("hidden");
-            $container.find('.only_fa').removeClass("hidden");
-            $container.find('button[data-event="resizefa"][data-value="2"]').toggleClass("active", $(oStyle.image).hasClass("fa-2x"));
-            $container.find('button[data-event="resizefa"][data-value="3"]').toggleClass("active", $(oStyle.image).hasClass("fa-3x"));
-            $container.find('button[data-event="resizefa"][data-value="4"]').toggleClass("active", $(oStyle.image).hasClass("fa-4x"));
-            $container.find('button[data-event="resizefa"][data-value="5"]').toggleClass("active", $(oStyle.image).hasClass("fa-5x"));
-            $container.find('button[data-event="resizefa"][data-value="1"]').toggleClass("active", !$container.find('.active[data-event="resizefa"]').length);
+//             $container.find('.btn-group:not(.only_fa):has(button[data-event="resize"],button[data-value="img-thumbnail"])').addClass("hidden");
+//             $container.find('.only_fa').removeClass("hidden");
+//             $container.find('button[data-event="resizefa"][data-value="2"]').toggleClass("active", $(oStyle.image).hasClass("fa-2x"));
+//             $container.find('button[data-event="resizefa"][data-value="3"]').toggleClass("active", $(oStyle.image).hasClass("fa-3x"));
+//             $container.find('button[data-event="resizefa"][data-value="4"]').toggleClass("active", $(oStyle.image).hasClass("fa-4x"));
+//             $container.find('button[data-event="resizefa"][data-value="5"]').toggleClass("active", $(oStyle.image).hasClass("fa-5x"));
+//             $container.find('button[data-event="resizefa"][data-value="1"]').toggleClass("active", !$container.find('.active[data-event="resizefa"]').length);
 
-            $container.find('button[data-event="imageShape"][data-value="fa-spin"]').toggleClass("active", $(oStyle.image).hasClass("fa-spin"));
-            $container.find('button[data-event="imageShape"][data-value="shadow"]').toggleClass("active", $(oStyle.image).hasClass("shadow"));
+//             $container.find('button[data-event="imageShape"][data-value="fa-spin"]').toggleClass("active", $(oStyle.image).hasClass("fa-spin"));
+//             $container.find('button[data-event="imageShape"][data-value="shadow"]').toggleClass("active", $(oStyle.image).hasClass("shadow"));
 
-        } else {
+//         } else {
 
-            $container.find('.hidden:not(.only_fa)').removeClass("hidden");
-            $container.find('.only_fa').addClass("hidden");
-            var width = ($(oStyle.image).attr('style') || '').match(/(^|;|\s)width:\s*([0-9]+%)/);
-            if (width) {
-                width = width[2];
-            }
-            $container.find('button[data-event="resize"][data-value="auto"]').toggleClass("active", width !== "100%" && width !== "50%" && width !== "25%");
-            $container.find('button[data-event="resize"][data-value="1"]').toggleClass("active", width === "100%");
-            $container.find('button[data-event="resize"][data-value="0.5"]').toggleClass("active", width === "50%");
-            $container.find('button[data-event="resize"][data-value="0.25"]').toggleClass("active", width === "25%");
+//             $container.find('.hidden:not(.only_fa)').removeClass("hidden");
+//             $container.find('.only_fa').addClass("hidden");
+//             var width = ($(oStyle.image).attr('style') || '').match(/(^|;|\s)width:\s*([0-9]+%)/);
+//             if (width) {
+//                 width = width[2];
+//             }
+//             $container.find('button[data-event="resize"][data-value="auto"]').toggleClass("active", width !== "100%" && width !== "50%" && width !== "25%");
+//             $container.find('button[data-event="resize"][data-value="1"]').toggleClass("active", width === "100%");
+//             $container.find('button[data-event="resize"][data-value="0.5"]').toggleClass("active", width === "50%");
+//             $container.find('button[data-event="resize"][data-value="0.25"]').toggleClass("active", width === "25%");
 
-            $container.find('button[data-event="imageShape"][data-value="shadow"]').toggleClass("active", $(oStyle.image).hasClass("shadow"));
+//             $container.find('button[data-event="imageShape"][data-value="shadow"]').toggleClass("active", $(oStyle.image).hasClass("shadow"));
 
-            if (!$(oStyle.image).is("img")) {
-                $container.find('.btn-group:has(button[data-event="imageShape"])').addClass("hidden");
-            }
+//             if (!$(oStyle.image).is("img")) {
+//                 $container.find('.btn-group:has(button[data-event="imageShape"])').addClass("hidden");
+//             }
 
-            $container.find('.note-color').addClass("hidden");
+//             $container.find('.note-color').addClass("hidden");
 
-        }
+//         }
 
-        $container.find('button[data-event="floatMe"][data-value="left"]').toggleClass("active", $(oStyle.image).hasClass("pull-left"));
-        $container.find('button[data-event="floatMe"][data-value="center"]').toggleClass("active", $(oStyle.image).hasClass("center-block"));
-        $container.find('button[data-event="floatMe"][data-value="right"]').toggleClass("active", $(oStyle.image).hasClass("pull-right"));
+//         $container.find('button[data-event="floatMe"][data-value="left"]').toggleClass("active", $(oStyle.image).hasClass("pull-left"));
+//         $container.find('button[data-event="floatMe"][data-value="center"]').toggleClass("active", $(oStyle.image).hasClass("center-block"));
+//         $container.find('button[data-event="floatMe"][data-value="right"]').toggleClass("active", $(oStyle.image).hasClass("pull-right"));
 
-        $(oStyle.image).trigger('attributes_change');
-    }
-};
+//         $(oStyle.image).trigger('attributes_change');
+//     }
+// };
 
-var fn_popover_update = eventHandler.modules.popover.update;
-eventHandler.modules.popover.update = function ($popover, oStyle, isAirMode) {
-    var $imagePopover = $popover.find('.note-image-popover');
-    var $linkPopover = $popover.find('.note-link-popover');
-    var $airPopover = $popover.find('.note-air-popover');
+// var fn_popover_update = eventHandler.modules.popover.update;
+// eventHandler.modules.popover.update = function ($popover, oStyle, isAirMode) {
+//     var $imagePopover = $popover.find('.note-image-popover');
+//     var $linkPopover = $popover.find('.note-link-popover');
+//     var $airPopover = $popover.find('.note-air-popover');
 
-    fn_popover_update.call(this, $popover, oStyle, isAirMode);
+//     fn_popover_update.call(this, $popover, oStyle, isAirMode);
 
-    if (oStyle.image) {
-        if (oStyle.image.parentNode.className.match(/(^|\s)media_iframe_video(\s|$)/i)) {
-            oStyle.image = oStyle.image.parentNode;
-        }
-        var alt =  $(oStyle.image).attr("alt");
+//     if (oStyle.image) {
+//         if (oStyle.image.parentNode.className.match(/(^|\s)media_iframe_video(\s|$)/i)) {
+//             oStyle.image = oStyle.image.parentNode;
+//         }
+//         var alt =  $(oStyle.image).attr("alt");
 
-        $imagePopover.find('.o_image_alt').text( (alt || "").replace(/&quot;/g, '"') ).parent().toggle(oStyle.image.tagName === "IMG");
-        $imagePopover.show();
+//         $imagePopover.find('.o_image_alt').text( (alt || "").replace(/&quot;/g, '"') ).parent().toggle(oStyle.image.tagName === "IMG");
+//         $imagePopover.show();
 
-        // for video tag (non-void) we select the range over the tag,
-        // for other media types we get the first descendant leaf element
-        var target_node = oStyle.image;
-        if (!oStyle.image.className.match(/(^|\s)media_iframe_video(\s|$)/i)) {
-            target_node = dom.firstChild(target_node);
-        }
-        range.createFromNode(target_node).select();
-        // save range on the editor so it is not lost if restored
-        eventHandler.modules.editor.saveRange(dom.makeLayoutInfo(target_node).editable());
-    } else {
-        $(".note-control-selection").hide();
-    }
+//         // for video tag (non-void) we select the range over the tag,
+//         // for other media types we get the first descendant leaf element
+//         var target_node = oStyle.image;
+//         if (!oStyle.image.className.match(/(^|\s)media_iframe_video(\s|$)/i)) {
+//             target_node = dom.firstChild(target_node);
+//         }
+//         range.createFromNode(target_node).select();
+//         // save range on the editor so it is not lost if restored
+//         eventHandler.modules.editor.saveRange(dom.makeLayoutInfo(target_node).editable());
+//     } else {
+//         $(".note-control-selection").hide();
+//     }
 
-    if (oStyle.image || (oStyle.range && (!oStyle.range.isCollapsed() || (oStyle.range.sc.tagName && !dom.isAnchor(oStyle.range.sc)))) || (oStyle.image && !$(oStyle.image).closest('a').length)) {
-        $linkPopover.hide();
-        oStyle.anchor = false;
-    }
+//     if (oStyle.image || (oStyle.range && (!oStyle.range.isCollapsed() || (oStyle.range.sc.tagName && !dom.isAnchor(oStyle.range.sc)))) || (oStyle.image && !$(oStyle.image).closest('a').length)) {
+//         $linkPopover.hide();
+//         oStyle.anchor = false;
+//     }
 
-    if (oStyle.image || oStyle.anchor || (oStyle.range && !$(oStyle.range.sc).closest('.note-editable').length)) {
-        $airPopover.hide();
-    } else {
-        $airPopover.show();
-    }
-};
+//     if (oStyle.image || oStyle.anchor || (oStyle.range && !$(oStyle.range.sc).closest('.note-editable').length)) {
+//         $airPopover.hide();
+//     } else {
+//         $airPopover.show();
+//     }
+// };
 
-var fn_handle_update = eventHandler.modules.handle.update;
-eventHandler.modules.handle.update = function ($handle, oStyle, isAirMode) {
-    fn_handle_update.call(this, $handle, oStyle, isAirMode);
-    if (oStyle.image) {
-        $handle.find('.note-control-selection').hide();
-    }
-};
+// var fn_handle_update = eventHandler.modules.handle.update;
+// eventHandler.modules.handle.update = function ($handle, oStyle, isAirMode) {
+//     fn_handle_update.call(this, $handle, oStyle, isAirMode);
+//     if (oStyle.image) {
+//         $handle.find('.note-control-selection').hide();
+//     }
+// };
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* hack for image and link editor */
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////
+// /* hack for image and link editor */
 
-function getImgTarget ($editable) {
-    var $handle = $editable ? dom.makeLayoutInfo($editable).handle() : undefined;
-    return $(".note-control-selection", $handle).data('target');
-}
-eventHandler.modules.editor.padding = function ($editable, sValue) {
-    var $target = $(getImgTarget($editable));
-    var paddings = "small medium large xl".split(/\s+/);
-    $editable.data('NoteHistory').recordUndo();
-    if (sValue.length) {
-        paddings.splice(paddings.indexOf(sValue),1);
-        $target.toggleClass('padding-'+sValue);
-    }
-    $target.removeClass("padding-" + paddings.join(" padding-"));
-};
-eventHandler.modules.editor.resize = function ($editable, sValue) {
-    var $target = $(getImgTarget($editable));
-    $editable.data('NoteHistory').recordUndo();
-    var width = ($target.attr('style') || '').match(/(^|;|\s)width:\s*([0-9]+)%/);
-    if (width) {
-        width = width[2]/100;
-    }
-    $target.css('width', (width !== sValue && sValue !== "auto") ? (sValue * 100) + '%' : '');
-};
-eventHandler.modules.editor.resizefa = function ($editable, sValue) {
-    var $target = $(getImgTarget($editable));
-    $editable.data('NoteHistory').recordUndo();
-    $target.attr('class', $target.attr('class').replace(/\s*fa-[0-9]+x/g, ''));
-    if (+sValue > 1) {
-        $target.addClass('fa-'+sValue+'x');
-    }
-};
-eventHandler.modules.editor.floatMe = function ($editable, sValue) {
-    var $target = $(getImgTarget($editable));
-    $editable.data('NoteHistory').recordUndo();
-    switch (sValue) {
-        case 'center': $target.toggleClass('center-block').removeClass('pull-right pull-left'); break;
-        case 'left': $target.toggleClass('pull-left').removeClass('pull-right center-block'); break;
-        case 'right': $target.toggleClass('pull-right').removeClass('pull-left center-block'); break;
-    }
-};
-eventHandler.modules.editor.imageShape = function ($editable, sValue) {
-    var $target = $(getImgTarget($editable));
-    $editable.data('NoteHistory').recordUndo();
-    $target.toggleClass(sValue);
-};
+// function getImgTarget ($editable) {
+//     var $handle = $editable ? dom.makeLayoutInfo($editable).handle() : undefined;
+//     return $(".note-control-selection", $handle).data('target');
+// }
+// eventHandler.modules.editor.padding = function ($editable, sValue) {
+//     var $target = $(getImgTarget($editable));
+//     var paddings = "small medium large xl".split(/\s+/);
+//     $editable.data('NoteHistory').recordUndo();
+//     if (sValue.length) {
+//         paddings.splice(paddings.indexOf(sValue),1);
+//         $target.toggleClass('padding-'+sValue);
+//     }
+//     $target.removeClass("padding-" + paddings.join(" padding-"));
+// };
+// eventHandler.modules.editor.resize = function ($editable, sValue) {
+//     var $target = $(getImgTarget($editable));
+//     $editable.data('NoteHistory').recordUndo();
+//     var width = ($target.attr('style') || '').match(/(^|;|\s)width:\s*([0-9]+)%/);
+//     if (width) {
+//         width = width[2]/100;
+//     }
+//     $target.css('width', (width !== sValue && sValue !== "auto") ? (sValue * 100) + '%' : '');
+// };
+// eventHandler.modules.editor.resizefa = function ($editable, sValue) {
+//     var $target = $(getImgTarget($editable));
+//     $editable.data('NoteHistory').recordUndo();
+//     $target.attr('class', $target.attr('class').replace(/\s*fa-[0-9]+x/g, ''));
+//     if (+sValue > 1) {
+//         $target.addClass('fa-'+sValue+'x');
+//     }
+// };
+// eventHandler.modules.editor.floatMe = function ($editable, sValue) {
+//     var $target = $(getImgTarget($editable));
+//     $editable.data('NoteHistory').recordUndo();
+//     switch (sValue) {
+//         case 'center': $target.toggleClass('center-block').removeClass('pull-right pull-left'); break;
+//         case 'left': $target.toggleClass('pull-left').removeClass('pull-right center-block'); break;
+//         case 'right': $target.toggleClass('pull-right').removeClass('pull-left center-block'); break;
+//     }
+// };
+// eventHandler.modules.editor.imageShape = function ($editable, sValue) {
+//     var $target = $(getImgTarget($editable));
+//     $editable.data('NoteHistory').recordUndo();
+//     $target.toggleClass(sValue);
+// };
 
-eventHandler.modules.linkDialog.showLinkDialog = function ($editable, $dialog, linkInfo) {
-    $editable.data('range').select();
-    $editable.data('NoteHistory').recordUndo();
+// eventHandler.modules.linkDialog.showLinkDialog = function ($editable, $dialog, linkInfo) {
+//     $editable.data('range').select();
+//     $editable.data('NoteHistory').recordUndo();
 
-    var editor = new widgets.LinkDialog(null, {}, $editable, linkInfo).open();
+//     var editor = new widgets.LinkDialog(null, {}, $editable, linkInfo).open();
 
-    var def = new $.Deferred();
-    editor.on("save", this, function (linkInfo) {
-        linkInfo.range.select();
-        $editable.data('range', linkInfo.range);
-        def.resolve(linkInfo);
-        $editable.trigger('keyup');
-        $('.note-popover .note-link-popover').show();
-    });
-    editor.on("cancel", this, function () {
-        def.reject();
-    });
-    return def;
-};
-eventHandler.modules.imageDialog.showImageDialog = function ($editable) {
-    var r = $editable.data('range');
-    if (r.sc.tagName && r.sc.childNodes.length) {
-        r.sc = r.sc.childNodes[r.so];
-    }
-    new widgets.MediaDialog(null, {}, $editable, dom.isImg(r.sc) ? r.sc : null).open();
-    return new $.Deferred().reject();
-};
-$.summernote.pluginEvents.alt = function (event, editor, layoutInfo, sorted) {
-    var $editable = layoutInfo.editable();
-    var $selection = layoutInfo.handle().find('.note-control-selection');
-    var media = $selection.data('target');
-    new widgets.alt(null, {}, $editable, media).open();
-};
+//     var def = new $.Deferred();
+//     editor.on("save", this, function (linkInfo) {
+//         linkInfo.range.select();
+//         $editable.data('range', linkInfo.range);
+//         def.resolve(linkInfo);
+//         $editable.trigger('keyup');
+//         $('.note-popover .note-link-popover').show();
+//     });
+//     editor.on("cancel", this, function () {
+//         def.reject();
+//     });
+//     return def;
+// };
+// eventHandler.modules.imageDialog.showImageDialog = function ($editable) {
+//     var r = $editable.data('range');
+//     if (r.sc.tagName && r.sc.childNodes.length) {
+//         r.sc = r.sc.childNodes[r.so];
+//     }
+//     new widgets.MediaDialog(null, {}, $editable, dom.isImg(r.sc) ? r.sc : null).open();
+//     return new $.Deferred().reject();
+// };
+// $.summernote.pluginEvents.alt = function (event, editor, layoutInfo, sorted) {
+//     var $editable = layoutInfo.editable();
+//     var $selection = layoutInfo.handle().find('.note-control-selection');
+//     var media = $selection.data('target');
+//     new widgets.alt(null, {}, $editable, media).open();
+// };
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 var fn_is_void = dom.isVoid || function () {};
 dom.isVoid = function (node) {
@@ -442,22 +445,22 @@ dom.isFont = function (node) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-var fn_visible = $.summernote.pluginEvents.visible;
-$.summernote.pluginEvents.visible = function (event, editor, layoutInfo) {
-    var res = fn_visible.apply(this, arguments);
-    var rng = range.create();
-    if(!rng) return res;
-    var $node = $(dom.node(rng.sc));
-    if (($node.is('[data-oe-type="html"]') || $node.is('[data-oe-field="arch"]')) &&
-        $node.hasClass("o_editable") &&
-        !$node[0].children.length &&
-        "h1 h2 h3 h4 h5 h6 p b bold i u code sup strong small pre th td span".toUpperCase().indexOf($node[0].nodeName) === -1) {
-        var p = $('<p><br/></p>')[0];
-        $node.append( p );
-        range.createFromNode(p.firstChild).select();
-    }
-    return res;
-};
+// var fn_visible = $.summernote.pluginEvents.visible;
+// $.summernote.pluginEvents.visible = function (event, editor, layoutInfo) {
+//     var res = fn_visible.apply(this, arguments);
+//     var rng = range.create();
+//     if(!rng) return res;
+//     var $node = $(dom.node(rng.sc));
+//     if (($node.is('[data-oe-type="html"]') || $node.is('[data-oe-field="arch"]')) &&
+//         $node.hasClass("o_editable") &&
+//         !$node[0].children.length &&
+//         "h1 h2 h3 h4 h5 h6 p b bold i u code sup strong small pre th td span".toUpperCase().indexOf($node[0].nodeName) === -1) {
+//         var p = $('<p><br/></p>')[0];
+//         $node.append( p );
+//         range.createFromNode(p.firstChild).select();
+//     }
+    // return res;
+// };
 
 function prettify_html(html) {
     html = html.trim();
@@ -529,7 +532,7 @@ function prettify_html(html) {
  * - add an 'enable' paramater to call the function directly and allow us to
  *   disable (false) or enable (true) the code view mode.
  */
-$.summernote.pluginEvents.codeview = function (event, editor, layoutInfo, enable) {
+$.summernote.options.modules.codeview = function (event, editor, layoutInfo, enable) {
     if (layoutInfo === undefined) {
         return;
     }
@@ -581,7 +584,6 @@ $.summernote.pluginEvents.codeview = function (event, editor, layoutInfo, enable
         }
     }
 };
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* fix ie and re-range to don't break snippet*/
 

@@ -642,6 +642,7 @@ define([
    * @alternateClassName range
    */
     return {
+      WrappedRange: WrappedRange,
       /**
        * create Range Object From arguments or Browser Selection
        *

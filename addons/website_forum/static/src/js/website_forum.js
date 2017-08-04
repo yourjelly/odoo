@@ -414,7 +414,7 @@ if(!$('.website_forum').length) {
                 styleWithSpan: false
             });
         $form.on('click', 'button, .a-submit', function () {
-            $textarea.html($form.find('.note-editable').code());
+            $textarea.html($form.find('.note-editable').html());
         });
     });
 

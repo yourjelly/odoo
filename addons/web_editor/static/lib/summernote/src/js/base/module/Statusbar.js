@@ -1,4 +1,4 @@
-define(function () {
+define('summernote/base/module/Statusbar', function () {
   var EDITABLE_PADDING = 24;
 
   var Statusbar = function (context) {

@@ -1,4 +1,4 @@
-define(function () {
+define('summernote/lite/module/Toolbar', function () {
   var Toolbar = function (context) {
     var ui = $.summernote.ui;
     var $toolbar = context.layoutInfo.toolbar;

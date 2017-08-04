@@ -1,4 +1,4 @@
-define(function () {
+define('summernote/bs3/module/Toolbar', function () {
   var Toolbar = function (context) {
     var ui = $.summernote.ui;
 

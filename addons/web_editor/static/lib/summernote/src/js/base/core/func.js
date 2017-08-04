@@ -1,4 +1,4 @@
-define(function () {
+define('summernote/base/core/func', function () {
   /**
    * @class core.func
    *

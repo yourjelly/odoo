@@ -1,4 +1,4 @@
-define(function () {
+define('summernote/base/renderer', function () {
   var Renderer = function (markup, children, options, callback) {
     this.render = function ($parent) {
       var $node = $(markup);

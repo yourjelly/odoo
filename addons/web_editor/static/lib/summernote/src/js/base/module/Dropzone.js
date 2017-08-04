@@ -1,4 +1,4 @@
-define(function () {
+define('summernote/base/module/Dropzone', function () {
   var Dropzone = function (context) {
     var $document = $(document);
     var $editor = context.layoutInfo.editor;

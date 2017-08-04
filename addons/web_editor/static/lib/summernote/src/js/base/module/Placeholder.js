@@ -1,4 +1,4 @@
-define(function () {
+define('summernote/base/module/Placeholder', function () {
   var Placeholder = function (context) {
     var self = this;
     var $editingArea = context.layoutInfo.editingArea;

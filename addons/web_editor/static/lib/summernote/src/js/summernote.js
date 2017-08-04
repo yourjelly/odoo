@@ -2,8 +2,19 @@ define([
     'jquery',
     'summernote/base/core/agent',
     'summernote/base/core/list',
-    'summernote/base/Context'
-], function($, agent, list, Context) {
+    'summernote/base/Context',
+    'summernote/base/core/range',
+    'summernote/base/core/key',
+], function($, agent, list, Context, range, key) {
+    $.extend($.summernote, {
+        core: {
+            agent: agent,
+            dom: $.summernote.dom,
+            range: range,
+            list: list,
+            key: key,
+        }
+    });
     $.fn.extend({
         /**
          * Summernote API
