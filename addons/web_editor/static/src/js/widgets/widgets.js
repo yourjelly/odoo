@@ -226,10 +226,10 @@ var ImageDialog = Widget.extend({
         });
     },
     set_image: function (attachment) {
+        this.images = [];
         this.push(attachment);
         this.$('input.url').val('');
         this.search();
-        this.images = [];
     },
     form_submit: function (event) {
         var self = this;
