@@ -59,8 +59,8 @@ data.Class = Widget.extend({
             e.preventDefault();
         });
 
-        var _isNotBreakable = $.summernote.core.dom.isNotBreakable;
-        $.summernote.core.dom.isNotBreakable = function (node) {
+        var _isNotBreakable = $.summernote.dom.isNotBreakable;
+        $.summernote.dom.isNotBreakable = function (node) {
             return _isNotBreakable(node) || $(node).is('div') || data.globalSelector.is($(node));
         };
 
@@ -399,13 +399,17 @@ data.Class = Widget.extend({
         }
     },
     clean_for_save: function () {
+        debugger;
         var self = this;
         var opt = options.registry;
         var template = self.templateOptions;
         for (var k in template) {
             var Option = opt[template[k]['option']];
+            debugger;
             if (Option && Option.prototype.clean_for_save !== editor.dummy) {
+            debugger;
                 template[k].selector.all().filter(function () {
+                    debugger;
                     var node = this;
                     while (!/o_dirty|o_editable/.test(node.className) && node !== document) {
                         node = node.parentNode;
@@ -1019,7 +1023,7 @@ data.Editor = Class.extend({
 
         var node = $parent[0];
         if (node && node.firstChild) {
-            $.summernote.core.dom.removeSpace(node, node.firstChild, 0, node.lastChild, 1);
+            $.summernote.dom.removeSpace(node, node.firstChild, 0, node.lastChild, 1);
             if (!node.firstChild.tagName && node.firstChild.textContent === " ") {
                 node.removeChild(node.firstChild);
             }

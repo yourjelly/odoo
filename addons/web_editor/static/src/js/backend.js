@@ -41,7 +41,7 @@ var FieldTextHtmlSimple = basic_fields.DebouncedField.extend(TranslatableFieldMi
         // switch to WYSIWYG mode if currently in code mode to get all changes
         if (config.debug && this.mode === 'edit') {
             var layoutInfo = this.$textarea.data('layoutInfo');
-            $.summernote.pluginEvents.codeview(undefined, undefined, layoutInfo, false);
+            $.summernote.options.modules.codeview(undefined, undefined, layoutInfo, false);
         }
         this._super.apply(this, arguments);
     },
@@ -389,7 +389,7 @@ var FieldTextHtml = AbstractField.extend({
         // switch to WYSIWYG mode if currently in code mode to get all changes
         if (config.debug && this.mode === 'edit' && this.editor.rte) {
             var layoutInfo = this.editor.rte.editable().data('layoutInfo');
-            $.summernote.pluginEvents.codeview(undefined, undefined, layoutInfo, false);
+            $.summernote.options.modules.codeview(undefined, undefined, layoutInfo, false);
         }
         this.editor.buildingBlock.clean_for_save();
         this._setValue(this.$content.html());
