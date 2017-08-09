@@ -665,9 +665,26 @@ var ListRenderer = BasicRenderer.extend({
         // The special_click property explicitely allow events to bubble all
         // the way up to bootstrap's level rather than being stopped earlier.
         if (!$(event.target).prop('special_click')) {
-            var id = $(event.currentTarget).data('id');
+            var id = $(event.currentTarget).data('id'),
+                action_name = this.arch.attrs.button_name,
+                action_type = this.arch.attrs.button_type;
+
             if (id) {
-                this.trigger_up('open_record', {id:id, target: event.target});
+                // trigger button for specific action
+                if (action_name && action_type) {
+                    this.trigger_up('button_clicked', {
+                        attrs: {
+                            name: action_name,
+                            type: action_type
+                        },
+                        // return current selected cell data
+                        record: _.filter(this.state.data, function(data){
+                                    return data.id == id;
+                                })[0],
+                    });
+                } else {
+                    this.trigger_up('open_record', {id:id, target: event.target});
+                }
             }
         }
     },
