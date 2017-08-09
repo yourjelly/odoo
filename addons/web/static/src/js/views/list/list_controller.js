@@ -437,6 +437,7 @@ var ListController = BasicController.extend({
                     field: event.data.handleField,
                 };
                 return self.model.resequence(self.modelName, resIDs, self.handle, options).then(function () {
+                    // self.update({}); // Need to check this update method call is needed now or not, as we are calling updateState
                     self._updateEnv();
                     state = self.model.get(self.handle);
                     return self.renderer.updateState(state, {noRender: true});
