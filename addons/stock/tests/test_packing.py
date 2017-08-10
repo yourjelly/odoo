@@ -130,7 +130,7 @@ class TestPacking(TestStockCommon):
 
     def _check_system_created_quants(self, product):
         quants = self.StockQuant.search([('product_id', '=', product.id)])
-        self.assertEqual(len(quants.ids), 3, "The number of quants created is not correct")
+        self.assertEqual(len(quants.ids), 5, "The number of quants created is not correct")
         for quant in quants:
             if quant.package_id.name == 'Pallet 1':
                 self.assertEqual(quant.quantity, 120, "Should have 120 pieces on pallet 1")
@@ -153,4 +153,4 @@ class TestPacking(TestStockCommon):
             elif quant.package_id.name == 'Pallet 3' and quant.location_id.id == self.stock_location_id:
                 self.assertEqual(quant.quantity, 50, "Should have 50 pieces in stock on pallet 3")
             else:
-                self.assertFalse(True, "Unrecognized quant")
+                self.assertNotEqual(quant.location_id.id, self.stock_location_id, "Unrecognized quant in stock")
