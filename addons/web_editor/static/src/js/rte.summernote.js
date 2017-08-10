@@ -23,69 +23,70 @@ ajax.jsonRpc('/web/dataset/call', 'call', {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Summernote Lib (neek change to make accessible: method and object) */
 
-var dom = $.summernote.dom;
+var dom = $.summernote.core.dom;
 var range = $.summernote.core.range;
+// var eventHandler = $.summernote.eventHandler;
+// var renderer = $.summernote.renderer;
 var options = $.summernote.options;
-var eventHandler = options;
-var renderer = $.summernote.ui.palette;
 
 // var tplButton = renderer.getTemplate().button;
 // var tplIconButton = renderer.getTemplate().iconButton;
 // var tplDropdown = renderer.getTemplate().dropdown;
-var tplButton = $.summernote.ui.button;
-var tplIconButton = $.summernote.ui.icon;
-var tplDropdown = $.summernote.ui.dropdown;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* update and change the popovers content, and add history button */
 
-var fn_createPalette = renderer.createPalette;
-renderer.createPalette = function ($container, options) {
-    fn_createPalette.call(this, $container, options);
+// var fn_createPalette = renderer.createPalette;
+// renderer.createPalette = function ($container, options) {
+//     fn_createPalette.call(this, $container, options);
 
-    if (!QWeb.has_template('web_editor.colorpicker')) {
-        return;
-    }
+//     if (!QWeb.has_template('web_editor.colorpicker')) {
+//         return;
+//     }
 
-    var $clpicker = $(QWeb.render('web_editor.colorpicker'));
+//     var $clpicker = $(QWeb.render('web_editor.colorpicker'));
 
-    var groups;
-    if ($clpicker.is("colorpicker")) {
-        groups = _.map($clpicker.children(), function (el) {
-            return $(el).find("button").empty();
-        });
-    } else {
-        groups = [$clpicker.find("button").empty()];
-    }
+//     var groups;
+//     if ($clpicker.is("colorpicker")) {
+//         groups = _.map($clpicker.children(), function (el) {
+//             return $(el).find("button").empty();
+//         });
+//     } else {
+//         groups = [$clpicker.find("button").empty()];
+//     }
 
-    var html = "<h6>" + _t("Theme colors") + "</h6>" + _.map(groups, function ($group) {
-        var $row = $("<div/>", {"class": "note-color-row mb8"}).append($group);
-        var $after_breaks = $row.find(".o_small + :not(.o_small)");
-        if ($after_breaks.length === 0) {
-            $after_breaks = $row.find(":nth-child(8n+9)");
-        }
-        $after_breaks.addClass("o_clear");
-        return $row[0].outerHTML;
-    }).join("") + "<h6>" + _t("Common colors") + "</h6>";
-    var $palettes = $container.find(".note-color .note-color-palette");
-    $palettes.prepend(html);
+//     var html = "<h6>" + _t("Theme colors") + "</h6>" + _.map(groups, function ($group) {
+//         var $row = $("<div/>", {"class": "note-color-row mb8"}).append($group);
+//         var $after_breaks = $row.find(".o_small + :not(.o_small)");
+//         if ($after_breaks.length === 0) {
+//             $after_breaks = $row.find(":nth-child(8n+9)");
+//         }
+//         $after_breaks.addClass("o_clear");
+//         return $row[0].outerHTML;
+//     }).join("") + "<h6>" + _t("Common colors") + "</h6>";
+//     var $palettes = $container.find(".note-color .note-color-palette");
+//     $palettes.prepend(html);
 
-    var $bg = $palettes.filter(":even").find("button:not(.note-color-btn)").addClass("note-color-btn");
-    var $fore = $palettes.filter(":odd").find("button:not(.note-color-btn)").addClass("note-color-btn");
-    $bg.each(function () {
-        var $el = $(this);
-        var className = 'bg-' + $el.data('color');
-        $el.attr('data-event', 'backColor').attr('data-value', className).addClass(className);
-    });
-    $fore.each(function () {
-        var $el = $(this);
-        var className = 'text-' + $el.data('color');
-        $el.attr('data-event', 'foreColor').attr('data-value', className).addClass('bg-' + $el.data('color'));
-    });
-};
+//     var $bg = $palettes.filter(":even").find("button:not(.note-color-btn)").addClass("note-color-btn");
+//     var $fore = $palettes.filter(":odd").find("button:not(.note-color-btn)").addClass("note-color-btn");
+//     $bg.each(function () {
+//         var $el = $(this);
+//         var className = 'bg-' + $el.data('color');
+//         $el.attr('data-event', 'backColor').attr('data-value', className).addClass(className);
+//     });
+//     $fore.each(function () {
+//         var $el = $(this);
+//         var className = 'text-' + $el.data('color');
+//         $el.attr('data-event', 'foreColor').attr('data-value', className).addClass('bg-' + $el.data('color'));
+//     });
+// };
 
-// var fn_tplPopovers = renderer.tplPopovers;
-// renderer.tplPopovers = function (lang, options) {
+// var fn_tplPopovers = options.modules.toolbar;
+// console.log("lang", lang);
+// console.log("options", options);
+// console.log("this", this);
+// options.modules.toolbar = function (lang, options) {
+//     debugger
 //     var $popover = $(fn_tplPopovers.call(this, lang, options));
 
 //     var $imagePopover = $popover.find('.note-image-popover');
@@ -96,121 +97,121 @@ renderer.createPalette = function ($container, options) {
 //         $popover.children().addClass("hidden-xs");
 //     }
 
-//     //////////////// image popover
+// //     //////////////// image popover
 
-//     // add center button for images
-//     $(tplIconButton('fa fa-align-center', {
-//         title: _t('Center'),
-//         event: 'floatMe',
-//         value: 'center'
-//     })).insertAfter($imagePopover.find('[data-event="floatMe"][data-value="left"]'));
-//     $imagePopover.find('button[data-event="removeMedia"]').parent().remove();
-//     $imagePopover.find('button[data-event="floatMe"][data-value="none"]').remove();
+// //     // add center button for images
+// //     $(tplIconButton('fa fa-align-center', {
+// //         title: _t('Center'),
+// //         event: 'floatMe',
+// //         value: 'center'
+// //     })).insertAfter($imagePopover.find('[data-event="floatMe"][data-value="left"]'));
+// //     $imagePopover.find('button[data-event="removeMedia"]').parent().remove();
+// //     $imagePopover.find('button[data-event="floatMe"][data-value="none"]').remove();
 
-//     // padding button
-//     var $padding = $('<div class="btn-group"/>');
-//     $padding.insertBefore($imagePopover.find('.btn-group:first'));
-//     var dropdown_content = [
-//         '<li><a data-event="padding" href="#" data-value="">'+_t('None')+'</a></li>',
-//         '<li><a data-event="padding" href="#" data-value="small">'+_t('Small')+'</a></li>',
-//         '<li><a data-event="padding" href="#" data-value="medium">'+_t('Medium')+'</a></li>',
-//         '<li><a data-event="padding" href="#" data-value="large">'+_t('Large')+'</a></li>',
-//         '<li><a data-event="padding" href="#" data-value="xl">'+_t('Xl')+'</a></li>',
-//     ];
-//     $(tplIconButton('fa fa-plus-square-o', {
-//         title: _t('Padding'),
-//         dropdown: tplDropdown(dropdown_content)
-//     })).appendTo($padding);
+// //     // padding button
+// //     var $padding = $('<div class="btn-group"/>');
+// //     $padding.insertBefore($imagePopover.find('.btn-group:first'));
+// //     var dropdown_content = [
+// //         '<li><a data-event="padding" href="#" data-value="">'+_t('None')+'</a></li>',
+// //         '<li><a data-event="padding" href="#" data-value="small">'+_t('Small')+'</a></li>',
+// //         '<li><a data-event="padding" href="#" data-value="medium">'+_t('Medium')+'</a></li>',
+// //         '<li><a data-event="padding" href="#" data-value="large">'+_t('Large')+'</a></li>',
+// //         '<li><a data-event="padding" href="#" data-value="xl">'+_t('Xl')+'</a></li>',
+// //     ];
+// //     $(tplIconButton('fa fa-plus-square-o', {
+// //         title: _t('Padding'),
+// //         dropdown: tplDropdown(dropdown_content)
+// //     })).appendTo($padding);
 
-//     // circle, boxed... options became toggled
-//     $imagePopover.find('[data-event="imageShape"]:not([data-value])').remove();
-//     var $button = $(tplIconButton('fa fa-sun-o', {
-//         title: _t('Shadow'),
-//         event: 'imageShape',
-//         value: 'shadow'
-//     })).insertAfter($imagePopover.find('[data-event="imageShape"][data-value="img-circle"]'));
+// //     // circle, boxed... options became toggled
+// //     $imagePopover.find('[data-event="imageShape"]:not([data-value])').remove();
+// //     var $button = $(tplIconButton('fa fa-sun-o', {
+// //         title: _t('Shadow'),
+// //         event: 'imageShape',
+// //         value: 'shadow'
+// //     })).insertAfter($imagePopover.find('[data-event="imageShape"][data-value="img-circle"]'));
 
-//     // add spin for fa
-//     var $spin = $('<div class="btn-group hidden only_fa"/>').insertAfter($button.parent());
-//     $(tplIconButton('fa fa-refresh', {
-//             title: _t('Spin'),
-//             event: 'imageShape',
-//             value: 'fa-spin'
-//         })).appendTo($spin);
+// //     // add spin for fa
+// //     var $spin = $('<div class="btn-group hidden only_fa"/>').insertAfter($button.parent());
+// //     $(tplIconButton('fa fa-refresh', {
+// //             title: _t('Spin'),
+// //             event: 'imageShape',
+// //             value: 'fa-spin'
+// //         })).appendTo($spin);
 
-//     // resize for fa
-//     var $resizefa = $('<div class="btn-group hidden only_fa"/>')
-//         .insertAfter($imagePopover.find('.btn-group:has([data-event="resize"])'));
-//     for (var size=1; size<=5; size++) {
-//         $(tplButton('<span class="note-fontsize-10">'+size+'x</span>', {
-//           title: size+"x",
-//           event: 'resizefa',
-//           value: size+''
-//         })).appendTo($resizefa);
-//     }
-//     var $colorfa = $airPopover.find('.note-color').clone();
-//     $colorfa.find("ul.dropdown-menu").css('min-width', '172px');
-//     $resizefa.after($colorfa);
+// //     // resize for fa
+// //     var $resizefa = $('<div class="btn-group hidden only_fa"/>')
+// //         .insertAfter($imagePopover.find('.btn-group:has([data-event="resize"])'));
+// //     for (var size=1; size<=5; size++) {
+// //         $(tplButton('<span class="note-fontsize-10">'+size+'x</span>', {
+// //           title: size+"x",
+// //           event: 'resizefa',
+// //           value: size+''
+// //         })).appendTo($resizefa);
+// //     }
+// //     var $colorfa = $airPopover.find('.note-color').clone();
+// //     $colorfa.find("ul.dropdown-menu").css('min-width', '172px');
+// //     $resizefa.after($colorfa);
 
-//     // show dialog box and delete
-//     var $imageprop = $('<div class="btn-group"/>');
-//     $imageprop.appendTo($imagePopover.find('.popover-content'));
-//     $(tplIconButton('fa fa-file-image-o', {
-//             title: _t('Edit'),
-//             event: 'showImageDialog'
-//         })).appendTo($imageprop);
-//     $(tplIconButton('fa fa-trash-o', {
-//             title: _t('Remove'),
-//             event: 'delete'
-//         })).appendTo($imageprop);
+// //     // show dialog box and delete
+// //     var $imageprop = $('<div class="btn-group"/>');
+// //     $imageprop.appendTo($imagePopover.find('.popover-content'));
+// //     $(tplIconButton('fa fa-file-image-o', {
+// //             title: _t('Edit'),
+// //             event: 'showImageDialog'
+// //         })).appendTo($imageprop);
+// //     $(tplIconButton('fa fa-trash-o', {
+// //             title: _t('Remove'),
+// //             event: 'delete'
+// //         })).appendTo($imageprop);
 
-//     $imagePopover.find('.popover-content').append($airPopover.find(".note-history").clone());
+// //     $imagePopover.find('.popover-content').append($airPopover.find(".note-history").clone());
 
-//     $imagePopover.find('[data-event="showImageDialog"]').before($airPopover.find('[data-event="showLinkDialog"]').clone());
+// //     $imagePopover.find('[data-event="showImageDialog"]').before($airPopover.find('[data-event="showLinkDialog"]').clone());
 
-//     var $alt = $('<div class="btn-group"/>');
-//     $alt.appendTo($imagePopover.find('.popover-content'));
-//     $alt.append('<button class="btn btn-default btn-sm btn-small" data-event="alt"><strong>' + _t('Description') + ': </strong><span class="o_image_alt"/></button>');
+// //     var $alt = $('<div class="btn-group"/>');
+// //     $alt.appendTo($imagePopover.find('.popover-content'));
+// //     $alt.append('<button class="btn btn-default btn-sm btn-small" data-event="alt"><strong>' + _t('Description') + ': </strong><span class="o_image_alt"/></button>');
 
-//     //////////////// link popover
+// //     //////////////// link popover
 
-//     $linkPopover.find('.popover-content').append($airPopover.find(".note-history").clone());
+// //     $linkPopover.find('.popover-content').append($airPopover.find(".note-history").clone());
 
-//     $linkPopover.find('button[data-event="showLinkDialog"] i').attr("class", "fa fa-link");
-//     $linkPopover.find('button[data-event="unlink"]').before($airPopover.find('button[data-event="showImageDialog"]').clone());
+// //     $linkPopover.find('button[data-event="showLinkDialog"] i').attr("class", "fa fa-link");
+// //     $linkPopover.find('button[data-event="unlink"]').before($airPopover.find('button[data-event="showImageDialog"]').clone());
 
-//     //////////////// text/air popover
+// //     //////////////// text/air popover
 
-//     //// highlight the text format
-//     $airPopover.find('.note-style .dropdown-toggle').on('mousedown', function () {
-//         var $format = $airPopover.find('[data-event="formatBlock"]');
-//         var node = range.create().sc;
-//         var formats = $format.map(function () { return $(this).data("value"); }).get();
-//         while (node && (!node.tagName || (!node.tagName || formats.indexOf(node.tagName.toLowerCase()) === -1))) {
-//             node = node.parentNode;
-//         }
-//         $format.parent().removeClass('active');
-//         $format.filter('[data-value="'+(node ? node.tagName.toLowerCase() : "p")+'"]')
-//             .parent().addClass("active");
-//     });
+// //     //// highlight the text format
+// //     $airPopover.find('.note-style .dropdown-toggle').on('mousedown', function () {
+// //         var $format = $airPopover.find('[data-event="formatBlock"]');
+// //         var node = range.create().sc;
+// //         var formats = $format.map(function () { return $(this).data("value"); }).get();
+// //         while (node && (!node.tagName || (!node.tagName || formats.indexOf(node.tagName.toLowerCase()) === -1))) {
+// //             node = node.parentNode;
+// //         }
+// //         $format.parent().removeClass('active');
+// //         $format.filter('[data-value="'+(node ? node.tagName.toLowerCase() : "p")+'"]')
+// //             .parent().addClass("active");
+// //     });
 
-//     //////////////// tooltip
+// //     //////////////// tooltip
 
-//     setTimeout(function () {
-//         $airPopover.add($linkPopover).add($imagePopover).find("button")
-//             .tooltip('destroy')
-//             .tooltip({
-//                 container: 'body',
-//                 trigger: 'hover',
-//                 placement: 'bottom'
-//             }).on('click', function () {$(this).tooltip('hide');});
-//     });
+// //     setTimeout(function () {
+// //         $airPopover.add($linkPopover).add($imagePopover).find("button")
+// //             .tooltip('destroy')
+// //             .tooltip({
+// //                 container: 'body',
+// //                 trigger: 'hover',
+// //                 placement: 'bottom'
+// //             }).on('click', function () {$(this).tooltip('hide');});
+// //     });
 
 //     return $popover;
 // };
 
-// var fn_boutton_update = eventHandler.popover.button.update;
-// eventHandler.popover.button.update = function ($container, oStyle) {
+// var fn_boutton_update = eventHandler.modules.popover.button.update;
+// eventHandler.modules.popover.button.update = function ($container, oStyle) {
 //     // stop animation when edit content
 //     var previous = $(".note-control-selection").data('target');
 //     if (previous) {
@@ -275,9 +276,8 @@ renderer.createPalette = function ($container, options) {
 //     }
 // };
 
-// var fn_popover_update = eventHandler.popover.update;
-// debugger;
-// eventHandler.popover.update = function ($popover, oStyle, isAirMode) {
+// var fn_popover_update = eventHandler.modules.popover.update;
+// eventHandler.modules.popover.update = function ($popover, oStyle, isAirMode) {
 //     var $imagePopover = $popover.find('.note-image-popover');
 //     var $linkPopover = $popover.find('.note-link-popover');
 //     var $airPopover = $popover.find('.note-air-popover');
@@ -325,8 +325,9 @@ renderer.createPalette = function ($container, options) {
 //         $handle.find('.note-control-selection').hide();
 //     }
 // };
-// //////////////////////////////////////////////////////////////////////////////////////////////////////////
-// /* hack for image and link editor */
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* hack for image and link editor */
 
 // function getImgTarget ($editable) {
 //     var $handle = $editable ? dom.makeLayoutInfo($editable).handle() : undefined;
@@ -373,26 +374,26 @@ renderer.createPalette = function ($container, options) {
 //     $editable.data('NoteHistory').recordUndo();
 //     $target.toggleClass(sValue);
 // };
+$.summernote.LinkDialog.showLinkDialog = function ($editable, $dialog, linkInfo) {
+    console.log('CALLEDD')
+    $editable.data('range').select();
+    $editable.data('NoteHistory').recordUndo();
 
-// eventHandler.modules.linkDialog.showLinkDialog = function ($editable, $dialog, linkInfo) {
-//     $editable.data('range').select();
-//     $editable.data('NoteHistory').recordUndo();
+    var editor = new widgets.LinkDialog(null, {}, $editable, linkInfo).open();
 
-//     var editor = new widgets.LinkDialog(null, {}, $editable, linkInfo).open();
-
-//     var def = new $.Deferred();
-//     editor.on("save", this, function (linkInfo) {
-//         linkInfo.range.select();
-//         $editable.data('range', linkInfo.range);
-//         def.resolve(linkInfo);
-//         $editable.trigger('keyup');
-//         $('.note-popover .note-link-popover').show();
-//     });
-//     editor.on("cancel", this, function () {
-//         def.reject();
-//     });
-//     return def;
-// };
+    var def = new $.Deferred();
+    editor.on("save", this, function (linkInfo) {
+        linkInfo.range.select();
+        $editable.data('range', linkInfo.range);
+        def.resolve(linkInfo);
+        $editable.trigger('keyup');
+        $('.note-popover .note-link-popover').show();
+    });
+    editor.on("cancel", this, function () {
+        def.reject();
+    });
+    return def;
+};
 // eventHandler.modules.imageDialog.showImageDialog = function ($editable) {
 //     var r = $editable.data('range');
 //     if (r.sc.tagName && r.sc.childNodes.length) {
@@ -408,7 +409,7 @@ renderer.createPalette = function ($container, options) {
 //     new widgets.alt(null, {}, $editable, media).open();
 // };
 
-// //////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 var fn_is_void = dom.isVoid || function () {};
 dom.isVoid = function (node) {
@@ -459,7 +460,7 @@ dom.isFont = function (node) {
 //         $node.append( p );
 //         range.createFromNode(p.firstChild).select();
 //     }
-    // return res;
+//     return res;
 // };
 
 function prettify_html(html) {
@@ -532,58 +533,59 @@ function prettify_html(html) {
  * - add an 'enable' paramater to call the function directly and allow us to
  *   disable (false) or enable (true) the code view mode.
  */
-$.summernote.options.modules.codeview = function (event, editor, layoutInfo, enable) {
-    if (layoutInfo === undefined) {
-        return;
-    }
-    if (layoutInfo.toolbar) {
-        // if editor inline (FieldTextHtmlSimple)
-        var is_activated = $.summernote.options.modules.codeview.isActivated(layoutInfo);
-        if (is_activated === enable) {
-            return;
-        }
-        return $.summernote.options.modules.codeview.toggle(layoutInfo);
-    } else {
-        // if editor iframe (FieldTextHtml)
-        var $editor = layoutInfo.editor();
-        var $textarea = $editor.prev('textarea');
-        if ($textarea.is('textarea') === enable) {
-            return;
-        }
+// $.summernote.pluginEvents.codeview = function (event, editor, layoutInfo, enable) {
+//     if (layoutInfo === undefined) {
+//         return;
+//     }
+//     if (layoutInfo.toolbar) {
+//         // if editor inline (FieldTextHtmlSimple)
+//         var is_activated = $.summernote.eventHandler.modules.codeview.isActivated(layoutInfo);
+//         if (is_activated === enable) {
+//             return;
+//         }
+//         return eventHandler.modules.codeview.toggle(layoutInfo);
+//     } else {
+//         // if editor iframe (FieldTextHtml)
+//         var $editor = layoutInfo.editor();
+//         var $textarea = $editor.prev('textarea');
+//         if ($textarea.is('textarea') === enable) {
+//             return;
+//         }
 
-        if (!$textarea.length) {
-            // init and create texarea
-            var html = prettify_html($editor.prop("innerHTML"));
-            $editor.parent().css({
-                'position': 'absolute',
-                'top': 0,
-                'bottom': 0,
-                'left': 0,
-                'right': 0
-            });
-            $textarea = $('<textarea/>').css({
-                'margin': '0 -4px',
-                'padding': '0 4px',
-                'border': 0,
-                'top': '51px',
-                'left': '620px',
-                'width': '100%',
-                'font-family': 'sans-serif',
-                'font-size': '13px',
-                'height': '98%',
-                'white-space': 'pre',
-                'word-wrap': 'normal'
-            }).val(html).data('init', html);
-            $editor.before($textarea);
-            $editor.hide();
-        } else {
-            // save changes
-            $editor.prop('innerHTML', $textarea.val().replace(/\s*\n\s*/g, '')).trigger('content_changed');
-            $textarea.remove();
-            $editor.show();
-        }
-    }
-};
+//         if (!$textarea.length) {
+//             // init and create texarea
+//             var html = prettify_html($editor.prop("innerHTML"));
+//             $editor.parent().css({
+//                 'position': 'absolute',
+//                 'top': 0,
+//                 'bottom': 0,
+//                 'left': 0,
+//                 'right': 0
+//             });
+//             $textarea = $('<textarea/>').css({
+//                 'margin': '0 -4px',
+//                 'padding': '0 4px',
+//                 'border': 0,
+//                 'top': '51px',
+//                 'left': '620px',
+//                 'width': '100%',
+//                 'font-family': 'sans-serif',
+//                 'font-size': '13px',
+//                 'height': '98%',
+//                 'white-space': 'pre',
+//                 'word-wrap': 'normal'
+//             }).val(html).data('init', html);
+//             $editor.before($textarea);
+//             $editor.hide();
+//         } else {
+//             // save changes
+//             $editor.prop('innerHTML', $textarea.val().replace(/\s*\n\s*/g, '')).trigger('content_changed');
+//             $textarea.remove();
+//             $editor.show();
+//         }
+//     }
+// };
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* fix ie and re-range to don't break snippet*/
 
@@ -750,132 +752,132 @@ function summernote_ie_fix (event, pred) {
     return editable !== div ? div : null;
 }
 
-var fn_attach = eventHandler.attach;
-eventHandler.attach = function (oLayoutInfo, options) {
-    fn_attach.call(this, oLayoutInfo, options);
+// var fn_attach = eventHandler.attach;
+// eventHandler.attach = function (oLayoutInfo, options) {
+//     fn_attach.call(this, oLayoutInfo, options);
 
-    oLayoutInfo.editor().on('dragstart', 'img', function (e) { e.preventDefault(); });
-    $(document).on('mousedown', summernote_mousedown).on('mouseup', summernote_mouseup);
-    oLayoutInfo.editor().off('click').on('click', function (e) {e.preventDefault();}); // if the content editable is a link
+//     oLayoutInfo.editor().on('dragstart', 'img', function (e) { e.preventDefault(); });
+//     $(document).on('mousedown', summernote_mousedown).on('mouseup', summernote_mouseup);
+//     oLayoutInfo.editor().off('click').on('click', function (e) {e.preventDefault();}); // if the content editable is a link
 
-    /**
-     * Open Media Dialog on double click on an image/video/icon.
-     * Shows a tooltip on click to say to the user he can double click.
-     */
-    create_dblclick_feature("img, .media_iframe_video, i.fa, span.fa, a.o_image", function () {
-        eventHandler.modules.imageDialog.show(oLayoutInfo);
-    });
+//     /**
+//      * Open Media Dialog on double click on an image/video/icon.
+//      * Shows a tooltip on click to say to the user he can double click.
+//      */
+//     create_dblclick_feature("img, .media_iframe_video, i.fa, span.fa, a.o_image", function () {
+//         eventHandler.modules.imageDialog.show(oLayoutInfo);
+//     });
 
-    /**
-     * Open Link Dialog on double click on a link/button.
-     * Shows a tooltip on click to say to the user he can double click.
-     */
-    create_dblclick_feature("a[href], .btn", function () {
-        eventHandler.modules.linkDialog.show(oLayoutInfo);
-    });
+//     /**
+//      * Open Link Dialog on double click on a link/button.
+//      * Shows a tooltip on click to say to the user he can double click.
+//      */
+//     create_dblclick_feature("a[href], .btn", function () {
+//         eventHandler.modules.linkDialog.show(oLayoutInfo);
+//     });
 
-    if(oLayoutInfo.editor().is('[data-oe-model][data-oe-type="image"]')) {
-        oLayoutInfo.editor().on('click', 'img', function (event) {
-            $(event.target).trigger("dblclick");
-        });
-    }
-    oLayoutInfo.editable().on('mousedown', function (e) {
-        if(dom.isImg(e.target)) {
-            range.createFromNode(e.target).select();
-        }
-    });
-    $(document).on("keyup", reRangeSelectKey);
+//     if(oLayoutInfo.editor().is('[data-oe-model][data-oe-type="image"]')) {
+//         oLayoutInfo.editor().on('click', 'img', function (event) {
+//             $(event.target).trigger("dblclick");
+//         });
+//     }
+//     oLayoutInfo.editable().on('mousedown', function (e) {
+//         if(dom.isImg(e.target)) {
+//             range.createFromNode(e.target).select();
+//         }
+//     });
+//     $(document).on("keyup", reRangeSelectKey);
 
-    var clone_data = false;
-    var $node = oLayoutInfo.editor();
-    if ($node.data('oe-model') || $node.data('oe-translation-id')) {
-        $node.on('content_changed', function () {
-            var $nodes = $('[data-oe-model], [data-oe-translation-id]')
-                .filter(function () { return this !== $node[0];});
+//     var clone_data = false;
+//     var $node = oLayoutInfo.editor();
+//     if ($node.data('oe-model') || $node.data('oe-translation-id')) {
+//         $node.on('content_changed', function () {
+//             var $nodes = $('[data-oe-model], [data-oe-translation-id]')
+//                 .filter(function () { return this !== $node[0];});
 
-            if ($node.data('oe-model')) {
-                $nodes = $nodes.filter('[data-oe-model="'+$node.data('oe-model')+'"]')
-                    .filter('[data-oe-id="'+$node.data('oe-id')+'"]')
-                    .filter('[data-oe-field="'+$node.data('oe-field')+'"]');
-            }
-            if ($node.data('oe-translation-id')) $nodes = $nodes.filter('[data-oe-translation-id="'+$node.data('oe-translation-id')+'"]');
-            if ($node.data('oe-type')) $nodes = $nodes.filter('[data-oe-type="'+$node.data('oe-type')+'"]');
-            if ($node.data('oe-expression')) $nodes = $nodes.filter('[data-oe-expression="'+$node.data('oe-expression')+'"]');
-            if ($node.data('oe-xpath')) $nodes = $nodes.filter('[data-oe-xpath="'+$node.data('oe-xpath')+'"]');
-            if ($node.data('oe-contact-options')) $nodes = $nodes.filter('[data-oe-contact-options="'+$node.data('oe-contact-options')+'"]');
+//             if ($node.data('oe-model')) {
+//                 $nodes = $nodes.filter('[data-oe-model="'+$node.data('oe-model')+'"]')
+//                     .filter('[data-oe-id="'+$node.data('oe-id')+'"]')
+//                     .filter('[data-oe-field="'+$node.data('oe-field')+'"]');
+//             }
+//             if ($node.data('oe-translation-id')) $nodes = $nodes.filter('[data-oe-translation-id="'+$node.data('oe-translation-id')+'"]');
+//             if ($node.data('oe-type')) $nodes = $nodes.filter('[data-oe-type="'+$node.data('oe-type')+'"]');
+//             if ($node.data('oe-expression')) $nodes = $nodes.filter('[data-oe-expression="'+$node.data('oe-expression')+'"]');
+//             if ($node.data('oe-xpath')) $nodes = $nodes.filter('[data-oe-xpath="'+$node.data('oe-xpath')+'"]');
+//             if ($node.data('oe-contact-options')) $nodes = $nodes.filter('[data-oe-contact-options="'+$node.data('oe-contact-options')+'"]');
 
-            var nodes = $node.get();
+//             var nodes = $node.get();
 
-            if ($node.data('oe-type') === "many2one") {
-                $nodes = $nodes.add($('[data-oe-model]')
-                    .filter(function () { return this !== $node[0] && nodes.indexOf(this) === -1; })
-                    .filter('[data-oe-many2one-model="'+$node.data('oe-many2one-model')+'"]')
-                    .filter('[data-oe-many2one-id="'+$node.data('oe-many2one-id')+'"]')
-                    .filter('[data-oe-type="many2one"]'));
+//             if ($node.data('oe-type') === "many2one") {
+//                 $nodes = $nodes.add($('[data-oe-model]')
+//                     .filter(function () { return this !== $node[0] && nodes.indexOf(this) === -1; })
+//                     .filter('[data-oe-many2one-model="'+$node.data('oe-many2one-model')+'"]')
+//                     .filter('[data-oe-many2one-id="'+$node.data('oe-many2one-id')+'"]')
+//                     .filter('[data-oe-type="many2one"]'));
 
-                $nodes = $nodes.add($('[data-oe-model]')
-                    .filter(function () { return this !== $node[0] && nodes.indexOf(this) === -1; })
-                    .filter('[data-oe-model="'+$node.data('oe-many2one-model')+'"]')
-                    .filter('[data-oe-id="'+$node.data('oe-many2one-id')+'"]')
-                    .filter('[data-oe-field="name"]'));
-            }
+//                 $nodes = $nodes.add($('[data-oe-model]')
+//                     .filter(function () { return this !== $node[0] && nodes.indexOf(this) === -1; })
+//                     .filter('[data-oe-model="'+$node.data('oe-many2one-model')+'"]')
+//                     .filter('[data-oe-id="'+$node.data('oe-many2one-id')+'"]')
+//                     .filter('[data-oe-field="name"]'));
+//             }
 
-            if (!clone_data) {
-                clone_data = true;
-                $nodes.html(this.innerHTML);
-                clone_data = false;
-            }
-        });
-    }
+//             if (!clone_data) {
+//                 clone_data = true;
+//                 $nodes.html(this.innerHTML);
+//                 clone_data = false;
+//             }
+//         });
+//     }
 
-    var custom_toolbar = oLayoutInfo.toolbar ? oLayoutInfo.toolbar() : undefined;
-    var $toolbar = $(oLayoutInfo.popover()).add(custom_toolbar);
-    $('button[data-event="undo"], button[data-event="redo"]', $toolbar).attr('disabled', true);
+//     var custom_toolbar = oLayoutInfo.toolbar ? oLayoutInfo.toolbar() : undefined;
+//     var $toolbar = $(oLayoutInfo.popover()).add(custom_toolbar);
+//     $('button[data-event="undo"], button[data-event="redo"]', $toolbar).attr('disabled', true);
 
-    $(oLayoutInfo.editor())
-        .add(oLayoutInfo.handle())
-        .add(oLayoutInfo.popover())
-        .add(custom_toolbar)
-        .on('click content_changed', function () {
-            $('button[data-event="undo"]', $toolbar).attr('disabled', !oLayoutInfo.editable().data('NoteHistory').hasUndo());
-            $('button[data-event="redo"]', $toolbar).attr('disabled', !oLayoutInfo.editable().data('NoteHistory').hasRedo());
-        });
+//     $(oLayoutInfo.editor())
+//         .add(oLayoutInfo.handle())
+//         .add(oLayoutInfo.popover())
+//         .add(custom_toolbar)
+//         .on('click content_changed', function () {
+//             $('button[data-event="undo"]', $toolbar).attr('disabled', !oLayoutInfo.editable().data('NoteHistory').hasUndo());
+//             $('button[data-event="redo"]', $toolbar).attr('disabled', !oLayoutInfo.editable().data('NoteHistory').hasRedo());
+//         });
 
-    function create_dblclick_feature(selector, callback) {
-        var show_tooltip = true;
+//     function create_dblclick_feature(selector, callback) {
+//         var show_tooltip = true;
 
-        oLayoutInfo.editor().on("dblclick", selector, function (e) {
-            if ($(e.target).closest(".note-toolbar").length) return; // prevent icon edition of top bar for default summernote
-            show_tooltip = false;
-            callback();
-            e.stopImmediatePropagation();
-        });
+//         oLayoutInfo.editor().on("dblclick", selector, function (e) {
+//             if ($(e.target).closest(".note-toolbar").length) return; // prevent icon edition of top bar for default summernote
+//             show_tooltip = false;
+//             callback();
+//             e.stopImmediatePropagation();
+//         });
 
-        oLayoutInfo.editor().on("click", selector, function (e) {
-            var $target = $(e.target);
-            if ($target.closest(".note-toolbar").length) return; // prevent icon edition of top bar for default summernote
-            show_tooltip = true;
-            setTimeout(function () {
-                if (!show_tooltip) return;
-                $target.tooltip({title: _t('Double-click to edit'), trigger: 'manuel', container: 'body'}).tooltip('show');
-                setTimeout(function () {
-                    $target.tooltip('destroy');
-                }, 800);
-            }, 400);
-        });
-    }
-};
-var fn_detach = eventHandler.detach;
-eventHandler.detach = function (oLayoutInfo, options) {
-    fn_detach.call(this, oLayoutInfo, options);
-    oLayoutInfo.editable().off('mousedown');
-    oLayoutInfo.editor().off("dragstart");
-    oLayoutInfo.editor().off('click');
-    $(document).off('mousedown', summernote_mousedown);
-    $(document).off('mouseup', summernote_mouseup);
-    oLayoutInfo.editor().off("dblclick");
-    $(document).off("keyup", reRangeSelectKey);
-};
+//         oLayoutInfo.editor().on("click", selector, function (e) {
+//             var $target = $(e.target);
+//             if ($target.closest(".note-toolbar").length) return; // prevent icon edition of top bar for default summernote
+//             show_tooltip = true;
+//             setTimeout(function () {
+//                 if (!show_tooltip) return;
+//                 $target.tooltip({title: _t('Double-click to edit'), trigger: 'manuel', container: 'body'}).tooltip('show');
+//                 setTimeout(function () {
+//                     $target.tooltip('destroy');
+//                 }, 800);
+//             }, 400);
+//         });
+//     }
+// };
+// var fn_detach = eventHandler.detach;
+// eventHandler.detach = function (oLayoutInfo, options) {
+//     fn_detach.call(this, oLayoutInfo, options);
+//     oLayoutInfo.editable().off('mousedown');
+//     oLayoutInfo.editor().off("dragstart");
+//     oLayoutInfo.editor().off('click');
+//     $(document).off('mousedown', summernote_mousedown);
+//     $(document).off('mouseup', summernote_mouseup);
+//     oLayoutInfo.editor().off("dblclick");
+//     $(document).off("keyup", reRangeSelectKey);
+// };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Translation for odoo */

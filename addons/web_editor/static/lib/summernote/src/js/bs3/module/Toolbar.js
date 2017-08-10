@@ -63,6 +63,6 @@ define('summernote/bs3/module/Toolbar', function () {
       ui.toggleBtn($btn, false);
     };
   };
-
+  this.Toolbar = Toolbar; // Odoo allow access for override
   return Toolbar;
 });

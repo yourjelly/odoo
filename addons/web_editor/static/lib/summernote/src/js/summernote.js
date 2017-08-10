@@ -5,7 +5,8 @@ define([
     'summernote/base/Context',
     'summernote/base/core/range',
     'summernote/base/core/key',
-], function($, agent, list, Context, range, key) {
+    'summernote/bs3/module/LinkDialog'
+], function($, agent, list, Context, range, key, LinkDialog) {
     $.extend($.summernote, {
         core: {
             agent: agent,
@@ -40,6 +41,7 @@ define([
                 var $note = $(note);
                 if (!$note.data('summernote')) {
                     var context = new Context($note, options);
+                    $.summernote.LinkDialog = new LinkDialog(context); //Odoo added Context
                     $note.data('summernote', context);
                     $note.data('summernote').triggerEvent('init', context.layoutInfo);
                 }

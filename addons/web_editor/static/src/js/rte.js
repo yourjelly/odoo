@@ -352,7 +352,6 @@ var RTE = Widget.extend({
             .removeAttr('contentEditable')
             .removeClass('o_dirty oe_carlos_danger o_is_inline_editable')
             .map(function () {
-                debugger;
                 var $el = $(this);
 
                 $el.find('[class]').filter(function () {
@@ -364,10 +363,8 @@ var RTE = Widget.extend({
                 // TODO: Add a queue with concurrency limit in webclient
                 // https://github.com/medikoo/deferred/blob/master/lib/ext/function/gate.js
                 return self.saving_mutex.exec(function () {
-                    debugger;
                     return self.saveElement($el, context)
                         .then(undefined, function (thing, response) {
-                            debugger;
                             // because ckeditor regenerates all the dom,
                             // we can't just setup the popover here as
                             // everything will be destroyed by the DOM
@@ -536,11 +533,10 @@ var RTE = Widget.extend({
             }, 150); // setTimeout to remove flickering when change to editable zone (re-create an editor)
             this.$last = null;
         }
-        console.log("$editable", $editable);
+
         if ($editable.length && (!this.$last || this.$last[0] !== $editable[0]) &&
                 ($target.closest('[contenteditable]').attr('contenteditable') || "").toLowerCase() !== 'false') {
-            debugger;
-        console.log("his.config($editable)", this.config($editable))
+
             $editable.summernote(this.config($editable));
 
             $editable.data('NoteHistory', history);
@@ -610,7 +606,6 @@ var RTE = Widget.extend({
     },
 
     config: function ($editable) {
-        debugger;
         return {
             'airMode' : true,
             'focus': false,
