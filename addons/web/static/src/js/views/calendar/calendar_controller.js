@@ -170,8 +170,7 @@ var CalendarController = AbstractController.extend({
      */
     _onOpenCreate: function (event) {
         var self = this;
-        if (this.mapping.all_day === "allday" &&
-            this.model.get().scale === "month") {
+        if (this.model.get().scale === "month") {
                 event.data.allDay = true;
         }
         var data = this.model.calendarEventToRecord(event.data);
