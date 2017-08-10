@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="stock_picking_wave.report_picking_wave">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-set="locations" t-value="o.picking_ids.mapped('move_line_ids').mapped('location_id')"/>
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <h2>Batch Pickings: <span t-field="o.name"/></h2><br/>
+                            <h4>Responsible: <strong><span t-field="o.user_id"/></strong></h4><br/>
+                            <strong>Pickings</strong>
+                            <table class="table table-condensed">
+                                <thead>
+                                    <tr>
+                                        <th>Reference</th>
+                                        <th>Status</th>
+                                        <th>Commitment Date</th>
+                                        <th>Scheduled Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="o.picking_ids" t-as="pick">
+                                        <td t-if="pick.origin">
+                                            <span t-field="pick.origin"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="pick.state"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="pick.date"/>
+                                        </td>
+                                        <td >
+                                            <span t-field="pick.scheduled_date"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p style="page-break-after: always;"/>
+                            <t t-foreach="set(locations)" t-as="loc">
+                                <t t-set="related_products" t-value="o.picking_ids.mapped('move_line_ids').filtered(lambda x: x.location_id==loc)"/>
+                                <t t-set="products" t-value="related_products.mapped('product_id')"/>
+                                <h2>Batch Pickings: <span t-field="o.name"/></h2>
+                                <h4>Responsible: <strong><span t-field="o.user_id"/></strong></h4><br/>
+                                <h4><strong>Source Location: <span t-field="loc.display_name"/></strong></h4>
+                                <table class="table table-condensed">
+                                    <thead>
+                                        <t t-set="has_serial_number" t-value="related_products.filtered('lot_id')" groups="stock.group_production_lot"/>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th colspan="3">
+                                                <table style="width:100%;">
+                                                    <tr>
+                                                        <th style="text-align:center;width:25%;">Quantity</th>
+                                                        <th style="text-align:center;width:25%;">Destination</th>
+                                                        <th style="text-align:center;width:25%;">Picking</th>
+                                                        <th t-if="has_serial_number" style="text-align:center;width:25%;">
+                                                            <strong>Lot/Serial Number</strong>
+                                                        </th>
+                                                    </tr>
+                                                </table>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="products" t-as="pro">
+                                            <td><span t-field="pro.name"/></td>
+                                            <td>
+                                                <table style="width:100%;">
+                                                    <t t-foreach="o.picking_ids" t-as="op">
+                                                        <t t-set="picking" t-value="pro.stock_move_ids.mapped('picking_id').filtered(lambda x: x==op)"/>
+                                                        <tr t-foreach="picking" t-as="pik">
+                                                            <t t-set="Total" t-value="0"/>
+                                                            <t t-foreach="pik.move_lines" t-as="pic_move" t-if="pic_move.product_id==pro">
+                                                                <t t-set="Total" t-value="Total+pic_move.product_uom_qty"/>
+                                                                <td style="text-align:center;width:25%;"><t t-esc="Total"/></td>
+                                                                <td style="text-align:center;width:25%;"><t t-esc="pic_move.location_dest_id.name"/></td>
+                                                            </t>
+                                                            <td style="text-align:center;width:25%;"><span t-field="pik.name"/></td>
+                                                            <td t-if="has_serial_number" style="text-align:center;width:25%;">
+                                                                <table class="table table-condensed">
+                                                                    <tr t-foreach="pik.move_line_ids" t-as="line" t-if="pro == line.product_id">
+                                                                        <td><t t-esc="line.lot_id.name"/></td>
+                                                                        <td><span t-field="line.package_id"/></td>
+                                                                        <td><span t-field="line.product_qty"/></td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </t>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p style="page-break-after: always;"/>
+                             </t>
+                         </div>
+                     </t>
+                 </t>
+            </t>
+        </template>
+    </data>
+</odoo>
