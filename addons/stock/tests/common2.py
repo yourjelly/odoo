@@ -56,7 +56,7 @@ class TestStockCommon(common.TestProductCommon):
         cls.StockMoveLine = cls.env['stock.move.line']
         cls.Package = cls.env['stock.quant.package']
         cls.ProductionLot = cls.env['stock.production.lot']
-        cls.Procurement = cls.env['procurement.order']
+        cls.Procurement = cls.env['procurement.group']
         cls.Product = cls.env['product.product']
 
         # Fetch stock-related user groups
