@@ -1045,7 +1045,7 @@ var LinkDialog = Dialog.extend({
             }
         }
 
-        this.data.text = this.data.text.replace(/[ \t\r\n]+/g, ' ');
+        // this.data.text = this.data.text.replace(/[ \t\r\n]+/g, ' ');
     },
     start: function () {
         this.bind_data();

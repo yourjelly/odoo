@@ -374,26 +374,27 @@ var options = $.summernote.options;
 //     $editable.data('NoteHistory').recordUndo();
 //     $target.toggleClass(sValue);
 // };
-$.summernote.LinkDialog.showLinkDialog = function ($editable, $dialog, linkInfo) {
-    console.log('CALLEDD')
-    $editable.data('range').select();
-    $editable.data('NoteHistory').recordUndo();
+// $.summernote.LinkDialog.showLinkDialog = function ($editable, $dialog, linkInfo) {
+//     // $editable.data('range').select();
+//     // $editable.data('NoteHistory').recordUndo();
+//     var $editable = $(".note-editable");
+//     // var linkInfo = $.summernote.core.range;
 
-    var editor = new widgets.LinkDialog(null, {}, $editable, linkInfo).open();
+//     var editor = new widgets.LinkDialog(null, {}, $editable, linkInfo).open();
 
-    var def = new $.Deferred();
-    editor.on("save", this, function (linkInfo) {
-        linkInfo.range.select();
-        $editable.data('range', linkInfo.range);
-        def.resolve(linkInfo);
-        $editable.trigger('keyup');
-        $('.note-popover .note-link-popover').show();
-    });
-    editor.on("cancel", this, function () {
-        def.reject();
-    });
-    return def;
-};
+//     var def = new $.Deferred();
+//     editor.on("save", this, function (linkInfo) {
+//         // linkInfo.range.select();
+//         // $editable.data('range', linkInfo.range);
+//         def.resolve(linkInfo);
+//         $editable.trigger('keyup');
+//         $('.note-popover .note-link-popover').show();
+//     });
+//     editor.on("cancel", this, function () {
+//         def.reject();
+//     });
+//     return def;
+// };
 // eventHandler.modules.imageDialog.showImageDialog = function ($editable) {
 //     var r = $editable.data('range');
 //     if (r.sc.tagName && r.sc.childNodes.length) {

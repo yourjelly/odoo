@@ -4,6 +4,7 @@ odoo.define('website_forum.website_forum', function (require) {
 var ajax = require('web.ajax');
 var core = require('web.core');
 var website = require('website.website');
+var widget = require('web_editor.widget');
 
 var _t = core._t;
 
@@ -404,15 +405,52 @@ if(!$('.website_forum').length) {
                 ['para', ['ul', 'ol', 'paragraph']],
                 ['table', ['table']],
                 ['history', ['undo', 'redo']],
+                ['mylink', ['mylink']],
             ];
         if (parseInt($("#karma").val()) >= editor_karma) {
             toolbar.push(['insert', ['link', 'picture']]);
         }
+
+        var myLink = function(context) {
+            var ui = $.summernote.ui;
+            // create button
+            var link = ui.button({
+                        contents: '<i class="fa fa-link"/>',
+                        tooltip: 'Link (CTRL+K)',
+                        click: function() {
+                                // var $editable = $(".note-editable");
+                                var $editable = $(".note-editable");
+                                var linkInfo = $.summernote.core.range;
+                                var editor = new widget.LinkDialog(null, {}, $editable, linkInfo).open();
+                                var def = new $.Deferred();
+                                editor.on("save", this, function(linkInfo) {
+                                    // linkInfo.range.select();
+                                    // $editable.data('range', linkInfo.range);
+                                    var target = linkInfo.isNewWindow ? '_blank' : '';
+                                    $editable.html("<a href='" + linkInfo.url +  "' target='" + target + "' class='" + linkInfo.className + "'>" + linkInfo.text +"</a>");
+                                    def.resolve(linkInfo);
+                                    $editable.trigger('keyup');
+                                    $('.note-popover .note-link-popover').show();
+                                });
+                                editor.on("cancel", this, function() {
+                                    def.reject();
+                                });
+                                return def;
+                        }
+                    });
+
+            return link.render();
+        }
+
         $textarea.summernote({
                 height: 150,
                 toolbar: toolbar,
+                buttons: {
+                        mylink: myLink,
+                },
                 styleWithSpan: false
             });
+
         $form.on('click', 'button, .a-submit', function () {
             $textarea.html($form.find('.note-editable').html());
         });
