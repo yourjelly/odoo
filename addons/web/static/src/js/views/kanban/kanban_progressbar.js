@@ -38,9 +38,9 @@ var ColumnProgressBar =  Widget.extend({
     },
     sideCounter: function (records) {
         this.trigger_up('setProgressCounter');
-        var result = {}
-        var sum_field = this.options.attrs.sum;
-        var colors = JSON.parse(this.options.attrs.colors);
+        this.result = {}
+        this.sum_field = this.options.attrs.sum;
+        this.colors = JSON.parse(this.options.attrs.colors);
         this.tot_n = 0;
         this.total_value = 0;
 
@@ -48,14 +48,30 @@ var ColumnProgressBar =  Widget.extend({
         var self = this;
         $(records).each(function () {
             var state = this.state.data[self.options.attrs.group_by];
-            if (!result.hasOwnProperty(state)) {
-                result[state] = 0;
+            if (!self.result.hasOwnProperty(state)) {
+                self.result[state] = 0;
             }
-            if (sum_field) {
-                self.total_value += this.state.data[sum_field];
+            if (self.sum_field) {
+                self.total_value += this.state.data[self.sum_field];
             } 
             self.tot_n += 1;
-            result[state] += 1; 
+            self.result[state] += 1;
+            switch (self.colors[state]) {
+                case 'success':
+                    this.$el.removeClass('oe_kanban_card_blocked oe_kanban_card_warning');
+                    this.$el.addClass('oe_kanban_card_success');
+                    break;
+                case 'warning':
+                    this.$el.removeClass('oe_kanban_card_success oe_kanban_card_blocked');
+                    this.$el.addClass('oe_kanban_card_warning');
+                    break;
+                case 'danger':
+                    this.$el.removeClass('oe_kanban_card_success oe_kanban_card_warning');
+                    this.$el.addClass('oe_kanban_card_blocked');
+                    break;
+                default:
+                    break;
+            }
         });
         var currency_prefix = "", currency_suffix = "";
         if (session.active_currency_id && this.modelName === 'crm.lead') {
@@ -65,34 +81,28 @@ var ColumnProgressBar =  Widget.extend({
                 currency_suffix = " " + session.currencies[session.active_currency_id].symbol;
             }
         }
-        if (sum_field) {
+        if (this.sum_field) {
             this._animateNumber(this.total_value, this.$side_c, 1000, currency_prefix, this.remaining > 0 ? currency_prefix+"+":currency_suffix);
         } else {
             this._animateNumber(this.tot_n, this.$side_c, 1000, currency_prefix, this.remaining > 0 ? currency_prefix+"+":currency_suffix);
         }
 
-        for (var value in result) {
-            switch (colors[value]) {
+        for (var value in this.result) {
+            switch (this.colors[value]) {
                 case 'success':
-                    this.bar_n_success = result[value];
-                    this.$el.removeClass('oe_kanban_card_blocked oe_kanban_card_warning');
-                    this.$el.addClass('oe_kanban_card_success');
+                    this.bar_n_success = this.result[value];
                     this.bar_n_success > 0 ? this.$bar_success.width((this.bar_n_success / this.tot_n) * 100 + "%").addClass('o_bar_active') : this.$bar_success.width(0).removeClass('o_bar_active');
                     break;
                 case 'warning':
-                    this.bar_n_warning = result[value];
-                    this.$el.removeClass('oe_kanban_card_success oe_kanban_card_blocked');
-                    this.$el.addClass('oe_kanban_card_warning');
+                    this.bar_n_warning = this.result[value];
                     this.bar_n_warning > 0 ? this.$bar_warning.width((this.bar_n_warning / this.tot_n) * 100 + "%").addClass('o_bar_active') : this.$bar_warning.width(0).removeClass('o_bar_active');
                     break;
                 case 'danger':
-                    this.$el.removeClass('oe_kanban_card_success oe_kanban_card_warning');
-                    this.$el.addClass('oe_kanban_card_blocked');
-                    this.bar_n_blocked = result[value];
+                    this.bar_n_blocked = this.result[value];
                     this.bar_n_blocked > 0 ? this.$bar_blocked.width((this.bar_n_blocked / this.tot_n) * 100 + "%").addClass('o_bar_active') : this.$bar_blocked.width(0).removeClass('o_bar_active');
                     break;
                 default:
-                    return
+                    break;
             }
         }
 
@@ -199,28 +209,29 @@ var ColumnProgressBar =  Widget.extend({
         }
     },
     _barAttrs: function () {
-        if (this.options.attrs.display === 'activity_state') {
-            this.$bar_success.attr({
-                'title': this.bar_n_success + ' future activities',
-                'data-original-title': this.bar_n_success + ' future activities'
-            });
-            this.$bar_blocked.attr({
-                'title': this.bar_n_blocked + ' overdue activities',
-                'data-original-title': this.bar_n_blocked + ' overdue activities'
-            });
-            this.$bar_warning.attr({
-                'title': this.bar_n_warning + ' today activities',
-                'data-original-title': this.bar_n_warning + ' today activities'
-            });
-        } else if (this.options.attrs.display === 'task') {
-            this.$bar_success.attr({
-                'title': this.bar_n_success + ' ready',
-                'data-original-title': this.bar_n_success + ' ready'
-            });
-            this.$bar_blocked.attr({
-                'title': this.bar_n_blocked + ' blocked',
-                'data-original-title': this.bar_n_blocked + ' blocked'
-            });
+        for (var value in this.result) {
+            switch (this.colors[value]) {
+                case 'success':
+                    this.$bar_success.attr({
+                        'title': this.bar_n_success + ' '+value,
+                        'data-original-title': this.bar_n_success + ' '+value
+                    });
+                    break;
+                case 'warning':
+                    this.$bar_warning.attr({
+                        'title': this.bar_n_warning + ' '+value,
+                        'data-original-title': this.bar_n_warning + ' '+value
+                    });
+                    break;
+                case 'danger':
+                    this.$bar_blocked.attr({
+                        'title': this.bar_n_blocked + ' '+value,
+                        'data-original-title': this.bar_n_blocked + ' '+value
+                    });
+                    break;
+                default:
+                    break;
+            }
         }
         this.$bar_success.add(this.$bar_blocked).add(this.$bar_warning).tooltip({
             delay: '0',
