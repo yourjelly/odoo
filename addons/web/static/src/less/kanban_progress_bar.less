@@ -119,7 +119,7 @@
             cursor: pointer;
             .o-linear-gradient(45deg, @brand-success, lighten(@brand-success, 10%));
 
-            &.o_progress_blocked {
+            &.o_progress_danger {
                 .o-linear-gradient(45deg, lighten(desaturate(@brand-danger,20%), 5%), desaturate(@brand-danger,20%));
             }
             &.o_progress_warning {
@@ -155,7 +155,7 @@
     }
 }
 
-&.o_kanban_group_show_success, &.o_kanban_group_show_blocked, &.o_kanban_group_show_warning {
+&.o_kanban_group_show_success, &.o_kanban_group_show_danger, &.o_kanban_group_show_warning {
     .o-flex-display();
     .o-flex-flow(wrap, column);
 
@@ -169,7 +169,7 @@
 }
     
 .o-kanban-css-filter(success, @o-kanban-progress-success);
-.o-kanban-css-filter(blocked, @brand-danger);
+.o-kanban-css-filter(danger, @brand-danger);
 .o-kanban-css-filter(warning, @o-kanban-progress-warning);
 
 
