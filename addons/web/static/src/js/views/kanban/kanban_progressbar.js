@@ -12,13 +12,14 @@ var ColumnProgressBar =  Widget.extend({
             $('.o_content').scrollTop(0);
             var state = $(e.currentTarget).data('state');
             var is_toggle = this.$el.closest('.o_kanban_group').is('.o_kanban_group_show_'+this.colors[state])
-            this.$el.closest('.o_kanban_group').removeClass('o_kanban_group_show_danger o_kanban_group_show_success o_kanban_group_show_warning');
+            //[DONE: Static statement]
+            this.removeAllClass(this.$el.closest('.o_kanban_group'));
             if(is_toggle){
                  var sum = _.reduce(this.result, function(sum, data){ return sum + data.val || 0;}, 0)
                  this._animateNumber(sum, this.$side_c, 1000, this.currency_prefix, this.remaining > 0 ? this.currency_prefix+"+":this.currency_suffix);
             } else {
                  this._animateNumber(this.result[state].val, this.$side_c, 1000, this.currency_prefix, this.remaining > 0 ? this.currency_prefix+"+":this.currency_suffix);
-                 this.$el.closest('.o_kanban_group').toggleClass('o_kanban_group_show_'+this.colors[state]);
+                 this.$el.closest('.o_kanban_group').toggleClass('o_kanban_group_show_'+this.colors[state]).toggleClass('o_kanban_group_show');
             }
         }
     },
@@ -27,7 +28,6 @@ var ColumnProgressBar =  Widget.extend({
         this.sum_field = barOptions.attrs.sum;
         this.field = barOptions.attrs.field;
         this.colors = JSON.parse(barOptions.attrs.colors);
-        this.trigger_up('setProgressCounter');
         this.is_monetary = false;
 
         if (this.sum_field && fieldsInfo[this.sum_field]['widget'] == 'monetary') {
@@ -35,9 +35,16 @@ var ColumnProgressBar =  Widget.extend({
             this.findCurrency();
         }
     },
+    removeAllClass: function($el) {
+        for (var value in this.colors) {
+            $el.removeClass('o_kanban_group_show_'+this.colors[value]);
+        }
+        $el.removeClass('o_kanban_group_show');
+    },
     findCurrency: function () {
         this.currency_prefix = "";
         this.currency_suffix = "";
+        this.trigger_up('setProgressCounter');
 
         if (this.is_monetary) {
             if (session.currencies[session.active_currency_id].position === 'before') {
@@ -101,13 +108,12 @@ var ColumnProgressBar =  Widget.extend({
         if (start > 1000000) {
             start = start / 1000000;
         }
-        else if (start > 10000) {
-            start = start / 10000;
+        else if (start > 1000) {
+            start = start / 1000;
         }
 
         var progress_bar_length = (90 - (2.8)*parseInt(end).toString().length).toString() + '%';
         this.$('.o_kanban_counter_progress').css('width', progress_bar_length);
-
         if (end > start) {
             $el.addClass('o-kanban-grow');
             $({ someValue: start}).animate({ someValue: end || 0 }, {
@@ -156,19 +162,25 @@ var ColumnProgressBar =  Widget.extend({
     _update: function (records, remaining) {
         this.$label = this.$('.o_kanban_counter_label');
         this.$side_c = this.$('.o_kanban_counter_side');
-        this.$bar_success = this.$('.o_progress_success');
-        this.$bar_danger = this.$('.o_progress_danger');
-        this.$bar_warning = this.$('.o_progress_warning');
-        this.bar_n_success = 0;
-        this.bar_n_danger = 0;
-        this.bar_n_warning = 0;
+        this.$counter = this.$('.o_kanban_counter_progress');
+        this.trigger_up('setProgressCounter');
+        this.$counter.empty();
+        // if (this.$counter.has('div').length === 0) {
+            for (var value in this.colors) {
+                var div_color = document.createElement('div');
+                div_color.className = 'progress-bar o_progress_'+this.colors[value];
+                this.$('.o_kanban_counter_progress')[0].appendChild(div_color);
+                this['$bar_'+this.colors[value]] = jQuery(div_color);
+                this['bar_n_'+this.colors[value]] = 0;
+            }
+        // }
+
         this.remaining = remaining;
         this.records = records;
-
         this._fixBarPosition();
         this.sideCounter(this.records);
         this._barAttrs();
-        this.$el.removeClass('o_kanban_group_show_danger o_kanban_group_show_success o_kanban_group_show_warning');
+        this.removeAllClass(this.$el);
     },
 });
 

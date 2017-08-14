@@ -95,11 +95,11 @@
 <t t-name="KanbanView.ProgressBar">
     <div class="o_kanban_counter">
         <div class="o_kanban_counter_progress progress">
-            <div class="progress-bar o_progress_success">
-                <span data-current-value="0" class="o_kanban_counter_label"/>
-            </div>
-            <div class="progress-bar o_progress_danger"/>
-            <div class="progress-bar o_progress_warning"/>
+            <!-- <div class="progress-bar o_progress_success"> -->
+                <!-- <span data-current-value="0" class="o_kanban_counter_label"/> -->
+            <!-- </div> -->
+            <!-- <div class="progress-bar o_progress_danger"/> -->
+            <!-- <div class="progress-bar o_progress_warning"/> -->
         </div>
         <div t-att-data-current-value="0" class="o_kanban_counter_side pull-right"/>
     </div>

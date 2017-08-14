@@ -30,6 +30,9 @@
             opacity: 0.5;
             box-shadow: none;
             margin: @o-kanban-record-margin*0.5 @o-kanban-record-margin;
+            &:hover {
+              opacity: 1;
+            }
         }
 
         .o_kanban_load_more {
@@ -155,7 +158,7 @@
     }
 }
 
-&.o_kanban_group_show_success, &.o_kanban_group_show_danger, &.o_kanban_group_show_warning {
+&.o_kanban_group_show {
     .o-flex-display();
     .o-flex-flow(wrap, column);
 
