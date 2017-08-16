@@ -21,9 +21,13 @@ from datetime import datetime, timedelta
 from lxml import etree
 from pprint import pformat
 
+from . import PyChromeDevTools
+
 import requests
+from requests.exceptions import ConnectionError
 
 from odoo.tools import pycompat
+from odoo.tools.misc import find_in_path
 
 try:
     from itertools import zip_longest as izip_longest
@@ -44,9 +48,16 @@ _logger = logging.getLogger(__name__)
 ADDONS_PATH = odoo.tools.config['addons_path']
 HOST = '127.0.0.1'
 PORT = odoo.tools.config['http_port']
+# Headless chrome remote debugging port
+REMOTE_DEBUG_PORT = 9222
 # Useless constant, tests are aware of the content of demo data
 ADMIN_USER_ID = odoo.SUPERUSER_ID
 
+#Headless exception timeout
+TIMEOUT_EXCEPTION_THROW = 10
+TIMEOUT_CONSOLE_API = 60
+TIMEOUT_FRAME_STOP_LOADING = 10
+TIMEOUT_CHROME_INTERFACE = 15
 
 def get_db_name():
     db = odoo.tools.config['db_name']
@@ -455,6 +466,160 @@ class HttpCase(TransactionCase):
         phantomtest = os.path.join(os.path.dirname(__file__), 'phantomtest.js')
         cmd = ['phantomjs', phantomtest, json.dumps(options)]
         self.phantom_run(cmd, timeout)
+
+    def _chrome_bin_path(self):
+        # TOCHECK: is it work for MacOS and Windows?
+        # ref: https://github.com/GoogleChrome/lighthouse/blob/master/chrome-launcher/chrome-finder.ts
+        try:
+            path = find_in_path('google-chrome')
+            process = subprocess.Popen(
+                [path, '--product-version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
+        except (OSError, IOError):
+            _logger.error("You need to intall google-chrome for run automate test")
+            return
+        else:
+            version, err = process.communicate()
+            major_version = int(version.decode('utf8').split('.')[0])
+            if major_version < 58:
+                _logger.error("Google chrome headless mode avalilabe only from version 59"
+                " you have version %s, please upgrade google chrome", version)
+                return
+        return path
+
+    # TODO: add args for pass aditional parameter
+    def _start_headless_chrome(self):
+        browser_path = self._chrome_bin_path()
+        if browser_path is not None:
+            options = ['--headless', '--disable-gpu',
+               '--remote-debugging-port=%s' % REMOTE_DEBUG_PORT]
+            browser_proc = subprocess.Popen([browser_path] + options, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            wait_seconds = 5.0
+            sleep_step = 0.25
+            site_url = 'http://%s:%d' % (HOST, REMOTE_DEBUG_PORT)
+            # wait for start remote dev tool
+            while wait_seconds > 0:
+                try:
+                    requests.get(site_url)
+                    return browser_proc
+                except requests.exceptions.ConnectionError:
+                    time.sleep(sleep_step)
+                    wait_seconds -= sleep_step
+            _logger.error("Could not connect to Chrome Headless")
+
+    def _check_on_load_exception(self, web_url):
+        try:
+            chrome = PyChromeDevTools.ChromeInterface(host=HOST, port=REMOTE_DEBUG_PORT, timeout=TIMEOUT_CHROME_INTERFACE)
+            if chrome:
+                chrome.Network.enable()
+                chrome.Runtime.enable()
+                chrome.Page.enable()
+                chrome.Network.setCookie(url=web_url, name="session_id", value=self.session_id)
+                chrome.Page.navigate(url=web_url)
+                event, logs = chrome.wait_event("Runtime.exceptionThrown", timeout=TIMEOUT_EXCEPTION_THROW)
+                if event:
+                    chrome.close()
+                    chrome = False
+                    # syntax error handling on page load.
+                    _logger.error(event['params']['exceptionDetails']['exception']['description'] + " \n at " + event['params']['exceptionDetails']['url'])
+        except ConnectionError as e:
+            _logger.error("Could not connect to Chrome Headless: %s", str(e))
+            return
+        return chrome
+
+    def chrome_headless(self, url_path, code, ready=None, login=None, timeout=60, **kw):
+        """ Test js code running in the chrome headless browser
+
+        To signal success test do:
+        console.log('ok')
+
+        To signal failure do:
+        console.error('error')
+
+        If neither are done before timeout test fails.
+        """
+        browser = self._start_headless_chrome()
+        if not browser:
+            return
+        site_url = 'http://%s:%d' % (HOST, PORT)
+        self.authenticate(login, login)
+        web_url = site_url + url_path
+        chrome = self._check_on_load_exception(web_url)
+        if not chrome:
+            browser.terminate()
+            return self.assertTrue(
+                False,
+                "Chrome Headless test completed without reporting success; "
+                "the log may contain errors or hints.")
+        if ready:
+            while True:
+                js_result, _ = chrome.Runtime.evaluate(expression=ready)
+                # wait for tour ready
+                if js_result['result']['result'].get('value') == True:
+                    break
+        error = False
+        if code:
+            event_data, log_data = chrome.Runtime.evaluate(expression=code)
+            if event_data['result'].get('exceptionDetails'):
+                # tour on load exception handling.
+                console_msg = event_data['result']['exceptionDetails']['exception']['description']
+                _logger.error(console_msg)
+                error = True
+            elif log_data[0]['params'].get('args'):
+                # tour custom code logic. i.e "console.log('ok')"
+                console_msg = log_data[0]['params']['args'][0].get('value')
+                if 'ok' == console_msg:
+                    _logger.info(console_msg)
+                if 'error' == console_msg or ('error' in console_msg):
+                    _logger.error(console_msg)
+                    error = True
+                if 'ok' == console_msg or 'error' == console_msg or ('error' in console_msg):
+                    chrome.close()
+                    browser.terminate()
+                    return self.assertTrue(
+                            not error,
+                            "Chrome Headless test completed without reporting success; "
+                            "the log may contain errors or hints.")
+        start_time = time.time()
+        # fetch console logs
+        while True:
+            now = time.time()
+            if now - start_time > timeout:
+                _logger.error("Timeout: chrome is terminated forcefully.")
+                error = True
+                break
+            event, logs = chrome.wait_event("Runtime.consoleAPICalled", timeout=TIMEOUT_CONSOLE_API)
+            for log in logs:
+                if log['method'] == 'Runtime.exceptionThrown':
+                    # tour runtime exception error handling
+                    _logger.error(log['params']['exceptionDetails']['exception']['description'])
+                    error = True
+            if event and event['method'] == "Runtime.consoleAPICalled":
+                log_type = event['params']['type']
+                messages = event['params']['args']
+                console_msg = " ".join(unicode(message['value']) for message in messages)
+                if log_type in ['log', 'info'] and ('error' not in console_msg):
+                    _logger.info(console_msg)
+                if ('error' == console_msg) or ('error' in console_msg):
+                    _logger.error(console_msg)
+                if log_type == 'warn':
+                    _logger.warn(console_msg)
+                # TODO: find better way to exit loop
+                if 'ok' == console_msg:
+                    break
+                if 'error' == console_msg or ('error' in console_msg):
+                    error = True
+                    break
+
+        # [EXPERIMENTAL] Used to wait for stop loading browser current process.
+        chrome.wait_event("Page.frameStoppedLoading", timeout=TIMEOUT_FRAME_STOP_LOADING)
+        chrome.close()
+        browser.terminate()
+        return self.assertTrue(
+                not error,
+                "Chrome Headless test completed without reporting success; "
+                "the log may contain errors or hints.")
+
 
 def can_import(module):
     """ Checks if <module> can be imported, returns ``True`` if it can be,
