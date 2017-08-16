@@ -80,10 +80,10 @@ var options = $.summernote.options;
 //         $el.attr('data-event', 'foreColor').attr('data-value', className).addClass('bg-' + $el.data('color'));
 //     });
 // };
-
+// console.log("okk upto here")
+// console.log("options", options);
 // var fn_tplPopovers = options.modules.toolbar;
 // console.log("lang", lang);
-// console.log("options", options);
 // console.log("this", this);
 // options.modules.toolbar = function (lang, options) {
 //     debugger
@@ -97,115 +97,115 @@ var options = $.summernote.options;
 //         $popover.children().addClass("hidden-xs");
 //     }
 
-// //     //////////////// image popover
+//     //////////////// image popover
 
-// //     // add center button for images
-// //     $(tplIconButton('fa fa-align-center', {
-// //         title: _t('Center'),
-// //         event: 'floatMe',
-// //         value: 'center'
-// //     })).insertAfter($imagePopover.find('[data-event="floatMe"][data-value="left"]'));
-// //     $imagePopover.find('button[data-event="removeMedia"]').parent().remove();
-// //     $imagePopover.find('button[data-event="floatMe"][data-value="none"]').remove();
+//     // add center button for images
+//     $(tplIconButton('fa fa-align-center', {
+//         title: _t('Center'),
+//         event: 'floatMe',
+//         value: 'center'
+//     })).insertAfter($imagePopover.find('[data-event="floatMe"][data-value="left"]'));
+//     $imagePopover.find('button[data-event="removeMedia"]').parent().remove();
+//     $imagePopover.find('button[data-event="floatMe"][data-value="none"]').remove();
 
-// //     // padding button
-// //     var $padding = $('<div class="btn-group"/>');
-// //     $padding.insertBefore($imagePopover.find('.btn-group:first'));
-// //     var dropdown_content = [
-// //         '<li><a data-event="padding" href="#" data-value="">'+_t('None')+'</a></li>',
-// //         '<li><a data-event="padding" href="#" data-value="small">'+_t('Small')+'</a></li>',
-// //         '<li><a data-event="padding" href="#" data-value="medium">'+_t('Medium')+'</a></li>',
-// //         '<li><a data-event="padding" href="#" data-value="large">'+_t('Large')+'</a></li>',
-// //         '<li><a data-event="padding" href="#" data-value="xl">'+_t('Xl')+'</a></li>',
-// //     ];
-// //     $(tplIconButton('fa fa-plus-square-o', {
-// //         title: _t('Padding'),
-// //         dropdown: tplDropdown(dropdown_content)
-// //     })).appendTo($padding);
+//     // padding button
+//     var $padding = $('<div class="btn-group"/>');
+//     $padding.insertBefore($imagePopover.find('.btn-group:first'));
+//     var dropdown_content = [
+//         '<li><a data-event="padding" href="#" data-value="">'+_t('None')+'</a></li>',
+//         '<li><a data-event="padding" href="#" data-value="small">'+_t('Small')+'</a></li>',
+//         '<li><a data-event="padding" href="#" data-value="medium">'+_t('Medium')+'</a></li>',
+//         '<li><a data-event="padding" href="#" data-value="large">'+_t('Large')+'</a></li>',
+//         '<li><a data-event="padding" href="#" data-value="xl">'+_t('Xl')+'</a></li>',
+//     ];
+//     $(tplIconButton('fa fa-plus-square-o', {
+//         title: _t('Padding'),
+//         dropdown: tplDropdown(dropdown_content)
+//     })).appendTo($padding);
 
-// //     // circle, boxed... options became toggled
-// //     $imagePopover.find('[data-event="imageShape"]:not([data-value])').remove();
-// //     var $button = $(tplIconButton('fa fa-sun-o', {
-// //         title: _t('Shadow'),
-// //         event: 'imageShape',
-// //         value: 'shadow'
-// //     })).insertAfter($imagePopover.find('[data-event="imageShape"][data-value="img-circle"]'));
+//     // circle, boxed... options became toggled
+//     $imagePopover.find('[data-event="imageShape"]:not([data-value])').remove();
+//     var $button = $(tplIconButton('fa fa-sun-o', {
+//         title: _t('Shadow'),
+//         event: 'imageShape',
+//         value: 'shadow'
+//     })).insertAfter($imagePopover.find('[data-event="imageShape"][data-value="img-circle"]'));
 
-// //     // add spin for fa
-// //     var $spin = $('<div class="btn-group hidden only_fa"/>').insertAfter($button.parent());
-// //     $(tplIconButton('fa fa-refresh', {
-// //             title: _t('Spin'),
-// //             event: 'imageShape',
-// //             value: 'fa-spin'
-// //         })).appendTo($spin);
+//     // add spin for fa
+//     var $spin = $('<div class="btn-group hidden only_fa"/>').insertAfter($button.parent());
+//     $(tplIconButton('fa fa-refresh', {
+//             title: _t('Spin'),
+//             event: 'imageShape',
+//             value: 'fa-spin'
+//         })).appendTo($spin);
 
-// //     // resize for fa
-// //     var $resizefa = $('<div class="btn-group hidden only_fa"/>')
-// //         .insertAfter($imagePopover.find('.btn-group:has([data-event="resize"])'));
-// //     for (var size=1; size<=5; size++) {
-// //         $(tplButton('<span class="note-fontsize-10">'+size+'x</span>', {
-// //           title: size+"x",
-// //           event: 'resizefa',
-// //           value: size+''
-// //         })).appendTo($resizefa);
-// //     }
-// //     var $colorfa = $airPopover.find('.note-color').clone();
-// //     $colorfa.find("ul.dropdown-menu").css('min-width', '172px');
-// //     $resizefa.after($colorfa);
+//     // resize for fa
+//     var $resizefa = $('<div class="btn-group hidden only_fa"/>')
+//         .insertAfter($imagePopover.find('.btn-group:has([data-event="resize"])'));
+//     for (var size=1; size<=5; size++) {
+//         $(tplButton('<span class="note-fontsize-10">'+size+'x</span>', {
+//           title: size+"x",
+//           event: 'resizefa',
+//           value: size+''
+//         })).appendTo($resizefa);
+//     }
+//     var $colorfa = $airPopover.find('.note-color').clone();
+//     $colorfa.find("ul.dropdown-menu").css('min-width', '172px');
+//     $resizefa.after($colorfa);
 
-// //     // show dialog box and delete
-// //     var $imageprop = $('<div class="btn-group"/>');
-// //     $imageprop.appendTo($imagePopover.find('.popover-content'));
-// //     $(tplIconButton('fa fa-file-image-o', {
-// //             title: _t('Edit'),
-// //             event: 'showImageDialog'
-// //         })).appendTo($imageprop);
-// //     $(tplIconButton('fa fa-trash-o', {
-// //             title: _t('Remove'),
-// //             event: 'delete'
-// //         })).appendTo($imageprop);
+//     // show dialog box and delete
+//     var $imageprop = $('<div class="btn-group"/>');
+//     $imageprop.appendTo($imagePopover.find('.popover-content'));
+//     $(tplIconButton('fa fa-file-image-o', {
+//             title: _t('Edit'),
+//             event: 'showImageDialog'
+//         })).appendTo($imageprop);
+//     $(tplIconButton('fa fa-trash-o', {
+//             title: _t('Remove'),
+//             event: 'delete'
+//         })).appendTo($imageprop);
 
-// //     $imagePopover.find('.popover-content').append($airPopover.find(".note-history").clone());
+//     $imagePopover.find('.popover-content').append($airPopover.find(".note-history").clone());
 
-// //     $imagePopover.find('[data-event="showImageDialog"]').before($airPopover.find('[data-event="showLinkDialog"]').clone());
+//     $imagePopover.find('[data-event="showImageDialog"]').before($airPopover.find('[data-event="showLinkDialog"]').clone());
 
-// //     var $alt = $('<div class="btn-group"/>');
-// //     $alt.appendTo($imagePopover.find('.popover-content'));
-// //     $alt.append('<button class="btn btn-default btn-sm btn-small" data-event="alt"><strong>' + _t('Description') + ': </strong><span class="o_image_alt"/></button>');
+//     var $alt = $('<div class="btn-group"/>');
+//     $alt.appendTo($imagePopover.find('.popover-content'));
+//     $alt.append('<button class="btn btn-default btn-sm btn-small" data-event="alt"><strong>' + _t('Description') + ': </strong><span class="o_image_alt"/></button>');
 
-// //     //////////////// link popover
+//     //////////////// link popover
 
-// //     $linkPopover.find('.popover-content').append($airPopover.find(".note-history").clone());
+//     $linkPopover.find('.popover-content').append($airPopover.find(".note-history").clone());
 
-// //     $linkPopover.find('button[data-event="showLinkDialog"] i').attr("class", "fa fa-link");
-// //     $linkPopover.find('button[data-event="unlink"]').before($airPopover.find('button[data-event="showImageDialog"]').clone());
+//     $linkPopover.find('button[data-event="showLinkDialog"] i').attr("class", "fa fa-link");
+//     $linkPopover.find('button[data-event="unlink"]').before($airPopover.find('button[data-event="showImageDialog"]').clone());
 
-// //     //////////////// text/air popover
+//     //////////////// text/air popover
 
-// //     //// highlight the text format
-// //     $airPopover.find('.note-style .dropdown-toggle').on('mousedown', function () {
-// //         var $format = $airPopover.find('[data-event="formatBlock"]');
-// //         var node = range.create().sc;
-// //         var formats = $format.map(function () { return $(this).data("value"); }).get();
-// //         while (node && (!node.tagName || (!node.tagName || formats.indexOf(node.tagName.toLowerCase()) === -1))) {
-// //             node = node.parentNode;
-// //         }
-// //         $format.parent().removeClass('active');
-// //         $format.filter('[data-value="'+(node ? node.tagName.toLowerCase() : "p")+'"]')
-// //             .parent().addClass("active");
-// //     });
+//     //// highlight the text format
+//     $airPopover.find('.note-style .dropdown-toggle').on('mousedown', function () {
+//         var $format = $airPopover.find('[data-event="formatBlock"]');
+//         var node = range.create().sc;
+//         var formats = $format.map(function () { return $(this).data("value"); }).get();
+//         while (node && (!node.tagName || (!node.tagName || formats.indexOf(node.tagName.toLowerCase()) === -1))) {
+//             node = node.parentNode;
+//         }
+//         $format.parent().removeClass('active');
+//         $format.filter('[data-value="'+(node ? node.tagName.toLowerCase() : "p")+'"]')
+//             .parent().addClass("active");
+//     });
 
-// //     //////////////// tooltip
+//     //////////////// tooltip
 
-// //     setTimeout(function () {
-// //         $airPopover.add($linkPopover).add($imagePopover).find("button")
-// //             .tooltip('destroy')
-// //             .tooltip({
-// //                 container: 'body',
-// //                 trigger: 'hover',
-// //                 placement: 'bottom'
-// //             }).on('click', function () {$(this).tooltip('hide');});
-// //     });
+//     setTimeout(function () {
+//         $airPopover.add($linkPopover).add($imagePopover).find("button")
+//             .tooltip('destroy')
+//             .tooltip({
+//                 container: 'body',
+//                 trigger: 'hover',
+//                 placement: 'bottom'
+//             }).on('click', function () {$(this).tooltip('hide');});
+//     });
 
 //     return $popover;
 // };
