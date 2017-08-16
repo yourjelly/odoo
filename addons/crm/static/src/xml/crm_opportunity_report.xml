@@ -13,8 +13,12 @@
                         <div class="o_pipeline_side_box">
                             <t t-set="opportunity_value" t-value="widget.data.opportunity" />
                             <b><t t-esc="opportunity_value.open_opp" /></b> Open Opportunity <br />
-                            <a class="js_opportunity_to_close" data-name="Pipeline to Close"><b><t t-esc="opportunity_value.opp_to_close.length" /></b> opportunities to close by the end of <t t-esc="widget.options.date.end_date" />.</a><br />
-                            <a class="js_opportunity_overpassed" data-name="Overpassed Date" ><b><t t-esc="opportunity_value.opp_overpassed.length"/></b> opportunities with expected closing date overpassed; amount is <b><t t-esc="opportunity_value.opp_overpassed_amount" />.</b></a>
+                            <t t-if="opportunity_value.opp_to_close.length !== 0">
+                                <a class="o_click_action" name="Pipeline to close"><b><t t-esc="opportunity_value.opp_to_close.length" /></b> opportunities to close by the end of <t t-esc="widget.options.date.end_date" />.</a><br />
+                            </t>
+                            <t t-if="opportunity_value.opp_overpassed.length !== 0">
+                                <a class="o_click_action" name="Overdue Opportunity" ><b><t t-esc="opportunity_value.opp_overpassed.length"/></b> opportunities with expected closing date overpassed with amount <b><t t-esc="opportunity_value.opp_overpassed_amount" />.</b></a>
+                            </t>
                         </div>
                         <div class="o_pipeline_side_box">
                             <strong><t t-esc="widget.data.average_days"/> Days</strong>
@@ -23,20 +27,30 @@
                     </div>
                     <div class="o_deals">
                         <strong class="o_won_deals">
-                            <t t-esc="widget.data.won_deals"/>
+                            <t t-esc="widget.data.opportunity.won_opp.length"/>
                         </strong>
-                        <br />Won Opportunity
+                        <br />Won Opportunity<br />
+                        <strong><t t-esc="widget.won_opp_amount" /></strong>
                     </div>
-                    <div class="o_piechart" />
+                        <div class="o_piechart_img">
+                            <img src="crm/static/src/img/pie_chart.png" alt="There isn't any won/lost opportunity" class="image-responsive mt8"/>
+                        </div>
+                        <div class="o_piechart_graph" />
                     <div class="o_deals">
                         <strong class="o_lost_deals">
-                            <t t-esc="widget.data.lost_deals"/>
+                            <t t-esc="widget.data.opportunity.lost_opp.length"/>
                         </strong>
-                        <br />Lost Opportunity
+                        <br />Lost Opportunity<br />
+                        <strong><t t-esc="widget.lost_opp_amount"/></strong>
                     </div>
                     <div class="o_funnel">
-                        Probable Turnover
-                        <div class="o_funnelchart" data-type="action" data-name="%(crm.crm_opportunity_report_action_view)d"/>
+                        <b>Probable Turnover</b>
+                        <div class="o_funnelchart_img">
+                            <img src="crm/static/src/img/funnel_chart.png" alt="There isn't any expected revenue for any stage" class="image-responsive mt8"/>
+                        </div>
+                        <a name="crm.crm_opportunity_report_view_pivot">
+                            <div class="o_funnelchart_graph" />
+                        </a>
                     </div>
                 </div>
             </t>
@@ -51,14 +65,17 @@
             </div>
             <t t-if="stage === _.first(widget.data.stage_moves)">
                 <div class="o_new_deals">
-                    <strong><t t-esc="widget.data.new_deals" /></strong>
+                    <strong><t t-esc="widget.data.new_opp" /></strong>
                     <br/> New Opportunity
                 </div>
             </t>
             <t t-else="">
                 <div class="o_pipeline_stage_moves">
-                    <t t-esc="stage.data"/> Opportunity <br />
-                    <t t-esc="stage.percentage" />% conversion
+                    <a class="o_click_action" name="Pipeline">
+                        <t t-esc="stage.data"/> Opportunity <br />
+                        <t t-esc="stage.percentage" /> % Conversion
+                    </a>
+                    <i class="chevron"></i>
                 </div>
             </t>
         </div>

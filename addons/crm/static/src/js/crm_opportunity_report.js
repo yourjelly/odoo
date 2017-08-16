@@ -17,7 +17,7 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
     template: 'crm.pipelineReview',
     events: {
         'click .o_funnelchart': '_onClickFunnelChart',
-        'click .js_opportunity_overpassed, .js_opportunity_to_close': '_onClickOpenOppBox',
+        'click .o_click_action': '_onClickOpenOppBox',
     },
     /**
      * @override
@@ -75,7 +75,7 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
     _getInitiatValues: function () {
         var self = this;
         return this._rpc({
-                model: 'crm.opportunity.history',
+                model: 'crm.stage.history',
                 method: 'get_value',
                 args: [null],
             }).then(function (result) {
@@ -126,60 +126,83 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
             filter.user_channel = session.uid;
         };
         return rpc.query({
-            model: 'crm.opportunity.history',
+            model: 'crm.stage.history',
             method: 'action_pipeline_analysis',
             args: [null, filter],
         }).then(function (result) {
             self.data = result;
+            self.won_opp_amount = _.reduce(self.data.opportunity.won_opp, function(sum, x) {return sum + x;});
+            self.lost_opp_amount = _.reduce(self.data.opportunity.lost_opp, function(sum, x) {return sum + x;});
             self.renderElement();
-            if (self.data.lost_deals !== 0 || self.data.won_deals !== 0) {
-                self._renderGraph();
-            };
-            if (self.data.expected_revenues.length > 0) {
-                self._renderFunnelchart();
-            };
+            self._renderGraph();
+            self._renderFunnelchart();
         });
     },
     /**
      * @private
      */
     _renderFunnelchart: function () {
-        var funnelchart = new FunnelChart({
-                        data: this.data.expected_revenues,
-                        height: 350,
-                        width: 300,
-                        bottomPct: 1/8
-                    });
-        funnelchart.draw('.o_funnelchart');
+        if (this.data.expected_revenues.length > 0) {
+            this.$(".o_funnelchart_img").hide();
+            this.$(".o_funnelchart_graph").show();
+            var funnelchart = new D3Funnel('.o_funnelchart_graph');
+            var options = {
+                chart: {
+                    height: 350,
+                    width: 300,
+                },
+                block: {
+                    dynamicHeight: true,
+                    minHeight: 25,
+                },
+            };
+            funnelchart.draw(this.data.expected_revenues, options);
+        } else {
+            this.$(".o_funnelchart_graph").hide();
+            this.$(".o_funnelchart_img").show();
+        };
     },
     /**
      * @private
      */
     _renderGraph: function () {
-        var totalDeals = this.data.lost_deals + this.data.won_deals;
-        var wonPercent = this.data.won_deals * 100 / totalDeals;
-        var lostPercent = 100 - wonPercent
-        var graphData = [wonPercent, lostPercent];
-        nv.addGraph(function() {
-            var pieChart = nv.models.pieChart()
-                .x(function(d) { return d; })
-                .y(function(d) { return d; })
-                .showLabels(true)
-                .labelThreshold(0.2)
-                .labelType("percent")
-                .showLegend(false)
-                .margin({ "left": 0, "right": 0, "top": 0, "bottom": 0 })
-                .color(['#00ff00', '#ff0000']);
-        var svg = d3.select(".o_piechart").append("svg");
+        if (this.data.opportunity.lost_opp.length === 0 && this.data.opportunity.won_opp.length === 0) {
+            this.$(".o_piechart_img").show();
+            this.$(".o_piechart_graph").hide();
+        } else {
+            this.$(".o_piechart_img").hide();
+            this.$(".o_piechart_graph").show();
+            var totalOpp = this.data.opportunity.lost_opp.length + this.data.opportunity.won_opp.length;
+            var wonPercent = this.data.opportunity.won_opp.length * 100 / totalOpp;
+            var lostPercent = 100 - wonPercent;
+            var graphData = [{
+                    'label': '$ ' + this.won_opp_amount,
+                    'value': wonPercent,
+                },
+                {
+                    'label': '$ ' + this.lost_opp_amount,
+                    'value': lostPercent,
+                }
+            ];
+            nv.addGraph(function() {
+                var pieChart = nv.models.pieChart()
+                    .x(function(d) { return d.label; })
+                    .y(function(d) { return d.value; })
+                    .labelType("percent")
+                    .showLegend(false)
+                    .margin({ "left": 0, "right": 0, "top": 0, "bottom": 0 })
+                    .color(['#00ff00', '#ff0000']);
+            var svg = d3.select(".o_piechart_graph").append("svg");
 
-        svg
-            .attr("height", "15em")
-            .datum(graphData)
-            .call(pieChart);
+            svg
+                .attr("height", "15em")
+                .datum(graphData)
+                .call(pieChart);
 
-        nv.utils.windowResize(pieChart.update);
-        return pieChart;
-        });
+            nv.utils.windowResize(pieChart.update);
+            return pieChart;
+            });
+        }
     },
     /**
      * @private
@@ -256,31 +279,6 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
     /**
      * @private
      */
-    _onClickOpenOppBox: function (event) {
-        event.preventDefault();
-        var $target = $(event.currentTarget);
-        var name = $target.data('name');
-
-        if ($target.hasClass('js_opportunity_overpassed')) {
-            var ids = this.data.opportunity.opp_overpassed;
-        } else {
-            var ids = this.data.opportunity.opp_to_close;
-        }
-
-        if (ids.length !== 0) {
-            return this.do_action({
-                name: name,
-                type: 'ir.actions.act_window',
-                view_mode: 'kanban',
-                views: [[false, 'kanban']],
-                res_model: 'crm.lead',
-                domain: [['id', 'in', ids]],
-            });
-        }
-    },
-    /**
-     * @private
-     */
     _onClickFunnelChart: function(event) {
         event.preventDefault();
         this.do_action({
@@ -288,7 +286,29 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
             type: 'ir.actions.act_window',
             res_model: 'crm.opportunity.report',
             views: [[false, 'pivot']],
-            view_id: 'crm.crm_opportunity_report_view_pivot',
+        });
+    },
+    /**
+     * @private
+     */
+    _onClickOpenOppBox: function (event) {
+        event.preventDefault();
+        var $action = $(event.currentTarget);
+        var domain = this.data.domain;
+
+        if ($action.attr('name') == 'Overdue Opportunity') {
+            domain = [['id', 'in', this.data.opportunity.opp_overpassed]];
+        } else if ($action.attr('name') == 'Pipeline to close') {
+            domain = [['id', 'in', this.data.opportunity.opp_to_close]];
+        }
+
+        return this.do_action({
+            name: $action.attr('name'),
+            type: 'ir.actions.act_window',
+            res_model: 'crm.lead',
+            views: [[false, 'kanban'], [false, 'form'], [false, 'list']],
+            view_mode: "kanban",
+            domain: domain,
         });
     },
 });
