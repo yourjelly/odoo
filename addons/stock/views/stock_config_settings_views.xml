@@ -25,7 +25,6 @@
                                     </div>
                                     <div class="content-group">
                                         <div class="mt16 text-warning" id="use_product_barcode" attrs="{'invisible': [('module_stock_barcode','=',False)]}">
-                                            Save this page and come back here to set up the feature.
                                         </div>
                                     </div>
                                 </div>
@@ -77,7 +76,6 @@
                                     </div>
                                     <div class="content-group">
                                         <div class="mt16 text-warning" id="delivery_ups" attrs="{'invisible': [('module_delivery_ups','=',False)]}">
-                                            Save this page and come back here to set up the feature.
                                         </div>
                                     </div>
                                 </div>
@@ -93,7 +91,6 @@
                                     </div>
                                     <div class="content-group">
                                         <div class="mt16 text-warning" id="delivery_dhl" attrs="{'invisible': [('module_delivery_dhl','=',False)]}">
-                                            Save this page and come back here to set up the feature.
                                         </div>
                                     </div>
                                 </div>
@@ -109,7 +106,6 @@
                                     </div>
                                     <div class="content-group">
                                         <div class="mt16 text-warning" id="delivery_fedex" attrs="{'invisible': [('module_delivery_fedex','=',False)]}">
-                                            Save this page and come back here to set up the feature.
                                         </div>
                                     </div>
                                 </div>
@@ -125,7 +121,6 @@
                                     </div>
                                     <div class="content-group">
                                         <div class="mt16 text-warning" id="delivery_usps" attrs="{'invisible': [('module_delivery_usps','=',False)]}">
-                                            Save this page and come back here to set up the feature.
                                         </div>
                                     </div>
                                 </div>
@@ -141,7 +136,6 @@
                                     </div>
                                     <div class="content-group">
                                         <div class="mt16 text-warning" id="delivery_bpost" attrs="{'invisible': [('module_delivery_bpost','=',False)]}">
-                                            Save this page and come back here to set up the feature.
                                         </div>
                                     </div>
                                 </div>
