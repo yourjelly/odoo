@@ -375,6 +375,7 @@ var options = $.summernote.options;
 //     $target.toggleClass(sValue);
 // };
 // $.summernote.LinkDialog.showLinkDialog = function ($editable, $dialog, linkInfo) {
+	// console.log("inn");
 //     // $editable.data('range').select();
 //     // $editable.data('NoteHistory').recordUndo();
 //     var $editable = $(".note-editable");

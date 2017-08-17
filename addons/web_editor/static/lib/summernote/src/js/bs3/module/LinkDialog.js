@@ -1,6 +1,7 @@
 define([
   'summernote/base/core/key'
 ], function (key) {
+  console.log("LinkDialog loaded");
   var LinkDialog = function (context) {
     var self = this;
     var ui = $.summernote.ui;
@@ -65,6 +66,7 @@ define([
      * @return {Promise}
      */
     this.showLinkDialog = function (linkInfo) {
+      debugger;
       return $.Deferred(function (deferred) {
         var $linkText = self.$dialog.find('.note-link-text'),
         $linkUrl = self.$dialog.find('.note-link-url'),

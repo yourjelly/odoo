@@ -33,7 +33,7 @@
         })();
     </script>
 
-    <t t-set="summer_js_files" t-value="['base/core/func', 'base/core/list', 'base/core/agent', 'base/core/dom', 'base/Context', 'base/module/Dropzone', 'base/module/Codeview', 'base/module/Statusbar', 'base/module/Handle', 'base/module/AutoSync', 'base/module/Placeholder', 'bs3/module/Buttons', 'bs3/module/Toolbar', 'bs3/module/LinkPopover', 'bs3/module/ImagePopover', 'bs3/module/TablePopover', 'bs3/module/AirPopover', 'bs3/module/HelpDialog', 'base/renderer', 'bs3/ui', 'base/core/key', 'base/module/Clipboard',
+    <t t-set="summer_js_files" t-value="['base/core/func', 'base/core/list', 'base/core/agent', 'base/core/dom', 'base/Context', 'base/module/test', 'base/module/Dropzone', 'base/module/Codeview', 'base/module/Statusbar', 'base/module/Handle', 'base/module/AutoSync', 'base/module/Placeholder', 'bs3/module/Buttons', 'bs3/module/Toolbar', 'bs3/module/LinkPopover', 'bs3/module/ImagePopover', 'bs3/module/TablePopover', 'bs3/module/AirPopover', 'bs3/module/HelpDialog', 'base/renderer', 'bs3/ui', 'base/core/key', 'base/module/Clipboard',
 'bs3/module/LinkDialog', 'bs3/module/ImageDialog', 'bs3/module/VideoDialog', 'base/core/range', 'base/module/AutoLink',
 'bs3/module/HintPopover', 'base/core/async', 'base/editing/History', 'base/editing/Style', 'base/editing/Table', 'base/editing/Bullet', 'base/editing/Typing',
 'base/module/Editor', 'base/module/Fullscreen', 'bs3/settings', 'base/summernote-en-US', 'summernote']" />

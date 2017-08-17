@@ -2,8 +2,10 @@ define([
   'jquery',
   'summernote/base/core/func',
   'summernote/base/core/list',
-  'summernote/base/core/agent'
-], function ($, func, list, agent) {
+  'summernote/base/core/agent',
+    'summernote/bs3/module/LinkDialog',
+], function ($, func, list, agent, linkDialog) {
+  console.log('GGGGGGGG', linkDialog)
   var Buttons = function (context) {
     var self = this;
     var ui = $.summernote.ui;
@@ -404,10 +406,11 @@ define([
       });
 
       context.memo('button.link', function () {
+        console.log('FFFF', linkDialog.show)
         return ui.button({
           contents: ui.icon(options.icons.link),
           tooltip: lang.link.link + representShortcut('linkDialog.show'),
-          click: context.createInvokeHandler('linkDialog.show')
+          click: linkDialog.show
         }).render();
       });
 
