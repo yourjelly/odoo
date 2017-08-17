@@ -1996,6 +1996,9 @@ var FieldDomain = AbstractField.extend({
     custom_events: _.extend({}, AbstractField.prototype.custom_events, {
         "domain_changed": "_onDomainSelectorValueChange",
         "domain_selected": "_onDomainSelectorDialogValueChange",
+        open_record: function (event) {
+            event.stopPropagation();
+        },
     }),
     /**
      * @constructor
