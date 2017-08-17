@@ -123,7 +123,6 @@
                                     </div>
                                     <div class="content-group" id="content_mrp_mps">
                                         <div class="text-warning mt16" id="mrp_mps" attrs="{'invisible': [('module_mrp_mps','=',False)]}">
-                                            Save this page and come back here to set up the feature.
                                         </div>
                                     </div>
                                 </div>
