@@ -564,21 +564,21 @@ class PurchaseOrderLine(models.Model):
     def create(self, values):
         line = super(PurchaseOrderLine, self).create(values)
         if line.order_id.state == 'purchase':
-            line._create_or_update_picking(values)
+            line._create_or_update_picking()
             msg = _("Extra line with %s ") % (line.product_id.display_name,)
             line.order_id.message_post(body=msg)
         return line
 
     @api.multi
     def write(self, values):
-        if 'product_qty' in values:
-            self.filtered(lambda l: l.order_id.state == 'purchase')._create_or_update_picking(values)
         result = super(PurchaseOrderLine, self).write(values)
         # Update expected date of corresponding moves
         if 'date_planned' in values:
             self.env['stock.move'].search([
                 ('purchase_line_id', 'in', self.ids), ('state', '!=', 'done')
             ]).write({'date_expected': values['date_planned']})
+        if 'product_qty' in values:
+            self.filtered(lambda l: l.order_id.state == 'purchase')._create_or_update_picking()
         return result
 
     name = fields.Text(string='Description', required=True)
@@ -612,13 +612,13 @@ class PurchaseOrderLine(models.Model):
     date_order = fields.Datetime(related='order_id.date_order', string='Order Date', readonly=True)
 
     orderpoint_id = fields.Many2one('stock.warehouse.orderpoint', 'Orderpoint')
-    move_dest_id = fields.Many2one('stock.move', 'Downstream Move')
+    move_dest_ids = fields.One2many('stock.move', 'created_purchase_line_id', 'Downstream Moves')
 
     @api.multi
-    def _create_or_update_picking(self, vals):
+    def _create_or_update_picking(self):
         for line in self:
             if line.product_id.type in ('product', 'consu'):
-                if float_compare(vals['product_qty'], line.qty_invoiced, line.product_uom.rounding) == -1:
+                if float_compare(line.product_qty, line.qty_invoiced, line.product_uom.rounding) == -1:
                     # If the quantity is now below the invoiced quantity, create an activity on the vendor bill
                     # inviting the user to create a refund.
                     activity = self.env['mail.activity'].sudo().create({
@@ -628,41 +628,23 @@ class PurchaseOrderLine(models.Model):
                         'res_model_id': self.env.ref('account.model_account_invoice').id,
                     })
                     activity._onchange_activity_type_id()
-                diff_purchase_uom_qty = vals['product_qty'] - line.product_qty
-                diff_qty = line.product_uom._compute_quantity(diff_purchase_uom_qty, line.product_id.uom_id)
-                if diff_purchase_uom_qty > 0 or not line.move_ids:
+                
+                
                     # If the user increased quantity of existing line or created a new line
-                    pickings = line.order_id.picking_ids.filtered(lambda x: x.state not in ('done', 'cancel') and x.location_dest_id.usage in ('internal', 'transit'))
-                    picking = pickings and pickings[0] or False
-                    if not picking:
-                        res = line.order_id._prepare_picking()
-                        picking = self.env['stock.picking'].create(res)
-                    move_vals = line._get_move_template(picking)
-                    if not line.move_ids:
-                        move_vals['product_uom_qty'] = vals['product_qty']
-                    else:
-                        move_vals['product_uom_qty'] = diff_purchase_uom_qty
+                pickings = line.order_id.picking_ids.filtered(lambda x: x.state not in ('done', 'cancel') and x.location_dest_id.usage in ('internal', 'transit'))
+                picking = pickings and pickings[0] or False
+                if not picking:
+                    res = line.order_id._prepare_picking()
+                    picking = self.env['stock.picking'].create(res)
+                move_vals = line._prepare_stock_moves(picking)
+                for move_val in move_vals:
                     self.env['stock.move']\
-                        .create(move_vals)\
+                        .create(move_val)\
                         .action_confirm()\
                         .action_assign()
-                else:
                     # Prevent decreasing below received quantity
-                    if float_compare(vals['product_qty'], line.qty_received, line.product_uom.rounding) >= 0:
-                        open_moves = line.move_ids.filtered(lambda m: m.state not in ('done', 'cancel')).sorted(lambda m: m.procurement_id.id)
-                        # We sort by procurement id to decrease first the moves without procurement id,
-                        # the idea is to get rid of the extra moves in priority
-                        for move in open_moves:
-                            if float_compare(move.product_qty, -diff_qty, line.product_id.uom_id.rounding) > 0:
-                                qty_for_move = line.product_uom._compute_quantity(diff_purchase_uom_qty, move.product_uom)
-                                move.product_uom_qty += qty_for_move
-                                move.action_assign()
-                                break
-                            else:
-                                diff_qty += move.product_qty
-                                move.action_cancel()
-                    else:
-                        raise UserError('You cannot decrease the ordered quantity below the received quantity.\n'
+                if float_compare(line.product_qty, line.qty_received, line.product_uom.rounding) < 0:
+                    raise UserError('You cannot decrease the ordered quantity below the received quantity.\n'
                                         'Create a return first.')
 
     @api.multi
@@ -702,7 +684,7 @@ class PurchaseOrderLine(models.Model):
             'location_dest_id': self.order_id._get_destination_location(),
             'picking_id': picking.id,
             'partner_id': self.order_id.dest_address_id.id,
-            'move_dest_ids': False,
+            'move_dest_ids': [(4, x) for x in self.move_dest_ids.ids],
             'state': 'draft',
             'purchase_line_id': self.id,
             'company_id': self.order_id.company_id.id,
