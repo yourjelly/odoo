@@ -961,11 +961,11 @@ var LinkDialog = Dialog.extend({
             this.preview();
         },
     }),
-    init: function (parent, options, editable, linkInfo) {
+    init: function (parent, options, linkInfo) {
         this._super(parent, _.extend({}, {
             title: _t("Link to")
         }, options || {}));
-        this.editable = editable;
+        // this.editable = editable;
         this.data = linkInfo || {};
 
         this.data.className = "";

@@ -1,10 +1,10 @@
 define([
-  'summernote/bs3/module/LinkDialog',
-  'summernote/bs3/module/Buttons',
-], function (linkdialog, buttons) {
-  console.log("okkk innn", linkdialog);
-  // linkdialog.show = function() {
-  //   console.log("ppp");
-  // }
-  // console.log('FFFFFFF', linkdialog.showLinkDialog)
+  'summernote/bs3/settings',
+], function() {
+        var OdooCustom = function(context) {
+        this.initialize = function() {
+            $.summernote.context = context;
+        }
+    }
+    $.summernote.options.modules.OdooCustom = OdooCustom
 });
