@@ -31,11 +31,6 @@ class ProcurementGroup(models.Model):
             result['sale_line_id'] = values['sale_line_id']
         return result
 
-    def _merge_domain(self, values, rule, group_id):
-        result = super(ProcurementGroup, self)._merge_domain(values, rule, group_id)
-        if values.get('sale_line_id', False):
-            result = result + [('sale_line_id', '=', values['sale_line_id'].id)]
-        return result
 
 class StockPicking(models.Model):
     _inherit = 'stock.picking'

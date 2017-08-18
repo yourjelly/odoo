@@ -28,6 +28,8 @@ class StockMove(models.Model):
 
     purchase_line_id = fields.Many2one('purchase.order.line',
         'Purchase Order Line', ondelete='set null', index=True, readonly=True, copy=False)
+    created_purchase_line_id = fields.Many2one('purchase.order.line',
+        'Created Purchase Order Line', ondelete='set null', readonly=True, copy=False)
 
     @api.multi
     def _get_price_unit(self):
