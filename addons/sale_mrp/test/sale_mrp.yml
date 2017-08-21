@@ -79,30 +79,7 @@
 -
   !python {model: sale.order, id: sale_order_so0}: |
     self.action_confirm()
--
-  I verify that a procurement has been generated for sale order
--
-  !python {model: procurement.order, id: False}: |
-    so = self.env['sale.order'].browse(ref("sale_order_so0"))
-    procs = self.search([('origin','=',so.name)])
-    assert procs, 'No Procurements!'
--
-  Then I click on the "Run Procurement" button
--
-  !python {model: procurement.order, id: False}: |
-    so = self.env['sale.order'].browse(ref("sale_order_so0"))
-    procs = self.search([('origin','like',so.name)])
-    procs.run()
--
-  I verify that a procurement state is "running"
--
-  !python {model: procurement.order, id: False}: |
-    so = self.env['sale.order'].browse(ref("sale_order_so0"))
-    procs = self.search([('origin','like',so.name)])
-    # Check that all procurement are running
-    for procu in procs:        
-        assert procu.state == u'running', 'Procurement with id %d should be with a state "running" but is with a state : %s!' %(procu.id,procu.state)
--
+- 
   I verify that a manufacturing order has been generated, and that its name and reference are correct
 -
   !python {model: sale.order, id: sale_order_so0}: |
