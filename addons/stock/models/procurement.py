@@ -57,7 +57,7 @@ class ProcurementGroup(models.Model):
 
     @api.model
     def run(self, values, doraise=True):
-        for key in ('product_id','product_qty','location_id', 'name'):
+        for key in ('product_id', 'product_uom', 'product_qty','location_id', 'name', 'origin'):
             assert key in values
         values.setdefault('company_id', self.env['res.company']._company_default_get('procurement.group'))
         values.setdefault('priority', '1')
@@ -132,7 +132,7 @@ class ProcurementGroup(models.Model):
             'partner_id': rule.partner_address_id.id or (values['group_id'] and values['group_id'].partner_id.id) or False,
             'location_id': rule.location_src_id.id,
             'location_dest_id': values['location_id'].id,
-            'move_dest_ids': values.get('move_dest_id', False) and [(4, values['move_dest_id'].id)] or [],
+            'move_dest_ids': values.get('move_dest_ids', False) and [(4, x) for x in values['move_dest_ids']] or [],
             'rule_id': rule.id,
             'procure_method': rule.procure_method,
             'origin': values['origin'],
@@ -197,8 +197,8 @@ class ProcurementGroup(models.Model):
                         values2 = values.copy()
                         values2.update({
                             'location_id': moves[0].location_id.id, 
-                            'move_dest_id': moves[0].id, 
-                            'move_ids': [(5)], 
+                            'move_dest_ids': [moves[0].id], 
+                            'move_ids': [(5)],  #TODO: better to remove...
                             'rule_id': False})
                         self.run(values2)
 

@@ -615,7 +615,7 @@ class StockMove(models.Model):
             'product_qty': self.product_uom_qty,
             'product_uom': self.product_uom,
             'location_id': self.location_id,
-            'move_dest_id': self,
+            'move_dest_ids': [self.id],
             'group_id': group_id,
             'route_ids': self.route_ids,
             'warehouse_id': self.warehouse_id or self.picking_id.picking_type_id.warehouse_id or self.picking_type_id.warehouse_id,
