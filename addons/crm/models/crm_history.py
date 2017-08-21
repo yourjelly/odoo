@@ -74,16 +74,16 @@ class History(models.Model):
         else:
             average_days = 0
 
-        stages = self.env['crm.stage'].search([], order='sequence')
+        stages = self.env['crm.stage'].search_read([], ['name', 'sequence'], order='sequence')
         stage_moves = []
         for stage in stages:
-            result = self.env['crm.stage.history'].search_count([('res_id', 'in', records.ids), ('stage_name', '=', stage.name)])
+            result = self.env['crm.stage.history'].search_count([('res_id', 'in', records.ids), ('stage_name', '=', stage['name'])])
             if total_opp != 0:
                 percentage = (result * 100) / total_opp
             else:
                 percentage = 0
-            stage_moves.append({'name': stage.name,
-                                'sequence': stage.sequence,
+            stage_moves.append({'name': stage['name'],
+                                'sequence': stage['sequence'],
                                 'data': result,
                                 'percentage': percentage})
 
@@ -94,10 +94,10 @@ class History(models.Model):
                 'expected_revenues': expected_revenues.items(),
                 'domain': domain}
 
-    def get_value(self):
-        list_of_users = self.env['res.users'].search([('sale_team_id', '!=', None)])
-        users = [{'name': user.name, 'id': user.id} for user in list_of_users]
-        list_of_sale_team = self.env['crm.team'].search([])
-        sales_team = [{'name': team.name, 'id': team.id} for team in list_of_sale_team]
+    def get_value(self, company_id):
+        users = self.env['res.users'].search_read([('sale_team_id', '!=', None)], ['name'])
+        sales_team = self.env['crm.team'].search_read([], ['name'])
+        currency_id = self.env['res.company'].search([('id', '=', company_id)], limit=1).currency_id.id
         return {'users': users,
-                'sales_team': sales_team}
+                'sales_team': sales_team,
+                'currency_id': currency_id}

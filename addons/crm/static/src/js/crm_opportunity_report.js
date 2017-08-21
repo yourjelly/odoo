@@ -1,7 +1,6 @@
 odoo.define('crm.opportunity_report', function (require) {
 "use strict";
 
-var ActionManager = require('web.ActionManager');
 var ControlPanelMixin = require('web.ControlPanelMixin');
 var core = require('web.core');
 var crashManager = require('web.crash_manager');
@@ -60,6 +59,9 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
         };
         return this.update_control_panel(status, {clear: true});
     },
+    /**
+     * @private
+     */
     reload: function () {
         this.options = this._getOptions();
         this.$searchview_buttons = $(QWeb.render('crm.searchView', {options: this.options,
@@ -74,13 +76,15 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
      */
     _getInitiatValues: function () {
         var self = this;
+        var company_id = session.company_id;
         return this._rpc({
                 model: 'crm.stage.history',
                 method: 'get_value',
-                args: [null],
+                args: [null, company_id],
             }).then(function (result) {
                 self.users = result.users;
                 self.salesTeam = result.sales_team;
+                self.currency = session.get_currency(result.currency_id);
         });
     },
     /**
@@ -88,23 +92,23 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
      */
     _getOptions: function () {
         var options = this.options || {
-                    date: {filter: 'this_week'},
+                    date: {filter: 'This Week'},
                     my_channel: this.active_id ? false : true,
                     my_pipeline: this.active_id ? false : true,
                     salesTeam: this.active_id ? [this.active_id] : []
         };
 
         var dateFilter = options.date.filter;
-        if (dateFilter === 'this_week') {
+        if (dateFilter === 'This Week') {
             options.date.start_date = moment().startOf('week').format('MM-DD-YYYY');
             options.date.end_date = moment().endOf('week').format('MM-DD-YYYY');
-        } else if (dateFilter === 'this_month') {
+        } else if (dateFilter === 'This Month') {
             options.date.start_date = moment().startOf('month').format('MM-DD-YYYY');
             options.date.end_date = moment().endOf('month').format('MM-DD-YYYY');
-        } else if (dateFilter === 'this_quarter') {
+        } else if (dateFilter === 'This Quarter') {
             options.date.start_date = moment().startOf('quarter').format('MM-DD-YYYY');
             options.date.end_date = moment().endOf('quarter').format('MM-DD-YYYY');
-        } else if (dateFilter === 'this_year') {
+        } else if (dateFilter === 'This Year') {
             options.date.start_date = moment().startOf('year').format('MM-DD-YYYY');
             options.date.end_date = moment().endOf('year').format('MM-DD-YYYY');
         }
@@ -134,14 +138,14 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
             self.won_opp_amount = _.reduce(self.data.opportunity.won_opp, function(sum, x) {return sum + x;});
             self.lost_opp_amount = _.reduce(self.data.opportunity.lost_opp, function(sum, x) {return sum + x;});
             self.renderElement();
-            self._renderGraph();
-            self._renderFunnelchart();
+            self._renderPieChart();
+            self._renderFunnelChart();
         });
     },
     /**
      * @private
      */
-    _renderFunnelchart: function () {
+    _renderFunnelChart: function () {
         if (this.data.expected_revenues.length > 0) {
             this.$(".o_funnelchart_img").hide();
             this.$(".o_funnelchart_graph").show();
@@ -165,7 +169,7 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
     /**
      * @private
      */
-    _renderGraph: function () {
+    _renderPieChart: function () {
         if (this.data.opportunity.lost_opp.length === 0 && this.data.opportunity.won_opp.length === 0) {
             this.$(".o_piechart_img").show();
             this.$(".o_piechart_graph").hide();
@@ -176,11 +180,11 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
             var wonPercent = this.data.opportunity.won_opp.length * 100 / totalOpp;
             var lostPercent = 100 - wonPercent;
             var graphData = [{
-                    'label': '$ ' + this.won_opp_amount,
+                    'label': this.currency.symbol + this.won_opp_amount,
                     'value': wonPercent,
                 },
                 {
-                    'label': '$ ' + this.lost_opp_amount,
+                    'label': this.currency.symbol + this.lost_opp_amount,
                     'value': lostPercent,
                 }
             ];
@@ -241,7 +245,7 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
         this.$searchview_buttons.find('.o_crm_opportunity_report_date_filter').click(function (event) {
             self.options.date.filter = $(this).data('filter');
             var error = false;
-            if ($(this).data('filter') === 'custom') {
+            if ($(this).data('filter') === 'Custom') {
                 var dateFrom = self.$searchview_buttons.find('.o_datepicker_input[name="date_from"]');
                 var dateTo = self.$searchview_buttons.find('.o_datepicker_input[name="date_to"]');
                 if (dateFrom.length > 0){
@@ -296,9 +300,9 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
         var $action = $(event.currentTarget);
         var domain = this.data.domain;
 
-        if ($action.attr('name') == 'Overdue Opportunity') {
+        if ($action.attr('name') === 'Overdue Opportunity') {
             domain = [['id', 'in', this.data.opportunity.opp_overpassed]];
-        } else if ($action.attr('name') == 'Pipeline to close') {
+        } else if ($action.attr('name') === 'Pipeline to close') {
             domain = [['id', 'in', this.data.opportunity.opp_to_close]];
         }
 
