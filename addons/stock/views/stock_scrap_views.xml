@@ -25,6 +25,7 @@
             <field name="arch" type="xml">
                 <form string="Scrap">
                     <header>
+                        <button name="action_validate" states="draft" string="Validate" type="object" class="oe_highlight"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,done" />
                     </header>
                     <sheet>
