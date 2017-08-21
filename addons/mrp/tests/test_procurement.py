@@ -38,11 +38,16 @@ class TestProcurement(TestMrpCommon):
         self.assertEqual(production_product_6.state, 'confirmed', 'Production order should be for Confirmed state')
 
         # Check procurement for product 4 created or not.
-        procurement = self.env['procurement.order'].search([('group_id', '=', production_product_6.procurement_group_id.id), ('product_id', '=', self.product_4.id)])
-        self.assertTrue(procurement, 'No procurement are created !')
-        self.assertEqual(procurement.state, 'running', 'Procurement order should be in state running')
-
-        produce_product_4 = procurement.production_id
+        # Check it created a purchase order
+        
+        
+#         procurement = self.env['procurement.order'].search([('group_id', '=', production_product_6.procurement_group_id.id), ('product_id', '=', self.product_4.id)])
+#         self.assertTrue(procurement, 'No procurement are created !')
+#         self.assertEqual(procurement.state, 'running', 'Procurement order should be in state running')
+#         
+        move_raw_product4 = production_product_6.move_raw_ids.filtered(lambda x: x.product_id == self.product_4)
+        produce_product_4 = self.env['mrp.production'].search([('product_id', '=', self.product_4.id), 
+                                                               ('move_dest_ids', '=', move_raw_product4[0].id)])#procurement.production_id
         # produce product
         self.assertEqual(produce_product_4.availability, 'waiting', "Consume material not available")
 
@@ -76,7 +81,6 @@ class TestProcurement(TestMrpCommon):
         # Check procurement and Production state for product 4.
         produce_product_4.button_mark_done()
         self.assertEqual(produce_product_4.state, 'done', 'Production order should be in state done')
-        self.assertEqual(procurement.state, 'done', 'Procurement order should be in state done')
 
         # Produce product 6
         # ------------------
@@ -135,8 +139,10 @@ class TestProcurement(TestMrpCommon):
             'product_uom_id': self.product_4.uom_id.id,
         })
 
+        #TODO: maybe check that an order is correctly created
+
         # check that procurement are correctly created
-        procurement = self.env['procurement.order'].search(
-            [('group_id', '=', production_product_4.procurement_group_id.id),
-             ('product_id', 'in', self.bom_1.bom_line_ids.mapped('product_id.id'))])
-        self.assertEqual(len(procurement), 2)
+#         procurement = self.env['procurement.order'].search(
+#             [('group_id', '=', production_product_4.procurement_group_id.id),
+#              ('product_id', 'in', self.bom_1.bom_line_ids.mapped('product_id.id'))])
+#         self.assertEqual(len(procurement), 2)
