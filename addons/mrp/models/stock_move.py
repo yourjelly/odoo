@@ -42,6 +42,7 @@ class StockMoveLine(models.Model):
 class StockMove(models.Model):
     _inherit = 'stock.move'
 
+    created_production_id = fields.Many2one('mrp.production', 'Created Production Order')
     production_id = fields.Many2one(
         'mrp.production', 'Production Order for finished products')
     raw_material_production_id = fields.Many2one(
