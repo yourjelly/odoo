@@ -2331,6 +2331,7 @@ class StockMove(TransactionCase):
             'product_uom_id':self.product1.uom_id.id,
             'scrap_qty': 1,
         })
+        scrap.do_scrap()
         self.assertEqual(scrap.state, 'done')
         move = scrap.move_id
         self.assertEqual(move.state, 'done')
@@ -2347,6 +2348,7 @@ class StockMove(TransactionCase):
             'product_uom_id':self.product4.uom_id.id,
             'scrap_qty': 1,
         })
+        scrap.do_scrap()
         self.assertEqual(scrap.state, 'done')
         move = scrap.move_id
         self.assertEqual(move.state, 'done')
@@ -2377,7 +2379,7 @@ class StockMove(TransactionCase):
             'product_uom_id':self.product1.uom_id.id,
             'scrap_qty': 1,
         })
-
+        scrap.do_scrap()
         self.assertEqual(move1.state, 'confirmed')
         self.assertEqual(len(move1.move_line_ids), 0)
 
