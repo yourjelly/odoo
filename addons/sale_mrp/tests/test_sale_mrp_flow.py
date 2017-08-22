@@ -163,6 +163,8 @@ class TestSaleMrpFlow(common.TransactionCase):
 
         # Check quantity, unit of measure and state of manufacturing order.
         # -----------------------------------------------------------------
+        self.env['procurement.group'].run_scheduler()
+        mnf_product_a = self.env['mrp.production'].search([('product_id', '=', product_a.id)])
 
         self.assertTrue(mnf_product_a, 'Manufacturing order not created.')
         self.assertEqual(mnf_product_a.product_qty, 10, 'Wrong product quantity in manufacturing order.')
@@ -219,7 +221,7 @@ class TestSaleMrpFlow(common.TransactionCase):
         # <><><><><><><><><><><><><><><><><><><><><><>
 
         # FP Todo: find a better way to look for the production order
-        mnf_product_d = self.MrpProduction.search(order='id desc', limit=1)
+        mnf_product_d = self.MrpProduction.search([('product_id', '=', product_d.id), ('move_dest_ids.group_id', '=', order.procurement_group_id.id)], order='id desc', limit=1)
         # Check state of production order D.
         self.assertEqual(mnf_product_d.state, 'confirmed', 'Manufacturing order should be confirmed.')
 
