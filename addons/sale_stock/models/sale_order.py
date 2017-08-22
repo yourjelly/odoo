@@ -64,6 +64,7 @@ class SaleOrder(models.Model):
     @api.multi
     def action_cancel(self):
         self.picking_ids.action_cancel()
+        # TODO: maybe not the best idea
         self.write({ 'procurement_group_id': False })
         return super(SaleOrder, self).action_cancel()
 
@@ -252,7 +253,7 @@ class SaleOrderLine(models.Model):
 
             if not line.order_id.procurement_group_id:
                 line.order_id.procurement_group_id = self.env["procurement.group"].create({
-                    'name': line.name, 'move_type': line.order_id.picking_policy,
+                    'name': line.order_id.name, 'move_type': line.order_id.picking_policy,
                     'sale_id': line.order_id.id
                 })
             vals = line._prepare_order_line_procurement(group_id=line.order_id.procurement_group_id)
