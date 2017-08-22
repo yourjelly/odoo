@@ -65,7 +65,7 @@ class ProcurementGroup(models.Model):
         rule = self._get_rule(values)
 
         if not rule:
-            if doraise and False:
+            if doraise:
                 raise UserError(_('No procurement rule found.'))
             else:
                 msg = _('No procurement rule found. Update the inventory tab of the product form.')

@@ -158,7 +158,7 @@ class PurchaseRequisitionLine(models.Model):
             'taxes_id': [(6, 0, taxes_ids)],
             'date_planned': requisition.schedule_date or fields.Date.today(),
             'account_analytic_id': self.account_analytic_id.id,
-            'move_dest_id': self.move_dest_id and self.move_dest_id.id or False
+            'move_dest_ids': self.move_dest_id and [(4, self.move_dest_id.id)] or []
         }
 
 
@@ -305,19 +305,17 @@ class ProcurementGroup(models.Model):
             return super(ProcurementGroup, self)._run(values, rule, doraise)
             
         Requisition = self.env['purchase.requisition']
-        Warehouse = self.env['stock.warehouse']
-        res = []
-        warehouse_id = Warehouse.search([('company_id', '=', procurement.company_id.id)], limit=1).id
         requisition_id = Requisition.create({
             'origin': values.get('origin', False),
             'date_end': values['date_planned'],
-            'warehouse_id': warehouse_id,
+            'warehouse_id': values.get('warehouse_id') and values['warehouse_id'].id or False,
             'company_id': values['company_id'].id,
             'picking_type_id': rule.picking_type_id.id,
             'line_ids': [(0, 0, {
                 'product_id': values['product_id'].id,
                 'product_uom_id': values['product_uom'].id,
-                'product_qty': values['product_qty']
+                'product_qty': values['product_qty'],
+                'move_dest_id': values.get('move_dest_ids') and values['move_dest_ids'][0] or False,
             })],
         })
         return True
