@@ -36,7 +36,7 @@ class ProcurementGroup(models.Model):
 
             # create the MO as SUPERUSER because the current user may not have the rights to do it (mto product launched by a sale for example)
             production = ProductionSudo.create(self._prepare_mo_vals(values, rule, bom))
-            origin_production = values.get('move_dest_ids') and self.env['stock.move'].browse(values.get('move_dest_ids')[0]).raw_material_production_id
+            origin_production = values.get('move_dest_ids') and values ['move_dest_ids'][0].raw_material_production_id or False
             orderpoint = values.get('orderpoint_id')
             if orderpoint:
                 production.message_post_with_view('mail.message_origin_link',
@@ -78,6 +78,6 @@ class ProcurementGroup(models.Model):
             'propagate': rule.propagate,
             'picking_type_id': rule.picking_type_id.id or values['warehouse_id'].manu_type_id.id,
             'company_id': values['company_id'].id,
-            'move_dest_ids': values.get('move_dest_ids') and [(4, x) for x in values['move_dest_ids']] or False,
+            'move_dest_ids': values.get('move_dest_ids') and [(4, x.id) for x in values['move_dest_ids']] or False,
         }
 
