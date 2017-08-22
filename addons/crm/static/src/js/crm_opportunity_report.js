@@ -280,18 +280,21 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
         });
 
     },
+    on_reverse_breadcrumb: function() {
+        this.actionManager.do_push_state({});
+        this.update_cp();
+    },
     /**
      * @private
      */
     _onClickFunnelChart: function(event) {
         event.preventDefault();
-        var self = this;
         this.do_action({
             name: 'pipeline',
             type: 'ir.actions.act_window',
             res_model: 'crm.opportunity.report',
             views: [[false, 'pivot']],
-        });
+        }, {on_reverse_breadcrumb: this.on_reverse_breadcrumb});
     },
     /**
      * @private
@@ -317,7 +320,7 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
             views: [[false, 'kanban'], [false, 'form'], [false, 'list']],
             view_mode: "kanban",
             domain: domain,
-        });
+        }, {on_reverse_breadcrumb: this.on_reverse_breadcrumb});
     },
 });
 
