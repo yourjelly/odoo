@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.addons.mrp.tests.common import TestMrpCommon
-
+from odoo.exceptions import UserError
 
 class TestProcurement(TestMrpCommon):
 
@@ -130,19 +130,12 @@ class TestProcurement(TestMrpCommon):
         mto_route.product_categ_selectable = True
         all_categ_id.write({'route_ids': [(6, 0, [mto_route.id])]})
 
-        # create MO
-        production_product_4 = self.env['mrp.production'].create({
-            'name': 'MO/Test-00002',
-            'product_id': self.product_4.id,
-            'product_qty': 1,
-            'bom_id': self.bom_1.id,
-            'product_uom_id': self.product_4.uom_id.id,
-        })
-
-        #TODO: maybe check that an order is correctly created
-
-        # check that procurement are correctly created
-#         procurement = self.env['procurement.order'].search(
-#             [('group_id', '=', production_product_4.procurement_group_id.id),
-#              ('product_id', 'in', self.bom_1.bom_line_ids.mapped('product_id.id'))])
-#         self.assertEqual(len(procurement), 2)
+        # create MO, but check it raises error as components are in make to order and not everyone has 
+        with self.assertRaises(UserError):
+            production_product_4 = self.env['mrp.production'].create({
+                'name': 'MO/Test-00002',
+                'product_id': self.product_4.id,
+                'product_qty': 1,
+                'bom_id': self.bom_1.id,
+                'product_uom_id': self.product_4.uom_id.id,
+            })

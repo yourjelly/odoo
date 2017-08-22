@@ -319,8 +319,8 @@ class ProcurementGroup(models.Model):
                                 qty -= substract_quantity[orderpoint.id]
                                 qty_rounded = float_round(qty, precision_rounding=orderpoint.product_uom.rounding)
                                 if qty_rounded > 0:
-                                    new_procurement = self.env['procurement.group'].run(
-                                        orderpoint._prepare_procurement_values(qty_rounded, **group['procurement_values']))
+                                    self.env['procurement.group'].run(
+                                        orderpoint._prepare_procurement_values(qty_rounded, **group['procurement_values']), doraise=False)
                                     self._procurement_from_orderpoint_post_process([orderpoint.id])
                                 if use_new_cursor:
                                     cr.commit()
