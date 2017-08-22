@@ -144,7 +144,7 @@ class ProcurementGroup(models.Model):
             'orderpoint_id': values.get('orderpoint_id', False) and values.get('orderpoint_id').id,
             'taxes_id': [(6, 0, taxes_id.ids)],
             'order_id': po.id,
-            'move_dest_ids': [(4, x) for x in values.get('move_dest_ids', [])],
+            'move_dest_ids': [(4, x.id) for x in values.get('move_dest_ids', [])],
         }
 
     def _prepare_purchase_order(self, values, rule, partner):
