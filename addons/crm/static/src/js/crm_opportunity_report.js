@@ -15,7 +15,7 @@ var _t = core._t;
 var OpportunityReport = Widget.extend(ControlPanelMixin, {
     template: 'crm.pipelineReview',
     events: {
-        'click .o_funnelchart': '_onClickFunnelChart',
+        'click .o_funnelchart_graph': '_onClickFunnelChart',
         'click .o_click_action': '_onClickOpenOppBox',
     },
     /**
@@ -180,12 +180,12 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
             var wonPercent = this.data.opportunity.won_opp.length * 100 / totalOpp;
             var lostPercent = 100 - wonPercent;
             var graphData = [{
-                    'label': this.currency.symbol + this.won_opp_amount,
-                    'value': wonPercent,
-                },
-                {
                     'label': this.currency.symbol + this.lost_opp_amount,
                     'value': lostPercent,
+                },
+                {
+                    'label': this.currency.symbol + this.won_opp_amount,
+                    'value': wonPercent,
                 }
             ];
             nv.addGraph(function() {
@@ -195,7 +195,7 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
                     .labelType("percent")
                     .showLegend(false)
                     .margin({ "left": 0, "right": 0, "top": 0, "bottom": 0 })
-                    .color(['#00ff00', '#ff0000']);
+                    .color(['#ff0000', '#00ff00']);
             var svg = d3.select(".o_piechart_graph").append("svg");
 
             svg
@@ -285,6 +285,7 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
      */
     _onClickFunnelChart: function(event) {
         event.preventDefault();
+        var self = this;
         this.do_action({
             name: 'pipeline',
             type: 'ir.actions.act_window',
@@ -299,17 +300,20 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
         event.preventDefault();
         var $action = $(event.currentTarget);
         var domain = this.data.domain;
-
+        var context = {default_type: 'opportunity'}
         if ($action.attr('name') === 'Overdue Opportunity') {
             domain = [['id', 'in', this.data.opportunity.opp_overpassed]];
         } else if ($action.attr('name') === 'Pipeline to close') {
             domain = [['id', 'in', this.data.opportunity.opp_to_close]];
+        } else {
+            context.group_by = 'stage_id';
         }
 
         return this.do_action({
             name: $action.attr('name'),
             type: 'ir.actions.act_window',
             res_model: 'crm.lead',
+            context: context,
             views: [[false, 'kanban'], [false, 'form'], [false, 'list']],
             view_mode: "kanban",
             domain: domain,

@@ -70,7 +70,7 @@ class History(models.Model):
                 total_days += day_close.days
 
         if total_days != 0:
-            average_days = round(total_days / total_opp, 3)
+            average_days = round(total_days / total_opp)
         else:
             average_days = 0
 

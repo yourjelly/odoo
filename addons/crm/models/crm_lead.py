@@ -286,7 +286,7 @@ class Lead(models.Model):
             vals['email_from'] = partner.email
         # context: no_log, because subtype already handle this
         record = super(Lead, self.with_context(context, mail_create_nolog=True)).create(vals)
-        if self._context.get('default_type') == 'opportunity':
+        if context.get('default_type') == 'opportunity':
             record.create_crm_opportunity_history(vals)
         return record
 
