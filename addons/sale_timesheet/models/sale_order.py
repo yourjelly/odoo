@@ -182,7 +182,7 @@ class SaleOrderLine(models.Model):
         project = self._get_project()
         planned_hours = self._convert_qty_company_hours()
         return {
-            'name': '%s:%s' % (self.order_id.origin or '', self.product_id.name),
+            'name': '%s:%s' % (self.order_id.name or '', self.product_id.name),
             'planned_hours': planned_hours,
             'remaining_hours': planned_hours,
             'partner_id': self.order_id.partner_id.id,
