@@ -230,7 +230,7 @@ class SaleOrderLine(models.Model):
             'sale_line_id': self.id,
             'date_planned': date_planned.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
             'location_id': self.order_id.partner_shipping_id.property_stock_customer,
-            'route_ids': self.route_id and [self.route_id] or [],
+            'route_ids': self.route_id,
             'warehouse_id': self.order_id.warehouse_id or False,
             'partner_dest_id': self.order_id.partner_shipping_id
         }
