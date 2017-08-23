@@ -22,6 +22,7 @@
         padding: 10px;
         overflow-x: auto;
         .o_crm_stage {
+            cursor: pointer;
             flex: 1;
             min-width: 16%;
             position: relative;
@@ -41,7 +42,6 @@
                 font-weight: bold;
             }
             .percentage {
-                cursor: pointer;
                 font-size: 18px;
                 font-weight: bold;
             }
@@ -50,13 +50,12 @@
                     border-left-color: #e8e8e8;
                 }
             }
-            &:first-child {
-                text-align: center;
-                padding-top: 20px;
-            }
         }
     }
     .o_pipeline_content {
+        .o_click_action_pivot, a{
+            cursor: pointer;
+        }
         display: flex;
         font-size: 1.2em;
         b {
@@ -91,7 +90,6 @@
             margin-top: 5%;
         }
         .o_funnel {
-            cursor: pointer;
             right: 0;
             text-align: center;
         }

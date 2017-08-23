@@ -14,17 +14,24 @@
                     <div class="o_crm_pipeline_box">
                         <div class="o_pipeline_side_box">
                             <t t-set="opportunity_value" t-value="widget.data.opportunity" />
-                            <b><t t-esc="opportunity_value.open_opp" /></b> Open Opportunities <br />
+                            <a class="o_click_action">
+                                <b><t t-esc="opportunity_value.open_opp" /></b> Open Opportunities <br />
+                            </a>
                             <t t-if="opportunity_value.opp_to_close.length !== 0">
-                                <a class="o_click_action" name="Pipeline to close"><b><t t-esc="opportunity_value.opp_to_close.length" /></b> opportunities to close by the end of <t t-esc="widget.options.date.end_date" />.</a><br />
+                                <a class="o_click_action" name="Pipeline to close">
+                                    <b><t t-esc="opportunity_value.opp_to_close.length" /></b> opportunities to close by the end of 
+                                    <t t-if="widget.options.date.filter == 'Custom'"><t t-esc="widget.options.date.end_date" /></t>
+                                    <t t-else=""><t t-esc="widget.options.date.filter" /></t> (<t t-esc="widget.currency.symbol" /><t t-esc="opportunity_value.opp_to_close_amount || 0" />).</a><br />
                             </t>
                             <t t-if="opportunity_value.opp_overpassed.length !== 0">
-                                <a class="o_click_action" name="Overdue Opportunity" ><b><t t-esc="opportunity_value.opp_overpassed.length"/></b> opportunities with expected closing date overpassed with amount <t t-esc="widget.currency.symbol" /><t t-esc="opportunity_value.opp_overpassed_amount || 0" />.</a>
+                                <a class="o_click_action" name="Overdue Opportunity" ><b><t t-esc="opportunity_value.opp_overpassed.length"/></b> opportunities with expected closing date overpassed (<t t-esc="widget.currency.symbol" /><t t-esc="opportunity_value.opp_overpassed_amount || 0" />).</a>
                             </t>
                         </div>
                         <div class="o_pipeline_side_box">
-                            <b><t t-esc="widget.data.average_days"/> Days</b>
-                            <br/>average time to close a deal
+                            <a class="o_click_action_pivot">
+                                <b><t t-esc="widget.data.average_days"/> Days</b>
+                                <br/>average time to close an opportunity
+                            </a>
                         </div>
                     </div>
                     <div class="o_deals">
@@ -37,7 +44,7 @@
                         <div class="o_piechart_img">
                             <img src="crm/static/src/img/pie_chart.png" alt="There isn't any won/lost opportunity" class="image-responsive mt8"/>
                         </div>
-                        <div class="o_piechart_graph" />
+                        <div class="o_piechart_graph o_click_action_pivot" />
                     <div class="o_deals">
                         <b class="o_lost_deals">
                             <t t-esc="widget.data.opportunity.lost_opp.length"/>
@@ -51,7 +58,7 @@
                             <img src="crm/static/src/img/funnel_chart.png" alt="There isn't any expected revenue for any stage" class="image-responsive mt8"/>
                         </div>
                         <a name="crm.crm_opportunity_report_view_pivot">
-                            <div class="o_funnelchart_graph" />
+                            <div class="o_funnelchart_graph o_click_action_pivot" />
                         </a>
                     </div>
                 </div>
@@ -60,7 +67,7 @@
     </t>
 
     <t t-name="o_crm_opportunity_stage">
-        <div class="o_crm_stage">
+        <div class="o_crm_stage o_click_action">
             <t t-if="stage === _.first(widget.data.stage_moves)">
                 <div class="name text-primary">New Opportunities</div>
                 <div class="percentage">
@@ -69,10 +76,12 @@
             </t>
             <t t-else="">
                 <div class="name text-primary"><t t-esc="stage.name" /></div>
-                <div class="percentage o_click_action" name="Pipeline">
+                <div class="percentage">
                     <t t-esc="stage.percentage" /> % Conversion
                 </div>
-                <t t-esc="stage.data" /> Opportunity
+                <t t-esc="stage.data" />
+                <t t-if="stage.data &lt; 2">Opportunity</t>
+                <t t-else="">Opportunities</t>
             </t>
         </div>
     </t>

@@ -39,6 +39,7 @@ class History(models.Model):
             'won_opp': [],
             'lost_opp': [],
             'opp_to_close': [],
+            'opp_to_close_amount': 0,
             'open_opp': 0,
             'opp_overpassed': [],
             'opp_overpassed_amount': 0,
@@ -62,6 +63,7 @@ class History(models.Model):
                     opportunity['opp_overpassed_amount'] += record.planned_revenue
                 elif record.date_deadline and record.date_deadline <= end_date:
                     opportunity['opp_to_close'].append(record.id)
+                    opportunity['opp_to_close_amount'] += record.planned_revenue
 
             if record.day_close:
                 total_days += record.day_close

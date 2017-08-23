@@ -15,8 +15,8 @@ var _t = core._t;
 var OpportunityReport = Widget.extend(ControlPanelMixin, {
     template: 'crm.pipelineReview',
     events: {
-        'click .o_funnelchart_graph': '_onClickFunnelChart',
-        'click .o_click_action': '_onClickOpenOppBox',
+        'click .o_click_action_pivot': '_onClickActionPivot',
+        'click .o_click_action': '_onClickOppBox',
     },
     /**
      * @override
@@ -38,7 +38,7 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
      */
     start: function () {
         this._super.apply(this, arguments);
-        this.reload();
+        this._reload();
     },
     // We need this method to rerender the control panel when going back in the breadcrumb
     /**
@@ -59,10 +59,15 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
         };
         return this.update_control_panel(status, {clear: true});
     },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
     /**
      * @private
      */
-    reload: function () {
+    _reload: function () {
         this.options = this._getOptions();
         this.$searchview_buttons = $(QWeb.render('crm.searchView', {options: this.options,
             users: this.users,
@@ -180,11 +185,11 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
             var wonPercent = this.data.opportunity.won_opp.length * 100 / totalOpp;
             var lostPercent = 100 - wonPercent;
             var graphData = [{
-                    'label': this.currency.symbol + this.lost_opp_amount,
+                    'label': "Lost: " + this.currency.symbol + this.lost_opp_amount,
                     'value': lostPercent,
                 },
                 {
-                    'label': this.currency.symbol + this.won_opp_amount,
+                    'label': "Won" + this.currency.symbol + this.won_opp_amount,
                     'value': wonPercent,
                 }
             ];
@@ -260,13 +265,13 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
             if (error) {
                 crashManager.show_warning({data: {message: _t('Date cannot be empty')}});
             } else {
-                self.reload();
+                self._reload();
             }
         });
         this.$searchview_buttons.find('.o_crm_opportunity_report_filter_extra').click(function (event) {
             var optionValue = $(this).data('filter');
             self.options[optionValue] = !self.options[optionValue];
-            self.reload();
+            self._reload();
         });
         // custom filter on salesmen and sales channels
         self.$searchview_buttons.find('[data-filter="salesmen"]').select2("val", self.options.users);
@@ -276,21 +281,21 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
             self.options.users = _.map(users, function(num){ return parseInt(num)})
             var salesTeam = self.$searchview_buttons.find('[data-filter="sales_channel"]').val();
             self.options.salesTeam = _.map(salesTeam, function(num){ return parseInt(num)})
-            self.reload();
+            self._reload();
         });
+    },
 
-    },
-    on_reverse_breadcrumb: function() {
-        this.actionManager.do_push_state({});
-        this.update_cp();
-    },
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
     /**
      * @private
      */
-    _onClickFunnelChart: function(event) {
+    _onClickActionPivot: function(event) {
         event.preventDefault();
         this.do_action({
-            name: 'pipeline',
+            name: 'Pipeline',
             type: 'ir.actions.act_window',
             res_model: 'crm.opportunity.report',
             views: [[false, 'pivot']],
@@ -299,7 +304,7 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
     /**
      * @private
      */
-    _onClickOpenOppBox: function (event) {
+    _onClickOppBox: function (event) {
         event.preventDefault();
         var $action = $(event.currentTarget);
         var domain = this.data.domain;
@@ -313,7 +318,7 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
         }
 
         return this.do_action({
-            name: $action.attr('name'),
+            name: $action.attr('name') || 'Pipeline',
             type: 'ir.actions.act_window',
             res_model: 'crm.lead',
             context: context,
@@ -322,6 +327,11 @@ var OpportunityReport = Widget.extend(ControlPanelMixin, {
             domain: domain,
         }, {on_reverse_breadcrumb: this.on_reverse_breadcrumb});
     },
+    on_reverse_breadcrumb: function() {
+        this.actionManager.do_push_state({});
+        this.update_cp();
+    },
+
 });
 
 core.action_registry.add('crm_opportunity_report', OpportunityReport);
