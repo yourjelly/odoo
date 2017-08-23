@@ -209,6 +209,10 @@ class ProcurementGroup(models.Model):
         return False
 
     @api.model
+    def _get_exceptions_domain(self):
+        return [('procure_method', '=', 'make_to_order'), ('move_orig_ids', '=', False)]
+
+    @api.model
     def run_scheduler(self, use_new_cursor=False, company_id=False):
         ''' Call the scheduler in order to check the running procurements (super method), to check the minimum stock rules
         and the availability of moves. This function is intended to be run for all the companies at the same time, so
@@ -224,10 +228,13 @@ class ProcurementGroup(models.Model):
             # Search all confirmed stock_moves and try to assign them
             confirmed_moves = self.env['stock.move'].search([('state', '=', 'confirmed')], limit=None, order='priority desc, date_expected asc')
             for moves_chunk in split_every(100, confirmed_moves.ids):
-                # TDE CLEANME: muf muf
                 self.env['stock.move'].browse(moves_chunk).action_assign()
                 if use_new_cursor:
                     self._cr.commit()
+                    
+            exception_moves = self.env['stock.move'].search(self._get_exceptions_domain())
+            for move in exception_moves:
+                self.env['procurement.group'].run(move._prepare_procurement_from_move(), doraise=False)
             if use_new_cursor:
                 self._cr.commit()
         finally:
