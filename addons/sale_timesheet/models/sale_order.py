@@ -197,4 +197,3 @@ class SaleOrderLine(models.Model):
             task_values = line._prepare_service_task_values()
             task = self.env['project.task'].create(task_values)
             self.write({'task_id': task.id})
-        return task
