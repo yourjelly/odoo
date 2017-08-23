@@ -190,3 +190,6 @@ class ProcurementGroup(models.Model):
             domain += (('group_id', '=', group.id),)
         return domain
 
+    @api.model
+    def _get_exceptions_domain(self):
+        return super(ProcurementGroup, self)._get_exceptions_domain() + [('created_purchase_line_id', '=', False)]
