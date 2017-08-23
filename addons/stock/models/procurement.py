@@ -175,35 +175,14 @@ class ProcurementGroup(models.Model):
 
             # create the move as SUPERUSER because the current user may not have the rights to do it (mto product launched by a sale for example)
             # Search if picking with move for it exists already:
-            added_to_existing = False
             group_id = False
             if rule.group_propagation_option == 'propagate':
                 group_id = values.get('group_id', False) and values['group_id'].id
             elif rule.group_propagation_option == 'fixed':
                 group_id = rule.group_id.id
 
-            if rule.merge_moves:
-                moves = self.env['stock.move'].search(self._merge_domain(values, rule, group_id), limit=1)
-
-                if moves:
-                    added_to_existing = True
-                    data = {
-                        'product_uom_qty': moves[0].product_uom_qty + values['product_qty'],
-                        'move_dest_ids': [(4, x.id) for x in values.get('move_dest_ids', [])],
-                    }
-                    moves[0].write(data)
-                    #Need to add a procurement if the move is mto again
-                    if rule.procure_method == 'make_to_order':
-                        values2 = values.copy()
-                        values2.update({
-                            'location_id': moves[0].location_id.id, 
-                            'move_dest_ids': moves[0], 
-                            'rule_id': False})
-                        self.run(values2)
-
-            if not added_to_existing:
-                data = self._get_stock_move_values(values, rule, group_id)
-                self.env['stock.move'].sudo().create(data).assign_picking()
+            data = self._get_stock_move_values(values, rule, group_id)
+            self.env['stock.move'].sudo().create(data).assign_picking()
             return True
         return False
 
@@ -399,5 +378,4 @@ class ProcurementRule(models.Model):
     propagate_warehouse_id = fields.Many2one(
         'stock.warehouse', 'Warehouse to Propagate',
         help="The warehouse to propagate on the created move/procurement, which can be different of the warehouse this rule is for (e.g for resupplying rules from another warehouse)")
-    merge_moves = fields.Boolean('Merge Moves')
 
