@@ -46,6 +46,5 @@
   I check a purchase quotation was created.
 -
   !python {model: sale.order, id: sale_order_route_dropship01}: |
-    import pdb; pdb.set_trace()
     purchase = self.env['purchase.order.line'].search([('sale_line_id', '=', self.order_line.ids[0])]).order_id
     assert purchase, 'No Purchase Quotation is created'
