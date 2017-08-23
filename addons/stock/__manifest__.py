@@ -76,6 +76,7 @@
         'test/stock_users.yml',
         'test/packing.yml',
         'test/packingneg.yml',
+        'test/procrule.yml',
         'test/wiseoperator.yml',
     ],
     'installable': True,
