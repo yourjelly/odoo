@@ -96,14 +96,16 @@ class SaleOrderLine(models.Model):
 
     @api.multi
     def write(self, values):
-        result = super(SaleOrderLine, self).write(values)
+        lines = False
         if 'product_uom_qty' in values:
             precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
             lines = self.filtered(
                 lambda r: r.state == 'sale' and float_compare(r.product_uom_qty, values['product_uom_qty'], precision_digits=precision) == -1)
-            if lines:
-                lines._action_procurement_create()
-        return result
+        res = super(SaleOrderLine, self).write(values)
+        if lines:
+            lines._action_procurement_create()
+        return res
+    
 
     @api.depends('order_id.state')
     def _compute_invoice_status(self):
