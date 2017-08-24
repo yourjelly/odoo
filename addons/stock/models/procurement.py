@@ -146,16 +146,6 @@ class ProcurementGroup(models.Model):
             'priority': values.get('priority', "1"),
         }
 
-    def _merge_domain(self, values, rule, group_id):
-        return [
-            ('group_id', '=', group_id), #extra logic?
-            ('location_id', '=', rule.location_src_id.id),
-            ('location_dest_id', '=', values['location_id'].id),
-            ('picking_type_id', '=', rule.picking_type_id.id),
-            ('picking_id.printed', '=', False),
-            ('picking_id.state', 'in', ['draft', 'confirmed', 'waiting', 'partially_available', 'assigned']),
-            ('product_id', '=', values['product_id'].id)]
-
     @api.multi
     def _run(self, values, rule, doraise=True):
         if rule.action == 'move':
