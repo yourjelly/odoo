@@ -305,20 +305,7 @@ return core.Class.extend({
                 viewType = viewType === 'tree' ? 'list' : viewType;
                 innerFieldsView.type = viewType;
                 attrs.views[viewType] = self._processFieldsView(_.extend({}, innerFieldsView));
-
-                // default_order is like:
-                //   'name,id desc'
-                // but we need it like:
-                //   [{name: 'id', asc: false}, {name: 'name', asc: true}]
-                var defaultOrder = innerFieldsView.arch.attrs.default_order;
-                if (defaultOrder) {
-                    attrs.orderedBy = _.map(defaultOrder.split(','), function (order) {
-                        order = order.trim().split(' ');
-                        return {name: order[0], asc: order[1] !== 'desc'};
-                    });
-                }
             });
-            delete field.views;
         }
 
         if (field.type === 'one2many' || field.type === 'many2many') {
@@ -362,6 +349,27 @@ return core.Class.extend({
                 }
             }
         }
+
+        if (!_.isEmpty(field.views)) {
+            // default_order is like:
+            //   'name,id desc'
+            // but we need it like:
+            //   [{name: 'id', asc: false}, {name: 'name', asc: true}]
+            var defaultOrder = attrs.views[mode].arch.attrs.default_order;
+            if (defaultOrder) {
+                attrs.orderedBy = _.map(defaultOrder.split(','), function (order) {
+                    order = order.trim().split(' ');
+                    return {name: order[0], asc: order[1] !== 'desc'};
+                });
+            }
+
+            // check if list is editable
+            if (attrs.views[mode].arch.attrs.editable) {
+                 attrs.keepChangesUnsorted = true;
+             }
+             delete field.views;
+        }
+
         return attrs;
     },
     /**

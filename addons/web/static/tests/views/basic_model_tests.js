@@ -381,7 +381,13 @@ QUnit.module('Views', {
                 model.notifyChanges(resultID, {product_ids: {operation: 'DELETE', ids: [newRecordID]}});
 
                 assert.deepEqual(model.localData[x2mListID]._changes, [{
+                    operation: 'ADD', id: newRecordID,
+                }, {
+                    operation: 'UPDATE', id: newRecordID,
+                }, {
                     operation: 'DELETE', id: existingRecordID,
+                }, {
+                    operation: 'DELETE', id: newRecordID,
                 }], "_changes should be correct");
                 record = model.get(resultID);
                 assert.strictEqual(record.data.product_ids.count, 0,

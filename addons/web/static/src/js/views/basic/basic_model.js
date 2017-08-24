@@ -337,7 +337,6 @@ var BasicModel = AbstractModel.extend({
         }
 
         if (element.type === 'record') {
-
             var data = _.extend({}, element.data, element._changes);
             var relDataPoint;
             for (var fieldName in data) {
@@ -412,15 +411,27 @@ var BasicModel = AbstractModel.extend({
 
         // here, type === 'list'
         // apply potential changes (only for x2many lists)
-        element = this._applyX2ManyOperations(element);
-        var listData = _.map(element.data, function (elemID) {
-            return self.get(elemID, options);
-        });
+        if (!element.keepChangesUnsorted) {
+            element = this._applyX2ManyOperations(element);
+        } else {
+            // Apply operation we want to be sorted
+            var count = element.keepChangesUnsortedCount || 0;
+            var range = {from: 0, to: count};
+            element = this._applyX2ManyOperations(element, range);
+        }
+        this._sortList(element);
+        if (element._changes && element.keepChangesUnsorted) {
+            // Apply the rest of operations that will be not sorted
+            range = {from: count, to: element._changes.length};
+            element = this._applyX2ManyOperations(element, range);
+        }
         var list = {
             aggregateValues: _.extend({}, element.aggregateValues),
             context: _.extend({}, element.context),
             count: element.count,
-            data: listData,
+            data: _.map(element.data, function (elemID) {
+                return self.get(elemID, options);
+            }),
             domain: element.domain.slice(0),
             fields: element.fields,
             getContext: element.getContext,
@@ -434,7 +445,7 @@ var BasicModel = AbstractModel.extend({
             offset: element.offset,
             orderedBy: element.orderedBy,
             res_id: element.res_id,
-            res_ids: element.res_ids,
+            res_ids: element.res_ids.slice(0),
             type: 'list',
             value: element.value,
             viewType: element.viewType,
@@ -442,7 +453,6 @@ var BasicModel = AbstractModel.extend({
         if (element.fieldsInfo) {
             list.fieldsInfo = element.fieldsInfo;
         }
-        this._sortList(list);
         return list;
     },
     /**
@@ -877,7 +887,7 @@ var BasicModel = AbstractModel.extend({
         if (list.type === 'record') {
             return;
         }
-        list.offset = 0;
+        list.keepChangesUnsortedCount = list.data.length; // We want to force the sort even if this is an editable list
         if (list.orderedBy.length === 0) {
             list.orderedBy.push({name: fieldName, asc: true});
         } else if (list.orderedBy[0].name === fieldName){
@@ -1361,20 +1371,8 @@ var BasicModel = AbstractModel.extend({
                 // Unlink the record of list.
                 list._forceM2MUnlink = true;
             case 'DELETE':
-                // filter out existing operations involving the current
-                // dataPoint, and add a 'DELETE' or 'FORGET' operation only if there is
-                // no 'ADD' operation for that dataPoint, as it would mean
-                // that the record wasn't in the relation yet
-                var idsToRemove = command.ids;
-                list._changes = _.reject(list._changes, function (change) {
-                    var idInCommands = _.contains(command.ids, change.id);
-                    if (idInCommands && change.operation === 'ADD') {
-                        idsToRemove = _.without(idsToRemove, change.id);
-                    }
-                    return idInCommands;
-                });
-                _.each(idsToRemove, function (id) {
-                    var operation = list._forceM2MUnlink ? 'FORGET': 'DELETE';
+                var operation = list._forceM2MUnlink ? 'FORGET': 'DELETE';
+                _.each(command.ids, function (id) {
                     list._changes.push({operation: operation, id: id});
                 });
                 break;
@@ -1426,16 +1424,21 @@ var BasicModel = AbstractModel.extend({
      * @returns {Object} element of type list in which the commands have been
      *   applied
      */
-    _applyX2ManyOperations: function (list) {
+    _applyX2ManyOperations: function (list, range) {
         if (!list.static) {
             // this function only applies on x2many lists
             return list;
         }
         var self = this;
         list = _.extend({}, list);
-        list.data = list.data.slice(0);
         list.res_ids = list.res_ids.slice(0);
-        _.each(list._changes, function (change) {
+        var changes;
+        if (range) {
+            changes = list._changes ? list._changes.slice(range.from, range.to) : null;
+        } else {
+            changes = list._changes ? list._changes.slice(0) : null;
+        }
+        _.each(changes, function (change) {
             var relRecord;
             if (change.id) {
                 relRecord = self.localData[change.id];
@@ -2144,6 +2147,7 @@ var BasicModel = AbstractModel.extend({
                     static: true,
                     type: 'list',
                     orderedBy: fieldInfo.orderedBy,
+                    keepChangesUnsorted: fieldInfo.keepChangesUnsorted,
                     parentID: record.id,
                     rawContext: rawContext,
                     relationField: field.relation_field,
@@ -2742,6 +2746,7 @@ var BasicModel = AbstractModel.extend({
             if (command.operation === 'DELETE' ||
                     command.operation === 'FORGET' ||
                     command.operation === 'REMOVE_ALL') {
+                isValid = true; // Must be valid even after UPDATE operation
                 return;
             }
             var recordData = self.get(command.id, {raw: true}).data;
@@ -2834,6 +2839,7 @@ var BasicModel = AbstractModel.extend({
             offset: params.offset || (type === 'record' ? _.indexOf(res_ids, res_id) : 0),
             openGroupByDefault: params.openGroupByDefault,
             orderedBy: params.orderedBy || [],
+            keepChangesUnsorted: params.keepChangesUnsorted,
             parentID: params.parentID,
             rawContext: params.rawContext,
             relationField: params.relationField,
@@ -3367,7 +3373,9 @@ var BasicModel = AbstractModel.extend({
                         change.id = dataPoint.id;
                     }
                 });
-                list.data.push(dataPoint.id);
+                if (_.contains(list.res_ids, id)) {
+                    list.data.push(dataPoint.id);
+                }
             });
             return list;
         });
@@ -3469,13 +3477,16 @@ var BasicModel = AbstractModel.extend({
             // only sort x2many lists
             return;
         }
+        var self = this;
+
         if (list.orderedBy.length) {
             // sort records according to ordered_by[0]
             var order = list.orderedBy[0];
             var data = list.data;
+            var res_ids = list.res_ids;
             data.sort(function (r1, r2) {
-                var data1 = r1.data;
-                var data2 = r2.data;
+                var data1 = _.extend({}, self.localData[r1].data, self.localData[r1]._changes);
+                var data2 = _.extend({}, self.localData[r2].data, self.localData[r2]._changes);
                 if (data1[order.name] < data2[order.name]) {
                     return order.asc ? -1 : 1;
                 }
@@ -3484,6 +3495,22 @@ var BasicModel = AbstractModel.extend({
                 }
                 return 0;
             });
+
+            // sort res_ids
+            var start = list.offset;
+            var end = list.offset + list.limit;
+            var preSorted = res_ids.slice(0, start), postSorted = res_ids.slice(end);
+
+            var listCache = {};
+            _.mapObject(list._cache, function (val, key) {
+                listCache[val] = key;
+            });
+            var sorted = _.map(data, function (value) {
+                return listCache[value];
+            });
+
+            res_ids.length = 0;
+            res_ids.push.apply(res_ids, preSorted.concat(sorted).concat(postSorted));
         }
     },
     /**
