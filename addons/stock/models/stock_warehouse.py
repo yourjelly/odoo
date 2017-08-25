@@ -788,6 +788,8 @@ class Orderpoint(models.Model):
 
     @api.multi
     def _quantity_in_progress(self):
+        """Return Quantities that are not yet in virtual stock but should be deduced from orderpoint rule
+        (example: purchases created from orderpoints)"""
         return dict(self.mapped(lambda x: (x.id, 0.0)))
 
     @api.constrains('product_id')
@@ -808,11 +810,6 @@ class Orderpoint(models.Model):
             self.product_uom = self.product_id.uom_id.id
             return {'domain':  {'product_uom': [('category_id', '=', self.product_id.uom_id.category_id.id)]}}
         return {'domain': {'product_uom': []}}
-
-    # Return Quantities that are not yet in virtual stock but should be deduced from orderpoint rule
-    # (example: purchases created from orderpoints)
-    def _qty_in_progress(self):
-        return dict.fromkeys(self.ids, 0.0)
 
     def _get_date_planned(self, product_qty, start_date):
         days = self.lead_days or 0.0
