@@ -57,11 +57,13 @@ class ProcurementGroup(models.Model):
 
     @api.model
     def run(self, values, doraise=True):
-        for key in ('product_id', 'product_uom', 'product_qty','location_id', 'name', 'origin'):
+        for key in ('product_id', 'product_uom', 'product_qty','location_id', 'name'):
             assert key in values
+        values.setdefault('origin', '/')
         values.setdefault('company_id', self.env['res.company']._company_default_get('procurement.group'))
         values.setdefault('priority', '1')
         values.setdefault('date_planned', fields.Datetime.now())
+        values.setdefault('group_id', self.env['procurement.group'])
         rule = self._get_rule(values)
 
         if not rule:

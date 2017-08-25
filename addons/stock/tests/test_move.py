@@ -94,10 +94,6 @@ class StockMove(TransactionCase):
 
         # confirmation
         move1.action_confirm()
-        self.assertEqual(move1.state, 'confirmed')
-
-        # assignment
-        move1.action_assign()
         self.assertEqual(move1.state, 'assigned')
         self.assertEqual(len(move1.move_line_ids), 1)
         move_line = move1.move_line_ids[0]
@@ -137,10 +133,6 @@ class StockMove(TransactionCase):
 
         # confirmation
         move1.action_confirm()
-        self.assertEqual(move1.state, 'confirmed')
-
-        # assignment
-        move1.action_assign()
         self.assertEqual(move1.state, 'assigned')
         self.assertEqual(len(move1.move_line_ids), 5)
         move_line = move1.move_line_ids[0]
