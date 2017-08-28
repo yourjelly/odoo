@@ -86,13 +86,13 @@
                                 <td>
                                     <span t-field="pack_operation.product_id"/>
                                     <p t-if="o.picking_type_code == 'outgoing'">
-                                        <span t-field="pack_operation.product_id.description_pickingout"/>
+                                        <span t-field="pack_operation.product_id.sudo().description_pickingout"/>
                                     </p>
                                     <p t-if="o.picking_type_code == 'incoming'">
-                                        <span t-field="pack_operation.product_id.description_pickingin"/>
+                                        <span t-field="pack_operation.product_id.sudo().description_pickingin"/>
                                     </p>
                                     <t t-if="not pack_operation.product_id and pack_operation.package_id">
-                                        <span  t-field="pack_operation.package_id"/>
+                                        <span  t-field="pack_operation.sudo().package_id"/>
                                     </t>
                                 </td>
                                 <t t-if="has_serial_number">
