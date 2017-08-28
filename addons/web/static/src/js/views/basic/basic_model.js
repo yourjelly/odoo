@@ -3465,6 +3465,10 @@ var BasicModel = AbstractModel.extend({
      * @param {Object} list list dataPoint on which changes have been applied
      */
     _sortList: function (list) {
+        if (!list.static) {
+            // only sort x2many lists
+            return;
+        }
         if (list.orderedBy.length) {
             // sort records according to ordered_by[0]
             var order = list.orderedBy[0];

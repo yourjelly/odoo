@@ -2086,4 +2086,44 @@ QUnit.module('Views', {
         model.destroy();
     });
 
+    QUnit.test('js must only sort x2many lists (static)', function (assert) {
+        assert.expect(1);
+
+        this.params.modelName = 'partner_type';
+        this.params.res_id = undefined;
+
+        var BasicModel2 = BasicModel.extend({
+            _sortList: function (list) {
+                var res = this._super.apply(this, arguments);
+                assert.deepEqual(list.res_ids, [12, 15, 14], "should keep the order from the server");
+                return res;
+            },
+        });
+
+        var model = createModel({
+            Model: BasicModel2,
+            data: this.data,
+            mockRPC: function (route, args) {
+                if (route === '/web/dataset/search_read') {
+                    // Simulate randomn sort form the server
+                    return $.when({
+                        length: 3,
+                        records: [
+                            {id: 12, display_name: "gold", date: "2017-01-25"},
+                            {id: 15, display_name: "bronze"},
+                            {id: 14, display_name: "silver"},
+                        ],
+                    });
+                } else {
+                    return this._super(route, args);
+                }
+            },
+        });
+
+        model.load(this.params).then(function (resultID) {
+            var record = model.get(resultID);
+        });
+        model.destroy();
+    });
+
 });});
