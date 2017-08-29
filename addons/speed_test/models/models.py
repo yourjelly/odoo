@@ -71,7 +71,7 @@ class speed_test(models.Model):
 
     @sql_count(target=10)
     def check_track(self):
-        self.track = '1'
+        self.track = str(random.randint(10,4000))
 
     def check(self):
         # Without Cache
