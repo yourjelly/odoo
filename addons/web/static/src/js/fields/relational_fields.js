@@ -1628,6 +1628,9 @@ var FormFieldMany2ManyTags = FieldMany2ManyTags.extend({
 });
 
 var KanbanFieldMany2ManyTags = FieldMany2ManyTags.extend({
+    events: _.extend({}, FieldMany2ManyTags.prototype.events, {
+        'click .o_tag': '_onClickTag'
+    }),
     _render: function () {
         var self = this;
         this.$el.empty().addClass('o_field_many2manytags o_kanban_tags');
@@ -1642,6 +1645,8 @@ var KanbanFieldMany2ManyTags = FieldMany2ManyTags.extend({
                     $tag.hide();
                 } else {
                     $tag.addClass('o_tag o_tag_color_' + m2m.data[self.colorField]);
+                    $tag.data('res_id', m2m.res_id);
+                    $tag.data('display_name', m2m.data.display_name);
                 }
             } else {
                 // display tags in grey by default
@@ -1649,6 +1654,14 @@ var KanbanFieldMany2ManyTags = FieldMany2ManyTags.extend({
             }
         });
     },
+    _onClickTag: function(e) {
+        var data = $(e.currentTarget).data();
+        this.trigger_up('search_by_tag', {
+            res_id: data.res_id,
+            field_name: this.name,
+            display_name: data.display_name,
+        });
+    }
 });
 
 var FieldMany2ManyCheckBoxes = AbstractField.extend({

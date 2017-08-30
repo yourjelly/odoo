@@ -603,6 +603,11 @@ var SearchView = Widget.extend({
             current_category = filter.category;
         });
     },
+    search_by_tag: function(data){
+        if (this.filter_menu) {
+            this.filter_menu.search_by_tag(data);
+        }
+    }
 });
 
 _.extend(SearchView, {

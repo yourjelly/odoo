@@ -28,6 +28,11 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
             _.extend(this.env, this._process_search_data(d.domains, d.contexts, d.groupbys));
             this.active_view.controller.reload(_.extend({}, this.env));
         },
+        search_by_tag: function(event) {
+            if (this.searchview){
+                this.searchview.search_by_tag(event.data);
+            }
+        },
         switch_view: function(event) {
             if ('res_id' in event.data) {
                 this.env.currentId = event.data.res_id;

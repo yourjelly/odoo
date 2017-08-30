@@ -380,6 +380,16 @@ return Widget.extend({
         this.append_proposition();
         this.toggle_custom_filter_menu(false);
     },
+    search_by_tag: function(data) {
+        _.invoke(this.propositions, 'destroy');
+        this.propositions = [];
+        this.append_proposition();
+        var prop = this.propositions[0];
+        prop.$(".o_searchview_extended_prop_field").val(data.field_name).change();
+        prop.$(".o_searchview_extended_prop_op").val('=').change();
+        prop.$(".o_searchview_extended_prop_value input").val(data.display_name).change();
+        this.commit_search();
+    },
 });
 
 });
