@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="stock_warn_insufficient_qty_form_view" model="ir.ui.view">
+        <field name="name">stock.warn.insufficient.qty</field>
+        <field name="model">stock.warn.insufficient.qty</field>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <form>
+                <div>
+                    The product
+                    <strong><field name="product_id" readonly="True"/></strong> is not available in sufficient quantity
+                    <span class="oe_inline" groups="stock.group_stock_multi_locations"> in 
+                        <strong><field name="location_id" readonly="True"/></strong>.
+                    </span>
+                </div>
+                <div attrs="{'invisible': [('quants', '=', [])]}">
+                    <strong>Product Inventory: </strong>
+                    <field name="quants" readonly="True"/>
+                </div>
+                <div>
+                    Are you sure you want to confirm this operation? This may lead to inconsistencies in your inventory.
+                </div>
+                <footer>
+                    <button name="cancel_button" string="Discard" class="btn-primary" special="cancel"/>
+                    <!-- <button string="Confirm" name="action_done" type="object" class="btn-default"/> -->
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="stock_warn_insufficient_qty_scrap_form_view" model="ir.ui.view">
+        <field name="name">stock.warn.insufficient.qty.scrap</field>
+        <field name="model">stock.warn.insufficient.qty.scrap</field>
+        <field name="inherit_id" ref="stock.stock_warn_insufficient_qty_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='cancel_button']" position="after">
+                <button string="Confirm" name="action_done" type="object" class="btn-default"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="stock_scrap_wizard_form_view2" model="ir.ui.view">
+        <field name="name">stock.scrap.wizard.form2</field>
+        <field name="model">stock.scrap.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Scrap">
+                <group>
+                    <group>
+                        <field name="product_id" domain="[('id', 'in', context.get('product_ids', []))]"/>
+                        <label for="scrap_qty"/>
+                        <div class="o_row">
+                            <field name="scrap_qty"/>
+                            <field name="product_uom_id" groups="product.group_uom"/>
+                        </div>
+                    </group>
+                    <group>
+                        <field name="picking_id" invisible="1"/>
+                        <field name="tracking" invisible="1"/>
+                        <field name="lot_id" attrs="{'invisible': [('tracking', '=', 'none')], 'required': [('tracking', '!=', 'none')]}" groups="stock.group_production_lot"/>
+                        <field name="package_id" groups="stock.group_tracking_lot"/>
+                        <field name="owner_id" groups="stock.group_tracking_owner"/>
+                        <field name="location_id" groups="stock.group_stock_multi_locations" options="{'no_open': True, 'no_create': True}"/>
+                        <field name="scrap_location_id" groups="stock.group_stock_multi_locations" options="{'no_open': True, 'no_create': True}" />
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_validate" string="Done" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-default" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_stock_scrap_warning_wizard" model="ir.actions.act_window">
+        <field name="name">Warning</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">stock.warn.insufficient.qty.scrap</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="stock.stock_warn_insufficient_qty_scrap_form_view"/>
+        <field name="context">{}</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>
