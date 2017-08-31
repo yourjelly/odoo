@@ -97,7 +97,7 @@
             <field name="arch" type="xml">
                 <form string="Unbuild Orders">
                     <header>
-                        <button name="action_unbuild" string="Unbuild" type="object" states="draft" class="oe_highlight"/>
+                        <button name="action_validate" string="Unbuild" type="object" states="draft" class="oe_highlight"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
                     </header>
                     <sheet>
@@ -128,7 +128,7 @@
                                 <field name="location_id" groups="stock.group_stock_multi_locations"/>
                                 <field name="location_dest_id" groups="stock.group_stock_multi_locations"/>
                                 <field name="has_tracking" invisible="1"/>
-                                <field name="lot_id" attrs="{'invisible': [('has_tracking', '=', 'none')]}" groups="stock.group_production_lot"/>
+                                <field name="lot_id" attrs="{'invisible': [('has_tracking', '=', 'none')], 'required': [('has_tracking', '!=', 'none')]}" groups="stock.group_production_lot"/>
                             </group>
                         </group>
                     </sheet>
