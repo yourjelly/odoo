@@ -201,6 +201,21 @@ class Repair(models.Model):
         self.mapped('operations').write({'state': 'draft'})
         return self.write({'state': 'draft'})
 
+    def action_validate(self):
+        self.ensure_one()
+        lot_id = self.lot_id or None
+        avail_qty = self.env['stock.quant']._get_available_quantity(self.product_id, self.location_id, lot_id, strict=True)
+        if avail_qty >= self.product_qty:
+            self.action_repair_confirm()
+        else:
+            action = self.env['stock.scrap.wizard'].raise_warning()
+            action['context'] = {
+                    'default_lot_id': self.lot_id.id,
+                    'default_product_id': self.product_id.id,
+                    'default_product_uom_id': self.product_uom.id,
+                    'default_repair_id': self.id}
+            return action
+
     @api.multi
     def action_repair_confirm(self):
         """ Repair order state is set to 'To be invoiced' when invoice method
