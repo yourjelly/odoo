@@ -32,7 +32,7 @@
         position: relative;
         .o-flex-display();
         .o-flex-flow(column, nowrap);
-        .o-justify-content(space-between);
+        .o-justify-content(baseline);
         padding: @o-kanban-dashboard-vpadding @o-kanban-dashboard-hpadding;
 
         @media (max-width: @screen-xs-max) {
@@ -177,11 +177,22 @@
         }
 
         .o_kanban_card_header + .container.o_kanban_card_content {
+            .o-flex-display();
+            .o-flex(1,0,auto);
+            .o-flex-flow(column,nowrap);
+            .o-justify-content(flex-end);
             margin-top: @o-kanban-dashboard-vpadding * 2;
             padding-right: 0;
             padding-left: 0;
+            width: 100%;
+
+            a {
+                .o-text-overflow(inline-block);
+                position: relative;
+            }
 
             .o_kanban_primary_bottom {
+                margin-top: @o-kanban-dashboard-vpadding;
                 margin-bottom: -@o-kanban-dashboard-vpadding;
 
                 &.bottom_block {
