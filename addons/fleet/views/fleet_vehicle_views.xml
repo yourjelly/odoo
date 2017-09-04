@@ -327,7 +327,7 @@
         <field name="model">fleet.service.type</field>
         <field name="arch" type="xml">
             <tree string="Service types" editable="top">
-                <field name="name" />
+                <field name="name" /> 
                 <field name="category" invisible="1"/>
             </tree>
         </field>
