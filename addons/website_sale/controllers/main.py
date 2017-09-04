@@ -142,15 +142,20 @@ class WebsiteSale(http.Controller):
         quantity = product._context.get('quantity') or 1
         product = product.with_context(quantity=quantity)
 
-        visible_attrs_ids = product.attribute_line_ids.filtered(lambda l: len(l.value_ids) > 1).mapped('attribute_id').ids
+        visible_attrs_ids = product.attribute_line_ids.mapped('attribute_id').ids
         to_currency = request.website.get_current_pricelist().currency_id
         attribute_value_ids = []
+        visible_attribute_ids = []
+        
         for variant in product.product_variant_ids:
             if to_currency != product.currency_id:
                 price = variant.currency_id.compute(variant.website_public_price, to_currency) / quantity
             else:
                 price = variant.website_public_price / quantity
-            visible_attribute_ids = [v.id for v in variant.attribute_value_ids if v.attribute_id.id in visible_attrs_ids]
+            # visible_attribute_ids = [v.id for v in variant.attribute_value_ids if v.attribute_id.id in visible_attrs_ids]
+            for att_id in visible_attrs_ids:
+                result = request.env['product.attribute.value'].search([('attribute_id','=',att_id)])
+                visible_attribute_ids.append(result.ids)
             attribute_value_ids.append([variant.id, visible_attribute_ids, variant.website_price, price])
         return attribute_value_ids
 
@@ -358,10 +363,24 @@ class WebsiteSale(http.Controller):
 
         return request.render("website_sale.cart", values)
 
+    def _create_variant(self, product_new_id, product_tmpl_id):
+        atttr_list = json.loads(product_new_id)
+        print "\n",atttr_list,"attrs_list >>>>>>>>>>>>><<<<<<<<\n"
+        vals = {
+            'product_tmpl_id': int(product_tmpl_id),
+            'attribute_value_ids': [(4, attr[1]) for attr in atttr_list],
+        }
+        # record = request.env['product.product'].search([('product_tmpl_id','=',product_tmpl_id),('attribute_value_ids','=',atttr_list)])
+        # print record
+        # if not record.exists():
+        new_product = request.env['product.product'].create(vals)
+        return new_product.id
+
     @http.route(['/shop/cart/update'], type='http', auth="public", methods=['POST'], website=True, csrf=False)
-    def cart_update(self, product_id, add_qty=1, set_qty=0, **kw):
+    def cart_update(self, product_id, product_new_id=False, product_tmpl_id=False, add_qty=1, set_qty=0, **kw):
+        new_product = self._create_variant(product_new_id, product_tmpl_id)
         request.website.sale_get_order(force_create=1)._cart_update(
-            product_id=int(product_id),
+            product_id=new_product,
             add_qty=float(add_qty),
             set_qty=float(set_qty),
             attributes=self._filter_attributes(**kw),

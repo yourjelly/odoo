@@ -304,20 +304,41 @@ odoo.define('website_sale.website_sale', function (require) {
             var $ul = $(ev.target).closest('.js_add_cart_variants');
             var $parent = $ul.closest('.js_product');
             var $product_id = $parent.find('.product_id').first();
+            var $product_new_id = $parent.find('.product_new_id').first();
             var $price = $parent.find(".oe_price:first .oe_currency_value");
             var $default_price = $parent.find(".oe_default_price:first .oe_currency_value");
             var $optional_price = $parent.find(".oe_optional:first .oe_currency_value");
             var variant_ids = $ul.data("attribute_value_ids");
+            var attribute_ids = $ul.data("attribute_ids");
             if(_.isString(variant_ids)) {
                 variant_ids = JSON.parse(variant_ids.replace(/'/g, '"'));
             }
+            console.log(variant_ids,"variant_ids");
+            if(_.isString(attribute_ids)) {
+                attribute_ids = JSON.parse(attribute_ids.replace(/'/g, '"'));
+            }
+            console.log(attribute_ids,"attribute_ids");
+
+            var new_val = [];
+
+            for (var i in attribute_ids) {
+                new_val.push([attribute_ids[i]]);
+            }
+
             var values = [];
             var unchanged_values = $parent.find('div.oe_unchanged_value_ids').data('unchanged_value_ids') || [];
 
             $parent.find('input.js_variant_change:checked, select.js_variant_change').each(function () {
                 values.push(+$(this).val());
+                var attr_id = $(this).data('attribute-id-new');
+                for (var j in new_val) {
+                    if (new_val[j][0] == attr_id) {
+                        new_val[j][1] = +$(this).val();
+                    }
+                }
             });
             values =  values.concat(unchanged_values);
+            console.log(values,"values");
 
             $parent.find("label").removeClass("text-muted css_not_available");
 
@@ -364,11 +385,15 @@ odoo.define('website_sale.website_sale', function (require) {
                 $parent.removeClass("css_not_available");
                 $product_id.val(product_id);
                 $parent.find("#add_to_cart").removeClass("disabled");
-            } else {
-                $parent.addClass("css_not_available");
-                $product_id.val(0);
-                $parent.find("#add_to_cart").addClass("disabled");
+            } 
+            else {
+                // console.log(json.stringify(new_val));
+                //$parent.addClass("css_not_available");
+                $product_new_id.val(JSON.stringify(new_val));
+                // console.log($product_new_id.val(JSON.stringify(new_val)));
+                //$parent.find("#add_to_cart").addClass("disabled");
             }
+
         });
 
         $('div.js_product', oe_website_sale).each(function () {

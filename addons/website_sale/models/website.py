@@ -157,7 +157,7 @@ class Website(models.Model):
         affiliate_id = request.session.get('affiliate_id')
         salesperson_id = affiliate_id if self.env['res.users'].sudo().browse(affiliate_id).exists() else request.website.salesperson_id.id
         addr = partner.address_get(['delivery', 'invoice'])
-        default_user_id = partner.parent_id.user_id.id or partner.user_id.id
+        defaultult_user_id = partner.parent_id.user_id.id or partner.user_id.id
         values = {
             'partner_id': partner.id,
             'pricelist_id': pricelist.id,
@@ -165,7 +165,7 @@ class Website(models.Model):
             'team_id': self.salesteam_id.id,
             'partner_invoice_id': addr['invoice'],
             'partner_shipping_id': addr['delivery'],
-            'user_id': salesperson_id or self.salesperson_id.id or default_user_id,
+            'user_id': salesperson_id or self.salesperson_id.id,
         }
         company = self.company_id or pricelist.company_id
         if company:
@@ -204,7 +204,6 @@ class Website(models.Model):
 
         # Test validity of the sale_order_id
         sale_order = self.env['sale.order'].sudo().browse(sale_order_id).exists() if sale_order_id else None
-
         # create so if needed
         if not sale_order and (force_create or code):
             # TODO cache partner_id session
@@ -234,12 +233,12 @@ class Website(models.Model):
             # case when user emptied the cart
             if not request.session.get('sale_order_id'):
                 request.session['sale_order_id'] = sale_order.id
-
             # check for change of pricelist with a coupon
             pricelist_id = pricelist_id or partner.property_product_pricelist.id
 
             # check for change of partner_id ie after signup
             if sale_order.partner_id.id != partner.id and request.website.partner_id.id != partner.id:
+
                 flag_pricelist = False
                 if pricelist_id != sale_order.pricelist_id.id:
                     flag_pricelist = True
@@ -272,17 +271,20 @@ class Website(models.Model):
                     update_pricelist = True
 
             if code and code != sale_order.pricelist_id.code:
+
                 code_pricelist = self.env['product.pricelist'].sudo().search([('code', '=', code)], limit=1)
                 if code_pricelist:
                     pricelist_id = code_pricelist.id
                     update_pricelist = True
             elif code is not None and sale_order.pricelist_id.code:
+
                 # code is not None when user removes code and click on "Apply"
                 pricelist_id = partner.property_product_pricelist.id
                 update_pricelist = True
 
             # update the pricelist
             if update_pricelist:
+
                 request.session['website_sale_current_pl'] = pricelist_id
                 values = {'pricelist_id': pricelist_id}
                 sale_order.write(values)
@@ -293,7 +295,6 @@ class Website(models.Model):
         else:
             request.session['sale_order_id'] = None
             return None
-
         return sale_order
 
     def sale_get_transaction(self):
