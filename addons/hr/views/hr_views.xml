@@ -192,7 +192,7 @@
                             </div>
                         </div>
                         <div class="oe_kanban_details">
-                            <strong>
+                            <strong class="o_kanban_record_title">
                                 <field name="name"/>
                             </strong>
                             <field name="category_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
