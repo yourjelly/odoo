@@ -201,10 +201,10 @@
                                     <strong class="o_kanban_record_title"><span><field name="name"/></span></strong>
                                 </div>
                                 <div>
-                                  <field name="tag_ids"/>
+                                    <span class="o_kanban_record_subtitle"><field name="contact_name"/></span>
                                 </div>
                                 <div>
-                                    <span><field name="contact_name"/></span>
+                                  <field name="tag_ids"/>
                                 </div>
                                 <div class="o_kanban_record_bottom">
                                     <div class="oe_kanban_bottom_left">
