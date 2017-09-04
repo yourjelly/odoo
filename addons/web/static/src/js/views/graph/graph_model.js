@@ -87,10 +87,12 @@ return AbstractModel.extend({
         if ('domain' in params) {
             this.chart.domain = params.domain;
         }
-        if (!params.groupBy.length) {
-            this.chart.groupedBy = this.initialGroupBys;
-        } else {
-            this.chart.groupedBy = params.groupBy;
+        if ('groupBy' in params) {
+            if (!params.groupBy.length) {
+                this.chart.groupedBy = this.initialGroupBys;
+            } else {
+                this.chart.groupedBy = params.groupBy;
+            }
         }
         if ('measure' in params) {
             this.chart.measure = params.measure;
