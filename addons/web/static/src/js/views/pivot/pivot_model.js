@@ -229,7 +229,7 @@ var PivotModel = AbstractModel.extend({
         this.data = {
             domain: params.domain,
             context: _.extend({}, session.user_context, params.context),
-            groupedBy: params.groupedBy,
+            groupedBy: params.rowGroupBys,
             colGroupBys: params.colGroupBys,
             measures: params.measures,
             sorted_column: {},
@@ -251,7 +251,7 @@ var PivotModel = AbstractModel.extend({
             this.data.domain = this.initialDomain;
         }
         if ('groupBy' in params) {
-            this.data.groupedBy = params.groupBy.length ? params.groupBy : this.defaultGroupedBy;
+            this.data.groupedBy = params.groupBy;
         }
         if (!this.data.has_data) {
             return this._loadData();
