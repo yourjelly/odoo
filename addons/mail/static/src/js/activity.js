@@ -51,6 +51,9 @@ var AbstractActivityField = AbstractField.extend({
         this.activities = [];
     },
 
+    // Debounce Time in Milliseconds, to call debounce function each 'DEBOUNCE_TIME' to save data in sessionStorage
+    DEBOUNCE_TIME: 500,
+
     // private
     _markActivityDone: function (id, feedback) {
         return this._rpc({
@@ -80,7 +83,13 @@ var AbstractActivityField = AbstractField.extend({
             self.activities = _.sortBy(self.activities, 'date_deadline');
         });
     },
+    // Remove Data from sessionStorage
+    _clearSessionStorage: function () {
+        sessionStorage.removeItem(this.key);
+    },
     _scheduleActivity: function (id, previous_activity_type_id, callback) {
+        var self = this;
+        this.key = this.model.replace(".", "_") + "_" + this.res_id  + "_activity";
         var action = {
             type: 'ir.actions.act_window',
             res_model: 'mail.activity',
@@ -91,11 +100,25 @@ var AbstractActivityField = AbstractField.extend({
             context: {
                 default_res_id: this.res_id,
                 default_res_model: this.model,
+                default_note: sessionStorage.getItem(this.key) || "", // Restore data from sessionStorage if present
                 default_previous_activity_type_id: previous_activity_type_id,
             },
             res_id: id || false,
         };
-        return this.do_action(action, { on_close: callback });
+        return this.do_action(action, { on_close: callback }).then(function () {
+            var $editor = $('.modal .o_act_window .note-editable');
+            self.$buttonSchedule = $('button[name = "action_close_dialog"]');
+            self.$buttonDone = $('button[name = "action_done"]');
+            self.$buttonSchedule.on('click', self._clearSessionStorage.bind(self));
+            self.$buttonDone.on('click', self._clearSessionStorage.bind(self));
+            var $buttonDiscard = $('button[special="cancel"]');
+            $buttonDiscard.on('click', self._clearSessionStorage.bind(self));
+            // Save data into sessionStorage
+            $editor.on('keyup', _.debounce(function () {
+                var value = $editor.html();
+                sessionStorage.setItem(self.key, value);
+            }, self.DEBOUNCE_TIME));
+        });
     },
 });
 

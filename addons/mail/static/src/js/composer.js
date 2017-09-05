@@ -360,6 +360,8 @@ var BasicComposer = Widget.extend(chat_mixin, {
     },
     // RPCs done to fetch the mention suggestions are throttled with the following value
     MENTION_THROTTLE: 200,
+    // Debounce Time in Milliseconds, to call debounce function each 'DEBOUNCE_TIME' to save data in sessionStorage
+    DEBOUNCE_TIME: 500,
 
     init: function (parent, options) {
         this._super.apply(this, arguments);
@@ -439,6 +441,28 @@ var BasicComposer = Widget.extend(chat_mixin, {
         this.$input.focus(function () {
             self.trigger('input_focused');
         });
+
+        // Save composer message in sessionStorage for each 500ms time interval
+        this.$input.on('keyup', _.debounce(function () {
+            var value = self.$input.val();
+            sessionStorage.setItem(self.options.key, value);
+        }, this.DEBOUNCE_TIME));
+
+        // Restore data from sessionStorage if present
+        if (!_.isEmpty(this.context)) {
+            this.options.key = this.model.replace(".", "_") + "_" + this.context.default_res_id + "_simple";
+        }
+        else {
+            this.options.key = "discuss_msg";
+        }
+        if (this.options.key in sessionStorage) {
+            this.options.default_body = sessionStorage.getItem(this.options.key);
+        }
+
+        // Remove data from sessionStorage
+        this.$sendButton = this.$('.o_composer_button_send');
+        this.$sendButton.on('click', this.clearSessionStorage.bind(this));
+
         this.$input.val(this.options.default_body);
         dom.autoresize(this.$input, {parent: this, min_height: this.options.input_min_height});
 
@@ -467,6 +491,10 @@ var BasicComposer = Widget.extend(chat_mixin, {
         this.mention_manager.prependTo(this.$('.o_composer'));
 
         return this._super();
+    },
+
+    clearSessionStorage: function () {
+        sessionStorage.removeItem(this.options.key);
     },
 
     destroy: function () {
