@@ -138,26 +138,31 @@ class WebsiteSale(http.Controller):
         :return: list of product variant description
            (variant id, [visible attribute ids], variant price, variant sale price)
         """
-        # product attributes with at least two choices
+       
         quantity = product._context.get('quantity') or 1
         product = product.with_context(quantity=quantity)
 
         visible_attrs_ids = product.attribute_line_ids.mapped('attribute_id').ids
+        
         to_currency = request.website.get_current_pricelist().currency_id
         attribute_value_ids = []
         visible_attribute_ids = []
-        
+
+        for att_id in visible_attrs_ids:
+            result = request.env['product.attribute.value'].search([('attribute_id','=',att_id)]).ids
+            visible_attribute_ids.append(result)
+
         for variant in product.product_variant_ids:
             if to_currency != product.currency_id:
                 price = variant.currency_id.compute(variant.website_public_price, to_currency) / quantity
             else:
                 price = variant.website_public_price / quantity
-            # visible_attribute_ids = [v.id for v in variant.attribute_value_ids if v.attribute_id.id in visible_attrs_ids]
-            for att_id in visible_attrs_ids:
-                result = request.env['product.attribute.value'].search([('attribute_id','=',att_id)])
-                visible_attribute_ids.append(result.ids)
-            attribute_value_ids.append([variant.id, visible_attribute_ids, variant.website_price, price])
+            record1 = request.env['product.product'].search([('id','=',variant.id)]).mapped('attribute_value_ids').ids
+            attribute_value_ids.append([variant.id, visible_attribute_ids, variant.website_price, price, record1])
+        print "\n" ,attribute_value_ids, "attribute_value_ids\n"
         return attribute_value_ids
+
+
 
     def _get_search_order(self, post):
         # OrderBy will be parsed in orm and so no direct sql injection
@@ -365,14 +370,10 @@ class WebsiteSale(http.Controller):
 
     def _create_variant(self, product_new_id, product_tmpl_id):
         atttr_list = json.loads(product_new_id)
-        print "\n",atttr_list,"attrs_list >>>>>>>>>>>>><<<<<<<<\n"
         vals = {
             'product_tmpl_id': int(product_tmpl_id),
             'attribute_value_ids': [(4, attr[1]) for attr in atttr_list],
         }
-        # record = request.env['product.product'].search([('product_tmpl_id','=',product_tmpl_id),('attribute_value_ids','=',atttr_list)])
-        # print record
-        # if not record.exists():
         new_product = request.env['product.product'].create(vals)
         return new_product.id
 
@@ -727,22 +728,14 @@ class WebsiteSale(http.Controller):
             partner=order.partner_id.id,
             order=order,
             payment_action_id=request.env.ref('payment.action_payment_acquirer').id,
-            return_url= '/shop/payment/validate',
-            bootstrap_formatting= True
         )
 
         acquirers = request.env['payment.acquirer'].search(
             [('website_published', '=', True), ('company_id', '=', order.company_id.id)]
         )
-
-        values['form_acquirers'] = [acq for acq in acquirers if acq.payment_flow == 'form' and acq.view_template_id]
-        values['s2s_acquirers'] = [acq for acq in acquirers if acq.payment_flow == 's2s' and acq.registration_view_template_id]
-        values['tokens'] = request.env['payment.token'].search(
-            [('partner_id', '=', order.partner_id.id),
-            ('acquirer_id', 'in', [acq.id for acq in values['s2s_acquirers']])])
-
-        for acq in values['form_acquirers']:
-            acq.form = acq.with_context(submit_class='btn btn-primary', submit_txt=_('Pay Now')).sudo().render(
+        values['acquirers'] = []
+        for acquirer in acquirers:
+            acquirer_button = acquirer.with_context(submit_class='btn btn-primary', submit_txt=_('Pay Now')).sudo().render(
                 '/',
                 order.amount_total,
                 order.pricelist_id.currency_id.id,
@@ -752,6 +745,9 @@ class WebsiteSale(http.Controller):
                     'billing_partner_id': order.partner_invoice_id.id,
                 }
             )
+            acquirer.button = acquirer_button
+            values['acquirers'].append(acquirer)
+        values['tokens'] = request.env['payment.token'].search([('partner_id', '=', order.partner_id.id), ('acquirer_id', 'in', acquirers.ids)])
 
         return values
 
@@ -800,10 +796,8 @@ class WebsiteSale(http.Controller):
         else:
             return request.redirect("/shop/payment?error=no_token_or_missmatch_tx")
 
-    @http.route(['/shop/payment/transaction/',
-        '/shop/payment/transaction/<int:so_id>',
-        '/shop/payment/transaction/<int:so_id>/<string:access_token>'], type='json', auth="public", website=True)
-    def payment_transaction(self, acquirer_id, save_token=False, so_id=None, access_token=None, token=None, **kwargs):
+    @http.route(['/shop/payment/transaction/<int:acquirer_id>'], type='json', auth="public", website=True)
+    def payment_transaction(self, acquirer_id, tx_type='form', token=None, **kwargs):
         """ Json method that creates a payment.transaction, used to create a
         transaction when the user clicks on 'pay now' button. After having
         created the transaction, the event continues and the user is redirected
@@ -812,11 +806,10 @@ class WebsiteSale(http.Controller):
         :param int acquirer_id: id of a payment.acquirer record. If not set the
                                 user is redirected to the checkout page
         """
-        tx_type = 'form'
-        if save_token:
-            tx_type = 'form_save'
 
         # In case the route is called directly from the JS (as done in Stripe payment method)
+        so_id = kwargs.get('so_id')
+        access_token = kwargs.get('access_token')
         if so_id and access_token:
             order = request.env['sale.order'].sudo().search([('id', '=', so_id), ('access_token', '=', access_token)])
         elif so_id:
@@ -824,7 +817,7 @@ class WebsiteSale(http.Controller):
         else:
             order = request.website.sale_get_order()
         if not order or not order.order_line or acquirer_id is None:
-            return False
+            return request.redirect("/shop/checkout")
 
         assert order.partner_id.id != request.website.partner_id.id
 
@@ -835,43 +828,10 @@ class WebsiteSale(http.Controller):
         tx = tx.check_or_create_sale_tx(order, acquirer, payment_token=payment_token, tx_type=tx_type)
         request.session['sale_transaction_id'] = tx.id
 
+        if token:
+            return request.env.ref('website_sale.payment_token_form').render(dict(tx=tx), engine='ir.qweb')
+
         return tx.render_sale_button(order, '/shop/payment/validate')
-
-    @http.route('/shop/payment/token', type='http', auth='public', website=True)
-    def payment_token(self, pm_id=None, **kwargs):
-        """ Method that handles payment using saved tokens
-
-        :param int pm_id: id of the payment.token that we want to use to pay.
-        """
-        order = request.website.sale_get_order()
-        # do not crash if the user has already paid and try to pay again
-        if not order:
-            return request.redirect('/shop/?error=no_order')
-
-        assert order.partner_id.id != request.website.partner_id.id
-
-        try:
-            pm_id = int(pm_id)
-        except ValueError:
-            return request.redirect('/shop/?error=invalid_token_id')
-
-        # We retrieve the token the user want to use to pay
-        token = request.env['payment.token'].browse(pm_id)
-        if not token:
-            return request.redirect('/shop/?error=token_not_found')
-
-        # we retrieve an existing transaction (if it exists obviously)
-        tx = request.website.sale_get_transaction() or request.env['payment.transaction'].sudo()
-        # we check if the transaction is Ok, if not then we create it
-        tx = tx.check_or_create_sale_tx(order, token.acquirer_id, payment_token=token, tx_type='server2server')
-        # we set the transaction id into the session (so `sale_get_transaction` can retrieve it )
-        request.session['sale_transaction_id'] = tx.id
-        # we proceed the s2s payment
-        res = tx.confirm_sale_token()
-        # we then redirect to the page that validates the payment by giving it error if there's one
-        if res is not True:
-            return request.redirect('/shop/payment/validate?success=False&error=%s' % res)
-        return request.redirect('/shop/payment/validate?success=True')
 
     @http.route('/shop/payment/get_status/<int:sale_order_id>', type='json', auth="public", website=True)
     def payment_get_status(self, sale_order_id, **post):
