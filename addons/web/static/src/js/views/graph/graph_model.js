@@ -55,12 +55,14 @@ return AbstractModel.extend({
      *   to keep track of various entities.
      */
     load: function (params) {
+        var groupBys = params.context.graph_groupbys || params.groupBys;
         this.initialGroupBys = params.groupBys;
         this.fields = params.fields;
         this.modelName = params.modelName;
         this.chart = {
             data: [],
-            groupedBy: params.groupBys,
+            // groupedBy: params.groupBys,
+            groupedBy: params.groupedBy.length ? params.groupedBy : groupBys,
             measure: params.measure,
             mode: params.mode,
             domain: params.domain,
@@ -84,6 +86,9 @@ return AbstractModel.extend({
      * @returns {Deferred}
      */
     reload: function (handle, params) {
+        if('context' in params) {
+            this.chart.groupedBy = params.context.graph_groupbys || this.chart.groupedBy;
+        }
         if ('domain' in params) {
             this.chart.domain = params.domain;
         }
