@@ -218,14 +218,14 @@ var ViewManagerAction = WidgetAction.extend({
      */
     get_breadcrumbs: function() {
         var self = this;
-        // debugger;
+        var dataset = new data.DataSetSearch(this.action_descr, this.action_descr.res_model, this.action_descr.context, this.action_descr.domain);
         return this.widget.view_stack.map(function (view, index) {
             return {
                 title: view.controller && view.controller.get('title') || self.title,
                 index: index,
                 action: self,
                 view: view,
-                data_record: view.controller ? view.controller.datarecord : false,
+                data_record: view.controller ? view.controller.model.get(view.controller.handle) : false,
             };
         });
     },
