@@ -26,6 +26,7 @@ var ListController = BasicController.extend({
         selection_changed: '_onSelectionChanged',
         toggle_column_order: '_onToggleColumnOrder',
         toggle_group: '_onToggleGroup',
+        content_scroll: '_onScrollLstLoadMore'
     }),
     /**
      * @constructor
@@ -479,6 +480,20 @@ var ListController = BasicController.extend({
         this.model
             .toggleGroup(event.data.group.id)
             .then(this.update.bind(this, {}, {reload: false}));
+    },
+    /**
+     * @private
+     * @param {OdooRevent} event
+     */
+    _onScrollLstLoadMore: function (event){
+        var self = this,
+            state = event.target.state;
+        this.model.loadMore(state.id).then(function (id) {
+            var data = self.model.get(id);
+            self.renderer.updateListView(data);
+            self._updateEnv();
+            self._updatePager();
+        });
     },
 });
 

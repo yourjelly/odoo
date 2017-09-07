@@ -11,6 +11,7 @@ odoo.define('web.ListView', function (require) {
 
 var BasicView = require('web.BasicView');
 var core = require('web.core');
+var ListModel = require('web.ListModel');
 var ListRenderer = require('web.ListRenderer');
 var ListController = require('web.ListController');
 
@@ -21,6 +22,7 @@ var ListView = BasicView.extend({
     display_name: _lt('List'),
     icon: 'fa-list-ul',
     config: _.extend({}, BasicView.prototype.config, {
+        Model: ListModel,
         Renderer: ListRenderer,
         Controller: ListController,
     }),

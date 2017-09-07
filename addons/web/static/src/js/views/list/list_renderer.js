@@ -66,12 +66,41 @@ var ListRenderer = BasicRenderer.extend({
         this.hasSelectors = params.hasSelectors;
         this.selection = [];
         this.pagers = []; // instantiated pagers (only for grouped lists)
+        $('.o_content').on('scroll', self._onContentScroll.bind(self));
     },
 
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     *
+     * @param {Object} state
+     *
+     */
+    updateListView: function (state) {
+        this.state = state;
+        this._renderView();
+    },
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     *
+     *
+     */
+    _onContentScroll: function () {
+        var $content = $(".o_content"),
+            startScroll = $content.scrollTop(),
+            endScroll = $content.innerHeight(),
+            scrollHeight = $content[0].scrollHeight,
+            state = this.state;
+
+        if (this.viewType === 'list' && (startScroll + endScroll) === scrollHeight && state.count !== state.data.length) {
+            this.trigger_up('content_scroll');
+        }
+    },
     /**
      * This method does a in-memory computation of the aggregate values, for
      * each columns that corresponds to a numeric field with a proper aggregate
