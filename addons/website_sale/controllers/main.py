@@ -159,7 +159,6 @@ class WebsiteSale(http.Controller):
                 price = variant.website_public_price / quantity
             record1 = request.env['product.product'].search([('id','=',variant.id)]).mapped('attribute_value_ids').ids
             attribute_value_ids.append([variant.id, visible_attribute_ids, variant.website_price, price, record1])
-        print "\n" ,attribute_value_ids, "attribute_value_ids\n"
         return attribute_value_ids
 
 
@@ -744,7 +743,6 @@ class WebsiteSale(http.Controller):
             [('website_published', '=', True), ('company_id', '=', order.company_id.id)]
         )
 
-
         values['form_acquirers'] = [acq for acq in acquirers if acq.payment_flow == 'form' and acq.view_template_id]
         values['s2s_acquirers'] = [acq for acq in acquirers if acq.payment_flow == 's2s' and acq.registration_view_template_id]
         values['tokens'] = request.env['payment.token'].search(
@@ -814,7 +812,6 @@ class WebsiteSale(http.Controller):
         '/shop/payment/transaction/<int:so_id>',
         '/shop/payment/transaction/<int:so_id>/<string:access_token>'], type='json', auth="public", website=True)
     def payment_transaction(self, acquirer_id, save_token=False, so_id=None, access_token=None, token=None, **kwargs):
-
         """ Json method that creates a payment.transaction, used to create a
         transaction when the user clicks on 'pay now' button. After having
         created the transaction, the event continues and the user is redirected
@@ -836,6 +833,7 @@ class WebsiteSale(http.Controller):
             order = request.website.sale_get_order()
         if not order or not order.order_line or acquirer_id is None:
             return False
+
         assert order.partner_id.id != request.website.partner_id.id
 
         # find or create transaction
@@ -844,6 +842,7 @@ class WebsiteSale(http.Controller):
         payment_token = request.env['payment.token'].sudo().browse(int(token)) if token else None
         tx = tx.check_or_create_sale_tx(order, acquirer, payment_token=payment_token, tx_type=tx_type)
         request.session['sale_transaction_id'] = tx.id
+        
         return tx.render_sale_button(order, '/shop/payment/validate')
 
     @http.route('/shop/payment/token', type='http', auth='public', website=True)
