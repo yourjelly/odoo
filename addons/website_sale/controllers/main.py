@@ -844,6 +844,11 @@ class WebsiteSale(http.Controller):
         payment_token = request.env['payment.token'].sudo().browse(int(token)) if token else None
         tx = tx.check_or_create_sale_tx(order, acquirer, payment_token=payment_token, tx_type=tx_type)
         request.session['sale_transaction_id'] = tx.id
+        return tx.render_sale_button(order, '/shop/payment/validate')
+
+    @http.route('/shop/payment/token', type='http', auth='public', website=True)
+    def payment_token(self, pm_id=None, **kwargs):
+        """ Method that handles payment using saved tokens
 
         :param int pm_id: id of the payment.token that we want to use to pay.
         """
@@ -876,12 +881,6 @@ class WebsiteSale(http.Controller):
         if res is not True:
             return request.redirect('/shop/payment/validate?success=False&error=%s' % res)
         return request.redirect('/shop/payment/validate?success=True')
-
-    @http.route('/shop/payment/token', type='http', auth='public', website=True)
-    def payment_token(self, pm_id=None, **kwargs):
-        """ Method that handles payment using saved tokens
-
-        return tx.render_sale_button(order, '/shop/payment/validate')
 
     @http.route('/shop/payment/get_status/<int:sale_order_id>', type='json', auth="public", website=True)
     def payment_get_status(self, sale_order_id, **post):
