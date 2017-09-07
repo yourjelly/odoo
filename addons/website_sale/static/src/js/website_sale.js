@@ -313,11 +313,9 @@ odoo.define('website_sale.website_sale', function (require) {
             if(_.isString(variant_ids)) {
                 variant_ids = JSON.parse(variant_ids.replace(/'/g, '"'));
             }
-            console.log(variant_ids,"variant_ids");
             if(_.isString(attribute_ids)) {
                 attribute_ids = JSON.parse(attribute_ids.replace(/'/g, '"'));
             }
-            console.log(attribute_ids,"attribute_ids");
 
             var new_val = [];
 
@@ -338,24 +336,13 @@ odoo.define('website_sale.website_sale', function (require) {
                 }
             });
             values =  values.concat(unchanged_values);
-            console.log(values,"values");
 
 
             $parent.find("label").removeClass("text-muted css_not_available");
 
             var product_id = false;
             for (var k in variant_ids) {
-                console.log(variant_ids[k][4],"variant_ids[k][4]");
-                console.log(values,"values");
-                var a = (variant_ids[k][4].sort()).val(JSON.stringify(variant_ids[k][4]));
-                var b = (values.sort()).val(JSON.stringify(values));
-                if(a != b){
-                    console.log("new product")
-                }
-                else{
-                    console.log("Product already exists!!")
-                }
-                if (_.isEmpty(_.difference(variant_ids[k][1], values))) {
+                if (JSON.stringify(variant_ids[k][4]) == JSON.stringify(values)){
                     $.when(base.ready()).then(function() {
                         $price.html(price_to_str(variant_ids[k][2]));
                         $default_price.html(price_to_str(variant_ids[k][3]));
@@ -398,10 +385,8 @@ odoo.define('website_sale.website_sale', function (require) {
                 $parent.find("#add_to_cart").removeClass("disabled");
             } 
             else {
-                // console.log(json.stringify(new_val));
                 //$parent.addClass("css_not_available");
                 $product_new_id.val(JSON.stringify(new_val));
-                // console.log($product_new_id.val(JSON.stringify(new_val)));
                 //$parent.find("#add_to_cart").addClass("disabled");
             }
 

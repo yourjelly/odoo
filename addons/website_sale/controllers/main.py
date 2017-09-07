@@ -370,6 +370,7 @@ class WebsiteSale(http.Controller):
 
     def _create_variant(self, product_new_id, product_tmpl_id):
         atttr_list = json.loads(product_new_id)
+        print atttr_list
         vals = {
             'product_tmpl_id': int(product_tmpl_id),
             'attribute_value_ids': [(4, attr[1]) for attr in atttr_list],
