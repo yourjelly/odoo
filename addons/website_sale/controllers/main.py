@@ -370,7 +370,6 @@ class WebsiteSale(http.Controller):
 
     def _create_variant(self, product_new_id, product_tmpl_id):
         atttr_list = json.loads(product_new_id)
-        print atttr_list
         vals = {
             'product_tmpl_id': int(product_tmpl_id),
             'attribute_value_ids': [(4, attr[1]) for attr in atttr_list],
@@ -380,13 +379,21 @@ class WebsiteSale(http.Controller):
 
     @http.route(['/shop/cart/update'], type='http', auth="public", methods=['POST'], website=True, csrf=False)
     def cart_update(self, product_id, product_new_id=False, product_tmpl_id=False, add_qty=1, set_qty=0, **kw):
-        new_product = self._create_variant(product_new_id, product_tmpl_id)
-        request.website.sale_get_order(force_create=1)._cart_update(
-            product_id=new_product,
-            add_qty=float(add_qty),
-            set_qty=float(set_qty),
-            attributes=self._filter_attributes(**kw),
-        )
+        if product_new_id:
+            new_product = self._create_variant(product_new_id, product_tmpl_id)
+            request.website.sale_get_order(force_create=1)._cart_update(
+                product_id=new_product,
+                add_qty=float(add_qty),
+                set_qty=float(set_qty),
+                attributes=self._filter_attributes(**kw),
+            )
+        else:
+            request.website.sale_get_order(force_create=1)._cart_update(
+                product_id=int(product_id),
+                add_qty=float(add_qty),
+                set_qty=float(set_qty),
+                attributes=self._filter_attributes(**kw),
+            )
         return request.redirect("/shop/cart")
 
     def _filter_attributes(self, **kw):
