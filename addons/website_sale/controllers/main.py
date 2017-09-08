@@ -371,7 +371,7 @@ class WebsiteSale(http.Controller):
             'product_tmpl_id': int(product_tmpl_id),
             'attribute_value_ids': [(4, attr[1]) for attr in atttr_list],
         }
-        new_product = request.env['product.product'].create(vals)
+        new_product = request.env['product.product'].sudo().create(vals)
         return new_product.id
 
     @http.route(['/shop/cart/update'], type='http', auth="public", methods=['POST'], website=True, csrf=False)
@@ -840,7 +840,7 @@ class WebsiteSale(http.Controller):
         payment_token = request.env['payment.token'].sudo().browse(int(token)) if token else None
         tx = tx.check_or_create_sale_tx(order, acquirer, payment_token=payment_token, tx_type=tx_type)
         request.session['sale_transaction_id'] = tx.id
-        
+
         return tx.render_sale_button(order, '/shop/payment/validate')
 
     @http.route('/shop/payment/token', type='http', auth='public', website=True)

@@ -375,8 +375,6 @@ odoo.define('website_sale.website_sale', function (require) {
                         return;
                     }
                 }
-                $input.closest("label").addClass("css_not_available");
-                $input.find("option[value='" + id + "']").addClass("css_not_available");
             });
 
             if (product_id) {
