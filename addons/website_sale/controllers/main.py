@@ -161,8 +161,6 @@ class WebsiteSale(http.Controller):
             attribute_value_ids.append([variant.id, visible_attribute_ids, variant.website_price, price, record1])
         return attribute_value_ids
 
-
-
     def _get_search_order(self, post):
         # OrderBy will be parsed in orm and so no direct sql injection
         # id is added to be sure that order is a unique sort key
