@@ -113,7 +113,6 @@ var ColumnProgressBar =  Widget.extend({
         }
 
         var progress_bar_length = (90 - (2.8)*parseInt(end).toString().length).toString() + '%';
-        this.$('.o_kanban_counter_progress').css('width', progress_bar_length);
         if (end > start) {
             $el.addClass('o-kanban-grow');
             $({ someValue: start}).animate({ someValue: end || 0 }, {
