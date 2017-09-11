@@ -104,7 +104,7 @@
                             <div>
                                 <table class="table-condensed" style="min-width: 250px;max-width: 400px;">
                                     <tr class="border-black" style="border-bottom:1px solid #dddddd;">
-                                        <td><strong>Subtotal</strong></td>
+                                        <td class="text-left" style="padding-right:75px"><strong>Subtotal</strong></td>
                                         <td class="text-right">
                                             <span t-field="o.amount_untaxed" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
                                         </td>

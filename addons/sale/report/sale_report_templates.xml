@@ -141,7 +141,7 @@
                     <div>
                         <table class="table-condensed" style="min-width: 200px;max-width: 350px;">
                             <tr class="border-black" style="border-bottom:1px solid #dddddd;">
-                                <td><strong>Subtotal</strong></td>
+                                <td class="text-left" style="padding-right:75px"><strong>Subtotal</strong></td>
                                 <td class="text-right">
                                     <span t-field="doc.amount_untaxed"
                                         t-options='{"widget": "monetary", "display_currency": doc.pricelist_id.currency_id}'/>
