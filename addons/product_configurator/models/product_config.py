@@ -25,8 +25,6 @@ class ProductConfiguration(models.Model):
     datetime = fields.Datetime(string="Select DateTime", default=fields.Datetime.now, required=True)
 
 
-
-
     
 
 

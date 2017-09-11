@@ -16,43 +16,30 @@
           	
 				<t t-if="variant_id.attribute_id.type == 'custom_value'">
 					<input name="attribute_type" type="hidden" value="custom_value"/>
-					<!-- <input name="product_tmpl_id" type="hidden" t-att-value="variant_id"/> -->
 					<input name="attribute_name" type="hidden" t-att-value="variant_id.attribute_id.name"/>
 					<t t-if="variant_id.attribute_id.value_type == 'char'">
-						
 							<input type="text" t-att-name ="'attribute-%s-%s' % (product.id, variant_id.attribute_id.id)"/>
-						
 					</t>
 					<t t-if="variant_id.attribute_id.value_type == 'integer'">
-						
 							<input type="text" t-att-name ="'attribute-%s-%s' % (product.id, variant_id.attribute_id.id)"/>
-						
 					</t>
 					<t t-if="variant_id.attribute_id.value_type == 'float'">
-						
 							<input type="text" t-att-name ="'attribute-%s-%s' % (product.id, variant_id.attribute_id.id)"/>
-						
 					</t>
 					<t t-if="variant_id.attribute_id.value_type == 'textarea'">
-						
 							<textarea rows="3" cols="30" t-att-name="textarea"/>
-						
 					</t>
 					<t t-if="variant_id.attribute_id.value_type == 'color'">
-						
 							<input class="js_product_variant_change" type="color" name="color" data-name="color"/>
-					
 					</t>
 					<t t-if="variant_id.attribute_id.value_type == 'attachment'">
 				        <div id="wrap" class="oe_structure oe_empty">
 				            <div class="container">
 				                <form class="website_fileupload_form" method="POST">
 				                    <div class="form-group"> 
-				                        <!-- <label class="control-label" for="file">File:</label>  -->
 				                        <input type="file" t-att-t-att-name="attachment" class="form-control" accept="image/*,application/pdf"/> 
 				                    </div>
 				                </form>
-				                <!-- <a class="btn btn-info website_fileupload_submit">Save</a> -->
 				            </div>
 				        </div>
 					</t>
@@ -72,9 +59,7 @@
 					        </div>
 				        </div>
 					</t>
-					
 				</t>
-			
 		  </li>
 		 </t>
 		</ul>
