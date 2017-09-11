@@ -149,13 +149,16 @@ var ColumnProgressBar =  Widget.extend({
         }
     },
     _fixBarPosition: function () {
-        this.$el.affix({
+        var self = this;
+        this.$el.parent().affix({
             offset: {
-                top: function () {
-                    return (this.top = $('.o_kanban_header').outerHeight(true));
-                }
+                // top: function () {
+                //     return (this.top = self.$el.parent().outerHeight(true));
+                // }
+                top: 0
             },
             target: $('.o_content'),
+            
         });
     },
     _update: function (records, remaining) {

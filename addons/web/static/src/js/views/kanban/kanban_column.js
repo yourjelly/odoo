@@ -136,7 +136,8 @@ var KanbanColumn = Widget.extend({
         });
         if (this.barOptions) {
             this.progressBar = new ProgressBar.ColumnProgressBar(this, this.barOptions, this.data.fieldsInfo.kanban);
-            this.progressBar.insertAfter(this.$header);
+            this.progressBar.appendTo(this.$header);
+            this.$header.addClass("o_has_progress");
         }
         this._update();
 
