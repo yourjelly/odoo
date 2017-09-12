@@ -2,25 +2,35 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import fields, models, api
-from datetime import date
-from datetime import datetime
 
 
 class ProductAttribute(models.Model):
     _inherit = "product.attribute"
 
-    # def _get_default_uom_id(self):
-    #     return self.env["product.uom"].search([], limit=1, order='id').id
+    type = fields.Selection(selection_add=[('custom', 'Custom Value')])
+    value_type = fields.Selection([
+        ('char', 'Char'),
+        ('integer', 'Integer'),
+        ('float', 'Float'),
+        ('textarea', 'Text Area'),
+        ('color', 'Color'),
+        ('attachment', 'Attachment'),
+        ('date', 'Date'),
+        ('datetime', 'DateTime')], default='char')
 
-    type = fields.Selection(selection_add=[('custom_value','Custom Value')])
-    # value_type = fields.Selection([('char','Char'),('integer','Integer'),('float','Float'),('textarea','Text Area'),('color','Color'),('attachment','Attachment'),('date','Date'),('datetime','DateTime')])
-    # max_value = fields.Integer()
-    # min_value = fields.Integer()
-    # required = fields.Boolean(string="Required", default=False)
-    # uom_id = fields.Many2one('product.uom', 'Unit of Measure',default=_get_default_uom_id, required=True)
-    # char = fields.Char(string="Custom Char")
-    # textarea = fields.Text(string="Custom Text")
-    # color = fields.Integer('Color Index', default=0)
-    # attachment = fields.Binary(string="Attachment")
-    # date = fields.Date(string="Select Date", default=fields.Date.context_today, required=True)
-    # datetime = fields.Datetime(string="Select DateTime", default=fields.Datetime.now, required=True)
+    char_custom = fields.Char(string="Custom Char")
+    textarea_custom = fields.Text(string="Custom Text")
+    integer_custom = fields.Integer('Custom Integer', default=0)
+    attachment_custom = fields.Binary(string="Attachment")
+    date_custom = fields.Date(string="Custom Date", default=fields.Date.context_today, required=True)
+    datetime_custom = fields.Datetime(string="Custom DateTime", default=fields.Datetime.now, required=True)
+
+    min_value = fields.Float(string="Minimum Value")
+    max_value = fields.Float(string="Maximum Value")
+
+    is_required = fields.Boolean(string="Required")
+
+    @api.onchange('type')
+    def onchange_type(self):
+        if self.type == 'custom':
+            self.create_variant = False

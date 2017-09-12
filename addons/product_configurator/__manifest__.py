@@ -4,11 +4,11 @@
     'name': 'Product Configurator',
     'version': '1.0',
     'category': 'Sales',
-    'depends': ['sale'],
+    'depends': ['website_sale'],
     'description': """ This module allows user to easily configure the products with lot of variants""",
     'data': [
         'views/product_template_views.xml',
-        #'views/product_attribute_views.xml',
+        'views/product_attribute_views.xml',
     ],
     'demo': [
     ],

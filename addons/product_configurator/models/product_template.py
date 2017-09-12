@@ -7,7 +7,7 @@ class ProductTemplate(models.Model):
 
     _inherit = "product.template"
 
-    variant_mode = fields.Selection(
-        [('standard', 'Standard'), ('configurable', 'Configurable')],
+    variant_type = fields.Selection(
+        [('standard', 'Standard'), ('configurable', 'Configurable')], default='standard',
         help="Standard variants are generated upfront so that you can manage them in your inventory.\n"
         "Configurable variants are generated at the sales when the product is added")

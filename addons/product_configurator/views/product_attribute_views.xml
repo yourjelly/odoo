@@ -5,20 +5,18 @@
         <field name="model">product.attribute</field>
         <field name="inherit_id" ref="product.product_attribute_view_form"/>
         <field name="arch" type="xml">
-        <xpath expr="//field[@name='name']" position="after">
-            <field name="value_type" attrs="{'invisible':[('type','not in',['custom_value'])]}"/>
-        </xpath>
-        <xpath expr="//field[@name='type']" position="after">
-            <field name="min_value" attrs="{'invisible':['|',('value_type','not in',['integer','float']),('type','not in','custom_value')]}"/>
-            <field name="max_value" attrs="{'invisible':['|',('value_type','not in',['integer','float']),('type','not in','custom_value')]}"/>
-            <field name="uom_id" groups="product.group_uom" attrs="{'invisible':[('type','not in',['custom_value'])]}"/>
-        </xpath>
-        <xpath expr="//field[@name='value_type']" position="after">
-            <field name="required" attrs="{'invisible':[('type','not in',['custom_value'])]}"/>
-        </xpath>
-        <xpath expr="//group[@name='values_ids']" position="attributes">
-            <attribute name="attrs">{'invisible':[('type','=','custom_value')]}</attribute>
-        </xpath>
+            <xpath expr="//group[@name='values_ids']" position="before">
+                <group string="Custom" attrs="{'invisible':[('type','!=', 'custom')]}">
+                    <field name="value_type"/>
+                    <field name="min_value" attrs="{'invisible': [('value_type','not in', ['integer','float'])]}"/>
+                    <field name="max_value" attrs="{'invisible':[('value_type','not in',['integer','float'])]}"/>
+                    <field name="is_required"/>
+                </group>
+            </xpath>
+
+            <xpath expr="//group[@name='values_ids']" position="attributes">
+                <attribute name="attrs">{'invisible': [('type', '=', 'custom')]}</attribute>
+            </xpath>
         </field>
     </record>
 
