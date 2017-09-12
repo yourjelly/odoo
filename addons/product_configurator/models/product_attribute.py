@@ -7,23 +7,19 @@ from odoo import fields, models, api
 class ProductAttribute(models.Model):
     _inherit = "product.attribute"
 
-    type = fields.Selection(selection_add=[('custom', 'Custom Value')])
-    value_type = fields.Selection([
+    CUSTOM_TYPES = [
         ('char', 'Char'),
         ('integer', 'Integer'),
         ('float', 'Float'),
-        ('textarea', 'Text Area'),
+        ('text', 'Textarea'),
         ('color', 'Color'),
-        ('attachment', 'Attachment'),
+        ('binary', 'Attachment'),
         ('date', 'Date'),
-        ('datetime', 'DateTime')], default='char')
+        ('datetime', 'DateTime'),
+    ]
 
-    char_custom = fields.Char(string="Custom Char")
-    textarea_custom = fields.Text(string="Custom Text")
-    integer_custom = fields.Integer('Custom Integer', default=0)
-    attachment_custom = fields.Binary(string="Attachment")
-    date_custom = fields.Date(string="Custom Date", default=fields.Date.context_today, required=True)
-    datetime_custom = fields.Datetime(string="Custom DateTime", default=fields.Datetime.now, required=True)
+    type = fields.Selection(selection_add=[('custom', 'Custom Value')])
+    value_type = fields.Selection(selection=CUSTOM_TYPES, default='char')
 
     min_value = fields.Float(string="Minimum Value")
     max_value = fields.Float(string="Maximum Value")

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--   Product Price List -->
+        <record id="product_configurator_wizard" model="ir.ui.view">
+              <field name="name">Product Configurator Wizard</field>
+              <field name="model">product.configurator.wizard</field>
+              <field name="arch" type="xml">
+                <form string="Product configurator">
+                    <group>
+                        <field name="product_tmpl_id" options="{'no_create': 1}"/>
+                    </group>
+                    <footer>
+                        <button name="create_variant" string="Create Variant"  type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-default" special="cancel" />
+                    </footer>
+                </form>
+              </field>
+        </record>
+
+         <record id="action_product_configurator_wizard" model="ir.actions.act_window">
+            <field name="name">Product Configurator</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">product.configurator.wizard</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+</odoo>
