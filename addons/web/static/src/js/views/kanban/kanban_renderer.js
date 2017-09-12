@@ -228,7 +228,7 @@ var KanbanRenderer = BasicRenderer.extend({
             }
         });
 
-        if (this.groupedByM2O) {
+        if (this.groupedByM2O && this.columnOptions.group_draggable) {
             // Enable column sorting
             this.$el.sortable({
                 axis: 'x',
@@ -317,8 +317,8 @@ var KanbanRenderer = BasicRenderer.extend({
         // Deactivate the drag'n'drop if the groupedBy field:
         // - is a date or datetime since we group by month or
         // - is readonly
-        var draggable = true;
-        if (groupByFieldAttrs) {
+        var draggable = this.columnOptions.group_draggable;
+        if (draggable && groupByFieldAttrs) {
             if (groupByFieldAttrs.type === "date" || groupByFieldAttrs.type === "datetime") {
                 draggable = false;
             } else if (groupByFieldAttrs.readonly !== undefined) {
@@ -329,7 +329,7 @@ var KanbanRenderer = BasicRenderer.extend({
         var grouped_by_field = this.groupedByM2O && groupByFieldAttrs.relation;
         var groupByTooltip = groupByFieldInfo && groupByFieldInfo.options.group_by_tooltip;
         this.columnOptions = _.extend(this.columnOptions, {
-            draggable: draggable,
+            group_draggable: draggable,
             group_by_tooltip: groupByTooltip,
             grouped_by_m2o: this.groupedByM2O,
             relation: grouped_by_field,

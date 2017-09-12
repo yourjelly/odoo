@@ -37,17 +37,21 @@ var KanbanView = BasicView.extend({
             group_create: arch.attrs.group_create ? JSON.parse(arch.attrs.group_create) : true,
             group_edit: arch.attrs.group_edit ? JSON.parse(arch.attrs.group_edit) : true,
             group_delete: arch.attrs.group_delete ? JSON.parse(arch.attrs.group_delete) : true,
+            group_draggable: arch.attrs.group_draggable ? JSON.parse(arch.attrs.group_draggable) : true,
+            draggable: arch.attrs.draggable ? JSON.parse(arch.attrs.draggable) : true,
         });
 
         this.rendererParams.column_options = {
             editable: activeActions.group_edit,
             deletable: activeActions.group_delete,
             group_creatable: activeActions.group_create,
+            group_draggable: activeActions.group_draggable,
             quick_create: params.isQuickCreateEnabled || this._isQuickCreateEnabled(viewInfo),
         };
         this.rendererParams.record_options = {
             editable: activeActions.edit,
             deletable: activeActions.delete,
+            draggable: activeActions.draggable,
             read_only_mode: params.readOnlyMode,
         };
 

@@ -716,6 +716,50 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
+    QUnit.test('kanban view with group_draggable=False', function (assert) {
+        assert.expect(2);
+
+        var kanban = createView({
+            View: KanbanView,
+            model: 'partner',
+            data: this.data,
+            arch: '<kanban class="o_kanban_test" group_draggable="false">' +
+                        '<templates><t t-name="kanban-box">' +
+                        '<div><field name="foo"/></div>' +
+                    '</t></templates></kanban>',
+            groupBy: ['product_id'],
+        });
+
+        assert.strictEqual(kanban.$('.o_kanban_view.ui-sortable').length, 0,
+            "the columns should not be draggable");
+        assert.ok(kanban.$('.o_kanban_group.ui-sortable').length,
+            "the records should be draggable");
+
+        kanban.destroy();
+    });
+
+    QUnit.test('kanban view with draggable=False', function (assert) {
+        assert.expect(2);
+
+        var kanban = createView({
+            View: KanbanView,
+            model: 'partner',
+            data: this.data,
+            arch: '<kanban class="o_kanban_test" draggable="false">' +
+                        '<templates><t t-name="kanban-box">' +
+                        '<div><field name="foo"/></div>' +
+                    '</t></templates></kanban>',
+            groupBy: ['product_id'],
+        });
+
+        assert.ok(kanban.$('.o_kanban_view.ui-sortable').length,
+            "the columns should be draggable");
+        assert.strictEqual(kanban.$('.o_kanban_group.ui-sortable').length, 0,
+            "the records should not be draggable");
+
+        kanban.destroy();
+    });
+
     QUnit.test('clicking on a link triggers correct event', function (assert) {
         assert.expect(1);
 
