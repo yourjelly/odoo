@@ -2,13 +2,13 @@
 
 {
     'name': 'Product Configurator',
-    'version': '10.0.1.0.0',
+    'version': '1.0',
     'category': 'Sales',
-    'depends': ['website_sale'],
-    'description': """ This is product configurator module""",
+    'depends': ['sale'],
+    'description': """ This module allows user to easily configure the products with lot of variants""",
     'data': [
-        'views/product_config_views.xml',
-        'views/templates.xml',
+        'views/product_template_views.xml',
+        #'views/product_attribute_views.xml',
     ],
     'demo': [
     ],
