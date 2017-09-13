@@ -106,6 +106,9 @@ class MrpProduction(models.Model):
         'stock.move', 'production_id', 'Finished Products',
         copy=False, states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}, 
         domain=[('scrapped', '=', False)])
+    move_line_ids = fields.Many2many(
+        'stock.move.line', compute='_compute_lines',#related='move_finished_ids.move_line_ids'
+        )
     workorder_ids = fields.One2many(
         'mrp.workorder', 'production_id', 'Work Orders',
         copy=False, oldname='workcenter_lines', readonly=True)
@@ -168,6 +171,12 @@ class MrpProduction(models.Model):
     def action_toggle_is_locked(self):
         self.is_locked = not self.is_locked
         return True
+
+    @api.depends('move_finished_ids.move_line_ids')
+    def _compute_lines(self):
+        for production in self:
+            production.move_line_ids = production.move_finished_ids.mapped('move_line_ids').ids
+
 
     @api.multi
     @api.depends('bom_id.routing_id', 'bom_id.routing_id.operation_ids')
@@ -336,6 +345,7 @@ class MrpProduction(models.Model):
             'move_dest_ids': [(4, x.id) for x in self.move_dest_ids],
         })
         move._action_confirm()
+        move._action_assign()
         return move
 
     def _generate_raw_moves(self, exploded_lines):
