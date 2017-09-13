@@ -546,14 +546,6 @@ QUnit.test('chatter: Attachment viewer', function (assert) {
                 '</div>' +
             '</form>',
         res_id: 2,
-        mockRPC: function (route) {
-            if(_.str.contains(route, '/mail/attachment/preview/') ||
-                _.str.contains(route, '/web/static/lib/pdfjs/web/viewer.html')){
-                var canvas = document.createElement('canvas');
-                return $.when(canvas.toDataURL());
-            }
-            return this._super.apply(this, arguments);
-        },
         intercepts: {
             get_messages: function (event) {
                 event.stopPropagation();
