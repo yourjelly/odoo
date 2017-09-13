@@ -177,7 +177,6 @@ class MrpProduction(models.Model):
         for production in self:
             production.move_line_ids = production.move_finished_ids.mapped('move_line_ids').ids
 
-
     @api.multi
     @api.depends('bom_id.routing_id', 'bom_id.routing_id.operation_ids')
     def _compute_routing(self):
