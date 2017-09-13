@@ -71,10 +71,16 @@ class StockMove(models.Model):
         store=True,
         help='Technical Field to order moves')
     is_locked = fields.Boolean('Is Locked', compute='_compute_is_locked')
-    production_product_id = fields.Many2one('product.product', 'Production Product')
+    production_product_id = fields.Many2one('product.product', 'Production Product', compute='_compute_production_product')
+    needs_lots = fields.Boolean('Needs Lots', compute='_compute_needs_lots')
+    
+    @api.depends('product_id.tracking')
+    def _compute_needs_lots(self):
+        for move in self:
+            move.needs_lots = move.product_id.tracking != 'none'
     
     @api.depends('production_id.product_id', 'raw_material_production_id.product_id')
-    def _compute_show_lots(self):
+    def _compute_production_product(self):
         for move in self:
             move.production_product_id = move.raw_material_production_id.product_id.id or move.production_id.product_id.id
 
