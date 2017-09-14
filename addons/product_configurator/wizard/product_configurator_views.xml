@@ -9,9 +9,18 @@
                 <form string="Product configurator">
                     <group>
                         <field name="product_tmpl_id" options="{'no_create': 1}"/>
+                        
+                    </group>
+                    <group string="Select Your Attributes">
+                        <field name="attribute_line_ids" nolabel="1">
+                          <tree editable="bottom">
+                              <field name="attribute_id" options="{'no_create': True}"/>
+                              <field name="value_id" domain="[('attribute_id', '=', attribute_id)]" options="{'no_create': True}"/>
+                          </tree>
+                        </field>
                     </group>
                     <footer>
-                        <button name="create_variant" string="Create Variant"  type="object" class="btn-primary"/>
+                        <button name="action_create_variant" string="Create Variant"  type="object" class="btn-primary"/>
                         <button string="Cancel" class="btn-default" special="cancel" />
                     </footer>
                 </form>
