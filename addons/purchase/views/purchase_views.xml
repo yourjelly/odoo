@@ -312,6 +312,7 @@
                     <field name="name" string="Reference"/>
                     <field name="partner_id" operator="child_of"/>
                     <field name="product_id"/>
+                    <field name="attribute_value_ids" groups="product.group_product_variant"/>
                     <field name="create_uid"/>
                     <field name="user_id"/>
                     <filter name="draft" string="Quotations" domain="[('state','in',('draft','sent','to approve'))]"/>

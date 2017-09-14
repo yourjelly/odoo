@@ -361,6 +361,8 @@ class AccountInvoice(models.Model):
     sequence_number_next = fields.Char(string='Next Number', compute="_get_sequence_number_next", inverse="_set_sequence_next")
     sequence_number_next_prefix = fields.Char(string='Next Number', compute="_get_sequence_prefix")
 
+    attribute_value_ids = fields.Many2many(related='invoice_line_ids.product_id.attribute_value_ids', relation="product.attribute.value", string='Attribute Value', store=False)
+
     _sql_constraints = [
         ('number_uniq', 'unique(number, company_id, journal_id, type)', 'Invoice Number must be unique per Company!'),
     ]

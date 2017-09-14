@@ -154,6 +154,8 @@ class PurchaseOrder(models.Model):
 
     product_id = fields.Many2one('product.product', related='order_line.product_id', string='Product')
     user_id = fields.Many2one('res.users', string='Purchase Representative', index=True, track_visibility='onchange', default=lambda self: self.env.user)
+    attribute_value_ids = fields.Many2many(related='product_id.attribute_value_ids', relation="product.attribute.value", string='Attribute Value', store=False)
+    create_uid = fields.Many2one('res.users', 'Responsible')
     company_id = fields.Many2one('res.company', 'Company', required=True, index=True, states=READONLY_STATES, default=lambda self: self.env.user.company_id.id)
 
     picking_type_id = fields.Many2one('stock.picking.type', 'Deliver To', states=READONLY_STATES, required=True, default=_default_picking_type,\

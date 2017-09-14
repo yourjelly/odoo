@@ -294,6 +294,7 @@ class Picking(models.Model):
     # Used to search on pickings
     product_id = fields.Many2one('product.product', 'Product', related='move_lines.product_id')
     show_operations = fields.Boolean(compute='_compute_show_operations')
+    attribute_value_ids = fields.Many2many(related='product_id.attribute_value_ids', relation="product.attribute.value", string='Attribute Value', store=False)
 
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per company!'),

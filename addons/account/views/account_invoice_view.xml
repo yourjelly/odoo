@@ -527,6 +527,7 @@
                 <search string="Search Invoice">
                     <field name="number" string="Invoice" filter_domain="['|','|','|', ('number','ilike',self), ('origin','ilike',self), ('reference', 'ilike', self), ('partner_id', 'child_of', self)]"/>
                     <field name="journal_id" />
+                    <field name="attribute_value_ids" groups="product.group_product_variant"/>
                     <filter name="draft" string="Draft" domain="[('state','=','draft')]"/>
                     <filter name="invoices" string="Invoices" domain="['&amp;', ('state','in',['draft','open','paid']),('type','in',('out_invoice','in_invoice'))]"/>
                     <filter name="refunds" string="Credit Notes" domain="['&amp;', ('state','in',['draft','open','paid']),('type','in',('out_refund','in_refund'))]"/>
