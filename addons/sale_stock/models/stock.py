@@ -30,6 +30,11 @@ class StockMove(models.Model):
                         line.qty_delivered = line._get_delivered_qty()
         return res
 
+    def _get_new_picking_values(self):
+        vals = super(StockMove, self)._get_new_picking_values()
+        vals['note'] = self.sale_line_id.order_id.note
+        return vals
+
 
 class ProcurementGroup(models.Model):
     _inherit = 'procurement.group'
@@ -44,6 +49,7 @@ class ProcurementRule(models.Model):
         result = super(ProcurementRule, self)._get_stock_move_values(product_id, product_qty, product_uom, location_id, name, origin, values, group_id)
         if values.get('sale_line_id', False):
             result['sale_line_id'] = values['sale_line_id']
+            result['description'] = values['description']
         return result
 
 
@@ -51,6 +57,7 @@ class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
     sale_id = fields.Many2one(related="group_id.sale_id", string="Sales Order", store=True)
+    sale_note = fields.Text(related="sale_id.note", string='Note')
 
     @api.multi
     def _create_backorder(self, backorder_moves=[]):

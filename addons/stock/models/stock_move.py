@@ -45,6 +45,7 @@ class StockMove(models.Model):
         'product.product', 'Product',
         domain=[('type', 'in', ['product', 'consu'])], index=True, required=True,
         states={'done': [('readonly', True)]})
+    description = fields.Text('Description', default="")
     ordered_qty = fields.Float('Ordered Quantity', digits=dp.get_precision('Product Unit of Measure'))
     product_qty = fields.Float(
         'Real Quantity', compute='_compute_product_qty', inverse='_set_product_qty',

@@ -26,6 +26,7 @@
         'views/portal_templates.xml',
         'report/purchase_order_templates.xml',
         'report/purchase_quotation_templates.xml',
+        'report/stock_report_pickingoperations.xml',
     ],
     'test': [
         '../account/test/account_minimal_test.xml',

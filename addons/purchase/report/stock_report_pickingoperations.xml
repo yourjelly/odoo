@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_picking_operations_document_inherit_purchase" inherit_id="stock.report_picking">
+        <xpath expr="//table//th[hasclass('stock-picking-operations-product-header')]" position="after">
+            <th><strong>Description</strong></th>
+        </xpath>
+        <xpath expr="//table//tbody//td[hasclass('stock-picking-operations-product-data')]" position="after">
+            <td><span t-field="pack_operation.move_id.description"/></td>
+        </xpath>
+        <!-- <xpath expr="//table[3]" position="after">
+            <div>
+                Note: <span t-field="o.sale_note"/>
+            </div>
+        </xpath> -->
+    </template>
+</odoo>

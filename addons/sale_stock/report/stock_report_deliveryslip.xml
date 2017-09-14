@@ -9,5 +9,16 @@
                 </div>
             </div>
         </xpath>
+        <xpath expr="//table//th[hasclass('stock-move-line-ids-product-header')]" position="after">
+            <th><strong>Description</strong></th>
+        </xpath>
+        <xpath expr="//table//tbody//td[hasclass('stock-move-line-ids-product-data')]" position="after">
+            <td><span t-field="pack_operation.move_id.description"/></td>
+        </xpath>
+        <xpath expr="//table[3]" position="after">
+            <div>
+                Note: <span t-field="o.sale_note"/>
+            </div>
+        </xpath>
     </template>
 </odoo>

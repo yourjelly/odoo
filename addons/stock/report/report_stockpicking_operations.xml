@@ -77,7 +77,7 @@
                               <t t-set="has_serial_number" t-value="o.move_line_ids.filtered('pack_lot_ids')" groups="stock.group_production_lot"/>
                               <thead>
                                 <tr>
-                                    <th><strong>Product</strong></th>
+                                    <th class="stock-picking-operations-product-header"><strong>Product</strong></th>
                                     <th class="text-right"><strong>Quantity</strong></th>
                                     <t t-if="o.picking_type_id.code != 'incoming'"><th><strong>Source</strong></th></t>
                                     <th t-if="has_barcode" class="text-center">
@@ -91,7 +91,7 @@
                               </thead>
                               <tbody>
                                 <tr t-foreach="o.move_line_ids" t-as="pack_operation">
-                                    <td><span t-field="pack_operation.product_id"/><br/>
+                                    <td class="stock-picking-operations-product-data"><span t-field="pack_operation.product_id"/><br/>
                                         <span t-field="pack_operation.product_id.description_picking"/>
                                         <t t-if="not pack_operation.product_id and pack_operation.package_id"><span  t-field="pack_operation.package_id"/></t></td>
                                     <td class="text-right"><span t-field="pack_operation.product_qty"/> <span t-field="pack_operation.product_uom_id" groups="product.group_uom"/></td>
