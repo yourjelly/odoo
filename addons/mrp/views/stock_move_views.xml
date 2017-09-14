@@ -26,7 +26,7 @@
                             </div>
                             <label for="quantity_done"/>
                             <div class="o_row">
-                                <span><field name="quantity_done" readonly="1" nolabel="1"/></span>
+                                <span><field name="quantity_done" attrs="{'readonly': ['|', ('is_locked', '=', True), ('has_tracking', '!=', 'none')]}" nolabel="1"/></span>
                                 <span> / </span>
                                 <span><field name="reserved_availability" nolabel="1"/></span>
                                 <!-- <span><field name="product_uom" readonly="1" nolabel="1"/></span>-->
@@ -40,13 +40,14 @@
                             <field name="is_locked" invisible="1"/>
                             <field name="production_product_id" invisible="1"/>
                             <field name="name" invisible="1"/>
+                            <field name="has_tracking" invisible="1"/>
                         </group>
                     </group>
-                    <field name="active_move_line_ids" attrs="{'readonly': [('is_locked', '=', True)]}" context="{'default_workorder_id': workorder_id, 'default_product_uom_id': product_uom, 'default_product_id': product_id,  'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_production_id': production_id or raw_material_production_id}">
+                    <field name="active_move_line_ids" attrs="{'readonly': [('is_locked', '=', True)], 'invisible': [('has_tracking', '=', 'none')]}" context="{'default_workorder_id': workorder_id, 'default_product_uom_id': product_uom, 'default_product_id': product_id,  'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_production_id': production_id or raw_material_production_id}">
                         <tree editable="bottom" decoration-success="product_qty==qty_done" decoration-danger="(product_qty &gt; 0) and (qty_done&gt;product_qty)">
                             <field name="lot_id" domain="[('product_id', '=', parent.product_id)]" context="{'default_product_id': parent.product_id}" attrs="{'invisible': [('has_tracking', '=', 'none')]}" groups="stock.group_production_lot"/>
-                            <field name="lot_produced_id" domain="[('product_id', '=', parent.production_product_id)]" context="{'default_product_id': parent.production_product_id}" invisible="not context.get('final_lots')"/>
-                            <field name="product_qty" invisible="not context.get('show_reserved') or context.get('serial') or context.get('state_done')" readonly="1"/>
+                            <field name="lot_produced_id" domain="[('product_id', '=', parent.production_product_id)]" context="{'default_product_id': parent.production_product_id}" invisible="not context.get('final_lots')" attrs="{'invisible': [('has_tracking', '=', 'none')]}"/>
+                            <field name="product_qty" readonly="1"/>
                             <field name="qty_done"/>
                             <field name="workorder_id" invisible="1"/>
                             <field name="product_id" invisible="1"/>
