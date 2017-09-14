@@ -50,7 +50,12 @@
                             <field name="value_ids" widget="many2many_tags" options="{'no_create_edit': True}" domain="[('attribute_id', '=', attribute_id)]" context="{'default_attribute_id': attribute_id}"/>
                         </tree>
                     </field>
-                        <p class="oe_grey">
+                    <button string="=&gt; Attribute Price Extras &amp; Images" type="action"
+                        name="%(product_attribute_value_action)d"
+                        attrs="{'invisible': [('product_variant_count', '&lt;=', 1)]}"
+                        groups="product.group_product_variant" class="oe_link"/>
+
+                    <p class="oe_grey">
                         <strong>Warning</strong>: adding or deleting attributes
                         will delete and recreate existing variants and lead
                         to the loss of their possible customizations.
