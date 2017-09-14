@@ -17,6 +17,13 @@ class StockMoveLine(models.Model):
     done_wo = fields.Boolean('Done for Work Order', default=True, help="Technical Field which is False when temporarily filled in in work order")  # TDE FIXME: naming
     done_move = fields.Boolean('Move Done', related='move_id.is_done', store=True)  # TDE FIXME: naming
     is_locked = fields.Boolean('Is Locked', compute='_compute_is_locked')
+    finished_lot_ids = fields.Many2many('stock.production.lot', compute='_compute_finished_lot_ids')
+    
+    @api.depends('move_id.raw_material_production_id.move_finished_ids.move_line_ids.lot_id')
+    def _compute_finished_lot_ids(self):
+        for ml in self:
+            if ml.move_id.product_id.tracking != 'none' and ml.move_id.raw_material_production_id:
+                ml.finished_lot_ids = ml.move_id.raw_material_production_id.move_finished_ids.mapped('move_line_ids').mapped('lot_id').ids
     
     @api.multi
     @api.depends('move_id.raw_material_production_id.is_locked')
