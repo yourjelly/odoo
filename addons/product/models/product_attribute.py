@@ -31,6 +31,7 @@ class ProductAttributevalue(models.Model):
         default=0.0, digits=dp.get_precision('Product Price'),
         help="Price Extra: Extra price for the variant with this attribute value on sale price. eg. 200 price extra, 1000 + 200 = 1200.")
     price_ids = fields.One2many('product.attribute.price', 'value_id', 'Attribute Prices', readonly=True)
+    attribute_value_ids = fields.Many2many('product.attribute.value', 'product_attribute_value_rel', 'value_id', 'attribute_value_id', string="Attribute Values")
 
     _sql_constraints = [
         ('value_company_uniq', 'unique (name,attribute_id)', 'This attribute value already exists !')
