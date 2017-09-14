@@ -148,6 +148,8 @@ class ProductTemplate(models.Model):
              "resized as a 64x64px image, with aspect ratio preserved. "
              "Use this field anywhere a small image is required.")
 
+    attribute_value_ids = fields.Many2many(related='attribute_line_ids.value_ids', relation="product.attribute.value", string='Attribute Values', store=False)
+
     @api.depends('product_variant_ids')
     def _compute_product_variant_id(self):
         for p in self:

@@ -29,7 +29,7 @@ class ProductConfiguratorWizard(models.TransientModel):
 
     def _find_variant_if_exist(self, value_ids):
         for variant in self.product_tmpl_id.product_variant_ids:
-            if cmp(variant.attribute_value_ids.ids, value_ids.ids) == 0:
+            if (set(variant.attribute_value_ids.ids) == set(value_ids.ids)) == 0:
                 return variant
         return False
 
