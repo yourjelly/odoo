@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+    <t t-name="Configurator">
+        <div class="product_configurator alert alert-info">
+            <div>
+                <h4 class="mt8 text-primary text-center">PRODUCT CONFIGURATOR</h4>
+                <t t-if="!widget.data.length">
+                    <h5 class="text-center mt16">No attribute available for this template.</h5>
+                </t>
+                <div class="config_fields"/>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="ConfiguratorFieldsWidget">
+        <!--TODO remove conditions-->
+        <t t-set="field" t-value="widget.field"/>
+        <t t-if="field.type === 'radio'">
+            <t t-call="product_configurator.field_selection_radio"/>
+        </t>
+        <t t-if="field.type === 'select'">
+            <t t-call="product_configurator.field_selection"/>
+        </t>
+        <t t-if="field.type === 'color'">
+            <t t-call="product_configurator.field_color"/>
+        </t>
+    </t>
+
+    <t t-name="product_configurator.field">
+        <div class="form-group form-field ">
+            <div class="col-md-3 col-sm-4 text-right-not-xs mt8">
+                <label class="control-label" t-att-for="field.name">
+                    <t t-esc="field.name"/>
+                </label>
+            </div>
+            <div class="col-md-7 col-sm-8 mt8">
+                <t t-raw="0"/>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="product_configurator.field_selection_radio">
+        <t t-call="product_configurator.field">
+            <div class="o_configurator_flex">
+                <t t-foreach="field.values" t-as="v">
+                    <div class="radio o_configurator_flex_item">
+                        <label>
+                            <input
+                                type="radio"
+                                class="o_form_input"
+                                t-att-name="field.id"
+                                t-att-value="v.id"
+                                t-att-data-value = "v.id"
+                                t-att-checked = "v.id === widget.defaultValue ? 'checked': ''"
+                            />
+                            <span>
+                                <t t-esc="v.name"/>
+                            </span>
+                        </label>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </t>
+
+    <t t-name="product_configurator.field_selection">
+        <t t-call="product_configurator.field">
+            <select class="form-control o_website_form_input" t-att-name="field.id">
+                <t t-foreach="field.values" t-as="v">
+                    <option t-att-value="v.id" t-att-selected = "v.id === widget.defaultValue ? '1': null">
+                        <t t-esc="v.name"/>
+                    </option>
+                </t>
+            </select>
+        </t>
+    </t>
+
+    <!--TODO Should be replace by radio field-->
+    <t t-name="product_configurator.field_color">
+        <t t-call="product_configurator.field">
+            <t t-foreach="field.values" t-as="v">
+                <label t-attf-style="background-color:#{v.html_color or v.name}" t-attf-class="css_attribute_color">
+                    <input 
+                        type="radio"
+                        t-att-name="field.id"
+                        t-att-value="v.id"
+                        t-att-title="v.name"
+                        t-att-checked = "v.id === widget.defaultValue ? 'checked': ''"/>
+                </label>
+            </t>
+        </t>
+    </t>
+
+</templates>

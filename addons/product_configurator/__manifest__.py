@@ -11,9 +11,11 @@
         'views/product_template_views.xml',
         'views/product_attribute_views.xml',
         'views/sale_order_views.xml',
+        'views/templates.xml',
     ],
     'demo': [
     ],
+    'qweb': ['static/src/xml/configurator.xml'],
     'installable': True,
     'auto_install': False,
 }
