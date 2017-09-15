@@ -326,6 +326,7 @@ class account_payment(models.Model):
             journal_type.append('general')
             self.payment_difference_handling = 'reconcile'
             self.journal_id = self.env['account.journal'].search([('type', '=', 'general')], limit=1)
+            domain.append(('type', 'in', journal_type))
         else:
             if self.payment_type == 'inbound':
                 domain.append(('at_least_one_inbound', '=', True))
