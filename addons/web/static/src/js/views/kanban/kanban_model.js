@@ -157,6 +157,12 @@ var KanbanModel = BasicModel.extend({
                 id: new_group.res_id,
                 display_name: new_group.value,
             };
+        } else if (groupedField.type === 'selection') {
+            _.map(groupedField.selection, function(val, index){
+                if (val[1] === new_group.value) {
+                    changes[groupedFieldName] = val[0];
+                }
+            });
         } else {
             changes[groupedFieldName] = new_group.value;
         }
