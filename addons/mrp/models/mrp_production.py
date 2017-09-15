@@ -218,10 +218,10 @@ class MrpProduction(models.Model):
                 assigned_list = [x.state in ('assigned', 'done', 'cancel') for x in order.move_raw_ids]
                 order.availability = (all(assigned_list) and 'assigned') or (any(partial_list) and 'partially_available') or 'waiting'
 
-    @api.depends('move_raw_ids', 'is_locked')
+    @api.depends('move_raw_ids', 'is_locked', 'state')
     def _compute_unreserve_visible(self):
         for order in self:
-            order.unreserve_visible = order.is_locked and order.mapped('move_raw_ids').mapped('move_line_ids') or False
+            order.unreserve_visible = order.is_locked and order.state not in ('done', 'cancel') and order.mapped('move_raw_ids').mapped('move_line_ids') or False
 
     @api.multi
     @api.depends('move_raw_ids.quantity_done', 'move_finished_ids.quantity_done', 'is_locked')
