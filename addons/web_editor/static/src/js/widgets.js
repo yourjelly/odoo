@@ -179,10 +179,10 @@ var MediaDialog = Dialog.extend({
                 this.imageDialog.clear();
             }
             // if not mode only_images
-            if (this.iconDialog && this.active !== this.iconDialog) {
+            if (this.iconDialog && this.active !== this.iconDialog && this.iconDialog.media) {
                 this.iconDialog.clear();
             }
-            if (this.videoDialog && this.active !== this.videoDialog) {
+            if (this.videoDialog && this.active !== this.videoDialog && this.videoDialog.media) {
                 this.videoDialog.clear();
             }
         } else {
@@ -298,6 +298,7 @@ var ImageDialog = Widget.extend({
             if (o.url) {
                 self.set_image(_.find(self.records, function (record) { return record.url === o.url;}) || o);
             }
+            self.$('.img-responsive:first').trigger('click');
         });
         return res;
     },
