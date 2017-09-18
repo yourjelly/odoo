@@ -79,12 +79,6 @@ class StockMove(models.Model):
         help='Technical Field to order moves')
     is_locked = fields.Boolean('Is Locked', compute='_compute_is_locked')
     production_product_id = fields.Many2one('product.product', 'Production Product', compute='_compute_production_product')
-    needs_lots = fields.Boolean('Needs Lots', compute='_compute_needs_lots')
-    
-    @api.depends('product_id.tracking')
-    def _compute_needs_lots(self):
-        for move in self:
-            move.needs_lots = move.product_id.tracking != 'none'
     
     @api.depends('production_id.product_id', 'raw_material_production_id.product_id')
     def _compute_production_product(self):
@@ -123,25 +117,13 @@ class StockMove(models.Model):
         return super(StockMove, self)._action_cancel()
 
     @api.multi
-    # Could use split_move_operation from stock here
     def split_move_lot(self):
         ctx = dict(self.env.context)
         self.ensure_one()
         view = self.env.ref('mrp.view_stock_move_lots')
-        serial = (self.has_tracking == 'serial')
-        only_create = False  # Check operation type in theory
-        show_reserved = any([x for x in self.move_line_ids if x.product_qty > 0.0])
         ctx.update({
-            'serial': serial,
-            'only_create': only_create,
-            'create_lots': True,
-            'state_done': self.is_done,
-            'show_reserved': show_reserved,
+            'final_lots': self.raw_material_production_id.product_id.tracking != 'none',
         })
-        if ctx.get('w_production'):
-            action = self.env.ref('mrp.act_mrp_product_produce').read()[0]
-            action['context'] = ctx
-            return action
         result = {
             'name': _('Register Lots'),
             'type': 'ir.actions.act_window',

@@ -63,6 +63,21 @@
             </field>
         </record>
 
+        <record id="view_stock_move_lots_save" model="ir.ui.view">
+            <field name="name">stock.move.lots.form.save</field>
+            <field name="model">stock.move</field>
+            <field name="inherit_id" ref="mrp.view_stock_move_lots" />
+            <field name="mode">primary</field>
+            <field name="arch" type="xml">
+                <field name="active_move_line_ids" position="after">
+                    <footer class="oe_edit_only" attrs="{'invisible': [('is_locked', '=', True)]}">
+                        <button name="save" type="object" string="Save" class="oe_highlight"/>
+                        <button string="Discard" special="cancel"/>
+                    </footer>
+                </field>
+            </field>
+        </record>
+
     <menuitem id="menu_mrp_traceability"
           name="Traceability: Lots"
           parent="menu_mrp_reporting"
