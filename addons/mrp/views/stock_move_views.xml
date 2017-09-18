@@ -37,7 +37,7 @@
                             <field name="location_dest_id" invisible="1"/>
                             <field name="production_id" invisible="1"/>
                             <field name="raw_material_production_id" invisible="1"/>
-                            <field name="is_locked" invisible="1"/>
+                            <field name="is_locked"/>
                             <field name="production_product_id" invisible="1"/>
                             <field name="name" invisible="1"/>
                             <field name="has_tracking" invisible="1"/>
@@ -71,7 +71,7 @@
             <field name="arch" type="xml">
                 <field name="active_move_line_ids" position="after">
                     <footer class="oe_edit_only" attrs="{'invisible': [('is_locked', '=', True)]}">
-                        <button name="save" type="object" string="Save" class="oe_highlight"/>
+                        <button string="Save" special="save" class="oe_highlight"/>
                         <button string="Discard" special="cancel"/>
                     </footer>
                 </field>

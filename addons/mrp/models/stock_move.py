@@ -16,7 +16,6 @@ class StockMoveLine(models.Model):
     lot_produced_qty = fields.Float('Quantity Finished Product', help="Informative, not used in matching")
     done_wo = fields.Boolean('Done for Work Order', default=True, help="Technical Field which is False when temporarily filled in in work order")  # TDE FIXME: naming
     done_move = fields.Boolean('Move Done', related='move_id.is_done', store=True)  # TDE FIXME: naming
-    is_locked = fields.Boolean('Is Locked', compute='_compute_is_locked')
     finished_lot_ids = fields.Many2many('stock.production.lot', compute='_compute_finished_lot_ids')
     
     @api.depends('move_id.raw_material_production_id.move_finished_ids.move_line_ids.lot_id')
@@ -24,12 +23,6 @@ class StockMoveLine(models.Model):
         for ml in self:
             if ml.move_id.product_id.tracking != 'none' and ml.move_id.raw_material_production_id:
                 ml.finished_lot_ids = ml.move_id.raw_material_production_id.move_finished_ids.mapped('move_line_ids').mapped('lot_id').ids
-    
-    @api.multi
-    @api.depends('move_id.raw_material_production_id.is_locked')
-    def _compute_is_locked(self):
-        for moveline in self:
-            moveline.is_locked = moveline.move_id.raw_material_production_id.is_locked or False #or moveline.move_id.picking_id.is_locked
 
     @api.one
     @api.constrains('lot_id', 'qty_done')
@@ -77,7 +70,6 @@ class StockMove(models.Model):
         'Done', compute='_compute_is_done',
         store=True,
         help='Technical Field to order moves')
-    is_locked = fields.Boolean('Is Locked', compute='_compute_is_locked')
     production_product_id = fields.Many2one('product.product', 'Production Product', compute='_compute_production_product')
     
     @api.depends('production_id.product_id', 'raw_material_production_id.product_id')
@@ -85,10 +77,10 @@ class StockMove(models.Model):
         for move in self:
             move.production_product_id = move.raw_material_production_id.product_id.id or move.production_id.product_id.id
 
-    @api.depends('raw_material_production_id.is_locked')
+    @api.depends('raw_material_production_id.is_locked', 'picking_id.is_locked')
     def _compute_is_locked(self):
         for move in self:
-            move.is_locked = move.raw_material_production_id.is_locked or False #or move.picking_id.is_locked
+            move.is_locked = move.raw_material_production_id.is_locked or move.picking_id.is_locked
 
     def _get_move_lines(self):
         self.ensure_one()
@@ -120,7 +112,7 @@ class StockMove(models.Model):
     def split_move_lot(self):
         ctx = dict(self.env.context)
         self.ensure_one()
-        view = self.env.ref('mrp.view_stock_move_lots')
+        view = self.env.ref('mrp.view_stock_move_lots_save')
         ctx.update({
             'final_lots': self.raw_material_production_id.product_id.tracking != 'none',
         })
