@@ -36,7 +36,7 @@
                 <form string="Manufacturing Orders">
                 <header>
                     <field name="consumed_less_than_planned" invisible="1"/>
-                    <button name="button_mark_done" attrs="{'invisible': ['|', ('check_to_done', '=', False)]}" string="Mark as Done" type="object" class="oe_highlight"/>
+                    <button name="button_mark_done" attrs="{'invisible': ['|', ('check_to_done', '=', False), ('consumed_less_than_planned', '=', True)]}" string="Mark as Done" type="object" class="oe_highlight"/>
                     <button name="button_mark_done" attrs="{'invisible': ['|', ('check_to_done', '=', False), ('consumed_less_than_planned', '=', False)]}" string="Mark as Done" type="object" class="oe_highlight" confirm="You have consumed less material than what was planned. Are you sure you want to close this MO?"/>
                     <button name="action_assign" attrs="{'invisible': ['|', ('availability', 'in', ('assigned', 'none')), ('is_locked', '=', False)]}" string="Check availability" type="object" class="oe_highlight"/>
                     <button name="button_plan" attrs="{'invisible': ['|', '|', ('state', '!=', 'confirmed'), ('routing_id', '=', False), ('is_locked', '=', False)]}" type="object" string="Create Workorders" class="oe_highlight"/>
