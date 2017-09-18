@@ -11,3 +11,10 @@ class ProductTemplate(models.Model):
         [('standard', 'Standard'), ('configurable', 'Configurable')], default='standard',
         help="Standard variants are generated upfront so that you can manage them in your inventory.\n"
         "Configurable variants are generated at the sales when the product is added")
+
+
+class ProductProduct(models.Model):
+
+    _inherit = 'product.product'
+
+    custom_value_ids = fields.One2many('product.attribute.value.custom', 'product_id', string='Custom Values', readonly=True)

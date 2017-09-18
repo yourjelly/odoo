@@ -2,8 +2,13 @@ odoo.define('product_configurator.configurator', function (require) {
 "use strict";
 
 var AbstractField = require('web.AbstractField');
+var core = require('web.core');
 var field_registry = require('web.field_registry');
+var time = require('web.time');
 var Widget = require('web.Widget');
+
+var _t = core._t;
+var qweb = core.qweb;
 
 
 var ProductConfiguratorWidget = AbstractField.extend({
@@ -134,9 +139,10 @@ var Configurator = Widget.extend({
      * @private
      */
     _onFieldValueChange: function(field) {
+        console.log('changedd')
         for (var i = 0; i < this.alldata.result.length; i++) {
             if (this.alldata.result[i].id === parseInt(field.data.id)) {
-                this.alldata.result[i].value = parseInt(field.data.value);
+                this.alldata.result[i].value = this.alldata.result[i].type === 'custom' ? field.data.value : parseInt(field.data.value);
             }
         }
     },
@@ -147,8 +153,8 @@ var Configurator = Widget.extend({
 var ConfiguratorFieldsWidget = Widget.extend({
     template: 'ConfiguratorFieldsWidget',
     events: {
-        'change input': '_onInputChange',
-        'change select': '_onSelectionChange',
+        'change .o_field_input, .o_custom_field_input': '_onInputChange',
+        'blur .o_custom_field_date, .o_custom_field_datetime' : '_onDatePickerChange',
     },
     /**
      * @constructor
@@ -163,8 +169,13 @@ var ConfiguratorFieldsWidget = Widget.extend({
      * @override
      */
     start: function() {
+        if (this.field.type == 'custom' && (this.field.value_type === 'datetime' || this.field.value_type === 'date')) {
+            this._initDatetimePicker();
+        }
         this._super.apply(this, arguments);
     },
+
+    
 
     //--------------------------------------------------------------------------
     // Private
@@ -176,23 +187,54 @@ var ConfiguratorFieldsWidget = Widget.extend({
     _onInputChange: function(ev) {
         var $input = $(ev.target);
         var vals = {
-            id: $input.attr('name'),
+            id: $input.data('attr-id'),
             value: $input.val(),
         }
+        this._setValue(vals);
+    },
+
+    _onDatePickerChange: function(ev) {
+        var $input = $(ev.target);
+        var vals = {
+            id: $input.data('attr-id'),
+            value: $input.val(),
+        }
+        this._setValue(vals);
+    },
+
+    /**
+     * @private
+     */
+    _setValue: function (vals) {
         this.trigger_up('config_field_changed', vals);
     },
 
     /**
      * @private
      */
-    _onSelectionChange: function(ev) {
-        var $select = $(ev.target);
-        var vals = {
-            id: $select.attr('name'),
-            value: $select.val(),
-        }
-        this.trigger_up('config_field_changed', vals);
-    }
+    _initDatetimePicker: function () {
+        // Initialize datetimepickers
+        var l10n = _t.database.parameters;
+        var datepickers_options = {
+            minDate: moment({ y: 1900 }),
+            maxDate: moment().add(200, "y"),
+            calendarWeeks: true,
+            icons : {
+                time: 'fa fa-clock-o',
+                date: 'fa fa-calendar',
+                next: 'fa fa-chevron-right',
+                previous: 'fa fa-chevron-left',
+                up: 'fa fa-chevron-up',
+                down: 'fa fa-chevron-down',
+               },
+            locale : moment.locale(),
+            format : time.strftime_to_moment_format(l10n.date_format +' '+ l10n.time_format),
+        };
+        this.$('.o_custom_field_datetime').datetimepicker(datepickers_options);
+        // Adapt options to date-only pickers
+        datepickers_options.format = time.strftime_to_moment_format(l10n.date_format);
+        this.$('.o_custom_field_date').datetimepicker(datepickers_options);
+    },
 });
 
 

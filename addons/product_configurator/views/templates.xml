@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="assets_backend" name="Product Configurator Assets" inherit_id="web.assets_backend" priority="17">
+        <xpath expr="." position="inside">
+            <link href="/product_configurator/static/src/less/configurator.less" rel="stylesheet" type="text/less"/>
+            <script type="text/javascript" src="/product_configurator/static/src/js/configurator.js"></script>
+        </xpath>
+    </template>
+</odoo>

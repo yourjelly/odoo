@@ -18,7 +18,8 @@ class ProductConfiguratorWizard(models.TransientModel):
     @api.multi
     def action_create_variant(self):
         data = json.loads(self.product_configurator)
-        value_ids = [r['value'] for r in data['result']]
+        value_ids = [r['value'] for r in data['result'] if r['type'] != 'custom']
+        custom_values = [(r['id'], r['value']) for r in data['result'] if r['type'] == 'custom']
         variant = self._find_variant_if_exist(value_ids)
         if not variant:
             vals = {
@@ -26,10 +27,15 @@ class ProductConfiguratorWizard(models.TransientModel):
                 'attribute_value_ids': [(4, v_id) for v_id in value_ids],
             }
 
+            if len(custom_values):
+                vals.update(custom_value_ids=[(0, 0, {
+                    'attribute_id': custom_v[0],
+                    'value': custom_v[1]}) for custom_v in custom_values])
+
             variant = self.env['product.product'].create(vals)
 
         saleOrder = self.env['sale.order'].browse(self.env.context.get('active_id'))
-        saleOrder.write({'order_line': [(0, 0, {'product_id': variant.id})]})
+        saleOrder.write({'order_line': [(0, 0, {'product_id': variant.id, 'is_configurable': True})]})
         return {'type': 'ir.actions.act_window_close'}
 
     def _find_variant_if_exist(self, value_ids):
@@ -44,15 +50,17 @@ class ProductConfiguratorWizard(models.TransientModel):
             data = {'data': [], 'result': []}
             for line in self.product_tmpl_id.attribute_line_ids:
                 data['data'].append({
-                        'id': line.attribute_id.id,
-                        'name': line.attribute_id.name,
-                        'type': line.attribute_id.type,
-                        'values': [{'id': v.id, 'name': v.name, 'html_color': v.html_color} for v in line.attribute_id.value_ids]
+                    'id': line.attribute_id.id,
+                    'name': line.attribute_id.name,
+                    'type': line.attribute_id.type,
+                    'value_type': line.attribute_id.value_type,
+                    'values': [{'id': v.id, 'name': v.name, 'html_color': v.html_color} for v in line.attribute_id.value_ids]
                 })
 
                 data['result'].append({
                     'id': line.attribute_id.id,
-                    'value': line.attribute_id.value_ids.ids[0]
+                    'value': line.attribute_id.value_ids.ids[0] if line.attribute_id.type != 'custom' else '',
+                    'type': line.attribute_id.type
                 })
 
             data = json.dumps(data)

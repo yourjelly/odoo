@@ -3,28 +3,17 @@
 <templates xml:space="preserve">
     <t t-name="Configurator">
         <div class="product_configurator alert alert-info">
-            <div>
-                <h4 class="mt8 text-primary text-center">PRODUCT CONFIGURATOR</h4>
-                <t t-if="!widget.data.length">
-                    <h5 class="text-center mt16">No attribute available for this template.</h5>
-                </t>
-                <div class="config_fields"/>
-            </div>
+            <h4 class="mt8 text-primary text-center">PRODUCT CONFIGURATOR</h4>
+            <t t-if="!widget.data.length">
+                <h5 class="text-center mt16">No attribute available for this template.</h5>
+            </t>
+            <div class="config_fields"/>
         </div>
     </t>
 
     <t t-name="ConfiguratorFieldsWidget">
-        <!--TODO remove conditions-->
         <t t-set="field" t-value="widget.field"/>
-        <t t-if="field.type === 'radio'">
-            <t t-call="product_configurator.field_selection_radio"/>
-        </t>
-        <t t-if="field.type === 'select'">
-            <t t-call="product_configurator.field_selection"/>
-        </t>
-        <t t-if="field.type === 'color'">
-            <t t-call="product_configurator.field_color"/>
-        </t>
+        <t t-call="product_configurator.field_{{widget.field.type}}"/>
     </t>
 
     <t t-name="product_configurator.field">
@@ -40,7 +29,7 @@
         </div>
     </t>
 
-    <t t-name="product_configurator.field_selection_radio">
+    <t t-name="product_configurator.field_radio">
         <t t-call="product_configurator.field">
             <div class="o_configurator_flex">
                 <t t-foreach="field.values" t-as="v">
@@ -48,8 +37,9 @@
                         <label>
                             <input
                                 type="radio"
-                                class="o_form_input"
-                                t-att-name="field.id"
+                                class="o_field_input"
+                                t-att-name="field.name"
+                                t-att-data-attr-id="field.id"
                                 t-att-value="v.id"
                                 t-att-data-value = "v.id"
                                 t-att-checked = "v.id === widget.defaultValue ? 'checked': ''"
@@ -64,9 +54,9 @@
         </t>
     </t>
 
-    <t t-name="product_configurator.field_selection">
+    <t t-name="product_configurator.field_select">
         <t t-call="product_configurator.field">
-            <select class="form-control o_website_form_input" t-att-name="field.id">
+            <select class="form-control o_field_input" t-att-name="field.name" t-att-data-attr-id="field.id">
                 <t t-foreach="field.values" t-as="v">
                     <option t-att-value="v.id" t-att-selected = "v.id === widget.defaultValue ? '1': null">
                         <t t-esc="v.name"/>
@@ -83,12 +73,105 @@
                 <label t-attf-style="background-color:#{v.html_color or v.name}" t-attf-class="css_attribute_color">
                     <input 
                         type="radio"
+                        class="o_field_input"
                         t-att-name="field.id"
                         t-att-value="v.id"
                         t-att-title="v.name"
                         t-att-checked = "v.id === widget.defaultValue ? 'checked': ''"/>
                 </label>
             </t>
+        </t>
+    </t>
+
+    <!--Custom Fields-->
+    <t t-name="product_configurator.field_custom">
+        <t t-call="product_configurator.custom_field_{{field.value_type}}"/>
+    </t>
+
+    <t t-name="product_configurator.custom_field_char">
+        <t t-call="product_configurator.field">
+            <input
+                type="text"
+                class="form-control o_custom_field_input"
+                t-att-name="field.name"
+                t-att-data-attr-id="field.id"
+                value=""
+            />
+        </t>
+    </t>
+
+    <!-- Text Field -->
+    <t t-name="product_configurator.custom_field_text">
+        <t t-call="product_configurator.field">
+            <textarea
+                class="form-control o_custom_field_input"
+                t-att-name="field.name"
+                t-att-data-attr-id="field.id"
+                value=""
+            />
+        </t>
+    </t>
+
+    <!-- Integer Field -->
+    <t t-name="product_configurator.custom_field_integer">
+        <t t-call="product_configurator.field">
+            <input
+                type="number"
+                class="form-control o_custom_field_input"
+                t-att-name="field.name"
+                t-att-data-attr-id="field.id"
+                step="1"
+            />
+        </t>
+    </t>
+
+    <!-- Float Field -->
+    <t t-name="product_configurator.custom_field_float">
+        <t t-call="product_configurator.field">
+            <input
+                type="number"
+                class="form-control o_custom_field_input"
+                t-att-name="field.name"
+                t-att-data-attr-id="field.id"
+                step="any"
+            />
+        </t>
+    </t>
+
+    <!-- Date Field -->
+    <t t-name="product_configurator.custom_field_date">
+        <t t-call="product_configurator.field">
+            <input
+                type="text"
+                class="form-control o_custom_field_date"
+                t-att-name="field.name"
+                t-att-data-attr-id="field.id"
+            />
+        </t>
+    </t>
+
+    <!-- Datetime Field -->
+    <t t-name="product_configurator.custom_field_datetime">
+        <t t-call="product_configurator.field">
+            <input
+                type="text"
+                class="form-control o_custom_field_datetime"
+                t-att-name="field.name"
+                t-att-data-attr-id="field.id"
+            />
+        </t>
+    </t>
+
+    <!-- Binary Field -->
+    <t t-name="product_configurator.custom_field_binary">
+        <t t-call="product_configurator.field">
+            <input
+                type="file"
+                class="form-control o_custom_field_input"
+                t-att-name="field.name"
+                t-att-data-attr-id="field.id"
+                multiple="1"
+            />
         </t>
     </t>
 

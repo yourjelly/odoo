@@ -11,6 +11,12 @@
                     <field name="variant_type" widget="radio"/>
                 </group>
             </xpath>
+            <xpath expr="//field[@name='attribute_line_ids']//tree" position="inside">
+                <field name="is_custom_attr" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='attribute_line_ids']//tree//field[@name='value_ids']" position="attributes">
+                <attribute name="attrs">{'readonly': [('is_custom_attr', '=', True)]}</attribute>
+            </xpath>
         </field>
     </record>
 
