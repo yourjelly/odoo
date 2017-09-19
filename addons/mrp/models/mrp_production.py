@@ -397,7 +397,7 @@ class MrpProduction(models.Model):
         self.ensure_one()
         move = self.move_raw_ids.filtered(lambda x: x.bom_line_id.id == bom_line.id and x.state not in ('done', 'cancel'))
         if move:
-            if quantity > 0:
+            if quantity > 0 or move.product_qty == 0: #Do not remove 0 lines
                 move[0].write({'product_uom_qty': quantity})
             else:
                 if move[0].quantity_done > 0:
@@ -510,6 +510,8 @@ class MrpProduction(models.Model):
         for order in self:
             moves_not_to_do = order.move_raw_ids.filtered(lambda x: x.state == 'done')
             moves_to_do = order.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
+            for move in moves_to_do.filtered(lambda m: m.product_qty == 0.0 and m.quantity_done > 0):
+                move.product_uom_qty = move.quantity_done
             moves_to_do._action_done()
             moves_to_do = order.move_raw_ids.filtered(lambda x: x.state == 'done') - moves_not_to_do
             order._cal_price(moves_to_do)
