@@ -48,6 +48,12 @@ class StockMoveLine(models.Model):
     consume_line_ids = fields.Many2many('stock.move.line', 'stock_move_line_consume_rel', 'consume_line_id', 'produce_line_id', help="Technical link to see who consumed what. ")
     produce_line_ids = fields.Many2many('stock.move.line', 'stock_move_line_consume_rel', 'produce_line_id', 'consume_line_id', help="Technical link to see which line was produced with this. ")
     has_tracking = fields.Selection(related='move_id.has_tracking')
+    needs_lots = fields.Boolean('Tracking', compute='_compute_needs_lots')
+
+    @api.depends('product_id.tracking')
+    def _compute_needs_lots(self):
+        for move in self:
+            move.needs_lots = move.product_id.tracking != 'none'
 
     @api.one
     def _compute_location_description(self):

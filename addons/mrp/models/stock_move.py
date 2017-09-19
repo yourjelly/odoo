@@ -108,28 +108,6 @@ class StockMove(models.Model):
              If you want to cancel this MO, please change the consumed quantities to 0.'))
         return super(StockMove, self)._action_cancel()
 
-    @api.multi
-    def split_move_lot(self):
-        ctx = dict(self.env.context)
-        self.ensure_one()
-        view = self.env.ref('mrp.view_stock_move_lots_save')
-        ctx.update({
-            'final_lots': self.raw_material_production_id.product_id.tracking != 'none',
-        })
-        result = {
-            'name': _('Register Lots'),
-            'type': 'ir.actions.act_window',
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_model': 'stock.move',
-            'views': [(view.id, 'form')],
-            'view_id': view.id,
-            'target': 'new',
-            'res_id': self.id,
-            'context': ctx,
-        }
-        return result
-
     def _action_confirm(self, merge=True):
         moves = self
         for move in self.filtered(lambda m: m.production_id):
