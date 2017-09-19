@@ -139,10 +139,12 @@ var Configurator = Widget.extend({
      * @private
      */
     _onFieldValueChange: function(field) {
-        console.log('changedd')
         for (var i = 0; i < this.alldata.result.length; i++) {
             if (this.alldata.result[i].id === parseInt(field.data.id)) {
                 this.alldata.result[i].value = this.alldata.result[i].type === 'custom' ? field.data.value : parseInt(field.data.value);
+                if (this.alldata.result[i].value_type === 'binary') {
+                    this.alldata.result[i].name = field.data.name;
+                }
             }
         }
     },
@@ -155,6 +157,7 @@ var ConfiguratorFieldsWidget = Widget.extend({
     events: {
         'change .o_field_input, .o_custom_field_input': '_onInputChange',
         'blur .o_custom_field_date, .o_custom_field_datetime' : '_onDatePickerChange',
+        'change .o_custom_field_binary': '_onFileInputChange',
     },
     /**
      * @constructor
@@ -191,6 +194,27 @@ var ConfiguratorFieldsWidget = Widget.extend({
             value: $input.val(),
         }
         this._setValue(vals);
+    },
+
+    _onFileInputChange: function(ev) {
+        //TODO: check the file Size and other validation
+        var self = this;
+        var $input = $(ev.target);
+        var file = $input.prop('files')[0];
+        if (file) {
+            var filereader = new FileReader();
+            filereader.readAsDataURL(file);
+            filereader.onloadend = function (upload) {
+                var data = upload.target.result;
+                data = data.split(',')[1];
+                var vals = {
+                    id: $input.data('attr-id'),
+                    value: data,
+                    name: file.name,
+                }
+                self._setValue(vals);
+            };
+        }
     },
 
     _onDatePickerChange: function(ev) {

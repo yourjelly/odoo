@@ -47,7 +47,7 @@ class ProductAttributeValueCustom(models.Model):
     name = fields.Char(compute="_compute_val_name", string='Name', readonly=True, store=True)
     product_id = fields.Many2one('product.product', string='Product ID', required=True, ondelete='cascade')
     attribute_id = fields.Many2one('product.attribute', string='Attribute', required=True)
-    attachment_ids = fields.Many2many('ir.attachment', 'product_attr_val_custom_value_attachment_rel', 'attr_val_custom_id', 'attachment_id', string='Attachments')
+    attachment_ids = fields.One2many('ir.attachment', 'res_id', string='Attachments')
     value = fields.Char(string='Custom Value')
 
     _sql_constraints = [
@@ -60,10 +60,13 @@ class ProductAttributeLine(models.Model):
 
     _inherit = 'product.attribute.line'
 
-    is_custom_attr = fields.Boolean(compute='_is_custome_attribute', string="Is Custom Attribute")
+    _order = 'sequence'
+
+    is_custom_attr = fields.Boolean(compute='_is_custom_attribute', string="Is Custom Attribute")
+    sequence = fields.Integer(string='Sequence', default=10)
 
     @api.multi
     @api.depends('attribute_id')
-    def _is_custome_attribute(self):
+    def _is_custom_attribute(self):
         for line in self.filtered(lambda l: l.attribute_id.type == 'custom'):
             line.is_custom_attr = True
