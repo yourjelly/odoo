@@ -914,7 +914,8 @@ class ProcurementRule(models.Model):
                     po_line = line.write({
                         'product_qty': line.product_qty + procurement_uom_po_qty,
                         'price_unit': price_unit,
-                        'move_dest_ids': [(4, x.id) for x in values.get('move_dest_ids', [])]
+                        'move_dest_ids': [(4, x.id) for x in values.get('move_dest_ids', [])],
+                        'orderpoint_id': line.orderpoint_id.id or (values.get('orderpoint_id') and values['orderpoint_id'].id or False),
                     })
                     break
         if not po_line:
