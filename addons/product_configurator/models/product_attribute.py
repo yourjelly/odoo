@@ -27,11 +27,6 @@ class ProductAttribute(models.Model):
     is_required = fields.Boolean(string="Required")
     uom_id = fields.Many2one('product.uom', string='Unit of Measure')
 
-    @api.onchange('type')
-    def onchange_type(self):
-        if self.type == 'custom':
-            self.create_variant = False
-
 
 class ProductAttributeValueCustom(models.Model):
 
