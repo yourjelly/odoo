@@ -118,15 +118,17 @@ class ProductConfiguratorWizard(models.TransientModel):
             }
 
         if len(custom_values):
+            data = []
             for custom_v in custom_values:
                 if custom_v['value_type'] != 'binary':
-                    vals.update(custom_value_ids=[(0, 0, {
+                    data.append((0, 0, {
                         'attribute_id': custom_v['id'],
-                        'value': custom_v['value']})])
+                        'value': custom_v['value']}))
                 else:
-                    vals.update(custom_value_ids=[(0, 0, {
+                    data.append((0, 0, {
                         'attribute_id': custom_v['id'],
-                        'attachment_ids': [(0, 0, self._get_attachment_value(custom_v['value'], custom_v['name']))]})])
+                        'attachment_ids': [(0, 0, self._get_attachment_value(custom_v['value'], custom_v['name']))]}))
+            vals.update(custom_value_ids=data)
 
         return vals
 
