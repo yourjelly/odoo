@@ -71,7 +71,13 @@ class StockMove(models.Model):
         store=True,
         help='Technical Field to order moves')
     production_product_id = fields.Many2one('product.product', 'Production Product', compute='_compute_production_product')
-    
+    needs_lots = fields.Boolean('Tracking', compute='_compute_needs_lots')
+
+    @api.depends('product_id.tracking')
+    def _compute_needs_lots(self):
+        for move in self:
+            move.needs_lots = move.product_id.tracking != 'none'
+
     @api.depends('production_id.product_id', 'raw_material_production_id.product_id')
     def _compute_production_product(self):
         for move in self:
