@@ -1308,7 +1308,7 @@
             <img class="img-circle oe_topbar_avatar" t-att-src="_s + '/web/static/src/img/user_menu_avatar.png'"/>
             <span class="oe_topbar_name"/>
         </a>
-        <ul class="dropdown-menu" role="menu">
+        <ul class="dropdown-menu o_user_menu_items" role="menu">
             <li><a href="#" data-menu="documentation">Documentation</a></li>
             <li><a href="#" data-menu="support">Support</a></li>
             <li class="divider"/>
