@@ -107,7 +107,7 @@ class MrpProduction(models.Model):
         copy=False, states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}, 
         domain=[('scrapped', '=', False)])
     move_line_ids = fields.Many2many(
-        'stock.move.line', compute='_compute_lines',#related='move_finished_ids.move_line_ids'
+        'stock.move.line', compute='_compute_lines', inverse='_inverse_lines',
         )
     workorder_ids = fields.One2many(
         'mrp.workorder', 'production_id', 'Work Orders',
@@ -168,9 +168,9 @@ class MrpProduction(models.Model):
         for production in self:
             production.show_final_lots = production.product_id.tracking != 'none'
 
-    def action_toggle_is_locked(self):
-        self.is_locked = not self.is_locked
-        return True
+    def _inverse_lines(self):
+        """ Little hack to make sure that when you change something on these objects, it gets saved"""
+        pass
 
     @api.depends('move_finished_ids.move_line_ids')
     def _compute_lines(self):
@@ -218,10 +218,12 @@ class MrpProduction(models.Model):
                 assigned_list = [x.state in ('assigned', 'done', 'cancel') for x in order.move_raw_ids]
                 order.availability = (all(assigned_list) and 'assigned') or (any(partial_list) and 'partially_available') or 'waiting'
 
-    @api.depends('move_raw_ids', 'is_locked', 'state')
+    @api.depends('move_raw_ids', 'is_locked', 'state', 'move_raw_ids.quantity_done')
     def _compute_unreserve_visible(self):
         for order in self:
-            order.unreserve_visible = order.is_locked and order.state not in ('done', 'cancel') and order.mapped('move_raw_ids').mapped('move_line_ids') or False
+            unreserve_visible = order.is_locked and order.state not in ('done', 'cancel') and order.mapped('move_raw_ids').mapped('move_line_ids') or False
+            touched_moves = any([x.quantity_done > 0 for x in order.move_raw_ids])
+            order.unreserve_visible = not touched_moves and unreserve_visible
 
     @api.multi
     @api.depends('move_raw_ids.quantity_done', 'move_finished_ids.quantity_done', 'is_locked')
@@ -313,6 +315,10 @@ class MrpProduction(models.Model):
         if any(production.state != 'cancel' for production in self):
             raise UserError(_('Cannot delete a manufacturing order not in cancel state'))
         return super(MrpProduction, self).unlink()
+
+    def action_toggle_is_locked(self):
+        self.is_locked = not self.is_locked
+        return True
 
     @api.multi
     def _generate_moves(self):
