@@ -26,4 +26,21 @@
         </field>
     </record>
 
+    <record id="product_variant_inherit_form_view" model="ir.ui.view">
+        <field name="name">product.variant.inherit.form</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
+        <field name="arch" type="xml">
+            <field name="attribute_value_ids" position="after">
+                <field name="custom_value_ids">
+                    <tree>
+                        <field name="attribute_id"/>
+                        <field name="value"/>
+                        <field name="attachment_ids" widget="many2many_tags"/>
+                    </tree>
+                </field>
+            </field>
+        </field>
+    </record>
+
 </odoo>

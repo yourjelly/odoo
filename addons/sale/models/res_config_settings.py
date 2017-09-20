@@ -75,6 +75,7 @@ class ResConfigSettings(models.TransientModel):
 
     module_product_email_template = fields.Boolean("Specific Email")
     module_sale_coupon = fields.Boolean("Coupons & Promotions")
+    module_product_configurator = fields.Boolean("Configurable Products")
 
     @api.onchange('multi_sales_price', 'multi_sales_price_method')
     def _onchange_sale_price(self):
@@ -129,6 +130,11 @@ class ResConfigSettings(models.TransientModel):
     def _onchange_portal_confirmation_options(self):
         if self.portal_confirmation_options == 'pay':
             self.module_sale_payment = True
+
+    @api.onchange('module_product_configurator')
+    def _onchange_module_product_configurator(self):
+        if self.module_product_configurator:
+            self.group_product_variant = True
 
     @api.model
     def get_values(self):
