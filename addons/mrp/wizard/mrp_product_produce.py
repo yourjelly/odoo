@@ -39,15 +39,14 @@ class MrpProductProduce(models.TransientModel):
                 lines = []
                 for move in production.move_raw_ids.filtered(lambda x: (x.product_id.tracking != 'none') and x.state not in ('done', 'cancel') and x.bom_line_id):
                     qty_to_consume = todo_quantity / move.bom_line_id.bom_id.product_qty * move.bom_line_id.product_qty
-                    for move_line in move.move_line_ids:
-                        if float_compare(qty_to_consume, 0.0, precision_rounding=move.product_uom.rounding) < 0\
-                                or move_line.product_id.tracking == 'serial' and move_line.qty_done != 0:
+                    for move_line in move.move_line_ids.filtered(lambda ml: not ml.lot_produced_id):
+                        if float_compare(qty_to_consume, 0.0, precision_rounding=move.product_uom.rounding) < 0:
                             break
-                        to_consume_in_line = min(qty_to_consume, move_line.product_uom_qty)
+                        to_consume_in_line = min(qty_to_consume, max(move_line.qty_done, move_line.product_uom_qty))
                         lines.append({
                             'move_id': move.id,
-                            'qty_to_consume': to_consume_in_line,
-                            'qty_done': 0.0,
+                            'qty_to_consume': move_line.product_uom_qty,
+                            'qty_done': move_line.qty_done,
                             'lot_id': move_line.lot_id.id,
                             'product_uom_id': move.product_uom.id,
                             'product_id': move.product_id.id,
@@ -138,14 +137,42 @@ class MrpProductProduce(models.TransientModel):
 
         for pl in self.produce_line_ids:
             if pl.qty_done and pl.lot_id:
+                if not pl.move_id:
+                    # Find move_id that would match
+                    move_id = self.production_id.move_raw_ids.filtered(lambda x: x.product_id == pl.product_id and x.state not in ('done', 'cancel'))
+                    if move_id:
+                        pl.move_id = move_id
+                    else:
+                        # create a move and put it in there
+                        order = self.production_id
+                        pl.move_id = self.env['stock.move'].create({
+                                    'name': order.name,
+                                    'date': order.date_planned_start,
+                                    'date_expected': order.date_planned_start,
+                                    'product_id': pl.product_id.id,
+                                    'product_uom_qty': 0.0,
+                                    'product_uom': pl.product_uom_id.id,
+                                    'location_id': order.location_src_id.id,
+                                    'location_dest_id': self.product_id.property_stock_production.id,
+                                    'raw_material_production_id': order.id,
+                                    'company_id': order.company_id.id,
+                                    'operation_id': False,
+                                    'price_unit': pl.product_id.standard_price,
+                                    'procure_method': 'make_to_stock',
+                                    'origin': order.name,
+                                    'warehouse_id': False,
+                                    'group_id': order.procurement_group_id.id,
+                                    'propagate': order.propagate,
+                                    'unit_factor': 0.0,
+                                    'state': 'confirmed'})
                 ml = pl.move_id.move_line_ids.filtered(lambda ml: ml.lot_id == pl.lot_id and not ml.lot_produced_id)
                 if ml:
-                    if (ml.qty_done + pl.qty_done) >= ml.product_uom_qty:
-                        ml.write({'qty_done': ml.qty_done + pl.qty_done, 'lot_produced_id': self.lot_id.id})
+                    if pl.qty_done >= ml.product_uom_qty:
+                        ml.write({'qty_done': pl.qty_done, 'lot_produced_id': self.lot_id.id})
                     else:
-                        new_qty_todo = ml.product_uom_qty - (ml.qty_done + pl.qty_done)
-                        default = {'product_uom_qty': ml.qty_done + pl.qty_done,
-                                   'qty_done': ml.qty_done + pl.qty_done,
+                        new_qty_todo = ml.product_uom_qty - pl.qty_done
+                        default = {'product_uom_qty': pl.qty_done,
+                                   'qty_done': pl.qty_done,
                                    'lot_produced_id': self.lot_id.id}
                         ml.copy(default=default)
                         ml.with_context(bypass_reservation_update=True).write({'product_uom_qty': new_qty_todo, 'qty_done': 0})
@@ -199,3 +226,7 @@ class MrpProductProduceLine(models.TransientModel):
                 if occurrences > 1 and lot_id is not False:
                     return _(
                         'You cannot consume the same serial number twice. Please correct the serial numbers encoded.')
+
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        self.product_uom_id = self.product_id.uom_id.id
