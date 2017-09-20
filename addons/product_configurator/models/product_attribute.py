@@ -33,7 +33,13 @@ class ProductAttribute(models.Model):
     @api.multi
     def validate_custom_val(self, val):
         self.ensure_one()
-        if self.value_type in ('integer', 'float'):
+        #check if required fields are correctly set or not
+        if self.is_required and not val:
+            raise ValidationError(
+                    _("Custom value for '%s' must be required" %
+                        (self.name))
+                )
+        if self.value_type in ('integer', 'float') and val:
             min_val = self.min_value
             max_val = self.max_value
             val = literal_eval(val)
@@ -51,13 +57,6 @@ class ProductAttribute(models.Model):
                 raise ValidationError(
                     _("Custom value for '%s' must be lower than %s" %
                         (self.name, self.max_value + 1))
-                )
-
-        #check if required fields are correctly set or not
-        if self.is_required and not val:
-            raise ValidationError(
-                    _("Custom value for '%s' must be required" %
-                        (self.name))
                 )
 
 

@@ -42,7 +42,7 @@
                                 t-att-data-attr-id="field.id"
                                 t-att-value="v.id"
                                 t-att-data-value = "v.id"
-                                t-att-checked = "v.id === widget.defaultValue ? 'checked': null"
+                                t-att-checked = "v.id === field.selected_value ? 'checked': null"
                             />
                             <span>
                                 <t t-esc="v.name"/>
@@ -58,7 +58,7 @@
         <t t-call="product_configurator.field">
             <select class="form-control o_field_input" t-att-name="field.name" t-att-data-attr-id="field.id">
                 <t t-foreach="field.values" t-as="v">
-                    <option t-att-value="v.id" t-att-selected = "v.id === widget.defaultValue ? '1': null">
+                    <option t-att-value="v.id" t-att-selected = "v.id === field.selected_value ? '1': null">
                         <t t-esc="v.name"/>
                     </option>
                 </t>
@@ -78,7 +78,7 @@
                         t-att-value="v.id"
                         t-att-data-attr-id="field.id"
                         t-att-title="v.name"
-                        t-att-checked = "v.id === widget.defaultValue ? 'checked': null"/>
+                        t-att-checked = "v.id === field.selected_value ? 'checked': null"/>
                 </label>
             </t>
         </t>
@@ -96,7 +96,7 @@
                 class="form-control o_custom_field_input"
                 t-att-name="field.name"
                 t-att-data-attr-id="field.id"
-                t-att-value="widget.defaultValue"
+                t-att-value="field.selected_value"
             />
         </t>
     </t>
@@ -108,7 +108,7 @@
                 class="form-control o_custom_field_input"
                 t-att-name="field.name"
                 t-att-data-attr-id="field.id">
-                <t t-esc="widget.defaultValue"/>
+                <t t-esc="field.selected_value"/>
             </textarea>
         </t>
     </t>
@@ -122,7 +122,7 @@
                 t-att-name="field.name"
                 t-att-data-attr-id="field.id"
                 step="1"
-                t-att-value="widget.defaultValue"
+                t-att-value="field.selected_value"
             />
         </t>
     </t>
@@ -136,7 +136,7 @@
                 t-att-name="field.name"
                 t-att-data-attr-id="field.id"
                 step="any"
-                t-att-value="widget.defaultValue"
+                t-att-value="field.selected_value"
             />
         </t>
     </t>
@@ -149,7 +149,7 @@
                 class="form-control o_custom_field_date"
                 t-att-name="field.name"
                 t-att-data-attr-id="field.id"
-                t-att-value="widget.defaultValue"
+                t-att-value="field.selected_value"
             />
         </t>
     </t>
@@ -162,7 +162,7 @@
                 class="form-control o_custom_field_datetime"
                 t-att-name="field.name"
                 t-att-data-attr-id="field.id"
-                t-att-value="widget.defaultValue"
+                t-att-value="field.selected_value"
             />
         </t>
     </t>
@@ -176,7 +176,7 @@
                 t-att-name="field.name"
                 t-att-data-attr-id="field.id"
                 multiple="1"
-                t-att-value="widget.defaultValue"
+                t-att-value="field.selected_value"
             />
         </t>
     </t>
@@ -189,7 +189,7 @@
                 class="form-control o_custom_field_input"
                 t-att-name="field.name"
                 t-att-data-attr-id="field.id"
-                t-att-value="widget.defaultValue"
+                t-att-value="field.selected_value"
             />
         </t>
     </t>

@@ -102,8 +102,7 @@ var Configurator = Widget.extend({
      * @override init from AbstractField
      */
     init: function(parent, data) {
-        this.data = data.data;
-        this.alldata = data; //TODO: can be replace by proper data structure
+        this.data = data;
         this._super.apply(this, arguments);
     },
     /**
@@ -112,23 +111,14 @@ var Configurator = Widget.extend({
     start: function() {
         var self = this;
         _.each(this.data, function(field) {
-            var defaultValue = self.getDefaultValue(field);
-            var field_widget = new ConfiguratorFieldsWidget(self, field, defaultValue);
+            var field_widget = new ConfiguratorFieldsWidget(self, field);
             field_widget.appendTo(self.$('.config_fields'));
         });
         this._super.apply(this, arguments);
     },
 
-    //TODO: Should be remove by sending proper JSON Data
-    getDefaultValue: function (field) {
-        var res = this.alldata.result;
-        for (var i = 0; i < res.length; i++) {
-            if (res[i].id === field.id) return res[i].value;
-        }
-    },
-
     getData: function () {
-        return JSON.stringify(this.alldata);
+        return JSON.stringify(this.data);
     },
 
     //--------------------------------------------------------------------------
@@ -139,11 +129,11 @@ var Configurator = Widget.extend({
      * @private
      */
     _onFieldValueChange: function(field) {
-        for (var i = 0; i < this.alldata.result.length; i++) {
-            if (this.alldata.result[i].id === parseInt(field.data.id)) {
-                this.alldata.result[i].value = this.alldata.result[i].type === 'custom' ? field.data.value : parseInt(field.data.value);
-                if (this.alldata.result[i].value_type === 'binary') {
-                    this.alldata.result[i].name = field.data.name;
+        for (var i = 0; i < this.data.length; i++) {
+            if (this.data[i].id === parseInt(field.data.id)) {
+                this.data[i].selected_value = this.data[i].type === 'custom' ? field.data.value : parseInt(field.data.value);
+                if (this.data[i].value_type === 'binary') {
+                    this.data[i].name = field.data.name;
                 }
             }
         }
@@ -163,9 +153,8 @@ var ConfiguratorFieldsWidget = Widget.extend({
      * @constructor
      * @override init from AbstractField
      */
-    init: function(parent, field, defaultValue) {
+    init: function(parent, field) {
         this.field = field;
-        this.defaultValue = defaultValue;
         this._super.apply(this, arguments);
     },
     /**
