@@ -20,13 +20,13 @@
             </xpath>
 
             <xpath expr="//form//notebook//field[@name='order_line']/form/field[@name='name']" position="after">
-                <div groups="product.group_product_variant">
+                <div groups="product.group_product_variant" attrs="{'invisible': [('is_configurable', '=', False)]}">
                     <label for="custom_value_ids"/>
-                    <field name="custom_value_ids">
-                        <tree>
+                    <field name="custom_value_ids" readonly="False">
+                        <tree editable="bottom">
                             <field name="attribute_id"/>
                             <field name="name"/>
-                            <field name="attachment_ids" widget="many2many_tags"/>
+                            <field name="attachment_ids" widget="many2many_tags" readonly="True"/>
                         </tree>
                     </field>
                 </div>

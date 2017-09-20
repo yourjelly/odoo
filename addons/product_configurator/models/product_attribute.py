@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, api
+from odoo import fields, models, api, _
+from odoo.exceptions import ValidationError
+
+from ast import literal_eval
 
 
 class ProductAttribute(models.Model):
@@ -26,6 +29,36 @@ class ProductAttribute(models.Model):
 
     is_required = fields.Boolean(string="Required")
     uom_id = fields.Many2one('product.uom', string='Unit of Measure')
+
+    @api.multi
+    def validate_custom_val(self, val):
+        self.ensure_one()
+        if self.value_type in ('integer', 'float'):
+            min_val = self.min_value
+            max_val = self.max_value
+            val = literal_eval(val)
+            if min_val and max_val and (val < min_val or val > max_val):
+                raise ValidationError(
+                    _("Custom value for '%s' must be between %s and %s"
+                        % (self.name, self.min_value, self.max_value))
+                )
+            elif min_val and val < min_val:
+                raise ValidationError(
+                    _("Custom value for '%s' must be at least %s" %
+                        (self.name, self.min_value))
+                )
+            elif max_val and val > max_val:
+                raise ValidationError(
+                    _("Custom value for '%s' must be lower than %s" %
+                        (self.name, self.max_value + 1))
+                )
+
+        #check if required fields are correctly set or not
+        if self.is_required and not val:
+            raise ValidationError(
+                    _("Custom value for '%s' must be required" %
+                        (self.name))
+                )
 
 
 class ProductAttributeValueCustom(models.Model):

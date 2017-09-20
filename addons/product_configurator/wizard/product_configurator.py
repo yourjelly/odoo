@@ -3,7 +3,7 @@
 import json
 
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 
 class ProductConfiguratorWizard(models.TransientModel):
@@ -26,20 +26,16 @@ class ProductConfiguratorWizard(models.TransientModel):
 
     @api.multi
     def action_create_variant(self):
-        data = json.loads(self.product_configurator)
-        value_ids = [r['value'] for r in data['result'] if r['type'] != 'custom']
-        custom_values = [{
-            'id': r['id'],
-            'value': r['value'],
-            'value_type': r['value_type'],
-            'name': r.get('name', False)
-        } for r in data['result'] if r['type'] == 'custom' and r['value']]
-
-        variant = self._find_variant_if_exist(value_ids)
-        #create a new variant if variant not found
-        if not variant:
-            vals = self._prepare_variant_vals(value_ids, custom_values)
-            variant = self.env['product.product'].create(vals)
+        data = self._get_data()
+        try:
+            variant = self.product_tmpl_id.create_get_variant(data['value_ids'], data['custom_values'])
+        except ValidationError:
+            raise
+        except:
+            raise ValidationError(
+                _('Invalid configuration! Please check all '
+                  'required fields.')
+            )
 
         line_values = {'product_id': variant.id}
         if self.order_line_id:
@@ -59,7 +55,6 @@ class ProductConfiguratorWizard(models.TransientModel):
             data = {'data': [], 'result': []}
             for line in self.product_tmpl_id.attribute_line_ids.filtered(lambda l: l.value_ids or l.attribute_id.type == 'custom'):
                 data['data'].append(self._prepare_attribute_data(line))
-
                 if not self.order_line_id:
                     data['result'].append({
                         'id': line.attribute_id.id,
@@ -67,18 +62,27 @@ class ProductConfiguratorWizard(models.TransientModel):
                         'type': line.attribute_id.type,
                         'value_type': line.attribute_id.value_type
                     })
-
             if self.order_line_id:
                 data['result'] = self._prepare_default_data()
 
             data = json.dumps(data)
             self.product_configurator = data
 
-    def _find_variant_if_exist(self, value_ids):
-        for variant in self.product_tmpl_id.product_variant_ids:
-            if (set(variant.attribute_value_ids.ids) == set(value_ids)):
-                return variant
-        return False
+    def _get_data(self):
+        data = {'value_ids': [], 'custom_values': {}}
+        result_data = json.loads(self.product_configurator)
+
+        for res in result_data['result']:
+            if res['type'] != 'custom':
+                data['value_ids'].append(res['value'])
+            else:
+                data['custom_values'][res['id']] = {
+                    'id': res['id'],
+                    'value': res['value'],
+                    'value_type': res['value_type'],
+                    'name': res.get('name', False)
+                }
+        return data
 
     def _prepare_default_data(self):
         data = []
@@ -103,43 +107,17 @@ class ProductConfiguratorWizard(models.TransientModel):
         return data
 
     def _prepare_attribute_data(self, attribute_line):
+        attribute = attribute_line.attribute_id
         return {
-            'id': attribute_line.attribute_id.id,
-            'name': attribute_line.attribute_id.name,
-            'type': attribute_line.attribute_id.type,
-            'value_type': attribute_line.attribute_id.value_type,
+            'id': attribute.id,
+            'name': attribute.name,
+            'type': attribute.type,
+            'require': attribute.is_required,
+            'value_type': attribute.value_type,
             'values': [{'id': v.id, 'name': v.name, 'html_color': v.html_color} for v in attribute_line.value_ids]
         }
-
-    def _prepare_variant_vals(self, value_ids, custom_values=None):
-        vals = {
-                'product_tmpl_id': self.product_tmpl_id.id,
-                'attribute_value_ids': [(4, v_id) for v_id in value_ids],
-            }
-
-        if len(custom_values):
-            data = []
-            for custom_v in custom_values:
-                if custom_v['value_type'] != 'binary':
-                    data.append((0, 0, {
-                        'attribute_id': custom_v['id'],
-                        'value': custom_v['value']}))
-                else:
-                    data.append((0, 0, {
-                        'attribute_id': custom_v['id'],
-                        'attachment_ids': [(0, 0, self._get_attachment_value(custom_v['value'], custom_v['name']))]}))
-            vals.update(custom_value_ids=data)
-
-        return vals
 
     def _extra_line_values(self, product):
         return {
             'name': product.display_name,
-        }
-
-    def _get_attachment_value(self, file, file_name):
-        return {
-            'name': file_name,
-            'datas': file,
-            'datas_fname': file_name,
         }

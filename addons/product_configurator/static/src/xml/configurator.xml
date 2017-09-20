@@ -107,9 +107,9 @@
             <textarea
                 class="form-control o_custom_field_input"
                 t-att-name="field.name"
-                t-att-data-attr-id="field.id"
-                t-att-value="widget.defaultValue"
-            />
+                t-att-data-attr-id="field.id">
+                <t t-esc="widget.defaultValue"/>
+            </textarea>
         </t>
     </t>
 
@@ -176,6 +176,19 @@
                 t-att-name="field.name"
                 t-att-data-attr-id="field.id"
                 multiple="1"
+                t-att-value="widget.defaultValue"
+            />
+        </t>
+    </t>
+
+    <!-- Color Field -->
+    <t t-name="product_configurator.custom_field_color">
+        <t t-call="product_configurator.field">
+            <input
+                type="color"
+                class="form-control o_custom_field_input"
+                t-att-name="field.name"
+                t-att-data-attr-id="field.id"
                 t-att-value="widget.defaultValue"
             />
         </t>

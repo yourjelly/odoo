@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="product.product_attribute_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//group[@name='values_ids']" position="before">
-                <group string="Custom" attrs="{'invisible':[('type','!=', 'custom')]}">
+                <group string="Custom Value" attrs="{'invisible':[('type','!=', 'custom')]}">
                     <field name="value_type"/>
                     <field name="min_value" attrs="{'invisible': [('value_type','not in', ['integer','float'])]}"/>
                     <field name="max_value" attrs="{'invisible':[('value_type','not in',['integer','float'])]}"/>
