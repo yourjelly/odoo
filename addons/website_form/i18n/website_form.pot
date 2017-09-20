@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 10.saas~14\n"
+"Project-Id-Version: Odoo Server 10.saas~18\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-15 09:50+0000\n"
-"PO-Revision-Date: 2017-02-15 09:50+0000\n"
+"POT-Creation-Date: 2017-09-20 09:08+0000\n"
+"PO-Revision-Date: 2017-09-20 09:08+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -17,20 +17,20 @@ msgstr ""
 
 #. module: website_form
 #. openerp-web
-#: code:addons/website_form/static/src/js/website_form.js:209
+#: code:addons/website_form/static/src/js/website_form.js:226
 #, python-format
 msgid "'%s' is not a correct date"
 msgstr ""
 
 #. module: website_form
 #. openerp-web
-#: code:addons/website_form/static/src/js/website_form.js:204
+#: code:addons/website_form/static/src/js/website_form.js:221
 #, python-format
 msgid "'%s' is not a correct datetime"
 msgstr ""
 
 #. module: website_form
-#: code:addons/website_form/controllers/main.py:225
+#: code:addons/website_form/controllers/main.py:226
 #, python-format
 msgid "<p>Attached files : </p>"
 msgstr ""
@@ -38,13 +38,6 @@ msgstr ""
 #. module: website_form
 #: model:ir.model.fields,field_description:website_form.field_ir_model_website_form_access
 msgid "Allowed to use in forms"
-msgstr ""
-
-#. module: website_form
-#. openerp-web
-#: code:addons/website_form/static/src/xml/website_form.xml:21
-#, python-format
-msgid "An error has occured, the form has not been sent."
 msgstr ""
 
 #. module: website_form
@@ -58,7 +51,7 @@ msgid "Blacklisted in web forms"
 msgstr ""
 
 #. module: website_form
-#: code:addons/website_form/controllers/main.py:53
+#: code:addons/website_form/controllers/main.py:54
 #, python-format
 msgid "Custom infos"
 msgstr ""
@@ -94,7 +87,7 @@ msgid "Label for form action"
 msgstr ""
 
 #. module: website_form
-#: code:addons/website_form/controllers/main.py:54
+#: code:addons/website_form/controllers/main.py:55
 #, python-format
 msgid "Metadata"
 msgstr ""
@@ -105,22 +98,8 @@ msgid "Models"
 msgstr ""
 
 #. module: website_form
-#. openerp-web
-#: code:addons/website_form/static/src/xml/website_form.xml:14
-#, python-format
-msgid "Please fill in the form correctly."
-msgstr ""
-
-#. module: website_form
 #: model:ir.model.fields,help:website_form.field_ir_model_website_form_default_field_id
 msgid "Specify the field which will contain meta and custom form fields datas."
-msgstr ""
-
-#. module: website_form
-#. openerp-web
-#: code:addons/website_form/static/src/xml/website_form.xml:7
-#, python-format
-msgid "The form has been sent successfully."
 msgstr ""
 
 #. module: website_form
