@@ -10,6 +10,7 @@
                     <field name="value_type"/>
                     <field name="min_value" attrs="{'invisible': [('value_type','not in', ['integer','float'])]}"/>
                     <field name="max_value" attrs="{'invisible':[('value_type','not in',['integer','float'])]}"/>
+                    <field name="uom_id" groups="product.group_uom" attrs="{'invisible':[('value_type','not in',['integer','float'])]}"/>
                     <field name="is_required"/>
                 </group>
             </xpath>
@@ -17,6 +18,17 @@
             <xpath expr="//group[@name='values_ids']" position="attributes">
                 <attribute name="attrs">{'invisible': [('type', '=', 'custom')]}</attribute>
             </xpath>
+        </field>
+    </record>
+
+    <record id="product_attribute_value_inherit_tree_view" model="ir.ui.view">
+        <field name="name">product.attribute.value.tree.view</field>
+        <field name="model">product.attribute.value</field>
+        <field name="inherit_id" ref="product.product_attribute_value_view_tree"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="attribute_value_ids" string="Not Available With" widget="many2many_tags" domain="[('attribute_id', '!=', attribute_id)]"/>
+            </field>
         </field>
     </record>
 

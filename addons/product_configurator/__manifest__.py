@@ -14,8 +14,6 @@
         'views/sale_order_views.xml',
         'views/templates.xml',
     ],
-    'demo': [
-    ],
     'qweb': ['static/src/xml/configurator.xml'],
     'installable': True,
     'auto_install': False,

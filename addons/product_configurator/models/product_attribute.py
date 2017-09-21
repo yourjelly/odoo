@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from ast import literal_eval
 
 from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError
-
-from ast import literal_eval
 
 
 class ProductAttribute(models.Model):
@@ -23,10 +22,8 @@ class ProductAttribute(models.Model):
 
     type = fields.Selection(selection_add=[('custom', 'Custom Value')])
     value_type = fields.Selection(selection=CUSTOM_TYPES, default='char')
-
     min_value = fields.Float(string="Minimum Value")
     max_value = fields.Float(string="Maximum Value")
-
     is_required = fields.Boolean(string="Required")
     uom_id = fields.Many2one('product.uom', string='Unit of Measure')
 
@@ -61,7 +58,6 @@ class ProductAttribute(models.Model):
 
 
 class ProductAttributeValueCustom(models.Model):
-
     _name = 'product.attribute.value.custom'
 
     @api.multi
@@ -84,9 +80,7 @@ class ProductAttributeValueCustom(models.Model):
 
 
 class ProductAttributeLine(models.Model):
-
     _inherit = 'product.attribute.line'
-
     _order = 'sequence'
 
     is_custom_attr = fields.Boolean(compute='_is_custom_attribute', string="Is Custom Attribute")
@@ -97,3 +91,19 @@ class ProductAttributeLine(models.Model):
     def _is_custom_attribute(self):
         for line in self.filtered(lambda l: l.attribute_id.type == 'custom'):
             line.is_custom_attr = True
+
+
+class ProductAttributeValue(models.Model):
+    _inherit = 'product.attribute.value'
+
+    attribute_value_ids = fields.Many2many('product.attribute.value', 'product_attribute_value_rel', 'value_id', 'attribute_value_id', string="Attribute Values")
+
+    @api.multi
+    def validate_combination_availability(self, value_ids):
+        for value in self.filtered(lambda v: v.attribute_value_ids and v.id in value_ids):
+            if len(set(value.attribute_value_ids.ids).intersection(value_ids)) != 0:
+                sub_msg = ""
+                for v in value.attribute_value_ids:
+                    sub_msg += "%s - %s, " % (v.attribute_id.name, v.name)
+                msg = _("Following combination of variant is not exist \n %s - '%s' is not available with --> ( %s)") % (value.attribute_id.name, value.name, sub_msg)
+                raise ValidationError(msg)

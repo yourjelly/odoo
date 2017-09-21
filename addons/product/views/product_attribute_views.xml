@@ -9,7 +9,6 @@
                 <field name="sequence" widget="handle"/>
                 <field name="attribute_id"/>
                 <field name="name"/>
-                <field name="attribute_value_ids" string="Not Available With" widget="many2many_tags"/>
                 <field name="price_extra"/>
             </tree>
         </field>

@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError
+from odoo import api, fields, models
+
 
 class ProductTemplate(models.Model):
-
     _inherit = "product.template"
 
     variant_type = fields.Selection(
@@ -28,14 +27,14 @@ class ProductTemplate(models.Model):
             attr = line.attribute_id
             if attr.id in custom_vals:
                 attr.validate_custom_val(custom_vals[attr.id]['value'])
+            # check variant availability with specific combination
+            attr.value_ids.validate_combination_availability(value_ids)
         return True
 
     def create_get_variant(self, value_ids, custom_values=None):
 
-        valid = self.validate_configuration(value_ids, custom_values)
-        if not valid:
-            raise ValidationError(_('Invalid Configuration'))
-        variant = self._find_variant_if_exist(value_ids)
+        self.validate_configuration(value_ids, custom_values)
+        variant = self._find_variant_if_exist(value_ids, custom_values)
         if variant:
             return variant
 
@@ -72,15 +71,15 @@ class ProductTemplate(models.Model):
             'datas_fname': file_name,
         }
 
-    def _find_variant_if_exist(self, value_ids):
+    def _find_variant_if_exist(self, value_ids, custom_values):
         for variant in self.product_variant_ids:
-            if (set(variant.attribute_value_ids.ids) == set(value_ids)):
+            # we don't find the variant if there is any custom values
+            if (set(variant.attribute_value_ids.ids) == set(value_ids) and not custom_values):
                 return variant
         return False
 
 
 class ProductProduct(models.Model):
-
     _inherit = 'product.product'
 
     custom_value_ids = fields.One2many('product.attribute.value.custom', 'product_id', string='Custom Values', readonly=True)
