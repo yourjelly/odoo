@@ -159,6 +159,19 @@
             </field>
         </record>
 
+        <record id="view_order_tree_inherit_sale" model="ir.ui.view">
+            <field name="name">sale.order.tree.inherit.orders</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_tree"/>
+            <field name="groups_id" eval="[(4, ref('base.group_multi_currency'))]"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='amount_total']" position="attributes">
+                    <attribute name="sum"/>
+                </xpath>
+            </field>
+        </record>
+
+
         <record id="view_quotation_tree" model="ir.ui.view">
             <field name="name">sale.order.tree</field>
             <field name="model">sale.order</field>
@@ -175,6 +188,18 @@
                     <field name="state"/>
                     <field name="currency_id" invisible="True"/>
                 </tree>
+            </field>
+        </record>
+
+        <record id="view_quotation_tree_inherit_sale" model="ir.ui.view">
+            <field name="name">sale.order.tree.inherit.quotions</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_quotation_tree"/>
+            <field name="groups_id" eval="[(4, ref('base.group_multi_currency'))]"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='amount_total']" position="attributes">
+                    <attribute name="sum"/>
+                </xpath>
             </field>
         </record>
 
