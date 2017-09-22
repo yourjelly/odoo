@@ -28,3 +28,14 @@ class StockScrapWizard(models.TransientModel):
             vals['origin'] = vals['origin'] or self.production_id.name
             vals.update({'production_id': self.production_id.id})
         return vals
+
+
+class StockScrapWizardUnbuild(models.TransientModel):
+    _name = 'stock.warn.insufficient.qty.unbuild'
+    _inherit = 'stock.warn.insufficient.qty'
+
+    unbuild_id = fields.Many2one('mrp.unbuild', 'Unbuild')
+
+    def action_done(self):
+        self.ensure_one()
+        return self.unbuild_id.action_unbuild()
