@@ -4,13 +4,12 @@
 
 from odoo import fields, models
 
-class StockScrapWizard(models.TransientModel):
-    _inherit = 'stock.scrap.wizard'
+class StockWarnInsufficientQtyRepair(models.TransientModel):
+    _name = 'stock.warn.insufficient.qty.repair'
+    _inherit = 'stock.warn.insufficient.qty'
 
     repair_id = fields.Many2one('mrp.repair', string='Repair')
 
     def action_done(self):
         self.ensure_one()
-        if self.repair_id:
-            return self.repair_id.action_repair_confirm()
-        return super(StockScrapWizard, self).action_done()
+        return self.repair_id.action_repair_confirm()

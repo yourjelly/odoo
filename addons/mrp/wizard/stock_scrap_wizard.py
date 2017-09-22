@@ -11,7 +11,6 @@ class StockScrapWizard(models.TransientModel):
     production_id = fields.Many2one('mrp.production', 'Manufacturing Order')
     workorder_id = fields.Many2one('mrp.workorder', 'Work Order',
         help='Not to restrict or prefer quants, but informative.')
-    unbuild_id = fields.Many2one('mrp.unbuild', 'Unbuild')
 
     @api.onchange('workorder_id')
     def onchange_workorder_id(self):
@@ -30,7 +29,13 @@ class StockScrapWizard(models.TransientModel):
             vals.update({'production_id': self.production_id.id})
         return vals
 
+
+class StockScrapWizardUnbuild(models.TransientModel):
+    _name = 'stock.warn.insufficient.qty.unbuild'
+    _inherit = 'stock.warn.insufficient.qty'
+
+    unbuild_id = fields.Many2one('mrp.unbuild', 'Unbuild')
+
     def action_done(self):
-        if self.unbuild_id:
-            return self.unbuild_id.action_unbuild()
-        return super(StockScrapWizard, self).action_done()
+        self.ensure_one()
+        return self.unbuild_id.action_unbuild()

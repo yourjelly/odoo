@@ -209,13 +209,21 @@ class Repair(models.Model):
         if available_qty >= self.product_qty:
             return self.action_repair_confirm()
         else:
-            action = self.env['stock.scrap.wizard'].get_action()
-            action['context'] = {
+            return {
+                'name': _('Insufficient Quantity'),
+                'view_type': 'form',
+                'view_mode': 'form',
+                'res_model': 'stock.warn.insufficient.qty.repair',
+                'view_id': self.env.ref('mrp_repair.stock_warn_insufficient_qty_repair_form_view').id,
+                'type': 'ir.actions.act_window',
+                'context': {
                     'default_product_id': self.product_id.id,
                     'default_product_uom_id': self.product_uom.id,
-                    'default_repair_id': self.id,
-                }
-            return action
+                    'default_location_id': self.location_id.id,
+                    'default_repair_id': self.id
+                    },
+                'target': 'new'
+            }
 
     @api.multi
     def action_repair_confirm(self):
