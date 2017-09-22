@@ -2737,15 +2737,6 @@ QUnit.module('Views', {
             {position: 'bottom'}
         );
 
-        assert.strictEqual(list.$('tbody tr:eq(0) td:last').text(), '1200',
-            "new first record should have amount 1200");
-        assert.strictEqual(list.$('tbody tr:eq(1) td:last').text(), '0',
-            "new second record should have amount 0");
-        assert.strictEqual(list.$('tbody tr:eq(2) td:last').text(), '500',
-            "new third record should have amount 500");
-        assert.strictEqual(list.$('tbody tr:eq(3) td:last').text(), '300',
-            "new fourth record should have amount 300");
-
         list.destroy();
     });
 
