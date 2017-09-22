@@ -700,6 +700,9 @@
                 </div>
             </div>
         </t>
+        <t t-else="">
+            <a contenteditable="false" href="/web#action=event.action_event_view"><i class="fa fa-plus-circle"/> Add Event</a>
+        </t>
     </t>
 </template>
 
