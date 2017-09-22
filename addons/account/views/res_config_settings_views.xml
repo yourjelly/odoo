@@ -75,6 +75,7 @@
                                             <label string="Purchase Tax" for="default_purchase_tax_id" class="col-md-3 o_light_label"/>
                                             <field name="default_purchase_tax_id" domain="[('type_tax_use', 'in', ('purchase', 'all')), ('company_id', '=', company_id)]"/>
                                         </div>
+                                        <a href="https://www.odoo.com/documentation/user/11.0/fr/accounting/others/taxes/taxcloud.html" class="oe-link" target="_blank"><i class="fa fa-fw fa-arrow-right"/>How to Get Credentials</a>
                                     </div>
                                 </div>
                             </div>
