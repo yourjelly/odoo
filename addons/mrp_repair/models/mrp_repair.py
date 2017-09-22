@@ -116,6 +116,7 @@ class Repair(models.Model):
     amount_untaxed = fields.Float('Untaxed Amount', compute='_amount_untaxed', store=True)
     amount_tax = fields.Float('Taxes', compute='_amount_tax', store=True)
     amount_total = fields.Float('Total', compute='_amount_total', store=True)
+    tracking = fields.Selection('Product Tracking', related="product_id.tracking")
 
     @api.one
     @api.depends('partner_id')
@@ -202,6 +203,29 @@ class Repair(models.Model):
         self.mapped('operations').write({'state': 'draft'})
         return self.write({'state': 'draft'})
 
+    def action_validate(self):
+        self.ensure_one()
+        lot_id = self.lot_id or None
+        available_qty = self.env['stock.quant']._get_available_quantity(self.product_id, self.location_id, lot_id, strict=True)
+        if available_qty >= self.product_qty:
+            return self.action_repair_confirm()
+        else:
+            return {
+                'name': _('Insufficient Quantity'),
+                'view_type': 'form',
+                'view_mode': 'form',
+                'res_model': 'stock.warn.insufficient.qty.repair',
+                'view_id': self.env.ref('mrp_repair.stock_warn_insufficient_qty_repair_form_view').id,
+                'type': 'ir.actions.act_window',
+                'context': {
+                    'default_product_id': self.product_id.id,
+                    'default_product_uom_id': self.product_uom.id,
+                    'default_location_id': self.location_id.id,
+                    'default_repair_id': self.id
+                    },
+                'target': 'new'
+            }
+
     @api.multi
     def action_repair_confirm(self):
         """ Repair order state is set to 'To be invoiced' when invoice method
@@ -215,9 +239,6 @@ class Repair(models.Model):
         before_repair.write({'state': '2binvoiced'})
         to_confirm = self - before_repair
         to_confirm_operations = to_confirm.mapped('operations')
-        for operation in to_confirm_operations:
-            if operation.product_id.tracking != 'none' and not operation.lot_id:
-                raise UserError(_("Serial number is required for operation line with product '%s'") % (operation.product_id.name))
         to_confirm_operations.write({'state': 'confirmed'})
         to_confirm.write({'state': 'confirmed'})
         return True
@@ -518,6 +539,11 @@ class RepairLine(models.Model):
     def _compute_price_subtotal(self):
         taxes = self.tax_id.compute_all(self.price_unit, self.repair_id.pricelist_id.currency_id, self.product_uom_qty, self.product_id, self.repair_id.partner_id)
         self.price_subtotal = taxes['total_excluded']
+
+    @api.constrains('lot_id', 'product_id')
+    def constrain_lot_id(self):
+        for line in self.filtered(lambda x: x.product_id.tracking != 'none' and not x.lot_id):
+            raise ValueError(_("Serial number is required for operation line with product '%s'") % (line.product_id.name))
 
     @api.onchange('type', 'repair_id')
     def onchange_operation_type(self):
