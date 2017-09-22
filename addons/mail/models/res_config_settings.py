@@ -14,7 +14,7 @@ class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
     fail_counter = fields.Integer('Fail Mail', readonly=True)
-    alias_domain = fields.Char('Alias Domain', help="If you have setup a catch-all email domain redirected to "
+    alias_domain = fields.Char('Alias Domain', related='company_id.alias_domain', help="If you have setup a catch-all email domain redirected to "
                                "the Odoo server, enter the domain name here.")
 
     @api.model
@@ -22,7 +22,6 @@ class ResConfigSettings(models.TransientModel):
         res = super(ResConfigSettings, self).get_values()
 
         previous_date = datetime.datetime.now() - datetime.timedelta(days=30)
-
         alias_domain = self.env["ir.config_parameter"].get_param("mail.catchall.domain", default=None)
         if alias_domain is None:
             domain = self.env["ir.config_parameter"].get_param("web.base.url")

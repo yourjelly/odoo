@@ -62,8 +62,7 @@ class Alias(models.Model):
         'Record Thread ID',
         help="Optional ID of a thread (record) to which all incoming messages will be attached, even "
              "if they did not reply to it. If set, this will disable the creation of new records completely.")
-    alias_domain = fields.Char('Alias domain', compute='_get_alias_domain',
-                               default=lambda self: self.env["ir.config_parameter"].sudo().get_param("mail.catchall.domain"))
+    alias_domain = fields.Char('Alias domain', compute='_get_alias_domain', default=lambda self: self.env["ir.config_parameter"].sudo().get_param("mail.catchall.domain"))
     alias_parent_model_id = fields.Many2one(
         'ir.model', 'Parent Model',
         help="Parent model holding the alias. The model holding the alias reference "
@@ -79,9 +78,9 @@ class Alias(models.Model):
              "- everyone: everyone can post\n"
              "- partners: only authenticated partners\n"
              "- followers: only followers of the related document or members of following channels\n")
-
+    company_id = fields.Many2one('res.company', default=lambda self: self.env.user.company_id)
     _sql_constraints = [
-        ('alias_unique', 'UNIQUE(alias_name)', 'Unfortunately this email alias is already used, please choose a unique one')
+        ('alias_unique', 'UNIQUE(alias_name, company_id)', 'Unfortunately this email alias is already used, please choose a unique one')
     ]
 
     @api.multi
