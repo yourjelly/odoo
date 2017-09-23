@@ -1566,7 +1566,7 @@ class Meeting(models.Model):
 
         result = []
         for calendar_id, real_id in select:
-            if not real_data.get(real_id):
+            if not real_data.get(real_id, False):
                 continue
             res = real_data[real_id].copy()
             ls = calendar_id2real_id(calendar_id, with_date=res and res.get('duration', 0) > 0 and res.get('duration') or 1)
