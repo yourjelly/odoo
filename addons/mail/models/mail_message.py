@@ -93,13 +93,6 @@ class Message(models.Model):
     starred = fields.Boolean(
         'Starred', compute='_get_starred', search='_search_starred',
         help='Current user has a starred notification linked to this message')
-    # tracking
-    tracking_value_ids = fields.One2many(
-        'mail.tracking.value', 'mail_message_id',
-        string='Tracking values',
-        groups="base.group_no_one",
-        help='Tracked values are stored in a separate model. This field allow to reconstruct '
-             'the tracking and to generate statistics on the model.')
     # mail gateway
     no_auto_thread = fields.Boolean(
         'No threading for answers',
@@ -281,8 +274,7 @@ class Message(models.Model):
         # 1. Aggregate partners (author_id and partner_ids), attachments and tracking values
         partners = self.env['res.partner'].sudo()
         attachments = self.env['ir.attachment']
-        message_ids = list(message_tree.keys())
-        for message in message_tree.values():
+        for key, message in message_tree.items():
             if message.author_id:
                 partners |= message.author_id
             if message.subtype_id and message.partner_ids:  # take notified people of message with a subtype
@@ -305,20 +297,6 @@ class Message(models.Model):
             'name': attachment['name'],
             'mimetype': attachment['mimetype'],
         }) for attachment in attachments_data)
-
-        # 3. Tracking values
-        tracking_values = self.env['mail.tracking.value'].sudo().search([('mail_message_id', 'in', message_ids)])
-        message_to_tracking = dict()
-        tracking_tree = dict.fromkeys(tracking_values.ids, False)
-        for tracking in tracking_values:
-            message_to_tracking.setdefault(tracking.mail_message_id.id, list()).append(tracking.id)
-            tracking_tree[tracking.id] = {
-                'id': tracking.id,
-                'changed_field': tracking.field_desc,
-                'old_value': tracking.get_old_display_value()[0],
-                'new_value': tracking.get_new_display_value()[0],
-                'field_type': tracking.field_type,
-            }
 
         # 4. Update message dictionaries
         for message_dict in messages:
@@ -344,10 +322,6 @@ class Message(models.Model):
             for attachment in message.attachment_ids:
                 if attachment.id in attachments_tree:
                     attachment_ids.append(attachments_tree[attachment.id])
-            tracking_value_ids = []
-            for tracking_value_id in message_to_tracking.get(message_id, list()):
-                if tracking_value_id in tracking_tree:
-                    tracking_value_ids.append(tracking_tree[tracking_value_id])
 
             message_dict.update({
                 'author_id': author,
@@ -357,7 +331,7 @@ class Message(models.Model):
                                         (any(d[2] == 'bounce' for d in customer_email_data) and 'bounce') or 'ready',
                 'customer_email_data': customer_email_data,
                 'attachment_ids': attachment_ids,
-                'tracking_value_ids': tracking_value_ids,
+                'tracking_value_ids': [],                         # TODO: To be removed while removing the JS part
             })
 
         return True
@@ -386,14 +360,7 @@ class Message(models.Model):
                     ],
                     'needaction_partner_ids': [], # list of partner ids
                     'res_id': 7,
-                    'tracking_value_ids': [
-                        {
-                            'old_value': "",
-                            'changed_field': "Customer",
-                            'id': 2965,
-                            'new_value': "Axelor"
-                        }
-                    ],
+                    'tracking_value_ids': [],
                     'author_id': (3, u'Administrator'),
                     'email_from': 'sacha@pokemon.com' # email address or False
                     'subtype_id': (1, u'Discussions'),
