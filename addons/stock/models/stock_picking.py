@@ -776,13 +776,11 @@ class Picking(models.Model):
                     if float_compare(operation.qty_done, operation.product_qty, precision_rounding=operation.product_uom_id.rounding) >= 0:
                         operation_ids |= operation
                     else:
-                        quantity_left_todo = float_round(
-                            operation.product_qty - operation.qty_done,
-                            precision_rounding=operation.product_uom_id.rounding,
-                            rounding_method='UP')
+                        quant_quantity_done = operation.product_uom_id._compute_quantity(operation.qty_done, operation.product_id.uom_id, rounding_method='HALF-UP')
+                        quant_quantity_left = operation.product_uom_id._compute_quantity(operation.product_uom_qty - operation.qty_done, operation.product_id.uom_id, rounding_method='HALF-UP')
                         new_operation = operation.copy(
-                            default={'product_uom_qty': operation.qty_done, 'qty_done': operation.qty_done})
-                        operation.write({'product_uom_qty': quantity_left_todo, 'qty_done': 0.0})
+                            default={'product_qty': quant_quantity_done, 'qty_done': operation.qty_done})
+                        operation.write({'product_uom_qty': quant_quantity_left, 'qty_done': 0.0})
                         operation_ids |= new_operation
 
                 operation_ids.write({'result_package_id': package.id})

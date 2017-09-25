@@ -622,14 +622,14 @@ class TestStockFlow(TestStockCommon):
         # ----------------------------------------------------------------------
 
         self.StockPackObj.search([('product_id', '=', self.kgB.id), ('picking_id', '=', picking_in_B.id)]).write({
-            'product_uom_qty': 0.020, 'product_uom_id': self.uom_kg.id})
+            'product_qty': 0.020, 'product_uom_id': self.uom_kg.id})
         self.StockPackObj.search([('product_id', '=', self.gB.id), ('picking_id', '=', picking_in_B.id)]).write({
-            'product_uom_qty': 526, 'product_uom_id': self.uom_gm.id})
+            'product_qty': 526, 'product_uom_id': self.uom_gm.id})
         self.StockPackObj.search([('product_id', '=', self.DozA.id), ('picking_id', '=', picking_in_B.id)]).write({
-            'product_uom_qty': 4, 'product_uom_id': self.uom_dozen.id})
+            'product_qty': 4, 'product_uom_id': self.uom_dozen.id})
         self.StockPackObj.create({
             'product_id': self.DozA.id,
-            'product_uom_qty': 48,
+            'product_qty': 4,
             'product_uom_id': self.uom_unit.id,
             'location_id': self.supplier_location,
             'location_dest_id': self.stock_location,
@@ -956,10 +956,8 @@ class TestStockFlow(TestStockCommon):
         picking_out.action_confirm()
         picking_out.action_assign()
         pack_opt = self.StockPackObj.search([('product_id', '=', productKG.id), ('picking_id', '=', picking_out.id)], limit=1)
-        pack_opt.write({'product_uom_qty': 0.5})
-        res_dict = picking_out.button_validate()
-        wizard = self.env[(res_dict.get('res_model'))].browse(res_dict.get('res_id'))
-        res_dict_for_back_order = wizard.process()
+        pack_opt.write({'qty_done': 0.5})
+        res_dict_for_back_order = picking_out.button_validate()
         backorder_wizard = self.env[(res_dict_for_back_order.get('res_model'))].browse(res_dict_for_back_order.get('res_id'))
         backorder_wizard.process()
         quants = self.StockQuantObj.search([('product_id', '=', productKG.id), ('location_id', '=', self.stock_location)])
@@ -980,10 +978,8 @@ class TestStockFlow(TestStockCommon):
         self.assertEqual(moves_KG.product_uom.id, self.uom_gm.id, 'Wrong uom in move for product KG.')
         bo_out_1.action_assign()
         pack_opt = self.StockPackObj.search([('product_id', '=', productKG.id), ('picking_id', '=', bo_out_1.id)], limit=1)
-        pack_opt.write({'product_uom_qty': 0.5})
-        res_dict = bo_out_1.button_validate()
-        wizard = self.env[(res_dict.get('res_model'))].browse(res_dict.get('res_id'))
-        res_dict_for_back_order = wizard.process()
+        pack_opt.write({'qty_done': 0.5})
+        res_dict_for_back_order = bo_out_1.button_validate()
         backorder_wizard = self.env[(res_dict_for_back_order.get('res_model'))].browse(res_dict_for_back_order.get('res_id'))
         backorder_wizard.process()
         quants = self.StockQuantObj.search([('product_id', '=', productKG.id), ('location_id', '=', self.stock_location)])
@@ -1004,10 +1000,8 @@ class TestStockFlow(TestStockCommon):
         self.assertEqual(moves_KG.product_uom.id, self.uom_gm.id, 'Wrong uom in move for product KG.')
         bo_out_2.action_assign()
         pack_opt = self.StockPackObj.search([('product_id', '=', productKG.id), ('picking_id', '=', bo_out_2.id)], limit=1)
-        pack_opt.write({'product_uom_qty': 0.5})
-        res_dict = bo_out_2.button_validate()
-        wizard = self.env[(res_dict.get('res_model'))].browse(res_dict.get('res_id'))
-        res_dict_for_back_order = wizard.process()
+        pack_opt.write({'qty_done': 0.5})
+        res_dict_for_back_order = bo_out_2.button_validate()
         backorder_wizard = self.env[(res_dict_for_back_order.get('res_model'))].browse(res_dict_for_back_order.get('res_id'))
         backorder_wizard.process()
         # Check total quantity stock location of product KG.
@@ -1027,10 +1021,8 @@ class TestStockFlow(TestStockCommon):
         self.assertEqual(moves_KG.product_uom.id, self.uom_gm.id, 'Wrong uom in move for product KG.')
         bo_out_3.action_assign()
         pack_opt = self.StockPackObj.search([('product_id', '=', productKG.id), ('picking_id', '=', bo_out_3.id)], limit=1)
-        pack_opt.write({'product_uom_qty': 0.5})
-        res_dict = bo_out_3.button_validate()
-        wizard = self.env[(res_dict.get('res_model'))].browse(res_dict.get('res_id'))
-        res_dict_for_back_order = wizard.process()
+        pack_opt.write({'qty_done': 0.5})
+        res_dict_for_back_order = bo_out_3.button_validate()
         backorder_wizard = self.env[(res_dict_for_back_order.get('res_model'))].browse(res_dict_for_back_order.get('res_id'))
         backorder_wizard.process()
         quants = self.StockQuantObj.search([('product_id', '=', productKG.id), ('location_id', '=', self.stock_location)])
@@ -1050,10 +1042,8 @@ class TestStockFlow(TestStockCommon):
         self.assertEqual(moves_KG.product_uom.id, self.uom_gm.id, 'Wrong uom in move for product KG.')
         bo_out_4.action_assign()
         pack_opt = self.StockPackObj.search([('product_id', '=', productKG.id), ('picking_id', '=', bo_out_4.id)], limit=1)
-        pack_opt.write({'product_uom_qty': 0.5})
+        pack_opt.write({'qty_done': 0.5})
         res_dict = bo_out_4.button_validate()
-        wizard = self.env[(res_dict.get('res_model'))].browse(res_dict.get('res_id'))
-        wizard.process()
         quants = self.StockQuantObj.search([('product_id', '=', productKG.id), ('location_id', '=', self.stock_location)])
         total_qty = [quant.quantity for quant in quants]
         self.assertEqual(sum(total_qty), 999.9975, 'Expecting 999.9975 kg , got %.4f kg on location stock!' % (sum(total_qty)))
@@ -1443,7 +1433,7 @@ class TestStockFlow(TestStockCommon):
         pack2 = pack_obj.create({'name': 'PACKINOUTTEST2'})
         picking_in.move_line_ids[0].result_package_id = pack1
         picking_in.move_line_ids[0].qty_done = 4
-        packop2 = picking_in.move_line_ids[0].with_context(bypass_reservation_update=True).copy({'product_uom_qty': 0})
+        packop2 = picking_in.move_line_ids[0].with_context(bypass_reservation_update=True).copy({'product_qty': 0})
         packop2.qty_done = 6
         packop2.result_package_id = pack2
         picking_in.action_done()
@@ -1468,7 +1458,7 @@ class TestStockFlow(TestStockCommon):
         picking_out.action_confirm()
         picking_out.action_assign()
         packout1 = picking_out.move_line_ids[0]
-        packout2 = picking_out.move_line_ids[0].with_context(bypass_reservation_update=True).copy({'product_uom_qty': 0})
+        packout2 = picking_out.move_line_ids[0].with_context(bypass_reservation_update=True).copy({'product_qty': 0})
         packout1.qty_done = 2
         packout1.package_id = pack1
         packout2.package_id = pack2
@@ -1503,7 +1493,7 @@ class TestStockFlow(TestStockCommon):
         pack2 = pack_obj.create({'name': 'PACKINOUTTEST2'})
         picking_in.move_line_ids[0].result_package_id = pack1
         picking_in.move_line_ids[0].qty_done = 120
-        packop2 = picking_in.move_line_ids[0].with_context(bypass_reservation_update=True).copy({'product_uom_qty': 0})
+        packop2 = picking_in.move_line_ids[0].with_context(bypass_reservation_update=True).copy({'product_qty': 0})
         packop2.qty_done = 80
         packop2.result_package_id = pack2
         picking_in.action_done()

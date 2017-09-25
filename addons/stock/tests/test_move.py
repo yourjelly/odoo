@@ -1285,7 +1285,7 @@ class StockMove(TransactionCase):
             'product_id': self.product1.id,
             'product_uom_id': self.uom_unit.id,
             'qty_done': 1,
-            'product_uom_qty': 0,
+            'product_qty': 0,
             'lot_id': False,
             'package_id': False,
             'result_package_id': False,
@@ -1346,7 +1346,7 @@ class StockMove(TransactionCase):
             'product_id': self.product1.id,
             'product_uom_id': self.uom_unit.id,
             'qty_done': 1,
-            'product_uom_qty': 0,
+            'product_qty': 0,
             'lot_id': lot1.id,
             'package_id': False,
             'result_package_id': False,
@@ -2830,10 +2830,10 @@ class StockMove(TransactionCase):
         move1._action_assign()
         move_line = move1.move_line_ids
 
-        default = {'product_uom_qty': 3,
+        default = {'product_qty': 3,
                    'qty_done': 3}
         move_line.copy(default=default)
-        move_line.with_context(bypass_reservation_update=True).write({'product_uom_qty': 7, 'qty_done': 0})
+        move_line.with_context(bypass_reservation_update=True).write({'product_qty': 7, 'qty_done': 0})
         move1._action_done()
 
         new_move = self.env['stock.move'].search([('name', '=', 'test_split_1'), ('state', '=', 'confirmed')])

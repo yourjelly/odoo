@@ -127,7 +127,7 @@ class MrpProductProduce(models.TransientModel):
                   'move_id': produce_move.id,
                   'product_id': produce_move.product_id.id,
                   'production_id': self.production_id.id,
-                  'product_uom_qty': self.product_qty,
+                  'product_qty': self.product_qty,
                   'product_uom_id': produce_move.product_uom.id,
                   'qty_done': self.product_qty,
                   'lot_id': self.lot_id.id,
@@ -143,19 +143,19 @@ class MrpProductProduce(models.TransientModel):
                     if (ml.qty_done + pl.qty_done) >= ml.product_uom_qty:
                         ml.write({'qty_done': ml.qty_done + pl.qty_done, 'lot_produced_id': self.lot_id.id})
                     else:
-                        new_qty_todo = ml.product_uom_qty - (ml.qty_done + pl.qty_done)
-                        default = {'product_uom_qty': ml.qty_done + pl.qty_done,
+                        new_qty_todo = ml.product_qty - (ml.qty_done + pl.qty_done)
+                        default = {'product_qty': ml.qty_done + pl.qty_done,
                                    'qty_done': ml.qty_done + pl.qty_done,
                                    'lot_produced_id': self.lot_id.id}
                         ml.copy(default=default)
-                        ml.with_context(bypass_reservation_update=True).write({'product_uom_qty': new_qty_todo, 'qty_done': 0})
+                        ml.with_context(bypass_reservation_update=True).write({'product_qty': new_qty_todo, 'qty_done': 0})
                 else:
                     self.env['stock.move.line'].create({
                         'move_id': pl.move_id.id,
                         'product_id': pl.product_id.id,
                         'location_id': pl.move_id.location_id.id,
                         'location_dest_id': pl.move_id.location_dest_id.id,
-                        'product_uom_qty': 0,
+                        'product_qty': 0,
                         'product_uom_id': pl.product_uom_id.id,
                         'qty_done': pl.qty_done,
                         'lot_id': pl.lot_id.id,

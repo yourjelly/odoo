@@ -207,7 +207,7 @@ class MrpWorkorder(models.Model):
                             'move_id': move.id,
                             'product_id': move.product_id.id,
                             'lot_id': False,
-                            'product_uom_qty': 0.0,
+                            'product_qty': 0.0,
                             'product_uom_id': move.product_uom.id,
                             'qty_done': min(1.0, qty_todo),
                             'workorder_id': self.id,
@@ -250,7 +250,7 @@ class MrpWorkorder(models.Model):
                 while float_compare(qty, 0.0, precision_rounding=move.product_uom.rounding) > 0:
                     MoveLine.create({
                         'move_id': move.id,
-                        'product_uom_qty': 0,
+                        'product_qty': 0,
                         'product_uom_id': move.product_uom.id,
                         'qty_done': min(1, qty),
                         'production_id': self.production_id.id,
@@ -264,7 +264,7 @@ class MrpWorkorder(models.Model):
             else:
                 MoveLine.create({
                     'move_id': move.id,
-                    'product_uom_qty': 0,
+                    'product_qty': 0,
                     'product_uom_id': move.product_uom.id,
                     'qty_done': qty,
                     'product_id': move.product_id.id,
@@ -331,12 +331,12 @@ class MrpWorkorder(models.Model):
             if production_move.has_tracking != 'none':
                 move_line = production_move.move_line_ids.filtered(lambda x: x.lot_id.id == self.final_lot_id.id)
                 if move_line:
-                    move_line.product_uom_qty += self.qty_producing
+                    move_line.product_qty += self.qty_producing
                 else:
                     move_line.create({'move_id': production_move.id,
                                  'product_id': production_move.product_id.id,
                                  'lot_id': self.final_lot_id.id,
-                                 'product_uom_qty': self.qty_producing,
+                                 'product_qty': self.qty_producing,
                                  'product_uom_id': production_move.product_uom.id,
                                  'qty_done': self.qty_producing,
                                  'workorder_id': self.id,

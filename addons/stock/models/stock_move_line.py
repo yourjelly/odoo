@@ -23,10 +23,10 @@ class StockMoveLine(models.Model):
         help="Change to a better name")
     product_id = fields.Many2one('product.product', 'Product', ondelete="cascade")
     product_uom_id = fields.Many2one('product.uom', 'Unit of Measure', required=True)
-    product_qty = fields.Float(
-        'Real Reserved Quantity', digits=0,
-        compute='_compute_product_qty', inverse='_set_product_qty', store=True)
-    product_uom_qty = fields.Float('Reserved', default=0.0, digits=dp.get_precision('Product Unit of Measure'), required=True)
+    product_qty = fields.Float('Real Reserved Quantity', default=0.0, required=True)
+    product_uom_qty = fields.Float(
+        'Reserved', digits=dp.get_precision('Product Unit of Measure'),
+        compute='_compute_product_uom_qty', inverse='_set_product_uom_qty', store=True)
     ordered_qty = fields.Float('Ordered Quantity', digits=dp.get_precision('Product Unit of Measure'))
     qty_done = fields.Float('Done', default=0.0, digits=dp.get_precision('Product Unit of Measure'), copy=False)
     package_id = fields.Many2one('stock.quant.package', 'Source Package', ondelete='restrict')
@@ -66,22 +66,21 @@ class StockMoveLine(models.Model):
             self.lots_visible = self.product_id.tracking != 'none'
 
     @api.one
-    @api.depends('product_id', 'product_uom_id', 'product_uom_qty')
-    def _compute_product_qty(self):
-        self.product_qty = self.product_uom_id._compute_quantity(self.product_uom_qty, self.product_id.uom_id, rounding_method='HALF-UP')
+    @api.depends('product_id', 'product_uom_id', 'product_qty')
+    def _compute_product_uom_qty(self):
+        self.product_uom_qty = self.product_id.uom_id._compute_quantity(self.product_qty, self.product_uom_id, rounding_method='HALF-UP')
 
     @api.one
-    def _set_product_qty(self):
-        """ The meaning of product_qty field changed lately and is now a functional field computing the quantity
-        in the default product UoM. This code has been added to raise an error if a write is made given a value
-        for `product_qty`, where the same write should set the `product_uom_qty` field instead, in order to
-        detect errors. """
-        raise UserError(_('The requested operation cannot be processed because of a programming error setting the `product_qty` field instead of the `product_uom_qty`.'))
+    def _set_product_uom_qty(self):
+        """ On stock move line it necessary to directly set the real
+        reserved quantity in order to avoid too much useless conversion
+        and thus lose precision that can lead to wrong data in quants. """
+        raise UserError(_('The requested operation cannot be processed because of a programming error setting the `product_uom_qty` field instead of the `product_qty`.'))
 
     @api.constrains('product_uom_qty')
     def check_reserved_done_quantity(self):
         for move_line in self:
-            if move_line.state == 'done' and not float_is_zero(move_line.product_uom_qty, precision_rounding=self.env['decimal.precision'].precision_get('Product Unit of Measure')):
+            if move_line.state == 'done' and not float_is_zero(move_line.product_qty, precision_rounding=self.env['decimal.precision'].precision_get('Product Unit of Measure')):
                 raise ValidationError(_('A done move line should never have a reserved quantity.'))
 
     @api.onchange('product_id', 'product_uom_id')
@@ -188,10 +187,10 @@ class StockMoveLine(models.Model):
         # We forbid to change the reserved quantity in the interace, but it is needed in the
         # case of stock.move's split.
         # TODO Move me in the update
-        if 'product_uom_qty' in vals:
+        if 'product_qty' in vals:
             for ml in self.filtered(lambda m: m.state in ('partially_available', 'assigned') and m.product_id.type == 'product'):
                 if not ml.location_id.should_bypass_reservation():
-                    qty_to_decrease = ml.product_qty - ml.product_uom_id._compute_quantity(vals['product_uom_qty'], ml.product_id.uom_id, rounding_method='HALF-UP')
+                    qty_to_decrease = ml.product_qty - vals['product_uom_qty']
                     try:
                         Quant._update_reserved_quantity(ml.product_id, ml.location_id, -qty_to_decrease, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id, strict=True)
                     except UserError:
@@ -240,8 +239,7 @@ class StockMoveLine(models.Model):
                             except UserError:
                                 pass
                     if new_product_qty != ml.product_qty:
-                        new_product_uom_qty = self.product_id.uom_id._compute_quantity(new_product_qty, self.product_uom_id, rounding_method='HALF-UP')
-                        ml.with_context(bypass_reservation_update=True).product_uom_qty = new_product_uom_qty
+                        ml.with_context(bypass_reservation_update=True).product_qty = new_product_qty
 
         # When editing a done move line, the reserved availability of a potential chained move is impacted. Take care of running again `_action_assign` on the concerned moves.
         next_moves = self.env['stock.move']
@@ -381,7 +379,7 @@ class StockMoveLine(models.Model):
                         Quant._update_available_quantity(ml.product_id, ml.location_id, taken_from_untracked_qty, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id)
                 Quant._update_available_quantity(ml.product_id, ml.location_dest_id, quantity, lot_id=ml.lot_id, package_id=ml.result_package_id, owner_id=ml.owner_id, in_date=in_date)
         # Reset the reserved quantity as we just moved it to the destination location.
-        (self - ml_to_delete).with_context(bypass_reservation_update=True).write({'product_uom_qty': 0.00})
+        (self - ml_to_delete).with_context(bypass_reservation_update=True).write({'product_qty': 0.00})
 
     def _free_reservation(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None):
         """ When editing a done move line or validating one with some forced quantities, it is
@@ -427,7 +425,7 @@ class StockMoveLine(models.Model):
                         candidate.product_qty - quantity,
                         precision_rounding=self.product_uom_id.rounding,
                         rounding_method='UP')
-                    candidate.product_uom_qty = self.product_id.uom_id._compute_quantity(quantity_split, self.product_uom_id, rounding_method='HALF-UP')
+                    candidate.product_qty = quantity_split
                     quantity -= quantity_split
                     move_to_recompute_state |= candidate.move_id
                 if quantity == 0.0:

@@ -319,7 +319,7 @@ class TestWorkOrderProcess(common.TransactionCase):
         # -----------------
 
         #===================================
-        # Product A 1 Unit
+        # Product A 2 Unit
         #     Product B 4 Unit
         #     Product C 600 gram
         # -----------------------------------

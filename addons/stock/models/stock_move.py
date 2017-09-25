@@ -48,8 +48,7 @@ class StockMove(models.Model):
     ordered_qty = fields.Float('Ordered Quantity', digits=dp.get_precision('Product Unit of Measure'))
     product_qty = fields.Float(
         'Real Quantity', compute='_compute_product_qty', inverse='_set_product_qty',
-        digits=0, store=True,
-        help='Quantity in the default UoM of the product')
+        store=True, help='Quantity in the default UoM of the product')
     product_uom_qty = fields.Float(
         'Initial Demand',
         digits=dp.get_precision('Product Unit of Measure'),
@@ -217,8 +216,7 @@ class StockMove(models.Model):
     @api.one
     @api.depends('product_id', 'product_uom', 'product_uom_qty')
     def _compute_product_qty(self):
-        rounding_method = self._context.get('rounding_method', 'UP')
-        self.product_qty = self.product_uom._compute_quantity(self.product_uom_qty, self.product_id.uom_id, rounding_method=rounding_method)
+        self.product_qty = self.product_uom._compute_quantity(self.product_uom_qty, self.product_id.uom_id, round=False)
 
     def _get_move_lines(self):
         """ This will return the move lines to consider when applying _quantity_done_compute on a stock.move. 
@@ -733,8 +731,7 @@ class StockMove(models.Model):
             'picking_id': self.picking_id.id,
         }
         if quantity:
-            uom_quantity = self.product_id.uom_id._compute_quantity(quantity, self.product_uom, rounding_method='HALF-UP')
-            vals = dict(vals, product_uom_qty=uom_quantity)
+            vals = dict(vals, product_qty=quantity)
         if reserved_quant:
             vals = dict(
                 vals,
@@ -767,7 +764,7 @@ class StockMove(models.Model):
         for reserved_quant, quantity in quants:
             to_update = self.move_line_ids.filtered(lambda m: m.location_id.id == reserved_quant.location_id.id and m.lot_id.id == reserved_quant.lot_id.id and m.package_id.id == reserved_quant.package_id.id and m.owner_id.id == reserved_quant.owner_id.id)
             if to_update:
-                to_update[0].with_context(bypass_reservation_update=True).product_uom_qty += self.product_id.uom_id._compute_quantity(quantity, self.product_uom, rounding_method='HALF-UP')
+                to_update[0].with_context(bypass_reservation_update=True).product_qty += quantity
             else:
                 if self.product_id.tracking == 'serial':
                     for i in range(0, int(quantity)):
@@ -800,7 +797,7 @@ class StockMove(models.Model):
                                                             not ml.package_id and
                                                             not ml.owner_id)
                     if to_update:
-                        to_update[0].product_uom_qty += move.product_qty - move.reserved_availability
+                        to_update[0].product_qty += move.product_qty - move.reserved_availability
                     else:
                         self.env['stock.move.line'].create(move._prepare_move_line_vals(quantity=move.product_qty - move.reserved_availability))
                 assigned_moves |= move

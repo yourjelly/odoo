@@ -428,7 +428,7 @@ class Repair(models.Model):
                     'location_dest_id': operation.location_dest_id.id,
                     'move_line_ids': [(0, 0, {'product_id': operation.product_id.id,
                                            'lot_id': operation.lot_id.id, 
-                                           'product_uom_qty': 0,  # bypass reservation here
+                                           'product_qty': 0,  # bypass reservation here
                                            'product_uom_id': operation.product_uom.id,
                                            'qty_done': operation.product_uom_qty,
                                            'package_id': False,
@@ -450,7 +450,7 @@ class Repair(models.Model):
                 'location_dest_id': repair.location_dest_id.id,
                 'move_line_ids': [(0, 0, {'product_id': repair.product_id.id,
                                            'lot_id': repair.lot_id.id, 
-                                           'product_uom_qty': 0,  # bypass reservation here
+                                           'product_qty': 0,  # bypass reservation here
                                            'product_uom_id': repair.product_uom.id or repair.product_id.uom_id.id,
                                            'qty_done': repair.product_qty,
                                            'package_id': False,
