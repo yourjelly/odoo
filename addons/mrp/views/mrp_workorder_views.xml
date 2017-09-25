@@ -91,6 +91,9 @@
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
             <form string="Production Workcenter" delete="0" create="0">
+            <field name="is_user_working" invisible="1"/>
+            <field name="working_state" invisible="1"/>
+            <field name="production_state" invisible="1"/>
             <header>
                 <button name="button_finish" type="object" string="Finish Order" attrs="{'invisible': ['|', ('state', '!=', 'progress'), ('is_produced', '=', False)]}" class="btn-info"/>
                 <button name="button_start" type="object" string="Start Working" attrs="{'invisible': ['|', ('working_state', '=', 'blocked'), ('state', '!=', 'pending')]}"/>
@@ -103,9 +106,6 @@
                 <button name="button_start" type="object" string="Continue Production" attrs="{'invisible': ['|', '|', ('production_state', '=', 'done'), ('working_state', '=', 'blocked'), ('state', '!=', 'done')]}"/>
                 <button name="button_scrap" type="object" string="Scrap" attrs="{'invisible': [('state', 'in', ('confirmed', 'cancel'))]}"/>
                 <field name="state" widget="statusbar" statusbar_visible="pending,ready,progress,done"/>
-                <field name="is_user_working" invisible="1"/>
-                <field name="working_state" invisible="1"/>
-                <field name="production_state" invisible="1"/>
             </header>
             <sheet>
                 <div class="oe_button_box" name="button_box">

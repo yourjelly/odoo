@@ -50,6 +50,7 @@ class MrpWorkorder(models.Model):
         'Product Tracking', related='production_id.product_id.tracking',
         help='Technical: used in views only.')
     qty_production = fields.Float('Original Production Quantity', readonly=True, related='production_id.product_qty')
+    qty_remaining = fields.Float('Quantity To Be Produced', compute='_compute_qty_remaining', digits=dp.get_precision('Product Unit of Measure'))
     qty_produced = fields.Float(
         'Quantity', default=0.0,
         readonly=True,
@@ -111,6 +112,7 @@ class MrpWorkorder(models.Model):
     final_lot_id = fields.Many2one(
         'stock.production.lot', 'Lot/Serial Number', domain="[('product_id', '=', product_id)]",
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
+    tracking = fields.Selection(related='production_id.product_id.tracking')
     time_ids = fields.One2many(
         'mrp.workcenter.productivity', 'workorder_id')
     is_user_working = fields.Boolean(
@@ -283,7 +285,7 @@ class MrpWorkorder(models.Model):
     def record_production(self):
         self.ensure_one()
         if self.qty_producing <= 0:
-            raise UserError(_('Please set the quantity you produced in the Current Qty field. It can not be 0!'))
+            raise UserError(_('Please set the quantity you are currently producing. It should be different from zero.'))
 
         if (self.production_id.product_id.tracking != 'none') and not self.final_lot_id:
             raise UserError(_('You should provide a lot/serial number for the final product'))
@@ -486,3 +488,9 @@ class MrpWorkorder(models.Model):
         action = self.env.ref('stock.action_stock_scrap').read()[0]
         action['domain'] = [('workorder_id', '=', self.id)]
         return action
+
+    @api.multi
+    @api.onchange('qty_production', 'qty_produced')
+    def _compute_qty_remaining(self):
+        for wo in self:
+            wo.qty_remaining = wo.qty_production - wo.qty_produced
