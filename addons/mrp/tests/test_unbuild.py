@@ -406,8 +406,6 @@ class TestUnbuild(TestMrpCommon):
         self.env['stock.quant']._update_available_quantity(p2, self.stock_location, 3, lot_id=lot_2)
         self.env['stock.quant']._update_available_quantity(p2, self.stock_location, 2, lot_id=lot_3)
         mo.action_assign()
-        for ml in mo.move_raw_ids.mapped('move_line_ids'):
-            ml.qty_done = ml.product_qty
 
         produce_wizard = self.env['mrp.product.produce'].with_context({
             'active_id': mo.id,
