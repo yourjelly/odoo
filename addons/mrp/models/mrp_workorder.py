@@ -293,7 +293,7 @@ class MrpWorkorder(models.Model):
         # Update quantities done on each raw material line
         raw_moves = self.move_raw_ids.filtered(lambda x: (x.has_tracking == 'none') and (x.state not in ('done', 'cancel')) and x.bom_line_id)
         for move in raw_moves:
-            if move.unit_factor:
+            if move.unit_factor and not move.move_line_ids.filtered(lambda m: not m.done_wo):
                 rounding = move.product_uom.rounding
                 move.quantity_done += float_round(self.qty_producing * move.unit_factor, precision_rounding=rounding)
 
@@ -303,10 +303,10 @@ class MrpWorkorder(models.Model):
             if move_line.qty_done <= 0:  # rounding...
                 move_line.sudo().unlink()
                 continue
-            if not move_line.lot_id:
+            if move_line.product_id.tracking != 'none' and not move_line.lot_id:
                 raise UserError(_('You should provide a lot/serial number for a component'))
             # Search other move_line where it could be added:
-            lots = self.move_line_ids.filtered(lambda x: (x.lot_id.id == move_line.lot_id.id) and (not x.lot_produced_id) and (not x.done_move))
+            lots = self.move_line_ids.filtered(lambda x: (x.lot_id.id == move_line.lot_id.id) and (not x.lot_produced_id) and (not x.done_move) and (x.product_id == move_line.product_id))
             if lots:
                 lots[0].qty_done += move_line.qty_done
                 lots[0].lot_produced_id = self.final_lot_id.id
