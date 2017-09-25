@@ -291,14 +291,14 @@
         </record>
 
         <record id="product_product_computer_desk" model="product.product">
-            <field name="name">Computer Desk</field>
+            <field name="name">Table</field>
             <field name="categ_id" ref="product.product_category_5"/>
             <field name="standard_price">2500</field>
             <field name="list_price">2250</field>
             <field name="type">product</field>
             <field name="uom_id" ref="product.product_uom_unit"/>
             <field name="uom_po_id" ref="product.product_uom_unit"/>
-            <field name="description">Solid wood computer desk.</field>
+            <field name="description">Solid wood table.</field>
             <field name="default_code">FURN001</field>
         </record>
         <record id="product_product_computer_desk_head" model="product.product">
@@ -311,6 +311,7 @@
             <field name="uom_po_id" ref="product.product_uom_unit"/>
             <field name="description">Solid wood is a durable natural material.</field>
             <field name="default_code">FURN002</field>
+            <field name="tracking">serial</field>
         </record>
         <record id="product_product_computer_desk_leg" model="product.product">
             <field name="name">Table Leg</field>
@@ -322,6 +323,7 @@
             <field name="uom_po_id" ref="product.product_uom_unit"/>
             <field name="description">18″ x 2½″ Square Leg</field>
             <field name="default_code">FURN003</field>
+            <field name="tracking">lot</field>
         </record>
         <record id="product_product_computer_desk_bolt" model="product.product">
             <field name="name">Bolt</field>
@@ -361,7 +363,7 @@
             <field name="product_uom_id" ref="product.product_uom_unit"/>
             <field name="sequence">2</field>
             <field name="bom_id" ref="mrp_bom_desk"/>
-            <field name="operation_id" ref="mrp.mrp_routing_workcenter_6"/>
+            <field name="operation_id" ref="mrp.mrp_routing_workcenter_5"/>
         </record>
 
         <record id="mrp_bom_desk_line_3 " model="mrp.bom.line">
