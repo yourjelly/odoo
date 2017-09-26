@@ -145,7 +145,7 @@ class PosConfig(models.Model):
     default_fiscal_position_id = fields.Many2one('account.fiscal.position', string='Default Fiscal Position')
     default_cashbox_lines_ids = fields.One2many('account.cashbox.line', 'default_pos_id', string='Default Balance')
     customer_facing_display_html = fields.Html(string='Customer facing display content', translate=True, default=_compute_default_customer_html)
-    use_pricelist = fields.Boolean("Use a pricelist.")
+    use_pricelist = fields.Boolean("Use a pricelist.", compute='_compute_group_value', inverse='_inverse_group_value')
     group_sale_pricelist = fields.Boolean("Use pricelists to adapt your price per customers",
                                           implied_group='product.group_sale_pricelist',
                                           help="""Allows to manage different prices based on rules per category of customers.
@@ -163,6 +163,15 @@ class PosConfig(models.Model):
     module_pos_reprint = fields.Boolean(string="Reprint Receipt")
     is_posbox = fields.Boolean("PosBox")
     is_header_or_footer = fields.Boolean("Header & Footer")
+
+    def _compute_group_value(self):
+        if self.env['res.users'].has_group('product.group_sale_pricelist'):
+            self.use_pricelist = True
+        else:
+            self.use_pricelist = False
+
+    def _inverse_group_value(self):
+        self.env['ir.config_parameter'].sudo().set_param("product.group_sale_pricelist", self.group_sale_pricelist)
 
     def _compute_is_installed_account_accountant(self):
         account_accountant = self.env['ir.module.module'].sudo().search([('name', '=', 'account_accountant'), ('state', '=', 'installed')])
