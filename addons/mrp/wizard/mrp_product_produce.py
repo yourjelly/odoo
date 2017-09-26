@@ -93,32 +93,9 @@ class MrpProductProduce(models.TransientModel):
         for move in self.production_id.move_raw_ids:
             # TODO currently not possible to guess if the user updated quantity by hand or automatically by the produce wizard.
             if move.product_id.tracking == 'none' and move.state not in ('done', 'cancel') and move.unit_factor:
-                ml = move.move_line_ids.filtered(lambda x: not x.lot_produced_id)
                 rounding = move.product_uom.rounding
                 qty_to_add = float_round(quantity * move.unit_factor, precision_rounding=rounding)
-                if ml:
-                    ml = ml[0]
-                    qty_todo = qty_to_add + ml.qty_done
-                    if qty_todo >= ml.product_uom_qty:
-                        ml.write({'qty_done': qty_todo, 'lot_produced_id': self.lot_id.id})
-                    else:
-                        new_qty_todo = ml.product_uom_qty - qty_todo
-                        default = {'product_uom_qty': qty_todo,
-                                   'qty_done': qty_todo,
-                                   'lot_produced_id': self.lot_id.id}
-                        ml.copy(default=default)
-                        ml.with_context(bypass_reservation_update=True).write({'product_uom_qty': new_qty_todo, 'qty_done': 0})
-                else:
-                    self.env['stock.move.line'].create({
-                        'move_id': move.id,
-                        'product_id': move.product_id.id,
-                        'location_id': move.location_id.id,
-                        'location_dest_id': move.location_dest_id.id,
-                        'product_uom_qty': 0,
-                        'product_uom_id': move.product_uom.id,
-                        'qty_done': qty_to_add,
-                        'lot_produced_id': self.lot_id.id,
-                    })
+                move._add_consume_qty(qty_to_add, self.lot_id)
         for move in self.production_id.move_finished_ids:
             if move.product_id.tracking == 'none' and move.state not in ('done', 'cancel'):
                 rounding = move.product_uom.rounding
@@ -191,29 +168,7 @@ class MrpProductProduce(models.TransientModel):
                                     'propagate': order.propagate,
                                     'unit_factor': 0.0,
                                     'state': 'confirmed'})
-                ml = pl.move_id.move_line_ids.filtered(lambda ml: ml.lot_id == pl.lot_id and not ml.lot_produced_id)
-                if ml:
-                    if pl.qty_done >= ml.product_uom_qty:
-                        ml.write({'qty_done': pl.qty_done, 'lot_produced_id': self.lot_id.id})
-                    else:
-                        new_qty_todo = ml.product_uom_qty - pl.qty_done
-                        default = {'product_uom_qty': pl.qty_done,
-                                   'qty_done': pl.qty_done,
-                                   'lot_produced_id': self.lot_id.id}
-                        ml.copy(default=default)
-                        ml.with_context(bypass_reservation_update=True).write({'product_uom_qty': new_qty_todo, 'qty_done': 0})
-                else:
-                    self.env['stock.move.line'].create({
-                        'move_id': pl.move_id.id,
-                        'product_id': pl.product_id.id,
-                        'location_id': pl.move_id.location_id.id,
-                        'location_dest_id': pl.move_id.location_dest_id.id,
-                        'product_uom_qty': 0,
-                        'product_uom_id': pl.product_uom_id.id,
-                        'qty_done': pl.qty_done,
-                        'lot_id': pl.lot_id.id,
-                        'lot_produced_id': self.lot_id.id,
-                    })
+                pl.move_id._add_consume_qty(pl.qty_done, self.lot_id, lot=pl.lot_id)
         return True
 
 class MrpProductProduceLine(models.TransientModel):

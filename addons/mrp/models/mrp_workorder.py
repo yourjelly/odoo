@@ -290,10 +290,10 @@ class MrpWorkorder(models.Model):
 
         # Update quantities done on each raw material line
         raw_moves = self.move_raw_ids.filtered(lambda x: (x.has_tracking == 'none') and (x.state not in ('done', 'cancel')) and x.bom_line_id)
-        for move in raw_moves:
-            if move.unit_factor:
-                rounding = move.product_uom.rounding
-                move.quantity_done += float_round(self.qty_producing * move.unit_factor, precision_rounding=rounding)
+        for move in raw_moves.filtered(lambda m: m.unit_factor):
+            rounding = self.product_uom.rounding
+            qty_to_add = float_round(self.qty_producing * move.unit_factor, precision_rounding=rounding)
+            move._add_consume_qty(qty_to_add, self.final_lot_id)
 
         # Transfer quantities from temporary to final move lots or make them final
         for move_line in self.active_move_line_ids:
