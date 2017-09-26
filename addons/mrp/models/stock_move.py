@@ -170,7 +170,7 @@ class StockMove(models.Model):
             ml = ml[0]
             qty_todo = qty_to_add + ml.qty_done
             if qty_todo >= ml.product_uom_qty:
-                ml.write({'qty_done': qty_todo, 'lot_produced_id': self.lot_id.id})
+                ml.write({'qty_done': qty_todo, 'lot_produced_id': final_lot.id})
             else:
                 new_qty_todo = ml.product_uom_qty - qty_todo
                 default = {'product_uom_qty': qty_todo,
