@@ -46,7 +46,7 @@
         </record>
 
         <record id="mrp_workcenter_3" model="mrp.workcenter">
-            <field name="name">Cutting</field>
+            <field name="name">Assembly Line 1</field>
             <field name="resource_calendar_id" ref="resource.resource_calendar_std"/>
         </record>
 
@@ -133,26 +133,8 @@
             <field name="workcenter_id" ref="mrp_workcenter_3"/>
             <field name="time_cycle">120</field>
             <field name="sequence">10</field>
-            <field name="name">Cutting</field>
+            <field name="name">Assembly Line 1</field>
             <field name="worksheet" type="base64" file="mrp/static/img/cutting-worksheet.pdf"/>
-        </record>
-
-        <record id="mrp_routing_workcenter_6" model="mrp.routing.workcenter">
-            <field name="routing_id" ref="mrp_routing_3"/>
-            <field name="workcenter_id" ref="mrp_workcenter_1"/>
-            <field name="time_cycle">120</field>
-            <field name="sequence">15</field>
-            <field name="name">Drilling</field>
-            <field name="worksheet" type="base64" file="mrp/static/img/drill-worksheet.pdf"/>
-        </record>
-
-        <record id="mrp_routing_workcenter_7" model="mrp.routing.workcenter">
-            <field name="routing_id" ref="mrp_routing_3"/>
-            <field name="workcenter_id" ref="mrp_workcenter_2"/>
-            <field name="time_cycle">120</field>
-            <field name="sequence">20</field>
-            <field name="name">Assembly</field>
-            <field name="worksheet" type="base64" file="mrp/static/img/assebly-worksheet.pdf"/>
         </record>
 
         <!-- Resource: mrp.bom -->
@@ -336,6 +318,17 @@
             <field name="description">Stainless steel screw full (dia - 5mm, Length - 10mm)</field>
             <field name="default_code">FURN004</field>
         </record>
+        <record id="product_product_computer_desk_screw" model="product.product">
+            <field name="name">Screw</field>
+            <field name="categ_id" ref="product.product_category_5"/>
+            <field name="standard_price">10</field>
+            <field name="list_price">10</field>
+            <field name="type">product</field>
+            <field name="uom_id" ref="product.product_uom_unit"/>
+            <field name="uom_po_id" ref="product.product_uom_unit"/>
+            <field name="description">Stainless steel screw</field>
+            <field name="default_code">FURN005</field>
+        </record>
 
         <record id="product_product_computer_desk_product_template" model="product.template">
             <field name="route_ids" eval="[(6, 0, [ref('stock.route_warehouse0_mto'), ref('mrp.route_warehouse0_manufacture')])]"/>
@@ -366,13 +359,22 @@
             <field name="operation_id" ref="mrp.mrp_routing_workcenter_5"/>
         </record>
 
-        <record id="mrp_bom_desk_line_3 " model="mrp.bom.line">
+        <record id="mrp_bom_desk_line_3" model="mrp.bom.line">
             <field name="product_id" ref="product_product_computer_desk_bolt"/>
             <field name="product_qty">4</field>
             <field name="product_uom_id" ref="product.product_uom_unit"/>
             <field name="sequence">3</field>
             <field name="bom_id" ref="mrp_bom_desk"/>
-            <field name="operation_id" ref="mrp.mrp_routing_workcenter_7"/>
+            <field name="operation_id" ref="mrp.mrp_routing_workcenter_5"/>
+        </record>
+
+        <record id="mrp_bom_desk_line_4" model="mrp.bom.line">
+            <field name="product_id" ref="product_product_computer_desk_screw"/>
+            <field name="product_qty">10</field>
+            <field name="product_uom_id" ref="product.product_uom_unit"/>
+            <field name="sequence">4</field>
+            <field name="bom_id" ref="mrp_bom_desk"/>
+            <field name="operation_id" ref="mrp.mrp_routing_workcenter_5"/>
         </record>
 
         <record id="mrp_production_3" model="mrp.production">
@@ -522,7 +524,7 @@
             <field name="sequence">2</field>
             <field name="bom_id" ref="mrp_bom_laptop_cust_rout"/>
         </record>
-        
+
         <record id="product.product_product_27" model="product.product">
             <field name="type">product</field>
         </record>
