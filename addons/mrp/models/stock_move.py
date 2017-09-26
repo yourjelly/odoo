@@ -193,6 +193,13 @@ class StockMove(models.Model):
                 vals.update({'lot_id': lot.id})
             self.env['stock.move.line'].create(vals)
 
+    def create(self, vals):
+        res = super(StockMove, self).create(vals)
+        if vals.get('raw_material_production_id'):
+            if self.env['mrp.production'].browse(vals['raw_material_production_id']).state in ('done', 'cancel'):
+                raise UserError(_('You can not add new components when the production order is done or cancelled.'))
+        return res
+
 
 class PushedFlow(models.Model):
     _inherit = "stock.location.path"
