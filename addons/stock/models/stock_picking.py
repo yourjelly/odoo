@@ -45,8 +45,6 @@ class PickingType(models.Model):
     show_operations = fields.Boolean(
         'Show Detailed Operations', default=False,
         help="If this checkbox is ticked, the pickings lines will represent detailed stock operations. If not, the picking lines will represent an aggregate of detailed stock operations.")
-    show_reserved = fields.Boolean(
-        'Show Reserved', default=True, help="If this checkbox is ticked, Odoo will show which products are reserved (lot/serial number, source location, source package).")
 
     # Statistics for the kanban view
     last_done_picking = fields.Char('Last 10 Done Pickings', compute='_compute_last_done_picking')
