@@ -95,7 +95,7 @@ class MrpProductProduce(models.TransientModel):
             if move.product_id.tracking == 'none' and move.state not in ('done', 'cancel') and move.unit_factor:
                 rounding = move.product_uom.rounding
                 qty_to_add = float_round(quantity * move.unit_factor, precision_rounding=rounding)
-                move._add_consume_qty(qty_to_add, self.lot_id)
+                move._set_consume_qty(qty_to_add, self.lot_id)
         for move in self.production_id.move_finished_ids:
             if move.product_id.tracking == 'none' and move.state not in ('done', 'cancel'):
                 rounding = move.product_uom.rounding
@@ -168,7 +168,7 @@ class MrpProductProduce(models.TransientModel):
                                     'propagate': order.propagate,
                                     'unit_factor': 0.0,
                                     'state': 'confirmed'})
-                pl.move_id._add_consume_qty(pl.qty_done, self.lot_id, lot=pl.lot_id)
+                pl.move_id._set_consume_qty(pl.qty_done, self.lot_id, lot=pl.lot_id)
         return True
 
 class MrpProductProduceLine(models.TransientModel):

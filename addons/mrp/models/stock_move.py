@@ -164,11 +164,14 @@ class StockMove(models.Model):
             })
         return self.env['stock.move']
 
-    def _add_consume_qty(self, qty_to_add, final_lot, lot=False):
+    def _set_consume_qty(self, qty_to_add, final_lot, lot=False):
         ml = self.move_line_ids.filtered(lambda x: x.lot_id == lot and not x.lot_produced_id)
         if ml:
             ml = ml[0]
-            qty_todo = qty_to_add + ml.qty_done
+            if not lot: # Use existing quantity when lot exists as the user modifies it in the wizard 
+                qty_todo = qty_to_add + ml.qty_done
+            else:
+                qty_todo = qty_to_add
             if qty_todo >= ml.product_uom_qty:
                 ml.write({'qty_done': qty_todo, 'lot_produced_id': final_lot.id})
             else:

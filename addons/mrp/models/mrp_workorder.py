@@ -293,7 +293,7 @@ class MrpWorkorder(models.Model):
         for move in raw_moves.filtered(lambda m: m.unit_factor):
             rounding = move.product_uom.rounding
             qty_to_add = float_round(self.qty_producing * move.unit_factor, precision_rounding=rounding)
-            move._add_consume_qty(qty_to_add, self.final_lot_id)
+            move._set_consume_qty(qty_to_add, self.final_lot_id)
 
         # Transfer quantities from temporary to final move lots or make them final
         for move_line in self.active_move_line_ids:
