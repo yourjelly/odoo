@@ -57,6 +57,10 @@
         padding: 0;
         list-style: none;
 
+        > .o_web_studio_navbar_item > a > img {
+            margin-bottom: 3px;
+        }
+
         > li {
             position: relative;
             display: block;
@@ -75,6 +79,10 @@
 
                 &:focus, &:active, &:focus:active {
                     outline: none;
+                }
+
+                > span.fa-bug {
+                    transform: scale(1.2)
                 }
             }
 
