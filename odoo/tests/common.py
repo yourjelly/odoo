@@ -597,7 +597,7 @@ class HttpCase(TransactionCase):
             if event and event['method'] == "Runtime.consoleAPICalled":
                 log_type = event['params']['type']
                 messages = event['params']['args']
-                console_msg = " ".join(unicode(message['value']) for message in messages)
+                console_msg = " ".join(str(message['value']) for message in messages)
                 if log_type in ['log', 'info'] and ('error' not in console_msg):
                     _logger.info(console_msg)
                 if ('error' == console_msg) or ('error' in console_msg):
