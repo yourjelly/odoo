@@ -190,7 +190,16 @@ var FormController = BasicController.extend({
             // the title could have been changed
             self.set('title', self.getTitle());
             self._updateEnv();
-
+            var alredycheckterms = _.any(self.renderer.__parentedChildren, function(field) {
+                return field ? field.value == true && field.attrs.name == 'use_sale_note' : false;
+            });
+            if (alredycheckterms) {
+                var is_check_terms = _.find(self.renderer.__parentedChildren, function(field) {
+                    if (field.attrs.name === 'use_sale_note') {
+                        return field;
+                    }
+                });
+            }
             if (_t.database.multi_lang && changedFields.length) {
                 // need to make sure changed fields that should be translated
                 // are displayed with an alert
@@ -202,7 +211,7 @@ var FormController = BasicController.extend({
                         alertFields.push(field);
                     }
                 }
-                if (alertFields.length) {
+                if (alertFields.length && is_check_terms && is_check_terms.value) {
                     self.renderer.displayTranslationAlert(alertFields);
                 }
             }
