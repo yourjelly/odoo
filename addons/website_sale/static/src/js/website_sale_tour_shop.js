@@ -11,7 +11,7 @@ odoo.define("website_sale.tour_shop", function (require) {
         url: "/shop",
         wait_for: base.ready(),
     }, [{
-        trigger: "#new-content-menu > a",
+        trigger: "#new-content-menu > a.ready",
         content: _t("Let's create your first product."),
         extra_trigger: ".js_sale",
         position: "bottom",

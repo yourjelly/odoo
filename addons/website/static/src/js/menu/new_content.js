@@ -21,8 +21,11 @@ var NewContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      * @override
      */
     start: function () {
+        var self =  this;
         this.$newContentMenuChoices = this.$('#o_new_content_menu_choices');
-        return this._super.apply(this, arguments);
+        return this._super.apply(this, arguments).then(function(){
+            self.$("> a").addClass('ready');
+        })
     },
 
     //--------------------------------------------------------------------------
