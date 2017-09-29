@@ -69,15 +69,16 @@
         </template>
 
         <template id="message_activity_done">
-<div>
-    <p>
-        <strong><span t-attf-class="fa #{activity.activity_type_id.icon}"/></strong> <span t-field="activity.activity_type_id.name"/> done
-        by <span t-field="activity.user_id.name"/>:
-        <span t-if="activity.summary" t-field="activity.summary"/>
-    </p>
-    <div t-field="activity.note"/>
-    <div t-if="activity.feedback"><strong> Feedback : </strong><p t-field="activity.feedback"></p></div>
-</div>
+            <div>
+                <p>
+                    <strong><span t-attf-class="fa #{activity.activity_type_id.icon}"/></strong> <span t-field="activity.activity_type_id.name"/> done
+                    by <span t-field="activity.user_id.name"/>:
+                    <span t-if="activity.summary" t-field="activity.summary"/>
+                </p>
+                <div t-field="activity.note"/>
+                <p/>
+                <div t-if="activity.feedback"><strong> Feedback: </strong> <span t-field="activity.feedback"></span></div>
+            </div>
         </template>
 
     </data>
