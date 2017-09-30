@@ -247,7 +247,7 @@ return AbstractModel.extend({
         if (params.domain) {
             this.data.domain = params.domain;
         }
-        return this._loadCalendar();
+        return this._loadCalendar(params.filterDomain);
     },
     /**
      * @param {Moment} start
@@ -390,14 +390,20 @@ return AbstractModel.extend({
         return domain;
     },
     /**
+     * @param {Boolean} filterDomain if set to true add the sidebar filter in the domain
      * @returns {Deferred}
      */
-    _loadCalendar: function () {
+    _loadCalendar: function (filterDomain) {
         var self = this;
         this.data.fullWidth = this.call('local_storage', 'getItem', 'calendar_fullWidth') === 'true';
         this.data.fc_options = this._getFullCalendarOptions();
 
         var defs = _.map(this.data.filters, this._loadFilter.bind(this));
+
+        var domain = self.data.domain.concat(self._getRangeDomain());
+        if (filterDomain) {
+            domain.concat(self._getFilterDomain());
+        }
 
         return $.when.apply($, defs).then(function () {
             return self._rpc({
@@ -405,7 +411,7 @@ return AbstractModel.extend({
                     method: 'search_read',
                     context: self.data.context,
                     fields: self.fieldNames,
-                    domain: self.data.domain.concat(self._getRangeDomain()).concat(self._getFilterDomain())
+                    domain: domain,
             })
             .then(function (events) {
                 self._parseServerData(events);
