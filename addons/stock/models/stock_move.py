@@ -25,6 +25,12 @@ class StockMove(models.Model):
             return self.env['stock.picking'].browse(self.env.context['default_picking_id']).group_id.id
         return False
 
+    def _default_initial_demand(self):
+        if self.env.context.get('planned_picking'):
+            return True
+        if self.env.context.get('default_picking_id'):
+            return (self.env['stock.picking'].browse(self.env.context['default_picking_id']).state == 'draft') and 1.0 or 0.0
+
     name = fields.Char('Description', index=True, required=True)
     sequence = fields.Integer('Sequence', default=10)
     priority = fields.Selection(PROCUREMENT_PRIORITIES, 'Priority', default='1')
@@ -53,7 +59,7 @@ class StockMove(models.Model):
     product_uom_qty = fields.Float(
         'Initial Demand',
         digits=dp.get_precision('Product Unit of Measure'),
-        default=0.0, required=True, states={'done': [('readonly', True)]},
+        default=_default_initial_demand, required=True, states={'done': [('readonly', True)]},
         help="This is the quantity of products from an inventory "
              "point of view. For moves in the state 'done', this is the "
              "quantity of products that were actually moved. For other "
@@ -198,6 +204,7 @@ class StockMove(models.Model):
     @api.depends('state', 'picking_id')
     def _compute_is_initial_demand_editable(self):
         for move in self:
+            
             if self._context.get('planned_picking') or (move.state == 'draft' and move.id):
                 move.is_initial_demand_editable = True
             elif not move.picking_id.is_locked and move.state != 'done' and move.picking_id:
