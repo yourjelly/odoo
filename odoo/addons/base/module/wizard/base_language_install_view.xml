@@ -7,22 +7,48 @@
             <field name="model">base.language.install</field>
             <field name="arch" type="xml">
                 <form string="Load a Translation">
-                    <field name="state" invisible="1"/>
-                    <group states="init">
-                        <field name="lang"/>
-                        <field name="overwrite" groups="base.group_no_one"/>
-                    </group>
-                    <group states="done" colspan="4">
-                        <label string="The selected language has been successfully installed.
-You must change the preferences of the user to view the changes."/>
-                    </group>
-                    <footer states="init">
-                        <button name="lang_install" string="Load" type="object" class="btn-primary"/>
-                        <button special="cancel" string="Cancel" class="btn-default"/>
-                    </footer>
-                    <footer states="done">
-                        <button name="reload" string="Close" type="object" class="btn-primary"/>
-                    </footer>
+
+
+                    <div class="hidden">
+                        <field name="state" invisible="1"/>
+                        <group states="init">
+                            <field name="lang"/>
+                            <field name="overwrite" groups="base.group_no_one"/>
+                        </group>
+                        <group states="done" colspan="4">
+                            <label string="The selected language has been successfully installed.
+                        You must change the preferences of the user to view the changes."/>
+                        </group>
+                        <footer states="init">
+                            <button name="lang_install" string="Load" type="object" class="btn-primary"/>
+                            <button special="cancel" string="Cancel" class="btn-default"/>
+                        </footer>
+                        <footer states="done">
+                            <button name="reload" string="Close" type="object" class="btn-primary"/>
+                        </footer>
+                    </div>
+
+                    <!-- ///////  SMS MODAL -->
+                    <div style="margin: -24px -16px; background-image: url(base/static/img/sms/sms_modal_bg.jpg); background-repeat:no-repeat;background-size: cover; background-position:center; min-height: 320px">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-sm-7 col-md-offset-1 mt32 mb32">
+                                    <h2>Reach any phone, anywhere, directly within Odoo.</h2>
+                                    <ul>
+                                        <li>send sms to your Odoo contacts</li>
+                                        <li>integrated with Discuss</li>
+                                        <li>worldwide coverage</li>
+                                        <li>calendar reminder</li>
+                                        <li>payment followup</li>
+                                    </ul>
+                                    <hr/>
+                                    <h5 class="">Starting at <strong class="text-success">0.XX euros</strong></h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ///////  SMS MODAL -->
+
                 </form>
            </field>
         </record>
