@@ -984,6 +984,15 @@ class StockMove(models.Model):
                         break
         return extra_move
 
+    def _check_pack_location_consistency(self):
+        packs_to_check = self.mapped('move_line_ids.result_package_id')
+        for pack in packs_to_check:
+            if len(pack.quant_ids) <= 1:
+                continue
+            location1 = pack.quant_ids[0].location_id
+            if any([q.location_id != location1 for q in pack.quant_ids]):
+                raise UserError(_('You should not put the contents of a package in different locations. '))
+
     def _action_done(self):
         self.filtered(lambda move: move.state == 'draft')._action_confirm()  # MRP allows scrapping draft moves
 
@@ -1028,6 +1037,8 @@ class StockMove(models.Model):
         picking = self and self[0].picking_id or False
         moves_todo.write({'state': 'done', 'date': fields.Datetime.now()})
         moves_todo.mapped('move_dest_ids')._action_assign()
+
+        moves_todo._check_pack_location_consistency()
 
         # We don't want to create back order for scrap moves
         if all(move_todo.scrapped for move_todo in moves_todo):
