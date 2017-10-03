@@ -1491,7 +1491,7 @@ QUnit.module('relational_fields', {
 
     QUnit.test('pressing ENTER on a \'no_quick_create\' many2one should not trigger M2ODialog', function (assert) {
         var done = assert.async();
-        assert.expect(1);
+        assert.expect(2);
 
         var M2O_DELAY = relationalFields.FieldMany2One.prototype.AUTOCOMPLETE_DELAY;
         relationalFields.FieldMany2One.prototype.AUTOCOMPLETE_DELAY = 0;
@@ -1502,7 +1502,6 @@ QUnit.module('relational_fields', {
             data: this.data,
             arch: '<form>' +
                     '<field name="trululu" options="{\'no_quick_create\': True}"/>' +
-                    '<field name="foo"/>' +
                 '</form>',
             archs: {
                 'partner,false,form': '<form string="Partners"><field name="display_name"/></form>',
@@ -1529,7 +1528,11 @@ QUnit.module('relational_fields', {
                 $input.blur();
                 assert.strictEqual($('.modal').length, 1,
                     "should have one modal in body");
-                form.destroy();
+                // Check that discarding clears $input
+                $('.modal .o_form_button_cancel').click();
+                assert.strictEqual($input.val(), '',
+                    "the field should be empty");
+                //form.destroy();
                 relationalFields.FieldMany2One.prototype.AUTOCOMPLETE_DELAY = M2O_DELAY;
                 done();
             });
