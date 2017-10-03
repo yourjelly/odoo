@@ -72,13 +72,12 @@ var ProductConfiguratorWidget = AbstractField.extend({
     _render: function() {
         var self = this;
         var data = JSON.parse(this.value);
-        if (!data) {
-            this.$el.html('');
-            return $.when();
-        }
-        if (!this.configurator) {
+        if (!this.configurator && data) {
             this.configurator = new Configurator(this, data);
             this.configurator.prependTo(this.$el);
+        } else {
+            this.$el.html('');
+            return $.when();
         }
     },
 
@@ -95,7 +94,7 @@ var ProductConfiguratorWidget = AbstractField.extend({
 var Configurator = Widget.extend({
     template: 'Configurator',
     custom_events: {
-        "config_field_changed": "_onFieldValueChange",
+        "config_field_changed": "_onFieldValueChanged",
     },
     /**
      * @constructor
@@ -111,8 +110,7 @@ var Configurator = Widget.extend({
     start: function() {
         var self = this;
         _.each(this.data, function(field) {
-            var field_widget = new ConfiguratorFieldsWidget(self, field);
-            field_widget.appendTo(self.$('.config_fields'));
+            self._createConfiguratorFieldsWidget(field);
         });
         this._super.apply(this, arguments);
     },
@@ -128,7 +126,7 @@ var Configurator = Widget.extend({
     /**
      * @private
      */
-    _onFieldValueChange: function(field) {
+    _onFieldValueChanged: function(field) {
         for (var i = 0; i < this.data.length; i++) {
             if (this.data[i].id === parseInt(field.data.id)) {
                 this.data[i].selected_value = this.data[i].type === 'custom' ? field.data.value : parseInt(field.data.value);
@@ -137,6 +135,13 @@ var Configurator = Widget.extend({
                 }
             }
         }
+    },
+    /**
+     * @private
+     */
+     _createConfiguratorFieldsWidget: function (field) {
+        var widget = new ConfiguratorFieldsWidget(this, field);
+        return widget.appendTo(this.$(".config_fields"));
     },
 
 });
@@ -167,7 +172,6 @@ var ConfiguratorFieldsWidget = Widget.extend({
         this._super.apply(this, arguments);
     },
 
-    
 
     //--------------------------------------------------------------------------
     // Private
@@ -178,13 +182,16 @@ var ConfiguratorFieldsWidget = Widget.extend({
      */
     _onInputChange: function(ev) {
         var $input = $(ev.target);
-        var vals = {
+        var value = {
             id: $input.data('attr-id'),
             value: $input.val(),
         }
-        this._setValue(vals);
+        this._setValue(value);
     },
 
+    /**
+     * @private
+     */
     _onFileInputChange: function(ev) {
         //TODO: check the file Size and other validation
         var self = this;
@@ -196,37 +203,39 @@ var ConfiguratorFieldsWidget = Widget.extend({
             filereader.onloadend = function (upload) {
                 var data = upload.target.result;
                 data = data.split(',')[1];
-                var vals = {
+                var value = {
                     id: $input.data('attr-id'),
                     value: data,
                     name: file.name,
                 }
-                self._setValue(vals);
+                self._setValue(value);
             };
         }
-    },
-
-    _onDatePickerChange: function(ev) {
-        var $input = $(ev.target);
-        var vals = {
-            id: $input.data('attr-id'),
-            value: $input.val(),
-        }
-        this._setValue(vals);
     },
 
     /**
      * @private
      */
-    _setValue: function (vals) {
-        this.trigger_up('config_field_changed', vals);
+    _onDatePickerChange: function(ev) {
+        var $input = $(ev.target);
+        var value = {
+            id: $input.data('attr-id'),
+            value: $input.val(),
+        }
+        this._setValue(value);
+    },
+
+    /**
+     * @private
+     */
+    _setValue: function (value) {
+        this.trigger_up('config_field_changed', value);
     },
 
     /**
      * @private
      */
     _initDatetimePicker: function () {
-        // Initialize datetimepickers
         var l10n = _t.database.parameters;
         var datepickers_options = {
             minDate: moment({ y: 1900 }),

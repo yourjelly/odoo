@@ -8,6 +8,7 @@
     'description': """ This module allows user to easily configure the products with lot of variants""",
     'data': [
         'security/ir.model.access.csv',
+        'security/security.xml',
         'wizard/product_configurator_views.xml',
         'views/product_template_views.xml',
         'views/product_attribute_views.xml',
