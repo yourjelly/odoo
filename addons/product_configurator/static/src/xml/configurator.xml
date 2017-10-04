@@ -2,8 +2,9 @@
 
 <templates xml:space="preserve">
     <t t-name="Configurator">
-        <div class="product_configurator alert alert-info">
+        <div class="product_configurator">
             <h4 class="mt8 text-primary text-center">PRODUCT CONFIGURATOR</h4>
+            <hr/>
             <t t-if="!widget.data.length">
                 <h5 class="text-center mt16">No attribute available for this template.</h5>
             </t>
@@ -17,7 +18,7 @@
     </t>
 
     <t t-name="product_configurator.field">
-        <div class="form-group form-field ">
+        <div class="form-group form-field row">
             <div class="col-md-3 col-sm-4 text-right-not-xs mt8">
                 <label class="control-label" t-att-for="field.name">
                     <t t-esc="field.name"/>
