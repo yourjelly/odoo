@@ -446,6 +446,7 @@ class HrExpenseSheet(models.Model):
         if vals.get('employee_id'):
             employee = self.env['hr.employee'].browse(vals['employee_id'])
             users = self._get_users_to_subscribe(employee=employee) - self.env.user
+            vals['expense_line_ids'] = [(4, dict(self._context)['default_expense_line_ids'][0])]
             vals['message_follower_ids'] = []
             for partner in users.mapped('partner_id'):
                 vals['message_follower_ids'] += self.env['mail.followers']._add_follower_command(self._name, [], {partner.id: None}, {})[0]
