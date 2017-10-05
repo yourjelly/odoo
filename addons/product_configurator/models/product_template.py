@@ -50,7 +50,10 @@ class ProductTemplate(models.Model):
 
         if custom_values:
             data = []
-            for key, val in custom_values.iteritems():
+            for key, val in custom_values.items():
+                if not val['value']:
+                    continue
+
                 if val['value_type'] != 'binary':
                     data.append((0, 0, {
                         'attribute_id': key,

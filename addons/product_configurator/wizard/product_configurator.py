@@ -69,7 +69,7 @@ class ProductConfiguratorWizard(models.TransientModel):
                     'id': res['id'],
                     'value': res['selected_value'],
                     'value_type': res['value_type'],
-                    'name': res.get('file_name', False)
+                    'name': res.get('name', False)
                 }
         return data
 
