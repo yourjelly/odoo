@@ -8,7 +8,6 @@ from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, float_compare
 from odoo.exceptions import UserError
 
 
-from profilehooks import profile
 
 class SaleOrder(models.Model):
     _inherit = "sale.order"
@@ -36,7 +35,6 @@ class SaleOrder(models.Model):
     procurement_group_id = fields.Many2one('procurement.group', 'Procurement Group', copy=False)
 
     @api.multi
-    @profile(immediate=True)
     def action_confirm(self):
         result = super(SaleOrder, self).action_confirm()
         for order in self.with_context(recompute=False):

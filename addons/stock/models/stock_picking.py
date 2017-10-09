@@ -13,7 +13,6 @@ from odoo.exceptions import UserError
 from odoo.addons.stock.models.stock_move import PROCUREMENT_PRIORITIES
 from operator import itemgetter
 
-from profilehooks import profile
 
 class PickingType(models.Model):
     _name = "stock.picking.type"
@@ -549,7 +548,6 @@ class Picking(models.Model):
         return True
 
     @api.multi
-    @profile(immediate=True)
     def action_done(self):
         """Changes picking state to done by processing the Stock Moves of the Picking
 
