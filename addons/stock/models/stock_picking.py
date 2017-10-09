@@ -13,6 +13,7 @@ from odoo.exceptions import UserError
 from odoo.addons.stock.models.stock_move import PROCUREMENT_PRIORITIES
 from operator import itemgetter
 
+from profilehooks import profile
 
 class PickingType(models.Model):
     _name = "stock.picking.type"
@@ -198,7 +199,7 @@ class Picking(models.Model):
         ('done', 'Done'),
         ('cancel', 'Cancelled'),
     ], string='Status', compute='_compute_state',
-        copy=False, index=True, readonly=True, store=True, track_visibility='onchange',
+        copy=False, index=True, readonly=True, store=True,
         help=" * Draft: not confirmed yet and will not be scheduled until confirmed.\n"
              " * Waiting Another Operation: waiting for another move to proceed before it becomes automatically available (e.g. in Make-To-Order flows).\n"
              " * Waiting: if it is not ready to be sent because the required products could not be reserved.\n"
@@ -328,6 +329,7 @@ class Picking(models.Model):
         - Done: if the picking is done.
         - Cancelled: if the picking is cancelled
         '''
+        #import pdb; pdb.set_trace()
         if not self.move_lines:
             self.state = 'draft'
         elif any(move.state == 'draft' for move in self.move_lines):  # TDE FIXME: should be all ?
@@ -547,6 +549,7 @@ class Picking(models.Model):
         return True
 
     @api.multi
+    @profile(immediate=True)
     def action_done(self):
         """Changes picking state to done by processing the Stock Moves of the Picking
 
@@ -593,7 +596,8 @@ class Picking(models.Model):
                     new_move._action_confirm()
                     todo_moves |= new_move
                     #'qty_done': ops.qty_done})
-        todo_moves._action_done()
+        todo_moves.with_context(recompute=False, mail_notrack=True)._action_done()
+        todo_moves.recompute()
         self.write({'date_done': fields.Datetime.now()})
         return True
 
