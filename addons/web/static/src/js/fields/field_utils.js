@@ -534,6 +534,7 @@ return {
         binary: _.identity, // todo
         boolean: formatBoolean,
         char: formatChar,
+        tsvector: formatChar,
         date: formatDate,
         datetime: formatDateTime,
         float: formatFloat,
@@ -552,6 +553,7 @@ return {
         binary: _.identity,
         boolean: _.identity, // todo
         char: _.identity, // todo
+        tsvector: _.identity,
         date: parseDate, // todo
         datetime: parseDateTime, // todo
         float: parseFloat,

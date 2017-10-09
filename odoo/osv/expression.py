@@ -141,7 +141,7 @@ DOMAIN_OPERATORS = (NOT_OPERATOR, OR_OPERATOR, AND_OPERATOR)
 # operators are also used. In this case its right operand has the form (subselect, params).
 TERM_OPERATORS = ('=', '!=', '<=', '<', '>', '>=', '=?', '=like', '=ilike',
                   'like', 'not like', 'ilike', 'not ilike', 'in', 'not in',
-                  'child_of', 'parent_of')
+                  'child_of', 'parent_of', '@@')
 
 # A subset of the above operators, with a 'negative' semantic. When the
 # expressions 'in NEGATIVE_TERM_OPERATORS' or 'not in NEGATIVE_TERM_OPERATORS' are used in the code
@@ -1173,6 +1173,20 @@ class expression(object):
         elif leaf == FALSE_LEAF:
             query = 'FALSE'
             params = []
+
+        elif operator == '@@':
+            params = []
+            if left in model._fields and model._fields[left].type == "tsvector":
+                column = '%s.%s' % (table_alias,_quote(left))
+                query = '(%s %s %s)' % (
+                    column,
+                    operator,
+                    "to_tsquery(%s)",
+                )
+                params = right
+            else:
+                raise ValueError(_(
+                    "Invalid field %r in domain term %r" % (left, leaf)))
 
         elif operator == 'inselect':
             query = '(%s."%s" in (%s))' % (table_alias, left, right[0])

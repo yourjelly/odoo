@@ -872,7 +872,10 @@ class Field(MetaField('DummyField', (object,), {})):
         """
         indexname = '%s_%s_index' % (model._table, self.name)
         if self.index:
-            sql.create_index(model._cr, indexname, model._table, ['"%s"' % self.name])
+            if self.column_type[1] == 'tsvector':
+                sql.create_gin_index(model._cr, indexname, model._table, ['"%s"' % self.name])
+            else:
+                sql.create_index(model._cr, indexname, model._table, ['"%s"' % self.name])
         else:
             sql.drop_index(model._cr, indexname, model._table)
 
@@ -1394,6 +1397,21 @@ class Text(_String):
             return False
         return ustr(value)
 
+class Tsvector(_String):
+    """
+        Designed to support full text search, which is the activity of searching through a
+        collection of natural-language documents to locate those that best match a query.
+
+        Optimizing Full Text Search with Postgres tsvector Columns and Triggers
+    """
+    type = 'tsvector'
+    column_type = ('tsvector','tsvector')
+    column_format = "to_tsvector(%s)"
+
+    def convert_to_cache(self, value, record, validate=True):
+        if value is None or value is False:
+            return False
+        return ustr(value)
 
 class Html(_String):
     type = 'html'

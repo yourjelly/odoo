@@ -172,6 +172,20 @@ var Char = Field.extend({
     }
 });
 
+var Tsvector = Field.extend({
+    tagName: 'input',
+    className: 'o_input',
+    attributes: {
+      type: 'tsvector'
+    },
+    operators: [
+      {value: "@@", text: _lt("@@")},
+    ],
+    get_value: function () {
+      return this.$el.val();
+    }
+});
+
 var DateTime = Field.extend({
     tagName: 'span',
     attributes: {
@@ -349,6 +363,7 @@ var Boolean = Field.extend({
 core.search_filters_registry
     .add('char', Char)
     .add('text', Char)
+    .add('tsvector', Tsvector)
     .add('one2many', Char)
     .add('many2one', Char)
     .add('many2many', Char)

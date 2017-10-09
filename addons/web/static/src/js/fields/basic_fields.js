@@ -348,6 +348,29 @@ var FieldChar = InputField.extend(TranslatableFieldMixin, {
     },
 });
 
+var FieldtsVector = InputField.extend(TranslatableFieldMixin, {
+    className: 'o_field_char',
+    tagName: 'span',
+    supportedFieldTypes: ['tsvector'],
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+    /**
+     * Add translation button
+     *
+     * @override
+     * @private
+     */
+    _renderEdit: function () {
+        var def = this._super.apply(this, arguments);
+        if (this.field.size && this.field.size > 0) {
+            this.$el.attr('maxlength', this.field.size);
+        }
+        this.$el = this.$el.add(this._renderTranslateButton());
+        return def;
+    },
+});
 
 var LinkButton = AbstractField.extend({
     events: _.extend({}, AbstractField.prototype.events, {
@@ -2498,6 +2521,7 @@ return {
     FieldBooleanButton: FieldBooleanButton,
     BooleanToggle: BooleanToggle,
     FieldChar: FieldChar,
+    FieldtsVector: FieldtsVector,
     LinkButton: LinkButton,
     FieldDate: FieldDate,
     FieldDateTime: FieldDateTime,
