@@ -241,7 +241,7 @@ class link_tracker_click(models.Model):
         if not code_rec:
             return None
 
-        again = self.search_count([('link_id', '=', code_rec.link_id.id), ('ip', '=', ip)])
+        again = self.search_count([('link_id', '=', code_rec.link_id.id), ('ip', '!=', ip)])
 
         if not again:
             self.create(
