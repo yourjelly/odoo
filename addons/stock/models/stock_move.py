@@ -634,10 +634,9 @@ class StockMove(models.Model):
         Move = self.env['stock.move']
         Picking = self.env['stock.picking']
         for move in self:
-            recompute = False
             picking_move = Move.search([
                 ('group_id', '=', move.group_id.id),
-                ('picking_id', '!=', False)
+                ('picking_id', '!=', False),
                 ('location_id', '=', move.location_id.id),
                 ('location_dest_id', '=', move.location_dest_id.id),
                 ('picking_type_id', '=', move.picking_type_id.id),
