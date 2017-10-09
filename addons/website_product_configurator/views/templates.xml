@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="variants" inherit_id="website_sale.variants">
+        <xpath expr="//ul//li[@class='product_attributes']" position="attributes">
+            <attribute name="t-if">len(variant_id.value_ids) > 1 or variant_id.attribute_id.type == 'custom'</attribute>
+        </xpath>
+        <xpath expr="//ul//li[@class='product_attributes']" position="inside">
+            <t t-if="variant_id.attribute_id.type == 'custom'">
+                <t t-if="variant_id.attribute_id.value_type == 'char'">
+                    <input type="text" t-attf-class="form-control #{'js_variant_change' if variant_id.attribute_id.create_variant else ''}" t-att-name="'attribute-%s-%s' % (product.id, variant_id.attribute_id.id)"/>
+                </t>
+
+                <t t-if="variant_id.attribute_id.value_type == 'integer'">
+                    <input type="number" t-attf-class="form-control #{'js_variant_change' if variant_id.attribute_id.create_variant else ''}" t-att-name="'attribute-%s-%s' % (product.id, variant_id.attribute_id.id)"/>
+                </t>
+                <t t-if="variant_id.attribute_id.value_type == 'text'">
+                    <textarea t-attf-class="form-control #{'js_variant_change' if variant_id.attribute_id.create_variant else ''}" t-att-name="'attribute-%s-%s' % (product.id, variant_id.attribute_id.id)"></textarea>
+                </t>
+                <t t-if="variant_id.attribute_id.value_type == 'color'">
+                    <input type="color" t-attf-class="form-control #{'js_variant_change' if variant_id.attribute_id.create_variant else ''}" t-att-name="'attribute-%s-%s' % (product.id, variant_id.attribute_id.id)"/>
+                </t>
+                <t t-if="variant_id.attribute_id.value_type == 'binary'">
+                    <input type="file" t-attf-class="form-control #{'js_variant_change' if variant_id.attribute_id.create_variant else ''}" t-att-name="'attribute-%s-%s' % (product.id, variant_id.attribute_id.id)"/>
+                </t>
+            </t>
+        </xpath>
+    </template>
+</odoo>
