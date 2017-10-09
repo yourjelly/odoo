@@ -1155,7 +1155,6 @@ class expression(object):
         model = eleaf.model
         leaf = eleaf.leaf
         left, operator, right = leaf
-
         # final sanity checks - should never fail
         assert operator in (TERM_OPERATORS + ('inselect', 'not inselect')), \
             "Invalid operator %r in domain term %r" % (operator, leaf)
@@ -1175,18 +1174,9 @@ class expression(object):
             params = []
 
         elif operator == '@@':
-            params = []
-            if left in model._fields and model._fields[left].type == "tsvector":
-                column = '%s.%s' % (table_alias,_quote(left))
-                query = '(%s %s %s)' % (
-                    column,
-                    operator,
-                    "to_tsquery(%s)",
-                )
-                params = right
-            else:
-                raise ValueError(_(
-                    "Invalid field %r in domain term %r" % (left, leaf)))
+            column = '%s.%s' % (table_alias,_quote(left))
+            query = '(%s %s %s)' % (column, operator, "to_tsquery(%s)")
+            params = [right]
 
         elif operator == 'inselect':
             query = '(%s."%s" in (%s))' % (table_alias, left, right[0])

@@ -16,5 +16,5 @@ class IRFTSDocuemnts(models.Model):
 
     res_name = fields.Char(string="Resource Name", compute='_compute_res_name', store=True, help="The name of the resource.")
     model_name = fields.Char('Model', required=True)
-    res_id = fields.Integer(string='Resource ID', required=True)
+    res_id = fields.Integer(string='Resource ID', required=True, copy=False)
     fts_document = fields.Tsvector(string='FTS Document', required=True, index=True)

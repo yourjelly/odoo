@@ -346,7 +346,6 @@ class ProductTemplate(models.Model):
             templates |= products.mapped('product_tmpl_id')
             if (not products) or (limit and (len(templates) > limit)):
                 break
-
         # re-apply product.template order + name_get
         return super(ProductTemplate, self).name_search(
             '', args=[('id', 'in', list(set(templates.ids)))],

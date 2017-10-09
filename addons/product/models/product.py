@@ -291,15 +291,30 @@ class ProductProduct(models.Model):
 
     @api.model
     def create(self, vals):
+        print("call create of product")
         product = super(ProductProduct, self.with_context(create_product_product=True)).create(vals)
         # When a unique variant is created from tmpl then the standard price is set by _set_standard_price
         if not (self.env.context.get('create_from_tmpl') and len(product.product_tmpl_id.product_variant_ids) == 1):
             product._set_standard_price(vals.get('standard_price') or 0.0)
+        fts_document = product.name
+        if product.description:
+            fts_document += product.description
+        self.env['ir.fts_documents'].create({'res_id': product.id,
+                                             'model_name': self._name,
+                                             'fts_document': fts_document})
         return product
 
     @api.multi
     def write(self, values):
+        print("call write of product")
         ''' Store the standard price change in order to be able to retrieve the cost of a product for a given date'''
+        if values.get('description'):
+            fts_document += values.get('description')
+        for product in self:
+            fts_document = product.name
+            fts_document_id = self.env['ir.fts_documents'].search([('res_id','=',product.id),('model_name','=',self._name)], limit = 1)
+            if fts_document_id:
+                fts_document_id.write({'fts_document': fts_document})
         res = super(ProductProduct, self).write(values)
         if 'standard_price' in values:
             self._set_standard_price(values['standard_price'])
@@ -318,6 +333,9 @@ class ProductProduct(models.Model):
             if not other_products:
                 unlink_templates |= product.product_tmpl_id
             unlink_products |= product
+            fts_document_id = self.env['ir.fts_documents'].search([('res_id','=',product.id),('model_name','=',self._name)])
+            if fts_document_id:
+                fts_document_id.unlink()
         res = super(ProductProduct, unlink_products).unlink()
         # delete templates after calling super, as deleting template could lead to deleting
         # products due to ondelete='cascade'
@@ -407,6 +425,10 @@ class ProductProduct(models.Model):
         if name:
             positive_operators = ['=', 'ilike', '=ilike', 'like', '=like']
             products = self.env['product.product']
+            if operator == '@@':
+                fts_document_ids = self.env['ir.fts_documents'].search([('fts_document', operator, name)])
+                product_ids = [x.res_id for x in fts_document_ids]
+                products = products.browse(product_ids)
             if operator in positive_operators:
                 products = self.search([('default_code', '=', name)] + args, limit=limit)
                 if not products:

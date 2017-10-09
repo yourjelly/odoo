@@ -102,6 +102,7 @@ var FieldMany2One = AbstractField.extend({
         this.nodeOptions = _.defaults(this.nodeOptions, {
             quick_create: true,
         });
+        this.name_search_operator = this.attrs.name_search_operator ? this.attrs.name_search_operator : "ilike",
         this.m2o_value = this._formatValue(this.value);
         // 'recordParams' is a dict of params used when calling functions
         // 'getDomain' and 'getContext' on this.record
@@ -319,7 +320,7 @@ var FieldMany2One = AbstractField.extend({
             kwargs: {
                 name: search_val,
                 args: domain,
-                operator: "ilike",
+                operator: this.name_search_operator,
                 limit: this.limit + 1,
                 context: context,
             }})
