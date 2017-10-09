@@ -98,3 +98,5 @@
 "access_ir_logging","ir_logging admin","model_ir_logging","group_erp_manager",1,1,1,1
 "paperformat_access_portal","ir_actions_report_paperformat group_portal","model_report_paperformat",,1,0,0,0
 "paperformat_access_employee","ir_actions_report_paperformat group_hr_user","model_report_paperformat",,1,0,1,0
+"access_ir_fts_documents_erp_manager","ir_fts_documents group_erp_manager","model_ir_fts_documents","group_erp_manager",1,1,1,1
+"access_ir_fts_documents_group_user","ir_fts_documents group_user","model_ir_fts_documents","group_user",1,1,1,0

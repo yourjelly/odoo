@@ -21,3 +21,4 @@ from . import ir_fields
 from . import ir_qweb
 from . import ir_http
 from . import ir_logging
+from . import ir_fts_documents
