@@ -329,7 +329,6 @@ class Picking(models.Model):
         - Done: if the picking is done.
         - Cancelled: if the picking is cancelled
         '''
-        #import pdb; pdb.set_trace()
         if not self.move_lines:
             self.state = 'draft'
         elif any(move.state == 'draft' for move in self.move_lines):  # TDE FIXME: should be all ?
@@ -546,6 +545,7 @@ class Picking(models.Model):
     def action_cancel(self):
         self.mapped('move_lines')._action_cancel()
         self.is_locked = True
+        self.message_post(_('Picking cancelled'))
         return True
 
     @api.multi
@@ -596,7 +596,7 @@ class Picking(models.Model):
                     new_move._action_confirm()
                     todo_moves |= new_move
                     #'qty_done': ops.qty_done})
-        todo_moves.with_context(recompute=False, mail_notrack=True)._action_done()
+        todo_moves.with_context(recompute=False)._action_done()
         todo_moves.recompute()
         self.write({'date_done': fields.Datetime.now()})
         return True

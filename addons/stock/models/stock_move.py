@@ -631,29 +631,24 @@ class StockMove(models.Model):
         reserved yet and has the same procurement group, locations and picking
         type (moves should already have them identical). Otherwise, create a new
         picking to assign them to. """
+        Move = self.env['stock.move']
         Picking = self.env['stock.picking']
         for move in self:
             recompute = False
-            picking = Picking.search([
-                ('group_id', '=', False),
+            picking_move = Move.search([
+                ('group_id', '=', move.group_id.id),
+                ('picking_id', '!=', False)
                 ('location_id', '=', move.location_id.id),
                 ('location_dest_id', '=', move.location_dest_id.id),
                 ('picking_type_id', '=', move.picking_type_id.id),
-                ('printed', '=', False),
-                #('state', 'in', ['draft', 'confirmed', 'waiting', 'partially_available', 'assigned'])
+                ('picking_id.printed', '=', False),
+                ('state', 'in', ['confirmed', 'waiting', 'partially_available', 'assigned'])
                 ], limit=1)
-            if not picking:
-                recompute = True
+            if not picking_move:
                 picking = Picking.create(move._get_new_picking_values())
+            else:
+                picking = picking_move.picking_id
             move.write({'picking_id': picking.id})
-
-#             # If this method is called in batch by a write on a one2many and
-#             # at some point had to create a picking, some next iterations could
-#             # try to find back the created picking. As we look for it by searching
-#             # on some computed fields, we have to force a recompute, else the
-#             # record won't be found.
-#             if recompute:
-#                 move.recompute()
         return True
 
     def _get_new_picking_values(self):
@@ -1023,6 +1018,7 @@ class StockMove(models.Model):
             return moves_todo
 
         if picking:
+            picking.message_post(_('Picking Validated'))
             moves_to_backorder = picking.move_lines.filtered(lambda x: x.state not in ('done', 'cancel'))
             if moves_to_backorder:
                 backorder_picking = picking.copy({

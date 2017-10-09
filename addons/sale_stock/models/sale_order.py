@@ -39,7 +39,7 @@ class SaleOrder(models.Model):
     @profile(immediate=True)
     def action_confirm(self):
         result = super(SaleOrder, self).action_confirm()
-        for order in self.with_context(recompute=False, mail_notrack=True):
+        for order in self.with_context(recompute=False):
             order.order_line._action_launch_procurement_rule()
         self.recompute()
         return result
