@@ -1,28 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <template id="assets_frontend" inherit_id="website.assets_frontend" name="Website Product Configurator assets">
+        <xpath expr="." position="inside">
+          <script type="text/javascript" src="/website_product_configurator/static/src/js/website_configurator.js"></script>
+        </xpath>
+  </template>
+
     <template id="variants" inherit_id="website_sale.variants">
-        <xpath expr="//ul//li[@class='product_attributes']" position="attributes">
+        <xpath expr='//ul//li[hasclass("product_attributes")]' position="attributes">
             <attribute name="t-if">len(variant_id.value_ids) > 1 or variant_id.attribute_id.type == 'custom'</attribute>
         </xpath>
-        <xpath expr="//ul//li[@class='product_attributes']" position="inside">
-            <t t-if="variant_id.attribute_id.type == 'custom'">
-                <t t-if="variant_id.attribute_id.value_type == 'char'">
-                    <input type="text" t-attf-class="form-control #{'js_variant_change' if variant_id.attribute_id.create_variant else ''}" t-att-name="'attribute-%s-%s' % (product.id, variant_id.attribute_id.id)"/>
+        <xpath expr='//ul//li[hasclass("product_attributes")]' position="inside">
+            <t t-set="attribute" t-value="variant_id.attribute_id"/>
+            <t t-if="attribute.type == 'custom'">
+                <t t-if="attribute.value_type == 'char'">
+                    <div class="form-group">
+                        <input type="text" t-attf-class="form-control #{'js_variant_change' if attribute.create_variant else ''}" t-att-name="'custom_attr-%s-%s' % (attribute.value_type, attribute.id)" t-att-required="'required' if attribute.is_required else null"/>
+                    </div>
                 </t>
 
-                <t t-if="variant_id.attribute_id.value_type == 'integer'">
-                    <input type="number" t-attf-class="form-control #{'js_variant_change' if variant_id.attribute_id.create_variant else ''}" t-att-name="'attribute-%s-%s' % (product.id, variant_id.attribute_id.id)"/>
+                <t t-if="attribute.value_type == 'integer'">
+                    <div class="form-group">
+                        <input type="number" t-attf-class="form-control #{'js_variant_change' if attribute.create_variant else ''}" t-att-name="'custom_attr-%s-%s' % (attribute.value_type, attribute.id)" t-att-required="'required' if attribute.is_required else null"/>
+                    </div>
                 </t>
-                <t t-if="variant_id.attribute_id.value_type == 'text'">
-                    <textarea t-attf-class="form-control #{'js_variant_change' if variant_id.attribute_id.create_variant else ''}" t-att-name="'attribute-%s-%s' % (product.id, variant_id.attribute_id.id)"></textarea>
+                <t t-if="attribute.value_type == 'text'">
+                    <div class="form-group">
+                        <textarea t-attf-class="form-control #{'js_variant_change' if attribute.create_variant else ''}" t-att-name="'custom_attr-%s-%s' % (attribute.value_type, attribute.id)" t-att-required="'required' if attribute.is_required else null"></textarea>
+                    </div>
                 </t>
-                <t t-if="variant_id.attribute_id.value_type == 'color'">
-                    <input type="color" t-attf-class="form-control #{'js_variant_change' if variant_id.attribute_id.create_variant else ''}" t-att-name="'attribute-%s-%s' % (product.id, variant_id.attribute_id.id)"/>
+                <t t-if="attribute.value_type == 'color'">
+                    <div class="form-group">
+                        <input type="color" t-attf-class="form-control #{'js_variant_change' if attribute.create_variant else ''}" t-att-name="'custom_attr-%s-%s' % (attribute.value_type, attribute.id)" t-att-required="'required' if attribute.is_required else null"/>
+                    </div>
                 </t>
-                <t t-if="variant_id.attribute_id.value_type == 'binary'">
-                    <input type="file" t-attf-class="form-control #{'js_variant_change' if variant_id.attribute_id.create_variant else ''}" t-att-name="'attribute-%s-%s' % (product.id, variant_id.attribute_id.id)"/>
+                <t t-if="attribute.value_type == 'binary'">
+                    <div class="form-group">
+                        <input type="file" t-attf-class="form-control #{'js_variant_change' if attribute.create_variant else ''}" t-att-name="'custom_attr-%s-%s' % (attribute.value_type, attribute.id)" t-att-required="'required' if attribute.is_required else null"/>
+                    </div>
                 </t>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="product" inherit_id="website_sale.product">
+        <xpath expr='//form[hasclass("js_add_cart_variants")]' position="inside">
+            <t t-if="product.variant_type == 'configurable'">
+                <input type="hidden" name="product_tmpl_id" t-att-value="product.id"/>
             </t>
         </xpath>
     </template>
