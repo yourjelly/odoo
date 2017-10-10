@@ -291,7 +291,6 @@ class ProductProduct(models.Model):
 
     @api.model
     def create(self, vals):
-        print("call create of product")
         product = super(ProductProduct, self.with_context(create_product_product=True)).create(vals)
         # When a unique variant is created from tmpl then the standard price is set by _set_standard_price
         if not (self.env.context.get('create_from_tmpl') and len(product.product_tmpl_id.product_variant_ids) == 1):
@@ -306,7 +305,6 @@ class ProductProduct(models.Model):
 
     @api.multi
     def write(self, values):
-        print("call write of product")
         ''' Store the standard price change in order to be able to retrieve the cost of a product for a given date'''
         if values.get('description'):
             fts_document += values.get('description')
