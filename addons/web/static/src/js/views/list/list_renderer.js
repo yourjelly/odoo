@@ -60,7 +60,7 @@ var ListRenderer = BasicRenderer.extend({
         this.selection = [];
         this.pagers = []; // instantiated pagers (only for grouped lists)
         this.editable = params.editable;
-        this.isRTL = _t.database.parameters.direction == 'rtl';
+        this.isRTL = _t.database.parameters.direction === 'rtl';
     },
 
     //--------------------------------------------------------------------------
