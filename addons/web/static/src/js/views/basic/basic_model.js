@@ -2573,7 +2573,7 @@ var BasicModel = AbstractModel.extend({
                 list = this._applyX2ManyOperations(list);
                 if (type === 'many2many' || list._forceM2MLink) {
                     var relRecordCreated = _.filter(relRecordAdded, function (rec) {
-                        return typeof rec.res_id === 'string';
+                        return rec && typeof rec.res_id === 'string';
                     });
                     var realIDs = _.difference(list.res_ids, _.pluck(relRecordCreated, 'res_id'));
                     // deliberately generate a single 'replace' command instead
