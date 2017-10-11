@@ -3180,7 +3180,7 @@ var BasicModel = AbstractModel.extend({
                             if (value[0] === 6) {
                                 // REPLACE_WITH
                                 _.each(value[2], function (res_id) {
-                                    x2manyList._changes.push({operation: 'ADD', resID: res_id});
+                                    x2manyList._changes.push({operation: 'ADD', id:null, resID: res_id});
                                 });
                                 var def = self._readUngroupedList(x2manyList).then(function () {
                                     return $.when(
