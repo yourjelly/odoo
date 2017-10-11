@@ -21,10 +21,7 @@ class WebsiteSale(WebsiteSale):
             except ValidationError:
                 raise
             except:
-                raise ValidationError(
-                    _('Invalid configuration! Please check all '
-                    'required fields.')
-                )
+                raise ValidationError(_('Invalid configuration!'))
 
         res = super(WebsiteSale, self).cart_update(product_id=product_id, add_qty=add_qty, set_qty=set_qty, **kw)
         return res
@@ -46,7 +43,6 @@ class WebsiteSale(WebsiteSale):
 
     def _prepare_attribute_data(self, **kw):
         attributes = []
-        print("**kw", kw)
         for k, v in self._filter_attributes(**kw).items():
             attributes.append(int(v))
         return attributes

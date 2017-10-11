@@ -38,8 +38,11 @@ class ProductAttributevalue(models.Model):
 
     @api.one
     def _compute_price_extra(self):
-        price = self.price_ids.filtered(lambda price: price.product_tmpl_id.id == self._context['active_id'])
-        self.price_extra = price.price_extra
+        if self._context.get('active_id'):
+            price = self.price_ids.filtered(lambda price: price.product_tmpl_id.id == self._context['active_id'])
+            self.price_extra = price.price_extra
+        else:
+            self.price_extra = 0.0
 
     def _set_price_extra(self):
         if not self._context.get('active_id'):

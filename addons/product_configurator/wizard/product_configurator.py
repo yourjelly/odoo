@@ -43,7 +43,6 @@ class ProductConfiguratorWizard(models.TransientModel):
             self.order_line_id.write(line_values)
         else:
             saleOrder = self.env['sale.order'].browse(self.env.context.get('active_id'))
-            line_values.update(is_configurable=True)
             saleOrder.write({
                 'order_line': [(0, 0, line_values)]})
 
