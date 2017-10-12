@@ -243,7 +243,6 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
     switch_mode: function(view_type, view_options) {
         var self = this;
         var view = this.views[view_type];
-
         if (!view || this.currently_switching) {
             return $.Deferred().reject();
         } else {
@@ -487,6 +486,7 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
             $buttons: $("<div>"),
             action: this.action,
             search_defaults: search_defaults,
+            disable_groupby: true,
         };
         // Instantiate the SearchView, but do not append it nor its buttons to the DOM as this will
         // be done later, simultaneously to all other ControlPanel elements

@@ -388,7 +388,6 @@ var SearchView = Widget.extend({
      */
     build_search_data: function () {
         var domains = [], contexts = [], groupbys = [];
-
         this.query.each(function (facet) {
             var field = facet.get('field');
             var domain = field.get_domain(facet);

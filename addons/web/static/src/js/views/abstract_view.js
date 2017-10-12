@@ -33,6 +33,7 @@ var AbstractController = require('web.AbstractController');
 var AbstractView = Class.extend({
     // name displayed in view switchers
     display_name: '',
+    disable_groupby: true,
     // indicates whether or not the view is mobile-friendly
     mobile_friendly: false,
     // icon is the font-awesome icon to display in the view switcher
@@ -46,6 +47,7 @@ var AbstractView = Class.extend({
     // views are the form view and the diagram view.
     searchable: true,
 
+    group_by_disable: true,
     config: {
         Model: AbstractModel,
         Renderer: AbstractRenderer,
