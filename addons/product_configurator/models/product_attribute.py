@@ -32,29 +32,18 @@ class ProductAttribute(models.Model):
         self.ensure_one()
         #check if required fields are correctly set or not
         if self.is_required and not val:
-            raise ValidationError(
-                    _("Custom value for '%s' must be required" %
-                        (self.name))
-                )
+            raise ValidationError(_("Custom value for '%s' must be required" % (self.name)))
+
         if self.value_type in ('integer', 'float') and val:
             min_val = self.min_value
             max_val = self.max_value
             val = literal_eval(val)
             if min_val and max_val and (val < min_val or val > max_val):
-                raise ValidationError(
-                    _("Custom value for '%s' must be between %s and %s"
-                        % (self.name, self.min_value, self.max_value))
-                )
+                raise ValidationError(_("Custom value for '%s' must be between %s and %s" % (self.name, self.min_value, self.max_value)))
             elif min_val and val < min_val:
-                raise ValidationError(
-                    _("Custom value for '%s' must be at least %s" %
-                        (self.name, self.min_value))
-                )
+                raise ValidationError(_("Custom value for '%s' must be at least %s" % (self.name, self.min_value)))
             elif max_val and val > max_val:
-                raise ValidationError(
-                    _("Custom value for '%s' must be lower than %s" %
-                        (self.name, self.max_value + 1))
-                )
+                raise ValidationError(_("Custom value for '%s' must be lower than %s" % (self.name, self.max_value)))
 
 
 class ProductAttributeValueCustom(models.Model):

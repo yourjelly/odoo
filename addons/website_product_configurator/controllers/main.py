@@ -20,8 +20,6 @@ class WebsiteSale(WebsiteSale):
                 product_id = product.create_get_variant(value_ids, custom_vals)
             except ValidationError:
                 raise
-            except:
-                raise ValidationError(_('Invalid configuration!'))
 
         res = super(WebsiteSale, self).cart_update(product_id=product_id, add_qty=add_qty, set_qty=set_qty, **kw)
         return res

@@ -20,9 +20,9 @@
                     </div>
                 </t>
 
-                <t t-if="attribute.value_type == 'integer'">
+                <t t-if="attribute.value_type in ['integer', 'float']">
                     <div class="form-group">
-                        <input type="number" class="form-control" t-att-name="'custom_attr-%s-%s' % (attribute.value_type, attribute.id)" t-att-required="'required' if attribute.is_required else null"/>
+                        <input type="number" class="form-control" t-att-name="'custom_attr-%s-%s' % (attribute.value_type, attribute.id)" t-att-required="'required' if attribute.is_required else null" t-att-step="attribute.value_type == 'float' and 'any' or null" t-att-max="attribute.max_value or null" t-att-min="attribute.min_value or null"/>
                     </div>
                 </t>
                 <t t-if="attribute.value_type == 'text'">
