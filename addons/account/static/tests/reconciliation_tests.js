@@ -574,7 +574,8 @@ QUnit.module('account', {
 
         var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
         testUtils.addMockEnvironment(clientAction, {
-            'data': this.params.data
+            'data': this.params.data,
+            session: this.params.session,
         });
 
         clientAction.appendTo($('#qunit-fixture'));
@@ -626,8 +627,10 @@ QUnit.module('account', {
                                                                   "credit": 525,
                                                                   "debit": 0,
                                                                   "name": "INV/2017/0003"
-                                                                }], 
-                                    payment_aml_ids: [], new_aml_dicts: []}]],
+                                                                }],
+                                    payment_aml_ids: [],
+                                    new_aml_dicts: [],
+                }]],
                 "Should call process_reconciliations with ids");
         });
 
@@ -643,6 +646,7 @@ QUnit.module('account', {
         var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
         testUtils.addMockEnvironment(clientAction, {
             data: this.params.data,
+            session: this.params.session,
             mockRPC: function (route, args) {
                 if (args.method === 'process_reconciliations') {
                     assert.deepEqual(args.args, [
@@ -1244,6 +1248,7 @@ QUnit.module('account', {
         var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
         testUtils.addMockEnvironment(clientAction, {
             'data': this.params.data,
+            session: this.params.session,
         });
 
         clientAction.appendTo($('#qunit-fixture'));
