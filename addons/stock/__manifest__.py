@@ -74,13 +74,7 @@
     'qweb': [
         'static/src/xml/stock_traceability_report_backend.xml',
     ],
-    'test': [
-        'test/stock_users.yml',
-        'test/packing.yml',
-        'test/packingneg.yml',
-        'test/procrule.yml',
-        'test/wiseoperator.yml',
-    ],
+
     'installable': True,
     'application': True,
     'auto_install': False,
