@@ -215,12 +215,12 @@ ul.oe_menu_editor {
     .pb@{name} { padding-bottom: unit(@size, px)!important; }
 }
 .o-hmargins-define(@name, @size: @name) {
-    .ml@{name} { margin-left: unit(@size, px)!important; }
-    .mr@{name} { margin-right: unit(@size, px)!important; }
+    .ml@{name} { .margin-left(unit(@size, px))!important; }
+    .mr@{name} { .margin-right(unit(@size, px))!important; }
 }
 .o-hpaddings-define(@name, @size: @name) {
-    .pl@{name} { padding-left: unit(@size, px)!important; }
-    .pr@{name} { padding-right: unit(@size, px)!important; }
+    .pl@{name} { .padding-left(unit(@size, px))!important; }
+    .pr@{name} { .padding-right(unit(@size, px))!important; }
 }
 
 // Generate all margins
