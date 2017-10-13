@@ -360,7 +360,7 @@ return AbstractModel.extend({
             navLinks: false,
             eventLimit: this.eventLimit, // allow "more" link when too many events
             snapMinutes: 15,
-            longPressDelay: 500,
+            longPressDelay: false,
             eventResizableFromStart: true,
             weekNumbers: true,
             weekNumberTitle: _t("W"),
