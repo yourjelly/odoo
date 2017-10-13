@@ -508,6 +508,7 @@ var RTEWidget = Widget.extend({
             'styleWithSpan': false,
             'inlinemedia' : ['p'],
             'lang': 'odoo',
+            'direction': _t.database.parameters.direction === 'rtl' ? 'rtl' : 'ltr',
             'onChange': function (html, $editable) {
                 $editable.trigger('content_changed');
             }
