@@ -15,15 +15,6 @@ var ProductConfiguratorWidget = AbstractField.extend({
     events: _.extend({}, AbstractField.prototype.events),
     supportedFieldTypes: ['char'],
 
-    /**
-     * @constructor
-     * @override init from AbstractField
-     */
-    init: function () {
-        this._super.apply(this, arguments);
-        this._setState();
-    },
-
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
@@ -39,14 +30,6 @@ var ProductConfiguratorWidget = AbstractField.extend({
         return this._super.apply(this, arguments);
     },
 
-    /**
-     * @override
-     * @returns {boolean}
-     */
-    isSet: function() {
-        return true;
-    },
-
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -57,9 +40,7 @@ var ProductConfiguratorWidget = AbstractField.extend({
      */
     _reset: function () {
         this._super.apply(this, arguments);
-        var oldConfigModel = this._configModel;
-        this._setState();
-        if (this.configurator && this._configModel == oldConfigModel) {
+        if (this.configurator) {
             this.configurator.destroy();
             this.configurator = null;
         }
@@ -79,14 +60,6 @@ var ProductConfiguratorWidget = AbstractField.extend({
             this.$el.html('');
             return $.when();
         }
-    },
-
-    /**
-     * @private
-     */
-    _setState: function () {
-        var data = this.recordData['product_tmpl_id'];
-        this._configModel = data.model;
     },
 
 });
@@ -110,7 +83,7 @@ var Configurator = Widget.extend({
     start: function() {
         var self = this;
         _.each(this.data, function(field) {
-            self._createConfiguratorFieldsWidget(field);
+            self._createConfigFieldsWidget(field);
         });
         this._super.apply(this, arguments);
     },
@@ -139,16 +112,16 @@ var Configurator = Widget.extend({
     /**
      * @private
      */
-     _createConfiguratorFieldsWidget: function (field) {
-        var widget = new ConfiguratorFieldsWidget(this, field);
+     _createConfigFieldsWidget: function (field) {
+        var widget = new ConfigFieldsWidget(this, field);
         return widget.appendTo(this.$(".config_fields"));
     },
 
 });
 
 
-var ConfiguratorFieldsWidget = Widget.extend({
-    template: 'ConfiguratorFieldsWidget',
+var ConfigFieldsWidget = Widget.extend({
+    template: 'ConfigFieldsWidget',
     events: {
         'change .o_field_input, .o_custom_field_input': '_onInputChange',
         'blur .o_custom_field_date, .o_custom_field_datetime' : '_onDatePickerChange',

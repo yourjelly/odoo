@@ -11,6 +11,8 @@ odoo.define('website_product_configurator.configurator', function(require) {
         return $.Deferred().reject("DOM doesn't contain '.product_configurator'");
     }
 
+    loadAjaxForm($('.js_add_cart_variants'));
+
     var $dateFields = $productConfigurator.find('.o_custom_date_field');
     if ($dateFields.length) {
         $dateFields.each(function() {
@@ -58,7 +60,7 @@ odoo.define('website_product_configurator.configurator', function(require) {
             if ($elem.prop('type') === 'number') {
                 var is_valid = checkMinMaxValidation($(this));
                 if (!is_valid) {
-                    error_field = true
+                    error_field = true;
                 }
             }
         });
@@ -87,13 +89,36 @@ odoo.define('website_product_configurator.configurator', function(require) {
         return true;
     }
 
-    $('.oe_website_sale .a-submit').off('click').on('click', function(ev) {
-            ev.preventDefault();
-            ev.stopPropagation();
-            var $form = $(this).closest('form');
-            if (!checkErrorField($form)) {
-                $form.submit();
-            }
-            return false;
-    });
+    function loadAjaxForm($form) {
+        $form.ajaxForm({
+            url: $form.attr('action'),
+            type: 'POST',
+            dataType: 'json',
+            beforeSubmit: function(formData, $form, options) {
+                if (checkErrorField($form)) {
+                    return false;
+                }
+                $form.find('input[type="file"]').each(function() {
+                    var field_obj = _.findWhere(formData, {
+                        'name': this.name
+                    });
+                    field_obj.value = $(this).prop('files')[0]; //for now we consider only one attachment;
+                });
+            },
+            success: function(response, status, xhr, wfe) {
+                if (response.error) {
+                    $form.find('.js_add_cart_variants').after('<div class="alert alert-danger config_error">' + response.error + '</div>');
+                    return false;
+                } else if (response.redirect) {
+                    window.location.replace(response.redirect);
+                    return true;
+                } else {
+                    console.error("Something Went Wrong");
+                    return false;
+                }
+            },
+            timeout: 5000,
+        });
+    }
+
 });

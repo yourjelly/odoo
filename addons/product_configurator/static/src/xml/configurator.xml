@@ -2,17 +2,22 @@
 
 <templates xml:space="preserve">
     <t t-name="Configurator">
-        <div class="product_configurator">
-            <h4 class="mt8 text-primary text-center">PRODUCT CONFIGURATOR</h4>
-            <hr/>
-            <t t-if="!widget.data.length">
-                <h5 class="text-center mt16">No attribute available for this template.</h5>
-            </t>
-            <div class="config_fields"/>
+        <div class="o_product_configurator">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <b>PRODUCT CONFIGURATOR</b>
+                </div>
+                <div class="panel-body">
+                    <t t-if="!widget.data.length">
+                        <h5 class="text-center mt16">No attribute available for this template.</h5>
+                    </t>
+                    <div class="config_fields"/>
+                </div>
+            </div>
         </div>
     </t>
 
-    <t t-name="ConfiguratorFieldsWidget">
+    <t t-name="ConfigFieldsWidget">
         <t t-set="field" t-value="widget.field"/>
         <t t-call="product_configurator.field_{{widget.field.type}}"/>
     </t>
