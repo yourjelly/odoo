@@ -250,8 +250,13 @@ class Partner(models.Model, FormatAddress):
 
     @api.depends('user_ids.share')
     def _compute_partner_share(self):
+        partner_with_no_user = self.search([('id', 'in', self.ids),
+                                           ('user_ids.id', '!=', 0)])
+        partner_with_share_users = self.search([('id', 'in', self.ids),
+                                                ('user_ids.share', '=', True)])
         for partner in self:
-            partner.partner_share = not partner.user_ids or any(user.share for user in partner.user_ids)
+            partner.partner_share = (partner in partner_with_no_user
+                                     or partner in partner_with_share_users)
 
     @api.depends(lambda self: self._display_address_depends())
     def _compute_contact_address(self):
