@@ -3338,7 +3338,10 @@ class BaseModel(object):
     def step_workflow(self):
         """ Reevaluate the workflow instances of the given records. """
         from odoo import workflow
+        records_with_wkfinstance = set(workflow.has_active_instance(self._uid, self._name, self.ids, self._cr))
         for res_id in self.ids:
+            if res_id not in records_with_wkfinstance:
+                continue
             workflow.trg_write(self._uid, self._name, res_id, self._cr)
         return True
 
@@ -3347,7 +3350,10 @@ class BaseModel(object):
         """ Send the workflow signal, and return a dict mapping ids to workflow results. """
         from odoo import workflow
         result = {}
+        records_with_wkfinstance = set(workflow.has_active_instance(self._uid, self._name, self.ids, self._cr))
         for res_id in self.ids:
+            if not res_id in records_with_wkfinstance:
+                continue
             result[res_id] = workflow.trg_validate(self._uid, self._name, res_id, signal, self._cr)
         return result
 

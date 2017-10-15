@@ -81,3 +81,20 @@ def trg_redirect(uid, res_type, res_id, new_rid, cr):
     """
     assert isinstance(new_rid, (long, int))
     return WorkflowService.new(cr, uid, res_type, res_id).redirect(new_rid)
+
+def has_active_instance(uid, res_type, res_ids, cr):
+    """
+    Return list of record ids which have an active workflow instance.
+
+    :param res_type: the model name
+    :param res_ids: list of model instance id the workflow might belongs to
+    :param cr: a database cursor
+    """
+    if not res_ids:
+        return []
+    cr.execute("""
+        SELECT res_id
+        FROM wkf_instance
+        WHERE res_type = %s AND res_id IN %s AND state = %s
+    """, (res_type, tuple(res_ids), 'active'))
+    return [id_ for id_, in cr.fetchall()]
