@@ -251,8 +251,9 @@ class Users(models.Model):
 
     @api.depends('groups_id')
     def _compute_share(self):
+        group_employee = self.env.ref('base.group_user').with_context(active_test=False)
         for user in self:
-            user.share = not user.has_group('base.group_user')
+            user.share = user not in group_employee.users
 
     @api.multi
     def _compute_companies_count(self):
