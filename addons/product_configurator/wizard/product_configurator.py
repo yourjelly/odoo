@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import json
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -28,23 +28,17 @@ class ProductConfiguratorWizard(models.TransientModel):
     def action_create_variant(self):
         data = self._get_data()
         try:
-            variant = self.product_tmpl_id.create_get_variant(data['value_ids'], data['custom_values'])
+            variant = self.product_tmpl_id.get_variant(data['value_ids'], data['custom_values'])
         except ValidationError:
             raise
-        except:
-            raise ValidationError(
-                _('Invalid configuration! Please check all '
-                  'required fields.')
-            )
 
         line_values = {'product_id': variant.id}
         if self.order_line_id:
-            line_values.update(self._extra_line_values(variant))
+            line_values.update(name=variant.display_name)
             self.order_line_id.write(line_values)
         else:
             saleOrder = self.env['sale.order'].browse(self.env.context.get('active_id'))
-            saleOrder.write({
-                'order_line': [(0, 0, line_values)]})
+            saleOrder.write({'order_line': [(0, 0, line_values)]})
 
         return {'type': 'ir.actions.act_window_close'}
 
@@ -92,8 +86,3 @@ class ProductConfiguratorWizard(models.TransientModel):
         else:
             value = self.order_line_id.product_id.attribute_value_ids.filtered(lambda v: v.attribute_id.id == attribute.id).id or attribute_line.value_ids.ids[0]
         return value
-
-    def _extra_line_values(self, product):
-        return {
-            'name': product.display_name,
-        }

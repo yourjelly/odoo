@@ -32,7 +32,7 @@
                 </t>
                 <t t-if="attribute.value_type == 'color'">
                     <div class="form-group">
-                        <input type="color" class="form-control" t-att-name="'custom_attr-%s-%s' % (attribute.value_type, attribute.id)" t-att-required="'required' if attribute.is_required else null"/>
+                        <input type="color" t-att-name="'custom_attr-%s-%s' % (attribute.value_type, attribute.id)" t-att-required="'required' if attribute.is_required else null"/>
                     </div>
                 </t>
                 <t t-if="attribute.value_type == 'binary'">
@@ -59,4 +59,41 @@
             <attribute name="t-attf-class"  separator=" " add="col-sm-5 col-lg-4 col-lg-offset-1 #{product.variant_type == 'configurable' and 'product_configurator' or ''}"/>
         </xpath>
     </template>
+
+    <template id="cart_lines" inherit_id="website_sale.cart_lines">
+        <xpath expr="//table[@id='cart_products']//td[hasclass('td-product_name')]//div[hasclass('text-muted')]" position="inside">
+            <t t-if="line.is_configurable and line.custom_value_ids">
+                <t t-foreach="line.custom_value_ids" t-as="custom_v">
+                    <span class="label label-default ml4 mb4">
+                        <t t-esc="custom_v.attribute_id.name"/>: <t t-esc="custom_v.name"/>
+                    </span>
+                </t>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="payment" inherit_id="website_sale.payment">
+        <xpath expr="//table[@id='cart_products']//td[hasclass('td-product_name')]//div[hasclass('text-muted')]" position="inside">
+            <t t-if="line.is_configurable and line.custom_value_ids">
+                <t t-foreach="line.custom_value_ids" t-as="custom_v">
+                    <span class="label label-default ml4 mb4">
+                        <t t-esc="custom_v.attribute_id.name"/>: <t t-esc="custom_v.name"/>
+                    </span>
+                </t>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="confirmation" inherit_id="website_sale.confirmation">
+        <xpath expr="//table//td[hasclass('td-product_name')]//div[hasclass('text-muted')]" position="inside">
+            <t t-if="line.is_configurable and line.custom_value_ids">
+                <t t-foreach="line.custom_value_ids" t-as="custom_v">
+                    <span class="label label-default ml4 mb4">
+                        <t t-esc="custom_v.attribute_id.name"/>: <t t-esc="custom_v.name"/>
+                    </span>
+                </t>
+            </t>
+        </xpath>
+    </template>
+
 </odoo>

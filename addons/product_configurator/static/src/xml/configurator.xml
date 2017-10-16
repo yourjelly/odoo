@@ -192,7 +192,7 @@
         <t t-call="product_configurator.field">
             <input
                 type="color"
-                class="form-control o_custom_field_input"
+                class="o_custom_field_input"
                 t-att-name="field.name"
                 t-att-data-attr-id="field.id"
                 t-att-value="field.selected_value"

@@ -14,10 +14,10 @@ class ProductTemplate(models.Model):
 
     @api.multi
     def create_variant_ids(self):
-        """ Prevent configurable products from creating variants as these serve
-            only as a template for the product configurator"""
         templates = self.filtered(lambda t: not t.variant_type == 'configurable')
         if not templates:
+            if self.env.context.get('create_from_tmpl'):
+                self.env['product.product'].create({'product_tmpl_id': self.id})
             return None
         return super(ProductTemplate, templates).create_variant_ids()
 
@@ -31,7 +31,7 @@ class ProductTemplate(models.Model):
             attr.value_ids.validate_combination_availability(value_ids)
         return True
 
-    def create_get_variant(self, value_ids, custom_values=None):
+    def get_variant(self, value_ids, custom_values=None):
 
         self.validate_configuration(value_ids, custom_values)
         variant = self._find_variant_if_exist(value_ids, custom_values)

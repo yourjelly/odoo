@@ -23,6 +23,7 @@ class WebsiteSale(WebsiteSale):
                 product_id = product.create_get_variant(value_ids, custom_vals)
             except ValidationError as e:
                 res['error'] = e.name
+                return json.dumps(res)
             res['redirect'] = '/shop/cart'
 
         super_res = super(WebsiteSale, self).cart_update(product_id=product_id, add_qty=add_qty, set_qty=set_qty, **kw)
