@@ -544,7 +544,7 @@ class MrpProduction(models.Model):
     def button_mark_done(self):
         self.ensure_one()
         for wo in self.workorder_ids:
-            if wo.time_ids.filtered(lambda x: (not x.date_end) and (x.loss_type in ('productive', 'performance'))):
+            if wo.state != 'done' or wo.time_ids.filtered(lambda x: (not x.date_end) and (x.loss_type in ('productive', 'performance'))):
                 raise UserError(_('Work order %s is still running') % wo.name)
         self.post_inventory()
         moves_to_cancel = (self.move_raw_ids | self.move_finished_ids).filtered(lambda x: x.state not in ('done', 'cancel'))
