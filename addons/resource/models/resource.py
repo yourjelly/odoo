@@ -15,6 +15,7 @@ from odoo import api, fields, models, _
 from odoo.addons.base.res.res_partner import _tz_get
 from odoo.exceptions import ValidationError
 from odoo.tools.float_utils import float_compare
+from odoo.exceptions import UserError
 
 
 def float_to_time(float_hour):
@@ -323,7 +324,6 @@ class ResourceCalendar(models.Model):
 
             dt_f = datetime.datetime.combine(day_date, max(from_time, start_time))
             dt_t = datetime.datetime.combine(day_date, min(to_time, end_time))
-
             yield self._interval_new(dt_f, dt_t, {'attendances': calendar_working_day})
 
     @api.multi
@@ -644,6 +644,21 @@ class ResourceCalendarAttendance(models.Model):
     hour_from = fields.Float(string='Work from', required=True, index=True, help="Start and End time of working.")
     hour_to = fields.Float(string='Work to', required=True)
     calendar_id = fields.Many2one("resource.calendar", string="Resource's Calendar", required=True, ondelete='cascade')
+
+    @api.model
+    def create(self, vals):
+        res = super(ResourceCalendarAttendance, self).create(vals)
+        if (vals['hour_to'] - vals['hour_from']) <= 0 or vals['hour_to'] > 24:
+            raise UserError(_("Please, use 24 hours format.!"))
+        return res
+
+    @api.multi
+    def write(self, vals):
+        if vals.get('hour_to'):
+            if (vals['hour_to'] - self.hour_from) <= 0 or vals['hour_to'] > 24:
+                raise UserError(_("Please, use 24 hours format.!"))
+        res = super(ResourceCalendarAttendance, self).write(vals)
+        return res
 
 
 class ResourceResource(models.Model):
