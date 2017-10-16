@@ -538,14 +538,16 @@ var BarcodeReader = core.Class.extend({
         if (!code) {
             return;
         }
-        var parsed_result = this.barcode_parser.parse_barcode(code);
-        if (this.action_callback[parsed_result.type]) {
-            this.action_callback[parsed_result.type](parsed_result);
+        var parsed_result = this.barcode_parser._parse_barcode(code);
+        for (var r; r < parsed_result.length; r++) {
+        if (this.action_callback[parsed_result[r].type]) {
+            this.action_callback[parsed_result[r].type](parsed_result[r]);
         } else if (this.action_callback.error) {
-            this.action_callback.error(parsed_result);
+            this.action_callback.error(parsed_result[r]);
         } else {
             console.warn("Ignored Barcode Scan:", parsed_result);
         }
+    }
     },
 
     // the barcode scanner will listen on the hw_proxy/scanner interface for

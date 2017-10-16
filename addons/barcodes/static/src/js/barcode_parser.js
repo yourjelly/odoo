@@ -175,7 +175,7 @@ var BarcodeParser = Class.extend({
 
         return match;
     },
-            
+
     // attempts to interpret a barcode (string encoding a barcode Code-128)
     // it will return an object containing various information about the barcode.
     // most importantly : 
@@ -185,8 +185,9 @@ var BarcodeParser = Class.extend({
     // - value  : if the barcode encodes a numerical value, it will be put there
     // - base_code : the barcode with all the encoding parts set to zero; the one put on
     //               the product in the backend
-    parse_barcode: function(barcode){
-        var parsed_result = {
+    _parse_barcode: function(barcode){
+        var list_parsed_results = [];
+        var default_parsed_result = {
             encoding: '',
             type:'error',  
             code:barcode,
@@ -195,11 +196,13 @@ var BarcodeParser = Class.extend({
         };
 
         if (!this.nomenclature) {
-            return parsed_result;
+            list_parsed_results.push(default_parsed_result);
+            return list_parsed_results;
         }
 
         var rules = this.nomenclature.rules;
         for (var i = 0; i < rules.length; i++) {
+            var parsed_result = $.extend({}, default_parsed_result);
             var rule = rules[i];
             var cur_barcode = barcode;
 
@@ -236,11 +239,15 @@ var BarcodeParser = Class.extend({
                     else{
                         parsed_result.base_code = match.base_code;
                     }
-                    return parsed_result;
+                    list_parsed_results.push(parsed_result);
                 }
             }
         }
-        return parsed_result;
+        return list_parsed_results;
+    },
+
+    parse_barcode: function(barcode){
+        return this._parse_barcode(barcode)[0];
     },
 });
 
