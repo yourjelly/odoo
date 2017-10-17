@@ -13,6 +13,28 @@ function get_active_tours () {
 
 DebugManager.include({
     start: function () {
+        var self = this;
+        self.force_disable_tour = false;
+        var domain = [["demo", "=", true]];
+        // modules with demodata
+        this._rpc({
+                model: 'ir.module.module',
+                method: 'search',
+                args: [domain],
+            })
+            .then(function (modules) {
+                if (modules.length > 0) {
+                    var active_tours = get_active_tours();
+                    self._rpc({
+                        model: 'web_tour.tour',
+                        method: 'consume',
+                        args: [active_tours],
+                    })
+                    .then(function () {
+                        window.location.reload();
+                    });
+                }
+            });
         this.consume_tours_enabled = get_active_tours().length > 0;
         return this._super.apply(this, arguments);
     },
