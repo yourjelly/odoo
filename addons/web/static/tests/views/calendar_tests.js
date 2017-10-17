@@ -252,6 +252,7 @@ QUnit.module('Views', {
         // click on an existing event to open the formViewDialog
 
         calendar.$('.fc-event:contains(event 4) .fc-content').trigger('click');
+        calendar.$('.fc-event:contains(event 4) .fc-content').trigger('click');
 
         assert.ok($('.modal-body').length, "should open the form view in dialog when click on event");
         assert.ok($('.modal button.btn:contains(Edit)').length, "formViewDialog should be in readonly mode");

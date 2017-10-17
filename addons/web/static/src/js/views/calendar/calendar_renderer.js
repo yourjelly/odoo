@@ -345,8 +345,17 @@ return AbstractRenderer.extend({
                 event.title = $render.find('.o_field_type_char:first').text();
                 element.find('.fc-content').html($render.html());
                 element.addClass($render.attr('class'));
-                var display_hour = '+ New Event';
-                element.find('.fc-content .fc-time').text(display_hour);
+                var display_hour = '';
+                if (!event.allDay) {
+                    var start = event.r_start || event.start;
+                    var end = event.r_end || event.end;
+                    display_hour = start.format('HH:mm') + ' - ' + end.format('HH:mm');
+                    if (display_hour === '00:00 - 00:00') {
+                        display_hour = _t('All day');
+                    }
+                }
+                var newevent = '+ New Event';
+                !event.title ? element.find('.fc-content .fc-time').text(newevent) : element.find('.fc-content .fc-time').text(display_hour);
             },
             // Dirty hack to ensure a correct first render
             eventAfterAllRender: function () {
