@@ -78,7 +78,8 @@ class MailController(http.Controller):
             else:
                 record_action = record.get_access_action()
         else:
-            record_action = record_sudo.get_access_action()
+            uid = request.env.ref('base.public_user').id
+            record_action = record_sudo.sudo(uid).get_access_action()
             if record_action['type'] == 'ir.actions.act_url' and record_action.get('target_type') != 'public':
                 return cls._redirect_to_messaging()
 

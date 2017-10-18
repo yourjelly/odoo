@@ -182,12 +182,13 @@ class SaleOrder(models.Model):
     def get_access_action(self):
         """ Instead of the classic form view, redirect to the online quote if it exists. """
         self.ensure_one()
-        if not self.template_id or (not self.env.user.share and not self.env.context.get('force_website')):
+        if not self.sudo().template_id or (not self.env.user.share and not self.env.context.get('force_website')):
             return super(SaleOrder, self).get_access_action()
         return {
             'type': 'ir.actions.act_url',
-            'url': '/quote/%s/%s' % (self.id, self.access_token),
+            'url': '/quote/%s/%s' % (self.id, self.sudo().access_token),
             'target': 'self',
+            'target_type': 'public',
             'res_id': self.id,
         }
 
