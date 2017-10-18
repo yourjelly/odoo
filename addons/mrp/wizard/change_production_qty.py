@@ -64,11 +64,14 @@ class ChangeProductionQty(models.TransientModel):
                     wo.duration_expected = (operation.workcenter_id.time_start +
                                  operation.workcenter_id.time_stop +
                                  cycle_number * operation.time_cycle * 100.0 / operation.workcenter_id.time_efficiency)
+                quantity = wo.qty_production - wo.qty_produced
                 if production.product_id.tracking == 'serial':
-                    quantity = 1.0
+                    quantity = 1.0 if quantity else 0.0
                 else:
-                    quantity = wo.qty_production - wo.qty_produced
                     quantity = quantity if (quantity > 0) else 0
+                if quantity == 0:
+                    wo.final_lot_id = False
+                    wo.active_move_lot_ids.unlink()
                 wo.qty_producing = quantity
                 if wo.qty_produced < wo.qty_production and wo.state == 'done':
                     wo.state = 'progress'
@@ -81,6 +84,6 @@ class ChangeProductionQty(models.TransientModel):
                 moves_finished = production.move_finished_ids.filtered(lambda move: move.operation_id == operation) #TODO: code does nothing, unless maybe by_products?
                 moves_raw.mapped('move_lot_ids').write({'workorder_id': wo.id})
                 (moves_finished + moves_raw).write({'workorder_id': wo.id})
-                if wo.move_raw_ids.filtered(lambda x: x.product_id.tracking != 'none') and not wo.active_move_lot_ids:
+                if quantity > 0 and wo.move_raw_ids.filtered(lambda x: x.product_id.tracking != 'none') and not wo.active_move_lot_ids:
                     wo._generate_lot_ids()
         return {}
