@@ -210,7 +210,7 @@
             <field name="inherit_id" ref="base.view_view_form"/>
             <field name="arch" type="xml">
                 <field name="name" position="after">
-                    <field name="website_id" readonly="1"/>
+                    <field name="website_id"/>
                     <field name="key" readonly="1"/>
                     <field name="page_ids" invisible="1" />
                 </field>
