@@ -109,7 +109,10 @@ class Http(models.AbstractModel):
         if not request.website.is_publisher:
             domain += [('is_visible', '=', True)]
 
-        mypage = request.env['website.page'].search(domain, limit=1)
+        # prefer a specific page (request.website in page.website_ids)
+        # todo jov: maybe pick most 'specific' view (view for this website beats view for this website + 2 others)
+        mypage = request.env['website.page'].search(domain).sorted(lambda page: 0 if page.website_ids else 1)[0]
+
         _, ext = os.path.splitext(req_page)
         if mypage:
             return request.render(mypage.view_id.id, {
