@@ -11,7 +11,6 @@
 
         <record id="main_menu" model="website.menu">
             <field name="name">Top Menu</field>
-            <field name="website_id" ref="default_website"/>
         </record>
 
         <record id="menu_homepage" model="website.menu">
