@@ -54,6 +54,31 @@ class View(models.Model):
             filtered += sorted(group, key=lambda record: record._sort_suitability_key())[0]
         return filtered
 
+    @api.multi
+    def save(self, value, xpath=None):
+        # copy-on-write so that editing websites does not impact other
+        # websites and so that newly created websites will only
+        # contain the default views
+        #
+        # todo jov: handle page deletions, create copies for all
+        # remaining websites? MOVE TO WEBSITE
+        current_website_id = self._context.get('website_id')
+        if not self.website_id and self.env['website'].search_count([]) > 1:  # generic view in multi-website context
+            # copy pages that link to it (this also copies the view)
+            website_specific_pages = self.env['website.page']
+            pages = self.env['website.page'].search([('view_id', '=', self.id)])
+            for page in pages:
+                new_page = page.copy()
+                new_page.website_published = True
+                new_page.website_ids |= self.env['website'].browse(current_website_id)
+                new_page.url = page.url
+                new_page.view_id.website_id = current_website_id
+                website_specific_pages |= new_page
+
+            return website_specific_pages.mapped('view_id').save(value, xpath=xpath)
+
+        return super(View, self).save(value, xpath=xpath)
+
     @api.model
     def _view_obj(self, view_id):
         if isinstance(view_id, pycompat.string_types):
