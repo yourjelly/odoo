@@ -108,6 +108,24 @@ class IrUiView(models.Model):
         arch_section = html.fromstring(
             value, parser=html.HTMLParser(encoding='utf-8'))
 
+        # copy-on-write so that editing websites does not impact other
+        # websites and so that newly created websites will only
+        # contain the default views
+        #
+        # todo jov: handle page deletions, create copies for all
+        # remaining websites? MULTI, MOVE TO WEBSITE
+        current_website_id = self._context.get('website_id')
+        if not self.website_id and self.env['website'].search_count([]) > 1:  # generic view in multi-website context
+            # copy this view + pages that link to it
+            new_pages = self.env['website.page'].search([('view_id', '=', self.id)]).copy()
+            new_view = self.copy({'website_id': current_website_id})
+            new_pages.write({
+                'website_ids': [(4, current_website_id, 0)],
+                'view_id': new_view.id,
+                'website_published': True,
+            })
+            return new_view.save(value, xpath=xpath)
+
         if xpath is None:
             # value is an embedded field on its own, not a view section
             self.save_embedded_field(arch_section)
