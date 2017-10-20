@@ -141,6 +141,7 @@
             <field name="model">website.page</field>
             <field name="arch" type="xml">
                 <tree string="Website Pages">
+                    <field name="website_ids" widget="many2many_tags"/>  <!-- todo jov: only show when websites > 1 -->
                     <field name="name"/>
                     <field name="url"/>
                     <field name="website_indexed"/>
