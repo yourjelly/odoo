@@ -61,21 +61,22 @@ class View(models.Model):
         # contain the default views
         #
         # todo jov: handle page deletions, create copies for all
-        # remaining websites? MOVE TO WEBSITE
+        # remaining websites?
+        #
+        # todo jov: multi
         current_website_id = self._context.get('website_id')
-        if not self.website_id and self.env['website'].search_count([]) > 1:  # generic view in multi-website context
-            # copy pages that link to it (this also copies the view)
+        if current_website_id and not self.website_id and self.env['website'].search_count([]) > 1:  # generic view in multi-website context
+            website_specific_view = self.copy({'website_id': current_website_id})
+
             website_specific_pages = self.env['website.page']
             pages = self.env['website.page'].search([('view_id', '=', self.id)])
             for page in pages:
-                new_page = page.copy()
+                new_page = page.with_context(dont_copy_view=True).copy({'view_id': website_specific_view.id})
                 new_page.website_published = True
                 new_page.website_ids |= self.env['website'].browse(current_website_id)
-                new_page.url = page.url
-                new_page.view_id.website_id = current_website_id
                 website_specific_pages |= new_page
 
-            return website_specific_pages.mapped('view_id').save(value, xpath=xpath)
+            return website_specific_view.save(value, xpath=xpath)
 
         return super(View, self).save(value, xpath=xpath)
 
