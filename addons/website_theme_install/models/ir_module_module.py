@@ -42,6 +42,13 @@ class IrModuleModule(models.Model):
 
     @api.multi
     def button_choose_theme(self):
+        website = self.env['website']
+
+        if website.search_count([]) == 1:
+            install_on_website = website.search([])
+        else:
+            install_on_website = self.env['website'].get_current_website()
+
         theme_category = self.env.ref('base.module_category_theme', False)
         hidden_category = self.env.ref('base.module_category_hidden', False)
         theme_hidden_category = self.env.ref('base.module_category_theme_hidden', False)
@@ -49,14 +56,25 @@ class IrModuleModule(models.Model):
         theme_category_id = theme_category.id if theme_category else 0
         hidden_categories_ids = [hidden_category.id if hidden_category else 0, theme_hidden_category.id if theme_hidden_category else 0]
 
-        self.search([ # Uninstall the theme(s) which is (are) installed
+        self.search([  # Uninstall the theme(s) which is (are) installed
             ('state', '=', 'installed'),
+            # ('website_id', '=', install_on_website.id),  todo jov
             '|', ('category_id', 'not in', hidden_categories_ids), ('name', '=', 'theme_default'),
-            '|', ('category_id', '=', theme_category_id), ('category_id.parent_id', '=', theme_category_id)
+            '|', ('category_id', '=', theme_category_id), ('category_id.parent_id', '=', theme_category_id),
         ]).button_immediate_uninstall()
 
-        next_action = self.button_immediate_install() # Then install the new chosen one
+        next_action = self.button_immediate_install()  # Then install the new chosen one
         if next_action.get('tag') == 'reload' and not next_action.get('params', {}).get('menu_id'):
             next_action = self.env.ref('website.action_website').read()[0]
+
+        # todo jov: themes can have dependencies, e.g. theme_loftspace and theme_loftspace_sale
+        view_external_ids = self.env['ir.model.data'].search([('module', '=', self.name), ('model', '=', 'ir.ui.view')])
+        self.env['ir.ui.view'].browse(view_external_ids.mapped('res_id')).write({
+            'website_id': install_on_website.id,
+        })
+
+        # make xml id unique so the same theme can be installed on multiple websites
+        for external_id in view_external_ids:
+            external_id.name += '_%s' % install_on_website.id
 
         return next_action
