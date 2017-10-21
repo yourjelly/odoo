@@ -13,6 +13,14 @@ class IrModuleModule(models.Model):
     image_ids = fields.One2many('ir.attachment', 'res_id',
                                 domain=[('res_model', '=', _name), ('mimetype', '=like', 'image/%')],
                                 string='Screenshots', readonly=True)
+    installed_on_website_ids = fields.One2many('website', 'theme_id')
+    is_theme_installed_on_this_website = fields.Boolean(compute='_compute_is_theme_installed_on_this_website')
+
+    @api.multi
+    def _compute_is_theme_installed_on_this_website(self):
+        current_website = self.env['website'].get_current_website()
+        for module in self:
+            module.is_theme_installed_on_this_website = current_website in module.installed_on_website_ids
 
     @api.model
     def update_list(self):
@@ -42,12 +50,7 @@ class IrModuleModule(models.Model):
 
     @api.multi
     def button_choose_theme(self):
-        website = self.env['website']
-
-        if website.search_count([]) == 1:
-            install_on_website = website.search([])
-        else:
-            install_on_website = self.env['website'].get_current_website()
+        install_on_website = self.env['website'].get_current_website()
 
         theme_category = self.env.ref('base.module_category_theme', False)
         hidden_category = self.env.ref('base.module_category_hidden', False)
@@ -56,12 +59,20 @@ class IrModuleModule(models.Model):
         theme_category_id = theme_category.id if theme_category else 0
         hidden_categories_ids = [hidden_category.id if hidden_category else 0, theme_hidden_category.id if theme_hidden_category else 0]
 
-        self.search([  # Uninstall the theme(s) which is (are) installed
-            ('state', '=', 'installed'),
-            # ('website_id', '=', install_on_website.id),  todo jov
-            '|', ('category_id', 'not in', hidden_categories_ids), ('name', '=', 'theme_default'),
-            '|', ('category_id', '=', theme_category_id), ('category_id.parent_id', '=', theme_category_id),
-        ]).button_immediate_uninstall()
+        # todo jov fix auto-uninstall
+        # self.search([  # Uninstall the theme(s) which is (are) installed
+        #     ('state', '=', 'installed'),
+        #     # ('website_id', '=', install_on_website.id),  todo jov
+        #     '|', ('category_id', 'not in', hidden_categories_ids), ('name', '=', 'theme_default'),
+        #     '|', ('category_id', '=', theme_category_id), ('category_id.parent_id', '=', theme_category_id),
+        # ]).button_immediate_uninstall()
+
+        # todo jov: to support installing the same theme twice on different websites:
+        # 1. mark installed theme + dependencies as uninstalled
+        # 2. continue as normal
+        # module will be automatically marked back as being installed and xmlids shouldn't conflict because of hack
+        if self.state == 'installed':
+            (self | self.dependencies_id).write({'state': 'uninstalled'})  # todo jov recursive dependencies, maybe also filter themes
 
         next_action = self.button_immediate_install()  # Then install the new chosen one
         if next_action.get('tag') == 'reload' and not next_action.get('params', {}).get('menu_id'):
@@ -76,5 +87,7 @@ class IrModuleModule(models.Model):
         # make xml id unique so the same theme can be installed on multiple websites
         for external_id in view_external_ids:
             external_id.name += '_%s' % install_on_website.id
+
+        self.installed_on_website_ids |= install_on_website
 
         return next_action
