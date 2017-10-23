@@ -556,9 +556,6 @@ class PurchaseOrderLine(models.Model):
             if line.order_id.state not in ['purchase', 'done']:
                 line.qty_received = 0.0
                 continue
-            if line.product_id.type not in ['consu', 'product']:
-                line.qty_received = line.product_qty
-                continue
             total = 0.0
             for move in line.move_ids:
                 if move.state == 'done':
@@ -568,6 +565,9 @@ class PurchaseOrderLine(models.Model):
                     else:
                         total += move.product_uom._compute_quantity(move.product_uom_qty, line.product_uom)
             line.qty_received = total
+
+    def _set_received_qty(self):
+        pass
 
     @api.model
     def create(self, values):
@@ -623,7 +623,7 @@ class PurchaseOrderLine(models.Model):
 
     # Replace by invoiced Qty
     qty_invoiced = fields.Float(compute='_compute_qty_invoiced', string="Billed Qty", digits=dp.get_precision('Product Unit of Measure'), store=True)
-    qty_received = fields.Float(compute='_compute_qty_received', string="Received Qty", digits=dp.get_precision('Product Unit of Measure'), store=True)
+    qty_received = fields.Float(compute='_compute_qty_received', string="Received Qty", digits=dp.get_precision('Product Unit of Measure'), inverse="_set_received_qty", store=True)
 
     partner_id = fields.Many2one('res.partner', related='order_id.partner_id', string='Partner', readonly=True, store=True)
     currency_id = fields.Many2one(related='order_id.currency_id', store=True, string='Currency', readonly=True)
