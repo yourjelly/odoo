@@ -325,13 +325,17 @@ return AbstractRenderer.extend({
             eventResize: function (event) {
                 self.trigger_up('updateRecord', event);
             },
-            eventClick: function (event,abcd,acdd) {
-                if (event.isVisited) {
+            eventClick: function (event) {
+                if (event.title) {
                     self.trigger_up('openEvent', event);
                     self.$calendar.fullCalendar('unselect');
-                }
-                else {
-                    event.isVisited = true;
+                } else {
+                    if (event.new_event) {
+                        self.trigger_up('openCreate', {'start': event.start, 'end': event.end});
+                        self.$calendar.fullCalendar('unselect');
+                    } else {
+                        event.new_event = 1;
+                    }
                 }
             },
             select: function (target_date, end_date, event, _js_event, _view) {
