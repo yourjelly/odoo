@@ -6,6 +6,7 @@ import os
 from odoo import api, fields, models
 
 
+import logging; _logger = logging.getLogger(__name__)
 class IrModuleModule(models.Model):
     _name = "ir.module.module"
     _inherit = _name
@@ -48,6 +49,10 @@ class IrModuleModule(models.Model):
 
         return res
 
+    def _get_records_belonging_to_modules(self, module_names, model):
+        external_ids = self.env['ir.model.data'].search([('module', 'in', module_names), ('model', '=', model)])
+        return self.env[model].browse(external_ids.mapped('res_id'))
+
     @api.multi
     def button_choose_theme(self):
         install_on_website = self.env['website'].get_current_website()
@@ -71,23 +76,45 @@ class IrModuleModule(models.Model):
         # 1. mark installed theme + dependencies as uninstalled
         # 2. continue as normal
         # module will be automatically marked back as being installed and xmlids shouldn't conflict because of hack
-        if self.state == 'installed':
-            (self | self.dependencies_id).write({'state': 'uninstalled'})  # todo jov recursive dependencies, maybe also filter themes
+        theme_category = self.env.ref('base.module_category_theme')
 
-        next_action = self.button_immediate_install()  # Then install the new chosen one
+        # mark theme and button to be installed
+        self.button_install()
+
+        # although there is a 'themes' category
+        # (base.module_category_theme) it seems not to be used for all
+        # themes. The same is true for the
+        # base.module_category_theme_hidden category, so just filter
+        # on name instead.
+        installed_theme_names = self.search([('state', '=', 'to install')]).filtered(lambda module: module.name.startswith('theme_')).mapped('name')
+        _logger.info('installing themes %s', installed_theme_names)
+
+        # newly_installed_themes = (self | self.dependencies_id.mapped('depend_id'))
+        # if self.state == 'installed':
+        #     newly_installed_themes.write({'state': 'uninstalled'})  # todo jov recursive dependencies
+
+        next_action = self._apply_changes()  # Then install the new chosen one
         if next_action.get('tag') == 'reload' and not next_action.get('params', {}).get('menu_id'):
             next_action = self.env.ref('website.action_website').read()[0]
 
-        # todo jov: themes can have dependencies, e.g. theme_loftspace and theme_loftspace_sale
-        view_external_ids = self.env['ir.model.data'].search([('module', '=', self.name), ('model', '=', 'ir.ui.view')])
-        self.env['ir.ui.view'].browse(view_external_ids.mapped('res_id')).write({
+        self._get_records_belonging_to_modules(installed_theme_names, 'ir.ui.view').write({
+            'website_id': install_on_website.id,
+        })
+
+        # can't write in one 'write' because of ensure_one in write of website.page
+        for page in self._get_records_belonging_to_modules(installed_theme_names, 'website.page'):
+            page.website_id = install_on_website
+
+        self._get_records_belonging_to_modules(installed_theme_names, 'website.menu').write({
             'website_id': install_on_website.id,
         })
 
         # make xml id unique so the same theme can be installed on multiple websites
-        for external_id in view_external_ids:
-            external_id.name += '_%s' % install_on_website.id
+        for external_id in self.env['ir.model.data'].search([('module', 'in', installed_theme_names)]):
+            external_id.name += '_website_%s' % install_on_website.id
 
         self.installed_on_website_ids |= install_on_website
 
         return next_action
+
+    # todo jov unset website.theme_id on uninstall

@@ -521,10 +521,7 @@ class Module(models.Model):
             'url': '/web',
         }
 
-    @api.multi
-    def _button_immediate_function(self, function):
-        function(self)
-
+    def _apply_changes(self):
         self._cr.commit()
         api.Environment.reset()
         modules.registry.Registry.new(self._cr.dbname, update_module=True)
@@ -543,6 +540,11 @@ class Module(models.Model):
             'tag': 'reload',
             'params': {'menu_id': menu.id},
         }
+
+    @api.multi
+    def _button_immediate_function(self, function):
+        function(self)
+        return self._apply_changes()
 
     @assert_log_admin_access
     @api.multi
