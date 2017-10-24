@@ -76,7 +76,15 @@ class IrModuleModule(models.Model):
         # 1. mark installed theme + dependencies as uninstalled
         # 2. continue as normal
         # module will be automatically marked back as being installed and xmlids shouldn't conflict because of hack
-        theme_category = self.env.ref('base.module_category_theme')
+
+        # todo jov do this to do the uninstall hack. instead mark all 'themes' as uninstalled
+        themes_installed_before = self.search([('name', '=like', 'theme_%'), ('state', '=', 'installed')])
+        themes_installed_before.write({'state': 'uninstalled'})
+        _logger.info('marked %s as uninstalled', themes_installed_before.mapped('name'))
+
+        # mark all data belonging to theme as noupdate to prevent them from being unlinked after module installation finishes
+        update_xml_ids = self.env['ir.model.data'].search([('module', 'in', themes_installed_before.mapped('name')), ('noupdate', '=', False)])
+        update_xml_ids.write({'noupdate': True})
 
         # mark theme and button to be installed
         self.button_install()
@@ -97,23 +105,29 @@ class IrModuleModule(models.Model):
         if next_action.get('tag') == 'reload' and not next_action.get('params', {}).get('menu_id'):
             next_action = self.env.ref('website.action_website').read()[0]
 
-        self._get_records_belonging_to_modules(installed_theme_names, 'ir.ui.view').write({
-            'website_id': install_on_website.id,
-        })
+        for view in self._get_records_belonging_to_modules(installed_theme_names, 'ir.ui.view'):
+            if not view.website_id:
+                view.website_id = install_on_website
 
         # can't write in one 'write' because of ensure_one in write of website.page
         for page in self._get_records_belonging_to_modules(installed_theme_names, 'website.page'):
-            page.website_id = install_on_website
+            if not page.website_id:
+                page.website_id = install_on_website
 
-        self._get_records_belonging_to_modules(installed_theme_names, 'website.menu').write({
-            'website_id': install_on_website.id,
-        })
+        for menu in self._get_records_belonging_to_modules(installed_theme_names, 'website.menu'):
+            if not menu.website_id:
+                menu.website_id = install_on_website
 
         # make xml id unique so the same theme can be installed on multiple websites
         for external_id in self.env['ir.model.data'].search([('module', 'in', installed_theme_names)]):
-            external_id.name += '_website_%s' % install_on_website.id
+            if '_website_' not in external_id.name:
+                external_id.name += '_website_%s' % install_on_website.id
 
         self.installed_on_website_ids |= install_on_website
+
+        update_xml_ids.write({'noupdate': False})
+        themes_installed_before.write({'state': 'installed'})
+        _logger.info('marked %s as installed again', themes_installed_before.mapped('name'))
 
         return next_action
 
