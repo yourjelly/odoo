@@ -119,7 +119,7 @@ class IrModuleModule(models.Model):
                 menu.website_id = install_on_website
 
         # make xml id unique so the same theme can be installed on multiple websites
-        for external_id in self.env['ir.model.data'].search([('module', 'in', installed_theme_names)]):
+        for external_id in self.env['ir.model.data'].search([('module', 'in', installed_theme_names), ('model', '!=', 'ir.attachment')]):
             if '_website_' not in external_id.name:
                 external_id.name += '_website_%s' % install_on_website.id
 

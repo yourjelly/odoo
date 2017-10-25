@@ -5,6 +5,7 @@ import ast
 
 from odoo import models
 from odoo.http import request
+from odoo.osv import expression
 
 
 class QWeb(models.AbstractModel):
@@ -74,6 +75,11 @@ class QWeb(models.AbstractModel):
     def _compile_dynamic_attributes(self, el, options):
         items = super(QWeb, self)._compile_dynamic_attributes(el, options)
         return self._wrap_build_attributes(el, items, options)
+
+    def _get_snippet_domain(self, key):
+        domain = super(QWeb, self)._get_snippet_domain(key)
+        website_domain = expression.OR([[('website_id', '=', False)], [('website_id', '=', self._context.get('website_id'))]])
+        return expression.AND([domain, website_domain])
 
     # method called by computing code
 

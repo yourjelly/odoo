@@ -44,9 +44,12 @@ class QWeb(models.AbstractModel):
 
     # compile directives
 
+    def _get_snippet_domain(self, key):
+        return [('key', '=', key)]
+
     def _compile_directive_snippet(self, el, options):
         el.set('t-call', el.attrib.pop('t-snippet'))
-        name = self.env['ir.ui.view'].search([('key', '=', el.attrib.get('t-call'))]).display_name
+        name = self.env['ir.ui.view'].search(self._get_snippet_domain(el.attrib.get('t-call'))).display_name
         thumbnail = el.attrib.pop('t-thumbnail', "oe-thumbnail")
         div = u'<div name="%s" data-oe-type="snippet" data-oe-thumbnail="%s">' % (
             escape(pycompat.to_text(name)),
