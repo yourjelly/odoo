@@ -112,7 +112,6 @@ class ProductTemplate(models.Model):
         'product.packaging', string="Product Packages", compute="_compute_packaging_ids", inverse="_set_packaging_ids",
         help="Gives the different ways to package the same product.")
     seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id', 'Vendors')
-    variant_seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id')
 
     active = fields.Boolean('Active', default=True, help="If unchecked, it will allow you to hide the product without removing it.")
     color = fields.Integer('Color Index')
