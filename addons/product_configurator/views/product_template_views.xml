@@ -23,6 +23,9 @@
             <xpath expr="//field[@name='attribute_line_ids']/tree/field[@name='attribute_id']" position="before">
                 <field name="sequence" widget="handle"/>
             </xpath>
+            <xpath expr="//p[@name='warning_msg']" position="attributes">
+                <attribute name="attrs">{'invisible': [('variant_type', '=', 'configurable')]}</attribute>
+            </xpath>
         </field>
     </record>
 

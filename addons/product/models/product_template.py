@@ -246,6 +246,7 @@ class ProductTemplate(models.Model):
     def _compute_product_variant_count(self):
         self.product_variant_count = len(self.product_variant_ids)
 
+
     @api.depends('product_variant_ids', 'product_variant_ids.default_code')
     def _compute_default_code(self):
         unique_variants = self.filtered(lambda template: len(template.product_variant_ids) == 1)

@@ -20,7 +20,7 @@ class WebsiteSale(WebsiteSale):
             custom_vals = self._prepare_custom_attribute_data(**kw)
             value_ids = self._prepare_attribute_data(**kw)
             try:
-                product_id = product.create_get_variant(value_ids, custom_vals)
+                product_id = product.get_variant(value_ids, custom_vals)
             except ValidationError as e:
                 res['error'] = e.name
                 return json.dumps(res)
