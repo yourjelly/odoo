@@ -61,6 +61,12 @@
             </field>
         </record>
 
+        <record id="action_website_list" model="ir.actions.act_window">
+            <field name="name">Website</field>
+            <field name="res_model">website</field>
+            <field name="view_mode">list,form</field>
+        </record>
+
         <!-- website.redirect views -->
         <record id="website_redirect_form_view" model="ir.ui.view">
             <field name="name">website.redirect.form</field>

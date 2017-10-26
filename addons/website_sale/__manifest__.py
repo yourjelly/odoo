@@ -20,6 +20,7 @@
         'views/crm_team_views.xml',
         'views/templates.xml',
         'views/payment_views.xml',
+        'views/website_views.xml',
         'views/snippets.xml',
         'views/report_shop_saleorder.xml',
         'views/res_config_settings_views.xml',

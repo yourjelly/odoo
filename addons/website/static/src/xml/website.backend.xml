@@ -105,10 +105,19 @@
     </div>
 
     <t t-name="website.DateRangeButtons">
-        <div class="btn-group btn-group-sm o_date_range_buttons pull-right">
-            <button class="btn btn-sm btn-default js_date_range active" data-date="week">Last Week</button>
-            <button class="btn btn-sm btn-default js_date_range" data-date="month">Last Month</button>
-            <button class="btn btn-sm btn-default js_date_range" data-date="year">Last Year</button>
+        <div class="pull-right">
+            <div class="btn-group btn-group-sm o_website_buttons">
+                <div>Data for</div>
+                <t t-foreach="widget.websites" t-as="website">
+                    <button t-attf-class="btn btn-sm btn-default js_website #{website.selected ? 'active' : ''}" t-att-data-website-id="website.id"><t t-esc="website.name"/></button>
+                </t>
+            </div>
+            <div class="btn-group btn-group-sm o_date_range_buttons">
+                <div>for</div>
+                <button class="btn btn-sm btn-default js_date_range active" data-date="week">Last Week</button>
+                <button class="btn btn-sm btn-default js_date_range" data-date="month">Last Month</button>
+                <button class="btn btn-sm btn-default js_date_range" data-date="year">Last Year</button>
+            </div>
         </div>
     </t>
 </templates>
