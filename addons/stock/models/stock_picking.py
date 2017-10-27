@@ -666,7 +666,7 @@ class Picking(models.Model):
             for line in lines_to_check:
                 product = line.product_id
                 if product and product.tracking != 'none' and (line.qty_done == 0 or (not line.lot_name and not line.lot_id)):
-                    raise UserError(_('You need to supply a lot/serial number for %s.') % product.name)
+                    raise UserError(_('You need to supply a Lot/Serial number for product %s.') % product.name)
 
         if no_quantities_done:
             view = self.env.ref('stock.view_immediate_transfer')
