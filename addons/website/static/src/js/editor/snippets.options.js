@@ -935,4 +935,65 @@ options.registry.gallery_img = options.Class.extend({
         });
     },
 });
+// Move to top option
+options.registry.push_to_top = options.Class.extend({
+    onFocus: function () {
+        var self = this;
+        if (self.$target.hasClass("push_to_top")) {
+            self.$overlay.find(".oe_snippet_clone, .oe_snippet_move").addClass("hidden");
+        } else {
+            self.$overlay
+                .find(".oe_snippet_clone, .oe_snippet_move").removeClass("hidden");
+        }
+    },
+    selectClass: function (previewMode, value, $li) {
+        this._super(previewMode, value, $li);
+        var self = this;
+        if (value === 'push_to_top') {
+            $('.push_to_top').removeClass('push_to_top');
+            self.$target.addClass('push_to_top');
+            $('#wrapwrap').addClass('top_content');
+            $("#wrap").css("margin-top", (self.$target.height() * 0.9));
+            $('.navbar-static-top').css({
+                'background-color': 'rgba(0, 0, 0, 0.09)',
+                'border-color': 'rgba(0, 0, 0, 0.09)',
+                'color': 'white',
+            });
+
+            $('html, body').animate({scrollTop:0}, 1000);
+
+            self.onFocus();
+        } else {
+            self.$target.removeClass("push_to_top");
+            $("#wrapwrap").removeClass("top_content");
+            $("#wrap").css("margin-top","");
+
+            var offset = self.$target.offset.top;
+            $('html, body').animate({scrollTop:(offset+100)}, 1000);
+        }
+
+        // if (self.$target.hasClass("s_media_block")) {
+        //     $(window).trigger("resize");
+        //     self.$target.data('snippet-view').stop_video();
+        //     self.$target.data('snippet-view').start_video();
+        // }
+    },
+});
+
+// FIX website builder overlay issues + Change margin
+options.registry.marginAndResize.include({
+    start: function () {
+        this._super();
+        var self = this;
+
+        this.$overlay.find(".oe_handle.size .size").on('mouseup', function (event) {
+            event.preventDefault();
+            if (self.$target.hasClass("push_to_top")) {
+                $("#wrap").css("margin-top", (self.$target.height()* 0.9));
+                self.trigger_up('cover_update');
+                $(window).trigger("resize");
+            }
+        });
+    },
+});
 });

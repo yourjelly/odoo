@@ -21,6 +21,106 @@
         }
     }
 }
+// Push to top cover snippet
+.website_top_content () {
+  z-index: -1;
+  width: 100%;
+  .o-position-absolute(@top: 0, @left: 0);
+}
+// .navbar-static-top {
+//     background-color: rgba(0, 0, 0, 0.09);
+//     border-color: rgba(0, 0, 0, 0.09);
+//     color: white;
+// }
+#wrapwrap.top_content{
+    position: relative;
+
+    #pre-header {
+        .o-position-absolute(@top: 0, @left: 0);
+        margin: 0;
+        width: 100%;
+
+        &:after {
+            content: "";
+            position: fixed;
+        }
+    }
+
+    .o_affix_enabled {
+        .o-position-absolute(@top: 0, @left: 0);
+        margin: 0;
+        width: 100%;
+
+        .navbar-default a.navbar-brand, a.navbar-brand {
+            color: #fff;
+        }
+
+        .navbar {
+            background-color: rgba(0, 0, 0, 0.09);
+            border-color: rgba(0, 0, 0, 0.09);
+        }
+
+        .nav > li {
+            &:not(.open) {
+                > a {
+                    color: @gray-lighter;
+                    opacity: 1;
+                }
+
+                &.active, &:hover {
+                    > a {
+                        color: #fff;
+                        background-color: rgba(0, 0, 0, 0.09);
+                    }
+                }
+            }
+
+            li.active > a {
+                color: #fff;
+            }
+            background-color: rgba(0, 0, 0, 0.09);
+        }
+    }
+
+    #wrap {
+        // Blog Layout
+        #title.blog_header {
+            .cover.cover_full {
+                height: 75vh;
+                .website_top_content();
+            }
+
+            .blog_title {
+                min-height: 300px;
+                top: 0;
+                margin-top: 15%;
+            }
+
+            >.container:not(.cover) {
+                z-index: 2;
+
+                .js_publish_management, #change_cover {
+                    top: -150px;
+                }
+            }
+        }
+
+        #blog_content {
+            background: #FEFEFE;
+            z-index: 2;
+            position: relative;
+            margin-top: 0!important;
+        }
+    }
+
+    > main, > footer {
+        opacity: 0.999; // hack to create a stacking context allowing to place top_content on top of background but behind everything else
+    }
+
+    .push_to_top {
+        .website_top_content();
+    }
+}
 
 // Table Snippet
 .table_desc {

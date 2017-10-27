@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 <template id="s_cover" name="Cover">
-    <section class="s_text_block_image_fw oe_img_bg oe_custom_bg" style="background-image: url(/web/image/website.s_cover_default_image); background-position: 50% 100%">
+    <section class="s_text_block_image_fw oe_img_bg oe_custom_bg s_cover_snippet" style="background-image: url(/web/image/website.s_cover_default_image); background-position: 50% 100%">
         <div class="container">
             <div class="row">
                 <div class="col-md-6 mt64 mb64 bg-black-25">
@@ -847,6 +847,23 @@
             <ul class="dropdown-menu">
                 <li></li>
             </ul>
+        </li>
+    </div>
+
+    <div data-js="push_to_top"
+        data-selector=".s_cover_snippet">
+        <li class="dropdown-submenu push_to_top_options">
+            <a tabindex="-1" href="#"><i class="fa fa-magic"/>Position</a>
+            <ul class="dropdown-menu" data-no-preview="true">
+                <li data-select-class=""><a>Normal</a></li>
+                <li data-select-class="push_to_top"><a>Push to top</a></li>
+            </ul>
+        </li>
+    </div>
+    <div data-js="video_options"
+        data-selector="section.s_cover_snippet">
+        <li>
+            <a tabindex="-1" href="#"><i class="fa fa-fw fa-cog"/>Video Options</a>
         </li>
     </div>
     <div data-js="colorpicker"

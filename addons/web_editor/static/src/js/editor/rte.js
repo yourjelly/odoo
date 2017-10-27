@@ -654,7 +654,7 @@ var RTEWidget = Widget.extend({
         // whitespace characters (so Tripleclicking then typing text will remove
         // the whole paragraph instead of its content).
         // http://stackoverflow.com/questions/38467334/why-does-google-chrome-always-add-space-after-selected-text
-        if ($.browser.chrome === true && event.originalEvent.detail === 3) {
+        if ($.browser.chrome === true && event.detail === 3) {
             var currentSelection = range.create();
             if (currentSelection.sc.parentNode === currentSelection.ec) {
                 _selectSC(currentSelection);
