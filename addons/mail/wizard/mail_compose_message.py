@@ -137,32 +137,18 @@ class MailComposer(models.TransientModel):
     is_incoming_server = fields.Boolean('Check Incoming mail server')
     is_outgoing_server = fields.Boolean('Check Outgoing mail server')
 
-    def action_mail_compose_message(self):
-        try:
-            compose_form_id = self.env.ref('mail.email_compose_message_wizard_form').id
-        except ValueError:
-            compose_form_id = False
-        return {
-            'type': 'ir.actions.act_window',
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_model': 'mail.compose.message',
-            'views': [(compose_form_id, 'form')],
-            'view_id': compose_form_id,
-            'target': 'new',
-            'res_id': self.id,
-        }
-
     def set_domain_name(self):
         self.is_alias_domain = True
         self.env['ir.config_parameter'].sudo().set_param("base_setup.default_external_email_server", True)
         self.env['ir.config_parameter'].sudo().set_param("mail.catchall.domain", self.alias_domain)
-        return self.action_mail_compose_message()
+        return _reopen(self, self.id, self.model, context=self._context)
 
     def set_email_server(self):
-        return self.action_mail_compose_message()
+        return _reopen(self, self.id, self.model, context=self._context)
 
     def action_ir_mail_server_from(self):
+        ctx = self._context.copy()
+        ctx.update({'custom_footer_visible': True, 'is_alias_domain': self.is_alias_domain, 'is_incoming_server': self.is_incoming_server})
         email_form_id = self.env.ref('base.ir_mail_server_form').id
         ir_mail_server = self.env['ir.mail_server'].sudo().search([])
         ir_mail_server_id = None
@@ -179,10 +165,13 @@ class MailComposer(models.TransientModel):
             'views': [(email_form_id, 'form')],
             'view_id': email_form_id,
             'target': 'new',
-            'res_id': ir_mail_server_id
+            'res_id': ir_mail_server_id,
+            'context': ctx,
         }
 
     def action_email_server_from(self):
+        ctx = self._context.copy()
+        ctx.update({'custom_footer_visible': True, 'is_alias_domain': self.is_alias_domain, 'is_outgoing_server': self.is_outgoing_server})
         email_form_id = self.env.ref('fetchmail.view_email_server_form').id
         fetchmail_server = self.env['fetchmail.server'].sudo().search([])
         fetchmail_server_id = None
@@ -191,6 +180,7 @@ class MailComposer(models.TransientModel):
             mail_server_confirm = fetchmail_server.filtered(lambda r: r.state == 'done')
             if mail_server_confirm:
                 fetchmail_server_id = mail_server_confirm[0].id
+
         return {
             'type': 'ir.actions.act_window',
             'view_type': 'form',
@@ -199,7 +189,8 @@ class MailComposer(models.TransientModel):
             'views': [(email_form_id, 'form')],
             'view_id': email_form_id,
             'target': 'new',
-            'res_id': fetchmail_server_id
+            'res_id': fetchmail_server_id,
+            'context': ctx,
         }
 
     @api.multi

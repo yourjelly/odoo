@@ -173,7 +173,37 @@ class IrMailServer(models.Model):
 
         self.check_connection = True
         self.env.cr.commit()
+        if self._context.get('custom_footer_visible'):
+            return True
         raise UserError(_("Connection Test Succeeded! Everything seems properly set up!"))
+
+    @api.multi
+    def button_test_confim(self):
+        res = self.test_smtp_connection()
+        context = self.env.context
+        if res and context.get('is_incoming_server') and context.get('is_alias_domain'):
+            return {
+                    'effect': {
+                        'fadeout': 'slow',
+                        'message': 'Mail setup is successfully configure',
+                        'img_url': '/web/static/src/img/smile.svg',
+                        'type': 'rainbow_man',
+                        }
+                    }
+        try:
+            compose_form_id = self.env.ref('mail.email_compose_message_wizard_form').id
+        except ValueError:
+            compose_form_id = False
+        return {
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'mail.compose.message',
+            'views': [(compose_form_id, 'form')],
+            'view_id': compose_form_id,
+            'target': 'new',
+            'context': context
+        }
 
     def connect(self, host=None, port=None, user=None, password=None, encryption=None,
                 smtp_debug=False, mail_server_id=None):
