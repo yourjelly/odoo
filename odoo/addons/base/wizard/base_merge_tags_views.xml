@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="base_merge_tags_form" model="ir.ui.view">
+    <field name="name">base.merge.tags.form</field>
+    <field name="model">base.merge.tags</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <group invisible="1">
+            <field name="model_name"/>
+          </group>
+          <div>This wizard will merge <strong><field name="model_id" class="oe_inline"/></strong></div>
+          <div>Every record tagged as <strong><field name="tag_to_merge" class="oe_inline"/></strong> will be tagged as <strong><field name="destination_tag" class="oe_inline"/></strong></div>
+          <div class="alert alert-danger">This operation is irreversible.</div>
+        </sheet>
+        <footer>
+          <button type="object" name="action_merge_tags" string="Merge" class="btn-primary"/>
+          <button special="cancel" string="Cancel" class="btn-default"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+</odoo>

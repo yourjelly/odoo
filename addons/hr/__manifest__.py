@@ -28,6 +28,7 @@
         'views/hr_templates.xml',
         'views/res_config_settings_views.xml',
         'data/hr_data.xml',
+        'wizard/base_merge_tags_views.xml',
     ],
     'demo': [
         'data/hr_demo.xml'

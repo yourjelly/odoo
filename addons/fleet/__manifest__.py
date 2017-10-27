@@ -37,6 +37,7 @@ Main Features
         'views/fleet_board_view.xml',
         'data/fleet_cars_data.xml',
         'data/fleet_data.xml',
+        'wizard/base_merge_tags_views.xml',
     ],
 
     'demo': ['data/fleet_demo.xml'],

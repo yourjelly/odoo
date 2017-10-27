@@ -18,6 +18,7 @@
         'data/note_data.xml',
         'views/note_views.xml',
         'views/note_templates.xml',
+        'wizard/base_merge_tags_views.xml',
     ],
     'demo': [
         'data/note_demo.xml',

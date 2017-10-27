@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="base_merge_tags_action" model="ir.actions.act_window">
+    <field name="name">Merge Tags</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">base.merge.tags</field>
+    <field name="view_type">form</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="base.base_merge_tags_form"/>
+    <field name="binding_model_id" ref="mass_mailing.model_mail_mass_mailing_tag"/>
+    <field name="target">new</field>
+  </record>
+</odoo>

@@ -30,6 +30,7 @@
         'views/project_templates.xml',
         'views/project_portal_templates.xml',
         'data/project_mail_template_data.xml',
+        'wizard/base_merge_tags_views.xml',
         'wizard/project_task_merge_wizard_views.xml',
     ],
     'qweb': ['static/src/xml/project.xml'],
