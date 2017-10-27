@@ -38,6 +38,7 @@ class TestConfirmUnsubscribe(common.HttpCase):
             ('module', '=', 'website_mail_channel'),
             ('name', '=', 'not_subscribed'),
         ]), 0, 'XID for template should have been deleted')
+        self.env['ir.model.data'].clear_caches()
         self.env2.cr.release()
 
         self._unsubscribe_check("The address %s is already unsubscribed or was never subscribed to any mailing list" % self.partner.email)
