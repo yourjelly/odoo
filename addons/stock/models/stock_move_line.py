@@ -50,6 +50,14 @@ class StockMoveLine(models.Model):
     produce_line_ids = fields.Many2many('stock.move.line', 'stock_move_line_consume_rel', 'produce_line_id', 'consume_line_id', help="Technical link to see which line was produced with this. ")
     reference = fields.Char(related='move_id.reference', store=True)
 
+    @api.multi
+    def name_get(self):
+        result = []
+        for s in self:
+            name = s.reference + ', ' + s.product_id.name_get()[0][1]
+            result.append((s.id, name))
+        return result
+
     @api.one
     def _compute_location_description(self):
         for operation, operation_sudo in izip(self, self.sudo()):
