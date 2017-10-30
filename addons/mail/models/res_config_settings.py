@@ -5,7 +5,7 @@ import datetime
 
 from werkzeug import urls
 
-from odoo import api, fields, models, tools
+from odoo import api, fields, models, tools, _
 
 
 class ResConfigSettings(models.TransientModel):
@@ -18,6 +18,20 @@ class ResConfigSettings(models.TransientModel):
                                "the Odoo server, enter the domain name here.")
     catchall_name = fields.Char('Reply-to Catchall', help="When a contact replies to an email sent from Odoo, the default reply-to address is this generic address. This is used to route the message to the right discussion thread in Odoo and to the inbox of all its followers. The reply-to address can be also be changed for specific emails from the configuration of the email templates.")
     catchall_domain = fields.Char(string="Catchall Domain", related='alias_domain')
+
+    @api.onchange('alias_domain')
+    def _onchange_alias_domain(self):
+        warning = {}
+        result = {}
+        if self.default_external_email_server:
+            if self.alias_domain:
+                warning = {
+                    'title': _('Warning!'),
+                    'message': _('Please make sure the address "%s@%s" is correctly set in your email server Otherwise you won`t receive any email reply in Odoo' % (self.catchall_name, self.alias_domain)),
+                }
+        if warning:
+            result['warning'] = warning
+        return result
 
     @api.model
     def get_values(self):
