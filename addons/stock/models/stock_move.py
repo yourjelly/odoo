@@ -990,7 +990,7 @@ class StockMove(models.Model):
             if len(pack.quant_ids) <= 1:
                 continue
             location1 = pack.quant_ids[0].location_id
-            if any([q.location_id != location1 for q in pack.quant_ids]):
+            if any([q.location_id != location1 for q in pack.quant_ids if q.quantity > 0]):
                 raise UserError(_('You should not put the contents of a package in different locations. '))
 
     def _action_done(self):
