@@ -1,7 +1,7 @@
 odoo.define('hr_expense.AttachPhoto', function (require) {
 "use strict";
 
-var config = require('web.config')
+var config = require('web.config');
 var Widget = require('web.Widget');
 
 var AttachPhoto = Widget.extend({
@@ -22,7 +22,7 @@ var AttachPhoto = Widget.extend({
 
     start: function () {
         var self = this;
-        $(window).on(this.fileuploadId, function(event) {
+        $(window).on(this.fileuploadId, function (event) {
             self.onAttachmentLoaded(Array.prototype.slice.call(arguments, 1));
         });
         return this._super.apply(this, arguments);
@@ -36,7 +36,7 @@ var AttachPhoto = Widget.extend({
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
-    
+
     /**
      * Attachment log on chatter
      *
@@ -46,8 +46,8 @@ var AttachPhoto = Widget.extend({
         var self = this;
 
         var att_ids = [];
-        _.each(files, function(file){
-            att_ids.push(file.id)
+        _.each(files, function (file) {
+            att_ids.push(file.id);
         });
 
         var message = {
@@ -71,7 +71,7 @@ var AttachPhoto = Widget.extend({
     _onClick: function (event) {
         var self = this;
         var $input = this.$('input.o_input_file');
-        $input.on("change", function(event) {
+        $input.on("change", function (event) {
             self.$('form.o_form_binary_form').submit();
         });
         $input.click();

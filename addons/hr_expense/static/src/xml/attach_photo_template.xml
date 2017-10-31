@@ -2,11 +2,9 @@
 <templates id="template" xml:space="preserve">
 
 	<t t-name="AttachPhoto">
-		<button t-attf-class="btn btn-sm oe_stat_button" widget="attach_photo">
-			<div class="fa fa-plus fa-fw o_button_icon"> </div>
-			<div class="o_field_widget o_stat_info o_attach_photo">
-				<span class="o_stat_info">Attach a</span><br/>
-				<span class="o_stat_info">Photo</span>
+		<button t-attf-class="btn btn-sm btn-default #{widget.formRender.state.data.attachment_number &gt;= 1 ? '' : 'oe_highlight'}" widget="attach_photo">
+			<div class="o_attach_photo">
+				<span>Attach a Photo</span><br/>
 			</div>
 			<span class="hide">
 				<t t-call="HiddenInputFile">
