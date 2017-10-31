@@ -5,6 +5,7 @@ var Context = require('web.Context');
 var ControlPanelMixin = require('web.ControlPanelMixin');
 var core = require('web.core');
 var data = require('web.data');
+var dialog = require('web.Dialog');
 var data_manager = require('web.data_manager');
 var dom = require('web.dom');
 var pyeval = require('web.pyeval');
@@ -243,7 +244,11 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
     switch_mode: function(view_type, view_options) {
         var self = this;
         var view = this.views[view_type];
-
+        if (view === undefined) {
+            dialog.alert(this, _t('Record is not available !'), {
+                        title: _t('Oops!'),
+                    });
+        }
         if (!view || this.currently_switching) {
             return $.Deferred().reject();
         } else {
@@ -297,7 +302,6 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
                     return view.controller.reload(view_options);
                 });
             }
-
             return $.when(view.loaded)
                 .then(function() {
                     self._display_view(old_view);
@@ -378,7 +382,7 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
         });
     },
     select_view: function (index) {
-        var viewType = this.view_stack[index].type;
+        var viewType = this.view_stack[index] ? this.view_stack[index].type : false;
         var viewOptions = {};
         if (viewType === 'form') {
             // reload form views in readonly, except for inline actions (i.e.
