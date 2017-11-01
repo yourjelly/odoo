@@ -30,6 +30,8 @@
 
         <script type="text/javascript" src="/website/static/src/js/content/affix_menu.js"/>
         <script type="text/javascript" src="/website/static/src/js/content/top_content.js"/>
+        <script type="text/javascript" src="/website/static/lib/YTPlayer/jquery.mb.YTPlayer.js"/>
+        <script type="text/javascript" src="/website/static/src/js/content/s_cover_snippet_frontend.js"/>
         <script type="text/javascript" src="/website/static/src/js/content/compatibility.js"/>
         <script type="text/javascript" src="/website/static/src/js/content/lazy_template_call.js"/>
         <script type="text/javascript" src="/website/static/src/js/content/snippets.animation.js"/>
@@ -64,6 +66,7 @@
 
     <script type="text/javascript" src="/website/static/src/js/widgets/ace.js"/>
     <script type="text/javascript" src="/website/static/src/js/widgets/theme.js"/>
+    <script type="text/javascript" src="/website/static/src/js/content/s_cover_snippet_editor.js"/>
 </template>
 
 <!-- Layout -->
