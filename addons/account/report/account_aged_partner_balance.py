@@ -14,8 +14,7 @@ class ReportAgedPartnerBalance(models.AbstractModel):
 
     def _get_partner_move_lines(self, account_type, date_from, target_move, period_length):
         periods = {}
-        partner_search_clause = ''
-        partner_search_value = []
+        res_partner_where_clause_query = ''
         start = datetime.strptime(date_from, "%Y-%m-%d")
         for i in range(5)[::-1]:
             stop = start - relativedelta(days=period_length)
@@ -45,9 +44,13 @@ class ReportAgedPartnerBalance(models.AbstractModel):
             arg_list += (tuple(reconciled_after_date),)
         arg_list += (date_from, user_company)
         if self._context.get('search_option'):
-            partner_search_clause = ' AND res_partner.name ilike %s'
-            partner_search_value = ['%'+self._context.get('search_option')[0][2]+'%']
-            arg_list += (tuple(partner_search_value))
+            from odoo.osv import expression
+            res_partner = self.env['res.partner']
+            e = expression.expression(self._context.get('search_option'), res_partner)
+            res_partner_where_clause, res_partner_where_params = e.to_sql()
+            res_partner_where_clause_query += ' AND ' + res_partner_where_clause
+            for res_partner_where_param in res_partner_where_params:
+                arg_list += (tuple([res_partner_where_param]))
         query = '''
             SELECT DISTINCT l.partner_id, UPPER(res_partner.name)
             FROM account_move_line AS l left join res_partner on l.partner_id = res_partner.id, account_account, account_move am
@@ -58,7 +61,7 @@ class ReportAgedPartnerBalance(models.AbstractModel):
                 AND ''' + reconciliation_clause + '''
                 AND (l.date <= %s)
                 AND l.company_id = %s
-                ''' + partner_search_clause + '''
+                ''' + res_partner_where_clause_query + '''
             ORDER BY UPPER(res_partner.name)'''
         cr.execute(query, arg_list)
 
