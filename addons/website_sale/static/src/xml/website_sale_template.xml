@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates>
+	<t t-name="product_variant_image_thumbnail">
+        <t t-foreach="variant_image_ids" t-as="pimg">
+            <div t-attf-class="mt4 o_website_sale_thumbnail#{pimg_index == 0 and ' active' or ''}">
+                <i class="fa fa-times o_website_sale_delete_img css_non_editable_mode_hidden o_not_editable"/>
+                <img class="img img-responsive" t-attf-src="/website/image/product.image/{{pimg}}/image/45x45" t-att-alt="pimg.name"/>
+            </div>
+        </t>
+    </t>
+</templates>

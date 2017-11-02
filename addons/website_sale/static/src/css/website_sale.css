@@ -680,3 +680,13 @@ a.no-decoration {
 .o_shadow_animation {
   box-shadow: 0 0 5px 10px rgba(240, 8, 0, 0.4) !important;
 }
+
+.o_website_sale_thumbnail {
+  opacity: 0.5;
+  border: 2px solid #cccccc;
+  width: 45px;
+}
+.o_website_sale_thumbnail:hover, .o_website_sale_thumbnail.active {
+  opacity: 1;
+  border-color: #a8a8a8;
+}

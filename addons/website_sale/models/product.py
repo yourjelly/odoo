@@ -259,6 +259,7 @@ class ProductAttributeValue(models.Model):
 
 class ProductImage(models.Model):
     _name = 'product.image'
+    _order = 'id desc'
 
     name = fields.Char('Name')
     image = fields.Binary('Image', attachment=True)

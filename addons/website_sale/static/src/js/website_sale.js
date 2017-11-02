@@ -77,7 +77,10 @@ odoo.define('website_sale.website_sale', function (require) {
     var core = require('web.core');
     var config = require('web.config');
     require("website.content.zoomodoo");
+
     var _t = core._t;
+    var QWeb = core.qweb;
+    var xml_load = ajax.loadXML('/website_sale/static/src/xml/website_sale_template.xml', QWeb);
 
     if(!$('.oe_website_sale').length) {
         return $.Deferred().reject("DOM doesn't contain '.oe_website_sale'");
@@ -252,6 +255,24 @@ odoo.define('website_sale.website_sale', function (require) {
             $('.css_attribute_color:has(input:checked)').addClass("active");
         });
 
+        // gallery snippet image changes
+        $(oe_website_sale).on('click', '#o_website_sale_product_images .o_website_sale_thumbnail', function (ev) {
+            var $img = $(this).find('img');
+            $(this).closest('#o_website_sale_product_images').find('.o_website_sale_thumbnail').removeClass('active');
+            $(this).addClass('active');
+            var $mainImg = $(oe_website_sale).find('.o_website_sale_main_img img');
+            // need a proper fix for slice
+            $mainImg.attr("src", $img.attr('src').slice('/', -6));
+            // $img.parent().attr('data-oe-model', 'product.product').attr('data-oe-id', product_id)
+                // .data('oe-model', 'product.product').data('oe-id', product_id);
+
+            // reset zooming constructs
+            $mainImg.filter('[data-zoom-image]').attr('data-zoom-image', $img.attr('src').slice('/', -6));
+            if ($mainImg.data('zoomOdoo') !== undefined) {
+                $mainImg.data('zoomOdoo').isReady = false;
+            }
+        });
+
         function price_to_str(price) {
             var l10n = _t.database.parameters;
             var precision = 2;
@@ -302,6 +323,7 @@ odoo.define('website_sale.website_sale', function (require) {
         });
 
         $(oe_website_sale).on('change', 'input.js_variant_change, select.js_variant_change, ul[data-attribute_value_ids]', function (ev) {
+            // debugger;
             var $ul = $(ev.target).closest('.js_add_cart_variants');
             var $parent = $ul.closest('.js_product');
             var $product_id = $parent.find('.product_id').first();
@@ -338,7 +360,7 @@ odoo.define('website_sale.website_sale', function (require) {
                         $default_price.parent().addClass('hidden');
                     }
                     product_id = variant_ids[k][0];
-                    update_product_image(this, product_id);
+                    // update_product_image(this, product_id);
                     break;
                 }
             }
@@ -362,6 +384,12 @@ odoo.define('website_sale.website_sale', function (require) {
             });
 
             if (product_id) {
+                xml_load.then(function() {
+                    var variant_images = eval($(oe_website_sale).find('#o_website_sale_product_images').data('variant_images'));
+                    var $variants = $(QWeb.render('product_variant_image_thumbnail', {'variant_image_ids': variant_images[0][product_id]}));
+                    $(oe_website_sale).find('.o_website_product_variant_images').empty().append($variants);
+                })
+
                 $parent.closest("#product_detail").data('id', product_id);
                 $parent.removeClass("css_not_available");
                 $product_id.val(product_id);
