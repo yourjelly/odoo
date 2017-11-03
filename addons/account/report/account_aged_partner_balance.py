@@ -6,6 +6,7 @@ from odoo.exceptions import UserError
 from odoo.tools import float_is_zero
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from odoo.osv import expression
 
 
 class ReportAgedPartnerBalance(models.AbstractModel):
@@ -43,14 +44,11 @@ class ReportAgedPartnerBalance(models.AbstractModel):
             reconciliation_clause = '(l.reconciled IS FALSE OR l.id IN %s)'
             arg_list += (tuple(reconciled_after_date),)
         arg_list += (date_from, user_company)
-        if self._context.get('search_option'):
-            from odoo.osv import expression
-            res_partner = self.env['res.partner']
-            e = expression.expression(self._context.get('search_option'), res_partner)
+        if self._context.get('search_domain'):
+            e = expression.expression(self._context.get('search_domain'), self.env['res.partner'])
             res_partner_where_clause, res_partner_where_params = e.to_sql()
             res_partner_where_clause_query += ' AND ' + res_partner_where_clause
-            for res_partner_where_param in res_partner_where_params:
-                arg_list += (tuple([res_partner_where_param]))
+            arg_list += tuple(res_partner_where_params)
         query = '''
             SELECT DISTINCT l.partner_id, UPPER(res_partner.name)
             FROM account_move_line AS l left join res_partner on l.partner_id = res_partner.id, account_account, account_move am
