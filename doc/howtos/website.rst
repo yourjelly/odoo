@@ -50,8 +50,8 @@ Although it does absolutely nothing we can install it:
 
 * go to http://localhost:8069
 * create a new database including demonstration data
-* to go :menuselection:`Settings --> Modules --> Modules`
-* in the top-right corner remove the *Installed* filter and search for
+* to go :menuselection:`Apps`
+* in the top-right corner remove the *Apps* filter and search for
   *academy*
 * click the :guilabel:`Install` button for the *Academy* module
 

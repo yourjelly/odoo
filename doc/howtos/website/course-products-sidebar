@@ -4,7 +4,7 @@
 
 diff --git a/academy/templates.xml b/academy/templates.xml
 --- a/academy/templates.xml
-+++ b/academy/templates.xml
++++ b/academy/views/templates.xml
 @@ -35,6 +35,10 @@
              </xpath>
          </template>

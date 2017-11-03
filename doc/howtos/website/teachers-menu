@@ -8,8 +8,8 @@ diff --git a/academy/__manifest__.py b/academy/__manifest__.py
 @@ -26,6 +26,7 @@
      'data': [
          'security/ir.model.access.csv',
-         'templates.xml',
-+        'views.xml',
+         'views/templates.xml',
++        'views/views.xml',
      ],
      # only loaded in demonstration mode
      'demo': [

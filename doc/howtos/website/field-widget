@@ -2,9 +2,9 @@
 # Parent c3d04f578b762612422e09777e0ac5b3863d6ea6
 # Parent  0bc39fe6579c4e48b61e77bc970da2e1784f1a67
 
-diff --git a/academy/templates.xml b/academy/templates.xml
---- a/academy/templates.xml
-+++ b/academy/templates.xml
+diff --git a/academy/templates.xml b/academy/views/templates.xml
+--- a/academy/views/templates.xml
++++ b/academy/views/templates.xml
 @@ -21,7 +21,7 @@
                  <div class="oe_structure">
                      <div class="container">

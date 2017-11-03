@@ -7,16 +7,16 @@ diff --git a/academy/__manifest__.py b/academy/__manifest__.py
 +++ b/academy/__manifest__.py
 @@ -27,6 +27,7 @@
          'security/ir.model.access.csv',
-         'templates.xml',
-         'views.xml',
-+        'data.xml',
+         'views/templates.xml',
+         'views/views.xml',
++        'demo/demo.xml',    
      ],
      # only loaded in demonstration mode
      'demo': [
-diff --git a/academy/data.xml b/academy/data.xml
+diff --git a/academy/data.xml b/academy/data/data.xml
 new file mode 100644
 --- /dev/null
-+++ b/academy/data.xml
++++ b/academy/demo/data.xml
 @@ -0,0 +1,6 @@
 +<odoo>
 +  <record model="product.public.category" id="category_courses">
@@ -26,7 +26,7 @@ new file mode 100644
 +</odoo>
 diff --git a/academy/demo.xml b/academy/demo.xml
 --- a/academy/demo.xml
-+++ b/academy/demo.xml
++++ b/academy/demo/demo.xml
 @@ -10,4 +10,29 @@
              <field name="name">Lester Vaughn</field>
          </record>
@@ -59,7 +59,7 @@ diff --git a/academy/demo.xml b/academy/demo.xml
  </odoo>
 diff --git a/academy/models.py b/academy/models.py
 --- a/academy/models.py
-+++ b/academy/models.py
++++ b/academy/models/models.py
 @@ -8,11 +8,9 @@ class Teachers(models.Model):
      name = fields.Char()
      biography = fields.Html()
@@ -83,7 +83,7 @@ diff --git a/academy/security/ir.model.access.csv b/academy/security/ir.model.ac
 -access_academy_courses,access_academy_courses,model_academy_courses,,1,0,0,0
 diff --git a/academy/views.xml b/academy/views.xml
 --- a/academy/views.xml
-+++ b/academy/views.xml
++++ b/academy/views/views.xml
 @@ -26,55 +26,9 @@
      </field>
    </record>
