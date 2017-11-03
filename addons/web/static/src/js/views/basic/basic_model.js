@@ -1121,6 +1121,7 @@ var BasicModel = AbstractModel.extend({
                 defs.push(this._applyX2ManyChange(record, fieldName, changes[fieldName], options.viewType));
             } else if (field.type === 'many2one' || field.type === 'reference') {
                 defs.push(this._applyX2OneChange(record, fieldName, changes[fieldName]));
+                record._isDirty = false;
             } else {
                 record._changes[fieldName] = changes[fieldName];
             }
