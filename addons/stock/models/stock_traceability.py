@@ -26,7 +26,7 @@ class MrpStockReport(models.TransientModel):
             # if MTO
             if move_line.move_id.move_orig_ids:
                 res |= move_line.move_id.move_orig_ids.mapped('move_line_ids').filtered(
-                    lambda m: m.lot_id.id == move_line.lot_id.id)
+                    lambda m: m.lot_id.id == move_line.lot_id.id and m.state == 'done')
             # if MTS
             else:
                 if move_line.location_id.usage == 'internal':
@@ -36,6 +36,7 @@ class MrpStockReport(models.TransientModel):
                         ('location_dest_id', '=', move_line.location_id.id),
                         ('id', '!=', move_line.id),
                         ('date', '<', move_line.date),
+                        ('state', '=', 'done')
                     ])
         if res:
             res |= self.get_move_lines_upstream(res)
@@ -48,7 +49,7 @@ class MrpStockReport(models.TransientModel):
             # if MTO
             if move_line.move_id.move_dest_ids:
                 res |= move_line.move_id.move_dest_ids.mapped('move_line_ids').filtered(
-                    lambda m: m.lot_id.id == move_line.lot_id.id)
+                    lambda m: m.lot_id.id == move_line.lot_id.id and m.state == 'done')
             # if MTS
             else:
                 if move_line.location_dest_id.usage == 'internal':
@@ -58,6 +59,7 @@ class MrpStockReport(models.TransientModel):
                         ('location_id', '=', move_line.location_dest_id.id),
                         ('id', '!=', move_line.id),
                         ('date', '>', move_line.date),
+                        ('state', '=', 'done')
                     ])
         if res:
             res |= self.get_move_lines_downstream(res)
