@@ -75,7 +75,6 @@
     ],
     'test': [
         'test/procrule.yml',
-        'test/wiseoperator.yml',
     ],
     'installable': True,
     'application': True,

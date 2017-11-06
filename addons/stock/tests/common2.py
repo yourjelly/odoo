@@ -128,3 +128,11 @@ class TestStockCommon(common.TestProductCommon):
                             "uom_id": cls.uom_unit_id,
                             "uom_po_id": cls.uom_unit_id,
                     })
+
+        cls.product_wise = cls.Product.create({
+            'name': 'Wise Unit',
+            'type': 'product',
+            'categ_id': cls.category,
+            'uom_id': cls.uom_unit_id,
+            'uom_po_id': cls.uom_unit_id
+        })
