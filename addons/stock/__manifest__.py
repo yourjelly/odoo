@@ -75,7 +75,6 @@
     ],
     'test': [
         'test/stock_users.yml',
-        'test/packingneg.yml',
         'test/procrule.yml',
         'test/wiseoperator.yml',
     ],
