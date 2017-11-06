@@ -822,7 +822,7 @@ class Orderpoint(models.Model):
             JOIN product_template AS template ON template.id = product.product_tmpl_id
             LEFT JOIN stock_move AS move ON move.procurement_id = procurement.id
             WHERE procurement.state not in ('done', 'cancel')
-                AND (move.state IS NULL OR move.state != 'draft')
+                AND (move.state IS NULL OR move.state not in ('draft', 'cancel'))
                 AND orderpoint.id IN %s
             ORDER BY orderpoint.id, procurement.id
         """, (tuple(self.ids),))
