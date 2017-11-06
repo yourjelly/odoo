@@ -74,7 +74,6 @@
         'static/src/xml/stock_traceability_report_backend.xml',
     ],
     'test': [
-        'test/stock_users.yml',
         'test/procrule.yml',
         'test/wiseoperator.yml',
     ],
