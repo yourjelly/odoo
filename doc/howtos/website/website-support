@@ -14,9 +14,9 @@ diff --git a/academy/__manifest__.py b/academy/__manifest__.py
  
      # always loaded
      'data': [
-diff --git a/academy/controllers.py b/academy/controllers.py
---- a/academy/controllers.py
-+++ b/academy/controllers.py
+diff --git a/academy/controllers/controllers.py b/academy/controllers/controllers.py
+--- a/academy/controllers/controllers.py
++++ b/academy/controllers/controllers.py
 @@ -2,7 +2,7 @@
  from odoo import http
  
@@ -26,9 +26,9 @@ diff --git a/academy/controllers.py b/academy/controllers.py
      def index(self, **kw):
          Teachers = http.request.env['academy.teachers']
          return http.request.render('academy.index', {
-diff --git a/academy/templates.xml b/academy/templates.xml
---- a/academy/templates.xml
-+++ b/academy/templates.xml
+diff --git a/academy/views/templates.xml b/academy/views/templates.xml
+--- a/academy/views/templates.xml
++++ b/academy/views/templates.xml
 @@ -1,9 +1,15 @@
  <odoo>
  

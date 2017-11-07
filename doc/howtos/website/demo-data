@@ -2,8 +2,8 @@
 # Parent c77aa2c3341b9ab3a4e9ed05874e8a278fe69453
 # Parent  f416ab6c60f9cb3a803d30ff4dbff880eaa44a65
 
-diff --git a/academy/demo.xml b/academy/demo/demo.xml
---- a/academy/demo.xml
+diff --git a/academy/demo/demo.xml b/academy/demo/demo.xml
+--- a/academy/demo/demo.xml
 +++ b/academy/demo/demo.xml
 @@ -1,25 +1,13 @@
  <odoo>

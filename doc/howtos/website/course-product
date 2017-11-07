@@ -13,7 +13,7 @@ diff --git a/academy/__manifest__.py b/academy/__manifest__.py
      ],
      # only loaded in demonstration mode
      'demo': [
-diff --git a/academy/data.xml b/academy/data/data.xml
+diff --git a/academy/demo/data.xml b/academy/demo/data.xml
 new file mode 100644
 --- /dev/null
 +++ b/academy/demo/data.xml
@@ -24,8 +24,8 @@ new file mode 100644
 +    <field name="parent_id" ref="website_sale.categ_others"/>
 +  </record>
 +</odoo>
-diff --git a/academy/demo.xml b/academy/demo.xml
---- a/academy/demo.xml
+diff --git a/academy/demo/demo.xml b/academy/demo/demo.xml
+--- a/academy/demo/demo.xml
 +++ b/academy/demo/demo.xml
 @@ -10,4 +10,29 @@
              <field name="name">Lester Vaughn</field>
@@ -57,8 +57,8 @@ diff --git a/academy/demo.xml b/academy/demo.xml
 +        </record>
 +
  </odoo>
-diff --git a/academy/models.py b/academy/models.py
---- a/academy/models.py
+diff --git a/academy/models/models.py b/academy/models/models.py
+--- a/academy/models/models.py
 +++ b/academy/models/models.py
 @@ -8,11 +8,9 @@ class Teachers(models.Model):
      name = fields.Char()
@@ -81,8 +81,8 @@ diff --git a/academy/security/ir.model.access.csv b/academy/security/ir.model.ac
  id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
  access_academy_teachers,access_academy_teachers,model_academy_teachers,,1,0,0,0
 -access_academy_courses,access_academy_courses,model_academy_courses,,1,0,0,0
-diff --git a/academy/views.xml b/academy/views.xml
---- a/academy/views.xml
+diff --git a/academy/views/views.xml b/academy/views/views.xml
+--- a/academy/views/views.xml
 +++ b/academy/views/views.xml
 @@ -26,55 +26,9 @@
      </field>

@@ -2,9 +2,9 @@
 # Parent 78b4476f35cbef86ee4f858daf843e3b932fb9fa
 # Parent  0a4f5e3206a0738201a40d2d1a88f41fdbbc98bf
 
-diff --git a/academy/controllers.py b/academy/academy/controllers.py
---- a/academy/controllers.py
-+++ b/academy/academy/controllers.py
+diff --git a/academy/controllers/controllers.py b/academy/controllers/controllers.py
+--- a/academy/controllers/controllers.py
++++ b/academy/controllers/controllers.py
 @@ -1,10 +1,10 @@
  # -*- coding: utf-8 -*-
  from odoo import http

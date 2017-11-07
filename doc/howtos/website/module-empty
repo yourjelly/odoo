@@ -124,10 +124,10 @@ new file mode 100644
 @@ -0,0 +1,2 @@
 +id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 +access_academy_academy,academy.academy,model_academy_academy,,1,0,0,0
-diff --git a/academy/templates/templates.xml b/academy/templates/templates.xml
+diff --git a/academy/views/templates.xml b/academy/views/templates.xml
 new file mode 100644
 --- /dev/null
-+++ b/academy/templates/templates.xml
++++ b/academy/views/templates.xml
 @@ -0,0 +1,22 @@
 +<odoo>
 +

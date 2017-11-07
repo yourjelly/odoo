@@ -13,10 +13,10 @@ diff --git a/academy/__manifest__.py b/academy/__manifest__.py
      ],
      # only loaded in demonstration mode
      'demo': [
-diff --git a/academy/views.xml b/academy/views.xml
+diff --git a/academy/views/views.xml b/academy/views/views.xml
 new file mode 100644
 --- /dev/null
-+++ b/academy/views.xml
++++ b/academy/views/views.xml
 @@ -0,0 +1,13 @@
 +<odoo>
 +

@@ -2,8 +2,8 @@
 # Parent 957395d27f63dfdb2ea0dacdbe72bc35e724ddcc
 # Parent  7156498d3cffb6128e73da2e351f2b5af5f7be63
 
-diff --git a/academy/models.py b/academy/models/models.py
---- a/academy/models.py
+diff --git a/academy/models/models.py b/academy/models/models.py
+--- a/academy/models/models.py
 +++ b/academy/models/models.py
 @@ -12,6 +12,7 @@ class Teachers(models.Model):
  
@@ -13,8 +13,8 @@ diff --git a/academy/models.py b/academy/models/models.py
  
      name = fields.Char()
      teacher_id = fields.Many2one('academy.teachers', string="Teacher")
-diff --git a/academy/views.xml b/academy/views/views.xml
---- a/academy/views.xml
+diff --git a/academy/views/views.xml b/academy/views/views.xml
+--- a/academy/views/views.xml
 +++ b/academy/views/views.xml
 @@ -61,6 +61,10 @@
            <label for="teacher_id"/>

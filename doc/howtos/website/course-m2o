@@ -2,8 +2,8 @@
 # Parent c3705f93fcea86a279f2c31204cc0c2914e784d8
 # Parent  8f2d190d879cdf6464bd61f7994b8b582befcafd
 
-diff --git a/academy/models.py b/academy/models/models.py
---- a/academy/models.py
+diff --git a/academy/models/models.py b/academy/models/models.py
+--- a/academy/models/models.py
 +++ b/academy/models/models.py
 @@ -7,3 +7,9 @@ class Teachers(models.Model):
  

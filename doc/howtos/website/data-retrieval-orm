@@ -2,8 +2,8 @@
 # Parent f0a3629abb17ca9f4dddd8885321d9ca5de14b55
 # Parent  4c1c3d77ba8ad35dc759405a0db39a6eae943b0f
 
-diff --git a/academy/controllers.py b/academy/controllers/controllers.py
---- a/academy/controllers.py
+diff --git a/academy/controllers/controllers.py b/academy/controllers/controllers.py
+--- a/academy/controllers/controllers.py
 +++ b/academy/controllers/controllers.py
 @@ -4,8 +4,9 @@ from odoo import http
  class Academy(http.Controller):
@@ -16,8 +16,8 @@ diff --git a/academy/controllers.py b/academy/controllers/controllers.py
          })
  
  #     @http.route('/academy/academy/objects/', auth='public')
-diff --git a/academy/templates.xml b/academy/views/templates.xml
---- a/academy/templates.xml
+diff --git a/academy/views/templates.xml b/academy/views/templates.xml
+--- a/academy/views/templates.xml
 +++ b/academy/views/templates.xml
 @@ -3,7 +3,7 @@
          <template id="index">
