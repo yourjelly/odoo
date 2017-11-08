@@ -15,11 +15,17 @@ class TestStockLandedCostsCommon(AccountingTestCase):
         # References
         self.supplier_id = self.ref('base.res_partner_2')
         self.customer_id = self.ref('base.res_partner_4')
+        # Picking Types
         self.picking_type_in_id = self.ref('stock.picking_type_in')
         self.picking_type_out_id = self.ref('stock.picking_type_out')
+        # Locations
         self.supplier_location_id = self.ref('stock.stock_location_suppliers')
         self.stock_location_id = self.ref('stock.stock_location_stock')
         self.customer_location_id = self.ref('stock.stock_location_customers')
+        # Unit of Measure
+        self.uom_unit_id = self.ref('product.product_uom_unit')
+        self.uom_dozen_id = self.ref('product.product_uom_dozen')
+        # Category
         self.categ_all = self.env.ref('product.product_category_all')
         # Create account
         self.default_account = self.env['account.account'].create({
@@ -68,3 +74,23 @@ class TestStockLandedCostsCommon(AccountingTestCase):
             'name': name,
             'landed_cost_ok': True,
             'type': 'service'})
+
+    def _create_shipment(self, product, uom_id, picking_type_id, location_src_id, location_dest_id, qty, price=1.0):
+        return self.Picking.create({
+            'name': 'Picking %s' % product.name,
+            'picking_type_id': picking_type_id,
+            'location_id': location_src_id,
+            'location_dest_id': location_dest_id,
+            'move_lines': [(0, 0, {
+                'name': product.name,
+                'product_id': product.id,
+                'product_uom_qty': qty,
+                'price_unit': price,
+                'product_uom':  uom_id,
+                'location_id': location_src_id,
+                'location_dest_id': location_dest_id,
+                })]
+            })
+
+    def _error_message(self, actual_cost, computed_cost):
+        return 'Additional Landed Cost should be %s instead of %s' % (actual_cost, computed_cost)
