@@ -357,7 +357,6 @@ class Website(models.Model):
         langs = []
         if req is None:
             req = request.httprequest
-        default = self.get_current_website().default_lang_code
         shorts = []
 
         def get_url_localized(router, lang):
@@ -369,7 +368,7 @@ class Website(models.Model):
 
         router = request.httprequest.app.get_db_router(request.db).bind('')
         for code, dummy in self.get_languages():
-            lg_path = ('/' + code) if code != default else ''
+            lg_path = ('/' + code)
             lg_codes = code.split('_')
             shorts.append(lg_codes[0])
             uri = get_url_localized(router, code) if request.endpoint else request.httprequest.path
