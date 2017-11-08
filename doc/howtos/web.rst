@@ -118,12 +118,8 @@ The files in the ``static`` folder, need to be defined within the module in orde
     individual files disappear and the code is made significantly less
     readable. It is possible to disable this process by enabling the
     "developer mode": log into your Odoo instance (user *admin* password
-    *admin* by default) open the user menu (in the top-right corner of the
-    Odoo screen) and select :guilabel:`About Odoo` then :guilabel:`Activate
-    the developer mode`:
-
-    .. image:: web/about_odoo.png
-        :align: center
+    *admin* by default) open the setting application and then select
+    :guilabel:`Activate the developer mode`:
 
     .. image:: web/devmode.png
         :align: center
