@@ -47,26 +47,30 @@ If you browse the ``petstore`` folder, you should see the following content:
 .. code-block:: text
 
     oepetstore
-    |-- images
-    |   |-- alligator.jpg
-    |   |-- ball.jpg
-    |   |-- crazy_circle.jpg
-    |   |-- fish.jpg
-    |   `-- mice.jpg
+    |-- data
+    |   `-- petstore_data.xml
+    |-- models
+    |   `-- petstore.py
+    |-- security
+    |   `-- oepetstore.message_of_the_day.csv
+    |-- static
+    |   |-- src
+    |       |-- css
+    |           `-- petstore.css
+    |       |-- js
+    |           `-- petstore.js
+    |       |-- xml
+    |           `-- petstore.xml
+    |       |-- images
+    |           |-- alligator.jpg
+    |           |-- ball.jpg
+    |           |-- crazy_circle.jpg
+    |           |-- fish.jpg
+    |           `-- mice.jpg
+    |-- views
+        `-- petstore.xml
     |-- __init__.py
-    |-- oepetstore.message_of_the_day.csv
     |-- __manifest__.py
-    |-- petstore_data.xml
-    |-- petstore.py
-    |-- petstore.xml
-    `-- static
-        `-- src
-            |-- css
-            |   `-- petstore.css
-            |-- js
-            |   `-- petstore.js
-            `-- xml
-                `-- petstore.xml
 
 The module already holds various server customizations. We'll come back to
 these later, for now let's focus on the web-related content, in the ``static``
