@@ -730,6 +730,8 @@ var FieldX2Many = AbstractField.extend({
         // values, the reset is skipped.
         if (!fieldChanged) {
            var newEval = this._evalColumnInvisibleFields();
+           console.log("New Val is ",newEval)
+           console.log("currentColInvisibleFields:",this.currentColInvisibleFields)
            if (_.isEqual(this.currentColInvisibleFields, newEval)) {
                return $.when();
            }
@@ -789,6 +791,7 @@ var FieldX2Many = AbstractField.extend({
                 size: this.value.count,
                 columnInvisibleFields: this.currentColInvisibleFields,
             });
+            console.log("----",this.pager.state.columnInvisibleFields)
             return $.when();
         }
         var arch = this.view.arch;
