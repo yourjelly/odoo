@@ -272,9 +272,6 @@ Possible children elements of the list view are:
 
         ``progressbar``
             displays ``float`` fields as a progress bar.
-        ``many2onebutton``
-            replaces the m2o field's value by a checkmark if the field is
-            filled, and a cross if it is not
         ``handle``
             for ``sequence`` fields, instead of displaying the field's value
             just displays a drag&drop icon
