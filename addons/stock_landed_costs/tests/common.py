@@ -8,6 +8,7 @@ class TestStockLandedCostsCommon(AccountingTestCase):
         super(TestStockLandedCostsCommon, self).setUp()
         # Objects
         self.Product = self.env['product.product']
+        self.ProductUom = self.env['product.uom']
         self.Picking = self.env['stock.picking']
         self.Move = self.env['stock.move']
         self.LandedCost = self.env['stock.landed.cost']
@@ -25,6 +26,7 @@ class TestStockLandedCostsCommon(AccountingTestCase):
         # Unit of Measure
         self.uom_unit_id = self.ref('product.product_uom_unit')
         self.uom_dozen_id = self.ref('product.product_uom_dozen')
+        self.product_uom_categ_unit = self.ref('product.product_uom_categ_unit')
         # Category
         self.categ_all = self.env.ref('product.product_category_all')
         # Create account
@@ -60,6 +62,12 @@ class TestStockLandedCostsCommon(AccountingTestCase):
             'weight': 20,
             'volume': 1.5,
             'categ_id': self.categ_all.id})
+        # Define undivisible units
+        self.product_uom_unit_round_1 = self.ProductUom.create({
+            'category_id': self.product_uom_categ_unit,
+            'name': "Uom Unit",
+            'factor': 1.0,
+            'rounding': 1.0})
         # Create service type product 1.Labour 2.Brokerage 3.Transportation 4.Packaging
         self.landed_cost = self._create_services('Landed Cost')
         self.brokerage_quantity = self._create_services('Brokerage Cost')
