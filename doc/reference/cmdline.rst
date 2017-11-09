@@ -27,10 +27,27 @@ Running the server
     comma-separated list of modules to update before running the server
     (requires :option:`-d`).
 
+.. option:: -P, --import-partial
+
+    Use this for big data importation, if it crashes you will be able to continue at the current state. Provide a filename to store intermediate importation states
+
+.. option:: --pidfile <file>
+
+    file where the server pid will be stored
+
 .. option:: --addons-path <directories>
 
     comma-separated list of directories in which modules are stored. These
     directories are scanned for modules (nb: when and why?)
+
+.. option:: --load <modules>
+
+    Comma-separated list of server-wide modules
+    Defaults to web
+
+.. option:: --D <directories>, --data-dir <directories>
+
+    Directory where to store Odoo data
 
 .. option:: --workers <count>
 
@@ -81,6 +98,11 @@ Running the server
 
         Defaults to 120.
 
+    .. option:: --limit-time-real-cron <count>
+
+        Maximum allowed Real time per cron job. (default: --limit-time-real).
+        Set to 0 for no limit.
+
 .. option:: --max-cron-threads <count>
 
     number of workers dedicated to cron jobs. Defaults to 2. The workers are
@@ -88,6 +110,14 @@ Running the server
 
     For multi-processing mode, this is in addition to the HTTP worker
     processes.
+
+.. option:: --unaccent
+
+    Use the unaccent function provided by the database when available.default is false
+
+.. option:: --geoip-db
+
+    Absolute path to the GeoIP database file default is '/usr/share/GeoIP/GeoLiteCity.dat.
 
 .. option:: -c <config>, --config <config>
 
@@ -127,6 +157,22 @@ Running the server
     * ``(i)p(u)db``: start the chosen python debugger in the code when an
       unexpected error is raised before logging and returning the error.
 
+.. option:: --shell-interface
+
+    Specify a preferred REPL to use in shell mode. Supported REPLs are [ipython|ptpython|bpython|python]
+
+.. option:: --stop-after-init
+
+    stop the server after its initialization
+
+.. option:: --osv-memory-count-limit <limit>
+
+    Force a limit on the maximum number of records kept in the virtual osv_memory tables. The default is False, which means no count-based limit
+
+.. option:: --osv-memory-age-limit <limit>
+
+    Force a limit on the maximum age of records kept in the virtual osv_memory tables. This is a decimal value expressed in hours,and the default is 1 hour.
+
 .. _reference/cmdline/server/database:
 
 database
@@ -140,6 +186,10 @@ database
 
     database password, if using `password authentication`_.
 
+.. option:: --pg_path <directories>
+
+    specify the pg executable path
+
 .. option:: --db_host <hostname>
 
     host for the database server
@@ -150,6 +200,17 @@ database
 .. option:: --db_port <port>
 
     port the database listens on, defaults to 5432
+
+.. option:: --db_sslmode <level>
+
+    levels (``critical``, ``disable``, ``allow``, ``prefer``, ``require``, ``verify-ca``, ``verify-full``)
+    specify the database ssl connection mode (see PostgreSQL documentation.default is prefer
+
+.. option:: --db_maxconn" <limit>
+
+    specify the the maximum number of physical connections to posgresql
+
+    default to 64,
 
 .. option:: --db-filter <filter>
 
@@ -199,6 +260,30 @@ built-in HTTP
     TCP port for long-polling connections in multiprocessing or gevent mode,
     defaults to 8072. Not used in default (threaded) mode.
 
+xmlrpc
+------
+
+.. option:: --xmlrpc-interface <interface>
+
+.. option:: --xmlrpc-port <port>
+
+.. option:: --no-xmlrpc
+
+Testing
+-------
+
+.. option:: --test-file <file>
+
+    Launch a python or YML test file
+
+.. option:: --test-report-directory <directory>
+
+    If set, will save sample of all reports in this directory.")
+
+.. option:: --test-commit
+
+    Commit database changes performed by YAML or XML tests
+
 logging
 -------
 
@@ -232,6 +317,11 @@ customize the amount of logging output
     logs to the ``ir.logging`` model (``ir_logging`` table) of the specified
     database. The database can be the name of a database in the "current"
     PostgreSQL, or `a PostgreSQL URI`_ for e.g. log aggregation
+
+.. option:: --log-db-level <level>
+
+    Logging database level
+    defaul to warn
 
 .. option:: --log-handler <handler-spec>
 
@@ -272,7 +362,7 @@ customize the amount of logging output
 .. option:: --log-level <level>
 
     Shortcut to more easily set predefined levels on specific loggers. "real"
-    levels (``critical``, ``error``, ``warn``, ``debug``) are set on the
+    levels (``critical``, ``error``, ``warn``, ``debug``, ``info``, ``debug_rpc``, ``warn``, ``test``,``debug_rpc_answer``, ``notset``) are set on the
     ``odoo`` and ``werkzeug`` loggers (except for ``debug`` which is only
     set on ``odoo``).
 
@@ -300,10 +390,25 @@ customize the amount of logging output
 
 translations
 ------------
+.. option:: --load-language
+
+    help="specifies the languages for the translations you want to be loaded
+
+.. option:: -l, --language <language>
+
+    specify the language of the translation file. Use it with --i18n-export or --i18n-import
 
 .. option:: --i18n-import
 
 .. option:: --i18n-export
+
+.. option:: --i18n-overwrite
+
+    overwrites existing translation terms on updating a module or importing a CSV or a PO file
+
+-- option:: --modules"
+
+    specify modules to export. Use in combination with --i18n-export
 
 emails
 ------
