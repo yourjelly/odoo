@@ -119,9 +119,14 @@ The files in the ``static`` folder, need to be defined within the module in orde
     readable. It is possible to disable this process by enabling the
     "developer mode": log into your Odoo instance (user *admin* password
     *admin* by default) open the setting application and then select
-    :guilabel:`Activate the developer mode`:
+    :guilabel:`Activate the developer mode` or with assets (development)
+    mode by selecting :guilabel:`Activate the developer mode (with assets)`
+    in the right the bottom side of setting app:
 
     .. image:: web/devmode.png
+        :align: center
+
+    .. image:: web/devmode_assets.png
         :align: center
 
     This will reload the web client with optimizations disabled, making
