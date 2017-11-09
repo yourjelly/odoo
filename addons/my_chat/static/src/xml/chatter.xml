@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+	<t t-name="my_chat.chatter">
+		<div class="my_chatter">
+			<div class="cwm">
+				<div class="username pull-left">
+					<i t-att-class=" 'fa fa-circle onlinestatus ' + widget.color " aria-hidden="true"></i>
+					<t t-esc="widget.recipientName" />
+				</div>
+				<a class="close_chatter pull-right"><i class="fa fa-times" aria-hidden="true"></i></a>
+			</div>
+			<div class="messagesDiv"/>
+			<span class="status"></span>
+			<input type="text" class="message_input"/>
+		</div>
+	</t>
+
+	<t t-name="my_chat.message">
+		<div>
+			<span><t t-esc="msg"></t></span>
+		</div>
+	</t>
+
+	<t t-name="my_chat.ChatterContainer">
+		<div class="chatter_container o_in_appswitcher"/>
+	</t>
+
+	<t t-name="my_chat.MessageChatterMenu">
+	    <li class="o_my_chat_menu">
+	        <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#">
+		    	<i class="fa fa-commenting-o" />
+	        </a>
+	        <ul class="dropdown-menu userList" role="menu"/>
+	    </li>
+	</t>
+
+	<t t-name="my_chat.MessageChatterUserList">
+		<li>
+			<a href="#" class="user_chat_select" t-att-data-id="id">
+				<i t-att-class=" 'fa fa-circle ' + color " aria-hidden="true"></i>
+				<t t-esc="username"/>
+			</a>
+		</li>
+	</t>
+</templates>

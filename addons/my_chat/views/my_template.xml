@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <template id="assets_backend" name="my_chat assets" inherit_id="web.assets_backend">
+            <xpath expr="." position="inside">
+                <link rel="stylesheet" href="/my_chat/static/src/less/chatter.less" type="text/less"/>
+                <script type="text/javascript" src="/my_chat/static/src/js/chatter.js"></script>
+                <script type="text/javascript" src="/my_chat/static/src/js/websockte.js" ></script>
+                <script type="text/javascript" src="/my_chat/static/src/js/systray.js" ></script>
+                <script type="text/javascript" src="/my_chat/static/src/js/contoller.js" ></script>
+                <script type="text/javascript" src="/my_chat/static/src/js/masterwebsockte.js" ></script>
+            </xpath>
+        </template>
+</odoo>
