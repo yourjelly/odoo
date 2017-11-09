@@ -272,9 +272,6 @@ Possible children elements of the list view are:
 
         ``progressbar``
             displays ``float`` fields as a progress bar.
-        ``many2onebutton``
-            replaces the m2o field's value by a checkmark if the field is
-            filled, and a cross if it is not
         ``handle``
             for ``sequence`` fields, instead of displaying the field's value
             just displays a drag&drop icon
@@ -416,6 +413,8 @@ system. Available semantic components are:
   ``readonly``
     display the field in both readonly and edition mode, but never make it
     editable
+  ``force_save``
+    save the changes even though its readonly field if field
   ``required``
     generates an error and prevents saving the record if the field doesn't
     have a value
