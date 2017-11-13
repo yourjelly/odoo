@@ -497,6 +497,7 @@ class ProductProduct(models.Model):
         if not currency and self._context.get('currency'):
             currency = self.env['res.currency'].browse(self._context['currency'])
 
+        price_extra = self.env.context.get('price_extra')
         products = self
         if price_type == 'standard_price':
             # standard_price field can only be seen by users in base.group_user
@@ -507,6 +508,8 @@ class ProductProduct(models.Model):
         prices = dict.fromkeys(self.ids, 0.0)
         for product in products:
             prices[product.id] = product[price_type] or 0.0
+            if price_extra:
+                prices[product.id] += price_extra
             if price_type == 'list_price':
                 prices[product.id] += product.price_extra
 

@@ -116,23 +116,8 @@ class SaleOrder(models.Model):
         product_context = dict(self.env.context)
         product_context.setdefault('lang', order.partner_id.lang)
         product = self.env['product.product'].with_context(product_context).browse(product_id)
-
-        name = product.display_name
-
-        # add untracked attributes in the name
-        untracked_attributes = []
-        for k, v in attributes.items():
-            # attribute should be like 'attribute-48-1' where 48 is the product_id, 1 is the attribute_id and v is the attribute value
-            attribute_value = self.env['product.attribute.value'].sudo().browse(int(v))
-            if attribute_value and not attribute_value.attribute_id.create_variant:
-                untracked_attributes.append(attribute_value.name)
-        if untracked_attributes:
-            name += '\n%s' % (', '.join(untracked_attributes))
-
-        if product.description_sale:
-            name += '\n%s' % (product.description_sale)
-
-        return name
+        attribute_values = [ self.env['product.attribute.value'].sudo().browse(int(v)) for k, v in attributes.items()]
+        return self.env['sale.order.line']._get_description_with_attribue_value(product, attribute_values)
 
     @api.multi
     def _cart_update(self, product_id=None, line_id=None, add_qty=0, set_qty=0, attributes=None, **kwargs):
@@ -150,8 +135,25 @@ class SaleOrder(models.Model):
 
         # Create line if no line with product_id can be located
         if not order_line:
+            name = self._get_line_description(self.id, product_id, attributes=attributes)
             values = self._website_product_id_change(self.id, product_id, qty=1)
-            values['name'] = self._get_line_description(self.id, product_id, attributes=attributes)
+            values['name'] = name
+            if attributes:
+                attribute_lines = []
+                sale_attributes = self.env['sale.attributes'].create({'product_id': product_id})
+                for attribute_value_id in attributes.values():
+                    # attribute should be like 'attribute-48-1' where 48 is the product_id, 1 is the attribute_id and attribute_value_id is the attribute value
+                    attribute_value = self.env['product.attribute.value'].sudo().browse(int(attribute_value_id))
+                    if attribute_value and not attribute_value.attribute_id.create_variant:
+                        product_tmpl_id = self.env['product.product'].sudo().browse(product_id).product_tmpl_id
+                        existing_vaue_line = ProductAttributeValueLine.search([('value_id', '=', attribute_value.id), ('product_tmpl_id', '=', product_tmpl_id.id)])
+                        if not existing_vaue_line:
+                            existing_vaue_line |= ProductAttributeValueLine.create({'value_id': attribute_value.id,
+                                'product_tmpl_id': product_tmpl_id.id, 'attribute_id': attribute_value.attribute_id.id})
+                        self.env['sale.attribute.lines'].create({'attribute_id': existing_vaue_line.attribute_id.id,
+                            'value_id':  existing_vaue_line.value_id.id, 'attribute_value_line_id': existing_vaue_line.id, 'sale_attributes_id': sale_attributes.id })
+
+                values['sale_attributes_id'] = sale_attributes.id
             order_line = SaleOrderLineSudo.create(values)
 
             try:

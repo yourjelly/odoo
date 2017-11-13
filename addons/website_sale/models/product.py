@@ -222,10 +222,10 @@ class ProductAttributeValue(models.Model):
                              "specific HTML color index (e.g. #ff0000) to display the color on the website if the "
                              "attibute type is 'Color'.")
 
-
 class ProductImage(models.Model):
     _name = 'product.image'
 
     name = fields.Char('Name')
     image = fields.Binary('Image', attachment=True)
     product_tmpl_id = fields.Many2one('product.template', 'Related Product', copy=True)
+    value_ids = fields.Many2many('product.attribute.value', string='Product Attribute Value')

@@ -825,6 +825,8 @@ class SaleOrderLine(models.Model):
     def create(self, values):
         values.update(self._prepare_add_missing_fields(values))
         line = super(SaleOrderLine, self).create(values)
+        if line.sale_attributes_id:
+            line.sale_attributes_id.sale_order_line_id = line.id
         if line.order_id.state == 'sale':
             msg = _("Extra line with %s ") % (line.product_id.display_name,)
             line.order_id.message_post(body=msg)
@@ -855,6 +857,9 @@ class SaleOrderLine(models.Model):
             self.filtered(
                 lambda r: r.state == 'sale' and float_compare(r.product_uom_qty, values['product_uom_qty'], precision_digits=precision) != 0)._update_line_quantity(values)
         result = super(SaleOrderLine, self).write(values)
+        for line in self:
+            if line.sale_attributes_id:
+                line.sale_attributes_id.sale_order_line_id = line.id
         return result
 
     order_id = fields.Many2one('sale.order', string='Order Reference', required=True, ondelete='cascade', index=True, copy=False)
@@ -924,6 +929,8 @@ class SaleOrderLine(models.Model):
     layout_category_sequence = fields.Integer(string='Layout Sequence')
     # TODO: remove layout_category_sequence in master or make it work properly
 
+    sale_attributes_id = fields.Many2one('sale.attributes', string="Attributes")
+
     @api.multi
     def _prepare_invoice_line(self, qty):
         """
@@ -986,10 +993,11 @@ class SaleOrderLine(models.Model):
     @api.multi
     def _get_display_price(self, product):
         # TO DO: move me in master/saas-16 on sale.order
+        price_extra = self.sale_attributes_id.price_extra
         if self.order_id.pricelist_id.discount_policy == 'with_discount':
-            return product.with_context(pricelist=self.order_id.pricelist_id.id).price
-        final_price, rule_id = self.order_id.pricelist_id.get_product_price_rule(self.product_id, self.product_uom_qty or 1.0, self.order_id.partner_id)
-        context_partner = dict(self.env.context, partner_id=self.order_id.partner_id.id, date=self.order_id.date_order)
+            return product.with_context(pricelist=self.order_id.pricelist_id.id, price_extra=price_extra).price
+        final_price, rule_id = self.order_id.pricelist_id.get_product_price_rule(self.product_id.with_context(price_extra=price_extra), self.product_uom_qty or 1.0, self.order_id.partner_id)
+        context_partner = dict(self.env.context, partner_id=self.order_id.partner_id.id, date=self.order_id.date_order, price_extra=price_extra)
         base_price, currency_id = self.with_context(context_partner)._get_real_price_currency(self.product_id, rule_id, self.product_uom_qty, self.product_uom, self.order_id.pricelist_id.id)
         if currency_id != self.order_id.pricelist_id.currency_id.id:
             base_price = self.env['res.currency'].browse(currency_id).with_context(context_partner).compute(base_price, self.order_id.pricelist_id.currency_id)
@@ -1061,6 +1069,38 @@ class SaleOrderLine(models.Model):
                 fiscal_position=self.env.context.get('fiscal_position')
             )
             self.price_unit = self.env['account.tax']._fix_tax_included_price_company(self._get_display_price(product), product.taxes_id, self.tax_id, self.company_id)
+
+    @api.onchange('sale_attributes_id')
+    def sale_attributes_change(self):
+        if not self.product_id:
+            self.price_unit = 0.0
+            return
+
+        if self.order_id.pricelist_id and self.order_id.partner_id:
+            product = self.product_id.with_context(
+                lang=self.order_id.partner_id.lang,
+                partner=self.order_id.partner_id.id,
+                quantity=self.product_uom_qty,
+                date=self.order_id.date_order,
+                pricelist=self.order_id.pricelist_id.id,
+                uom=self.product_uom.id,
+                fiscal_position=self.env.context.get('fiscal_position'),
+            )
+            attribute_values = [ line.value_id for line in self.sale_attributes_id.attribute_lines]
+            self.name = self._get_description_with_attribue_value(product, attribute_values)
+            self.price_unit = self.env['account.tax']._fix_tax_included_price_company(self._get_display_price(product), product.taxes_id, self.tax_id, self.company_id)
+
+    @api.model
+    def _get_description_with_attribue_value(self, product, attribute_values=None):
+        name = product.display_name
+        untracked_attribute_values = []
+        for attribute_value in attribute_values:
+            untracked_attribute_values.append(attribute_value.name)
+        if untracked_attribute_values:
+            name += '\n%s' % (', '.join(untracked_attribute_values))
+        if product.description_sale:
+            name += '\n%s' % (product.description_sale)
+        return name
 
     @api.multi
     def name_get(self):
@@ -1141,6 +1181,9 @@ class SaleOrderLine(models.Model):
         else:
             uom_factor = 1.0
 
+        price_extra = self.env.context.get('price_extra')
+        if price_extra and field_name == 'lst_price':
+            product[field_name] += price_extra
         return product[field_name] * uom_factor * cur_factor, currency_id.id
 
     @api.onchange('product_id', 'price_unit', 'product_uom', 'product_uom_qty', 'tax_id')

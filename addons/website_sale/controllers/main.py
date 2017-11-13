@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import json
 import logging
+import itertools
 from werkzeug.exceptions import Forbidden
 
 from odoo import http, tools, _
@@ -145,14 +146,34 @@ class WebsiteSale(http.Controller):
         visible_attrs_ids = product.attribute_line_ids.filtered(lambda l: len(l.value_ids) > 1).mapped('attribute_id').ids
         to_currency = request.website.get_current_pricelist().currency_id
         attribute_value_ids = []
-        for variant in product.product_variant_ids:
-            if to_currency != product.currency_id:
-                price = variant.currency_id.compute(variant.website_public_price, to_currency) / quantity
-            else:
-                price = variant.website_public_price / quantity
-            visible_attribute_ids = [v.id for v in variant.attribute_value_ids if v.attribute_id.id in visible_attrs_ids]
-            attribute_value_ids.append([variant.id, visible_attribute_ids, variant.website_price, price])
-        return attribute_value_ids
+        price_extra = 0.0
+        AttributeValues = request.env['product.attribute.value']
+        AttributeValueLines = request.env['product.attribute.value.line']
+        attribute_value_lines = AttributeValueLines.search([('product_tmpl_id', '=', product.id)])
+        # iterator of n-uple of product.attribute.value *ids*
+        no_variant_attribute_values = [
+            AttributeValues.browse(value_ids)
+            for value_ids in itertools.product(*(line.value_ids.ids for line in product.attribute_line_ids 
+                if line.attribute_id.id in visible_attrs_ids and not line.attribute_id.create_variant))
+        ]
+        for no_attr_values in no_variant_attribute_values:
+            for variant in product.product_variant_ids:
+                if to_currency != product.currency_id:
+                    price = variant.currency_id.compute(variant.website_public_price, to_currency) / quantity
+                else:
+                    price = variant.website_public_price / quantity
+                attribute_values = variant.attribute_value_ids | no_attr_values
+                exclude_attribute_value_ids = attribute_value_lines.filtered(lambda l: l.value_id.id in attribute_values.ids).mapped('excluded_value_ids').ids
+                if any( value.id in exclude_attribute_value_ids for value in attribute_values):
+                    continue
+                if no_attr_values:
+                    attribute_prices = request.env['product.attribute.price'].search([('product_tmpl_id', '=', variant.product_tmpl_id.id),
+                        ('value_id', 'in', no_attr_values.ids)])
+                    price_extra = sum(attribute_prices.mapped('price_extra'))
+                visible_attribute_ids = [v.id for v in attribute_values if v.attribute_id.id in visible_attrs_ids]
+                attribute_value_ids.append([variant.id, visible_attribute_ids, variant.with_context(price_extra=price_extra).website_price, price])
+        return  attribute_value_ids
+
 
     def _get_search_order(self, post):
         # OrderBy will be parsed in orm and so no direct sql injection
