@@ -17,7 +17,7 @@ Ready to create your own theme? Great. Here are some things you should know befo
 An introduction for web designers
 =================================
 
-If you are a web designer using Odoo for the first time, you are in the right place.
+If you are a web designer using Odoo for the first time, You are on the right place.
 This introduction will outline the basics of Odoo theme creation.
 
 .. note::
@@ -91,7 +91,7 @@ Odoo default theme structure
 Thinking "modular"
 ==================
 
-An Odoo theme is not a folder containing HTML or PHP files, it’s a modular framework written in XML. Never worked with XML files before? Don’t worry, after following the tutorial, you’ll be able to create your first theme with only basic knowledge of HTML.
+An Odoo theme is not a folder that containing HTML or PHP files, it’s a modular framework written in XML. Never worked with XML files before? Don’t worry, after following the tutorial, you’ll be able to create your first theme with only basic knowledge of HTML.
 
 Using classical web design workflows, you usually code the layout of the entire page. The result of this is a “static” web page. You can update the content, of course, but your client will need you to work on making even basic changes.
 
@@ -172,7 +172,7 @@ Almost every element and option that you create has to be placed inside a ``<tem
    defines a piece of html code or options - but it does not
    necessarily coincide with a visual arrangement of elements.
 
-The previous code defines a title, but it will not be displayed
+The previous code defines a title, but it will be not displayed
 anywhere because that *template* is not associated with any part of
 the **Odoo default structure**.  In order to do that you can use
 **xpath**, **qWeb** or a combination of both.
@@ -371,23 +371,30 @@ Imagine that we want to create a specific layout for a Services page.
 For this page, we need to add a list of services to the top and give the client the possibility of setting the rest of the page’s layout using snippets.
 
 Inside your *views* folder, create a **pages.xml** file and add the
-default Odoo markup.  Inside ``<odoo>`` create a ``<template>`` tag, set the
-``page`` attribute to ``True`` and add your code into it.
+default Odoo markup.  Inside ``<odoo>`` create a ``<template>`` tag and add your code into it. Also create entry into
+Website Pages ``id="website.services"``.
 
 .. code-block:: xml
 
    <?xml version="1.0" encoding="utf-8" ?>
    <odoo>
 
-       <!-- === Services Page === -->
-       <template name="Services page" id="website.services" page="True">
-         <h1>Our Services</h1>
-           <ul class="services">
-             <li>Cloud Hosting</li>
-             <li>Support</li>
-             <li>Unlimited space</li>
-           </ul>
-         </template>
+        <!-- === Services Page === -->
+        <template name="Services page" id="website.services">
+          <h1>Our Services</h1>
+          <ul class="services">
+            <li>Cloud Hosting</li>
+            <li>Support</li>
+            <li>Unlimited space</li>
+          </ul>
+        </template>
+
+        <!-- === Website Pages === -->
+        <record id="service_page" model="website.page">
+          <field name="website_published">True</field>
+          <field name="url">/services</field>
+          <field name="view_id" ref="services" />
+        </record>
 
      </odoo>
 
@@ -399,8 +406,8 @@ html code into a ``<t>`` tag, like in this example.
 
 .. code-block:: xml
 
-   <!-- === Services Page === -->
-   <template name="Services page" id="website.services" page="True">
+    <!-- === Services Page === -->
+    <template name="Services page" id="website.services">
      <t t-call="website.layout">
        <div id="wrap">
          <div class="container">
@@ -414,6 +421,13 @@ html code into a ``<t>`` tag, like in this example.
        </div>
      </t>
    </template>
+
+    <!-- === Website Pages === -->
+    <record id="service_page" model="website.page">
+      <field name="website_published">True</field>
+      <field name="url">/services</field>
+      <field name="view_id" ref="services" />
+    </record>
 
 Using ``<t t-call="website.layout">`` we will extend the Odoo
 default page layout with our code.
@@ -466,7 +480,7 @@ Update your theme
 
 .. image:: theme_tutorial_assets/img/restart.png
 
-Great, our Services page is ready and you’ll be able to access it by navigating to ``/yourwebsite/page/services``.
+Great, our Services page is ready and you’ll be able to access it by navigating to ``/yourwebsite/services``.
 
 You will notice that it's possible to drag/drop snippets underneath the
 *Our Services* list.
@@ -481,7 +495,7 @@ copy/paste the following code.
 
   <record id="services_page_link" model="website.menu">
     <field name="name">Services</field>
-    <field name="url">/page/services</field>
+    <field name="url">/services</field>
     <field name="parent_id" ref="website.main_menu" />
     <field name="sequence" type="int">99</field>
   </record>
@@ -538,7 +552,7 @@ Let’s navigate to the view folder and create an XML file called *assets.xml*. 
 
    <template id="mystyle" name="My style" inherit_id="website.assets_frontend">
        <xpath expr="link[last()]" position="after">
-           <link href="/theme folder/static/less/style.less" rel="stylesheet" type="text/less"/>
+           <link href="/theme folder/static/src/less/style.less" rel="stylesheet" type="text/less"/>
        </xpath>
    </template>
 
@@ -614,7 +628,7 @@ The previous code will create the snippet’s content, but we still need to plac
 .. code-block:: xml
 
    <template id="place_into_bar" inherit_id="website.snippets" name="Place into bar">
-     <xpath expr="//div[@id='snippet_content']/div[@class='o_panel_body']" position="inside">
+     <xpath expr="//div[@id='snippet_content']//t[@t-snippet]" position="after">
        <t t-snippet="theme_tutorial.snippet_testimonial"
           t-thumbnail="/theme_tutorial/static/src/img/ui/snippet_thumb.jpg"/>
      </xpath>
@@ -785,11 +799,16 @@ the following code
 
 .. code-block:: javascript
 
-    (function() {
-        'use strict';
-        var website = odoo.website;
-        website.odoo_website = {};
-    })();
+    odoo.define('theme_tutorial.editor', function (require) {
+    'use strict';
+        var options = require('web_editor.snippets.options');
+
+        options.registry.snippet_testimonial_options = options.Class.extend({{
+            onFocus: function() {
+                alert("On focus!");
+            }
+        });
+    });
 
 Great, we successfully created our javascript editor file. This file will contain all the javascript functions used by our snippets in edit mode. Let’s create a new function for our testimonial snippet using the ``snippet_testimonial_options`` method that we created before.
 
