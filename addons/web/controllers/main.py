@@ -453,6 +453,15 @@ class Home(http.Controller):
         except AccessError:
             return werkzeug.utils.redirect('/web/login?error=access')
 
+    @http.route('/web/db/ensure', type='json', auth='none')
+    def web_db_ensure(self, **kw):
+        """Setting database via RPC Call in session."""
+        db = kw.get('db', None)
+        if db and db not in http.db_filter([db]):
+            return {'db': False}
+        request.session.db = db
+        return {"db": request.session.db}
+
     @http.route('/web/dbredirect', type='http', auth="none")
     def web_db_redirect(self, redirect='/', **kw):
         ensure_db()
