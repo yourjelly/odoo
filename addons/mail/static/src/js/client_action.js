@@ -902,6 +902,7 @@ var ChatAction = Widget.extend(ControlPanelMixin, {
      * @param {OdooEvent}
      */
     _onSearch: function (event) {
+        event.stopPropagation();
         var session = this.getSession();
         var result = pyeval.eval_domains_and_contexts({
             domains: event.data.domains,

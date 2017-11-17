@@ -502,10 +502,7 @@ var DataImport = Widget.extend(ControlPanelMixin, {
         this.exit();
     },
     exit: function () {
-        this.do_action({
-            type: 'ir.actions.client',
-            tag: 'history_back'
-        });
+        this.trigger_up('history_back');
     },
     onresults: function (event, from, to, message) {
         var no_messages = _.isEmpty(message);
