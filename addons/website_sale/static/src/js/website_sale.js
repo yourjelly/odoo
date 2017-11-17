@@ -257,9 +257,13 @@ odoo.define('website_sale.website_sale', function (require) {
 
         // gallery snippet image changes
         $(oe_website_sale).on('click', '#o_website_sale_product_images .o_website_sale_thumbnail', function (ev) {
-            var $img = $(this).find('img');
-            $(this).closest('#o_website_sale_product_images').find('.o_website_sale_thumbnail').removeClass('active');
-            $(this).addClass('active');
+            update_product_img(this);
+        });
+
+        function update_product_img(event) {
+            var $img = $(event).find('img');
+            $(event).closest('#o_website_sale_product_images').find('.o_website_sale_thumbnail').removeClass('active');
+            $(event).addClass('active');
             var $mainImg = $(oe_website_sale).find('.o_website_sale_main_img img');
             // need a proper fix for slice
             $mainImg.attr("src", $img.attr('src').slice('/', -6));
@@ -271,7 +275,7 @@ odoo.define('website_sale.website_sale', function (require) {
             if ($mainImg.data('zoomOdoo') !== undefined) {
                 $mainImg.data('zoomOdoo').isReady = false;
             }
-        });
+        }
 
         function price_to_str(price) {
             var l10n = _t.database.parameters;
@@ -388,6 +392,10 @@ odoo.define('website_sale.website_sale', function (require) {
                     var variant_images = eval($(oe_website_sale).find('#o_website_sale_product_images').data('variant_images'));
                     var $variants = $(QWeb.render('product_variant_image_thumbnail', {'variant_image_ids': variant_images[0][product_id]}));
                     $(oe_website_sale).find('.o_website_product_variant_images').empty().append($variants);
+                    if (!$variants.length) {
+                        $variants = $(oe_website_sale).find('.o_website_product_template_images .o_website_sale_thumbnail')
+                    }
+                    update_product_img($variants[0]);
                 })
 
                 $parent.closest("#product_detail").data('id', product_id);
