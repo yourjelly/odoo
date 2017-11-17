@@ -672,6 +672,7 @@ a.no-decoration {
   padding: 6px 1px 2px 1px;
   font-size: 8px;
   text-align: center;
+  cursor: pointer;
 }
 #o_website_sale_product_images .o_website_sale_delete_img {
   position: absolute;
@@ -681,7 +682,7 @@ a.no-decoration {
 #o_website_sale_product_images .o_website_sale_delete_img:hover {
   color: red;
 }
-#o_website_sale_product_images div:hover img, #o_website_sale_product_images div:hover .o_website_sale_delete_img {
+#o_website_sale_product_images .o_website_sale_thumbnail:hover img, #o_website_sale_product_images .o_website_sale_thumbnail:hover .o_website_sale_delete_img {
   opacity: 1;
 }
 
@@ -698,4 +699,13 @@ a.no-decoration {
 .o_website_sale_thumbnail:hover {
   outline: 0;
   box-shadow: 0 0 3px 2px rgba(228,121,17,.5);
+}
+.o_website_sale_thumbnail_arrow {
+  font-size: 30px;
+  color: #cccccc;
+  opacity: 0.5;
+}
+.o_website_sale_thumbnail_arrow:hover {
+  color: #cccccc;
+  opacity: 1;
 }

@@ -420,6 +420,9 @@
                                 <t t-set="variant_images" t-value="[{v.id: v.product_product_image_ids.ids for v in product.product_variant_ids}]"/>
 
                                 <div id="o_website_sale_product_images" class="col-sm-2 pull-left" t-att-data-variant_images="variant_images">
+                                    <a class="ml8 o_website_sale_thumbnail_arrow">
+                                        <span class="fa fa-chevron-up"/>
+                                    </a>
                                     <div class="o_website_product_variant_images">
                                         <t t-foreach="variant_image_ids" t-as="pimg">
                                             <div t-attf-class="mt4 o_website_sale_thumbnail#{pimg_index == 0 and ' active' or ''}">
@@ -439,6 +442,9 @@
                                             <span class="fa fa-image o_website_sale_product_add_img o_not_editable css_non_editable_mode_hidden"><p>Add Images</p></span>
                                         </div>
                                     </div>
+                                    <a class="ml8 o_website_sale_thumbnail_arrow">
+                                        <span class="fa fa-chevron-down"/>
+                                    </a>
                                 </div>
                                 <div class="col-sm-10 o_website_sale_main_img">
                                     <div t-if="variant_image_ids" t-field="variant_image_ids[0].image" t-options='{"widget": "image", "class": "product_detail_img", "alt-field": "name", "zoom": "image" }'/>

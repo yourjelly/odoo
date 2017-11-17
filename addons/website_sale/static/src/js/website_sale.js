@@ -327,7 +327,6 @@ odoo.define('website_sale.website_sale', function (require) {
         });
 
         $(oe_website_sale).on('change', 'input.js_variant_change, select.js_variant_change, ul[data-attribute_value_ids]', function (ev) {
-            // debugger;
             var $ul = $(ev.target).closest('.js_add_cart_variants');
             var $parent = $ul.closest('.js_product');
             var $product_id = $parent.find('.product_id').first();
@@ -364,7 +363,6 @@ odoo.define('website_sale.website_sale', function (require) {
                         $default_price.parent().addClass('hidden');
                     }
                     product_id = variant_ids[k][0];
-                    // update_product_image(this, product_id);
                     break;
                 }
             }
