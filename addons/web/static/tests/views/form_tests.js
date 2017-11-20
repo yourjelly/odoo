@@ -94,7 +94,6 @@ QUnit.module('Views', {
         };
     }
 }, function () {
-    QUnit.module('FormView');
 
     QUnit.test('INVALID VIEW', function (assert) {
         assert.expect(1);
@@ -116,6 +115,7 @@ QUnit.module('Views', {
         form.destroy();
     });
 
+    QUnit.module('FormView');
 
 
     QUnit.test('simple form rendering', function (assert) {
