@@ -709,3 +709,30 @@ a.no-decoration {
   color: #cccccc;
   opacity: 1;
 }
+
+#o_website_sale_product_images {
+  width:50px;
+  height:300px;
+  padding-left: 0px;
+}
+#o_website_sale_images_main {
+  width:50px;
+  height:250px;
+  overflow:hidden;
+  position:relative;
+}
+.o_website_sale_images {
+  height:50px;
+  position:absolute;
+  top:0px;
+}
+/*Animation*/
+/*#o_website_sale_product_images {
+    transform: scale(0.7);
+    transition: transform 0.25s;
+    opacity: 0.6;
+}
+#o_website_sale_product_images:hover {
+  transform: scale(1);
+  opacity: 1;
+}*/

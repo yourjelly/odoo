@@ -277,6 +277,42 @@ odoo.define('website_sale.website_sale', function (require) {
             }
         }
 
+        $('.o_website_sale_images').css('height', $('.o_website_sale_thumbnail').length * 50);
+        $('.o_website_sale_thumbnail_arrow').hover(function() {
+            var whiches = $(this).children('span').attr('id');
+            if (whiches == 'product_up') {
+                movingThumbs(2000, '+');
+            }
+            else {
+                movingThumbs(2000, '-');
+            }
+        }, function() {
+            $('.o_website_sale_images').stop();
+        });
+
+
+        //Function for Thumbnails Moving
+        function movingThumbs(speed, direction) {
+            // debugger;
+            var currentTop = $('.o_website_sale_images').position().top;
+            //figure out how far to go left - only for right arrow
+            var moving = $('.o_website_sale_images').height() - (Math.abs($('.o_website_sale_images').position().top) + $('#o_website_sale_images_main').height());
+            if (currentTop == 0 && direction == '+') {
+                //do nothing
+            } else if (Math.abs($('.o_website_sale_images').position().top) + $('#o_website_sale_images_main').height() >= $('.o_website_sale_images').height() && direction == '-') {
+                //do nothing
+            } else if (direction == '+' && currentTop != 0) {
+                $('.o_website_sale_images').animate({
+                    top: 0,
+                }, speed);
+            } else {
+                $('.o_website_sale_images').animate({
+                    top: '+='+direction + moving,
+                }, speed);
+            }
+        }
+
+
         function price_to_str(price) {
             var l10n = _t.database.parameters;
             var precision = 2;
