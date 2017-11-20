@@ -95,6 +95,26 @@ QUnit.module('Views', {
     }
 }, function () {
 
+    QUnit.test('INVALID VIEW', function (assert) {
+        assert.expect(1);
+
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<sheet>' +
+                        '<group>' +
+                        '</notebook>' +
+                    '</sheet>' +
+                '</form>',
+            res_id: 2,
+        });
+
+        assert.strictEqual(true, true, "true");
+        form.destroy();
+    });
+
     QUnit.module('FormView');
 
     QUnit.test('simple form rendering', function (assert) {
