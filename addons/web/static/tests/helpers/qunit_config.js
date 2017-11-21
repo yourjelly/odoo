@@ -47,6 +47,10 @@ var sortButtonAppended = false;
  * Someday, we should devise a safer strategy...
  */
 QUnit.done(function(result) {
+    console.log('######### QUnit RESULTS:');
+    console.log('failed: ' + result.failed);
+    console.log('passed: ' + result.passed);
+    console.log('total: ' + result.total);
     if (!result.failed) {
         console.log('ok');
     } else {
