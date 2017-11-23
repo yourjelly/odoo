@@ -265,50 +265,40 @@ odoo.define('website_sale.website_sale', function (require) {
             $(event).closest('#o_website_sale_product_images').find('.o_website_sale_thumbnail').removeClass('active');
             $(event).addClass('active');
             var $mainImg = $(oe_website_sale).find('.o_website_sale_main_img img');
-            // need a proper fix for slice
-            $mainImg.attr("src", $img.attr('src').slice('/', -6));
-            // $img.parent().attr('data-oe-model', 'product.product').attr('data-oe-id', product_id)
-                // .data('oe-model', 'product.product').data('oe-id', product_id);
+            var image_id = $img.data('image_id');
+            $mainImg.attr("src", "/website/image/product.image/" + image_id + "/image");
+            $mainImg.parent().attr('data-oe-model', 'product.image').attr('data-oe-id', image_id)
+                .data('oe-model', 'product.image').data('oe-id', image_id);
 
             // reset zooming constructs
-            $mainImg.filter('[data-zoom-image]').attr('data-zoom-image', $img.attr('src').slice('/', -6));
+            $mainImg.filter('[data-zoom-image]').attr('data-zoom-image', "/website/image/product.image/" + image_id + "/image");
             if ($mainImg.data('zoomOdoo') !== undefined) {
                 $mainImg.data('zoomOdoo').isReady = false;
             }
         }
 
-        $('.o_website_sale_images').css('height', $('.o_website_sale_thumbnail').length * 50);
-        $('.o_website_sale_thumbnail_arrow').hover(function() {
-            var whiches = $(this).children('span').attr('id');
-            if (whiches == 'product_up') {
-                movingThumbs(2000, '+');
-            }
-            else {
-                movingThumbs(2000, '-');
-            }
-        }, function() {
-            $('.o_website_sale_images').stop();
+        $('.o_website_sale_images').css('width', $('.o_website_sale_thumbnail').length * 50);
+        $('.o_website_sale_thumbnail_arrow').click(function() {
+            var direction = $(this).children('span').attr('id') == 'product_left' ? '+' : '-'
+            update_product_thumbnail(direction);
         });
 
 
-        //Function for Thumbnails Moving
-        function movingThumbs(speed, direction) {
-            // debugger;
-            var currentTop = $('.o_website_sale_images').position().top;
+        //Function for product thumbnail moving
+        function update_product_thumbnail(direction) {
+            var currentLeft = $('.o_website_sale_images').position().left;
             //figure out how far to go left - only for right arrow
-            var moving = $('.o_website_sale_images').height() - (Math.abs($('.o_website_sale_images').position().top) + $('#o_website_sale_images_main').height());
-            if (currentTop == 0 && direction == '+') {
+            var moving = $('.o_website_sale_images').width() - (Math.abs($('.o_website_sale_images').position().left) + $('#o_website_sale_images_main').width());
+            if (currentLeft == 0 && direction == '+') {
                 //do nothing
-            } else if (Math.abs($('.o_website_sale_images').position().top) + $('#o_website_sale_images_main').height() >= $('.o_website_sale_images').height() && direction == '-') {
+            } else if (Math.abs($('.o_website_sale_images').position().left) + $('#o_website_sale_images_main').width() >= $('.o_website_sale_images').width() && direction == '-') {
                 //do nothing
-            } else if (direction == '+' && currentTop != 0) {
-                $('.o_website_sale_images').animate({
-                    top: 0,
-                }, speed);
+            } else if (direction == '+' && currentLeft != 0) {
+                moving = currentLeft < -245 ? currentLeft + 245 : 0;
+                $('.o_website_sale_images').animate({left: moving}, 1000);
             } else {
-                $('.o_website_sale_images').animate({
-                    top: '+='+direction + moving,
-                }, speed);
+                moving = moving > 245 ? 245 : moving;
+                $('.o_website_sale_images').animate({left: '+='+direction + moving}, 1000);
             }
         }
 

@@ -3,9 +3,9 @@
 <templates>
 	<t t-name="product_variant_image_thumbnail">
         <t t-foreach="variant_image_ids" t-as="pimg">
-            <div class="mt4 o_website_sale_thumbnail">
+            <div class="mr4 o_website_sale_thumbnail">
                 <i class="fa fa-times o_website_sale_delete_img css_non_editable_mode_hidden o_not_editable"/>
-                <img class="img img-responsive" t-attf-src="/website/image/product.image/{{pimg}}/image/45x45" t-att-alt="pimg.name"/>
+                <img class="img img-responsive" t-attf-src="/website/image/product.image/{{pimg}}/image/45x45" t-att-alt="pimg.name" t-att-data-image_id="pimg"/>
             </div>
         </t>
     </t>

@@ -442,7 +442,7 @@ label.css_attribute_color.css_not_available {
   margin-left: auto;
   margin-right: auto;
   display: block;
-  max-height: 500px;
+  max-height: 400px;
 }
 
 .oe_default_price {
@@ -686,11 +686,15 @@ a.no-decoration {
   opacity: 1;
 }
 
+.o_website_sale_main_img {
+  height: 400px;
+}
 .o_website_sale_thumbnail {
   opacity: 0.5;
   border: 1px solid #949494;
   width: 45px;
   border-radius: 2px;
+  float: left;
 }
 .o_website_sale_thumbnail:hover, .o_website_sale_thumbnail.active {
   opacity: 1;
@@ -704,27 +708,38 @@ a.no-decoration {
   font-size: 30px;
   color: #cccccc;
   opacity: 0.5;
+  float: left;
 }
 .o_website_sale_thumbnail_arrow:hover {
-  color: #cccccc;
+  color: #959595;
   opacity: 1;
 }
 
-#o_website_sale_product_images {
-  width:50px;
-  height:300px;
-  padding-left: 0px;
-}
 #o_website_sale_images_main {
-  width:50px;
-  height:250px;
+  width:245px;
+  height:50px;
   overflow:hidden;
+  float: left;
   position:relative;
 }
 .o_website_sale_images {
-  height:50px;
+  width:50px;
   position:absolute;
   top:0px;
+  left: 0px;
+}
+.o_website_sale_manage_images {
+  position: absolute;
+  width: 100%;
+  color: white;
+  background-color: #000;
+  opacity: 0;
+  transition: opacity ease 400ms;
+  height: 50px;
+  text-align: center;
+}
+.o_website_sale_manage_images:hover {
+  opacity: 0.6;
 }
 /*Animation*/
 /*#o_website_sale_product_images {
