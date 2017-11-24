@@ -114,8 +114,10 @@ class StockMoveLine(models.Model):
                         move_vals.pop('remaining_qty')
                 if move_id._is_out():
                     move_vals['remaining_value'] = new_remaining_value if new_remaining_value < 0 else 0
+                    move_vals['value'] = move_id.value - correction_value
                 else:
                     move_vals['remaining_value'] = new_remaining_value
+                    move_vals['value'] = move_id.value + correction_value
                 move_id.write(move_vals)
 
                 if move_id.product_id.valuation == 'real_time':
@@ -387,9 +389,17 @@ class StockMove(models.Model):
             # it was only used to infer the correction entry anyway.
             new_remaining_qty = -qty_to_take_on_candidates
             new_remaining_value = 0 if not new_remaining_qty else move.remaining_value + tmp_value
+            corrected_value = tmp_value
+            if remaining_value_before_vacuum < 0:
+                corrected_value += remaining_value_before_vacuum
+#             if move._is_in():
+#                 value = move.value + corrected_value
+#             else:
+#                 value = move.value - corrected_value
             move.write({
                 'remaining_value': new_remaining_value,
                 'remaining_qty': new_remaining_qty,
+                'value': move.value - corrected_value,
             })
 
             if move.product_id.valuation == 'real_time':
@@ -398,9 +408,7 @@ class StockMove(models.Model):
                 # compensate and should always be positive, but if the remaining value is still negative
                 # we have to take care to not overvalue by decreasing the correction entry by what's
                 # already been posted.
-                corrected_value = tmp_value
-                if remaining_value_before_vacuum < 0:
-                    corrected_value += remaining_value_before_vacuum
+                
 
                 if move._is_in():
                     # If we just compensated an IN move that has a negative remaining
