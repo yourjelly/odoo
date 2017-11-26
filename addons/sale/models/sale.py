@@ -1095,7 +1095,7 @@ class SaleOrderLine(models.Model):
         name = product.display_name
         untracked_attribute_values = []
         for attribute_value in attribute_values:
-            untracked_attribute_values.append(attribute_value.name)
+            untracked_attribute_values.append('%s: %s' % (attribute_value.attribute_id.name, attribute_value.name))
         if untracked_attribute_values:
             name += '\n%s' % (', '.join(untracked_attribute_values))
         if product.description_sale:

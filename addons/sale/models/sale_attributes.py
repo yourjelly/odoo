@@ -21,18 +21,6 @@ class SaleAttributes(models.Model):
             result['attribute_lines'] = attr_lines
         return result
 
-    @api.multi
-    def name_get(self):
-        result = []
-        for attribute in self:
-            name = attribute.product_id.display_name
-            attribute_list = []
-            for line in attribute.attribute_lines:
-                attribute_list.append('%s: %s' % (line.attribute_id.name, line.value_id.name))
-            name = '%s' % (', '.join(attribute_list))
-            result.append((attribute.id, name))
-        return result
-
     sale_order_line_id = fields.Many2one('sale.order.line', string="Order Line", ondelete='cascade', index=True, copy=False)
     product_id = fields.Many2one('product.product', string="Product")
     attribute_lines = fields.One2many('attribute.lines', 'sale_attributes_id')
