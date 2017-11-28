@@ -1086,7 +1086,7 @@ class SaleOrderLine(models.Model):
                 uom=self.product_uom.id,
                 fiscal_position=self.env.context.get('fiscal_position'),
             )
-            attribute_values = [ line.value_id for line in self.sale_attributes_id.attribute_lines]
+            attribute_values = [line.attribute_value_line_id.value_id for line in self.sale_attributes_id.sale_attribute_lines]
             self.name = self._get_description_with_attribue_value(product, attribute_values)
             self.price_unit = self.env['account.tax']._fix_tax_included_price_company(self._get_display_price(product), product.taxes_id, self.tax_id, self.company_id)
 

@@ -391,6 +391,7 @@ class ProductTemplate(models.Model):
     def create_variant_ids(self):
         Product = self.env["product.product"]
         AttributeValues = self.env['product.attribute.value']
+        AttributeValueLines = self.env['product.attribute.value.line']
         for tmpl_id in self.with_context(active_test=False):
             # adding an attribute with only one value should not recreate product
             # write this attribute on every product to make sure we don't lose them
@@ -415,6 +416,31 @@ class ProductTemplate(models.Model):
                 if set(value_ids.ids) not in existing_variants
             ]
 
+            attribute_lines_to_unlink = self.env['product.attribute.value.line']
+            attribute_lines_to_active = self.env['product.attribute.value.line']
+            tmpl_attribute_value_ids = tmpl_id.attribute_line_ids.mapped('value_ids').ids
+            attribute_value_lines = AttributeValueLines.with_context(active_test=False).search([('product_tmpl_id', '=', tmpl_id.id)])
+            existing_line_values = attribute_value_lines.mapped('value_id')
+
+            for existing_line in attribute_value_lines:
+                if existing_line.value_id.id not in tmpl_attribute_value_ids:
+                    attribute_lines_to_unlink |= existing_line
+                if not existing_line.active and existing_line.value_id.id in tmpl_attribute_value_ids:
+                    attribute_lines_to_active |= existing_line
+
+            for line in tmpl_id.attribute_line_ids:
+                for value in line.value_ids:
+                    if value.id not in existing_line_values.filtered(lambda l: value.attribute_id.id == l.attribute_id.id).ids:
+                        AttributeValueLines.create({
+                        'product_tmpl_id': tmpl_id.id,
+                        'value_id': value.id,
+                        'attribute_id': value.attribute_id.id
+                    })
+            if attribute_lines_to_unlink:
+                attribute_lines_to_unlink.write({'active': False})
+            if attribute_lines_to_active:
+                attribute_lines_to_active.write({'active': True})
+
             # check product
             variants_to_activate = self.env['product.product']
             variants_to_unlink = self.env['product.product']
@@ -428,10 +454,11 @@ class ProductTemplate(models.Model):
 
             # create new product
             for variant_ids in to_create_variants:
-                new_variant = Product.create({
-                    'product_tmpl_id': tmpl_id.id,
-                    'attribute_value_ids': [(6, 0, variant_ids.ids)]
-                })
+                if not tmpl_id.attribute_line_ids or tmpl_id.attribute_line_ids.filtered(lambda l: not l.attribute_id.create_variant) or variant_ids:
+                    new_variant = Product.create({
+                        'product_tmpl_id': tmpl_id.id,
+                        'attribute_value_ids': [(6, 0, variant_ids.ids)]
+                    })
 
             # unlink or inactive product
             for variant in variants_to_unlink:

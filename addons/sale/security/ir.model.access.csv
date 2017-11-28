@@ -56,5 +56,5 @@ access_account_account_sale_manager,account.account sale manager,account.model_a
 access_report_all_channels_sales_salesman,report.all.channels.sales,model_report_all_channels_sales,sales_team.group_sale_salesman,1,1,1,0
 access_report_all_channels_sales_manager,report.all.channels.sales,model_report_all_channels_sales,sales_team.group_sale_manager,1,1,1,1
 access_report_all_channels_sales_manager,report.all.channels.sales,model_report_all_channels_sales,sales_team.group_sale_manager,1,1,1,1
-access_sale_attributes,sale.attributes,model_sale_attributes,,1,0,0,0
-access_sale_attribute_lines,sale.attribute.lines,model_attribute_lines,,1,0,0,0
+access_sale_attributes,sale.attributes,model_sale_attributes,sales_team.group_sale_salesman,1,0,0,0
+access_sale_attribute_lines,sale.attribute.lines,model_sale_attribute_lines,sales_team.group_sale_salesman,1,0,0,0

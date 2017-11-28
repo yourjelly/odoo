@@ -208,7 +208,7 @@
             <field name="active" eval="False"/>
         </record>
         
-        <record id="product_attribute_price_1" model="product.attribute.price">
+        <record id="product_attribute_price_1" model="product.attribute.value.line">
             <field name="product_tmpl_id" ref="product_product_4_product_template"/>
             <field name="value_id" ref="product_attribute_value_2"/>
             <field name="price_extra">50.40</field>
@@ -344,10 +344,14 @@
             <field name="attribute_line_ids" eval="[(6,0,[ref('product.product_attribute_line_4')])]"/>
         </record>
         
-        <record id="product_attribute_price_2" model="product.attribute.price">
+        <record id="product_attribute_price_2" model="product.attribute.value.line">
             <field name="product_tmpl_id" ref="product_product_11_product_template"/>
             <field name="value_id" ref="product_attribute_value_2"/>
             <field name="price_extra">6.40</field>
+        </record>
+
+        <record id="product.product_attribute_value_2" model="product.attribute.value">
+            <field name="price_ids" eval="[(6, 0, [ref('product.product_attribute_price_1'), ref('product.product_attribute_price_2')])]"/>
         </record>
 
         <!-- MRP Demo Data-->

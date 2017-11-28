@@ -10,10 +10,11 @@
                             <field name="product_id" readonly="1" string="Product"/>
                             <field name="sale_order_line_id" invisible="1"/>
                         </group>
-                        <field name="attribute_lines">
-                            <tree string="Attribute Lines" editable="bottom" create="false" delete="false">
+                        <field name="sale_attribute_lines">
+                            <tree string="Sale Attribute Lines" editable="bottom" create="false" delete="false">
                                 <field name="attribute_id" readonly="1" force_save="1"/>
-                                <field name="value_id" domain="[('attribute_id', '=', attribute_id)]" context="{'show_attribute': False}" options="{'no_open': True}"/>
+                                <field name="product_tmpl_id" invisible="1"/>
+                                <field name="attribute_value_line_id" domain="[('attribute_id', '=', attribute_id), ('product_tmpl_id', '=', product_tmpl_id)]" context="{'show_attribute': False}" options="{'no_open': True}"/>
                             </tree>
                         </field>
                     </sheet>

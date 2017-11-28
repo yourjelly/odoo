@@ -45,7 +45,7 @@ class TestUi(odoo.tests.HttpCase):
                 'name': 'add 2',
             }).id,
         })
-        env['product.attribute.price'].create({
+        env['product.attribute.value.line'].create({
             'product_tmpl_id': pear.product_tmpl_id.id,
             'price_extra': 2,
             'value_id': attribute_value.id,

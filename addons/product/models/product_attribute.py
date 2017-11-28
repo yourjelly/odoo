@@ -26,40 +26,11 @@ class ProductAttributevalue(models.Model):
     sequence = fields.Integer('Sequence', help="Determine the display order")
     attribute_id = fields.Many2one('product.attribute', 'Attribute', ondelete='cascade', required=True)
     product_ids = fields.Many2many('product.product', string='Variants', readonly=True)
-    price_extra = fields.Float(
-        'Attribute Price Extra', compute='_compute_price_extra', inverse='_set_price_extra',
-        default=0.0, digits=dp.get_precision('Product Price'),
-        help="Price Extra: Extra price for the variant with this attribute value on sale price. eg. 200 price extra, 1000 + 200 = 1200.")
-    price_ids = fields.One2many('product.attribute.price', 'value_id', 'Attribute Prices', readonly=True)
+    price_ids = fields.One2many('product.attribute.value.line', 'value_id', 'Attribute Prices', readonly=True)
 
     _sql_constraints = [
         ('value_company_uniq', 'unique (name,attribute_id)', 'This attribute value already exists !')
     ]
-
-    @api.one
-    def _compute_price_extra(self):
-        if self._context.get('active_id'):
-            price = self.price_ids.filtered(lambda price: price.product_tmpl_id.id == self._context['active_id'])
-            self.price_extra = price.price_extra
-        else:
-            self.price_extra = 0.0
-
-    def _set_price_extra(self):
-        if not self._context.get('active_id'):
-            return
-
-        AttributePrice = self.env['product.attribute.price']
-        prices = AttributePrice.search([('value_id', 'in', self.ids), ('product_tmpl_id', '=', self._context['active_id'])])
-        updated = prices.mapped('value_id')
-        if prices:
-            prices.write({'price_extra': self.price_extra})
-        else:
-            for value in self - updated:
-                AttributePrice.create({
-                    'product_tmpl_id': self._context['active_id'],
-                    'value_id': value.id,
-                    'price_extra': self.price_extra,
-                })
 
     @api.multi
     def name_get(self):
@@ -78,14 +49,22 @@ class ProductAttributevalue(models.Model):
     def _variant_name(self, variable_attributes):
         return ", ".join([v.name for v in self if v.attribute_id in variable_attributes])
 
+class ProductAttributevalueLine(models.Model):
+    _name = "product.attribute.value.line"
+    _order = 'sequence, attribute_id, id'
+    _rec_name = 'attribute_id'
 
-class ProductAttributePrice(models.Model):
-    _name = "product.attribute.price"
-
+    sequence = fields.Integer('Sequence', help="Determine the display order")
     product_tmpl_id = fields.Many2one('product.template', 'Product Template', ondelete='cascade', required=True)
     value_id = fields.Many2one('product.attribute.value', 'Product Attribute Value', ondelete='cascade', required=True)
+    attribute_id = fields.Many2one(related="value_id.attribute_id", relation='product.attribute', string='Attribute')
     price_extra = fields.Float('Price Extra', digits=dp.get_precision('Product Price'))
+    excluded_value_ids = fields.Many2many('product.attribute.value', 'product_attribute_value_line_rel', 'value_line_id', 'attribute_value_id', string="Excluded Attribute values")
+    active = fields.Boolean(string="Active", default=True)
 
+    @api.multi
+    def name_get(self):
+        return [(value_line.id, "%s: %s" % (value_line.attribute_id.name, value_line.value_id.name)) for value_line in self]
 
 class ProductAttributeLine(models.Model):
     _name = "product.attribute.line"

@@ -124,8 +124,10 @@ class SaleOrder(models.Model):
         """ Add or set product quantity, add_qty can be negative """
         self.ensure_one()
         SaleOrderLineSudo = self.env['sale.order.line'].sudo()
+        ProductAttributeValueLine = self.env['product.attribute.value.line']
         quantity = 0
         order_line = False
+        attribute_value_line_id = False
         if self.state != 'draft':
             request.session['sale_order_id'] = None
             raise UserError(_('It is forbidden to modify a sales order which is not in draft status'))
@@ -152,7 +154,6 @@ class SaleOrder(models.Model):
                                 'product_tmpl_id': product_tmpl_id.id, 'attribute_id': attribute_value.attribute_id.id})
                         self.env['sale.attribute.lines'].create({'attribute_id': existing_vaue_line.attribute_id.id,
                             'value_id':  existing_vaue_line.value_id.id, 'attribute_value_line_id': existing_vaue_line.id, 'sale_attributes_id': sale_attributes.id })
-
                 values['sale_attributes_id'] = sale_attributes.id
             order_line = SaleOrderLineSudo.create(values)
 

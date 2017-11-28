@@ -167,9 +167,8 @@ class WebsiteSale(http.Controller):
                 if any( value.id in exclude_attribute_value_ids for value in attribute_values):
                     continue
                 if no_attr_values:
-                    attribute_prices = request.env['product.attribute.price'].search([('product_tmpl_id', '=', variant.product_tmpl_id.id),
-                        ('value_id', 'in', no_attr_values.ids)])
-                    price_extra = sum(attribute_prices.mapped('price_extra'))
+                    no_attr_value_lines = attribute_value_lines.filtered(lambda l: l.value_id.id in no_attr_values.ids)
+                    price_extra = sum(no_attr_value_lines.mapped('price_extra'))
                 visible_attribute_ids = [v.id for v in attribute_values if v.attribute_id.id in visible_attrs_ids]
                 attribute_value_ids.append([variant.id, visible_attribute_ids, variant.with_context(price_extra=price_extra).website_price, price])
         return  attribute_value_ids
@@ -319,6 +318,11 @@ class WebsiteSale(http.Controller):
             product_context['pricelist'] = pricelist.id
             product = product.with_context(product_context)
 
+        attribute_value_line_data = {}
+        attribute_value_line_ids = request.env['product.attribute.value.line'].search([('product_tmpl_id', '=', product.id)])
+        for line in attribute_value_line_ids:
+            attribute_value_line_data[line.value_id.id] = line.price_extra
+
         values = {
             'search': search,
             'category': category,
@@ -331,6 +335,7 @@ class WebsiteSale(http.Controller):
             'main_object': product,
             'product': product,
             'get_attribute_value_ids': self.get_attribute_value_ids,
+            'attribute_value_line_data': attribute_value_line_data
         }
         return request.render("website_sale.product", values)
 
