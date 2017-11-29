@@ -392,10 +392,6 @@ class StockMove(models.Model):
             corrected_value = tmp_value
             if remaining_value_before_vacuum < 0:
                 corrected_value += remaining_value_before_vacuum
-#             if move._is_in():
-#                 value = move.value + corrected_value
-#             else:
-#                 value = move.value - corrected_value
             move.write({
                 'remaining_value': new_remaining_value,
                 'remaining_qty': new_remaining_qty,
@@ -408,7 +404,6 @@ class StockMove(models.Model):
                 # compensate and should always be positive, but if the remaining value is still negative
                 # we have to take care to not overvalue by decreasing the correction entry by what's
                 # already been posted.
-                
 
                 if move._is_in():
                     # If we just compensated an IN move that has a negative remaining
