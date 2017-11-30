@@ -102,7 +102,7 @@ class test_ids_stuff(ImporterCase):
         self.assertEqual(len(result['ids']), 1)
         self.assertFalse(result['messages'])
         self.assertEqual(
-            '__import__.somexmlid',
+            'somexmlid',
             self.xid(self.browse()[0]))
 
     def test_update_with_id(self):
