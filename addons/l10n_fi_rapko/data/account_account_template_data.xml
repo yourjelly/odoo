@@ -1,233 +1,201 @@
 <odoo>
-    <record model="account.account.template" id="a10002">
+    <record id="a10002" model="account.account.template">
         <field name="code">10002</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">V&#228;hennykset</field>
     </record>
-    <record model="account.account.template" id="a10003">
+    <record id="a10003" model="account.account.template">
         <field name="code">10003</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Poistot</field>
     </record>
-    <record model="account.account.template" id="a10100">
+    <record id="a10100" model="account.account.template">
         <field name="code">10100</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Tutkimusmenot / ei nettovarallisuutta</field>
     </record>
-    <record model="account.account.template" id="a10102">
+    <record id="a10102" model="account.account.template">
         <field name="code">10102</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">V&#228;hennykset</field>
     </record>
-    <record model="account.account.template" id="a10104">
+    <record id="a10104" model="account.account.template">
         <field name="code">10104</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Poistot</field>
     </record>
-    <record model="account.account.template" id="a10200">
+    <record id="a10200" model="account.account.template">
         <field name="code">10200</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Kehitt&#228;mismenot / ei nettovarallisuutta</field>
     </record>
-    <record model="account.account.template" id="a10201">
+    <record id="a10201" model="account.account.template">
         <field name="code">10201</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Lis&#228;ykset</field>
     </record>
-    <record model="account.account.template" id="a10202">
+    <record id="a10202" model="account.account.template">
         <field name="code">10202</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">V&#228;hennykset</field>
     </record>
-    <record model="account.account.template" id="a10204">
+    <record id="a10204" model="account.account.template">
         <field name="code">10204</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Poistot</field>
     </record>
-    <record model="account.account.template" id="a10210">
+    <record id="a10210" model="account.account.template">
         <field name="code">10210</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
         <field name="reconcile" eval="False"/>
         <field name="name">Kehitt&#228;mismenot</field>
     </record>
-    <record model="account.account.template" id="a10211">
+    <record id="a10211" model="account.account.template">
         <field name="code">10211</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Lis&#228;ykset</field>
     </record>
-    <record model="account.account.template" id="a10212">
+    <record id="a10212" model="account.account.template">
         <field name="code">10212</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">V&#228;hennykset</field>
     </record>
-    <record model="account.account.template" id="a10214">
+    <record id="a10214" model="account.account.template">
         <field name="code">10214</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Poistot</field>
     </record>
-    <record model="account.account.template" id="a10300">
+    <record id="a10300" model="account.account.template">
         <field name="code">10300</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Aineettomat oikeudet</field>
     </record>
-    <record model="account.account.template" id="a10301">
+    <record id="a10301" model="account.account.template">
         <field name="code">10301</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Lis&#228;ykset</field>
     </record>
-    <record model="account.account.template" id="a10302">
+    <record id="a10302" model="account.account.template">
         <field name="code">10302</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">V&#228;hennykset</field>
     </record>
-    <record model="account.account.template" id="a10303">
+    <record id="a10303" model="account.account.template">
         <field name="code">10303</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Katettu j&#228;lleenhankintavarauksella tai avustuksella</field>
     </record>
-    <record model="account.account.template" id="a10304">
+    <record id="a10304" model="account.account.template">
         <field name="code">10304</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Poistot</field>
     </record>
-    <record model="account.account.template" id="a10305">
+    <record id="a10305" model="account.account.template">
         <field name="code">10305</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Lis&#228;poisto</field>
     </record>
-    <record model="account.account.template" id="a10306">
+    <record id="a10306" model="account.account.template">
         <field name="code">10306</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Poistoeron muutos</field>
     </record>
-    <record model="account.account.template" id="a10307">
+    <record id="a10307" model="account.account.template">
         <field name="code">10307</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Poistoero</field>
     </record>
-    <record model="account.account.template" id="a10400">
+    <record id="a10400" model="account.account.template">
         <field name="code">10400</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Liikearvo tilikauden alussa</field>
     </record>
-    <record model="account.account.template" id="a10401">
+    <record id="a10401" model="account.account.template">
         <field name="code">10401</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Lis&#228;ykset</field>
     </record>
-    <record model="account.account.template" id="a10402">
+    <record id="a10402" model="account.account.template">
         <field name="code">10402</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">V&#228;hennykset</field>
     </record>
-    <record model="account.account.template" id="a10404">
+    <record id="a10404" model="account.account.template">
         <field name="code">10404</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Poistot</field>
     </record>
-    <record model="account.account.template" id="a10410">
+    <record id="a10410" model="account.account.template">
         <field name="code">10410</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Fuusioaktiiva</field>
     </record>
-    <record model="account.account.template" id="a10411">
+    <record id="a10411" model="account.account.template">
         <field name="code">10411</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Lis&#228;ykset</field>
     </record>
-    <record model="account.account.template" id="a10412">
+    <record id="a10412" model="account.account.template">
         <field name="code">10412</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">V&#228;hennykset</field>
     </record>
-    <record model="account.account.template" id="a10414">
+    <record id="a10414" model="account.account.template">
         <field name="code">10414</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Poistot</field>
     </record>
-    <record model="account.account.template" id="a10500">
+    <record id="a10500" model="account.account.template">
         <field name="code">10500</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Konserniliikearvo</field>
     </record>
-    <record model="account.account.template" id="a10501">
+    <record id="a10501" model="account.account.template">
         <field name="code">10501</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Lis&#228;ykset</field>
     </record>
-    <record model="account.account.template" id="a10502">
+    <record id="a10502" model="account.account.template">
         <field name="code">10502</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">V&#228;hennykset</field>
     </record>
-    <record model="account.account.template" id="a10504">
+    <record id="a10504" model="account.account.template">
         <field name="code">10504</field>
         <field name="user_type_id" ref="account.data_account_type_current_assets"/>
         <field name="chart_template_id" ref="chart_template_fi_rapko"/>
-        <field name="reconcile" eval="False"/>
         <field name="name">Poistot</field>
     </record>
     <record model="account.account.template" id="a10600">
