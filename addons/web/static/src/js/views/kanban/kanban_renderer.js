@@ -306,6 +306,8 @@ var KanbanRenderer = BasicRenderer.extend({
                 this._renderUngrouped(fragment);
             }
             this.$el.append(fragment);
+            // necessary to ensure all subwidgets are properly mounted
+            this._mount();
         }
 
         return this._super.apply(this, arguments).then(_.invoke.bind(_, oldWidgets, 'destroy'));

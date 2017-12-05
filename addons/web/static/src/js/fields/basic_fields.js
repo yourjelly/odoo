@@ -435,7 +435,7 @@ var FieldDate = InputField.extend({
                     this._setValue(value);
                 }
             });
-            def = this.datewidget.appendTo('<div>').done(function () {
+            def = this.datewidget.appendTo($('<div>')).done(function () {
                 self.datewidget.$el.addClass(self.$el.attr('class'));
                 self._prepareInput(self.datewidget.$input);
                 self._replaceElement(self.datewidget.$el);

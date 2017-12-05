@@ -388,6 +388,200 @@ QUnit.module('core', {}, function () {
         assert.ok(true,
             "there should be no crash when calling _rpc on a destroyed widget");
     });
+
+    QUnit.module('Widget lifecycle');
+
+    function makeWidget(assert, props, parent) {
+        var TestWidget = Widget.extend({
+            init: function () {
+                assert.step('init');
+                this._super.apply(this, arguments);
+            },
+            willStart: function () {
+                assert.step('willStart');
+                return this._super.apply(this, arguments);
+            },
+            start: function () {
+                assert.step('start');
+                return this._super.apply(this, arguments);
+            },
+            mounted: function () {
+                assert.step('mounted');
+            },
+            willUnmount: function () {
+                assert.step('willUnmount');
+            },
+            destroy: function () {
+                this._super.apply(this, arguments);
+                assert.step('destroy');
+            },
+        }, props);
+        return new TestWidget(parent);
+    }
+
+    QUnit.test("mounted and willUnmount hooks are called when put in DOM", function (assert) {
+        assert.expect(9);
+
+        var widget = makeWidget(assert);
+        assert.verifySteps(['init']);
+
+        var $fix = $( "#qunit-fixture");
+        widget.appendTo($fix);
+        assert.verifySteps(['init', 'willStart', 'start', 'mounted']);
+        widget.destroy();
+        assert.verifySteps(['init', 'willStart', 'start', 'mounted', 'willUnmount', 'destroy']);
+    });
+
+    QUnit.test("mounted and willUnmount hooks are not called when not put in DOM", function (assert) {
+        assert.expect(7);
+
+        var widget = makeWidget(assert);
+
+        assert.verifySteps(['init']);
+
+        var $fix = $( "<div>");
+        widget.appendTo($fix);
+        assert.verifySteps(['init', 'willStart', 'start']);
+        widget.destroy();
+        assert.verifySteps(['init', 'willStart', 'start', 'destroy']);
+    });
+
+    QUnit.test("widgets can be detached and reappended (if not in dom)", function (assert) {
+        assert.expect(8);
+        var widget = makeWidget(assert);
+
+        assert.verifySteps(['init']);
+
+        var $fix = $( "<div>");
+        widget.appendTo($fix);
+        assert.verifySteps(['init', 'willStart', 'start']);
+        widget.detach();
+        assert.verifySteps(['init', 'willStart', 'start']);
+        widget.appendTo($('<div>'));
+        assert.verifySteps(['init', 'willStart', 'start']);
+        widget.destroy();
+    });
+
+    QUnit.test("widgets can be detached and reappended (in dom)", function (assert) {
+        assert.expect(10);
+        var widget = makeWidget(assert);
+
+        assert.verifySteps(['init']);
+
+        var $fix = $( "#qunit-fixture");
+        widget.appendTo($fix);
+        assert.verifySteps(['init', 'willStart', 'start', 'mounted']);
+        widget.detach();
+        assert.verifySteps(['init', 'willStart', 'start', 'mounted', 'willUnmount']);
+        widget.appendTo($('<div>'));
+        assert.verifySteps(['init', 'willStart', 'start', 'mounted', 'willUnmount']);
+        widget.destroy();
+    });
+
+    QUnit.test("widgets can be destroyed before being started", function (assert) {
+        assert.expect(4);
+        var widget = makeWidget(assert);
+
+        assert.verifySteps(['init']);
+        widget.destroy();
+
+        assert.verifySteps(['init', 'destroy']);
+    });
+
+    QUnit.test("widgets can be destroyed after willStart, but before being started", function (assert) {
+        assert.expect(6);
+        var def = $.Deferred();
+        var widget = makeWidget(assert, {
+            willStart: function () {
+                assert.step('willStart');
+                return def;
+            },
+        });
+
+        var $fix = $( "#qunit-fixture");
+        widget.appendTo($fix);
+
+        assert.verifySteps(['init', 'willStart']);
+        widget.destroy();
+
+        assert.verifySteps(['init', 'willStart', 'destroy']);
+
+        def.resolve();
+
+        assert.verifySteps(['init', 'willStart', 'destroy']);
+    });
+
+    QUnit.test("widgets can be reappendedTo without being detached", function (assert) {
+        assert.expect(8);
+
+        var $fix = $( "#qunit-fixture");
+        var $div1 = $('<div>');
+        var $div2 = $('<div>');
+        $fix.append($div1).append($div2);
+
+        var widget = makeWidget(assert);
+        widget.appendTo($div1);
+        assert.verifySteps(['init', 'willStart', 'start', 'mounted']);
+        widget.appendTo($div2);
+        assert.verifySteps(['init', 'willStart', 'start', 'mounted']);
+        widget.destroy();
+    });
+
+    QUnit.test("widgets can be reappendedTo after being detached", function (assert) {
+        assert.expect(11);
+
+        var $fix = $( "#qunit-fixture");
+        var $div1 = $('<div>');
+        var $div2 = $('<div>');
+        $fix.append($div1).append($div2);
+
+        var widget = makeWidget(assert);
+        widget.appendTo($div1);
+        assert.verifySteps(['init', 'willStart', 'start', 'mounted']);
+        widget.detach();
+        assert.verifySteps(['init', 'willStart', 'start', 'mounted', 'willUnmount']);
+        widget.appendTo($div2);
+        assert.verifySteps(['init', 'willStart', 'start', 'mounted', 'willUnmount', 'mounted']);
+        widget.destroy();
+    });
+
+    QUnit.test("widgets can be detached twice in a row", function (assert) {
+        assert.expect(7);
+
+        var $fix = $( "#qunit-fixture");
+
+        var widget = makeWidget(assert);
+        widget.appendTo($fix);
+        widget.detach();
+        widget.detach();
+        assert.verifySteps(['init', 'willStart', 'start', 'mounted', 'willUnmount']);
+        widget.destroy();
+    });
+
+    QUnit.test("subwidget hooks are properly called", function (assert) {
+        assert.expect(10);
+
+        var $fix = $( "#qunit-fixture");
+
+        var ParentWidget = Widget.extend({
+            start: function () {
+                var widget = makeWidget(assert, {
+                    willUnmount: function () {
+                        assert.ok(document.contains(this.el), 'node should still be in dom');
+                        assert.step('willUnmount');
+                    },
+                }, parent);
+                assert.verifySteps(['init']);
+                return widget.appendTo(this.$el);
+            },
+        });
+        var parent = new ParentWidget();
+        parent.appendTo($fix);
+        assert.verifySteps(['init', 'willStart', 'start', 'mounted']);
+        parent.destroy();
+        assert.verifySteps(['init', 'willStart', 'start', 'mounted', 'willUnmount', 'destroy']);
+    });
+
 });
 
 });

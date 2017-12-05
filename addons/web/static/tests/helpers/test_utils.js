@@ -234,10 +234,8 @@ function createAsyncView(params) {
         // without being in the DOM
         var fragment = document.createDocumentFragment();
         return view.appendTo(fragment).then(function () {
-            dom.append($content, fragment, {
-                callbacks: [{widget: view}],
-                in_DOM: true,
-            });
+            view.appendTo($content);
+
             view.$el.on('click', 'a', function (ev) {
                 ev.preventDefault();
             });

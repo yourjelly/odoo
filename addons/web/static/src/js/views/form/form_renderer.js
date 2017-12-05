@@ -804,6 +804,8 @@ var FormRenderer = BasicRenderer.extend({
 
         // Set the new content of the form view, and toggle classnames
         this.$el.html($newContent);
+        // necessary to make sure all new subwidgets are properly mounted
+        this._mount();
         this.$el.toggleClass('o_form_nosheet', !this.has_sheet);
         if (this.has_sheet) {
             this.$el.children().not('.oe_chatter')

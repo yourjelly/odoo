@@ -34,6 +34,14 @@ var FormController = BasicController.extend({
         this.hasSidebar = params.hasSidebar;
         this.toolbarActions = params.toolbarActions || {};
     },
+    /**
+     * Called each time the form view is attached into the DOM
+     *
+     * @todo convert to new style
+     */
+    mounted: function () {
+        this.autofocus();
+    },
 
     //--------------------------------------------------------------------------
     // Public
@@ -91,14 +99,6 @@ var FormController = BasicController.extend({
      */
     getTitle: function () {
         return this.model.getName(this.handle);
-    },
-    /**
-     * Called each time the form view is attached into the DOM
-     *
-     * @todo convert to new style
-     */
-    on_attach_callback: function () {
-        this.autofocus();
     },
     /**
      * Render buttons for the control panel.  The form view can be rendered in

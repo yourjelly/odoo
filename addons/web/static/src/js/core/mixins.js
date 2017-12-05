@@ -29,10 +29,10 @@ var ParentedMixin = {
      * getChildren() method is called.
      */
     setParent : function (parent) {
-        if (this.getParent()) {
-            if (this.getParent().__parentedMixin) {
-                this.getParent().__parentedChildren = _.without(this
-                        .getParent().getChildren(), this);
+        if (this.__parentedParent) {
+            if (this.__parentedParent.__parentedMixin) {
+                this.__parentedParent.__parentedChildren = _.without(this
+                        .__parentedParent.__parentedChildren, this);
             }
         }
         this.__parentedParent = parent;
@@ -99,9 +99,9 @@ var ParentedMixin = {
      * resource it could have reserved.
      */
     destroy : function () {
-        _.each(this.getChildren(), function (el) {
-            el.destroy();
-        });
+        for (var i = 0; i < this.__parentedChildren.length; i++) {
+            this.__parentedChildren[i].destroy();
+        }
         this.setParent(undefined);
         this.__parentedDestroyed = true;
     },

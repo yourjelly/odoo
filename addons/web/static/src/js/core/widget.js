@@ -6,6 +6,8 @@ var core = require('web.core');
 var mixins = require('web.mixins');
 var ServicesMixin = require('web.ServicesMixin');
 
+var eventRegexp = new RegExp(/^(\S+)(\s+(.*))?$/);
+var blackMagicRegexp = new RegExp(/^on_|^do_/);
 /**
  * Base class for all visual components. Provides a lot of functions helpful
  * for the management of a part of the DOM.
@@ -93,13 +95,16 @@ var Widget = core.Class.extend(mixins.PropertiesMixin, ServicesMixin, {
      *   current instance will be destroyed too. Can be null.
      */
     init: function (parent) {
+        this._mounted = false;
+        this._started = false;
+
         mixins.PropertiesMixin.init.call(this);
         this.setParent(parent);
         // Bind on_/do_* methods to this
         // We might remove this automatic binding in the future
         for (var name in this) {
             if(typeof(this[name]) === "function") {
-                if((/^on_|^do_/).test(name)) {
+                if((blackMagicRegexp).test(name)) {
                     this[name] = this[name].bind(this);
                 }
             }
@@ -121,7 +126,6 @@ var Widget = core.Class.extend(mixins.PropertiesMixin, ServicesMixin, {
             });
             return $.when.apply($, defs);
         }
-        return $.when();
     },
     /**
      * Method called after rendering. Mostly used to bind actions, perform
@@ -138,15 +142,16 @@ var Widget = core.Class.extend(mixins.PropertiesMixin, ServicesMixin, {
     start: function () {
         return $.when();
     },
+    mounted: function () {
+    },
+    willUnmount: function () {
+    },
     /**
      * Destroys the current widget, also destroys all its children before
      * destroying itself.
      */
     destroy: function () {
-        _.invoke(this.getChildren(), 'destroy');
-        if(this.$el) {
-            this.$el.remove();
-        }
+        this.detach(false, true);
         mixins.PropertiesMixin.destroy.call(this);
     },
 
@@ -158,6 +163,7 @@ var Widget = core.Class.extend(mixins.PropertiesMixin, ServicesMixin, {
      * Renders the current widget and appends it to the given jQuery object.
      *
      * @param {jQuery} target
+     * @returns {Deferred}
      */
     appendTo: function (target) {
         var self = this;
@@ -169,13 +175,29 @@ var Widget = core.Class.extend(mixins.PropertiesMixin, ServicesMixin, {
      * Attach the current widget to a dom element
      *
      * @param {jQuery} target
+     * @returns {Deferred}
      */
     attachTo: function (target) {
-        var self = this;
         this.setElement(target.$el || target);
-        return this.willStart().then(function () {
-            return self.start();
-        });
+        var willStart = this.willStart();
+        return willStart ? willStart.then(this.start.bind(this)) : this.start();
+    },
+    detach: function (noDetach, remove) {
+        if (this._mounted) {
+            this.willUnmount();
+            for (var i = 0; i < this.__parentedChildren.length; i++) {
+                var child = this.__parentedChildren[i];
+                if (child._mounted) {
+                    child.detach(true);
+                }
+            }
+            this._mounted = false;
+            if (remove) {
+                this.$el.remove();
+            } else if (!noDetach) {
+                this.$el.detach();
+            }
+        }
     },
     /**
      * Hides the widget
@@ -194,17 +216,14 @@ var Widget = core.Class.extend(mixins.PropertiesMixin, ServicesMixin, {
      * @param {boolean} [display] use true to show the widget or false to hide it
      */
     do_toggle: function (display) {
-        if (_.isBoolean(display)) {
-            display ? this.do_show() : this.do_hide();
-        } else {
-            this.$el.hasClass('o_hidden') ? this.do_show() : this.do_hide();
-        }
+        this.$el.toggleClass('o_hidden', display);
     },
     /**
      * Renders the current widget and inserts it after to the given jQuery
      * object.
      *
      * @param {jQuery} target
+     * @returns {Deferred}
      */
     insertAfter: function (target) {
         var self = this;
@@ -217,6 +236,7 @@ var Widget = core.Class.extend(mixins.PropertiesMixin, ServicesMixin, {
      * object.
      *
      * @param {jQuery} target
+     * @returns {Deferred}
      */
     insertBefore: function (target) {
         var self = this;
@@ -228,6 +248,7 @@ var Widget = core.Class.extend(mixins.PropertiesMixin, ServicesMixin, {
      * Renders the current widget and prepends it to the given jQuery object.
      *
      * @param {jQuery} target
+     * @returns {Deferred}
      */
     prependTo: function (target) {
         var self = this;
@@ -253,11 +274,13 @@ var Widget = core.Class.extend(mixins.PropertiesMixin, ServicesMixin, {
      * Renders the current widget and replaces the given jQuery object.
      *
      * @param target A jQuery object or a Widget instance.
+     * @returns {Deferred}
      */
     replace: function (target) {
-        return this._widgetRenderAndInsert(_.bind(function (t) {
-            this.$el.replaceAll(t);
-        }, this), target);
+        var self = this;
+        return this._widgetRenderAndInsert(function (t) {
+            self.$el.replaceAll(t);
+        }, target);
     },
     /**
      * Re-sets the widget's root element (el/$el/$el).
@@ -297,9 +320,6 @@ var Widget = core.Class.extend(mixins.PropertiesMixin, ServicesMixin, {
      * @returns {jQuery} selector match
      */
     $: function (selector) {
-        if (selector === undefined) {
-            return this.$el;
-        }
         return this.$el.find(selector);
     },
     /**
@@ -316,7 +336,7 @@ var Widget = core.Class.extend(mixins.PropertiesMixin, ServicesMixin, {
 
             var method = this.proxy(events[key]);
 
-            var match = /^(\S+)(\s+(.*))?$/.exec(key);
+            var match = eventRegexp.exec(key);
             var event = match[1];
             var selector = match[3];
 
@@ -344,10 +364,22 @@ var Widget = core.Class.extend(mixins.PropertiesMixin, ServicesMixin, {
             attrs['class'] = this.className;
         }
         var $el = $(document.createElement(this.tagName));
-        if (!_.isEmpty(attrs)) {
+        if (Object.keys(attrs).length) {
             $el.attr(attrs);
         }
         return $el;
+    },
+    _mount: function (parentEl) {
+        if (!this._mounted && (parentEl || document).contains(this.el)) {
+            this._mounted = true;
+            this.mounted();
+            for (var i = 0; i < this.__parentedChildren.length; i++) {
+                var child = this.__parentedChildren[i];
+                if (child._mounted === false) {
+                    child._mount();
+                }
+            }
+        }
     },
     /**
      * Re-sets the widget's root element and replaces the old root element
@@ -390,11 +422,29 @@ var Widget = core.Class.extend(mixins.PropertiesMixin, ServicesMixin, {
      */
     _widgetRenderAndInsert: function (insertion, target) {
         var self = this;
-        return this.willStart().then(function () {
-            self.renderElement();
+        function postInsert () {
+            self._started = true;
+            self._mount();
+        }
+        if (this._started) {
             insertion(target);
-            return self.start();
-        });
+            postInsert();
+            return;
+        }
+        function postWillStart () {
+            if (!self.__parentedDestroyed) {
+                self.renderElement();
+                insertion(target);
+                var start = self.start();
+                return start ? start.then(postInsert) : postInsert();
+            }
+        }
+
+        var willStart = this.willStart();
+        if (willStart) {
+            return willStart.then(postWillStart);
+        }
+        return postWillStart() || $.when();
     },
 });
 
