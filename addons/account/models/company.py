@@ -159,19 +159,15 @@ Best Regards,''')
     def setting_init_bank_account_action(self):
         """ Called by the 'Bank Accounts' button of the setup bar."""
         company = self.env.user.company_id
-        view_id_tree = self.env.ref('account.view_account_bank_journal_tree').id
-        view_id_form = self.env.ref('account.view_account_bank_journal_form').id
+        view_id = self.env.ref('account.view_account_bank_journal_tree').id
 
         res = {
-            'name': _('Bank Account'),
-            'res_model': 'account.journal',
-            'view_mode': 'tree',
             'type': 'ir.actions.act_window',
-            'views': [(view_id_tree, 'list'), (view_id_form, 'form')],
-            'view_id': view_id_tree,
-            'search_view_id': self.env.ref('account.view_account_journal_search').id,
-            'domain': [('type', '=', 'bank')],
-            'view_type': 'form'
+            'name': _('Bank Account'),
+            'view_mode': 'tree',
+            'res_model': 'account.journal',
+            'target': 'new',
+            'views': [[view_id, 'form']],
         }
 
         return res
