@@ -115,5 +115,5 @@ var AttachDocument = Widget.extend({
     },
 
 });
-return AttachDocument;
+Core.button_widgets_registry.add('attachment', AttachDocument);
 });
