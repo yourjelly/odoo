@@ -31,7 +31,10 @@ FormRenderer.include({
       */
      _renderHeaderButton: function (node) {
          if (node.attrs.special === 'attachdocument') {
-            return this._renderAttachDocument(node, this.state);
+            var $button = this._renderAttachDocument(node, this.state);
+            this._handleAttributes($button, node);
+            this._registerModifiers(node, this.state, $button);
+            return $button;
          }
         return this._super.apply(this, arguments);
      },
