@@ -167,7 +167,8 @@ Best Regards,''')
             'view_mode': 'tree',
             'res_model': 'account.journal',
             'target': 'new',
-            'views': [[view_id, 'form']],
+            'views': [[view_id, 'list']],
+            'domain': [('type', '=', 'bank')],
         }
 
         return res
