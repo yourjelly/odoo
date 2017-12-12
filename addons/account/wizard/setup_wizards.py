@@ -84,3 +84,17 @@ class OpeningAccountMoveWizard(models.TransientModel):
                         'company_id': self.company_id,
                     })
             self.opening_move_line_ids += balancing_line
+
+class BankAccountSetupWizard(models.TransientModel):
+    _name = "bank.account"
+
+    account_setup_bank_data_done = fields.Boolean(string='Bank setup marked as done', related='company_id.account_setup_bank_data_done', help="Technical field used in the special view for the setup bar step.")
+    bank_account_id = fields.Many2one('res.partner.bank', string="Bank Account", ondelete='restrict', copy=False, domain="[('partner_id','=', company_id)]")
+
+    def mark_bank_setup_as_done_action(self):
+        """ Marks the 'bank setup' step as done in the setup bar and in the company."""
+        self.company_id.account_setup_bank_data_done = True
+
+    def unmark_bank_setup_as_done_action(self):
+        """ Marks the 'bank setup' step as not done in the setup bar and in the company."""
+        self.company_id.account_setup_bank_data_done = False
