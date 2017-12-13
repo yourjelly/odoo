@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import time
-from collections import defaultdict
 
 from odoo import api, fields, models, tools, SUPERUSER_ID, _
 from odoo.exceptions import ValidationError
@@ -133,6 +132,7 @@ class IrRule(models.Model):
         self.clear_caches()
         return res
 
+
 #
 # Hack for field 'global': this field cannot be defined like others, because
 # 'global' is a Python keyword. Therefore, we add it to the class by assignment.
@@ -141,3 +141,4 @@ class IrRule(models.Model):
 setattr(IrRule, 'global',
         fields.Boolean(compute='_compute_global', store=True, _module=IrRule._module,
                        help="If no group is specified the rule is global and applied to everyone"))
+setattr(IrRule, 'is_global', fields.Boolean(related='global'))    # for use in python expressions
