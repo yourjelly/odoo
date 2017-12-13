@@ -88,8 +88,10 @@ class OpeningAccountMoveWizard(models.TransientModel):
 class BankAccountSetupWizard(models.TransientModel):
     _name = "bank.account"
 
-    account_setup_bank_data_done = fields.Boolean(string='Bank setup marked as done', related='company_id.account_setup_bank_data_done', help="Technical field used in the special view for the setup bar step.")
-    bank_account_id = fields.Many2one('res.partner.bank', string="Bank Account", ondelete='restrict', copy=False, domain="[('partner_id','=', company_id)]")
+    bank_account_ids = fields.Many2many('account.journal', 'account_journal_rel', 'bank_id', 'journal_id', 'Bank Accounts')
+
+    # account_setup_bank_data_done = fields.Boolean(string='Bank setup marked as done', related='company_id.account_setup_bank_data_done', help="Technical field used in the special view for the setup bar step.")
+    # bank_account_id = fields.Many2one('res.partner.bank', string="Bank Account", ondelete='restrict', copy=False, domain="[('partner_id','=', company_id)]")
 
     def mark_bank_setup_as_done_action(self):
         """ Marks the 'bank setup' step as done in the setup bar and in the company."""
