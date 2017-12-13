@@ -110,37 +110,57 @@ class MrpBom(models.Model):
         # order to prioritize bom with product_id over the one without
         return self.search(domain, order='sequence, product_id', limit=1)
 
+    def _check_bom_recursion(self, product, picking_type=False):
+        """ Check if a cycle exist in the bom and subbom for the
+        specific variant given as parameter. This function transform
+        the bom and bom_lines in a tree form. Then it uses a DFS
+        search in order to find an existing cycle.
+        return : The first cycle found or False if it do not exist.
+        """
+        visited = []
+        recStack = []
+
+        def check_cycle(product, visited, recStack, picking_type):
+            """ params:
+            product: the current tree node explored.
+            visited: stack that contains all the product already visited.
+            recStack: contains all the product in the current subtree.
+            """
+            visited.append(product)
+            recStack.append(product)
+
+            bom = self._bom_find(product=product, picking_type=picking_type or self.picking_type_id, company_id=self.company_id.id)
+
+            for bom_line in bom.bom_line_ids:
+                if bom_line._skip_bom_line(product):
+                    continue
+
+                if bom_line.product_id not in visited:
+                    if check_cycle(bom_line.product_id, visited, recStack, picking_type):
+                        return recStack
+                elif bom_line.product_id in recStack:
+                    recStack.append(bom_line.product_id)
+                    return recStack
+            recStack.pop()
+            return False
+
+        return check_cycle(product, visited, recStack, picking_type)
+
     def explode(self, product, quantity, picking_type=False):
         """
             Explodes the BoM and creates two lists with all the information you need: bom_done and line_done
             Quantity describes the number of times you need the BoM: so the quantity divided by the number created by the BoM
             and converted into its UoM
         """
-        from collections import defaultdict
-
-        graph = defaultdict(list)
-        V = set()
-
-        def check_cycle(v, visited, recStack, graph):
-            visited[v] = True
-            recStack[v] = True
-            for neighbour in graph[v]:
-                if visited[neighbour] == False:
-                    if check_cycle(neighbour, visited, recStack, graph) == True:
-                        return True
-                elif recStack[neighbour] == True:
-                    return True
-            recStack[v] = False
-            return False
+        cycle = self.check_bom_recursion(product, picking_type)
+        if cycle:
+            raise UserError(_('Recursion error!  A product with a Bill of Material should not have itself in its BoM or child BoMs! \n The problematic product is %s \n Cycle: \n%s')
+                            % (cycle[-1].display_name, ' -> '.join([c.display_name for c in cycle],)))
 
         boms_done = [(self, {'qty': quantity, 'product': product, 'original_qty': quantity, 'parent_line': False})]
         lines_done = []
-        V |= set([product.product_tmpl_id.id])
 
         bom_lines = [(bom_line, product, quantity, False) for bom_line in self.bom_line_ids]
-        for bom_line in self.bom_line_ids:
-            V |= set([bom_line.product_id.product_tmpl_id.id])
-            graph[product.product_tmpl_id.id].append(bom_line.product_id.product_tmpl_id.id)
         while bom_lines:
             current_line, current_product, current_qty, parent_line = bom_lines[0]
             bom_lines = bom_lines[1:]
@@ -153,11 +173,6 @@ class MrpBom(models.Model):
             if bom.type == 'phantom':
                 converted_line_quantity = current_line.product_uom_id._compute_quantity(line_quantity / bom.product_qty, bom.product_uom_id)
                 bom_lines = [(line, current_line.product_id, converted_line_quantity, current_line) for line in bom.bom_line_ids] + bom_lines
-                for bom_line in bom.bom_line_ids:
-                    graph[current_line.product_id.product_tmpl_id.id].append(bom_line.product_id.product_tmpl_id.id)
-                    if bom_line.product_id.product_tmpl_id.id in V and check_cycle(bom_line.product_id.product_tmpl_id.id, {key: False for  key in V}, {key: False for  key in V}, graph):
-                        raise UserError(_('Recursion error!  A product with a Bill of Material should not have itself in its BoM or child BoMs!'))
-                    V |= set([bom_line.product_id.product_tmpl_id.id])
                 boms_done.append((bom, {'qty': converted_line_quantity, 'product': current_product, 'original_qty': quantity, 'parent_line': current_line}))
             else:
                 # We round up here because the user expects that if he has to consume a little more, the whole UOM unit
