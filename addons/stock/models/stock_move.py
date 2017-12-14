@@ -503,7 +503,6 @@ class StockMove(models.Model):
         return {
             'product_uom_qty': sum(self.mapped('product_uom_qty')),
             'date': min(self.mapped('date')),
-            'date_expected': min(self.mapped('date_expected')) if self.mapped('picking_id').move_type == 'direct' else max(self.mapped('date_expected')),
             'move_dest_ids': [(4, m.id) for m in self.mapped('move_dest_ids')],
             'move_orig_ids': [(4, m.id) for m in self.mapped('move_orig_ids')],
             'state': state,
@@ -513,7 +512,7 @@ class StockMove(models.Model):
     @api.model
     def _prepare_merge_moves_distinct_fields(self):
         return [
-            'product_id', 'price_unit', 'product_packaging', 'procure_method',
+            'product_id', 'price_unit', 'product_packaging', 'procure_method', 'date_expected',
             'product_uom', 'restrict_partner_id', 'scrapped', 'origin_returned_move_id'
         ]
 
@@ -521,7 +520,7 @@ class StockMove(models.Model):
     def _prepare_merge_move_sort_method(self, move):
         move.ensure_one()
         return [
-            move.product_id.id, move.price_unit, move.product_packaging.id, move.procure_method, 
+            move.product_id.id, move.price_unit, move.product_packaging.id, move.procure_method, move.date_expected,
             move.product_uom.id, move.restrict_partner_id.id, move.scrapped, move.origin_returned_move_id.id
         ]
 
