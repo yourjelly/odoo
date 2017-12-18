@@ -4,6 +4,7 @@
 from odoo import http, _
 from odoo.addons.portal.controllers.portal import _build_url_w_params
 from odoo.http import request, route
+from werkzeug import urls
 
 
 class PaymentPortal(http.Controller):
@@ -18,6 +19,11 @@ class PaymentPortal(http.Controller):
                       redirect customers to the acquirer website """
         success_url = kwargs.get('success_url', '/my')
         callback_method = kwargs.get('callback_method', '')
+
+        success_url_dict = urls.url_decode(success_url.split('?')[1])
+        success_url_dict.pop("error", None)
+        success_url_dict.pop("success", None)
+        success_url = success_url.split('?')[0] + "?" + urls.url_encode(success_url_dict)
 
         invoice_sudo = request.env['account.invoice'].sudo().browse(invoice_id)
         if not invoice_sudo:
@@ -61,6 +67,21 @@ class PaymentPortal(http.Controller):
         callback_method = kwargs.get('callback_method', '')
         access_token = kwargs.get('access_token')
         params = {}
+
+
+        import pudb; pu.db
+        #don't keep the result from last transaction
+        error_url_dict = urls.url_decode(error_url.split('?')[1])
+        success_url_dict = urls.url_decode(success_url.split('?')[1])
+        error_url_dict.pop("error", None)
+        error_url_dict.pop("success", None)
+        error_url_dict.pop("access_token", None)
+        success_url_dict.pop("error", None)
+        success_url_dict.pop("success", None)
+        success_url_dict.pop("access_token", None)
+        error_url = error_url.split('?')[0] + "?" + urls.url_encode(error_url_dict)
+        success_url = success_url.split('?')[0] + "?" + urls.url_encode(success_url_dict)
+
         if access_token:
             params['access_token'] = access_token
 
