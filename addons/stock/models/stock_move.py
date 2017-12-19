@@ -654,8 +654,12 @@ class StockMove(models.Model):
             if move.state != 'assigned' and not self.env.context.get('reserve_only_ops'):
                 qty_already_assigned = move.reserved_availability
                 qty = move.product_qty - qty_already_assigned
+                if move.product_id.tracking != 'none' and not move.restrict_lot_id and (move.picking_type_id.use_existing_lots or move.picking_type_id.use_create_lots): #And picking type is tracked by lots
+                    pdl = [('lot_id', '!=', False), ('lot_id', '=', False)]
+                else:
+                    pdl = []
 
-                quants = Quant.quants_get_preferred_domain(qty, move, domain=main_domain[move.id], preferred_domain_list=[])
+                quants = Quant.quants_get_preferred_domain(qty, move, domain=main_domain[move.id], preferred_domain_list=pdl)
                 Quant.quants_reserve(quants, move)
 
         # force assignation of consumable products and incoming from supplier/inventory/production
