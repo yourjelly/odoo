@@ -183,18 +183,29 @@ ActionManager.include({
         var viewDescr = _.findWhere(action.views, {type: viewType});
         var view = new viewDescr.Widget(viewDescr.fieldsView, viewOptions);
         if (!options || !options.lazy) {
-            action.controllers[viewType] = view.getController(this).then(function (widget) {
-                // AAB: change this logic to stop using the properties mixin
-                widget.on("change:title", this, function () {
-                    if (!action.flags.headless) {
-                        var breadcrumbs = self._getBreadcrumbs();
-                        self.controlPanel.update({breadcrumbs: breadcrumbs}, {clear: false});
-                    }
-                });
-                controller.widget = widget;
+            var def = $.Deferred();
+            view.getController(this).then(function (widget) {
+                if (def.state() === 'rejected') {
+                    // the deferred has been rejected meanwhile, meaning that the
+                    // action has been removed, so simply destroy the widget
+                    widget.destroy();
+                } else {
+                    // AAB: change this logic to stop using the properties mixin
+                    widget.on("change:title", this, function () {
+                        if (!action.flags.headless) {
+                            var breadcrumbs = self._getBreadcrumbs();
+                            self.controlPanel.update({breadcrumbs: breadcrumbs}, {clear: false});
+                        }
+                    });
+                    controller.widget = widget;
 
-                return controller;
+                    def.resolve(controller);
+                }
+            }).fail(def.reject.bind(def));
+            def.fail(function () {
+                delete self.controllers[controllerID];
             });
+            action.controllers[viewType] = def;
         } else {
             action.controllers[viewType] = $.when(controller);
         }
@@ -455,6 +466,10 @@ ActionManager.include({
                         controller.widget.destroy();
                     }
                 });
+                // reject the deferred if it is not yet resolved, so that the
+                // controller is correctly destroyed as soon as it is ready, and
+                // its reference is removed
+                controllerDef.reject();
             });
             if (action.searchView) {
                 action.searchView.destroy();

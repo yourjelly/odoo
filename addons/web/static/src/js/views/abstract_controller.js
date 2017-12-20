@@ -79,12 +79,13 @@ var AbstractController = Widget.extend(ControlPanelMixin, {
 
         this.$el.addClass('o_view_controller');
 
+        // render the ControlPanel elements (buttons, pager, sidebar...)
+        this.controlPanelElements = this._renderControlPanelElements();
+
         return $.when(
             this._super.apply(this, arguments),
             this.renderer.appendTo(this.$el)
         ).then(function () {
-            // render the ControlPanel elements (buttons, pager, sidebar...)
-            self.controlPanelElements = self._renderControlPanelElements();
             self._update(self.initialState);
         });
     },
@@ -95,7 +96,7 @@ var AbstractController = Widget.extend(ControlPanelMixin, {
         if (this.$buttons) {
             this.$buttons.off();
         }
-        if (this.controlPanelElements.$switch_buttons) {
+        if (this.controlPanelElements && this.controlPanelElements.$switch_buttons) {
             this.controlPanelElements.$switch_buttons.off();
         }
         return this._super.apply(this, arguments);

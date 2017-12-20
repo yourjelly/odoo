@@ -220,6 +220,57 @@ QUnit.module('ActionManager', {
         testUtils.unpatch(Widget);
     });
 
+    QUnit.test('no memory leaks when executing an action while switching view', function (assert) {
+        assert.expect(1);
+
+        var def;
+        var delta = 0;
+        testUtils.patch(Widget, {
+            init: function () {
+                delta += 1;
+                this._super.apply(this, arguments);
+            },
+            destroy: function () {
+                delta -= 1;
+                this._super.apply(this, arguments);
+            },
+        });
+
+        var actionManager = createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            mockRPC: function (route, args) {
+                var result = this._super.apply(this, arguments);
+                if (args.method === 'read') {
+                    return $.when(def).then(_.constant(result));
+                }
+                return result;
+            },
+        });
+
+        actionManager.doAction(4);
+        var n = delta;
+
+        actionManager.doAction(3, {clear_breadcrumbs: true});
+
+        // switch to the form view (this request is blocked)
+        def = $.Deferred();
+        actionManager.$('.o_list_view .o_data_row:first').click();
+
+        // execute another action meanwhile (don't block this request)
+        actionManager.doAction(4, {clear_breadcrumbs: true});
+
+        // unblock the switch to the form view in action 3
+        def.resolve();
+
+        assert.strictEqual(n, delta,
+            "all widgets of action 3 should have been destroyed");
+
+        actionManager.destroy();
+        testUtils.unpatch(Widget);
+    });
+
     QUnit.test('action with "no_breadcrumbs" set to true', function (assert) {
         assert.expect(2);
 
@@ -879,6 +930,68 @@ QUnit.module('ActionManager', {
         actionManager.destroy();
     });
 
+    QUnit.test('execute a new action while loading a lazy-loaded controller', function (assert) {
+        assert.expect(14);
+
+        var def;
+        var actionManager = createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            mockRPC: function (route, args) {
+                var result = this._super.apply(this, arguments);
+                assert.step(args.method || route);
+                if (route === '/web/dataset/search_read' && args.model === 'partner') {
+                    return $.when(def).then(_.constant(result));
+                }
+                return result;
+            },
+        });
+        actionManager.loadState({
+            action: 4,
+            id: 2,
+            view_type: 'form',
+        });
+
+        assert.strictEqual(actionManager.$('.o_form_view').length, 1,
+            "should display the form view of action 4");
+
+        // click to go back to Kanban (this request is blocked)
+        def = $.Deferred();
+        $('.o_control_panel .breadcrumb a').click();
+
+        assert.strictEqual(actionManager.$('.o_form_view').length, 1,
+            "should still display the form view of action 4");
+
+        // execute another action meanwhile (don't block this request)
+        actionManager.doAction(8, {clear_breadcrumbs: true});
+
+        assert.strictEqual(actionManager.$('.o_list_view').length, 1,
+            "should display action 8");
+        assert.strictEqual(actionManager.$('.o_form_view').length, 0,
+            "should no longer display the form view");
+
+        // unblock the switch to Kanban in action 4
+        def.resolve();
+
+        assert.strictEqual(actionManager.$('.o_list_view').length, 1,
+            "should still display action 8");
+        assert.strictEqual(actionManager.$('.o_kanban_view').length, 0,
+            "should not display the kanban view of action 4");
+
+        assert.verifySteps([
+            '/web/action/load', // load state action 4
+            'load_views', // load state action 4
+            'read', // read the opened record (action 4)
+            '/web/dataset/search_read', // blocked search read when coming back to Kanban (action 4)
+            '/web/action/load', // action 8
+            'load_views', // action 8
+            '/web/dataset/search_read', // search read action 8
+        ]);
+
+        actionManager.destroy();
+    });
+
     QUnit.test('execute a new action while handling a call_button', function (assert) {
         assert.expect(15);
 
@@ -935,6 +1048,65 @@ QUnit.module('ActionManager', {
             '/web/action/load', // action 8
             'load_views', // action 8
             '/web/dataset/search_read', // list for action 8
+        ]);
+
+        actionManager.destroy();
+    });
+
+    QUnit.test('execute a new action while switching to another controller', function (assert) {
+        assert.expect(14);
+
+        var def;
+        var actionManager = createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            mockRPC: function (route, args) {
+                var result = this._super.apply(this, arguments);
+                assert.step(args.method || route);
+                if (args.method === 'read') {
+                    return $.when(def).then(_.constant(result));
+                }
+                return result;
+            },
+        });
+
+        actionManager.doAction(3);
+
+        assert.strictEqual(actionManager.$('.o_list_view').length, 1,
+            "should display the list view of action 3");
+
+        // switch to the form view (this request is blocked)
+        def = $.Deferred();
+        actionManager.$('.o_list_view .o_data_row:first').click();
+
+        assert.strictEqual(actionManager.$('.o_list_view').length, 1,
+            "should still display the list view of action 3");
+
+        // execute another action meanwhile (don't block this request)
+        actionManager.doAction(4, {clear_breadcrumbs: true});
+
+        assert.strictEqual(actionManager.$('.o_kanban_view').length, 1,
+            "should display the kanban view of action 8");
+        assert.strictEqual(actionManager.$('.o_list_view').length, 0,
+            "should no longer display the list view");
+
+        // unblock the switch to the form view in action 3
+        def.resolve();
+
+        assert.strictEqual(actionManager.$('.o_kanban_view').length, 1,
+            "should still display the kanban view of action 8");
+        assert.strictEqual(actionManager.$('.o_form_view').length, 0,
+            "should not display the form view of action 3");
+
+        assert.verifySteps([
+            '/web/action/load', // action 3
+            'load_views', // action 3
+            '/web/dataset/search_read', // search read of list view of action 3
+            'read', // read the opened record of action 3 (this request is blocked)
+            '/web/action/load', // action 4
+            'load_views', // action 4
+            '/web/dataset/search_read', // search read action 4
         ]);
 
         actionManager.destroy();
