@@ -128,8 +128,292 @@
       </t>
     </template>
 
+    <!-- signature modal dialog -->
+    <template id="signature_dialog" name="Payment Dialog">
+        <div class="modal fade" id="modalaccept" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <form id="accept" method="POST" t-att-data-order-id="quotation.id" t-att-data-token="quotation.access_token" class="js_accept_json modal-content js_website_submit_form">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&amp;times;</button>
+                        <h4 class="modal-title">Accept &amp; Sign</h4>
+                    </div>
+                    <div class="modal-body" id="sign-dialog">
+                        <p>
+                            <span>I agree that by signing this proposal, I accept it on the behalf of </span>
+                            <b t-field="quotation.partner_id.commercial_partner_id"/>
+                            <span>, for an amount of </span>
+                            <b data-id="total_amount" t-field="quotation.amount_total"
+                                t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/>
+                            <span>with payment terms: </span><b t-field="quotation.payment_term_id"/>.
+                        </p>
+                        <t t-call="portal.portal_signature">
+                            <t t-set="object" t-value="order"/>
+                            <t t-set="partner_name" t-value="order.partner_id.name"/>
+                            <t t-set="callUrl" t-value="'/my/quotes/accept'"/>
+                            <t t-set="signLabel" t-value="'Accept Order'"/>
+                            <t t-set="accessToken" t-value="quotation.access_token"/>
+                        </t>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </template>
+
+    <!-- extend sidebar view for quotation -->
+    <template id="so_quotation_sidebar_content" name="quotation sidebar content">
+        <div class="text-center">
+            <h3><strong><span t-field="quotation.amount_total"/></strong><br/></h3>
+        </div>
+        <div class="text-center" style="padding: 10px">
+            <t t-if="order.state == 'sent' and portal_confirmation == 'sign'" name="portal_confirmation_sign">
+                <a class="btn btn-primary btn-xs ml8 mr8 pull-right" data-toggle="modal" data-target="#modalaccept">
+                    <i class="fa fa-arrow-circle-right"/> Accept &amp; Sign
+                </a>
+            </t>
+        </div>
+    </template>
+
+    <template id="pricing" name="Price">
+        <section id="quote">
+            <h1 class="page-header">Pricing</h1>
+            <t t-foreach="quotation.order_lines_layouted()" t-as="page">
+              <table class="table wq-table">
+                  <thead>
+                      <tr>
+                          <th>Products</th>
+                          <th>Quantity</th>
+                          <th><span t-if="any([line.tax_id for line in quotation.order_line])">Taxes</span></th>
+                          <th><span t-if="True in [line.discount > 0 for line in quotation.order_line]">Discount</span></th>
+                          <th class="text-right">Unit Price</th>
+                          <th class="text-right" groups="sale.group_show_price_subtotal">Amount</th>
+                          <th class="text-right price_tax_included" groups="sale.group_show_price_total">Total Price</th>
+                          <th></th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      <t t-foreach="page" t-as="layout_category">
+
+                          <t t-if="layout_category_size > 1 or page_size > 1" groups="sale.group_sale_layout">
+                              <tr class="active">
+                                  <td colspan="7" style="font-weight: bold; border-bottom: 1px solid black;">&amp;bull;
+                                      <t t-esc="layout_category['name']"/>
+                                  </td>
+                              </tr>
+                          </t>
+
+                          <!-- Lines associated -->
+                          <t t-foreach="layout_category['lines']" t-as="line">
+                              <tr>
+                                <td>
+                                    <span t-field="line.name"/>
+                                </td>
+                                <td>
+                                    <div id="quote_qty">
+                                        <span t-field="line.product_uom_qty"/>
+                                        <span t-field="line.product_uom"/>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div t-foreach="line.tax_id" t-as="tax">
+                                        <t t-esc="tax.name"/>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong t-if="line.discount" class="text-info">
+                                        <t t-esc="((line.discount % 1) and '%s' or '%d') % line.discount"/>% discount
+                                    </strong>
+                                </td>
+                                <td class="text-right">
+                                      <div t-field="line.price_unit"
+                                          t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'
+                                          t-att-style="line.discount and 'text-decoration: line-through' or None"
+                                          t-att-class="(line.discount and 'text-danger' or '') + ' text-right'"/>
+                                      <div t-if="line.discount">
+                                          <t t-esc="(1-line.discount / 100.0) * line.price_unit" t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/>
+                                      </div>
+                                </td>
+                                <td class="text-right" groups="sale.group_show_price_subtotal">
+                                    <span t-field="line.price_subtotal"
+                                          t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/>
+                                </td>
+                                <td class="text-right" groups="sale.group_show_price_total">
+                                    <span t-field="line.price_total"
+                                          t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/>
+                                </td>
+                            </tr>
+                          </t>
+
+                          <t t-if="(layout_category_size > 1  or page_size > 1) and layout_category['subtotal']" groups="sale.group_sale_layout">
+                              <tr>
+                                  <td></td><td></td><td></td><td></td>
+                                  <td class="text-right" style="padding-bottom: 32px"><strong>Subtotal:</strong></td>
+                                  <td class="text-right" style="padding-bottom: 32px">
+                                      <t t-set="subtotal" t-value="sum(line.price_subtotal for line in layout_category['lines'])"/>
+                                      <strong data-id="total_amount" t-esc="subtotal" t-options="{'widget': 'monetary', 'display_currency': quotation.pricelist_id.currency_id}"/>
+                                  </td>
+                                  <td></td>
+                              </tr>
+                          </t>
+                      </t>
+                      <t t-if="page_index == page_size - 1">
+                          <t t-if="any([line.tax_id for line in quotation.order_line])">
+                              <tr>
+                                  <td></td><td></td><td></td><td></td>
+                                  <td class="text-right"><strong>Subtotal:</strong></td>
+                                  <td class="text-right">
+                                      <strong data-id="total_amount" t-field="quotation.amount_untaxed" t-options='{"widget": "monetary","display_currency": quotation.pricelist_id.currency_id}'/>
+                                  </td>
+                                  <td></td>
+                              </tr>
+
+                              <tr>
+                                  <td></td><td></td><td></td><td></td>
+                                  <td class="text-right">Taxes:</td>
+                                  <td class="text-right">
+                                      <span data-id="total_amount" t-field="quotation.amount_tax" t-options='{"widget": "monetary","display_currency": quotation.pricelist_id.currency_id}'/>
+                                  </td>
+                                  <td></td>
+                              </tr>
+                          </t>
+                          <tr>
+                              <td></td><td></td><td></td><td></td>
+                              <td class="text-right"><strong>Total:</strong></td>
+                              <td class="text-right">
+                                  <strong data-id="total_amount" t-field="quotation.amount_total" t-options='{"widget": "monetary","display_currency": quotation.pricelist_id.currency_id}'/>
+                              </td>
+                              <td></td>
+                          </tr>
+                      </t>
+                  </tbody>
+              </table>
+
+              <t t-if="page_index &lt; page_size - 1" groups="sale.group_sale_layout">
+                  <p style="page-break-before:always;"> </p>
+              </t>
+
+            </t>
+        </section>
+        <section id="terms" class="container" t-if="quotation.note">
+            <h2 class="page-header">Terms &amp; Conditions</h2>
+            <p t-field="quotation.note"/>
+        </section>
+    </template>
+
+    <template id="so_quotation_content" name="sale order content">
+        <div id="introduction" class="page-header mt16">
+            <h1>
+                <t t-if="quotation.state in ('draft','sent','cancel')">Your Quotation</t>
+                <t t-if="quotation.state not in ('draft','sent','cancel')">Your Order</t>
+                <em t-esc="quotation.name"/>
+                <small t-field="quotation.state"/>
+                <div t-ignore="true" class="pull-right css_editable_mode_hidden hidden-print">
+                    <ul class="list-inline">
+                        <li>
+                            <t t-call='portal.record_pager'/>
+                        </li>
+                    </ul>
+                </div>
+            </h1>
+        </div>
+        <div class="row mt32">
+            <div class="col-md-6 col-xs-6">
+                <div class="row">
+                    <label class="col-sm-4 col-xs-4 text-right">Customer:</label>
+                    <div class="col-sm-8 col-xs-8">
+                        <div t-field="quotation.partner_id"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <label class="col-sm-4 col-xs-4 text-right">Bill To:</label>
+                    <div class="col-sm-8 col-xs-8">
+                        <div t-field="quotation.partner_invoice_id" t-options='{
+                            "widget": "contact",
+                            "fields": ["address", "name", "phone", "email"]
+                            }'/>
+                    </div>
+                </div>
+                <div t-if="quotation.partner_shipping_id.id != quotation.partner_invoice_id.id" class="row">
+                    <label class="col-sm-4 col-xs-4 text-right">Ship To:</label>
+                    <div class="col-sm-8 col-xs-8">
+                        <div t-field="quotation.partner_shipping_id" t-options='{
+                          "widget": "contact",
+                          "fields": ["address", "name", "phone"]
+                          }'/>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xs-6">
+                <div class="row">
+                    <label class="col-sm-5 col-xs-5 text-right">Your Contact:</label>
+                    <div class="col-sm-7 col-xs-7">
+                        <div t-field="quotation.user_id" t-options='{
+                            "widget": "contact",
+                            "fields": ["name", "phone", "email"]
+                            }'/>
+                    </div>
+                </div>
+                <div class="row">
+                    <label class="col-sm-5 col-xs-5 text-right">Quote Date:</label>
+                    <div class="col-sm-7 col-xs-7">
+                        <span t-field="quotation.date_order"/>
+                    </div>
+                    <div class="clearfix"/>
+                    <div t-if="quotation.validity_date and quotation.state in ['draft', 'sent']">
+                      <label class="col-sm-5 col-xs-5 text-right">Expiration Date:</label>
+                      <div class="col-sm-7 col-xs-7">
+                          <span t-field="quotation.validity_date"/>
+                      </div>
+                    </div>
+                    <div class="clearfix"/>
+                    <div t-if="quotation.client_order_ref">
+                        <label class="col-sm-5 col-xs-5 text-right">Your Reference:</label>
+                        <div class="col-sm-7 col-xs-7">
+                            <span t-field="quotation.client_order_ref"/>
+                        </div>
+                    </div>
+                    <div class="clearfix"/>
+                    <div t-if="quotation.payment_term_id">
+                        <label class="col-sm-5 col-xs-5 text-right">Payment Terms:</label>
+                        <div class="col-sm-7 col-xs-7">
+                            <span t-field="quotation.payment_term_id"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="oe_structure"/>
+        <!-- Pricing -->
+        <div id="so_pricing">
+            <t t-call="sale.pricing" t-if="quotation.order_line"/>
+        </div>
+    </template>
+
+    <template id="so_quotation_sidebar" name="quotation sidebar" inherit_id="portal.portal_sidebar">
+        <xpath expr="//div[@id='sidebar_content']/hr" position="before">
+            <t t-call="sale.so_quotation_sidebar_content"/>
+        </xpath>
+        <xpath expr="//div[@id='page_content']" position="inside">
+            <t t-call="sale.so_quotation_content"/>
+        </xpath>
+    </template>
+
     <template id="portal_order_page" name="Sales Order">
+        <t t-call="portal.portal_layout">
+            <t t-set="quotation" t-value="order"/>
+            <t t-set="invoices" t-value="[i for i in order.invoice_ids if i.state not in ['draft', 'cancel']]"/>
+            <t t-set="invoices_amount" t-value="sum(i.amount_total for i in invoices)"/>
+            <div id="optional_placeholder"></div>
+            <t t-call="sale.so_quotation_sidebar"/>
+            <div class="row" t-if="order.state == 'sent' and portal_confirmation == 'sign'" id="portal_sign">
+                <t t-call="sale.signature_dialog"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_order_page1" name="Sales Order">
       <t t-call="portal.portal_layout">
+        <t t-set="quotation" t-value="order"/>
         <t t-set="sales_order" t-value="order"/> <!-- rename to ensure breadcrumb compatibility (differentiate with purchase orders) -->
         <t t-set="invoices" t-value="[i for i in order.invoice_ids if i.state not in ['draft', 'cancel']]"/>
         <t t-set="invoices_amount" t-value="sum(i.amount_total for i in invoices)"/>
@@ -154,7 +438,7 @@
                 </div>
                 <div class="col-md-6 col-sm-3 col-xs-3 hidden-print" id="o_portal_order_actions">
                     <t t-if="order.state == 'sent' and portal_confirmation == 'sign'" name="portal_confirmation_sign">
-                        <a class="btn btn-primary ml8 pull-right" href="#portal_sign">
+                        <a class="btn btn-primary ml8 pull-right" data-toggle="modal" data-target="#modalaccept">
                             <i class="fa fa-arrow-circle-right"/> Accept &amp; Sign
                         </a>
                     </t>
@@ -316,16 +600,7 @@
             </div>
             <div class="panel-body">
                 <div class="row" t-if="order.state == 'sent' and portal_confirmation == 'sign'" id="portal_sign">
-                    <div class="col-md-offset-3 col-md-6">
-                        <h4>Accept &amp; Sign</h4>
-                        <t t-call="portal.portal_signature">
-                            <t t-set="object" t-value="order"/>
-                            <t t-set="partner_name" t-value="order.partner_id.name"/>
-                            <t t-set="callUrl" t-value="'/my/quotes/accept'"/>
-                            <t t-set="signLabel" t-value="'Accept Order'"/>
-                            <t t-set="accessToken" t-value="order.access_token"/>
-                        </t>
-                    </div>
+                    <t t-call="sale.signature_dialog"/>
                 </div>
             </div>
           </div>
