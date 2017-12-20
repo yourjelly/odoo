@@ -76,3 +76,47 @@
 .label-optional {
     font-weight: normal;
 }
+
+.o_portal_sidebar .bs-sidebar {
+    position:relative;
+    width:100%;
+    z-index:1;
+    background-color:#f7f5fa;
+    border-radius:5px;
+    .nav {
+        > .active > a, > .active:hover > a, > .active:focus > a {
+            font-weight:bold;
+            color:#563d7c;
+            background-color:transparent;
+            border-right:1px solid #563d7c;
+        }
+        > li > a {
+            display:block;
+            color:#716b7a;
+            padding:5px 20px;
+        }
+        .nav {
+            display:none;
+            margin-bottom:8px;
+          > li > a {
+            padding-top:3px;
+            padding-bottom:3px;
+            padding-left:30px;
+            font-size:90%;
+        }
+    }
+  }
+}
+.o_portal_sidebar .bs-sidenav {
+    padding-top:10px;
+    padding-bottom:10px;
+}
+.wq-table {
+    table-layout:auto !important;
+    th, td {
+    border-top:none !important;
+    }
+}
+.wq-table:not(:first-of-type) thead {
+    display:none;
+}
