@@ -879,6 +879,67 @@ QUnit.module('ActionManager', {
         actionManager.destroy();
     });
 
+    QUnit.test('execute a new action while handling a call_button', function (assert) {
+        assert.expect(15);
+
+        var self = this;
+        var def = $.Deferred();
+        var actionManager = createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            mockRPC: function (route, args) {
+                assert.step(args.method || route);
+                if (route === '/web/dataset/call_button') {
+                    return def.then(_.constant(self.actions[0]));
+                }
+                return this._super.apply(this, arguments);
+            },
+        });
+
+        // execute action 3 and open a record in form view
+        actionManager.doAction(3);
+        actionManager.$('.o_list_view .o_data_row:first').click();
+
+        assert.strictEqual(actionManager.$('.o_form_view').length, 1,
+            "should display the form view of action 3");
+
+        // click on 'Call method' button (this request is blocked)
+        actionManager.$('.o_form_view button:contains(Call method)').click();
+
+        assert.strictEqual(actionManager.$('.o_form_view').length, 1,
+            "should still display the form view of action 3");
+
+        // execute another action
+        actionManager.doAction(8, {clear_breadcrumbs: true});
+
+        assert.strictEqual(actionManager.$('.o_list_view').length, 1,
+            "should display the list view of action 8");
+        assert.strictEqual(actionManager.$('.o_form_view').length, 0,
+            "should no longer display the form view");
+
+        // unblock the call_button request
+        def.resolve();
+
+        assert.strictEqual(actionManager.$('.o_list_view').length, 1,
+            "should still display the list view of action 8");
+        assert.strictEqual(actionManager.$('.o_kanban_view').length, 0,
+            "should not display action 1");
+
+        assert.verifySteps([
+            '/web/action/load', // action 3
+            'load_views', // action 3
+            '/web/dataset/search_read', // list for action 3
+            'read', // form for action 3
+            'object', // click on 'Call method' button (this request is blocked)
+            '/web/action/load', // action 8
+            'load_views', // action 8
+            '/web/dataset/search_read', // list for action 8
+        ]);
+
+        actionManager.destroy();
+    });
+
     QUnit.module('Client Actions');
 
     QUnit.test('can execute client actions from tag name', function (assert) {

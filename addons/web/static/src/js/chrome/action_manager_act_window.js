@@ -602,11 +602,50 @@ ActionManager.include({
         var self = this;
         var actionData = ev.data.action_data;
         var env = ev.data.env;
-        var closeHandler = ev.data.on_closed || function () {};
         var context = new Context(env.context, actionData.context || {});
         var recordID = env.currentID || null; // pyeval handles null value, not undefined
         var def;
-        var handler = function (action) {
+
+        // determine the action to execute according to the actionData
+        if (actionData.special) {
+            def = $.when({type: 'ir.actions.act_window_close'});
+        } else if (actionData.type === 'object') {
+            // call a Python Object method, which may return an action to execute
+            var args = recordID ? [[recordID]] : [env.resIDs];
+            if (actionData.args) {
+                try {
+                    // warning: quotes and double quotes problem due to json and xml clash
+                    // maybe we should force escaping in xml or do a better parse of the args array
+                    var additionalArgs = JSON.parse(actionData.args.replace(/'/g, '"'));
+                    args = args.concat(additionalArgs);
+                } catch (e) {
+                    console.error("Could not JSON.parse arguments", actionData.args);
+                }
+            }
+            args.push(context.eval());
+            def = this._rpc({
+                route: '/web/dataset/call_button',
+                params: {
+                    args: args,
+                    method: actionData.name,
+                    model: env.model,
+                },
+            });
+        } else if (actionData.type === 'action') {
+            // execute a given action, so load it first
+            def = this._loadAction(actionData.name, _.extend(pyeval.eval('context', context), {
+                active_model: env.model,
+                active_ids: env.resIDs,
+                active_id: recordID,
+            }));
+        }
+
+        // use the DropPrevious to prevent from executing the handler if another
+        // request (doAction, switchView...) has been done meanwhile ; execute
+        // the fail handler if the 'call_button' or 'loadAction' failed but not
+        // if the request failed due to the DropPrevious,
+        def.fail(ev.data.on_fail);
+        this.dp.add(def).then(function (action) {
             // show effect if button have effect attribute
             // rainbowman can be displayed from two places: from attribute on a button or from python
             // code below handles the first case i.e 'effect' attribute on button.
@@ -621,7 +660,9 @@ ActionManager.include({
                 //  - wrong group_by values will fail and forbid rendering of the destination view
                 var ctx = new Context(
                     _.object(_.reject(_.pairs(env.context), function (pair) {
-                        return pair[0].match('^(?:(?:default_|search_default_|show_).+|.+_view_ref|group_by|group_by_no_leaf|active_id|active_ids)$') !== null;
+                        return pair[0].match('^(?:(?:default_|search_default_|show_).+|' +
+                                             '.+_view_ref|group_by|group_by_no_leaf|active_id|' +
+                                             'active_ids)$') !== null;
                     }))
                 );
                 ctx.add(actionData.context || {});
@@ -645,41 +686,9 @@ ActionManager.include({
                     type: 'ir.actions.act_window_close',
                 };
             }
-            return self.doAction(action, {on_close: closeHandler});
-        };
-
-        if (actionData.special) {
-            def = handler({type: 'ir.actions.act_window_close'});
-        } else if (actionData.type === 'object') {
-            var args = recordID ? [[recordID]] : [env.resIDs];
-            if (actionData.args) {
-                try {
-                    // warning: quotes and double quotes problem due to json and xml clash
-                    // maybe we should force escaping in xml or do a better parse of the args array
-                    var additionalArgs = JSON.parse(actionData.args.replace(/'/g, '"'));
-                    args = args.concat(additionalArgs);
-                } catch (e) {
-                    console.error("Could not JSON.parse arguments", actionData.args);
-                }
-            }
-            args.push(context.eval());
-            def = this._rpc({
-                route: '/web/dataset/call_button',
-                params: {
-                    args: args,
-                    method: actionData.name,
-                    model: env.model,
-                },
-            }).then(handler);
-        } else if (actionData.type === 'action') {
-            def = this._loadAction(actionData.name, _.extend(pyeval.eval('context', context), {
-                active_model: env.model,
-                active_ids: env.resIDs,
-                active_id: recordID,
-            })).then(handler);
-        }
-
-        def.then(ev.data.on_success).fail(ev.data.on_fail);
+            var options = {on_close: ev.data.on_closed};
+            return self.doAction(action, options).then(ev.data.on_success, ev.data.on_fail);
+        });
     },
     /**
      * Called when there is a change in the search view, so the current action's
