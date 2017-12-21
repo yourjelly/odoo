@@ -221,13 +221,6 @@ var ActionManager = Widget.extend({
         return currentControllerID ? this.controllers[currentControllerID] : null;
     },
     /**
-     * AAB: compatibility with existing client actions
-     * todo: remove this
-     */
-    get_breadcrumbs: function () {
-        return this._getBreadcrumbs();
-    },
-    /**
      * Updates the UI according to the given state, for instance, executes a new
      * action, or updates the state of the current action.
      *

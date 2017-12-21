@@ -126,7 +126,6 @@ var DataImport = Widget.extend(ControlPanelMixin, {
                 self.renderButtons();
                 self.renderImportLink();
                 var status = {
-                    breadcrumbs: self.action_manager.get_breadcrumbs(),
                     cp_content: {$buttons: self.$buttons},
                 };
                 self.update_control_panel(status);
