@@ -17,18 +17,19 @@ var QWeb = core.qweb;
 
 // Constants
 var LIVECHAT_COOKIE_HISTORY = 'im_livechat_history';
-var HISTORY_LIMIT = 15;
+var HISTORY_LIMIT = 4096;
 
 // History tracking
 var page = window.location.href.replace(/^.*\/\/[^\/]+/, '');
 var page_history = utils.get_cookie(LIVECHAT_COOKIE_HISTORY);
+var cookie_size = encodeURIComponent('' + page_history).length;
 var url_history = [];
 if(page_history){
     url_history = JSON.parse(page_history) || [];
 }
 if (!_.contains(url_history, page)) {
     url_history.push(page);
-    while (url_history.length > HISTORY_LIMIT) {
+    if (cookie_size > HISTORY_LIMIT) {
         url_history.shift();
     }
     utils.set_cookie(LIVECHAT_COOKIE_HISTORY, JSON.stringify(url_history), 60*60*24); // 1 day cookie
