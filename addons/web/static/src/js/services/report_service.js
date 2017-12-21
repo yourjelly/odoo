@@ -6,7 +6,6 @@ odoo.define('web.ReportService', function (require) {
  */
 
 var AbstractService = require('web.AbstractService');
-var session = require('web.session');
 
 var wkhtmltopdfState;
 
@@ -22,9 +21,7 @@ var ReportService = AbstractService.extend({
      */
     checkWkhtmltopdf: function () {
         if (!wkhtmltopdfState) {
-            // AAB: for now, services aren't available for each other, so we
-            // can't use this._rpc (the ajax service)
-            wkhtmltopdfState = session.rpc('/report/check_wkhtmltopdf');
+            wkhtmltopdfState = this._rpc({route: '/report/check_wkhtmltopdf'});
         }
         return wkhtmltopdfState;
     },
