@@ -54,7 +54,7 @@ class ReportAgedPartnerBalance(models.AbstractModel):
 
         # This dictionary will store the not due amount of all partners
         undue_amounts = {}
-        am_domain = [('move_id.state', 'in', move_state), ('account_id.internal_type', 'in', account_type), '|', ('date_maturity', '>', date_from), ('date', '>', date_from), '|', ('partner_id', 'in', partner_ids), ('partner_id', '=', False), ('date', '<=', date_from), ('company_id', '=', user_company)]
+        am_domain = [('move_id.state', 'in', move_state), ('account_id.internal_type', 'in', account_type), '|', '&', ('date_maturity', '!=', False), ('date_maturity', '>', date_from), ('date', '>', date_from), '|', ('partner_id', 'in', partner_ids), ('partner_id', '=', False), ('date', '<=', date_from), ('company_id', '=', user_company)]
         for line in self.env['account.move.line'].search(am_domain):
             partner_id = line.partner_id.id or False
             if partner_id not in undue_amounts:
@@ -80,34 +80,19 @@ class ReportAgedPartnerBalance(models.AbstractModel):
         # Each history will contain: history[1] = {'<partner_id>': <partner_debit-credit>}
         history = []
         for i in range(5):
-            args_list = (tuple(move_state), tuple(account_type), tuple(partner_ids),)
-            dates_query = '(COALESCE(l.date_maturity,l.date)'
-
+            date_domain = []
             if periods[str(i)]['start'] and periods[str(i)]['stop']:
-                dates_query += ' BETWEEN %s AND %s)'
-                args_list += (periods[str(i)]['start'], periods[str(i)]['stop'])
+                date_domain += [ '|', ('date_maturity', '=', False), '&',  ('date_maturity', '>=', periods[str(i)]['start']), ('date_maturity', '<=', periods[str(i)]['stop']), '&', ('date', '>=', periods[str(i)]['start']), ('date', '<=', periods[str(i)]['stop'])]
             elif periods[str(i)]['start']:
-                dates_query += ' >= %s)'
-                args_list += (periods[str(i)]['start'],)
+                date_domain += ['|', ('date_maturity', '>=', periods[str(i)]['start']), ('date', '>=', periods[str(i)]['start'])]
             else:
-                dates_query += ' <= %s)'
-                args_list += (periods[str(i)]['stop'],)
-            args_list += (date_from, user_company)
-
-            query = '''SELECT l.id
-                    FROM account_move_line AS l, account_account, account_move am
-                    WHERE (l.account_id = account_account.id) AND (l.move_id = am.id)
-                        AND (am.state IN %s)
-                        AND (account_account.internal_type IN %s)
-                        AND ((l.partner_id IN %s) OR (l.partner_id IS NULL))
-                        AND ''' + dates_query + '''
-                    AND (l.date <= %s)
-                    AND l.company_id = %s'''
-            cr.execute(query, args_list)
+                date_domain += ['|', ('date_maturity', '<=', periods[str(i)]['stop']), ('date', '<=', periods[str(i)]['stop'])]
             partners_amount = {}
             aml_ids = cr.fetchall()
             aml_ids = aml_ids and [x[0] for x in aml_ids] or []
-            for line in self.env['account.move.line'].browse(aml_ids):
+            am_domain = [('move_id.state', 'in', move_state), ('account_id.internal_type', 'in', account_type), '|', ('partner_id', 'in', partner_ids), ('partner_id', '=', False), ('date', '<=', date_from), ('company_id', '=', user_company)]
+            am_domain += date_domain
+            for line in self.env['account.move.line'].search(am_domain):
                 partner_id = line.partner_id.id or False
                 if partner_id not in partners_amount:
                     partners_amount[partner_id] = 0.0
