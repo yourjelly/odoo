@@ -1,42 +1,34 @@
 <odoo>
 
     <!-- payment methods modal dialog -->
-    <template id="payment_method_dialog" name="payment method dialog">
-        <div class="modal fade" id="modalpayment" role="dialog" aria-hidden="true">
-            <div class="modal-dialog modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&amp;times;</button>
-                    <h4 class="modal-title">Payment Methods</h4>
-                </div>
-                <div class="modal-body" id="sign-dialog">
-                    <p>
-                        <span>I agree that by signing this proposal, I accept it on the behalf of </span>
-                        <b t-field="quotation.partner_id.commercial_partner_id"/>
-                        <span>, for an amount of </span>
-                        <b data-id="total_amount" t-field="quotation.amount_total"
-                            t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/>
-                        <span>with payment terms: </span><b t-field="quotation.payment_term_id"/>.
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <div t-if="pms or s2s_acquirers or form_acquirers" id="payment_method" class="text-left col-md-13">
-                        <h4 class="mb24">Pay with</h4>
-                        <t t-call="payment.payment_tokens_list">
-                            <t t-set="mode" t-value="'payment'"/>
-                            <t t-set="partner_id" t-value="order.partner_id.id"/>
-                            <t t-set="access_token" t-value="access_token"/>
-                            <t t-set="success_url" t-value="'/my/orders/%s?%s' % (order.id, keep_query())"/>
-                            <t t-set="error_url" t-value="'/my/orders/%s?%s' % (order.id, keep_query())"/>
-                            <t t-set="callback_method" t-value="''"/>
-                            <t t-set="submit_txt" t-value="'Pay Now'"/>
-                            <t t-set="icon_class" t-value="'fa-lock'"/>
-                            <t t-set="form_action" t-value="'/pay/sale/' + str(order.id) + '/s2s_token_tx/'"/>
-                            <t t-set="prepare_tx_url" t-value="'/pay/sale/' + str(order.id) + '/form_tx/'"/>
-                        </t>
-                    </div>
-                </div>
+    <template id="sale_payment_modal" name="Payment method modal" inherit_id="payment.payment_modal">
+        <xpath expr="//div[@id='payment-body-dialog']" position="inside">
+            <p>
+                <span>I agree that by signing this proposal, I accept it on the behalf of </span>
+                <b t-field="quotation.partner_id.commercial_partner_id"/>
+                <span>, for an amount of </span>
+                <b data-id="total_amount" t-field="quotation.amount_total"
+                    t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/>
+                <span>with payment terms: </span><b t-field="quotation.payment_term_id"/>.
+            </p>
+        </xpath>
+        <xpath expr="//div[@id='payment-modal_footer']" position="inside">
+            <div t-if="pms or s2s_acquirers or form_acquirers" id="payment_method" class="text-left col-md-13">
+                <h4 class="mb24">Pay with</h4>
+                <t t-call="payment.payment_tokens_list">
+                    <t t-set="mode" t-value="'payment'"/>
+                    <t t-set="partner_id" t-value="order.partner_id.id"/>
+                    <t t-set="access_token" t-value="access_token"/>
+                    <t t-set="success_url" t-value="'/my/orders/%s?%s' % (order.id, keep_query())"/>
+                    <t t-set="error_url" t-value="'/my/orders/%s?%s' % (order.id, keep_query())"/>
+                    <t t-set="callback_method" t-value="''"/>
+                    <t t-set="submit_txt" t-value="'Pay Now'"/>
+                    <t t-set="icon_class" t-value="'fa-lock'"/>
+                    <t t-set="form_action" t-value="'/pay/sale/' + str(order.id) + '/s2s_token_tx/'"/>
+                    <t t-set="prepare_tx_url" t-value="'/pay/sale/' + str(order.id) + '/form_tx/'"/>
+                </t>
             </div>
-        </div>
+        </xpath>
     </template>
 
     <template id="portal_my_orders_sidebar_payment" name="Payment on my orders" inherit_id="sale.so_quotation_sidebar_content">
@@ -57,7 +49,7 @@
     <template id="portal_my_orders_payment" name="Payment on my orders" inherit_id="sale.portal_order_page">
         <xpath expr="//div[@id='portal_sign']" position="after">
             <div class="row" t-if="not invoices and order.state in ('sent', 'sale') and portal_confirmation == 'pay'" id="portal_pay">
-                <t t-call="sale_payment.payment_method_dialog"/>
+                <t t-call="sale_payment.sale_payment_modal"/>
             </div>
         </xpath>
         <!-- <xpath expr="//t[@t-if='invoices']" position="before">
