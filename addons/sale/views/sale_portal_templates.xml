@@ -129,35 +129,24 @@
     </template>
 
     <!-- signature modal dialog -->
-    <template id="signature_dialog" name="Payment Dialog">
-        <div class="modal fade" id="modalaccept" role="dialog" aria-hidden="true">
-            <div class="modal-dialog">
-                <form id="accept" method="POST" t-att-data-order-id="quotation.id" t-att-data-token="quotation.access_token" class="js_accept_json modal-content js_website_submit_form">
-                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&amp;times;</button>
-                        <h4 class="modal-title">Accept &amp; Sign</h4>
-                    </div>
-                    <div class="modal-body" id="sign-dialog">
-                        <p>
-                            <span>I agree that by signing this proposal, I accept it on the behalf of </span>
-                            <b t-field="quotation.partner_id.commercial_partner_id"/>
-                            <span>, for an amount of </span>
-                            <b data-id="total_amount" t-field="quotation.amount_total"
-                                t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/>
-                            <span>with payment terms: </span><b t-field="quotation.payment_term_id"/>.
-                        </p>
-                        <t t-call="portal.portal_signature">
-                            <t t-set="object" t-value="order"/>
-                            <t t-set="partner_name" t-value="order.partner_id.name"/>
-                            <t t-set="callUrl" t-value="'/my/quotes/accept'"/>
-                            <t t-set="signLabel" t-value="'Accept Order'"/>
-                            <t t-set="accessToken" t-value="quotation.access_token"/>
-                        </t>
-                    </div>
-                </form>
-            </div>
-        </div>
+    <template id="portal_sign_dialog" name="Sign Dialog" inherit_id="payment.signature_dialog">
+        <xpath expr="//div[@id='sign-body-dialog']" position="inside">
+            <p>
+                <span>I agree that by signing this proposal, I accept it on the behalf of </span>
+                <b t-field="quotation.partner_id.commercial_partner_id"/>
+                <span>, for an amount of </span>
+                <b data-id="total_amount" t-field="quotation.amount_total"
+                    t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/>
+                <span>with payment terms: </span><b t-field="quotation.payment_term_id"/>.
+            </p>
+            <t t-call="portal.portal_signature">
+                <t t-set="object" t-value="order"/>
+                <t t-set="partner_name" t-value="order.partner_id.name"/>
+                <t t-set="callUrl" t-value="'/my/quotes/accept'"/>
+                <t t-set="signLabel" t-value="'Accept Order'"/>
+                <t t-set="accessToken" t-value="quotation.access_token"/>
+            </t>
+        </xpath>
     </template>
 
     <!-- extend sidebar view for quotation -->
@@ -167,7 +156,7 @@
         </div>
         <div class="text-center" style="padding: 10px">
             <t t-if="order.state == 'sent' and portal_confirmation == 'sign'" name="portal_confirmation_sign">
-                <a class="btn btn-primary btn-xs ml8 mr8 pull-right" data-toggle="modal" data-target="#modalaccept">
+                <a class="btn btn-primary btn-block" data-toggle="modal" data-target="#modalaccept">
                     <i class="fa fa-arrow-circle-right"/> Accept &amp; Sign
                 </a>
             </t>
@@ -406,7 +395,7 @@
             <div id="optional_placeholder"></div>
             <t t-call="sale.so_quotation_sidebar"/>
             <div class="row" t-if="order.state == 'sent' and portal_confirmation == 'sign'" id="portal_sign">
-                <t t-call="sale.signature_dialog"/>
+                <t t-call="sale.portal_sign_dialog"/>
             </div>
         </t>
     </template>
@@ -600,7 +589,7 @@
             </div>
             <div class="panel-body">
                 <div class="row" t-if="order.state == 'sent' and portal_confirmation == 'sign'" id="portal_sign">
-                    <t t-call="sale.signature_dialog"/>
+                    <t t-call="sale.portal_sign_dialog"/>
                 </div>
             </div>
           </div>
