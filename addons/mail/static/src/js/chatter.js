@@ -12,6 +12,8 @@ var concurrency = require('web.concurrency');
 var config = require('web.config');
 var core = require('web.core');
 var Widget = require('web.Widget');
+var FormView = require('web.FormView');
+var FormController = require('web.FormController');
 
 var QWeb = core.qweb;
 
@@ -50,6 +52,8 @@ var Chatter = Widget.extend(chat_mixin, {
         this.fields = {};
         if (mailFields.mail_activity) {
             this.fields.activity = new Activity(this, mailFields.mail_activity, record, options);
+            var nodeOptions = this.record.fieldsInfo.form[mailFields.mail_thread].options;
+            this.activity_chatter_form_id = nodeOptions.activity_chatter_form_id;
         }
         if (mailFields.mail_followers) {
             this.fields.followers = new Followers(this, mailFields.mail_followers, record, options);
@@ -132,6 +136,9 @@ var Chatter = Widget.extend(chat_mixin, {
     _openComposer: function (options) {
         var self = this;
         var old_composer = this.composer;
+        if (this.activity_form){
+            this.activity_form.controller.destroy();
+        }
         // create the new composer
         this.composer = new ChatterComposer(this, this.record.model, options.suggested_partners || [], {
             commands_enabled: false,
@@ -167,10 +174,57 @@ var Chatter = Widget.extend(chat_mixin, {
             self.composer.on('close_composer', null, self._closeComposer.bind(self, true));
 
             self.$el.addClass('o_chatter_composer_active');
-            self.$('.o_chatter_button_new_message, .o_chatter_button_log_note').removeClass('o_active');
+            self.clear_active_btns();
             self.$('.o_chatter_button_new_message').toggleClass('o_active', !self.composer.options.is_log);
             self.$('.o_chatter_button_log_note').toggleClass('o_active', self.composer.options.is_log);
         });
+    },
+    _openScheduleActivity() {
+        var self = this;
+        var form_id = this.activity_chatter_form_id
+        this.loadViews('mail.activity', {}, [[form_id, 'form']], {}).then(function (view_info) {
+            self.activity_form = new FormView(view_info.form, {
+                auto_search: false,
+                context: {
+                    default_res_id: self.record.res_id,
+                    default_res_model: self.record.model,
+                    default_previous_activity_type_id: false,
+                },
+                display_title: false,
+                domain: [],
+                headless: true,
+                modelName: 'mail.activity',
+                pager: false,
+                search_disable_custom_filters: true,
+                search_view: false,
+                sidebar: false,
+                views:  [
+                    [form_id, 'form']
+                ],
+                views_switcher: false
+            });
+            self._closeComposer(true);
+            self.activity_form.Controller = FormController.extend({
+               _onButtonClicked: function (event) {
+                   this._super.apply(this, arguments).then(function (){
+                       self.trigger_up('reload');
+                       self.clear_active_btns();
+                       self.activity_form.controller.destroy();
+                   });
+               }
+           });
+            self.activity_form.getController(self).then(function (controller) {
+                self.activity_form.controller = controller;
+                controller.insertAfter(self.$('.o_chatter_topbar'));
+                self.$el.addClass('o_chatter_composer_active');
+                self.clear_active_btns();
+                self.$('.o_chatter_button_schedule_activity').addClass('o_active');
+
+            });
+        });
+    },
+    clear_active_btns: function () {
+        this.$('.o_chatter_button_new_message, .o_chatter_button_log_note, .o_chatter_button_schedule_activity').removeClass('o_active');
     },
     _render: function (def) {
         // the rendering of the chatter is aynchronous: relational data of its fields needs to be
@@ -295,7 +349,7 @@ var Chatter = Widget.extend(chat_mixin, {
         });
     },
     _onScheduleActivity: function () {
-        this.fields.activity.scheduleActivity(false);
+        this._openScheduleActivity();
     },
 });
 

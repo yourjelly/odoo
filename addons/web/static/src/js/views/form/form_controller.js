@@ -395,7 +395,7 @@ var FormController = BasicController.extend({
             def = saveAndExecuteAction();
         }
 
-        def.always(this._enableButtons.bind(this));
+        return def.always(this._enableButtons.bind(this));
     },
     /**
      * Called when the user wants to create a new record -> @see createRecord

@@ -370,6 +370,7 @@ class MailThread(models.AbstractModel):
                 options = safe_eval(node.get('options', '{}'))
                 is_employee = self.env.user.has_group('base.group_user')
                 options['display_log_button'] = is_employee
+                options['activity_chatter_form_id'] = self.env.ref('mail.mail_activity_view_form_chatter').id
                 # save options on the node
                 node.set('options', repr(options))
             res['arch'] = etree.tostring(doc, encoding='unicode')
