@@ -374,6 +374,8 @@ class AccountBankStatementLine(models.Model):
     move_name = fields.Char(string='Journal Entry Name', readonly=True,
         default=False, copy=False,
         help="Technical field holding the number given to the journal entry, automatically set when the statement line is reconciled then stored to set the same number again if the line is cancelled, set to draft and re-processed again.")
+    fiscal_date_mark = fields.Boolean(string='Fiscal Year Date', help="Technical field set to True when reconciliation page open.")
+    opening_date = fields.Date(string='Opening Date', required=True, related='company_id.account_opening_date', help="Date from which the accounting is managed in Odoo. It is the date of the opening entry.")
 
     @api.one
     @api.constrains('amount')
@@ -528,6 +530,7 @@ class AccountBankStatementLine(models.Model):
             'amount_currency_str': amount_currency_str,  # Amount in the statement currency
             'amount_currency': amount_currency,  # Amount in the statement currency
             'has_no_partner': not self.partner_id.id,
+            'opening_date': self.opening_date,
         }
         if self.partner_id:
             if amount > 0:
@@ -541,7 +544,9 @@ class AccountBankStatementLine(models.Model):
     def get_move_lines_for_reconciliation_widget(self, partner_id=None, excluded_ids=None, str=False, offset=0, limit=None):
         """ Returns move lines for the bank statement reconciliation widget, formatted as a list of dicts
         """
+        print("abcd.....................................\n\n", self)
         aml_recs = self.get_move_lines_for_reconciliation(partner_id=partner_id, excluded_ids=excluded_ids, str=str, offset=offset, limit=limit)
+        print("abcd2.....................................\n\n", aml_recs)
         target_currency = self.currency_id or self.journal_id.currency_id or self.journal_id.company_id.currency_id
         return aml_recs.prepare_move_lines_for_reconciliation_widget(target_currency=target_currency, target_date=self.date)
 

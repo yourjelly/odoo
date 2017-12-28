@@ -296,7 +296,7 @@ var LineRenderer = Widget.extend(FieldManagerMixin, {
                     {mode: 'edit'}
                 )
             };
-            self.fields.partner_id.appendTo(self.$('.accounting_view caption'));
+            self.fields.partner_id.prependTo(self.$('.accounting_view caption .fiscal_opening'));
         });
         this.$('thead .line_info_button').attr("data-content", qweb.render('reconciliation.line.statement_line.details', {'state': this._initialState}));
         this.$el.popover({
