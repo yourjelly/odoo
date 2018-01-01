@@ -248,6 +248,7 @@ var StatementRenderer = Widget.extend(FieldManagerMixin, {
 var LineRenderer = Widget.extend(FieldManagerMixin, {
     template: "reconciliation.line",
     events: {
+        'click .fiscal': '_onfiscal_openingChecked',
         'click .accounting_view caption .o_buttons button': '_onValidate',
         'click .accounting_view thead td': '_onTogglePanel',
         'click .accounting_view tfoot td:not(.cell_left,.cell_right)': '_onShowPanel',
@@ -296,7 +297,7 @@ var LineRenderer = Widget.extend(FieldManagerMixin, {
                     {mode: 'edit'}
                 )
             };
-            self.fields.partner_id.prependTo(self.$('.accounting_view caption .fiscal_opening'));
+            self.fields.partner_id.prependTo(self.$('.accounting_view caption .fiscal_year'));
         });
         this.$('thead .line_info_button').attr("data-content", qweb.render('reconciliation.line.statement_line.details', {'state': this._initialState}));
         this.$el.popover({
@@ -702,6 +703,9 @@ var LineRenderer = Widget.extend(FieldManagerMixin, {
             return;
         }
         this.trigger_up('create_proposition');
+    },
+    _onfiscal_openingChecked: function () {
+        console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     },
     /**
      * @private

@@ -68,10 +68,13 @@
     <div class="o_reconciliation_line" t-att-data-mode="state.mode">
         <table class="accounting_view">
             <caption>
-                <div class="pull-left fiscal_opening">
-                    Current Date:
-                    <input type="checkbox" id="fiscal_date"/>
-                    <t t-if="state.st_line.opening_date" t-esc="state.st_line.opening_date"/>
+                <div class="pull-left fiscal_year">
+                    <t t-if="state.st_line.fiscal_date">
+                        <input type="checkbox" name="fiscal_date" checked="checked" class="fiscal"><span>From Fiscal Year</span></input>
+                    </t>
+                    <t t-else="">
+                        <input type="checkbox" name="fiscal_date" class="fiscal"><span>From Fiscal Year</span></input>
+                    </t>
                 </div>
                 <div class="pull-right o_buttons">
                     <button t-attf-class="o_validate btn btn-default btn-sm #{!state.balance.type ? '' : 'hidden'}">Validate</button>

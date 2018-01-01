@@ -1380,6 +1380,7 @@ var ManualModel = StatementModel.extend({
      * @returns {Deferred}
      */
     _performMoveLine: function (handle) {
+        console.log("handle", handle);
         var line = this.getLine(handle);
         var excluded_ids = _.compact(_.flatten(_.map(this.lines, function (line) {
             return _.map(line.reconciliation_proposition, function (prop) {
