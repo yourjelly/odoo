@@ -163,6 +163,91 @@
       </xpath>
   </template>
 
+  <template id="quote_expire_detail" name="quote expire details">
+      <div t-if="order_valid and quotation.state in ['draft', 'sent']" class="text-center">
+          <input type="hidden" t-att-value="quotation.validity_date" id="validity_date"/>
+          <div class="mt8" t-if="days_valid &gt; 0">
+              <strong>This offer expires in</strong>
+              <div class="day_counter mt8 mb16">
+                  <i class="fa fa-clock-o"></i>
+                  <t t-esc="days_valid"/>
+                  <t t-if="days_valid &gt; 1">
+                      days
+                  </t>
+                  <t t-if="days_valid &lt;= 1">
+                      day
+                  </t>
+              </div>
+          </div>
+
+
+          <div class="text-center mb16" t-if="quotation.amount_undiscounted &gt; quotation.amount_untaxed">
+              <p class="text-muted mb8">Your advantage:</p>
+              <t t-if="quotation.amount_untaxed == quotation.amount_total">
+                  <strong t-field="quotation.amount_total"
+                      t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/>
+                  <strong t-field="quotation.amount_undiscounted"
+                      t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'
+                      style="text-decoration: line-through"
+                      class="text-danger"/>
+              </t>
+              <t t-if="quotation.amount_untaxed != quotation.amount_total">
+                  <strong t-field="quotation.amount_untaxed"
+                      t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/>
+                  <strong t-field="quotation.amount_undiscounted"
+                      t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'
+                      style="text-decoration: line-through"
+                      class="text-danger"/>
+                  <br />
+                  (<span t-field="quotation.amount_total"
+                      t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/> Incl. tax)
+              </t>
+          </div>
+     </div>
+  </template>
+
+  <template id="so_sidebar_content" name="sidebar button">
+      <div class="text-center" t-if="quotation.state in ('draft', 'sent', 'waiting_date')" style="padding: 10px">
+          <a t-if="order_valid and not quotation.require_payment" class="btn btn-primary btn-block" data-toggle="modal" data-target="#modalaccept">
+              <i class="fa fa-check"></i> Accept Order
+          </a>
+          <a t-if="order_valid and quotation.require_payment" class="btn btn-primary btn-block" data-toggle="modal" data-target="#modalaccept">
+              <i class="fa fa-check"></i> Accept &amp; Pay
+          </a>
+          <a t-if="not order_valid" href="#discussion" class="btn btn-info btn-block o_normalwhitespace">
+              <strong>This offer expired!</strong><br/>
+              Contact us for new quote.
+          </a>
+          <div class="mt8" t-if="order_valid">
+              <a data-toggle="modal" data-target="#modaldecline">
+                  Reject
+              </a>
+          </div>
+      </div>
+      <div class="text-center" t-if="need_payment or (quotation.state in ('sale') and quotation.require_payment and tx_state != 'done')" style="padding: 10px">
+          <a class="btn btn-primary btn-block" data-toggle="modal" data-target="#modalaccept">
+              <i class="fa fa-check"></i> Pay Now
+          </a>
+      </div>
+  </template>
+
+  <template id="website_quote_sidebar" name="quotation sidebar" inherit_id="portal.portal_sidebar">
+    <xpath expr="//div[@id='sidebar_content']/hr" position="before">
+        <t t-call="website_quote.so_sidebar_content"/>
+    </xpath>
+    <xpath expr="//div[@id='sidebar_content']//hr[last()]" position="after">
+        <t t-call="website_quote.quote_expire_detail"/>
+    </xpath>
+  </template>
+
+  <template id="so_quotation1" name="Product Quotation">
+      <t t-call="portal.portal_layout">
+          <t t-set="sales_order" t-value="quotation"/>
+          <t t-set="order" t-value="quotation"/>
+          <t t-call="website_quote.website_quote_sidebar"/>
+      </t>
+  </template>
+
   <!-- Complete page of the quotation -->
   <template id="so_quotation" name="Product Quotation">
       <t t-call="portal.portal_layout">
@@ -198,46 +283,7 @@
                           <hr class="mt0 mb0"/>
                           <t t-call="website_quote.navigation_menu"/>
                           <hr class="mt0 mb0"/>
-                          <div t-if="order_valid and quotation.state in ['draft', 'sent']" class="text-center">
-                              <input type="hidden" t-att-value="quotation.validity_date" id="validity_date"/>
-                              <div class="mt8" t-if="days_valid &gt; 0">
-                                  <strong>This offer expires in</strong>
-                                  <div class="day_counter mt8 mb16">
-                                      <i class="fa fa-clock-o"></i>
-                                      <t t-esc="days_valid"/>
-                                      <t t-if="days_valid &gt; 1">
-                                          days
-                                      </t>
-                                      <t t-if="days_valid &lt;= 1">
-                                          day
-                                      </t>
-                                  </div>
-                              </div>
 
-
-                              <div class="text-center mb16" t-if="quotation.amount_undiscounted &gt; quotation.amount_untaxed">
-                                  <p class="text-muted mb8">Your advantage:</p>
-                                  <t t-if="quotation.amount_untaxed == quotation.amount_total">
-                                      <strong t-field="quotation.amount_total"
-                                          t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/>
-                                      <strong t-field="quotation.amount_undiscounted"
-                                          t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'
-                                          style="text-decoration: line-through"
-                                          class="text-danger"/>
-                                  </t>
-                                  <t t-if="quotation.amount_untaxed != quotation.amount_total">
-                                      <strong t-field="quotation.amount_untaxed"
-                                          t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/>
-                                      <strong t-field="quotation.amount_undiscounted"
-                                          t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'
-                                          style="text-decoration: line-through"
-                                          class="text-danger"/>
-                                      <br />
-                                      (<span t-field="quotation.amount_total"
-                                          t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/> Incl. tax)
-                                  </t>
-                              </div>
-                         </div>
                       </div>
                   </div>
                   <!-- Page content -->
@@ -663,6 +709,6 @@
             <t t-else="">
                 <a t-attf-href="/my/orders/#{quotation.id}?#{keep_query()}"><t t-esc="quotation.name"/></a>
             </t>
-        </xpath>              
+        </xpath>
     </template>
 </odoo>
