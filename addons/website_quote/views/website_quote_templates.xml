@@ -256,36 +256,6 @@
             <div class="container o_website_quote">
               <div class="row mt16">
                 <!-- Sidebar -->
-                  <div class="col-md-3 hidden-print">
-                      <div class="bs-sidebar">
-                          <div class="text-center" t-if="quotation.state in ('draft', 'sent', 'waiting_date')" style="padding: 10px">
-                              <a t-if="order_valid and not quotation.require_payment" class="btn btn-primary btn-block" data-toggle="modal" data-target="#modalaccept">
-                                  <i class="fa fa-check"></i> Accept Order
-                              </a>
-                              <a t-if="order_valid and quotation.require_payment" class="btn btn-primary btn-block" data-toggle="modal" data-target="#modalaccept">
-                                  <i class="fa fa-check"></i> Accept &amp; Pay
-                              </a>
-                              <a t-if="not order_valid" href="#discussion" class="btn btn-info btn-block o_normalwhitespace">
-                                  <strong>This offer expired!</strong><br/>
-                                  Contact us for new quote.
-                              </a>
-                              <div class="mt8" t-if="order_valid">
-                                  <a data-toggle="modal" data-target="#modaldecline">
-                                      Reject
-                                  </a>
-                              </div>
-                          </div>
-                          <div class="text-center" t-if="need_payment or (quotation.state in ('sale') and quotation.require_payment and tx_state != 'done')" style="padding: 10px">
-                              <a class="btn btn-primary btn-block" data-toggle="modal" data-target="#modalaccept">
-                                  <i class="fa fa-check"></i> Pay Now
-                              </a>
-                          </div>
-                          <hr class="mt0 mb0"/>
-                          <t t-call="website_quote.navigation_menu"/>
-                          <hr class="mt0 mb0"/>
-
-                      </div>
-                  </div>
                   <!-- Page content -->
                   <div id="quote_content" class="col-md-9">
 
