@@ -255,6 +255,10 @@ var StatementModel = BasicModel.extend({
                     }
                 });
     },
+    fiscalFilter: function(){
+        console.log('arguments', arguments);
+        return $.when()
+    },
     /**
      * close the statement
      * @returns {Deferred<number>} resolves to the res_id of the closed statements
@@ -1033,6 +1037,7 @@ var StatementModel = BasicModel.extend({
         var filter = line.filter || "";
         var offset = line.offset;
         var limit = this.limitMoveLines+1;
+        var additional_domain = line.st_line.opening_date
         return this._rpc({
                 model: 'account.bank.statement.line',
                 method: 'get_move_lines_for_reconciliation_widget',

@@ -248,7 +248,7 @@ var StatementRenderer = Widget.extend(FieldManagerMixin, {
 var LineRenderer = Widget.extend(FieldManagerMixin, {
     template: "reconciliation.line",
     events: {
-        'click .fiscal': '_onfiscal_openingChecked',
+        'click .o_fiscal': '_onfiscalOpeningChecked',
         'click .accounting_view caption .o_buttons button': '_onValidate',
         'click .accounting_view thead td': '_onTogglePanel',
         'click .accounting_view tfoot td:not(.cell_left,.cell_right)': '_onShowPanel',
@@ -704,8 +704,8 @@ var LineRenderer = Widget.extend(FieldManagerMixin, {
         }
         this.trigger_up('create_proposition');
     },
-    _onfiscal_openingChecked: function () {
-        console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    _onfiscalOpeningChecked: function (event) {
+        this.trigger_up('fiscal_filter', {'data': event.target.checked});
     },
     /**
      * @private

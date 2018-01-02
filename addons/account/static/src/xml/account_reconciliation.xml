@@ -70,10 +70,10 @@
             <caption>
                 <div class="pull-left fiscal_year">
                     <t t-if="state.st_line.fiscal_date">
-                        <input type="checkbox" name="fiscal_date" checked="checked" class="fiscal"><span>From Fiscal Year</span></input>
+                        <input type="checkbox" name="fiscal_date" checked="checked" class="o_fiscal"><span>From Fiscal Year</span></input>
                     </t>
                     <t t-else="">
-                        <input type="checkbox" name="fiscal_date" class="fiscal"><span>From Fiscal Year</span></input>
+                        <input type="checkbox" name="fiscal_date" class="o_fiscal"><span>From Fiscal Year</span></input>
                     </t>
                 </div>
                 <div class="pull-right o_buttons">

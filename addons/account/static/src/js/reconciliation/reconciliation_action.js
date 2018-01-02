@@ -32,6 +32,7 @@ var StatementAction = Widget.extend(ControlPanelMixin, {
         change_name: '_onChangeName',
         close_statement: '_onCloseStatement',
         load_more: '_onLoadMore',
+        fiscal_filter: '_onAction'
     },
     config: {
         // used to instanciate the model
