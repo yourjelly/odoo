@@ -399,6 +399,7 @@ var StatementModel = BasicModel.extend({
             });
             var ids = _.pluck(self.lines, 'id');
             ids = ids.splice(0, self.defaultDisplayQty);
+            // debugger;
             self.pagerIndex = ids.length;
             return self.loadData(ids, []);
         });
@@ -426,6 +427,8 @@ var StatementModel = BasicModel.extend({
      * @returns {Deferred}
      */
     loadData: function(ids, excluded_ids) {
+        // console.log(ids, "\n" , excluded_ids)
+        // debugger;
         var self = this;
         return self._rpc({
             model: 'account.bank.statement.line',
