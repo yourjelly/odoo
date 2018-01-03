@@ -44,6 +44,7 @@ class HrExpense(models.Model):
     currency_id = fields.Many2one('res.currency', string='Currency', readonly=True, states={'draft': [('readonly', False)], 'refused': [('readonly', False)]}, default=lambda self: self.env.user.company_id.currency_id)
     company_currency_id = fields.Many2one('res.currency', string="Report Company Currency", related='sheet_id.currency_id', store=True)
     analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', states={'post': [('readonly', True)], 'done': [('readonly', True)]}, oldname='analytic_account')
+    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags', states={'post': [('readonly', True)], 'done': [('readonly', True)]})
     account_id = fields.Many2one('account.account', string='Account', states={'post': [('readonly', True)], 'done': [('readonly', True)]}, default=_default_account_id, help="An expense account is expected")
     description = fields.Text('Notes...', readonly=True, states={'draft': [('readonly', False)], 'reported': [('readonly', False)], 'refused': [('readonly', False)]})
     payment_mode = fields.Selection([
@@ -176,6 +177,32 @@ class HrExpense(models.Model):
             }
         }
 
+    def _prepare_move_line(self, line):
+        '''
+        This function prepares move line of account.move related to an expense
+        '''
+        partner_id = self.employee_id.address_home_id.commercial_partner_id.id
+        return {
+            'date_maturity': line.get('date_maturity'),
+            'partner_id': partner_id,
+            'name': line['name'][:64],
+            'debit': line['price'] > 0 and line['price'],
+            'credit': line['price'] < 0 and - line['price'],
+            'account_id': line['account_id'],
+            'analytic_line_ids': line.get('analytic_line_ids'),
+            'amount_currency': line['price'] > 0 and abs(line.get('amount_currency')) or - abs(line.get('amount_currency')),
+            'currency_id': line.get('currency_id'),
+            'tax_line_id': line.get('tax_line_id'),
+            'tax_ids': line.get('tax_ids'),
+            'quantity': line.get('quantity', 1.00),
+            'product_id': line.get('product_id'),
+            'product_uom_id': line.get('uom_id'),
+            'analytic_account_id': line.get('analytic_account_id'),
+            'analytic_tag_ids': [(6, 0, line.get('analytic_tag_ids', []))],
+            'payment_id': line.get('payment_id'),
+            'expense_id': line.get('expense_id'),
+        }
+
     @api.multi
     def action_get_attachment_view(self):
         self.ensure_one()
@@ -273,6 +300,7 @@ class HrExpense(models.Model):
                 'product_id': expense.product_id.id,
                 'product_uom_id': expense.product_uom_id.id,
                 'analytic_account_id': expense.analytic_account_id.id,
+                'analytic_tag_ids': expense.analytic_tag_ids.ids,
                 'expense_id': expense.id,
                 'partner_id': partner_id,
                 'tax_ids': [(6, 0, expense.tax_ids.ids)],
