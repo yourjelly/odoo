@@ -585,7 +585,6 @@ QUnit.module('Views', {
                     '<sheet>' +
                         '<group>' +
                             '<label for="bar" string="customstring"/>' +
-                            '<div><field name="bar"/></div>' +
                         '</group>' +
                     '</sheet>' +
                 '</form>',

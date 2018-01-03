@@ -154,6 +154,7 @@ var Dialog = Widget.extend({
         var self = this;
         this.appendTo($('<div/>')).then(function () {
             self.$modal.find(".modal-body").replaceWith(self.$el);
+            self._mount();
             self.$modal.modal('show');
             self._opened.resolve();
         });

@@ -381,6 +381,14 @@ var Widget = core.Class.extend(mixins.PropertiesMixin, ServicesMixin, {
             }
         }
     },
+    _mountChildren: function () {
+        for (var i = 0; i < this.__parentedChildren.length; i++) {
+            var child = this.__parentedChildren[i];
+            if (child._mounted === false) {
+                child._mount();
+            }
+        }
+    },
     /**
      * Re-sets the widget's root element and replaces the old root element
      * (if any) by the new one in the DOM.

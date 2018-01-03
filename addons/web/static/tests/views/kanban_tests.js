@@ -1112,7 +1112,7 @@ QUnit.module('Views', {
         kanban.$('.o_column_quick_create input').val('new column 1');
         kanban.$('.o_column_quick_create button.o_kanban_add').click();
 
-        assert.strictEqual(kanban.$('.o_kanban_group').length, 3, "should have two columns");
+        assert.strictEqual(kanban.$('.o_kanban_group').length, 3, "should have three columns");
 
         kanban.$('.o_kanban_group:last .o_column_delete').click();
         $('.modal .modal-footer .btn-primary').click();
