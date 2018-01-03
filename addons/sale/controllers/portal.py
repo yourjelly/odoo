@@ -182,7 +182,7 @@ class CustomerPortal(CustomerPortal):
             return request.redirect('/my')
 
         values = self._order_get_page_view_values(order_sudo, access_token, **kw)
-        return request.render("sale.portal_order_page", values)
+        return request.render("sale.portal_order_page1", values)
 
     @http.route(['/my/orders/pdf/<int:order_id>'], type='http', auth="public", website=True)
     def portal_order_report(self, order_id, access_token=None, **kw):
