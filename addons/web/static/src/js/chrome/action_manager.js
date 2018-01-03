@@ -72,26 +72,6 @@ var ActionManager = Widget.extend({
 
         return $.when(def, this._super.apply(this, arguments));
     },
-    /**
-     * Called each time the action manager is attached into the DOM.
-     */
-    on_attach_callback: function() {
-        this.isInDOM = true;
-        var currentController = this.getCurrentController();
-        if (currentController && currentController.widget.on_attach_callback) {
-            currentController.widget.on_attach_callback();
-        }
-    },
-    /**
-     * Called each time the action manager is detached from the DOM.
-     */
-    on_detach_callback: function() {
-        this.isInDOM = false;
-        var currentController = this.getCurrentController();
-        if (currentController && currentController.widget.on_detach_callback) {
-            currentController.widget.on_detach_callback();
-        }
-    },
 
     //--------------------------------------------------------------------------
     // Public
@@ -689,10 +669,7 @@ var ActionManager = Widget.extend({
                 breadcrumbs: this._getBreadcrumbs(),
             }, {clear: false});
         }
-        dom.append(this.$el, controller.widget.$el, {
-            in_DOM: this.isInDOM,
-            callbacks: [{widget: controller.widget}],
-        });
+        controller.widget.appendTo(this.$el);
         this.trigger_up('scrollTo', {offset: controller.scrollTop || 0});
 
         // notify the environment of the new action

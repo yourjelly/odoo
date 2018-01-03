@@ -216,7 +216,7 @@ var Widget = core.Class.extend(mixins.PropertiesMixin, ServicesMixin, {
      * @param {boolean} [display] use true to show the widget or false to hide it
      */
     do_toggle: function (display) {
-        this.$el.toggleClass('o_hidden', display);
+        this.$el.toggleClass('o_hidden', display === undefined ? undefined : !display);
     },
     /**
      * Renders the current widget and inserts it after to the given jQuery
