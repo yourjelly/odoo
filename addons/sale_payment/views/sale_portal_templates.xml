@@ -58,6 +58,16 @@
         </xpath>
     </template>
 
+    <template id="portal_my_orders_sidebar_payment" name="Payment on my orders" inherit_id="sale.so_quotation_sidebar_content">
+        <xpath expr="//t[@name='portal_confirmation_sign']" position="after">
+            <t t-if="not invoices and order.state in ('sent', 'sale') and portal_confirmation == 'pay' and order.payment_tx_id.state != 'done'" name="portal_confirmation_pay">
+                <a class="btn btn-primary btn-block" data-toggle="modal" data-target="#modalpayment">
+                    <i class="fa fa-arrow-circle-right"/> Pay Now
+                </a>
+            </t>
+        </xpath>
+    </template>
+
     <template id="portal_order_error" name="Order error display: payment errors"
             inherit_id="sale.portal_order_error">
         <xpath expr="//t[@name='generic']" position="after">
