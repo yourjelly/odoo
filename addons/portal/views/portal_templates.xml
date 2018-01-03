@@ -375,4 +375,33 @@
             t-att-data-sign-label="signLabel"
             t-att-data-access-token="accessToken"/>
     </template>
+
+    <template id="navigation_menu">
+      <div class="navspy" t-ignore="true" role="complementary">
+          <ul class="nav bs-sidenav" data-id="portal_sidebar">
+              <li><a href="#introduction">Introduction</a></li>
+          </ul>
+      </div>
+    </template>
+    <!--
+        Generic sidebar template for the frontend
+    -->
+    <template id="portal_sidebar" name="Sidebar">
+        <body data-spy="scroll" data-target=".navspy" data-offset="50">
+            <div class="container o_portal_sidebar">
+                <div class="row mt16">
+                    <!-- Sidebar -->
+                    <div class="col-md-3 hidden-print">
+                        <div class="bs-sidebar" id="sidebar_content">
+                            <hr class="mt0 mb0"/>
+                            <t t-call="portal.navigation_menu"/>
+                            <hr class="mt0 mb0"/>
+                        </div>
+                    </div>
+                    <!-- Page content -->
+                    <div id="page_content" class="col-md-9"></div>
+                </div>
+            </div>
+        </body>
+    </template>
 </odoo>
