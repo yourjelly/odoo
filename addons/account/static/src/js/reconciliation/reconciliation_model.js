@@ -256,8 +256,7 @@ var StatementModel = BasicModel.extend({
                 });
     },
     fiscalFilter: function(){
-        console.log('arguments', arguments);
-        return $.when()
+        return this._performMoveLine(arguments[0]);
     },
     /**
      * close the statement
@@ -1037,11 +1036,11 @@ var StatementModel = BasicModel.extend({
         var filter = line.filter || "";
         var offset = line.offset;
         var limit = this.limitMoveLines+1;
-        var additional_domain = line.st_line.opening_date
+        var additional_domain = line.st_line.opening_date ? [('date_maturity', '>=', line.st_line.opening_date)] : [];
         return this._rpc({
                 model: 'account.bank.statement.line',
                 method: 'get_move_lines_for_reconciliation_widget',
-                args: [line.id, line.st_line.partner_id, excluded_ids, filter, offset, limit],
+                args: [line.id, line.st_line.partner_id, excluded_ids, filter, offset, limit, additional_domain],
             })
             .then(this._formatMoveLine.bind(this, handle));
     },
