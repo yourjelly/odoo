@@ -97,7 +97,7 @@ class sale_quote(http.Controller):
 
         history = request.session.get('my_quotes_history', [])
         values.update(get_records_pager(history, order_sudo))
-        return request.render('website_quote.so_quotation', values)
+        return request.render('website_quote.so_quotation1', values)
 
     @http.route(['/quote/<int:order_id>/<token>/decline'], type='http', auth="public", methods=['POST'], website=True)
     def decline(self, order_id, token, **post):
