@@ -352,10 +352,7 @@ var ActionManager = Widget.extend({
             controller.dialog = dialog;
 
             return dialog.open().opened(function () {
-                dom.append(dialog.$el, widget.$el, {
-                    in_DOM: true,
-                    callbacks: [{widget: dialog}],
-                });
+                widget.appendTo(dialog.$el);
                 // AAB: renderButtons will be a function of AbstractAction, so this
                 // test won't be necessary anymore
                 if (widget.renderButtons) {

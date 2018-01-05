@@ -197,10 +197,7 @@ var FormViewDialog = ViewDialog.extend({
                         if ($buttons.children().length) {
                             self.$footer.empty().append($buttons.contents());
                         }
-                        dom.append(self.$el, fragment, {
-                            callbacks: [{widget: self.form_view}],
-                            in_DOM: true,
-                        });
+                        self.form_view.appendTo(self.$el);
                     });
                     _super();
                 });
@@ -303,10 +300,10 @@ var SelectCreateDialog = ViewDialog.extend({
             .then(this.setup.bind(this, search_defaults))
             .then(function (fragment) {
                 self.opened().then(function () {
-                    dom.append(self.$el, fragment, {
-                        callbacks: [{widget: self.list_controller}],
-                        in_DOM: true,
-                    });
+                    self.$el.append(fragment); // nope...
+                    self._mount();
+                    // self._searchview.appendTo(self.$el);
+                    // self.list_controller.appendTo(self.$el);
                     self.set_buttons(self.__buttons);
                 });
                 _super();
@@ -328,6 +325,7 @@ var SelectCreateDialog = ViewDialog.extend({
             search_defaults: search_defaults,
         };
         var searchview = new SearchView(this, this.dataset, fields_views.search, options);
+        this._searchview = searchview;
         searchview.prependTo($header).done(function () {
             var d = searchview.build_search_data();
             if (self.initial_ids) {
