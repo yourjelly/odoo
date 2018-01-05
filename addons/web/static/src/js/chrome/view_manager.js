@@ -356,7 +356,9 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
     create_view: function(view_descr, view_options) {
         var self = this;
         var arch = view_descr.fields_view.arch;
-        var View = this.registry.get(arch.attrs.js_class || view_descr.type);
+        var parsedXML = new DOMParser().parseFromString(arch, "text/xml");
+        var key = parsedXML.documentElement.getAttribute('js_class');
+        var View = this.registry.get(key || view_descr.type);
         var params = _.extend({}, view_options, {userContext: this.getSession().user_context});
         if (view_descr.type === "form" && ((this.action.target === 'new' || this.action.target === 'inline' || this.action.target === 'fullscreen') ||
             (view_options && (view_options.mode === 'edit' || view_options.context.form_view_initial_mode)))) {

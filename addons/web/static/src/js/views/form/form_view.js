@@ -89,6 +89,7 @@ var FormView = BasicView.extend({
                             [[null, attrs.mode === 'tree' ? 'list' : attrs.mode]])
                         .then(function (views) {
                             for (var viewName in views) {
+                                self._processView(views[viewName], viewName);
                                 attrs.views[viewName] = views[viewName];
                             }
                             self._setSubViewLimit(attrs);

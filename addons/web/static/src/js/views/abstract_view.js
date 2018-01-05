@@ -25,10 +25,10 @@ odoo.define('web.AbstractView', function (require) {
 
 var ajax = require('web.ajax');
 var Class = require('web.Class');
-var Context = require('web.Context');
 var AbstractModel = require('web.AbstractModel');
 var AbstractRenderer = require('web.AbstractRenderer');
 var AbstractController = require('web.AbstractController');
+var utils = require('web.utils');
 
 var AbstractView = Class.extend({
     // name displayed in view switchers
@@ -74,18 +74,21 @@ var AbstractView = Class.extend({
      * @param {string} [params.action.help]
      */
     init: function (viewInfo, params) {
+        this.arch = this._postprocess_fvg(viewInfo.arch, viewInfo.fields);
+        this.fields = viewInfo.fields;
+
         this.rendererParams = {
-            arch: viewInfo.arch,
+            arch: this.arch,
             noContentHelp: params.action && params.action.help,
         };
 
         this.controllerParams = {
             modelName: params.modelName,
             activeActions: {
-                edit: viewInfo.arch.attrs.edit ? JSON.parse(viewInfo.arch.attrs.edit) : true,
-                create: viewInfo.arch.attrs.create ? JSON.parse(viewInfo.arch.attrs.create) : true,
-                delete: viewInfo.arch.attrs.delete ? JSON.parse(viewInfo.arch.attrs.delete) : true,
-                duplicate: viewInfo.arch.attrs.duplicate ? JSON.parse(viewInfo.arch.attrs.duplicate) : true,
+                edit: this.arch.attrs.edit ? JSON.parse(this.arch.attrs.edit) : true,
+                create: this.arch.attrs.create ? JSON.parse(this.arch.attrs.create) : true,
+                delete: this.arch.attrs.delete ? JSON.parse(this.arch.attrs.delete) : true,
+                duplicate: this.arch.attrs.duplicate ? JSON.parse(this.arch.attrs.duplicate) : true,
             },
         };
 
@@ -106,7 +109,7 @@ var AbstractView = Class.extend({
         //   'name,id desc'
         // but we need it like:
         //   [{name: 'id', asc: false}, {name: 'name', asc: true}]
-        var defaultOrder = viewInfo.arch.attrs.default_order;
+        var defaultOrder = this.arch.attrs.default_order;
         if (defaultOrder) {
             this.loadParams.orderedBy = _.map(defaultOrder.split(','), function (order) {
                 order = order.trim().split(' ');
@@ -207,6 +210,28 @@ var AbstractView = Class.extend({
         var model = this.getModel(parent);
         return model.load(this.loadParams);
     },
+    /**
+     * Private function that postprocesses fields_view (mainly parses the arch attribute)
+     */
+    _postprocess_fvg: function (arch, fields) {
+        var self = this;
+
+        // Parse arch
+        if (typeof arch === 'string') {
+            var doc = $.parseXML(arch).documentElement;
+            arch = utils.xml_to_json(doc, (doc.nodeName.toLowerCase() !== 'kanban'));
+        }
+
+        // Process inner views (x2manys)
+        _.each(fields, function(field) {
+            _.each(field.views || {}, function(view) {
+                view.arch = self._postprocess_fvg(view.arch, view.fields);
+            });
+        });
+
+        return arch;
+    },
+
 });
 
 return AbstractView;

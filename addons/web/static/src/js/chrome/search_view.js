@@ -9,6 +9,7 @@ var FilterMenu = require('web.FilterMenu');
 var GroupByMenu = require('web.GroupByMenu');
 var pyeval = require('web.pyeval');
 var search_inputs = require('web.search_inputs');
+var utils = require('web.utils');
 var Widget = require('web.Widget');
 var _t = core._t;
 
@@ -275,6 +276,11 @@ var SearchView = Widget.extend({
         this.options = options;
         this.dataset = dataset;
         this.fields_view = fvg;
+        if (typeof fvg.arch === 'string') {
+            var doc = $.parseXML(fvg.arch).documentElement;
+            fvg.arch = utils.xml_to_json(doc, (doc.nodeName.toLowerCase() !== 'kanban'));
+        }
+
         this.fields = this.fields_view.fields;
         this.query = undefined;
         this.title = this.options.action && this.options.action.name;
