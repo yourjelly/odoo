@@ -112,5 +112,4 @@ class PaypalController(http.Controller):
     def paypal_cancel(self, **post):
         """ When the user cancels its Paypal payment: GET on this route """
         _logger.info('Beginning Paypal cancel with post data %s', pprint.pformat(post))  # debug
-        return_url = self._get_return_url(**post)
-        return werkzeug.utils.redirect(return_url)
+        return werkzeug.utils.redirect("/shop/payment")

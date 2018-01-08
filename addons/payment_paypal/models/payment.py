@@ -133,13 +133,13 @@ class TxPaypal(models.Model):
 
     @api.model
     def _paypal_form_get_tx_from_data(self, data):
-        reference, txn_id = data.get('item_number'), data.get('txn_id')
-        if not reference or not txn_id:
-            error_msg = _('Paypal: received data with missing reference (%s) or txn_id (%s)') % (reference, txn_id)
+        reference = data.get('item_number')
+        if not reference:
+            error_msg = _('Paypal: received data with missing reference (%s)') % (reference)
             _logger.info(error_msg)
             raise ValidationError(error_msg)
 
-        # find tx -> @TDENOTE use txn_id ?
+        # find tx
         txs = self.env['payment.transaction'].search([('reference', '=', reference)])
         if not txs or len(txs) > 1:
             error_msg = 'Paypal: received data for reference %s' % (reference)

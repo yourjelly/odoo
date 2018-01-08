@@ -31,6 +31,7 @@ class OgoneController(http.Controller):
         '/payment/ogone/cancel', '/payment/ogone/test/cancel',
     ], type='http', auth='none')
     def ogone_cancel_feedback(self, **post):
+        _logger.info('Ogone: entering form_feedback with post data %s', pprint.pformat(post))  # debug
         request.env['payment.transaction'].sudo().form_feedback(post, 'ogone')
         return werkzeug.utils.redirect("/shop/payment")
 

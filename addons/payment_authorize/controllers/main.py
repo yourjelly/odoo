@@ -16,7 +16,6 @@ class AuthorizeController(http.Controller):
 
     @http.route([
         '/payment/authorize/return/',
-        '/payment/authorize/cancel/',
     ], type='http', auth='public', csrf=False)
     def authorize_form_feedback(self, **post):
         _logger.info('Authorize: entering form_feedback with post data %s', pprint.pformat(post))
@@ -24,6 +23,24 @@ class AuthorizeController(http.Controller):
         if post:
             request.env['payment.transaction'].sudo().form_feedback(post, 'authorize')
             return_url = post.pop('return_url', '/')
+        base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        # Authorize.Net is expecting a response to the POST sent by their server.
+        # This response is in the form of a URL that Authorize.Net will pass on to the
+        # client's browser to redirect them to the desired location need javascript.
+        return request.render('payment_authorize.payment_authorize_redirect', {
+            'return_url': urls.url_join(base_url, return_url)
+        })
+
+    @http.route([
+        '/payment/authorize/cancel',
+    ], type='http', auth='none')
+    def authorize_cancel_feedback(self, **post):
+        _logger.info('Authorize: entering form_feedback with post data %s', pprint.pformat(post))
+        return_url = '/shop/payment'
+        #actually authorize doesn't send post data for a cancel
+        if post:
+            request.env['payment.transaction'].sudo().form_feedback(post, 'authorize')
+            return_url = post.pop('return_url', '/shop/payment')
         base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url')
         # Authorize.Net is expecting a response to the POST sent by their server.
         # This response is in the form of a URL that Authorize.Net will pass on to the

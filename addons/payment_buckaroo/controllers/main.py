@@ -18,7 +18,6 @@ class BuckarooController(http.Controller):
 
     @http.route([
         '/payment/buckaroo/return',
-        '/payment/buckaroo/cancel',
         '/payment/buckaroo/error',
         '/payment/buckaroo/reject',
     ], type='http', auth='none', csrf=False)
@@ -28,4 +27,15 @@ class BuckarooController(http.Controller):
         request.env['payment.transaction'].sudo().form_feedback(post, 'buckaroo')
         post = {key.upper(): value for key, value in post.items()}
         return_url = post.get('ADD_RETURNDATA') or '/'
+        return werkzeug.utils.redirect(return_url)
+
+    @http.route([
+        '/payment/buckaroo/cancel',
+    ], type='http', auth='none', csrf=False)
+    def buckaroo_cancel(self, **post):
+        """ Buckaroo."""
+        _logger.info('Buckaroo: entering form_feedback with post data %s', pprint.pformat(post))  # debug
+        request.env['payment.transaction'].sudo().form_feedback(post, 'buckaroo')
+        post = {key.upper(): value for key, value in post.items()}
+        return_url = post.get('ADD_RETURNDATA') or '/shop/payment'
         return werkzeug.utils.redirect(return_url)

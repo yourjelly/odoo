@@ -22,3 +22,14 @@ class PayuMoneyController(http.Controller):
             request.env['payment.transaction'].sudo().form_feedback(post, 'payumoney')
             return_url = post.get('udf1')
         return werkzeug.utils.redirect(return_url)
+
+    @http.route(['/payment/payumoney/cancel'], type='http', auth='public', csrf=False)
+    def payu_cancel(self, **post):
+        """ PayUmoney."""
+        _logger.info(
+            'PayUmoney: entering form_feedback with post data %s - canceling payment', pprint.pformat(post))
+        return_url = '/shop/payment'
+        if post:
+            request.env['payment.transaction'].sudo().form_feedback(post, 'payumoney')
+            return_url = post.get('udf1')
+        return werkzeug.utils.redirect(return_url)
