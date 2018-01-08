@@ -5710,6 +5710,7 @@ QUnit.module('relational_fields', {
             archs: {
                 "partner,false,list": '<tree string="Partners"><field name="display_name"/></tree>',
             },
+            debug: true,
         });
 
         assert.strictEqual(form.$('.o_data_row').length, 2,
@@ -5720,7 +5721,7 @@ QUnit.module('relational_fields', {
         assert.strictEqual($('.modal .o_field_widget[name="partner_ids"] .o_list_view').length, 1,
             'should display many2many list view in the modal');
 
-        form.destroy();
+        // form.destroy();
     });
 
     QUnit.test('one2many (who contains a one2many) with tree view and without form view', function (assert) {

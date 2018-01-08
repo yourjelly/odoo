@@ -65,6 +65,7 @@ var FormView = BasicView.extend({
      * @returns {Deferred}
      */
     _loadSubviews: function (parent) {
+        debugger
         var self = this;
         var defs = [];
         if (this.loadParams && this.loadParams.fieldsInfo) {
