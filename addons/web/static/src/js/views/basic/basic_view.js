@@ -39,7 +39,7 @@ var BasicView = AbstractView.extend({
     init: function (viewInfo, params) {
         this._super.apply(this, arguments);
         this.fieldsInfo = {};
-        this.fieldsInfo[this.viewType] = this._processFields(this.viewType, this.arch, this.fields);
+        this.fieldsInfo[this.viewType] = this._processFields(this.viewType, this.arch, viewInfo.viewFields);
 
 
         this.rendererParams.viewType = this.viewType;

@@ -75,7 +75,7 @@ var AbstractView = Class.extend({
      */
     init: function (viewInfo, params) {
         this.arch = this._postprocess_fvg(viewInfo.arch, viewInfo.fields);
-        this.fields = viewInfo.fields;
+        this.fields = _.extend({}, viewInfo.fields, viewInfo.viewFields);
 
         this.rendererParams = {
             arch: this.arch,

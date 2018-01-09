@@ -102,7 +102,10 @@ return core.Class.extend({
                 _.each(views_descr, function (view_descr) {
                     var toolbar = options.toolbar && view_descr[1] !== 'search';
                     var fv_key = self._gen_key(model, view_descr[0], view_descr[1], toolbar, context);
-                    self._cache.fields_views[fv_key] = $.when(result.fields_views[view_descr[1]]);
+                    var fvg = result.fields_views[view_descr[1]];
+                    fvg.viewFields = fvg.fields;
+                    fvg.fields = result.fields;
+                    self._cache.fields_views[fv_key] = $.when(fvg);
                 });
 
                 // Insert filters, if any, into the filters cache
