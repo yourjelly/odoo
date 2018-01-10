@@ -982,7 +982,6 @@ class SaleOrderLine(models.Model):
     def product_id_change(self):
         if not self.product_id:
             return {'domain': {'product_uom': []}}
-
         vals = {}
         domain = {'product_uom': [('category_id', '=', self.product_id.uom_id.category_id.id)]}
         if not self.product_uom or (self.product_id.uom_id.id != self.product_uom.id):
@@ -1042,6 +1041,20 @@ class SaleOrderLine(models.Model):
                 fiscal_position=self.env.context.get('fiscal_position')
             )
             self.price_unit = self.env['account.tax']._fix_tax_included_price_company(self._get_display_price(product), product.taxes_id, self.tax_id, self.company_id)
+
+    @api.model
+    def _get_description_with_attribue_value(self, product, attribute_values=None):
+        name = product.display_name
+        untracked_attribute_values = []
+        for attribute_value in attribute_values:
+            if attribute_value and not attribute_value.attribute_id.create_variant:
+                untracked_attribute_values.append('%s: %s' %(attribute_value.attribute_id.name, attribute_value.name))
+        if untracked_attribute_values:
+            name += '\n%s' % (', '.join(untracked_attribute_values))
+        if product.description_sale:
+            name += '\n%s' % (product.description_sale)
+        return name
+
 
     @api.multi
     def name_get(self):

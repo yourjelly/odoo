@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="sale_attributes_view_form" model="ir.ui.view">
+            <field name="name">sale.attributes.form</field>
+            <field name="model">sale.attributes</field>
+            <field name="arch" type="xml">
+                <form string="Attributes">
+                    <group>
+                        <field name="product_tmpl_id" string="Product"/>
+                        <field name="sale_order_line_id" invisible="1"/>
+                    </group>
+                    <field name="sale_attribute_lines">
+                        <tree string="Attribute Lines" editable="bottom" create="false" delete="false">
+                            <field name="attribute_id" readonly="1" force_save="1"/>
+                            <field name="value_id" domain="[('attribute_id', '=', attribute_id)]" context="{'show_attribute': False}" options="{'no_open': True}"/>
+                        </tree>
+                    </field>
+                    <footer>
+                        <button class="btn btn-primary" string="Create Lines" name="create_order_lines" type="object"/>
+                        <button string="cancel" special="cancel" />
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="sale_attributes_action" model="ir.actions.act_window">
+            <field name="name">Update Order lines</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sale.attributes</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+</odoo>

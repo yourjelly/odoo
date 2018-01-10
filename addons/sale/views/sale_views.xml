@@ -233,6 +233,7 @@
                     </group>
                     <notebook>
                         <page string="Order Lines">
+                            <button class="btn btn-primary" name="%(sale_attributes_action)d" type="action" string="Configure Attributes" groups="product.group_product_variant"/>
                             <field name="order_line" mode="tree,kanban"
                                 attrs="{'readonly': [('state', 'in', ('done','cancel'))]}">
                                 <form string="Sales Order Lines">
