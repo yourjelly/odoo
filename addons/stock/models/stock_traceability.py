@@ -92,6 +92,7 @@ class MrpStockReport(models.TransientModel):
 
     def make_dict_move(self, level, parent_id, move_line, unfoldable=False):
         res_model, res_id, ref = self.get_links(move_line)
+        line_type = move_line.location_dest_id.usage
         dummy, is_used = self.get_linked_move_lines(move_line)
         data = [{
             'level': level,
@@ -99,6 +100,7 @@ class MrpStockReport(models.TransientModel):
             'date': move_line.move_id.date,
             'parent_id': parent_id,
             'is_used': bool(is_used),
+            'line_type': line_type,
             'model_id': move_line.id,
             'model':'stock.move.line',
             'product_id': move_line.product_id.display_name,
@@ -112,6 +114,7 @@ class MrpStockReport(models.TransientModel):
         return data
 
     def make_dict_head(self, level, parent_id, model=False, move_line=False):
+        line_type = move_line.location_dest_id.usage
         res_model, res_id, ref = self.get_links(move_line)
         data = []
         if model == 'stock.move.line':
@@ -120,6 +123,7 @@ class MrpStockReport(models.TransientModel):
                 'unfoldable': False if not move_line.lot_id else True,
                 'date': move_line.move_id.date,
                 'model_id': move_line.id,
+                'line_type': line_type,
                 'parent_id': parent_id,
                 'model': model or 'stock.move.line',
                 'product_id': move_line.product_id.display_name,
@@ -153,6 +157,7 @@ class MrpStockReport(models.TransientModel):
                 'model': data['model'],
                 'model_id': data['model_id'],
                 'parent_id': data['parent_id'],
+                'line_type': data.get('line_type', False),
                 'is_used': data.get('is_used', False),
                 'lot_id': data.get('lot_id', False),
                 'type': 'line',
