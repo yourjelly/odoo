@@ -1,18 +1,23 @@
 <odoo>
     <template id="portal_my_home_menu_sale" name="Portal layout : sales menu entries" inherit_id="portal.portal_layout" priority="20">
         <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
-            <li t-if="page_name == 'quote' or sales_order and sales_order.state in ('sent', 'cancel')">
-                <a t-if="sales_order" t-attf-href="/my/quotes?{{ keep_query() }}">Quotations</a>
+            <li t-if="page_name == 'quote' or sales_order and order.state in ('sent', 'cancel')">
+                <a t-if="order" t-attf-href="/my/quotes?{{ keep_query() }}">Quotations</a>
                 <t t-else="">Quotations</t>
             </li>
-            <li t-if="page_name == 'order' or sales_order and sales_order.state not in ('sent', 'cancel')">
-                <a t-if="sales_order" t-attf-href="/my/orders?{{ keep_query() }}">Sales Orders</a>
+            <li t-if="page_name == 'order' or sales_order and order.state not in ('sent', 'cancel')">
+                <a t-if="order" t-attf-href="/my/orders?{{ keep_query() }}">Sales Orders</a>
                 <t t-else="">Sales Orders</t>
             </li>
-            <li t-if="sales_order">
-                <t t-if="sales_order.state in ('sent', 'cancel')">Quotation</t>
-                <t t-else="">Order</t>
-                <t t-esc="sales_order.name"/>
+            <li t-if="order">
+                <t t-if="order.state in ('sent', 'cancel')">
+                    <a href="/my/quotes?{{ keep_query() }}">Quotations / </a>
+                    <t t-esc="order.name"/>
+                </t>
+                <t t-else="">
+                    <a href="/my/orders?{{ keep_query() }}">Sales Orders / </a>
+                    <t t-esc="order.name"/>
+                </t>
             </li>
         </xpath>
     </template>
@@ -28,6 +33,37 @@
                 <a href="/my/orders">Sales Orders</a>
             </li>
         </xpath>
+    </template>
+
+    <template id="signature_dialog" name="Payment Dialog">
+        <div class="modal fade" id="modalaccept" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <form id="accept" method="POST" t-att-data-order-id="quotation.id" t-att-data-token="quotation.access_token" class="js_accept_json modal-content js_website_submit_form">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&amp;times;</button>
+                        <h4 class="modal-title">Accept &amp; Sign</h4>
+                    </div>
+                    <div class="modal-body" id="sign-dialog">
+                        <p>
+                            <span>I agree that by signing this proposal, I accept it on the behalf of </span>
+                            <b t-field="quotation.partner_id.commercial_partner_id"/>
+                            <span>, for an amount of </span>
+                            <b data-id="total_amount" t-field="quotation.amount_total"
+                                t-options='{"widget": "monetary", "display_currency": quotation.pricelist_id.currency_id}'/>
+                            <span>with payment terms: </span><b t-field="quotation.payment_term_id"/>.
+                        </p>
+                        <t t-call="portal.portal_signature">
+                            <t t-set="object" t-value="order"/>
+                            <t t-set="partner_name" t-value="order.partner_id.name"/>
+                            <t t-set="callUrl" t-value="'/my/quotes/accept'"/>
+                            <t t-set="signLabel" t-value="'Accept Order'"/>
+                            <t t-set="accessToken" t-value="quotation.access_token"/>
+                        </t>
+                    </div>
+                </form>
+            </div>
+        </div>
     </template>
 
     <template id="portal_my_quotations" name="My Quotations">
@@ -77,7 +113,7 @@
     </template>
 
     <template id="portal_my_orders" name="My Sales Orders">
-      <t t-call="portal.portal_layout">
+        <t t-call="portal.portal_layout">
         <h3>Sales Orders
             <t t-call="portal.portal_searchbar"/>
         </h3>
@@ -125,60 +161,61 @@
               <t t-call="portal.pager"/>
             </div>
         </div>
-      </t>
+    </t>
     </template>
 
-    <template id="portal_order_page" name="Sales Order">
-      <t t-call="portal.portal_layout">
-        <t t-set="sales_order" t-value="order"/> <!-- rename to ensure breadcrumb compatibility (differentiate with purchase orders) -->
-        <t t-set="invoices" t-value="[i for i in order.invoice_ids if i.state not in ['draft', 'cancel']]"/>
-        <t t-set="invoices_amount" t-value="sum(i.amount_total for i in invoices)"/>
-        <div id="optional_placeholder"></div>
-        <div class="container">
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <div class="row">
-                <div class="col-md-6 col-xs-9 col-sm-9">
-                    <h4>
+
+    <template id="portal_order_page" name="Sales Order" inherit_id="portal.portal_sidebar" primary="True">
+        <xpath expr="//div[@id='sidebar_content']" position="before">
+            <div class="row" t-if="order.state == 'sent' and portal_confirmation == 'sign'" id="portal_sign">
+                 <t t-call="sale.signature_dialog"/>
+            </div>
+        </xpath>
+        <xpath expr="//div[@id='sidebar_content']" position="inside">
+            <div class="text-center o_sale_portal_sidebar" id="sale_content">
+                <div>
+                    <h3><strong><span t-field="order.amount_total" t-options='{"widget": "monetary", "display_currency": order.pricelist_id.currency_id}'/></strong><br/></h3>
+                </div> 
+                <div class="o_portal_div">         
+                    <a class="btn btn-primary" target="_blank" t-att-href="'/my/orders/pdf/%s?%s' % (order.id, keep_query())" title="Download">Dowanload
+                    </a>
+                </div>
+            </div>
+            <hr class="mt0 mb0"/>
+            <t t-call="website_quote.navigation_menu"/>
+            <hr class="mt0 mb0"/>
+            <div class="text-center" style="padding: 10px">
+            <t t-if="order.state == 'sent' and portal_confirmation == 'sign'" name="portal_confirmation_sign">
+                <a class="btn btn-primary btn-xs ml8 mr8 pull-right" data-toggle="modal" data-target="#modalaccept">
+                    <i class="fa fa-arrow-circle-right"/> Accept &amp; Sign
+                </a>
+            </t>
+            <t t-if="order.state == 'sale' and portal_confirmation == 'sign'">
+                <a class="btn btn-success" disabled="disabled" t-attf-title="Order signed on #{order.confirmation_date} by #{order.partner_id.name}">
+                    <i class="fa fa-check-circle"/> Signed
+                </a>
+            </t>
+        </div>
+        </xpath>
+        <xpath expr="//div[@id='page_content']" position="inside">
+            <t t-call="sale.so_quotation_content"/>
+                <div id="page_content">
+                    <h1 class="page-header">
                         <t t-call='portal.record_pager'/>
                         <t t-if="order.state in ('sent', 'cancel')">Quotation</t>
                         <t t-else="">Order</t>
-                        <span t-esc="order.name"/>
+                        <em t-esc="order.name"/>
                         <t t-if="order.state == 'cancel'">
                             <span class="label label-default"><i class="fa fa-fw fa-remove"/> Cancelled</span>
                         </t>
                         <t t-if="order.state == 'done'">
                             <span class="label label-default"><i class="fa fa-fw fa-remove"/> Done</span>
                         </t>
-                    </h4>
+                    </h1>
                 </div>
-                <div class="col-md-6 col-sm-3 col-xs-3 hidden-print" id="o_portal_order_actions">
-                    <t t-if="order.state == 'sent' and portal_confirmation == 'sign'" name="portal_confirmation_sign">
-                        <a class="btn btn-primary ml8 pull-right" href="#portal_sign">
-                            <i class="fa fa-arrow-circle-right"/> Accept &amp; Sign
-                        </a>
-                    </t>
-                    <t t-if="order.state == 'sale' and portal_confirmation == 'sign'">
-                        <a class="btn btn-success ml8 pull-right" disabled="disabled"
-                            t-attf-title="Order signed on #{order.confirmation_date} by #{order.partner_id.name}">
-                            <i class="fa fa-check-circle"/> Signed
-                        </a>
-                    </t>
-                    <a target="_blank" t-att-href="'/my/orders/pdf/%s?%s' % (order.id, keep_query())" class="ml8 pull-right mt4 mr8" title="Download">
-                        <i class="fa fa-download fa-2x" aria-hidden="true"/>
-                    </a>
-                </div>
-              </div>
-            </div>
-            <div class="panel-body">
+            <div class="panel-body" id="o_portal_order_actions">
               <t t-if="error or warning" t-call="sale.portal_order_error"/>
               <t t-if="success and (not error and not warning)" t-call="sale.portal_order_success"/>
-              <div class="mb8">
-                  <strong>Date:</strong> <span t-field="order.create_date" t-options='{"widget": "date"}'/>
-              </div>
-              <div class="mb8" t-if="order.validity_date">
-                  <strong>Expiration Date:</strong> <span t-field="order.validity_date" t-options='{"widget": "date"}'/>
-              </div>
               <div class='row'>
                 <div class="col-md-6">
                   <div>
@@ -209,6 +246,14 @@
                     </div>
                   </t>
                 </div>
+                <div class="col-md-3">
+                    <div class="mb8">
+                        <strong>Date:</strong> <span t-field="order.create_date" t-options='{"widget": "date"}'/>
+                    </div>
+                    <div class="mb8" t-if="order.validity_date">
+                        <strong>Expiration Date:</strong> <span t-field="order.validity_date" t-options='{"widget": "date"}'/>
+                    </div>
+                </div>
                 <div id="shipping_address" class="col-md-6" groups="sale.group_delivery_invoice_address">
                   <div>
                     <strong>Shipping Address</strong>
@@ -218,10 +263,8 @@
                   </div>
                 </div>
               </div>
-
-              <hr/>
-
               <div class="row">
+                <h1 class="page-header">Products</h1>
                 <div class="col-md-6">
                   <strong>Product</strong>
                 </div>
@@ -328,10 +371,25 @@
                     </div>
                 </div>
             </div>
-          </div>
-        </div>
+          </xpath>
         <div class="oe_structure mb32"/>
-      </t>
+    </template>
+
+    <template id="chatter" name="Allow Comments &amp; History" customize_show="True" inherit_id="sale.portal_order_page">
+      <xpath expr="//div[@id='page_content']" position="inside">
+          <h1 class="page-header" id="chatter">History</h1>
+          <!-- Options:Quotation Chatter: user can reply -->
+          <t t-call="portal.message_thread">
+            <t t-set="object" t-value="order"/>
+          </t>
+      </xpath>
+    </template>
+
+  <template id="so_quotation_content" name="Quotation Content">
+      <t t-set="quotation" t-value="order">
+          <div class="oe_structure"/>
+          <t t-call="website_quote.pricing" t-if="quotation.order_line"/>
+    </t>
     </template>
 
     <template id="portal_order_error" name="Order error/warning display">
