@@ -377,20 +377,9 @@
     </template>
 
     <template id="portal_sidebar" name="Sidebar">
-            <t t-call="portal.portal_layout">
+        <t t-call="portal.portal_layout">
             <body data-spy="scroll" data-target=".navspy" data-offset="50">
-                <div class="container o_portal_sidebar">
-                    <div class="row mt16">
-                        <!-- Sidebar -->
-                        <div class="col-md-3 hidden-print">
-                            <div class="bs-sidebar" id="sidebar_content">
-                            </div>
-                        </div>
-                        <!-- Page content -->
-                        <div id="page_content" class="col-md-9 hidden-print">
-                        </div>
-                    </div>
-                </div>
+                <div class="container o_portal_sidebar"></div>
                 <div class="oe_structure mb32"/>
             </body>
         </t>

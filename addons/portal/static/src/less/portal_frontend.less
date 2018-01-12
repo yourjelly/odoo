@@ -61,8 +61,8 @@
 
         .o_portal_chatter_message_title {
             p {
-                font-size:85%;
-                color:@odoo-main-color-muted;
+                font-size: 85%;
+                color: @odoo-main-color-muted;
                 margin: 0px;
             }
         }
@@ -77,68 +77,54 @@
     font-weight: normal;
 }
 
-.o_portal_sidebar {
-    .bs-sidebar {
-        position: relative;
-        width: 100%;
-        z-index : 1;
-        background-color: #f8f8f8;
-        border-radius: 5px;
-
-        .nav {
-            >li {
-                >a {
-                display: block;
-                color: #716b7a;
-                padding: 5px 20px;
-                }
-            }
-            >.active, &.active:hover, &.active:focus {
-                >a {
-                font-weight: bold;
-                color: #563d7c;
-                background-color: transparent;
-                border-right: 1px solid #563d7c;
-                }
-            }
-            .nav {
-                display: none;
-                margin-bottom: 8px;
-
-                >li >a {
-                    padding-top: 3px;
-                    padding-bottom: 3px;
-                    padding-left: 30px;
-                    font-size: 90%;
-                    }
-            }
+.o_portal_sidebar .bs-sidebar {
+    position: relative;
+    width: 100%;
+    z-index: 1;
+    background-color: #f7f5fa;
+    border-radius: 5px;
+    .nav {
+        > .active > a, > .active:hover > a, > .active:focus > a {
+            font-weight: bold;
+            color: #563d7c;
+            background-color: transparent;
+            border-right: 1px solid #563d7c;
         }
-
-        .o_portal_div{
+        > li > a {
+            display: block;
+            color: #716b7a;
             padding: 5px 20px;
         }
-
+        .nav {
+            display: none;
+            margin-bottom: 8px;
+          > li > a {
+            padding-top: 3px;
+            padding-bottom: 3px;
+            padding-left: 30px;
+            font-size: 90%;
+        }
     }
-
-    .modal-body {
-        min-height: 160px;
-        max-height: auto;
-        position: relative;
-        padding: 15px;
-        &:extend(.clearfix all); 
+  }
+}
+.o_portal_sidebar {
+    .o_portal_pdf_view {
+        width: 100%;
+        height: 1049px;
     }
 }
-
-.ap-table {
-    table-layout: auto;
-
+.o_portal_sidebar .bs-sidenav {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.wq-table {
+    table-layout: auto !important;
     th, td {
-        border-top: none;
+    border-top: none !important;
     }
 }
-
-.ap-table:not(:first-of-type) thead {
-  display: none;
+.wq-table:not(:first-of-type) thead {
+    display: none;
 }
 
 @media (min-width: 992px) {
