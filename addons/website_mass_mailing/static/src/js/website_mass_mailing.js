@@ -135,40 +135,112 @@ sAnimation.registry.newsletter_popup = sAnimation.Class.extend({
 //==============================================================================
 
 odoo.define('mass_mailing.unsubscribe', function (require) {
-    'use strict';
+'use strict';
 
-    var ajax = require('web.ajax');
-    var core = require('web.core');
-    require('web.dom_ready');
+var core = require('web.core');
+var sAnimation = require('website.content.snippets.animation');
 
-    var _t = core._t;
+var _t = core._t;
 
-    if (!$('.o_unsubscribe_form').length) {
-        return $.Deferred().reject("DOM doesn't contain '.o_unsubscribe_form'");
-    }
+sAnimation.registry.massMailingUnsubscribe = sAnimation.Class.extend({
+    selector: "#unsubscribe_form",
+    read_events: {
+        'submit': '_onSubmit',
+    },
 
-    $('#unsubscribe_form').on('submit', function (e) {
-        e.preventDefault();
+    /**
+     * @override
+     */
+    start: function () {
+        this.$alert = this.$('.alert');
+        this.$email = this.$('input[name="email"]');
+        this.$contacts = this.$('input[name="contact_ids"]');
+        this.$mailingID = this.$('input[name="mailing_id"]');
 
-        var email = $("input[name='email']").val();
-        var mailing_id = parseInt($("input[name='mailing_id']").val());
+        return this._super.apply(this, arguments);
+    },
 
-        var checked_ids = [];
-        $("input[type='checkbox']:checked").each(function (i){
-          checked_ids[i] = parseInt($(this).val());
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * Gets a filtered array of integer IDs of matching lists.
+     *
+     * @private
+     * @param {boolean} [checked=false]
+     * @return {integer[]}
+     */
+    _getContactIDs: function (checked) {
+        var filter = checked ? ':checked' : ':not(:checked)';
+        return _.map(this.$contacts.filter(filter), function (el) {
+            return parseInt($(el).val(), 10);
         });
+    },
+    /**
+     * Reads the form data which is needed to perform the unsubscription.
+     *
+     * @private
+     * @returns {Object}
+     */
+    _getValues: function () {
+        return {
+            email: this.$email.val(),
+            mailing_id: parseInt(this.$mailingID.val(), 10),
+            opt_in_ids: this._getContactIDs(true),
+            opt_out_ids: this._getContactIDs(false),
+        };
+    },
+    /**
+     * Calls the controller to perform the unsubscription.
+     *
+     * @private
+     * @returns {Deferred}
+     */
+    _unsubscribe: function () {
+        return this._rpc({
+            route: this.$el.attr('action'),
+            params: this._getValues(),
+        }).then(this._onSuccess.bind(this), this._onFailure.bind(this));
+    },
 
-        var unchecked_ids = [];
-        $("input[type='checkbox']:not(:checked)").each(function (i){
-          unchecked_ids[i] = parseInt($(this).val());
-        });
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
 
-        ajax.jsonRpc('/mail/mailing/unsubscribe', 'call', {'opt_in_ids': checked_ids, 'opt_out_ids': unchecked_ids, 'email': email, 'mailing_id': mailing_id})
-            .then(function (result) {
-                $('.alert-info').html(_t('Your changes have been saved.')).removeClass('alert-info').addClass('alert-success');
-            })
-            .fail(function () {
-                $('.alert-info').html(_t('Your changes have not been saved, try again later.')).removeClass('alert-info').addClass('alert-warning');
-            });
-    });
+    /**
+     * Called the form is submitted -> Do the unsubscription.
+     *
+     * @private
+     * @param {Event} ev
+     */
+    _onSubmit: function (ev) {
+        ev.preventDefault();
+        this._unsubscribe();
+    },
+    /**
+     * Called when the unsubscription failed to be performed -> Changes the
+     * message displayed to the user.
+     *
+     * @private
+     */
+    _onFailure: function () {
+        this.$alert
+        .html(_t("Your changes have not been saved, try again later."))
+        .removeClass('alert-info alert-success')
+        .addClass('alert-warning');
+    },
+    /**
+     * Called when the unsubscription succeeded to be performed -> Changes the
+     * message displayed to the user.
+     *
+     * @private
+     */
+    _onSuccess: function () {
+        this.$alert
+        .html(_t("Your changes have been saved."))
+        .removeClass('alert-info alert-warning')
+        .addClass('alert-success');
+    },
+});
 });
