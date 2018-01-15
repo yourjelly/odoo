@@ -148,6 +148,9 @@ var ListController = BasicController.extend({
                 }
                 if (event.which == $.ui.keyCode.ESCAPE) {
                     self.trigger_up('history_back');
+                } else if (event.which == $.ui.keyCode.TAB && !event.shiftKey) {
+                    event.preventDefault();
+                    $(this).trigger('click');
                 }
             });
 

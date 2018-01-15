@@ -152,6 +152,9 @@ var FormController = BasicController.extend({
                     if (e.which === $.ui.keyCode.ESCAPE) {
                         $(this).tooltip('hide'); //forcefully hide tooltip as firefox doesn't hide it when element get hidden
                         self.trigger_up('history_back');
+                    } else if (e.which === $.ui.keyCode.TAB) {
+                        e.preventDefault();
+                        $(this).trigger('click');
                     }
                 });
 
@@ -163,6 +166,8 @@ var FormController = BasicController.extend({
                 .on('keydown', function (e) {
                     if (e.which === $.ui.keyCode.TAB) {
                         e.preventDefault();
+                        $(this).trigger('click');
+                    } else if (e.which === 18) {
                         self.renderer.focusFirstButton();
                     } else if (e.which === $.ui.keyCode.ESCAPE) {
                         $(this).tooltip('hide'); //forcefully hide tooltip as firefox doesn't hide it when element get hidden
@@ -179,14 +184,17 @@ var FormController = BasicController.extend({
                     event.preventDefault();
                     if (event.which === $.ui.keyCode.TAB) {
                         if (event.shiftKey && self.renderer.getLastFieldWidget()) {
-                            self.renderer.getLastFieldWidget().activate();
-                        } else {
-                            self.renderer.focusFirstButton();
+                            return self.renderer.getLastFieldWidget().activate();
                         }
+                        self._onSave(event).then(function () {
+                            self.renderer.focusFirstButton();
+                        });
                     } else if (event.which === $.ui.keyCode.ENTER) {
                         self._onSave(event).then(function () {
                             self.renderer.focusFirstButton();
                         });
+                    } else if (event.which === 18) {
+                        self.renderer.focusFirstButton();
                     } else if (event.which === $.ui.keyCode.ESCAPE) {
                         self._onDiscard();
                     }

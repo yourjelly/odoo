@@ -36,9 +36,9 @@ var ButtonWidget = ViewWidget.extend({
     start: function () {
         var self = this;
         this._super.apply(this, arguments);
-        var enterPressed = false;
+        var keyPressed = false;
         this.$el.click(function () {
-            if (enterPressed) {
+            if (keyPressed) {
                 self.trigger_up('set_last_tabindex', {target: self});
             }
             self.trigger_up('button_clicked', {
@@ -56,11 +56,24 @@ var ButtonWidget = ViewWidget.extend({
         }
 
         this.$el.on('keydown', function (e) {
-            // Note: For setting enterPressed variable which will be helpful to set next widget or not,
+            // Note: For setting keyPressed variable which will be helpful to set next widget or not,
             // if mouse is used then do not set next widget focus
             e.stopPropagation();
             if (e.which === $.ui.keyCode.ENTER) {
-                enterPressed = true;
+                keyPressed = true;
+            } else if (e.which === $.ui.keyCode.TAB) {
+                if (!event.shiftKey) {
+                    return self.trigger_up('navigation_move', {
+                        direction: 'previous',
+                    });
+                }
+                e.preventDefault();
+                keyPressed = true;
+                $(this).trigger('click');
+            } else if (e.which === 18) {
+                self.trigger_up('navigation_move', {
+                    direction: e.shiftKey ? 'previous' : 'next',
+                });
             }
         });
         this._addOnFocusAction();
