@@ -115,7 +115,7 @@ var CrashManager = core.Class.extend({
             // Now if there are many form views available, main form inside that o2m and again o2m and then UserError throws 
             // closing that bootstrap modal will trigger event for all forms and set focus on top visible form's widget
             var modals = $('body > .modal').filter(':visible');
-            if (!modals.length > 1) {
+            if (!(modals.length > 1)) {
                 core.bus.trigger('dialog_closed');
             }
         });
@@ -158,7 +158,7 @@ var CrashManager = core.Class.extend({
             $clipboardBtn.tooltip("destroy");
             clipboard.destroy();
             var modals = $('body > .modal').filter(':visible');
-            if (!modals.length > 1) {
+            if (!(modals.length > 1)) {
                 core.bus.trigger('dialog_closed');
             }
         });
