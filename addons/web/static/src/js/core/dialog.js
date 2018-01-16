@@ -142,6 +142,14 @@ var Dialog = Widget.extend({
             $button.on('keydown', function (e) {
                 if (buttonData.keydown) {
                     buttonData.keydown.call(self, e);
+                } else if (e.which === $.ui.keyCode.TAB && !e.shiftKey) {
+                    $button.trigger('click');
+                } else if (e.which === 18) {
+                    if ($button.next('button').length){
+                        $button.next('button').trigger('focus');
+                    } else {
+                        $button.prev('button').trigger('focus');
+                    }
                 }
             });
             self.$footer.append($button);
