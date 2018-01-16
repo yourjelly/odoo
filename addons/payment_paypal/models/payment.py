@@ -111,7 +111,7 @@ class AcquirerPaypal(models.Model):
             'last_name': values.get('partner_last_name'),
             'paypal_return': urls.url_join(base_url, PaypalController._return_url),
             'notify_url': urls.url_join(base_url, PaypalController._notify_url),
-            'cancel_return': urls.url_join(base_url, PaypalController._cancel_url),
+            'cancel_return': urls.url_join(base_url, '%s?token=%s&item_number=%s' % (PaypalController._cancel_url, values['transaction_key'], values['reference'])),
             'handling': '%.2f' % paypal_tx_values.pop('fees', 0.0) if self.fees_active else False,
             'custom': json.dumps({'return_url': '%s' % paypal_tx_values.pop('return_url')}) if paypal_tx_values.get('return_url') else False,
         })
@@ -154,6 +154,13 @@ class TxPaypal(models.Model):
     @api.multi
     def _paypal_form_get_invalid_parameters(self, data):
         invalid_parameters = []
+        token = data.get('token')
+        #As paypal doesn't return anything for a cancel, we must bypass this method. However, if we just check
+        # if the status is equal to cancel, an attacker would be able to validate his payement by adding 
+        # &status=Cancel in his URL. So we check the token for cancelURL to verify this is a real cancel action
+        if token:
+            if self.validate_token(token):
+                return invalid_parameters
         _logger.info('Received a notification from Paypal with IPN version %s', data.get('notify_version'))
         if data.get('test_ipn'):
             _logger.warning(
@@ -191,9 +198,10 @@ class TxPaypal(models.Model):
     @api.multi
     def _paypal_form_validate(self, data):
         status = data.get('payment_status')
+        token = data.get('token')
         res = {
             'acquirer_reference': data.get('txn_id'),
-            'paypal_txn_type': data.get('payment_type'),
+            'paypal_txn_type': data.get('payment_type', ''),
         }
         if status in ['Completed', 'Processed']:
             _logger.info('Validated Paypal payment for tx %s: set as done' % (self.reference))
@@ -212,6 +220,14 @@ class TxPaypal(models.Model):
             _logger.info('Received notification for Paypal payment %s: set as pending' % (self.reference))
             res.update(state='pending', state_message=data.get('pending_reason', ''))
             return self.write(res)
+        elif status in ['Cancel']:
+            if token:
+                _logger.info('Received notification for Paypal payment %s: set as cancel' % (self.reference))
+                res.update(state='cancel', state_message=data.get('cancel_reason', ''))
+                return self.write(res)
+            else:
+                _logger.info('Received notification for Paypal payment %s: set as cancel rejected, as no token was provided' % (self.reference))
+                return self
         else:
             error = 'Received unrecognized status for Paypal payment %s: %s, set as error' % (self.reference, status)
             _logger.info(error)

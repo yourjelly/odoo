@@ -196,6 +196,7 @@ class PaymentTransaction(models.Model):
             'return_url': return_url,
             'partner_id': order.partner_shipping_id.id or order.partner_invoice_id.id,
             'billing_partner_id': order.partner_invoice_id.id,
+            'transaction_key': self.transaction_key,
         }
         if render_values:
             values.update(render_values)

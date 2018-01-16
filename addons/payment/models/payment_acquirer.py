@@ -538,6 +538,7 @@ class PaymentTransaction(models.Model):
     callback_hash = fields.Char('Callback Hash', groups="base.group_system")
 
     payment_token_id = fields.Many2one('payment.token', 'Payment Token', domain="[('acquirer_id', '=', acquirer_id)]")
+    transaction_key = fields.Char('Transaction Key')
 
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
@@ -574,6 +575,16 @@ class PaymentTransaction(models.Model):
         if failed_tx:
             raise exceptions.ValidationError(_('The %s payment acquirers are not allowed to manual capture mode!' % failed_tx.mapped('acquirer_id.name')))
 
+    @api.multi
+    def _generate_transaction_key(self):
+        secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
+        hm = hmac.new(secret.encode('utf-8'), str(self.partner_id.id).encode('utf-8') + str(self.id).encode('utf-8'), hashlib.sha1)
+        self.write({'transaction_key': hm.hexdigest()})
+
+    @api.multi
+    def validate_token(self, token):
+        return _consteq(token, self.transaction_key)
+
     @api.model
     def create(self, values):
         if values.get('partner_id'):  # @TDENOTE: not sure
@@ -606,6 +617,8 @@ class PaymentTransaction(models.Model):
         if tx_sudo.callback_model_id and tx_sudo.callback_res_id and tx_sudo.callback_method:
             tx.write({'callback_hash': tx._generate_callback_hash()})
 
+        tx._generate_transaction_key()
+        
         return tx
 
     @api.multi
