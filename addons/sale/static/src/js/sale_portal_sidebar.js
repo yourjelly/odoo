@@ -1,29 +1,28 @@
-odoo.define('sale.o_sale_portal_sidebar', function (require) {
+odoo.define('sale.SalePortalSidebar', function (require) {
 "use strict";
 
 require('web.dom_ready');
-    var Widget = require("web.Widget");
+var Widget = require("web.Widget");
 
-    if (!$('.o_sale_portal_sidebar').length) {
-        console.log("unfortunately inside :|");
-        return $.Deferred().reject("DOM doesn't contain '.o_sale_portal_sidebar'");
-    }
+if (!$('.o_portal_sidebar').length) {
+    return $.Deferred().reject("DOM doesn't contain '.o_portal_sidebar'");
+}
 
     // Nav Menu ScrollSpy
     var NavigationSpyMenu = Widget.extend({
-        start: function(watched_selector) {
-            this.authorized_text_tag = ['em', 'b', 'i', 'u'];
-            this.spy_watched = $(watched_selector);
+        start: function (watched_selector) {
+            this.authorizedTextTag = ['em', 'b', 'i', 'u'];
+            this.spyWatched = $(watched_selector);
             this.generateMenu();
         },
-        generateMenu: function() {
-            console.log("inside the function. :) ");
+
+        generateMenu: function () {
             var self = this;
-            $("[id^=quote_header_], [id^=quote_]", this.spy_watched).attr("id", "");
+            $("[id^=quote_header_], [id^=quote_]", this.spyWatched).attr("id", "");
             // generate the new spy menu
-            var last_li = false;
-            var last_ul = null;
-            _.each(this.spy_watched.find("h1, h2"), function(el) {
+            var lastLI = false;
+            var lastUL = null;
+            _.each(this.spyWatched.find("h1, h2"), function (el) {
                 var id, text;
                 switch (el.tagName.toLowerCase()) {
                     case "h1":
@@ -32,8 +31,8 @@ require('web.dom_ready');
                         if (!text) {
                             break;
                         }
-                        last_li = $("<li>").append($('<a href="#' + id + '"/>').text(text)).appendTo(self.$el);
-                        last_ul = false;
+                        lastLI = $("<li>").append($('<a href="#' + id + '"/>').text(text)).appendTo(self.$el);
+                        lastUL = false;
                         break;
                     case "h2":
                         id = self.setElementId('quote_', el);
@@ -41,39 +40,41 @@ require('web.dom_ready');
                         if (!text) {
                             break;
                         }
-                        if (last_li) {
-                            if (!last_ul) {
-                                last_ul = $("<ul class='nav'>").appendTo(last_li);
+                        if (lastLI) {
+                            if (!lastUL) {
+                                lastUL = $("<ul class='nav'>").appendTo(lastLI);
                             }
-                            $("<li>").append($('<a href="#' + id + '"/>').text(text)).appendTo(last_ul);
+                            $("<li>").append($('<a href="#' + id + '"/>').text(text)).appendTo(lastUL);
                         }
                         break;
                 }
             });
         },
-        setElementId: function(prefix, $el) {
+
+        setElementId: function (prefix, $el) {
             var id = _.uniqueId(prefix);
-            this.spy_watched.find($el).attr('id', id);
+            this.spyWatched.find($el).attr('id', id);
             return id;
         },
-        extractText: function($node) {
+
+        extractText: function ($node) {
             var self = this;
-            var raw_text = [];
-            _.each($node.contents(), function(el) {
+            var rawText = [];
+            _.each($node.contents(), function (el) {
                 var current = $(el);
                 if ($.trim(current.text())) {
                     var tagName = current.prop("tagName");
                     if (_.isUndefined(tagName) || (!_.isUndefined(tagName) && _.contains(self.authorized_text_tag, tagName.toLowerCase()))) {
-                        raw_text.push($.trim(current.text()));
+                        rawText.push($.trim(current.text()));
                     }
                 }
             });
-            return raw_text.join(' ');
+            return rawText.join(' ');
         }
     });
 
-    var nav_menu = new NavigationSpyMenu();
-    nav_menu.setElement($('[data-id="quote_sidebar"]'));
-    nav_menu.start($('body[data-target=".navspy"]'));
+    var navSpyMenu = new NavigationSpyMenu();
+    navSpyMenu.setElement($('[data-id="portal_sidebar"]'));
+    navSpyMenu.start($('body[data-target=".navspy"]'));
 
 });
