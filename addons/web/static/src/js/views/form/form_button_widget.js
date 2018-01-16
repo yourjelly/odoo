@@ -61,18 +61,13 @@ var ButtonWidget = ViewWidget.extend({
             e.stopPropagation();
             if (e.which === $.ui.keyCode.ENTER) {
                 keyPressed = true;
-            } else if (e.which === $.ui.keyCode.TAB) {
-                if (e.shiftKey) {
-                    return self.trigger_up('navigation_move', {
-                        direction: 'previous',
-                    });
-                }
+            } else if (e.which === $.ui.keyCode.TAB && !e.shiftKey) {
                 e.preventDefault();
                 keyPressed = true;
                 $(this).trigger('click');
             } else if (e.which === 18) {
                 self.trigger_up('navigation_move', {
-                    direction: e.shiftKey ? 'previous' : 'next',
+                    direction: 'next',
                 });
             }
         });
