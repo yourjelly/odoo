@@ -119,6 +119,16 @@ var FormViewDialog = ViewDialog.extend({
                         });
                     }
                 },
+                keydown: function(event) {
+                    if (event.which == $.ui.keyCode.TAB && !event.shiftKey) {
+                        event.preventDefault();
+                        $(event.currentTarget).trigger('click');
+                    } else if (event.which == 18) {
+                        // Set focus on next widget/button(set focus on first button if buttons available else first widget)
+                        // when keydown ALT is pressed on Discard button
+                        self.form_view.renderer.focusFirstButton();
+                    }
+                }
             }];
 
             if (!readonly) {
@@ -128,14 +138,12 @@ var FormViewDialog = ViewDialog.extend({
                     click: function () {
                         this._save().then(self.close.bind(self));
                     },
-                    // Set focus on next widget/button(set focus on first button if buttons available else first widget)
-                    // when keydown TAB is pressed on Save/Save & New button
                     keydown: function (event) {
                         if (event.which == $.ui.keyCode.TAB && !event.shiftKey) {
                             event.preventDefault();
                             $(event.currentTarget).trigger('click');
                         } else if (event.which == 18) {
-                            self.form_view.renderer.focusFirstButton();
+                            $(event.currentTarget).next('button');
                         }
                     }
                 });
@@ -152,7 +160,7 @@ var FormViewDialog = ViewDialog.extend({
                                 event.preventDefault();
                                 $(event.currentTarget).trigger('click');
                             } else if (event.which == 18) {
-                                self.form_view.renderer.focusFirstButton();
+                                $(event.currentTarget).next('button');
                             }
                         }
                     });
@@ -420,6 +428,8 @@ var SelectCreateDialog = ViewDialog.extend({
                         if (event.which == $.ui.keyCode.TAB && !event.shiftKey) {
                             event.preventDefault();
                             $(event.currentTarget).trigger('click');
+                        } else if (event.which == 18) {
+                            $(event.currentTarget).next('button').trigger('focus');
                         }
                     },
                 });

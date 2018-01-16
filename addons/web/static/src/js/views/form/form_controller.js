@@ -159,6 +159,8 @@ var FormController = BasicController.extend({
                         }
                         e.preventDefault();
                         $(this).trigger('click');
+                    } else if (e.which === 18) {
+                        self.$buttons.find('.o_form_button_create').trigger('focus');
                     }
                 });
 
