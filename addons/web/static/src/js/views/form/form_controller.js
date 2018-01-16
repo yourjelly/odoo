@@ -153,6 +153,10 @@ var FormController = BasicController.extend({
                         $(this).tooltip('hide'); //forcefully hide tooltip as firefox doesn't hide it when element get hidden
                         self.trigger_up('history_back');
                     } else if (e.which === $.ui.keyCode.TAB) {
+                        // TODO: MSH: Why not calling navigation_move event with direction previous?
+                        if (e.shiftKey && self.renderer.getLastFieldWidget()) {
+                            return self.renderer.getLastFieldWidget().activate();
+                        }
                         e.preventDefault();
                         $(this).trigger('click');
                     }

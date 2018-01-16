@@ -62,7 +62,7 @@ var ButtonWidget = ViewWidget.extend({
             if (e.which === $.ui.keyCode.ENTER) {
                 keyPressed = true;
             } else if (e.which === $.ui.keyCode.TAB) {
-                if (!event.shiftKey) {
+                if (e.shiftKey) {
                     return self.trigger_up('navigation_move', {
                         direction: 'previous',
                     });

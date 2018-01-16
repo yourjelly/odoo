@@ -131,9 +131,9 @@ var FormViewDialog = ViewDialog.extend({
                     // Set focus on next widget/button(set focus on first button if buttons available else first widget)
                     // when keydown TAB is pressed on Save/Save & New button
                     keydown: function (event) {
-                        if (!multi_select && event.which == $.ui.keyCode.TAB && !event.shiftKey) {
+                        if (event.which == $.ui.keyCode.TAB && !event.shiftKey) {
                             event.preventDefault();
-                            $(this).trigger('click');
+                            $(event.currentTarget).trigger('click');
                         } else if (event.which == 18) {
                             self.form_view.renderer.focusFirstButton();
                         }
@@ -148,9 +148,9 @@ var FormViewDialog = ViewDialog.extend({
                             this._save().then(self.form_view.createRecord.bind(self.form_view, self.parentID));
                         },
                         keydown: function (event) {
-                            if (event.which == $.ui.keyCode.TAB && event.shiftKey) {
+                            if (event.which == $.ui.keyCode.TAB && !event.shiftKey) {
                                 event.preventDefault();
-                                $(this).trigger('click');
+                                $(event.currentTarget).trigger('click');
                             } else if (event.which == 18) {
                                 self.form_view.renderer.focusFirstButton();
                             }
@@ -393,7 +393,7 @@ var SelectCreateDialog = ViewDialog.extend({
                         // Set focus back to search view input when TAB is pressed from Create button
                         if (event.which == $.ui.keyCode.TAB && !event.shiftKey) {
                             event.preventDefault();
-                            $(this).trigger('click');
+                            $(event.currentTarget).trigger('click');
                         } else if (event.which == 18) {
                             self.searchview.setInputFocus();
                         }
@@ -419,7 +419,7 @@ var SelectCreateDialog = ViewDialog.extend({
                     keydown: function (event) {
                         if (event.which == $.ui.keyCode.TAB && !event.shiftKey) {
                             event.preventDefault();
-                            $(this).trigger('click');
+                            $(event.currentTarget).trigger('click');
                         }
                     },
                 });
