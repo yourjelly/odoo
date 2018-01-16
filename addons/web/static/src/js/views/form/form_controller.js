@@ -170,7 +170,7 @@ var FormController = BasicController.extend({
                     on_button_focus(this, _t('Press ENTER to <b>Create</b> or ESC to go back'));
                 })
                 .on('keydown', function (e) {
-                    if (e.which === $.ui.keyCode.TAB) {
+                    if (e.which === $.ui.keyCode.TAB && !e.shiftKey) {
                         e.preventDefault();
                         $(this).trigger('click');
                     } else if (e.which === 18) {

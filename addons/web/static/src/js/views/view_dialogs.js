@@ -143,7 +143,7 @@ var FormViewDialog = ViewDialog.extend({
                             event.preventDefault();
                             $(event.currentTarget).trigger('click');
                         } else if (event.which == 18) {
-                            $(event.currentTarget).next('button');
+                            $(event.currentTarget).next('button').trigger('focus');
                         }
                     }
                 });
@@ -160,7 +160,7 @@ var FormViewDialog = ViewDialog.extend({
                                 event.preventDefault();
                                 $(event.currentTarget).trigger('click');
                             } else if (event.which == 18) {
-                                $(event.currentTarget).next('button');
+                                $(event.currentTarget).next('button').trigger('focus');
                             }
                         }
                     });
