@@ -765,7 +765,7 @@ var FieldX2Many = AbstractField.extend({
      * @override
      */
     activate: function () {
-        if (!this.activeActions.create || this.isReadonly) {
+        if (!this.activeActions.create || this.isReadonly || !this.$el.is(":visible")) {
             return false;
         }
         if (this.editable) {
