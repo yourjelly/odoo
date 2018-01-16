@@ -104,6 +104,10 @@ class PaymentAcquirer(models.Model):
         'Pending Message', translate=True,
         default=lambda s: _('<i>Pending,</i> Your online payment has been successfully processed. But your order is not validated yet.'),
         help='Message displayed, if order is in pending state after having done the payment process.')
+    authorized_msg = fields.Html(
+        'Authorize Message', translate=True,
+        default='<i>Authorized,</i> Your online payment has been successfully processed. But your order is not validated yet.',
+        help='Message displayed, if order is in authorized state after having done the payment process.')
     done_msg = fields.Html(
         'Done Message', translate=True,
         default=lambda s: _('<i>Done,</i> Your online payment has been successfully processed. Thank you for your order.'),
