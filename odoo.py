@@ -139,18 +139,6 @@ def main():
         'spath', nargs=1,
         help="path to the migration scripts for the specified database"
     )
-    # ----------------- #
-    #  Shell Interface  #
-    # ----------------- #
-    shell_parser = top_level_subparsers.add_parser(
-        'shell',
-        help="activate the shell interface for the specified database",
-        parents=[dbname_parser, logging_parser, common_parser]
-    )
-    shell_parser.add_argument(
-        '-r', '--repl', choices=['python', 'ipython', 'ptpython'],
-        help="the repl to be used for the shell session"
-    )
     # --------- #
     #  Imports  #
     # --------- #
@@ -270,7 +258,9 @@ def main():
     #  Serve  #
     # ------- #
     serve_parser = top_level_subparsers.add_parser(
-        'serve', help="launch an odoo server"
+        'serve',
+        parents=[common_parser, logging_parser],
+        help="launch an odoo server"
     )
     serve_parser.add_argument(
         '-i', '--init', nargs='+',
@@ -301,6 +291,10 @@ def main():
         help="longpolling port for the server"
     )
     serve_parser.add_argument(
+        '-d', '--database', nargs=1,
+        help="database to select or create if it doesn't exist"
+    )
+    serve_parser.add_argument(
         '--db-filter', nargs=1,
         help="databases to make available"
     )
@@ -311,8 +305,9 @@ def main():
     serve_parser.add_argument(
         '--dev', nargs='+',
         choices=[
+            # TODO: Re-parse this later on and remove duplicates
             'pudb', 'wdb', 'ipdb', 'pdb', 'all', 'reload', 'qweb',
-            'werkzeug', 'xml'  # TODO: Check how this is parsed later on
+            'werkzeug', 'xml'
         ],
         help="enable developer mode"
     )
@@ -377,9 +372,83 @@ def main():
             help="Maximum number of request to be processed per worker "
             "(default 8192)"
         )
+    # --------------- #
+    #  Configuration  #
+    # --------------- #
+    config_parser = top_level_subparsers.add_parser(
+        'config',
+        help="set up your Odoo configuration"
+    )
+    config_parser.add_argument(
+        'setting', nargs=1,
+        help="setting to modify"
+    )
+    # Just to avoid any shenanigans
+    ex_group = config_parser.add_mutually_exclusive_group()
+    ex_group.add_argument(
+        'new_val', nargs='?', default=None,
+        help="new value for the specified setting"
+    )
+    ex_group.add_argument(
+        '-e', '--edit', action='store_true',
+        help="open the settings file with the preferred text editor"
+    )
+    # ------------ #
+    #  Deployment  #
+    # ------------ #
+    deploy_parser = top_level_subparsers.add_parser(
+        'deploy',
+        help="deploy a module on an Odoo instance"
+    )
+    deploy_parser.add_argument(
+        'path', nargs=1,
+        help="path of the module to be deployed"
+    )
+    deploy_parser.add_argument(
+        'url', nargs='?',
+        help="url of the server",
+        default="http://localhost:8069"
+    )
+    # ---------- #
+    #  Scaffold  #
+    # ---------- #
+    scaffold_parser = top_level_subparsers.add_parser(
+        'scaffold',
+        help="create an empty module following a template"
+    )
+    scaffold_parser.add_argument(
+        'name', nargs=1,
+        help="name of the module to create"
+    )
+    scaffold_parser.add_argument(
+        'dest', nargs='?', default='.',
+        help="directory where the newly-created module will be stored "
+        "(default is current working directory)"
+    )
+    scaffold_parser.add_argument(
+        '-t', '--template', nargs=1,
+        help="provide a template for the module to be generated"
+    )
+    # ----------------- #
+    #  Shell Interface  #
+    # ----------------- #
+    shell_parser = top_level_subparsers.add_parser(
+        'shell',
+        help="activate the shell interface for the specified database",
+        parents=[common_parser, logging_parser]
+    )
+    shell_parser.add_argument(
+        '-d', '--database',
+        help="a database to run the shell on, creates a new one by default"
+    )
+    shell_parser.add_argument(
+        '-r', '--repl', choices=['python', 'ipython', 'ptpython'],
+        help="the repl to be used for the shell session"
+    )
 
     # Parse them args
-    main_parser.parse_args()
+    parsed = main_parser.parse_args()
+    print(parsed)
 
 
 if __name__ == '__main__':
