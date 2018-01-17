@@ -133,6 +133,13 @@ var BasicRenderer = AbstractRenderer.extend({
             dom.setSelectionRange(field.getFocusableElement().get(0), {start: offset, end: offset});
         }
     },
+    setTabindexWidgets: function (state) {
+        var self = this;
+        this.tabindexWidgets[state.id] = [];
+        _.each(this.tabindexFieldWidgets[state.id], function (widget) {
+            self.tabindexWidgets[state.id].push(widget);
+        });
+    },
 
     //--------------------------------------------------------------------------
     // Private

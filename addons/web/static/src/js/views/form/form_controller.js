@@ -106,7 +106,8 @@ var FormController = BasicController.extend({
      * @todo convert to new style
      */
     on_attach_callback: function () {
-        this.renderer.setTabindexWidgets();
+        var state = this.model.get(this.handle);
+        this.renderer.setTabindexWidgets(state);
         this.autofocus();
     },
     /**
