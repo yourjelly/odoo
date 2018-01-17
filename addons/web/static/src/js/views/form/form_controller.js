@@ -586,8 +586,9 @@ var FormController = BasicController.extend({
         event.stopPropagation();
         if (this.mode !== 'readonly' && this.$buttons && this.$buttons.find('.o_form_button_save').length) {
             return this.$buttons.find('.o_form_button_save').focus();
-        } else if (this.mode === 'readonly' && this.$buttons && this.$buttons.find('.o_form_button_edit')) {
-            return this.$buttons.find('.o_form_button_edit').focus();
+        } else if (this.mode === 'readonly' && this.$buttons && (this.$buttons.find('.o_form_button_create') || this.$buttons.find('.o_form_button_edit'))) {
+            var $button = this.$buttons.find('.o_form_button_create') || this.$buttons.find('.o_form_button_edit');
+            return $button.focus();
         } else {
             return this.renderer.focusFirstButton();
         }
