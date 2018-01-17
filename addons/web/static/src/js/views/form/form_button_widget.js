@@ -150,14 +150,14 @@ var ButtonWidget = ViewWidget.extend({
     /**
      * _onKeydown on ViewWidget will move user to next widget as soon as Enter key is pressed
      * Next button/widget should be focused once reload is done and once lastTabindex variable is set
-     * So here we skip Enter key, click handler will do the job of trigerring navigation_move once button operation is complete
+     * So here we skip Enter and TAB key, click handler will do the job of trigerring navigation_move once button operation is complete
      *
      * @override
      * @private
      * @param {KeyEvent} ev
      */
     _onKeydown: function (ev) {
-        if (ev.which === $.ui.keyCode.ENTER) {
+        if (ev.which === $.ui.keyCode.ENTER || ev.which === $.ui.keyCode.TAB) {
             return;
         }
         return this._super.apply(this, arguments);
