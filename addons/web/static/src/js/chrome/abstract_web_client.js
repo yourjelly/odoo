@@ -17,6 +17,7 @@ var core = require('web.core');
 var config = require('web.config');
 var crash_manager = require('web.crash_manager');
 var data_manager = require('web.data_manager');
+var dom = require('web.dom');
 var Dialog = require('web.Dialog');
 var Loading = require('web.Loading');
 var mixins = require('web.mixins');
@@ -52,6 +53,8 @@ var AbstractWebClient = Widget.extend(mixins.ServiceProvider, {
         },
         warning: '_onDisplayWarning',
         load_action: '_onLoadAction',
+        scrollTo: 'scrollTo',
+        find_scroll_position: 'findScrollPosition',
         load_views: function (event) {
             var params = {
                 model: event.data.modelName,
@@ -386,6 +389,62 @@ var AbstractWebClient = Widget.extend(mixins.ServiceProvider, {
             throw new Error('Unknown effect type: ' + type);
         }
     },
+
+    // --------------------------------------------------------------
+    // Scroll position handling
+    // --------------------------------------------------------------
+
+    /**
+     * Find the scroll position
+     *
+     * @param {OdooEvent} ev
+     */
+    findScrollPosition: function (ev) {
+        _.extend(ev.data.position, this.getScrollPosition());
+    },
+    /**
+     * Get top position if mobile, otherwise top and left
+     *
+     * @returns {Object}
+     */
+    getScrollPosition: function () {
+        if (config.device.isMobile) {
+            return {
+                top: $(window).scrollTop(),
+            };
+        } else {
+            return {
+                top: this.action_manager.el.scrollTop,
+                left: this.action_manager.el.scrollLeft,
+            };
+        }
+    },
+    /**
+     * Scrolls the webclient to either a given offset or a target element
+     * Must be called with: trigger_up('scrollTo', options)
+     *
+     * @param {OdooEvent} ev
+     * @param {integer} [ev.data.top] the number of pixels to scroll from top
+     * @param {integer} [ev.data.left] the number of pixels to scroll from left
+     * @param {string} [ev.data.selector] the selector of the target element to scroll to
+     */
+    scrollTo: function (ev) {
+        var offset = {top: ev.data.top, left: ev.data.left || 0};
+        if (!offset.top && !offset.left) {
+            offset = dom.getPosition(document.querySelector(ev.data.selector));
+            if (!config.device.isMobile) {
+                // Substract the position of the action_manager as it is the scrolling part
+                offset.top -= dom.getPosition(this.action_manager.el).top;
+            }
+        }
+        if (config.device.isMobile) {
+            $(window).scrollTop(offset.top);
+        } else {
+            this.action_manager.el.scrollTop = offset.top;
+        }
+        this.action_manager.el.scrollLeft = offset.left;
+    },
+
 });
 
 return AbstractWebClient;

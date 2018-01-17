@@ -266,7 +266,7 @@ var ActionManager = Widget.extend({
             callbacks: [{widget: controller.widget}],
         });
 
-        this.trigger_up('scrollTo', {offset: controller.scrollTop || 0});
+        this.trigger_up('scrollTo', this.getScrollTop());
 
         if (!controller.widget.need_control_panel) {
             this.controlPanel.do_hide();
@@ -302,7 +302,7 @@ var ActionManager = Widget.extend({
     _detachCurrentController: function () {
         var currentController = this.getCurrentController();
         if (currentController) {
-            currentController.scrollTop = this._getScrollTop();
+            currentController.scroll = this.getScrollTop();
             dom.detach([{widget: currentController.widget}]);
         }
     },
@@ -348,6 +348,7 @@ var ActionManager = Widget.extend({
                 // AAB: store it on the AbstractAction instance, and call it
                 // automatically when the action is restored
                 if (options.on_reverse_breadcrumb) {
+                    debugger;
                     var currentAction = self.getCurrentAction();
                     if (currentAction) {
                         currentAction.on_reverse_breadcrumb = options.on_reverse_breadcrumb;
@@ -615,20 +616,13 @@ var ActionManager = Widget.extend({
         }
         return state;
     },
-    /**
-     * Returns the current vertical scroll position.
-     *
-     * @private
-     * @returns {integer}
-     */
-    _getScrollTop: function () {
-        var scrollTop;
-        this.trigger_up('getScrollTop', {
+    getScrollTop: function (ev) {
+        debugger;
+        this.trigger_up('find_scroll_position', {
             callback: function (value) {
-                scrollTop = value;
+                ev.data.position = value;
             }
         });
-        return scrollTop;
     },
     /**
      * Dispatches the given action to the corresponding handler to execute it,
