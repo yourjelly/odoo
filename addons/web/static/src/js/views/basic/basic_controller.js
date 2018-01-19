@@ -254,7 +254,13 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
             on_fail: function () {
                 reload().always(def.reject.bind(def));
             },
-            on_closed: reload,
+            on_closed: function () {
+                reload().then(function () {
+                    if (callback) {
+                        callback.apply(self, ['next']);
+                    }
+                });
+            },
         });
         return this.alive(def);
     },
