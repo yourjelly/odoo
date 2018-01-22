@@ -862,7 +862,8 @@ class WebsiteSale(http.Controller):
         return {
             'recall': order.payment_tx_id.state == 'pending',
             'message': request.env['ir.ui.view'].render_template("website_sale.payment_confirmation_status", {
-                'order': order
+                'order': order,
+                'post_msg_plaintext': tools.html2plaintext(order.payment_acquirer_id.post_msg).replace('\n', '')
             })
         }
 
