@@ -32,6 +32,7 @@ var MyHtmlEditor = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @private
      */
     _renderEdit: function () {
+        var self = this;
         if (!this.$el.find('#my_editor').html() .trim() === 'Write here...' || this.value) {
             this.$el.find('#my_editor').html(this.value);
         }
@@ -48,6 +49,14 @@ var MyHtmlEditor = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             e.preventDefault();
             e.stopPropagation();
             var command = $(this).data('command');
+            if (command === 'code') {
+                var $myeditor = $('#my_editor');
+                var vals = $myeditor.html();
+                if (vals) {
+                    $myeditor.text(vals);
+                    $myeditor.css({'background-color': 'black', color: 'white'});
+                }
+            }
             if (_.contains(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'], command) || command == 'p') {
                 document.execCommand('formatBlock', false, command);
             }

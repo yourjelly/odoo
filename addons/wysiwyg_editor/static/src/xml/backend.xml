@@ -60,6 +60,7 @@
             <a href="#" data-command='p'>P</a>
             <a href="#" data-command='subscript'><i class='fa fa-subscript'></i></a>
             <a href="#" data-command='superscript'><i class='fa fa-superscript'></i></a>
+            <a href="#" data-command='code'><i class="fa fa-code" aria-hidden="true"></i></a>
         </div>
         <div id='my_editor' contenteditable='true' tabindex="5">
               Write here...
