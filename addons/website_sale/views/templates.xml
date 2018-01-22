@@ -1563,7 +1563,7 @@
                         Your payment has been authorized.
                     </t>
                 </div>
-                <div class="panel-body" t-if="order.payment_acquirer_id.post_msg">
+                <div class="panel-body" t-if="post_msg_plaintext">
                     <t t-raw="order.payment_acquirer_id.post_msg" />
                 </div>
             </div>
