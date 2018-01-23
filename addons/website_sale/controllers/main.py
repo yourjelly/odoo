@@ -900,7 +900,7 @@ class WebsiteSale(http.Controller):
         # clean context and session, then redirect to the confirmation page
         request.website.sale_reset()
         if tx and tx.state == 'draft':
-            return request.redirect('/shop')
+            return request.redirect('/shop/payment')
 
         return request.redirect('/shop/confirmation')
 
