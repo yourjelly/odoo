@@ -60,10 +60,12 @@
         }
 
         .o_mail_emoji_container {
+            .o-position-absolute(auto, 0, 100%, 0);
+            max-height: 20vh;
             padding: 0 @o-mail-chatter-gap @o-mail-chatter-gap 0;
             border: 1px solid @gray-lighter-dark;
-            border-width: 1px 0 0 0;
             background-color: @gray-lighter;
+            overflow-y: auto;
 
             .o_mail_emoji {
                 margin: @o-mail-chatter-gap 0 0 @o-mail-chatter-gap;
@@ -99,7 +101,7 @@
             }
 
             .o_mail_emoji_container {
-                margin: 0 -@o-mail-chatter-gap;
+                left: 0;
             }
         }
 
@@ -144,7 +146,6 @@
                 border-right-width: 0;
 
                 .o_mail_emoji_container {
-                    text-align: right;
                     border-right-width: 1px;
                 }
             }
@@ -189,7 +190,6 @@
         }
         .o_composer {
             .o_mail_emoji_container {
-                .o-position-absolute(auto, 0, 100%, 0);
                 border-bottom-width: 1px;
             }
         }
