@@ -6,10 +6,11 @@
 ###################
 
 import argparse
+import getpass
 import os
 
 
-class GNUHelpFormatter(argparse.HelpFormatter):
+class GNUHelpFormatter(argparse.ArgumentDefaultsHelpFormatter):
     """
     This formatter class will rearrange the display of the --help option
     so that options are shown in pseudo-alphabetical order, like how most
@@ -26,12 +27,30 @@ class GNUHelpFormatter(argparse.HelpFormatter):
                 [act for act in actions if len(act.option_strings) == 1],
                 key=lambda x: getattr(x, 'option_strings')[0].lower()
             )
-            return short + long
+            args = [act for act in actions if len(act.option_strings) == 0]
+            return short + long + args
         actions = sort(actions)
         super(GNUHelpFormatter, self).add_arguments(actions)
 
 
-# TODO: Destinations, defaults, groups, custom actions (password), etc.
+class PasswordAction(argparse.Action):
+    """
+    This action will launch a password prompt.
+    """
+    def __init__(self, option_strings, dest, nargs=None, **kwargs):
+        # Don't accept any arguments for password options
+        if nargs is not None:
+            raise ValueError("PasswordAction requires no arguments.")
+        super(PasswordAction, self).__init__(
+            option_strings, dest, nargs, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        # Trigger the password prompt
+        pw = getpass.getpass("Please input your password: ")
+        setattr(namespace, self.dest, pw)
+
+
+# TODO: Destinations, defaults, groups, etc.
 def main():
     # ------------- #
     #  Main parser  #
@@ -52,21 +71,27 @@ def main():
     # ----------------- #
     logging_parser = argparse.ArgumentParser(add_help=False)
     logging_parser.add_argument(
-        '--logfile', nargs=1, metavar='PATH', type=str,
-        help="path to where the log file should be saved"
+        '--log-file', nargs=1, metavar='PATH', type=str,
+        help="path for the file where the server logs will be stored."
     )
     logging_parser.add_argument(
         '--syslog', action='store_true',
-        help="save odoo logs as system logs"
+        help="send the log to the syslog server."
     )
     ex_group_log = logging_parser.add_mutually_exclusive_group()
     ex_group_log.add_argument(
-        '--log-level', nargs=1, metavar='EXPRESSION', type=str,
-        help="which type of logs to display to stdin"
+        '--log-filter', nargs=1, metavar='EXPRESSION', type=str,
+        help="specify a log level or a log handler. "
+        "Possible log levels are [info, debug_rpc, warn, test, critical, "
+        "debug_sql, error, debug, debug_rpc_answer, notset]. "
+        "For more fine-tuned logs, log handlers can be used, these are in the "
+        "form of LOGGER:LEVEL, e.g.: odoo.orm:DEBUG, werkzeug:WARNING."
     )
     ex_group_log.add_argument(
         '-v', '--verbose', action='count',
-        help="level of log verbosity"
+        help="level of log verbosity, presets for --log-filter. "
+        "This option is repetitive, every extra v (-v -v or -vv) increases "
+        "the log level."
     )
     # ---------------- #
     #  Common options  #
@@ -74,56 +99,52 @@ def main():
     common_parser = argparse.ArgumentParser(add_help=False)
     common_parser.add_argument(
         '-a', '--addons-path', action='append', metavar='PATH', type=str,
-        help="space-separated list of paths to check for addons"
+        help="specify a path where odoo modules can be found. This option is "
+        "repetitive, you can specify it multiple times to add multiple "
+        "addons paths."
     )
     common_parser.add_argument(
         '--data-dir', nargs=1, metavar='PATH', type=str,
-        help="path to a directory where odoo-generated files should be stored"
+        help="path to a directory where odoo-generated data should be stored."
     )
     # ------------------ #
     #  Database options  #
     # ------------------ #
     db_parser = argparse.ArgumentParser(add_help=False)
     db_parser.add_argument(
-        '--odoo-user', nargs=1, metavar='USERNAME', type=str,
-        help="specify the admin username of the odoo instance"
-    )
-    db_parser.add_argument(
-        '--odoo-password', nargs=1, metavar='PASSWORD', type=str,
-        help="specify the admin password of the odoo instance"
-    )
-    db_parser.add_argument(
         '-U', '--db-user', nargs=1, metavar='USERNAME', type=str,
-        help="specify the database username"
+        help="specify the database username."
     )
     db_parser.add_argument(
-        '-W', '--db-password', nargs=1, metavar='PASSWORD', type=str,
-        help="specify the database password"
+        '-W', '--db-password', action=PasswordAction,
+        help="specify the database password, this option takes no arguments, "
+        "instead, it will prompt the user for the password upon entering "
+        "the command."
     )
     db_parser.add_argument(
         '--pg-path', nargs=1, metavar='PATH', type=str,
-        help="specify the postgres executable path"
+        help="specify the postgres executable path."
     )
     db_parser.add_argument(
         '--db-host', nargs=1, metavar='ADDRESS', type=str,
-        help="specify the database host address"
+        help="specify the database host address."
     )
     db_parser.add_argument(
         '--db-port', nargs=1, metavar='PORT', type=int,
-        help="specify the database port number"
+        help="specify the database port number."
     )
     db_parser.add_argument(
         '--db-ssl-mode', nargs=1, metavar='MODE', type=str,
-        help="specify the database ssl connection mode (see PostgreSQL doc)"
+        help="specify the database ssl connection mode (see PostgreSQL doc)."
     )
     db_parser.add_argument(
         '--db-max-connections', nargs=1, metavar='MAX', type=int,
         help="specify the maximum number of physical connections to the "
-        "database"
+        "database."
     )
     db_parser.add_argument(
         '--db-template', nargs=1, metavar='TEMPLATE', type=str,
-        help="specify a custom database template to create a new database"
+        help="specify a custom database template to create a new database."
     )
     # ------------ #
     #  Subparsers  #
@@ -132,57 +153,57 @@ def main():
     dbname_parser = argparse.ArgumentParser(add_help=False)
     dbname_parser.add_argument(
         'dbname', nargs=1, type=str, metavar='DATABASE',
-        help="name of the database"
+        help="name of the target database."
     )
     # ------------- #
     #  DB creation  #
     # ------------- #
     create_parser = top_level_subparsers.add_parser(
         'create',
-        help="create odoo databases",
+        help="create odoo databases.",
         parents=[dbname_parser, logging_parser, common_parser, db_parser],
         formatter_class=GNUHelpFormatter,
     )
     create_parser.add_argument(
         '-d', '--demo', action='store_true',
-        help="if specified demo data will be installed in the database"
+        help="if specified demo data will be installed in the database."
     )
     create_parser.add_argument(
         '-l', '--launch', action='store_true',
-        help="if specified, the db will be launched after it is created"
+        help="if specified, the db will be launched after it is created."
     )
     # ---------------- #
     #  DB duplication  #
     # ---------------- #
     dupe_parser = top_level_subparsers.add_parser(
         'duplicate',
-        help="duplicate odoo databases",
+        help="duplicate odoo databases.",
         formatter_class=GNUHelpFormatter,
     )
     dupe_parser.add_argument(
         'source', nargs=1, type=str, metavar='SOURCE',
-        help="name of the source database"
+        help="name of the source database to duplicate."
     )
     dupe_parser.add_argument(
         'destination', nargs=1, type=str, metavar='DESTINATION',
-        help="name of the destination database"
+        help="name of the destination database to duplicate to."
     )
     # --------- #
     #  DB dump  #
     # --------- #
     dump_parser = top_level_subparsers.add_parser(
         'dump',
-        help="dump odoo databases",
+        help="dump odoo databases.",
         parents=[dbname_parser, logging_parser],
         formatter_class=GNUHelpFormatter,
     )
     dump_parser.add_argument(
         'path', nargs=1, type=str, metavar='PATH',
-        help="path where the dump should be stored"
+        help="path where the dump should be stored."
     )
     dump_parser.add_argument(
         '-f', '--format', choices=['gzip', 'raw', 'sql'],
-        help="one of three available formats for the dump file"
+        help="one of three available formats for the dump file."
     )
     # Defaults
     dump_parser.set_defaults(format='gzip')
@@ -191,60 +212,75 @@ def main():
     # ------------ #
     restore_parser = top_level_subparsers.add_parser(
         'restore',
-        help="restore odoo databases",
+        help="restore odoo databases.",
         parents=[dbname_parser, logging_parser],
         formatter_class=GNUHelpFormatter,
     )
     restore_parser.add_argument(
         'path', nargs=1, type=str, metavar='PATH',
-        help="path of the dump to restore"
+        help="path of the dump to restore."
     )
     restore_parser.add_argument(
-        '--dbuuid', type=str, help="dbuuid of the db to restore"
+        '--dbuuid', type=str, help="dbuuid of the db to restore."
+    )
+    restore_parser.add_argument(
+        '--filestore', type=str, metavar='PATH',
+        help="path to the filestore of the database to restore."
     )
     # -------------- #
     #  Cron Process  #
     # -------------- #
     cron_parser = top_level_subparsers.add_parser(
         'cron',
-        help="launch a cron server for running all cron jobs",
+        help="launch a cron server for running all cron jobs.",
         formatter_class=GNUHelpFormatter,
     )
     cron_parser.add_argument(
-        '-w', '--workers', nargs=1,
-        help="amount of workers to assign to this cron server (default: 2)"
+        '-w', '--workers', nargs=1, default=2, type=int,
+        help="specify the number of workers, if 0, prefork mode will be "
+        "disabled."
     )
     cron_parser.add_argument(
         '--pid-file', nargs=1, type=str, metavar='PATH',
-        help="file where the pid of the cron server will be stored"
+        help="file where the pid of the cron server will be stored."
     )
-    # TODO: not one, but different --limit-* commands, maybe make a parser
-    # and inherit in subparsers
+    cron_parser.add_argument(
+        '--limit-virt-count', nargs=1, type=int, metavar='RECORDS',
+        help="Force a limit on the maximum number of records kept in the "
+        "virtual osv_memory tables. The default is False, which means no "
+        "count-based limit."
+    )
+    cron_parser.add_argument(
+        '--limit-virt-age', nargs=1, type=float, metavar='HOURS',
+        help="Force a limit on the maximum age of records kept in the "
+        "virtual osv_memory tables. This is a decimal value expressed in "
+        "hours, the default is 1 hours."
+    )
     # ------------ #
     #  Migrations  #
     # ------------ #
     migration_parser = top_level_subparsers.add_parser(
         'migrate',
-        help="migrate the specified odoo database",
+        help="migrate odoo databases.",
         parents=[dbname_parser, logging_parser],
         formatter_class=GNUHelpFormatter,
     )
     migration_parser.add_argument(
         'path', nargs=1, type=str, metavar='PATH',
-        help="path to the migration scripts for the specified database"
+        help="path to the migration scripts for the specified database."
     )
     # --------- #
     #  Imports  #
     # --------- #
     import_parser = top_level_subparsers.add_parser(
         'import',
-        help="import csv data into odoo",
+        help="import csv data into odoo databases.",
         parents=[dbname_parser, logging_parser, common_parser],
         formatter_class=GNUHelpFormatter,
     )
     import_parser.add_argument(
         'path', nargs=1, type=str, metavar='PATH',
-        help="path to the csv file to import into the odoo database"
+        help="path to the csv file to import into the odoo database."
     )
     import_parser.add_argument(
         # In master, this argument takes a file where intermediate states are
@@ -253,62 +289,63 @@ def main():
         # to litter the user's file system
         '-p', '--import-partial', action='store_true',
         help="import in incremental steps, primarily used to import big "
-        "amounts of data"
+        "amounts of data."
     )
     # --------------------- #
     #  Module installation  #
     # --------------------- #
     install_parser = top_level_subparsers.add_parser(
         'install',
-        help="install odoo modules",
+        help="install odoo modules.",
         parents=[dbname_parser, logging_parser, common_parser],
         formatter_class=GNUHelpFormatter,
     )
     install_parser.add_argument(
         'modules', nargs='+', metavar='MODULE', type=str,
-        help="space-separated list of modules to be installed"
+        help="space-separated list of modules to be installed."
     )
     install_parser.add_argument(
         '-d', '--demo', action='store_true',
         help="whether the specified modules should be installed with demo "
-        "data or not"
+        "data or not."
     )
     # ---------------- #
     #  Module updates  #
     # ---------------- #
     update_parser = top_level_subparsers.add_parser(
         'update',
-        help="update odoo modules",
+        help="update odoo modules.",
         parents=[dbname_parser, logging_parser, common_parser],
         formatter_class=GNUHelpFormatter,
     )
     update_parser.add_argument(
         'modules', nargs='+', metavar='MODULE', type=str,
-        help="space-separated list of modules to be updated"
+        help="space-separated list of modules to be updated."
     )
     # --------------------------- #
     #  Standalone test execution  #
     # --------------------------- #
     test_parser = top_level_subparsers.add_parser(
-        'test', help="execute specific unit tests",
+        'test', help="execute specific unit tests.",
         parents=[logging_parser, common_parser],
         formatter_class=GNUHelpFormatter,
     )
     test_parser.add_argument(
         # Equivalent of +tag
         'tag', nargs='*', type=str, metavar='TAG',
-        help="only run tests with the specified tags"
+        help="only run tests with the specified tags, if no tags are "
+        "specified, run the tests with tags 'standard'."
     )
     test_parser.add_argument(
         # Print the test results in a more user-friendly format, current format
         # is hard to read (but is still okay for the runbot I guess...)
         '-p', '--pretty-print', action='store_true',
-        help="print the test results in a human-readable format"
+        help="print the test results in a human-readable format."
     )
     test_parser.add_argument(
         # Equivalent of -tag
         '-e', '--exclude', type=str, metavar='TAG', action='append',
-        help="exclude tests with these tags when running the tests suite"
+        help="exclude tests with these tags when running the tests suite."
     )
     test_parser.add_argument(
         # Stop execution of the tests at the first failure, this could be
@@ -316,65 +353,63 @@ def main():
         # if I'm debugging my code I don't need to see 50 failures, I can just
         # see one and fix as I go
         '-f', '--fail-fast', action='store_true',
-        help="terminate the test execution upon first failure"
+        help="terminate the test execution upon first failure, whether it is "
+        "an error or an actual failure."
     )
     test_parser.add_argument(
         '-s', '--save', metavar='PATH', type=str,
-        help="save the test results to the specified file"
+        help="save the test results to the specified file."
     )
     # -------------- #
     #  Translations  #
     # -------------- #
     translation_parser = top_level_subparsers.add_parser(
-        'translate', help="tools for handling translations in odoo",
+        'translate', help="tools for handling translations in odoo.",
         parents=[dbname_parser, logging_parser, common_parser],
         formatter_class=GNUHelpFormatter,
     )
     translation_subparsers = translation_parser.add_subparsers(
-        help='translation toolset help'
+        help="translate subcommand help."
     )
     # Load subcommand
     t_load_parser = translation_subparsers.add_parser(
-        'load', help="load a translation into the specified database",
+        'load', help="load a translation into the specified database.",
         formatter_class=GNUHelpFormatter,
     )
     t_load_parser.add_argument(
         'language', nargs=1, type=str, metavar='LANG',
-        help="language to be loaded"
+        help="language for which translations will be loaded."
     )
     # Import subcommand
     t_import_parser = translation_subparsers.add_parser(
-        'import', help="import translations",
+        'import', help="import translations.",
         formatter_class=GNUHelpFormatter,
     )
     t_import_parser.add_argument(
         'language', nargs=1, type=str, metavar='LANG',
-        help="language for which translations will be imported"
+        help="language for which translations will be imported."
     )
     t_import_parser.add_argument(
         'infile', nargs=1, type=str, metavar='PATH',
-        help="path to the PO/CSV file containing the translations"
+        help="path to the PO/CSV file containing the translations."
     )
     t_import_parser.add_argument(
         '-o', '--overwrite', action='store_true',
         help="if specified, translations in the database will be overwritten "
-        "for those found in the input file"
+        "by those found in the input file."
     )
     # Export subcommand
     t_export_parser = translation_subparsers.add_parser(
-        'export', help="export translations",
+        'export', help="export translations.",
         formatter_class=GNUHelpFormatter,
     )
     t_export_parser.add_argument(
         'language', nargs=1, type=str, metavar='LANG',
-        help="language for which translations will be exported"
+        help="language for which translations will be exported."
     )
     t_export_parser.add_argument(
         'outfile', nargs=1, type=str, metavar='PATH',
-        help="path to where the exported records will be stored"
-    )
-    t_export_parser.add_argument(
-        '-t', '--template', action='store_true', help="???"
+        help="path to where the exported records will be stored."
     )
     # ------- #
     #  Serve  #
@@ -382,182 +417,208 @@ def main():
     serve_parser = top_level_subparsers.add_parser(
         'serve',
         parents=[common_parser, logging_parser, db_parser],
-        help="launch an odoo server",
+        help="launch an odoo server.",
         formatter_class=GNUHelpFormatter
     )
     serve_parser.add_argument(
         '-i', '--init', type=str, metavar='MODULE', action='append',
-        help="space-separated list of modules to install during server launch"
+        help="specify a module to install during server initialization. "
+        "This option is repetitive, specify it multiple times to install "
+        "multiple different modules."
     )
     serve_parser.add_argument(
         '-u', '--update', type=str, metavar='MODULE', action='append',
-        help="space-separated list of modules to update during server launch"
+        help="specify a module to update during server initialization. "
+        "This option is repetitive, specify it multiple times to update "
+        "multiple different modules."
     )
     serve_parser.add_argument(
         '-l', '--load', type=str, metavar='MODULE', action='append',
-        help="space-separated list of server-wide modules"
+        help="specify a module to install server-wide, this module will be "
+        "available to all databases running on the server. This option is "
+        "repetitive, specify it multiple times to load multiple different "
+        "modules."
     )
     serve_parser.add_argument(
         '--interface-address', nargs=1, type=str, metavar='ADDRESS',
-        help="IPv4 address for the HTTP/XMLRPC interface"
+        help="IP address for the HTTP/XMLRPC interface."
     )
     serve_parser.add_argument(
         '-P', '--proxy-mode', action='store_true',
-        help="something something reverse proxy"
+        help="activate reverse proxy WSGI wrappers (headers rewriting), only "
+        "enable this when running behind a trusted web proxy!"
     )
     serve_parser.add_argument(
         '-p', '--port', nargs=1, type=int, metavar='PORT',
-        help="HTTP port for the server"
+        help="HTTP port for the server."
     )
     serve_parser.add_argument(
         '--longpolling-port', nargs=1, type=int, metavar='PORT',
-        help="longpolling port for the server"
+        help="longpolling port for the server."
     )
     serve_parser.add_argument(
         '-d', '--database', nargs=1, type=str, metavar='DATABASE',
-        help="database to select or create if it doesn't exist"
+        help="database to select or create if it doesn't exist."
     )
     serve_parser.add_argument(
         '-f', '--db-filter', nargs=1, type=str, metavar='REGEX',
-        help="databases to make available"
+        help="use a regex to select databases to make available."
     )
     serve_parser.add_argument(
         '-n', '--no-database-list', action='store_true',
-        help="don't show list of databases through Web UI"
+        help="do not show list of databases through Web UI."
     )
     serve_parser.add_argument(
         '-D', '--dev', action='append',
-        choices=[
-            # TODO: Re-parse this later on and remove duplicates
-            'pudb', 'wdb', 'ipdb', 'pdb', 'all', 'reload', 'qweb',
-            'werkzeug', 'xml'
-        ],
-        help="enable developer mode"
+        choices=['all', 'reload', 'qweb', 'werkzeug', 'xml', 'python'],
+        help="enable developer developer tools, if python is selected, a "
+        "debugger other than python's default can be chosen using the "
+        "--debugger option."
+    )
+    serve_parser.add_argument(
+        '--debugger', choices=['pdb', 'ipdb', 'pudb'],
+        help="debugger to be used in conjunction with the --dev option, if "
+        "--dev is not specified, it will have no effect."
     )
     serve_parser.add_argument(
         '-w', '--without-demo', type=str, metavar='MODULE', action='append',
-        help="disable loading demo data for modules to be installed"
+        help="disable loading demo data for modules to be installed."
     )
     serve_parser.add_argument(
         '--pid-file', nargs=1, metavar='PATH', type=str,
-        help="file where the server pid will be stored"
+        help="file where the server pid will be stored."
     )
     # Advanced options
     serve_parser.add_argument(
-        '--limit-virt-count', nargs=1, type=int, metavar='RECORDS',
-        help="Force a limit on the maximum number of records kept in the "
-        "virtual osv_memory tables. The default is False, which means no "
-        "count-based limit."
+        '--limit-virt-count', nargs=1, type=int, metavar='RECORDS', default=-1,
+        help="force a limit on the maximum number of records kept in the "
+        "virtual osv_memory tables."
     )
     serve_parser.add_argument(
-        '--limit-virt-age', nargs=1, type=float, metavar='HOURS',
-        help="Force a limit on the maximum age of records kept in the "
+        '--limit-virt-age', nargs=1, type=float, metavar='HOURS', default=1,
+        help="force a limit on the maximum age of records kept in the "
         "virtual osv_memory tables. This is a decimal value expressed in "
-        "hours, the default is 1 hours."
+        "hours."
     )
     serve_parser.add_argument(
-        '--max-cron-threads', nargs=1, type=int, metavar='THREADS',
-        help="Maximum number of threads processing concurrently cron jobs "
-        "(default 2)."
+        '--max-cron-threads', nargs=1, type=int, metavar='THREADS', default=2,
+        help="maximum number of threads processing concurrently cron jobs."
     )
     serve_parser.add_argument(
         '--unaccent', action='store_true',
-        help="Use the unaccent function provided by the database"
-        "when available"
+        help="use the unaccent function provided by the database"
+        "when available."
     )
     serve_parser.add_argument(
         '--geoip-database', nargs=1, type=str, metavar='PATH',
-        help="Absolute path to the GeoIP database file."
+        help="absolute path to the GeoIP database file."
     )
     # SMTP options
     serve_parser.add_argument(
         '--email-from', nargs=1, type=str, metavar='EMAIL',
-        help="specify the SMTP email address for sending email"
+        help="specify the SMTP email address for sending email."
     )
     serve_parser.add_argument(
         '--smtp', nargs=1, type=str, metavar='ADDRESS',
-        help="specify the SMTP server address for sending email"
+        help="specify the SMTP server address for sending email."
     )
     serve_parser.add_argument(
         '--smtp-port', nargs=1, type=int, metavar='PORT',
-        help="specify the SMTP port"
+        help="specify the SMTP port."
     )
     serve_parser.add_argument(
         '--smtp-ssl', action='store_true',
-        help="if specified, SMTP connections will be encrypted with SSL"
+        help="if specified, SMTP connections will be encrypted with SSL."
     )
     serve_parser.add_argument(
         '--smtp-user', nargs=1, type=str, metavar='USER',
-        help="specify the SMTP username for sending email"
+        help="specify the SMTP username for sending email."
     )
     serve_parser.add_argument(
-        '--smtp-password', nargs=1, type=str, metavar='PASSWORD',
-        help="specify the SMTP password for sending email"
+        '--smtp-password', action=PasswordAction,
+        help="specify the SMTP password for sending email."
     )
     # Multi-processing, POSIX only
     if os.name == 'posix':
         serve_parser.add_argument(
             '--workers', nargs=1, type=int, metavar='WORKERS',
-            help="Specify the number of workers, 0 to disable prefork mode."
+            help="specify the number of workers, 0 to disable prefork mode."
         )
         # Different limits
         serve_parser.add_argument(
             '--limit-memory-soft', nargs=1, type=str, metavar='BYTES',
-            help="Maximum allowed virtual memory per worker, when reached the "
-            "worker will be reset after the current request (default 2GiB)"
+            help="maximum allowed virtual memory per worker, when reached the "
+            "worker will be reset after the current request.",
+            default='2G'
         )
         serve_parser.add_argument(
             '--limit-memory-hard', nargs=1, type=str, metavar='BYTES',
-            help="Maximum allowed virtual memory per worker, when reached, "
-            "memory allocation will fail (default 2.5GiB)"
+            help="maximum allowed virtual memory per worker, when reached, "
+            "memory allocation will fail.", default='2.5G'
         )
         serve_parser.add_argument(
             '--limit-time-cpu', nargs=1, type=int, metavar='SECONDS',
-            help="Maximum allowed CPU time per request in seconds (default 60)"
+            help="maximum allowed CPU time per request in seconds.",
+            default=60
         )
         serve_parser.add_argument(
             '--limit-time-real', nargs=1, type=int, metavar='SECONDS',
-            help="Maximum allowed real time per request in seconds "
-            "(default 120)"
+            help="maximum allowed real time per request in seconds ",
+            default=120
         )
         serve_parser.add_argument(
             '--limit-time-real-cron', nargs=1, type=int, metavar='SECONDS',
-            help="Maximum allowed real time per cron job in seconds "
-            "(default --limit-time-real), set to 0 for no limit"
+            help="maximum allowed real time per cron job in seconds, "
+            "set to 0 for no limit.",
+            default=serve_parser.get_default('limit-time-real')
         )
         serve_parser.add_argument(
             '--limit-request', nargs=1, type=int, metavar='REQUESTS',
-            help="Maximum number of request to be processed per worker "
-            "(default 8192)"
+            help="maximum number of request to be processed per worker.",
+            default=8192
         )
     # --------------- #
     #  Configuration  #
     # --------------- #
     config_parser = top_level_subparsers.add_parser(
         'config',
-        help="set up your Odoo configuration",
+        help="manage your .odoorc configuration.",
         formatter_class=GNUHelpFormatter,
     )
-    config_parser.add_argument(
-        'setting', nargs=1, type=str, metavar='SETTING',
-        help="setting to modify"
+    config_subparser = config_parser.add_subparsers(
+        help="config subcommand help."
     )
-    # Just to avoid any shenanigans
-    ex_group_config = config_parser.add_mutually_exclusive_group()
-    ex_group_config.add_argument(
-        'new_val', nargs='?', type=str, metavar='VALUE', default=None,
-        help="new value for the specified setting"
+    get_parser = config_subparser.add_parser(
+        'get',
+        help="display settings from your .odoorc.",
+        formatter_class=GNUHelpFormatter,
     )
-    ex_group_config.add_argument(
-        '-e', '--edit', action='store_true',
-        help="open the settings file with the preferred text editor"
+    get_parser.add_argument(
+        'setting', nargs=1, type=str, help="setting to display, if `all` is "
+        "specified, all settings within the local .odoorc will be displayed."
     )
+    set_parser = config_subparser.add_parser(
+        'set',
+        help="modify settings in your .odoorc.",
+        formatter_class=GNUHelpFormatter,
+    )
+    set_parser.add_argument(
+        'setting', nargs=1, type=str, help="setting to be modified."
+    )
+    set_parser.add_argument(
+        'value', nargs=1, type=str, help="new value of the specified setting."
+    )
+    edit_parser = config_subparser.add_parser(
+        'edit',
+        help="open your .odoorc with your preferred text editor."
+    )
+    edit_parser.add_argument(action='store_true', dest='edit')
     # ------------ #
     #  Deployment  #
     # ------------ #
     deploy_parser = top_level_subparsers.add_parser(
         'deploy',
-        help="deploy a module on an Odoo instance",
+        help="deploy a module on an odoo instance.",
         formatter_class=GNUHelpFormatter,
     )
     deploy_parser.add_argument(
@@ -574,7 +635,7 @@ def main():
     # ---------- #
     scaffold_parser = top_level_subparsers.add_parser(
         'scaffold',
-        help="create an empty module following a template",
+        help="create an empty module following a template.",
         formatter_class=GNUHelpFormatter,
     )
     scaffold_parser.add_argument(
@@ -594,7 +655,7 @@ def main():
     # ----------------- #
     shell_parser = top_level_subparsers.add_parser(
         'shell',
-        help="activate the shell interface for the specified database",
+        help="launch the shell interface",
         parents=[common_parser, logging_parser],
         formatter_class=GNUHelpFormatter,
     )
@@ -606,9 +667,25 @@ def main():
         '-r', '--repl', choices=['python', 'ipython', 'ptpython'],
         metavar='REPL', help="the repl to be used for the shell session"
     )
-    shell_parser.add_argument(
-        '-s', '--script', type=str, metavar='PATH',
-        help="specify a python script to execute through the odoo shell"
+    # ------------------ #
+    #  Script execution  #
+    # ------------------ #
+    exec_parser = top_level_subparsers.add_parser(
+        'exec', help="execute an odoo script.",
+        parents=[common_parser, logging_parser],
+        formatter_class=GNUHelpFormatter,
+    )
+    exec_parser.add_argument(
+        'script', type=str, metavar='PATH',
+        help="path of the script to be executed"
+    )
+    exec_parser.add_argument(
+        '-d', '--database', type=str, metavar='DATABASE',
+        help="name of the database to run the script on"
+    )
+    exec_parser.add_argument(
+        '-s', '--shell-mode', action='store_true',
+        help="run the script within the shell environment"
     )
 
     # Parse them args
