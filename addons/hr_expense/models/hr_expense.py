@@ -530,7 +530,6 @@ class HrExpenseSheet(models.Model):
             employee = self.env['hr.employee'].browse(vals['employee_id'])
             users = self._get_users_to_subscribe(employee=employee) - self.env.user
             self.env['mail.followers']._add_follower_command(self._name, self.ids, users.mapped('partner_id'), {})
-        self.check_consistency()
         return sheet
 
     @api.multi
