@@ -72,14 +72,8 @@ class StockQuant(models.Model):
     @api.constrains('quantity')
     def check_quantity(self):
         for quant in self:
-            if float_compare(quant.quantity, 1, precision_rounding=quant.product_uom_id.rounding) > 0 and quant.lot_id and quant.product_id.tracking == 'serial':
+            if float_compare(quant.quantity, 1, precision_rounding=quant.product_uom_id.rounding) > 0 and quant.lot_id and quant.product_id.tracking == 'serial' and quant.location_id.usage == 'internal':
                 raise ValidationError(_('A serial number should only be linked to a single product.'))
-
-    @api.constrains('in_date', 'lot_id')
-    def check_in_date(self):
-        for quant in self:
-            if quant.in_date and not quant.lot_id:
-                raise ValidationError(_('An incoming date cannot be set to an untracked product.'))
 
     @api.constrains('location_id')
     def check_location_id(self):
