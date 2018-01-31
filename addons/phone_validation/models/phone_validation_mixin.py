@@ -10,7 +10,7 @@ class PhoneValidationMixin(models.AbstractModel):
 
     def _phone_get_country(self):
         if 'country_id' in self:
-            return self.country_id
+            return self.country_id or self.env.user.company_id.country_id
         return self.env.user.company_id.country_id
 
     def _phone_get_always_international(self):

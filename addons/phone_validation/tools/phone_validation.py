@@ -26,7 +26,7 @@ try:
 
         return phone_nbr
 
-    def phone_format(number, country_code, country_phone_code, always_international=True, raise_exception=True):
+    def phone_format(number, country_code, country_phone_code, always_international=True, raise_exception=False):
         """ Format the given phone number according to the localisation and international options.
             :param number: number to convert
             :param country_code: the ISO country code in two chars
