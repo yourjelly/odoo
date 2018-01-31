@@ -331,7 +331,15 @@ class res_users(osv.osv):
             cr, user, args, offset=offset, limit=limit, order=order, context=context, count=count,
             access_rights_uid=access_rights_uid)
 
+    def _adapt_values(vals):
+        """ This method adapt the values of vals provided by create & write"""
+        if vals.get('login'):
+            # strip the login
+            vals['login'] = vals['login'].strip() # Remove in master plz
+        return vals
+
     def create(self, cr, uid, vals, context=None):
+        vals = self._adapt_values(vals)
         user_id = super(res_users, self).create(cr, uid, vals, context=context)
         user = self.browse(cr, uid, user_id, context=context)
         user.partner_id.active = user.active
@@ -343,6 +351,7 @@ class res_users(osv.osv):
         if not hasattr(ids, '__iter__'):
             ids = [ids]
 
+        vals = self._adapt_values(vals)
         if values.get('active') == False:
             for current_id in ids:
                 if current_id == SUPERUSER_ID:
