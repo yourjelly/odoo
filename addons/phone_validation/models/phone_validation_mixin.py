@@ -21,10 +21,11 @@ class PhoneValidationMixin(models.AbstractModel):
     def phone_format(self, number, country=None, company=None):
         country = country or self._phone_get_country()
         always_international = company.phone_international_format == 'prefix' if company else self._phone_get_always_international()
+        country2 = self.env.user.company_id.country_id
         return phone_validation.phone_format(
             number,
             country.code if country else None,
-            country.phone_code if country else None,
+            country2.phone_code if country2 else None,
             always_international=always_international,
-            raise_exception=True
+            raise_exception=False
         )
