@@ -331,7 +331,7 @@ class res_users(osv.osv):
             cr, user, args, offset=offset, limit=limit, order=order, context=context, count=count,
             access_rights_uid=access_rights_uid)
 
-    def _adapt_values(vals):
+    def _adapt_values(self, vals):
         """ This method adapt the values of vals provided by create & write"""
         if vals.get('login'):
             # strip the login
