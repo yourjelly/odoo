@@ -202,11 +202,9 @@ def main():
         help="path where the dump should be stored."
     )
     dump_parser.add_argument(
-        '-f', '--format', choices=['gzip', 'raw', 'sql'],
+        '-f', '--format', choices=['gzip', 'raw', 'sql'], default='gzip',
         help="one of three available formats for the dump file."
     )
-    # Defaults
-    dump_parser.set_defaults(format='gzip')
     # ------------ #
     #  DB restore  #
     # ------------ #
