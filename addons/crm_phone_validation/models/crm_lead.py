@@ -17,3 +17,11 @@ class Lead(models.Model):
     def _onchange_mobile_validation(self):
         if self.mobile:
             self.mobile = self.phone_format(self.mobile)
+
+    @api.model
+    def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
+        # The company_id field is needed for phone.validation.mixin but was
+        # not added in the view, which means it is not accessible in onchanges.
+        res = super(Lead, self).fields_view_get(view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
+        res['fields']['company_id'] = ???
+        return res
