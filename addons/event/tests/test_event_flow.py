@@ -7,6 +7,7 @@ from odoo.addons.event.tests.common import TestEventCommon
 from odoo.exceptions import ValidationError, UserError, AccessError
 from odoo.tools import mute_logger
 from odoo.fields import Datetime
+from odoo.tests import Form
 try:
     from unittest.mock import patch
 except ImportError:
@@ -19,36 +20,40 @@ class TestEventFlow(TestEventCommon):
     def test_00_basic_event_auto_confirm(self):
         """ Basic event management with auto confirmation """
         # EventUser creates a new event: ok
-        test_event = self.Event.sudo(self.user_eventmanager).create({
-            'name': 'TestEvent',
-            'auto_confirm': True,
-            'date_begin': datetime.datetime.now() + relativedelta(days=-1),
-            'date_end': datetime.datetime.now() + relativedelta(days=1),
-            'seats_max': 2,
-            'seats_availability': 'limited',
-        })
+
+        test_event_form = Form(self.Event.sudo(self.user_eventmanager))
+        test_event_form.name = 'TestEvent'
+        test_event_form.auto_confirm = True
+        test_event_form.date_begin = datetime.datetime.now() + relativedelta(days=-1)
+        test_event_form.date_end = datetime.datetime.now() + relativedelta(days=1)
+        test_event_form.seats_max = 2
+        test_event_form.seats_availability = 'limited'
+        test_event = test_event_form.save()
+
         self.assertEqual(test_event.state, 'confirm', 'Event: auto_confirmation of event failed')
 
-        # EventUser create registrations for this event
-        test_reg1 = self.Registration.sudo(self.user_eventuser).create({
-            'name': 'TestReg1',
-            'event_id': test_event.id,
-        })
+        test_reg_form = Form(self.Registration.sudo(self.user_eventuser))
+        test_reg_form.name = 'TestReg1'
+        test_reg_form.event_id = test_event
+        test_reg1 = test_reg_form.save()
+
         self.assertEqual(test_reg1.state, 'open', 'Event: auto_confirmation of registration failed')
         self.assertEqual(test_event.seats_reserved, 1, 'Event: wrong number of reserved seats after confirmed registration')
-        test_reg2 = self.Registration.sudo(self.user_eventuser).create({
-            'name': 'TestReg2',
-            'event_id': test_event.id,
-        })
+
+        test_reg_form2 = Form(self.Registration.sudo(self.user_eventuser))
+        test_reg_form2.name = 'TestReg2'
+        test_reg_form2.event_id = test_event
+        test_reg2 = test_reg_form2.save()
+
         self.assertEqual(test_reg2.state, 'open', 'Event: auto_confirmation of registration failed')
         self.assertEqual(test_event.seats_reserved, 2, 'Event: wrong number of reserved seats after confirmed registration')
 
         # EventUser create registrations for this event: too much registrations
         with self.assertRaises(ValidationError):
-            self.Registration.sudo(self.user_eventuser).create({
-                'name': 'TestReg3',
-                'event_id': test_event.id,
-            })
+            test_reg3 = Form(self.Registration.sudo(self.user_eventuser))
+            test_reg3.name = 'TestReg3'
+            test_reg3.event_id = test_event
+            test_reg3.save()
 
         # EventUser validates registrations
         test_reg1.button_reg_close()
@@ -70,21 +75,22 @@ class TestEventFlow(TestEventCommon):
         """ Avanced event flow: no auto confirmation, manage minimum / maximum
         seats, ... """
         # EventUser creates a new event: ok
-        test_event = self.Event.sudo(self.user_eventmanager).create({
-            'name': 'TestEvent',
-            'date_begin': datetime.datetime.now() + relativedelta(days=-1),
-            'date_end': datetime.datetime.now() + relativedelta(days=1),
-            'seats_max': 10,
-        })
+        test_event_form = Form(self.Event.sudo(self.user_eventmanager))
+        test_event_form.name = 'TestEvent'
+        test_event_form.date_begin = datetime.datetime.now() + relativedelta(days=-1)
+        test_event_form.date_end = datetime.datetime.now() + relativedelta(days=1)
+        test_event_form.seats_max = 10
+        test_event = test_event_form.save()
         self.assertEqual(
             test_event.state, 'draft',
             'Event: new event should be in draft state, no auto confirmation')
 
         # EventUser create registrations for this event -> no auto confirmation
-        test_reg1 = self.Registration.sudo(self.user_eventuser).create({
-            'name': 'TestReg1',
-            'event_id': test_event.id,
-        })
+        test_reg_form = Form(self.Registration.sudo(self.user_eventuser))
+        test_reg_form.name = 'TestReg1',
+        test_reg_form.event_id = test_event
+        test_reg1 = test_reg_form.save()
+
         self.assertEqual(
             test_reg1.state, 'draft',
             'Event: new registration should not be confirmed with auto_confirmation parameter being False')
