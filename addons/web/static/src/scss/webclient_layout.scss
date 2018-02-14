@@ -30,6 +30,7 @@
     }
 
     > .o_main {
+        direction: ltr;
         flex: 1 1 auto;
         display: flex;
         min-height: 0; // Allow flex to shrink this element as much as it wants
@@ -149,6 +150,7 @@
                 flex: 0 0 auto;
             }
             .o_content {
+                direction: ltr;
                 flex: 1 1 auto;
                 height: 100%;
                 overflow: auto;
