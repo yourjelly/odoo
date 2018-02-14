@@ -154,7 +154,7 @@ class MrpWorkorder(models.Model):
     def _compute_working_users(self):
         """ Checks whether the current user is working, all the users currently working and the last user that worked. """
         for order in self:
-            order.working_user_ids = [(4, order.id) for order in order.time_ids.filtered(lambda time: not time.date_end).sorted('date_start').mapped('user_id')]
+            order.working_user_ids = [(4, productivity.id) for productivity in order.time_ids.filtered(lambda time: not time.date_end).sorted('date_start').mapped('user_id')]
             if order.working_user_ids:
                 order.last_working_user_id = order.working_user_ids[-1]
             elif order.time_ids:
