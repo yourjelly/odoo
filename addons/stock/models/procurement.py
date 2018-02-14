@@ -229,7 +229,6 @@ class ProcurementOrder(models.Model):
                 return True
             else:
                 self.message_post(body=_('All stock moves have been cancelled for this procurement.'))
-                # TDE FIXME: strange that a check method actually modified the procurement...
                 self.write({'state': 'cancel'})
                 return False
         return super(ProcurementOrder, self)._check()

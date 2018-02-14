@@ -920,8 +920,13 @@ class ProcurementOrder(models.Model):
         if self.purchase_line_id:
             if not self.move_ids:
                 return False
-            if all(move.state in ('done', 'cancel') for move in self.move_ids) and any(move.state == 'done' for move in self.move_ids):
+            if all(m.state in ('done', 'cancel') for m in self.move_ids) and any(m.state == 'done' for m in self.move_ids):
                 return True
+            else:
+                if all(move.state == 'cancel' for move in self.move_ids):
+                    self.message_post(body=_('All stock moves have been cancelled for this procurement.'))
+                    self.write({'state': 'cancel'})
+                return False
         return super(ProcurementOrder, self)._check()
 
     def _get_purchase_schedule_date(self):
