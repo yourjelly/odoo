@@ -3,6 +3,7 @@ $o-mail-thread-window-zindex: $zindex-modal + 1 !default;
 .o_thread_window {
     @include o-flex-display;
     @include o-flex-flow(column, nowrap);
+    direction: $lng-direction;
     position: fixed;
     width: $o-mail-thread-window-width;
     max-width: 100%;
