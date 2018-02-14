@@ -3,6 +3,7 @@ $o-mail-chat-window-zindex: $zindex-modal + 1 !default;
 .o_chat_window {
     @include o-flex-display;
     @include o-flex-flow(column, nowrap);
+    direction: $lng-direction;
     position: fixed;
     width: $o-mail-chat-window-width;
     max-width: 100%;
