@@ -13,6 +13,7 @@ class AccountAnalyticDefault(models.Model):
 
     sequence = fields.Integer(string='Sequence', help="Gives the sequence order when displaying a list of analytic distribution")
     analytic_id = fields.Many2one('account.analytic.account', string='Analytic Account')
+    account_id = fields.Many2one('account.account', string='Account', ondelete='cascade')
     analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags')
     product_id = fields.Many2one('product.product', string='Product', ondelete='cascade', help="Select a product which will use analytic account specified in analytic default (e.g. create new customer invoice or Sales order if we select this product, it will automatically take this as an analytic account)")
     partner_id = fields.Many2one('res.partner', string='Partner', ondelete='cascade', help="Select a partner which will use analytic account specified in analytic default (e.g. create new customer invoice or Sales order if we select this partner, it will automatically take this as an analytic account)")
@@ -27,8 +28,11 @@ class AccountAnalyticDefault(models.Model):
             raise ValidationError(_('An analytic default requires at least an analytic account or an analytic tag.'))
 
     @api.model
-    def account_get(self, product_id=None, partner_id=None, user_id=None, date=None, company_id=None):
+    def account_get(self, account_id=None, product_id=None, partner_id=None, user_id=None, date=None, company_id=None):
         domain = []
+        if account_id:
+            domain += ['|', ('account_id', '=', account_id)]
+        domain += [('account_id', '=', False)]
         if product_id:
             domain += ['|', ('product_id', '=', product_id)]
         domain += [('product_id', '=', False)]
@@ -66,7 +70,16 @@ class AccountInvoiceLine(models.Model):
     @api.onchange('product_id')
     def _onchange_product_id(self):
         res = super(AccountInvoiceLine, self)._onchange_product_id()
-        rec = self.env['account.analytic.default'].account_get(self.product_id.id, self.invoice_id.partner_id.id, self.env.uid,
+        rec = self.env['account.analytic.default'].account_get(self.account_id.id, self.product_id.id, self.invoice_id.partner_id.id, self.env.uid,
+                                                               fields.Date.today(), company_id=self.company_id.id)
+        self.account_analytic_id = rec.analytic_id.id
+        self.analytic_tag_ids = rec.analytic_tag_ids.ids
+        return res
+
+    @api.onchange('account_id')
+    def _onchange_account_id(self):
+        res = super(AccountInvoiceLine, self)._onchange_account_id()
+        rec = self.env['account.analytic.default'].account_get(self.account_id.id, self.product_id.id, self.invoice_id.partner_id.id, self.env.uid,
                                                                fields.Date.today(), company_id=self.company_id.id)
         self.account_analytic_id = rec.analytic_id.id
         self.analytic_tag_ids = rec.analytic_tag_ids.ids
@@ -74,7 +87,7 @@ class AccountInvoiceLine(models.Model):
 
     def _set_additional_fields(self, invoice):
         if not self.account_analytic_id or not self.analytic_tag_ids:
-            rec = self.env['account.analytic.default'].account_get(
+            rec = self.env['account.analytic.default'].account_get(self.account_id.id,
                 self.product_id.id, self.invoice_id.partner_id.id, self.env.uid,
                 fields.Date.today(), company_id=self.company_id.id)
             if rec:

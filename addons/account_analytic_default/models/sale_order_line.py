@@ -10,7 +10,7 @@ class SaleOrderLine(models.Model):
     @api.multi
     def _prepare_invoice_line(self, qty):
         res = super(SaleOrderLine, self)._prepare_invoice_line(qty)
-        default_analytic_account = self.env['account.analytic.default'].account_get(self.product_id.id, self.order_id.partner_id.id, self.order_id.user_id.id, fields.Date.today())
+        default_analytic_account = self.env['account.analytic.default'].account_get(res['account_id'], self.product_id.id, self.order_id.partner_id.id, self.order_id.user_id.id, fields.Date.today())
         if default_analytic_account:
             res.update({'account_analytic_id': default_analytic_account.analytic_id.id})
         return res
