@@ -21,6 +21,9 @@ var PlanAction = Widget.extend(ControlPanelMixin, {
         "click .oe_stat_button": "_onClickStatButton",
         "click .o_timesheet_plan_sale_timesheet_people_time .progress-bar": '_onClickEmployeeProgressbar',
     },
+    custom_events: {
+        'search': '_onSearch',
+    },
     init: function(parent, action, options) {
         this._super.apply(this, arguments);
         this.action = action;
@@ -59,7 +62,6 @@ var PlanAction = Widget.extend(ControlPanelMixin, {
 
         var dataset = new data.DataSetSearch(this, 'account.analytic.line');
         this.searchview = new SearchView(this, dataset, this.fields_view, options);
-        this.searchview.on('search', this, this._onSearch);
 
         var def1 = this._super.apply(this, arguments);
         var def2 = this.searchview.appendTo($("<div>")).then(function () {
@@ -213,6 +215,7 @@ var PlanAction = Widget.extend(ControlPanelMixin, {
         });
     },
     _onSearch: function (search_event) {
+        search_event.stopPropagation();
         var session = this.getSession();
         // group by are disabled, so we don't take care of them
         var result = pyeval.eval_domains_and_contexts({
