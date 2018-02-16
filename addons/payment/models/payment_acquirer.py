@@ -583,7 +583,7 @@ class PaymentTransaction(models.Model):
 
     @api.multi
     def validate_token(self, token):
-        return _consteq(token, self.transaction_key)
+        return consteq(token, self.transaction_key)
 
     @api.model
     def create(self, values):

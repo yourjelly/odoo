@@ -1495,8 +1495,9 @@
                             </div>
                         </div>
                 </div>
-                <div class="oe_structure" />
+                <div class="oe_structure" />   
             </div>
+            <script type="text/javascript" src="/payment/static/src/js/payment_wait_page.js"></script>
         </t>
     </template>
 

@@ -63,7 +63,7 @@ class PaypalController(http.Controller):
 
         Once data is validated, process it. """
         res = False
-        new_post = dict(post, cmd='_notify-validate', charset='utf-8')
+        new_post = dict(post, cmd='_notify-validate', charset='UTF-8')
         reference = post.get('item_number')
         tx = None
         if reference:
@@ -92,7 +92,11 @@ class PaypalController(http.Controller):
 
     @http.route('/payment/paypal/ipn/', type='http', auth='none', methods=['POST'], csrf=False)
     def paypal_ipn(self, **post):
-        """ Paypal IPN. """
+        """ Paypal IPN. 
+        
+        This route is never called by user, but only by Paypal to validate payment in background.
+        The user will always come back in Odoo by the route /payment/paypal/dpn, even if pdt and/or ipn is activated.
+        """
         _logger.info('Beginning Paypal IPN form_feedback with post data %s', pprint.pformat(post))  # debug
         try:
             self.paypal_validate_data(**post)
@@ -101,9 +105,18 @@ class PaypalController(http.Controller):
         return ''
 
     @http.route('/payment/paypal/dpn', type='http', auth="none", methods=['POST', 'GET'], csrf=False)
-    def paypal_dpn(self, **post):
-        """ Paypal DPN """
+    def paypal_dpn(self, token, item_number, **post):
+        """ Paypal DPN 
+        
+        The user will always come back to this route - pdt/ipn activated or not.
+        """
         _logger.info('Beginning Paypal DPN form_feedback with post data %s', pprint.pformat(post))  # debug
+        if len(post) == 0: #pdt is not activated - we just redirect user to the confirmation page
+            transaction = request.env['payment.transaction'].search([('reference', '=', item_number)])
+            if transaction.validate_token(token):
+                request.session['sale_transaction_id'] = transaction.id
+                return werkzeug.utils.redirect(transaction.paypal_return_url) #we use saved url as paypal doesn't return the return url without pdt
+        #pdt is activated: we validate data and redirect user
         return_url = self._get_return_url(**post)
         self.paypal_validate_data(**post)
         return werkzeug.utils.redirect(return_url)
@@ -115,3 +128,27 @@ class PaypalController(http.Controller):
         post.update({'payment_status': 'Cancel'}) #write ourself cancel in status post data
         request.env['payment.transaction'].sudo().form_feedback(post, 'paypal')
         return werkzeug.utils.redirect("/shop/payment")
+
+    @http.route('/payment/paypal/wait', type='http', auth="public", website=True)
+    def paypal_wait_page(self, **post):
+        """ When the user cancels its Paypal payment: GET on this route """
+        reference = post.pop('item_number', '')
+        return request.env['ir.ui.view'].render_template("payment.wait_page", {
+                'reference': reference,
+            })
+
+    @http.route('/payment/transaction_status', type='json', auth="public", website=True)
+    def payment_get_status(self, **post):
+        transaction = request.env['payment.transaction'].browse(request.session.get('sale_transaction_id'))
+
+        #if no more update needed, clear session
+        if transaction.state != 'draft':
+            request.session.update({
+                'sale_order_id': False,
+                'sale_transaction_id': False,
+                'website_sale_current_pl': False,
+            })
+
+        return {
+            'recall': transaction.state in ['draft'],
+        }

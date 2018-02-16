@@ -898,9 +898,11 @@ class WebsiteSale(http.Controller):
             order.action_cancel()
 
         # clean context and session, then redirect to the confirmation page
-        request.website.sale_reset()
-        if tx and tx.state == 'draft':
-            return request.redirect('/shop/payment')
+        if tx:
+            if tx.state != 'draft':
+                request.website.sale_reset()
+        else:
+            request.website.sale_reset()
 
         return request.redirect('/shop/confirmation')
 
