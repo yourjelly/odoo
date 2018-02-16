@@ -92,7 +92,9 @@ class AcquirerPaypal(models.Model):
     @api.multi
     def paypal_form_generate_values(self, values):
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
-
+        transaction = self.env['payment.transaction'].search([('reference', '=', values['reference'])])
+        if transaction:
+            transaction.paypal_return_url = values.get('return_url') if values.get('return_url') else False
         paypal_tx_values = dict(values)
         paypal_tx_values.update({
             'cmd': '_xclick',
@@ -109,7 +111,7 @@ class AcquirerPaypal(models.Model):
             'zip_code': values.get('partner_zip'),
             'first_name': values.get('partner_first_name'),
             'last_name': values.get('partner_last_name'),
-            'paypal_return': urls.url_join(base_url, PaypalController._return_url),
+            'paypal_return': urls.url_join(base_url, '%s?token=%s&item_number=%s' % (PaypalController._return_url, values['transaction_key'], values['reference'])),
             'notify_url': urls.url_join(base_url, PaypalController._notify_url),
             'cancel_return': urls.url_join(base_url, PaypalController._cancel_url),
             'handling': '%.2f' % paypal_tx_values.pop('fees', 0.0) if self.fees_active else False,
@@ -126,6 +128,7 @@ class TxPaypal(models.Model):
     _inherit = 'payment.transaction'
 
     paypal_txn_type = fields.Char('Transaction type')
+    paypal_return_url = fields.Char('Return url')
 
     # --------------------------------------------------
     # FORM RELATED METHODS
