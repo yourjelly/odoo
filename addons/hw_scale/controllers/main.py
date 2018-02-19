@@ -82,7 +82,11 @@ Toledo8217Protocol = ScaleProtocol(
     autoResetWeight=False,
 )
 
-# The WeightOnly
+# The WeightOnly with standard baudrate & bytesize : Scale with this protocol gives us continus output of
+# Only Weight without sending any command to scale, output doesn't require to be parsed. We will iddentify
+# each new weight with outputTerminator.
+# Tested Scales : 1.) PointDigi Scale Standard Table Top (Yes Yes Technology) (https://www.yesyestechnologies.com/007.php)
+#                 2.) Essae Bench-scale (http://www.essae.com/ds-450ss-bench-scale)
 WeightOnlyProtocol = ScaleProtocol(
     name='Weight Only Protocol',
     baudrate=9600,
@@ -91,10 +95,10 @@ WeightOnlyProtocol = ScaleProtocol(
     parity=serial.PARITY_NONE,
     timeout=1,
     writeTimeout=1,
-    weightRegexp="\x02\\s*([0-9.]+)N?\\r",
-    statusRegexp="\x02\\s*(\\?.)\\r",
-    statusParse=_toledo8217StatusParse,
-    commandDelay=0.2,
+    weightRegexp=None,
+    statusRegexp=None,
+    statusParse=None,
+    commandDelay=0,
     weightDelay=0,
     newWeightDelay=0,
     commandTerminator='',
