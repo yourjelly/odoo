@@ -161,29 +161,15 @@ ListRenderer.include({
             if (!record) {
                 return;
             }
-            var oldRowIndex = _.findIndex(oldData, {id: id});
-            var $row = self.$('.o_data_row:nth(' + oldRowIndex + ')');
-            $row.nextAll('.o_data_row').remove();
-            $row.prevAll().remove();
+            self.$('tbody').empty();
             _.each(oldData, function (rec) {
                 if (rec.id !== id) {
                     self._destroyFieldWidgets(rec.id);
                 }
             });
+            self.$('tbody').replaceWith(self._renderBody());
+            self.setRowMode(id, self.mode);
             var newRowIndex = _.findIndex(state.data, {id: id});
-            var $lastRow = $row;
-            _.each(state.data, function (record, index) {
-                if (index === newRowIndex) {
-                    return;
-                }
-                var $newRow = self._renderRow(record);
-                if (index < newRowIndex) {
-                    $newRow.insertBefore($row);
-                } else {
-                    $newRow.insertAfter($lastRow);
-                    $lastRow = $newRow;
-                }
-            });
             if (self.currentRow !== null) {
                 self.currentRow = newRowIndex;
                 return self._selectCell(newRowIndex, self.currentFieldIndex, {force: true}).then(function () {
