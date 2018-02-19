@@ -48,7 +48,7 @@ def _toledo8217StatusParse(status):
 ScaleProtocol = namedtuple(
     'ScaleProtocol',
     "name baudrate bytesize stopbits parity timeout writeTimeout weightRegexp statusRegexp "
-    "statusParse commandTerminator commandDelay weightDelay newWeightDelay "
+    "statusParse commandTerminator outputTerminator commandDelay weightDelay newWeightDelay commandSupport "
     "weightCommand zeroCommand tareCommand clearCommand emptyAnswerValid autoResetWeight")
 
 # 8217 Mettler-Toledo (Weight-only) Protocol, as described in the scale's Service Manual.
@@ -72,10 +72,38 @@ Toledo8217Protocol = ScaleProtocol(
     weightDelay=0.5,
     newWeightDelay=0.2,
     commandTerminator='',
+    outputTerminator=None,
+    commandSupport=True,
     weightCommand='W',
     zeroCommand='Z',
     tareCommand='T',
     clearCommand='C',
+    emptyAnswerValid=False,
+    autoResetWeight=False,
+)
+
+# The WeightOnly
+WeightOnlyProtocol = ScaleProtocol(
+    name='Weight Only Protocol',
+    baudrate=9600,
+    bytesize=serial.EIGHTBITS,
+    stopbits=serial.STOPBITS_ONE,
+    parity=serial.PARITY_NONE,
+    timeout=1,
+    writeTimeout=1,
+    weightRegexp="\x02\\s*([0-9.]+)N?\\r",
+    statusRegexp="\x02\\s*(\\?.)\\r",
+    statusParse=_toledo8217StatusParse,
+    commandDelay=0.2,
+    weightDelay=0,
+    newWeightDelay=0,
+    commandTerminator='',
+    outputTerminator='\r',
+    commandSupport=False,
+    weightCommand='',
+    zeroCommand='',
+    tareCommand='',
+    clearCommand=None,
     emptyAnswerValid=False,
     autoResetWeight=False,
 )
@@ -96,11 +124,13 @@ ADAMEquipmentProtocol = ScaleProtocol(
     statusRegexp=None,
     statusParse=None,
     commandTerminator="\r\n",
+    outputTerminator=None,
     commandDelay=0.2,
     weightDelay=0.5,
     newWeightDelay=5,  # AZExtra beeps every time you ask for a weight that was previously returned!
                        # Adding an extra delay gives the operator a chance to remove the products
                        # before the scale starts beeping. Could not find a way to disable the beeps.
+    commandSupport=True,
     weightCommand='P',
     zeroCommand='Z',
     tareCommand='T',
@@ -111,6 +141,7 @@ ADAMEquipmentProtocol = ScaleProtocol(
 
 
 SCALE_PROTOCOLS = (
+    WeightOnlyProtocol,
     Toledo8217Protocol,
     ADAMEquipmentProtocol, # must be listed last, as it supports no probing!
 )
@@ -155,11 +186,11 @@ class Scale(Thread):
             elif status == 'disconnected' and message:
                 _logger.warning('Disconnected Scale: '+message)
 
-    def _get_raw_response(self, connection):
+    def _get_raw_response(self, connection, protocol):
         answer = []
         while True:
             char = connection.read(1) # may return `bytes` or `str`
-            if not char:
+            if not char or protocol.outputTerminator in char:
                 break
             else:
                 answer.append(char)
@@ -227,10 +258,21 @@ class Scale(Thread):
                                                    parity=protocol.parity,
                                                    timeout=1,      # longer timeouts for probing
                                                    writeTimeout=1) # longer timeouts for probing
-                        connection.write(protocol.weightCommand + protocol.commandTerminator)
+                        if protocol.commandSupport:
+                            connection.write(protocol.weightCommand + protocol.commandTerminator)
                         time.sleep(protocol.commandDelay)
-                        answer = self._get_raw_response(connection)
-                        weight, weight_info, status = self._parse_weight_answer(protocol, answer)
+                        answer = self._get_raw_response(connection, protocol)
+                        if protocol.commandSupport:
+                            weight, weight_info, status = self._parse_weight_answer(protocol, answer)
+                        else:
+                            if answer:
+                                weight = answer
+                                status = False
+                                weight_info = 'ok'
+                            else:
+                                weight = None
+                                status = "Invalid Answer"
+
                         if status:
                             _logger.info('Probing %s: no valid answer to protocol %s', path, protocol.name)
                         else:
@@ -268,10 +310,20 @@ class Scale(Thread):
         with self.scalelock:
             p = self.protocol
             try:
-                self.device.write(p.weightCommand + p.commandTerminator)
-                time.sleep(p.commandDelay)
-                answer = self._get_raw_response(self.device)
-                weight, weight_info, status = self._parse_weight_answer(p, answer)
+                if p.commandSupport:
+                    self.device.write(p.weightCommand + p.commandTerminator)
+                    time.sleep(p.commandDelay)
+                answer = self._get_raw_response(self.device, p)
+                if p.commandSupport:
+                    weight, weight_info, status = self._parse_weight_answer(p, answer)
+                else:
+                    if answer:
+                        weight = float(answer)
+                        status = False
+                        weight_info = 'ok'
+                    else:
+                        weight = None
+                        status = "Invalid Answer"
                 if status:
                     self.set_status('error', status)
                     self.device = None
