@@ -6,6 +6,10 @@ odoo.define('payment.polling_confirmation', function(require) {
     $(document).ready(function () {
     
         var _poll_nbr = 0;
+
+        if (!document.getElementById("payment_draft_state")) {
+            return;
+        }
     
         function payment_transaction_poll_status() {
             return ajax.jsonRpc('/payment/transaction_status', 'call', {
@@ -16,7 +20,7 @@ odoo.define('payment.polling_confirmation', function(require) {
                         setTimeout(function () { payment_transaction_poll_status(); }, Math.ceil(_poll_nbr / 3) * 1000);
                     }
                     else {
-                        
+                        //Here we can notfiy of time-out
                     }
                 } else {
                     location.reload();

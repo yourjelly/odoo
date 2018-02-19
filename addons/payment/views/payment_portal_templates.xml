@@ -123,6 +123,11 @@
     </template>
 
     <template id="payment_confirmation_status">
+        <div t-if="payment_tx_id and payment_tx_id.state == 'draft'" class="alert alert-warning alert-dismissable" id="payment_draft_state">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
+            <span t-if='payment_tx_id.acquirer_id.draft_msg' t-raw="payment_tx_id.acquirer_id.draft_msg"/>
+            <span t-if='payment_tx_id.acquirer_id.post_msg' t-raw="payment_tx_id.acquirer_id.post_msg"/>
+        </div>
         <div t-if="payment_tx_id and payment_tx_id.state == 'done'" class="alert alert-success alert-dismissable">
             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
             <span t-if='payment_tx_id.acquirer_id.done_msg' t-raw="payment_tx_id.acquirer_id.done_msg"/>

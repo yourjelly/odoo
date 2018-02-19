@@ -150,5 +150,5 @@ class PaypalController(http.Controller):
             })
 
         return {
-            'recall': transaction.state in ['draft'],
+            'recall': transaction.state in ['draft']
         }
