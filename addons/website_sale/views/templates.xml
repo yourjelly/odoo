@@ -1561,7 +1561,7 @@
                         <t t-raw="order.payment_acquirer_id.error_msg"/>
                     </t>
                     <t t-if="order.payment_tx_id.state == 'authorized'">
-                        Your payment has been authorized.
+                        <t t-raw="order.payment_acquirer_id.authorized_msg"/>
                     </t>
                 </div>
                 <div class="panel-body" t-if="post_msg_plaintext">
