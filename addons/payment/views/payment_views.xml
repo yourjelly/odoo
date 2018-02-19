@@ -73,6 +73,7 @@
                                 <group>
                                     <field name="pre_msg"/>
                                     <field name="post_msg"/>
+                                    <field name="draft_msg"/>
                                     <field name="pending_msg"/>
                                     <field name="done_msg"/>
                                     <field name="cancel_msg"/>

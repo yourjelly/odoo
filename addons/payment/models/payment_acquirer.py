@@ -100,6 +100,10 @@ class PaymentAcquirer(models.Model):
     post_msg = fields.Html(
         'Thanks Message', translate=True,
         help='Message displayed after having done the payment process.')
+    draft_msg = fields.Html(
+        'Draft Message', translate=True,
+        default=lambda s: _('<i>Draft,</i> We don''t have any information concerning your payment. Please wait while we receive notification from the acquirer.'),
+        help='Message displayed, if order is in draft state, when no response has been received from acquirer.')
     pending_msg = fields.Html(
         'Pending Message', translate=True,
         default=lambda s: _('<i>Pending,</i> Your online payment has been successfully processed. But your order is not validated yet.'),

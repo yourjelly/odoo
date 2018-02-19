@@ -1540,16 +1540,20 @@
         <div class="oe_website_sale_tx_status" t-att-data-order-id="order.id">
             <div t-att-class="'panel %s' % (
                     (order.payment_tx_id.state == 'pending' and 'panel-info') or
+                    (order.payment_tx_id.state == 'draft' and 'panel-info') or
                     (order.payment_tx_id.state == 'done' and 'panel-success') or
                     (order.payment_tx_id.state == 'authorized' and 'panel-success') or
-                    'panel-danger')">
+                    'panel-danger')" 
+                t-att-id="'%s' % (
+                    (order.payment_tx_id.state == 'draft' and 'payment_draft_state') or
+                    'payment_state')">
                 <a groups="base.group_system" class="btn pull-right" target="_blank"
                         t-att-href="'/web#model=%s&amp;id=%s&amp;action=%s&amp;view_type=form' % ('payment.acquirer', order.payment_acquirer_id.id, 'payment.action_payment_acquirer')">
                     <i class="fa fa-pencil"></i>
                 </a>
                 <div class="panel-heading">
-                    <t t-if="order.payment_tx_id.state == 'pending'">
-                        <t t-raw="order.payment_acquirer_id.pending_msg"/>
+                    <t t-if="order.payment_tx_id.state == 'draft'">
+                        <t t-raw="order.payment_acquirer_id.draft_msg"/>
                     </t>
                     <t t-if="order.payment_tx_id.state == 'done'">
                         <t t-raw="order.payment_acquirer_id.done_msg"/>
