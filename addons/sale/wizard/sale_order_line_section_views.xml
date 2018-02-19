@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="view_sale_order_line_section" model="ir.ui.view">
+            <field name="name">Sale Section</field>
+            <field name="model">sale.order.line.section</field>
+            <field name="arch" type="xml">
+                <form string="Add a Section">
+                    <group>
+                        <field name="section"/>
+                        <field name="sub_total"/>
+                        <field name="page_break"/>
+                    </group>
+                    <footer>
+                        <button string="save" name="add_section_line" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-default" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_view_sale_order_line_section" model="ir.actions.act_window">
+            <field name="name">Sale Section</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sale.order.line.section</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+</odoo>
