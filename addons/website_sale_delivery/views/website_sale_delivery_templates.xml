@@ -50,11 +50,6 @@
                     </t>
                     </ul>
                 </div>
-                <a class="btn-link"
-                        groups="base.group_system"
-                        t-attf-href="/web#return_label=Website&amp;action=#{delivery_action_id}">
-                    <i class="fa fa-arrow-right" aria-hidden="true"></i> Add delivery methods
-                </a>
             </div>
         </xpath>
     </template>

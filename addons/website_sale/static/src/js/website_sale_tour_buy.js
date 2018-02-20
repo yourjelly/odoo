@@ -62,7 +62,7 @@ tour.register('shop_buy_product', {
         {
             content: "go to checkout",
             extra_trigger: '#cart_products input.js_quantity:propValue(1)',
-            trigger: 'a[href="/shop/checkout"]',
+            trigger: 'a[href*="/shop/checkout"]',
         },
         {
             content: "Confirm checkout",
