@@ -90,7 +90,7 @@
                 </a>
             </div>
         </xpath>
-        <xpath expr="//div[@id='page_content']//div[hasclass('o_portal_pdf_view')]" position="before">
+        <xpath expr="//div[@id='page_content']//div[hasclass('o_portal_html_view')]" position="before">
             <div t-if="invoice.payment_tx_ids and invoice.amount_total and not success and not error" class="o_account_payment_tx_status" t-att-data-invoice-id="invoice.id">
                <t t-call="account_payment.payment_confirmation_status">
                    <t t-set="payment_tx_id" t-value="invoice.payment_tx_id"/>
