@@ -233,7 +233,7 @@
                     </group>
                     <notebook>
                         <page string="Order Lines">
-                            <field name="order_line" mode="tree,kanban"
+                            <field name="order_line" widget="sale_section_list" mode="tree,kanban"
                                 attrs="{'readonly': [('state', 'in', ('done','cancel'))]}">
                                 <form string="Sales Order Lines">
                                     <group>

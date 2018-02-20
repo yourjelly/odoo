@@ -518,7 +518,7 @@ ListRenderer.include({
         if (this.addCreateLine) {
             var $a = $('<a href="#">').text(_t("Add an item"));
             var $td = $('<td>')
-                        .attr('colspan', this._getNumberOfCols())
+                        .attr('colspan', 2)
                         .addClass('o_field_x2many_list_row_add')
                         .append($a);
             var $tr = $('<tr>').append($td);
