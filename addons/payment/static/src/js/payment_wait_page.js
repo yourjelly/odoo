@@ -16,12 +16,7 @@ odoo.define('payment.polling_confirmation', function(require) {
             }).then(function (result) {
                 _poll_nbr += 1;
                 if(result.recall) {
-                    if (_poll_nbr < 20){
-                        setTimeout(function () { payment_transaction_poll_status(); }, Math.ceil(_poll_nbr / 3) * 1000);
-                    }
-                    else {
-                        //Here we can notfiy of time-out
-                    }
+                        setTimeout(function () { payment_transaction_poll_status(); }, Math.ceil(_poll_nbr < 20 ? _poll_nbr / 3: 6) * 1000);
                 } else {
                     location.reload();
                 }

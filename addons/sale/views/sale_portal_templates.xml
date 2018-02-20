@@ -133,6 +133,7 @@
         <t t-set="sales_order" t-value="order"/> <!-- rename to ensure breadcrumb compatibility (differentiate with purchase orders) -->
         <t t-set="invoices" t-value="[i for i in order.invoice_ids if i.state not in ['draft', 'cancel']]"/>
         <t t-set="invoices_amount" t-value="sum(i.amount_total for i in invoices)"/>
+        <script type="text/javascript" src="/payment/static/src/js/payment_wait_page.js"></script>
         <div id="optional_placeholder"></div>
         <div class="container">
           <div class="panel panel-default">

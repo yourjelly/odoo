@@ -137,7 +137,7 @@ class PaypalController(http.Controller):
 
     @http.route('/payment/transaction_status', type='json', auth="public", website=True)
     def payment_get_status(self, **post):
-        transaction = request.env['payment.transaction'].browse(request.session.get('sale_transaction_id'))
+        transaction = request.env['payment.transaction'].sudo().browse(request.session.get('sale_transaction_id'))
 
         #if no more update needed, clear session
         if transaction.state != 'draft':

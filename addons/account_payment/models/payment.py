@@ -125,6 +125,7 @@ class PaymentTransaction(models.Model):
         values = {
             'return_url': return_url,
             'partner_id': invoice.partner_id.id,
+            'transaction_key': self.transaction_key,
         }
         if render_values:
             values.update(render_values)

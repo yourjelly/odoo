@@ -70,6 +70,7 @@
 
     <template id="portal_invoice_page" name="Invoice Portal Template">
         <t t-call="portal.portal_layout">
+            <script type="text/javascript" src="/payment/static/src/js/payment_wait_page.js"></script>
             <div class="container">
                 <div class="panel panel-default">
                     <div class="panel-heading">
