@@ -27,16 +27,17 @@ $("#sidebar_content .o_timeago").each(function (index, el) {
      $(el).text(displayStr);
 });
 
-var $PDFIframe = $('iframe#invoice_pdf');
-$PDFIframe.load(function () {
-    $PDFIframe.css('height' , this.contentWindow.document.body.scrollHeight + 'px');
-    $PDFIframe.contents().find('#openFile, #pageRotateCw, #pageRotateCcw, #pageRotateCcw, #viewBookmark, #secondaryOpenFile').hide();
+var $HtmlIframe = $('iframe#invoice_html');
+$HtmlIframe.load(function () {
+    var $body = $(this).contents().find('body');
+    this.style.height = $body.scrollParent().height() + 'px';
+    $body.css('width', '100%');
 });
 
 $('a#print_invoice_report').on('click', function (ev) {
     ev.stopPropagation();
-    var pdfContent = window.frames["invoice_pdf"].contentWindow;
-    pdfContent.focus();
-    pdfContent.print();
+    var HtmlContent = window.frames["invoice_html"].contentWindow;
+    HtmlContent.focus();
+    HtmlContent.print();
 });
 });

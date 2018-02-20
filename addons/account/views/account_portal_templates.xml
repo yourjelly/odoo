@@ -106,7 +106,7 @@
                     <t t-if="error or warning" t-call="account.portal_invoice_error"/>
                     <t t-if="success and (not error and not warning)" t-call="account.portal_invoice_success"/>
                     <div class="o_portal_html_view">
-                        <iframe id="invoice_pdf" class="mt4" width="100%" height="100%" frameborder="0" scrolling="no" t-attf-src="/my/invoices/html/#{invoice.id}/#{invoice.access_token}" />
+                        <iframe id="invoice_html" class="mt4" width="100%" height="100%" frameborder="0" scrolling="no" t-attf-src="/my/invoices/html/#{invoice.id}/#{invoice.access_token}" />
                     </div>
                 </div>
             </div>
