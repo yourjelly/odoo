@@ -119,11 +119,21 @@ class PortalAccount(CustomerPortal):
         values['filename'] = '%s.%s' % (filename, 'pdf') if filename else ''
         return request.render("account.portal_invoice_page", values)
 
-    @http.route([
-        '/my/invoices/pdf/<int:invoice_id>',
-        '/my/invoices/pdf/<int:invoice_id>/<string:access_token>',
-    ], type='http', auth="public", website=True)
-    def portal_my_invoice_report(self, invoice_id, access_token=None, **kw):
+    @http.route('/my/invoices/html/<int:invoice_id>/<string:access_token>', type='http', auth="public", website=True)
+    def portal_my_invoice_html_report(self, invoice_id, access_token, **kw):
+        try:
+            invoice_sudo = self._invoice_check_access(invoice_id, access_token)
+        except AccessError:
+            return request.redirect('/my')
+
+        # html report as sudo, since it require access to taxes, payment term, ... and portal
+        # does not have those access rights.
+        html = request.env.ref('account.account_invoices').sudo().render_qweb_html([invoice_sudo.id])[0]
+        htmlhttpheaders = [('Content-Type', 'text/html')]
+        return request.make_response(html, headers=htmlhttpheaders)
+
+    @http.route('/my/invoices/pdf/<int:invoice_id>', type='http', auth="public", website=True)
+    def portal_my_invoice_report(self, invoice_id, access_token=None, html_view=None, **kw):
         try:
             invoice_sudo = self._invoice_check_access(invoice_id, access_token)
         except AccessError:

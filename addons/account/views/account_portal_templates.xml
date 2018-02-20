@@ -84,38 +84,6 @@
                                 <a class="ml4 hidden-xs hidden-sm" href="#" id="print_invoice_report" title="Print"><i class="fa fa-print"/> Print</a>
                             </div>
                         </div>
-                        <hr class="mt0 mb0"/>
-                        <div class="ml16">
-                            <div t-if="invoice.number" class="mb4">
-                                <strong>
-                                    <span t-if="invoice.type == 'out_invoice' and (invoice.state == 'open' or invoice.state == 'paid')">Invoice:</span>
-                                    <span t-if="invoice.type == 'out_invoice' and invoice.state == 'draft'">Draft Invoice:</span>
-                                    <span t-if="invoice.type == 'out_invoice' and invoice.state == 'cancel'">Cancelled Invoice:</span>
-                                    <span t-if="invoice.type == 'out_refund'">Credit Note:</span>
-                                    <span t-if="invoice.type == 'in_refund'">Vendor Credit Note:</span>
-                                    <span t-if="invoice.type == 'in_invoice'">Vendor Bill:</span>
-                                </strong>
-                                <span t-field="invoice.number"/>
-                            </div>
-                            <div t-if="invoice.reference" class="mb4">
-                                <strong>Reference: </strong>
-                                <span t-field="invoice.reference"/>
-                            </div>
-                            <div t-if="invoice.date_invoice" class="mb4">
-                                <strong>Invoice Date: </strong>
-                                <span t-field="invoice.date_invoice"/>
-                            </div>
-                            <div t-if="invoice.date_due" class="mb4">
-                                <strong>Due Date: </strong>
-                                <span t-field="invoice.date_due"/>
-                            </div>
-                        </div>
-                        <t t-if="invoice.payment_term_id">
-                            <hr class="mt0 mb0"/>
-                            <div class="mb4 ml16">
-                                <span t-field="invoice.payment_term_id.note"/>
-                            </div>
-                        </t>
                         <t t-if="invoice.user_id">
                             <hr class="mt0 mb0"/>
                             <div class="mb4 ml16">
@@ -132,19 +100,13 @@
                         <div id="History" class="ml16 mb8">
                             <a data-toggle="modal" href="#" data-target="#invoice_chatter">A question about the Invoice?</a>
                         </div>
-                        <hr class="mt0 mb0"/>
-                        <div id="Powered" class="mt0 ml16 mr16 text-center o_powered_by">
-                            <ul>
-                                <li>Powered by<img class="img o_powered_logo" src="/web/static/src/img/logo.png"/></li>
-                            </ul>
-                        </div>
                     </div>
                 </div>
                 <div id="page_content" class="col-md-9 col-sm-8 o_portal_page_content hidden-print">
                     <t t-if="error or warning" t-call="account.portal_invoice_error"/>
                     <t t-if="success and (not error and not warning)" t-call="account.portal_invoice_success"/>
-                    <div class="o_portal_pdf_view">
-                        <iframe height="100%" width="100%" id="invoice_pdf" t-attf-src="/web/static/lib/pdfjs/web/viewer.html?file=/my/invoices/pdf/#{invoice.id}/#{invoice.access_token}?#{filename}" />
+                    <div class="o_portal_html_view">
+                        <iframe id="invoice_pdf" class="mt4" width="100%" height="100%" frameborder="0" scrolling="no" t-attf-src="/my/invoices/html/#{invoice.id}/#{invoice.access_token}" />
                     </div>
                 </div>
             </div>
@@ -152,7 +114,7 @@
     </template>
 
     <template id="chatter" name="Allow Comments &amp; History" inherit_id="account.portal_invoice_page">
-        <xpath expr="//div[@id='page_content']//div[hasclass('o_portal_pdf_view')]" position="after">
+        <xpath expr="//div[@id='page_content']//div[hasclass('o_portal_html_view')]" position="after">
             <div class="modal fade" id="invoice_chatter" role="dialog" aria-hidden="true">
                 <div class="modal-dialog modal-content">
                     <div class="modal-content">

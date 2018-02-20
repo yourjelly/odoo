@@ -29,6 +29,7 @@ $("#sidebar_content .o_timeago").each(function (index, el) {
 
 var $PDFIframe = $('iframe#invoice_pdf');
 $PDFIframe.load(function () {
+    $PDFIframe.css('height' , this.contentWindow.document.body.scrollHeight + 'px');
     $PDFIframe.contents().find('#openFile, #pageRotateCw, #pageRotateCcw, #pageRotateCcw, #viewBookmark, #secondaryOpenFile').hide();
 });
 
