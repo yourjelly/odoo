@@ -59,7 +59,6 @@ var EventRegistrationForm = Widget.extend({
             $button.attr('disabled', true);
             return ajax.jsonRpc($form.attr('action'), 'call', post).then(function (modal) {
                 var $modal = $(modal);
-                $modal.find('.modal-body > div').removeClass('container'); // retrocompatibility - REMOVE ME in master / saas-19
                 $modal.insertAfter($form).modal();
                 $modal.on('click', '.js_goto_event', function () {
                     $modal.modal('hide');
