@@ -181,7 +181,7 @@ class sale_quote(http.Controller):
         tx_type = order._get_payment_type()
         found_tx = tx._get_sale_tx(order, acquirer, payment_token=token, tx_type=tx_type)
         tx = found_tx or tx._create_sale_tx(order, acquirer, payment_token=token, tx_type=tx_type)
-        request.session['quote_%s_transaction_id' % order.id] = tx.id
+        request.session['current_transaction_id'] = tx.id
 
         return tx.render_sale_button(order, '/quote/%s/%s' % (order_id, access_token) if access_token else '/quote/%s' % order_id,
                                      submit_txt=_('Pay & Confirm'), render_values={
@@ -215,7 +215,7 @@ class sale_quote(http.Controller):
         found_tx = tx._get_sale_tx(order, token.acquirer_id, payment_token=token, tx_type=tx_type)
         tx = found_tx or tx._create_sale_tx(order, token.acquirer_id, payment_token=token, tx_type=tx_type)
         # set the transaction id into the session
-        request.session['quote_%s_transaction_id' % order_id] = tx.id
+        request.session['quote_transaction_id'] = tx.id
         # proceed to the payment
         tx.confirm_sale_token()
         # redirect the user to the online quote

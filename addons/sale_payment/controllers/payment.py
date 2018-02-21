@@ -41,7 +41,7 @@ class PaymentPortal(http.Controller):
             })
 
         # set the transaction id into the session
-        request.session['portal_sale_%s_transaction_id' % order_sudo.id] = tx.id
+        request.session['current_transaction_id'] = tx.id
 
         return tx.render_sale_button(
             order_sudo,
@@ -90,7 +90,7 @@ class PaymentPortal(http.Controller):
             })
 
         # set the transaction id into the session
-        request.session['portal_sale_%s_transaction_id' % order_sudo.id] = tx.id
+        request.session['current_transaction_id'] = tx.id
 
         # proceed to the payment
         res = tx.confirm_sale_token()

@@ -114,7 +114,7 @@ class PaypalController(http.Controller):
         if len(post) == 0: #pdt is not activated - we just redirect user to the confirmation page
             transaction = request.env['payment.transaction'].search([('reference', '=', item_number)])
             if transaction.validate_token(token):
-                request.session['sale_transaction_id'] = transaction.id
+                request.session['current_transaction_id'] = transaction.id
                 return werkzeug.utils.redirect(transaction.paypal_return_url) #we use saved url as paypal doesn't return the return url without pdt
         #pdt is activated: we validate data and redirect user
         return_url = self._get_return_url(**post)
@@ -125,7 +125,13 @@ class PaypalController(http.Controller):
     def paypal_cancel(self, **post):
         """ When the user cancels its Paypal payment: GET on this route """
         _logger.info('Beginning Paypal cancel with post data %s', pprint.pformat(post))  # debug
-        return werkzeug.utils.redirect("/shop/payment")
+        #little hack: as we don't have any information in a cancelled payment message, we recover it from the session
+        transaction_id = request.session.get('current_transaction_id')
+        transaction = request.env['payment.transaction'].sudo().browse(transaction_id)
+        reference = transaction.reference
+        post.update({'payment_status': 'Cancel', 'item_number': reference}) #write ourself cancel in status post data
+        request.env['payment.transaction'].sudo().form_feedback(post, 'paypal')
+        return werkzeug.utils.redirect("/shop/payment") //CHANGE THIS plz
 
     @http.route('/payment/paypal/wait', type='http', auth="public", website=True)
     def paypal_wait_page(self, **post):
@@ -137,13 +143,13 @@ class PaypalController(http.Controller):
 
     @http.route('/payment/transaction_status', type='json', auth="public", website=True)
     def payment_get_status(self, **post):
-        transaction = request.env['payment.transaction'].sudo().browse(request.session.get('sale_transaction_id'))
+        transaction = request.env['payment.transaction'].sudo().browse(request.session.get('current_transaction_id'))
 
         #if no more update needed, clear session
         if transaction.state != 'draft':
             request.session.update({
                 'sale_order_id': False,
-                'sale_transaction_id': False,
+                'current_transaction_id': False,
                 'website_sale_current_pl': False,
             })
 

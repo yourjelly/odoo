@@ -427,7 +427,7 @@ class WebsiteSale(http.Controller):
         # must have a draft sales order with lines at this point, otherwise reset
         if not order or order.state != 'draft':
             request.session['sale_order_id'] = None
-            request.session['sale_transaction_id'] = None
+            request.session['current_transaction_id'] = None
             return request.redirect('/shop')
 
         if order and not order.order_line:
@@ -811,7 +811,7 @@ class WebsiteSale(http.Controller):
         payment_token = request.env['payment.token'].sudo().browse(int(token)) if token else None
         found_tx = tx._get_sale_tx(order, acquirer, payment_token=payment_token, tx_type=tx_type)
         tx = found_tx or tx._create_sale_tx(order, acquirer, payment_token=token, tx_type=tx_type)
-        request.session['sale_transaction_id'] = tx.id
+        request.session['current_transaction_id'] = tx.id
 
         return tx.render_sale_button(order, '/shop/payment/validate')
 
@@ -844,7 +844,7 @@ class WebsiteSale(http.Controller):
         found_tx = tx._get_sale_tx(order, token.acquirer_id, payment_token=token, tx_type='server2server')
         tx = found_tx or tx._create_sale_tx(order, token.acquirer_id, payment_token=token, tx_type='server2server')
         # we set the transaction id into the session (so `sale_get_transaction` can retrieve it )
-        request.session['sale_transaction_id'] = tx.id
+        request.session['current_transaction_id'] = tx.id
         # we proceed the s2s payment
         res = tx.confirm_sale_token()
         # we then redirect to the page that validates the payment by giving it error if there's one

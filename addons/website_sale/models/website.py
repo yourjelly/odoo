@@ -298,7 +298,7 @@ class Website(models.Model):
         return sale_order
 
     def sale_get_transaction(self):
-        tx_id = request.session.get('sale_transaction_id')
+        tx_id = request.session.get('current_transaction_id')
         if tx_id:
             transaction = self.env['payment.transaction'].sudo().browse(tx_id)
             # Ugly hack for SIPS: SIPS does not allow to reuse a payment reference, even if the
@@ -312,13 +312,13 @@ class Website(models.Model):
             if transaction.state != 'cancel' and transaction.acquirer_id.provider != 'sips':
                 return transaction
             else:
-                request.session['sale_transaction_id'] = False
+                request.session['current_transaction_id'] = False
         return False
 
     def sale_reset(self):
         request.session.update({
             'sale_order_id': False,
-            'sale_transaction_id': False,
+            'current_transaction_id': False,
             'website_sale_current_pl': False,
         })
 

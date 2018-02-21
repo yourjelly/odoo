@@ -111,7 +111,7 @@ class AcquirerPaypal(models.Model):
             'zip_code': values.get('partner_zip'),
             'first_name': values.get('partner_first_name'),
             'last_name': values.get('partner_last_name'),
-            'paypal_return': urls.url_join(base_url, '%s?token=%s&item_number=%s' % (PaypalController._return_url, values['transaction_key'], values['reference'])),
+            'paypal_return': urls.url_join(base_url, PaypalController._return_url),
             'notify_url': urls.url_join(base_url, PaypalController._notify_url),
             'cancel_return': urls.url_join(base_url, PaypalController._cancel_url),
             'handling': '%.2f' % paypal_tx_values.pop('fees', 0.0) if self.fees_active else False,
@@ -162,6 +162,9 @@ class TxPaypal(models.Model):
             _logger.warning(
                 'Received a notification from Paypal using sandbox'
             ),
+        status = data.get('payment_status')
+        if status in ['Cancel']:
+            return invalid_parameters
 
         # TODO: txn_id: shoudl be false at draft, set afterwards, and verified with txn details
         if self.acquirer_reference and data.get('txn_id') != self.acquirer_reference:
@@ -196,7 +199,7 @@ class TxPaypal(models.Model):
         status = data.get('payment_status')
         res = {
             'acquirer_reference': data.get('txn_id'),
-            'paypal_txn_type': data.get('payment_type'),
+            'paypal_txn_type': data.get('payment_type', ''),
         }
         if status in ['Completed', 'Processed']:
             _logger.info('Validated Paypal payment for tx %s: set as done' % (self.reference))
@@ -214,6 +217,10 @@ class TxPaypal(models.Model):
         elif status in ['Pending', 'Expired']:
             _logger.info('Received notification for Paypal payment %s: set as pending' % (self.reference))
             res.update(state='pending', state_message=data.get('pending_reason', ''))
+            return self.write(res)
+        elif status in ['Cancel']:
+            _logger.info('Received notification for Paypal payment %s: set as cancel' % (self.reference))
+            res.update(state='cancel', state_message=data.get('cancel_reason', ''))
             return self.write(res)
         else:
             error = 'Received unrecognized status for Paypal payment %s: %s, set as error' % (self.reference, status)

@@ -674,7 +674,6 @@ class PaymentTransaction(models.Model):
             'partner_country': self.partner_country_id,
             'partner_phone': self.partner_phone,
             'partner_state': None,
-            'transaction_key': self.transaction_key,
         }
         return self.acquirer_id.render(None, None, None, values=values)
 
