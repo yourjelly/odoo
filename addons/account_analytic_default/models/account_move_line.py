@@ -15,3 +15,16 @@ class AccountMoveLine(models.Model):
         if default_analytic_account:
             analytic_data.update({'analytic_account_id': default_analytic_account.analytic_id.id})
         return analytic_data
+
+
+class AccountPartialReconcile(models.Model):
+    _inherit = "account.partial.reconcile"
+
+    @api.model
+    def create_exchange_rate_entry(self, aml_to_fix, amount_diff, diff_in_currency, currency, move):
+        res = super(AccountPartialReconcile, self).create_exchange_rate_entry(aml_to_fix, amount_diff, diff_in_currency, currency, move)
+        for line in res[0]:
+            default_analytic_account = self.env['account.analytic.default'].account_get(line.account_id.id, line.product_id.id, line.invoice_id.id, line.partner_id.id, fields.Date.today())
+            if default_analytic_account:
+                line.update({'analytic_account_id': default_analytic_account.analytic_id.id})
+        return res
