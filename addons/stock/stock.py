@@ -1117,11 +1117,14 @@ class stock_picking(models.Model):
     def unlink(self, cr, uid, ids, context=None):
         #on picking deletion, cancel its move then unlink them too
         move_obj = self.pool.get('stock.move')
+        pack_obj = self.pool.get('stock.pack.operation')
         context = context or {}
         for pick in self.browse(cr, uid, ids, context=context):
             move_ids = [move.id for move in pick.move_lines]
             move_obj.action_cancel(cr, uid, move_ids, context=context)
             move_obj.unlink(cr, uid, move_ids, context=context)
+            pack_ids = [pack.id for pack in pick.pack_operation_ids]
+            pack_obj.unlink(cr, uid, pack_ids, context=context)
         return super(stock_picking, self).unlink(cr, uid, ids, context=context)
 
     def _create_backorder(self, cr, uid, picking, backorder_moves=[], context=None):
