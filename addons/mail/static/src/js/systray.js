@@ -229,7 +229,8 @@ var ActivityMenu = Widget.extend({
      * @param {Boolean} [data.activity_deleted] when activity deleted
      * @param {Boolean} [data.activity_created] when activity created
      */
-    _updateCounter: function (data) {
+    _updateCounter: function (event) {
+        var data = event && event.data ? event.data.data : event;
         if (data) {
             if (data.activity_created) {
                 this.activityCounter ++;

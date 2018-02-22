@@ -114,17 +114,17 @@ var ChatWindowManager =  AbstractService.extend({
                 self._closeChat(chatSession);
                 self.call('chat_manager', 'closeChatSession', chatSession.id);
             });
-            chatSession.window.on("toggle_star_status", null, function (messageID) {
-                self.call('chat_manager', 'toggleStarStatus', messageID);
+            chatSession.window.on("toggle_star_status", null, function (event) {
+                self.call('chat_manager', 'toggleStarStatus', event.data.messageID);
             });
 
-            chatSession.window.on("fold_channel", null, function (channelID, folded) {
-                self.call('chat_manager', 'foldChannel', channelID, folded);
+            chatSession.window.on("fold_channel", null, function (event) {
+                self.call('chat_manager', 'foldChannel', event.data.channelID, event.data.folded);
             });
 
-            chatSession.window.on("post_message", null, function (message, channelID) {
-                self.call('chat_manager', 'postMessage', message, {
-                        channelID: channelID
+            chatSession.window.on("post_message", null, function (event) {
+                self.call('chat_manager', 'postMessage', event.data.message, {
+                        channelID: event.data.channelID
                     }).then(function () {
                         chatSession.window.thread.scroll_to();
                     });
@@ -283,11 +283,11 @@ var ChatWindowManager =  AbstractService.extend({
                 window: new ExtendedChatWindow(web_client, undefined, _t('New message'), false, 0, {thread_less: true}),
             };
             this.newChatSession.window.on("close_chat_session", null, this._closeNewChat.bind(this));
-            this.newChatSession.window.on('open_dm_session', null, function (partner_id) {
-                self.newChatSession.partner_id = partner_id;
-                var dm = self.call('chat_manager', 'getDmFromPartnerID', partner_id);
+            this.newChatSession.window.on('open_dm_session', null, function (event) {
+                self.newChatSession.partner_id = event.data.partner_id;
+                var dm = self.call('chat_manager', 'getDmFromPartnerID', event.data.partner_id);
                 if (!dm) {
-                    self.call('chat_manager', 'openAndDetachDm', partner_id);
+                    self.call('chat_manager', 'openAndDetachDm', event.data.partner_id);
                 } else {
                     var dmSession = _.findWhere(self.chatSessions, {id: dm.id});
                     if (!dmSession) {
@@ -426,10 +426,10 @@ var ChatWindowManager =  AbstractService.extend({
      * @param {integer|string} channel.id
      * @param {Object} query
      */
-    _onAnyoneListening: function (channel, query) {
+    _onAnyoneListening: function (event) {
         _.each(this.chatSessions, function (session) {
-            if (channel.id === session.id && session.window.thread.is_at_bottom() && !session.window.is_hidden) {
-                query.is_displayed = true;
+            if (event.data.channel.id === session.id && session.window.thread.is_at_bottom() && !session.window.is_hidden) {
+                event.data.query.is_displayed = true;
             }
         });
     },
@@ -438,10 +438,10 @@ var ChatWindowManager =  AbstractService.extend({
      * @param {Object} channel
      * @param {integer} channel.id
      */
-    _onDetachChannel: function (channel) {
-        var chatSession = _.findWhere(this.chatSessions, {id: channel.id});
+    _onDetachChannel: function (event) {
+        var chatSession = _.findWhere(this.chatSessions, {id: event.data.id});
         if (!chatSession || chatSession.window.folded) {
-            this.call('chat_manager', 'detachChannel', channel.id);
+            this.call('chat_manager', 'detachChannel', event.data.id);
         } else if (chatSession.window.is_hidden) {
             this._makeSessionVisible(chatSession);
         } else {
@@ -452,9 +452,9 @@ var ChatWindowManager =  AbstractService.extend({
      * @private
      * @param {boolean} open
      */
-    _onDiscussOpen: function (open) {
-        this.displayState.chatWindowsHidden = open;
-        if (open) {
+    _onDiscussOpen: function (event) {
+        this.displayState.chatWindowsHidden = event.data.value;
+        if (event.data.value) {
             $('body').addClass('o_no_chat_window');
         } else {
             $('body').removeClass('o_no_chat_window');
@@ -465,8 +465,8 @@ var ChatWindowManager =  AbstractService.extend({
      * @private
      * @param {Object} message
      */
-    _onNewMessage: function (message) {
-        this._updateSessions(message, true);
+    _onNewMessage: function (event) {
+        this._updateSessions(event.data, true);
     },
     /**
      * @private
@@ -498,10 +498,10 @@ var ChatWindowManager =  AbstractService.extend({
      * @param {string|integer} channel.id
      * @param {string} channel.status e.g. 'offline'
      */
-    _onUpdateDmPresence: function (channel) {
+    _onUpdateDmPresence: function (event) {
         _.each(this.chatSessions, function (session) {
-            if (channel.id === session.id) {
-                session.window.update_status(channel.status);
+            if (event.data.channel.id === session.id) {
+                session.window.update_status(event.data.channel.status);
             }
         });
     },
@@ -516,10 +516,10 @@ var ChatWindowManager =  AbstractService.extend({
      * @private
      * @param {string|integer} channelID
      */
-    _onUnsubscribeFromChannel: function (channelID) {
+    _onUnsubscribeFromChannel: function (event) {
         var self = this;
         _.each(self.chatSessions, function (session) {
-            if (channelID === session.id) {
+            if (event.data.channelID === session.id) {
                 self._closeChat(session);
             }
         });

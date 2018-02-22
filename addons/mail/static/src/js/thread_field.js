@@ -38,8 +38,8 @@ var ThreadField = AbstractField.extend({
         this.thread.on('load_more_messages', this, this._onLoadMoreMessages);
         this.thread.on('redirect', this, this._onRedirect);
         this.thread.on('redirect_to_channel', this, this._onRedirectToChannel);
-        this.thread.on('toggle_star_status', this, function (messageID) {
-            self.call('chat_manager', 'toggleStarStatus', messageID);
+        this.thread.on('toggle_star_status', this, function (event) {
+            self.call('chat_manager', 'toggleStarStatus', event.data.messageID);
         });
 
         var def1 = this.thread.appendTo(this.$el);
@@ -79,8 +79,10 @@ var ThreadField = AbstractField.extend({
      * @param  {integer[]} message.partner_ids
      * @return {$.Promise}
      */
-    postMessage: function (message) {
+    postMessage: function (event) {
         var self = this;
+
+        var message = event.data.message
         var options = {model: this.model, res_id: this.res_id};
         return this.call('chat_manager', 'postMessage', message, options)
             .then(function () {
@@ -149,9 +151,9 @@ var ThreadField = AbstractField.extend({
     _onLoadMoreMessages: function () {
         this._fetchAndRenderThread(this.msgIDs, {forceFetch: true});
     },
-    _onNewMessage: function (message) {
-        if (message.model === this.model && message.res_id === this.res_id) {
-            this.msgIDs.unshift(message.id);
+    _onNewMessage: function (event) {
+        if (event.data.model === this.model && event.data.res_id === this.res_id) {
+            this.msgIDs.unshift(event.data.id);
             this.trigger_up('new_message', {
                 id: this.value.id,
                 msgIDs: this.msgIDs,

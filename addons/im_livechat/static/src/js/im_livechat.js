@@ -190,7 +190,9 @@ var LivechatButton = Widget.extend({
                 this.close_chat();
             }
         });
-        this.chat_window.on("post_message", this, function (message) {
+        this.chat_window.on("post_message", this, function (event) {
+            event.stopPropagation();
+            var message = event.data.message;
             self.send_message(message).fail(function (error, e) {
                 e.preventDefault();
                 return self.send_message(message); // try again just in case
@@ -325,7 +327,7 @@ var Feedback = Widget.extend({
     },
 
     on_click_no_feedback: function () {
-        this.trigger("feedback_sent"); // will close the chat
+        this.trigger_up("feedback_sent"); // will close the chat
     },
 
     on_click_send: function () {
@@ -348,7 +350,7 @@ var Feedback = Widget.extend({
                     content += " \n" + options.reason;
                 }
                 self.trigger("send_message", {content: content});
-                self.trigger("feedback_sent"); // will close the chat
+                self.trigger_up("feedback_sent"); // will close the chat
             }
         });
     }

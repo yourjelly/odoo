@@ -214,7 +214,7 @@ var Discuss = Widget.extend(ControlPanelMixin, {
      * @override
      */
     on_attach_callback: function () {
-        this.call('chat_manager', 'getChatBus').trigger('discuss_open', true);
+        this.call('chat_manager', 'getChatBus').trigger_up('discuss_open', {value: true});
         if (this.channel) {
             this.thread.scroll_to({offset: this.channelsScrolltop[this.channel.id]});
         }
@@ -223,7 +223,7 @@ var Discuss = Widget.extend(ControlPanelMixin, {
      * @override
      */
     on_detach_callback: function () {
-        this.call('chat_manager', 'getChatBus').trigger('discuss_open', false);
+        this.call('chat_manager', 'getChatBus').trigger_up('discuss_open', {value: false});
         this.channelsScrolltop[this.channel.id] = this.thread.get_scrolltop();
     },
 
@@ -438,11 +438,11 @@ var Discuss = Widget.extend(ControlPanelMixin, {
             self.call('chat_manager', 'joinChannel', channelID).then(this._setChannel.bind(this));
         });
         this.thread.on('load_more_messages', this, this._loadMoreMessages);
-        this.thread.on('mark_as_read', this, function (messageID) {
-            self.call('chat_manager', 'markAsRead', [messageID]);
+        this.thread.on('mark_as_read', this, function (event) {
+            self.call('chat_manager', 'markAsRead', [event.data.messageID]);
         });
-        this.thread.on('toggle_star_status', this, function (messageID) {
-            self.call('chat_manager', 'toggleStarStatus', messageID);
+        this.thread.on('toggle_star_status', this, function (event) {
+            self.call('chat_manager', 'toggleStarStatus', event.data.messageID);
         });
         this.thread.on('select_message', this, this._selectMessage);
         this.thread.on('unselect_message', this, this._unselectMessage);
@@ -505,9 +505,9 @@ var Discuss = Widget.extend(ControlPanelMixin, {
      * @private
      * @param {integer} messageID
      */
-    _selectMessage: function (messageID) {
+    _selectMessage: function (event) {
         this.$el.addClass('o_mail_selection_mode');
-        var message = this._getMessage(messageID);
+        var message = this._getMessage(event.data.messageID);
         this.selected_message = message;
         var subject = "Re: " + message.record_name;
         this.extendedComposer.set_subject(subject);
@@ -517,7 +517,7 @@ var Discuss = Widget.extend(ControlPanelMixin, {
         }
         this.extendedComposer.do_show();
 
-        this.thread.scroll_to({id: messageID, duration: 200, only_if_necessary: true});
+        this.thread.scroll_to({id: event.data.messageID, duration: 200, only_if_necessary: true});
         this.extendedComposer.focus('body');
     },
     /**
@@ -525,12 +525,13 @@ var Discuss = Widget.extend(ControlPanelMixin, {
      * @param {Object} channel
      * @returns {$.Promise}
      */
-    _setChannel: function (channel) {
+    _setChannel: function (event) {
         var self = this;
 
         // Store scroll position and composer state of the previous channel
         this._storeChannelState();
 
+        var channel = event.data || event;
         this.channel = channel;
         this.messages_separator_position = undefined; // reset value on channel change
         this.unread_counter = this.channel.unread_counter;
@@ -576,9 +577,9 @@ var Discuss = Widget.extend(ControlPanelMixin, {
         chatBus.on('new_message', this, this._onNewMessage);
         chatBus.on('update_message', this, this._onMessageUpdated);
         chatBus.on('new_channel', this, this._onNewChannel);
-        chatBus.on('anyone_listening', this, function (channel, query) {
-            query.is_displayed = query.is_displayed ||
-                                (channel.id === this.channel.id && this.thread.is_at_bottom());
+        chatBus.on('anyone_listening', this, function (event) {
+            event.data.query.is_displayed = event.data.query.is_displayed ||
+                                (event.data.channel.id === this.channel.id && this.thread.is_at_bottom());
         });
         chatBus.on('unsubscribe_from_channel', this, this._onChannelLeft);
         chatBus.on('update_needaction', this, this.throttledUpdateChannels);
@@ -744,13 +745,13 @@ var Discuss = Widget.extend(ControlPanelMixin, {
      * @private
      * @param {integer|string} channelID
      */
-    _onChannelLeft: function (channelID) {
-        if (this.channel.id === channelID) {
+    _onChannelLeft: function (event) {
+        if (this.channel.id === event.data.channelID) {
             var channel = this.call('chat_manager', 'getChannel', 'channel_inbox');
             this._setChannel(channel);
         }
         this._updateChannels();
-        delete this.channelsScrolltop[channelID];
+        delete this.channelsScrolltop[event.data.channelID];
     },
     /**
      * @private
@@ -796,40 +797,41 @@ var Discuss = Widget.extend(ControlPanelMixin, {
      * @private
      * @param {Object} channel
      */
-    _onNewChannel: function (channel) {
+    _onNewChannel: function (event) {
         this._updateChannels();
-        if (channel.autoswitch) {
-            this._setChannel(channel);
+        if (event.data.autoswitch) {
+            this._setChannel(event.data);
         }
     },
     /**
      * @private
      * @param {Object} message
      */
-    _onNewMessage: function (message) {
+    _onNewMessage: function (event) {
         var self = this;
-        if (_.contains(message.channel_ids, this.channel.id)) {
+        if (_.contains(event.data.channel_ids, this.channel.id)) {
             if (this.channel.type !== 'static' && this.thread.is_at_bottom()) {
                 this.call('chat_manager', 'markChannelAsSeen', this.channel);
             }
             var should_scroll = this.thread.is_at_bottom();
             this._fetchAndRenderThread().then(function () {
                 if (should_scroll) {
-                    self.thread.scroll_to({id: message.id});
+                    self.thread.scroll_to({id: event.data.id});
                 }
             });
         }
         // Re-render sidebar to indicate that there is a new message in the corresponding channels
         this._updateChannels();
         // Dump scroll position of channels in which the new message arrived
-        this.channelsScrolltop = _.omit(this.channelsScrolltop, message.channel_ids);
+        this.channelsScrolltop = _.omit(this.channelsScrolltop, event.data.channel_ids);
     },
     /**
      * @private
      * @param {Object} message
      */
-    _onPostMessage: function (message) {
+    _onPostMessage: function (event) {
         var self = this;
+        var message = event.data;
         var options = this.selected_message ? {} : {channelID: this.channel.id};
         if (this.selected_message) {
             message.subtype = this.selected_message.is_note ? 'mail.mt_note': 'mail.mt_comment';

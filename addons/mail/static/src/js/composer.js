@@ -478,7 +478,7 @@ var BasicComposer = Widget.extend({
         this.$attachments_list = this.$('.o_composer_attachments_list');
         this.$input = this.$('.o_composer_input');
         this.$input.focus(function () {
-            self.trigger('input_focused');
+            self.trigger_up('input_focused');
         });
         this.$input.html(this.options.default_body);
         this.$input.css('min-height', this.options.input_min_height);
@@ -526,7 +526,7 @@ var BasicComposer = Widget.extend({
         clearTimeout(this.canned_timeout);
         var self = this;
         this.preprocess_message().then(function (message) {
-            self.trigger('post_message', message);
+            self.trigger_up('post_message', {message: message});
             self.clear_composer_on_send();
             self.$input.focus();
         });

@@ -20,14 +20,14 @@ return ChatWindow.extend({
                         self.call('chat_manager', 'searchPartner', request.term, 10).done(response);
                     },
                     select: function (event, ui) {
-                        self.trigger('open_dm_session', ui.item.id);
+                        self.trigger_up('open_dm_session', {partner_id: ui.item.id});
                     },
                 })
                 .focus();
         } else if (!self.options.input_less) {
             var basicComposer = new composer.BasicComposer(self, {mention_partners_restricted: true, isMini: true});
-            basicComposer.on('post_message', self, function (message) {
-                self.call('chat_manager', 'postMessage', message, {
+            basicComposer.on('post_message', self, function (event) {
+                self.call('chat_manager', 'postMessage', event.data, {
                     channelID: self.channel_id,
                 });
             });
@@ -48,7 +48,7 @@ return ChatWindow.extend({
         event.stopPropagation();
     },
     on_reverse_breadcrumb: function () {
-        this.call('chat_manager', 'getChatBus').trigger('discuss_open', false);
+        this.call('chat_manager', 'getChatBus').trigger_up('discuss_open', {value: false});
      },
     on_click_expand: _.debounce(function (event) {
         event.preventDefault();

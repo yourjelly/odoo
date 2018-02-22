@@ -36,18 +36,18 @@ var Thread = Widget.extend({
         "click .o_attachment_view": "_onAttachmentView",
         "click .o_thread_message_needaction": function (event) {
             var message_id = $(event.currentTarget).data('message-id');
-            this.trigger("mark_as_read", message_id);
+            this.trigger_up("mark_as_read", {messageID: message_id});
         },
         "click .o_thread_message_star": function (event) {
             var message_id = $(event.currentTarget).data('message-id');
-            this.trigger("toggle_star_status", message_id);
+            this.trigger_up("toggle_star_status", {messageID: message_id});
         },
         "click .o_thread_message_reply": function (event) {
             this.selected_id = $(event.currentTarget).data('message-id');
             this.$('.o_thread_message').removeClass('o_thread_selected_message');
             this.$('.o_thread_message[data-message-id="' + this.selected_id + '"]')
                 .addClass('o_thread_selected_message');
-            this.trigger('select_message', this.selected_id);
+            this.trigger_up('select_message', {messageID: this.selected_id});
             event.stopPropagation();
         },
         "click .oe_mail_expand": function (event) {
@@ -62,7 +62,7 @@ var Thread = Widget.extend({
         "click": function () {
             if (this.selected_id) {
                 this.unselect();
-                this.trigger('unselect_message');
+                this.trigger_up('unselect_message');
             }
         },
     },
@@ -245,7 +245,7 @@ var Thread = Widget.extend({
     },
 
     on_click_show_more: function () {
-        this.trigger('load_more_messages');
+        this.trigger_up('load_more_messages');
     },
 
     /**

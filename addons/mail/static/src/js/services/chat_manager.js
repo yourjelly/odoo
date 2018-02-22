@@ -57,8 +57,8 @@ var ChatManager =  AbstractService.extend({
         this.chatBus = new Bus(this);
         this.busBus = this.call('bus_service', 'getBus');
 
-        this.chatBus.on('discuss_open', null, function (open) {
-            self.discussOpen = open;
+        this.chatBus.on('discuss_open', null, function (event) {
+            self.discussOpen = event.data.value;
         });
 
         this.busBus.on('notification', this, this._onNotification);
@@ -603,7 +603,7 @@ var ChatManager =  AbstractService.extend({
      * @param  {Object} channel
      */
     openChannel: function (channel) {
-        this.chatBus.trigger(this.discussOpen ? 'open_channel' : 'detach_channel', channel);
+        this.chatBus.trigger_up(this.discussOpen ? 'open_channel' : 'detach_channel', channel);
     },
     /**
      * Prepares and sends a message to the server:
@@ -629,6 +629,7 @@ var ChatManager =  AbstractService.extend({
         var self = this;
         options = options || {};
 
+        data = data.message || data;
         // This message will be received from the mail composer as html content subtype
         // but the urls will not be linkified. If the mail composer takes the responsibility
         // to linkify the urls we end up with double linkification a bit everywhere.
@@ -881,7 +882,7 @@ var ChatManager =  AbstractService.extend({
                 return _.isString(channel.name) ? channel.name.toLowerCase() : '';
             });
             if (!options.silent) {
-                this.chatBus.trigger("new_channel", channel);
+                this.chatBus.trigger_up("new_channel", channel);
             }
             if (channel.is_detached) {
                 this.call('chat_window_manager', 'openChat', channel);
@@ -942,7 +943,7 @@ var ChatManager =  AbstractService.extend({
                     }
                     if (channel.hidden) {
                         channel.hidden = false;
-                        self.chatBus.trigger('new_channel', channel);
+                        self.chatBus.trigger_up('new_channel', channel);
                     }
                     if (channel.type !== 'static' && !msg.is_author && !msg.is_system_notification) {
                         if (options.increment_unread) {
@@ -954,14 +955,17 @@ var ChatManager =  AbstractService.extend({
                                 self.call('chat_window_manager', 'openChat', channel, { passively: true });
                             }
                             var query = {is_displayed: false};
-                            self.chatBus.trigger('anyone_listening', channel, query);
+                            self.chatBus.trigger_up('anyone_listening', {
+                                channel: channel,
+                                query: query
+                            });
                             self._notifyIncomingMessage(msg, query);
                         }
                     }
                 }
             });
             if (!options.silent) {
-                this.chatBus.trigger('new_message', msg);
+                this.chatBus.trigger_up('new_message', msg);
             }
         } else if (options.domain && options.domain !== []) {
             this._addToCache(msg, options.domain);
@@ -1389,7 +1393,7 @@ var ChatManager =  AbstractService.extend({
      * @param  {Object} data key, value to decide activity created or deleted
      */
     _manageActivityUpdateNotification: function (data) {
-        this.chatBus.trigger('activity_updated', data);
+        this.chatBus.trigger_up('activity_updated', {data: data});
     },
     /**
      * @private
@@ -1543,7 +1547,7 @@ var ChatManager =  AbstractService.extend({
                     msg = _.str.sprintf(_t('You unpinned your conversation with <b>%s</b>.'), channel.name);
                 }
                 this._removeChannel(channel);
-                this.chatBus.trigger("unsubscribe_from_channel", data.id);
+                this.chatBus.trigger_up("unsubscribe_from_channel", {channelID: data.id});
                 web_client.do_notify(_("Unsubscribed"), msg);
             }
         } else if (data.type === 'toggle_star') {
@@ -1570,7 +1574,7 @@ var ChatManager =  AbstractService.extend({
         var dm = this.getDmFromPartnerID(data.id);
         if (dm) {
             dm.status = data.im_status;
-            this.chatBus.trigger('update_dm_presence', dm);
+            this.chatBus.trigger_up('update_dm_presence', {channel: dm});
         }
     },
     /**
