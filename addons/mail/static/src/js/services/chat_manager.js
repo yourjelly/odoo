@@ -1508,7 +1508,7 @@ var ChatManager =  AbstractService.extend({
             });
         }
         this.needactionCounter = Math.max(this.needactionCounter - data.message_ids.length, 0);
-        this.chatBus.trigger('update_needaction', this.needactionCounter);
+        this.chatBus.trigger_up('update_needaction', this.needactionCounter);
     },
     /**
      * @private
@@ -1532,7 +1532,7 @@ var ChatManager =  AbstractService.extend({
                 channel.needaction_counter++;
             }
         });
-        this.chatBus.trigger('update_needaction', this.needactionCounter);
+        this.chatBus.trigger_up('update_needaction', this.needactionCounter);
     },
     /**
      * @private
@@ -1701,7 +1701,7 @@ var ChatManager =  AbstractService.extend({
             this.unreadConversationCounter++;
         }
         channel.unread_counter = counter;
-        this.chatBus.trigger("update_channel_unread_counter", channel);
+        this.chatBus.trigger_up("update_channel_unread_counter", channel);
     },
 
     //--------------------------------------------------------------------------
