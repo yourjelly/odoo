@@ -868,7 +868,7 @@ class AccountBankStatementLine(models.Model):
         payment_aml_rec = payment_aml_rec or self.env['account.move.line']
         new_aml_dicts = new_aml_dicts or []
 
-        aml_obj = self.env['account.move.line']
+        aml_obj = self.env['account.move.line'].with_context(check_move_validity=False)
 
         company_currency = self.journal_id.company_id.currency_id
         statement_currency = self.journal_id.currency_id or company_currency
@@ -893,9 +893,9 @@ class AccountBankStatementLine(models.Model):
 
         # Fully reconciled moves are just linked to the bank statement
         total = self.amount
-        for aml_rec in payment_aml_rec:
+        for aml_rec in payment_aml_rec.with_context(check_move_validity=False):
             total -= aml_rec.debit - aml_rec.credit
-            aml_rec.with_context(check_move_validity=False).write({'statement_line_id': self.id})
+            aml_rec.write({'statement_line_id': self.id})
             counterpart_moves = (counterpart_moves | aml_rec.move_id)
 
         # Create move line(s). Either matching an existing journal entry (eg. invoice), in which
@@ -978,12 +978,13 @@ class AccountBankStatementLine(models.Model):
                     and counterpart_aml[0].currency_id\
                     and counterpart_aml[0].currency_id != company_currency:
                 new_aml_currency = counterpart_aml[0].currency_id
+            aml_obj_deux = aml_obj.with_context(check_move_validity=False, apply_taxes=True)
             for aml_dict in new_aml_dicts:
                 aml_dict['payment_id'] = payment and payment.id or False
                 if new_aml_currency and not aml_dict.get('currency_id'):
                     aml_dict['currency_id'] = new_aml_currency.id
                     aml_dict['amount_currency'] = company_currency.with_context(ctx).compute(aml_dict['debit'] - aml_dict['credit'], new_aml_currency)
-                aml_obj.with_context(check_move_validity=False, apply_taxes=True).create(aml_dict)
+                aml_obj_deux.create(aml_dict)
 
             # Create counterpart move lines and reconcile them
             for aml_dict in counterpart_aml_dicts:
@@ -996,7 +997,7 @@ class AccountBankStatementLine(models.Model):
                 if counterpart_move_line.currency_id and counterpart_move_line.currency_id != company_currency and not aml_dict.get('currency_id'):
                     aml_dict['currency_id'] = counterpart_move_line.currency_id.id
                     aml_dict['amount_currency'] = company_currency.with_context(ctx).compute(aml_dict['debit'] - aml_dict['credit'], counterpart_move_line.currency_id)
-                new_aml = aml_obj.with_context(check_move_validity=False).create(aml_dict)
+                new_aml = aml_obj.create(aml_dict)
 
                 (new_aml | counterpart_move_line).reconcile()
 
