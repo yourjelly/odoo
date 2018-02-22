@@ -1015,13 +1015,15 @@ class Cache(object):
 
     def copy(self, records, env):
         """ Copy the cache of ``records`` to ``env``. """
+        if not records:
+            return
         src = records
         dst = records.with_env(env)
         for field, field_cache in self._data.items():
             src_key = field.cache_key(src)
             dst_key = field.cache_key(dst)
             for record_id, record_cache in field_cache.items():
-                if src_key in record_cache:
+                if record_id in records._ids and src_key in record_cache:
                     record_cache[dst_key] = record_cache[src_key]
 
     def invalidate(self, spec=None):
