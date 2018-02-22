@@ -509,8 +509,8 @@ var ChatWindowManager =  AbstractService.extend({
      * @private
      * @param {Object} message
      */
-    _onUpdateMessage: function (message) {
-        this._updateSessions(message, false);
+    _onUpdateMessage: function (event) {
+        this._updateSessions(event.data.message, false);
     },
     /**
      * @private

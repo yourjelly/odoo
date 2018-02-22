@@ -774,8 +774,9 @@ var Discuss = Widget.extend(ControlPanelMixin, {
      * @param {Object} message
      * @param {string} type the channel type
      */
-    _onMessageUpdated: function (message, type) {
+    _onMessageUpdated: function (event) {
         var self = this;
+        var message = event.data.message
         var currentChannelID = this.channel.id;
         if ((currentChannelID === "channel_starred" && !message.is_starred) ||
             (currentChannelID === "channel_inbox" && !message.is_needaction)) {
@@ -786,7 +787,7 @@ var Discuss = Widget.extend(ControlPanelMixin, {
                     var options = self._getThreadRenderingOptions(messages);
                     self.thread.remove_message_and_render(message.id, messages, options)
                         .then(function () {
-                            self._updateButtonStatus(messages.length === 0, type);
+                            self._updateButtonStatus(messages.length === 0, event.data.type);
                         });
                 });
         } else if (_.contains(message.channel_ids, currentChannelID)) {

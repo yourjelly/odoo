@@ -1489,7 +1489,10 @@ var ChatManager =  AbstractService.extend({
             if (message) {
                 self._invalidateCaches(message.channel_ids);
                 self._removeMessageFromChannel("channel_inbox", message);
-                self.chatBus.trigger('update_message', message, data.type);
+                self.chatBus.trigger_up('update_message', {
+                    message: message,
+                    type: data.type
+                });
             }
         });
         if (data.channel_ids) {
@@ -1600,10 +1603,10 @@ var ChatManager =  AbstractService.extend({
                     channelStarred.cache = _.pick(channelStarred.cache, "[]");
                     self.starredCounter++;
                 }
-                self.chatBus.trigger('update_message', message);
+                self.chatBus.trigger_up('update_message', {message: message});
             }
         });
-        this.chatBus.trigger('update_starred', this.starredCounter);
+        this.chatBus.trigger_up('update_starred', this.starredCounter);
     },
     /**
      * @private

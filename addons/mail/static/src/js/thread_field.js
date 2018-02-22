@@ -174,8 +174,8 @@ var ThreadField = AbstractField.extend({
             res_model: res_model,
         });
     },
-    _onUpdateMessage: function (message) {
-        if (message.model === this.model && message.res_id === this.res_id) {
+    _onUpdateMessage: function (event) {
+        if (event.data.message.model === this.model && event.data.message.res_id === this.res_id) {
             this._fetchAndRenderThread(this.msgIDs);
         }
     },
