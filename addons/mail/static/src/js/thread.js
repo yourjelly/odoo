@@ -345,9 +345,12 @@ var Thread = Widget.extend({
      */
     _redirect: _.debounce(function (options) {
         if ('channel_id' in options) {
-            this.trigger('redirect_to_channel', options.channel_id);
+            this.trigger_up('redirect_to_channel', {channelID: options.channel_id});
         } else {
-            this.trigger('redirect', options.model, options.id);
+            this.trigger_up('redirect', {
+                res_model: options.model,
+                res_id: options.id
+            });
         }
     }, 200, true),
 

@@ -431,11 +431,13 @@ var Discuss = Widget.extend(ControlPanelMixin, {
         var self = this;
         this.thread = new ChatThread(this, {display_help: true});
 
-        this.thread.on('redirect', this, function (resModel, resID) {
-            self.call('chat_manager', 'redirect', resModel, resID, self._setChannel.bind(self));
+        this.thread.on('redirect', this, function (event) {
+            event.stopPropagation()
+            self.call('chat_manager', 'redirect', event.data.res_model, event.data.res_id, self._setChannel.bind(self));
         });
-        this.thread.on('redirect_to_channel', this, function (channelID) {
-            self.call('chat_manager', 'joinChannel', channelID).then(this._setChannel.bind(this));
+        this.thread.on('redirect_to_channel', this, function (event) {
+            event.stopPropagation()
+            self.call('chat_manager', 'joinChannel', event.data.channelID).then(this._setChannel.bind(this));
         });
         this.thread.on('load_more_messages', this, this._loadMoreMessages);
         this.thread.on('mark_as_read', this, function (event) {

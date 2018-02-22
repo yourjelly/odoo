@@ -129,10 +129,11 @@ var ChatWindowManager =  AbstractService.extend({
                         chatSession.window.thread.scroll_to();
                     });
             });
-            chatSession.window.on("redirect", null, function (resModel, resID) {
-                self.call('chat_manager', 'redirect', resModel, resID, self.openChat.bind(self));
+            chatSession.window.on("redirect", null, function (event) {
+                self.call('chat_manager', 'redirect', event.data.res_model, event.data.res_id, self.openChat.bind(self));
             });
-            chatSession.window.on("redirect_to_channel", null, function (channelID) {
+            chatSession.window.on("redirect_to_channel", null, function (event) {
+                var channelID = event.data.channelID;
                 var session = _.findWhere(self.chatSessions, {id: channelID});
                 if (!session) {
                     self.call('chat_manager', 'joinChannel', channelID).then(function (channel) {

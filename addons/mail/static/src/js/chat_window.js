@@ -55,8 +55,6 @@ return Widget.extend({
             display_stars: this.options.display_stars,
         });
         this.thread.on('toggle_star_status', null, this.trigger_up.bind(this, 'toggle_star_status'));
-        this.thread.on('redirect_to_channel', null, this.trigger_up.bind(this, 'redirect_to_channel'));
-        this.thread.on('redirect', null, this.trigger_up.bind(this, 'redirect'));
 
         if (this.folded) {
             this.$el.css('height', HEIGHT_FOLDED);

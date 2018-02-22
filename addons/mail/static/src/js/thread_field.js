@@ -161,17 +161,18 @@ var ThreadField = AbstractField.extend({
             this._fetchAndRenderThread(this.msgIDs);
         }
     },
-    _onRedirectToChannel: function (channelID) {
+    _onRedirectToChannel: function (event) {
         var self = this;
-        this.call('chat_manager', 'joinChannel', channelID).then(function () {
+        this.call('chat_manager', 'joinChannel', event.data.channelID).then(function () {
             // Execute Discuss client action with 'channel' as default channel
-            self.do_action('mail.mail_channel_action_client_chat', {active_id: channelID});
+            self.do_action('mail.mail_channel_action_client_chat', {active_id: event.data.channelID});
         });
     },
-    _onRedirect: function (res_model, res_id) {
+    _onRedirect: function (event) {
+        event.stopPropagation()
         this.trigger_up('redirect', {
-            res_id: res_id,
-            res_model: res_model,
+            res_id: event.data.res_id,
+            res_model: event.data.res_model,
         });
     },
     _onUpdateMessage: function (event) {
