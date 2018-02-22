@@ -25,6 +25,13 @@
                         <col width='25%' />
                         <col width='25%' />
                     </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th class="text-right">Quantity</th>
+                            <th class="text-right">Price</th>
+                        </tr>
+                    </thead>
                     <t t-foreach="page" t-as="layout_sections">
                         <t t-if="layout_sections_size > 1 or page_size > 1" groups="sale.group_sale_layout">
                             <tr class="active">
