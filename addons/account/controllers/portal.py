@@ -133,7 +133,7 @@ class PortalAccount(CustomerPortal):
         return request.make_response(html, headers=htmlhttpheaders)
 
     @http.route('/my/invoices/pdf/<int:invoice_id>', type='http', auth="public", website=True)
-    def portal_my_invoice_report(self, invoice_id, access_token=None, html_view=None, **kw):
+    def portal_my_invoice_report(self, invoice_id, access_token=None, **kw):
         try:
             invoice_sudo = self._invoice_check_access(invoice_id, access_token)
         except AccessError:
