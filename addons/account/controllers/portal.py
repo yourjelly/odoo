@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import re
-
 from odoo import http, _
 from odoo.addons.portal.controllers.portal import CustomerPortal, pager as portal_pager
 from odoo.exceptions import AccessError
@@ -115,8 +113,6 @@ class PortalAccount(CustomerPortal):
             return request.redirect('/my')
 
         values = self._invoice_get_page_view_values(invoice_sudo, access_token, **kw)
-        filename = re.sub(r"[^\w\s]", '_', invoice_sudo._get_printed_report_name())
-        values['filename'] = '%s.%s' % (filename, 'pdf') if filename else ''
         return request.render("account.portal_invoice_page", values)
 
     @http.route('/my/invoices/html/<int:invoice_id>/<string:access_token>', type='http', auth="public", website=True)
