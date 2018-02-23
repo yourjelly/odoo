@@ -27,7 +27,7 @@ var Menu = Widget.extend({
         this.$el.on('click', 'a[data-menu]', function (event) {
             event.preventDefault();
             var menu_id = $(event.currentTarget).data('menu');
-            core.bus.trigger('change_menu_section', menu_id);
+            core.bus.trigger_up('change_menu_section', {menu_id: menu_id});
         });
 
         // Hide second level submenus
@@ -35,7 +35,7 @@ var Menu = Widget.extend({
         if (self.current_menu) {
             self.open_menu(self.current_menu);
         }
-        this.trigger('menu_bound');
+        this.trigger_up('menu_bound');
 
         var lazyreflow = _.debounce(this.reflow.bind(this), 200);
         core.bus.on('resize', this, function() {
@@ -45,7 +45,7 @@ var Menu = Widget.extend({
                 lazyreflow();
             }
         });
-        core.bus.trigger('resize');
+        core.bus.trigger_up('resize');
 
         this.is_bound.resolve();
     },
@@ -184,7 +184,7 @@ var Menu = Widget.extend({
             }
         }
         if (action_id) {
-            this.trigger('menu_click', {
+            this.trigger_up('menu_click', {
                 action_id: action_id,
                 id: id,
                 previous_menu_id: this.current_menu // Here we don't know if action will fail (in which case we have to revert menu)
@@ -200,9 +200,9 @@ var Menu = Widget.extend({
      *
      * @param {int} [menu_id] the top menu id
      */
-    on_change_top_menu: function(menu_id) {
+    on_change_top_menu: function(event) {
         var self = this;
-        this.menu_click(menu_id);
+        this.menu_click(event.data.menu_id);
     },
     on_menu_click: function(ev) {
         ev.preventDefault();

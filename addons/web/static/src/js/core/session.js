@@ -219,7 +219,7 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
             return self.load_js(file_list);
         }).done(function () {
             self.on_modules_loaded();
-            self.trigger('module_loaded');
+            self.trigger_up('module_loaded');
        });
     },
     load_translations: function () {
@@ -343,7 +343,7 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
             }
             // TODO correct handling of timeouts
             if (! shadow)
-                self.trigger('request');
+                self.trigger_up('request');
             var fct;
             if (self.origin_server) {
                 fct = ajax.jsonRpc;
@@ -365,19 +365,19 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
             var p = fct(url, "call", params, options);
             p = p.then(function (result) {
                 if (! shadow)
-                    self.trigger('response');
+                    self.trigger_up('response');
                 return result;
             }, function (type, error, textStatus, errorThrown) {
                 if (type === "server") {
                     if (! shadow)
-                        self.trigger('response');
+                        self.trigger_up('response');
                     if (error.code === 100) {
                         self.uid = false;
                     }
                     return $.Deferred().reject(error, $.Event());
                 } else {
                     if (! shadow)
-                        self.trigger('response_failed');
+                        self.trigger_up('response_failed');
                     var nerror = {
                         code: -32098,
                         message: "XmlHttpRequestError " + errorThrown,

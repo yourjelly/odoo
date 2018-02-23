@@ -123,7 +123,7 @@ function Reload(parent, action) {
     var url = l.protocol + "//" + l.host + l.pathname + search + hash;
 
     // Clear cache
-    core.bus.trigger('clear_cache');
+    core.bus.trigger_up('clear_cache');
 
     redirect(url, params.wait);
 }

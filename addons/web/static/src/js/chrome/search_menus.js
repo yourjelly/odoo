@@ -370,7 +370,7 @@ return Widget.extend({
         filter_group.insertBefore(this.$add_filter);
         $('<li class="divider">').insertBefore(this.$add_filter);
         this.searchview.query.add(facets, {silent: true});
-        this.searchview.query.trigger('reset');
+        this.searchview.query.trigger_up('reset');
 
         _.invoke(this.propositions, 'destroy');
         this.propositions = [];

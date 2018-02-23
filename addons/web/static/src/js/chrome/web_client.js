@@ -153,9 +153,9 @@ return AbstractWebClient.extend({
             }
         });
     },
-    on_menu_action: function(options) {
+    on_menu_action: function(event) {
         var self = this;
-        return this.menu_dm.add(data_manager.load_action(options.action_id))
+        return this.menu_dm.add(data_manager.load_action(event.data.action_id))
             .then(function (result) {
                 return self.action_mutex.exec(function() {
                     var completed = $.Deferred();
@@ -163,7 +163,7 @@ return AbstractWebClient.extend({
                         clear_breadcrumbs: true,
                         action_menu_id: self.menu.current_menu,
                     }).fail(function() {
-                        self.menu.open_menu(options.previous_menu_id);
+                        self.menu.open_menu(event.data.previous_menu_id);
                     }).always(function() {
                         completed.resolve();
                     });

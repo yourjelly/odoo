@@ -879,11 +879,11 @@ var FieldX2Many = AbstractField.extend({
             single_page_hidden: true,
             withAccessKey: false,
         });
-        this.pager.on('pager_changed', this, function (new_state) {
+        this.pager.on('pager_changed', this, function (event) {
             this.trigger_up('load', {
                 id: this.value.id,
-                limit: new_state.limit,
-                offset: new_state.current_min - 1,
+                limit: event.data.limit,
+                offset: event.data.current_min - 1,
                 on_success: function (value) {
                     self.value = value;
                     self._render();

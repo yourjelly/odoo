@@ -128,7 +128,7 @@ var AbstractWebClient = Widget.extend(ServiceProviderMixin, {
             }).then(function () {
                 // Listen to 'scroll' event and propagate it on main bus
                 self.action_manager.$el.on('scroll', core.bus.trigger.bind(core.bus, 'scroll'));
-                core.bus.trigger('web_client_ready');
+                core.bus.trigger_up('web_client_ready');
             });
     },
     bind_events: function () {
