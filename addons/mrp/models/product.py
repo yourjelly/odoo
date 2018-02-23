@@ -16,7 +16,7 @@ class ProductTemplate(models.Model):
         help="Average lead time in days to manufacture this product. In the case of multi-level BOM, the manufacturing lead times of the components will be added.")
 
     def _compute_bom_count(self):
-        read_group_res = self.env['mrp.bom'].read_group([('product_tmpl_id', 'in', self.ids)], ['product_tmpl_id'], ['product_tmpl_id'])
+        read_group_res = self.env['mrp.bom'].read_group([('product_tmpl_id', 'in', self.ids)], ['product_tmpl_id'], ['product_tmpl_id'], label=False)
         mapped_data = dict([(data['product_tmpl_id'][0], data['product_tmpl_id_count']) for data in read_group_res])
         for product in self:
             product.bom_count = mapped_data.get(product.id, 0)
@@ -59,7 +59,10 @@ class ProductProduct(models.Model):
         # read_group_res: BOM where product_id is set
         # read_group_res_tmpl: BOM where product_tmpl_id is set and product_id is not set
         # The total count is the sum of both.
-        read_group_res = self.env['mrp.bom'].read_group([('product_id', 'in', self.ids)], ['product_id'], ['product_id'])
+        read_group_res = self.env['mrp.bom'].read_group(
+            [('product_id', 'in', self.ids)],
+            ['product_id'], ['product_id'], label=False
+        )
         mapped_data = dict([(data['product_id'][0], data['product_id_count']) for data in read_group_res])
         read_group_res_tmpl = self.env['mrp.bom'].read_group([
             ('product_tmpl_id', 'in', self.mapped('product_tmpl_id.id')), ('product_id', '=', False)
@@ -81,7 +84,7 @@ class ProductProduct(models.Model):
         return action
 
     def _compute_mo_count(self):
-        read_group_res = self.env['mrp.production'].read_group([('product_id', 'in', self.ids)], ['product_id'], ['product_id'])
+        read_group_res = self.env['mrp.production'].read_group([('product_id', 'in', self.ids)], ['product_id'], ['product_id'], label=False)
         mapped_data = dict([(data['product_id'][0], data['product_id_count']) for data in read_group_res])
         for product in self:
             product.mo_count = mapped_data.get(product.id, 0)
