@@ -409,7 +409,7 @@ Andrew</p>]]></field>
 
         <record id="crm_case_15" model="crm.lead">
             <field name="type">opportunity</field>
-            <field name="name">Plan to buy RedHat servers</field>
+            <field name="name">Plan to buy Odoo servers</field>
             <field name="planned_revenue">25000</field>
             <field name="probability">30.0</field>
             <field name="partner_id" ref="base.res_partner_2"/>
@@ -422,7 +422,7 @@ Andrew</p>]]></field>
             <field name="priority">1</field>
             <field name="date_deadline" eval="(DateTime.today() + relativedelta(weeks=1)).strftime('%Y-%m-%d %H:%M')"/>
             <field name="team_id" ref="sales_team.team_sales_department"/>
-            <field name="user_id" ref="base.user_demo"/>
+            <field name="user_id" ref="base.user_root"/>
             <field name="stage_id" ref="crm.stage_lead2"/>
             <field name="campaign_id" ref="utm.utm_campaign_email_campaign_products"/>
             <field name="source_id" ref="utm.utm_source_newsletter"/>
@@ -508,7 +508,7 @@ Andrew</p>]]></field>
             <field name="priority">2</field>
             <field name="date_deadline" eval="(DateTime.today() + relativedelta(weeks=1)).strftime('%Y-%m-%d %H:%M')"/>
             <field name="team_id" ref="sales_team.team_sales_department"/>
-            <field name="user_id" ref="base.user_demo"/>
+            <field name="user_id" ref="base.user_root"/>
             <field name="stage_id" ref="crm.stage_lead2"/>
             <field name="campaign_id" ref="utm.utm_campaign_email_campaign_products"/>
             <field name="source_id" ref="utm.utm_source_mailing"/>
@@ -611,7 +611,7 @@ Andrew</p>]]></field>
             <field name="priority">1</field>
             <field name="date_deadline" eval="(DateTime.today() + relativedelta(weeks=1)).strftime('%Y-%m-%d %H:%M')"/>
             <field name="team_id" ref="sales_team.team_sales_department"/>
-            <field name="user_id" ref="base.user_root"/>
+            <field name="user_id" ref="base.user_demo"/>
             <field name="stage_id" ref="crm.stage_lead3"/>
             <field name="date_closed" eval="(DateTime.today() - relativedelta(months=3)).strftime('%Y-%m-%d %H:%M')"/>
             <field name="campaign_id" ref="utm.utm_campaign_email_campaign_products"/>
@@ -633,7 +633,7 @@ Andrew</p>]]></field>
             <field name="tag_ids" eval="[(6, 0, [categ_oppor4,categ_oppor8])]"/>
             <field name="priority">2</field>
             <field name="team_id" ref="sales_team.team_sales_department"/>
-            <field name="user_id" ref="base.user_demo"/>
+            <field name="user_id" ref="base.user_root"/>
             <field name="stage_id" ref="crm.stage_lead3"/>
             <field name="campaign_id" ref="utm.utm_campaign_email_campaign_products"/>
             <field name="source_id" ref="utm.utm_source_mailing"/>
