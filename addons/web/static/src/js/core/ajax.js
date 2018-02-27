@@ -14,7 +14,10 @@ function genericJsonRpc (fct_name, params, fct) {
     };
     var xhr = fct(data);
     var result = xhr.pipe(function(result) {
-        core.bus.trigger('rpc:result', data, result);
+        core.bus.trigger_up('rpc:result', {
+            data: data, 
+            result:result
+        });
         if (result.error !== undefined) {
             if (result.error.data.arguments[0] !== "bus.Bus not available in test mode") {
                 console.error("Server application error", JSON.stringify(result.error));

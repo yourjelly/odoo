@@ -44,8 +44,8 @@ var DebugManager = Widget.extend({
         }
     },
     start: function () {
-        core.bus.on('rpc:result', this, function (data, result) {
-            this._debug_events(result.debug);
+        core.bus.on('rpc:result', this, function (event) {
+            this._debug_events(event.data ? event.data.result.debug : event.data);
         });
         this.on('update-stats', this, this._update_stats);
         var init;

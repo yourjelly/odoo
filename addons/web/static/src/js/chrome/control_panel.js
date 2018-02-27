@@ -51,6 +51,7 @@ var ControlPanelMixin = {
      */
     update_control_panel: function(cp_status, options) {
         if (this.cp_bus) {
+            debugger
             this.cp_bus.trigger_up("update", {
                 cp_status: cp_status || {},
                 options: options || {}
@@ -128,8 +129,9 @@ var ControlPanel = Widget.extend({
      * @param {Boolean} [options.clear] set to true to clear from control panel
      * elements that are not in status.cp_content
      */
-    update: function(event) {
-        var status = event.data.cp_status;
+    update: function(event, op) {
+        debugger
+        var status = event.data ? event.data.cp_status : event;
         var options = event.data.options;
         this._toggle_visibility(!status.hidden);
 
