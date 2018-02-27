@@ -44,8 +44,8 @@ var DebugManager = Widget.extend({
         }
     },
     start: function () {
-        core.bus.on('rpc:result', this, function (req, resp) {
-            this._debug_events(resp.debug);
+        core.bus.on('rpc:result', this, function (data, result) {
+            this._debug_events(result.debug);
         });
         this.on('update-stats', this, this._update_stats);
         var init;
@@ -105,12 +105,12 @@ var DebugManager = Widget.extend({
         if (events && events.length) {
             this._events.push(events);
         }
-        this.trigger('update-stats', this._events);
+        this.trigger_up('update-stats', this._events);
     },
     requests_clear: function () {
         if (!this._events) { return; }
         this._events = [];
-        this.trigger('update-stats', this._events);
+        this.trigger_up('update-stats', this._events);
     },
     _update_stats: function (rqs) {
         var requests = 0, rtime = 0, queries = 0, qtime = 0;

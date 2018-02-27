@@ -453,7 +453,7 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
             return this.update({mode: mode}, {reload: false}).then(function () {
                 // necessary to allow all sub widgets to use their dimensions in
                 // layout related activities, such as autoresize on fieldtexts
-                core.bus.trigger('DOM_updated');
+                core.bus.trigger_up('DOM_updated');
             });
         }
         return $.when();

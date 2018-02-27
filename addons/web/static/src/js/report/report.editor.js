@@ -50,10 +50,10 @@ if (window.self !== window.top) {
 
             switch (message) {
                 case 'report.editor:ask_save':
-                    core.bus.trigger('editor_save_request');
+                    core.bus.trigger_up('editor_save_request');
                     break;
                 case 'report.editor:ask_discard':
-                    core.bus.trigger('editor_discard_request');
+                    core.bus.trigger_up('editor_discard_request');
                     break;
                 default:
             }

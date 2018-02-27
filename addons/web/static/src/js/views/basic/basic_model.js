@@ -2965,7 +2965,7 @@ var BasicModel = AbstractModel.extend({
             dataPoint = this.localData[dataPoint.parentID];
         }
         if (_.contains(this.noCacheModels, dataPoint.model)) {
-            core.bus.trigger('clear_cache');
+            core.bus.trigger_up('clear_cache');
         }
     },
     /**

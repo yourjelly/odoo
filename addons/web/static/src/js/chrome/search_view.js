@@ -133,8 +133,8 @@ var SearchQuery = Backbone.Collection.extend({
 var InputView = Widget.extend({
     template: 'SearchView.InputView',
     events: {
-        focus: function () { this.trigger('focused', this); },
-        blur: function () { this.$el.val(''); this.trigger('blurred', this); },
+        focus: function () { this.trigger_up('focused', this); },
+        blur: function () { this.$el.val(''); this.trigger_up('blurred', this); },
         keydown: 'onKeydown',
     },
     onKeydown: function (e) {
@@ -473,7 +473,7 @@ var SearchView = Widget.extend({
         if(ui.item.facet && ui.item.facet.values && ui.item.facet.values.length && String(ui.item.facet.values[0].value).trim() !== "") {
             this.query.add(ui.item.facet);
         } else {
-            this.query.trigger('add');
+            this.query.trigger_up('add');
         }
     },
     subviewForRoot: function (subview_root) {

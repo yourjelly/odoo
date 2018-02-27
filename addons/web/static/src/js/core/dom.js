@@ -35,7 +35,7 @@ function _notify(content, callbacks) {
             c.widget.on_attach_callback(c.callback_args);
         }
     });
-    core.bus.trigger('DOM_updated', content);
+    core.bus.trigger_up('DOM_updated', content);
 }
 
 return {

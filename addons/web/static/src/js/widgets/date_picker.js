@@ -83,7 +83,7 @@ var DateWidget = Widget.extend({
             if (!oldValue !== !newValue || oldValue && newValue && !oldValue.isSame(newValue)) {
                 // The condition is strangely written; this is because the
                 // values can be false/undefined
-                this.trigger("datetime_changed");
+                this.trigger_up("datetime_changed");
             }
         }
     },

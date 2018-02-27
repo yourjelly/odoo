@@ -38,12 +38,12 @@ var CrashManager = core.Class.extend({
             return;
         }
         if (error.code === -32098) {
-            core.bus.trigger('connection_lost');
+            core.bus.trigger_up('connection_lost');
             this.connection_lost = true;
             var timeinterval = setInterval(function() {
                 ajax.jsonRpc('/web/webclient/version_info').then(function() {
                     clearInterval(timeinterval);
-                    core.bus.trigger('connection_restored');
+                    core.bus.trigger_up('connection_restored');
                     self.connection_lost = false;
                 });
             }, 2000);

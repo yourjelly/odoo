@@ -96,7 +96,7 @@ var AttachDocument = Widget.extend({
      */
     _onFileChanged: function (ev) {
         ev.stopPropagation();
-        this.$('form.o_form_binary_form').trigger('submit');
+        this.$('form.o_form_binary_form').trigger_up('submit');
         framework.blockUI();
     },
     /**
