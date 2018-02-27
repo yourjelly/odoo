@@ -68,7 +68,7 @@ class HrExpense(models.Model):
         for expense in self:
             if not expense.sheet_id:
                 expense.state = "draft"
-            elif expense.sheet_id.state == "cancel":
+            elif expense.sheet_id.state == "refuse":
                 expense.state = "refused"
             elif expense.sheet_id.state == "approve" or expense.sheet_id.state == "post":
                 expense.state = "approved"
@@ -382,7 +382,7 @@ class HrExpense(models.Model):
     @api.multi
     def refuse_expense(self, reason):
         self.write({'is_refused': True})
-        self.sheet_id.write({'state': 'cancel'})
+        self.sheet_id.write({'state': 'refuse'})
         self.sheet_id.message_post_with_view('hr_expense.hr_expense_template_refuse_reason',
                                              values={'reason': reason, 'is_sheet': False, 'name': self.name})
 
@@ -471,7 +471,8 @@ class HrExpenseSheet(models.Model):
         ('approve', 'Approved'),
         ('post', 'Posted'),
         ('done', 'Paid'),
-        ('cancel', 'Refused')
+        ('refuse', 'Refused'),
+        ('cancel', 'Cancelled')
     ], string='Status', index=True, readonly=True, track_visibility='onchange', copy=False, default='submit', required=True, help='Expense Report State')
     employee_id = fields.Many2one('hr.employee', string="Employee", required=True, readonly=True, states={'submit': [('readonly', False)]}, default=lambda self: self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1))
     address_id = fields.Many2one('res.partner', string="Employee Home Address")
@@ -555,7 +556,7 @@ class HrExpenseSheet(models.Model):
             return 'hr_expense.mt_expense_approved'
         elif 'state' in init_values and self.state == 'submit':
             return 'hr_expense.mt_expense_confirmed'
-        elif 'state' in init_values and self.state == 'cancel':
+        elif 'state' in init_values and self.state == 'refuse':
             return 'hr_expense.mt_expense_refused'
         elif 'state' in init_values and self.state == 'done':
             return 'hr_expense.mt_expense_paid'
@@ -656,7 +657,7 @@ class HrExpenseSheet(models.Model):
     def refuse_sheet(self, reason):
         if not self.user_has_groups('hr_expense.group_hr_expense_user'):
             raise UserError(_("Only HR Officers can refuse expenses"))
-        self.write({'state': 'cancel'})
+        self.write({'state': 'refuse'})
         for sheet in self:
             sheet.message_post_with_view('hr_expense.hr_expense_template_refuse_reason', values={'reason': reason, 'is_sheet': True, 'name': self.name})
 
@@ -664,3 +665,14 @@ class HrExpenseSheet(models.Model):
     def reset_expense_sheets(self):
         self.mapped('expense_line_ids').write({'is_refused': False})
         return self.write({'state': 'submit'})
+
+    def cancel(self):
+        moves = self.env['account.move']
+        for sheet in self:
+            if sheet.account_move_id:
+                moves += sheet.account_move_id
+        self.write({'state': 'cancel', 'account_move_id': False})
+        if moves:
+            moves.button_cancel()
+            moves.unlink()
+        return True
