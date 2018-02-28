@@ -384,11 +384,16 @@ var KanbanController = BasicController.extend({
      * @param {OdooEvent} event
      */
     _onToggleActiveRecords: function (event) {
+        var self = this;
         var active = !event.data.archive;
         var column = event.target;
         var recordIds = _.pluck(column.records, 'db_id');
         if (recordIds.length) {
-            return this.model.toggleActive(recordIds, active, column.db_id).then(this.update.bind(this, {}, {reload: false}));
+            return this.model.toggleActive(recordIds, active, column.db_id).then(function (db_id) {
+                var data = self.model.get(db_id);
+                self.renderer.updateColumn(db_id, data);
+                self._updateEnv();
+            });
         }
     },
 });
