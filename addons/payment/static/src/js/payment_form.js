@@ -169,6 +169,7 @@ odoo.define('payment.payment_form', function (require) {
                                 if(action_url) {
                                     newForm.submit(); // and finally submit the form
                                 }
+                                self.def ? self.def.resolve() : true;
                             }
                             else {
                                 self.displayError(
