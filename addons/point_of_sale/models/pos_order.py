@@ -589,7 +589,9 @@ class PosOrder(models.Model):
 
     @api.multi
     def action_pos_order_done(self):
-        return self._create_account_move_line()
+        res = self.with_context(check_move_validity=False, recompute=False)._create_account_move_line()
+        self.recompute()
+        return res
 
     @api.model
     def create_from_ui(self, orders):
