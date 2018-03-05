@@ -43,6 +43,7 @@
     var cjsRequireRegExp = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g;
 
     var debug = ($.deparam($.param.querystring()).debug !== undefined);
+    debug = true;
 
     var odoo = window.odoo = window.odoo || {};
     _.extend(odoo, {
@@ -189,24 +190,25 @@
                     var log = console[_.isEmpty(failed) || _.isEmpty(unloaded) ? 'info' : 'error'].bind(console);
                     log((_.isEmpty(failed) ? (_.isEmpty(unloaded) ? 'info' : 'warning') : 'error') + ': Some modules could not be started');
                     if (missing.length) {
-                        log('Missing dependencies:    ', missing);
+                        log('Missing dependencies:    ', JSON.stringify(missing));
                     }
                     if (!_.isEmpty(failed)) {
-                        log('Failed modules:          ', _.pluck(failed, 'name'));
+                        log('Failed modules:          ', JSON.stringify(_.pluck(failed, 'name')));
                     }
                     if (!_.isEmpty(rejected)) {
-                        log('Rejected modules:        ', rejected);
+                        log('Rejected modules:        ', JSON.stringify(rejected));
                     }
                     if (!_.isEmpty(rejected_linked)) {
-                        log('Rejected linked modules: ', rejected_linked);
+                        log('Rejected linked modules: ', JSON.stringify(rejected_linked));
                     }
                     if (!_.isEmpty(unloaded)) {
-                        log('Non loaded modules:      ', _.pluck(unloaded, 'name'));
+                        log('Non loaded modules:      ', JSON.stringify(_.pluck(unloaded, 'name')));
                     }
                     if (odoo.debug && !_.isEmpty(debug_jobs)) {
-                        log('Debug:                   ', debug_jobs);
+                        log('Debug:                   ', JSON.stringify(debug_jobs));
                     }
                 }
+                console.log('FAILED', JSON.stringify(failed));
             }
             odoo.__DEBUG__.js_modules = {
                 missing: missing,
