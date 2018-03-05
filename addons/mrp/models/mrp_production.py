@@ -3,7 +3,7 @@
 
 from collections import defaultdict
 import math
-
+from itertools import groupby
 from odoo import api, fields, models, _
 from odoo.addons import decimal_precision as dp
 from odoo.exceptions import UserError
@@ -527,9 +527,89 @@ class MrpProduction(models.Model):
             finish_moves = production.move_finished_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
             raw_moves = production.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
             (finish_moves | raw_moves)._action_cancel()
-
         self.write({'state': 'cancel', 'is_locked': True})
+        self._log_decrease_ordered_quantity({self:(self.product_qty, self.product_qty)})
+        depended_mos = self.search([('origin', '=', self.name)])
+        if depended_mos:
+            depended_mos.write({'state': 'cancel', 'is_locked': True})
+            depended_mos._log_decrease_ordered_quantity({depended_mos:(depended_mos.product_qty, depended_mos.product_qty)})
         return True
+
+    def _log_decrease_ordered_quantity(self, mrp_order_lines_quantities):
+
+        def _keys_in_sorted(move):
+            """ sort by Production Order and the responsible for the product the
+            move.
+            """
+            return (move.production_id.id, move.product_id.responsible_id.id)
+
+        def _keys_in_groupby(move):
+            """ group by Production Order and the responsible for the product the
+            move.
+            """
+            return (move.production_id, move.product_id.responsible_id)
+
+        def _render_note_exception_quantity_mrp_production(order_exceptions):
+            mrp_order_ids = self
+            move_ids = self.env['stock.move'].concat(*rendering_context.keys())
+            impacted_pickings = move_ids.mapped('production_id')
+            values = {
+                'mrp_order_ids': mrp_order_ids,
+                'order_exceptions': order_exceptions.values(),
+                'impacted_pickings': impacted_pickings,
+            }
+            res = self.env.ref('mrp.exception_on_mrp').render(values=values)
+            return res
+        documents = self._log_activity_get_documents(mrp_order_lines_quantities, 'move_finished_ids', 'DOWN', _keys_in_sorted, _keys_in_groupby)
+        filtered_documents = {}
+        for (parent, responsible), rendering_context in documents.items():
+            filtered_documents[(parent, responsible)] = rendering_context
+        self.env['mrp.production']._log_activity(_render_note_exception_quantity_mrp_production, filtered_documents)
+
+    def _log_activity_get_documents(self, orig_obj_changes, stream_field, stream, sorted_method=False, groupby_method=False):
+        move_to_orig_object_rel = {co: ooc for ooc in orig_obj_changes.keys() for co in ooc[stream_field]}
+        origin_objects = self.env[list(orig_obj_changes.keys())[0]._name].concat(*list(orig_obj_changes.keys()))
+        visited_documents = {}
+        if stream == 'DOWN':
+            if sorted_method and groupby_method:
+                grouped_moves = groupby(sorted(origin_objects.mapped(stream_field), key=sorted_method), key=groupby_method)
+            else:
+                raise UserError(_('You have to define a groupby and sorted method and pass them as arguments.'))
+        elif stream == 'UP':
+            grouped_moves = {}
+            for visited_move in origin_objects.mapped(stream_field):
+                for document, responsible, visited in visited_move._get_upstream_documents_and_responsibles(self.env[visited_move._name]):
+                    if grouped_moves.get((document, responsible)):
+                        grouped_moves[(document, responsible)] |= visited_move
+                        visited_documents[(document, responsible)] |= visited
+                    else:
+                        grouped_moves[(document, responsible)] = visited_move
+                        visited_documents[(document, responsible)] = visited
+            grouped_moves = grouped_moves.items()
+        else:
+            raise UserError(_('Unknow stream.'))
+        documents = {}
+        for (parent, responsible), moves in grouped_moves:
+            moves = list(moves)
+            moves = self.env[moves[0]._name].concat(*moves)
+            # Get the note
+            rendering_context = {move: (orig_object, orig_obj_changes[orig_object]) for move in moves for orig_object in move_to_orig_object_rel[move]}
+            if visited_documents:
+                documents[(parent, responsible)] = rendering_context, visited_documents.values()
+            else:
+                documents[(parent, responsible)] = rendering_context
+        return documents
+
+    def _log_activity(self, render_method, documents):
+        for (parent, responsible), rendering_context in documents.items():
+            note = render_method(rendering_context)
+            self.env['mail.activity'].create({
+                'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
+                'note': note,
+                'user_id': responsible.id,
+                'res_id': parent.id,
+                'res_model_id': self.env['ir.model'].search([('model', '=', parent._name)], limit=1).id,
+            })
 
     def _cal_price(self, consumed_moves):
         self.ensure_one()
