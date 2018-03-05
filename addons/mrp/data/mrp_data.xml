@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
+    <data>
 
         <record id="sequence_mrp_prod" model="ir.sequence">
             <field name="name">Production order</field>
@@ -93,6 +93,33 @@
             <value>init</value>
             <value model="stock.warehouse" eval="obj().env.ref('stock.warehouse0').manu_type_id.id"/>
         </function>
+
+        <template id="exception_on_mrp">
+            <div class="alert alert-warning">
+              Exception(s) occurred on the manufactured order(s):
+              <t t-foreach="mrp_order_ids" t-as="mrp_order">
+                  <a href="#" data-oe-model="mrp.production" t-att-data-oe-id="mrp_order.id"><t t-esc="mrp_order.name"/></a>.
+              </t>
+              Manual actions may be needed.
+              <div class="mt16">
+                    <p>Exception(s):</p>
+                    <t t-foreach="mrp_order_ids" t-as="mrp_order">
+                        <t t-if="mrp_order.state=='cancel'">
+                            Your order <a href="#" data-oe-model="mrp.production" t-att-data-oe-id="mrp_order.id"><t t-esc="mrp_order.name"/></a> has been cancelled.
+                        </t>
+                    </t>
+                    <ul t-foreach="order_exceptions" t-as="exception">
+                        <li>
+                            <t t-set="order_line" t-value="exception[0]"/>
+                            <t t-set="new_qty" t-value="exception[1][0]"/>
+                            <t t-set="old_qty" t-value="exception[1][1]"/>
+                            <t t-esc="new_qty"/>  of <t t-esc="order_line.product_id.name"/>
+                            ordered instead of <t t-esc="old_qty"/>
+                        </li>
+                    </ul>
+              </div>
+            </div>
+        </template>
 
     </data>
 
