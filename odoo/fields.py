@@ -1952,6 +1952,16 @@ class Many2one(_Relational):
         if not self.delegate:
             self.delegate = name in model._inherits.values()
 
+        if model._transient:
+            # transient records should not prevent the deletion of other records
+            # in particular, do not prevent the auto-vacuum of other transient records
+            VALID = [(True, 'cascade'), (False, 'set null'), (False, 'cascade')]
+            if (self.required, self.ondelete) not in VALID:
+                _logger.warning("Field %s on transient model should be either:\n"
+                                " - required and ondelete='cascade', or\n"
+                                " - not required and ondelete='set null', or\n"
+                                " - not required and ondelete='cascade'.", self)
+
     def update_db(self, model, columns):
         comodel = model.env[self.comodel_name]
         if not model.is_transient() and comodel.is_transient():
