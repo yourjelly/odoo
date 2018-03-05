@@ -23,7 +23,7 @@ class SurveyMailComposeMessage(models.TransientModel):
         if context.get('model') == 'survey.survey':
             return context.get('res_id')
 
-    survey_id = fields.Many2one('survey.survey', string='Survey', default=default_survey_id, required=True)
+    survey_id = fields.Many2one('survey.survey', string='Survey', default=default_survey_id)
     public = fields.Selection([('public_link', 'Share the public web link to your audience.'),
                                 ('email_public_link', 'Send by email the public web link to your audience.'),
                                 ('email_private', 'Send private invitation to your audience (only one response per recipient and per invitation).')],

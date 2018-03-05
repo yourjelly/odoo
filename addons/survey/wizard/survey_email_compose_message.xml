@@ -30,7 +30,9 @@
                     <field name="res_id" invisible="1"/>
                     <field name="parent_id" invisible="1"/>
                     <group col="2">
-                        <field name="survey_id" readonly="context.get('default_survey_id')"/>
+                        <field name="survey_id"
+                            readonly="context.get('default_survey_id')"
+                            required="True"/>
                         <field name="public" widget="radio" invisible="context.get('survey_resent_token')" />
                     </group>
                     <group col="1" invisible="context.get('survey_resent_token')" attrs="{'invisible':[('public','in',['email_private', 'email_public_link'])]}" class="oe_survey_email_public">

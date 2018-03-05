@@ -51,7 +51,7 @@ class FinancialYearOpeningWizard(models.TransientModel):
 class OpeningAccountMoveWizard(models.TransientModel):
     _name = 'account.opening'
 
-    company_id = fields.Many2one(comodel_name='res.company', required=True)
+    company_id = fields.Many2one(comodel_name='res.company')
     opening_move_id = fields.Many2one(string='Opening Journal Entry', comodel_name='account.move', related='company_id.account_opening_move_id')
     currency_id = fields.Many2one(comodel_name='res.currency', related='opening_move_id.currency_id')
     opening_move_line_ids = fields.One2many(string='Opening Journal Items', related="opening_move_id.line_ids")

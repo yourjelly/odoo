@@ -12,7 +12,7 @@
                         <newline/>
                         <field name="debit"/>
                         <field name="credit"/>
-                        <field name="company_id" invisible="1"/>
+                        <field name="company_id" invisible="1" required="True"/>
                     </group><group string="Write-Off">
                         <field name="writeoff"/>
                     </group>

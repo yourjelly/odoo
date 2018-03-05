@@ -6,7 +6,7 @@
             <form string="Grant Badge To">
                 Set the current value you have reached for this goal
                 <group>
-                    <field name="goal_id" invisible="1"/>
+                    <field name="goal_id" invisible="1" required="True"/>
                     <field name="current" />
                 </group>
                 <footer>

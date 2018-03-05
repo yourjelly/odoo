@@ -679,8 +679,8 @@ class WizardMultiChartsAccounts(models.TransientModel):
     _name = 'wizard.multi.charts.accounts'
     _inherit = 'res.config'
 
-    company_id = fields.Many2one('res.company', string='Company', required=True)
-    currency_id = fields.Many2one('res.currency', string='Currency', help="Currency as per company's country.", required=True)
+    company_id = fields.Many2one('res.company', string='Company')
+    currency_id = fields.Many2one('res.currency', string='Currency', help="Currency as per company's country.")
     only_one_chart_template = fields.Boolean(string='Only One Chart Template Available')
     chart_template_id = fields.Many2one('account.chart.template', string='Chart Template', required=True)
     bank_account_ids = fields.One2many('account.bank.accounts.wizard', 'bank_account_id', string='Cash and Banks', required=True, oldname="bank_accounts_id")
