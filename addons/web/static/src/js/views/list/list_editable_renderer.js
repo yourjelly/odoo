@@ -423,7 +423,7 @@ ListRenderer.include({
      * @returns {boolean}
      */
     _isEditable: function () {
-        return !this.state.groupedBy.length && this.editable;
+        return this.editable;
     },
     /**
      * Move the cursor on the end of the previous line, if possible.
