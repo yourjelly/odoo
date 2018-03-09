@@ -348,12 +348,14 @@ class AssetsBundle(object):
             Checks if the bundle contains any sass/less content, then compiles it to css.
             Returns the bundle's flat css.
         """
+        user_direction = self.env['res.lang'].search([('code', '=', self.env.user.lang)]).direction
         for atype in (SassStylesheetAsset, ScssStylesheetAsset, LessStylesheetAsset):
             assets = [asset for asset in self.stylesheets if isinstance(asset, atype)]
             if assets:
                 source = '\n'.join([asset.get_source() for asset in assets])
                 compiled = self.compile_css(assets[0].compile, source)
-                compiled = self.run_rtlcss(compiled);
+                if user_direction == 'rtl':
+                    compiled = self.run_rtlcss(compiled);
 
                 if not self.css_errors and old_attachments:
                     old_attachments.unlink()
