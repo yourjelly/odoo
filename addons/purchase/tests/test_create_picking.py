@@ -305,11 +305,10 @@ class TestCreatePicking(common.TestProductCommon):
         self.assertTrue(purchase_order_2, 'No purchase order created.')
 
         purchase_order_2.button_confirm()
+        purchase_order.order_line.move_ids.quantity_done = 80.0
+        purchase_order.order_line.move_ids.picking_id.button_validate()
 
-        purchase_order.picking_ids.move_lines.quantity_done = 80.0
-        purchase_order.picking_ids.button_validate()
-
-        purchase_order_2.picking_ids.move_lines.quantity_done = 20.0
-        purchase_order_2.picking_ids.button_validate()
+        purchase_order_2.order_line.move_ids.quantity_done = 20.0
+        purchase_order_2.order_line.move_ids.picking_id.button_validate()
 
         self.assertEqual(sum(customer_picking.move_lines.mapped('reserved_availability')), 100.0, 'The total quantity for the customer move should be available and reserved.')

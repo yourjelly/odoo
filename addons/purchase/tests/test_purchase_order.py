@@ -6,6 +6,7 @@ from datetime import datetime
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from odoo.addons.account.tests.account_test_classes import AccountingTestCase
 from odoo.tests import tagged
+from odoo.tests.common import Form
 
 
 @tagged('post_install', '-at_install')
@@ -21,6 +22,7 @@ class TestPurchaseOrder(AccountingTestCase):
         self.partner_id = self.env.ref('base.res_partner_1')
         self.product_id_1 = self.env.ref('product.product_product_8')
         self.product_id_2 = self.env.ref('product.product_product_11')
+        self.wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.user.id)], limit=1)
 
         (self.product_id_1 | self.product_id_2).write({'purchase_method': 'purchase'})
         self.po_vals = {
@@ -159,3 +161,74 @@ class TestPurchaseOrder(AccountingTestCase):
         self.invoice.invoice_line_ids[1].quantity = 2.0
         self.invoice.invoice_validate()
         self.assertEqual(self.po.order_line.mapped('qty_invoiced'), [3.0, 3.0], 'Purchase: Billed quantity should be 3.0')
+        
+    def test_create_purchase_order_picking_count_1(self):
+        """
+        Test if only 1 picking is created when creating a PO with a warehouse setted 
+        to 'one_step' reception 
+        """
+        self.wh.reception_steps = 'one_step'
+        self.po = self.env['purchase.order'].create(self.po_vals)
+        self.po.button_confirm()
+        self.assertEqual(self.po.picking_count, 1, "Picking count is incorrect")
+    
+    def test_create_purchase_order_picking_count_2(self):
+        """
+        Test if 2 pickings are created when creating a PO with a warehouse setted 
+        to 'two_steps' reception 
+        """
+        self.wh.reception_steps = 'two_steps'
+        self.po = self.env['purchase.order'].create(self.po_vals)
+        self.po.button_confirm()
+        self.assertEqual(self.po.picking_count, 2, "Picking count is incorrect")
+    
+    def test_create_purchase_order_picking_count_3(self):
+        """
+        Test if 3 pickings are created when creating a PO with a warehouse setted 
+        to 'three_steps' reception 
+        """
+        self.wh.reception_steps = 'three_steps'
+        self.po = self.env['purchase.order'].create(self.po_vals)
+        self.po.button_confirm()
+        self.assertEqual(self.po.picking_count, 3, "Picking count is incorrect")
+        
+    def test_purchase_order_picking_count(self):
+        """
+        Test if a picking is created when the quantity is increased in the 
+        purchase order and the first picking was previously validated.
+        Then create a return and check if the pickings for the returns are created
+        """
+        self.wh.reception_steps = 'three_steps'
+        self.po = self.env['purchase.order'].create(self.po_vals)
+        self.po.button_confirm()
+        self.assertEqual(self.po.picking_count, 3, "Picking count is incorrect after the PO creation")
+        
+        # Validating 1st picking
+        for move_line in self.po.picking_ids[0].move_lines:
+            move_line.quantity_done = move_line.product_uom_qty
+        self.po.picking_ids[0].button_validate()
+        self.po.picking_ids[0].action_done()
+
+        # Editing a quantity on the PO
+        with Form(self.po) as po:
+            with po.order_line.edit(0) as line:
+                line.product_qty += 20
+
+        self.assertEqual(self.po.picking_count, 4, "Picking count is incorrect after the quantity was increased")
+        
+        # Validating the picking created by the quantity edition
+        for move_line in self.po.picking_ids[3].move_lines:
+            move_line.quantity_done = move_line.product_uom_qty
+        self.po.picking_ids[3].button_validate()
+        self.po.picking_ids[3].action_done()
+
+        # Create 2 returns based on the picking previously validated
+        stock_return_picking = self.env['stock.return.picking']\
+            .with_context(active_ids=self.po.picking_ids[3].ids, active_id=self.po.picking_ids[3].id)\
+            .create({})
+        stock_return_picking.product_return_moves[0].quantity = 3.0 # Return only 3 for the first line
+        stock_return_picking_action = stock_return_picking.create_returns()
+        return_pick = self.env['stock.picking'].browse(stock_return_picking_action['res_id'])
+        return_pick.move_lines[0].move_line_ids[0].qty_done = 5.0
+        return_pick.action_done()
+        self.assertEqual(len(self.po.picking_ids), 6, "Picking count is incorrect after the return creation")
