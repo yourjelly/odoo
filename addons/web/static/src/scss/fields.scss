@@ -39,7 +39,7 @@
 
     // Flex fields (inline)
     &.o_field_many2one, &.o_field_radio, &.o_field_many2manytags, &.o_field_percent_pie, &.o_field_monetary, &.o_field_binary_file {
-        @media (min-width: $screen-sm-min) {
+        @include media-breakpoint-up(md) {
             display: inline-flex;
         }
         > span, > button {
@@ -359,7 +359,7 @@
                 cursor: pointer;
             }
         }
-        @media (max-width: $screen-xs-min) {
+        @include media-breakpoint-down(xs, $o-extra-grid-breakpoints) {
             .o_form_image_controls{
                 position: initial;
                 opacity: 1;
