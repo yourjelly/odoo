@@ -552,19 +552,17 @@
                                         </small>
                                     </div>
                                     <div class="o_dropdown_kanban dropdown" groups="base.group_user">
-                                        <a class="dropdown-toggle btn" data-toggle="dropdown" href="#" >
+                                        <a class="dropdown-toggle o-no-caret btn" data-toggle="dropdown" href="#" >
                                             <span class="fa fa-ellipsis-v" aria-hidden="true"/>
                                         </a>
-                                        <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-                                            <li t-if="widget.editable"><a type="set_cover">Set Cover Image</a></li>
-                                            <li t-if="widget.editable"><a type="edit">Edit Task</a></li>
-                                            <li t-if="widget.deletable"><a type="delete">Delete</a></li>
-                                            <li class="divider"></li>
-                                            <li class="dropdown-header">Record's Colour</li>
-                                            <li>
-                                                <ul class="oe_kanban_colorpicker" data-field="color"/>
-                                            </li>
-                                        </ul>
+                                        <div class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                                            <a type="set_cover" class="dropdown-item" t-if="widget.editable">Set Cover Image</a>
+                                            <a type="edit" class="dropdown-item" t-if="widget.editable">Edit Task</a>
+                                            <a type="delete" class="dropdown-item" t-if="widget.deletable">Delete</a>
+                                            <div class="dropdown-divider"></div>
+                                            <div class="dropdown-header">Record's Colour</div>
+                                            <ul class="oe_kanban_colorpicker" data-field="color"/>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="o_kanban_record_body">

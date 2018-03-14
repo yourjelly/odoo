@@ -20,13 +20,13 @@
 
     <t t-name="website_sale.LinkTrackersDropDown">
         <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle utm_dropdown ml4" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><span class="utm_button_name">Campaigns</span><span class="caret ml4"/>
+            <button class="btn btn-secondary dropdown-toggle utm_dropdown ml4" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><span class="utm_button_name">Campaigns</span>
             </button>
-            <ul class="dropdown-menu" role="menu" aria-labelledby="utm_dropdown">
-                <li><a class="js_utm_selector" name="campaign_id">Campaigns</a></li>
-                <li><a class="js_utm_selector" name="medium_id">Medium</a></li>
-                <li><a class="js_utm_selector" name="source_id">Sources</a></li>
-            </ul>
+            <div class="dropdown-menu" role="menu" aria-labelledby="utm_dropdown">
+                <a name="campaign_id" class="dropdown-item js_utm_selector">Campaigns</a>
+                <a name="medium_id" class="dropdown-item js_utm_selector">Medium</a>
+                <a name="source_id" class="dropdown-item js_utm_selector">Sources</a>
+            </div>
         </div>
     </t>
 </templates>

@@ -12,7 +12,7 @@
                     <i class="fa fa-user"></i>
                     <span class="o_followers_count"/>
                 </button>
-                <ul class="dropdown-menu o_followers_list" role="menu"></ul>
+                <div class="dropdown-menu o_followers_list" role="menu"/>
             </div>
             <div class="o_followers_actions">
                 <div class="btn-group o_subtypes_list">
@@ -25,7 +25,7 @@
                     </button><button class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                         <span class="fa fa-bell"/>
                     </button>
-                    <ul class="dropdown-menu" role="menu"/>
+                    <div class="dropdown-menu" role="menu"/>
                 </div>
             </div>
         </div>
@@ -57,13 +57,9 @@
     -->
     <t t-name="mail.Followers.add_more">
         <t t-if="widget.isEditable">
-            <li class="o_add_follower">
-                <a href="#"> Add Followers </a>
-            </li>
-            <li class="o_add_follower_channel">
-                <a href="#"> Add Channels </a>
-            </li>
-            <li t-if="widget.followers.length > 0" class="divider"/>
+            <a href="#" class="dropdown-item o_add_follower">Add Followers</a>
+            <a href="#" class="dropdown-item o_add_follower_channel">Add Channels</a>
+            <div t-if="widget.followers.length > 0" class="dropdown-divider"/>
         </t>
     </t>
 
@@ -71,7 +67,7 @@
         Message subtypes of a follower subscription
     -->
     <t t-name="mail.Followers.subtype">
-        <li class="o_subtype">
+        <div class="o_subtype dropdown-item">
             <div class="o_checkbox">
                 <input type="checkbox" t-att-checked="record.followed"
                        t-att-id="'input_mail_followers_subtype_'+record.id+(dialog ? '_in_dialog': '')"
@@ -82,7 +78,7 @@
                 <t t-esc="record.name"/>
             </span>
             <i t-if="display_warning" class="fa fa-warning text-warning"/>
-        </li>
+        </div>
     </t>
     <t t-name="mail.Followers.subtypes.warning">
         <span class="text-warning">

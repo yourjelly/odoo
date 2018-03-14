@@ -44,7 +44,7 @@ var MessagingMenu = Widget.extend({
         return this._super();
     },
     is_open: function () {
-        return this.$el.hasClass('open');
+        return this.$el.hasClass('show');
     },
     update_counter: function () {
         var messageFailures = this.call('chat_manager', 'getMessageFailures');
@@ -268,7 +268,7 @@ var ActivityMenu = Widget.extend({
      * @returns {boolean}
      */
     _isOpen: function () {
-        return this.$el.hasClass('open');
+        return this.$el.hasClass('show');
     },
     /**
      * Update(render) activity system tray view on activity updation.

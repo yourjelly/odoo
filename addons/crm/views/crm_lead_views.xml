@@ -324,16 +324,16 @@
                             <div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click">
                                 <div class="o_dropdown_kanban dropdown">
 
-                                    <a class="dropdown-toggle btn" data-toggle="dropdown" href="#" >
+                                    <a class="dropdown-toggle o-no-caret btn" data-toggle="dropdown" href="#" >
                                         <span class="fa fa-ellipsis-v"/>
                                     </a>
-                                    <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-                                        <t t-if="widget.editable"><li><a type="edit">Edit</a></li></t>
-                                        <t t-if="widget.deletable"><li><a type="delete">Delete</a></li></t>
-                                        <li t-if="! record.active.value"><a name="action_set_active" type="object">Restore</a></li>
-                                        <li t-if="record.active.value"><a name="action_set_unactive" type="object">Archive</a></li>
-                                        <li><ul class="oe_kanban_colorpicker" data-field="color"/></li>
-                                    </ul>
+                                    <div class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                                        <t t-if="widget.editable"><a type="edit" class="dropdown-item">Edit</a></t>
+                                        <t t-if="widget.deletable"><a type="delete" class="dropdown-item">Delete</a></t>
+                                        <a name="action_set_active" type="object" class="dropdown-item" t-if="! record.active.value">Restore</a>
+                                        <a name="action_set_unactive" type="object" class="dropdown-item" t-if="record.active.value">Archive</a>
+                                        <ul class="oe_kanban_colorpicker" data-field="color"/>
+                                    </div>
                                 </div>
                                 <div class="oe_kanban_content">
                                     <div>

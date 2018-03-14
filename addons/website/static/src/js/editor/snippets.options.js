@@ -248,8 +248,8 @@ options.registry.carousel = options.Class.extend({
      * @override
      */
     _setActive: function () {
-        this.$el.find('li[data-interval]').removeClass('active')
-            .filter('li[data-interval=' + this.$target.attr('data-interval') + ']').addClass('active');
+        this.$el.find('[data-interval]').removeClass('active')
+            .filter('[data-interval=' + this.$target.attr('data-interval') + ']').addClass('active');
     },
     /**
      * Rebinds carousel events on indicators.
@@ -340,7 +340,7 @@ options.registry.layout_column = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    selectCount: function (previewMode, value, $li) {
+    selectCount: function (previewMode, value, $opt) {
         this._updateColumnCount(value - this.$target.children().length);
     },
 
@@ -399,8 +399,8 @@ options.registry.layout_column = options.Class.extend({
      */
     _setActive: function () {
         this._super.apply(this, arguments);
-        this.$el.find('li[data-select-count]').removeClass('active')
-            .filter('li[data-select-count=' + this.$target.children().length + ']').addClass('active');
+        this.$el.find('[data-select-count]').removeClass('active')
+            .filter('[data-select-count=' + this.$target.children().length + ']').addClass('active');
     },
 });
 
@@ -965,7 +965,7 @@ options.registry.gallery = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    mode: function (previewMode, value, $li) {
+    mode: function (previewMode, value, $opt) {
         this.$target.css('height', '');
         this[value]();
         this.$target
@@ -1014,7 +1014,7 @@ options.registry.gallery = options.Class.extend({
      * Displays the images with a "slideshow" layout.
      */
     slideshow: function () {
-        var imgStyle = this.$el.find('li.active[data-styling]').data('styling') || '';
+        var imgStyle = this.$el.find('.active[data-styling]').data('styling') || '';
         var urls = _.map(this._getImages(), function (img) {
             return $(img).attr('src');
         });
@@ -1047,8 +1047,8 @@ options.registry.gallery = options.Class.extend({
      * @see this.selectClass for parameters
      */
     styling: function (previewMode, value) {
-        var classes = _.map(this.$el.find('li[data-styling]'), function (li) {
-            return $(li).data('styling');
+        var classes = _.map(this.$el.find('[data-styling]'), function (el) {
+            return $(el).data('styling');
         }).join(' ');
         this.$('img').removeClass(classes).addClass(value);
     },
@@ -1160,8 +1160,8 @@ options.registry.gallery = options.Class.extend({
             .removeClass('active')
             .filter('[data-styling="' + classes.join('"], [data-styling="') + '"]').addClass('active');
 
-        this.$el.find('li[data-interval]').removeClass('active')
-            .filter('li[data-interval='+this.$target.find('.carousel:first').attr('data-interval')+']')
+        this.$el.find('[data-interval]').removeClass('active')
+            .filter('[data-interval='+this.$target.find('.carousel:first').attr('data-interval')+']')
             .addClass('active');
 
         var interval = this.$target.find('.carousel:first').attr('data-interval');

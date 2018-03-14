@@ -318,12 +318,12 @@ var MentionManager = Widget.extend({
                 suggestions: suggestions,
             }));
             this.$el
-                .addClass('open')
-                .find('ul').css("max-width", this.composer.$input.width())
-                .find('.o_mention_proposition').first().addClass('active');
+                .addClass('show')
+                .find('.dropdown-menu').addClass('show').css("max-width", this.composer.$input.width())
+                .find('.dropdown-item').first().addClass('active');
             this.open = true;
         } else {
-            this.$el.removeClass('open');
+            this.$el.removeClass('show');
             this.$el.empty();
             this.open = false;
         }

@@ -14,3 +14,9 @@
     background: inherit;
     border: none;
 }
+
+.dropdown-toggle.o-no-caret {
+    &::before, &::after {
+        content: normal;
+    }
+}

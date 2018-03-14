@@ -27,12 +27,12 @@
         }
     }
 
-    &.open > a {
+    &.show > a {
         color: white;
         background-color: $o-we-color-dark;
     }
 
-    .dropdown-menu {
+    .dropdown-menu { // FIXME
         @include o-position-absolute($o-navbar-height - 1, -1px, -1px, -1px);
         margin: 0;
         border-radius: 0;
@@ -83,7 +83,7 @@ body.o_force_mail_theme_choice {
                 display: none;
             }
 
-            .dropdown-menu {
+            .dropdown-menu { // FIXME
                 display: block;
 
                 > li {

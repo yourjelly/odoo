@@ -164,10 +164,10 @@
         </div>
         <div class="dropdown pull-right">
             <a data-toggle="dropdown" href="#"><span class="fa fa-cog"/></a>
-            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="Presets config">
-                <li><a class="reconcile_model_create" href="#">Create model</a></li>
-                <li><a class="reconcile_model_edit" href="#">Modify models</a></li>
-            </ul>
+            <div class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="Presets config">
+                <a href="#" class="dropdown-item reconcile_model_create">Create model</a>
+                <a href="#" class="dropdown-item reconcile_model_edit">Modify models</a>
+            </div>
         </div>
     </div>
     <table class="pull-left">
@@ -218,8 +218,8 @@
         <td class="cell_label">
             <t t-if="line.partner_id &amp;&amp; line.partner_id !== state.st_line.partner_id">
                 <t t-if="line.partner_name.length">
-                    <t t-esc="line.partner_name"/>: 
-                </t>   
+                    <t t-esc="line.partner_name"/>:
+                </t>
             </t>
             <t t-esc="line.label || line.name"/>
             <t t-if="line.ref &amp;&amp; line.ref.length"> : </t>

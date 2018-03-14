@@ -105,9 +105,9 @@ QUnit.test('activity menu widget: activity menu with 3 records', function (asser
         search_default_activities_overdue: 1,
     };
     activityMenu.$('.dropdown-toggle').click();
-    assert.strictEqual(activityMenu.$el.hasClass("open"), true, 'ActivityMenu should be open');
+    assert.strictEqual(activityMenu.$el.hasClass("show"), true, 'ActivityMenu should be open');
     activityMenu.$(".o_activity_filter_button[data-model_name='Issue'][data-filter='overdue']").click();
-    assert.strictEqual(activityMenu.$el.hasClass("open"), false, 'ActivityMenu should be closed');
+    assert.strictEqual(activityMenu.$el.hasClass("show"), false, 'ActivityMenu should be closed');
     // case 2: click on "today"
     context = {
         search_default_activities_today: 1,
@@ -353,7 +353,7 @@ QUnit.test("messaging menu widget: messaging menu with 1 message", function ( as
     messagingMenu.$('.dropdown-toggle').click();
     assert.ok(messagingMenu.$el.hasClass('o_mail_navbar_item'),
         'should be the instance of widget');
-    assert.strictEqual(messagingMenu.$el.hasClass("open"), true,
+    assert.strictEqual(messagingMenu.$el.hasClass("show"), true,
         'MessagingMenu should be open');
     assert.strictEqual(messagingMenu.$('.o_channel_unread').length, 1,
         "should have one unread message for channel");

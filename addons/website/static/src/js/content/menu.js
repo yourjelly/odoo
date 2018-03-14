@@ -66,7 +66,7 @@ sAnimation.registry.affixMenu = sAnimation.Class.extend({
         this.$headerClone.toggleClass('affixed', wOffset > (hOffset + 300));
 
         // Reset opened menus
-        this.$dropdowns.removeClass('open');
+        this.$dropdowns.removeClass('show');
         this.$navbarCollapses.removeClass('in').attr('aria-expanded', false);
     },
 });
@@ -128,7 +128,7 @@ sAnimation.registry.autohideMenu = sAnimation.Class.extend({
             return sum + computeFloatOuterWidthWithMargins(el);
         }, 0);
 
-        if (menuItemsWidth > this.maxWidth) {
+        if (menuItemsWidth > this.maxWidth) { // FIXME
             this.$extraItemsToggle = $('<li/>', {class: 'o_extra_menu_items'});
             this.$extraItemsToggle.append($('<a/>', {href: '#', class: 'dropdown-toggle', 'data-toggle': 'dropdown'})
                 .append($('<i/>', {class: 'fa fa-plus'})));

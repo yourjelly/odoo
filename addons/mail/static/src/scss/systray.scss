@@ -15,7 +15,7 @@
             display: none;
         }
     }
-    &.open .o_mail_navbar_dropdown {
+    .o_mail_navbar_dropdown.show {
         display: flex;
         flex-flow: column nowrap;
     }

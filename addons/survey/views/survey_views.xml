@@ -239,16 +239,16 @@
                         <div t-name="kanban-box" t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click">
                             <div class="o_dropdown_kanban dropdown" t-if="widget.editable">
 
-                                <a class="dropdown-toggle btn" data-toggle="dropdown" href="#" >
+                                <a class="dropdown-toggle o-no-caret btn" data-toggle="dropdown" href="#" >
                                     <span class="fa fa-ellipsis-v"/>
                                 </a>
-                                <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-                                    <li><a type="edit">Edit Survey</a></li>
-                                    <li t-if="widget.deletable"><a type="delete">Delete</a></li>
-                                    <li class="divider"/>
-                                    <li>Color</li>
-                                    <li><ul class="oe_kanban_colorpicker" data-field="color"/></li>
-                                </ul>
+                                <div class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                                    <a type="edit" class="dropdown-item">Edit Survey</a>
+                                    <a type="delete" class="dropdown-item" t-if="widget.deletable">Delete</a>
+                                    <div class="dropdown-divider"/>
+                                    <div class="dropdown-item-text">Color</div>
+                                    <ul class="oe_kanban_colorpicker" data-field="color"/>
+                                </div>
                             </div>
                             <div class="o_kanban_record_top">
                                 <h4 class="o_kanban_record_title mb4"><field name="title" /></h4>

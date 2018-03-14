@@ -26,17 +26,17 @@
                     <t t-if="unread_counter"><t t-esc="unread_counter"/></t>
                 </span>
             </span>
-            <ul class="dropdown-menu">
+            <div class="dropdown-menu">
                 <t t-foreach="sessions" t-as="session">
-                    <li class="o_chat_header" t-att-data-session-id="session.id">
+                    <div class="o_chat_header" t-att-data-session-id="session.id">
                         <t t-call="mail.ChatWindowHeaderContent">
                             <t t-set="status" t-value="session.window.status"/>
                             <t t-set="title" t-value="session.window.title"/>
                             <t t-set="unread_counter" t-value="session.window.unread_msgs"/>
                         </t>
-                    </li>
+                    </div>
                 </t>
-            </ul>
+            </div>
         </div>
     </t>
 
