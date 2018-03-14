@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo>   
+<odoo>
 
     <record id="tax_tag_tva_intracomunitara_achizitii_0" model="account.account.tag">
         <field name="name">TVA Intracomunitara Achizitii 0%</field>
@@ -33,9 +33,8 @@
          <field name="name">TVA Taxare Inversa 24%</field>
          <field name="applicability">taxes</field>
     </record>
-    
+
     <!-- TVA -->    
-    
     <record id="tvac_00" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="sequence">10</field>
@@ -203,9 +202,8 @@
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_320'), ref('tax_tag_ro_340')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_24"/>
     </record>
-    
+
     <!-- TVA la Incasare-->
-    
     <record id="tvaic_00" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="sequence">20</field>
@@ -397,9 +395,8 @@
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_320'), ref('tax_tag_ro_340')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_24"/>
     </record>
-    
-    <!-- Taxare inversa-->
 
+    <!-- Taxare inversa-->
     <record id="tvati" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="sequence">50</field>
@@ -895,7 +892,7 @@
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_24')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_0"/>
     </record>
-    
+
     <record id="tva_ned_1950c" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="name">TVA colectat 19% Nedeductibil 50%</field>
@@ -939,7 +936,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tva_ned_1950c'), ref('tva_ned_1950d'), ref('tva_ned_1950dexp')])]"/>
     </record>
-    
+
     <record id="tva_ned_19c" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="name">TVA colectat 19% Nedeductibil 100%</field>
@@ -983,7 +980,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tva_ned_19c'), ref('tva_ned_19d'), ref('tva_ned_19dexp')])]"/>
     </record>
-    
+
     <record id="tva_reg_intr_scut" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="sequence">9000</field>
@@ -993,11 +990,10 @@
         <field name="amount">0.0</field>
         <field name="amount_type">fixed</field>
         <field name="type_tax_use">none</field>
-        <field name="tax_adjustment" eval="True"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_020'), ref('tax_tag_ro_170')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_regularizari"/>
     </record>
-    
+
     <record id="tva_reg_intr_scut" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="sequence">9001</field>
@@ -1007,11 +1003,10 @@
         <field name="amount">0.0</field>
         <field name="amount_type">fixed</field>
         <field name="type_tax_use">none</field>
-        <field name="tax_adjustment" eval="True"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_040'), ref('tax_tag_ro_170')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_regularizari"/>
     </record>
-    
+
     <record id="tva_reg_intr_bunc" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="name">Regularizări privind achiziţiile intracomunitare de bunuri Colectat</field>
@@ -1044,10 +1039,9 @@
         <field name="amount">0.0</field>
         <field name="amount_type">fixed</field>
         <field name="type_tax_use">none</field>
-        <field name="tax_adjustment" eval="True"/>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tva_reg_intr_bunc'), ref('tva_reg_intr_bund')])]"/>
     </record>
-    
+
     <record id="tva_reg_intr_servc" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="name">Regularizări privind achiziţiile intracomunitare de servicii Colectat</field>
@@ -1080,10 +1074,9 @@
         <field name="amount">0.0</field>
         <field name="amount_type">fixed</field>
         <field name="type_tax_use">none</field>
-        <field name="tax_adjustment" eval="True"/>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tva_reg_intr_servc'), ref('tva_reg_intr_servd')])]"/>
     </record>
-    
+
     <record id="tva_comp_forf_agri" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="sequence">9004</field>
@@ -1093,11 +1086,10 @@
         <field name="amount">0.0</field>
         <field name="amount_type">fixed</field>
         <field name="type_tax_use">none</field>
-        <field name="tax_adjustment" eval="True"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_260'), ref('tax_tag_ro_290'), ref('tax_tag_ro_300'), ref('tax_tag_ro_340')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_regularizari"/>
     </record>
-    
+
     <record id="tva_reg_comp_forf_agri" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="sequence">9005</field>
@@ -1107,11 +1099,10 @@
         <field name="amount">0.0</field>
         <field name="amount_type">fixed</field>
         <field name="type_tax_use">none</field>
-        <field name="tax_adjustment" eval="True"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_270'), ref('tax_tag_ro_290'), ref('tax_tag_ro_300'), ref('tax_tag_ro_340')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_regularizari"/>
     </record>
-    
+
     <record id="tva_rest_straini" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="sequence">9006</field>
@@ -1121,11 +1112,10 @@
         <field name="amount">0.0</field>
         <field name="amount_type">fixed</field>
         <field name="type_tax_use">none</field>
-        <field name="tax_adjustment" eval="True"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_310'), ref('tax_tag_ro_340')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_regularizari"/>
     </record>
-    
+
     <record id="tva_reg_dedus" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="sequence">9007</field>
@@ -1135,11 +1125,10 @@
         <field name="amount">0.0</field>
         <field name="amount_type">fixed</field>
         <field name="type_tax_use">none</field>
-        <field name="tax_adjustment" eval="True"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_320'), ref('tax_tag_ro_340')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_regularizari"/>
     </record>
-    
+
     <record id="tva_reg_prorata" model="account.tax.template">
         <field name="chart_template_id" ref="ro_chart_template"/>
         <field name="sequence">9008</field>
@@ -1149,7 +1138,6 @@
         <field name="amount">0.0</field>
         <field name="amount_type">fixed</field>
         <field name="type_tax_use">none</field>
-        <field name="tax_adjustment" eval="True"/>
         <field name="tag_ids" eval="[(6,0,[ref('tax_tag_ro_330'), ref('tax_tag_ro_340')])]"/>
         <field name="tax_group_id" ref="tax_group_tva_regularizari"/>
     </record>
