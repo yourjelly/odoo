@@ -17,7 +17,11 @@ BaseImport.DataImport.include({
             this.$(".import-link").prop({"text": _t(" Import Template for Vendor Pricelists"), "href": "/product/static/csv/product.vendor.pricelist.template.xlsx"});
             this.$(".template-import").removeClass("hidden");
         }
-    },   
+        if (this.res_model == 'product.pricelist') {
+            this.$(".import-link").prop({"text": _t(" Import Template for Pricelists"), "href": "/product/static/csv/product.pricelist.template.xlsx"});
+            this.$(".template-import").removeClass("hidden");
+        }
+    },
 });
 
 });
