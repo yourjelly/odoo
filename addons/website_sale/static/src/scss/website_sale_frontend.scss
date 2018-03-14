@@ -19,7 +19,7 @@ $o-wsale-wizard-label-completed: $state-success-text;
 .progress-wizard {
     // Scoped variables
     $tmp-dot-radius: ($o-wsale-wizard-dot-size + $o-wsale-wizard-thickness)*0.5;
-    $tmp-check-size: max($font-size-base, $o-wsale-wizard-dot-size + $o-wsale-wizard-thickness + $o-wsale-wizard-dot-active-glow*2);
+    $tmp-check-size: 15px; // FIXME max($font-size-base, $o-wsale-wizard-dot-size + $o-wsale-wizard-thickness + $o-wsale-wizard-dot-active-glow*2);
     $tmp-check-pos: $o-wsale-wizard-dot-size*0.5 - $tmp-check-size*0.5;
 
     margin-top: $grid-gutter-width*0.5;
