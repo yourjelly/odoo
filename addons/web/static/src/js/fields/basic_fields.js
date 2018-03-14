@@ -303,8 +303,9 @@ var InputField = DebouncedField.extend({
      * @see _doDebouncedAction
      *
      * @private
+     * @param {Event} ev
      */
-    _onInput: function () {
+    _onInput: function (ev) {
         this.isDirty = true;
         this._doDebouncedAction();
     },
