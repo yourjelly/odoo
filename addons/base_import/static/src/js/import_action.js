@@ -160,7 +160,7 @@ var DataImport = AbstractAction.extend(ControlPanelMixin, {
     },
     renderImportLink: function() {
         if (this.res_model == 'res.partner') {
-            this.$(".import-link").prop({"text": _t(" Import Template for Customers"), "href": "/base_import/static/csv/res.partner.csv"});
+            this.$(".import-link").prop({"text": _t(" Import Template for Customers"), "href": "/base_import/static/csv/res.partner.xlsx"});
             this.$(".template-import").removeClass("hidden");
         }
     },
