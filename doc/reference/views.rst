@@ -468,7 +468,7 @@ Business views are targeted at regular users, not advanced users.  Examples
 are: Opportunities, Products, Partners, Tasks, Projects, etc.
 
 .. image:: forms/oppreadonly.png
-   :class: img-responsive
+   :class: img-fluid
 
 In general, a business view is composed of
 
@@ -491,7 +491,7 @@ The purpose of the status bar is to show the status of the current record and
 the action buttons.
 
 .. image:: forms/status.png
-   :class: img-responsive
+   :class: img-fluid
 
 The Buttons
 ...........
@@ -523,10 +523,10 @@ visible at all times but exceptions or states depending on particular sub-flow
 should only be visible when current.
 
 .. image:: forms/status1.png
-   :class: img-responsive
+   :class: img-fluid
 
 .. image:: forms/status2.png
-   :class: img-responsive
+   :class: img-fluid
 
 The states are shown following the order used in the field (the list in a
 selection field, etc). States that are always visible are specified with the
@@ -543,7 +543,7 @@ The Sheet
 All business views should look like a printed sheet:
 
 .. image:: forms/sheet.png
-   :class: img-responsive
+   :class: img-fluid
 
 1. Elements inside a ``<form>`` or ``<page>`` do not define groups, elements
    inside them are laid out according to normal HTML rules. They content can
@@ -572,9 +572,9 @@ fields are only shown in edit mode.
    * - View mode
      - Edit mode
    * - .. image:: forms/header.png
-          :class: img-responsive
+          :class: img-fluid
      - .. image:: forms/header2.png
-          :class: img-responsive
+          :class: img-fluid
 
 Use HTML text, ``<div>``, ``<h1>``, ``<h2>``… to produce nice headers, and
 ``<label>`` with the class ``oe_edit_only`` to only display the field's label
@@ -602,7 +602,7 @@ an important place in the use of the CRM. Instead of placing them in the
 them more visible and more easily accessible.
 
 .. image:: forms/header3.png
-   :class: img-responsive
+   :class: img-fluid
 
 Technically, the buttons are placed inside a ``<div>`` to group them as a
 block on the top of the sheet.
@@ -621,7 +621,7 @@ A column of fields is now produced with a ``<group>`` element, with an
 optional title.
 
 .. image:: forms/screenshot-03.png
-   :class: img-responsive
+   :class: img-fluid
 
 ::
 
@@ -644,7 +644,7 @@ Special Case: Subtotals
 Some classes are defined to render subtotals like in invoice forms:
 
 .. image:: forms/screenshot-00.png
-   :class: img-responsive
+   :class: img-fluid
 
 ::
 
@@ -677,9 +677,9 @@ inline fields (zip and city).
    * - Edit mode
      - View mode
    * - .. image:: forms/placeholder.png
-          :class: img-responsive
+          :class: img-fluid
      - .. image:: forms/screenshot-01.png
-          :class: img-responsive
+          :class: img-fluid
 
 ::
 
@@ -704,7 +704,7 @@ Images, like avatars, should be displayed on the right of the sheet.  The
 product form looks like:
 
 .. image:: forms/screenshot-02.png
-   :class: img-responsive
+   :class: img-fluid
 
 The form above contains a <sheet> element that starts with:
 
@@ -719,7 +719,7 @@ Most :class:`~odoo.fields.Many2many` fields, like categories, are better
 rendered as a list of tags. Use the widget ``many2many_tags`` for this:
 
 .. image:: forms/screenshot-04.png
-   :class: img-responsive
+   :class: img-fluid
 
 ::
 
@@ -732,7 +732,7 @@ Examples of configuration forms: Stages, Leave Type, etc.  This concerns all
 menu items under Configuration of each application (like Sales/Configuration).
 
 .. image:: forms/nosheet.png
-   :class: img-responsive
+   :class: img-fluid
 
 1. no header (because no state, no workflow, no button)
 2. no sheet
@@ -743,7 +743,7 @@ Dialog forms guidelines
 Example: "Schedule a Call" from an opportunity.
 
 .. image:: forms/wizard-popup.png
-   :class: img-responsive
+   :class: img-fluid
 
 1. avoid separators (the title is already in the popup title bar, so another
    separator is not relevant)
