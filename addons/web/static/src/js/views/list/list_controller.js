@@ -27,7 +27,6 @@ var ListController = BasicController.extend({
         selection_changed: '_onSelectionChanged',
         toggle_column_order: '_onToggleColumnOrder',
         toggle_group: '_onToggleGroup',
-        get_data: 'onGetData',
     }),
     /**
      * @constructor
@@ -130,12 +129,6 @@ var ListController = BasicController.extend({
             this.$buttons.on('click', '.o_list_button_discard', this._onDiscard.bind(this));
             this.$buttons.appendTo($node);
         }
-    },
-    onGetData: function (event) {
-        var isGrouped= this.renderer.state.groupedBy;
-        this.renderer.state = this.model.get(event.data.id);
-        this.renderer.state.groupedBy = isGrouped;
-        this.handle = event.data.id;
     },
     /**
      * Render the sidebar (the 'action' menu in the control panel, right of the
@@ -439,8 +432,11 @@ var ListController = BasicController.extend({
         ev.stopPropagation();
         this.trigger_up('mutexify', {
             action: function () {
-                var record = self.model.get(self.handle);
-                var editedRecord = record.data[ev.data.index];
+                var state = self.model.get(self.handle);
+                if (state.groupedBy && ev.data.groupID) {
+                    state = self.model.get(ev.data.groupID);
+                }
+                var editedRecord = state.data[ev.data.index];
                 self._setMode('edit', editedRecord.id)
                     .done(ev.data.onSuccess);
             },

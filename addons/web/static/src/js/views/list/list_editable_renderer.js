@@ -668,7 +668,9 @@ ListRenderer.include({
         // To select a row, the currently selected one must be unselected first
         var self = this;
         return this.unselectRow().then(function () {
-            if (self.state.data.length <= rowIndex) {
+            debugger;
+            var state = self.state.groupedBy.length ? self.current_group : self.state;
+            if (state.data.length <= rowIndex) {
                 // The row to selected doesn't exist anymore (probably because
                 // an onchange triggered when unselecting the previous one
                 // removes rows)
@@ -678,6 +680,7 @@ ListRenderer.include({
             var def = $.Deferred();
             self.trigger_up('edit_line', {
                 index: rowIndex,
+                groupID: self.current_group && self.current_group.id,
                 onSuccess: def.resolve.bind(def),
             });
             return def;
@@ -720,13 +723,16 @@ ListRenderer.include({
         if (!this._isEditable() || $(event.target).prop('special_click')) {
             return;
         }
-        if (this.state.groupedBy.length) {
-            this.trigger_up('get_data', {id: this.groupedID});
-        }
         var $td = $(event.currentTarget);
         var $tr = $td.parent();
+        var group = false;
         var rowIndex = this.$('.o_data_row').index($tr);
         var fieldIndex = Math.max($tr.find('.o_data_cell').not('.o_list_button').index($td), 0);
+        debugger;
+        if (this.state.groupedBy.length) {
+            var groupRow = this.$('.o_data_row:first').closest('.o_group_header');
+            this.current_group = groupRow.data('group');
+        }
         this._selectCell(rowIndex, fieldIndex, {event: event});
     },
     /**
@@ -870,11 +876,9 @@ ListRenderer.include({
      * @override
      * @private
      */
-    _onRowClicked: function (event) {
+    _onRowClicked: function () {
         if (!this._isEditable()) {
             this._super.apply(this, arguments);
-        } else if ($(event.currentTarget).data('group')){
-            this.groupedID = $(event.currentTarget).data('group').id;
         }
     },
     /**
