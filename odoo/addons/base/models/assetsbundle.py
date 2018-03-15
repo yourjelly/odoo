@@ -333,10 +333,9 @@ class AssetsBundle(object):
                         # To invalidate css on rtl to ltr transition in debug
                         url_path = "/%s.less.css" % user_direction
                         if attachment.url.endswith(url_path):
-                            print (">>>>>>>>>>>>>>>>>>url", attachment.url)
                             alternate_direction = 'rtl' if user_direction == 'ltr' else 'ltr'
                             att = self.env['ir.attachment'].sudo().search([('url', '=ilike', attachment.url.replace(user_direction, alternate_direction))], order='write_date desc', limit=1)
-                            if att and att.write_date > attachment.write_date:
+                            if att and att.write_date >= attachment.write_date:
                                 preprocessed = False
 
                     asset = assets[attachment.url]
@@ -367,8 +366,9 @@ class AssetsBundle(object):
             if assets:
                 source = '\n'.join([asset.get_source() for asset in assets])
                 compiled = self.compile_css(assets[0].compile, source)
+
                 if user_direction == 'rtl':
-                    compiled = self.run_rtlcss(compiled);
+                    compiled = self.run_rtlcss(compiled)
 
                 if not self.css_errors and old_attachments:
                     old_attachments.unlink()
@@ -382,7 +382,6 @@ class AssetsBundle(object):
                     asset_id = fragments.pop(0)
                     asset = next(asset for asset in self.stylesheets if asset.id == asset_id)
                     asset._content = fragments.pop(0)
-                    # print ("\n\nasset_id and asset._content ::: ", asset_id, asset._content)
 
                     if debug:
                         try:
