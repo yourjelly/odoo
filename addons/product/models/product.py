@@ -559,6 +559,9 @@ class ProductProduct(models.Model):
         )
         return super(ProductProduct, self).get_empty_list_help(help)
 
+    @api.model
+    def get_pricelist_values(self):
+        return self.env['ir.config_parameter'].sudo().get_param('sale.sale_pricelist_setting')
 
 class ProductPackaging(models.Model):
     _name = "product.packaging"
