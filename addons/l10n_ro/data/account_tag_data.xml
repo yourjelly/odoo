@@ -184,4 +184,36 @@
         <field name="name">Romania - D300: randul 34</field>
         <field name="applicability">taxes</field>
     </record>
+    <record id="tax_tag_tva_intracomunitara_achizitii_0" model="account.account.tag">
+        <field name="name">TVA Intracomunitara Achizitii 0%</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_tva_intracomunitara_achizitii_5" model="account.account.tag">
+        <field name="name">TVA Intracomunitara Achizitii 5%</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_tva_intracomunitara_achizitii_9" model="account.account.tag">
+        <field name="name">TVA Intracomunitara Achizitii 9%</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_tva_intracomunitara_achizitii_24" model="account.account.tag">
+        <field name="name">TVA Intracomunitara Achizitii 24%</field>
+        <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_tva_taxare_inversa_0" model="account.account.tag">
+         <field name="name">TVA Taxare Inversa 0%</field>
+         <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_tva_taxare_inversa_5" model="account.account.tag">
+         <field name="name">TVA Taxare Inversa 5%</field>
+         <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_tva_taxare_inversa_9" model="account.account.tag">
+         <field name="name">TVA Taxare Inversa 9%</field>
+         <field name="applicability">taxes</field>
+    </record>
+    <record id="tax_tag_tva_taxare_inversa_24" model="account.account.tag">
+         <field name="name">TVA Taxare Inversa 24%</field>
+         <field name="applicability">taxes</field>
+    </record>
 </odoo>

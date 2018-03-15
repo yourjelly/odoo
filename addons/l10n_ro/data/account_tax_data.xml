@@ -409,6 +409,8 @@
         <field name="amount_type">group</field>
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tvatip00-d'), ref('tvatip00-c')])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_taxare_inversa_0')])]"/>
+        <field name="tax_group_id" ref="tax_group_tva_0"/>
     </record>
 
     <record id="tvatip05-c" model="account.tax.template">
@@ -442,6 +444,8 @@
         <field name="amount_type">group</field>
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tvatip05-d'), ref('tvatip05-c')])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_taxare_inversa_5')])]"/>
+        <field name="tax_group_id" ref="tax_group_tva_0"/>
     </record>
 
     <record id="tvatip09-c" model="account.tax.template">
@@ -475,6 +479,8 @@
         <field name="amount_type">group</field>
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tvatip09-d'), ref('tvatip09-c')])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_taxare_inversa_9')])]"/>
+        <field name="tax_group_id" ref="tax_group_tva_0"/>
     </record>
 
     <record id="tvatip19-c" model="account.tax.template">
@@ -574,6 +580,8 @@
         <field name="amount_type">group</field>
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tvatip24-d'), ref('tvatip24-c')])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_taxare_inversa_24')])]"/>
+        <field name="tax_group_id" ref="tax_group_tva_0"/>
     </record>
 
     <record id="tvatisc" model="account.tax.template">
@@ -676,6 +684,8 @@
         <field name="amount_type">group</field>
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tvati_intrap0d'), ref('tvati_intrap0c')])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_0')])]"/>
+        <field name="tax_group_id" ref="tax_group_tva_0"/>
     </record>
 
     <record id="tvati_intrap5c" model="account.tax.template">
@@ -709,6 +719,8 @@
         <field name="amount_type">group</field>
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tvati_intrap5d'), ref('tvati_intrap5c')])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_5')])]"/>
+        <field name="tax_group_id" ref="tax_group_tva_0"/>
     </record>
 
     <record id="tvati_intrap9c" model="account.tax.template">
@@ -742,6 +754,8 @@
         <field name="amount_type">group</field>
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tvati_intrap9d'), ref('tvati_intrap9c')])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_9')])]"/>
+        <field name="tax_group_id" ref="tax_group_tva_0"/>
     </record>
 
     <record id="tvati_intrap19c" model="account.tax.template">
@@ -841,6 +855,8 @@
         <field name="amount_type">group</field>
         <field name="type_tax_use">purchase</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('tvati_intrap24d'), ref('tvati_intrap24c')])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('tax_tag_tva_intracomunitara_achizitii_24')])]"/>
+        <field name="tax_group_id" ref="tax_group_tva_0"/>
     </record>
 
     <record id="tva_ned_1950c" model="account.tax.template">
