@@ -26,7 +26,7 @@
         <xpath expr="//div[@id='payment_method']" position="before">
             <div t-if="deliveries" class="col-lg-12" id="delivery_carrier">
                 <h3 class="mb24">Choose a delivery method</h3>
-                <div class="panel panel-default" id="delivery_method">
+                <div class="card" id="delivery_method">
                     <ul class="list-group">
                     <t t-set="delivery_nb" t-value="len(deliveries)" />
                     <t t-foreach="deliveries" t-as="delivery">
