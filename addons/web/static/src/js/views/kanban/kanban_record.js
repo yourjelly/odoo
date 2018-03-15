@@ -81,8 +81,7 @@ var KanbanRecord = Widget.extend({
             var tooltip = $el.attr('tooltip');
             if (tooltip) {
                 $el.tooltip({
-                    'html': true,
-                    'title': self.qweb.render(tooltip, self.qweb_context)
+                    title: self.qweb.render(tooltip, self.qweb_context)
                 });
             }
         });
@@ -449,7 +448,7 @@ var KanbanRecord = Widget.extend({
             if (elem === event.currentTarget) {
                 ischild = false;
             }
-            var test_event = events && events.click && (events.click.length > 1 || events.click[0].namespace !== "tooltip");
+            var test_event = events && events.click && (events.click.length > 1 || events.click[0].namespace !== 'bs.tooltip');
             if (ischild) {
                 children.push(elem);
                 if (test_event) {

@@ -244,8 +244,10 @@ var Activity = AbstractActivityField.extend({
         var previous_activity_type_id = $popover_el.data('previous-activity-type-id');
         if (!$popover_el.data('bs.popover')) {
             $popover_el.popover({
+                template: $(Popover.Default.template).addClass('o_mail_activity_feedback')[0].outerHTML, // Ugly but cannot find another way
+                container: $popover_el.parent(), // FIXME Ugly and should probably be in the body as by default but form view should handle destroying popovers
                 title : _t('Feedback'),
-                html: 'true',
+                html: true,
                 trigger:'click',
                 content : function() {
                     var $popover = $(QWeb.render("mail.activity_feedback_form", {'previous_activity_type_id': previous_activity_type_id}));
@@ -265,12 +267,10 @@ var Activity = AbstractActivityField.extend({
                     });
                     return $popover;
                 },
-            }).on("show.bs.popover", function (e) {
-                var $popover = $(this).data("bs.popover").tip();
-                $popover.addClass('o_mail_activity_feedback').attr('tabindex', 0);
-                $(".o_mail_activity_feedback.popover").not(e.target).popover("hide");
             }).on("shown.bs.popover", function () {
-                var $popover = $(this).data("bs.popover").tip();
+                var $popover = $($(this).data("bs.popover").tip);
+                $(".o_mail_activity_feedback.popover").not($popover).popover("hide");
+                $popover.addClass('o_mail_activity_feedback').attr('tabindex', 0);
                 $popover.find('#activity_feedback').focus();
                 $popover.off('focusout');
                 $popover.focusout(function (e) {

@@ -145,7 +145,7 @@ var CrashManager = core.Class.extend({
             });
         });
         dialog.on("closed", this, function () {
-            $clipboardBtn.tooltip("destroy");
+            $clipboardBtn.tooltip('dispose');
             clipboard.destroy();
         });
 
