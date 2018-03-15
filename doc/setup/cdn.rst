@@ -18,18 +18,18 @@ Step 1: Create a pull zone in the KeyCDN dashboard
 --------------------------------------------------
 
 .. image:: cdn/keycdn_create_a_pull_zone.png
-   :class: img-responsive
+   :class: img-fluid
 
 When creating the zone, enable the CORS option in the
 :guilabel:`advanced features` submenu. (more on that later)
 
 .. image:: cdn/keycdn_enable_CORS.png
-   :class: img-responsive
+   :class: img-fluid
 
 Once done, you'll have to wait a bit while KeyCDN_ is crawling your website.
 
 .. image:: cdn/keycdn_progressbar.png
-   :class: img-responsive
+   :class: img-fluid
 
 .. note:: a new URL has been generated for your Zone, in this case it is
           ``http://pulltest-b49.kxcdn.com``
@@ -43,7 +43,7 @@ activate the CDN support and copy/paste your zone URL in the
 you have developer mode activated.
 
 .. image:: cdn/odoo_cdn_base_url.png
-   :class: img-responsive
+   :class: img-fluid
 
 Now your website is using the CDN for the resources matching the
 :guilabel:`CDN filters` regular expressions.
@@ -52,7 +52,7 @@ You can have a look to the HTML of your website in order to check if the CDN
 integration is properly working.
 
 .. image:: cdn/odoo_check_your_html.png
-   :class: img-responsive
+   :class: img-fluid
 
 
 Why should I activate CORS?
@@ -70,12 +70,12 @@ the remote server.
 Here's what you would see on your homepage in such a case:
 
 .. image:: cdn/odoo_font_file_not_loaded.png
-   :class: img-responsive
+   :class: img-fluid
 
 A security error message will also appear in the browser's console:
 
 .. image:: cdn/odoo_security_message.png
-   :class: img-responsive
+   :class: img-fluid
 
 Enabling the CORS option in the CDN fixes this issue.
 

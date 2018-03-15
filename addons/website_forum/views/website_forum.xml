@@ -1292,7 +1292,7 @@
                     <a href="#">
                         <i class="fa fa-trash-o fa-1g pull-right o_forum_profile_pic_clear" title="Clear"></i>
                     </a>
-                    <img class="img img-responsive img-circle o_forum_avatar_img" t-attf-src="/forum/user/#{user.id}/avatar"/>
+                    <img class="img img-fluid img-circle o_forum_avatar_img" t-attf-src="/forum/user/#{user.id}/avatar"/>
                 </div>
                 <div class="col-md-10">
                     <input name="user_id" t-att-value="user.id" type="hidden"/>
@@ -1367,7 +1367,7 @@
         </h1>
         <div class="row">
             <div class="col-sm-2">
-                <img class="img img-responsive img-circle" t-attf-src="/forum/user/#{user.id}/avatar"/>
+                <img class="img img-fluid img-circle" t-attf-src="/forum/user/#{user.id}/avatar"/>
             </div>
             <div class="col-sm-10">
                 <table class="table table-condensed">
