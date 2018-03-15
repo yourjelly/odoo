@@ -504,20 +504,20 @@ QUnit.module('Views', {
         });
 
         form.$buttons.find('.o_form_button_edit').click();
-        assert.ok(form.$('.o_notebook .nav li:first()').hasClass('active'),
+        assert.ok(form.$('.o_notebook .nav .nav-link:first()').hasClass('active'),
             'first tab should be active');
-        assert.ok(!form.$('.o_notebook .nav li:first()').hasClass('o_invisible_modifier'),
+        assert.ok(!form.$('.o_notebook .nav .nav-item:first()').hasClass('o_invisible_modifier'),
             'first tab should be visible');
 
         // set a value on the m2o
         var $dropdown = form.$('.o_field_many2one input').autocomplete('widget');
         form.$('.o_field_many2one input').click();
         $dropdown.find('li:first()').click();
-        assert.ok(!form.$('.o_notebook .nav li:first()').hasClass('active'),
+        assert.ok(!form.$('.o_notebook .nav .nav-link:first()').hasClass('active'),
             'first tab should not be active');
-        assert.ok(form.$('.o_notebook .nav li:first()').hasClass('o_invisible_modifier'),
+        assert.ok(form.$('.o_notebook .nav .nav-item:first()').hasClass('o_invisible_modifier'),
             'first tab should be invisible');
-        assert.ok(form.$('.o_notebook .nav li:nth(1)').hasClass('active'),
+        assert.ok(form.$('.o_notebook .nav .nav-link:nth(1)').hasClass('active'),
             'second tab should be active');
         assert.ok(form.$('.o_notebook .tab-content .tab-pane:nth(1)').hasClass('active'),
             'second page should be active');
@@ -547,9 +547,9 @@ QUnit.module('Views', {
             res_id: 1,
         });
 
-        assert.notOk(form.$('.o_notebook .nav li:first()').is(':visible'),
+        assert.notOk(form.$('.o_notebook .nav .nav-item:first()').is(':visible'),
             'first tab should be invisible');
-        assert.ok(form.$('.o_notebook .nav li:nth(1)').hasClass('active'),
+        assert.ok(form.$('.o_notebook .nav .nav-link:nth(1)').hasClass('active'),
             'second tab should be active');
 
         form.destroy();
@@ -578,9 +578,9 @@ QUnit.module('Views', {
             res_id: 1,
         });
 
-        assert.notOk(form.$('.o_notebook .nav li:first()').hasClass('active'),
+        assert.notOk(form.$('.o_notebook .nav .nav-link:first()').hasClass('active'),
             'first tab should not active');
-        assert.ok(form.$('.o_notebook .nav li:nth(1)').hasClass('active'),
+        assert.ok(form.$('.o_notebook .nav .nav-link:nth(1)').hasClass('active'),
             'second tab should be active');
 
         form.destroy();
@@ -2538,19 +2538,19 @@ QUnit.module('Views', {
         });
 
         // click on second page tab
-        form.$('.o_notebook li:eq(1) a').click();
+        form.$('.o_notebook .nav-link:eq(1)').click();
 
-        assert.notOk(form.$('.o_notebook li:eq(0)').hasClass('active'),
+        assert.notOk(form.$('.o_notebook .nav-link:eq(0)').hasClass('active'),
             "first tab should not be active");
-        assert.ok(form.$('.o_notebook li:eq(1)').hasClass('active'),
+        assert.ok(form.$('.o_notebook .nav-link:eq(1)').hasClass('active'),
             "second tab should be active");
 
         // click on the pager to switch to the next record
         form.pager.$('.o_pager_next').click();
 
-        assert.notOk(form.$('.o_notebook li:eq(0)').hasClass('active'),
+        assert.notOk(form.$('.o_notebook .nav-link:eq(0)').hasClass('active'),
             "first tab should not be active");
-        assert.ok(form.$('.o_notebook li:eq(1)').hasClass('active'),
+        assert.ok(form.$('.o_notebook .nav-link:eq(1)').hasClass('active'),
             "second tab should be active");
         form.destroy();
     });
