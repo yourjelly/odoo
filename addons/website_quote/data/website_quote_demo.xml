@@ -208,7 +208,7 @@
                                 <h2>What you will learn?</h2>
                             </div>
                             <div class="col-lg-4">
-                                <div class="panel panel-info">
+                                <div class="panel bg-info text-white">
                                     <div class="panel-heading text-center">
                                         <h3 style="margin: 0">Day 1</h3>
                                         <p class="text-muted" style="margin: 0">Introduction to Javascript</p>
@@ -227,7 +227,7 @@
                                 </div>
                             </div>
                             <div class="col-lg-4">
-                                <div class="panel panel-info">
+                                <div class="panel bg-info text-white">
                                     <div class="panel-heading text-center">
                                         <h3 style="margin: 0">Day 2</h3>
 
@@ -248,7 +248,7 @@
                                 </div>
                             </div>
                             <div class="col-lg-4">
-                                <div class="panel panel-info">
+                                <div class="panel bg-info text-white">
                                     <div class="panel-heading text-center">
                                         <h3 style="margin: 0">Day 3</h3>
 
