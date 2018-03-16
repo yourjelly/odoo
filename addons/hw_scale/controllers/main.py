@@ -5,6 +5,7 @@ import logging
 import os
 import re
 import time
+import xmlrpclib
 
 from collections import namedtuple
 from os import listdir
@@ -130,6 +131,12 @@ class Scale(Thread):
         self.device = None
         self.path_to_scale = ''
         self.protocol = None
+        try:
+            f = open('/home/pi/odoo-remote-server.conf', 'r')
+            self.server_url = f[0]
+            f.close()
+        except:
+            self.server_url = False
 
     def lockedstart(self):
         with self.lock:
@@ -341,6 +348,8 @@ class Scale(Thread):
                 self.read_weight()
                 if self.weight != old_weight:
                     _logger.info('New Weight: %s, sleeping %ss', self.weight, self.protocol.newWeightDelay)
+                    if self.server_url:
+
                     time.sleep(self.protocol.newWeightDelay)
                     if self.weight and self.protocol.autoResetWeight:
                         self.weight = 0
