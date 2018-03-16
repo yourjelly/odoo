@@ -251,3 +251,71 @@ class PosboxHomepage(odoo.addons.web.controllers.main.Home):
             return 'starting with ' + auth_token
         else:
             return 'already running'
+
+
+    @http.route('/server_connect', type='http', auth='none', cors='*')
+    def connect_to_server(self, url):
+        subprocess.call(['umount /'])
+
+        if persistent:
+                persistent = "1"
+        else:
+                persistent = ""
+
+        subprocess.call(['/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/connect_to_wifi.sh', essid, password, persistent])
+        return "connecting to " + essid
+
+    # Set server address
+    @http.route('/server', type='http', auth='none', website=True)
+    def server(self):
+        server_template = """
+    <!DOCTYPE HTML>
+    <html>
+        <head>
+            <title>IoT -> Odoo server configuration</title>
+        """ + index_style + """
+        </head>
+        <body>
+            <h1>Configure Odoo server</h1>
+            <p>
+            Here you can configure how the still hidden IoT sauce on your posbox
+            can connect with the Odoo server. 
+            </p>
+            <form action='/server_connect' method='POST'>
+                <table>
+                    <tr>
+                        <td>
+                            Server URL:
+                        </td>
+                        <td>
+                            <input type="text" name="url">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td/>
+                        <td>
+                            <input type="submit" value="connect"/>
+                        </td>
+                    </tr>
+                </table>
+                <p>
+                Your current server is: 
+        """
+
+        try:
+            f = open('/etc/odoo-remote-server.conf', 'r')
+            for line in f:
+                server_template += line
+        except:
+            server_template += "No server configured yet"
+
+        server_template += """
+            </p>
+            </form>
+        </body>
+    </html>
+        """
+        return server_template
+
+
+
