@@ -35,7 +35,8 @@ class Location(models.Model):
         ('inventory', 'Inventory Loss'),
         ('procurement', 'Procurement'),
         ('production', 'Production'),
-        ('transit', 'Transit Location')], string='Location Type',
+        ('transit', 'Transit Location'),
+        ('scrap', 'Scrap Location')], string='Location Type',
         default='internal', index=True, required=True,
         help="* Vendor Location: Virtual location representing the source location for products coming from your vendors"
              "\n* View: Virtual location used to create a hierarchical structures for your warehouse, aggregating its child locations ; can't directly contain products"
@@ -59,7 +60,7 @@ class Location(models.Model):
         'res.company', 'Company',
         default=lambda self: self.env['res.company']._company_default_get('stock.location'), index=True,
         help='Let this field empty if this location is shared between companies')
-    scrap_location = fields.Boolean('Is a Scrap Location?', default=False, help='Check this box to allow using this location to put scrapped/damaged goods.')
+    scrap_location = fields.Boolean('Is a Scrap Location?', compute='_compute_is_scrap_location', store=True, help='Check this box to allow using this location to put scrapped/damaged goods.')
     return_location = fields.Boolean('Is a Return Location?', help='Check this box to allow using this location as a return location.')
     removal_strategy_id = fields.Many2one('product.removal', 'Removal Strategy', help="Defines the default method used for suggesting the exact location (shelf) where to take the products from, which lot etc. for this location. This method can be enforced at the product category level, and a fallback is made on the parent locations if none is set here.")
     putaway_strategy_id = fields.Many2one('product.putaway', 'Put Away Strategy', help="Defines the default method used for suggesting the exact location (shelf) where to store the products. This method can be enforced at the product category level, and a fallback is made on the parent locations if none is set here.")
@@ -76,6 +77,10 @@ class Location(models.Model):
             self.complete_name = '%s/%s' % (self.location_id.complete_name, self.name)
         else:
             self.complete_name = self.name
+
+    @api.depends('usage')
+    def _compute_is_scrap_location(self):
+        return self.usage == 'scrap'
 
     def write(self, values):
         if 'usage' in values and values['usage'] == 'view':
@@ -122,7 +127,7 @@ class Location(models.Model):
 
     def should_bypass_reservation(self):
         self.ensure_one()
-        return self.usage in ('supplier', 'customer', 'inventory', 'production') or self.scrap_location
+        return self.usage in ('supplier', 'customer', 'inventory', 'production', 'scrap')
 
 
 class Route(models.Model):
