@@ -252,3 +252,66 @@ class PosboxHomepage(openerp.addons.web.controllers.main.Home):
             return 'starting with ' + auth_token
         else:
             return 'already running'
+
+
+    @http.route('/server_connect', type='http', auth='none', cors='*')
+    def connect_to_server(self, url):
+        subprocess.call(['sudo mount -o remount,rw /'])
+        subprocess.call(['echo ' + url + ' > /home/pi/odoo-remote-server.conf'])
+        subprocess.call(['sudo mount -o remount,ro /'])
+
+    # Set server address
+    @http.route('/server', type='http', auth='none', website=True)
+    def server(self):
+        server_template = """
+    <!DOCTYPE HTML>
+    <html>
+        <head>
+            <title>IoT -> Odoo server configuration</title>
+        """ + index_style + """
+        </head>
+        <body>
+            <h1>Configure Odoo server</h1>
+            <p>
+            Here you can configure how the still hidden IoT sauce on your IoT infiltrated posbox
+            can connect with the Odoo server. 
+            </p>
+            <form action='/server_connect' method='POST'>
+                <table>
+                    <tr>
+                        <td>
+                            Server URL:
+                        </td>
+                        <td>
+                            <input type="text" name="url">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td/>
+                        <td>
+                            <input type="submit" value="connect"/>
+                        </td>
+                    </tr>
+                </table>
+                <p>
+                Your current server is: 
+        """
+
+        try:
+            f = open('/home/pi/odoo-remote-server.conf', 'r')
+            for line in f:
+                server_template += line
+            f.close()
+        except:
+            server_template += "No server configured yet"
+
+        server_template += """
+            </p>
+            </form>
+        </body>
+    </html>
+        """
+        return server_template
+
+
+
