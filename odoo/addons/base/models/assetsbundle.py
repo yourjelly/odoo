@@ -436,6 +436,15 @@ class AssetsBundle(object):
         rtlcss = 'rtlcss'
         cmd = [rtlcss, '-']
 
+        # Check the presence of rtlcss, if rtlcss not available then we should return normal less file
+        try:
+            process = Popen(
+                ['rtlcss', '--version'], stdout=PIPE, stderr=PIPE
+            )
+        except (OSError, IOError):
+            _logger.info('You need rtlcss to convert css file to right to left compatible.')
+            return source
+
         try:
             rtlcss = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         except Exception:
