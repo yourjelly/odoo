@@ -121,6 +121,18 @@
                     <input class="oe_import_match_field"/>
                 </td>
             </tr>
+            <tr class="oe_import_create_field_row">
+                <t t-foreach="headers" t-as="header">
+                    <td t-if="header.includes('/')">
+                        <div class="o_checkbox">
+                            <input type="checkbox" id="oe_import_create_val" t-att-field_index="header_index"/>
+                            <span/>
+                        </div>
+                        <label class="o_form_label">Create if doesn't exist</label>
+                    </td>
+                    <td t-else=""/>
+                </t>
+            </tr>
         </thead>
         <tbody>
             <tr t-foreach="preview" t-as="row" class="oe_import_grid-row">

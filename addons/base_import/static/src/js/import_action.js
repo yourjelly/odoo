@@ -466,6 +466,12 @@ var DataImport = AbstractAction.extend(ControlPanelMixin, {
         var fields = this.$('.oe_import_fields input.oe_import_match_field').map(function (index, el) {
             return $(el).select2('val') || false;
         }).get();
+        var fields_to_create = this.$('.oe_import_create_field_row td').map(function (index, el) {
+            return {
+                name: fields[index],
+                create_if_not_exist: $(el).find('#oe_import_create_val').is(":checked"),
+            };
+        }).get();  //[TODO: Pass this dict to rpc & perform business logic]
         var tracking_disable = 'tracking_disable' in kwargs ? kwargs.tracking_disable : !this.$('#oe_import_tracking').prop('checked')
         var defer_parent_store = 'defer_parent_store' in kwargs ? kwargs.defer_parent_store : !!this.$('#oe_import_deferparentstore').prop('checked')
         delete kwargs.tracking_disable;
