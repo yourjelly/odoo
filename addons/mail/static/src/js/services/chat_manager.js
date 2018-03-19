@@ -1319,8 +1319,10 @@ var ChatManager =  AbstractService.extend({
             is_read: propertyDescr("channel_history"),
         });
 
-        msg.is_read = data.is_read;
-        if (_.contains(data.needaction_partner_ids, session.partner_id) && !data.is_read) {
+        if (data.is_read === false) {
+           msg.is_read = true;
+        }
+        if (_.contains(data.needaction_partner_ids, session.partner_id) && data.is_read) {
             msg.is_needaction = true;
         }
         if (_.contains(data.starred_partner_ids, session.partner_id)) {

@@ -114,15 +114,15 @@ class Message(models.Model):
         my_messages = self.env['mail.notification'].sudo().search([
             ('mail_message_id', 'in', self.ids),
             ('res_partner_id', '=', self.env.user.partner_id.id),
-            ('is_read', '=', False)]).mapped('mail_message_id')
+            ('active', '=', True)]).mapped('mail_message_id')
         for message in self:
             message.needaction = message in my_messages
 
     @api.model
     def _search_needaction(self, operator, operand):
         if operator == '=' and operand:
-            return ['&', ('notification_ids.res_partner_id', '=', self.env.user.partner_id.id), ('notification_ids.is_read', '=', False)]
-        return ['&', ('notification_ids.res_partner_id', '=', self.env.user.partner_id.id), ('notification_ids.is_read', '=', True)]
+            return ['&', ('notification_ids.res_partner_id', '=', self.env.user.partner_id.id), ('notification_ids.active', '=', True)]
+        return ['&', ('notification_ids.res_partner_id', '=', self.env.user.partner_id.id), ('notification_ids.active', '=', False)]
 
     @api.depends('starred_partner_ids')
     def _get_starred(self):
@@ -149,10 +149,16 @@ class Message(models.Model):
         partner_id = self.env.user.partner_id.id
         delete_mode = not self.env.user.share  # delete employee notifs, keep customer ones
         if not domain and delete_mode and channel_ids:
-            query = """DELETE FROM mail_message_res_partner_needaction_rel WHERE res_partner_id IN %s
-            AND mail_message_id in (SELECT mail_message_id FROM mail_message_mail_channel_rel WHERE mail_channel_id in %s)
-            RETURNING mail_message_id as id"""
-            args = [(partner_id,), tuple(channel_ids)]
+            query = "DELETE FROM mail_message_res_partner_needaction_rel WHERE res_partner_id IN %s"
+            args = [(partner_id,)]
+            if channel_ids:
+                query += """
+                    AND mail_message_id in
+                        (SELECT mail_message_id
+                        FROM mail_message_mail_channel_rel
+                        WHERE mail_channel_id in %s)"""
+                args += [tuple(channel_ids)]
+            query += " RETURNING mail_message_id as id"
             self._cr.execute(query, args)
             self.invalidate_cache()
 
@@ -168,11 +174,8 @@ class Message(models.Model):
             notifications = self.env['mail.notification'].sudo().search([
                 ('mail_message_id', 'in', unread_messages.ids),
                 ('res_partner_id', '=', self.env.user.partner_id.id),
-                ('is_read', '=', False)])
-            if delete_mode:
-                notifications.write({'is_read': True, 'active': False})
-            else:
-                notifications.write({'is_read': True})
+                ('active', '=', True)])
+            notifications.write({'active': False})
             ids = unread_messages.mapped('id')
 
         notification = {'type': 'mark_as_read', 'message_ids': ids, 'channel_ids': channel_ids}
@@ -184,12 +187,11 @@ class Message(models.Model):
     def set_message_done(self):
         """ Remove the needaction from messages for the current partner. """
         partner_id = self.env.user.partner_id
-        delete_mode = not self.env.user.share  # delete employee notifs, keep customer ones
 
         notifications = self.env['mail.notification'].sudo().search([
             ('mail_message_id', 'in', self.ids),
             ('res_partner_id', '=', partner_id.id),
-            ('is_read', '=', False)])
+            ('active', '=', True)])
 
         if not notifications:
             return
@@ -212,11 +214,7 @@ class Message(models.Model):
         current_group = [record.id]
         current_channel_ids = record.channel_ids
 
-        if delete_mode:
-            notifications.write({'is_read': True, 'active': False})
-        else:
-            notifications.write({'is_read': True})
-
+        notifications.write({'active': False})
         for (msg_ids, channel_ids) in groups:
             notification = {'type': 'mark_as_read', 'message_ids': msg_ids, 'channel_ids': [c.id for c in channel_ids]}
             self.env['bus.bus'].sendone((self._cr.dbname, 'res.partner', partner_id.id), notification)
@@ -326,7 +324,7 @@ class Message(models.Model):
                 if notification.active and notification.res_partner_id.partner_share and notification.res_partner_id.active:
                     customer_email_data.append((partner_tree[notification.res_partner_id.id][0], partner_tree[notification.res_partner_id.id][1], notification.email_status))
                 if notification.res_partner_id == self.env.user.partner_id:
-                    message_dict['is_read'] = notification.is_read
+                    message_dict['is_read'] = notification.active
 
             attachment_ids = []
             for attachment in message.attachment_ids:

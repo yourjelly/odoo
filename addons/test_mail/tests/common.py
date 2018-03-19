@@ -52,7 +52,7 @@ class BaseFunctionalTest(common.SavepointCase):
             yield
         finally:
             new_messages = self.test_record.sudo().message_ids - init_messages
-            new_notifications = self.env['mail.notification'].search([
+            new_notifications = self.env['mail.notification'].with_context(active_test=False).search([
                 ('res_partner_id', 'in', partners.ids),
                 ('mail_message_id', 'in', new_messages.ids)
             ])
@@ -71,7 +71,7 @@ class BaseFunctionalTest(common.SavepointCase):
                                      (partner.name, expected, self.test_record.sudo(partner.user_ids[0]).message_needaction_counter))
                 if partner_notif:
                     self.assertTrue(all(n.is_email == (notif_type == 'email') for n in partner_notif))
-                    self.assertTrue(all(n.is_read == (notif_read == 'read') for n in partner_notif),
+                    self.assertTrue(all(n.active != (notif_read == 'read' or notif_read == '') for n in partner_notif),
                                     'Invalid read status for %s' % partner.name)
 
             # for simplification, limitate to single message asserts
