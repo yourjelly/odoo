@@ -11,18 +11,18 @@
                 <p class="oe_grey">
                 The rules defined per product will be applied before the rules defined per product category.
                 </p>
-                <field name="product_location_ids" colspan="4" nolabel="1">
+                <field name="putaway_product_location_ids" colspan="4" nolabel="1">
                     <tree editable="bottom">
                         <field name="sequence" widget='handle'/>
                         <field name="product_id" required="1"/>
-                        <field name="fixed_location_id" domain="[('id', 'child_of', context.get('location_id'))]"/>
+                        <field name="putaway_location_id" domain="[('id', 'child_of', context.get('location_id'))]"/>
                     </tree>
                 </field>
-                <field name="fixed_location_ids" colspan="4" nolabel="1">
+                <field name="putaway_category_location_ids" colspan="4" nolabel="1">
                     <tree editable="bottom">
                         <field name="sequence" widget='handle'/>
                         <field name="category_id" required="1"/>
-                        <field name="fixed_location_id" domain="[('id', 'child_of', context.get('location_id'))]"/>
+                        <field name="putaway_location_id" domain="[('id', 'child_of', context.get('location_id'))]"/>
                     </tree>
                 </field>
             </form>
@@ -37,7 +37,7 @@
                 <group>
                     <group>
                         <field name="putaway_id"/>
-                        <field name="fixed_location_id"/>
+                        <field name="putaway_location_id"/>
                         <field name="sequence"/>
                     </group>
                     <group>
