@@ -30,7 +30,7 @@
     }
 
     > .o_main {
-        direction: $lng-direction;
+        direction: ltr;
         @include o-flex(1, 1, auto);
         @include o-flex-display;
         min-height: 0; // Allow flex to shrink this element as much as it wants
@@ -150,7 +150,7 @@
                 @include o-flex(0, 0, auto);
             }
             .o_content {
-                direction: $lng-direction;
+                direction: ltr;
                 @include o-flex(1, 1, auto);
                 height: 100%;
                 overflow: auto;

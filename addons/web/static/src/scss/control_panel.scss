@@ -3,7 +3,7 @@
     @include o-flex-display;
     @include o-flex-flow(row, wrap);
     border-bottom: 1px solid darken($o-control-panel-background-color, 20%);
-    direction: $lng-direction;
+    direction: ltr;
     @include o-webclient-padding($top: 10px, $bottom: 10px);
     background-color: $o-control-panel-background-color;
 
