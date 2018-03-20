@@ -98,6 +98,7 @@ class AssetsBundle(object):
         self.css_errors = []
         self._checksum = None
         self.files = files
+        self.user_direction = self.env['res.lang'].search([('code', '=', self.env.user.lang)]).direction
         for f in files:
             if f['atype'] == 'text/sass':
                 self.stylesheets.append(SassStylesheetAsset(self, url=f['url'], filename=f['filename'], inline=f['content'], media=f['media']))
@@ -213,7 +214,7 @@ class AssetsBundle(object):
         # TODO: MSH: Store user_direction as attribute instead of accessing it everywhere through search
         user_direction = self.env['res.lang'].search([('code', '=', self.env.user.lang)]).direction
         domain = [
-            ('url', '=like', '/web/content/%-%/{0}.{1}%.{2}'.format(self.name, user_direction, type)),  # The wilcards are id, version and pagination number (if any)
+            ('url', '=like', '/web/content/%-%/{0}{1}%.{2}'.format(self.name, ('.%s' % user_direction if type == 'css' else ''), type)),  # The wilcards are id, version and pagination number (if any)
             '!', ('url', '=like', '/web/content/%-{}/%'.format(self.version))
         ]
 
@@ -233,7 +234,7 @@ class AssetsBundle(object):
         """
         user_direction = self.env['res.lang'].search([('code', '=', self.env.user.lang)]).direction
         version = "%" if ignore_version else self.version
-        url_pattern = '/web/content/%-{0}/{1}.{2}{3}.{4}'.format(version, self.name, user_direction, '.%' if type == 'css' else '', type)
+        url_pattern = '/web/content/%-{0}/{1}{2}{3}.{4}'.format(version, self.name, ('.%s' % user_direction if type == 'css' else ''), '.%' if type == 'css' else '', type)
         print ("\n\nurl_pattern :::: ", url_pattern)
         self.env.cr.execute("""
              SELECT max(id)
@@ -250,8 +251,8 @@ class AssetsBundle(object):
         ira = self.env['ir.attachment']
 
         user_direction = self.env['res.lang'].search([('code', '=', self.env.user.lang)]).direction
-        # Set user direction in name, we will store two bundles 1 for ltr and 1 for rtl, this will help while clearing assets bundle, we will only clear current direction bundle
-        fname = '%s.%s%s.%s' % (self.name, user_direction, ('' if inc is None else '.%s' % inc), type)
+        # Set user direction in name, we will store two bundles 1 for ltr and 1 for rtl, this will help while clearing assets bundle, we will only clear current direction bundle(this applies to css bundles only)
+        fname = '%s%s%s.%s' % (self.name, ('.%s' % user_direction if type == 'css' else ''), ('' if inc is None else '.%s' % inc), type)
         mimetype = 'application/javascript' if type == 'js' else 'text/css'
         values = {
             'name': "/web/content/%s" % type,
@@ -366,17 +367,18 @@ class AssetsBundle(object):
             outdated = False
             assets = dict((asset.html_url, asset) for asset in self.stylesheets if isinstance(asset, atype))
             if assets:
+                print ("\n\nWhile searching assets ::::: ", assets.keys())
                 assets_domain = [('url', 'in', list(assets.keys()))]
                 attachments = self.env['ir.attachment'].sudo().search(assets_domain)
                 for attachment in attachments:
-                    if debug == 'assets':
-                        # To invalidate css on rtl to ltr transition in debug
-                        url_path = "/%s.less.css" % user_direction
-                        if attachment.url.endswith(url_path):
-                            alternate_direction = 'rtl' if user_direction == 'ltr' else 'ltr'
-                            att = self.env['ir.attachment'].sudo().search([('url', '=ilike', attachment.url.replace(user_direction, alternate_direction))], order='write_date desc', limit=1)
-                            if att and att.write_date >= attachment.write_date:
-                                preprocessed = False
+                    # if debug == 'assets':
+                    #     # To invalidate css on rtl to ltr transition in debug
+                    #     url_path = "/%s.less.css" % user_direction
+                    #     if attachment.url.endswith(url_path):
+                    #         alternate_direction = 'rtl' if user_direction == 'ltr' else 'ltr'
+                    #         att = self.env['ir.attachment'].sudo().search([('url', '=ilike', attachment.url.replace(user_direction, alternate_direction))], order='write_date desc', limit=1)
+                    #         if att and att.write_date >= attachment.write_date:
+                    #             preprocessed = False
 
                     asset = assets[attachment.url]
                     if asset.last_modified > fields.Datetime.from_string(attachment['__last_update']):
@@ -427,6 +429,7 @@ class AssetsBundle(object):
                         try:
                             fname = os.path.basename(asset.url)
                             url = asset.html_url
+                            print ("\n\nurlllllllllllll ", url)
                             with self.env.cr.savepoint():
                                 self.env['ir.attachment'].sudo().create(dict(
                                     datas=base64.b64encode(asset.content.encode('utf8')),
