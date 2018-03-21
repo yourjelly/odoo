@@ -981,6 +981,7 @@ var ChatManager =  AbstractService.extend({
                 this.chatBus.trigger("new_channel", channel);
             }
             if (channel.is_detached) {
+                channel.isRtl = session.user_context.lang_direction === 'rtl'
                 this.call('chat_window_manager', 'openChat', channel);
             }
         }

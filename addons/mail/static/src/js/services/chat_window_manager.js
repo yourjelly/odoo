@@ -109,6 +109,7 @@ var ChatWindowManager =  AbstractService.extend({
                 name: session.name,
                 keep_unread: options.passively, // don't automatically mark unread messages as seen
                 window: new ExtendedChatWindow(web_client, session.id, prefix + session.name, session.is_folded, session.unread_counter, windowOptions),
+                is_rtl: session.isRtl
             };
             chatSession.window.on("close_chat_session", null, function () {
                 self._closeChat(chatSession);
@@ -376,7 +377,8 @@ var ChatWindowManager =  AbstractService.extend({
         var nbSlots = this.displayState.nbSlots;
         _.each(this.chatSessions, function (session, index) {
             if (index < nbSlots) {
-                session.window.$el.css({right: CHAT_WINDOW_WIDTH*index, bottom: 0});
+                var loadChat = session.is_rtl === 'rtl' ? 'left' : 'right';
+                session.window.$el.css({loadChat: CHAT_WINDOW_WIDTH*index, bottom: 0});
                 session.window.do_show();
             } else {
                 hiddenSessions.push(session);
