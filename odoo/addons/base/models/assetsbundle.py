@@ -263,6 +263,12 @@ class AssetsBundle(object):
         if not attachments:
             # get css content
             css = self.preprocess_css()
+
+            # process css for changing direction using rtlcss
+            user_direction = self.env['res.lang'].search([('code', '=', self.env.user.lang)]).direction
+            if user_direction == 'rtl':
+                css = self.run_rtlcss(css)
+
             if self.css_errors:
                 return self.get_attachments('css', ignore_version=True)
 
@@ -329,8 +335,6 @@ class AssetsBundle(object):
     def is_css_preprocessed(self, debug=False):
         preprocessed = True
         attachments = None
-        if debug == 'assets':
-            user_direction = self.env['res.lang'].search([('code', '=', self.env.user.lang)]).direction
 
         for atype in (SassStylesheetAsset, ScssStylesheetAsset, LessStylesheetAsset):
             outdated = False
@@ -340,15 +344,6 @@ class AssetsBundle(object):
                 assets_domain = [('url', 'in', list(assets))]
                 attachments = self.env['ir.attachment'].sudo().search(assets_domain)
                 for attachment in attachments:
-                    # if debug == 'assets':
-                    #     # To invalidate css on rtl to ltr transition in debug
-                    #     url_path = "/%s.less.css" % user_direction
-                    #     if attachment.url.endswith(url_path):
-                    #         alternate_direction = 'rtl' if user_direction == 'ltr' else 'ltr'
-                    #         att = self.env['ir.attachment'].sudo().search([('url', '=ilike', attachment.url.replace(user_direction, alternate_direction))], order='write_date desc', limit=1)
-                    #         if att and att.write_date >= attachment.write_date:
-                    #             preprocessed = False
-
                     asset = assets[attachment.url]
                     if asset.last_modified > fields.Datetime.from_string(attachment['__last_update']):
                         outdated = True
@@ -371,7 +366,6 @@ class AssetsBundle(object):
             Checks if the bundle contains any sass/less content, then compiles it to css.
             Returns the bundle's flat css.
         """
-        user_direction = self.env['res.lang'].search([('code', '=', self.env.user.lang)]).direction
         for atype in (SassStylesheetAsset, ScssStylesheetAsset, LessStylesheetAsset):
             assets = [asset for asset in self.stylesheets if isinstance(asset, atype)]
             if assets:
