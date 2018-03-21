@@ -1082,6 +1082,7 @@ class OpenERPSession(werkzeug.contrib.sessions.Session):
         assert self.uid, "The user needs to be logged-in to initialize his context"
         self.context = request.env['res.users'].context_get() or {}
         self.context['uid'] = self.uid
+        self.context['lang_direction'] = request.env['res.lang'].search([('code', '=', request.env.user.lang)]).direction
         self._fix_lang(self.context)
         return self.context
 
