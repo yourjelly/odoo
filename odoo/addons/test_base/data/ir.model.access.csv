@@ -2,3 +2,6 @@
 access_test_inherit_mother,access_test_inherit_mother,model_test_inherit_mother,,1,1,1,1
 access_test_inherit_daughter,access_test_inherit_daughter,model_test_inherit_daughter,,1,1,1,1
 access_test_inherit_property,access_test_inherit_property,model_test_inherit_property,,1,1,1,1
+access_test_unit,access_test_unit,model_test_unit,,1,1,1,1
+access_test_box,access_test_box,model_test_box,,1,1,1,1
+access_test_pallet,access_test_pallet,model_test_pallet,,1,1,1,1
