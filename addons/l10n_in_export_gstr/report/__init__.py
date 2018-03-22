@@ -5,3 +5,4 @@ from . import account_invoice_gst_report
 from . import account_payment_report
 from . import hsn_gst_report
 from . import docs_gst_report
+from . import exempted_gst_report

@@ -33,7 +33,7 @@ class ExportGstReturnCsv(models.TransientModel):
                                        ('exp', 'Export'),
                                        ('at', 'Tax Liability on advances'),
                                        ('atadj', 'Advance adjustments'),
-                                       #('exemp', 'Nil Rated, Exempted and Non GST supplies'),
+                                       ('exemp', 'Nil Rated, Exempted and Non GST supplies'),
                                        ('hsn', 'HSN Summary'),
                                        ('docs', 'List of Documents issued')
                                        ], string="Export Summary For", default="b2b")

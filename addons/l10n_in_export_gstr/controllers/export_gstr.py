@@ -175,6 +175,16 @@ class ExportGstr(CSVExport):
                       {"name": "total_number", "label": "Total Number"},
                       {"name": "cancelled", "label": "Cancelled"},
                      ]
+
+        if gst_type == 'exemp':
+            model = 'exempted.gst.report'
+            domain = [('invoice_month', '=', month_and_year)]
+            fields = [{"name": "type_of_supply", "label": "Description"},
+                      {"name": "nil_rated_amount", "label": "Nil Rated Supplies"},
+                      {"name": "exempted_amount", "label": "Exempted(other than nil rated/non GST supply)"},
+                      {"name": "non_gst_supplies", "label": "Non-GST Supplies"}
+                     ]
+
         return {'fields': fields, 'import_compat': False, 'domain': domain, 'model': model,'ids': []}
 
     def gst_group_ids(self):
