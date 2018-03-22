@@ -100,13 +100,13 @@ class AssetsBundle(object):
         self.user_direction = self.env['res.lang'].search([('code', '=', self.env.user.lang)]).direction
         for f in files:
             if f['atype'] == 'text/sass':
-                self.stylesheets.append(SassStylesheetAsset(self, url=f['url'], filename=f['filename'], inline=f['content'], media=f['media']))
+                self.stylesheets.append(SassStylesheetAsset(self, url=f['url'], filename=f['filename'], inline=f['content'], media=f['media'], direction=self.user_direction))
             elif f['atype'] == 'text/scss':
-                self.stylesheets.append(ScssStylesheetAsset(self, url=f['url'], filename=f['filename'], inline=f['content'], media=f['media']))
+                self.stylesheets.append(ScssStylesheetAsset(self, url=f['url'], filename=f['filename'], inline=f['content'], media=f['media'], direction=self.user_direction))
             elif f['atype'] == 'text/less':
-                self.stylesheets.append(LessStylesheetAsset(self, url=f['url'], filename=f['filename'], inline=f['content'], media=f['media']))
+                self.stylesheets.append(LessStylesheetAsset(self, url=f['url'], filename=f['filename'], inline=f['content'], media=f['media'], direction=self.user_direction))
             elif f['atype'] == 'text/css':
-                self.stylesheets.append(StylesheetAsset(self, url=f['url'], filename=f['filename'], inline=f['content'], media=f['media']))
+                self.stylesheets.append(StylesheetAsset(self, url=f['url'], filename=f['filename'], inline=f['content'], media=f['media'], direction=self.user_direction))
             elif f['atype'] == 'text/javascript':
                 self.javascripts.append(JavascriptAsset(self, url=f['url'], filename=f['filename'], inline=f['content']))
 
@@ -265,9 +265,8 @@ class AssetsBundle(object):
             css = self.preprocess_css()
 
             # process css for changing direction using rtlcss
-            user_direction = self.env['res.lang'].search([('code', '=', self.env.user.lang)]).direction
-            if user_direction == 'rtl':
-                css = self.run_rtlcss(css)
+            # if self.user_direction == 'rtl':
+            #     css = self.run_rtlcss(css)
 
             if self.css_errors:
                 return self.get_attachments('css', ignore_version=True)
@@ -335,6 +334,7 @@ class AssetsBundle(object):
     def is_css_preprocessed(self, debug=False):
         preprocessed = True
         attachments = None
+        # TODO: MSH: If direction is rtl then also unlink css assets as we stored css for rtl direction
 
         for atype in (SassStylesheetAsset, ScssStylesheetAsset, LessStylesheetAsset):
             outdated = False
@@ -387,6 +387,8 @@ class AssetsBundle(object):
                     asset_id = fragments.pop(0)
                     asset = next(asset for asset in self.stylesheets if asset.id == asset_id)
                     asset._content = fragments.pop(0)
+                    if self.user_direction == 'rtl':
+                        asset._content = self.run_rtlcss(asset.content)
 
                     if debug:
                         try:
@@ -409,6 +411,36 @@ class AssetsBundle(object):
                                 self.env.cr.commit()
                         except psycopg2.Error:
                             pass
+
+        # TODO: MSH: Make this common code as we are using same for storing less and sass processed files in ir.attachment
+        css_assets = [asset for asset in self.stylesheets if not isinstance(asset, SassStylesheetAsset) and not isinstance(asset, LessStylesheetAsset)]
+        if css_assets:
+            # source = '\n'.join([asset.content for asset in css_assets])
+            for asset in css_assets:
+                asset._content = self.run_rtlcss(asset.content)
+                if self.user_direction == 'rtl' and debug:
+                    try:
+                        fname = os.path.basename(asset.url)
+                        # TODO: MSH: Need to store url with rtl suffix for css style class also, so when webclient do GET call it fails and find it from ir.attachment
+                        # Currently html url and html url args are on preprocess class
+                        url = asset.html_url
+                        print ("\n\nurlllllllllllll ", url)
+                        with self.env.cr.savepoint():
+                            self.env['ir.attachment'].sudo().create(dict(
+                                datas=base64.b64encode(asset.content.encode('utf8')),
+                                mimetype='text/css',
+                                type='binary',
+                                name=url,
+                                url=url,
+                                datas_fname=fname,
+                                res_model=False,
+                                res_id=False,
+                            ))
+
+                        if self.env.context.get('commit_assetsbundle') is True:
+                            self.env.cr.commit()
+                    except psycopg2.Error:
+                        pass
 
         return '\n'.join(asset.minify() for asset in self.stylesheets)
 
@@ -608,7 +640,13 @@ class StylesheetAsset(WebAsset):
 
     def __init__(self, *args, **kw):
         self.media = kw.pop('media', None)
+        self.direction = kw.pop('direction', None)
         super(StylesheetAsset, self).__init__(*args, **kw)
+        if self.direction == 'rtl' and self.url:
+            self.html_url_format = '%s.%s.%s'
+            self.html_url_args = self.url.rsplit('.', 1)
+            self.html_url_args.insert(-1, self.direction)
+            self.html_url_args = tuple(self.html_url_args)
 
     @property
     def content(self):
@@ -667,7 +705,7 @@ class PreprocessedCSS(StylesheetAsset):
 
     def __init__(self, *args, **kw):
         super(PreprocessedCSS, self).__init__(*args, **kw)
-        self.html_url_format = '%%s/%s/%%s.css' % self.bundle.name
+        self.html_url_format = '%%s/%s/%%s.%s.css' % (self.bundle.name, self.direction)
         self.html_url_args = tuple(self.url.rsplit('/', 1))
 
     def get_source(self):
