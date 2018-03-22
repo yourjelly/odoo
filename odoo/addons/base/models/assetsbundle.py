@@ -371,69 +371,37 @@ class AssetsBundle(object):
             Checks if the bundle contains any sass/less content, then compiles it to css.
             Returns the bundle's flat css.
         """
-        for atype in (SassStylesheetAsset, ScssStylesheetAsset, LessStylesheetAsset):
-            assets = [asset for asset in self.stylesheets if isinstance(asset, atype)]
-            if assets:
-                source = '\n'.join([asset.get_source() for asset in assets])
-                compiled = self.compile_css(assets[0].compile, source)
+        if self.stylesheets:
+            compiled = ""
+            for atype in (SassStylesheetAsset, ScssStylesheetAsset, LessStylesheetAsset):
+                assets = [asset for asset in self.stylesheets if isinstance(asset, atype)]
+                if assets:
+                    source = '\n'.join([asset.get_source() for asset in assets])
+                    compiled = self.compile_css(assets[0].compile, source)
 
-                if user_direction == 'rtl':
-                    compiled = self.run_rtlcss(compiled)
+            # We want to run rtlcss on normal css, so merge it in compiled
+            if self.user_direction == 'rtl':
+                stylesheet_assets = [asset for asset in self.stylesheets if not isinstance(asset, (SassStylesheetAsset, ScssStylesheetAsset, LessStylesheetAsset))]
+                print ("\n\nstylesheet_assets :::: ", stylesheet_assets)
+                compiled += '\n'.join([asset.get_source() for asset in stylesheet_assets])
+                compiled = self.run_rtlcss(compiled)
 
-                if not self.css_errors and old_attachments:
-                    old_attachments.unlink()
+            if not self.css_errors and old_attachments:
+                old_attachments.unlink()
 
-                fragments = self.rx_css_split.split(compiled)
-                at_rules = fragments.pop(0)
-                if at_rules:
-                    # Sass and less moves @at-rules to the top in order to stay css 2.1 compatible
-                    self.stylesheets.insert(0, StylesheetAsset(self, inline=at_rules))
-                while fragments:
-                    asset_id = fragments.pop(0)
-                    asset = next(asset for asset in self.stylesheets if asset.id == asset_id)
-                    asset._content = fragments.pop(0)
-                    if self.user_direction == 'rtl':
-                        asset._content = self.run_rtlcss(asset.content)
+            fragments = self.rx_css_split.split(compiled)
+            at_rules = fragments.pop(0)
+            if at_rules:
+                # Sass and less moves @at-rules to the top in order to stay css 2.1 compatible
+                self.stylesheets.insert(0, StylesheetAsset(self, inline=at_rules))
+            while fragments:
+                asset_id = fragments.pop(0)
+                asset = next(asset for asset in self.stylesheets if asset.id == asset_id)
+                asset._content = fragments.pop(0)
 
-                    if debug:
-                        try:
-                            fname = os.path.basename(asset.url)
-                            url = asset.html_url
-                            print ("\n\nurlllllllllllll ", url)
-                            with self.env.cr.savepoint():
-                                self.env['ir.attachment'].sudo().create(dict(
-                                    datas=base64.b64encode(asset.content.encode('utf8')),
-                                    mimetype='text/css',
-                                    type='binary',
-                                    name=url,
-                                    url=url,
-                                    datas_fname=fname,
-                                    res_model=False,
-                                    res_id=False,
-                                ))
-
-                            if self.env.context.get('commit_assetsbundle') is True:
-                                self.env.cr.commit()
-                        except psycopg2.Error:
-                            pass
-
-        # TODO: MSH: Make this common code as we are using same for storing less and sass processed files in ir.attachment
-        css_assets = [asset for asset in self.stylesheets if not isinstance(asset, SassStylesheetAsset) and not isinstance(asset, LessStylesheetAsset)]
-        if css_assets:
-            # source = '\n'.join([asset.content for asset in css_assets])
-            for asset in css_assets:
-                asset._content = self.run_rtlcss(asset.content)
-                if not self.css_errors and old_attachments:
-                    try: # TODO: MSH: We need to unlink old_attachments in try, except, maybe previous loop unlink all attachments, we should merge this code as it creates many issues
-                        old_attachments.unlink()
-                    except MissingError:
-                        pass
-
-                if self.user_direction == 'rtl' and debug:
+                if debug:
                     try:
                         fname = os.path.basename(asset.url)
-                        # TODO: MSH: Need to store url with rtl suffix for css style class also, so when webclient do GET call it fails and find it from ir.attachment
-                        # Currently html url and html url args are on preprocess class
                         url = asset.html_url
                         print ("\n\nurlllllllllllll ", url)
                         with self.env.cr.savepoint():
@@ -692,6 +660,10 @@ class StylesheetAsset(WebAsset):
             self.bundle.css_errors.append(str(e))
             return ''
 
+    def get_source(self):
+        content = self.inline or self._fetch_content()
+        return "/*! %s */\n%s" % (self.id, content)
+
     def minify(self):
         # remove existing sourcemaps, make no sense after re-mini
         content = self.rx_sourceMap.sub('', self.content)
@@ -718,10 +690,6 @@ class PreprocessedCSS(StylesheetAsset):
         super(PreprocessedCSS, self).__init__(*args, **kw)
         self.html_url_format = '%%s/%s/%%s.%s.css' % (self.bundle.name, self.direction)
         self.html_url_args = tuple(self.url.rsplit('/', 1))
-
-    def get_source(self):
-        content = self.inline or self._fetch_content()
-        return "/*! %s */\n%s" % (self.id, content)
 
     def get_command(self):
         raise NotImplementedError
