@@ -11,10 +11,10 @@ class ExemptedGstReport(models.Model):
     _auto = False
 
 
-    type_of_supply = fields.Selection([('intrb2b','Inter-State supplies to registered persons'),
-                                    ('intrb2c','Intra-State supplies to unregistered persons'),
-                                    ('intrab2b','Inter-State supplies to registered persons'),
-                                    ('intrab2c','Intra-State supplies to unregistered persons')],"Type of supply")
+    type_of_supply = fields.Selection([('intrb2b', 'Inter-State supplies to registered persons'),
+                                    ('intrb2c', 'Inter-State supplies to unregistered persons'),
+                                    ('intrab2b', 'Intra-State supplies to registered persons'),
+                                    ('intrab2c', 'Intra-State supplies to unregistered persons')],"Type of supply")
     nil_rated_amount = fields.Float("Nil rated supplies")
     exempted_amount = fields.Float("Exempted")
     non_gst_supplies = fields.Float("Non GST Supplies")
@@ -75,8 +75,8 @@ class ExemptedGstReport(models.Model):
                                         JOIN res_company comp ON comp.id = ai.company_id
                                         JOIN res_partner cp ON cp.id = comp.partner_id
                                         JOIN res_partner p ON p.id = ai.commercial_partner_id
-                                        LEFT JOIN ( SELECT  atax.id as id, 
-                                            ailts.invoice_line_id AS a_invoice_line_id,                                               
+                                        LEFT JOIN ( SELECT  atax.id as id,
+                                            ailts.invoice_line_id AS a_invoice_line_id,
                                             CASE WHEN atax.amount_type::text = 'group'::text
                                                 THEN catax.tax_group_id
                                                 ELSE atax.tax_group_id
