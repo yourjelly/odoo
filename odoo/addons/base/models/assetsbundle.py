@@ -716,6 +716,10 @@ class StylesheetAsset(WebAsset):
             self.bundle.css_errors.append(str(e))
             return ''
 
+    def get_source(self):
+        content = self.inline or self._fetch_content()
+        return "/*! %s */\n%s" % (self.id, content)
+
     def minify(self):
         # remove existing sourcemaps, make no sense after re-mini
         content = self.rx_sourceMap.sub('', self.content)
@@ -750,10 +754,6 @@ class PreprocessedCSS(StylesheetAsset):
         super(PreprocessedCSS, self).__init__(*args, **kw)
         self.html_url_format = '%%s/%s/%%s.%s.css' % (self.bundle.name, self.direction)
         self.html_url_args = tuple(self.url.rsplit('/', 1))
-
-    def get_source(self):
-        content = self.inline or self._fetch_content()
-        return "/*! %s */\n%s" % (self.id, content)
 
     def get_command(self):
         raise NotImplementedError
