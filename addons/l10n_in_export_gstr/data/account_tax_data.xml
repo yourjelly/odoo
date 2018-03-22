@@ -34,7 +34,7 @@
         <field name="amount">0</field>
         <field name="account_id" ref="l10n_in_gst.p11233"/>
         <field name="tax_group_id" ref="cgst_group"/>
-       <field name="tag_ids" eval="[(6,0,[ref('l10n_in_gst.sgst_tag_tax'),])]"/>
+       <field name="tag_ids" eval="[(6,0,[ref('l10n_in_gst.cgst_tag_tax'),])]"/>
     </record>
 
     <record id="gst_sale_0" model="account.tax">
