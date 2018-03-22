@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_account_invoice_refund_reason_user,account.invoice.refund.reason.user,model_account_invoice_refund_reason,,1,0,0,0
+access_gst_port_code_user,gst.port.code.user,model_gst_port_code,,1,0,0,0
+aceess_account_advances_payment_report_user,account.advances.payment.report.user,model_account_advances_payment_report,,1,0,0,0
+access_account_advances_payment_adjustments_report_user,account.advances.payment.adjustments.report.user,model_account_advances_adjustments_report,,1,0,0,0
+access_account_invoice_gst_report,account.invoice.gst.report.user,model_account_invoice_gst_report,,1,0,0,0
+access_docs_gst_report,docs.gst.report.user,model_docs_gst_report,,1,0,0,0
+access_hsn_gst_report,hsn.gst.report.user,model_hsn_gst_report,,1,0,0,0
