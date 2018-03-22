@@ -18,6 +18,7 @@ from subprocess import Popen, PIPE
 from collections import OrderedDict
 from odoo import fields, tools
 from odoo.tools.pycompat import string_types, to_text
+from odoo.exceptions import MissingError
 from odoo.http import request
 from odoo.modules.module import get_resource_path
 from .qweb import escape
@@ -367,7 +368,11 @@ class AssetsBundle(object):
         attachments = None
         # TODO: MSH: If direction is rtl then also unlink css assets as we stored css for rtl direction
 
-        for atype in (SassStylesheetAsset, ScssStylesheetAsset, LessStylesheetAsset):
+        asset_types = [SassStylesheetAsset, ScssStylesheetAsset, LessStylesheetAsset]
+        if self.user_direction == 'rtl':
+            asset_types.append(StylesheetAsset)
+
+        for atype in asset_types:
             outdated = False
             assets = dict((asset.html_url, asset) for asset in self.stylesheets if isinstance(asset, atype))
             if assets:
@@ -449,6 +454,12 @@ class AssetsBundle(object):
             # source = '\n'.join([asset.content for asset in css_assets])
             for asset in css_assets:
                 asset._content = self.run_rtlcss(asset.content)
+                if not self.css_errors and old_attachments:
+                    try: # TODO: MSH: We need to unlink old_attachments in try, except, maybe previous loop unlink all attachments, we should merge this code as it creates many issues
+                        old_attachments.unlink()
+                    except MissingError:
+                        pass
+
                 if self.user_direction == 'rtl' and debug:
                     try:
                         fname = os.path.basename(asset.url)
