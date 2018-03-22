@@ -212,17 +212,14 @@ class AssetsBundle(object):
         must exclude the current bundle.
         """
         ira = self.env['ir.attachment']
-        # TODO: MSH: Store user_direction as attribute instead of accessing it everywhere through search
-        user_direction = self.env['res.lang'].search([('code', '=', self.env.user.lang)]).direction
         domain = [
-            ('url', '=like', '/web/content/%-%/{0}{1}%.{2}'.format(self.name, ('.%s' % user_direction if type == 'css' else ''), type)),  # The wilcards are id, version and pagination number (if any)
+            ('url', '=like', '/web/content/%-%/{0}{1}%.{2}'.format(self.name, ('.%s' % self.user_direction if type == 'css' else ''), type)),  # The wilcards are id, version and pagination number (if any)
             '!', ('url', '=like', '/web/content/%-{}/%'.format(self.version))
         ]
 
         # force bundle invalidation on other workers
         self.env['ir.qweb'].clear_caches()
 
-        print ("\n\nInside clean_attachments :::::: ", domain)
         return ira.sudo().search(domain).unlink()
 
     def get_attachments(self, type, ignore_version=False):
@@ -233,10 +230,8 @@ class AssetsBundle(object):
         multiple time the same bundle in our `to_html` function, we group our ir.attachment records
         by file name and only return the one with the max id for each group.
         """
-        user_direction = self.env['res.lang'].search([('code', '=', self.env.user.lang)]).direction
         version = "%" if ignore_version else self.version
-        url_pattern = '/web/content/%-{0}/{1}{2}{3}.{4}'.format(version, self.name, ('.%s' % user_direction if type == 'css' else ''), '.%' if type == 'css' else '', type)
-        print ("\n\nurl_pattern :::: ", url_pattern)
+        url_pattern = '/web/content/%-{0}/{1}{2}{3}.{4}'.format(version, self.name, ('.%s' % self.user_direction if type == 'css' else ''), '.%' if type == 'css' else '', type)
         self.env.cr.execute("""
              SELECT max(id)
                FROM ir_attachment
@@ -251,9 +246,8 @@ class AssetsBundle(object):
         assert type in ('js', 'css')
         ira = self.env['ir.attachment']
 
-        user_direction = self.env['res.lang'].search([('code', '=', self.env.user.lang)]).direction
         # Set user direction in name, we will store two bundles 1 for ltr and 1 for rtl, this will help while clearing assets bundle, we will only clear current direction bundle(this applies to css bundles only)
-        fname = '%s%s%s.%s' % (self.name, ('.%s' % user_direction if type == 'css' else ''), ('' if inc is None else '.%s' % inc), type)
+        fname = '%s%s%s.%s' % (self.name, ('.%s' % self.user_direction if type == 'css' else ''), ('' if inc is None else '.%s' % inc), type)
         mimetype = 'application/javascript' if type == 'js' else 'text/css'
         values = {
             'name': "/web/content/%s" % type,
@@ -268,7 +262,6 @@ class AssetsBundle(object):
         attachment = ira.sudo().create(values)
 
         url = '/web/content/%s-%s/%s' % (attachment.id, self.version, fname)
-        print ("\n\nsave urlllllll ", url)
         values = {
             'name': url,
             'url': url,
@@ -291,14 +284,9 @@ class AssetsBundle(object):
 
     def css(self):
         attachments = self.get_attachments('css')
-        print ("\n\nattachments inside css :::: ", attachments)
         if not attachments:
             # get css content
             css = self.preprocess_css()
-
-            # process css for changing direction using rtlcss
-            # if self.user_direction == 'rtl':
-            #     css = self.run_rtlcss(css)
 
             if self.css_errors:
                 return self.get_attachments('css', ignore_version=True)
@@ -366,7 +354,6 @@ class AssetsBundle(object):
     def is_css_preprocessed(self, debug=False):
         preprocessed = True
         attachments = None
-        # TODO: MSH: If direction is rtl then also unlink css assets as we stored css for rtl direction
 
         asset_types = [SassStylesheetAsset, ScssStylesheetAsset, LessStylesheetAsset]
         if self.user_direction == 'rtl':
