@@ -127,8 +127,7 @@ class ExportGstr(CSVExport):
         if gst_type == 'at':
             model = 'account.advances.payment.report'
             domain = [
-                ('place_of_supply','!=',False),
-                ('payment_month','=', month_and_year),
+                ('payment_month','=', str(month_and_year)),
                 ('amount', '>', 0),
                 ('internal_type', '=', 'receivable')]
             fields = [
@@ -184,7 +183,6 @@ class ExportGstr(CSVExport):
                       {"name": "exempted_amount", "label": "Exempted(other than nil rated/non GST supply)"},
                       {"name": "non_gst_supplies", "label": "Non-GST Supplies"}
                      ]
-
         return {'fields': fields, 'import_compat': False, 'domain': domain, 'model': model,'ids': []}
 
     def gst_group_ids(self):

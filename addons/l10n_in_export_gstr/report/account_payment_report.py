@@ -52,7 +52,7 @@ class AccountAdvancesPaymentReport(models.Model):
                     SELECT
                         to_char(ap.payment_date, 'MM-YYYY') as payment_month,
                         ap.company_id as company_id,
-                        (CASE WHEN rcs.x_tin IS NOT NULL THEN concat(rcs.x_tin,'-',rcs.name) ELSE '' END) as place_of_supply,
+                        (CASE WHEN rcs.x_tin IS NOT NULL THEN concat(rcs.x_tin,'-',rcs.name) ELSE NULL END) as place_of_supply,
                         rcs.id as state_id,
                         ap.amount - sum(paml.invoice_paid_amount) as amount,
                         paml.internal_type as internal_type
@@ -84,7 +84,7 @@ class AccountAdvancesPaymentReport(models.Model):
                                 ON ai.id = ai_aml.invoice_id
                                 group by acc.internal_type, app.id ,ai.date_invoice, app.payment_date) as paml
                                     ON paml.payment_id = ap.id
-                        WHERE ap.state = ANY (ARRAY['posted','sent','reconciled']) and ap.payment_type = 'inbound'
+                        WHERE ap.state = ANY (ARRAY['posted','sent','reconciled']) and ap.payment_type = 'inbound' and rcs.x_tin IS NOT NULL
                         GROUP BY
                             ap.amount,
                             ap.payment_date,
@@ -136,7 +136,7 @@ class AccountAdvancesAdjustmentsReport(models.Model):
                     SELECT
                         paml.invoice_month,
                         ap.company_id as company_id,
-                        (CASE WHEN rcs.x_tin IS NOT NULL THEN concat(rcs.x_tin,'-',rcs.name) ELSE '' END) as place_of_supply,
+                        (CASE WHEN rcs.x_tin IS NOT NULL THEN concat(rcs.x_tin,'-',rcs.name) ELSE NULL END) as place_of_supply,
                         rcs.id as state_id,
                         sum(paml.invoice_paid_amount) as invoice_payment,
                         paml.internal_type as internal_type
@@ -167,7 +167,7 @@ class AccountAdvancesAdjustmentsReport(models.Model):
                                 LEFT JOIN account_invoice ai ON ai.id = ai_aml.invoice_id
                                 where ai.date_invoice IS NOT NULL
                                 group by acc.internal_type, app.id ,ai.date_invoice, app.payment_date) as paml ON paml.payment_id = ap.id
-                        WHERE ap.state = ANY (ARRAY['posted','sent','reconciled']) and ap.payment_type = 'inbound'
+                        WHERE ap.state = ANY (ARRAY['posted','sent','reconciled']) and ap.payment_type = 'inbound' and rcs.x_tin IS NOT NULL
                         GROUP BY
                             ap.amount,
                             rcs.x_tin,

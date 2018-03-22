@@ -116,7 +116,7 @@ class AccountInvoiceGstReport(models.Model):
                 ai.company_id AS company_id,
                 to_char(ai.date_invoice, 'DD-MON-YYYY') AS invoice_date,
                 to_char(ai.date_invoice, 'MM-YYYY') AS invoice_month,
-                (CASE WHEN ps.x_tin IS NOT NULL THEN concat(ps.x_tin,'-',ps.name) ELSE null END) AS place_of_supply,
+                (CASE WHEN ps.x_tin IS NOT NULL THEN concat(ps.x_tin,'-',ps.name) ELSE NULL END) AS place_of_supply,
                 p.x_gstin AS partner_gstn,
                 p.name AS partner_name,
                 ai.type AS type,
