@@ -346,7 +346,7 @@ class Scale(Thread):
                 if self.weight != old_weight:
                     _logger.info('New Weight: %s, sleeping %ss', self.weight, self.protocol.newWeightDelay)
                     if self.server_url:
-
+                        _logger.info('Would have sent to %s .', self.server_url)
                     time.sleep(self.protocol.newWeightDelay)
                     if self.weight and self.protocol.autoResetWeight:
                         self.weight = 0
