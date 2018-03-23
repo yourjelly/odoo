@@ -363,7 +363,6 @@ class AssetsBundle(object):
             outdated = False
             assets = dict((asset.html_url, asset) for asset in self.stylesheets if isinstance(asset, atype))
             if assets:
-                print ("\n\nWhile searching assets ::::: ", assets.keys())
                 assets_domain = [('url', 'in', list(assets.keys()))]
                 attachments = self.env['ir.attachment'].sudo().search(assets_domain)
                 for attachment in attachments:
