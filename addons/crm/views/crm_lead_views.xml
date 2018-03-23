@@ -103,7 +103,6 @@
                         <page name="extra" string="Extra Info">
                             <group>
                                 <group string="Email">
-                                    <field name="opt_out"/>
                                     <field name="message_bounce" readonly="1" groups="base.group_no_one"/>
                                 </group>
                                 <group string="Tracking" groups="base.group_multi_company,base.group_no_one" name="categorization">
@@ -580,7 +579,6 @@
                                     </div>
                                     <field name="function"/>
                                     <field name="mobile"/>
-                                    <field name="opt_out"/>
                                 </group>
                                 <group string="Marketing">
                                     <field name="campaign_id" />

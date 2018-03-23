@@ -60,7 +60,6 @@
                     <field name="company_name"/>
                     <field name="email"/>
                     <field name="message_bounce"/>
-                    <field name="opt_out"/>
                 </tree>
             </field>
         </record>
@@ -139,7 +138,6 @@
                                     <field name="message_bounce"/>
                                     <span> times</span>
                                 </div>
-                                <field name="opt_out"/>
                             </group>
                         </group>
                         <field name="list_ids"/>
