@@ -22,6 +22,7 @@ MASS_MAILING_BUSINESS_MODELS = [
     'event.track',
     'sale.order',
     'mail.mass_mailing.list',
+    'mail.mass_mailing.contact',
 ]
 
 
