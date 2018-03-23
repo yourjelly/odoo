@@ -310,7 +310,7 @@ class TestJavascriptAssetsBundle(TransactionCase):
 
         # the ir.attachment records should be deduplicated in the bundle's content
         content = bundle0.to_html()
-        self.assertEqual(content.count('test_assetsbundle.bundle2.0.css'), 1)
+        self.assertEqual(content.count('test_assetsbundle.bundle2.ltr.0.css'), 1)
 
     def test_15_exteral_lib_assets(self):
         html = self.env['ir.ui.view'].render_template('test_assetsbundle.template2')
