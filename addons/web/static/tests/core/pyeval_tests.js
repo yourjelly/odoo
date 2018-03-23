@@ -797,7 +797,6 @@ QUnit.module('core', function () {
                                     "date_due": false, "user_id": 1,
                                     "partner_bank_id": false, "origin": false,
                                     "move_id": false, "comment": false,
-                                    "payment_ids": [[6, false, []]],
                                     "active_id": false, "active_ids": [],
                                     "active_model": "account.invoice",
                                     "parent": {}}
@@ -830,8 +829,7 @@ QUnit.module('core', function () {
                         "state": "draft", "residual": 0, "company_id": 1,
                         "date_due": false, "user_id": 1,
                         "partner_bank_id": false, "origin": false,
-                        "move_id": false, "comment": false,
-                        "payment_ids": [[6, false, []]]}
+                        "move_id": false, "comment": false}
                 }],
                 "__eval_context": null
             }

@@ -196,15 +196,18 @@ class TestPayment(AccountingTestCase):
         # One payment for inv_4 (Vendor Bill)
         inv_4 = self.create_invoice(amount=50, partner=self.partner_agrolait.id, type='in_invoice')
 
+        #TODO OCO v
         ids = [inv_1.id, inv_2.id, inv_3.id, inv_4.id]
         register_payments = self.register_payments_model.with_context(active_ids=ids).create({
             'payment_date': time.strftime('%Y') + '-07-15',
             'journal_id': self.bank_journal_euro.id,
             'payment_method_id': self.payment_method_manual_in.id,
         })
+
         register_payments.create_payments()
         payment_ids = self.payment_model.search([('invoice_ids', 'in', ids)], order="id desc")
 
+        #TODO OCO
         self.assertEqual(len(payment_ids), 3)
         self.assertAlmostEquals(register_payments.amount, 750)
 
@@ -224,6 +227,7 @@ class TestPayment(AccountingTestCase):
                 self.assertEqual(payment_id.amount, 200)
                 inv_3_pay = payment_id
 
+        #TODO OCO
         self.assertIsNotNone(inv_1_2_pay)
         self.assertIsNotNone(inv_3_pay)
         self.assertIsNotNone(inv_4_pay)
@@ -382,9 +386,9 @@ class TestPayment(AccountingTestCase):
             'payment_difference_handling': 'reconcile',
             'writeoff_account_id': self.account_payable.id,
             'journal_id': self.bank_journal_euro.id,
-            'invoice_ids': [(4, invoice.id, None)]
             })
-        payment.post()
+        payment.post(invoices=invoice)
+        #TODO OCO le check_journal_items foire ; peut-être cela vient-il de la fonction directement (mais c'est peu probable)
         self.check_journal_items(payment.move_line_ids, [
             {'account_id': self.account_eur.id, 'debit': 16.35, 'credit': 0.0, 'amount_currency': 25.0, 'currency_id': self.currency_usd_id},
             {'account_id': self.account_payable.id, 'debit': 8.65, 'credit': 0.0, 'amount_currency': 13.22, 'currency_id': self.currency_usd_id},
@@ -409,9 +413,8 @@ class TestPayment(AccountingTestCase):
             'payment_difference_handling': 'reconcile',
             'writeoff_account_id': self.account_payable.id,
             'journal_id': self.bank_journal_euro.id,
-            'invoice_ids': [(4, invoice.id, None)]
             })
-        payment.post()
+        payment.post(invoices=invoice)
         self.check_journal_items(payment.move_line_ids, [
             {'account_id': self.account_eur.id, 'debit': 0.0, 'credit': 16.35, 'amount_currency': -25.0, 'currency_id': self.currency_usd_id},
             {'account_id': self.account_payable.id, 'debit': 0.0, 'credit': 8.65, 'amount_currency': -13.22, 'currency_id': self.currency_usd_id},
@@ -452,9 +455,8 @@ class TestPayment(AccountingTestCase):
             'payment_difference_handling': 'reconcile',
             'writeoff_account_id': self.account_revenue.id,
             'journal_id': self.bank_journal_euro.id,
-            'invoice_ids': [(4, invoice.id, None)]
             })
-        payment.post()
+        payment.post(invoices=invoice)
         self.check_journal_items(payment.move_line_ids, [
             {'account_id': self.account_eur.id, 'debit': 0, 'credit': 6051.14, 'amount_currency': -5325.0, 'currency_id': self.currency_usd_id},
             {'account_id': self.account_revenue.id, 'debit': 0.0, 'credit': 0.68, 'amount_currency': -0.6, 'currency_id': self.currency_usd_id},
@@ -498,10 +500,9 @@ class TestPayment(AccountingTestCase):
             'payment_difference_handling': 'reconcile',
             'writeoff_account_id': self.account_revenue.id,
             'journal_id': self.bank_journal_euro.id,
-            'invoice_ids': [(4, invoice.id, None)],
             'name': 'test_payment_and_writeoff_in_other_currency_3',
             })
-        payment.post()
+        payment.post(invoices=invoice)
         self.check_journal_items(payment.move_line_ids, [
             {'account_id': self.account_eur.id, 'debit': 253116.0, 'credit': 0.0, 'amount_currency': 267.0, 'currency_id': self.currency_usd_id},
             {'account_id': self.account_revenue.id, 'debit': 0.0, 'credit': 5526.84, 'amount_currency': -5.83, 'currency_id': self.currency_usd_id},

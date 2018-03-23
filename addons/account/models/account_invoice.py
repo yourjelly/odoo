@@ -228,6 +228,8 @@ class AccountInvoice(models.Model):
             payment_lines.update(line.mapped('matched_credit_ids.credit_move_id.id'))
             payment_lines.update(line.mapped('matched_debit_ids.debit_move_id.id'))
         self.payment_move_line_ids = self.env['account.move.line'].browse(list(payment_lines))
+        payments_set = self.payment_move_line_ids.mapped('payment_id.id')
+        self.payment_ids = self.env['account.payment'].browse(payments_set)
 
     name = fields.Char(string='Reference/Description', index=True,
         readonly=True, states={'draft': [('readonly', False)]}, copy=False, help='The name that will be used on account move lines')
@@ -345,7 +347,8 @@ class AccountInvoice(models.Model):
         compute='_compute_residual', store=True, help="Remaining amount due in the currency of the invoice.")
     residual_company_signed = fields.Monetary(string='Amount Due in Company Currency', currency_field='company_currency_id',
         compute='_compute_residual', store=True, help="Remaining amount due in the currency of the company.")
-    payment_ids = fields.Many2many('account.payment', 'account_invoice_payment_rel', 'invoice_id', 'payment_id', string="Payments", copy=False, readonly=True)
+    #TODO OCO payment_ids, il va probablement falloir le rendre computed aussi
+    payment_ids = fields.Many2many('account.payment', 'account_invoice_payment_rel', 'invoice_id', 'payment_id', compute='_compute_payments', store=True, string="Payments", copy=False, readonly=True)
     payment_move_line_ids = fields.Many2many('account.move.line', string='Payment Move Lines', compute='_compute_payments', store=True)
     user_id = fields.Many2one('res.users', string='Salesperson', track_visibility='onchange',
         readonly=True, states={'draft': [('readonly', False)]},
@@ -1378,7 +1381,6 @@ class AccountInvoice(models.Model):
             communication = '%s (%s)' % (communication, self.origin)
 
         payment_vals = {
-            'invoice_ids': [(6, 0, self.ids)],
             'amount': pay_amount or self.residual,
             'payment_date': date or fields.Date.context_today(self),
             'communication': communication,
@@ -1392,7 +1394,7 @@ class AccountInvoice(models.Model):
         }
 
         payment = self.env['account.payment'].create(payment_vals)
-        payment.post()
+        payment.post(self)
 
         return True
 

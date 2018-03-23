@@ -64,8 +64,8 @@ class AccountPayment(models.Model):
                 raise ValidationError(_("A check memo cannot exceed 60 characters."))
 
     @api.multi
-    def post(self):
-        res = super(AccountPayment, self).post()
+    def post(self, invoices=False):
+        res = super(AccountPayment, self).post(invoices)
         payment_method_check = self.env.ref('account_check_printing.account_payment_method_check')
         for payment in self.filtered(lambda p: p.payment_method_id == payment_method_check and p.check_manual_sequencing):
             sequence = payment.journal_id.check_sequence_id
