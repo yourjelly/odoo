@@ -18,11 +18,13 @@ class DocsGstReport(models.Model):
     total_number = fields.Integer("Total Number")
     cancelled = fields.Integer("Cancelled")
     invoice_month = fields.Char("Invoice Month")
+    company_id = fields.Integer("Company")
 
     def _select(self):
         select_str = """
             SELECT
                 concat(sub.id,'-',sub.document_type,'-',sub.invoice_month) AS id,
+                sub.company_id,
                 sub.document_type,
                 MIN(sub.invoice_number) as num_from,
                 MAX(sub.invoice_number) as num_to,
@@ -35,6 +37,7 @@ class DocsGstReport(models.Model):
     def _sub_select(self):
         sub_select_str = """
             SELECT aj.id as id,
+                aj.company_id,
                 ai.number AS invoice_number,
                 to_char(ai.date_invoice, 'MM-YYYY') AS invoice_month,
                 (CASE WHEN ai.type = 'out_invoice'
@@ -63,6 +66,7 @@ class DocsGstReport(models.Model):
     def _sub_group_by(self):
         sub_group_by_str = """
             GROUP BY aj.id,
+                aj.company_id,
                 ai.date_invoice,
                 ai.number,
                 ai.type,
@@ -74,6 +78,7 @@ class DocsGstReport(models.Model):
         group_by_str = """
         GROUP BY
             sub.id,
+            sub.company_id,
             sub.document_type,
             sub.invoice_month,
             sub.cancelled

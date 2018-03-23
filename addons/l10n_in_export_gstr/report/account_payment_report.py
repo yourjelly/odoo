@@ -108,7 +108,7 @@ class AccountAdvancesAdjustmentsReport(models.Model):
         for record in self:
             invoice_payment = 0
             for payment in  self.env['account.payment'].browse(eval(record.payment_ids)):
-                for invoice_id in payment.invoice_ids.filtered(lambda i: i.date_invoice > payment.payment_date):
+                for invoice_id in payment.invoice_ids:
                     payment_move_lines  = invoice_id.payment_move_line_ids
                     if  payment.id in payment_move_lines.mapped('payment_id').ids:
                         invoice_payment += sum([p.amount for p in payment_move_lines.matched_debit_ids if p.debit_move_id in invoice_id.move_id.line_ids])

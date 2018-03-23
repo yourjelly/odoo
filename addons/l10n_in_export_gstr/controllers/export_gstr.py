@@ -18,7 +18,8 @@ class ExportGstr(CSVExport):
     def export_data(self, gst_type, month, year):
         month_and_year = "%s-%s"%(month, year)
         fields = []
-        domain = [('invoice_month', '=', str(month_and_year)), ('tax_group_id', 'in', self.gst_group_ids())]
+        company_ids = request.env.user.company_id.ids + request.env.user.company_id.child_ids.ids
+        domain = [('company_id','in', company_ids), ('invoice_month', '=', str(month_and_year)), ('tax_group_id', 'in', self.gst_group_ids())]
         #Get value from account settings
         b2cs_amount = 250000
         model = 'account.invoice.gst.report'
@@ -126,7 +127,7 @@ class ExportGstr(CSVExport):
             ]
         if gst_type == 'at':
             model = 'account.advances.payment.report'
-            domain = [('payment_month','=', str(month_and_year))]
+            domain = [('payment_month','=', str(month_and_year)), ('company_id','in', company_ids)]
             fields = [
                 {"name": "place_of_supply", "label": "Place Of Supply"},
                 {"name": "tax_rate", "label": "Rate"},
@@ -135,7 +136,7 @@ class ExportGstr(CSVExport):
             ]
         if gst_type == 'atadj':
             model = 'account.advances.adjustments.report'
-            domain = [('invoice_month', '=', month_and_year)]
+            domain = [('invoice_month', '=', month_and_year), ('company_id','in', company_ids)]
             fields = [
                 {"name": "place_of_supply", "label": "Place Of Supply"},
                 {"name": "tax_rate", "label": "Rate"},
@@ -144,7 +145,7 @@ class ExportGstr(CSVExport):
             ]
         if gst_type == 'hsn':
             model = 'hsn.gst.report'
-            domain = [('invoice_month', '=', month_and_year), ('uom_name', '!=', False), '|', ('hsn_code', '!=', False), ('hsn_description', '!=', False)]
+            domain = [('invoice_month', '=', month_and_year), ('uom_name', '!=', False), '|', ('hsn_code', '!=', False), ('hsn_description', '!=', False), ('company_id','in', company_ids)]
             fields = [{"name": "hsn_code", "label": "HSN"},
                       {"name": "hsn_description", "label": "Description"},
                       {"name": "uom_name", "label": "UQC"},
@@ -159,7 +160,7 @@ class ExportGstr(CSVExport):
 
         if gst_type == 'docs':
             model = 'docs.gst.report'
-            domain = [('invoice_month', '=', month_and_year), ('document_type', '!=', False)]
+            domain = [('invoice_month', '=', month_and_year), ('document_type', '!=', False), ('company_id','in', company_ids)]
             fields = [
                       {"name": "document_type", "label": "Nature of Document"},
                       {"name": "num_from", "label": "Sr. No. From"},
@@ -170,7 +171,7 @@ class ExportGstr(CSVExport):
 
         if gst_type == 'exemp':
             model = 'exempted.gst.report'
-            domain = [('invoice_month', '=', month_and_year)]
+            domain = [('invoice_month', '=', month_and_year), ('company_id','in', company_ids)]
             fields = [{"name": "type_of_supply", "label": "Description"},
                       {"name": "nil_rated_amount", "label": "Nil Rated Supplies"},
                       {"name": "exempted_amount", "label": "Exempted(other than nil rated/non GST supply)"},

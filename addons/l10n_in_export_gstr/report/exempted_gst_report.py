@@ -19,6 +19,7 @@ class ExemptedGstReport(models.Model):
     exempted_amount = fields.Float("Exempted")
     non_gst_supplies = fields.Float("Non GST Supplies")
     invoice_month = fields.Char("Invoice Month")
+    company_id = fields.Integer("Company")
 
 
     @api.model_cr
@@ -31,10 +32,12 @@ class ExemptedGstReport(models.Model):
                     sub.invoice_month,
                     sum(sub.exempted_amount) as exempted_amount,
                     sum(sub.non_gst_supplies) as non_gst_supplies,
-                    sum(sub.nil_rated_amount) as nil_rated_amount
+                    sum(sub.nil_rated_amount) as nil_rated_amount,
+                    sub.company_id
                     FROM ( SELECT
                                 ailtax.type_of_supply,
                                 ailtax.invoice_month,
+                                ailtax.company_id,
                                 case when ARRAY[NULL]::int[] = ailtax.tax_group_id
                                     THEN ailtax.price_total
                                     ELSE 0
@@ -96,7 +99,7 @@ class ExemptedGstReport(models.Model):
                                         cp.state_id,
                                         ai.date_invoice, p.state_id, p.x_gstin, ai.type) as ailtax
                 ) as sub
-                GROUP BY sub.type_of_supply, sub.invoice_month)""" %(self._table, self.get_model_data('l10n_in_export_gstr','igst_group'),
+                GROUP BY sub.type_of_supply, sub.company_id, sub.invoice_month)""" %(self._table, self.get_model_data('l10n_in_export_gstr','igst_group'),
                                                     self.get_model_data('l10n_in_export_gstr','cgst_group'),
                                                     self.get_model_data('l10n_in_export_gstr','sgst_group'),
                                                     self.get_model_data('l10n_in_export_gstr','igst_sale_0'),
