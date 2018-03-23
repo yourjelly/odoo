@@ -316,7 +316,7 @@ class TestJavascriptAssetsBundle(TransactionCase):
 
         # the ir.attachment records should be deduplicated in the bundle's content
         content = bundle0.to_html()
-        self.assertEqual(content.count('test_assetsbundle.bundle2.0.css'), 1)
+        self.assertEqual(content.count('test_assetsbundle.bundle2.ltr.0.css'), 1)
 
 
 class TestAssetsBundleInBrowser(HttpCase):
