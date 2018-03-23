@@ -594,14 +594,11 @@ class MassMailing(models.Model):
         else:
             return super(MassMailing, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby)
 
-    def update_opt_out(self, email, res_ids, value):
-        model = self.env[self.mailing_model_real].with_context(active_test=False)
-        if 'opt_out' in model._fields:
-            email_fname = 'email_from'
-            if 'email' in model._fields:
-                email_fname = 'email'
-            records = model.search([('id', 'in', res_ids), (email_fname, 'ilike', email)])
-            records.write({'opt_out': value})
+    def create_blacklist_email(self, email):
+        MailBlacklist = self.env['mail.blacklist']
+        blacklisted_email = MailBlacklist.sudo().search([('email', 'ilike', email)])
+        if len(blacklisted_email) == 0:
+            MailBlacklist.create({'email': email})
 
     #------------------------------------------------------
     # Views & Actions

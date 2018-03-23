@@ -29,7 +29,7 @@ class MassMailController(http.Controller):
             right_token = mailing._unsubscribe_token(res_id, email)
             if not consteq(str(token), right_token):
                 raise exceptions.AccessDenied()
-            mailing.update_opt_out(email, res_ids, True)
+            mailing.create_blacklist_email(email)
             return _('You have been unsubscribed successfully')
 
     @http.route('/mail/track/<int:mail_id>/blank.gif', type='http', auth='none')
