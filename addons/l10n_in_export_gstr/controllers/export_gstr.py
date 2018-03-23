@@ -126,10 +126,7 @@ class ExportGstr(CSVExport):
             ]
         if gst_type == 'at':
             model = 'account.advances.payment.report'
-            domain = [
-                ('payment_month','=', str(month_and_year)),
-                ('amount', '>', 0),
-                ('internal_type', '=', 'receivable')]
+            domain = [('payment_month','=', str(month_and_year))]
             fields = [
                 {"name": "place_of_supply", "label": "Place Of Supply"},
                 {"name": "tax_rate", "label": "Rate"},
@@ -138,11 +135,7 @@ class ExportGstr(CSVExport):
             ]
         if gst_type == 'atadj':
             model = 'account.advances.adjustments.report'
-            domain = [
-                ('place_of_supply','!=',False),
-                ('invoice_month', '=', month_and_year),
-                ('invoice_payment', '>', 0),
-                ('internal_type', '=', 'receivable')]
+            domain = [('invoice_month', '=', month_and_year)]
             fields = [
                 {"name": "place_of_supply", "label": "Place Of Supply"},
                 {"name": "tax_rate", "label": "Rate"},
