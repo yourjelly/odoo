@@ -539,7 +539,7 @@ class MassMailing(models.Model):
         if self.mailing_model_name:
             if self.mailing_model_name == 'mail.mass_mailing.list':
                 if self.contact_list_ids:
-                    str_tuples += "('list_ids', 'in', {}),".format(','.join(str(id) for id in self.contact_list_ids.ids))
+                    str_tuples += "('list_ids', 'in', [{}]),".format(','.join(str(id) for id in self.contact_list_ids.ids))
                 else:
                     str_tuples += "(0, '=', 1),"
             elif self.mailing_model_name == 'res.partner':
