@@ -52,9 +52,9 @@ class ExemptedGstReport(models.Model):
                             END as nil_rated_amount
 
                          FROM(SELECT
-                                CASE WHEN cp.state_id != p.state_id or p.state_id IS NULL and p.x_gstin IS NOT NULL
+                                CASE WHEN (cp.state_id != p.state_id or p.state_id IS NULL or cp.state_id IS NULL) and p.x_gstin IS NOT NULL
                                     THEN 'intrb2b'
-                                    WHEN cp.state_id != p.state_id or p.state_id IS NULL and p.x_gstin IS NULL
+                                    WHEN (cp.state_id != p.state_id or p.state_id IS NULL or cp.state_id IS NULL) and p.x_gstin IS NULL
                                     THEN 'intrb2c'
                                     WHEN cp.state_id = p.state_id and p.x_gstin IS NOT NULL
                                     THEN 'intrab2b'
