@@ -190,7 +190,7 @@ class ProcurementGroup(models.Model):
         return True
 
     @api.model
-    def _search_rule(self, product_id, values, domain):
+    def _search_rule(self, product_id, values, domain, limit=1):
         """ First find a rule among the ones defined on the procurement
         group; then try on the routes defined for the product; finally fallback
         on the default behavior """
@@ -199,15 +199,15 @@ class ProcurementGroup(models.Model):
         Pull = self.env['procurement.rule']
         res = self.env['procurement.rule']
         if values.get('route_ids', False):
-            res = Pull.search(expression.AND([[('route_id', 'in', values['route_ids'].ids)], domain]), order='route_sequence, sequence', limit=1)
+            res = Pull.search(expression.AND([[('route_id', 'in', values['route_ids'].ids)], domain]), order='route_sequence, sequence', limit=limit)
         if not res:
             product_routes = product_id.route_ids | product_id.categ_id.total_route_ids
             if product_routes:
-                res = Pull.search(expression.AND([[('route_id', 'in', product_routes.ids)], domain]), order='route_sequence, sequence', limit=1)
+                res = Pull.search(expression.AND([[('route_id', 'in', product_routes.ids)], domain]), order='route_sequence, sequence', limit=limit)
         if not res:
             warehouse_routes = values['warehouse_id'].route_ids
             if warehouse_routes:
-                res = Pull.search(expression.AND([[('route_id', 'in', warehouse_routes.ids)], domain]), order='route_sequence, sequence', limit=1)
+                res = Pull.search(expression.AND([[('route_id', 'in', warehouse_routes.ids)], domain]), order='route_sequence, sequence', limit=limit)
         return res
 
     @api.model
