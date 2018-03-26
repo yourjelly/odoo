@@ -34,6 +34,7 @@ class TestJavascriptAssetsBundle(TransactionCase):
         super(TestJavascriptAssetsBundle, self).setUp()
         self.jsbundle_xmlid = 'test_assetsbundle.bundle1'
         self.cssbundle_xmlid = 'test_assetsbundle.bundle2'
+        self.env['res.lang'].load_lang('ar_SY')
 
     def _get_asset(self, xmlid, env=None):
         env = (env or self.env)
@@ -43,9 +44,10 @@ class TestJavascriptAssetsBundle(TransactionCase):
     def _any_ira_for_bundle(self, type):
         """ Returns all ir.attachments associated to a bundle, regardless of the verion.
         """
+        user_direction = self.env['res.lang'].search([('code', '=', self.env.user.lang)]).direction
         bundle = self.jsbundle_xmlid if type == 'js' else self.cssbundle_xmlid
         return self.env['ir.attachment'].search([
-            ('url', '=like', '/web/content/%-%/{0}%.{1}'.format(bundle, type))
+            ('url', '=like', '/web/content/%-%/{0}{1}%.{2}'.format(bundle, ('.%s' % user_direction if type == 'css' else ''), type))
         ])
 
     def test_01_generation(self):
@@ -317,6 +319,21 @@ class TestJavascriptAssetsBundle(TransactionCase):
         # the ir.attachment records should be deduplicated in the bundle's content
         content = bundle0.to_html()
         self.assertEqual(content.count('test_assetsbundle.bundle2.ltr.0.css'), 1)
+
+    def test_15_rtl_assets_generation(self):
+        self.env.user.lang = 'ar_SY'
+        self.bundle = self._get_asset(self.cssbundle_xmlid, env=self.env(context={'lang': 'ar_SY'}))
+
+        # there shouldn't be any attachment associated to this bundle
+        self.assertEquals(len(self._any_ira_for_bundle('css')), 0)
+        self.assertEquals(len(self.bundle.get_attachments('css')), 0)
+
+        # trigger the first generation and, thus, the first save in database
+        self.bundle.css()
+
+        # there should be one attachment associated to this bundle
+        self.assertEquals(len(self._any_ira_for_bundle('css')), 1)
+        self.assertEquals(len(self.bundle.get_attachments('css')), 1)
 
 
 class TestAssetsBundleInBrowser(HttpCase):
