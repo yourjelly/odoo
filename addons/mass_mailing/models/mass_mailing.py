@@ -53,6 +53,7 @@ class MassMailingList(models.Model):
     contact_ids = fields.Many2many(
         'mail.mass_mailing.contact', 'mail_mass_mailing_contact_list_rel', 'list_id', 'contact_id',
         string='Mailing Lists')
+    opt_out = fields.Boolean(compute="_compute_list_opt_out", string="Opt-Out")
 
     # Compute number of contacts non opt-out for a mailing list
     def _compute_contact_nbr(self):
@@ -61,15 +62,36 @@ class MassMailingList(models.Model):
                 list_id, count(*)
             from
                 mail_mass_mailing_contact_list_rel r
-                left join mail_mass_mailing_contact c on (r.contact_id=c.id)
-            where
-                c.opt_out <> true
+                left join mail_mass_mailing_list l on (l.id=r.list_id)
             group by
                 list_id
         ''')
         data = dict(self.env.cr.fetchall())
         for mailing_list in self:
             mailing_list.contact_nbr = data.get(mailing_list.id, 0)
+
+    def _compute_list_opt_out(self):
+        self.env.cr.execute('''
+            select
+                list_id, opt_out
+            from
+                mail_mass_mailing_contact_list_rel r where (r.list_id in %s and r.contact_id = %s)
+            group by
+                list_id, opt_out
+        ''', (tuple(self.ids), self._context.get('contact_id') or 0))
+        data = dict(self.env.cr.fetchall())
+        for mailing_list in self:
+            mailing_list.opt_out = data.get(mailing_list.id)
+
+    @api.multi
+    def write(self, vals):
+        if 'opt_out' in vals:
+            self.env.cr.execute('''
+                update mail_mass_mailing_contact_list_rel
+                set opt_out=%s
+                where (list_id=%s and contact_id=%s)
+            ''', (vals['opt_out'], self.id, self._context.get('contact_id')))
+        return super(MassMailingList, self).write(vals)
 
     @api.multi
     def action_merge(self, src_lists, archive):
@@ -100,21 +122,21 @@ class MassMailingList(models.Model):
         # Put destination is sources lists if not already the case
         src_lists |= self
         self.env.cr.execute("""
-            INSERT INTO mail_mass_mailing_contact_list_rel (contact_id, list_id)
-            SELECT st.contact_id AS contact_id, %s AS list_id
+            INSERT INTO mail_mass_mailing_contact_list_rel (contact_id, list_id, opt_out)
+            SELECT st.contact_id AS contact_id, %s AS list_id, st.opt_out AS opt_out
             FROM
                 (
                 SELECT
                     contact.id AS contact_id,
                     contact.email AS email,
                     mailing_list.id AS list_id,
+                    contact_list_rel.opt_out AS opt_out,
                     row_number() OVER (PARTITION BY email ORDER BY email) AS rn
                 FROM
                     mail_mass_mailing_contact contact,
                     mail_mass_mailing_contact_list_rel contact_list_rel,
                     mail_mass_mailing_list mailing_list
                 WHERE contact.id=contact_list_rel.contact_id
-                AND contact.opt_out = FALSE
                 AND mailing_list.id=contact_list_rel.list_id
                 AND mailing_list.id IN %s
                 AND NOT EXISTS
@@ -137,6 +159,14 @@ class MassMailingList(models.Model):
     def close_dialog(self):
         return {'type': 'ir.actions.act_window_close'}
 
+    def update_opt_out(self, contact, res_ids, value):
+        if contact and res_ids:
+            self.env.cr.execute('''
+                update mail_mass_mailing_contact_list_rel r
+                SET opt_out=%s
+                where r.contact_id=%s and r.list_id in %s
+            ''', (value, contact.id, tuple(res_ids)))
+
 
 class MassMailingContact(models.Model):
     """Model of a contact. This model is different from the partner model
@@ -157,23 +187,9 @@ class MassMailingContact(models.Model):
     list_ids = fields.Many2many(
         'mail.mass_mailing.list', 'mail_mass_mailing_contact_list_rel',
         'contact_id', 'list_id', string='Mailing Lists')
-    opt_out = fields.Boolean(string='Opt Out', help='The contact has chosen not to receive mails anymore from this list')
-    unsubscription_date = fields.Datetime(string='Unsubscription Date')
     message_bounce = fields.Integer(string='Bounced', help='Counter of the number of bounced emails for this contact.', default=0)
     country_id = fields.Many2one('res.country', string='Country')
     tag_ids = fields.Many2many('res.partner.category', string='Tags')
-
-    @api.model
-    def create(self, vals):
-        if 'opt_out' in vals:
-            vals['unsubscription_date'] = vals['opt_out'] and fields.Datetime.now()
-        return super(MassMailingContact, self).create(vals)
-
-    @api.multi
-    def write(self, vals):
-        if 'opt_out' in vals:
-            vals['unsubscription_date'] = vals['opt_out'] and fields.Datetime.now()
-        return super(MassMailingContact, self).write(vals)
 
     def get_name_email(self, name):
         name, email = self.env['res.partner']._parse_partner_name(name)
@@ -664,18 +680,28 @@ class MassMailing(models.Model):
         self.ensure_one()
         blacklist = {}
         target = self.env[self.mailing_model_real]
-        mail_field = 'email' if 'email' in target._fields else 'email_from'
-        if 'opt_out' in target._fields:
-            # avoid loading a large number of records in memory
-            # + use a basic heuristic for extracting emails
-            query = """
-                SELECT lower(substring(%(mail_field)s, '([^ ,;<@]+@[^> ,;]+)'))
-                  FROM %(target)s
-                 WHERE opt_out AND
-                       substring(%(mail_field)s, '([^ ,;<@]+@[^> ,;]+)') IS NOT NULL;
-            """
-            query = query % {'target': target._table, 'mail_field': mail_field}
-            self._cr.execute(query)
+        if 'opt_out' in target._fields or 'list_ids' in target._fields:
+            if 'opt_out' in target._fields:
+                # avoid loading a large number of records in memory
+                # + use a basic heuristic for extracting emails
+                mail_field = 'email' if 'email' in target._fields else 'email_from'
+                query = """
+                    SELECT lower(substring(%(mail_field)s, '([^ ,;<@]+@[^> ,;]+)'))
+                      FROM %(target)s
+                     WHERE opt_out AND
+                           substring(%(mail_field)s, '([^ ,;<@]+@[^> ,;]+)') IS NOT NULL;
+                """
+                query = query % {'target': target._table, 'mail_field': mail_field}
+                self._cr.execute(query)
+            else:
+                self.env.cr.execute('''
+                    SELECT
+                        email
+                    FROM
+                        mail_mass_mailing_contact c JOIN mail_mass_mailing_contact_list_rel r
+                    ON
+                        (r.list_id in %s  and opt_out and c.id = r.contact_id)
+                ''', (tuple(self.contact_list_ids.ids),))
             blacklist = set(m[0] for m in self._cr.fetchall())
             _logger.info(
                 "Mass-mailing %s targets %s, blacklist: %s emails",
@@ -714,6 +740,7 @@ class MassMailing(models.Model):
         return seen_list
 
     def _get_mass_mailing_context(self):
+
         """Returns extra context items with pre-filled blacklist and seen list for massmailing"""
         return {
             'mass_mailing_blacklist': self._get_blacklist(),
@@ -820,3 +847,10 @@ class MassMailing(models.Model):
                 mass_mailing.send_mail()
             else:
                 mass_mailing.state = 'done'
+
+
+class MassMailingOptOut(models.Model):
+    _name = 'mail.mass.mailing.contact.list.rel'
+    _table = 'mail_mass_mailing_contact_list_rel'
+
+    opt_out = fields.Boolean(string='Opt Out', help='The List choosen to not send mail to its contact')
