@@ -3,6 +3,7 @@
 
 from odoo import tools
 from odoo import models, fields, api
+from odoo.tools.safe_eval import safe_eval
 
 
 class AccountInvoiceGstReport(models.Model):
@@ -17,7 +18,7 @@ class AccountInvoiceGstReport(models.Model):
         AccountTax = self.env['account.tax']
         for record in self.filtered(lambda r: r.invoice_line_ids):
             cess_amount_count = 0
-            account_invoice_lines = AccountInvoiceLine.browse(eval(record.invoice_line_ids))
+            account_invoice_lines = AccountInvoiceLine.browse(safe_eval(record.invoice_line_ids))
             for account_invoice_line in account_invoice_lines:
                 price_unit = account_invoice_line.price_unit * (1 - (account_invoice_line.discount or 0.0) / 100.0)
                 tax_lines = account_invoice_line.invoice_line_tax_ids.compute_all(price_unit, account_invoice_line.invoice_id.currency_id,
@@ -77,7 +78,7 @@ class AccountInvoiceGstReport(models.Model):
 
     def _select(self):
         select_str = """
-            SELECT DENSE_RANK() over (order by CASE WHEN sub.tax_id IS NOT NULL THEN (sub.id, sub.tax_id) ELSE (sub.id, sub.id) END) as id,
+            SELECT (CASE WHEN sub.tax_id IS NOT NULL THEN concat(sub.id, '-', sub.tax_id, '-', sub.company_id) ELSE concat(sub.id, '-', sub.company_id) END) as id,
                 array_agg(sub.invoice_line_id) as invoice_line_ids,
                 sub.company_id,
                 '' as is_ecommerce,

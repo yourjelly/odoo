@@ -23,7 +23,7 @@ class DocsGstReport(models.Model):
     def _select(self):
         select_str = """
             SELECT
-                concat(sub.id,'-',sub.document_type,'-',sub.invoice_month) AS id,
+                concat(sub.id, '-', sub.document_type, '-', sub.invoice_month, '-', sub.company_id) AS id,
                 sub.company_id,
                 sub.document_type,
                 MIN(sub.invoice_number) as num_from,

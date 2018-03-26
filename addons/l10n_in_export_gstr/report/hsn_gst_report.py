@@ -3,6 +3,7 @@
 
 from odoo import tools
 from odoo import models, fields, api
+from odoo.tools.safe_eval import safe_eval
 
 
 class HsnGstReport(models.Model):
@@ -17,7 +18,7 @@ class HsnGstReport(models.Model):
         AccountTax = self.env['account.tax']
         for record in self.filtered(lambda r: r.invoice_line_ids):
             cess_amount_count = 0
-            account_invoice_lines = AccountInvoiceLine.browse(eval(record.invoice_line_ids))
+            account_invoice_lines = AccountInvoiceLine.browse(safe_eval(record.invoice_line_ids))
             for account_invoice_line in account_invoice_lines:
                 price_unit = account_invoice_line.price_unit * (1 - (account_invoice_line.discount or 0.0) / 100.0)
                 tax_lines = account_invoice_line.invoice_line_tax_ids.compute_all(price_unit, account_invoice_line.invoice_id.currency_id,
@@ -47,8 +48,8 @@ class HsnGstReport(models.Model):
     def _select(self):
         select_str = """
             SELECT concat(case when sub.hsn_code is not null
-                    then (sub.uom_id, '-', sub.hsn_code, '-', sub.invoice_month)
-                    else (sub.uom_id, '-', sub.hsn_description, '-', sub.invoice_month)
+                    then (sub.uom_id, '-', sub.hsn_code, '-', sub.invoice_month, '-', sub.company_id)
+                    else (sub.uom_id, '-', sub.hsn_description, '-', sub.invoice_month, '-', sub.company_id)
                     END) AS id,
                 array_agg(sub.invoice_line_id) as invoice_line_ids,
                 (select sum(amount_total_company_signed) from account_invoice where id = ANY (array_agg(sub.id))) as invoice_total,

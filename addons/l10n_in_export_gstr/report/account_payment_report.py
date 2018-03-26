@@ -3,6 +3,8 @@
 
 from odoo import tools
 from odoo import api, fields, models
+from odoo.tools.safe_eval import safe_eval
+
 
 class AccountAdvancesPaymentReport(models.Model):
 
@@ -35,7 +37,7 @@ class AccountAdvancesPaymentReport(models.Model):
     def _compute_amount(self):
         for record in self:
             amount = record.payment_amount
-            for payment in  self.env['account.payment'].browse(eval(record.payment_ids)):
+            for payment in  self.env['account.payment'].browse(safe_eval(record.payment_ids)):
                 for invoice_id in payment.invoice_ids.filtered(lambda i: i.date_invoice <= payment.payment_date):
                     payment_move_lines  = invoice_id.payment_move_line_ids
                     if  payment.id in payment_move_lines.mapped('payment_id').ids:
@@ -53,7 +55,7 @@ class AccountAdvancesPaymentReport(models.Model):
         tools.drop_view_if_exists(self.env.cr, self._table)
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
-                SELECT sub.state_id AS id,
+                SELECT concat(sub.state_id, '-', sub.company_id) AS id,
                 array_agg(sub.payment_id) as payment_ids,
                 sub.place_of_supply,
                 sum(sub.amount) as payment_amount,
@@ -107,7 +109,7 @@ class AccountAdvancesAdjustmentsReport(models.Model):
     def _compute_invoice_payment(self):
         for record in self:
             invoice_payment = 0
-            for payment in  self.env['account.payment'].browse(eval(record.payment_ids)):
+            for payment in  self.env['account.payment'].browse(safe_eval(record.payment_ids)):
                 for invoice_id in payment.invoice_ids:
                     payment_move_lines  = invoice_id.payment_move_line_ids
                     if  payment.id in payment_move_lines.mapped('payment_id').ids:
@@ -120,7 +122,7 @@ class AccountAdvancesAdjustmentsReport(models.Model):
         tools.drop_view_if_exists(self.env.cr, self._table)
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
-                SELECT sub.state_id AS id,
+                SELECT concat(sub.state_id, '-', sub.company_id) AS id,
                 array_agg(sub.payment_id) as payment_ids,
                 sub.place_of_supply,
                 sub.invoice_month,
