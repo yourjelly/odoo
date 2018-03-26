@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- SGST & CGST Sales Group 0% Tax -->
+
+    <record id="sgst_sale_0" model="account.tax">
+        <field name="name">SGST Sale 0%</field>
+        <field name="description">SGST 0%</field>
+        <field name="type_tax_use">none</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="account_id" ref="l10n_in.p11232"/>
+        <field name="tax_group_id" ref="l10n_in.sgst_group"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('l10n_in.sgst_tag_tax')])]"/>
+    </record>
+
+    <record id="cgst_sale_0" model="account.tax">
+        <field name="name">CGST Sale 0%</field>
+        <field name="description">CGST 0%</field>
+        <field name="type_tax_use">none</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="account_id" ref="l10n_in.p11233"/>
+        <field name="tax_group_id" ref="l10n_in.cgst_group"/>
+       <field name="tag_ids" eval="[(6, 0, [ref('l10n_in.cgst_tag_tax')])]"/>
+    </record>
+
+    <record id="gst_sale_0" model="account.tax">
+        <field name="name">GST 0%</field>
+        <field name="description">GST 0%</field>
+        <field name="type_tax_use">sale</field>
+        <field name="amount_type">group</field>
+        <field name="amount">0</field>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('sgst_sale_0'), ref('cgst_sale_0')])]"/>
+    </record>
+
+     <!-- IGST 0% -->
+
+    <record id="igst_sale_0" model="account.tax">
+        <field name="name">IGST 0%</field>
+        <field name="description">IGST 0%</field>
+        <field name="type_tax_use">sale</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="account_id" ref="l10n_in.p11234"/>
+        <field name="tax_group_id" ref="l10n_in.igst_group"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('l10n_in.igst_tag_tax')])]"/>
+    </record>
+
+     <!-- SGST & CGST Purchase Group 0% Tax -->
+
+    <record id="sgst_purchase_0" model="account.tax">
+        <field name="name">SGST Purchase 0%</field>
+        <field name="description">SGST 0%</field>
+        <field name="type_tax_use">none</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="account_id" ref="l10n_in.p10051"/>
+        <field name="tax_group_id" ref="l10n_in.sgst_group"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('l10n_in.sgst_tag_tax')])]"/>
+    </record>
+
+    <record id="cgst_purchase_0" model="account.tax">
+        <field name="name">CGST Purchase 0%</field>
+        <field name="description">CGST 0%</field>
+        <field name="type_tax_use">none</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="account_id" ref="l10n_in.p10052"/>
+        <field name="tax_group_id" ref="l10n_in.cgst_group"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('l10n_in.cgst_tag_tax')])]"/>
+    </record>
+
+    <record id="gst_purchase_0" model="account.tax">
+        <field name="name">GST 0%</field>
+        <field name="description">GST 0%</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="amount_type">group</field>
+        <field name="amount">0</field>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('sgst_purchase_0'),ref('cgst_purchase_0'),])]"/>
+    </record>
+
+    <!-- IGST -->
+
+    <record id="igst_purchase_0" model="account.tax">
+        <field name="name">IGST 0%</field>
+        <field name="description">IGST 0%</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="account_id" ref="l10n_in.p10053"/>
+        <field name="tax_group_id" ref="l10n_in.igst_group"/>
+        <field name="tag_ids" eval="[(6, 0, [ref('l10n_in.igst_tag_tax')])]"/>
+    </record>
+
+</odoo>
