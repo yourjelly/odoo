@@ -3,8 +3,6 @@ import logging
 import os
 import re
 import time
-import xmlrpclib
-
 from collections import namedtuple
 from os import listdir
 from threading import Thread, Lock
