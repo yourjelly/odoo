@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- GST TAXES-->
+
+    <!-- IGST -->
+
+    <record id="igst_sale_0" model="account.tax.template">
+        <field name="name">IGST 0%</field>
+        <field name="description">IGST 0%</field>
+        <field name="type_tax_use">sale</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="account_id" ref="l10n_in.p11234"/>
+        <field name="refund_account_id" ref="l10n_in.p20011"/>
+        <field name="chart_template_id" ref="l10n_in.indian_chart_template_standard"/>
+        <field name="tag_ids" eval="[(6,0,[ref('l10n_in.igst_tag_tax'),])]"/>
+        <field name="tax_group_id" ref="l10n_in.igst_group"/>
+    </record>
+
+    
+    <!-- SGST & CGST Sales Group Tax -->
+
+     <record id="sgst_sale_0" model="account.tax.template">
+        <field name="name">SGST Sale 0%</field>
+        <field name="description">SGST 0%</field>
+        <field name="type_tax_use">none</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0.0</field>
+        <field name="account_id" ref="l10n_in.p11232"/>
+        <field name="refund_account_id" ref="l10n_in.p20011"/>
+        <field name="chart_template_id" ref="l10n_in.indian_chart_template_standard"/>
+        <field name="tag_ids" eval="[(6,0,[ref('l10n_in.sgst_tag_tax'),])]"/>
+        <field name="tax_group_id" ref="l10n_in.sgst_group"/>
+    </record>
+
+    <record id="cgst_sale_0" model="account.tax.template">
+        <field name="name">CGST Sale 0%</field>
+        <field name="description">CGST 0%</field>
+        <field name="type_tax_use">none</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0.0</field>
+        <field name="account_id" ref="l10n_in.p11233"/>
+        <field name="refund_account_id" ref="l10n_in.p20011"/>
+        <field name="chart_template_id" ref="l10n_in.indian_chart_template_standard"/>
+        <field name="tag_ids" eval="[(6,0,[ref('l10n_in.cgst_tag_tax'),])]"/>
+        <field name="tax_group_id" ref="l10n_in.cgst_group"/>
+    </record>
+
+    <record id="gst_sale_0" model="account.tax.template">
+        <field name="name">GST 0%</field>
+        <field name="description">GST 0%</field>
+        <field name="type_tax_use">sale</field>
+        <field name="amount_type">group</field>
+        <field name="amount">0</field>
+        <field name="chart_template_id" ref="l10n_in.indian_chart_template_standard"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('sgst_sale_0'), ref('cgst_sale_0'),])]"/>
+    </record>
+
+    
+    <!-- Purchase Taxes-->
+
+    <!-- IGST -->
+
+    <record id="igst_purchase_0" model="account.tax.template">
+        <field name="name">IGST 0%</field>
+        <field name="description">IGST 0%</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="account_id" ref="l10n_in.p10053"/>
+        <field name="refund_account_id" ref="l10n_in.p2107"/>
+        <field name="chart_template_id" ref="l10n_in.indian_chart_template_standard"/>
+        <field name="tag_ids" eval="[(6,0,[ref('l10n_in.igst_tag_tax'),])]"/>
+        <field name="tax_group_id" ref="l10n_in.igst_group"/>
+    </record>
+
+
+    <!-- SGST & CGST -->
+
+     <record id="sgst_purchase_0" model="account.tax.template">
+        <field name="name">SGST Purchase 0%</field>
+        <field name="description">SGST 0%</field>
+        <field name="type_tax_use">none</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="account_id" ref="l10n_in.p10051"/>
+        <field name="refund_account_id" ref="l10n_in.p2107"/>
+        <field name="chart_template_id" ref="l10n_in.indian_chart_template_standard"/>
+        <field name="tag_ids" eval="[(6,0,[ref('l10n_in.sgst_tag_tax'),])]"/>
+        <field name="tax_group_id" ref="l10n_in.sgst_group"/>
+    </record>
+
+    <record id="cgst_purchase_0" model="account.tax.template">
+        <field name="name">CGST Purchase 0%</field>
+        <field name="description">CGST 0%</field>
+        <field name="type_tax_use">none</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">0</field>
+        <field name="account_id" ref="l10n_in.p10052"/>
+        <field name="refund_account_id" ref="l10n_in.p2107"/>
+        <field name="chart_template_id" ref="l10n_in.indian_chart_template_standard"/>
+        <field name="tag_ids" eval="[(6,0,[ref('l10n_in.cgst_tag_tax'),])]"/>
+        <field name="tax_group_id" ref="l10n_in.cgst_group"/>
+    </record>
+
+    <record id="gst_purchase_0" model="account.tax.template">
+        <field name="name">GST 0%</field>
+        <field name="description">GST 0%</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="amount_type">group</field>
+        <field name="amount">0</field>
+        <field name="chart_template_id" ref="l10n_in.indian_chart_template_standard"/>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('sgst_purchase_0'),ref('cgst_purchase_0'),])]"/>
+    </record>
+
+</odoo>

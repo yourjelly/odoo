@@ -1,0 +1,17 @@
+-
+  Generate the GST 0% tax from tax template
+-
+  !python {model: account.tax.template, id: False}: |
+      mapping_list = [
+          'l10n_in_export_gstr.igst_sale_0',
+          'l10n_in_export_gstr.sgst_sale_0',
+          'l10n_in_export_gstr.cgst_sale_0',
+          'l10n_in_export_gstr.gst_sale_0',
+          'l10n_in_export_gstr.igst_purchase_0',
+          'l10n_in_export_gstr.sgst_purchase_0',
+          'l10n_in_export_gstr.cgst_purchase_0',
+          'l10n_in_export_gstr.gst_purchase_0'
+      ]
+      for xml_id in mapping_list:
+          self.env.ref(xml_id)._generate_tax(self.env.user.company_id)
+          

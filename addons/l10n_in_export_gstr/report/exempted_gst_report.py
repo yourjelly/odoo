@@ -46,7 +46,7 @@ class ExemptedGstReport(models.Model):
                                 ELSE 0
                             END as non_gst_supplies,
 
-                            case when ARRAY[%s, %s]::int[] && ailtax.tax_ids
+                            case when ARRAY[(SELECT res_id FROM ir_model_data WHERE module='%s' AND name=concat(ailtax.company_id,'_','%s')),(SELECT res_id FROM ir_model_data WHERE module='%s' AND name=concat(ailtax.company_id,'_','%s'))]::int[] && ailtax.tax_ids
                                 THEN ailtax.price_total
                                 ELSE 0
                             END as nil_rated_amount
@@ -100,8 +100,8 @@ class ExemptedGstReport(models.Model):
                 GROUP BY sub.type_of_supply, sub.company_id, sub.invoice_month)""" %(self._table, self.get_model_data('l10n_in','igst_group'),
                     self.get_model_data('l10n_in','cgst_group'),
                     self.get_model_data('l10n_in','sgst_group'),
-                    self.get_model_data('l10n_in_export_gstr','igst_sale_0'),
-                    self.get_model_data('l10n_in_export_gstr','gst_sale_0')))
+                    'l10n_in_export_gstr', 'igst_sale_0',
+                    'l10n_in_export_gstr', 'gst_sale_0'))
 
     def get_model_data(self, module, name):
         return "(SELECT res_id FROM ir_model_data WHERE module='%s' AND name='%s')"%(module, name)

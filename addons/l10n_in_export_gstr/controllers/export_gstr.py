@@ -146,37 +146,37 @@ class ExportGstr(CSVExport):
         if gst_type == 'hsn':
             model = 'hsn.gst.report'
             domain = [('invoice_month', '=', month_and_year), ('uom_name', '!=', False), '|', ('hsn_code', '!=', False), ('hsn_description', '!=', False), ('company_id','in', company_ids)]
-            fields = [{"name": "hsn_code", "label": "HSN"},
-                      {"name": "hsn_description", "label": "Description"},
-                      {"name": "uom_name", "label": "UQC"},
-                      {"name": "product_qty", "label": "Total Quantity"},
-                      {"name": "invoice_total", "label": "Total Value"},
-                      {"name": "price_total", "label": "Taxable Value"},
-                      {"name": "igst_amount", "label": "Integrated Tax Amount"},
-                      {"name": "cgst_amount", "label": "Central Tax Amount"},
-                      {"name": "sgst_amount", "label": "State/UT Tax Amount"},
-                      {"name": "cess_amount", "label": "Cess Amount"}
-                    ]
-
+            fields = [
+                {"name": "hsn_code", "label": "HSN"},
+                {"name": "hsn_description", "label": "Description"},
+                {"name": "uom_name", "label": "UQC"},
+                {"name": "product_qty", "label": "Total Quantity"},
+                {"name": "invoice_total", "label": "Total Value"},
+                {"name": "price_total", "label": "Taxable Value"},
+                {"name": "igst_amount", "label": "Integrated Tax Amount"},
+                {"name": "cgst_amount", "label": "Central Tax Amount"},
+                {"name": "sgst_amount", "label": "State/UT Tax Amount"},
+                {"name": "cess_amount", "label": "Cess Amount"}
+            ]
         if gst_type == 'docs':
             model = 'docs.gst.report'
             domain = [('invoice_month', '=', month_and_year), ('document_type', '!=', False), ('company_id','in', company_ids)]
             fields = [
-                      {"name": "document_type", "label": "Nature of Document"},
-                      {"name": "num_from", "label": "Sr. No. From"},
-                      {"name": "num_to", "label": "Sr. No. To"},
-                      {"name": "total_number", "label": "Total Number"},
-                      {"name": "cancelled", "label": "Cancelled"},
-                     ]
-
+                {"name": "document_type", "label": "Nature of Document"},
+                {"name": "num_from", "label": "Sr. No. From"},
+                {"name": "num_to", "label": "Sr. No. To"},
+                {"name": "total_number", "label": "Total Number"},
+                {"name": "cancelled", "label": "Cancelled"},
+            ]
         if gst_type == 'exemp':
             model = 'exempted.gst.report'
             domain = [('invoice_month', '=', month_and_year), ('company_id','in', company_ids)]
-            fields = [{"name": "type_of_supply", "label": "Description"},
-                      {"name": "nil_rated_amount", "label": "Nil Rated Supplies"},
-                      {"name": "exempted_amount", "label": "Exempted(other than nil rated/non GST supply)"},
-                      {"name": "non_gst_supplies", "label": "Non-GST Supplies"}
-                     ]
+            fields = [
+                {"name": "type_of_supply", "label": "Description"},
+                {"name": "nil_rated_amount", "label": "Nil Rated Supplies"},
+                {"name": "exempted_amount", "label": "Exempted(other than nil rated/non GST supply)"},
+                {"name": "non_gst_supplies", "label": "Non-GST Supplies"}
+            ]
         return {'fields': fields, 'import_compat': False, 'domain': domain, 'model': model,'ids': []}
 
     def gst_group_ids(self):
