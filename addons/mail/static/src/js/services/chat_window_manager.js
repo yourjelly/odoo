@@ -27,7 +27,6 @@ var ChatWindowManager =  AbstractService.extend({
      */
     init: function () {
         var self = this;
-
         this._super.apply(this, arguments);
 
         this.chatSessions = [];

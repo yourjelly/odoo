@@ -876,6 +876,10 @@ var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
             }
         }
 
+        if (this.gui.lang_direction === 'rtl') {
+            this.$(".debug-widget").css({"width": "220", "direction": "rtl"});
+        }
+
         this.screens = {};
         for (i = 0; i < this.gui.screen_classes.length; i++) {
             classe = this.gui.screen_classes[i];

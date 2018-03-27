@@ -1444,6 +1444,9 @@ var ClientListScreenWidget = ScreenWidget.extend({
             this.toggle_save_button();
 
             // Browsers attempt to scroll invisible input elements
+            if (this.gui.lang_direction === 'rtl') {
+                this.$(".client-details").css("direction", "rtl");
+            }
             // into view (eg. when hidden behind keyboard). They don't
             // seem to take into account that some elements are not
             // scrollable.
