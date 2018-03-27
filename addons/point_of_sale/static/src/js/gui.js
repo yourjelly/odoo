@@ -25,6 +25,7 @@ var Gui = core.Class.extend({
         this.startup_screen = null;
         this.current_popup  = null;
         this.current_screen = null; 
+        this.lang_direction = session.user_context.lang_direction;
 
         this.chrome.ready.then(function(){
             self.close_other_tabs();
