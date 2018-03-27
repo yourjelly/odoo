@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <template id="ebs_form">
+        <div>
+            <input type="hidden" name="data_set" t-att-data-action-url="tx_url" data-remove-me=""/>
+            <input name="channel" type="hidden" t-att-value="channel"/>
+            <input name="account_id" type="hidden" t-att-value="account_id"/>
+            <input name="reference_no" type="hidden" t-att-value="reference_no"/>
+            <input name="amount" type="hidden" t-att-value="amount"/>
+            <input name="mode" type="hidden" t-att-value="mode"/>
+            <input name="currency" type="hidden" t-att-value="currency"/>
+            <input name="description" type="hidden" t-att-value="description"/>
+            <input name="return_url" type="hidden" t-att-value="return_url"/>
+            <input name="name" type="hidden" t-att-value="name"/>
+            <input name="address" type="hidden" t-att-value="address"/>
+            <input name="city" type="hidden" t-att-value="city"/>
+            <input name="country" type="hidden" t-att-value="country"/>
+            <input name="postal_code" type="hidden" t-att-value="postal_code"/>
+            <input name="phone" type="hidden" t-att-value="phone"/>
+            <input name="email" type="hidden" t-att-value="email"/>
+            <input name="secure_hash" type="hidden" t-att-value="secure_hash"/>
+        </div>
+    </template>
+</odoo>

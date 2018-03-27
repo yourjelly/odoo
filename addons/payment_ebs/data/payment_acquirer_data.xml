@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="payment.payment_acquirer_ebs" model="payment.acquirer">
+        <field name="name">EBS</field>
+        <field name="image" type="base64" file="payment_ebs/static/description/icon.png"/>
+        <field name="provider">ebs</field>
+        <field name="company_id" ref="base.main_company"/>
+        <field name="view_template_id" ref="ebs_form"/>
+        <field name="environment">test</field>
+        <field name="pre_msg"><![CDATA[
+<p>You will be redirected to the EBS website after clicking on the payment button.</p>]]></field>
+        <field name="ebs_account_id">dummy</field>
+        <field name="ebs_secret_key">dummy</field>
+    </record>
+</odoo>

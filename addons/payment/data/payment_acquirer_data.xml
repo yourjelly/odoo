@@ -243,4 +243,21 @@
                                                         ref("payment.payment_icon_cc_visa")])]'/>
     </record>
 
+    <record id="payment_acquirer_ebs" model="payment.acquirer">
+        <field name="name">EBS</field>
+        <field name="image" type="base64" file="payment_ebs/static/description/icon.png"/>
+        <field name="view_template_id" ref="default_acquirer_button"/>
+        <field name="module_id" ref="base.module_payment_ebs"/>
+        <field name="description" type="html">
+            <p>
+                EBS is the most popular online payment platform in India. Indian consumers can buy online using their eWallet or Card.
+            </p>
+            <ul class="list-inline">
+                <li><i class="fa fa-check"/>Online Payment</li>
+                <li><i class="fa fa-check"/>Payment Status Tracking</li>
+            </ul>
+        </field>
+        <!-- https://www.ebs.in/IPS/features/boost-your-payment-success-rate -->
+        <field name="payment_icon_ids" eval='[(6, 0, [ref("payment.payment_icon_cc_jcb"),ref("payment.payment_icon_cc_mastercard"),ref("payment.payment_icon_cc_visa"),ref("payment.payment_icon_cc_maestro"),ref("payment.payment_icon_cc_american_express")])]'/>
+    </record>
 </odoo>
