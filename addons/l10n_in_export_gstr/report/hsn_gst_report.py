@@ -25,7 +25,7 @@ class HsnGstReport(models.Model):
                     account_invoice_line.quantity, account_invoice_line.product_id, account_invoice_line.invoice_id.partner_id)['taxes']
                 for tax_line in tax_lines:
                     tax = AccountTax.browse(tax_line['id'])
-                    if cess_group and cess_group.id == tax.tax_tag_id.id:
+                    if cess_group and cess_group.id == tax.tax_group_id.id:
                         cess_amount_count += tax_line.get('amount')
             record.cess_amount = cess_amount_count
 
