@@ -320,7 +320,12 @@ class TestJavascriptAssetsBundle(TransactionCase):
         content = bundle0.to_html()
         self.assertEqual(content.count('test_assetsbundle.bundle2.ltr.0.css'), 1)
 
-    def test_15_rtl_assets_generation(self):
+    # Language direction specific tests
+
+    def test_15_rtl_css_generation(self):
+        """ Checks that a bundle creates an ir.attachment record when its `css` method is called
+        for the first time for language with different direction and separate bundle is created for rtl direction.
+        """
         self.env.user.lang = 'ar_SY'
         self.bundle = self._get_asset(self.cssbundle_xmlid, env=self.env(context={'lang': 'ar_SY'}))
 
@@ -334,6 +339,200 @@ class TestJavascriptAssetsBundle(TransactionCase):
         # there should be one attachment associated to this bundle
         self.assertEquals(len(self._any_ira_for_bundle('css')), 1)
         self.assertEquals(len(self.bundle.get_attachments('css')), 1)
+
+    def test_16_ltr_and_rtl_css_access(self):
+        """ Checks that the bundle's cache is working, i.e. that the bundle creates only one
+        ir.attachment record when rendered multiple times for rtl direction also check we have two css bundles,
+        one for ltr and one for rtl.
+        """
+        # Assets access for en_US language
+        ltr_bundle0 = self._get_asset(self.cssbundle_xmlid)
+        ltr_bundle0.css()
+
+        self.assertEquals(len(self._any_ira_for_bundle('css')), 1)
+
+        ltr_version0 = ltr_bundle0.version
+        ltr_ira0 = self._any_ira_for_bundle('css')
+        ltr_date0 = ltr_ira0.create_date
+
+        ltr_bundle1 = self._get_asset(self.cssbundle_xmlid)
+        ltr_bundle1.css()
+
+        self.assertEquals(len(self._any_ira_for_bundle('css')), 1)
+
+        ltr_version1 = ltr_bundle1.version
+        ltr_ira1 = self._any_ira_for_bundle('css')
+        ltr_date1 = ltr_ira1.create_date
+
+        self.assertEquals(ltr_version0, ltr_version1)
+        self.assertEquals(ltr_date0, ltr_date1)
+
+        # Assets access for ar_SY language
+        self.env.user.lang = 'ar_SY'
+        rtl_bundle0 = self._get_asset(self.cssbundle_xmlid)
+        rtl_bundle0.css()
+
+        self.assertEquals(len(self._any_ira_for_bundle('css')), 1)
+
+        rtl_version0 = rtl_bundle0.version
+        rtl_ira0 = self._any_ira_for_bundle('css')
+        rtl_date0 = rtl_ira0.create_date
+
+        rtl_bundle1 = self._get_asset(self.cssbundle_xmlid)
+        rtl_bundle1.css()
+
+        self.assertEquals(len(self._any_ira_for_bundle('css')), 1)
+
+        rtl_version1 = rtl_bundle1.version
+        rtl_ira1 = self._any_ira_for_bundle('css')
+        rtl_date1 = rtl_ira1.create_date
+
+        self.assertEquals(rtl_version0, rtl_version1)
+        self.assertEquals(rtl_date0, rtl_date1)
+
+        # Checks rtl and ltr bundles are different
+        self.assertNotEquals(ltr_ira1.id, rtl_ira1.id)
+
+        # Check two bundles are available, one for ltr and one for rtl
+        css_bundles = self.env['ir.attachment'].search([
+            ('url', '=like', '/web/content/%-%/{0}%.{1}'.format(self.cssbundle_xmlid, 'css'))
+        ]) # TODO: MSH: Create method for this
+        self.assertEquals(len(css_bundles), 2)
+
+    def test_17_css_bundle_date_invalidation(self):
+        """ Checks that both css bundles are invalidated when one of its assets' modification date is changed
+        """
+        # Assets access for en_US language
+        ltr_bundle0 = self._get_asset(self.cssbundle_xmlid)
+        ltr_bundle0.css()
+        ltr_last_modified0 = ltr_bundle0.last_modified
+        ltr_version0 = ltr_bundle0.version
+
+        # Assets access for ar_SY language
+        self.env.user.lang = 'ar_SY'
+        rtl_bundle0 = self._get_asset(self.cssbundle_xmlid)
+        rtl_bundle0.css()
+        rtl_last_modified0 = rtl_bundle0.last_modified
+        rtl_version0 = rtl_bundle0.version
+
+        # Touch test_cssfile1.css
+        self.env.user.lang = 'en_US'
+        path = get_resource_path('test_assetsbundle', 'static', 'src', 'css', 'test_cssfile1.css')
+        ltr_bundle1 = self._get_asset(self.cssbundle_xmlid)
+        _touch(path, ltr_bundle1)
+
+        ltr_bundle1.css()
+        ltr_last_modified1 = ltr_bundle1.last_modified
+        ltr_version1 = ltr_bundle1.version
+        ltr_ira1 = self._any_ira_for_bundle('css')
+        self.assertNotEquals(ltr_last_modified0, ltr_last_modified1)
+        self.assertNotEquals(ltr_version0, ltr_version1)
+
+        self.env.user.lang = 'ar_SY'
+        rtl_bundle1 = self._get_asset(self.cssbundle_xmlid)
+
+        rtl_bundle1.css()
+        rtl_last_modified1 = rtl_bundle1.last_modified
+        rtl_version1 = rtl_bundle1.version
+        rtl_ira1 = self._any_ira_for_bundle('css')
+        self.assertNotEquals(rtl_last_modified0, rtl_last_modified1)
+        self.assertNotEquals(rtl_version0, rtl_version1)
+
+        # Checks rtl and ltr bundles are different
+        self.assertNotEquals(ltr_ira1.id, rtl_ira1.id)
+
+        # check if the previous attachment is correctly cleaned
+        css_bundles = self.env['ir.attachment'].search([
+            ('url', '=like', '/web/content/%-%/{0}%.{1}'.format(self.cssbundle_xmlid, 'css'))
+        ])
+        self.assertEquals(len(css_bundles), 2)
+
+    def test_18_css_bundle_content_invalidation(self):
+        """ Checks that a bundle is invalidated when its content is modified by adding a file to
+        source.
+        """
+        # Assets for en_US
+        ltr_bundle0 = self._get_asset(self.cssbundle_xmlid)
+        ltr_bundle0.css()
+        ltr_files0 = ltr_bundle0.files
+        ltr_remains0 = ltr_bundle0.remains
+        ltr_version0 = ltr_bundle0.version
+
+        self.env.user.lang = 'ar_SY'
+        rtl_bundle0 = self._get_asset(self.cssbundle_xmlid)
+        rtl_bundle0.css()
+        rtl_files0 = rtl_bundle0.files
+        rtl_remains0 = rtl_bundle0.remains
+        rtl_version0 = rtl_bundle0.version
+
+        css_bundles = self.env['ir.attachment'].search([
+            ('url', '=like', '/web/content/%-%/{0}%.{1}'.format(self.cssbundle_xmlid, 'css'))
+        ])
+        self.assertEquals(len(css_bundles), 2)
+
+        self.env.user.lang = 'en_US'
+        view_arch = """
+        <data>
+            <xpath expr="." position="inside">
+                <script type="text/css" src="/test_assetsbundle/static/src/css/test_cssfile3.css"/>
+            </xpath>
+        </data>
+        """
+        bundle = self.browse_ref(self.cssbundle_xmlid)
+        view = self.env['ir.ui.view'].create({
+            'name': 'test bundle inheritance',
+            'type': 'qweb',
+            'arch': view_arch,
+            'inherit_id': bundle.id,
+        })
+
+        ltr_bundle1 = self._get_asset(self.cssbundle_xmlid, env=self.env(context={'check_view_ids': view.ids}))
+        ltr_bundle1.css()
+        ltr_files1 = ltr_bundle1.files
+        ltr_remains1 = ltr_bundle1.remains
+        ltr_version1 = ltr_bundle1.version
+        ltr_ira1 = self._any_ira_for_bundle('css')
+
+        self.assertNotEquals(ltr_files0, ltr_files1)
+        self.assertEquals(ltr_remains0, ltr_remains1)
+        self.assertNotEquals(ltr_version0, ltr_version1)
+
+        self.env.user.lang = 'ar_SY'
+        rtl_bundle1 = self._get_asset(self.cssbundle_xmlid, env=self.env(context={'check_view_ids': view.ids}))
+        rtl_bundle1.css()
+        rtl_files1 = rtl_bundle1.files
+        rtl_remains1 = rtl_bundle1.remains
+        rtl_version1 = rtl_bundle1.version
+        rtl_ira1 = self._any_ira_for_bundle('css')
+
+        self.assertNotEquals(rtl_files0, rtl_files1)
+        self.assertEquals(rtl_remains0, rtl_remains1)
+        self.assertNotEquals(rtl_version0, rtl_version1)
+
+        # Checks rtl and ltr bundles are different
+        self.assertNotEquals(ltr_ira1.id, rtl_ira1.id)
+
+        # check if the previous attachment are correctly cleaned
+        css_bundles = self.env['ir.attachment'].search([
+            ('url', '=like', '/web/content/%-%/{0}%.{1}'.format(self.cssbundle_xmlid, 'css'))
+        ])
+        self.assertEquals(len(css_bundles), 2)
+
+    def test_19_css_in_debug_assets(self):
+        """ Checks that a bundle rendered in debug mode(assets) with right to left language direction stores css files in assets bundle.
+        """
+        self.env.user.lang = 'ar_SY'
+        debug_bundle = self._get_asset(self.cssbundle_xmlid)
+        content = debug_bundle.to_html(debug='assets')
+
+        # css file should be available in assets bundle as user's lang direction is rtl
+        self.assertIn('/test_assetsbundle/static/src/css/test_cssfile1.rtl.css', content)
+
+        # there should be assets(css) created in debug mode as user's lang direction is rtl
+        css_bundle = self.env['ir.attachment'].search([
+            ('url', '=', '/test_assetsbundle/static/src/css/test_cssfile1.rtl.css')
+        ])
+        self.assertEquals(len(css_bundle), 1)
 
 
 class TestAssetsBundleInBrowser(HttpCase):

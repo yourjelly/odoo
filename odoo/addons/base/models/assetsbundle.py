@@ -98,6 +98,8 @@ class AssetsBundle(object):
         self._checksum = None
         self.files = files
         self.remains = remains
+        # TODO: MSH: We may consider context language instead of user's lang as sometimes we forcefully pass different lang in context(consider report case where we want to print report in partner's lang)
+        # We can keep user's lang in fallback(may need to pass lang in context when calling _get_asset of test_assetsbundle)
         self.user_direction = self.env['res.lang'].search([('code', '=', self.env.user.lang)]).direction
         for f in files:
             if f['atype'] == 'text/sass':
