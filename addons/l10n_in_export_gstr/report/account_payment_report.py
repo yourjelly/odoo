@@ -55,7 +55,7 @@ class AccountAdvancesPaymentReport(models.Model):
         tools.drop_view_if_exists(self.env.cr, self._table)
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
-                SELECT concat(sub.state_id, '-', sub.company_id) AS id,
+                SELECT concat(sub.state_id, '-', sub.company_id, '-', sub.payment_month) AS id,
                 array_agg(sub.payment_id) as payment_ids,
                 sub.place_of_supply,
                 sum(sub.amount) as payment_amount,
@@ -122,7 +122,7 @@ class AccountAdvancesAdjustmentsReport(models.Model):
         tools.drop_view_if_exists(self.env.cr, self._table)
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
-                SELECT concat(sub.state_id, '-', sub.company_id) AS id,
+                SELECT concat(sub.state_id, '-', sub.company_id, '-', sub.invoice_month) AS id,
                 array_agg(sub.payment_id) as payment_ids,
                 sub.place_of_supply,
                 sub.invoice_month,
