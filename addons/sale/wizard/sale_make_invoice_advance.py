@@ -78,10 +78,10 @@ class SaleAdvancePaymentInv(models.TransientModel):
             raise UserError(_('The value of the down payment amount must be positive.'))
         if self.advance_payment_method == 'percentage':
             amount = order.amount_untaxed * self.amount / 100
-            name = _("Down payment of %s%%") % (self.amount,)
+            name = self.env['ir.translation']._get_source(None, ('code'), order.partner_id.lang, "Down payment of %s") % (amount,)
         else:
             amount = self.amount
-            name = _('Down Payment')
+            name = self.env['ir.translation']._get_source(None, ('code'), order.partner_id.lang, "Down payment")
         taxes = self.product_id.taxes_id.filtered(lambda r: not order.company_id or r.company_id == order.company_id)
         if order.fiscal_position_id and taxes:
             tax_ids = order.fiscal_position_id.map_tax(taxes).ids
