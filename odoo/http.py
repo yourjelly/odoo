@@ -1083,7 +1083,7 @@ class OpenERPSession(werkzeug.contrib.sessions.Session):
         self.context = request.env['res.users'].context_get() or {}
         self.context['uid'] = self.uid
         # TODO: MSH: Temporary store it in user context to avoid rpc to get user direction from language, check if we can have any other alternative
-        self.context['lang_direction'] = request.env['res.lang'].search([('code', '=', request.env.user.lang)]).direction
+        self.context['lang_direction'] = request.env['res.lang'].search([('code', '=', request.env.lang)]).direction
         self._fix_lang(self.context)
         return self.context
 
