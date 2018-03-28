@@ -133,7 +133,6 @@ var Dashboard = AbstractAction.extend(ControlPanelMixin, {
         this.$(div_to_display).empty();
 
         var self = this;
-        var rtl = session.user_context.lang_direction === 'rtl';
         nv.addGraph(function() {
             var chart = nv.models.lineChart()
                 .x(function(d) { return self.getDate(d); })
@@ -143,8 +142,7 @@ var Dashboard = AbstractAction.extend(ControlPanelMixin, {
                 .useInteractiveGuideline(true)
                 .showLegend(false)
                 .showYAxis(true)
-                .showXAxis(true)
-                .rightAlignYAxis(rtl);
+                .showXAxis(true);
 
             var tick_values = self.getPrunedTickValues(chart_values[0].values, 5);
 

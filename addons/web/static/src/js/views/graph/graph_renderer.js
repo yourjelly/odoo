@@ -177,15 +177,14 @@ return AbstractRenderer.extend({
         svg.transition().duration(0);
 
         var chart = nv.models.multiBarChart();
-        var rtl = this.state.context.lang_direction === "rtl"
         chart.options({
-          margin: {left: 80, bottom: 100, top: 80, right: 80},
+          margin: {left: 80, bottom: 100, top: 80, right: 0},
           delay: 100,
           transition: 10,
           showLegend: _.size(data) <= MAX_LEGEND_LENGTH,
           showXAxis: true,
           showYAxis: true,
-          rightAlignYAxis: rtl,
+          rightAlignYAxis: false,
           stacked: this.stacked,
           reduceXTicks: false,
           rotateLabels: -20,
@@ -327,14 +326,12 @@ return AbstractRenderer.extend({
         svg.transition().duration(0);
 
         var chart = nv.models.lineChart();
-        var rtl = this.state.context.lang_direction === "rtl"
         chart.options({
-          margin: {left: 80, bottom: 100, top: 80, right: 100},
+          margin: {left: 80, bottom: 100, top: 80, right: 0},
           useInteractiveGuideline: true,
           showLegend: _.size(data) <= MAX_LEGEND_LENGTH,
           showXAxis: true,
           showYAxis: true,
-          rightAlignYAxis: rtl
         });
         chart.xAxis.tickValues(tickValues)
             .tickFormat(tickFormat);
