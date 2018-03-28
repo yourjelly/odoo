@@ -6,6 +6,7 @@ var ExtendedChatWindow = require('mail.ExtendedChatWindow');
 var AbstractService = require('web.AbstractService');
 var config = require('web.config');
 var core = require('web.core');
+var session = require('web.session');
 var utils = require('web.utils');
 var web_client = require('web.web_client');
 
@@ -47,6 +48,7 @@ var ChatWindowManager =  AbstractService.extend({
                 }
             });
         });
+        this.lang_direction = session.user_context.lang_direction;
 
         var chatBus = this.call('chat_manager', 'getChatBus');
         chatBus.on('update_message', this, this._onUpdateMessage);
@@ -108,7 +110,6 @@ var ChatWindowManager =  AbstractService.extend({
                 name: session.name,
                 keep_unread: options.passively, // don't automatically mark unread messages as seen
                 window: new ExtendedChatWindow(web_client, session.id, prefix + session.name, session.is_folded, session.unread_counter, windowOptions),
-                is_rtl: session.isRtl
             };
             chatSession.window.on("close_chat_session", null, function () {
                 self._closeChat(chatSession);
@@ -376,8 +377,8 @@ var ChatWindowManager =  AbstractService.extend({
         var nbSlots = this.displayState.nbSlots;
         _.each(this.chatSessions, function (session, index) {
             if (index < nbSlots) {
-                var loadChat = session.is_rtl === 'rtl' ? 'left' : 'right';
-                session.window.$el.css({loadChat: CHAT_WINDOW_WIDTH*index, bottom: 0});
+                self.lang_direction === "rtl" ? session.window.$el.css({left: CHAT_WINDOW_WIDTH*index, bottom: 0}) :
+                    session.window.$el.css({right: CHAT_WINDOW_WIDTH*index, bottom: 0});
                 session.window.do_show();
             } else {
                 hiddenSessions.push(session);
