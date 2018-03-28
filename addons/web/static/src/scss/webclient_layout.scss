@@ -150,7 +150,6 @@
                 @include o-flex(0, 0, auto);
             }
             .o_content {
-                direction: ltr;
                 @include o-flex(1, 1, auto);
                 height: 100%;
                 overflow: auto;
@@ -159,6 +158,7 @@
                 > .o_view_controller {
                     @include o-position-absolute(0, 0, 0, 0);  // Get the 100% height of its flex parent
                     height: 100%;
+                    direction: ltr;
                 }
             }
         }
