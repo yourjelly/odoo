@@ -258,6 +258,8 @@ class StockMove(models.Model):
         res = super(StockMove, self).create(vals)
         if perform_tracking:
             picking.message_track(picking.fields_get(['state']), initial_values)
+        if vals['product_uom_qty'] == 0.0:
+            raise UserError(_('You should not put moves at 0'))
         return res
 
     @api.multi
@@ -272,6 +274,8 @@ class StockMove(models.Model):
         propagated_changes_dict = {}
         #propagation of expected date:
         propagated_date_field = False
+        if vals.get('product_uom_qty') and vals['product_uom_qty'] == 0.0:
+            raise UserError(_('You should not put moves at 0'))
         if vals.get('date_expected'):
             #propagate any manual change of the expected date
             propagated_date_field = 'date_expected'
