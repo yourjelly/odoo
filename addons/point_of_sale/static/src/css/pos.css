@@ -126,6 +126,7 @@ td {
             user-select: none;
     text-shadow: none;
     overflow: hidden;
+    direction: ltr;
 }
 
 /*  ********* The black loading screen ********* */

@@ -28,6 +28,7 @@ var ChatWindowManager =  AbstractService.extend({
      */
     init: function () {
         var self = this;
+
         this._super.apply(this, arguments);
 
         this.chatSessions = [];
@@ -48,7 +49,6 @@ var ChatWindowManager =  AbstractService.extend({
                 }
             });
         });
-        this.lang_direction = session.user_context.lang_direction;
 
         var chatBus = this.call('chat_manager', 'getChatBus');
         chatBus.on('update_message', this, this._onUpdateMessage);
@@ -377,7 +377,7 @@ var ChatWindowManager =  AbstractService.extend({
         var nbSlots = this.displayState.nbSlots;
         _.each(this.chatSessions, function (session, index) {
             if (index < nbSlots) {
-                self.lang_direction === "rtl" ? session.window.$el.css({left: CHAT_WINDOW_WIDTH*index, bottom: 0}) :
+                _t.database.parameters.direction === "rtl" ? session.window.$el.css({left: CHAT_WINDOW_WIDTH*index, bottom: 0}) :
                     session.window.$el.css({right: CHAT_WINDOW_WIDTH*index, bottom: 0});
                 session.window.do_show();
             } else {
