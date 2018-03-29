@@ -95,6 +95,7 @@
 			<field name="location_dest_id" ref="stock.stock_location_output"/>		
 			<field name="product_uom" ref="product.product_uom_unit" />
 			<field name="product_id" ref="product_product_ice_cream_choco"/>
+			<field name="product_uom_qty">1.0</field>
 		</record>
 		<record id="stock_move2" model="stock.move">
 			<field name="name">A second stock move</field>		
@@ -103,6 +104,7 @@
 			<field name="location_dest_id" ref="stock.stock_location_output"/>		
 			<field name="product_uom" ref="product.product_uom_unit" />
 			<field name="product_id" ref="product_product_ice_cream_vani"/>
+			<field name="product_uom_qty">1.0</field>
 		</record>
 		<record id="stock_move3" model="stock.move">
 			<field name="name">A third stock move</field>		
@@ -111,7 +113,8 @@
 			<field name="location_dest_id" ref="stock.stock_location_output"/>		
 			<field name="product_uom" ref="product.product_uom_unit" />
 			<!--<field name="product_id" ref="product.product_product_10"/>-->
-			<field name="product_id" ref="product_product_dry_specu"/>		
+			<field name="product_id" ref="product_product_dry_specu"/>
+			<field name="product_uom_qty">1.0</field>
 		</record>
 		<record id="stock_move4" model="stock.move">
 			<field name="name">A fourth stock move</field>		
@@ -119,7 +122,8 @@
 			<field name="location_id" ref="stock.stock_location_stock"/>
 			<field name="location_dest_id" ref="stock.stock_location_output"/>		
 			<field name="product_uom" ref="product.product_uom_unit" />		
-			<field name="product_id" ref="product_product_ice_cream_vani"/>		
+			<field name="product_id" ref="product_product_ice_cream_vani"/>
+			<field name="product_uom_qty">1.0</field>
 		</record>
 
 </odoo>
