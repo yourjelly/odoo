@@ -578,6 +578,17 @@ class MrpProduction(models.Model):
         for wo in self.workorder_ids:
             if wo.time_ids.filtered(lambda x: (not x.date_end) and (x.loss_type in ('productive', 'performance'))):
                 raise UserError(_('Work order %s is still running') % wo.name)
+        # Check that every produced lot effectively has a lot in the different consumptions
+        if self.product_id.tracking != 'none':
+            finished_lots = self.finished_move_line_ids.mapped('lot_id')
+            raw_finished_lots = self.move_raw_ids.mapped('move_line_ids.lot_produced_id')
+            if raw_finished_lots not in finished_lots:
+                lots_short = set(raw_finished_lots) - set(finished_lots)
+                error_msg = _("You say some raw materials were produced with a lot where we don't have a finished product.  You can correct the used lot by unlocking. Please check the following components:")
+                products_short = self.move_raw_ids.mapped('move_line_ids').filtered(lambda x: x.lot_produced_id in lots_short)
+                for product in products_short:
+                    error_msg += product.name + ", "
+                raise error_msg
         self.post_inventory()
         moves_to_cancel = (self.move_raw_ids | self.move_finished_ids).filtered(lambda x: x.state not in ('done', 'cancel'))
         moves_to_cancel._action_cancel()
