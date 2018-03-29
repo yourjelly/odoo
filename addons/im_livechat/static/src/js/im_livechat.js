@@ -231,6 +231,8 @@ var LivechatButton = Widget.extend({
         this._chatWindow = new WebsiteLivechatWindow(this, this._livechat, options);
         this._chatWindow.appendTo($('body')).then(function () {
             self._chatWindow.$el.css({right: 0, bottom: 0});
+            _t.database.parameters.direction === "rtl" ? self.chat_window.$el.css("bottom", 0) :
+                self.chat_window.$el.css({right: 0, bottom: 0});
             self.$el.hide();
         });
         this._chatWindow.on('close', this, function () {
