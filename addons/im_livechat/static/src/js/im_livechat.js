@@ -181,7 +181,8 @@ var LivechatButton = Widget.extend({
         var is_folded = (channel.state === 'folded');
         this.chat_window = new ChatWindow(this, channel.id, channel.name, is_folded, channel.message_unread_counter, options);
         this.chat_window.appendTo($('body')).then(function () {
-            self.chat_window.$el.css({right: 0, bottom: 0});
+            _t.database.parameters.direction === "rtl" ? self.chat_window.$el.css("bottom", 0) :
+                self.chat_window.$el.css({right: 0, bottom: 0});
             self.$el.hide();
         });
         this.chat_window.on("close_chat_session", this, function () {
