@@ -423,6 +423,33 @@ class ProductTemplate(models.Model):
     route_from_categ_ids = fields.Many2many(
         relation="stock.location.route", string="Category Routes",
         related='categ_id.total_route_ids')
+    route_txt = fields.Text('Computed Pathway', compute='_compute_routes')
+
+    @api.depends('route_ids')
+    @api.one
+    def _compute_routes(self):
+        whs = self.env['stock.warehouse'].search([])
+        ProcurementGroup = self.env['procurement.group']
+        txt = ""
+        for wh in whs:
+            # Search customer location
+            current_loc = self.env.ref('stock.stock_location_customers')
+            one_line = "Customers"
+            while current_loc:
+                rule = ProcurementGroup._get_rule(self, current_loc, {'warehouse_id': wh})
+                if rule and rule.location_src_id:
+                    one_line = rule.location_src_id.display_name + " --> " + one_line
+                elif rule:
+                    one_line = rule.name + " --> " + one_line
+                else:
+                    one_line = 'error?' + one_line
+                if rule.procure_method == 'make_to_order':
+                    current_loc = rule.location_src_id
+                else:
+                    current_loc = False
+            txt += one_line + '\r \n \r \n'
+        self.route_txt = txt
+
 
     def _is_cost_method_standard(self):
         return True
