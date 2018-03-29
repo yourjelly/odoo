@@ -585,7 +585,7 @@ class StockMove(models.Model):
         ancestors_list = {}
 
         # work only on in progress moves
-        moves = self.filtered(lambda move: move.state in ['confirmed', 'waiting', 'assigned'])
+        moves = self.filtered(lambda move: move.state in ['confirmed', 'waiting', 'assigned'] and move.product_qty > 0)
         moves.filtered(lambda move: move.reserved_quant_ids).do_unreserve()
         for move in moves:
             if move.location_id.usage in ('supplier', 'inventory', 'production'):
@@ -804,6 +804,8 @@ class StockMove(models.Model):
         remaining_move_qty = {}
 
         for move in self:
+            if move.product_qty == 0.0:
+                raise UserError(_('You have a move with initial demand 0. We can not process it. Cancel the initial demand at 0.'))
             if move.picking_id:
                 pickings |= move.picking_id
             remaining_move_qty[move.id] = move.product_qty
