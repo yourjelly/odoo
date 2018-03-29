@@ -9,11 +9,10 @@ import dateutil.relativedelta as relativedelta
 import logging
 
 import functools
-import lxml
 from werkzeug import urls
 
 from odoo import _, api, fields, models, tools
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tools import pycompat
 
 _logger = logging.getLogger(__name__)
@@ -237,36 +236,38 @@ class MailTemplate(models.Model):
             self.sub_model_object_field = False
             self.null_value = False
 
-    @api.multi
-    def write(self, vals):
-        # This override is for checking that the template is correct when
-        # saving it
-        if vals.get('body_html'):
-            # render_template can return empty results if the mako rendering
-            # crashes or if the body_html is empty, therefore we will only
-            # perform this check if the new body_html is non-empty
-            if vals.get('model_id'):
-                _model = self.env['ir.model'].sudo().browse(
-                    vals['model_id']).model
-            else:
-                _model = self.model
+    @api.one
+    @api.constrains('body_html', 'model')
+    def _check_body(self, fail_if_no_records=False):
+        if not self.body_html:
+            return
 
-            Model = self.env[_model]
-            if not Model._abstract:
-                # Get the latest record so as to not use older, potentially
-                # deprecated/obsolete records
-                res_ids = Model.search([], limit=1, order='id DESC').ids[:1]
-                if res_ids:
-                    render = self.render_template(
-                        vals['body_html'], _model, res_ids)
+        Model = self.env[self.model]
+        if Model._abstract:
+            return
 
-                    if not any(render.values()):
-                        raise UserError(_(
-                            "Template rendering failed, this could mean that "
-                            "your template contains python syntax errors"
-                        ))
+        # Get the latest record so as to not use older, potentially
+        # deprecated/obsolete records
+        res_ids = Model.search([], limit=1, order='id DESC').ids[:1]
+        if res_ids:
+            render = self.render_template(self.body_html, self.model, res_ids)
 
-        return super(MailTemplate, self).write(vals)
+            if not any(render.values()):
+                raise ValidationError(_(
+                    "Template rendering failed, this could mean that "
+                    "your template contains syntax errors"
+                ))
+        elif fail_if_no_records:
+            raise ValidationError(_(
+                "Unable to verify template's body due to lack of record defined. "
+                "Please create at least one %r record." % self.model
+            ))
+
+    @api.model_cr
+    def _register_hook(self):
+        fail_if_no_records = bool(tools.config['test_enable'])
+        for template in self.search([]):
+            template._check_body(fail_if_no_records)
 
     @api.multi
     def unlink(self):
