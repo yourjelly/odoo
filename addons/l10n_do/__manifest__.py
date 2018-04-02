@@ -96,7 +96,7 @@ en Odoo):
         'data/account_data.xml',
         'data/account.tax.template.xml',
         # Country States
-        'data/l10n_do_state_data.xml',
+        '../base/l10n_extra/l10n_do/l10n_do_state_data.xml',
         # Adds fiscal position
         'data/fiscal_position_template.xml',
         # configuration wizard, views, reports...

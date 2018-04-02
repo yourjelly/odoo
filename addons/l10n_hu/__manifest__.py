@@ -29,7 +29,7 @@ This module consists :
         'data/account.tax.template.csv',
         'data/account.fiscal.position.template.csv',
         'data/account.fiscal.position.tax.template.csv',
-        'data/res.bank.csv',
+        '../base/l10n_extra/l10n_hu/res.bank.csv',
         'data/account_chart_template_data.xml',
         'data/account_chart_template_configure_data.xml',
     ],

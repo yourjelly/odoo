@@ -40,7 +40,7 @@ configuration of their taxes and fiscal positions manually.
         'views/l10n_fr_view.xml',
         'data/account_data.xml',
         'data/account_tax_data.xml',
-        'data/res_country_data.xml',
+        '../base/l10n_extra/l10n_fr/res_country_data.xml',
         'data/account_fiscal_position_template_data.xml',
         'data/account_reconcile_model_template.xml',
         'data/account_chart_template_configure_data.xml',

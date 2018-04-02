@@ -54,7 +54,7 @@ please go to http://translations.launchpad.net/openerp-costa-rica.
     """,
     'depends': ['account'],
     'data': [
-        'data/l10n_cr_state_data.xml',
+        '../base/l10n_extra/l10n_cr/l10n_cr_state_data.xml',
         'data/l10n_cr_chart_data.xml',
         'data/account_template_data.xml',
         'data/account_data.xml',

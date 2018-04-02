@@ -30,6 +30,6 @@ This is the latest Ethiopian Odoo localization and consists of:
         'data/account.tax.group.csv',
         'data/account.tax.template.csv',
         'data/account_chart_template_configure_data.xml',
-        'data/res.country.state.csv',
+        '../base/l10n_extra/l10n_et/res.country.state.csv',
     ],
 }

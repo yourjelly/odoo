@@ -29,7 +29,7 @@ Romanian accounting chart and localization.
              'data/account_tax_data.xml',
              'data/account_fiscal_position_data.xml',
              'data/account_chart_template_data.xml',
-             'data/res.country.state.csv',
-             'data/res.bank.csv',
+             '../base/l10n_extra/l10n_ro/res.country.state.csv',
+             '../base/l10n_extra/l10n_ro/res.bank.csv',
              ],
 }
