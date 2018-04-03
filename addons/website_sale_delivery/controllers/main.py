@@ -4,12 +4,17 @@ from odoo import http
 from odoo.http import request
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 
+import logging
+
+_logger = logging.getLogger(__name__)
+
 
 class WebsiteSaleDelivery(WebsiteSale):
 
     @http.route(['/shop/payment'], type='http', auth="public", website=True)
     def payment(self, **post):
         order = request.website.sale_get_order()
+        _logger.info('/shop/payment. POST:%s. order:%s' % (post, order.sudo().order_line.read(['price_subtotal', 'price_tax', 'price_total'])))
         carrier_id = post.get('carrier_id')
         if carrier_id:
             carrier_id = int(carrier_id)

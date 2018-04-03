@@ -708,6 +708,7 @@ class WebsiteSale(http.Controller):
         SaleOrder = request.env['sale.order']
 
         order = request.website.sale_get_order()
+        _logger.info('/shop/payment. POST:%s. order:%s' % (post, order.sudo().order_line.read(['price_subtotal', 'price_tax', 'price_total'])))
 
         redirection = self.checkout_redirection(order)
         if redirection:
