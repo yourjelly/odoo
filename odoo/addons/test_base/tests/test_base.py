@@ -59,7 +59,7 @@ SAMPLES = [
 class TestBase(TransactionCase):
 
     def test_00_res_partner_name_create(self):
-        res_partner = self.env['res.partner']
+        res_partner = self.env['test_base.base']
         parse = res_partner._parse_partner_name
         for text, name, mail in SAMPLES:
             self.assertEqual((name, mail), parse(text), 'Partner name parsing failed')
@@ -69,7 +69,7 @@ class TestBase(TransactionCase):
             self.assertEqual(mail or False, partner.email, 'Partner email incorrect')
 
     def test_10_res_partner_find_or_create(self):
-        res_partner = self.env['res.partner']
+        res_partner = self.env['test_base.base']
         email = SAMPLES[0][0]
         partner_id, dummy = res_partner.name_create(email)
         found_id = res_partner.find_or_create(email)
@@ -83,7 +83,7 @@ class TestBase(TransactionCase):
         self.assertTrue(new_id2 > new_id, 'find_or_create failed - should have created new one again')
 
     def test_15_res_partner_name_search(self):
-        res_partner = self.env['res.partner']
+        res_partner = self.env['test_base.base']
         DATA = [
             ('"A Raoul Grosbedon" <raoul@chirurgiens-dentistes.fr>', False),
             ('B Raoul chirurgiens-dentistes.fr', True),
@@ -99,7 +99,7 @@ class TestBase(TransactionCase):
         self.assertEqual(partners[0][1], 'B Raoul chirurgiens-dentistes.fr', 'Incorrect partner returned, should be the first active')
 
     def test_20_res_partner_address_sync(self):
-        res_partner = self.env['res.partner']
+        res_partner = self.env['test_base.base']
         ghoststep = res_partner.create({
             'name': 'GhostStep',
             'is_company': True,
@@ -147,7 +147,7 @@ class TestBase(TransactionCase):
     def test_30_res_partner_first_contact_sync(self):
         """ Test initial creation of company/contact pair where contact address gets copied to
         company """
-        res_partner = self.env['res.partner']
+        res_partner = self.env['test_base.base']
         ironshield = res_partner.browse(res_partner.name_create('IronShield')[0])
         self.assertFalse(ironshield.is_company, 'Partners are not companies by default')
         self.assertEqual(ironshield.type, 'contact', 'Default type must be "contact"')
@@ -166,7 +166,7 @@ class TestBase(TransactionCase):
         stopping when encountering another is_copmany entity, then go up, stopping again at the first
         is_company entity or the root ancestor and if nothing matches, it should use the provided partner
         itself """
-        res_partner = self.env['res.partner']
+        res_partner = self.env['test_base.base']
         elmtree = res_partner.browse(res_partner.name_create('Elmtree')[0])
         branch1 = res_partner.create({'name': 'Branch 1',
                                       'parent_id': elmtree.id,
@@ -252,7 +252,7 @@ class TestBase(TransactionCase):
                         {'contact': branch11.id}, 'Invalid address resolution, branch11 should now be contact')
 
     def test_50_res_partner_commercial_sync(self):
-        res_partner = self.env['res.partner']
+        res_partner = self.env['test_base.base']
         p0 = res_partner.create({'name': 'Sigurd Sunknife',
                                  'email': 'ssunknife@gmail.com'})
         sunhelm = res_partner.create({'name': 'Sunhelm',
@@ -302,8 +302,8 @@ class TestBase(TransactionCase):
         self.assertEquals(p0.vat, sunhelmvat2, 'Commercial fields must be automatically synced')
 
     def test_60_read_group(self):
-        title_sir = self.env['res.partner.title'].create({'name': 'Sir...'})
-        title_lady = self.env['res.partner.title'].create({'name': 'Lady...'})
+        title_sir = self.env['test_base.title'].create({'name': 'Sir...'})
+        title_lady = self.env['test_base.title'].create({'name': 'Lady...'})
         test_users = [
             {'name': 'Alice', 'login': 'alice', 'color': 1, 'function': 'Friend', 'date': '2015-03-28', 'title': title_lady.id},
             {'name': 'Alice', 'login': 'alice2', 'color': 0, 'function': 'Friend',  'date': '2015-01-28', 'title': title_lady.id},
@@ -312,7 +312,7 @@ class TestBase(TransactionCase):
             {'name': 'Nab', 'login': 'nab', 'color': -3, 'function': '5$ Wrench', 'date': '2014-09-10', 'title': title_sir.id},
             {'name': 'Nab', 'login': 'nab-she', 'color': 6, 'function': '5$ Wrench', 'date': '2014-01-02', 'title': title_lady.id},
         ]
-        res_users = self.env['res.users']
+        res_users = self.env['test_base.inherited']
         user_ids = [res_users.create(vals).id for vals in test_users]
         domain = [('id', 'in', user_ids)]
 
@@ -401,7 +401,7 @@ class TestPartnerRecursion(TransactionCase):
 
     def setUp(self):
         super(TestPartnerRecursion,self).setUp()
-        res_partner = self.env['res.partner']
+        res_partner = self.env['test_base.base']
         self.p1 = res_partner.browse(res_partner.name_create('Elmtree')[0])
         self.p2 = res_partner.create({'name': 'Elmtree Child 1', 'parent_id': self.p1.id})
         self.p3 = res_partner.create({'name': 'Elmtree Grand-Child 1.1', 'parent_id': self.p2.id})

@@ -12,7 +12,7 @@ class test_search(TransactionCase):
         # are by default excluded from the searches and to provide a second
         # `order` argument.
 
-        Partner = self.env['res.partner']
+        Partner = self.env['test_base.base']
         c = Partner.create({'name': 'test_search_order_C'})
         d = Partner.create({'name': 'test_search_order_D', 'active': False})
         a = Partner.create({'name': 'test_search_order_A'})
@@ -134,7 +134,7 @@ class test_search(TransactionCase):
         Users = self.env['res.users']
 
         # will sort by login desc of the creator, then by name
-        self.patch_order('res.partner', 'create_uid, name')
+        self.patch_order('test_base.base', 'create_uid, name')
         self.patch_order('res.users', 'partner_id, login desc')
 
         kw = dict(groups_id=[(6, 0, [self.ref('base.group_system'),

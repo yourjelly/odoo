@@ -11,7 +11,7 @@ class TestResPartnerBank(TransactionCase):
     """
 
     def test_sanitized_acc_number(self):
-        partner_bank_model = self.env['res.partner.bank']
+        partner_bank_model = self.env['test_base.base.bank']
         acc_number = " BE-001 2518823 03 "
         vals = partner_bank_model.search([('acc_number', '=', acc_number)])
         self.assertEquals(0, len(vals))
