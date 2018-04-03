@@ -30,10 +30,11 @@ def location_name_search(self, name='', args=None, operator='ilike', limit=100):
 class Country(models.Model):
     _name = 'res.country'
     _description = 'Country'
-    _order = 'name'
+    _order = 'active desc,name'
 
     name = fields.Char(
         string='Country Name', required=True, translate=True, help='The full name of the country.')
+    active = fields.Boolean()
     code = fields.Char(
         string='Country Code', size=2,
         help='The ISO country code in two chars. \nYou can use this field for quick search.')
@@ -74,6 +75,13 @@ class Country(models.Model):
     ]
 
     name_search = location_name_search
+
+    @api.multi
+    @api.onchange('active')
+    def _onchange_active(self):
+        print('\n\n\n\n\n\n\n\n\n Hello World \n\n\n\n\n\n')
+        country = self.with_context(active_test=False).search([('code', '=', self.code)])
+        country.state_ids.write({'active': self.active})
 
     @api.model
     def create(self, vals):
@@ -121,6 +129,7 @@ class CountryState(models.Model):
     name = fields.Char(string='State Name', required=True,
                help='Administrative divisions of a country. E.g. Fed. State, Departement, Canton')
     code = fields.Char(string='State Code', help='The state code.', required=True)
+    active = fields.Boolean()
 
     _sql_constraints = [
         ('name_code_uniq', 'unique(country_id, code)', 'The code of the state must be unique by country !')
