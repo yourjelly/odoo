@@ -42,6 +42,10 @@ class HsnGstReport(models.Model):
     sgst_amount = fields.Float("State/UT Tax Amount")
     cess_amount = fields.Float(compute="_compute_cess_amount" ,string="Cess Amount", digits=0)
     company_id = fields.Integer("Company")
+    type = fields.Selection([
+        ('out_invoice', 'Customer Invoice'),
+        ('in_invoice', 'Vendor Bill'),
+        ], readonly=True)
 
     _order = 'invoice_month desc'
 
@@ -62,7 +66,8 @@ class HsnGstReport(models.Model):
                 sum(sub.igst_amount) as igst_amount,
                 sum(sub.cgst_amount) as cgst_amount,
                 sum(sub.sgst_amount) as sgst_amount,
-                sum(sub.product_qty) as product_qty
+                sum(sub.product_qty) as product_qty,
+                sub.type as type
         """
         return select_str
 
@@ -71,6 +76,7 @@ class HsnGstReport(models.Model):
         sub_select_str = """
             SELECT ai.id as id,
                 ail.id AS invoice_line_id,
+                ai.type as type,
                 CASE WHEN taxmin.tax_tag_id = ANY(ARRAY[%s,%s]) THEN ail.quantity / 2 ELSE ail.quantity END as product_qty,
                 ai.company_id AS company_id,
                 pt.l10n_in_hsn_code AS hsn_code,
@@ -117,7 +123,7 @@ class HsnGstReport(models.Model):
                     where att.account_account_tag_id = %s or catt.account_account_tag_id = ANY (ARRAY[%s, %s])
                     group by atax.id, a_invoice_line_id, atax.amount_type, att.account_account_tag_id, catt.account_account_tag_id)
                     as taxmin on taxmin.a_invoice_line_id=ail.id
-                    where ai.state = ANY (ARRAY['open', 'paid']) and ai.type = 'out_invoice' and taxmin.id IS NOT NULL
+                    where ai.state = ANY (ARRAY['open', 'paid']) and ai.type = ANY (ARRAY['out_invoice','in_invoice']) and taxmin.id IS NOT NULL
         """ %(gst_tag_ids.get('igst_tag'), gst_tag_ids.get('cgst_tag'), gst_tag_ids.get('sgst_tag'))
         return from_str
 
@@ -126,6 +132,7 @@ class HsnGstReport(models.Model):
             GROUP BY ai.id,
                 ail.id,
                 ai.company_id,
+                ai.type,
                 pt.l10n_in_hsn_code,
                 pt.hsn_description,
                 u.name,
@@ -144,7 +151,8 @@ class HsnGstReport(models.Model):
             sub.hsn_code,
             sub.hsn_description,
             sub.uom_name,
-            sub.uom_id
+            sub.uom_id,
+            sub.type
         """
         return group_by_str
 

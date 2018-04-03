@@ -8,3 +8,4 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     country_code = fields.Char(related="country_id.code",string="Country code")
+    composition = fields.Boolean(string="Is Composition", help="Check this box if this vendor is under composition scheme")

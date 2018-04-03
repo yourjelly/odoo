@@ -14,12 +14,14 @@ class AccountAdvancesPaymentReport(models.Model):
     _rec_name = 'place_of_supply'
 
     payment_month = fields.Char('Payment Month')
-    payment_ids = fields.Char('Payment ids')
+    #payment_ids = fields.Char('Payment ids')
     place_of_supply = fields.Char("Place of supply")
     payment_amount = fields.Float(string="Payment Amount")
     amount = fields.Float(compute="_compute_amount" ,string="Advance Payment Amount")
     tax_rate = fields.Float(compute="_compute_tax_rate", string="Tax rate")
     company_id = fields.Integer("Company")
+    payment_type = fields.Selection([('outbound', 'Send Money'), ('inbound', 'Receive Money')], string='Payment Type')
+    supply_type = fields.Selection([('inter_state', 'Inter State'), ('intra_state', 'Intra State')], string="Supply Type")
 
     def get_default_gst_rate(self):
         #Give default gst tax rate if Any GST tax select in account setting else return 18(default as per Indian GSTR guidelines).
@@ -37,7 +39,7 @@ class AccountAdvancesPaymentReport(models.Model):
     def _compute_amount(self):
         for record in self:
             amount = record.payment_amount
-            for payment in  self.env['account.payment'].browse(safe_eval(record.payment_ids)):
+            for payment in  self.env['account.payment'].browse(safe_eval(record.id)):
                 for invoice_id in payment.invoice_ids.filtered(lambda i: i.date_invoice <= payment.payment_date):
                     payment_move_lines  = invoice_id.payment_move_line_ids
                     if  payment.id in payment_move_lines.mapped('payment_id').ids:
@@ -55,36 +57,46 @@ class AccountAdvancesPaymentReport(models.Model):
         tools.drop_view_if_exists(self.env.cr, self._table)
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
-                SELECT concat(sub.state_id, '-', sub.company_id, '-', sub.payment_month) AS id,
-                array_agg(sub.payment_id) as payment_ids,
+                SELECT array_agg(sub.payment_id)::text AS id,
                 sub.place_of_supply,
                 sum(sub.amount) as payment_amount,
                 sub.payment_month as payment_month,
-                sub.company_id
+                sub.company_id,
+                sub.payment_type,
+                sub.supply_type
                 FROM (
                     SELECT ap.id as payment_id,
                         to_char(ap.payment_date, 'MM-YYYY') as payment_month,
                         aj.company_id as company_id,
                         (CASE WHEN rcs.l10n_in_tin IS NOT NULL THEN concat(rcs.l10n_in_tin,'-',rcs.name) ELSE NULL END) as place_of_supply,
+                        (CASE WHEN p.state_id = compp.state_id THEN 'intra_state' ELSE 'inter_state' END) as supply_type,
                         rcs.id as state_id,
-                        ap.amount as amount
+                        ap.amount as amount,
+                        ap.payment_type
                         FROM account_payment ap
                         JOIN account_journal aj ON aj.id = ap.journal_id
+                        JOIN res_company comp ON comp.id = aj.company_id
+                        JOIN res_partner compp ON compp.id = comp.partner_id
                         JOIN res_partner p ON p.id = ap.partner_id
                         JOIN res_country_state rcs ON  rcs.id = p.state_id
-                        WHERE ap.state = ANY (ARRAY['posted','sent','reconciled']) and ap.payment_type = 'inbound' and rcs.l10n_in_tin IS NOT NULL
+                        WHERE ap.state = ANY (ARRAY['posted','sent','reconciled']) and ap.payment_type = ANY(ARRAY['inbound', 'outbound']) and rcs.l10n_in_tin IS NOT NULL
                         GROUP BY ap.id,
                             ap.amount,
                             ap.payment_date,
                             rcs.l10n_in_tin,
                             rcs.id,
                             rcs.name,
-                            aj.company_id
+                            aj.company_id,
+                            compp.state_id,
+                            p.state_id,
+                            ap.payment_type
                 ) as sub
                 GROUP BY sub.place_of_supply,
                     sub.state_id,
                     sub.payment_month,
-                    sub.company_id)""" %(self._table))
+                    sub.company_id,
+                    sub.payment_type,
+                    sub.supply_type)""" %(self._table))
 
 
 class AccountAdvancesAdjustmentsReport(models.Model):
@@ -106,6 +118,8 @@ class AccountAdvancesAdjustmentsReport(models.Model):
     invoice_month = fields.Char(string="Invoice Month")
     tax_rate = fields.Float(compute="_compute_tax_rate", string="Tax rate")
     company_id = fields.Integer("Company")
+    payment_type = fields.Selection([('outbound', 'Send Money'), ('inbound', 'Receive Money')], string='Payment Type')
+    supply_type = fields.Selection([('inter_state', 'Inter State'), ('intra_state', 'Intra State')], string="Supply Type")
 
     def _compute_invoice_payment(self):
         for record in self:
@@ -123,33 +137,44 @@ class AccountAdvancesAdjustmentsReport(models.Model):
         tools.drop_view_if_exists(self.env.cr, self._table)
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
-                SELECT concat(sub.state_id, '-', sub.company_id, '-', sub.invoice_month) AS id,
+                SELECT concat(sub.state_id, '-', sub.company_id, '-', sub.invoice_month, '-', sub.payment_type) AS id,
                 array_agg(sub.payment_id) as payment_ids,
                 sub.place_of_supply,
                 sub.invoice_month,
-                sub.company_id
+                sub.company_id,
+                sub.payment_type,
+                sub.supply_type
                 FROM (
                     SELECT ap.id as payment_id,
                         to_char(ai.date_invoice, 'MM-YYYY') AS invoice_month,
                         aj.company_id as company_id,
                         (CASE WHEN rcs.l10n_in_tin IS NOT NULL THEN concat(rcs.l10n_in_tin,'-',rcs.name) ELSE NULL END) as place_of_supply,
-                        rcs.id as state_id
+                        (CASE WHEN p.state_id = compp.state_id THEN 'intra_state' ELSE 'inter_state' END) as supply_type,
+                        rcs.id as state_id,
+                        ap.payment_type as payment_type
                         FROM account_invoice ai
                             JOIN account_invoice_payment_rel aipr ON aipr.invoice_id = ai.id
                             JOIN account_payment ap ON ap.id = aipr.payment_id
                             JOIN account_journal aj ON aj.id = ap.journal_id
+                            JOIN res_company comp ON comp.id = aj.company_id
+                            JOIN res_partner compp ON compp.id = comp.partner_id
                             JOIN res_partner p ON p.id = ai.partner_id
                             JOIN res_country_state rcs ON  rcs.id = p.state_id
-                        WHERE ai.state = ANY (ARRAY['open','paid']) and rcs.l10n_in_tin IS NOT NULL AND ai.date_invoice > ap.payment_date and ap.payment_type = 'inbound'
+                        WHERE ai.state = ANY (ARRAY['open','paid']) and rcs.l10n_in_tin IS NOT NULL AND ai.date_invoice > ap.payment_date and ap.payment_type = ANY(ARRAY['inbound', 'outbound'])
                         GROUP BY
                             ap.id,
+                            ap.payment_type,
                             ai.date_invoice,
                             rcs.l10n_in_tin,
                             rcs.id,
                             rcs.name,
-                            aj.company_id
+                            aj.company_id,
+                            p.state_id,
+                            compp.state_id
                 ) as sub
                 GROUP BY sub.place_of_supply,
                     sub.state_id,
                     sub.invoice_month,
-                    sub.company_id)"""%(self._table))
+                    sub.company_id,
+                    sub.payment_type,
+                    sub.supply_type)"""%(self._table))

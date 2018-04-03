@@ -18,6 +18,7 @@ class AccountInvoiceGstReport(models.Model):
         AccountTax = self.env['account.tax']
         for record in self.filtered(lambda r: r.invoice_line_ids):
             cess_amount_count = 0
+            itc_cess_amount_count = 0
             account_invoice_lines = AccountInvoiceLine.browse(safe_eval(record.invoice_line_ids))
             for account_invoice_line in account_invoice_lines:
                 price_unit = account_invoice_line.price_unit * (1 - (account_invoice_line.discount or 0.0) / 100.0)
@@ -27,7 +28,26 @@ class AccountInvoiceGstReport(models.Model):
                     tax = AccountTax.browse(tax_line['id'])
                     if cess_group and cess_group.id == tax.tax_group_id.id:
                         cess_amount_count += tax_line.get('amount')
+                if account_invoice_line.gst_itc_type_id:
+                    itc_cess_amount_count += tax_line.get('amount')
             record.cess_amount = cess_amount_count
+            record.itc_cess_amount = itc_cess_amount_count
+
+    @api.multi
+    def _get_all_gst_amount(self):
+        igst_group = self.env.ref('l10n_in.igst_group', False)
+        igst_group_id  = igst_group and igst_group.id or 0
+        for record in self:
+            gst_tax_amount = record.price_total * (record.tax_rate/100)
+            itc_gst_tax_amount = record.itc_price_total * (record.tax_rate/100)
+            if record.tax_group_id ==  igst_group_id:
+                record.igst_amount = gst_tax_amount
+                record.itc_igst_amount = itc_gst_tax_amount
+            else:
+                record.cgst_amount = gst_tax_amount / 2
+                record.sgst_amount = gst_tax_amount / 2
+                record.itc_cgst_amount = itc_gst_tax_amount / 2
+                record.itc_sgst_amount = itc_gst_tax_amount / 2
 
     invoice_line_ids = fields.Char("invoice Line ids")
     invoice_date = fields.Char("Date")
@@ -49,7 +69,7 @@ class AccountInvoiceGstReport(models.Model):
         ('paid', 'Paid'),
         ('cancel', 'Cancelled')
         ], string='Invoice Status', readonly=True)
-    tax_rate = fields.Char("Rate")
+    tax_rate = fields.Float("Rate")
     is_reverse_charge = fields.Char("Reverse Charge")
     port_code = fields.Char("Port Code")
     ecommerce_gstn = fields.Char("E-commerce GSTIN")
@@ -63,16 +83,34 @@ class AccountInvoiceGstReport(models.Model):
                                          ('EXPWP','EXPWP'),
                                          ('EXPWOP','EXPWP')], string="UR Type")
     refund_document_type = fields.Selection([('C', 'C'), ('D', 'D'), ('R', 'R')], string="Refund Document Type")
+    supply_type = fields.Selection([('inter_state', 'Inter State'), ('intra_state', 'Intra State')], string="Supply Type")
     refund_reason = fields.Char("Refund Reason")
     refund_invoice_number = fields.Char("Refund Invoice number")
     refund_invoice_date = fields.Char("Refund Invoice Date")
     invoice_total = fields.Float("Invoice Total")
     tax_group_id = fields.Integer("Tax group")
-    cess_amount = fields.Float(compute="_compute_cess_amount" ,string="Cess Amount", digits=0)
+    cess_amount = fields.Float(compute="_compute_cess_amount", string="Cess Amount", digits=0)
+    igst_amount = fields.Float(compute="_get_all_gst_amount", string="IGST amount")
+    cgst_amount = fields.Float(compute="_get_all_gst_amount", string="CGST amount")
+    sgst_amount = fields.Float(compute="_get_all_gst_amount", string="SGST amount")
+    itc_type = fields.Char('ITC Type')
+    itc_cess_amount = fields.Float(compute="_compute_cess_amount", string="ITC Cess Amount", digits=0)
+    itc_price_total = fields.Float(string="ITC price total", digits=0)
+    itc_igst_amount = fields.Float(compute="_get_all_gst_amount", string="ITC IGST amount")
+    itc_cgst_amount = fields.Float(compute="_get_all_gst_amount", string="ITC CGST amount")
+    itc_sgst_amount = fields.Float(compute="_get_all_gst_amount", string="ITC SGST amount")
+
     is_pre_gst = fields.Char("Is Pre GST")
     shipping_bill_number = fields.Char("Shipping Bill Number") #Is Pending
     shipping_bill_date = fields.Char("Shipping Bill Date") #Is pending
     company_id = fields.Integer("Company")
+
+    import_type = fields.Selection([('import_of_services', 'Import of Services'),
+                                    ('import_of_goods', 'Import of Goods')], string="Import Type")
+    refund_import_type = fields.Selection([('import_of_services','IMPS'),
+                                            ('import_of_goods','IMPG'),
+                                            ('b2bur', 'B2BUR')], string="Refund import type")
+
 
     _order = 'invoice_date desc'
 
@@ -104,9 +142,14 @@ class AccountInvoiceGstReport(models.Model):
                 sub.refund_invoice_number,
                 sub.refund_invoice_date,
                 sub.is_pre_gst,
+                sub.itc_type,
+                sub.itc_price_total,
                 sub.state,
+                sub.supply_type,
                 '' as shipping_bill_number,
-                '' as shipping_bill_date
+                '' as shipping_bill_date,
+                sub.import_type,
+                sub.refund_import_type
         """
         return select_str
 
@@ -122,6 +165,7 @@ class AccountInvoiceGstReport(models.Model):
                 p.name AS partner_name,
                 ai.type AS type,
                 ai.number AS invoice_number,
+                (CASE WHEN p.state_id = compp.state_id THEN 'intra_state' ELSE 'inter_state' END) as supply_type,
                 (CASE WHEN ai.gst_invoice_type = ANY (ARRAY['dewp', 'dewop']) THEN 'DE' ELSE UPPER(ai.gst_invoice_type) END) AS b2b_invoice_type,
                 (CASE WHEN ai.gst_invoice_type = ANY (ARRAY['dewp', 'sewp']) THEN 'WPAY' WHEN ai.gst_invoice_type = ANY (ARRAY['dewop', 'sewop']) THEN 'WOPAY' ELSE '' END) AS exp_invoice_type,
                 (CASE WHEN air.gst_invoice_type = ANY (ARRAY['DEWP', 'SEWP']) THEN 'EXPWP' WHEN air.gst_invoice_type = ANY (ARRAY['DEWOP', 'SEWOP']) THEN 'EXPWOP' ELSE 'B2CL' END) AS refund_invoice_type,
@@ -133,9 +177,14 @@ class AccountInvoiceGstReport(models.Model):
                 taxmin.id as tax_id,
                 (CASE WHEN airr.name IS NOT NULL THEN concat(airr.code,'-',airr.name) END) AS refund_reason,
                 air.number AS refund_invoice_number,
+                (CASE WHEN itct.name IS NOT NULL THEN itct.name ELSE 'Ineligible' END) as itc_type,
+                SUM(CASE WHEN itct.name IS NOT NULL THEN (CASE WHEN ai.type = ANY (ARRAY['in_refund', 'out_refund']) THEN ail.price_subtotal_signed * -1 ELSE ail.price_subtotal_signed END) ELSE 0 END) AS itc_price_total,
                 to_char(air.date_invoice, 'DD-MON-YYYY') AS refund_invoice_date,
                 (CASE WHEN to_char(air.date_invoice, 'DD-MM-YYYY') < '01-07-2017' THEN 'Y' ELSE 'N' END) AS is_pre_gst,
-                taxmin.tax_group_id AS tax_group_id
+                taxmin.tax_group_id AS tax_group_id,
+                (CASE WHEN ai.gst_import_type IS NOT NULL THEN (CASE WHEN pt.type = 'service' THEN 'import_of_services' ELSE 'import_of_goods' END) ELSE NULL END) as import_type,
+                (CASE WHEN ai.gst_import_type IS NOT NULL THEN (CASE WHEN pt.type = 'service' THEN 'import_of_services' ELSE 'import_of_goods' END) ELSE NULL END) as refund_import_type
+
         """
         return sub_select_str
 
@@ -145,16 +194,19 @@ class AccountInvoiceGstReport(models.Model):
                 JOIN account_invoice ai ON ai.id = ail.invoice_id
                 JOIN res_currency cr ON cr.id = ai.currency_id
                 JOIN res_company comp ON comp.id = ai.company_id
+                JOIN res_partner compp ON compp.id = comp.partner_id
                 JOIN res_partner p ON p.id = ai.commercial_partner_id
                 LEFT JOIN res_country_state ps ON ps.id = p.state_id
                 LEFT JOIN product_product pr ON pr.id = ail.product_id
+                LEFT JOIN product_template pt ON pt.id = pr.product_tmpl_id
                 LEFT JOIN account_invoice_refund_reason airr ON airr.id = ai.refund_reason_id
                 LEFT JOIN account_invoice air on air.id = ai.refund_invoice_id
+                LEFT JOIN gst_itc_type itct on itct.id = ail.gst_itc_type_id
                 LEFT join (select atax.id as id,
                     ailts.invoice_line_id as a_invoice_line_id,
                     CASE when atax.amount_type::text = 'group'
-                        THEN sum(catax.amount)::character varying::text
-                    ELSE sum(atax.amount)::character varying::text
+                        THEN sum(catax.amount)
+                    ELSE sum(atax.amount)
                     END as amount,
                     CASE when atax.amount_type::text = 'group'
                         THEN max(catax.tax_group_id)
@@ -166,8 +218,7 @@ class AccountInvoiceGstReport(models.Model):
                     LEFT JOIN account_tax catax ON catax.id = cataxr.child_tax
                     group by atax.id, a_invoice_line_id, atax.amount_type, atax.tax_group_id)
                     as taxmin on taxmin.a_invoice_line_id=ail.id
-                    where ai.state = ANY (ARRAY['open', 'paid']
-                )
+                where ai.state = ANY (ARRAY['open', 'paid'])
         """
         return from_str
 
@@ -181,6 +232,8 @@ class AccountInvoiceGstReport(models.Model):
                 ps.name,
                 p.vat,
                 p.name,
+                p.state_id,
+                compp.state_id,
                 ai.type,
                 ai.state,
                 ai.number,
@@ -191,9 +244,11 @@ class AccountInvoiceGstReport(models.Model):
                 taxmin.tax_group_id,
                 taxmin.id,
                 taxmin.amount,
+                itct.name,
                 airr.name,
                 airr.code,
-                air.gst_invoice_type
+                air.gst_invoice_type,
+                pt.type
         """
         return sub_group_by_str
 
@@ -220,7 +275,12 @@ class AccountInvoiceGstReport(models.Model):
             sub.refund_invoice_number,
             sub.refund_invoice_date,
             sub.is_pre_gst,
-            sub.state
+            sub.itc_type,
+            sub.itc_price_total,
+            sub.supply_type,
+            sub.state,
+            sub.import_type,
+            sub.refund_import_type
         """
         return group_by_str
 

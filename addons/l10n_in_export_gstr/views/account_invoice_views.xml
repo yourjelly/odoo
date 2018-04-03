@@ -6,8 +6,24 @@
         <field name="inherit_id" ref="account.invoice_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='partner_id']" position="after">
-                <field name="gst_invoice_type"/>
+                <field name="gst_invoice_type" attrs="{'invisible':[('type', '=', 'out_invoice')]}"/>
             </xpath>
         </field>
     </record>
+
+    <record id="account_invoice_supplier_form_inherit_l10n_in_export_gstr" model="ir.ui.view">
+        <field name="name">account.invoice.form.inherit.l10n.in.export.gstr</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_supplier_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='name']" position="after">
+                <field name="product_type" invisible="0"/>
+                <field name="gst_itc_type_id" domain="[('product_type','=', product_type)]" options="{'no_create': True, 'no_open': True}"/>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="gst_import_type"/>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>

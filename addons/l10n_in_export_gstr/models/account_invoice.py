@@ -14,3 +14,12 @@ class AccountInvoice(models.Model):
                                          ('dewop', 'Deemed Exports without payment'),
                                          ('sewp', 'SEZ Exports with payment'),
                                          ('sewop', 'SEZ exports without payment')], default="r", string="GST Invoice Type")
+    gst_import_type = fields.Selection([('import', 'Import'),
+                                         ('sez_import', 'Import from SEZ')], string="GST Invoice Type")
+
+class AccountInvoiceLine(models.Model):
+
+    _inherit = "account.invoice.line"
+
+    gst_itc_type_id = fields.Many2one('gst.itc.type', string="ITC Type", help="Input Tax Credit Under GST. If type not selected then it's consider as Ineligible")
+    product_type = fields.Selection(related="product_id.type", string="Product type")
