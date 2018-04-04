@@ -13,7 +13,7 @@ var Dashboard = AbstractAction.extend({
     template: 'DashboardMain',
 
     init: function(){
-        this.all_dashboards = ['apps', 'invitations', 'share', 'translations', 'company', 'security'];
+        this.all_dashboards = ['apps', 'invitations', 'share', 'translations', 'company'];
         return this._super.apply(this, arguments);
     },
 
@@ -62,10 +62,6 @@ var Dashboard = AbstractAction.extend({
     load_company: function (data) {
         return new DashboardCompany(this, data.company).replace(this.$('.o_web_settings_dashboard_company'));
     },
-
-    load_security: function (data) {
-        return new DashboardSecurity(this, data.security).replace(this.$('.o_web_settings_dashboard_security'));
-    }
 });
 
 var DashboardInvitations = Widget.extend({
@@ -372,40 +368,6 @@ var DashboardCompany = Widget.extend({
     }
 });
 
-var DashboardSecurity = Widget.extend({
-    template: 'DashboardSecurity',
-
-    events: {
-        'click .o_setup_admin_user': 'on_setup_admin_user'
-    },
-
-    init: function (parent, data) {
-        this.data = data;
-        this.parent = parent;
-        this._super.apply(this, arguments);
-    },
-
-    on_setup_admin_user: function () {
-        var self = this;
-        var action = {
-            type: 'ir.actions.act_window',
-            res_model: 'res.users',
-            view_mode: 'form',
-            view_type: 'form',
-            views: [[false, 'form']],
-            res_id: 1
-        };
-        this.do_action(action, {
-            on_reverse_breadcrumb: function () { return self.reload(); }
-        });
-    },
-
-    reload: function () {
-        return this.parent.load(['security']);
-    }
-
-});
-
 core.action_registry.add('web_settings_dashboard.main', Dashboard);
 
 return {
@@ -414,8 +376,7 @@ return {
     DashboardInvitations: DashboardInvitations,
     DashboardShare: DashboardShare,
     DashboardTranslations: DashboardTranslations,
-    DashboardCompany: DashboardCompany,
-    DashboardSecurity: DashboardSecurity
+    DashboardCompany: DashboardCompany
 };
 
 });

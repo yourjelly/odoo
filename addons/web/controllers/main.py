@@ -42,7 +42,7 @@ from odoo.tools.safe_eval import safe_eval
 from odoo import http
 from odoo.http import content_disposition, dispatch_rpc, request, \
     serialize_exception as _serialize_exception, Response
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError, UserError, AccessDenied
 from odoo.models import check_method_name
 from odoo.service import db
 
@@ -492,6 +492,14 @@ class Home(http.Controller):
         else:
             if 'error' in request.params and request.params.get('error') == 'access':
                 values['error'] = _('Only employee can access this database. Please contact the administrator.')
+
+            # warn users who did not change the default admin password
+            values['admin_has_default_password'] = False
+            try:
+                request.session.authenticate(request.session.db, uid=1, password='admin')
+                values['admin_has_default_password'] = True
+            except AccessDenied:
+                pass
 
         if 'login' not in values and request.session.get('auth_login'):
             values['login'] = request.session.get('auth_login')

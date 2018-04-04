@@ -341,6 +341,12 @@
 
     <template id="web.login" name="Login">
         <t t-call="web.login_layout">
+            <div t-if="admin_has_default_password" class="alert alert-danger">
+                <p>
+                    <strong><i class="fa fa-exclamation-triangle"></i> The password for the administrator account (UID=1) is still the default.</strong><br />
+                    DO NOT use this software in production without changing it.</p>
+            </div>
+
             <form class="oe_login_form" role="form" t-attf-action="/web/login{{ '?debug' if debug else '' }}" method="post" onsubmit="this.action = this.action + location.hash">
                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
