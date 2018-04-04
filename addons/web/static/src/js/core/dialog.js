@@ -93,6 +93,13 @@ var Dialog = Widget.extend({
         });
     },
     /**
+     * check dialog is open or not
+     * @returns {boolean}
+     */
+    isOpen: function () {
+        return !this.__closed;
+    },
+    /**
      * @override
      */
     renderElement: function () {

@@ -495,13 +495,16 @@ var FormController = BasicController.extend({
      */
     _onOpenOne2ManyRecord: function (event) {
         event.stopPropagation();
+        if (this.o2mFormViewDialog && this.o2mFormViewDialog.isOpen()) {
+            return;
+        }
+
         var data = event.data;
         var record;
         if (data.id) {
             record = this.model.get(data.id, {raw: true});
         }
-
-        new dialogs.FormViewDialog(this, {
+        this.o2mFormViewDialog = new dialogs.FormViewDialog(this, {
             context: data.context,
             domain: data.domain,
             fields_view: data.fields_view,
@@ -524,9 +527,14 @@ var FormController = BasicController.extend({
      */
     _onOpenRecord: function (event) {
         event.stopPropagation();
+
+        if (this.formViewDialog && this.formViewDialog.isOpen()) {
+            return;
+        }
+
         var self = this;
         var record = this.model.get(event.data.id, {raw: true});
-        new dialogs.FormViewDialog(self, {
+        this.formViewDialog = new dialogs.FormViewDialog(self, {
             context: event.data.context,
             fields_view: event.data.fields_view,
             on_saved: event.data.on_saved,

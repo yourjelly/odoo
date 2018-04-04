@@ -523,11 +523,17 @@ var FieldMany2One = AbstractField.extend({
      * @private
      */
     _onExternalButtonClick: function () {
+        var self = this;
+
+        if (this.m2oFormViewDialog && this.m2oFormViewDialog.isOpen()) {
+            return;
+        }
+
         if (!this.value) {
             this.activate();
             return;
         }
-        var self = this;
+
         var context = this.record.getContext(this.recordParams);
         this._rpc({
                 model: this.field.relation,
@@ -536,7 +542,7 @@ var FieldMany2One = AbstractField.extend({
                 context: context,
             })
             .then(function (view_id) {
-                new dialogs.FormViewDialog(self, {
+                self.m2oFormViewDialog = new dialogs.FormViewDialog(self, {
                     res_model: self.field.relation,
                     res_id: self.value.res_id,
                     context: context,
@@ -1349,9 +1355,12 @@ var FieldMany2Many = FieldX2Many.extend({
         var self = this;
         ev.stopPropagation();
 
+        if (this.m2mSelectCreateDialog && this.m2mSelectCreateDialog.isOpen()) {
+            return;
+        }
         var domain = this.record.getDomain({fieldName: this.name});
 
-        new dialogs.SelectCreateDialog(this, {
+        this.m2mSelectCreateDialog = new dialogs.SelectCreateDialog(this, {
             res_model: this.field.relation,
             domain: domain.concat(["!", ["id", "in", this.value.res_ids]]),
             context: this.record.getContext(this.recordParams),
