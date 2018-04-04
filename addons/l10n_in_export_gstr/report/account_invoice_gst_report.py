@@ -28,8 +28,8 @@ class AccountInvoiceGstReport(models.Model):
                     tax = AccountTax.browse(tax_line['id'])
                     if cess_group and cess_group.id == tax.tax_group_id.id:
                         cess_amount_count += tax_line.get('amount')
-                if account_invoice_line.gst_itc_type_id:
-                    itc_cess_amount_count += tax_line.get('amount')
+                    if account_invoice_line.is_eligible_for_itc:
+                        itc_cess_amount_count += tax_line.get('amount')
             record.cess_amount = cess_amount_count
             record.itc_cess_amount = itc_cess_amount_count
 
@@ -93,7 +93,10 @@ class AccountInvoiceGstReport(models.Model):
     igst_amount = fields.Float(compute="_get_all_gst_amount", string="IGST amount")
     cgst_amount = fields.Float(compute="_get_all_gst_amount", string="CGST amount")
     sgst_amount = fields.Float(compute="_get_all_gst_amount", string="SGST amount")
-    itc_type = fields.Char('ITC Type')
+    itc_type = fields.Selection([('inputs', 'Inputs'),
+                                ('capital_goods', 'Capital goods'),
+                                ('input_services', 'Input services'),
+                                ('ineligible', 'Ineligible')], string="ITC Type")
     itc_cess_amount = fields.Float(compute="_compute_cess_amount", string="ITC Cess Amount", digits=0)
     itc_price_total = fields.Float(string="ITC price total", digits=0)
     itc_igst_amount = fields.Float(compute="_get_all_gst_amount", string="ITC IGST amount")
@@ -177,8 +180,8 @@ class AccountInvoiceGstReport(models.Model):
                 taxmin.id as tax_id,
                 (CASE WHEN airr.name IS NOT NULL THEN concat(airr.code,'-',airr.name) END) AS refund_reason,
                 air.number AS refund_invoice_number,
-                (CASE WHEN itct.name IS NOT NULL THEN itct.name ELSE 'Ineligible' END) as itc_type,
-                SUM(CASE WHEN itct.name IS NOT NULL THEN (CASE WHEN ai.type = ANY (ARRAY['in_refund', 'out_refund']) THEN ail.price_subtotal_signed * -1 ELSE ail.price_subtotal_signed END) ELSE 0 END) AS itc_price_total,
+                (CASE WHEN ail.is_eligible_for_itc IS True THEN (CASE WHEN pt.type = 'service' THEN 'input_services' ELSE (CASE WHEN pt.is_asset IS True THEN 'capital_goods' ELSE 'inputs' END) END) ELSE 'ineligible' END) as itc_type,
+                SUM(CASE WHEN ail.is_eligible_for_itc IS True THEN (CASE WHEN ai.type = ANY (ARRAY['in_refund', 'out_refund']) THEN ail.price_subtotal_signed * -1  ELSE ail.price_subtotal_signed END) * (ail.itc_percentage/100) ELSE 0 END) AS itc_price_total,
                 to_char(air.date_invoice, 'DD-MON-YYYY') AS refund_invoice_date,
                 (CASE WHEN to_char(air.date_invoice, 'DD-MM-YYYY') < '01-07-2017' THEN 'Y' ELSE 'N' END) AS is_pre_gst,
                 taxmin.tax_group_id AS tax_group_id,
@@ -201,7 +204,6 @@ class AccountInvoiceGstReport(models.Model):
                 LEFT JOIN product_template pt ON pt.id = pr.product_tmpl_id
                 LEFT JOIN account_invoice_refund_reason airr ON airr.id = ai.refund_reason_id
                 LEFT JOIN account_invoice air on air.id = ai.refund_invoice_id
-                LEFT JOIN gst_itc_type itct on itct.id = ail.gst_itc_type_id
                 LEFT join (select atax.id as id,
                     ailts.invoice_line_id as a_invoice_line_id,
                     CASE when atax.amount_type::text = 'group'
@@ -244,11 +246,11 @@ class AccountInvoiceGstReport(models.Model):
                 taxmin.tax_group_id,
                 taxmin.id,
                 taxmin.amount,
-                itct.name,
                 airr.name,
                 airr.code,
                 air.gst_invoice_type,
-                pt.type
+                pt.type,
+                pt.is_asset
         """
         return sub_group_by_str
 

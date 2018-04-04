@@ -14,7 +14,7 @@ class AccountAdvancesPaymentReport(models.Model):
     _rec_name = 'place_of_supply'
 
     payment_month = fields.Char('Payment Month')
-    #payment_ids = fields.Char('Payment ids')
+    payment_ids = fields.Char('Payment ids')
     place_of_supply = fields.Char("Place of supply")
     payment_amount = fields.Float(string="Payment Amount")
     amount = fields.Float(compute="_compute_amount" ,string="Advance Payment Amount")
@@ -39,7 +39,7 @@ class AccountAdvancesPaymentReport(models.Model):
     def _compute_amount(self):
         for record in self:
             amount = record.payment_amount
-            for payment in  self.env['account.payment'].browse(safe_eval(record.id)):
+            for payment in  self.env['account.payment'].browse(safe_eval(record.payment_ids)):
                 for invoice_id in payment.invoice_ids.filtered(lambda i: i.date_invoice <= payment.payment_date):
                     payment_move_lines  = invoice_id.payment_move_line_ids
                     if  payment.id in payment_move_lines.mapped('payment_id').ids:
@@ -58,6 +58,7 @@ class AccountAdvancesPaymentReport(models.Model):
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
                 SELECT array_agg(sub.payment_id)::text AS id,
+                array_agg(sub.payment_id) AS payment_ids,
                 sub.place_of_supply,
                 sum(sub.amount) as payment_amount,
                 sub.payment_month as payment_month,

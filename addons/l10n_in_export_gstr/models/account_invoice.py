@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, _
+from odoo import api, fields, models, _
 
 
 class AccountInvoice(models.Model):
@@ -15,11 +15,17 @@ class AccountInvoice(models.Model):
                                          ('sewp', 'SEZ Exports with payment'),
                                          ('sewop', 'SEZ exports without payment')], default="r", string="GST Invoice Type")
     gst_import_type = fields.Selection([('import', 'Import'),
-                                         ('sez_import', 'Import from SEZ')], string="GST Invoice Type")
+                                         ('sez_import', 'Import from SEZ')], string="Import Type")
 
 class AccountInvoiceLine(models.Model):
 
     _inherit = "account.invoice.line"
 
-    gst_itc_type_id = fields.Many2one('gst.itc.type', string="ITC Type", help="Input Tax Credit Under GST. If type not selected then it's consider as Ineligible")
-    product_type = fields.Selection(related="product_id.type", string="Product type")
+    is_eligible_for_itc = fields.Boolean(string="Is eligible for ITC",  help="Check this box if this product is eligible for ITC(Input Tax Credit) under GST")
+    itc_percentage = fields.Float(string="ITC percentage", default=100,  help="Enter percentage in case of partly eligible for ITC(Input Tax Credit) under GST.")
+
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        res = super(AccountInvoiceLine, self)._onchange_product_id()
+        if self.product_id:
+            self.is_eligible_for_itc = self.product_id.is_eligible_for_itc

@@ -9,7 +9,15 @@
             <field name="l10n_in_hsn_code" position="after">
                 <field name="hsn_description" attrs="{'required':[('l10n_in_hsn_code','=',False)]}"/>
             </field>
+            <group name="bill" position="inside">
+                <field name="is_eligible_for_itc"/>
+            </group>
+            <div name="options" position="inside">
+                <div attrs="{'invisible':[('type','=', 'service')]}">
+                    <field name="is_asset"/>
+                    <label for="is_asset"/>
+                </div>
+            </div>
         </field>
     </record>
-
 </odoo>
