@@ -4,7 +4,7 @@
 from datetime import datetime, timedelta
 
 from odoo import _, fields, http
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, AccessDenied
 from odoo.http import request
 from odoo import release
 
@@ -53,6 +53,14 @@ class WebSettingsDashboard(http.Controller):
         enterprise_users = request.env['res.users'].search_count([("login_date", ">=", fields.Datetime.to_string(limit_date)), ('share', '=', False)])
 
         expiration_date = request.env['ir.config_parameter'].sudo().get_param('database.expiration_date')
+
+        admin_has_default_password = False
+        try:
+            request.session.authenticate(request.session.db, uid=1, password='admin')
+            admin_has_default_password = True
+        except AccessDenied:
+            pass
+
         return {
             'apps': {
                 'installed_apps': installed_apps,
@@ -72,5 +80,8 @@ class WebSettingsDashboard(http.Controller):
             'company': {
                 'company_id': request.env.user.company_id.id,
                 'company_name': request.env.user.company_id.name
+            },
+            'security': {
+                'admin_has_default_password': admin_has_default_password,
             }
         }

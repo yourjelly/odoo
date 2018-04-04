@@ -559,6 +559,11 @@ class Users(models.Model):
         """
         uid = cls._login(db, login, password)
         if uid == SUPERUSER_ID:
+            # warn users who did not change the default admin password
+            if password == 'admin':
+                _logger.warn("Security Alert: "
+                             "The password for the administrator account (UID=1) is still the default. "
+                             "DO NOT use this database in production without changing it.")
             # Successfully logged in as admin!
             # Attempt to guess the web base url...
             if user_agent_env and user_agent_env.get('base_location'):

@@ -16,6 +16,7 @@
                     </div>
                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 o_web_settings_dashboard_col">
                         <div class="text-center o_web_settings_dashboard_share"></div>
+                        <div class="text-center o_web_settings_dashboard_security"></div>
                     </div>
                 </div>
             </div>
@@ -185,6 +186,26 @@
                 <a class="btn btn-primary btn-block o_setup_company"><strong>Set Up</strong></a>
             </div>
         </div>
+    </t>
+
+    <t t-name="DashboardSecurity">
+        <t t-if="widget.data.admin_has_default_password">
+            <div class="text-center o_web_settings_dashboard_security mt8">
+                <i class="fa fa-shield fa-4x text-muted"></i>
+                <div class="o_web_settings_dashboard_header">
+                    Security Alert!
+                </div>
+                <div>
+                    <small class="text-muted text-center o_web_settings_dashboard_compact_subtitle">
+                        <strong>The password for the administrator account (UID=1) is still the default.</strong><br />
+                        DO NOT use this software in production without changing it.
+                    </small>
+                </div>
+                <div class="mt16">
+                    <a class="btn btn-danger btn-block o_setup_admin_user"><strong>Change it now</strong></a>
+                </div>
+            </div>
+        </t>
     </t>
 
 </templates>
