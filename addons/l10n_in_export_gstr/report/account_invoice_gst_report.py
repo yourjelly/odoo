@@ -28,8 +28,7 @@ class AccountInvoiceGstReport(models.Model):
                     tax = AccountTax.browse(tax_line['id'])
                     if cess_group and cess_group.id == tax.tax_group_id.id:
                         cess_amount_count += tax_line.get('amount')
-                    if account_invoice_line.is_eligible_for_itc:
-                        itc_cess_amount_count += tax_line.get('amount')
+                        itc_cess_amount_count += account_invoice_line.is_eligible_for_itc and tax_line.get('amount') or 0
             record.cess_amount = cess_amount_count
             record.itc_cess_amount = itc_cess_amount_count
 
@@ -129,7 +128,7 @@ class AccountInvoiceGstReport(models.Model):
                 sub.tax_group_id as tax_group_id,
                 sub.type,
                 sub.invoice_number,
-                '' as is_reverse_charge,
+                sub.is_reverse_charge,
                 sub.b2b_invoice_type,
                 sub.exp_invoice_type,
                 sub.refund_invoice_type,
@@ -168,6 +167,7 @@ class AccountInvoiceGstReport(models.Model):
                 p.name AS partner_name,
                 ai.type AS type,
                 ai.number AS invoice_number,
+                (CASE WHEN ai.reverse_charge THEN 'Y' ELSE 'N' END) AS is_reverse_charge,
                 (CASE WHEN p.state_id = compp.state_id THEN 'intra_state' ELSE 'inter_state' END) as supply_type,
                 (CASE WHEN ai.gst_invoice_type = ANY (ARRAY['dewp', 'dewop']) THEN 'DE' ELSE UPPER(ai.gst_invoice_type) END) AS b2b_invoice_type,
                 (CASE WHEN ai.gst_invoice_type = ANY (ARRAY['dewp', 'sewp']) THEN 'WPAY' WHEN ai.gst_invoice_type = ANY (ARRAY['dewop', 'sewop']) THEN 'WOPAY' ELSE '' END) AS exp_invoice_type,
@@ -265,6 +265,7 @@ class AccountInvoiceGstReport(models.Model):
             sub.exp_invoice_type,
             sub.refund_invoice_type,
             sub.refund_document_type,
+            sub.is_reverse_charge,
             sub.tax_group_id,
             sub.tax_id,
             sub.invoice_total,

@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 
 
 class AccountInvoice(models.Model):
@@ -16,6 +17,15 @@ class AccountInvoice(models.Model):
                                          ('sewop', 'SEZ exports without payment')], default="r", string="GST Invoice Type")
     gst_import_type = fields.Selection([('import', 'Import'),
                                          ('sez_import', 'Import from SEZ')], string="Import Type")
+    reverse_charge = fields.Boolean(string="Reverse charge", help="Check this box to apply Reverse charge mechanism under GST")
+
+    @api.multi
+    def get_taxes_values(self):
+        return {} if self.reverse_charge else super(AccountInvoice, self).get_taxes_values()
+
+    @api.onchange('reverse_charge')
+    def _onchange_reverse_charge(self):
+        return self._onchange_invoice_line_ids()
 
 class AccountInvoiceLine(models.Model):
 
@@ -29,3 +39,4 @@ class AccountInvoiceLine(models.Model):
         res = super(AccountInvoiceLine, self)._onchange_product_id()
         if self.product_id:
             self.is_eligible_for_itc = self.product_id.is_eligible_for_itc
+        return res

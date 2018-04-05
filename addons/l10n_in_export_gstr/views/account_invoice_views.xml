@@ -7,6 +7,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="gst_invoice_type" attrs="{'invisible':[('type', '!=', 'out_invoice')]}"/>
+                <field name="reverse_charge" attrs="{'invisible':[('type', 'in', ['out_refund','in_refund'])]}"/>
             </xpath>
         </field>
     </record>
@@ -22,6 +23,7 @@
             </xpath>
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="gst_import_type"/>
+                <field name="reverse_charge" attrs="{'invisible':[('type', 'in', ['out_refund','in_refund'])]}"/>
             </xpath>
         </field>
     </record>
