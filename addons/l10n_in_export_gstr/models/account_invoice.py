@@ -19,6 +19,10 @@ class AccountInvoice(models.Model):
                                          ('sez_import', 'Import from SEZ')], string="Import Type")
     reverse_charge = fields.Boolean(string="Reverse charge", help="Check this box to apply Reverse charge mechanism under GST")
 
+    @api.model
+    def _get_refund_common_fields(self):
+        return super(AccountInvoice, self)._get_refund_common_fields() + ['reverse_charge', 'gst_invoice_type', 'gst_import_type']
+
     @api.multi
     def get_taxes_values(self):
         return {} if self.reverse_charge else super(AccountInvoice, self).get_taxes_values()

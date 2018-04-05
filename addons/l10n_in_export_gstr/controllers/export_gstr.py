@@ -267,10 +267,10 @@ class ExportGstr(CSVExport):
             domain += [('import_type', '=', 'import_of_goods'),('type', '=', 'in_invoice')]
             fields = [
                 {"name": "port_code", "label": "Port Code"},
-                #{"name": "", "label": "Bill Of Entry Number"},
-                #{"name": "", "label": "Bill Of Entry Date"},
-                #{"name": "", "label": "Bill Of Entry Value"},
-                {"name": "refund_document_type", "label": "Document type"},
+                {"name": "shipping_bill_number", "label": "Bill Of Entry Number"},
+                {"name": "shipping_bill_date", "label": "Bill Of Entry Date"},
+                {"name": "invoice_total", "label": "Bill Of Entry Value"},
+                {"name": "gst_import_type", "label": "Document type"},
                 {"name": "partner_gstn", "label": "GSTIN Of SEZ Supplier"},
                 {"name": "tax_rate", "label": "Rate"},
                 {"name": "price_total", "label": "Taxable Value"},

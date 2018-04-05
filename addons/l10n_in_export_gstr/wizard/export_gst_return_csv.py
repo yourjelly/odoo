@@ -30,6 +30,7 @@ class ExportGstReturnCsv(models.TransientModel):
                ('imps', 'Import of Services'),
                ('impg', 'Import of Goods'),
                ('cdnr', 'Credit/ Debit Note'),
+               ('cdnur', 'Credit/ Debit Note for unregistered Persons'),
                ('at', 'Tax liability on advances'),
                ('atadj', 'Advance adjustments'),
                ('exempt', 'Nil Rated, Exempted and Non GST supplies'),

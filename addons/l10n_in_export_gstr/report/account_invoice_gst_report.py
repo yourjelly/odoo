@@ -112,6 +112,8 @@ class AccountInvoiceGstReport(models.Model):
     refund_import_type = fields.Selection([('import_of_services','IMPS'),
                                             ('import_of_goods','IMPG'),
                                             ('b2bur', 'B2BUR')], string="Refund import type")
+    gst_import_type = fields.Selection([('import', 'Imports'),
+                                         ('sez_import', 'Received from SEZ')], string="Import Type")
 
 
     _order = 'invoice_date desc'
@@ -151,7 +153,8 @@ class AccountInvoiceGstReport(models.Model):
                 '' as shipping_bill_number,
                 '' as shipping_bill_date,
                 sub.import_type,
-                sub.refund_import_type
+                sub.refund_import_type,
+                sub.gst_import_type
         """
         return select_str
 
@@ -186,7 +189,8 @@ class AccountInvoiceGstReport(models.Model):
                 (CASE WHEN to_char(air.date_invoice, 'DD-MM-YYYY') < '01-07-2017' THEN 'Y' ELSE 'N' END) AS is_pre_gst,
                 taxmin.tax_group_id AS tax_group_id,
                 (CASE WHEN ai.gst_import_type IS NOT NULL THEN (CASE WHEN pt.type = 'service' THEN 'import_of_services' ELSE 'import_of_goods' END) ELSE NULL END) as import_type,
-                (CASE WHEN ai.gst_import_type IS NOT NULL THEN (CASE WHEN pt.type = 'service' THEN 'import_of_services' ELSE 'import_of_goods' END) ELSE NULL END) as refund_import_type
+                (CASE WHEN ai.gst_import_type IS NOT NULL THEN (CASE WHEN pt.type = 'service' THEN 'import_of_services' ELSE 'import_of_goods' END) ELSE NULL END) as refund_import_type,
+                ai.gst_import_type as gst_import_type
 
         """
         return sub_select_str
@@ -283,7 +287,8 @@ class AccountInvoiceGstReport(models.Model):
             sub.supply_type,
             sub.state,
             sub.import_type,
-            sub.refund_import_type
+            sub.refund_import_type,
+            sub.gst_import_type
         """
         return group_by_str
 
