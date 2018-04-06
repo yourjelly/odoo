@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+from odoo import SUPERUSER_ID
 
 
 class ExportGstReturnCsv(models.TransientModel):
@@ -66,6 +67,19 @@ class ExportGstReturnCsv(models.TransientModel):
     @api.multi
     def export_gstr(self):
         self.ensure_one()
+        if (self.env.uid == SUPERUSER_ID) and not (self.env.user.company_id.state_id or self.env.user.company_id.vat):
+            template = self.env.ref('l10n_in_export_gstr.view_company_gst_report_form')
+            return {
+                'name': _('Choose Your State'),
+                'type': 'ir.actions.act_window',
+                'view_type': 'form',
+                'view_mode': 'form',
+                'res_id': self.env.user.company_id.id,
+                'res_model': 'res.company',
+                'views': [(template.id, 'form')],
+                'view_id': template.id,
+                'target': 'new',
+            }
         return {
             'type': 'ir.actions.act_url',
             'url': '/csv/download/%s' % (self.id)

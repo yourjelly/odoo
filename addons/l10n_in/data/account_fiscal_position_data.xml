@@ -9,7 +9,7 @@
 
     <record model="account.fiscal.position.template" id="fiscal_position_in_export">
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="name">Export</field>
+        <field name="name">Export / Import</field>
     </record>
 
     <!-- Fiscal Position Tax Templates -->

@@ -10,26 +10,34 @@ class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
     refund_reason_id = fields.Many2one("account.invoice.refund.reason", string="Refund Reason")
-    gst_invoice_type = fields.Selection([('r', 'Regular'),
-                                         ('dewp', 'Deemed Exports with payment'),
-                                         ('dewop', 'Deemed Exports without payment'),
-                                         ('sewp', 'SEZ Exports with payment'),
-                                         ('sewop', 'SEZ exports without payment')], default="r", string="GST Invoice Type")
-    gst_import_type = fields.Selection([('import', 'Import'),
-                                         ('sez_import', 'Import from SEZ')], string="Import Type")
+    gst_exports_type = fields.Selection([
+        ('dewp', 'Deemed Exports with payment'), ('dewop', 'Deemed Exports without payment'),
+        ('sewp', 'SEZ Exports with payment'),('sewop', 'SEZ exports without payment')
+        ], string="GST Invoice Type")
+    gst_import_type = fields.Selection([('import', 'Import'), ('sez_import', 'Import from SEZ')], string="Import Type")
     reverse_charge = fields.Boolean(string="Reverse charge", help="Check this box to apply Reverse charge mechanism under GST")
 
     @api.model
     def _get_refund_common_fields(self):
-        return super(AccountInvoice, self)._get_refund_common_fields() + ['reverse_charge', 'gst_invoice_type', 'gst_import_type']
+        return super(AccountInvoice, self)._get_refund_common_fields() + ['reverse_charge', 'gst_exports_type', 'gst_import_type']
 
     @api.multi
     def get_taxes_values(self):
-        return {} if self.reverse_charge else super(AccountInvoice, self).get_taxes_values()
+        if not self.reverse_charge:
+            super(AccountInvoice, self).get_taxes_values()
+        return {}
 
     @api.onchange('reverse_charge')
     def _onchange_reverse_charge(self):
         return self._onchange_invoice_line_ids()
+
+    @api.onchange('gst_import_type', 'gst_exports_type')
+    def onchange_gst_import_exports_type(self):
+        if self.gst_import_type or self.gst_exports_type:
+            self.fiscal_position_id = self.env.ref('l10n_in.fiscal_position_in_export').id
+        else:
+            self.fiscal_position_id = False
+
 
 class AccountInvoiceLine(models.Model):
 

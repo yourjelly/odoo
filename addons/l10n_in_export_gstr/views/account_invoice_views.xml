@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="account.invoice_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='partner_id']" position="after">
-                <field name="gst_invoice_type" attrs="{'invisible':[('type', '!=', 'out_invoice')]}"/>
+                <field name="gst_exports_type" attrs="{'invisible':[('type', '!=', 'out_invoice')]}"/>
                 <field name="reverse_charge" attrs="{'invisible':[('type', 'in', ['out_refund','in_refund'])]}"/>
             </xpath>
         </field>

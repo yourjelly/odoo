@@ -63,40 +63,43 @@ class AccountAdvancesPaymentReport(models.Model):
                 SELECT array_agg(sub.payment_id)::text AS id,
                 array_agg(sub.payment_id) AS payment_ids,
                 sub.place_of_supply,
-                sum(sub.amount) as payment_amount,
-                sub.payment_month as payment_month,
+                SUM(sub.amount) AS payment_amount,
+                sub.payment_month AS payment_month,
                 sub.company_id,
                 sub.payment_type,
                 sub.supply_type
                 FROM (
-                    SELECT ap.id as payment_id,
-                        to_char(ap.payment_date, 'MM-YYYY') as payment_month,
-                        aj.company_id as company_id,
-                        (CASE WHEN rcs.l10n_in_tin IS NOT NULL THEN concat(rcs.l10n_in_tin,'-',rcs.name) ELSE NULL END) as place_of_supply,
-                        (CASE WHEN p.state_id = compp.state_id THEN 'intra_state' ELSE 'inter_state' END) as supply_type,
-                        rcs.id as state_id,
-                        ap.amount as amount,
-                        ap.payment_type
+                    SELECT ap.id AS payment_id,
+                        to_char(ap.payment_date, 'MM-YYYY') AS payment_month,
+                        aj.company_id AS company_id,
+                        ap.amount AS amount,
+                        ap.payment_type,
+                        (CASE WHEN p.state_id = cp.state_id THEN 'intra_state' ELSE 'inter_state' END) AS supply_type,
+                        (CASE WHEN ap.payment_type = 'outbound' AND ps.l10n_in_tin IS NOT NULL THEN concat(ps.l10n_in_tin,'-',ps.name)
+                            WHEN ap.payment_type = 'inbound' AND cps.l10n_in_tin IS NOT NULL THEN concat(cps.l10n_in_tin,'-',cps.name)
+                            ELSE NULL END) AS place_of_supply
                         FROM account_payment ap
                         JOIN account_journal aj ON aj.id = ap.journal_id
-                        JOIN res_company comp ON comp.id = aj.company_id
-                        JOIN res_partner compp ON compp.id = comp.partner_id
+                        JOIN res_company apc ON apc.id = aj.company_id
+                        JOIN res_partner cp ON cp.id = apc.partner_id
+                        JOIN res_country_state cps ON  cps.id = cp.state_id
                         JOIN res_partner p ON p.id = ap.partner_id
-                        JOIN res_country_state rcs ON  rcs.id = p.state_id
-                        WHERE ap.state = ANY (ARRAY['posted','sent','reconciled']) and ap.payment_type = ANY(ARRAY['inbound', 'outbound']) and rcs.l10n_in_tin IS NOT NULL
+                        JOIN res_country_state ps ON  ps.id = p.state_id
+                        WHERE ap.state = ANY (ARRAY['posted','sent','reconciled']) AND ap.payment_type = ANY(ARRAY['inbound', 'outbound']) AND ps.l10n_in_tin IS NOT NULL
                         GROUP BY ap.id,
                             ap.amount,
                             ap.payment_date,
-                            rcs.l10n_in_tin,
-                            rcs.id,
-                            rcs.name,
+                            ps.l10n_in_tin,
+                            ps.id,
+                            ps.name,
                             aj.company_id,
-                            compp.state_id,
+                            cp.state_id,
                             p.state_id,
-                            ap.payment_type
-                ) as sub
+                            ap.payment_type,
+                            cps.l10n_in_tin,
+                            cps.name
+                ) AS sub
                 GROUP BY sub.place_of_supply,
-                    sub.state_id,
                     sub.payment_month,
                     sub.company_id,
                     sub.payment_type,
@@ -144,43 +147,48 @@ class AccountAdvancesAdjustmentsReport(models.Model):
         tools.drop_view_if_exists(self.env.cr, self._table)
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
-                SELECT concat(sub.state_id, '-', sub.company_id, '-', sub.invoice_month, '-', sub.payment_type) AS id,
-                array_agg(sub.payment_id) as payment_ids,
+                SELECT concat(sub.supply_type, '-', sub.place_of_supply, '-', sub.company_id, '-', sub.invoice_month, '-', sub.payment_type) AS id,
+                array_agg(sub.payment_id) AS payment_ids,
                 sub.place_of_supply,
                 sub.invoice_month,
                 sub.company_id,
                 sub.payment_type,
                 sub.supply_type
                 FROM (
-                    SELECT ap.id as payment_id,
+                    SELECT ap.id AS payment_id,
                         to_char(ai.date_invoice, 'MM-YYYY') AS invoice_month,
-                        aj.company_id as company_id,
-                        (CASE WHEN rcs.l10n_in_tin IS NOT NULL THEN concat(rcs.l10n_in_tin,'-',rcs.name) ELSE NULL END) as place_of_supply,
-                        (CASE WHEN p.state_id = compp.state_id THEN 'intra_state' ELSE 'inter_state' END) as supply_type,
-                        rcs.id as state_id,
-                        ap.payment_type as payment_type
+                        aj.company_id AS company_id,
+                        (CASE WHEN ap.payment_type = 'outbound' AND ps.l10n_in_tin IS NOT NULL THEN concat(ps.l10n_in_tin,'-',ps.name)
+                            WHEN ap.payment_type = 'inbound' AND cps.l10n_in_tin IS NOT NULL THEN concat(cps.l10n_in_tin,'-',cps.name)
+                            ELSE NULL END) AS place_of_supply,
+                        (CASE WHEN p.state_id = cp.state_id THEN 'intra_state' ELSE 'inter_state' END) AS supply_type,
+                        ps.id AS state_id,
+                        ap.payment_type AS payment_type
                         FROM account_invoice ai
                             JOIN account_invoice_payment_rel aipr ON aipr.invoice_id = ai.id
                             JOIN account_payment ap ON ap.id = aipr.payment_id
                             JOIN account_journal aj ON aj.id = ap.journal_id
-                            JOIN res_company comp ON comp.id = aj.company_id
-                            JOIN res_partner compp ON compp.id = comp.partner_id
+                            JOIN res_company apc ON apc.id = aj.company_id
+                            JOIN res_partner cp ON cp.id = apc.partner_id
+                            JOIN res_country_state cps ON  cps.id = cp.state_id
                             JOIN res_partner p ON p.id = ai.partner_id
-                            JOIN res_country_state rcs ON  rcs.id = p.state_id
-                        WHERE ai.state = ANY (ARRAY['open','paid']) and rcs.l10n_in_tin IS NOT NULL AND ai.date_invoice > ap.payment_date and ap.payment_type = ANY(ARRAY['inbound', 'outbound'])
+                            JOIN res_country_state ps ON  ps.id = p.state_id
+                        WHERE ai.state = ANY (ARRAY['open','paid']) AND ps.l10n_in_tin IS NOT NULL
+                            AND ai.date_invoice > ap.payment_date AND ap.payment_type = ANY(ARRAY['inbound', 'outbound'])
                         GROUP BY
                             ap.id,
                             ap.payment_type,
                             ai.date_invoice,
-                            rcs.l10n_in_tin,
-                            rcs.id,
-                            rcs.name,
+                            ps.l10n_in_tin,
+                            ps.id,
+                            ps.name,
                             aj.company_id,
                             p.state_id,
-                            compp.state_id
-                ) as sub
+                            cp.state_id,
+                            cps.l10n_in_tin,
+                            cps.name
+                ) AS sub
                 GROUP BY sub.place_of_supply,
-                    sub.state_id,
                     sub.invoice_month,
                     sub.company_id,
                     sub.payment_type,

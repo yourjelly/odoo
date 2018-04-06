@@ -33,5 +33,6 @@ The return is divided into 13 sections:
         'views/product_template_views.xml',
         'views/res_partner_views.xml',
         'views/res_config_settings_views.xml',
+        'views/res_company_views.xml'
     ],
 }

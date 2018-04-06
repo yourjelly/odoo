@@ -58,7 +58,7 @@ class ExportGstr(CSVExport):
         if gst_type == 'b2cl':
             domain += [
                 ('place_of_supply', '!=', False),
-                ('b2b_invoice_type', '=', 'R'),
+                ('b2b_invoice_type', '=', 'regular'),
                 ('invoice_total', '>', b2cs_amount),
                 ('type', '=', 'out_invoice'),
                 ('partner_gstn','=', False)]
@@ -75,7 +75,7 @@ class ExportGstr(CSVExport):
         if gst_type == 'b2cs':
             domain += [
                 ('place_of_supply', '!=', False),
-                ('b2b_invoice_type', '=', 'R'),
+                ('b2b_invoice_type', '=', 'regular'),
                 ('invoice_total', '<', b2cs_amount),
                 ('type', '=', 'out_invoice'),
                 ('partner_gstn','=', False)]
@@ -130,7 +130,7 @@ class ExportGstr(CSVExport):
                 {"name": "is_pre_gst", "label": "Pre GST"}
             ]
         if gst_type == 'exp':
-            domain += [('type', '=', 'out_invoice'), ('exp_invoice_type','in',['WPAY','WOPAY'])]
+            domain += [('type', '=', 'out_invoice'), ('exp_invoice_type','in',['wpay','wopay'])]
             fields = [
                 {"name": "exp_invoice_type", "label": "Export Type"},
                 {"name": "invoice_number", "label": "Invoice Number"},
@@ -189,8 +189,8 @@ class ExportGstr(CSVExport):
 
         if gst_type == 'exemp':
             model = 'exempted.gst.report'
-            domain = [('invoice_month', '=', month_and_year), ('company_id','in', company_ids)]
-            fields = [{"name": "type_of_supply", "label": "Description"},
+            domain = [('invoice_month', '=', month_and_year), ('company_id','in', company_ids), ('type', '=', 'out_invoice')]
+            fields = [{"name": "out_type_of_supply", "label": "Description"},
                       {"name": "nil_rated_amount", "label": "Nil Rated Supplies"},
                       {"name": "exempted_amount", "label": "Exempted(other than nil rated/non GST supply)"},
                       {"name": "non_gst_supplies", "label": "Non-GST Supplies"}
@@ -248,7 +248,7 @@ class ExportGstr(CSVExport):
             ]
 
         if gst_type == 'imps':
-            domain += [('import_type', '=', 'import_of_services'),('type', '=', 'in_invoice')]
+            domain += [('import_product_type', '=', 'import_of_services'),('type', '=', 'in_invoice')]
             fields = [
                 {"name": "invoice_number", "label": "Invoice Number of Reg Recipient"},
                 {"name": "invoice_date", "label": "Invoice Date"},
@@ -264,7 +264,7 @@ class ExportGstr(CSVExport):
             ]
 
         if gst_type == 'impg':
-            domain += [('import_type', '=', 'import_of_goods'),('type', '=', 'in_invoice')]
+            domain += [('import_product_type', '=', 'import_of_goods'),('type', '=', 'in_invoice')]
             fields = [
                 {"name": "port_code", "label": "Port Code"},
                 {"name": "shipping_bill_number", "label": "Bill Of Entry Number"},
@@ -357,10 +357,10 @@ class ExportGstr(CSVExport):
             ]
 
         if gst_type == 'exempt':
-            model = 'exempted.in.gst.report'
-            domain = [('invoice_month', '=', month_and_year), ('company_id','in', company_ids)]
+            model = 'exempted.gst.report'
+            domain = [('invoice_month', '=', month_and_year), ('company_id','in', company_ids), ('type', '=', 'in_invoice')]
             fields = [
-                {"name": "type_of_supply", "label": "Description"},
+                {"name": "in_type_of_supply", "label": "Description"},
                 {"name": "composition_amount", "label": "Composition taxable person"},
                 {"name": "nil_rated_amount", "label": "Nil Rated Supplies"},
                 {"name": "exempted_amount", "label": "Exempted (other than nil rated/non GST supply )"},

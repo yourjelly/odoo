@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_company_gst_report_form" model="ir.ui.view">
+        <field name="name">res.company.gst.report.form</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form" />
+        <field name="mode">primary</field>
+        <field name="priority">1024</field>
+        <field name="arch" type="xml">
+            <field name="logo" position="before">
+                <div class="row">
+                    <div class="alert alert-warning ml8 mr8" role="alert" attrs="{'invisible': [('state_id','!=',False),('vat','!=',False)]}">
+                        Set your company
+                        <t attrs="{'invisible': [('state_id','!=',False)]}"> State</t>
+                        <t attrs="{'invisible': ['|', ('vat','!=',False),('state_id','!=',False)]}"> and</t>
+                        <t attrs="{'invisible': [('vat','!=',False)]}"> GSTIN</t>.
+                    </div>
+                </div>
+            </field>
+            <xpath expr="//h1" position="replace">
+                <h2>
+                    <field name="name"/>
+                </h2>
+            </xpath>
+            <xpath expr="//field[@name='state_id']"  position="attributes">
+                <attribute name="required">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='vat']"  position="attributes">
+                <attribute name="required">1</attribute>
+            </xpath>
+            <field name="parent_id" groups="base.group_multi_company" position="replace" invisible="1"/>
+            <xpath expr="//sheet" position="inside">
+                <hr />
+                <footer>
+                    <button string="Save" type="object" class="oe_highlight" name="write"/>
+                    <button string="Cancel" class="oe_link" special="cancel" />
+                </footer>
+            </xpath>
+        </field>
+    </record>
+</odoo>

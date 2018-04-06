@@ -51,43 +51,43 @@ class HsnGstReport(models.Model):
 
     def _select(self):
         select_str = """
-            SELECT concat(case when sub.hsn_code is not null
-                    then (sub.uom_id, '-', sub.hsn_code, '-', sub.invoice_month, '-', sub.company_id)
-                    else (sub.uom_id, '-', sub.hsn_description, '-', sub.invoice_month, '-', sub.company_id)
+            SELECT concat(CASE WHEN sub.hsn_code IS NOT NULL
+                    THEN (sub.uom_id, '-', sub.hsn_code, '-', sub.invoice_month, '-', sub.company_id)
+                    ELSE (sub.uom_id, '-', sub.hsn_description, '-', sub.invoice_month, '-', sub.company_id)
                     END) AS id,
-                array_agg(sub.invoice_line_id) as invoice_line_ids,
-                (select sum(amount_total_company_signed) from account_invoice where id = ANY (array_agg(sub.id))) as invoice_total,
+                array_agg(sub.invoice_line_id) AS invoice_line_ids,
+                (SELECT SUM(amount_total_company_signed) FROM account_invoice WHERE id = ANY (array_agg(sub.id))) AS invoice_total,
                 sub.company_id,
-                sum(sub.price_total) as price_total,
+                sum(sub.price_total) AS price_total,
                 sub.hsn_code,
                 sub.hsn_description,
                 sub.invoice_month,
                 sub.uom_name,
-                sum(sub.igst_amount) as igst_amount,
-                sum(sub.cgst_amount) as cgst_amount,
-                sum(sub.sgst_amount) as sgst_amount,
-                sum(sub.product_qty) as product_qty,
-                sub.type as type
+                sum(sub.igst_amount) AS igst_amount,
+                sum(sub.cgst_amount) AS cgst_amount,
+                sum(sub.sgst_amount) AS sgst_amount,
+                sum(sub.product_qty) AS product_qty,
+                sub.type AS type
         """
         return select_str
 
     def _sub_select(self):
         gst_tag_ids = self.get_gst_tag_ids()
         sub_select_str = """
-            SELECT ai.id as id,
+            SELECT ai.id AS id,
                 ail.id AS invoice_line_id,
-                ai.type as type,
-                CASE WHEN taxmin.tax_tag_id = ANY(ARRAY[%s,%s]) THEN ail.quantity / 2 ELSE ail.quantity END as product_qty,
+                ai.type AS type,
+                CASE WHEN taxmin.tax_tag_id = ANY(ARRAY[%s,%s]) THEN ail.quantity / 2 ELSE ail.quantity END AS product_qty,
                 ai.company_id AS company_id,
                 pt.l10n_in_hsn_code AS hsn_code,
                 pt.hsn_description AS hsn_description,
                 to_char(ai.date_invoice, 'MM-YYYY') AS invoice_month,
                 CASE WHEN taxmin.tax_tag_id = ANY(ARRAY[%s,%s]) THEN ail.price_subtotal_signed / 2 ELSE ail.price_subtotal_signed END AS price_total,
-                u.name as uom_name,
-                u.id as uom_id,
-                (CASE WHEN taxmin.tax_tag_id = %s THEN (taxmin.amount / 100) * ail.price_subtotal_signed ELSE 0 END) as igst_amount,
-                (CASE WHEN taxmin.tax_tag_id = %s THEN (taxmin.amount / 100) * ail.price_subtotal_signed ELSE 0 END) as cgst_amount,
-                (CASE WHEN taxmin.tax_tag_id = %s THEN (taxmin.amount / 100) * ail.price_subtotal_signed ELSE 0 END) as sgst_amount
+                u.name AS uom_name,
+                u.id AS uom_id,
+                (CASE WHEN taxmin.tax_tag_id = %s THEN (taxmin.amount / 100) * ail.price_subtotal_signed ELSE 0 END) AS igst_amount,
+                (CASE WHEN taxmin.tax_tag_id = %s THEN (taxmin.amount / 100) * ail.price_subtotal_signed ELSE 0 END) AS cgst_amount,
+                (CASE WHEN taxmin.tax_tag_id = %s THEN (taxmin.amount / 100) * ail.price_subtotal_signed ELSE 0 END) AS sgst_amount
         """%(gst_tag_ids.get('sgst_tag'), gst_tag_ids.get('cgst_tag'),
              gst_tag_ids.get('sgst_tag'), gst_tag_ids.get('cgst_tag'),
              gst_tag_ids.get('igst_tag'), gst_tag_ids.get('cgst_tag'), gst_tag_ids.get('sgst_tag'))
@@ -104,26 +104,26 @@ class HsnGstReport(models.Model):
                 LEFT JOIN product_product pr ON pr.id = ail.product_id
                 LEFT JOIN product_template pt ON pt.id = pr.product_tmpl_id
                 LEFT JOIN uom_uom u ON u.id = ail.uom_id
-                LEFT join (select atax.id as id,
-                    ailts.invoice_line_id as a_invoice_line_id,
-                    CASE when atax.amount_type::text = 'group'
-                        THEN sum(catax.amount)
-                        ELSE sum(atax.amount)
-                    END as amount,
-                    CASE when atax.amount_type::text = 'group'
+                LEFT JOIN (SELECT atax.id AS id,
+                    ailts.invoice_line_id AS a_invoice_line_id,
+                    CASE WHEN atax.amount_type::text = 'group'
+                        THEN SUM(catax.amount)
+                        ELSE SUM(atax.amount)
+                    END AS amount,
+                    CASE WHEN atax.amount_type::text = 'group'
                         THEN catt.account_account_tag_id
                         ELSE att.account_account_tag_id
-                    END as tax_tag_id
-                    FROM account_tax as atax
-                    inner join account_invoice_line_tax as ailts ON (ailts.tax_id=atax.id)
-                    LEFT JOIN account_tax_account_tag as att ON att.account_tax_id = atax.id
+                    END AS tax_tag_id
+                    FROM account_tax AS atax
+                    INNER JOIN account_invoice_line_tax AS ailts ON (ailts.tax_id=atax.id)
+                    LEFT JOIN account_tax_account_tag AS att ON att.account_tax_id = atax.id
                     LEFT JOIN account_tax_filiation_rel cataxr ON cataxr.parent_tax = atax.id
                     LEFT JOIN account_tax catax ON catax.id = cataxr.child_tax
                     LEFT JOIN account_tax_account_tag as catt ON catt.account_tax_id = catax.id
-                    where att.account_account_tag_id = %s or catt.account_account_tag_id = ANY (ARRAY[%s, %s])
-                    group by atax.id, a_invoice_line_id, atax.amount_type, att.account_account_tag_id, catt.account_account_tag_id)
-                    as taxmin on taxmin.a_invoice_line_id=ail.id
-                    where ai.state = ANY (ARRAY['open', 'paid']) and ai.type = ANY (ARRAY['out_invoice','in_invoice']) and taxmin.id IS NOT NULL
+                    WHERE att.account_account_tag_id = %s OR catt.account_account_tag_id = ANY (ARRAY[%s, %s])
+                    GROUP BY atax.id, a_invoice_line_id, atax.amount_type, att.account_account_tag_id, catt.account_account_tag_id)
+                    AS taxmin on taxmin.a_invoice_line_id=ail.id
+                    WHERE ai.state = ANY (ARRAY['open', 'paid']) AND ai.type = ANY (ARRAY['out_invoice','in_invoice']) AND taxmin.id IS NOT NULL
         """ %(gst_tag_ids.get('igst_tag'), gst_tag_ids.get('cgst_tag'), gst_tag_ids.get('sgst_tag'))
         return from_str
 
@@ -161,7 +161,7 @@ class HsnGstReport(models.Model):
         tools.drop_view_if_exists(self.env.cr, self._table)
         self.env.cr.execute("""CREATE or REPLACE VIEW %s as (
             %s
-            FROM (%s %s %s) as sub
+            FROM (%s %s %s) AS sub
             %s
         )""" % (self._table, self._select(), self._sub_select(), self._from(), self._sub_group_by() , self._group_by()))
 

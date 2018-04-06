@@ -26,17 +26,17 @@ class DocsGstReport(models.Model):
                 concat(sub.id, '-', sub.document_type, '-', sub.invoice_month, '-', sub.company_id) AS id,
                 sub.company_id,
                 sub.document_type,
-                MIN(sub.invoice_number) as num_from,
-                MAX(sub.invoice_number) as num_to,
-                COUNT(sub.invoice_number) as total_number,
-                SUM(sub.cancelled) as cancelled,
+                MIN(sub.invoice_number) AS num_from,
+                MAX(sub.invoice_number) AS num_to,
+                COUNT(sub.invoice_number) AS total_number,
+                SUM(sub.cancelled) AS cancelled,
                 sub.invoice_month
         """
         return select_str
 
     def _sub_select(self):
         sub_select_str = """
-            SELECT aj.id as id,
+            SELECT aj.id AS id,
                 aj.company_id,
                 ai.number AS invoice_number,
                 to_char(ai.date_invoice, 'MM-YYYY') AS invoice_month,
@@ -90,6 +90,6 @@ class DocsGstReport(models.Model):
         tools.drop_view_if_exists(self.env.cr, self._table)
         self.env.cr.execute("""CREATE or REPLACE VIEW %s as (
             %s
-            FROM (%s %s %s) as sub
+            FROM (%s %s %s) AS sub
             %s
         )""" % (self._table, self._select(), self._sub_select(), self._from(), self._sub_group_by(), self._group_by()))
