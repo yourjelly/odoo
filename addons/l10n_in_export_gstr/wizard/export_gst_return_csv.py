@@ -20,9 +20,6 @@ class ExportGstReturnCsv(models.TransientModel):
         current_year = fields.Date.from_string(fields.Date.context_today(self)).year
         return [('%s'%(current_year+year_count), '%s'%(current_year+year_count)) for year_count in range(-1, 2)]
 
-    def _default_get_export_summary(self):
-        return 'b2b'
-
     @api.model
     def _get_export_summary_type(self):
         if self.env.context.get('default_gst_return_type') == 'gstr2':
@@ -58,7 +55,7 @@ class ExportGstReturnCsv(models.TransientModel):
     year = fields.Selection('_get_year', string="Financial Year", required=True, default=_default_get_year)
 
     #gst_return_section_id = fields.Many2one('gst.return.section', string='Section', required=True)
-    export_summary = fields.Selection('_get_export_summary_type', string="Export Summary For", default=_default_get_export_summary)
+    export_summary = fields.Selection('_get_export_summary_type', string="Export Summary For", default='b2b')
 
     @api.onchange('gst_return_type')
     def onchange_gst_return_type(self):

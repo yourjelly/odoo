@@ -72,29 +72,29 @@ class HsnGstReport(models.Model):
         return select_str
 
     def _sub_select(self):
-        gst_tag_ids = self.get_gst_tag_ids()
+        tax_group_query = self.env['account.invoice'].get_tax_group_ids_query()
         sub_select_str = """
             SELECT ai.id AS id,
                 ail.id AS invoice_line_id,
                 ai.type AS type,
-                CASE WHEN taxmin.tax_tag_id = ANY(ARRAY[%s,%s]) THEN ail.quantity / 2 ELSE ail.quantity END AS product_qty,
+                CASE WHEN taxmin.tax_group_id = ANY(ARRAY[%s,%s]) THEN ail.quantity / 2 ELSE ail.quantity END AS product_qty,
                 ai.company_id AS company_id,
                 pt.l10n_in_hsn_code AS hsn_code,
                 pt.hsn_description AS hsn_description,
                 to_char(ai.date_invoice, 'MM-YYYY') AS invoice_month,
-                CASE WHEN taxmin.tax_tag_id = ANY(ARRAY[%s,%s]) THEN ail.price_subtotal_signed / 2 ELSE ail.price_subtotal_signed END AS price_total,
+                CASE WHEN taxmin.tax_group_id = ANY(ARRAY[%s,%s]) THEN ail.price_subtotal_signed / 2 ELSE ail.price_subtotal_signed END AS price_total,
                 u.name AS uom_name,
                 u.id AS uom_id,
-                (CASE WHEN taxmin.tax_tag_id = %s THEN (taxmin.amount / 100) * ail.price_subtotal_signed ELSE 0 END) AS igst_amount,
-                (CASE WHEN taxmin.tax_tag_id = %s THEN (taxmin.amount / 100) * ail.price_subtotal_signed ELSE 0 END) AS cgst_amount,
-                (CASE WHEN taxmin.tax_tag_id = %s THEN (taxmin.amount / 100) * ail.price_subtotal_signed ELSE 0 END) AS sgst_amount
-        """%(gst_tag_ids.get('sgst_tag'), gst_tag_ids.get('cgst_tag'),
-             gst_tag_ids.get('sgst_tag'), gst_tag_ids.get('cgst_tag'),
-             gst_tag_ids.get('igst_tag'), gst_tag_ids.get('cgst_tag'), gst_tag_ids.get('sgst_tag'))
+                (CASE WHEN taxmin.tax_group_id = %s THEN (taxmin.amount / 100) * ail.price_subtotal_signed ELSE 0 END) AS igst_amount,
+                (CASE WHEN taxmin.tax_group_id = %s THEN (taxmin.amount / 100) * ail.price_subtotal_signed ELSE 0 END) AS cgst_amount,
+                (CASE WHEN taxmin.tax_group_id = %s THEN (taxmin.amount / 100) * ail.price_subtotal_signed ELSE 0 END) AS sgst_amount
+        """%(tax_group_query.get('sgst_group'), tax_group_query.get('cgst_group'),
+            tax_group_query.get('sgst_group'), tax_group_query.get('cgst_group'),
+            tax_group_query.get('igst_group'), tax_group_query.get('sgst_group'), tax_group_query.get('cgst_group'))
         return sub_select_str
 
     def _from(self):
-        gst_tag_ids = self.get_gst_tag_ids()
+        tax_group_query = self.env['account.invoice'].get_tax_group_ids_query()
         from_str = """
             FROM account_invoice_line ail
                 JOIN account_invoice ai ON ai.id = ail.invoice_id
@@ -111,20 +111,19 @@ class HsnGstReport(models.Model):
                         ELSE SUM(atax.amount)
                     END AS amount,
                     CASE WHEN atax.amount_type::text = 'group'
-                        THEN catt.account_account_tag_id
-                        ELSE att.account_account_tag_id
-                    END AS tax_tag_id
+                        THEN catax.tax_group_id
+                    ELSE atax.tax_group_id
+                    END AS tax_group_id
+
                     FROM account_tax AS atax
                     INNER JOIN account_invoice_line_tax AS ailts ON (ailts.tax_id=atax.id)
-                    LEFT JOIN account_tax_account_tag AS att ON att.account_tax_id = atax.id
                     LEFT JOIN account_tax_filiation_rel cataxr ON cataxr.parent_tax = atax.id
                     LEFT JOIN account_tax catax ON catax.id = cataxr.child_tax
-                    LEFT JOIN account_tax_account_tag as catt ON catt.account_tax_id = catax.id
-                    WHERE att.account_account_tag_id = %s OR catt.account_account_tag_id = ANY (ARRAY[%s, %s])
-                    GROUP BY atax.id, a_invoice_line_id, atax.amount_type, att.account_account_tag_id, catt.account_account_tag_id)
+                    WHERE atax.tax_group_id = %s OR catax.tax_group_id = ANY (ARRAY[%s, %s])
+                    GROUP BY atax.id, a_invoice_line_id, atax.amount_type, atax.tax_group_id, catax.tax_group_id)
                     AS taxmin on taxmin.a_invoice_line_id=ail.id
                     WHERE ai.state = ANY (ARRAY['open', 'paid']) AND ai.type = ANY (ARRAY['out_invoice','in_invoice']) AND taxmin.id IS NOT NULL
-        """ %(gst_tag_ids.get('igst_tag'), gst_tag_ids.get('cgst_tag'), gst_tag_ids.get('sgst_tag'))
+        """ %(tax_group_query.get('igst_group'), tax_group_query.get('cgst_group'), tax_group_query.get('sgst_group'))
         return from_str
 
     def _sub_group_by(self):
@@ -137,7 +136,7 @@ class HsnGstReport(models.Model):
                 pt.hsn_description,
                 u.name,
                 u.id,
-                taxmin.tax_tag_id,
+                taxmin.tax_group_id,
                 taxmin.amount,
                 ai.date_invoice
         """
@@ -164,12 +163,3 @@ class HsnGstReport(models.Model):
             FROM (%s %s %s) AS sub
             %s
         )""" % (self._table, self._select(), self._sub_select(), self._from(), self._sub_group_by() , self._group_by()))
-
-
-    def get_gst_tag_ids(self):
-        igst_tag = self.env.ref('l10n_in.igst_tag_tax', False)
-        cgst_tag = self.env.ref('l10n_in.cgst_tag_tax', False)
-        sgst_tag = self.env.ref('l10n_in.sgst_tag_tax', False)
-        return {'igst_tag': igst_tag and igst_tag.id or 0,
-                'sgst_tag': sgst_tag and sgst_tag.id or 0,
-                'cgst_tag': cgst_tag and cgst_tag.id or 0}

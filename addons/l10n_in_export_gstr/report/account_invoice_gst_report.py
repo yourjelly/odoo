@@ -111,7 +111,7 @@ class AccountInvoiceGstReport(models.Model):
 
     def _select(self):
         select_str = """
-            SELECT (CASE WHEN sub.tax_id IS NOT NULL THEN concat(sub.id, '-', sub.tax_id, '-', sub.company_id) ELSE concat(sub.id, '-', sub.company_id) END) AS id,
+            SELECT concat(sub.id, '-', sub.tax_id, '-', sub.company_id) AS id,
                 array_agg(sub.invoice_line_id) AS invoice_line_ids,
                 sub.company_id,
                 SUM(sub.price_total) AS price_total,
@@ -216,7 +216,7 @@ class AccountInvoiceGstReport(models.Model):
                 LEFT JOIN product_template pt ON pt.id = pr.product_tmpl_id
                 LEFT JOIN account_invoice_refund_reason airr ON airr.id = ai.refund_reason_id
                 LEFT JOIN account_invoice air on air.id = ai.refund_invoice_id
-                LEFT JOIN (select atax.id AS id,
+                JOIN (select atax.id AS id,
                     ailts.invoice_line_id AS a_invoice_line_id,
                     CASE WHEN atax.amount_type::text = 'group'
                         THEN SUM(catax.amount)
@@ -231,9 +231,9 @@ class AccountInvoiceGstReport(models.Model):
                     LEFT JOIN account_tax_filiation_rel cataxr ON cataxr.parent_tax = atax.id
                     LEFT JOIN account_tax catax ON catax.id = cataxr.child_tax
                     GROUP BY atax.id, a_invoice_line_id, atax.amount_type, atax.tax_group_id)
-                    AS taxmin ON taxmin.a_invoice_line_id=ail.id
-                where ai.state = ANY (ARRAY['open', 'paid'])
-        """
+                AS taxmin ON taxmin.a_invoice_line_id=ail.id
+                where ai.state = ANY (ARRAY['open', 'paid']) and taxmin.tax_group_id = ANY (ARRAY[%s, %s, %s])
+        """%tuple(self.env['account.invoice'].get_tax_group_ids_query().values())
         return from_str
 
     def _sub_group_by(self):

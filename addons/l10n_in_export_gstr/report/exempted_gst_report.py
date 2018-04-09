@@ -10,11 +10,11 @@ class ExemptedGstReport(models.Model):
     _description = "Exempted gst supplied Statistics"
     _auto = False
 
-    out_type_of_supply = fields.Selection([('intrb2b', 'Inter-State supplies to registered persons'),
+    out_supply_type = fields.Selection([('intrb2b', 'Inter-State supplies to registered persons'),
                                     ('intrb2c', 'Inter-State supplies to unregistered persons'),
                                     ('intrab2b', 'Intra-State supplies to registered persons'),
                                     ('intrab2c', 'Intra-State supplies to unregistered persons')],"OUT Type of supply")
-    in_type_of_supply = fields.Selection([('intr', 'Inter-State supplies'),
+    in_supply_type = fields.Selection([('intr', 'Inter-State supplies'),
                                     ('intra', 'Intra-State supplies')], "IN Type of supply")
     composition_amount = fields.Float('Composition amount')
     nil_rated_amount = fields.Float("Nil rated supplies")
@@ -26,12 +26,13 @@ class ExemptedGstReport(models.Model):
 
     @api.model_cr
     def init(self):
+        tax_group_ids_query = self.env['account.invoice'].get_tax_group_ids_query()
         tools.drop_view_if_exists(self.env.cr, self._table)
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
-                SELECT concat(sub.in_type_of_supply, '-', sub.out_type_of_supply, '-', sub.invoice_month, '-', sub.company_id) as id,
-                    sub.out_type_of_supply,
-                    sub.in_type_of_supply,
+                SELECT concat(sub.in_supply_type, '-', sub.out_supply_type, '-', sub.invoice_month, '-', sub.company_id) as id,
+                    sub.out_supply_type,
+                    sub.in_supply_type,
                     sub.invoice_month,
                     sub.company_id,
                     sub.type,
@@ -40,8 +41,8 @@ class ExemptedGstReport(models.Model):
                     SUM(sub.non_gst_supplies) AS non_gst_supplies,
                     SUM(sub.nil_rated_amount) AS nil_rated_amount
                     FROM ( SELECT
-                            ailtax.out_type_of_supply,
-                            ailtax.in_type_of_supply,
+                            ailtax.out_supply_type,
+                            ailtax.in_supply_type,
                             ailtax.invoice_month,
                             ailtax.company_id,
                             ailtax.type,
@@ -87,10 +88,10 @@ class ExemptedGstReport(models.Model):
                                         THEN 'intrab2b'
                                         WHEN cp.state_id = p.state_id AND p.vat IS NULL
                                         THEN 'intrab2c'
-                                    END) ELSE NULL END) AS out_type_of_supply,
+                                    END) ELSE NULL END) AS out_supply_type,
                                 (CASE WHEN ai.type = 'in_invoice' THEN
                                         (CASE WHEN cp.state_id = p.state_id THEN 'intra' ELSE 'intr' END)
-                                    ELSE NULL END) AS in_type_of_supply
+                                    ELSE NULL END) AS in_supply_type
                                 FROM account_invoice_line ail
                                     JOIN account_invoice ai ON ai.id = ail.invoice_id
                                     JOIN res_company comp ON comp.id = ai.company_id
@@ -118,13 +119,11 @@ class ExemptedGstReport(models.Model):
                                     ai.date_invoice, p.state_id,
                                     p.vat, ai.type, p.composition) AS ailtax
                 ) AS sub
-                GROUP BY sub.in_type_of_supply, sub.out_type_of_supply, sub.company_id, sub.invoice_month, sub.type)""" %(self._table, self.get_model_data('l10n_in','igst_group'),
-                    self.get_model_data('l10n_in','cgst_group'),
-                    self.get_model_data('l10n_in','sgst_group'),
+                GROUP BY sub.in_supply_type, sub.out_supply_type, sub.company_id, sub.invoice_month, sub.type)""" %(self._table,
+                    tax_group_ids_query.get('igst_group'),
+                    tax_group_ids_query.get('cgst_group'),
+                    tax_group_ids_query.get('sgst_group'),
                     'l10n_in', 'igst_sale_0',
                     'l10n_in', 'gst_sale_0',
                     'l10n_in', 'igst_purchase_0',
                     'l10n_in', 'gst_purchase_0'))
-
-    def get_model_data(self, module, name):
-        return "(SELECT res_id FROM ir_model_data WHERE module='%s' AND name='%s')"%(module, name)

@@ -37,7 +37,7 @@ class ExportGstr(CSVExport):
         #Get value from account settings
         IrConfig = request.env['ir.config_parameter'].sudo()
         b2cs_amount = IrConfig.get_param('l10n_in.l10n_in_b2cs_max') or 250000
-        domain = [('company_id','in', company_ids), ('invoice_month', '=', str(month_and_year)), ('tax_group_id', 'in', self.gst_group_ids())]
+        domain = [('company_id','in', company_ids), ('invoice_month', '=', str(month_and_year))]
         fields = []
         if gst_type == 'b2b':
             domain += [('place_of_supply', '!=', False), ('type', '=', 'out_invoice'), ('partner_gstn','!=', False)]
@@ -199,7 +199,7 @@ class ExportGstr(CSVExport):
 
     def get_gstr2_type_data(self, gst_type, model, company_ids, month_and_year):
         #Give model, Fields and domain by gstr1 type data
-        domain = [('company_id','in', company_ids), ('invoice_month', '=', str(month_and_year)), ('tax_group_id', 'in', self.gst_group_ids())]
+        domain = [('company_id','in', company_ids), ('invoice_month', '=', str(month_and_year))]
         fields = []
         if gst_type == 'b2b':
             domain += [('place_of_supply', '!=', False), ('type', '=', 'in_invoice'), ('partner_gstn','!=', False)]
@@ -386,8 +386,3 @@ class ExportGstr(CSVExport):
                 {"name": "cess_amount", "label": "Cess Amount"}
             ]
         return {'model': model, 'domain': domain, 'fields': fields}
-    def gst_group_ids(self):
-        sgst_group = request.env.ref('l10n_in.sgst_group', False)
-        cgst_group = request.env.ref('l10n_in.cgst_group', False)
-        igst_group = request.env.ref('l10n_in.igst_group', False)
-        return [sgst_group and sgst_group.id or 0, cgst_group and cgst_group.id or 0, igst_group and igst_group.id or 0]
