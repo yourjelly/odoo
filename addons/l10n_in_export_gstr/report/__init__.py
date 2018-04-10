@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from . import generic_account_gst_report
+from . import account_generic_gst_report
 from . import account_invoice_gst_report
 from . import account_payment_report
 from . import docs_gst_report

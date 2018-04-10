@@ -6,6 +6,7 @@ from odoo import models, fields, api
 
 
 class DocsGstReport(models.Model):
+
     _name = "docs.gst.report"
     _description = "Documents GST report"
     _auto = False

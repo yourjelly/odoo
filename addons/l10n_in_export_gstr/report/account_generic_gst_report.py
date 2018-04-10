@@ -1,11 +1,14 @@
-from odoo import tools
-from odoo import models, fields, api
+# -*- coding:utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+
+from odoo import api, models
 from odoo.tools.safe_eval import safe_eval
 
 
-class GenericAccountGstReport(models.AbstractModel):
+class AccountGenericGstReport(models.AbstractModel):
 
-    _name = "generic.account.gst.report"
+    _name = "account.generic.gst.report"
 
     @api.model
     def _get_model_data_res_id(self, module, name):
@@ -33,7 +36,7 @@ class GenericAccountGstReport(models.AbstractModel):
                 if cess_group and cess_group.id == tax.tax_group_id.id:
                     cess_amount_count += tax_line.get('amount')
                     itc_cess_amount_count += account_invoice_line.is_eligible_for_itc and tax_line.get('amount') or 0
-        return {'cess_amount': cess_amount_count, 'itc_cess_amount':itc_cess_amount_count}
+        return {'cess_amount': cess_amount_count, 'itc_cess_amount': itc_cess_amount_count}
 
     @api.model
     def _get_default_gst_rate(self, type):

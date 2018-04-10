@@ -5,7 +5,7 @@
         <field name="name">export.gst.return.csv.form</field>
         <field name="model">export.gst.return.csv</field>
         <field name="arch" type="xml">
-        <form string="Export GSTR-1 xls">
+        <form string="Export GSTR xls">
             <group>
                 <group>
                     <field name="gst_return_type" invisible="1"/>

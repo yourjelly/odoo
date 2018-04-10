@@ -7,7 +7,7 @@
     'description': """
 Indian Accounting GSTR Export.
 ====================================
-This module allows to export csv file for GSTR-1 report.
+This module allows to export csv file for GSTR-1 and GSTR-2 report.
 GSTR-1 is a monthly or quarterly return to be filed by regular dealers.
 The return contains details of all outward supplies made during the month.
 The return is divided into 13 sections:

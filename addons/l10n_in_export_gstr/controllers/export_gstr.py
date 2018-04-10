@@ -339,7 +339,7 @@ class ExportGstr(CSVExport):
                 ('payment_month', '=', str(month_and_year)),
                 ('company_id','in', company_ids),
                 ('payment_type','=', 'outbound')
-                ]
+            ]
             fields = [
                 {"name": "place_of_supply", "label": "Place Of Supply"},
                 {"name": "supply_type", "label": "Supply Type"},
@@ -354,7 +354,7 @@ class ExportGstr(CSVExport):
                 ('invoice_month', '=', str(month_and_year)),
                 ('company_id','in', company_ids),
                 ('payment_type','=', 'outbound')
-                ]
+            ]
             fields = [
                 {"name": "place_of_supply", "label": "Place Of Supply"},
                 {"name": "supply_type", "label": "Supply Type"},
@@ -368,7 +368,7 @@ class ExportGstr(CSVExport):
                 ('invoice_month', '=', month_and_year),
                 ('company_id','in', company_ids),
                 ('type', '=', 'in_invoice')
-                ]
+            ]
             fields = [
                 {"name": "in_supply_type", "label": "Description"},
                 {"name": "composition_amount", "label": "Composition taxable person"},
@@ -381,10 +381,9 @@ class ExportGstr(CSVExport):
             model = 'hsn.gst.report'
             domain = [
                 ('invoice_month', '=', month_and_year),
-                ('uom_name', '!=', False), '|', ('hsn_code', '!=', False),
-                ('hsn_description', '!=', False),
+                ('uom_name', '!=', False), '|', ('hsn_code', '!=', False), ('hsn_description', '!=', False),
                 ('company_id','in', company_ids), ('type', '=', 'in_invoice')
-                ]
+            ]
             fields = [
                 {"name": "hsn_code", "label": "HSN"},
                 {"name": "hsn_description", "label": "Description"},

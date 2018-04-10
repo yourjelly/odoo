@@ -8,8 +8,8 @@ from odoo.tools.safe_eval import safe_eval
 
 class AccountAdvancesPaymentReport(models.Model):
 
-    _inherit = "generic.account.gst.report"
     _name = "account.advances.payment.report"
+    _inherit = "account.generic.gst.report"
     _description = "Advances Payment Analysis"
     _auto = False
     _rec_name = 'place_of_supply'
@@ -37,8 +37,7 @@ class AccountAdvancesPaymentReport(models.Model):
         default_sale_gst_rate = self._get_default_gst_rate('sale')
         default_purchase_gst_rate = self._get_default_gst_rate('purchase')
         for record in self:
-            default_sale_gst_rate = self._get_default_gst_rate('sale')
-            record.tax_rate = record.supply_type == 'inbound' and default_sale_gst_rate or record.supply_type == 'outbound' and default_purchase_gst_rate
+            record.tax_rate = (record.supply_type == 'inbound' and default_sale_gst_rate) or (record.supply_type == 'outbound' and default_purchase_gst_rate)
 
     @api.model_cr
     def init(self):
@@ -93,8 +92,8 @@ class AccountAdvancesPaymentReport(models.Model):
 
 class AccountAdvancesAdjustmentsReport(models.Model):
 
-    _inherit = "generic.account.gst.report"
     _name = "account.advances.adjustments.report"
+    _inherit = "account.generic.gst.report"
     _description = "Advances Payment Adjustments Analysis"
     _auto = False
     _rec_name = 'place_of_supply'
@@ -108,14 +107,12 @@ class AccountAdvancesAdjustmentsReport(models.Model):
     payment_type = fields.Selection([('outbound', 'Send Money'), ('inbound', 'Receive Money')], string='Payment Type')
     supply_type = fields.Selection([('inter_state', 'Inter State'), ('intra_state', 'Intra State')], string="Supply Type")
 
-    @api.multi
     def _compute_tax_rate(self):
         default_sale_gst_rate = self._get_default_gst_rate('sale')
         default_purchase_gst_rate = self._get_default_gst_rate('purchase')
         for record in self:
             record.tax_rate = record.supply_type == 'inbound' and default_sale_gst_rate or record.supply_type == 'outbound' and default_purchase_gst_rate
 
-    @api.multi
     def _compute_invoice_payment(self):
         for record in self:
             invoice_payment = 0

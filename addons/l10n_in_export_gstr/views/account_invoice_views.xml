@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="invoice_form_inherit_export_gstr" model="ir.ui.view">
-        <field name="name">account.invoice.inherit.export.gstr.form</field>
+        <field name="name">account.invoice.form.inherit.l10n.in.export.gstr</field>
         <field name="model">account.invoice</field>
         <field name="inherit_id" ref="account.invoice_form"/>
         <field name="arch" type="xml">

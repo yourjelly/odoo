@@ -7,21 +7,21 @@ from odoo import models, fields, api
 
 class ExemptedGstReport(models.Model):
 
-    _inherit = "generic.account.gst.report"
     _name = "exempted.gst.report"
+    _inherit = "account.generic.gst.report"
     _description = "Exempted gst supplied Statistics"
     _auto = False
 
     out_supply_type = fields.Selection([('intrb2b', 'Inter-State supplies to registered persons'),
                                     ('intrb2c', 'Inter-State supplies to unregistered persons'),
                                     ('intrab2b', 'Intra-State supplies to registered persons'),
-                                    ('intrab2c', 'Intra-State supplies to unregistered persons')],"OUT Type of supply")
+                                    ('intrab2c', 'Intra-State supplies to unregistered persons')], string="Outward Supply Type")
     in_supply_type = fields.Selection([('intr', 'Inter-State supplies'),
-                                    ('intra', 'Intra-State supplies')], "IN Type of supply")
-    composition_amount = fields.Float('Composition amount', digits= (16,2))
-    nil_rated_amount = fields.Float("Nil rated supplies", digits= (16,2))
-    exempted_amount = fields.Float("Exempted", digits= (16,2))
-    non_gst_supplies = fields.Float("Non GST Supplies", digits= (16,2))
+                                    ('intra', 'Intra-State supplies')], string="Inward Supply Type")
+    composition_amount = fields.Float('Composition amount')
+    nil_rated_amount = fields.Float("Nil rated supplies")
+    exempted_amount = fields.Float("Exempted")
+    non_gst_supplies = fields.Float("Non GST Supplies")
     invoice_month = fields.Char("Invoice Month")
     company_id = fields.Integer("Company")
     type = fields.Selection([('out_invoice', 'Customer Invoice'), ('in_invoice', 'Vendor Bill')], readonly=True)

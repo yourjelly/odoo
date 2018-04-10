@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from odoo import api, fields, models
 
 
 class AccountInvoice(models.Model):
@@ -13,8 +12,8 @@ class AccountInvoice(models.Model):
     gst_export_type = fields.Selection([
         ('dewp', 'Deemed Exports with payment'), ('dewop', 'Deemed Exports without payment'),
         ('sewp', 'SEZ Exports with payment'), ('sewop', 'SEZ exports without payment')
-        ], string="GST Invoice Type")
-    gst_import_type = fields.Selection([('import', 'Import'), ('sez_import', 'Import from SEZ')], string="Import Type")
+        ], string="GST Export Type")
+    gst_import_type = fields.Selection([('import', 'Import'), ('sez_import', 'Import from SEZ')], string="GST Import Type")
     reverse_charge = fields.Boolean(string="Reverse charge", help="Check this box to apply Reverse charge mechanism under GST")
 
     @api.model
@@ -35,17 +34,6 @@ class AccountInvoice(models.Model):
             tax_lines += tax_lines.new(tax)
         self.tax_line_ids = tax_lines
 
-    @api.onchange('gst_import_type', 'gst_export_type')
-    def onchange_gst_import_exports_type(self):
-        fiscal_position = False
-        fiscal_position_export = self.env.ref('l10n_in.fiscal_position_in_export', False)
-        if self.partner_id.id:
-            delivery_partner_id = self.get_delivery_partner_id()
-            fiscal_position = self.env['account.fiscal.position'].get_fiscal_position(self.partner_id.id, delivery_id=delivery_partner_id)
-        if (self.gst_import_type or self.gst_export_type) and fiscal_position_export:
-            fiscal_position =  fiscal_position_export.id
-        self.fiscal_position_id = fiscal_position
-
 class AccountInvoiceLine(models.Model):
 
     _inherit = "account.invoice.line"
@@ -55,7 +43,5 @@ class AccountInvoiceLine(models.Model):
 
     @api.onchange('product_id')
     def _onchange_product_id(self):
-        res = super(AccountInvoiceLine, self)._onchange_product_id()
         if self.product_id:
             self.is_eligible_for_itc = self.product_id.is_eligible_for_itc
-        return res

@@ -8,17 +8,12 @@ from odoo.tools.safe_eval import safe_eval
 
 class HsnGstReport(models.Model):
 
-    _inherit = "generic.account.gst.report"
     _name = "hsn.gst.report"
+    _inherit = "account.generic.gst.report"
     _description = "Hsn gst Statistics"
     _auto = False
+    _order = 'invoice_month desc'
 
-    @api.multi
-    def _compute_cess_amount(self):
-        AccountInvoiceLine = self.env['account.invoice.line']
-        for record in self.filtered(lambda r: r.invoice_line_ids):
-            account_invoice_lines = AccountInvoiceLine.browse(safe_eval(record.invoice_line_ids))
-            record.cess_amount = self._get_cess_amount(account_invoice_lines).get('cess_amount')
 
     hsn_code = fields.Char("HSN")
     hsn_description = fields.Char("HSN description")
@@ -38,7 +33,11 @@ class HsnGstReport(models.Model):
         ('in_invoice', 'Vendor Bill'),
         ], readonly=True)
 
-    _order = 'invoice_month desc'
+    def _compute_cess_amount(self):
+        AccountInvoiceLine = self.env['account.invoice.line']
+        for record in self.filtered(lambda r: r.invoice_line_ids):
+            account_invoice_lines = AccountInvoiceLine.browse(safe_eval(record.invoice_line_ids))
+            record.cess_amount = self._get_cess_amount(account_invoice_lines).get('cess_amount')
 
     def _select(self):
         select_str = """

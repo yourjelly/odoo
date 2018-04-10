@@ -9,7 +9,7 @@ from odoo.tools.safe_eval import safe_eval
 class AccountInvoiceGstReport(models.Model):
 
     _name = "account.invoice.gst.report"
-    _inherit = "generic.account.gst.report"
+    _inherit = "account.generic.gst.report"
     _description = "Invoices Statistics"
     _auto = False
     _order = 'invoice_date desc'
@@ -41,7 +41,7 @@ class AccountInvoiceGstReport(models.Model):
         ('paid', 'Paid'), ('cancel', 'Cancelled')
         ], string='Invoice Status', readonly=True)
     b2b_invoice_type = fields.Selection([
-        ('regular','Regular'),('deemed_exp','Deemed Exp'),
+        ('regular','Regular'), ('deemed_exp','Deemed Exp'),
         ('sewp','SEZ supplies with payment'), ('sewop','SEZ supplies without payment')
         ], string="GST Invoice Type")
     itc_type = fields.Selection([
@@ -60,17 +60,17 @@ class AccountInvoiceGstReport(models.Model):
     refund_reason = fields.Char("Refund Reason")
     refund_invoice_number = fields.Char("Refund Invoice number")
     refund_invoice_date = fields.Char("Refund Invoice Date")
-    refund_invoice_type = fields.Selection([('b2cl','B2CL'), ('expwp','EXPWP'), ('expwop','EXPWOP')], string="UR Type")
+    refund_invoice_type = fields.Selection([('b2cl', 'B2CL'), ('expwp', 'EXPWP'), ('expwop', 'EXPWOP')], string="UR Type")
     refund_document_type = fields.Selection([('credit_note', 'C'), ('debit_note', 'D'), ('refund_note', 'R')], string="Refund Document Type")
     refund_import_type = fields.Selection([
-        ('import_of_services','IMPS'),
-        ('import_of_goods','IMPG'), ('b2bur', 'B2BUR')
+        ('import_of_services', 'IMPS'),
+        ('import_of_goods', 'IMPG'), ('b2bur', 'B2BUR')
         ], string="Refund import type")
-    is_ecommerce = fields.Selection([('yes', 'Y'), ('no', 'N')], string="Is E-commerce") #Is pending
-    shipping_bill_number = fields.Char("Shipping Bill Number") #Is Pending
-    shipping_bill_date = fields.Char("Shipping Bill Date") #Is pending
-    port_code = fields.Char("Port Code") #Is pending
-    ecommerce_gstn = fields.Char("E-commerce GSTIN") #Is pending
+    is_ecommerce = fields.Selection([('yes', 'Y'), ('no', 'N')], string="Is E-commerce") #TODO
+    shipping_bill_number = fields.Char("Shipping Bill Number") #TODO
+    shipping_bill_date = fields.Char("Shipping Bill Date") #TODO
+    port_code = fields.Char("Port Code") #TODO
+    ecommerce_gstn = fields.Char("E-commerce GSTIN") #TODO
 
     @api.multi
     def _compute_cess_amount(self):
@@ -175,7 +175,7 @@ class AccountInvoiceGstReport(models.Model):
                     (CASE WHEN pt.type = 'service' THEN 'input_services' ELSE
                         (CASE WHEN pt.is_asset IS True THEN 'capital_goods' ELSE 'inputs' END) END)
                     ELSE 'ineligible' END) AS itc_type,
-                (CASE WHEN ai.gst_export_type = ANY (ARRAY['dewp', 'sewp']) THEN 'wapy'
+                (CASE WHEN ai.gst_export_type = ANY (ARRAY['dewp', 'sewp']) THEN 'wpay'
                     WHEN ai.gst_export_type = ANY (ARRAY['dewop', 'sewop']) THEN 'wopay' ELSE NULL END) AS exp_invoice_type,
                 (CASE WHEN ai.gst_export_type = ANY (ARRAY['dewp', 'sewp']) THEN 'expwp'
                     WHEN ai.gst_export_type = ANY (ARRAY['dewop', 'sewop']) THEN 'expwop' ELSE 'b2cl' END) AS refund_invoice_type,

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record model="ir.ui.view" id="product_template_form_view_inherit_export_gstr">
-        <field name="name">product.template.inherit.export.gstr.form</field>
+    <record id="product_template_form_view_inherit_export_gstr" model="ir.ui.view">
+        <field name="name">product.template.form.inherit.l10n.in.export.gstr</field>
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_form_view"/>
         <field name="arch" type="xml">
