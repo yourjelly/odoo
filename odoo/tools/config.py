@@ -276,6 +276,9 @@ class configmanager(object):
                          help="Use the unaccent function provided by the database when available.")
         group.add_option("--geoip-db", dest="geoip_database", my_default='/usr/share/GeoIP/GeoLiteCity.dat',
                          help="Absolute path to the GeoIP database file.")
+        group.add_option("--sessionless", dest="sessionless", my_default=False,
+                         help="Disable session file saving for requests with a context containing "
+                         "a subset of the specified set of keys.")
         parser.add_option_group(group)
 
         if os.name == 'posix':
@@ -401,7 +404,7 @@ class configmanager(object):
                 'db_port', 'db_template', 'logfile', 'pidfile', 'smtp_port',
                 'email_from', 'smtp_server', 'smtp_user', 'smtp_password',
                 'db_maxconn', 'import_partial', 'addons_path',
-                'syslog', 'without_demo',
+                'syslog', 'without_demo', 'sessionless',
                 'dbfilter', 'log_level', 'log_db',
                 'log_db_level', 'geoip_database', 'dev_mode', 'shell_interface'
         ]
