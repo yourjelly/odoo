@@ -8,6 +8,7 @@ from odoo.tools.safe_eval import safe_eval
 
 class AccountAdvancesPaymentReport(models.Model):
 
+    _inherit = "generic.account.gst.report"
     _name = "account.advances.payment.report"
     _description = "Advances Payment Analysis"
     _auto = False
@@ -16,44 +17,29 @@ class AccountAdvancesPaymentReport(models.Model):
     payment_month = fields.Char('Payment Month')
     payment_ids = fields.Char('Payment ids')
     place_of_supply = fields.Char("Place of supply")
-    payment_amount = fields.Float(string="Payment Amount")
-    amount = fields.Float(compute="_compute_amount" ,string="Advance Payment Amount")
+    payment_amount = fields.Float(string="Payment Amount", digits= (16,2))
+    amount = fields.Float(compute="_compute_amount" ,string="Advance Payment Amount", digits= (16,2))
     tax_rate = fields.Float(compute="_compute_tax_rate", string="Tax rate")
     company_id = fields.Integer("Company")
     payment_type = fields.Selection([('outbound', 'Send Money'), ('inbound', 'Receive Money')], string='Payment Type')
     supply_type = fields.Selection([('inter_state', 'Inter State'), ('intra_state', 'Intra State')], string="Supply Type")
 
-    def get_default_gst_rate(self):
-        #Give default gst tax rate if Any GST tax select in account setting else return 18(default as per Indian GSTR guidelines).
-        tax_rate_count = 18
-        IrDefault = self.env['ir.default'].sudo()
-        taxes_id = IrDefault.get('product.template', "taxes_id", company_id = self.env.user.company_id.id)
-        if taxes_id:
-            sale_tax = self.env['account.tax'].browse(taxes_id)
-            if sale_tax.amount_type == 'group':
-                tax_rate_count = sum(sale_tax.children_tax_ids.mapped('amount'))
-            else:
-                tax_rate_count = sale_tax.amount
-        return tax_rate_count
-
     def _compute_amount(self):
         for record in self:
             amount = record.payment_amount
             for payment in  self.env['account.payment'].browse(safe_eval(record.payment_ids)):
-                for invoice_id in payment.invoice_ids.filtered(lambda i: i.date_invoice <= payment.payment_date):
-                    payment_move_lines  = invoice_id.payment_move_line_ids
-                    if  payment.id in payment_move_lines.mapped('payment_id').ids:
-                        if record.payment_type == 'inbound':
-                            amount -= sum([p.amount for p in payment_move_lines.matched_debit_ids if p.debit_move_id in invoice_id.move_id.line_ids])
-                        if record.payment_type == 'outbound':
-                            amount -= sum([p.amount for p in payment_move_lines.matched_credit_ids if p.credit_move_id in invoice_id.move_id.line_ids])
+                for invoice in payment.invoice_ids.filtered(lambda i: i.date_invoice <= payment.payment_date):
+                    amount -= self._get_related_payment(invoice, payment)
             record.amount = amount
 
     @api.multi
     def _compute_tax_rate(self):
         tax_rate_count = self.get_default_gst_rate()
+        default_sale_gst_rate = self._get_default_gst_rate('sale')
+        default_purchase_gst_rate = self._get_default_gst_rate('purchase')
         for record in self:
-            record.tax_rate = tax_rate_count
+            default_sale_gst_rate = self._get_default_gst_rate('sale')
+            record.tax_rate = record.supply_type == 'inbound' and default_sale_gst_rate or record.supply_type == 'outbound' and default_purchase_gst_rate
 
     @api.model_cr
     def init(self):
@@ -108,16 +94,11 @@ class AccountAdvancesPaymentReport(models.Model):
 
 class AccountAdvancesAdjustmentsReport(models.Model):
 
+    _inherit = "generic.account.gst.report"
     _name = "account.advances.adjustments.report"
     _description = "Advances Payment Adjustments Analysis"
     _auto = False
     _rec_name = 'place_of_supply'
-
-    @api.multi
-    def _compute_tax_rate(self):
-        tax_rate_count = self.env['account.advances.payment.report'].get_default_gst_rate()
-        for record in self:
-            record.tax_rate = tax_rate_count
 
     place_of_supply = fields.Char("Place of supply")
     payment_ids = fields.Char('Payment ids')
@@ -128,17 +109,20 @@ class AccountAdvancesAdjustmentsReport(models.Model):
     payment_type = fields.Selection([('outbound', 'Send Money'), ('inbound', 'Receive Money')], string='Payment Type')
     supply_type = fields.Selection([('inter_state', 'Inter State'), ('intra_state', 'Intra State')], string="Supply Type")
 
+    @api.multi
+    def _compute_tax_rate(self):
+        default_sale_gst_rate = self._get_default_gst_rate('sale')
+        default_purchase_gst_rate = self._get_default_gst_rate('purchase')
+        for record in self:
+            record.tax_rate = record.supply_type == 'inbound' and default_sale_gst_rate or record.supply_type == 'outbound' and default_purchase_gst_rate
+
+    @api.multi
     def _compute_invoice_payment(self):
         for record in self:
             invoice_payment = 0
             for payment in  self.env['account.payment'].browse(safe_eval(record.payment_ids)):
-                for invoice_id in payment.invoice_ids:
-                    payment_move_lines  = invoice_id.payment_move_line_ids
-                    if  payment.id in payment_move_lines.mapped('payment_id').ids:
-                        if record.payment_type == 'inbound':
-                            invoice_payment += sum([p.amount for p in payment_move_lines.matched_debit_ids if p.debit_move_id in invoice_id.move_id.line_ids])
-                        if record.payment_type == 'outbound':
-                            invoice_payment += sum([p.amount for p in payment_move_lines.matched_credit_ids if p.credit_move_id in invoice_id.move_id.line_ids])
+                for invoice in payment.invoice_ids:
+                    invoice_payment += self._get_related_payment(invoice, payment)
             record.invoice_payment = invoice_payment
 
 

@@ -7,6 +7,8 @@ from odoo.tools.safe_eval import safe_eval
 
 
 class AccountInvoiceGstReport(models.Model):
+
+    _inherit = "generic.account.gst.report"
     _name = "account.invoice.gst.report"
     _description = "Invoices Statistics"
     _auto = False
@@ -14,23 +16,11 @@ class AccountInvoiceGstReport(models.Model):
     @api.multi
     def _compute_cess_amount(self):
         AccountInvoiceLine = self.env['account.invoice.line']
-        cess_group = self.env.ref('l10n_in.cess_group', False)
-        AccountTax = self.env['account.tax']
         for record in self.filtered(lambda r: r.invoice_line_ids):
-            cess_amount_count = 0
-            itc_cess_amount_count = 0
             account_invoice_lines = AccountInvoiceLine.browse(safe_eval(record.invoice_line_ids))
-            for account_invoice_line in account_invoice_lines:
-                price_unit = account_invoice_line.price_unit * (1 - (account_invoice_line.discount or 0.0) / 100.0)
-                tax_lines = account_invoice_line.invoice_line_tax_ids.compute_all(price_unit, account_invoice_line.invoice_id.currency_id,
-                    account_invoice_line.quantity, account_invoice_line.product_id, account_invoice_line.invoice_id.partner_id)['taxes']
-                for tax_line in tax_lines:
-                    tax = AccountTax.browse(tax_line['id'])
-                    if cess_group and cess_group.id == tax.tax_group_id.id:
-                        cess_amount_count += tax_line.get('amount')
-                        itc_cess_amount_count += account_invoice_line.is_eligible_for_itc and tax_line.get('amount') or 0
-            record.cess_amount = cess_amount_count
-            record.itc_cess_amount = itc_cess_amount_count
+            cess_amount = self._get_cess_amount(account_invoice_lines)
+            record.cess_amount = cess_amount.get('cess_amount')
+            record.itc_cess_amount = cess_amount.get('itc_cess_amount')
 
     @api.multi
     def _get_all_gst_amount(self):
@@ -53,16 +43,16 @@ class AccountInvoiceGstReport(models.Model):
     invoice_date = fields.Char("Date")
     invoice_month = fields.Char("Invoice Month")
     invoice_number = fields.Char("Invoice Number")
-    partner_name = fields.Char("Parnter name")
+    partner_name = fields.Char("Partner name")
     place_of_supply = fields.Char("Place of Supply")
-    partner_gstn = fields.Char("Parnter GSTN")
-    price_total = fields.Float('Total Without Tax')
+    partner_gstn = fields.Char("Partner GSTN")
+    price_total = fields.Float('Total Without Tax', digits= (16,2))
     tax_rate = fields.Float("Rate")
     is_reverse_charge = fields.Char("Reverse Charge")
     refund_reason = fields.Char("Refund Reason")
     refund_invoice_number = fields.Char("Refund Invoice number")
     refund_invoice_date = fields.Char("Refund Invoice Date")
-    invoice_total = fields.Float("Invoice Total")
+    invoice_total = fields.Float("Invoice Total", digits= (16,2))
     tax_group_id = fields.Integer("Tax group")
     is_pre_gst = fields.Selection([('yes', 'Y'), ('no', 'N')], string="Is Pre GST")
     exp_invoice_type = fields.Selection([('wpay','WPAY'), ('wopay','WOPAY')], string="Export Type")
@@ -91,15 +81,15 @@ class AccountInvoiceGstReport(models.Model):
         ('import_of_services','IMPS'),
         ('import_of_goods','IMPG'), ('b2bur', 'B2BUR')
         ], string="Refund import type")
-    cess_amount = fields.Float(compute="_compute_cess_amount", string="Cess Amount", digits=0)
-    igst_amount = fields.Float(compute="_get_all_gst_amount", string="IGST amount")
-    cgst_amount = fields.Float(compute="_get_all_gst_amount", string="CGST amount")
-    sgst_amount = fields.Float(compute="_get_all_gst_amount", string="SGST amount")
-    itc_cess_amount = fields.Float(compute="_compute_cess_amount", string="ITC Cess Amount", digits=0)
-    itc_price_total = fields.Float(string="ITC price total", digits=0)
-    itc_igst_amount = fields.Float(compute="_get_all_gst_amount", string="ITC IGST amount")
-    itc_cgst_amount = fields.Float(compute="_get_all_gst_amount", string="ITC CGST amount")
-    itc_sgst_amount = fields.Float(compute="_get_all_gst_amount", string="ITC SGST amount")
+    cess_amount = fields.Float(compute="_compute_cess_amount", string="Cess Amount", digits= (16,2))
+    igst_amount = fields.Float(compute="_get_all_gst_amount", string="IGST amount", digits= (16,2))
+    cgst_amount = fields.Float(compute="_get_all_gst_amount", string="CGST amount", digits= (16,2))
+    sgst_amount = fields.Float(compute="_get_all_gst_amount", string="SGST amount", digits= (16,2))
+    itc_cess_amount = fields.Float(compute="_compute_cess_amount", string="ITC Cess Amount", digits= (16,2))
+    itc_price_total = fields.Float(string="ITC price total", digits= (16,2))
+    itc_igst_amount = fields.Float(compute="_get_all_gst_amount", string="ITC IGST amount", digits= (16,2))
+    itc_cgst_amount = fields.Float(compute="_get_all_gst_amount", string="ITC CGST amount", digits= (16,2))
+    itc_sgst_amount = fields.Float(compute="_get_all_gst_amount", string="ITC SGST amount", digits= (16,2))
     shipping_bill_number = fields.Char("Shipping Bill Number") #Is Pending
     shipping_bill_date = fields.Char("Shipping Bill Date") #Is pending
     port_code = fields.Char("Port Code") #Is pending
@@ -233,7 +223,7 @@ class AccountInvoiceGstReport(models.Model):
                     GROUP BY atax.id, a_invoice_line_id, atax.amount_type, atax.tax_group_id)
                 AS taxmin ON taxmin.a_invoice_line_id=ail.id
                 where ai.state = ANY (ARRAY['open', 'paid']) and taxmin.tax_group_id = ANY (ARRAY[%s, %s, %s])
-        """%tuple(self.env['account.invoice'].get_tax_group_ids_query().values())
+        """%tuple(self._get_tax_group_ids().values())
         return from_str
 
     def _sub_group_by(self):

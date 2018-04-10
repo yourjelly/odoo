@@ -6,6 +6,8 @@ from odoo import models, fields, api
 
 
 class ExemptedGstReport(models.Model):
+
+    _inherit = "generic.account.gst.report"
     _name = "exempted.gst.report"
     _description = "Exempted gst supplied Statistics"
     _auto = False
@@ -16,20 +18,20 @@ class ExemptedGstReport(models.Model):
                                     ('intrab2c', 'Intra-State supplies to unregistered persons')],"OUT Type of supply")
     in_supply_type = fields.Selection([('intr', 'Inter-State supplies'),
                                     ('intra', 'Intra-State supplies')], "IN Type of supply")
-    composition_amount = fields.Float('Composition amount')
-    nil_rated_amount = fields.Float("Nil rated supplies")
-    exempted_amount = fields.Float("Exempted")
-    non_gst_supplies = fields.Float("Non GST Supplies")
+    composition_amount = fields.Float('Composition amount', digits= (16,2))
+    nil_rated_amount = fields.Float("Nil rated supplies", digits= (16,2))
+    exempted_amount = fields.Float("Exempted", digits= (16,2))
+    non_gst_supplies = fields.Float("Non GST Supplies", digits= (16,2))
     invoice_month = fields.Char("Invoice Month")
     company_id = fields.Integer("Company")
     type = fields.Selection([('out_invoice', 'Customer Invoice'), ('in_invoice', 'Vendor Bill')], readonly=True)
 
     @api.model_cr
     def init(self):
-        tax_group_ids_query = self.env['account.invoice'].get_tax_group_ids_query()
+        tax_group_ids = self._get_tax_group_ids()
         tools.drop_view_if_exists(self.env.cr, self._table)
         self._cr.execute("""
-            CREATE OR REPLACE VIEW %s AS (
+            CREATE OR REPLACE VIEW {table} AS (
                 SELECT concat(sub.in_supply_type, '-', sub.out_supply_type, '-', sub.invoice_month, '-', sub.company_id) as id,
                     sub.out_supply_type,
                     sub.in_supply_type,
@@ -46,7 +48,15 @@ class ExemptedGstReport(models.Model):
                             ailtax.invoice_month,
                             ailtax.company_id,
                             ailtax.type,
-                            CASE WHEN ailtax.composition
+                           CASE WHEN ailtax.composition and ARRAY[NULL]::int[] = ailtax.tax_group_id
+                                THEN ailtax.price_total
+                                WHEN ailtax.composition and not ARRAY[{igst_group}, {cgst_group}, {sgst_group}]::int[] && ailtax.tax_group_id AND not ARRAY[NULL]::int[] = ailtax.tax_group_id
+                                THEN ailtax.price_total
+                                WHEN ailtax.composition and ARRAY[
+                                    (SELECT res_id FROM ir_model_data WHERE module='{tax_module}' AND name=concat(ailtax.company_id,'_','{igst_sale_0}')),
+                                    (SELECT res_id FROM ir_model_data WHERE module='{tax_module}' AND name=concat(ailtax.company_id,'_','{gst_sale_0}')),
+                                    (SELECT res_id FROM ir_model_data WHERE module='{tax_module}' AND name=concat(ailtax.company_id,'_','{igst_purchase_0}')),
+                                    (SELECT res_id FROM ir_model_data WHERE module='{tax_module}' AND name=concat(ailtax.company_id,'_','{gst_purchase_0}'))]::int[] && ailtax.tax_ids
                                 THEN ailtax.price_total
                                 ELSE 0
                             END as composition_amount,
@@ -55,16 +65,16 @@ class ExemptedGstReport(models.Model):
                                 ELSE 0
                             END AS exempted_amount,
 
-                            CASE WHEN not ARRAY[%s, %s, %s]::int[] && ailtax.tax_group_id AND not ARRAY[NULL]::int[] = ailtax.tax_group_id
+                            CASE WHEN not ARRAY[{igst_group}, {cgst_group}, {sgst_group}]::int[] && ailtax.tax_group_id AND not ARRAY[NULL]::int[] = ailtax.tax_group_id
                                 THEN ailtax.price_total
                                 ELSE 0
                             END AS non_gst_supplies,
 
                             CASE WHEN ARRAY[
-                                    (SELECT res_id FROM ir_model_data WHERE module='%s' AND name=concat(ailtax.company_id,'_','%s')),
-                                    (SELECT res_id FROM ir_model_data WHERE module='%s' AND name=concat(ailtax.company_id,'_','%s')),
-                                    (SELECT res_id FROM ir_model_data WHERE module='%s' AND name=concat(ailtax.company_id,'_','%s')),
-                                    (SELECT res_id FROM ir_model_data WHERE module='%s' AND name=concat(ailtax.company_id,'_','%s'))]::int[] && ailtax.tax_ids
+                                    (SELECT res_id FROM ir_model_data WHERE module='{tax_module}' AND name=concat(ailtax.company_id,'_','{igst_sale_0}')),
+                                    (SELECT res_id FROM ir_model_data WHERE module='{tax_module}' AND name=concat(ailtax.company_id,'_','{gst_sale_0}')),
+                                    (SELECT res_id FROM ir_model_data WHERE module='{tax_module}' AND name=concat(ailtax.company_id,'_','{igst_purchase_0}')),
+                                    (SELECT res_id FROM ir_model_data WHERE module='{tax_module}' AND name=concat(ailtax.company_id,'_','{gst_purchase_0}'))]::int[] && ailtax.tax_ids
                                 THEN ailtax.price_total
                                 ELSE 0
                             END as nil_rated_amount
@@ -119,11 +129,13 @@ class ExemptedGstReport(models.Model):
                                     ai.date_invoice, p.state_id,
                                     p.vat, ai.type, p.composition) AS ailtax
                 ) AS sub
-                GROUP BY sub.in_supply_type, sub.out_supply_type, sub.company_id, sub.invoice_month, sub.type)""" %(self._table,
-                    tax_group_ids_query.get('igst_group'),
-                    tax_group_ids_query.get('cgst_group'),
-                    tax_group_ids_query.get('sgst_group'),
-                    'l10n_in', 'igst_sale_0',
-                    'l10n_in', 'gst_sale_0',
-                    'l10n_in', 'igst_purchase_0',
-                    'l10n_in', 'gst_purchase_0'))
+                GROUP BY sub.in_supply_type, sub.out_supply_type, sub.company_id, sub.invoice_month, sub.type)""".format(table = self._table,
+                    igst_group = tax_group_ids.get('igst_group'),
+                    cgst_group = tax_group_ids.get('cgst_group'),
+                    sgst_group = tax_group_ids.get('sgst_group'),
+                    tax_module = 'l10n_in',
+                    igst_sale_0 = 'igst_sale_0',
+                    gst_sale_0 = 'gst_sale_0',
+                    igst_purchase_0 = 'igst_purchase_0',
+                    gst_purchase_0 = 'gst_purchase_0'
+                    ))

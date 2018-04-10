@@ -24,7 +24,7 @@ class AccountInvoice(models.Model):
     @api.multi
     def get_taxes_values(self):
         if not self.reverse_charge:
-            super(AccountInvoice, self).get_taxes_values()
+            return super(AccountInvoice, self).get_taxes_values()
         return {}
 
     @api.onchange('reverse_charge')
@@ -37,19 +37,6 @@ class AccountInvoice(models.Model):
             self.fiscal_position_id = self.env.ref('l10n_in.fiscal_position_in_export').id
         else:
             self.fiscal_position_id = False
-
-    @api.model
-    def _get_model_data_query(self, module, name):
-        return "(SELECT res_id FROM ir_model_data WHERE module='%s' AND name='%s')"%(module, name)
-
-    @api.model
-    def get_tax_group_ids_query(self):
-        sgst_group = self._get_model_data_query('l10n_in', 'sgst_group')
-        cgst_group = self._get_model_data_query('l10n_in', 'cgst_group')
-        igst_group = self._get_model_data_query('l10n_in', 'igst_group')
-        return {'sgst_group': sgst_group, 'cgst_group': cgst_group, 'igst_group': igst_group}
-
-
 
 class AccountInvoiceLine(models.Model):
 
