@@ -3,7 +3,9 @@
 
 import re
 import logging
-from odoo import api, fields, models
+import os
+import odoo.tools as tools
+from odoo import api, fields, models, modules
 from psycopg2 import IntegrityError
 from odoo.tools.translate import _
 _logger = logging.getLogger(__name__)
@@ -79,7 +81,21 @@ class Country(models.Model):
     @api.multi
     @api.onchange('active')
     def _onchange_active(self):
-        print('\n\n\n\n\n\n\n\n\n Hello World \n\n\n\n\n\n')
+
+        def _load_data(cr, module_name, idref, mode, kind, filenames):
+            for filename in filenames:
+                _logger.info("loading %s", filename)
+                tools.convert_file(cr, module_name, filename, idref, mode, False, kind)
+
+        if self.active:
+            extra_path = modules.module.get_resource_path('base', 'l10n_extra', ''.join(['l10n_', self.code.lower()]))
+
+            if extra_path:
+                filenames = [os.path.join(extra_path, f) for f in os.listdir(extra_path)]
+                if filenames:
+                    _load_data(self.env.cr, 'base', {}, 'init', 'data', filenames)
+
+
         country = self.with_context(active_test=False).search([('code', '=', self.code)])
         country.state_ids.write({'active': self.active})
 
