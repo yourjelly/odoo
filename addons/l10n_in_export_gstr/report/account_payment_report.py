@@ -32,7 +32,6 @@ class AccountAdvancesPaymentReport(models.Model):
                     amount -= self._get_related_payment(invoice, payment)
             record.amount = amount
 
-    @api.multi
     def _compute_tax_rate(self):
         tax_rate_count = self.get_default_gst_rate()
         default_sale_gst_rate = self._get_default_gst_rate('sale')

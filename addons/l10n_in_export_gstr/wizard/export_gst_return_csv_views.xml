@@ -2,7 +2,7 @@
 <odoo>
 
     <record id="export_gst_return_csv_view_form" model="ir.ui.view">
-        <field name="name">Export Gstr</field>
+        <field name="name">export.gst.return.csv.form</field>
         <field name="model">export.gst.return.csv</field>
         <field name="arch" type="xml">
         <form string="Export GSTR-1 xls">

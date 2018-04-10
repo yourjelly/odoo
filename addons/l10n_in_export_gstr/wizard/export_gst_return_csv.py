@@ -54,18 +54,13 @@ class ExportGstReturnCsv(models.TransientModel):
                                ('11', 'November'), ('12', 'December')], string='Tax Month', required=True, default=_default_get_month)
     year = fields.Selection('_get_year', string="Financial Year", required=True, default=_default_get_year)
 
-    #gst_return_section_id = fields.Many2one('gst.return.section', string='Section', required=True)
     export_summary = fields.Selection('_get_export_summary_type', string="Export Summary For", default='b2b')
-
-    @api.onchange('gst_return_type')
-    def onchange_gst_return_type(self):
-        self.gst_return_section_id = False
 
     @api.multi
     def export_gstr(self):
         self.ensure_one()
-        if (self.env.uid == SUPERUSER_ID) and not (self.env.user.company_id.state_id or self.env.user.company_id.vat):
-            template = self.env.ref('l10n_in_export_gstr.view_company_gst_report_form')
+        template = self.env.ref('l10n_in_export_gstr.view_company_form_inherit_export_gstr', False)
+        if (self.env.uid == SUPERUSER_ID and template) and not (self.env.user.company_id.state_id or self.env.user.company_id.vat):
             return {
                 'name': _('Choose Your State'),
                 'type': 'ir.actions.act_window',

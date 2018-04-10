@@ -8,10 +8,69 @@ from odoo.tools.safe_eval import safe_eval
 
 class AccountInvoiceGstReport(models.Model):
 
-    _inherit = "generic.account.gst.report"
     _name = "account.invoice.gst.report"
+    _inherit = "generic.account.gst.report"
     _description = "Invoices Statistics"
     _auto = False
+    _order = 'invoice_date desc'
+
+    invoice_line_ids = fields.Char("invoice Line ids")
+    company_id = fields.Integer("Company")
+    invoice_date = fields.Char("Date")
+    invoice_month = fields.Char("Invoice Month")
+    invoice_number = fields.Char("Invoice Number")
+    partner_name = fields.Char("Partner name")
+    place_of_supply = fields.Char("Place of Supply")
+    partner_gstn = fields.Char("Partner GSTN")
+    price_total = fields.Float('Total Without Tax', digits= (16,2))
+    tax_rate = fields.Float("Rate")
+    is_reverse_charge = fields.Char("Reverse Charge")
+    invoice_total = fields.Float("Invoice Total", digits= (16,2))
+    tax_group_id = fields.Integer("Tax group")
+    is_pre_gst = fields.Selection([('yes', 'Y'), ('no', 'N')], string="Is Pre GST")
+    exp_invoice_type = fields.Selection([('wpay','WPAY'), ('wopay','WOPAY')], string="Export Type")
+    supply_type = fields.Selection([('inter_state', 'Inter State'), ('intra_state', 'Intra State')], string="Supply Type")
+    import_product_type = fields.Selection([('import_of_services', 'Import of Services'), ('import_of_goods', 'Import of Goods')], string="Import Product Type")
+    gst_import_type = fields.Selection([('import', 'Imports'), ('sez_import', 'Received from SEZ')], string="Import Type")
+    type = fields.Selection([
+        ('out_invoice', 'Customer Invoice'), ('in_invoice', 'Vendor Bill'),
+        ('out_refund', 'Customer Credit Note'), ('in_refund', 'Vendor Credit Note'),
+        ], readonly=True)
+    state = fields.Selection([
+        ('draft', 'Draft'), ('open', 'Open'),
+        ('paid', 'Paid'), ('cancel', 'Cancelled')
+        ], string='Invoice Status', readonly=True)
+    b2b_invoice_type = fields.Selection([
+        ('regular','Regular'),('deemed_exp','Deemed Exp'),
+        ('sewp','SEZ supplies with payment'), ('sewop','SEZ supplies without payment')
+        ], string="GST Invoice Type")
+    itc_type = fields.Selection([
+        ('ineligible', 'Ineligible'), ('inputs', 'Inputs'),
+        ('capital_goods', 'Capital goods'), ('input_services', 'Input services'),
+        ], string="ITC Type")
+    cess_amount = fields.Float(compute="_compute_cess_amount", string="Cess Amount", digits= (16,2))
+    igst_amount = fields.Float(compute="_get_all_gst_amount", string="IGST amount", digits= (16,2))
+    cgst_amount = fields.Float(compute="_get_all_gst_amount", string="CGST amount", digits= (16,2))
+    sgst_amount = fields.Float(compute="_get_all_gst_amount", string="SGST amount", digits= (16,2))
+    itc_cess_amount = fields.Float(compute="_compute_cess_amount", string="ITC Cess Amount", digits= (16,2))
+    itc_price_total = fields.Float(string="ITC price total", digits= (16,2))
+    itc_igst_amount = fields.Float(compute="_get_all_gst_amount", string="ITC IGST amount", digits= (16,2))
+    itc_cgst_amount = fields.Float(compute="_get_all_gst_amount", string="ITC CGST amount", digits= (16,2))
+    itc_sgst_amount = fields.Float(compute="_get_all_gst_amount", string="ITC SGST amount", digits= (16,2))
+    refund_reason = fields.Char("Refund Reason")
+    refund_invoice_number = fields.Char("Refund Invoice number")
+    refund_invoice_date = fields.Char("Refund Invoice Date")
+    refund_invoice_type = fields.Selection([('b2cl','B2CL'), ('expwp','EXPWP'), ('expwop','EXPWOP')], string="UR Type")
+    refund_document_type = fields.Selection([('credit_note', 'C'), ('debit_note', 'D'), ('refund_note', 'R')], string="Refund Document Type")
+    refund_import_type = fields.Selection([
+        ('import_of_services','IMPS'),
+        ('import_of_goods','IMPG'), ('b2bur', 'B2BUR')
+        ], string="Refund import type")
+    is_ecommerce = fields.Selection([('yes', 'Y'), ('no', 'N')], string="Is E-commerce") #Is pending
+    shipping_bill_number = fields.Char("Shipping Bill Number") #Is Pending
+    shipping_bill_date = fields.Char("Shipping Bill Date") #Is pending
+    port_code = fields.Char("Port Code") #Is pending
+    ecommerce_gstn = fields.Char("E-commerce GSTIN") #Is pending
 
     @api.multi
     def _compute_cess_amount(self):
@@ -37,67 +96,6 @@ class AccountInvoiceGstReport(models.Model):
                 record.sgst_amount = gst_tax_amount / 2
                 record.itc_cgst_amount = itc_gst_tax_amount / 2
                 record.itc_sgst_amount = itc_gst_tax_amount / 2
-
-    invoice_line_ids = fields.Char("invoice Line ids")
-    company_id = fields.Integer("Company")
-    invoice_date = fields.Char("Date")
-    invoice_month = fields.Char("Invoice Month")
-    invoice_number = fields.Char("Invoice Number")
-    partner_name = fields.Char("Partner name")
-    place_of_supply = fields.Char("Place of Supply")
-    partner_gstn = fields.Char("Partner GSTN")
-    price_total = fields.Float('Total Without Tax', digits= (16,2))
-    tax_rate = fields.Float("Rate")
-    is_reverse_charge = fields.Char("Reverse Charge")
-    refund_reason = fields.Char("Refund Reason")
-    refund_invoice_number = fields.Char("Refund Invoice number")
-    refund_invoice_date = fields.Char("Refund Invoice Date")
-    invoice_total = fields.Float("Invoice Total", digits= (16,2))
-    tax_group_id = fields.Integer("Tax group")
-    is_pre_gst = fields.Selection([('yes', 'Y'), ('no', 'N')], string="Is Pre GST")
-    exp_invoice_type = fields.Selection([('wpay','WPAY'), ('wopay','WOPAY')], string="Export Type")
-    supply_type = fields.Selection([('inter_state', 'Inter State'), ('intra_state', 'Intra State')], string="Supply Type")
-    refund_invoice_type = fields.Selection([('b2cl','B2CL'), ('expwp','EXPWP'), ('expwop','EXPWOP')], string="UR Type")
-    refund_document_type = fields.Selection([('credit_note', 'C'), ('debit_note', 'D'), ('refund_note', 'R')], string="Refund Document Type")
-    import_product_type = fields.Selection([('import_of_services', 'Import of Services'), ('import_of_goods', 'Import of Goods')], string="Import Product Type")
-    gst_import_type = fields.Selection([('import', 'Imports'), ('sez_import', 'Received from SEZ')], string="Import Type")
-    type = fields.Selection([
-        ('out_invoice', 'Customer Invoice'), ('in_invoice', 'Vendor Bill'),
-        ('out_refund', 'Customer Credit Note'), ('in_refund', 'Vendor Credit Note'),
-        ], readonly=True)
-    state = fields.Selection([
-        ('draft', 'Draft'), ('open', 'Open'),
-        ('paid', 'Paid'), ('cancel', 'Cancelled')
-        ], string='Invoice Status', readonly=True)
-    b2b_invoice_type = fields.Selection([
-        ('regular','Regular'),('deemed_exp','Deemed Exp'),
-        ('sewp','SEZ supplies with payment'), ('sewop','SEZ supplies without payment')
-        ], string="GST Invoice Type")
-    itc_type = fields.Selection([
-        ('ineligible', 'Ineligible'), ('inputs', 'Inputs'),
-        ('capital_goods', 'Capital goods'), ('input_services', 'Input services'),
-        ], string="ITC Type")
-    refund_import_type = fields.Selection([
-        ('import_of_services','IMPS'),
-        ('import_of_goods','IMPG'), ('b2bur', 'B2BUR')
-        ], string="Refund import type")
-    cess_amount = fields.Float(compute="_compute_cess_amount", string="Cess Amount", digits= (16,2))
-    igst_amount = fields.Float(compute="_get_all_gst_amount", string="IGST amount", digits= (16,2))
-    cgst_amount = fields.Float(compute="_get_all_gst_amount", string="CGST amount", digits= (16,2))
-    sgst_amount = fields.Float(compute="_get_all_gst_amount", string="SGST amount", digits= (16,2))
-    itc_cess_amount = fields.Float(compute="_compute_cess_amount", string="ITC Cess Amount", digits= (16,2))
-    itc_price_total = fields.Float(string="ITC price total", digits= (16,2))
-    itc_igst_amount = fields.Float(compute="_get_all_gst_amount", string="ITC IGST amount", digits= (16,2))
-    itc_cgst_amount = fields.Float(compute="_get_all_gst_amount", string="ITC CGST amount", digits= (16,2))
-    itc_sgst_amount = fields.Float(compute="_get_all_gst_amount", string="ITC SGST amount", digits= (16,2))
-    shipping_bill_number = fields.Char("Shipping Bill Number") #Is Pending
-    shipping_bill_date = fields.Char("Shipping Bill Date") #Is pending
-    port_code = fields.Char("Port Code") #Is pending
-    ecommerce_gstn = fields.Char("E-commerce GSTIN") #Is pending
-    is_ecommerce = fields.Selection([('yes', 'Y'), ('no', 'N')], string="Is E-commerce") #Is pending
-
-
-    _order = 'invoice_date desc'
 
     def _select(self):
         select_str = """
@@ -165,8 +163,8 @@ class AccountInvoiceGstReport(models.Model):
                     WHEN ai.type = ANY (ARRAY['in_invoice', 'in_refund']) and cps.l10n_in_tin IS NOT NULL THEN concat(cps.l10n_in_tin,'-',cps.name)
                     ELSE NULL END) AS place_of_supply,
                 (CASE WHEN ai.type = 'in_refund' THEN 'debit_note' WHEN ai.type = 'out_refund' THEN 'credit_note' ELSE '' END) AS refund_document_type,
-                (CASE WHEN ai.gst_exports_type = ANY (ARRAY['dewp', 'dewop']) THEN 'de'
-                    ELSE (CASE WHEN ai.gst_exports_type IS NULL THEN 'regular' ELSE ai.gst_exports_type END)
+                (CASE WHEN ai.gst_export_type = ANY (ARRAY['dewp', 'dewop']) THEN 'de'
+                    ELSE (CASE WHEN ai.gst_export_type IS NULL THEN 'regular' ELSE ai.gst_export_type END)
                     END) AS b2b_invoice_type,
                 (CASE WHEN ai.gst_import_type IS NOT NULL
                     THEN (CASE WHEN pt.type = 'service' THEN 'import_of_services' ELSE 'import_of_goods' END)
@@ -177,10 +175,10 @@ class AccountInvoiceGstReport(models.Model):
                     (CASE WHEN pt.type = 'service' THEN 'input_services' ELSE
                         (CASE WHEN pt.is_asset IS True THEN 'capital_goods' ELSE 'inputs' END) END)
                     ELSE 'ineligible' END) AS itc_type,
-                (CASE WHEN ai.gst_exports_type = ANY (ARRAY['dewp', 'sewp']) THEN 'wapy'
-                    WHEN ai.gst_exports_type = ANY (ARRAY['dewop', 'sewop']) THEN 'wopay' ELSE NULL END) AS exp_invoice_type,
-                (CASE WHEN ai.gst_exports_type = ANY (ARRAY['dewp', 'sewp']) THEN 'expwp'
-                    WHEN ai.gst_exports_type = ANY (ARRAY['dewop', 'sewop']) THEN 'expwop' ELSE 'b2cl' END) AS refund_invoice_type,
+                (CASE WHEN ai.gst_export_type = ANY (ARRAY['dewp', 'sewp']) THEN 'wapy'
+                    WHEN ai.gst_export_type = ANY (ARRAY['dewop', 'sewop']) THEN 'wopay' ELSE NULL END) AS exp_invoice_type,
+                (CASE WHEN ai.gst_export_type = ANY (ARRAY['dewp', 'sewp']) THEN 'expwp'
+                    WHEN ai.gst_export_type = ANY (ARRAY['dewop', 'sewop']) THEN 'expwop' ELSE 'b2cl' END) AS refund_invoice_type,
                 (CASE WHEN ai.type = ANY (ARRAY['in_refund', 'out_refund']) THEN ai.amount_total_company_signed * -1
                     ELSE ai.amount_total_company_signed END) AS invoice_total,
                 SUM(CASE WHEN ai.type = ANY (ARRAY['in_refund', 'out_refund']) THEN ail.price_subtotal_signed * -1
@@ -244,7 +242,7 @@ class AccountInvoiceGstReport(models.Model):
                 ai.state,
                 ai.number,
                 ai.amount_total_company_signed,
-                ai.gst_exports_type,
+                ai.gst_export_type,
                 air.number,
                 air.date_invoice,
                 taxmin.tax_group_id,

@@ -4,7 +4,7 @@
 import json
 import uuid
 
-from odoo import http, _
+from odoo import http
 from odoo.http import request
 
 from odoo.addons.web.controllers.main import CSVExport
@@ -37,10 +37,10 @@ class ExportGstr(CSVExport):
         #Get value from account settings
         IrConfig = request.env['ir.config_parameter'].sudo()
         b2cs_amount = IrConfig.get_param('l10n_in.l10n_in_b2cs_max') or 250000
-        domain = [('company_id','in', company_ids), ('invoice_month', '=', str(month_and_year))]
+        domain = [('company_id', 'in', company_ids), ('invoice_month', '=', str(month_and_year))]
         fields = []
         if gst_type == 'b2b':
-            domain += [('place_of_supply', '!=', False), ('type', '=', 'out_invoice'), ('partner_gstn','!=', False)]
+            domain += [('place_of_supply', '!=', False), ('type', '=', 'out_invoice'), ('partner_gstn', '!=', False)]
             fields = [
                 {"name": "partner_gstn", "label": "GSTIN/UIN of Recipient"},
                 {"name": "partner_name", "label": "Receiver Name"},
@@ -199,10 +199,10 @@ class ExportGstr(CSVExport):
 
     def get_gstr2_type_data(self, gst_type, model, company_ids, month_and_year):
         #Give model, Fields and domain by gstr2 type data
-        domain = [('company_id','in', company_ids), ('invoice_month', '=', str(month_and_year))]
+        domain = [('company_id', 'in', company_ids), ('invoice_month', '=', str(month_and_year))]
         fields = []
         if gst_type == 'b2b':
-            domain += [('place_of_supply', '!=', False), ('type', '=', 'in_invoice'), ('partner_gstn','!=', False)]
+            domain += [('place_of_supply', '!=', False), ('type', '=', 'in_invoice'), ('partner_gstn', '!=', False)]
             fields = [
                 {"name": "partner_gstn", "label": "GSTIN of Supplier"},
                 {"name": "invoice_number", "label": "Invoice Number"},
@@ -226,7 +226,7 @@ class ExportGstr(CSVExport):
             ]
 
         if gst_type == 'b2bur':
-            domain += [('place_of_supply', '!=', False), ('type', '=', 'in_invoice'), ('partner_gstn','=', False)]
+            domain += [('place_of_supply', '!=', False), ('type', '=', 'in_invoice'), ('partner_gstn', '=', False)]
             fields = [
                 {"name": "partner_name", "label": "Supplier Name"},
                 {"name": "invoice_number", "label": "Invoice Number"},
@@ -248,7 +248,7 @@ class ExportGstr(CSVExport):
             ]
 
         if gst_type == 'imps':
-            domain += [('import_product_type', '=', 'import_of_services'),('type', '=', 'in_invoice')]
+            domain += [('import_product_type', '=', 'import_of_services'), ('type', '=', 'in_invoice')]
             fields = [
                 {"name": "invoice_number", "label": "Invoice Number of Reg Recipient"},
                 {"name": "invoice_date", "label": "Invoice Date"},
@@ -264,7 +264,7 @@ class ExportGstr(CSVExport):
             ]
 
         if gst_type == 'impg':
-            domain += [('import_product_type', '=', 'import_of_goods'),('type', '=', 'in_invoice')]
+            domain += [('import_product_type', '=', 'import_of_goods'), ('type', '=', 'in_invoice')]
             fields = [
                 {"name": "port_code", "label": "Port Code"},
                 {"name": "shipping_bill_number", "label": "Bill Of Entry Number"},
@@ -282,7 +282,7 @@ class ExportGstr(CSVExport):
             ]
 
         if gst_type == 'cdnr':
-            domain += [('type', '=', 'in_refund'), ('partner_gstn','!=', False)]
+            domain += [('type', '=', 'in_refund'), ('partner_gstn', '!=', False)]
             fields = [
                 {"name": "partner_gstn", "label": "GSTIN of Supplier"},
                 {"name": "invoice_number", "label": "Note/Refund Voucher Number"},
@@ -307,7 +307,7 @@ class ExportGstr(CSVExport):
                 {"name": "itc_cess_amount", "label": "Availed ITC Cess"},
             ]
         if gst_type == 'cdnur':
-            domain += [('type', '=', 'in_refund'), ('partner_gstn','=', False)]
+            domain += [('type', '=', 'in_refund'), ('partner_gstn', '=', False)]
             fields = [
                 {"name": "invoice_number", "label": "Note/Voucher Number"},
                 {"name": "invoice_date", "label": "Note/Voucher date"},
@@ -334,9 +334,12 @@ class ExportGstr(CSVExport):
 
         if gst_type == 'at':
             model = 'account.advances.payment.report'
-            domain = [('place_of_supply', '!=', False), ('payment_month','=', str(month_and_year)),
+            domain = [
+                ('place_of_supply', '!=', False),
+                ('payment_month', '=', str(month_and_year)),
                 ('company_id','in', company_ids),
-                ('payment_type','=', 'outbound')]
+                ('payment_type','=', 'outbound')
+                ]
             fields = [
                 {"name": "place_of_supply", "label": "Place Of Supply"},
                 {"name": "supply_type", "label": "Supply Type"},
@@ -346,9 +349,12 @@ class ExportGstr(CSVExport):
 
         if gst_type == 'atadj':
             model = 'account.advances.adjustments.report'
-            domain = [('place_of_supply', '!=', False), ('invoice_month', '=', str(month_and_year)),
+            domain = [
+                ('place_of_supply', '!=', False),
+                ('invoice_month', '=', str(month_and_year)),
                 ('company_id','in', company_ids),
-                ('payment_type','=', 'outbound')]
+                ('payment_type','=', 'outbound')
+                ]
             fields = [
                 {"name": "place_of_supply", "label": "Place Of Supply"},
                 {"name": "supply_type", "label": "Supply Type"},
@@ -358,7 +364,11 @@ class ExportGstr(CSVExport):
 
         if gst_type == 'exempt':
             model = 'exempted.gst.report'
-            domain = [('invoice_month', '=', month_and_year), ('company_id','in', company_ids), ('type', '=', 'in_invoice')]
+            domain = [
+                ('invoice_month', '=', month_and_year),
+                ('company_id','in', company_ids),
+                ('type', '=', 'in_invoice')
+                ]
             fields = [
                 {"name": "in_supply_type", "label": "Description"},
                 {"name": "composition_amount", "label": "Composition taxable person"},
@@ -369,10 +379,12 @@ class ExportGstr(CSVExport):
 
         if gst_type == 'hsnsum':
             model = 'hsn.gst.report'
-            domain = [('invoice_month', '=', month_and_year),
-                    ('uom_name', '!=', False), '|', ('hsn_code', '!=', False),
-                    ('hsn_description', '!=', False),
-                    ('company_id','in', company_ids), ('type', '=', 'in_invoice')]
+            domain = [
+                ('invoice_month', '=', month_and_year),
+                ('uom_name', '!=', False), '|', ('hsn_code', '!=', False),
+                ('hsn_description', '!=', False),
+                ('company_id','in', company_ids), ('type', '=', 'in_invoice')
+                ]
             fields = [
                 {"name": "hsn_code", "label": "HSN"},
                 {"name": "hsn_description", "label": "Description"},

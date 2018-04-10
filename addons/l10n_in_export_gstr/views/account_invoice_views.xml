@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="account_invoice_form_inherit_l10n_in_export_gstr" model="ir.ui.view">
-        <field name="name">account.invoice.form.inherit.l10n.in.export.gstr</field>
+    <record id="invoice_form_inherit_export_gstr" model="ir.ui.view">
+        <field name="name">account.invoice.inherit.export.gstr.form</field>
         <field name="model">account.invoice</field>
         <field name="inherit_id" ref="account.invoice_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='partner_id']" position="after">
-                <field name="gst_exports_type" attrs="{'invisible':[('type', '!=', 'out_invoice')]}"/>
+                <field name="gst_export_type" attrs="{'invisible':[('type', '!=', 'out_invoice')]}"/>
                 <field name="reverse_charge" attrs="{'invisible':[('type', 'in', ['out_refund','in_refund'])]}"/>
             </xpath>
         </field>
     </record>
 
-    <record id="account_invoice_supplier_form_inherit_l10n_in_export_gstr" model="ir.ui.view">
-        <field name="name">account.invoice.form.inherit.l10n.in.export.gstr</field>
+    <record id="invoice_supplier_form_inherit_export_gstr" model="ir.ui.view">
+        <field name="name">invoice.supplier.form.inherit.export.gstr</field>
         <field name="model">account.invoice</field>
         <field name="inherit_id" ref="account.invoice_supplier_form"/>
         <field name="arch" type="xml">
