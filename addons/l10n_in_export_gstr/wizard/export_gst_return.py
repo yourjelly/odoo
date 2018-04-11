@@ -5,8 +5,8 @@ from odoo import api, fields, models, _
 from odoo import SUPERUSER_ID
 
 
-class ExportGstReturnCsv(models.TransientModel):
-    _name = "export.gst.return.csv"
+class ExportGstReturn(models.TransientModel):
+    _name = "export.gst.return"
     _description = 'Export GSTR'
 
     def _default_get_month(self):
@@ -21,7 +21,7 @@ class ExportGstReturnCsv(models.TransientModel):
         return [('%s'%(current_year+year_count), '%s'%(current_year+year_count)) for year_count in range(-1, 2)]
 
     @api.model
-    def _get_export_summary_type(self):
+    def get_export_summary_type(self):
         if self.env.context.get('default_gst_return_type') == 'gstr2':
             return [('b2b', 'B2B Supplies received'),
                ('b2bur', 'Inward supplies from unregistered Supplier'),
@@ -54,7 +54,7 @@ class ExportGstReturnCsv(models.TransientModel):
                                ('11', 'November'), ('12', 'December')], string='Tax Month', required=True, default=_default_get_month)
     year = fields.Selection('_get_year', string="Financial Year", required=True, default=_default_get_year)
 
-    export_summary = fields.Selection('_get_export_summary_type', string="Export Summary For", default='b2b')
+    export_summary = fields.Selection('get_export_summary_type', string="Export Summary For", default='b2b')
 
     @api.multi
     def export_gstr(self):

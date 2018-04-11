@@ -5,7 +5,7 @@
         <field name="model">account.invoice</field>
         <field name="inherit_id" ref="account.invoice_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='partner_id']" position="after">
+            <xpath expr="//page[@name='other_info']//field[@name='name']" position="after">
                 <field name="gst_export_type" attrs="{'invisible':[('type', '!=', 'out_invoice')]}"/>
                 <field name="reverse_charge" attrs="{'invisible':[('type', 'in', ['out_refund','in_refund'])]}"/>
             </xpath>
@@ -21,7 +21,7 @@
                 <field name="is_eligible_for_itc"/>
                 <field name="itc_percentage" attrs="{'readonly':[('is_eligible_for_itc', '=', False)]}"/>
             </xpath>
-            <xpath expr="//field[@name='partner_id']" position="after">
+            <xpath expr="//page[@name='other_info']//field[@name='name']" position="after">
                 <field name="gst_import_type"/>
                 <field name="reverse_charge" attrs="{'invisible':[('type', 'in', ['out_refund','in_refund'])]}"/>
             </xpath>

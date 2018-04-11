@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="export_gst_return_csv_view_form" model="ir.ui.view">
-        <field name="name">export.gst.return.csv.form</field>
-        <field name="model">export.gst.return.csv</field>
+    <record id="export_gst_return_view_form" model="ir.ui.view">
+        <field name="name">export.gst.return.form</field>
+        <field name="model">export.gst.return</field>
         <field name="arch" type="xml">
         <form string="Export GSTR xls">
             <group>
@@ -32,10 +32,10 @@
         </field>
     </record>
 
-    <record id="export_gstr_one_return_csv_action" model="ir.actions.act_window">
+    <record id="export_gstr_one_return_action" model="ir.actions.act_window">
         <field name="name">Export GSTR-1</field>
         <field name="type">ir.actions.act_window</field>
-        <field name="res_model">export.gst.return.csv</field>
+        <field name="res_model">export.gst.return</field>
         <field name="view_type">form</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
@@ -46,14 +46,14 @@
         name="Export GSTR-1"
         parent="l10n_in.account_reports_in_statements_menu"
         sequence="2"
-        action="export_gstr_one_return_csv_action"
+        action="export_gstr_one_return_action"
         id="menu_export_gstr_one_return_xls"
         />
 
-    <record id="export_gstr_two_return_csv_action" model="ir.actions.act_window">
+    <record id="export_gstr_two_return_action" model="ir.actions.act_window">
         <field name="name">Export GSTR-2</field>
         <field name="type">ir.actions.act_window</field>
-        <field name="res_model">export.gst.return.csv</field>
+        <field name="res_model">export.gst.return</field>
         <field name="view_type">form</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
@@ -64,7 +64,7 @@
         name="Export GSTR-2"
         parent="l10n_in.account_reports_in_statements_menu"
         sequence="3"
-        action="export_gstr_two_return_csv_action"
+        action="export_gstr_two_return_action"
         id="menu_export_gstr_two_return_xls"
         />
 

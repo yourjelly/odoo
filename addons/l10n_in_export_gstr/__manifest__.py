@@ -28,7 +28,7 @@ The return is divided into 13 sections:
         'data/gst.port.code.csv',
         'security/ir.model.access.csv',
         'wizard/account_invoice_refund_views.xml',
-        'wizard/export_gst_return_csv_views.xml',
+        'wizard/export_gst_return_views.xml',
         'views/account_invoice_views.xml',
         'views/product_template_views.xml',
         'views/res_partner_views.xml',

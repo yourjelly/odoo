@@ -11,7 +11,7 @@ from odoo.addons.web.controllers.main import CSVExport
 
 class ExportGstr(CSVExport):
 
-    @http.route(['/csv/download/<model("export.gst.return.csv"):gst_return>'], type='http', auth='public')
+    @http.route(['/csv/download/<model("export.gst.return"):gst_return>'], type='http', auth='public')
     def download_gstr_report(self, gst_return, **post):
         return self.base(json.dumps(self.export_data(gst_return.gst_return_type ,gst_return.export_summary, gst_return.month, gst_return.year)), uuid.uuid4().hex)
 
