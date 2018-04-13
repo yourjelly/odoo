@@ -1496,6 +1496,7 @@ var BasicModel = AbstractModel.extend({
                 }
                 // TODO: before registering the changes, verify that the x2many
                 // value has changed
+
                 record._changes[name] = list.id;
                 list._changes = list._changes || [];
 
@@ -1503,9 +1504,9 @@ var BasicModel = AbstractModel.extend({
                 var oldChanges = list._changes;
                 _.each(val, function (command) {
                     var rec, recID;
-                    if (command[0] === 0 || command[0] === 1) {
-                        // CREATE or UPDATE
-                        if (command[0] === 0 && command[1]) {
+                    if (command[0] === 0) {
+                        // CREATE
+                        if (command[1]) {
                             // updating an existing (virtual) record
                             var previousChange = _.find(oldChanges, function (operation) {
                                 var child = self.localData[operation.id];
@@ -1514,12 +1515,8 @@ var BasicModel = AbstractModel.extend({
                             recID = previousChange && previousChange.id;
                             rec = self.localData[recID];
                         }
-                        if (command[0] === 1 && command[1]) {
-                            // updating an existing record
-                            rec = self.localData[list._cache[command[1]]];
-                        }
                         if (!rec) {
-                            var params = {
+                            rec = self._makeDataPoint({
                                 context: list.context,
                                 fields: list.fields,
                                 fieldsInfo: list.fieldsInfo,
@@ -1527,19 +1524,46 @@ var BasicModel = AbstractModel.extend({
                                 parentID: list.id,
                                 viewType: list.viewType,
                                 ref: command[1],
-                            };
-                            if (command[0] === 1) {
-                                params.res_id = command[1];
-                            }
-                            rec = self._makeDataPoint(params);
+                            });
                             list._cache[rec.res_id] = rec.id;
                         }
 
                         rec._noAbandon = true;
                         list._changes.push({operation: 'ADD', id: rec.id});
-                        if (command[0] === 1) {
-                            list._changes.push({operation: 'UPDATE', id: rec.id});
+                        defs.push(self._applyOnChange(command[2], rec));
+                    } else if (command[0] === 1) {
+                        // UPDATE
+                        if (command[1]) {
+                            // updating an existing record
+                            rec = self.localData[list._cache[command[1]]];
+                            // TODO: if a record has not change, keep a [4, res_id, false]
+                            // even if the server returns a [1, res_id, ...]
+                            // --> if rec has not changed, register a LINK_TO instead
+                            var sameRecord = rec && !rec._changes;  // Note: this will only works for records on the same page
+                            // TODO: maybe check that all fields in command[2]
+                            // have the same value that rec.data?
+                            if (sameRecord) {
+                                // LINK TO
+                                linkRecord(list, command[1]);
+                                return;
+                            }
                         }
+                        if (!rec) {
+                            rec = self._makeDataPoint({
+                                context: list.context,
+                                fields: list.fields,
+                                fieldsInfo: list.fieldsInfo,
+                                modelName: list.model,
+                                parentID: list.id,
+                                viewType: list.viewType,
+                                ref: command[1],
+                                res_id: command[1],
+                            });
+                            list._cache[rec.res_id] = rec.id;
+                        }
+                        rec._noAbandon = true;
+                        list._changes.push({operation: 'ADD', id: rec.id});
+                        list._changes.push({operation: 'UPDATE', id: rec.id});
                         defs.push(self._applyOnChange(command[2], rec));
                     } else if (command[0] === 4) {
                         // LINK TO
