@@ -19,7 +19,10 @@ class AccountAdvancesPaymentReport(models.Model):
     place_of_supply = fields.Char("Place of supply")
     payment_amount = fields.Float(string="Payment Amount", digits= (16,2))
     amount = fields.Float(compute="_compute_amount" ,string="Advance Payment Amount", digits= (16,2))
-    tax_rate = fields.Float(compute="_compute_tax_rate", string="Tax rate")
+    tax_rate = fields.Float(compute="_compute_tax", string="Tax rate")
+    igst_amount = fields.Float(compute="_compute_tax", string="IGST amount", digits= (16,2))
+    cgst_amount = fields.Float(compute="_compute_tax", string="CGST amount", digits= (16,2))
+    sgst_amount = fields.Float(compute="_compute_tax", string="SGST amount", digits= (16,2))
     company_id = fields.Integer("Company")
     payment_type = fields.Selection([('outbound', 'Send Money'), ('inbound', 'Receive Money')], string='Payment Type')
     supply_type = fields.Selection([('inter_state', 'Inter State'), ('intra_state', 'Intra State')], string="Supply Type")
@@ -32,12 +35,16 @@ class AccountAdvancesPaymentReport(models.Model):
                     amount -= self._get_related_payment(invoice, payment)
             record.amount = amount
 
-    def _compute_tax_rate(self):
-        tax_rate_count = self.get_default_gst_rate()
+    def _compute_tax(self):
         default_sale_gst_rate = self._get_default_gst_rate('sale')
         default_purchase_gst_rate = self._get_default_gst_rate('purchase')
         for record in self:
-            record.tax_rate = (record.supply_type == 'inbound' and default_sale_gst_rate) or (record.supply_type == 'outbound' and default_purchase_gst_rate)
+            tax_rate_count = default_purchase_gst_rate if record.supply_type == 'outbound' else default_sale_gst_rate
+            tax_amount = record.amount * (tax_rate_count / 100)
+            record.igst_amount = record.supply_type == 'inter_state' and tax_amount or 0
+            record.cgst_amount = record.supply_type == 'intra_state' and tax_amount/2 or 0
+            record.sgst_amount = record.supply_type == 'intra_state' and tax_amount/2 or 0
+            record.tax_rate = tax_rate_count
 
     @api.model_cr
     def init(self):
@@ -102,16 +109,24 @@ class AccountAdvancesAdjustmentsReport(models.Model):
     payment_ids = fields.Char('Payment ids')
     invoice_payment = fields.Float(compute="_compute_invoice_payment" ,string="Advance adjustments Amount")
     invoice_month = fields.Char(string="Invoice Month")
-    tax_rate = fields.Float(compute="_compute_tax_rate", string="Tax rate")
+    tax_rate = fields.Float(compute="_compute_tax", string="Tax rate")
+    igst_amount = fields.Float(compute="_compute_tax", string="IGST amount", digits= (16,2))
+    cgst_amount = fields.Float(compute="_compute_tax", string="CGST amount", digits= (16,2))
+    sgst_amount = fields.Float(compute="_compute_tax", string="SGST amount", digits= (16,2))
     company_id = fields.Integer("Company")
     payment_type = fields.Selection([('outbound', 'Send Money'), ('inbound', 'Receive Money')], string='Payment Type')
     supply_type = fields.Selection([('inter_state', 'Inter State'), ('intra_state', 'Intra State')], string="Supply Type")
 
-    def _compute_tax_rate(self):
+    def _compute_tax(self):
         default_sale_gst_rate = self._get_default_gst_rate('sale')
         default_purchase_gst_rate = self._get_default_gst_rate('purchase')
         for record in self:
-            record.tax_rate = record.supply_type == 'inbound' and default_sale_gst_rate or record.supply_type == 'outbound' and default_purchase_gst_rate
+            tax_rate_count = default_purchase_gst_rate if record.supply_type == 'outbound' else default_sale_gst_rate
+            tax_amount = record.invoice_payment * (tax_rate_count / 100)
+            record.igst_amount = record.supply_type == 'inter_state' and tax_amount or 0
+            record.cgst_amount = record.supply_type == 'intra_state' and tax_amount/2 or 0
+            record.sgst_amount = record.supply_type == 'intra_state' and tax_amount/2 or 0
+            record.tax_rate = tax_rate_count
 
     def _compute_invoice_payment(self):
         for record in self:

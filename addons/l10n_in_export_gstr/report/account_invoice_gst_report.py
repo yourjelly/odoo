@@ -159,8 +159,8 @@ class AccountInvoiceGstReport(models.Model):
                 (CASE WHEN airr.name IS NOT NULL THEN concat(airr.code,'-',airr.name) END) AS refund_reason,
                 (CASE WHEN p.state_id = cp.state_id THEN 'intra_state' ELSE 'inter_state' END) AS supply_type,
                 (CASE WHEN to_char(air.date_invoice, 'DD-MM-YYYY') < '01-07-2017' THEN 'yes' ELSE 'no' END) AS is_pre_gst,
-                (CASE WHEN ai.type = ANY (ARRAY['out_invoice', 'our_refund']) AND ps.l10n_in_tin IS NOT NULL THEN concat(ps.l10n_in_tin,'-',ps.name)
-                    WHEN ai.type = ANY (ARRAY['in_invoice', 'in_refund']) and cps.l10n_in_tin IS NOT NULL THEN concat(cps.l10n_in_tin,'-',cps.name)
+                (CASE WHEN ai.type = ANY (ARRAY['out_invoice', 'out_refund']) AND ps.l10n_in_tin IS NOT NULL THEN concat(ps.l10n_in_tin,'-',ps.name)
+                    WHEN ai.type = ANY (ARRAY['in_invoice', 'in_refund']) AND cps.l10n_in_tin IS NOT NULL THEN concat(cps.l10n_in_tin,'-',cps.name)
                     ELSE NULL END) AS place_of_supply,
                 (CASE WHEN ai.type = 'in_refund' THEN 'debit_note' WHEN ai.type = 'out_refund' THEN 'credit_note' ELSE '' END) AS refund_document_type,
                 (CASE WHEN ai.gst_export_type = ANY (ARRAY['dewp', 'dewop']) THEN 'de'
