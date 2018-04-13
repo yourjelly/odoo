@@ -43,5 +43,7 @@ class AccountInvoiceLine(models.Model):
 
     @api.onchange('product_id')
     def _onchange_product_id(self):
+        res = super(AccountInvoiceLine, self)._onchange_product_id()
         if self.product_id:
             self.is_eligible_for_itc = self.product_id.is_eligible_for_itc
+        return res
