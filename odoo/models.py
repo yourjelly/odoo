@@ -24,6 +24,7 @@
 import datetime
 
 import collections
+import copy
 import dateutil
 import functools
 import itertools
@@ -5000,6 +5001,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             :param field_onchange: dictionary mapping field names to their
                 on_change attribute
         """
+        initial_values = copy.deepcopy(values)
         env = self.env
         if isinstance(field_name, list):
             names = field_name
@@ -5094,6 +5096,15 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 for name in dirty
             }
 
+        # transform (4, ...) into (4, ...)
+        if result['value'].get(field_name) and initial_values[field_name]:
+            for index, command in enumerate(result['value'][field_name]):
+                if command[0] == 1:
+                    res_id = command[1]
+                    initial_command = next(x for x in initial_values[field_name] if x[1] == res_id)
+                    if initial_command[0] == 4:
+                        # TODO: maybe check that all fields are the same?
+                        result['value'][field_name][index] = (4, res_id, False)
         return result
 
 collections.Set.register(BaseModel)
