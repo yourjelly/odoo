@@ -18,6 +18,7 @@ class DocsGstReport(models.Model):
     num_to = fields.Char("Sr. No. To")
     total_number = fields.Integer("Total Number")
     cancelled = fields.Integer("Cancelled")
+    net_issued = fields.Integer("Net issued")
     invoice_month = fields.Char("Invoice Month")
     company_id = fields.Integer("Company")
 
@@ -31,6 +32,7 @@ class DocsGstReport(models.Model):
                 MAX(sub.invoice_number) AS num_to,
                 COUNT(sub.invoice_number) AS total_number,
                 SUM(sub.cancelled) AS cancelled,
+                (COUNT(sub.invoice_number) - SUM(sub.cancelled)) as net_issued,
                 sub.invoice_month
         """
         return select_str
