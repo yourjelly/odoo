@@ -59,8 +59,11 @@ class Expression(object):
             args += rargs
             sql += right + ')'
         else:
-            args.append(self.right)
-            sql += '%s)'
+            if self.right == 'NULL':
+                sql += 'NULL)'
+            else:
+                args.append(self.right)
+                sql += '%s)'
 
         return (sql, args)
 
@@ -103,16 +106,16 @@ class Join(object):
             if self.t2._nullable:
                 self.type = 'FULL JOIN'
             else:
-                self.type = 'RIGHT JOIN'
+                self.type = 'LEFT JOIN'
         else:
             if self.t2._nullable:
-                self.type = 'LEFT JOIN'
+                self.type = 'RIGHT JOIN'
             else:
                 self.type = 'INNER JOIN'
 
     def __to_sql__(self):
         sql, args = self.expression.__to_sql__()
-        return ("%s %s ON %s" % (self.type, self.t2._table, sql), args)
+        return (" %s %s ON %s" % (self.type, self.t2._table, sql), args)
 
 
 class Select(object):
@@ -123,9 +126,9 @@ class Select(object):
         self.joins = []
 
         if self.aliased:
-            self.tables = {self.columns[c]._row for c in self.columns}
+            self.tables = sorted({self.columns[c]._row for c in self.columns})
         else:
-            self.tables = {c._row for c in self.columns}
+            self.tables = sorted({c._row for c in self.columns}, key=lambda r: r._table)
 
         self._where = where
         self.order = order
@@ -145,31 +148,42 @@ class Select(object):
             self.joins.append(Join(exp))
 
     def _build_joins(self):
-        return ' '.join([j.__to_sql__() for j in self.joins])
+        sql = []
+        args = []
+
+        for join in self.joins:
+            jsql, jargs = join.__to_sql__()
+            sql.append(jsql)
+            args += jargs
+
+        return (' '.join(sql), args)
 
     def _build_columns(self):
         if self.aliased:
-            return ', '.join(["%s AS %s" % (self.columns[c]._qualified, c) for c in self.columns])
+            return ', '.join(["%s AS %s" % (self.columns[c]._qualified, _quote(c))
+                              for c in self.columns])
         return ', '.join(["%s" % c._qualified for c in self.columns])
 
     def _build_tables(self):
         return ', '.join(["%s" % t._table for t in self.tables])
 
+    def _build_where(self):
+        sql = " WHERE %s"
+        if self._where:
+            where, args = self._where.__to_sql__()
+            return (sql % where, args)
+        return ('', [])
+
     def build(self):
-        query = "SELECT %s FROM %s"
+        query = "SELECT %s FROM %s" % (self._build_columns(), self._build_tables())
         args = []
 
-        args.append(self._build_columns())
-        args.append(self._build_tables())
+        jsql, jargs = self._build_joins()
+        query += "%s" % jsql
+        args += jargs
 
-        joins = self._build_joins()
+        wsql, wargs = self._build_where()
+        query += "%s" % wsql
+        args += wargs
 
-        if joins:
-            query += " %s"
-            args.append(joins)
-
-        if self._where:
-            query += " WHERE %s"
-            args.append(self._where.__to_sql__())
-
-        return query % tuple(args)
+        return (query, args)
