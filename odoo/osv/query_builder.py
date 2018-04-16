@@ -1,3 +1,5 @@
+from odoo.tools.pycompat import text_type
+
 
 def _quote(val):
     if '"' not in val:
@@ -49,15 +51,18 @@ class Expression(object):
         return Expression('>=', self, other)
 
     def __to_sql__(self):
-        left = "(%s " % self.left.__to_sql__()
-        op = "%s " % self.op
+        left, args = self.left.__to_sql__()
+        sql = "(%s %s " % (left, self.op)
 
         if isinstance(self.right, Expression):
-            right = "%s)" % self.right.__to_sql__()
+            right, rargs = self.right.__to_sql__()
+            args += rargs
+            sql += right + ')'
         else:
-            right = "%s)" % str(self.right)
+            args.append(self.right)
+            sql += '%s)'
 
-        return left + op + right
+        return (sql, args)
 
 
 class Column(Expression):
@@ -70,7 +75,7 @@ class Column(Expression):
         self._qualified = '%s.%s' % (self._row._table, self._name)
 
     def __to_sql__(self):
-        return self._qualified
+        return (self._qualified, [])
 
 
 class Row(object):
@@ -106,7 +111,8 @@ class Join(object):
                 self.type = 'INNER JOIN'
 
     def __to_sql__(self):
-        return "%s %s ON %s" % (self.type, self.t2._table, self.expression.__to_sql__())
+        sql, args = self.expression.__to_sql__()
+        return ("%s %s ON %s" % (self.type, self.t2._table, sql), args)
 
 
 class Select(object):
