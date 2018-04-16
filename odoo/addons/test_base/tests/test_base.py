@@ -305,12 +305,12 @@ class TestBase(TransactionCase):
         title_sir = self.env['test_base.title'].create({'name': 'Sir...'})
         title_lady = self.env['test_base.title'].create({'name': 'Lady...'})
         test_users = [
-            {'name': 'Alice', 'login': 'alice', 'color': 1, 'function': 'Friend', 'date': '2015-03-28', 'title': title_lady.id},
-            {'name': 'Alice', 'login': 'alice2', 'color': 0, 'function': 'Friend',  'date': '2015-01-28', 'title': title_lady.id},
-            {'name': 'Bob', 'login': 'bob', 'color': 2, 'function': 'Friend', 'date': '2015-03-02', 'title': title_sir.id},
-            {'name': 'Eve', 'login': 'eve', 'color': 3, 'function': 'Eavesdropper', 'date': '2015-03-20', 'title': title_lady.id},
-            {'name': 'Nab', 'login': 'nab', 'color': -3, 'function': '5$ Wrench', 'date': '2014-09-10', 'title': title_sir.id},
-            {'name': 'Nab', 'login': 'nab-she', 'color': 6, 'function': '5$ Wrench', 'date': '2014-01-02', 'title': title_lady.id},
+            {'name': 'Alice', 'login': 'alice', 'color': 1, 'city': 'Friend', 'date': '2015-03-28', 'title': title_lady.id},
+            {'name': 'Alice', 'login': 'alice2', 'color': 0, 'city': 'Friend',  'date': '2015-01-28', 'title': title_lady.id},
+            {'name': 'Bob', 'login': 'bob', 'color': 2, 'city': 'Friend', 'date': '2015-03-02', 'title': title_sir.id},
+            {'name': 'Eve', 'login': 'eve', 'color': 3, 'city': 'Eavesdropper', 'date': '2015-03-20', 'title': title_lady.id},
+            {'name': 'Nab', 'login': 'nab', 'color': -3, 'city': '5$ Wrench', 'date': '2014-09-10', 'title': title_sir.id},
+            {'name': 'Nab', 'login': 'nab-she', 'color': 6, 'city': '5$ Wrench', 'date': '2014-01-02', 'title': title_lady.id},
         ]
         res_users = self.env['test_base.inherited']
         user_ids = [res_users.create(vals).id for vals in test_users]
@@ -326,9 +326,9 @@ class TestBase(TransactionCase):
         self.assertEqual(['bob', 'alice2', 'alice'], [g['login'] for g in groups_data], 'Result mismatch')
 
         # group on inherited char field, aggregate on int field (second groupby ignored on purpose)
-        groups_data = res_users.read_group(domain, fields=['name', 'color', 'function'], groupby=['function', 'login'])
+        groups_data = res_users.read_group(domain, fields=['name', 'color', 'city'], groupby=['city', 'login'])
         self.assertEqual(len(groups_data), 3, "Incorrect number of results when grouping on a field")
-        self.assertEqual(['5$ Wrench', 'Eavesdropper', 'Friend'], [g['function'] for g in groups_data], 'incorrect read_group order')
+        self.assertEqual(['5$ Wrench', 'Eavesdropper', 'Friend'], [g['city'] for g in groups_data], 'incorrect read_group order')
         for group_data in groups_data:
             self.assertIn('color', group_data, "Aggregated data for the column 'color' is not present in read_group return values")
             self.assertEqual(group_data['color'], 3, "Incorrect sum for aggregated data for the column 'color'")
@@ -353,19 +353,19 @@ class TestBase(TransactionCase):
         self.assertEqual([1, 2, 1, 2], [g['name_count'] for g in groups_data], 'Incorrect number of results')
 
         # group on inherited date column (res_partner.date) -> Year-Month, default ordering
-        groups_data = res_users.read_group(domain, fields=['function', 'color', 'date'], groupby=['date'])
+        groups_data = res_users.read_group(domain, fields=['city', 'color', 'date'], groupby=['date'])
         self.assertEqual(len(groups_data), 4, "Incorrect number of results when grouping on a field")
         self.assertEqual(['January 2014', 'September 2014', 'January 2015', 'March 2015'], [g['date'] for g in groups_data], 'Incorrect ordering of the list')
         self.assertEqual([1, 1, 1, 3], [g['date_count'] for g in groups_data], 'Incorrect number of results')
 
         # group on inherited date column (res_partner.date) -> Year-Month, custom order
-        groups_data = res_users.read_group(domain, fields=['function', 'color', 'date'], groupby=['date'], orderby='date DESC')
+        groups_data = res_users.read_group(domain, fields=['city', 'color', 'date'], groupby=['date'], orderby='date DESC')
         self.assertEqual(len(groups_data), 4, "Incorrect number of results when grouping on a field")
         self.assertEqual(['March 2015', 'January 2015', 'September 2014', 'January 2014'], [g['date'] for g in groups_data], 'Incorrect ordering of the list')
         self.assertEqual([3, 1, 1, 1], [g['date_count'] for g in groups_data], 'Incorrect number of results')
 
         # group on inherited many2one (res_partner.title), default order
-        groups_data = res_users.read_group(domain, fields=['function', 'color', 'title'], groupby=['title'])
+        groups_data = res_users.read_group(domain, fields=['city', 'color', 'title'], groupby=['title'])
         self.assertEqual(len(groups_data), 2, "Incorrect number of results when grouping on a field")
         # m2o is returned as a (id, label) pair
         self.assertEqual([(title_lady.id, 'Lady...'), (title_sir.id, 'Sir...')], [g['title'] for g in groups_data], 'Incorrect ordering of the list')
@@ -373,7 +373,7 @@ class TestBase(TransactionCase):
         self.assertEqual([10, -1], [g['color'] for g in groups_data], 'Incorrect aggregation of int column')
 
         # group on inherited many2one (res_partner.title), reversed natural order
-        groups_data = res_users.read_group(domain, fields=['function', 'color', 'title'], groupby=['title'], orderby="title desc")
+        groups_data = res_users.read_group(domain, fields=['city', 'color', 'title'], groupby=['title'], orderby="title desc")
         self.assertEqual(len(groups_data), 2, "Incorrect number of results when grouping on a field")
         # m2o is returned as a (id, label) pair
         self.assertEqual([(title_sir.id, 'Sir...'), (title_lady.id, 'Lady...')], [g['title'] for g in groups_data], 'Incorrect ordering of the list')
@@ -381,7 +381,7 @@ class TestBase(TransactionCase):
         self.assertEqual([-1, 10], [g['color'] for g in groups_data], 'Incorrect aggregation of int column')
 
         # group on inherited many2one (res_partner.title), multiple orders with m2o in second position
-        groups_data = res_users.read_group(domain, fields=['function', 'color', 'title'], groupby=['title'], orderby="color desc, title desc")
+        groups_data = res_users.read_group(domain, fields=['city', 'color', 'title'], groupby=['title'], orderby="color desc, title desc")
         self.assertEqual(len(groups_data), 2, "Incorrect number of results when grouping on a field")
         # m2o is returned as a (id, label) pair
         self.assertEqual([(title_lady.id, 'Lady...'), (title_sir.id, 'Sir...')], [g['title'] for g in groups_data], 'Incorrect ordering of the result')
@@ -389,7 +389,7 @@ class TestBase(TransactionCase):
         self.assertEqual([10, -1], [g['color'] for g in groups_data], 'Incorrect aggregation of int column')
 
         # group on inherited many2one (res_partner.title), ordered by other inherited field (color)
-        groups_data = res_users.read_group(domain, fields=['function', 'color', 'title'], groupby=['title'], orderby='color')
+        groups_data = res_users.read_group(domain, fields=['city', 'color', 'title'], groupby=['title'], orderby='color')
         self.assertEqual(len(groups_data), 2, "Incorrect number of results when grouping on a field")
         # m2o is returned as a (id, label) pair
         self.assertEqual([(title_sir.id, 'Sir...'), (title_lady.id, 'Lady...')], [g['title'] for g in groups_data], 'Incorrect ordering of the list')
@@ -444,7 +444,7 @@ class TestParentStore(TransactionCase):
         super(TestParentStore, self).setUp()
 
         # force res_partner_category.copy() to copy children
-        category = self.env['res.partner.category']
+        category = self.env['test_base.category']
         self.patch(category._fields['child_ids'], 'copy', True)
 
         # setup categories

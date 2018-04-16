@@ -13,11 +13,11 @@ class TestExpression(TransactionCase):
 
     def test_00_in_not_in_m2m(self):
         # Create 4 partners with no category, or one or two categories (out of two categories).
-        categories = self.env['res.partner.category']
+        categories = self.env['test_base.category']
         cat_a = categories.create({'name': 'test_expression_category_A'})
         cat_b = categories.create({'name': 'test_expression_category_B'})
 
-        partners = self.env['res.partner']
+        partners = self.env['test_base.base']
         a = partners.create({'name': 'test_expression_partner_A', 'category_id': [(6, 0, [cat_a.id])]})
         b = partners.create({'name': 'test_expression_partner_B', 'category_id': [(6, 0, [cat_b.id])]})
         ab = partners.create({'name': 'test_expression_partner_AB', 'category_id': [(6, 0, [cat_a.id, cat_b.id])]})
@@ -69,8 +69,8 @@ class TestExpression(TransactionCase):
         self.assertLessEqual(a + c, without_b, "Search for category_id doesn't contain cat_b failed (3).")
 
     def test_05_not_str_m2m(self):
-        partners = self.env['res.partner']
-        categories = self.env['res.partner.category']
+        partners = self.env['test_base.base']
+        categories = self.env['test_base.category']
 
         cids = {}
         for name in 'A B AB'.split():
@@ -102,8 +102,8 @@ class TestExpression(TransactionCase):
         test('not like', 'AB', ['0', 'a', 'b', 'a b'])
 
     def test_10_hierarchy_in_m2m(self):
-        Partner = self.env['res.partner']
-        Category = self.env['res.partner.category']
+        Partner = self.env['test_base.base']
+        Category = self.env['test_base.category']
 
         # search through m2m relation
         partners = Partner.search([('category_id', 'child_of', self.ref('base.res_partner_category_0'))])
@@ -156,20 +156,20 @@ class TestExpression(TransactionCase):
 
     def test_10_equivalent_id(self):
         # equivalent queries
-        Currency = self.env['res.currency']
-        non_currency_id = max(Currency.search([]).ids) + 1003
-        res_0 = Currency.search([])
-        res_1 = Currency.search([('name', 'not like', 'probably_unexisting_name')])
+        Category = self.env['test_base.category']
+        non_category_id = max(Category.search([]).ids) + 1003
+        res_0 = Category.search([])
+        res_1 = Category.search([('name', 'not like', 'probably_unexisting_name')])
         self.assertEqual(res_0, res_1)
-        res_2 = Currency.search([('id', 'not in', [non_currency_id])])
+        res_2 = Category.search([('id', 'not in', [non_category_id])])
         self.assertEqual(res_0, res_2)
-        res_3 = Currency.search([('id', 'not in', [])])
+        res_3 = Category.search([('id', 'not in', [])])
         self.assertEqual(res_0, res_3)
-        res_4 = Currency.search([('id', '!=', False)])
+        res_4 = Category.search([('id', '!=', False)])
         self.assertEqual(res_0, res_4)
 
         # equivalent queries, integer and string
-        Partner = self.env['res.partner']
+        Partner = self.env['test_base.base']
         all_partners = Partner.search([])
         self.assertTrue(len(all_partners) > 1)
         one = all_partners[0]
@@ -339,7 +339,7 @@ class TestExpression(TransactionCase):
         self.assertTrue(menus)
 
     def test_15_o2m(self):
-        Partner = self.env['res.partner']
+        Partner = self.env['test_base.base']
 
         # test one2many operator with empty search list
         partners = Partner.search([('child_ids', 'in', [])])
@@ -351,7 +351,7 @@ class TestExpression(TransactionCase):
             self.assertFalse(partner.child_ids)
 
         # verify domain evaluation for one2many != False and one2many == False
-        categories = self.env['res.partner.category'].search([])
+        categories = self.env['test_base.category'].search([])
         parents = categories.search([('child_ids', '!=', False)])
         self.assertEqual(parents, categories.filtered(lambda c: c.child_ids))
         leafs = categories.search([('child_ids', '=', False)])
@@ -421,8 +421,8 @@ class TestExpression(TransactionCase):
         self.assertEqual(set(all_ids) - set([p1,p2]), set(Partner.search([('user_ids', 'not in', [u1b, u2])]).ids), "o2m NOT IN matches none on the right side")
 
     def test_15_equivalent_one2many_2(self):
-        Currency = self.env['res.currency']
-        CurrencyRate = self.env['res.currency.rate']
+        Currency = self.env['test_base.currency']
+        CurrencyRate = self.env['test_base.currency.rate']
 
         # create a currency and a currency rate
         currency = Currency.create({'name': 'ZZZ', 'symbol': 'ZZZ', 'rounding': 1.0})
@@ -504,7 +504,7 @@ class TestExpression(TransactionCase):
         pos_leaves = [[('a', 'in', [])], [('d', '!=', 3)]]
         neg_leaves = [[('a', 'not in', [])], [('d', '=', 3)]]
 
-        source = expression.OR([expression.AND(pos_leaves)] * 1000)
+        source = expression.OR([expressionssion.AND(pos_leaves)] * 1000)
         expect = source
         self.assertEqual(expression.distribute_not(source), expect,
             "distribute_not on long expression without negation operator should not alter it")

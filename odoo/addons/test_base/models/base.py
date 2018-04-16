@@ -7,32 +7,34 @@ import datetime
 #ResPartner
 
 class BaseModel(models.Model):
+    _description = 'Contact'
 	_name = "test_base.base"
 	_order = "display_name" #??
+
+    def _default_category(self):
+        return self.env['test_base.category'].browse(self._context.get('category_id'))
 
 	#used in test_search
 	name = fields.Char(index=True)
 	display_name = fields.Char(store=True, index=True)		#compute='_compute_display_name',
 	active = fields.Boolean(default=True)
     email = fields.Char()
+    color = fields.Integer(string='Color Index', default=0)
     is_company = fields.Boolean(string='Is a Company', default=False,
         help="Check if the contact is a company, otherwise it is a person")
-    function = fields.Char(string='Job Position')
     date = fields.Date(index=True)
     title = fields.Many2one('test_base.title')
+    category_id = fields.Many2many('test_base.category', column1='partner_id',
+                                    column2='category_id', string='Tags', default=_default_category)
     parent_id = fields.Many2one('test_base.base', string='Related Company', index=True)
-    child_ids = fields.One2many('res.partner', 'parent_id', string='Contacts', domain=[('active', '=', True)])
-	supplier = fields.Boolean(string='Is a Vendor',
-                               help="Check this box if this contact is a vendor. "
-                               "If it's not checked, purchase people will not see it when encoding a purchase order.")
+    user_ids = fields.One2many('test_base.base', 'partner_id', string='Users', auto_join=True)
+    child_ids = fields.One2many('test_base.base', 'parent_id', string='Contacts', domain=[('active', '=', True)])
     vat = fields.Char(string='TIN', help="Tax Identification Number. "
                                          "Fill it if the company is subjected to taxes. "
                                          "Used by the some of the legal statements.")
     phone = fields.Char()
     street = fields.Char()
 	city = fields.Char()
-	state_id = fields.Many2one("test_base.country.state", string='State', ondelete='restrict')
-    country_id = fields.Many2one('test_base.country', string='Country', ondelete='restrict')
     type = fields.Selection(
         [('contact', 'Contact'),
          ('invoice', 'Invoice address'),
@@ -41,22 +43,46 @@ class BaseModel(models.Model):
         default='contact',
         help="Used to select automatically the right address according to the context in sales and purchases documents.")
 
-class ResUsers(models.Model):
-	_name = "test_base.inherited"
-    _description = 'Users'
-    _inherits = {'test_base.base': 'partner_id'}
-    _order = 'name, login'
-
-    partner_id = fields.Many2one('test_base.base', required=True, ondelete='restrict', auto_join=True,
-        string='Related Partner', help='Partner-related data of the user')
-	login = fields.Char(required=True, help="Used to log into the system")
-    color = fields.Integer(string='Color Index') #in seperate res.groups class but we taken in users class directly
 
 class PartnerTitle(models.Model):
     _name = 'test_base.title'
     _order = 'name'
 
     name = fields.Char(string='Title', required=True, translate=True)
+
+
+class ResUsers(models.Model):
+    _name = "test_base.inherited"
+    _description = 'Users'
+    _inherits = {'test_base.base': 'partner_id'}
+    _order = 'name, login'
+
+    partner_id = fields.Many2one('test_base.base', required=True, ondelete='restrict', auto_join=True,
+        string='Related Partner', help='Partner-related data of the user')
+    login = fields.Char(required=True, help="Used to log into the system")
+
+
+class ResCurrency(models.Model):
+    _name = "test_base.currency"
+    _description = "Currency"
+    _order = 'active desc, name'
+
+    name = fields.Char(string='Currency', size=3, required=True, help="Currency Code (ISO 4217)")
+    symbol = fields.Char(help="Currency sign, to be used when printing amounts.", required=True)
+    rounding = fields.Float(string='Rounding Factor', digits=(12, 6), default=0.01)
+    rate_ids = fields.One2many('test_base.currency.rate', 'currency_id', string='Rates')
+
+
+class ResCurrencyRate(models.Model):
+    _name = "test_base.currency.rate"
+    _description = "Currency Rate"
+    _order = "name desc"
+
+    name = fields.Date(string='Date', required=True, index=True,
+                           default=lambda self: fields.Date.today())
+    rate = fields.Float(digits=(12, 6), default=1.0, help='The rate of the currency to the currency of rate 1')
+    currency_id = fields.Many2one('test_base.currency', string='Currency', readonly=True)
+
 
 class PartnerCategory(models.Model):
     _description = 'Partner Tags'
@@ -72,29 +98,6 @@ class PartnerCategory(models.Model):
         if not self._check_recursion():
             raise ValidationError(_('Error ! You can not create recursive tags.'))
 
-#res country
-class ResCountry(models.Model):
-    _name = 'test_base.country'
-    _description = 'Country'
-    _order = 'name'
-
-    name = fields.Char(
-        string='Country Name', required=True, translate=True, help='The full name of the country.')
-    code = fields.Char(
-        string='Country Code', size=2,
-        help='The ISO country code in two chars. \nYou can use this field for quick search.')
-    state_ids = fields.One2many('res.country.state', 'country_id', string='States')
-
-#res country state
-class ResCountryState(models.Model):
-	_description = "Country state"
-    _name = 'test_base.country.state'
-    _order = 'code'
-
-    country_id = fields.Many2one('res.country', string='Country', required=True)
-    name = fields.Char(string='State Name', required=True,
-               help='Administrative divisions of a country. E.g. Fed. State, Departement, Canton')
-    code = fields.Char(string='State Code', help='The state code.', required=True)
 
 #ResPartnerBank
 def sanitize_account_number(acc_number):
