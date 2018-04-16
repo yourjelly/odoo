@@ -52,6 +52,10 @@ class Expression(object):
 
     def __to_sql__(self):
         left, args = self.left.__to_sql__()
+
+        if self.op == 'NOT':
+            return ("(NOT %s)" % left, args)
+
         sql = "(%s %s " % (left, self.op)
 
         if isinstance(self.right, Expression):
