@@ -189,6 +189,7 @@ class Exclude(SyncOperation):
 class GoogleCalendar(models.AbstractModel):
     STR_SERVICE = 'calendar'
     _name = 'google.%s' % STR_SERVICE
+    _inherit = 'google.service'
 
     def generate_data(self, event, isCreating=False):
         if event.allday:
@@ -262,7 +263,7 @@ class GoogleCalendar(models.AbstractModel):
         url = "/calendar/v3/calendars/%s/events?fields=%s&access_token=%s" % ('primary', urls.url_quote('id,updated'), self.get_token())
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
         data_json = json.dumps(data)
-        return self.env['google.service']._do_request(url, data_json, headers, type='POST')
+        return self._do_request(url, data_json, headers, type='POST')
 
     def delete_an_event(self, event_id):
         """ Delete the given event in primary calendar of google cal.
@@ -274,7 +275,7 @@ class GoogleCalendar(models.AbstractModel):
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
         url = "/calendar/v3/calendars/%s/events/%s" % ('primary', event_id)
 
-        return self.env['google.service']._do_request(url, params, headers, type='DELETE')
+        return self._do_request(url, params, headers, type='DELETE')
 
     def get_calendar_primary_id(self):
         """ In google calendar, you can have multiple calendar. But only one is
@@ -289,7 +290,7 @@ class GoogleCalendar(models.AbstractModel):
         url = "/calendar/v3/calendars/primary"
 
         try:
-            status, content, ask_time = self.env['google.service']._do_request(url, params, headers, type='GET')
+            status, content, ask_time = self._do_request(url, params, headers, type='GET')
         except requests.HTTPError as e:
             if e.response.status_code == 401:  # Token invalid / Acces unauthorized
                 error_msg = _("Your token is invalid or has been revoked !")
@@ -328,7 +329,7 @@ class GoogleCalendar(models.AbstractModel):
         if nextPageToken:
             params['pageToken'] = nextPageToken
 
-        status, content, ask_time = self.env['google.service']._do_request(url, params, headers, type='GET')
+        status, content, ask_time = self._do_request(url, params, headers, type='GET')
 
         google_events_dict = {}
         for google_event in content['items']:
@@ -354,7 +355,7 @@ class GoogleCalendar(models.AbstractModel):
 
         url = "/calendar/v3/calendars/%s/events/%s" % ('primary', google_id)
         try:
-            status, content, ask_time = self.env['google.service']._do_request(url, params, headers, type='GET')
+            status, content, ask_time = self._do_request(url, params, headers, type='GET')
         except Exception as e:
             _logger.info("Calendar Synchro - In except of get_one_event_synchro")
             _logger.info(exception_to_unicode(e))
@@ -369,7 +370,7 @@ class GoogleCalendar(models.AbstractModel):
         data['sequence'] = google_event.get('sequence', 0)
         data_json = json.dumps(data)
 
-        status, content, ask_time = self.env['google.service']._do_request(url, data_json, headers, type='PATCH')
+        status, content, ask_time = self._do_request(url, data_json, headers, type='PATCH')
 
         update_date = datetime.strptime(content['updated'], "%Y-%m-%dT%H:%M:%S.%fz")
         oe_event.write({'oe_update_date': update_date})
@@ -383,7 +384,7 @@ class GoogleCalendar(models.AbstractModel):
         headers = {}
         data['access_token'] = self.get_token()
 
-        status, response, ask_time = self.env['google.service']._do_request(url, data, headers, type='GET')
+        status, response, ask_time = self._do_request(url, data, headers, type='GET')
         #TO_CHECK : , if http fail, no event, do DELETE ?
         return response
 
@@ -399,7 +400,7 @@ class GoogleCalendar(models.AbstractModel):
 
         data.update(recurringEventId=event_ori_google_id, originalStartTime=event_new.recurrent_id_date, sequence=self.get_sequence(instance_id))
         data_json = json.dumps(data)
-        return self.env['google.service']._do_request(url, data_json, headers, type='PUT')
+        return self._do_request(url, data_json, headers, type='PUT')
 
     def create_from_google(self, event, partner_id):
         context_tmp = dict(self._context, NewMeeting=True)
@@ -864,7 +865,7 @@ class GoogleCalendar(models.AbstractModel):
         }
         headers = {'Content-type': 'application/json'}
         url = "/calendar/v3/calendars/%s/events/%s" % ('primary', instance_id)
-        status, content, ask_time = self.env['google.service']._do_request(url, params, headers, type='GET')
+        status, content, ask_time = self._do_request(url, params, headers, type='GET')
         return content.get('sequence', 0)
 
     #################################
@@ -885,7 +886,7 @@ class GoogleCalendar(models.AbstractModel):
 
     def do_refresh_token(self):
         current_user = self.env.user
-        all_token = self.env['google.service']._refresh_google_token_json(current_user.google_calendar_rtoken, self.STR_SERVICE)
+        all_token = self._refresh_google_token_json(current_user.google_calendar_rtoken, self.STR_SERVICE)
 
         vals = {}
         vals['google_%s_token_validity' % self.STR_SERVICE] = datetime.now() + timedelta(seconds=all_token.get('expires_in'))
@@ -902,7 +903,7 @@ class GoogleCalendar(models.AbstractModel):
         return 'https://www.googleapis.com/auth/calendar%s' % (readonly)
 
     def authorize_google_uri(self, from_url='http://www.odoo.com'):
-        url = self.env['google.service']._get_authorize_uri(from_url, self.STR_SERVICE, scope=self.get_calendar_scope())
+        url = self._get_authorize_uri(from_url, self.STR_SERVICE, scope=self.get_calendar_scope())
         return url
 
     def can_authorize_google(self):
@@ -910,7 +911,7 @@ class GoogleCalendar(models.AbstractModel):
 
     @api.model
     def set_all_tokens(self, authorization_code):
-        all_token = self.env['google.service']._get_google_token_json(authorization_code, self.STR_SERVICE)
+        all_token = self._get_google_token_json(authorization_code, self.STR_SERVICE)
 
         vals = {}
         vals['google_%s_rtoken' % self.STR_SERVICE] = all_token.get('refresh_token')

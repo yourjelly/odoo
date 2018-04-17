@@ -22,8 +22,7 @@ GOOGLE_TOKEN_ENDPOINT = 'https://accounts.google.com/o/oauth2/token'
 GOOGLE_API_BASE_URL = 'https://www.googleapis.com'
 
 
-# FIXME : this needs to become an AbstractModel, to be inhereted by google_calendar_service and google_drive_service
-class GoogleService(models.TransientModel):
+class GoogleService(models.AbstractModel):
     _name = 'google.service'
 
     @api.model
@@ -119,7 +118,6 @@ class GoogleService(models.TransientModel):
             error_msg = _("Something went wrong during your token generation. Maybe your Authorization Code is invalid")
             raise self.env['res.config.settings'].get_config_warning(error_msg)
 
-    # FIXME : this method update a field defined in google_calendar module. Since it is used only in that module, maybe it should be moved.
     @api.model
     def _refresh_google_token_json(self, refresh_token, service):  # exchange_AUTHORIZATION vs Token (service = calendar)
         get_param = self.env['ir.config_parameter'].sudo().get_param
