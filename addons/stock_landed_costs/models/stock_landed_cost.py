@@ -105,7 +105,6 @@ class LandedCost(models.Model):
                 new_landed_cost_value = line.move_id.landed_cost_value + line.additional_landed_cost
                 line.move_id.write({
                     'landed_cost_value': new_landed_cost_value,
-                    'value': line.move_id.value + cost_to_add,
                     'remaining_value': line.move_id.remaining_value + cost_to_add,
                     'price_unit': (line.move_id.value + new_landed_cost_value) / line.move_id.product_qty,
                 })
