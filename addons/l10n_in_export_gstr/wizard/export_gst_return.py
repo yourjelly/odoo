@@ -23,7 +23,7 @@ class ExportGstReturn(models.TransientModel):
     @api.model
     def get_export_summary_type(self):
         if self.env.context.get('default_gst_return_type') == 'gstr2':
-            return [('b2b', 'B2B Supplies received'),
+          return [('b2b', 'B2B Supplies received'),
                ('b2bur', 'Inward supplies from unregistered Supplier'),
                ('imps', 'Import of Services'),
                ('impg', 'Import of Goods'),

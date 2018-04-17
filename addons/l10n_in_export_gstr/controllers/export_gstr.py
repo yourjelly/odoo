@@ -144,7 +144,7 @@ class ExportGstr(CSVExport):
             ]
         if gst_type == 'at':
             model = 'account.advances.payment.report'
-            domain = [('payment_month','=', str(month_and_year)), ('company_id','in', company_ids), ('payment_type','=', 'inbound')]
+            domain = [('place_of_supply', '!=', False), ('payment_month','=', str(month_and_year)), ('company_id','in', company_ids), ('payment_type','=', 'inbound')]
             fields = [
                 {"name": "place_of_supply", "label": "Place Of Supply"},
                 {"name": "tax_rate", "label": "Rate"},
@@ -153,7 +153,7 @@ class ExportGstr(CSVExport):
             ]
         if gst_type == 'atadj':
             model = 'account.advances.adjustments.report'
-            domain = [('invoice_month', '=', month_and_year), ('company_id','in', company_ids), ('payment_type','=', 'inbound')]
+            domain = [('place_of_supply', '!=', False), ('invoice_month', '=', month_and_year), ('company_id','in', company_ids), ('payment_type','=', 'inbound')]
             fields = [
                 {"name": "place_of_supply", "label": "Place Of Supply"},
                 {"name": "tax_rate", "label": "Rate"},
@@ -248,7 +248,7 @@ class ExportGstr(CSVExport):
             ]
 
         if gst_type == 'imps':
-            domain += [('import_product_type', '=', 'import_of_services'), ('type', '=', 'in_invoice')]
+            domain += [('place_of_supply', '!=', False), ('import_product_type', '=', 'import_of_services'), ('type', '=', 'in_invoice')]
             fields = [
                 {"name": "invoice_number", "label": "Invoice Number of Reg Recipient"},
                 {"name": "invoice_date", "label": "Invoice Date"},
