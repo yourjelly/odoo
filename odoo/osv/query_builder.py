@@ -187,7 +187,7 @@ class Select(object):
             sql.append(jsql)
             args += jargs
 
-        return (' '.join(sql), args)
+        return (''.join(sql), args)
 
     def _build_columns(self):
         if self.aliased:

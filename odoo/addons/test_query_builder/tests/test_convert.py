@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.tests import common
-from odoo.osv.query_builder import Row, Select, Column
+from odoo.osv.query_builder import Row, Select, Column, Asc, Desc
 
 
 class TestExpressions(common.TransactionCase):
@@ -111,9 +111,49 @@ class TestSelect(common.TransactionCase):
                """ FULL JOIN "res_users" ON ("res_partner"."id" = "res_users"."partner_id")""")
         self.assertEqual(s.build()[0], res)
 
-    def test_select_outer_join(self):
+    def test_select_inner_join(self):
         s = Select([self.p.id])
         s.join(self.p.id == self.u.partner_id)
         res = ("""SELECT "res_partner"."id" FROM "res_partner\""""
                """ INNER JOIN "res_users" ON ("res_partner"."id" = "res_users"."partner_id")""")
         self.assertEqual(s.build()[0], res)
+
+    def test_select_multi_join(self):
+        self.p._nullable = True
+        x = Row('res_currency', True)
+        s = Select([self.p.id])
+        s.join(self.p.id == self.u.partner_id, self.p.active == x.active)
+        res = (
+            """SELECT "res_partner"."id" FROM "res_partner" """
+            """LEFT JOIN "res_users" ON ("res_partner"."id" = "res_users"."partner_id") """
+            """FULL JOIN "res_currency" ON ("res_partner"."active" = "res_currency"."active")"""
+        )
+        self.assertEqual(s.build()[0], res)
+
+    def test_order_by_asc_nfirst(self):
+        s = Select([self.p.id], order=[Asc(self.p.name, True)])
+        res = (
+            """SELECT "res_partner"."id" FROM "res_partner" """
+            """ORDER BY "res_partner"."name" ASC NULLS FIRST"""
+        )
+        self.assertEqual(s.build()[0], res)
+
+    def test_order_by_desc_nlast(self):
+        s = Select([self.p.id], order=[Desc(self.p.name)])
+        res = (
+            """SELECT "res_partner"."id" FROM "res_partner" """
+            """ORDER BY "res_partner"."name" DESC NULLS LAST"""
+        )
+        self.assertEqual(s.build()[0], res)
+
+    def test_full_select_query(self):
+        s = Select([self.p.id], where=self.p.name != 'johnny', order=[Asc(self.p.name)])
+        s.join(self.p.id == self.u.partner_id)
+        res = (
+            """SELECT "res_partner"."id" FROM "res_partner" """
+            """INNER JOIN "res_users" ON ("res_partner"."id" = "res_users"."partner_id") """
+            """WHERE ("res_partner"."name" != %s) """
+            """ORDER BY "res_partner"."name" ASC NULLS LAST""",
+            ['johnny']
+        )
+        self.assertEqual(s.build(), res)
