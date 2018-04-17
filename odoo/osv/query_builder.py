@@ -1,6 +1,3 @@
-from odoo.tools.pycompat import text_type
-
-
 def _quote(val):
     if '"' not in val:
         return '"%s"' % val
@@ -122,9 +119,36 @@ class Join(object):
         return (" %s %s ON %s" % (self.type, self.t2._table, sql), args)
 
 
+class Modifier(object):
+
+    def __init__(self, column, modifier, nfirst=False):
+        assert isinstance(column, Column), "Modifier requires a column!"
+        self.column = column
+        self.modifier = modifier
+        self.nfirst = nfirst
+
+    def __to_sql__(self):
+        sql = self.column.__to_sql__()[0]
+        sql += " %s " % self.modifier
+        sql += "NULLS FIRST" if self.nfirst else "NULLS LAST"
+        return sql
+
+
+class Asc(Modifier):
+
+    def __init__(self, column, nfirst=False):
+        super(Asc, self).__init__(column, 'ASC', nfirst)
+
+
+class Desc(Modifier):
+
+    def __init__(self, column, nfirst=False):
+        super(Desc, self).__init__(column, 'DESC', nfirst)
+
+
 class Select(object):
 
-    def __init__(self, columns, where=None, order=None):
+    def __init__(self, columns, where=None, order=[]):
         self.columns = columns
         self.aliased = isinstance(columns, dict)
         self.joins = []
@@ -135,7 +159,7 @@ class Select(object):
             self.tables = sorted({c._row for c in self.columns}, key=lambda r: r._table)
 
         self._where = where
-        self.order = order
+        self._order = order
 
     def where(self, expression):
         if self._where is not None:
@@ -150,6 +174,9 @@ class Select(object):
             assert exp.left._row in self.tables, \
                 "The left hand side operand of the join predicate must be in the FROM clause."
             self.joins.append(Join(exp))
+
+    def order(self, expression):
+        self._order += expression
 
     def _build_joins(self):
         sql = []
@@ -178,6 +205,12 @@ class Select(object):
             return (sql % where, args)
         return ('', [])
 
+    def _build_order(self):
+        if self.order:
+            sql = " ORDER BY %s"
+            return sql % ', '.join([o.__to_sql__() for o in self._order])
+        return ''
+
     def build(self):
         query = "SELECT %s FROM %s" % (self._build_columns(), self._build_tables())
         args = []
@@ -189,5 +222,7 @@ class Select(object):
         wsql, wargs = self._build_where()
         query += "%s" % wsql
         args += wargs
+
+        query += self._build_order()
 
         return (query, args)
