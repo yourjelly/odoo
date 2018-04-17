@@ -66,8 +66,8 @@ class AccountAdvancesPaymentReport(models.Model):
                         ap.amount AS amount,
                         ap.payment_type,
                         (CASE WHEN p.state_id = cp.state_id THEN 'intra_state' ELSE 'inter_state' END) AS supply_type,
-                        (CASE WHEN ap.payment_type = 'outbound' AND ps.l10n_in_tin IS NOT NULL THEN concat(ps.l10n_in_tin,'-',ps.name)
-                            WHEN ap.payment_type = 'inbound' AND cps.l10n_in_tin IS NOT NULL THEN concat(cps.l10n_in_tin,'-',cps.name)
+                        (CASE WHEN ap.payment_type = 'inbound' AND ps.l10n_in_tin IS NOT NULL THEN concat(ps.l10n_in_tin,'-',ps.name)
+                            WHEN ap.payment_type = 'outbound' AND cps.l10n_in_tin IS NOT NULL THEN concat(cps.l10n_in_tin,'-',cps.name)
                             ELSE NULL END) AS place_of_supply
                         FROM account_payment ap
                         JOIN account_journal aj ON aj.id = ap.journal_id
@@ -153,8 +153,8 @@ class AccountAdvancesAdjustmentsReport(models.Model):
                     SELECT ap.id AS payment_id,
                         to_char(ai.date_invoice, 'MM-YYYY') AS invoice_month,
                         aj.company_id AS company_id,
-                        (CASE WHEN ap.payment_type = 'outbound' AND ps.l10n_in_tin IS NOT NULL THEN concat(ps.l10n_in_tin,'-',ps.name)
-                            WHEN ap.payment_type = 'inbound' AND cps.l10n_in_tin IS NOT NULL THEN concat(cps.l10n_in_tin,'-',cps.name)
+                        (CASE WHEN ap.payment_type = 'inbound' AND ps.l10n_in_tin IS NOT NULL THEN concat(ps.l10n_in_tin,'-',ps.name)
+                            WHEN ap.payment_type = 'outbound' AND cps.l10n_in_tin IS NOT NULL THEN concat(cps.l10n_in_tin,'-',cps.name)
                             ELSE NULL END) AS place_of_supply,
                         (CASE WHEN p.state_id = cp.state_id THEN 'intra_state' ELSE 'inter_state' END) AS supply_type,
                         ps.id AS state_id,
