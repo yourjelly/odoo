@@ -206,7 +206,7 @@ class Select(object):
         return ('', [])
 
     def _build_order(self):
-        if self.order:
+        if self._order:
             sql = " ORDER BY %s"
             return sql % ', '.join([o.__to_sql__() for o in self._order])
         return ''
