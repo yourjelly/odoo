@@ -61,74 +61,74 @@ class TestSelect(common.TransactionCase):
     def test_simple_select(self):
         s = Select([self.p.id])
         res = """SELECT "res_partner"."id" FROM "res_partner\""""
-        self.assertEqual(s.build()[0], res)
+        self.assertEqual(s.__to_sql__()[0], res)
 
     def test_select_aliased(self):
         s = Select({'id': self.p.id})
         res = """SELECT "res_partner"."id" AS "id" FROM "res_partner\""""
-        self.assertEqual(s.build()[0], res)
+        self.assertEqual(s.__to_sql__()[0], res)
 
     def test_select_cartesian_product(self):
         s = Select([self.u.id, self.p.id])
         res = """SELECT "res_users"."id", "res_partner"."id" FROM "res_partner", "res_users\""""
-        self.assertEqual(s.build()[0], res)
+        self.assertEqual(s.__to_sql__()[0], res)
 
     def test_select_simple_where(self):
         s = Select([self.p.id], self.p.id == 5)
         res = ("""SELECT "res_partner"."id" FROM "res_partner" WHERE ("res_partner"."id" = %s)""",
                [5])
-        self.assertEqual(s.build(), res)
+        self.assertEqual(s.__to_sql__(), res)
 
     def test_select_complex_where(self):
         s = Select([self.p.id], (self.p.id == 5) & (self.p.active != None))  # noqa
         res = (("""SELECT "res_partner"."id" FROM "res_partner\""""
                """ WHERE (("res_partner"."id" = %s) AND ("res_partner"."active" IS NOT NULL))"""),
                [5])
-        self.assertEqual(s.build(), res)
+        self.assertEqual(s.__to_sql__(), res)
 
     def test_select_right_join(self):
         self.p._nullable = True
         s = Select([self.u.id])
-        s.join(self.u.partner_id == self.p.id)
+        s = s.join(self.u.partner_id == self.p.id)
         res = ("""SELECT "res_users"."id" FROM "res_users\""""
                """ RIGHT JOIN "res_partner" ON ("res_users"."partner_id" = "res_partner"."id")""")
-        self.assertEqual(s.build()[0], res)
+        self.assertEqual(s.__to_sql__()[0], res)
 
     def test_select_left_join(self):
         self.p._nullable = True
         s = Select([self.p.id])
-        s.join(self.p.id == self.u.partner_id)
+        s = s.join(self.p.id == self.u.partner_id)
         res = ("""SELECT "res_partner"."id" FROM "res_partner\""""
                """ LEFT JOIN "res_users" ON ("res_partner"."id" = "res_users"."partner_id")""")
-        self.assertEqual(s.build()[0], res)
+        self.assertEqual(s.__to_sql__()[0], res)
 
     def test_select_full_join(self):
         self.u._nullable = True
         self.p._nullable = True
         s = Select([self.p.id])
-        s.join(self.p.id == self.u.partner_id)
+        s = s.join(self.p.id == self.u.partner_id)
         res = ("""SELECT "res_partner"."id" FROM "res_partner\""""
                """ FULL JOIN "res_users" ON ("res_partner"."id" = "res_users"."partner_id")""")
-        self.assertEqual(s.build()[0], res)
+        self.assertEqual(s.__to_sql__()[0], res)
 
     def test_select_inner_join(self):
         s = Select([self.p.id])
-        s.join(self.p.id == self.u.partner_id)
+        s = s.join(self.p.id == self.u.partner_id)
         res = ("""SELECT "res_partner"."id" FROM "res_partner\""""
                """ INNER JOIN "res_users" ON ("res_partner"."id" = "res_users"."partner_id")""")
-        self.assertEqual(s.build()[0], res)
+        self.assertEqual(s.__to_sql__()[0], res)
 
     def test_select_multi_join(self):
         self.p._nullable = True
         x = Row('res_currency', True)
         s = Select([self.p.id])
-        s.join(self.p.id == self.u.partner_id, self.p.active == x.active)
+        s = s.join(self.p.id == self.u.partner_id, self.p.active == x.active)
         res = (
             """SELECT "res_partner"."id" FROM "res_partner" """
             """LEFT JOIN "res_users" ON ("res_partner"."id" = "res_users"."partner_id") """
             """FULL JOIN "res_currency" ON ("res_partner"."active" = "res_currency"."active")"""
         )
-        self.assertEqual(s.build()[0], res)
+        self.assertEqual(s.__to_sql__()[0], res)
 
     def test_order_by_asc_nfirst(self):
         s = Select([self.p.id], order=[Asc(self.p.name, True)])
@@ -136,7 +136,7 @@ class TestSelect(common.TransactionCase):
             """SELECT "res_partner"."id" FROM "res_partner" """
             """ORDER BY "res_partner"."name" ASC NULLS FIRST"""
         )
-        self.assertEqual(s.build()[0], res)
+        self.assertEqual(s.__to_sql__()[0], res)
 
     def test_order_by_desc_nlast(self):
         s = Select([self.p.id], order=[Desc(self.p.name)])
@@ -144,11 +144,11 @@ class TestSelect(common.TransactionCase):
             """SELECT "res_partner"."id" FROM "res_partner" """
             """ORDER BY "res_partner"."name" DESC NULLS LAST"""
         )
-        self.assertEqual(s.build()[0], res)
+        self.assertEqual(s.__to_sql__()[0], res)
 
     def test_full_select_query(self):
         s = Select([self.p.id], where=self.p.name != 'johnny', order=[Asc(self.p.name)])
-        s.join(self.p.id == self.u.partner_id)
+        s = s.join(self.p.id == self.u.partner_id)
         res = (
             """SELECT "res_partner"."id" FROM "res_partner" """
             """INNER JOIN "res_users" ON ("res_partner"."id" = "res_users"."partner_id") """
@@ -156,4 +156,4 @@ class TestSelect(common.TransactionCase):
             """ORDER BY "res_partner"."name" ASC NULLS LAST""",
             ['johnny']
         )
-        self.assertEqual(s.build(), res)
+        self.assertEqual(s.__to_sql__(), res)

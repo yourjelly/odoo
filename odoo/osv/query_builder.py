@@ -1,3 +1,6 @@
+
+
+
 def _quote(val):
     if '"' not in val:
         return '"%s"' % val
@@ -131,7 +134,7 @@ class Modifier(object):
         sql = self.column.__to_sql__()[0]
         sql += " %s " % self.modifier
         sql += "NULLS FIRST" if self.nfirst else "NULLS LAST"
-        return sql
+        return sql, []
 
 
 class Asc(Modifier):
@@ -148,32 +151,24 @@ class Desc(Modifier):
 
 class Select(object):
 
-    def __init__(self, columns, where=None, order=[]):
-        self.columns = columns
-        self.aliased = isinstance(columns, dict)
-        self.joins = []
+    def __init__(self, columns, where=None, order=[], joins=[]):
+        self._columns = columns
+        self._aliased = isinstance(columns, dict)
+        self._joins = [Join(join) for join in joins]
 
-        if self.aliased:
-            self.tables = sorted({self.columns[c]._row for c in self.columns})
+        if self._aliased:
+            self._tables = sorted({self._columns[c]._row for c in self._columns})
         else:
-            self.tables = sorted({c._row for c in self.columns}, key=lambda r: r._table)
+            self._tables = sorted({c._row for c in self._columns}, key=lambda r: r._table)
 
         self._where = where
         self._order = order
 
     def where(self, expression):
-        if self._where is not None:
-            self._where &= expression
-        else:
-            self._where = expression
+        return Select(self._columns, expression, self._order)
 
     def join(self, *expressions):
-        for exp in expressions:
-            assert (isinstance(exp.left, Column) and isinstance(exp.right, Column)), \
-                "The operands of a join predicate MUST be Columns."
-            assert exp.left._row in self.tables, \
-                "The left hand side operand of the join predicate must be in the FROM clause."
-            self.joins.append(Join(exp))
+        return Select(self._columns, self._where, self._order, expressions)
 
     def order(self, expression):
         self._order += expression
@@ -182,7 +177,7 @@ class Select(object):
         sql = []
         args = []
 
-        for join in self.joins:
+        for join in self._joins:
             jsql, jargs = join.__to_sql__()
             sql.append(jsql)
             args += jargs
@@ -190,13 +185,13 @@ class Select(object):
         return (''.join(sql), args)
 
     def _build_columns(self):
-        if self.aliased:
-            return ', '.join(["%s AS %s" % (self.columns[c]._qualified, _quote(c))
-                              for c in self.columns])
-        return ', '.join(["%s" % c._qualified for c in self.columns])
+        if self._aliased:
+            return ', '.join(["%s AS %s" % (self._columns[c]._qualified, _quote(c))
+                              for c in self._columns])
+        return ', '.join(["%s" % c._qualified for c in self._columns])
 
     def _build_tables(self):
-        return ', '.join(["%s" % t._table for t in self.tables])
+        return ', '.join(["%s" % t._table for t in self._tables])
 
     def _build_where(self):
         sql = " WHERE %s"
@@ -208,10 +203,10 @@ class Select(object):
     def _build_order(self):
         if self._order:
             sql = " ORDER BY %s"
-            return sql % ', '.join([o.__to_sql__() for o in self._order])
+            return sql % ', '.join([o.__to_sql__()[0] for o in self._order])
         return ''
 
-    def build(self):
+    def __to_sql__(self):
         query = "SELECT %s FROM %s" % (self._build_columns(), self._build_tables())
         args = []
 
