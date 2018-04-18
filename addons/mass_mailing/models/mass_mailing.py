@@ -61,8 +61,6 @@ class MassMailingList(models.Model):
             from
                 mail_mass_mailing_contact_list_rel r
                 left join mail_mass_mailing_contact c on (r.contact_id=c.id)
-            where
-                c.opt_out <> true
             group by
                 list_id
         ''')
@@ -113,7 +111,6 @@ class MassMailingList(models.Model):
                     mail_mass_mailing_contact_list_rel contact_list_rel,
                     mail_mass_mailing_list mailing_list
                 WHERE contact.id=contact_list_rel.contact_id
-                AND contact.opt_out = FALSE
                 AND mailing_list.id=contact_list_rel.list_id
                 AND mailing_list.id IN %s
                 AND NOT EXISTS
@@ -156,23 +153,9 @@ class MassMailingContact(models.Model):
     list_ids = fields.Many2many(
         'mail.mass_mailing.list', 'mail_mass_mailing_contact_list_rel',
         'contact_id', 'list_id', string='Mailing Lists')
-    opt_out = fields.Boolean(string='Opt Out', help='The contact has chosen not to receive mails anymore from this list')
-    unsubscription_date = fields.Datetime(string='Unsubscription Date')
     message_bounce = fields.Integer(string='Bounced', help='Counter of the number of bounced emails for this contact.', default=0)
     country_id = fields.Many2one('res.country', string='Country')
     tag_ids = fields.Many2many('res.partner.category', string='Tags')
-
-    @api.model
-    def create(self, vals):
-        if 'opt_out' in vals:
-            vals['unsubscription_date'] = vals['opt_out'] and fields.Datetime.now()
-        return super(MassMailingContact, self).create(vals)
-
-    @api.multi
-    def write(self, vals):
-        if 'opt_out' in vals:
-            vals['unsubscription_date'] = vals['opt_out'] and fields.Datetime.now()
-        return super(MassMailingContact, self).write(vals)
 
     def get_name_email(self, name):
         name, email = self.env['res.partner']._parse_partner_name(name)

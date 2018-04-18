@@ -17,20 +17,42 @@ class MassMailController(http.Controller):
         if mailing.exists():
             res_id = res_id and int(res_id)
             res_ids = []
-            if mailing.mailing_model_name == 'mail.mass_mailing.list':
-                contacts = request.env['mail.mass_mailing.contact'].sudo().search([
-                    ('email', '=', email),
-                    ('list_ids', 'in', [mailing_list.id for mailing_list in mailing.contact_list_ids])
-                ])
-                res_ids = contacts.ids
-            else:
-                res_ids = [res_id]
-
             right_token = mailing._unsubscribe_token(res_id, email)
             if not consteq(str(token), right_token):
                 raise exceptions.AccessDenied()
-            mailing.update_opt_out(email, res_ids, True)
-            return _('You have been unsubscribed successfully')
+            if mailing.mailing_model_name == 'mail.mass_mailing.list':
+                contact = request.env['mail.mass_mailing.contact'].sudo().browse(res_id)
+                return request.render('mass_mailing.unsubscribe', {
+                    'res_id': res_id,
+                    'token': token,
+                    'contact': contact,
+                    'email': email,
+                    'mailing': mailing})
+            else:
+                res_ids = [res_id]
+                mailing.update_opt_out(email, res_ids, True)
+                return request.render('mass_mailing.unsubscribe_success')
+        else:
+            raise exceptions.AccessError(_('Access Denied'))
+
+    @http.route(['/mail/mailing/unsubscribe'], type='json', methods=['POST'], website=True, auth='public')
+    def unsubscribe_mailing(self, **post):
+        mailing = request.env['mail.mass_mailing'].sudo().browse(post['mailing_id'])
+        if mailing.exists():
+            res_id = post['contact_id'] and int(post['contact_id'])
+            right_token = mailing._unsubscribe_token(res_id, post['email'])
+            if not consteq(str(post['token']), right_token):
+                raise exceptions.AccessDenied()
+            mailing_contact = request.env['mail.mass_mailing.contact'].sudo().browse(res_id)
+            if post['opt_out_ids']:
+                mailing_list_names = request.env['mail.mass_mailing.list'].sudo().browse(post['opt_out_ids']).mapped('name')
+                mailing_contact.list_ids = [(6, 0, post['opt_in_ids'])]
+                message = _('You have unsubscribed %s mailing list.') % ','.join(mailing_list_names)
+                mailing_contact._message_log(body=message)
+            return True
+        else:
+            raise exceptions.AccessError(_('Access Denied'))
+
 
     @http.route('/mail/track/<int:mail_id>/blank.gif', type='http', auth='none')
     def track_mail_open(self, mail_id, **post):
