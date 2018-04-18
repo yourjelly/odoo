@@ -38,7 +38,24 @@
         <t t-call="web._assets_helpers"/>
 
         <link rel="stylesheet" type="text/css" href="/web/static/lib/jquery.ui/jquery-ui.css"/>
-        <link rel="stylesheet" type="text/css" href="/web/static/lib/fontawesome/css/font-awesome.css"/>
+
+        <link rel="stylesheet" type="text/scss" href="/web/static/lib/fontawesome/scss/_variables.scss"/>
+        <link rel="stylesheet" type="text/scss" href="/web/static/lib/fontawesome/scss/_mixins.scss"/>
+        <link rel="stylesheet" type="text/scss" href="/web/static/lib/fontawesome/scss/_core.scss"/>
+        <link rel="stylesheet" type="text/scss" href="/web/static/lib/fontawesome/scss/_larger.scss"/>
+        <link rel="stylesheet" type="text/scss" href="/web/static/lib/fontawesome/scss/_fixed-width.scss"/>
+        <link rel="stylesheet" type="text/scss" href="/web/static/lib/fontawesome/scss/_list.scss"/>
+        <link rel="stylesheet" type="text/scss" href="/web/static/lib/fontawesome/scss/_bordered-pulled.scss"/>
+        <link rel="stylesheet" type="text/scss" href="/web/static/lib/fontawesome/scss/_animated.scss"/>
+        <link rel="stylesheet" type="text/scss" href="/web/static/lib/fontawesome/scss/_rotated-flipped.scss"/>
+        <link rel="stylesheet" type="text/scss" href="/web/static/lib/fontawesome/scss/_stacked.scss"/>
+        <link rel="stylesheet" type="text/scss" href="/web/static/lib/fontawesome/scss/_icons.scss"/>
+        <link rel="stylesheet" type="text/scss" href="/web/static/lib/fontawesome/scss/_screen-reader.scss"/>
+        <link rel="stylesheet" type="text/scss" href="/web/static/lib/fontawesome/scss/fa-brands.scss"/>
+        <link rel="stylesheet" type="text/scss" href="/web/static/lib/fontawesome/scss/fa-regular.scss"/>
+        <link rel="stylesheet" type="text/scss" href="/web/static/lib/fontawesome/scss/fa-solid.scss"/>
+        <link rel="stylesheet" type="text/scss" href="/web/static/src/scss/fontawesome.scss"/>
+
         <link rel="stylesheet" type="text/scss" href="/web/static/lib/bootstrap-datetimepicker/src/scss/_bootstrap-datetimepicker.scss"/>
         <link rel="stylesheet" type="text/css" href="/web/static/lib/select2/select2.css"/>
         <link rel="stylesheet" type="text/css" href="/web/static/lib/select2-bootstrap-css/select2-bootstrap.css"/>

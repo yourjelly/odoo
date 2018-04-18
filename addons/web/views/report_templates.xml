@@ -17,7 +17,9 @@
         <!-- TODO: Put in the right report ..? -->
         <link href="https://fonts.googleapis.com/css?family=Work+Sans:thin,light,regular,medium,bold,semi-bold" rel="stylesheet"/>
 
-        <link href="/web/static/lib/fontawesome/css/font-awesome.css" rel="stylesheet" type="text/css"/>
+        <link rel="stylesheet" type="text/css" href="/web/static/lib/fontawesome/css/fontawesome.css"/>
+        <link rel="stylesheet" type="text/css" href="/web/static/lib/fontawesome/css/fa-solid.css"/>
+        <link rel="stylesheet" type="text/css" href="/web/static/lib/fontawesome/css/fa-brands.css"/>
 
         <link rel="stylesheet" type="text/scss" href="/web/static/src/scss/report.scss"/>
         <link rel="stylesheet" type="text/scss" href="/web/static/src/scss/layout_background.scss"/>
