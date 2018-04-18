@@ -13,13 +13,13 @@ class MassMailController(http.Controller):
 
     @http.route(['/mail/mailing/<int:mailing_id>/unsubscribe'], type='http', website=True, auth='public')
     def mailing(self, mailing_id, email=None, res_id=None, token="", **post):
+        res_ids = []
         mailing = request.env['mail.mass_mailing'].sudo().browse(mailing_id)
+        right_token = mailing._unsubscribe_token(res_id, email)
+        if not consteq(str(token), right_token):
+            raise exceptions.AccessDenied()
         if mailing.exists():
             res_id = res_id and int(res_id)
-            res_ids = []
-            right_token = mailing._unsubscribe_token(res_id, email)
-            if not consteq(str(token), right_token):
-                raise exceptions.AccessDenied()
             if mailing.mailing_model_name == 'mail.mass_mailing.list':
                 contact = request.env['mail.mass_mailing.contact'].sudo().browse(res_id)
                 return request.render('mass_mailing.unsubscribe', {
@@ -38,11 +38,11 @@ class MassMailController(http.Controller):
     @http.route(['/mail/mailing/unsubscribe'], type='json', methods=['POST'], website=True, auth='public')
     def unsubscribe_mailing(self, **post):
         mailing = request.env['mail.mass_mailing'].sudo().browse(post['mailing_id'])
+        res_id = post['contact_id'] and int(post['contact_id'])
+        right_token = mailing._unsubscribe_token(res_id, post['email'])
+        if not consteq(str(post['token']), right_token):
+            raise exceptions.AccessDenied()
         if mailing.exists():
-            res_id = post['contact_id'] and int(post['contact_id'])
-            right_token = mailing._unsubscribe_token(res_id, post['email'])
-            if not consteq(str(post['token']), right_token):
-                raise exceptions.AccessDenied()
             mailing_contact = request.env['mail.mass_mailing.contact'].sudo().browse(res_id)
             if post['opt_out_ids']:
                 mailing_list_names = request.env['mail.mass_mailing.list'].sudo().browse(post['opt_out_ids']).mapped('name')
