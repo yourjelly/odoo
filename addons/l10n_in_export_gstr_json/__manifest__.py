@@ -2,12 +2,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'Indian - Export GSTR',
+    'name': 'Indian - Export json GSTR',
     'version': '1.0',
     'description': """
 Indian Accounting GSTR Export.
 ====================================
-This module allows to export csv file for GSTR-1 and GSTR-2 report.
+This module allows to export json file for GSTR-1 report.
 GSTR-1 is a monthly or quarterly return to be filed by regular dealers.
 The return contains details of all outward supplies made during the month.
 The return is divided into 13 sections:
@@ -19,21 +19,12 @@ The return is divided into 13 sections:
 * Export Invoice: Sales to Countries outside india.
 * Tax Liability (Advance Payment): Advance Payment received by Customers.
 * Tax already paid on invoices: Invoices on which on advance was received and tax has already been paid.
-""",
+  """,
     'category': 'Localization',
     'depends': [
-        'l10n_in'
+        'l10n_in_export_gstr'
     ],
     'data': [
-        'data/account_invoice_refund_reason_data.xml',
-        'data/gst.port.code.csv',
-        'security/ir.model.access.csv',
-        'wizard/account_invoice_refund_views.xml',
-        'wizard/export_gst_return_views.xml',
-        'views/account_invoice_views.xml',
-        'views/product_template_views.xml',
-        'views/res_partner_views.xml',
-        'views/res_config_settings_views.xml',
-        'views/res_company_views.xml'
+        'wizard/export_gst_return_csv_views.xml'
     ],
 }

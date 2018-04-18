@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="export_gst_return_view_form_inherit_export_gstr_json" model="ir.ui.view">
+        <field name="name">export.gst.return.form.inherit.export.gstr.json</field>
+        <field name="model">export.gst.return</field>
+        <field name="inherit_id" ref="l10n_in_export_gstr.export_gst_return_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='export_gstr']"  position="attributes">
+                <attribute name="attrs">{'invisible': [('file_type','!=','csv')]}</attribute>
+            </xpath>
+            <xpath expr="//button[@name='export_gstr']"  position="after">
+                <button name="export_gstr_json" string="Export(JSON)" attrs="{'invisible': [('file_type','!=','json')]}" type="object" class="btn-primary o_gst_export"/>
+            </xpath>
+            
+            <field name="export_summary" position="attributes">
+                <attribute name="attrs">{'invisible': [('file_type','!=','csv')]}</attribute>
+            </field>
+            <field name="export_summary" position="before">
+                <field name="file_type"/>
+                <field name="gross_turnover" attrs="{'invisible': [('file_type','!=','json')]}"/>
+                <field name="cur_gross_turnover" attrs="{'invisible': [('file_type','!=','json')]}"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>
