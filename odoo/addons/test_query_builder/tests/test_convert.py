@@ -65,7 +65,7 @@ class TestSelect(common.TransactionCase):
 
     def test_select_aliased(self):
         s = Select({'id': self.p.id})
-        res = """SELECT "res_partner"."id" AS "id" FROM "res_partner\""""
+        res = """SELECT "res_partner"."id" AS id FROM "res_partner\""""
         self.assertEqual(s.__to_sql__()[0], res)
 
     def test_select_cartesian_product(self):
@@ -157,3 +157,8 @@ class TestSelect(common.TransactionCase):
             ['johnny']
         )
         self.assertEqual(s.__to_sql__(), res)
+
+    def test_distinct(self):
+        s = Select([self.p.name], distinct=[self.p.id])
+        res = ("""SELECT DISTINCT "res_partner"."name" FROM "res_partner\"""")
+        self.assertEqual(s.__to_sql__()[0], res)

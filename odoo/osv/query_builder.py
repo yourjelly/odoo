@@ -151,7 +151,7 @@ class Desc(Modifier):
 
 class Select(object):
 
-    def __init__(self, columns, where=None, order=[], joins=[]):
+    def __init__(self, columns, where=None, order=[], joins=[], distinct=[]):
         self._columns = columns
         self._aliased = isinstance(columns, dict)
         self._joins = [Join(join) for join in joins]
@@ -163,6 +163,7 @@ class Select(object):
 
         self._where = where
         self._order = order
+        self._distinct = distinct
 
     def where(self, expression):
         return Select(self._columns, expression, self._order)
@@ -185,10 +186,19 @@ class Select(object):
         return (''.join(sql), args)
 
     def _build_columns(self):
-        if self._aliased:
-            return ', '.join(["%s AS %s" % (self._columns[c]._qualified, _quote(c))
-                              for c in self._columns])
-        return ', '.join(["%s" % c._qualified for c in self._columns])
+        res = []
+
+        for c in self._columns:
+            if self._aliased:
+                sql = "%s AS %s" % (self._columns[c]._qualified, c)
+                c = self._columns[c]
+            else:
+                sql = "%s" % c._qualified
+            if c in self._distinct:
+                sql = 'DISTINCT %s' % sql
+            res.append(sql)
+
+        return ', '.join(res)
 
     def _build_tables(self):
         return ', '.join(["%s" % t._table for t in self._tables])
