@@ -19,4 +19,21 @@
             </li>
         </div>
     </div>
+
+    <div t-name="mass_mailing.unsubscribe_template">
+        <div class="row">
+            <t t-if="result">
+                <div class="col-md-12 text-center">
+                    <i class="fa fa-check-circle fa-5x text-success"></i>
+                    <h3><t t-esc="message"/></h3>
+                </div>
+            </t>
+            <t t-else="">
+                <div class="col-md-12 text-center">
+                    <i class="fa fa-times-circle fa-5x text-danger"></i>
+                    <h3><t t-esc="message"/></h3>
+                </div>
+            </t>
+        </div>
+    </div>
 </templates>
