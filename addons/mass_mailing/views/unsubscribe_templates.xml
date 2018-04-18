@@ -1,73 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="unsubscribe">
-        <div class="container o_unsubscribe_form">
-            <div class="row">
-                <form action="/mail/mailing/unsubscribe" method="POST" id="unsubscribe_form">
-                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                    <input type="hidden" name="email" t-att-value="email"/>
-                    <input type="hidden" name="mailing_id" t-att-value="mailing_id"/>
-
-                    <div class="col-md-6 col-md-offset-3">
-
-                        <h1 class="page-header">Mailing Subscriptions</h1>
-
-                        <t t-if="contacts">
-                            <div class="alert alert-info text-center">
-                                <p>Choose your mailing subscriptions.</p>
-                            </div>
-
-                            <ul class="list-group">
-                                <t t-foreach="contacts" t-as="contact">
-                                    <li class="list-group-item">
-                                        <input type="checkbox" class="mail_list_checkbox" name="contact_ids"
-                                            t-att-value="contact['id']" t-att-checked="'checked' if contact['opt_out'] == False else None"/>
-                                        <t t-foreach="contact.list_ids" t-as="contact_list">
-                                            <t t-esc="contact_list.name"/> 
-                                        </t>
-                                    </li>
-                                </t>
-                            </ul>
-
-                            <div class="text-center mb16">
-                                <input type="submit" id="send_form" class="btn btn-primary" value="Update my subscriptions"/>
-                            </div>
-                        </t>
-
-                        <t t-if="contacts == False">
-                            <div class="alert alert-info text-center">
-                                <p>You are not subscribed to any of our mailing list.</p>
-                            </div>
-                        </t>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </template>
-
-    <template id="unsubscribed">
-        <div class="container mt8">
-            <div class="row">
-                <div class="col-md-6 col-md-offset-3">
-                    <h1 class="page-header">Mailing Subscriptions</h1>
-
-                    <div class="alert alert-success text-center">
-                        <p>You have been successfully <strong>unsubscribed</strong>!</p>
+    <template id="mass_mailing_unsubscribe_template">
+        <t t-call="web.layout">
+            <t t-set="head">
+                <t t-call-assets="web.assets_common" t-js="false"/>
+                <t t-call-assets="web.assets_common" t-css="false"/>
+                <t t-call-assets="web.assets_backend" t-css="false"/>
+                <t t-call-assets="web.assets_backend" t-js="false"/>
+            </t>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-2">
+                        <img t-attf-src="data:image/png;base64,#{to_text(res_company.logo)}" class="img img-responsive" t-att-title="res_company.name"/>
                     </div>
                 </div>
+                <t t-raw="0"/>
             </div>
-        </div>
-    </template>
-
-    <template id="page_unsubscribe" name="Unsubscribe">
-        <t t-call="website.layout">
-            <t t-call="website_mass_mailing.unsubscribe"/>
         </t>
     </template>
 
-    <template id="page_unsubscribed" name="Unsubscribed">
-        <t t-call="website.layout">
-            <t t-call="website_mass_mailing.unsubscribed"/>
+    <template id="unsubscribe">
+        <t t-call="mass_mailing.mass_mailing_unsubscribe_template">
+            <div class="row o_unsubscribe_form">
+                <div class="col-md-12">
+                    <h3 class="text-center">Mailing Subscriptions</h3>
+                </div>
+                <div class="col-md-6 col-md-offset-3">
+                    <form action="/mail/mailing/unsubscribe" method="POST" id="unsubscribe_form">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="email" t-att-value="email"/>
+                        <input type="hidden" name="contact_id" t-att-value="contact.id"/>
+                        <input type="hidden" name="token" t-att-value="token"/>
+                        <input type="hidden" name="mailing_id" t-att-value="mailing.id"/>
+                        <t t-if="contact and contact.list_ids">
+                            <ul class="list-group">
+                                <t t-foreach="contact.list_ids" t-as="contact_list">
+                                    <li class="list-group-item">
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox" name="mailing_ids" class="mail_list_checkbox" t-att-value="contact_list['id']" t-att-checked="'checked'"/> <t t-esc="contact_list.name"/>
+                                            </label>
+                                        </div>
+                                    </li>
+                                </t>
+                            </ul>
+                            <div>
+                                <input type="submit" id="send_form" class="btn btn-block btn-primary" value="Update my subscriptions"/>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="alert alert-warning text-center">
+                                <i class="fa fa-info-circle"/> You are not subscribed to any of our mailing list.
+                            </div>
+                        </t>
+                    </form>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="unsubscribe_success">
+        <t t-call="mass_mailing.mass_mailing_unsubscribe_template">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <i class="fa fa-check-circle fa-5x text-success"></i>
+                    <h3>Your mailing preference has been updated successfully!</h3>
+                </div>
+            </div>
         </t>
     </template>
 </odoo>
