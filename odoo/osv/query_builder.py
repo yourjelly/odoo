@@ -221,16 +221,24 @@ class Select(object):
         else:
             self._tables = sorted({c._row for c in self._columns}, key=lambda r: r._table)
 
+    def columns(self, *cols):
+        """ Create a similar Select object but with different output columns."""
+        return Select(**{**self.attrs, 'where': cols})
+
+    def distinct(self, *cols):
+        """ Create a similar Select object but with different distinct columns."""
+        return Select(**{**self.attrs, 'where': cols})
+
     def where(self, expression):
-        """ Create a similar Select object but with a new where clause."""
+        """ Create a similar Select object but with a different where clause."""
         return Select(**{**self.attrs, 'where': expression})
 
     def join(self, *expressions):
-        """ Create a similar Select object but with new joins."""
+        """ Create a similar Select object but with different joins."""
         return Select(**{**self.attrs, 'joins': expressions})
 
     def order(self, *expressions):
-        """ Create a similar Select object but with a new order by clause."""
+        """ Create a similar Select object but with a different order by clause."""
         return Select(**{**self.attrs, 'order': expressions})
 
     def _build_joins(self):

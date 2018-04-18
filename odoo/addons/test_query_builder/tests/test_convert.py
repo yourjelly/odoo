@@ -173,3 +173,5 @@ class TestSelect(common.TransactionCase):
         s_base = Select([self.p.name, self.p.surname], where=self.p.name != 'johnny')
         s_composite = s_base.where(self.p.name == 'johnny')
         self.assertIsNot(s_base, s_composite)
+        self.assertEqual(s_base._where.op, '!=')
+        self.assertEqual(s_composite._where.op, '=')
