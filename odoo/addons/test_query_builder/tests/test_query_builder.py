@@ -51,6 +51,11 @@ class TestExpressions(common.TransactionCase):
         res = ("""(("res_users"."id" != %s) AND ("res_partner"."name" IS NOT NULL))""", [5])
         self.assertEqual(expr.__to_sql__(), res)
 
+    def test_abs_expression(self):
+        expr = abs(self.u.delta)
+        res = ("""(ABS("res_users"."delta"))""", [])
+        self.assertEqual(expr.__to_sql__(), res)
+
 
 class TestSelect(common.TransactionCase):
 

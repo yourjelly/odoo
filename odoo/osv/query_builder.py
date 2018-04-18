@@ -56,6 +56,9 @@ class Expression(object):
     def __ge__(self, other):
         return Expression('>=', self, other)
 
+    def __abs__(self):
+        return Func('ABS', self, None)
+
     def __to_sql__(self):
         left, args = self.left.__to_sql__()
 
@@ -75,6 +78,43 @@ class Expression(object):
                 args.append(self.right)
                 sql += '%s)'
 
+        return (sql, args)
+
+
+class Func(Expression):
+
+    __slots__ = ('left', 'right', 'op')
+
+    def __init__(self, func, op1, op2):
+        self.op = func
+        self.left = op1
+        self.right = op2
+
+    def __to_sql__(self):
+        _not_none = []
+
+        if self.left is not None:
+            _not_none.append(self.left)
+
+        if self.right is not None:
+            _not_none.append(self.right)
+
+        assert len(_not_none) > 0, "A SQL function needs at least one argument"
+        sql = '(%s(' % self.op
+        args = []
+
+        for el in _not_none:
+            if isinstance(el, Expression):
+                rsql, rargs = el.__to_sql__()
+                sql += rsql
+                args += rargs
+            else:
+                args.append(el)
+                sql += '%s'
+            if _not_none.index(el) < (len(_not_none) - 1):
+                sql += ', '
+
+        sql += '))'
         return (sql, args)
 
 
