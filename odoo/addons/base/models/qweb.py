@@ -292,8 +292,7 @@ class QWeb(object):
         _options['ast_calls'] = []
         _options['root'] = element.getroottree()
         _options['last_path_node'] = None
-        if not options.get('nsmap'):
-            _options['nsmap'] = {}
+        _options['nsmap'] = dict(options.get('nsmap') or {}, xml="http://www.w3.org/XML/1998/namespace")
 
         # generate ast
 
