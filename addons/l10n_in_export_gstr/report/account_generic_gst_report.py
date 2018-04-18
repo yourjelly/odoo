@@ -43,7 +43,11 @@ class AccountGenericGstReport(models.AbstractModel):
         #Give default sale gst tax rate if Any GST tax select in account setting else return 18(default as per Indian GSTR guidelines).
         default_tax_rate = 18
         company_id = self.env.user.company_id
-        default_tax_id = type == 'sale' and company_id.account_sale_tax_id or type == 'purchase' and company_id.account_purchase_tax_id or False
+        default_tax_id = False
+        if type == 'sale':
+            default_tax_id = company_id.account_sale_tax_id
+        if type == 'purchase':
+            default_tax_id = company_id.account_purchase_tax_id
         if default_tax_id:
             if default_tax_id.amount_type == 'group':
                 default_tax_rate = sum(default_tax_id.children_tax_ids.mapped('amount'))
