@@ -159,6 +159,12 @@ class TestSelect(common.TransactionCase):
         self.assertEqual(s.__to_sql__(), res)
 
     def test_distinct(self):
-        s = Select([self.p.name], distinct=[self.p.id])
+        s = Select([self.p.name], distinct=[self.p.name])
         res = ("""SELECT DISTINCT "res_partner"."name" FROM "res_partner\"""")
+        self.assertEqual(s.__to_sql__()[0], res)
+
+    def test_distinct_multi(self):
+        s = Select([self.p.name, self.p.surname], distinct=[self.p.name, self.p.surname])
+        res = ("""SELECT DISTINCT "res_partner"."name", """
+               """DISTINCT "res_partner"."surname" FROM "res_partner\"""")
         self.assertEqual(s.__to_sql__()[0], res)

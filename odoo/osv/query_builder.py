@@ -1,13 +1,19 @@
-
+# -*- coding: utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 
 def _quote(val):
+    """ Helper function for quoting SQL identifiers. """
     if '"' not in val:
         return '"%s"' % val
     return val
 
 
 class Expression(object):
+
+    """
+    Main Abstract Syntax Tree of the query builder.
+    """
 
     __slots__ = ('left', 'op', 'right')
 
@@ -90,6 +96,14 @@ class Row(object):
     __slots__ = ('_table', '_nullable')
 
     def __init__(self, table, nullable=False):
+        """
+        Create an object that represents any row of a table.
+
+        Args:
+            table (str): Name of the table.
+            nullable (bool): In the case of a join, whether the NULLs of this
+                table should be used in the resulting joined table.
+        """
         self._table = _quote(table)
         self._nullable = nullable
 
@@ -102,6 +116,22 @@ class Row(object):
 class Join(object):
 
     def __init__(self, expression):
+        """
+        Create a join between two tables on a given condition.
+
+        /!\ This class should *NOT* be used on its own, the Select class already takes care
+            of creating the appropriate Join objects /!\
+
+        The type of join depends on each table's `_nullable` boolean flag:
+            If LHS is _nullable and RHS is _nullable, the type is a FULL JOIN
+            If LHS is _nullable and RHS is not _nullable, the type is a LEFT JOIN
+
+        Args:
+            expression (Expression): an AST expression which will serve as the ON condition for the
+                Join. At the moment, both sides of the expression must be Columns, as it is
+                the most common case and this allows us to infer the tables to join from the
+                condition expression.
+        """
         self.expression = expression
         self.t1 = self.expression.left._row
         self.t2 = self.expression.right._row
@@ -152,9 +182,33 @@ class Desc(Modifier):
 class Select(object):
 
     def __init__(self, columns, where=None, order=[], joins=[], distinct=[]):
+        """
+        Stateless class for generating SQL SELECT statements.
+
+        Args:
+            columns: Either a list of Column for the output table or a dictionary
+                of alias: Column, these will be used in the 'SELECT x' part of
+                the query.
+            where (Expression): An AST expression for filtering out the results of the query.
+            order: A list of (potentially modified) columns to order by.
+            joins: A list of expressions by which to join different tables based on a condition.
+            distinct: A list of columns to be fetched only if they're not the same.
+
+        Example:
+            p = Row('res_partner', True)
+            u = Row('res_users')
+            s = Select({'id': p.id}, p.name != None, [Desc(p.id)], [p.id == u.partner_id])
+
+            >>> s.__to_sql__()
+
+            SELECT "res_partner"."id" AS id
+            LEFT JOIN "res_users" ON "res_partner"."id" = "res_users"."partner_id"
+            WHERE ("res_partner"."name" IS NOT NULL)
+            ORDER BY "res_partner"."id" DESC NULLS LAST
+        """
         self._columns = columns
         self._aliased = isinstance(columns, dict)
-        self._joins = [Join(join) for join in joins]
+        self._joins = joins
 
         if self._aliased:
             self._tables = sorted({self._columns[c]._row for c in self._columns})
@@ -166,20 +220,23 @@ class Select(object):
         self._distinct = distinct
 
     def where(self, expression):
-        return Select(self._columns, expression, self._order)
+        """ Create a similar Select object but with a new where clause."""
+        return Select(self._columns, expression, self._order, self._joins, self._distinct)
 
     def join(self, *expressions):
-        return Select(self._columns, self._where, self._order, expressions)
+        """ Create a similar Select object but with new joins."""
+        return Select(self._columns, self._where, self._order, expressions, self._distinct)
 
-    def order(self, expression):
-        self._order += expression
+    def order(self, *expressions):
+        """ Create a similar Select object but with a new order by clause."""
+        return Select(self._columns, self._where, expressions, self._joins, self._distinct)
 
     def _build_joins(self):
         sql = []
         args = []
 
         for join in self._joins:
-            jsql, jargs = join.__to_sql__()
+            jsql, jargs = Join(join).__to_sql__()
             sql.append(jsql)
             args += jargs
 
@@ -217,6 +274,12 @@ class Select(object):
         return ''
 
     def __to_sql__(self):
+        """
+        Generate a SQL (Postgres) statement from the different parts of the Select object.
+
+        Returns:
+            tuple: The SQL query as a string and the arguments to be passed to cr.execute as list.
+        """
         query = "SELECT %s FROM %s" % (self._build_columns(), self._build_tables())
         args = []
 
