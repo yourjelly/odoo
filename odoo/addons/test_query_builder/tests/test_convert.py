@@ -168,3 +168,8 @@ class TestSelect(common.TransactionCase):
         res = ("""SELECT DISTINCT "res_partner"."name", """
                """DISTINCT "res_partner"."surname" FROM "res_partner\"""")
         self.assertEqual(s.__to_sql__()[0], res)
+
+    def test_composite_select(self):
+        s_base = Select([self.p.name, self.p.surname], where=self.p.name != 'johnny')
+        s_composite = s_base.where(self.p.name == 'johnny')
+        self.assertIsNot(s_base, s_composite)

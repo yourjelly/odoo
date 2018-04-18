@@ -206,30 +206,32 @@ class Select(object):
             WHERE ("res_partner"."name" IS NOT NULL)
             ORDER BY "res_partner"."id" DESC NULLS LAST
         """
-        self._columns = columns
+        self.attrs = {}
+
+        self.attrs['columns'] = self._columns = columns
+        self.attrs['where'] = self._where = where
+        self.attrs['order'] = self._order = order
+        self.attrs['joins'] = self._joins = joins
+        self.attrs['distinct'] = self._distinct = distinct
+
         self._aliased = isinstance(columns, dict)
-        self._joins = joins
 
         if self._aliased:
             self._tables = sorted({self._columns[c]._row for c in self._columns})
         else:
             self._tables = sorted({c._row for c in self._columns}, key=lambda r: r._table)
 
-        self._where = where
-        self._order = order
-        self._distinct = distinct
-
     def where(self, expression):
         """ Create a similar Select object but with a new where clause."""
-        return Select(self._columns, expression, self._order, self._joins, self._distinct)
+        return Select(**{**self.attrs, 'where': expression})
 
     def join(self, *expressions):
         """ Create a similar Select object but with new joins."""
-        return Select(self._columns, self._where, self._order, expressions, self._distinct)
+        return Select(**{**self.attrs, 'joins': expressions})
 
     def order(self, *expressions):
         """ Create a similar Select object but with a new order by clause."""
-        return Select(self._columns, self._where, expressions, self._joins, self._distinct)
+        return Select(**{**self.attrs, 'order': expressions})
 
     def _build_joins(self):
         sql = []
