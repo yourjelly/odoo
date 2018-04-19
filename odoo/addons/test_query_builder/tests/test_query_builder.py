@@ -220,6 +220,17 @@ class TestSelect(common.TransactionCase):
             """GROUP BY "res_partner"."name\""""
         )
 
+    def test_limit(self):
+        s = Select([self.p.id], limit=5)
+        self.assertEqual(
+            s.__to_sql__(),
+            ("""SELECT "res_partner"."id" FROM "res_partner" LIMIT %s""", [5])
+        )
+
+    ####################
+    # Test functions that return new Select instances
+    ####################
+
     def test_new_columns(self):
         # TODO: Verify that any of these methods properly regenerate the corresponding tables
         base = Select([self.p.name])
@@ -299,4 +310,17 @@ class TestSelect(common.TransactionCase):
             new.__to_sql__()[0],
             """SELECT "res_partner"."id", "res_partner"."name" FROM "res_partner" """
             """GROUP BY "res_partner"."name\""""
+        )
+
+    def test_new_limit(self):
+        base = Select([self.p.id], limit=5)
+        new = base.limit(100)
+        self.assertIsNot(base, new)
+        self.assertEqual(
+            base.__to_sql__(),
+            ("""SELECT "res_partner"."id" FROM "res_partner" LIMIT %s""", [5])
+        )
+        self.assertEqual(
+            new.__to_sql__(),
+            ("""SELECT "res_partner"."id" FROM "res_partner" LIMIT %s""", [100])
         )

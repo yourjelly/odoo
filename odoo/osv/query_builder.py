@@ -87,8 +87,8 @@ class Expression(object):
         sql = "(%s %s " % (left, self.op)
 
         if isinstance(self.right, Expression):
-            right, rargs = self.right.__to_sql__()
-            args += rargs
+            right, _args = self.right.__to_sql__()
+            args += _args
             sql += right + ')'
         else:
             if self.right == 'NULL':
@@ -114,9 +114,9 @@ class Func(Expression):
 
         for arg in self.args:
             if isinstance(arg, Expression):
-                rsql, rargs = arg.__to_sql__()
-                sql += rsql
-                args += rargs
+                _sql, _args = arg.__to_sql__()
+                sql += _sql
+                args += _args
             else:
                 args.append(arg)
                 sql += '%s'
@@ -235,7 +235,7 @@ class Select(object):
     # force a cartesian product
 
     def __init__(self, columns, where=None, order=[], joins=[], distinct=False,
-                 group=[]):
+                 group=[], limit=None):
         """
         Stateless class for generating SQL SELECT statements.
 
@@ -268,6 +268,7 @@ class Select(object):
         self.attrs['joins'] = self._joins = joins
         self.attrs['distinct'] = self._distinct = distinct
         self.attrs['group'] = self._group = group
+        self.attrs['limit'] = self._limit = limit
 
         self._aliased = isinstance(columns, dict)
 
@@ -301,14 +302,18 @@ class Select(object):
         """ Create a similar Select object but with a different group by clause."""
         return Select(**{**self.attrs, 'group': expressions})
 
+    def limit(self, n):
+        """ Create a similar Select object but with a different limit."""
+        return Select(**{**self.attrs, 'limit': n})
+
     def _build_joins(self):
         sql = []
         args = []
 
         for join in self._joins:
-            jsql, jargs = Join(join).__to_sql__()
-            sql.append(jsql)
-            args += jargs
+            _sql, _args = Join(join).__to_sql__()
+            sql.append(_sql)
+            args += _args
 
         return (''.join(sql), args)
 
@@ -347,6 +352,12 @@ class Select(object):
             return sql % ', '.join([g.__to_sql__()[0] for g in self._group])
         return ''
 
+    def _build_limit(self):
+        if self._limit:
+            sql = " LIMIT %s"
+            return sql, [self._limit]
+        return '', []
+
     def __to_sql__(self):
         """
         Generate a SQL (Postgres) statement from the different parts of the Select object.
@@ -354,19 +365,23 @@ class Select(object):
         Returns:
             tuple: The SQL query as a string and the arguments to be passed to cr.execute as list.
         """
-        query = "SELECT %s%s FROM %s" % ('DISTINCT ' if self._distinct else '',
-                                         self._build_columns(), self._build_tables())
+        sql = "SELECT %s%s FROM %s" % ('DISTINCT ' if self._distinct else '',
+                                       self._build_columns(), self._build_tables())
         args = []
 
-        jsql, jargs = self._build_joins()
-        query += "%s" % jsql
-        args += jargs
+        def with_args(f):
+            # access parent f(x)'s query and args and modify them
+            nonlocal sql, args
+            _sql, _args = f()
+            sql += "%s" % _sql
+            args += _args
 
-        wsql, wargs = self._build_where()
-        query += "%s" % wsql
-        args += wargs
+        with_args(self._build_joins)
+        with_args(self._build_where)
 
-        query += self._build_order()
-        query += self._build_group()
+        sql += self._build_order()
+        sql += self._build_group()
 
-        return (query, args)
+        with_args(self._build_limit)
+
+        return (sql, args)
