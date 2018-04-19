@@ -586,6 +586,14 @@ class MassMailing(models.Model):
             records = model.search([('id', 'in', res_ids), (email_fname, 'ilike', email)])
             records.write({'opt_out': value})
 
+    def unsubscribe_list(self, opt_out_ids, opt_in_ids, contact_id):
+        mailing_contact = self.env['mail.mass_mailing.contact'].sudo().browse(contact_id)
+        if opt_out_ids:
+            mailing_list_names = self.env['mail.mass_mailing.list'].sudo().browse(opt_out_ids).mapped('name')
+            mailing_contact.list_ids = [(6, 0, opt_in_ids)]
+            message = _('You have unsubscribed %s mailing list.') % ','.join(mailing_list_names)
+            mailing_contact._message_log(body=message)
+
     #------------------------------------------------------
     # Views & Actions
     #------------------------------------------------------

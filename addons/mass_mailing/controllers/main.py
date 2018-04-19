@@ -43,13 +43,7 @@ class MassMailController(http.Controller):
         if not consteq(str(post['token']), right_token):
             raise exceptions.AccessDenied()
         if mailing.exists():
-            mailing_contact = request.env['mail.mass_mailing.contact'].sudo().browse(res_id)
-            if post['opt_out_ids']:
-                mailing_list_names = request.env['mail.mass_mailing.list'].sudo().browse(post['opt_out_ids']).mapped('name')
-                mailing_contact.list_ids = [(6, 0, post['opt_in_ids'])]
-                message = _('You have unsubscribed %s mailing list.') % ','.join(mailing_list_names)
-                mailing_contact._message_log(body=message)
-            return True
+            mailing.unsubscribe_list(post['opt_out_ids'], post['opt_in_ids'], res_id)
         else:
             raise exceptions.AccessError(_('Access Denied'))
 
