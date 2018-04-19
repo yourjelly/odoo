@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.tests import common
-from odoo.osv.query_builder import Row, Select, Column, Asc, Desc
+from odoo.osv.query_builder import Row, Select, Asc, Desc
 
 
 class TestExpressions(common.TransactionCase):
@@ -46,14 +46,37 @@ class TestExpressions(common.TransactionCase):
         res = ("""(NOT ("res_users"."id" = %s))""", [5])
         self.assertEqual(expr.__to_sql__(), res)
 
+    def test_precedence_explicit(self):
+        expr = (~((self.u.id > 5) | (self.u.id < 100))) & (self.u.name == 'johnny')
+        res = ("""((NOT (("res_users"."id" > %s) OR ("res_users"."id" < %s)))"""
+               """ AND ("res_users"."name" = %s))""", [5, 100, 'johnny'])
+        self.assertEqual(expr.__to_sql__(), res)
+
+    def test_precedence_implicit(self):
+        expr = ~(self.u.id > 5) | (self.u.id < 100) & (self.u.name == 'johnny')
+        res = ("""((NOT ("res_users"."id" > %s)) OR (("res_users"."id" < %s)"""
+               """ AND ("res_users"."name" = %s)))""", [5, 100, 'johnny'])
+        self.assertEqual(expr.__to_sql__(), res)
+
     def test_multi_table_expression(self):
         expr = (self.u.id != 5) & (self.p.name != None)  # noqa
         res = ("""(("res_users"."id" != %s) AND ("res_partner"."name" IS NOT NULL))""", [5])
         self.assertEqual(expr.__to_sql__(), res)
 
-    def test_abs_expression(self):
+    def test_func_expression(self):
+        expr = (self.u.name != None) & (abs(self.u.delta)) & (self.u.id > 5)  # noqa
+        res = ("""((("res_users"."name" IS NOT NULL) AND (ABS("res_users"."delta")))"""
+               """ AND ("res_users"."id" > %s))""", [5])
+        self.assertEqual(expr.__to_sql__(), res)
+
+    def test_single_arg_func_expression(self):
         expr = abs(self.u.delta)
         res = ("""(ABS("res_users"."delta"))""", [])
+        self.assertEqual(expr.__to_sql__(), res)
+
+    def test_multi_arg_func_expression(self):
+        expr = self.u.count % 100
+        res = ("""(MOD("res_users"."count", %s))""", [100])
         self.assertEqual(expr.__to_sql__(), res)
 
 

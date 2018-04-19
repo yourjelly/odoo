@@ -57,7 +57,25 @@ class Expression(object):
         return Expression('>=', self, other)
 
     def __abs__(self):
-        return Func('ABS', self, None)
+        return Func('ABS', self)
+
+    def __pow__(self, other):
+        return Func('POW', self, other)
+
+    def __mod__(self, other):
+        return Func('MOD', self, other)
+
+    def __ceil__(self):
+        return Func('CEIL', self)
+
+    def __floor__(self):
+        return Func('FLOOR', self)
+
+    def __trunc__(self):
+        return Func('TRUNC', self)
+
+    def __round__(self, ndigits=2):
+        return Func('ROUND', self, ndigits)
 
     def __to_sql__(self):
         left, args = self.left.__to_sql__()
@@ -83,35 +101,25 @@ class Expression(object):
 
 class Func(Expression):
 
-    __slots__ = ('left', 'right', 'op')
+    __slots__ = ('func', 'args')
 
-    def __init__(self, func, op1, op2):
-        self.op = func
-        self.left = op1
-        self.right = op2
+    def __init__(self, func, *args):
+        self.func = func
+        self.args = args
 
     def __to_sql__(self):
-        _not_none = []
-
-        if self.left is not None:
-            _not_none.append(self.left)
-
-        if self.right is not None:
-            _not_none.append(self.right)
-
-        assert len(_not_none) > 0, "A SQL function needs at least one argument"
-        sql = '(%s(' % self.op
+        sql = '(%s(' % self.func
         args = []
 
-        for el in _not_none:
-            if isinstance(el, Expression):
-                rsql, rargs = el.__to_sql__()
+        for arg in self.args:
+            if isinstance(arg, Expression):
+                rsql, rargs = arg.__to_sql__()
                 sql += rsql
                 args += rargs
             else:
-                args.append(el)
+                args.append(arg)
                 sql += '%s'
-            if _not_none.index(el) < (len(_not_none) - 1):
+            if arg is not self.args[-1]:
                 sql += ', '
 
         sql += '))'
@@ -263,11 +271,11 @@ class Select(object):
 
     def columns(self, *cols):
         """ Create a similar Select object but with different output columns."""
-        return Select(**{**self.attrs, 'where': cols})
+        return Select(**{**self.attrs, 'columns': cols})
 
     def distinct(self, *cols):
         """ Create a similar Select object but with different distinct columns."""
-        return Select(**{**self.attrs, 'where': cols})
+        return Select(**{**self.attrs, 'distinct': cols})
 
     def where(self, expression):
         """ Create a similar Select object but with a different where clause."""
