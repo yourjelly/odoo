@@ -1,0 +1,20 @@
+<odoo>
+  <data>
+
+    <record id="test_base_only_read_demo" model="test.base.only.read">
+      <field name="name">Demo</field>
+    </record>
+
+    <record id="test_base_parent" model="test.base">
+      <field name="name">Parent</field>
+      <field name="test_only_read" ref="test_base_only_read_demo"/>
+    </record>
+
+    <record id="test_base_child" model="test.base">
+      <field name="name">Child</field>
+      <field name="test_only_read" ref="test_base_only_read_demo"/>
+      <field name="parent_id" ref="test_base_parent"/>
+    </record>
+
+  </data>
+</odoo>

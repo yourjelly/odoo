@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_test_base,access_test_base,model_test_base,,1,1,1,1
+access_test_many2one,access_test_many2one,model_test_many2one,,1,1,1,1
+access_test_sub_many2one,access_test_sub_many2one,model_test_sub_many2one,,1,1,1,1
+access_test_base_only_read,access_test_base_only_read,model_test_base_only_read,,1,0,0,0
+access_test_base_only_read_admin,access_test_base_only_read_admin,model_test_base_only_read,base.group_system,1,1,1,1

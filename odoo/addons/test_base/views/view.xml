@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="view_test_base" model="ir.ui.view">
+        <field name="name">test.base.form</field>
+        <field name="model">test.base</field>
+        <field name="arch" type="xml">
+            <form string="Test base">
+                <group>
+                    <group>
+                        <field name="name"/>
+                        <field name="color"/>
+                    </group>
+                    <group>
+                        <field name="parent_id"/>
+                        <field name="test_only_read"/>
+                    </group>
+                    <field name="child_ids"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+     <record id="view_test_base_only_read" model="ir.ui.view">
+        <field name="name">test.base.only.read.form</field>
+        <field name="model">test.base.only.read</field>
+        <field name="arch" type="xml">
+            <form string="Test base only read">
+                <group>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </group>
+            </form>
+        </field>
+    </record>
+
+</odoo>
