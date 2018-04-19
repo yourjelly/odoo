@@ -486,6 +486,7 @@ var ListRenderer = BasicRenderer.extend({
                 } else {
                     // the opened group contains records
                     var $records = _.map(group.data, function (record) {
+                        record.groupID = group.id;
                         return self._renderRow(record).prepend($('<td>'));
                     });
                     result.push($('<tbody>').append($records));
@@ -583,6 +584,9 @@ var ListRenderer = BasicRenderer.extend({
         var $tr = $('<tr/>', {class: 'o_data_row'})
                     .data('id', record.id)
                     .append($cells);
+        if (record.groupID) {
+            $tr.data('groupID', record.groupID);
+        }
         if (this.hasSelectors) {
             $tr.prepend(this._renderSelector('td', !record.res_id));
         }

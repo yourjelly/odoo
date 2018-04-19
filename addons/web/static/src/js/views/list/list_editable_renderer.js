@@ -363,8 +363,9 @@ ListRenderer.include({
         if (this.currentRow === null) {
             return $.when();
         }
+        debugger;
 
-        var record = this.state.data[this.currentRow];
+        var record = this.state.groupedBy.length ? this.current_group.data[this.currentRow] : this.state.data[this.currentRow];
         var recordWidgets = this.allFieldWidgets[record.id];
         toggleWidgets(true);
 
@@ -445,13 +446,15 @@ ListRenderer.include({
      * @private
      */
     _moveToNextLine: function () {
-        var record = this.state.data[this.currentRow];
+        var record = this.state.groupedBy.length ? this.current_group.data[this.currentRow] : this.state.data[this.currentRow];
         var fieldNames = this.canBeSaved(record.id);
         if (fieldNames.length) {
             return;
         }
 
-        if (this.currentRow < this.state.data.length - 1) {
+        var state = this.state.groupedBy.length ? this.current_group : this.state;
+
+        if (this.currentRow < state.data.length - 1) {
             this._selectCell(this.currentRow + 1, 0);
         } else {
             var self = this;
@@ -628,11 +631,12 @@ ListRenderer.include({
             return $.when();
         }
         var wrap = options.wrap === undefined ? true : options.wrap;
-
+        debugger;
         // Select the row then activate the widget in the correct cell
         var self = this;
         return this._selectRow(rowIndex).then(function () {
-            var record = self.state.data[rowIndex];
+            debugger
+            var record = self.state.groupedBy.length ? self.current_group.data[rowIndex] : self.state.data[rowIndex];
             if (fieldIndex >= (self.allFieldWidgets[record.id] || []).length) {
                 return $.Deferred().reject();
             }
@@ -668,7 +672,6 @@ ListRenderer.include({
         // To select a row, the currently selected one must be unselected first
         var self = this;
         return this.unselectRow().then(function () {
-            debugger;
             var state = self.state.groupedBy.length ? self.current_group : self.state;
             if (state.data.length <= rowIndex) {
                 // The row to selected doesn't exist anymore (probably because
@@ -723,15 +726,20 @@ ListRenderer.include({
         if (!this._isEditable() || $(event.target).prop('special_click')) {
             return;
         }
+        var self = this;
         var $td = $(event.currentTarget);
         var $tr = $td.parent();
         var group = false;
         var rowIndex = this.$('.o_data_row').index($tr);
         var fieldIndex = Math.max($tr.find('.o_data_cell').not('.o_list_button').index($td), 0);
-        debugger;
         if (this.state.groupedBy.length) {
-            var groupRow = this.$('.o_data_row:first').closest('.o_group_header');
-            this.current_group = groupRow.data('group');
+            var currentGroupID =  this.$('.o_data_row:first').data('groupID');
+            _.each(this.$('.o_group_header'), function (groupRow) {
+                debugger;
+                if ($(groupRow).data('group').id === currentGroupID) {
+                    self.current_group = $(groupRow).data('group');
+                }
+            })
         }
         this._selectCell(rowIndex, fieldIndex, {event: event});
     },
@@ -765,15 +773,18 @@ ListRenderer.include({
      * @returns {Class} Widget returns first widget
      */
     _getFirstWidget: function () {
-        var record = this.state.data[this.currentRow];
+        debugger;
+        var record = this.state.groupedBy.length ? this.current_group.data[this.currentRow] : this.state.data[this.currentRow];
         var recordWidgets = this.allFieldWidgets[record.id];
         var firstWidget = _.find(recordWidgets, function (widget) {
+            debugger;
             var isFirst = widget.$el.is(':visible') && 
                                 (widget.$el.has('input').length > 0 ||
                                 widget.tagName== 'input') && 
                             !widget.$el.hasClass('o_readonly_modifier');
             return isFirst;
         });
+        debugger;
         return firstWidget;
     },
 
@@ -834,6 +845,7 @@ ListRenderer.include({
                 // first field is left empty.
                 var column = this.columns[this.currentFieldIndex];
                 var firstWidget = this._getFirstWidget();
+                debugger;
                 if (column.attrs.name === firstWidget.name && !firstWidget.$input.val()) {
                     this.trigger_up('activate_next_widget');
                 } else {

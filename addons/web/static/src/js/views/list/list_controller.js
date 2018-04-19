@@ -433,7 +433,7 @@ var ListController = BasicController.extend({
         this.trigger_up('mutexify', {
             action: function () {
                 var state = self.model.get(self.handle);
-                if (state.groupedBy && ev.data.groupID) {
+                if (state.groupedBy.length && ev.data.groupID) {
                     state = self.model.get(ev.data.groupID);
                 }
                 var editedRecord = state.data[ev.data.index];
