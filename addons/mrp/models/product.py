@@ -35,8 +35,10 @@ class ProductTemplate(models.Model):
 
     @api.one
     def _compute_mo_count(self):
-        # TDE FIXME: directly use a read_group
-        self.mo_count = sum(self.mapped('product_variant_ids').mapped('mo_count'))
+        mo_data = self.env['mrp.production'].read_group([('product_id', 'in', self.product_variant_ids.ids)], ['product_id'], ['product_id'])
+        res_mo = dict((data['product_id'][0], data['product_id_count']) for data in mo_data)
+        for template in self:
+            template.mo_count = sum([res_mo.get(p.id, 0) for p in template.product_variant_ids])
 
     @api.multi
     def action_view_mos(self):
