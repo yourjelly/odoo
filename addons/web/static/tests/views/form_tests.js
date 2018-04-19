@@ -4421,7 +4421,7 @@ QUnit.module('Views', {
             arch: '<form string="Manufacturing Orders">' +
                     '<sheet>' +
                         '<div class="oe_button_box" name="button_box">' +
-                            '<button string="Inventory Moves" class="oe_stat_button" icon="fa-arrows-v"/>' +
+                            '<button string="Inventory Moves" class="oe_stat_button" icon="fa-arrows-alt-v"/>' +
                         '</div>' +
                     '</sheet>' +
                 '</form>',

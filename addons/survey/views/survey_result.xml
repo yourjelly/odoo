@@ -7,7 +7,7 @@
             <div class="container js_surveyresult">
                 <t t-call="survey.back" />
                 <div class="jumbotron mt32">
-                    <h1><span t-field="survey.title" /> <span style="font-size:1.5em;" class="fa fa-bar-chart-o pull-right "/></h1>
+                    <h1><span t-field="survey.title" /> <span style="font-size:1.5em;" class="fa fa-chart-bar-o pull-right "/></h1>
                     <div t-field="survey.description" class="oe_no_empty" />
                 </div>
                 <div class="panel panel-default hidden-print">
@@ -138,12 +138,12 @@
             <ul class="nav nav-tabs hidden-print">
                 <li class="active" t-if="question.type != 'simple_choice'">
                     <a t-att-href="'#graph_question_%d' % question.id" data-toggle="tab">
-                        <i class="fa fa-bar-chart-o"></i> Graph
+                        <i class="fa fa-chart-bar-o"></i> Graph
                     </a>
                 </li>
                 <li class="active" t-if="question.type == 'simple_choice'">
                     <a t-att-href="'#graph_question_%d' % question.id" data-toggle="tab">
-                        <i class="fa fa-bar-chart-o"></i> Pie Chart
+                        <i class="fa fa-chart-bar-o"></i> Pie Chart
                     </a>
                 </li>
                 <li>
@@ -202,7 +202,7 @@
         <ul class="nav nav-tabs hidden-print">
             <li class="active">
                 <a t-att-href="'#graph_question_%d' % question.id" data-toggle="tab">
-                    <i class="fa fa-bar-chart"></i>
+                    <i class="fa fa-chart-bar"></i>
                     Graph
                 </a>
             </li>

@@ -2411,7 +2411,7 @@ QUnit.module('ActionManager', {
         });
         actionManager.doAction(3);
 
-        assert.ok($('.o_control_panel  .fa-bar-chart-o').hasClass('active'),
+        assert.ok($('.o_control_panel  .fa-chart-bar-o').hasClass('active'),
             "bar chart button is active");
         assert.ok(!$('.o_control_panel  .fa-line-chart').hasClass('active'),
             "line chart button is not active");

@@ -799,7 +799,7 @@
             </ul>
         </li>
         <li class="dropdown-submenu">
-            <a tabindex="-2" href="#"><i class="fa fa-arrows-h"/>Images spacing</a>
+            <a tabindex="-2" href="#"><i class="fa fa-arrows-alt-h"/>Images spacing</a>
 
             <ul class="dropdown-menu">
                 <li data-select-class="o_spc-none"><a href="#">None</a></li>

@@ -920,7 +920,7 @@ var FieldText = InputField.extend(TranslatableFieldMixin, {
  * Displays a handle to modify the sequence.
  */
 var HandleWidget = AbstractField.extend({
-    className: 'o_row_handle fa fa-arrows ui-sortable-handle',
+    className: 'o_row_handle fa fa-arrows-alt ui-sortable-handle',
     tagName: 'span',
     description: "",
     supportedFieldTypes: ['integer'],

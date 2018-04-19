@@ -502,7 +502,7 @@
         </ul>
     </div>
     <div class="btn-group btn-group-sm">
-        <button class="btn btn-default fa fa-bar-chart-o o_graph_button" title="Bar Chart" data-mode="bar"/>
+        <button class="btn btn-default fa fa-chart-bar-o o_graph_button" title="Bar Chart" data-mode="bar"/>
         <button class="btn btn-default fa fa-line-chart o_graph_button" title="Line Chart" data-mode="line"/>
         <button class="btn btn-default fa fa-pie-chart o_graph_button" title="Pie Chart" data-mode="pie"/>
     </div>

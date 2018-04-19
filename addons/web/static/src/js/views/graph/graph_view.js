@@ -18,7 +18,7 @@ var _lt = core._lt;
 
 var GraphView = AbstractView.extend({
     display_name: _lt('Graph'),
-    icon: 'fa-bar-chart',
+    icon: 'fa-chart-bar',
     cssLibs: [
         '/web/static/lib/nvd3/nv.d3.css'
     ],

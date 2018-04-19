@@ -509,7 +509,7 @@
                                 </li>
                                 <li>
                                     <a href="#statistic" role="tab" data-toggle="tab">
-                                        <i class="fa fa-bar-chart"></i> Statistics
+                                        <i class="fa fa-chart-bar"></i> Statistics
                                     </a>
                                 </li>
                             </ul>
