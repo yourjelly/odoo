@@ -41,7 +41,7 @@ __all__ = [
     'cr_uid_id', 'cr_uid_id_context',
     'cr_uid_ids', 'cr_uid_ids_context',
     'cr_uid_records', 'cr_uid_records_context',
-    'constrains', 'depends', 'onchange', 'returns',
+    'constrains', 'prewrite', 'postupdate', 'depends', 'onchange', 'returns',
     'call_kw',
 ]
 
@@ -65,6 +65,8 @@ _logger = logging.getLogger(__name__)
 #  - method._depends: set by @depends, specifies compute dependencies
 #  - method._returns: set by @returns, specifies return model
 #  - method._onchange: set by @onchange, specifies onchange fields
+#  - method._prewrite: set by @prewrite, specifies prewrite fields
+#  - method._postupdate: set by @postupdate, specifies postupdate fields
 #  - method.clear_cache: set by @ormcache, used to clear the cache
 #
 # On wrapping method only:
@@ -72,7 +74,7 @@ _logger = logging.getLogger(__name__)
 #  - method._orig: original method
 #
 
-WRAPPED_ATTRS = ('__module__', '__name__', '__doc__', '_constrains',
+WRAPPED_ATTRS = ('__module__', '__name__', '__doc__', '_constrains', '_prewrite', '_postupdate',
                  '_depends', '_onchange', '_returns', 'clear_cache')
 
 INHERITED_ATTRS = ('_returns',)
@@ -135,6 +137,35 @@ def propagate(method1, method2):
                 setattr(method2, attr, getattr(method1, attr))
     return method2
 
+def prewrite(*args):
+    return attrsetter('_prewrite', args)
+
+def postupdate(*args):
+    """ Return a decorator to decorate an postupdate method for given fields.
+        Each argument must be a field name:
+
+            @api.postupdate('parent_id')
+            def _postupdate_parent_id(self):
+                for record in self:
+                    if record.parent_id.customer:
+                        record.customer = True
+
+        Invoked on the records on which one of the named fields has been modified.
+
+        .. warning::
+
+            ``@postupdate`` only supports simple field names, dotted names
+            (fields of relational fields e.g. ``partner_id.customer``) are not
+            supported and will be ignored
+
+            ``@postupdate`` will be triggered only if the declared fields in the
+            decorated method are included in the ``create`` or ``write`` call.
+            It implies that fields not present in a view will not trigger a call
+            during a record creation. A override of ``create`` is necessary to make
+            sure a postupdate will always be triggered (e.g. to test the absence of
+            value).
+    """
+    return attrsetter('_postupdate', args)
 
 def constrains(*args):
     """ Decorates a constraint checker. Each argument must be a field name
