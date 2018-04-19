@@ -159,20 +159,28 @@ class TestSelect(common.TransactionCase):
         self.assertEqual(s.__to_sql__()[0], res)
 
     def test_order_by_asc_nfirst(self):
-        s = Select([self.p.id], order=[Asc(self.p.name, True)])
+        s = Select([self.p.id, self.p.name], order=[Asc(self.p.name, True)])
         res = (
-            """SELECT "res_partner"."id" FROM "res_partner" """
+            """SELECT "res_partner"."id", "res_partner"."name" FROM "res_partner" """
             """ORDER BY "res_partner"."name" ASC NULLS FIRST"""
         )
         self.assertEqual(s.__to_sql__()[0], res)
 
     def test_order_by_desc_nlast(self):
-        s = Select([self.p.id], order=[Desc(self.p.name)])
+        s = Select([self.p.id, self.p.name], order=[Desc(self.p.name)])
         res = (
-            """SELECT "res_partner"."id" FROM "res_partner" """
+            """SELECT "res_partner"."id", "res_partner"."name" FROM "res_partner" """
             """ORDER BY "res_partner"."name" DESC NULLS LAST"""
         )
         self.assertEqual(s.__to_sql__()[0], res)
+
+    def test_order_by_no_modifier(self):
+        s = Select([self.p.id, self.p.name], order=[self.p.name])
+        self.assertEqual(
+            s.__to_sql__()[0],
+            """SELECT "res_partner"."id", "res_partner"."name" FROM "res_partner" """
+            """ORDER BY "res_partner"."name\""""
+        )
 
     def test_full_select_query(self):
         s = Select([self.p.id], where=self.p.name != 'johnny', order=[Asc(self.p.name)])
@@ -187,14 +195,14 @@ class TestSelect(common.TransactionCase):
         self.assertEqual(s.__to_sql__(), res)
 
     def test_distinct(self):
-        s = Select([self.p.name], distinct=[self.p.name])
+        s = Select([self.p.name], distinct=True)
         res = ("""SELECT DISTINCT "res_partner"."name" FROM "res_partner\"""")
         self.assertEqual(s.__to_sql__()[0], res)
 
     def test_distinct_multi(self):
-        s = Select([self.p.name, self.p.surname], distinct=[self.p.name, self.p.surname])
+        s = Select([self.p.name, self.p.surname], distinct=True)
         res = ("""SELECT DISTINCT "res_partner"."name", """
-               """DISTINCT "res_partner"."surname" FROM "res_partner\"""")
+               """"res_partner"."surname" FROM "res_partner\"""")
         self.assertEqual(s.__to_sql__()[0], res)
 
     def test_composite_select(self):
@@ -203,3 +211,92 @@ class TestSelect(common.TransactionCase):
         self.assertIsNot(s_base, s_composite)
         self.assertEqual(s_base._where.op, '!=')
         self.assertEqual(s_composite._where.op, '=')
+
+    def test_group_by(self):
+        s = Select([self.p.id, self.p.name], group=[self.p.name])
+        self.assertEqual(
+            s.__to_sql__()[0],
+            """SELECT "res_partner"."id", "res_partner"."name" FROM "res_partner" """
+            """GROUP BY "res_partner"."name\""""
+        )
+
+    def test_new_columns(self):
+        # TODO: Verify that any of these methods properly regenerate the corresponding tables
+        base = Select([self.p.name])
+        new = base.columns(self.p.id)
+        self.assertIsNot(base, new)
+        self.assertEqual(base.__to_sql__()[0],
+                         """SELECT "res_partner"."name" FROM "res_partner\"""")
+        self.assertEqual(new.__to_sql__()[0],
+                         """SELECT "res_partner"."id" FROM "res_partner\"""")
+
+    def test_new_distinct(self):
+        base = Select([self.p.id, self.p.name], distinct=True)
+        new = base.distinct()
+        self.assertIsNot(base, new)
+        self.assertEqual(
+            base.__to_sql__()[0],
+            """SELECT DISTINCT "res_partner"."id", "res_partner"."name" FROM "res_partner\""""
+        )
+        self.assertEqual(new.__to_sql__()[0],
+                         """SELECT "res_partner"."id", "res_partner"."name" FROM "res_partner\"""")
+
+    def test_new_where(self):
+        base = Select([self.p.id], where=self.p.id > 5)
+        new = base.where(self.p.id < 5)
+        self.assertIsNot(base, new)
+        self.assertEqual(
+            base.__to_sql__(),
+            ("""SELECT "res_partner"."id" FROM "res_partner" WHERE ("res_partner"."id" > %s)""",
+             [5])
+        )
+        self.assertEqual(
+            new.__to_sql__(),
+            ("""SELECT "res_partner"."id" FROM "res_partner" WHERE ("res_partner"."id" < %s)""",
+             [5])
+        )
+
+    def test_new_join(self):
+        base = Select([self.p.id], joins=[self.p.id == self.u.partner_id])
+        new = base.join(self.p.name == self.u.name)
+        self.assertIsNot(base, new)
+        self.assertEqual(
+            base.__to_sql__()[0],
+            """SELECT "res_partner"."id" FROM "res_partner" """
+            """INNER JOIN "res_users" ON ("res_partner"."id" = "res_users"."partner_id")"""
+        )
+        self.assertEqual(
+            new.__to_sql__()[0],
+            """SELECT "res_partner"."id" FROM "res_partner" """
+            """INNER JOIN "res_users" ON ("res_partner"."name" = "res_users"."name")"""
+        )
+
+    def test_new_order(self):
+        base = Select([self.p.id, self.p.name], order=[Asc(self.p.name)])
+        new = base.order(Desc(self.p.id))
+        self.assertIsNot(base, new)
+        self.assertEqual(
+            base.__to_sql__()[0],
+            """SELECT "res_partner"."id", "res_partner"."name" FROM "res_partner" """
+            """ORDER BY "res_partner"."name" ASC NULLS LAST"""
+        )
+        self.assertEqual(
+            new.__to_sql__()[0],
+            """SELECT "res_partner"."id", "res_partner"."name" FROM "res_partner" """
+            """ORDER BY "res_partner"."id" DESC NULLS LAST"""
+        )
+
+    def test_new_group(self):
+        base = Select([self.p.id, self.p.name], group=[self.p.id])
+        new = base.group(self.p.name)
+        self.assertIsNot(base, new)
+        self.assertEqual(
+            base.__to_sql__()[0],
+            """SELECT "res_partner"."id", "res_partner"."name" FROM "res_partner" """
+            """GROUP BY "res_partner"."id\""""
+        )
+        self.assertEqual(
+            new.__to_sql__()[0],
+            """SELECT "res_partner"."id", "res_partner"."name" FROM "res_partner" """
+            """GROUP BY "res_partner"."name\""""
+        )

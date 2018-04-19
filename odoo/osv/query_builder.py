@@ -78,6 +78,7 @@ class Expression(object):
         return Func('ROUND', self, ndigits)
 
     def __to_sql__(self):
+        # TODO: Optimize parentheses generation
         left, args = self.left.__to_sql__()
 
         if self.op == 'NOT':
@@ -228,8 +229,13 @@ class Desc(Modifier):
 
 
 class Select(object):
+    # TODO: Make smarter joins, if the table of the RHS operand of the join predicate
+    # is already in the select's _tables attribute, then remove it, this allows
+    # for the columns to be columns from the joined table without the need to
+    # force a cartesian product
 
-    def __init__(self, columns, where=None, order=[], joins=[], distinct=[]):
+    def __init__(self, columns, where=None, order=[], joins=[], distinct=False,
+                 group=[]):
         """
         Stateless class for generating SQL SELECT statements.
 
@@ -261,6 +267,7 @@ class Select(object):
         self.attrs['order'] = self._order = order
         self.attrs['joins'] = self._joins = joins
         self.attrs['distinct'] = self._distinct = distinct
+        self.attrs['group'] = self._group = group
 
         self._aliased = isinstance(columns, dict)
 
@@ -273,9 +280,10 @@ class Select(object):
         """ Create a similar Select object but with different output columns."""
         return Select(**{**self.attrs, 'columns': cols})
 
-    def distinct(self, *cols):
-        """ Create a similar Select object but with different distinct columns."""
-        return Select(**{**self.attrs, 'distinct': cols})
+    def distinct(self):
+        """ Create a similar Select object but toggle the distinct flag."""
+        # TODO: Optimize so as to never actually use the distinct keyword
+        return Select(**{**self.attrs, 'distinct': not self.attrs['distinct']})
 
     def where(self, expression):
         """ Create a similar Select object but with a different where clause."""
@@ -288,6 +296,10 @@ class Select(object):
     def order(self, *expressions):
         """ Create a similar Select object but with a different order by clause."""
         return Select(**{**self.attrs, 'order': expressions})
+
+    def group(self, *expressions):
+        """ Create a similar Select object but with a different group by clause."""
+        return Select(**{**self.attrs, 'group': expressions})
 
     def _build_joins(self):
         sql = []
@@ -309,8 +321,6 @@ class Select(object):
                 c = self._columns[c]
             else:
                 sql = "%s" % c._qualified
-            if c in self._distinct:
-                sql = 'DISTINCT %s' % sql
             res.append(sql)
 
         return ', '.join(res)
@@ -331,6 +341,12 @@ class Select(object):
             return sql % ', '.join([o.__to_sql__()[0] for o in self._order])
         return ''
 
+    def _build_group(self):
+        if self._group:
+            sql = " GROUP BY %s"
+            return sql % ', '.join([g.__to_sql__()[0] for g in self._group])
+        return ''
+
     def __to_sql__(self):
         """
         Generate a SQL (Postgres) statement from the different parts of the Select object.
@@ -338,7 +354,8 @@ class Select(object):
         Returns:
             tuple: The SQL query as a string and the arguments to be passed to cr.execute as list.
         """
-        query = "SELECT %s FROM %s" % (self._build_columns(), self._build_tables())
+        query = "SELECT %s%s FROM %s" % ('DISTINCT ' if self._distinct else '',
+                                         self._build_columns(), self._build_tables())
         args = []
 
         jsql, jargs = self._build_joins()
@@ -350,5 +367,6 @@ class Select(object):
         args += wargs
 
         query += self._build_order()
+        query += self._build_group()
 
         return (query, args)
