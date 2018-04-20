@@ -224,7 +224,16 @@ class TestSelect(common.TransactionCase):
         s = Select([self.p.id], limit=5)
         self.assertEqual(
             s.__to_sql__(),
-            ("""SELECT "res_partner"."id" FROM "res_partner" LIMIT %s""", [5])
+            ("""SELECT "res_partner"."id" FROM "res_partner" LIMIT %s OFFSET %s""",
+             [5, 0])
+        )
+
+    def test_offset(self):
+        s= Select([self.p.id], limit=7, offset=2)
+        self.assertEqual(
+            s.__to_sql__(),
+            ("""SELECT "res_partner"."id" FROM "res_partner" LIMIT %s OFFSET %s""",
+             [7, 2])
         )
 
     ####################
@@ -318,9 +327,26 @@ class TestSelect(common.TransactionCase):
         self.assertIsNot(base, new)
         self.assertEqual(
             base.__to_sql__(),
-            ("""SELECT "res_partner"."id" FROM "res_partner" LIMIT %s""", [5])
+            ("""SELECT "res_partner"."id" FROM "res_partner" LIMIT %s OFFSET %s""",
+             [5, 0])
         )
         self.assertEqual(
             new.__to_sql__(),
-            ("""SELECT "res_partner"."id" FROM "res_partner" LIMIT %s""", [100])
+            ("""SELECT "res_partner"."id" FROM "res_partner" LIMIT %s OFFSET %s""",
+             [100, 0])
+        )
+
+    def test_new_offset(self):
+        base = Select([self.p.id], limit=100, offset=50)
+        new = base.offset(30)
+        self.assertIsNot(base, new)
+        self.assertEqual(
+            base.__to_sql__(),
+            ("""SELECT "res_partner"."id" FROM "res_partner" LIMIT %s OFFSET %s""",
+             [100, 50])
+        )
+        self.assertEqual(
+            new.__to_sql__(),
+            ("""SELECT "res_partner"."id" FROM "res_partner" LIMIT %s OFFSET %s""",
+             [100, 30])
         )

@@ -235,7 +235,7 @@ class Select(object):
     # force a cartesian product
 
     def __init__(self, columns, where=None, order=[], joins=[], distinct=False,
-                 group=[], limit=None):
+                 group=[], limit=None, offset=0):
         """
         Stateless class for generating SQL SELECT statements.
 
@@ -269,6 +269,7 @@ class Select(object):
         self.attrs['distinct'] = self._distinct = distinct
         self.attrs['group'] = self._group = group
         self.attrs['limit'] = self._limit = limit
+        self.attrs['offset'] = self._offset = offset
 
         self._aliased = isinstance(columns, dict)
 
@@ -305,6 +306,10 @@ class Select(object):
     def limit(self, n):
         """ Create a similar Select object but with a different limit."""
         return Select(**{**self.attrs, 'limit': n})
+
+    def offset(self, n):
+        """ Create a similar Select object but with a different offset."""
+        return Select(**{**self.attrs, 'offset': n})
 
     def _build_joins(self):
         sql = []
@@ -354,8 +359,8 @@ class Select(object):
 
     def _build_limit(self):
         if self._limit:
-            sql = " LIMIT %s"
-            return sql, [self._limit]
+            sql = " LIMIT %s OFFSET %s"
+            return sql, [self._limit, self._offset]
         return '', []
 
     def __to_sql__(self):
