@@ -304,8 +304,8 @@ msgstr "<i class=\"fa fa-eyedropper\"/> Kleurbedekking"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-facebook\"/>Options"
-msgstr "<i class=\"fa fa-facebook\"/>Opties"
+msgid "<i class=\"fab fa-facebook\"/>Options"
+msgstr "<i class=\"fab fa-facebook\"/>Opties"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippets
@@ -334,8 +334,8 @@ msgstr "<i class=\"fa fa-paint-brush\"/>Stijl"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-picture-o\"/>Background Image"
-msgstr "<i class=\"fa fa-picture-o\"/>Achtergrondafbeelding"
+msgid "<i class=\"far fa-image\"/>Background Image"
+msgstr "<i class=\"far fa-image\"/>Achtergrondafbeelding"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.language_selector

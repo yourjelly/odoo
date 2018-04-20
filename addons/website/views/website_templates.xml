@@ -328,8 +328,8 @@
                         <li t-ignore="true"><i class="fa fa-envelope"></i>  <span t-field="res_company.email"></span></li>
                     </ul>
                     <h2>
-                        <a t-att-href="website.social_facebook" t-if="website.social_facebook"><i class="fa fa-facebook-square"/></a>
-                        <a t-att-href="website.social_twitter" t-if="website.social_twitter"><i class="fa fa-twitter"/></a>
+                        <a t-att-href="website.social_facebook" t-if="website.social_facebook"><i class="fab fa-facebook-square"/></a>
+                        <a t-att-href="website.social_twitter" t-if="website.social_twitter"><i class="fab fa-twitter"/></a>
                         <a t-att-href="website.social_linkedin" t-if="website.social_linkedin"><i class="fa fa-linkedin"/></a>
                         <a t-att-href="website.social_youtube" t-if="website.social_youtube"><i class="fa fa-youtube-play"/></a>
                         <a t-att-href="website.social_googleplus" t-if="website.social_googleplus" rel="publisher"><i class="fa fa-google-plus-square"/></a>

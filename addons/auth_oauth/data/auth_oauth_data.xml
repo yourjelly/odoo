@@ -17,7 +17,7 @@
             <field name="scope">public_profile,email</field>
             <field name="validation_endpoint">https://graph.facebook.com/me</field>
             <field name="data_endpoint">https://graph.facebook.com/me?fields=id,name,email</field>
-            <field name="css_class">fa fa-facebook-square</field>
+            <field name="css_class">fab fa-facebook-square</field>
             <field name="body">Log in with facebook</field>
         </record>
         <record id="provider_google" model="auth.oauth.provider">

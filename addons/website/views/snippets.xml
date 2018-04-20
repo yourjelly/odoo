@@ -274,8 +274,8 @@
     <div class="oe_share s_share">
         <h3>
             <span>Share</span>
-            <a target="_Blank" class="oe_share_facebook" href="https://www.facebook.com/sharer/sharer.php?u={url}"><i class="fa fa-facebook-square"></i></a>
-            <a target="_Blank" class="oe_share_twitter" href="https://twitter.com/intent/tweet?text={title}&amp;url={url}"><i class="fa fa-twitter"></i></a>
+            <a target="_Blank" class="oe_share_facebook" href="https://www.facebook.com/sharer/sharer.php?u={url}"><i class="fab fa-facebook-square"></i></a>
+            <a target="_Blank" class="oe_share_twitter" href="https://twitter.com/intent/tweet?text={title}&amp;url={url}"><i class="fab fa-twitter"></i></a>
             <a target="_Blank" class="oe_share_linkedin" href="http://www.linkedin.com/shareArticle?mini=true&amp;url={url}&amp;title={title}&amp;"><i class="fa fa-linkedin"></i></a>
             <a target="_Blank" class="oe_share_google" href="https://plus.google.com/share?url={url}"><i class="fa fa-google-plus-square"></i></a>
             <a href="mailto:?body={url}&amp;subject={title}"><i class="fa fa-envelope-o"></i></a>
@@ -610,7 +610,7 @@
                             <p>From the main container, you can change the background to highlight features.</p>
                         </div>
                         <div class="col-md-12">
-                            <span style="min-width: 45px" class="fa fa-2x fa-picture-o pull-left mb16"></span>
+                            <span style="min-width: 45px" class="far fa-2x fa-image pull-left mb16"></span>
                             <h4 class="mt0 mb0">Sample images</h4>
                             <p>All these icons are licensed under creative commons so that you can use them.</p>
                         </div>
@@ -824,7 +824,7 @@
     <div data-js="background"
         data-selector="section, :not(.o_gallery > .container) > .carousel, .parallax, .s_banner .carousel-content">
         <li data-choose-image="true" data-no-preview="true">
-            <a tabindex="-1" href="#"><i class="fa fa-picture-o"/>Choose Background Image</a>
+            <a tabindex="-1" href="#"><i class="far fa-image"/>Choose Background Image</a>
         </li>
     </div>
 
@@ -974,7 +974,7 @@
 
     <div data-js="facebookPage" data-selector=".o_facebook_page">
         <li data-fb-page-options="true" data-no-preview="true">
-            <a href="#"><i class="fa fa-facebook"/>Options</a>
+            <a href="#"><i class="fab fa-facebook"/>Options</a>
         </li>
     </div>
 

@@ -292,7 +292,7 @@ msgstr ""
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-facebook\"/>Options"
+msgid "<i class=\"fab fa-facebook\"/>Options"
 msgstr ""
 
 #. module: website
@@ -322,7 +322,7 @@ msgstr "<i class=\"fa fa-paint-brush\"/>Şekillendirme"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-picture-o\"/>Background Image"
+msgid "<i class=\"far fa-image\"/>Background Image"
 msgstr ""
 
 #. module: website

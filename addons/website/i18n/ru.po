@@ -313,7 +313,7 @@ msgstr "<i class=\"fa fa-eyedropper\"/>Оверлей цвет"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-facebook\"/>Options"
+msgid "<i class=\"fab fa-facebook\"/>Options"
 msgstr ""
 
 #. module: website
@@ -343,8 +343,8 @@ msgstr "<i class=\"fa fa-paint-brush\"/>Стайлинг"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-picture-o\"/>Background Image"
-msgstr "<i class=\"fa fa-picture-o\"/>Фоновое изображение"
+msgid "<i class=\"far fa-image\"/>Background Image"
+msgstr "<i class=\"far fa-image\"/>Фоновое изображение"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.language_selector

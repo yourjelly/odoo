@@ -300,7 +300,7 @@ msgstr ""
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-facebook\"/>Options"
+msgid "<i class=\"fab fa-facebook\"/>Options"
 msgstr ""
 
 #. module: website
@@ -330,8 +330,8 @@ msgstr "<i class=\"fa fa-paint-brush\"/>Stilsko oblikovanje"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-picture-o\"/>Background Image"
-msgstr "<i class=\"fa fa-picture-o\"/>Pozadinska slika"
+msgid "<i class=\"far fa-image\"/>Background Image"
+msgstr "<i class=\"far fa-image\"/>Pozadinska slika"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.language_selector

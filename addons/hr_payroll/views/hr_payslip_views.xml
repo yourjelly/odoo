@@ -139,7 +139,7 @@
                 <div class="oe_button_box" name="button_box">
                     <button name="%(act_payslip_lines)d"
                         class="oe_stat_button"
-                        icon="fa-money"
+                        icon="fa-money-bill-alt"
                         type="action">
                         <field name="payslip_count" widget="statinfo" string="Payslip" help="Payslip Computation Details"/>
                     </button>

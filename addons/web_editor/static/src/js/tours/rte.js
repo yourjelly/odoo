@@ -291,7 +291,7 @@ tour.register('rte_inline', {
             '          <img src="/logo.png" alt="Your Logo" class="img-circle img-thumbnail">\n'+
             '        </td>\n'+
             '        <td valign="center" width="270">\n'+
-            '          <a href="https://www.facebook.com/Odoo"><span class="fa fa-facebook-square fa-2x text-primary"></span></a>\n'+
+            '          <a href="https://www.facebook.com/Odoo"><span class="fab fa-facebook-square fa-2x text-primary"></span></a>\n'+
             '          <span style="color: rgb(255, 0, 0);" class="fa fa-4x fa-google-plus-square pull-right"></span>\n'+
             '        </td>\n'+
             '      </tr>\n'+

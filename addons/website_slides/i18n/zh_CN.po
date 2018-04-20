@@ -258,10 +258,10 @@ msgstr "<i class=\"fa fa-thumbs-up\"/> 喜欢"
 #: model:ir.ui.view,arch_db:website_slides.slide_detail_view
 msgid ""
 "<span class=\"badge\" id=\"facebook-badge\">0</span>\n"
-"                                                    <i class=\"fa fa-facebook-square\"/> Facebook"
+"                                                    <i class=\"fab fa-facebook-square\"/> Facebook"
 msgstr ""
 "<span class=\"badge\" id=\"facebook-badge\">0</span>\n"
-"                                                    <i class=\"fa fa-facebook-square\"/> Facebook"
+"                                                    <i class=\"fab fa-facebook-square\"/> Facebook"
 
 #. module: website_slides
 #: model:ir.ui.view,arch_db:website_slides.slide_detail_view
@@ -276,10 +276,10 @@ msgstr ""
 #: model:ir.ui.view,arch_db:website_slides.slide_detail_view
 msgid ""
 "<span class=\"badge\" id=\"linkedin-badge\">0</span>\n"
-"                                                    <i class=\"fa fa-linkedin-square\"/> LinkedIn"
+"                                                    <i class=\"fab fa-linkedin\"/> LinkedIn"
 msgstr ""
 "<span class=\"badge\" id=\"linkedin-badge\">0</span>\n"
-"<i class=\"fa fa-linkedin-square\"/>领英"
+"<i class=\"fab fa-linkedin\"/>领英"
 
 #. module: website_slides
 #: model:ir.ui.view,arch_db:website_slides.slide_detail_view
@@ -294,10 +294,10 @@ msgstr ""
 #: model:ir.ui.view,arch_db:website_slides.slide_detail_view
 msgid ""
 "<span class=\"badge\" id=\"twitter-badge\">0</span>\n"
-"                                                    <i class=\"fa fa-twitter-square\"/> Twitter"
+"                                                    <i class=\"fab fa-twitter-square\"/> Twitter"
 msgstr ""
 "<span class=\"badge\" id=\"twitter-badge\">0</span>\n"
-"<i class=\"fa fa-twitter-square\"/> 推特"
+"<i class=\"fab fa-twitter-square\"/> 推特"
 
 #. module: website_slides
 #: model:ir.ui.view,arch_db:website_slides.slide_social_email

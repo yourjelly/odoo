@@ -105,7 +105,7 @@
                                     </div>
                                     <div class="col-xs-4 text-right">
                                         <span class="badge">
-                                            <strong><i class="fa fa-money"/> <field name="amount"/></strong>
+                                            <strong><i class="far fa-money-bill-alt"/> <field name="amount"/></strong>
                                         </span>
                                     </div>
                                 </div>
@@ -390,7 +390,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-xs-6">
-                                        <i class="fa fa-money"/> <field name="price"/>
+                                        <i class="far fa-money-bill-alt"/> <field name="price"/>
                                     </div>
                                     <div class="col-xs-6 text-right">
                                         <i class="far fa-clock"/> <field name="date"/>
@@ -449,7 +449,7 @@
                             <button class="oe_stat_button"
                                 attrs="{'invisible': [('balance_visible', '=', False)]}"
                                 name="%(lunch_cashmove_action_account)d"
-                                icon="fa-money"
+                                icon="fa-money-bill-alt"
                                 type="action">
                                 <div class="o_field_widget o_stat_info">
                                     <span class="o_stat_value"><field name="cash_move_balance" widget="monetary"/></span>

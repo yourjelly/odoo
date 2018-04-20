@@ -284,11 +284,11 @@ msgstr ""
 #: model:ir.ui.view,arch_db:website_slides.slide_detail_view
 msgid ""
 "<span class=\"badge\" id=\"twitter-badge\">0</span>\n"
-"                                                    <i class=\"fa fa-twitter-"
+"                                                    <i class=\"fab fa-twitter-"
 "square\"/> Twitter"
 msgstr ""
 "<span class=\"badge\" id=\"twitter-badge\">0</span>\n"
-"                                                    <i class=\"fa fa-twitter-"
+"                                                    <i class=\"fab fa-twitter-"
 "square\"/> Twitter"
 
 #. module: website_slides

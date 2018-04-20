@@ -70,7 +70,7 @@
 <template id="social_links">
     <t t-if="website.social_facebook">
         <a t-att-href="website.social_facebook">
-          <span class="fa fa-facebook"></span>
+          <span class="fab fa-facebook"></span>
         </a>
     </t>
     <t t-if="website.social_googleplus">
@@ -85,7 +85,7 @@
     </t>
     <t t-if="website.social_twitter">
         <a t-att-href="website.social_twitter" style="margin-left:10px">
-            <span class="fa fa-twitter"></span>
+            <span class="fab fa-twitter"></span>
         </a>
     </t>
 </template>

@@ -164,9 +164,9 @@
                                 <a class="mr8" t-attf-href="#{blog_url(tag=one_tag.id, date_begin=False, date_end=False)}" t-esc="one_tag.name"/>
                             </t>
                             <div class="o_sharing_links">
-                                <a class="fa fa-twitter-square o_twitter"></a>
-                                <a class="fa fa-facebook-square o_facebook"></a>
-                                <a class="fa fa-linkedin-square o_linkedin"></a>
+                                <a class="fab fa-twitter-square o_twitter"></a>
+                                <a class="fab fa-facebook-square o_facebook"></a>
+                                <a class="fab fa-linkedin o_linkedin"></a>
                                 <a class="fa fa-google-plus-square o_google"></a>
                             </div>
                             <hr/>
@@ -256,9 +256,9 @@
         <div id="blog_content" t-field="blog_post.content" class="blog_content mt32"/>
 
         <div class="o_blog_post_complete o_sharing_links">
-            <a class="fa fa-twitter-square o_twitter_complete" id="o_twitter_complete"></a>
-            <a class="fa fa-facebook-square o_facebook_complete" id="o_facebook_complete"></a>
-            <a class="fa fa-linkedin-square o_linkedin_complete" id="o_linkedin_complete"></a>
+            <a class="fab fa-twitter-square o_twitter_complete" id="o_twitter_complete"></a>
+            <a class="fab fa-facebook-square o_facebook_complete" id="o_facebook_complete"></a>
+            <a class="fab fa-linkedin o_linkedin_complete" id="o_linkedin_complete"></a>
             <a class="fa fa-google-plus-square o_google_complete" id="o_google_complete"></a>
         </div>
         <t t-set='head'>
@@ -500,8 +500,8 @@
                 Participate on our social stream.
             </p>
             <h2 class="mt4">
-                <a t-att-href="website.social_facebook" t-if="website.social_facebook"><i class="fa fa-facebook-square"/></a>
-                <a t-att-href="website.social_twitter" t-if="website.social_twitter"><i class="fa fa-twitter"/></a>
+                <a t-att-href="website.social_facebook" t-if="website.social_facebook"><i class="fab fa-facebook-square"/></a>
+                <a t-att-href="website.social_twitter" t-if="website.social_twitter"><i class="fab fa-twitter"/></a>
                 <a t-att-href="website.social_linkedin" t-if="website.social_linkedin"><i class="fa fa-linkedin"/></a>
                 <a t-att-href="website.social_youtube" t-if="website.social_youtube"><i class="fa fa-youtube-play"/></a>
                 <a t-att-href="website.social_googleplus" t-if="website.social_googleplus"><i class="fa fa-google-plus-square"/></a>

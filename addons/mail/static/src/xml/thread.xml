@@ -23,7 +23,7 @@
         <div class="o_viewer_content">
             <div class="o_viewer-header">
                 <span class="o_image_caption">
-                    <i class="fa fa-picture-o mr8" t-if="widget.activeAttachment.type == 'image'"/>
+                    <i class="far fa-image mr8" t-if="widget.activeAttachment.type == 'image'"/>
                     <i class="fa fa-file-text mr8" t-if="widget.activeAttachment.type == 'application/pdf'"/>
                     <i class="fa fa-video-camera mr8" t-if="widget.activeAttachment.type == 'video'"/>
                     <t t-esc="widget.activeAttachment.name"/>

@@ -344,8 +344,8 @@ msgstr "<i class=\"fa fa-paint-brush\"/>Στυλ"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-picture-o\"/>Background Image"
-msgstr "<i class=\"fa fa-picture-o\"/>Εικόνα Φόντου"
+msgid "<i class=\"far fa-image\"/>Background Image"
+msgstr "<i class=\"far fa-image\"/>Εικόνα Φόντου"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.language_selector

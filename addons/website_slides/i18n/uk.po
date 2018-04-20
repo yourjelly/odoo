@@ -226,10 +226,10 @@ msgstr "<i class=\"fa fa-thumbs-up\"/> Сподобалось"
 #: model:ir.ui.view,arch_db:website_slides.slide_detail_view
 msgid ""
 "<span class=\"badge\" id=\"facebook-badge\">0</span>\n"
-"                                                    <i class=\"fa fa-facebook-square\"/> Facebook"
+"                                                    <i class=\"fab fa-facebook-square\"/> Facebook"
 msgstr ""
 "<span class=\"badge\" id=\"facebook-badge\">0</span>\n"
-"                                                    <i class=\"fa fa-facebook-square\"/> Фейсбук"
+"                                                    <i class=\"fab fa-facebook-square\"/> Фейсбук"
 
 #. module: website_slides
 #: model:ir.ui.view,arch_db:website_slides.slide_detail_view
@@ -244,10 +244,10 @@ msgstr ""
 #: model:ir.ui.view,arch_db:website_slides.slide_detail_view
 msgid ""
 "<span class=\"badge\" id=\"linkedin-badge\">0</span>\n"
-"                                                    <i class=\"fa fa-linkedin-square\"/> LinkedIn"
+"                                                    <i class=\"fab fa-linkedin\"/> LinkedIn"
 msgstr ""
 "<span class=\"badge\" id=\"linkedin-badge\">0</span>\n"
-"                                                    <i class=\"fa fa-linkedin-square\"/> ЛінкедІн"
+"                                                    <i class=\"fab fa-linkedin\"/> ЛінкедІн"
 
 #. module: website_slides
 #: model:ir.ui.view,arch_db:website_slides.slide_detail_view
@@ -262,10 +262,10 @@ msgstr ""
 #: model:ir.ui.view,arch_db:website_slides.slide_detail_view
 msgid ""
 "<span class=\"badge\" id=\"twitter-badge\">0</span>\n"
-"                                                    <i class=\"fa fa-twitter-square\"/> Twitter"
+"                                                    <i class=\"fab fa-twitter-square\"/> Twitter"
 msgstr ""
 "<span class=\"badge\" id=\"twitter-badge\">0</span>\n"
-"                                                    <i class=\"fa fa-twitter-square\"/> Твітер"
+"                                                    <i class=\"fab fa-twitter-square\"/> Твітер"
 
 #. module: website_slides
 #: model:ir.ui.view,arch_db:website_slides.slide_social_email

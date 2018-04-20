@@ -10,7 +10,7 @@
                 <button name="toggle_active" position="before">
                     <button name="%(act_hr_employee_payslip_list)d"
                         class="oe_stat_button"
-                        icon="fa-money"
+                        icon="fa-money-bill-alt"
                         type="action"
                         groups="hr_payroll.group_hr_payroll_user">
                         <field name="payslip_count" widget="statinfo" string="Payslips"/>

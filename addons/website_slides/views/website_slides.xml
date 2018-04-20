@@ -24,8 +24,8 @@
 <!-- Tools template: share on social networkds -->
 <template id='slides_share' name="Slides Media Share">
     <div class="form-group">
-        <a t-attf-href="https://www.facebook.com/sharer/sharer.php?u=#{slide.website_url}" class="o_slides_social_share" social-key="facebook"><i class="fa fa-facebook-square fa-2x"/></a>
-        <a t-attf-href="https://twitter.com/intent/tweet?text=#{slide.name}&amp;url=#{slide.website_url}" class="o_slides_social_share"  social-key="twitter"><i class="fa fa-twitter fa-2x"/></a>
+        <a t-attf-href="https://www.facebook.com/sharer/sharer.php?u=#{slide.website_url}" class="o_slides_social_share" social-key="facebook"><i class="fab fa-facebook-square fa-2x"/></a>
+        <a t-attf-href="https://twitter.com/intent/tweet?text=#{slide.name}&amp;url=#{slide.website_url}" class="o_slides_social_share"  social-key="twitter"><i class="fab fa-twitter fa-2x"/></a>
         <a t-attf-href="http://www.linkedin.com/shareArticle?mini=true&amp;url=#{slide.website_url}&amp;title=#{slide.name}&amp;" social-key="linkedin" class="o_slides_social_share"><i class="fa fa-linkedin fa-2x"/></a>
         <a t-attf-href="https://plus.google.com/share?url=#{slide.website_url}" class="o_slides_social_share" social-key="gplus"><i class="fa fa-google-plus-square fa-2x"/></a>
     </div>
@@ -594,15 +594,15 @@
                                             <ul class="list-group">
                                                 <li class="list-group-item">
                                                     <span class="badge" id="facebook-badge">0</span>
-                                                    <i class="fa fa-facebook-square"></i> Facebook
+                                                    <i class="fab fa-facebook-square"></i> Facebook
                                                 </li>
                                                 <li class="list-group-item">
                                                     <span class="badge" id="twitter-badge">0</span>
-                                                    <i class="fa fa-twitter-square"></i> Twitter
+                                                    <i class="fab fa-twitter-square"></i> Twitter
                                                 </li>
                                                 <li class="list-group-item">
                                                     <span class="badge" id="linkedin-badge">0</span>
-                                                    <i class="fa fa-linkedin-square"></i> LinkedIn
+                                                    <i class="fab fa-linkedin"></i> LinkedIn
                                                 </li>
                                                 <li class="list-group-item">
                                                     <span class="badge" id="google-badge">0</span>

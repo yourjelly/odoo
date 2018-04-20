@@ -337,8 +337,8 @@ msgstr "<i class=\"fa fa-paint-brush\"/>Styling"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-picture-o\"/>Background Image"
-msgstr "<i class=\"fa fa-picture-o\"/>Baggrundsbillede"
+msgid "<i class=\"far fa-image\"/>Background Image"
+msgstr "<i class=\"far fa-image\"/>Baggrundsbillede"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.language_selector
