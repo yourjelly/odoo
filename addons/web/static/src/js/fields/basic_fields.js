@@ -1447,9 +1447,9 @@ var PriorityWidget = AbstractField.extend({
         return $(tag)
             .attr('title', tip)
             .attr('data-index', index)
-            .addClass('o_priority_star fa')
-            .toggleClass('fa-star', isFull)
-            .toggleClass('fa-star-o', !isFull);
+            .addClass('o_priority_star fa-star')
+            .toggleClass('fa', isFull)
+            .toggleClass('far', !isFull);
     },
 
     //--------------------------------------------------------------------------
@@ -1494,8 +1494,8 @@ var PriorityWidget = AbstractField.extend({
      */
     _onMouseOver: function (event) {
         clearTimeout(this.hoverTimer);
-        this.$('.o_priority_star').removeClass('fa-star-o').addClass('fa-star');
-        $(event.currentTarget).nextAll().removeClass('fa-star').addClass('fa-star-o');
+        this.$('.o_priority_star').removeClass('far').addClass('fa');
+        $(event.currentTarget).nextAll().removeClass('fa').addClass('far');
     },
 });
 
@@ -1648,8 +1648,8 @@ var FavoriteWidget = AbstractField.extend({
      * @private
      */
     _render: function () {
-        var template = this.attrs.nolabel ? '<a href="#"><i class="fa %s" title="%s"></i></a>' : '<a href="#"><i class="fa %s"></i> %s</a>';
-        this.$el.empty().append(_.str.sprintf(template, this.value ? 'fa-star' : 'fa-star-o', this.value ? _t('Remove from Favorites') : _t('Add to Favorites')));
+        var template = this.attrs.nolabel ? '<a href="#"><i class="fa %s" title="%s"></i></a>' : '<a href="#"><i class="fa-star %s"></i> %s</a>';
+        this.$el.empty().append(_.str.sprintf(template, this.value ? 'fa' : 'far', this.value ? _t('Remove from Favorites') : _t('Add to Favorites')));
     },
 
     //--------------------------------------------------------------------------

@@ -203,11 +203,11 @@ odoo.define('website_rating.thread', function(require) {
             var index = Math.floor(val);
             var decimal = val - index;
             // reset the stars
-            this.$star_list.removeClass('fa-star fa-star-half-o').addClass('fa-star-o');
+            this.$star_list.removeClass('fa far').addClass('far');
 
-            this.$('.stars').find("i:lt("+index+")").removeClass('fa-star-o fa-star-half-o').addClass('fa-star');
+            this.$('.stars').find("i:lt("+index+")").removeClass('fa far').addClass('fa');
             if(decimal){
-                this.$('.stars').find("i:eq("+(index)+")").removeClass('fa-star-o fa-star fa-star-half-o').addClass('fa-star-half-o');
+                this.$('.stars').find("i:eq("+(index)+")").removeClass('fa far fa-star fa-star-half').addClass('fa fa-star-half');
             }
 
             this.$('.rate_text .label').text(this.labels[index]);

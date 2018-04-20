@@ -10,7 +10,7 @@
                        <button type="object"
                            name="action_view_timesheet"
                            class="oe_stat_button"
-                           icon="fa-clock-o"
+                           icon="fa-clock"
                            attrs="{'invisible': [('timesheet_count', '=', 0)]}"
                            groups="hr_timesheet.group_hr_timesheet_user">
                            <field name="timesheet_count" widget="statinfo" string="Timesheets"/>

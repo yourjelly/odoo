@@ -282,13 +282,13 @@ msgstr ""
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-clock-o\"/>Scroll Speed"
-msgstr "<i class=\"fa fa-clock-o\"/>Scrollhastighed"
+msgid "<i class=\"far fa-clock\"/>Scroll Speed"
+msgstr "<i class=\"far fa-clock\"/>Scrollhastighed"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-clock-o\"/>Slideshow speed"
-msgstr "<i class=\"fa fa-clock-o\"/>Diashow hastighed"
+msgid "<i class=\"far fa-clock\"/>Slideshow speed"
+msgstr "<i class=\"far fa-clock\"/>Diashow hastighed"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippets

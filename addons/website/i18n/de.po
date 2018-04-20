@@ -297,13 +297,13 @@ msgstr "<i class=\"fa fa-arrows-h\"/>Bildabstand"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-clock-o\"/>Scroll Speed"
-msgstr "<i class=\"fa fa-clock-o\"/>Scroll Geschwindigkeit"
+msgid "<i class=\"far fa-clock\"/>Scroll Speed"
+msgstr "<i class=\"far fa-clock\"/>Scroll Geschwindigkeit"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-clock-o\"/>Slideshow speed"
-msgstr "<i class=\"fa fa-clock-o\"/>Geschwindigkeit Folienwechsel"
+msgid "<i class=\"far fa-clock\"/>Slideshow speed"
+msgstr "<i class=\"far fa-clock\"/>Geschwindigkeit Folienwechsel"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippets

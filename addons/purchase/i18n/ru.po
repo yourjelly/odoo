@@ -132,10 +132,10 @@ msgstr "Трехстороннее сопоставление: закупки, �
 #. module: purchase
 #: model:ir.ui.view,arch_db:purchase.portal_my_purchase_orders
 msgid ""
-"<span class=\"label label-default\"><i class=\"fa fa-fw fa-remove\"/> "
+"<span class=\"label label-default\"><i class=\"fa fa-fw fa-times\"/> "
 "Cancelled</span>"
 msgstr ""
-"<span class=\"label label-default\"><i class=\"fa fa-fw fa-remove\"/> "
+"<span class=\"label label-default\"><i class=\"fa fa-fw fa-times\"/> "
 "Отменено</span>"
 
 #. module: purchase

@@ -293,13 +293,13 @@ msgstr "<i class=\"fa fa-arrows-h\"/>Odległości między obrazami"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-clock-o\"/>Scroll Speed"
-msgstr "<i class=\"fa fa-clock-o\"/>Prędkość przewijania"
+msgid "<i class=\"far fa-clock\"/>Scroll Speed"
+msgstr "<i class=\"far fa-clock\"/>Prędkość przewijania"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-clock-o\"/>Slideshow speed"
-msgstr "<i class=\"fa fa-clock-o\"/>Prędkość pokazu slajdów"
+msgid "<i class=\"far fa-clock\"/>Slideshow speed"
+msgstr "<i class=\"far fa-clock\"/>Prędkość pokazu slajdów"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippets

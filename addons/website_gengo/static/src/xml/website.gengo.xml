@@ -3,7 +3,7 @@
 <t t-name="website.ButtonGengoTranslator">
     <a class="btn btn-danger gengo_post" data-action="translation_gengo_post" href="#">Auto Translate</a>
     <a class="btn btn-danger hidden gengo_wait disabled"  href="#"><i class="fa fa-spinner fa-spin"></i> Wait</a>
-    <a class="btn btn-danger hidden gengo_inprogress disabled"  href="#"> <i class="fa fa-clock-o"></i> Translation in Progress</a>
+    <a class="btn btn-danger hidden gengo_inprogress disabled"  href="#"> <i class="far fa-clock"></i> Translation in Progress</a>
     <a class="btn btn-link gengo_info" data-action="translation_gengo_info">Count Words</a>
 </t>
 <t t-name="web_editor.TranslatorInfoDialog">

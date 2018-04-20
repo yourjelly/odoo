@@ -9,7 +9,7 @@
                 <t t-if="widget.notification_bar">
                     <div class="o_mail_annoying_notification_bar">
                         <span class="o_mail_request_permission">Odoo needs your permission to <a href="#"> enable desktop notifications</a>.</span>
-                        <span class="fa fa-close"></span>
+                        <span class="fa fa-times"></span>
                     </div>
                 </t>
             </div>
@@ -25,7 +25,7 @@
             </div>
             <div t-attf-class="o_mail_chat_title_main o_mail_chat_title_starred o_mail_chat_channel_item #{(active_channel_id === 'channel_starred') ? 'o_active': ''}"
                  data-channel-id="channel_starred">
-                <span class="o_channel_name"><i class="fa fa-star-o mr8"/>Starred</span>
+                <span class="o_channel_name"><i class="far fa-star mr8"/>Starred</span>
                 <t t-set="counter" t-value="starred_counter"/>
                 <t t-call="mail.chat.SidebarNeedaction"/>
             </div>

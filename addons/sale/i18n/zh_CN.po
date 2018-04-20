@@ -160,20 +160,20 @@ msgstr ""
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.portal_my_quotations
 msgid ""
-"<span class=\"label label-default\"><i class=\"fa fa-fw fa-clock-o\"/> "
+"<span class=\"label label-default\"><i class=\"far fa-fw fa-clock\"/> "
 "Expired</span>"
 msgstr ""
-"<span class=\"label label-default\"><i class=\"fa fa-fw fa-clock-o\"/> "
+"<span class=\"label label-default\"><i class=\"far fa-fw fa-clock\"/> "
 "过期</span>"
 
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.portal_my_quotations
 #: model:ir.ui.view,arch_db:sale.portal_order_page
 msgid ""
-"<span class=\"label label-default\"><i class=\"fa fa-fw fa-remove\"/> "
+"<span class=\"label label-default\"><i class=\"fa fa-fw fa-times\"/> "
 "Cancelled</span>"
 msgstr ""
-"<span class=\"label label-default\"><i class=\"fa fa-fw fa-remove\"/> "
+"<span class=\"label label-default\"><i class=\"fa fa-fw fa-times\"/> "
 "取消</span>"
 
 #. module: sale
@@ -188,10 +188,10 @@ msgstr ""
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.portal_my_orders
 msgid ""
-"<span class=\"label label-info\"><i class=\"fa fa-fw fa-clock-o\"/><span "
+"<span class=\"label label-info\"><i class=\"far fa-fw fa-clock\"/><span "
 "class=\"hidden-xs\"> Invoiced</span></span>"
 msgstr ""
-"<span class=\"label label-info\"><i class=\"fa fa-fw fa-clock-o\"/><span "
+"<span class=\"label label-info\"><i class=\"far fa-fw fa-clock\"/><span "
 "class=\"hidden-xs\">发票</span></span>"
 
 #. module: sale

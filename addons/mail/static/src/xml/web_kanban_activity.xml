@@ -4,7 +4,7 @@
 <t t-name="mail.KanbanActivity">
     <div class="o_kanban_inline_block dropdown o_kanban_selection o_mail_activity">
         <a class="dropdown-toggle o_activity_btn" data-toggle="dropdown">
-            <span class="fa fa-clock-o fa-lg fa-fw"/>
+            <span class="far fa-clock fa-lg fa-fw"/>
         </a>
         <ul class="dropdown-menu o_activity" role="menu">
         </ul>
@@ -37,7 +37,7 @@
                             <t t-esc="log.title_action or log.activity_type_id[1]" />
                         </strong>
                         <div>
-                            <span class="fa fa-clock-o fa-fw" />
+                            <span class="far fa-clock fa-fw" />
                             <span t-att-title="log.date_deadline"><t t-esc="log.label_delay" /></span>
                             <t t-if="log.user_id[0] != uid">
                                 <span class="ml4 fa fa-user" />

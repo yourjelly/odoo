@@ -278,13 +278,13 @@ msgstr "<i class=\"fa fa-arrows-h\"/>画像の間隔"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-clock-o\"/>Scroll Speed"
-msgstr "<i class=\"fa fa-clock-o\"/>スクロール速度"
+msgid "<i class=\"far fa-clock\"/>Scroll Speed"
+msgstr "<i class=\"far fa-clock\"/>スクロール速度"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-clock-o\"/>Slideshow speed"
-msgstr "<i class=\"fa fa-clock-o\"/>スライドショー速度"
+msgid "<i class=\"far fa-clock\"/>Slideshow speed"
+msgstr "<i class=\"far fa-clock\"/>スライドショー速度"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippets

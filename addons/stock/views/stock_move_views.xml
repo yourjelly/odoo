@@ -457,7 +457,7 @@
                                     </div>
                                     <div class="col-xs-8">
                                         <span class="pull-right">
-                                            <i class="fa fa-clock-o"/> <field name="date"/>
+                                            <i class="far fa-clock"/> <field name="date"/>
                                         </span>
                                     </div>
                                 </div>

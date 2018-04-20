@@ -37,7 +37,7 @@ msgstr ""
 
 #. module: sale_stock
 #: model:ir.ui.view,arch_db:sale_stock.portal_order_page_shipping
-msgid "<span class=\"label label-info label-text-align\"><i class=\"fa fa-fw fa-clock-o\"/> Preparation</span>"
+msgid "<span class=\"label label-info label-text-align\"><i class=\"far fa-fw fa-clock\"/> Preparation</span>"
 msgstr ""
 
 #. module: sale_stock
@@ -47,7 +47,7 @@ msgstr ""
 
 #. module: sale_stock
 #: model:ir.ui.view,arch_db:sale_stock.portal_order_page_shipping
-msgid "<span class=\"label label-warning label-text-align\"><i class=\"fa fa-fw fa-clock-o\"/> Partially Available</span>"
+msgid "<span class=\"label label-warning label-text-align\"><i class=\"far fa-fw fa-clock\"/> Partially Available</span>"
 msgstr ""
 
 #. module: sale_stock

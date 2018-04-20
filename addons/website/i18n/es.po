@@ -299,13 +299,13 @@ msgstr "<i class=\"fa fa-arrows-h\"/>Espaciado de imágenes"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-clock-o\"/>Scroll Speed"
-msgstr "<i class=\"fa fa-clock-o\"/>Velocidad de desplazamiento"
+msgid "<i class=\"far fa-clock\"/>Scroll Speed"
+msgstr "<i class=\"far fa-clock\"/>Velocidad de desplazamiento"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-clock-o\"/>Slideshow speed"
-msgstr "<i class=\"fa fa-clock-o\"/>Velocidad de la presentación"
+msgid "<i class=\"far fa-clock\"/>Slideshow speed"
+msgstr "<i class=\"far fa-clock\"/>Velocidad de la presentación"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippets

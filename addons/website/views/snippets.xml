@@ -777,7 +777,7 @@
             </ul>
         </li>
         <li class="dropdown-submenu">
-            <a tabindex="-2" href="#"><i class="fa fa-clock-o"/>Slideshow speed</a>
+            <a tabindex="-2" href="#"><i class="far fa-clock"/>Slideshow speed</a>
             <ul class="dropdown-menu">
                  <li data-interval="1000"><a href="#">1s</a></li>
                  <li data-interval="2000"><a href="#">2s</a></li>
@@ -874,7 +874,7 @@
         data-selector=":not(.o_gallery > .container) > .carousel">
         <li class="divider"></li>
         <li class="dropdown-submenu">
-            <a tabindex="-2" href="#"><i class="fa fa-clock-o"/>Slideshow speed</a>
+            <a tabindex="-2" href="#"><i class="far fa-clock"/>Slideshow speed</a>
             <ul class="dropdown-menu">
                  <li data-interval="1000"><a href="#">1s</a></li>
                  <li data-interval="2000"><a href="#">2s</a></li>
@@ -953,7 +953,7 @@
 
     <div data-js="parallax" data-selector=".parallax">
         <li class="dropdown-submenu">
-            <a tabindex="-1" href="#"><i class="fa fa-clock-o"/>Scroll Speed</a>
+            <a tabindex="-1" href="#"><i class="far fa-clock"/>Scroll Speed</a>
             <ul class="dropdown-menu" name="parallax-scroll">
                 <li data-scroll="0"><a href="#">No-scroll</a></li>
                 <li class="separator"/>

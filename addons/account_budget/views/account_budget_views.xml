@@ -176,7 +176,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-xs-10">
-                                        <i class="fa fa-clock-o"/> <t t-esc="record.date_from.value"/>-<t t-esc="record.date_to.value"/>
+                                        <i class="far fa-clock"/> <t t-esc="record.date_from.value"/>-<t t-esc="record.date_to.value"/>
                                     </div>
                                     <div class="col-xs-2">
                                         <span class="pull-right">

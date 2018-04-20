@@ -129,7 +129,7 @@
                                 <i class="fa fa-check text-success" title="This payment method is verified by our system."></i>
                             </t>
                             <t t-else="">
-                                <i class="fa fa-close text-danger" title="This payment method has not been verified by our system."></i>
+                                <i class="fa fa-times text-danger" title="This payment method has not been verified by our system."></i>
                             </t>
                         </label>
                         <button t-if="mode == 'manage'" name="delete_pm" t-att-value="pm.id" class="btn btn-primary btn-xs pull-right">

@@ -63,7 +63,7 @@
                                         }'/>
                                     <span t-if="not job.website_published" class="label label-danger">unpublished</span>
                                     <div class="text-muted">
-                                        <i class="fa fa-clock-o"/> <span t-field="job.write_date"/>
+                                        <i class="far fa-clock"/> <span t-field="job.write_date"/>
                                     </div>
                                 </div>
                             </li>

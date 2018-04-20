@@ -37,8 +37,8 @@ msgstr "# 正在等待"
 
 #. module: membership
 #: model:ir.ui.view,arch_db:membership.membership_products_kanban
-msgid "<i class=\"fa fa-clock-o\" aria-hidden=\"true\"/><strong> From: </strong>"
-msgstr "<i class=\"fa fa-clock-o\" aria-hidden=\"true\"/><strong>从：</strong>"
+msgid "<i class=\"far fa-clock\" aria-hidden=\"true\"/><strong> From: </strong>"
+msgstr "<i class=\"far fa-clock\" aria-hidden=\"true\"/><strong>从：</strong>"
 
 #. module: membership
 #: model:ir.ui.view,arch_db:membership.membership_products_kanban

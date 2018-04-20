@@ -111,7 +111,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-xs-6">
-                                        <i class="fa fa-clock-o"/>
+                                        <i class="far fa-clock"/>
                                         <t t-esc="record.date.value"/>
                                     </div>
                                     <div class="col-xs-6">
@@ -393,7 +393,7 @@
                                         <i class="fa fa-money"/> <field name="price"/>
                                     </div>
                                     <div class="col-xs-6 text-right">
-                                        <i class="fa fa-clock-o"/> <field name="date"/>
+                                        <i class="far fa-clock"/> <field name="date"/>
                                     </div>
                                 </div>
                                 <div class="row mt4">

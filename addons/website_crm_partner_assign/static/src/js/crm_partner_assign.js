@@ -186,7 +186,7 @@ $('.edit_opp_form .next_activity').on('change', function(){
 $("div.input-group span.fa-calendar").on('click', function(e) {
     $(e.currentTarget).closest("div.date").datetimepicker({
         icons : {
-            time: 'fa fa-clock-o',
+            time: 'far fa-clock',
             date: 'fa fa-calendar',
             up: 'fa fa-chevron-up',
             down: 'fa fa-chevron-down'

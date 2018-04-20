@@ -60,15 +60,15 @@ msgstr "<b>Próximos Eventos</b>"
 #: model:ir.ui.view,arch_db:website_event.event_description_full
 msgid ""
 "<br/>\n"
-"                    <i class=\"fa fa-clock-o\"/> To"
+"                    <i class=\"far fa-clock\"/> To"
 msgstr ""
 "<br/>\n"
-"<i class=\"fa fa-clock-o\"/> Para"
+"<i class=\"far fa-clock\"/> Para"
 
 #. module: website_event
 #: model:ir.ui.view,arch_db:website_event.event_description_full
-msgid "<i class=\"fa fa-clock-o\"/> From"
-msgstr "<i class=\"fa fa-clock-o\"/> De"
+msgid "<i class=\"far fa-clock\"/> From"
+msgstr "<i class=\"far fa-clock\"/> De"
 
 #. module: website_event
 #: model:ir.ui.view,arch_db:website_event.registration_template

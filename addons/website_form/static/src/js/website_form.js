@@ -36,7 +36,7 @@ odoo.define('website_form.animation', function (require) {
                 maxDate: moment().add(200, "y"),
                 calendarWeeks: true,
                 icons : {
-                    time: 'fa fa-clock-o',
+                    time: 'far fa-clock',
                     date: 'fa fa-calendar',
                     next: 'fa fa-chevron-right',
                     previous: 'fa fa-chevron-left',

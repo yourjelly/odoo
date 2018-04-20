@@ -1021,7 +1021,7 @@
         <t t-esc="widget.model.get('category')"/>
     </span>
     <div class="o_facet_values"/>
-    <div class="fa fa-sm fa-remove o_facet_remove"/>
+    <div class="fa fa-sm fa-times o_facet_remove"/>
 </div>
 <span t-name="SearchView.FacetView.Value">
     <t t-esc="widget.model.get('label')"/>

@@ -50,7 +50,7 @@
             <span t-if="unread_counter"> (<t t-esc="unread_counter"/>)</span>
         </span>
         <span t-if="!widget.isMobile" class="o_chat_window_buttons">
-            <a href="#" class="o_chat_window_close fa fa-close"/>
+            <a href="#" class="o_chat_window_close fa fa-times"/>
         </span>
     </t>
 

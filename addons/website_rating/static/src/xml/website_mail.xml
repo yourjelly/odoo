@@ -13,7 +13,7 @@
                 <i class="fa fa-star-half-o"></i>
             </t>
             <t t-foreach="_.range(0, empty_star)" t-as="num">
-                <i class="fa fa-star-o"></i>
+                <i class="far fa-star"></i>
             </t>
         </div>
     </t>
@@ -62,11 +62,11 @@
     <t t-name="website_rating.rating_star_input">
         <div class="o_rating_star_card" t-if="widget.options['display_rating']">
             <div class="stars enabled">
-                <i class="fa fa-star-o"></i>
-                <i class="fa fa-star-o"></i>
-                <i class="fa fa-star-o"></i>
-                <i class="fa fa-star-o"></i>
-                <i class="fa fa-star-o"></i>
+                <i class="far fa-star"></i>
+                <i class="far fa-star"></i>
+                <i class="far fa-star"></i>
+                <i class="far fa-star"></i>
+                <i class="far fa-star"></i>
             </div>
             <div class="rate_text">
                 <span class="label label-info"></span>

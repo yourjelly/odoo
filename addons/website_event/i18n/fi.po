@@ -63,15 +63,15 @@ msgstr "<b>Tulevat tapahtumat</b>"
 #: model:ir.ui.view,arch_db:website_event.event_description_full
 msgid ""
 "<br/>\n"
-"                    <i class=\"fa fa-clock-o\"/> To"
+"                    <i class=\"far fa-clock\"/> To"
 msgstr ""
 "<br/>\n"
-"<i class=\"fa fa-clock-o\"/> Päättyy"
+"<i class=\"far fa-clock\"/> Päättyy"
 
 #. module: website_event
 #: model:ir.ui.view,arch_db:website_event.event_description_full
-msgid "<i class=\"fa fa-clock-o\"/> From"
-msgstr "<i class=\"fa fa-clock-o\"/> Alkaa"
+msgid "<i class=\"far fa-clock\"/> From"
+msgstr "<i class=\"far fa-clock\"/> Alkaa"
 
 #. module: website_event
 #: model:ir.ui.view,arch_db:website_event.registration_template

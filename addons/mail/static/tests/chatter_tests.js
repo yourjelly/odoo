@@ -369,7 +369,7 @@ QUnit.test('kanban activity widget with an activity', function (assert) {
 QUnit.test('chatter: post, receive and star messages', function (assert) {
     var done = assert.async();
     assert.expect(28);
-    
+
     var unpatchWindowGetSelection = testUtils.patchWindowGetSelection();
 
     var bus = new Bus();
@@ -501,15 +501,15 @@ QUnit.test('chatter: post, receive and star messages', function (assert) {
         "the message's author should be correct");
 
     // star message 2
-    assert.ok(form.$('.o_thread_message[data-message-id=2] .o_thread_message_star.fa-star-o').length,
+    assert.ok(form.$('.o_thread_message[data-message-id=2] .o_thread_message_star.far').length,
         "message 2 should not be starred");
     form.$('.o_thread_message[data-message-id=2] .o_thread_message_star').click();
-    assert.ok(form.$('.o_thread_message[data-message-id=2] .o_thread_message_star.fa-star').length,
+    assert.ok(form.$('.o_thread_message[data-message-id=2] .o_thread_message_star.fa').length,
         "message 2 should be starred");
 
     // unstar message 2
     form.$('.o_thread_message[data-message-id=2] .o_thread_message_star').click();
-    assert.ok(form.$('.o_thread_message[data-message-id=2] .o_thread_message_star.fa-star-o').length,
+    assert.ok(form.$('.o_thread_message[data-message-id=2] .o_thread_message_star.far').length,
         "message 2 should not be starred");
 
     // very basic test of mention

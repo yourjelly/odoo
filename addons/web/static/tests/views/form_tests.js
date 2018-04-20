@@ -2351,11 +2351,11 @@ QUnit.module('Views', {
         assert.strictEqual($('.modal:visible').length, 0, 'no confirm modal should be displayed');
         assert.strictEqual(form.pager.$('.o_pager_value').text(), "2", 'pager value should be 2');
 
-        assert.strictEqual(form.$('.o_priority .fa-star-o').length, 2,
+        assert.strictEqual(form.$('.o_priority .far.fa-star').length, 2,
             'priority widget should have been rendered with correct value');
 
         // edit the value in readonly
-        form.$('.o_priority .fa-star-o:first').click(); // click on the first star
+        form.$('.o_priority .far.fa-star:first').click(); // click on the first star
         assert.strictEqual(form.$('.o_priority .fa-star').length, 1,
             'priority widget should have been updated');
 
@@ -2721,11 +2721,11 @@ QUnit.module('Views', {
 
         assert.strictEqual(form.$('.o_priority .o_priority_star').length, 2,
             'priority widget should have been rendered');
-        assert.strictEqual(form.$('.o_priority .fa-star-o').length, 2,
+        assert.strictEqual(form.$('.o_priority .far.fa-star').length, 2,
             'priority widget should have been rendered with correct value');
 
         // edit the value in readonly
-        form.$('.o_priority .fa-star-o:first').click(); // click on the first star
+        form.$('.o_priority .far.fa-star:first').click(); // click on the first star
         assert.strictEqual(nbWrite, 1, 'should have saved directly');
         assert.strictEqual(form.$('.o_priority .fa-star').length, 1,
             'priority widget should have been updated');
@@ -2736,7 +2736,7 @@ QUnit.module('Views', {
             'priority widget should have been correctly rendered');
         assert.strictEqual(form.$('.o_priority .fa-star').length, 1,
             'priority widget should have correct value');
-        form.$('.o_priority .fa-star-o:first').click(); // click on the second star
+        form.$('.o_priority .far.fa-star:first').click(); // click on the second star
         assert.strictEqual(nbWrite, 1, 'should not have saved directly');
         assert.strictEqual(form.$('.o_priority .fa-star').length, 2,
             'priority widget should have been updated');

@@ -3448,7 +3448,7 @@ QUnit.module('basic_fields', {
             "should have two stars for representing each possible value: no star, one star and two stars");
         assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.fa-star').length, 0,
             "should have no full star since there is no value");
-        assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.fa-star-o').length, 2,
+        assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.far.fa-star').length, 2,
             "should have two empty stars since there is no value");
 
         form.destroy();
@@ -3477,16 +3477,16 @@ QUnit.module('basic_fields', {
             "should have two stars for representing each possible value: no star, one star and two stars");
         assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.fa-star').length, 1,
             "should have one full star since the value is the second value");
-        assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.fa-star-o').length, 1,
+        assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.far.fa-star').length, 1,
             "should have one empty star since the value is the second value");
 
         // hover last star
-        form.$('.o_field_widget.o_priority a.o_priority_star.fa-star-o').last().trigger('mouseover');
+        form.$('.o_field_widget.o_priority a.o_priority_star.far.fa-star').last().trigger('mouseover');
         assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star').length, 2,
             "should have two stars for representing each possible value: no star, one star and two stars");
         assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.fa-star').length, 2,
             "should temporary have two full stars since we are hovering the third value");
-        assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.fa-star-o').length, 0,
+        assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.far.fa-star').length, 0,
             "should temporary have no empty star since we are hovering the third value");
 
         // Here we should test with mouseout, but currently the effect associated with it
@@ -3498,7 +3498,7 @@ QUnit.module('basic_fields', {
             "should still have two stars");
         assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.fa-star').length, 1,
             "should still have one full star since the value is the second value");
-        assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.fa-star-o').length, 1,
+        assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.far.fa-star').length, 1,
             "should still have one empty star since the value is the second value");
 
         // save
@@ -3507,7 +3507,7 @@ QUnit.module('basic_fields', {
             "should still have two stars");
         assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.fa-star').length, 1,
             "should still have one full star since the value is the second value");
-        assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.fa-star-o').length, 1,
+        assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.far.fa-star').length, 1,
             "should still have one empty star since the value is the second value");
 
         // switch to edit mode to check that the new value was properly written
@@ -3516,17 +3516,17 @@ QUnit.module('basic_fields', {
             "should still have two stars");
         assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.fa-star').length, 1,
             "should still have one full star since the value is the second value");
-        assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.fa-star-o').length, 1,
+        assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.far.fa-star').length, 1,
             "should still have one empty star since the value is the second value");
 
         // click on the second star in edit mode
-        form.$('.o_field_widget.o_priority a.o_priority_star.fa-star-o').last().click();
+        form.$('.o_field_widget.o_priority a.o_priority_star.far.fa-star').last().click();
 
         assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star').length, 2,
             "should still have two stars");
         assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.fa-star').length, 2,
             "should now have two full stars since the value is the third value");
-        assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.fa-star-o').length, 0,
+        assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.far.fa-star').length, 0,
             "should now have no empty star since the value is the third value");
 
         // save
@@ -3535,7 +3535,7 @@ QUnit.module('basic_fields', {
             "should still have two stars");
         assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.fa-star').length, 2,
             "should now have two full stars since the value is the third value");
-        assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.fa-star-o').length, 0,
+        assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.far.fa-star').length, 0,
             "should now have no empty star since the value is the third value");
 
         form.destroy();
@@ -3557,7 +3557,7 @@ QUnit.module('basic_fields', {
             "should have two stars for representing each possible value: no star, one star and two stars");
         assert.strictEqual(list.$('.o_data_row').first().find('.o_priority a.o_priority_star.fa-star').length, 1,
             "should have one full star since the value is the second value");
-        assert.strictEqual(list.$('.o_data_row').first().find('.o_priority a.o_priority_star.fa-star-o').length, 1,
+        assert.strictEqual(list.$('.o_data_row').first().find('.o_priority a.o_priority_star.far.fa-star').length, 1,
             "should have one empty star since the value is the second value");
 
         // Here we should test with mouseout, but currently the effect associated with it
@@ -3570,7 +3570,7 @@ QUnit.module('basic_fields', {
             "should have two stars for representing each possible value: no star, one star and two stars");
         assert.strictEqual(list.$('.o_data_row').first().find('.o_priority a.o_priority_star.fa-star').length, 1,
             "should have one full star since the value is the second value");
-        assert.strictEqual(list.$('.o_data_row').first().find('.o_priority a.o_priority_star.fa-star-o').length, 1,
+        assert.strictEqual(list.$('.o_data_row').first().find('.o_priority a.o_priority_star.far.fa-star').length, 1,
             "should have one empty star since the value is the second value");
 
         // save
@@ -3579,16 +3579,16 @@ QUnit.module('basic_fields', {
             "should have two stars for representing each possible value: no star, one star and two stars");
         assert.strictEqual(list.$('.o_data_row').first().find('.o_priority a.o_priority_star.fa-star').length, 1,
             "should have one full star since the value is the second value");
-        assert.strictEqual(list.$('.o_data_row').first().find('.o_priority a.o_priority_star.fa-star-o').length, 1,
+        assert.strictEqual(list.$('.o_data_row').first().find('.o_priority a.o_priority_star.far.fa-star').length, 1,
             "should have one empty star since the value is the second value");
 
         // hover last star
-        list.$('.o_data_row .o_priority a.o_priority_star.fa-star-o').first().trigger('mouseenter');
+        list.$('.o_data_row .o_priority a.o_priority_star.far.fa-star').first().trigger('mouseenter');
         assert.strictEqual(list.$('.o_data_row').first().find('.o_priority a.o_priority_star').length, 2,
             "should have two stars for representing each possible value: no star, one star and two stars");
         assert.strictEqual(list.$('.o_data_row').first().find('a.o_priority_star.fa-star').length, 2,
             "should temporary have two full stars since we are hovering the third value");
-        assert.strictEqual(list.$('.o_data_row').first().find('a.o_priority_star.fa-star-o').length, 0,
+        assert.strictEqual(list.$('.o_data_row').first().find('a.o_priority_star.far.fa-star').length, 0,
             "should temporary have no empty star since we are hovering the third value");
 
         // click on the first star in readonly mode
@@ -3598,7 +3598,7 @@ QUnit.module('basic_fields', {
             "should still have two stars");
         assert.strictEqual(list.$('.o_data_row').first().find('.o_priority a.o_priority_star.fa-star').length, 0,
             "should now have no full star since the value is the first value");
-        assert.strictEqual(list.$('.o_data_row').first().find('.o_priority a.o_priority_star.fa-star-o').length, 2,
+        assert.strictEqual(list.$('.o_data_row').first().find('.o_priority a.o_priority_star.far.fa-star').length, 2,
             "should now have two empty stars since the value is the first value");
 
         // re-enter edit mode to force re-rendering the widget to check if the value was correctly saved
@@ -3609,17 +3609,17 @@ QUnit.module('basic_fields', {
             "should still have two stars");
         assert.strictEqual(list.$('.o_data_row').first().find('.o_priority a.o_priority_star.fa-star').length, 0,
             "should now only have no full star since the value is the first value");
-        assert.strictEqual(list.$('.o_data_row').first().find('.o_priority a.o_priority_star.fa-star-o').length, 2,
+        assert.strictEqual(list.$('.o_data_row').first().find('.o_priority a.o_priority_star.far.fa-star').length, 2,
             "should now have two empty stars since the value is the first value");
 
         // Click on second star in edit mode
-        list.$('.o_priority a.o_priority_star.fa-star-o').last().click();
+        list.$('.o_priority a.o_priority_star.far.fa-star').last().click();
 
         assert.strictEqual(list.$('.o_data_row').last().find('.o_priority a.o_priority_star').length, 2,
             "should still have two stars");
         assert.strictEqual(list.$('.o_data_row').last().find('.o_priority a.o_priority_star.fa-star').length, 2,
             "should now have two full stars since the value is the third value");
-        assert.strictEqual(list.$('.o_data_row').last().find('.o_priority a.o_priority_star.fa-star-o').length, 0,
+        assert.strictEqual(list.$('.o_data_row').last().find('.o_priority a.o_priority_star.far.fa-star').length, 0,
             "should now have no empty star since the value is the third value");
 
         // save
@@ -3628,7 +3628,7 @@ QUnit.module('basic_fields', {
             "should still have two stars");
         assert.strictEqual(list.$('.o_data_row').last().find('.o_priority a.o_priority_star.fa-star').length, 2,
             "should now have two full stars since the value is the third value");
-        assert.strictEqual(list.$('.o_data_row').last().find('.o_priority a.o_priority_star.fa-star-o').length, 0,
+        assert.strictEqual(list.$('.o_data_row').last().find('.o_priority a.o_priority_star.far.fa-star').length, 0,
             "should now have no empty star since the value is the third value");
 
         list.destroy();
@@ -3895,7 +3895,7 @@ QUnit.module('basic_fields', {
 
         // switch to edit mode
         form.$buttons.find('.o_form_button_edit').click();
-        assert.strictEqual(form.$('.o_field_widget.o_favorite > a i.fa.fa-star-o').length, 1,
+        assert.strictEqual(form.$('.o_field_widget.o_favorite > a i.far.fa-star').length, 1,
             'should not be favorite');
         assert.strictEqual(form.$('.o_field_widget.o_favorite > a').text(), ' Add to Favorites',
             'the label should say "Add to Favorites"');
@@ -3944,7 +3944,7 @@ QUnit.module('basic_fields', {
 
         // save
         list.$buttons.find('.o_list_button_save').click();
-        assert.strictEqual(list.$('.o_data_row:first .o_field_widget.o_favorite > a i.fa.fa-star-o').length, 1,
+        assert.strictEqual(list.$('.o_data_row:first .o_field_widget.o_favorite > a i.far.fa-star').length, 1,
             'should not be favorite');
 
         list.destroy();

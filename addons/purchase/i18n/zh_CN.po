@@ -131,10 +131,10 @@ msgstr "三匹配:采购，接受和发票"
 #. module: purchase
 #: model:ir.ui.view,arch_db:purchase.portal_my_purchase_orders
 msgid ""
-"<span class=\"label label-default\"><i class=\"fa fa-fw fa-remove\"/> "
+"<span class=\"label label-default\"><i class=\"fa fa-fw fa-times\"/> "
 "Cancelled</span>"
 msgstr ""
-"<span class=\"label label-default\"><i class=\"fa fa-fw fa-remove\"/> "
+"<span class=\"label label-default\"><i class=\"fa fa-fw fa-times\"/> "
 "取消</span>"
 
 #. module: purchase

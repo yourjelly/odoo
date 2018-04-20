@@ -305,13 +305,13 @@ msgstr "<i class=\"fa fa-arrows-h\"/>Espacement de l'image"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-clock-o\"/>Scroll Speed"
+msgid "<i class=\"far fa-clock\"/>Scroll Speed"
 msgstr "Vitesse de défilement"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-clock-o\"/>Slideshow speed"
-msgstr "<i class=\"fa fa-clock-o\"/>Vitesse du diaporama"
+msgid "<i class=\"far fa-clock\"/>Slideshow speed"
+msgstr "<i class=\"far fa-clock\"/>Vitesse du diaporama"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippets

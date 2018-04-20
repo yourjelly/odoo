@@ -696,7 +696,7 @@
                                                       <label>Priority: </label>
                                                       <div class="input-group">
                                                         <label class="radio-inline">
-                                                          <input type="radio" name="PriorityRadioOptions" value="0" t-att-checked="opportunity.priority not in ['1','2','3']"/><i class="fa fa-star-o"></i>
+                                                          <input type="radio" name="PriorityRadioOptions" value="0" t-att-checked="opportunity.priority not in ['1','2','3']"/><i class="far fa-star"></i>
                                                         </label>
                                                         <label class="radio-inline">
                                                           <input type="radio" name="PriorityRadioOptions" value="1" t-att-checked="opportunity.priority == '1'"/><i class="fa fa-star"></i>

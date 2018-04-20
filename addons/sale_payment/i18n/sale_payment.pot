@@ -50,7 +50,7 @@ msgstr ""
 
 #. module: sale_payment
 #: model:ir.ui.view,arch_db:sale_payment.portal_my_orders_payment
-msgid "<span class=\"label label-info orders_label_text_align\"><i class=\"fa fa-fw fa-clock-o\"/> Waiting</span>"
+msgid "<span class=\"label label-info orders_label_text_align\"><i class=\"far fa-fw fa-clock\"/> Waiting</span>"
 msgstr ""
 
 #. module: sale_payment

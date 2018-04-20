@@ -15,7 +15,7 @@
                         <div class="o_note_datetime"/>
                         <span class="ml4">
                             <a class="o_note_set_datetime text-muted">
-                                <span class="fa fa-clock-o"/>
+                                <span class="far fa-clock"/>
                             </a>
                         </span>
                     </div>

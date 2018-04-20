@@ -38,7 +38,7 @@ msgstr "# In asteptare"
 
 #. module: membership
 #: model:ir.ui.view,arch_db:membership.membership_products_kanban
-msgid "<i class=\"fa fa-clock-o\" aria-hidden=\"true\"/><strong> From: </strong>"
+msgid "<i class=\"far fa-clock\" aria-hidden=\"true\"/><strong> From: </strong>"
 msgstr ""
 
 #. module: membership

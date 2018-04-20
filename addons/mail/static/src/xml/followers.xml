@@ -47,7 +47,7 @@
                t-att-data-follower-id="record.id"
                t-att-data-oe-id="record.res_id"
                t-att-data-oe-model="record.res_model"/>
-            <i t-if="widget.isEditable" class="fa fa-remove o_remove_follower"
+            <i t-if="widget.isEditable" class="fa fa-times o_remove_follower"
                title="Remove this follower"/>
         </li>
     </t>

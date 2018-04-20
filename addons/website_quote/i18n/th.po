@@ -189,16 +189,16 @@ msgstr ""
 #. module: website_quote
 #: model:ir.ui.view,arch_db:website_quote.quotations
 msgid ""
-"<span class=\"label label-default\"><i class=\"fa fa-fw fa-clock-o\"/> "
+"<span class=\"label label-default\"><i class=\"far fa-fw fa-clock\"/> "
 "Expired</span>"
 msgstr ""
-"<span class=\"label label-default\"><i class=\"fa fa-fw fa-clock-o\"/> "
+"<span class=\"label label-default\"><i class=\"far fa-fw fa-clock\"/> "
 "หมดอายุ</span>"
 
 #. module: website_quote
 #: model:ir.ui.view,arch_db:website_quote.quotations
 msgid ""
-"<span class=\"label label-default\"><i class=\"fa fa-fw fa-remove\"/> "
+"<span class=\"label label-default\"><i class=\"fa fa-fw fa-times\"/> "
 "Cancelled</span>"
 msgstr ""
 

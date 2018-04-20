@@ -194,10 +194,10 @@
                 padding-left: 5px;
             }
 
-            &.fa-star-o {
+            &.far {
                 color: $o-main-color-muted;
             }
-            &.fa-star {
+            &.fa {
                 color: gold;
             }
         }
@@ -205,16 +205,16 @@
 
     // Favorite
     &.o_favorite {
-        i.fa {
+        i.fa-star {
             font-size: 16px;
         }
-        i.fa-star-o {
+        i.far {
             color: $o-main-color-muted;
             &:hover {
                 color: gold;
             }
         }
-        i.fa-star {
+        i.fa {
             color: gold;
         }
     }

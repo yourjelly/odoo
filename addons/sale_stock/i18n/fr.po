@@ -83,7 +83,7 @@ msgid ""
 "<span class=\"label label-warning label-text-align\"><i class=\"fa fa-fw fa-"
 "clock-o\"/> Partially Available</span>"
 msgstr ""
-"<span class=\"label label-warning label-text-align\"><i class=\"fa fa-fw fa-clock-o\"/> \n"
+"<span class=\"label label-warning label-text-align\"><i class=\"far fa-fw fa-clock\"/> \n"
 "Partiellement disponible</span>"
 
 #. module: sale_stock

@@ -268,29 +268,29 @@ msgstr ""
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.portal_my_quotations
 msgid ""
-"<span class=\"label label-default\"><i class=\"fa fa-fw fa-clock-o\"/> "
+"<span class=\"label label-default\"><i class=\"far fa-fw fa-clock\"/> "
 "Expired</span>"
 msgstr ""
-"<span class=\"label label-default\"><i class=\"fa fa-fw fa-clock-o\"/> Έχει "
+"<span class=\"label label-default\"><i class=\"far fa-fw fa-clock\"/> Έχει "
 "Λήξει</span>"
 
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.portal_my_quotations
 #: model:ir.ui.view,arch_db:sale.portal_order_page
 msgid ""
-"<span class=\"label label-default\"><i class=\"fa fa-fw fa-remove\"/> "
+"<span class=\"label label-default\"><i class=\"fa fa-fw fa-times\"/> "
 "Cancelled</span>"
 msgstr ""
-"<span class=\"label label-default\"><i class=\"fa fa-fw fa-remove\"/> "
+"<span class=\"label label-default\"><i class=\"fa fa-fw fa-times\"/> "
 "Ακυρώθηκε</span>"
 
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.portal_order_page
 msgid ""
-"<span class=\"label label-default\"><i class=\"fa fa-fw fa-remove\"/> "
+"<span class=\"label label-default\"><i class=\"fa fa-fw fa-times\"/> "
 "Done</span>"
 msgstr ""
-"<span class=\"label label-default\"><i class=\"fa fa-fw fa-remove\"/> "
+"<span class=\"label label-default\"><i class=\"fa fa-fw fa-times\"/> "
 "Ολοκληρωμένη</span>"
 
 #. module: sale
@@ -305,10 +305,10 @@ msgstr ""
 #. module: sale
 #: model:ir.ui.view,arch_db:sale.portal_my_orders
 msgid ""
-"<span class=\"label label-info\"><i class=\"fa fa-fw fa-clock-o\"/><span "
+"<span class=\"label label-info\"><i class=\"far fa-fw fa-clock\"/><span "
 "class=\"hidden-xs\"> Invoiced</span></span>"
 msgstr ""
-"<span class=\"label label-info\"><i class=\"fa fa-fw fa-clock-o\"/><span "
+"<span class=\"label label-info\"><i class=\"far fa-fw fa-clock\"/><span "
 "class=\"hidden-xs\"> Τιμολογήθηκε</span></span>"
 
 #. module: sale

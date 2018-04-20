@@ -1246,7 +1246,7 @@
                                         <span t-esc="record.move_id.value"/>
                                     </strong>
                                     <strong class="col-xs-6 text-right">
-                                        <i class="fa fa-clock-o"/><field name="date_maturity"/>
+                                        <i class="far fa-clock"/><field name="date_maturity"/>
                                     </strong>
                                     <div class="col-xs-10">
                                         <span t-esc="record.name.value"/>
@@ -1457,7 +1457,7 @@
                                         <strong><span><field name="journal_id"/></span></strong>
                                     </div>
                                     <div class="col-xs-6 text-right">
-                                        <strong><i class="fa fa-clock-o"/> <t t-esc="record.date.value"/></strong>
+                                        <strong><i class="far fa-clock"/> <t t-esc="record.date.value"/></strong>
                                     </div>
                                 </div>
                                 <div class="row">

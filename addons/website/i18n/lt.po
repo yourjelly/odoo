@@ -274,12 +274,12 @@ msgstr ""
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-clock-o\"/>Scroll Speed"
+msgid "<i class=\"far fa-clock\"/>Scroll Speed"
 msgstr ""
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
-msgid "<i class=\"fa fa-clock-o\"/>Slideshow speed"
+msgid "<i class=\"far fa-clock\"/>Slideshow speed"
 msgstr ""
 
 #. module: website

@@ -231,7 +231,7 @@
                               <div class="mt8" t-if="days_valid &gt; 0">
                                   <strong>This offer expires in</strong>
                                   <div class="day_counter mt8 mb16">
-                                      <i class="fa fa-clock-o"></i>
+                                      <i class="far fa-clock"></i>
                                       <t t-esc="days_valid"/>
                                       <t t-if="days_valid &gt; 1">
                                           days

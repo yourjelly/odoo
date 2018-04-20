@@ -47,8 +47,8 @@ msgstr "Wartend"
 
 #. module: membership
 #: model:ir.ui.view,arch_db:membership.membership_products_kanban
-msgid "<i class=\"fa fa-clock-o\" aria-hidden=\"true\"/><strong> From: </strong>"
-msgstr "<i aria-hidden=\"true\" class=\"fa fa-clock-o\"/><strong/>"
+msgid "<i class=\"far fa-clock\" aria-hidden=\"true\"/><strong> From: </strong>"
+msgstr "<i aria-hidden=\"true\" class=\"far fa-clock\"/><strong/>"
 
 #. module: membership
 #: model:ir.ui.view,arch_db:membership.membership_products_kanban

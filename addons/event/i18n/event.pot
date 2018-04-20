@@ -366,7 +366,7 @@ msgstr ""
 
 #. module: event
 #: model:ir.ui.view,arch_db:event.view_event_kanban
-msgid "<i class=\"fa fa-clock-o\"/>\n"
+msgid "<i class=\"far fa-clock\"/>\n"
 "                                        <b>To</b>"
 msgstr ""
 

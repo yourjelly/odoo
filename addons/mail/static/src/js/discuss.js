@@ -113,7 +113,7 @@ var Discuss = AbstractAction.extend(ControlPanelMixin, {
     },
     events: {
         'blur .o_mail_add_channel input': '_onAddChannelBlur',
-        'click .o_mail_annoying_notification_bar .fa-close': '_onCloseNotificationBar',
+        'click .o_mail_annoying_notification_bar .fa-times': '_onCloseNotificationBar',
         'click .o_mail_chat_channel_item': '_onChannelClicked',
         'click .o_mail_open_channels': '_onPublicChannelsClick',
         'click .o_mail_partner_unpin': '_onUnpinChannel',

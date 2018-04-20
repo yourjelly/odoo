@@ -54,14 +54,14 @@ msgstr ""
 #: model:ir.ui.view,arch_db:website_event.event_description_full
 msgid ""
 "<br/>\n"
-"                    <i class=\"fa fa-clock-o\"/> To"
+"                    <i class=\"far fa-clock\"/> To"
 msgstr ""
 "<br/>\n"
-"                    <i class=\"fa fa-clock-o\"/> La"
+"                    <i class=\"far fa-clock\"/> La"
 
 #. module: website_event
 #: model:ir.ui.view,arch_db:website_event.event_description_full
-msgid "<i class=\"fa fa-clock-o\"/> From"
+msgid "<i class=\"far fa-clock\"/> From"
 msgstr ""
 
 #. module: website_event
