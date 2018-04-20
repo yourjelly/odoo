@@ -216,7 +216,7 @@ ListRenderer.include({
      */
     getEditableRecordID: function () {
         if (this.currentRow !== null) {
-            return this.state.data[this.currentRow].id;
+            return this.state.groupedBy.length ? this.current_group.data[this.currentRow].id : this.state.data[this.currentRow].id;
         }
         return null;
     },
@@ -266,9 +266,10 @@ ListRenderer.include({
         var record;
         var rowIndex;
         if (this.state.groupedBy.length) {
+            var state = this.current_group;
             rowIndex = -1;
             var count = 0;
-            utils.traverse_records(this.state, function (r) {
+            utils.traverse_records(state, function (r) {
                 if (r.id === recordID) {
                     record = r;
                     rowIndex = count;
@@ -733,14 +734,16 @@ ListRenderer.include({
         var rowIndex = this.$('.o_data_row').index($tr);
         var fieldIndex = Math.max($tr.find('.o_data_cell').not('.o_list_button').index($td), 0);
         if (this.state.groupedBy.length) {
-            var currentGroupID =  this.$('.o_data_row:first').data('groupID');
-            _.each(this.$('.o_group_header'), function (groupRow) {
-                debugger;
-                if ($(groupRow).data('group').id === currentGroupID) {
-                    self.current_group = $(groupRow).data('group');
+            var $headers = this.$('.o_group_header');
+            var groupRow = _.find($headers, function (row) {
+                if ($(row).data('group').id ===  $tr.data('groupID')) {
+                    debugger;
+                    return row;
                 }
-            })
+            });
+            self.current_group = $(groupRow).data('group');
         }
+        debugger;
         this._selectCell(rowIndex, fieldIndex, {event: event});
     },
     /**
