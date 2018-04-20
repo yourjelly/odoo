@@ -1,20 +1,66 @@
 <odoo>
-  <data>
+    <data>
 
-    <record id="test_base_only_read_demo" model="test.base.only.read">
-      <field name="name">Demo</field>
-    </record>
+        <!-- Test base sub demo many2one-->
+        <record id="test_sub_many2one_demo" model="test.sub.many2one">
+            <field name="name">Sub Demo M2O</field>
+        </record>
 
-    <record id="test_base_parent" model="test.base">
-      <field name="name">Parent</field>
-      <field name="test_only_read" ref="test_base_only_read_demo"/>
-    </record>
+        <!-- Test demo many2one -->
+        <record id="test_many2one_demo" model="test.many2one">
+            <field name="name">Demo M2O</field>
+            <field name="sub_many2one_id" ref="test_sub_many2one_demo"/>
+        </record>
 
-    <record id="test_base_child" model="test.base">
-      <field name="name">Child</field>
-      <field name="test_only_read" ref="test_base_only_read_demo"/>
-      <field name="parent_id" ref="test_base_parent"/>
-    </record>
+        <!-- Test demo many2one for multi value -->
+        <record id="test_many2one_demo2" model="test.many2one">
+            <field name="name">Demo 2 M2O</field>
+            <field name="sub_many2one_id" ref="test_sub_many2one_demo"/>
+        </record>
 
-  </data>
+        <!-- Test base only read demo for test only read access rights -->
+        <record id="test_base_only_read_demo" model="test.base.only.read">
+            <field name="name">Demo</field>
+        </record>
+
+        <!-- Test demo many2many -->
+        <record id="test_many2many_demo" model="test.many2many">
+            <field name="name">Demo M2M</field>
+        </record>
+
+        <!-- Test base demo Parent one -->
+        <record id="test_base_parent1" model="test.base">
+            <field name="name">Parent1</field>
+            <field name="test_only_read" ref="test_base_only_read_demo"/>
+            <field name="many2one_id" ref="test_many2one_demo"/>
+            <field name="boolean" eval="True"/>
+        </record>
+
+        <!-- Test base demo child one of one -->
+        <record id="test_base_child1_1" model="test.base">
+            <field name="name">Child1-1</field>
+            <field name="test_only_read" ref="test_base_only_read_demo"/>
+            <field name="parent_id" ref="test_base_parent1"/>
+            <field name="many2one_id" ref="test_many2one_demo"/>
+            <field name="boolean" eval="True"/>
+        </record>
+
+        <!-- two parent child record for multi record test -->
+        <!-- Test base demo Parent two-->
+        <record id="test_base_parent2" model="test.base">
+            <field name="name">Parent2</field>
+            <field name="test_only_read" ref="test_base_only_read_demo"/>
+            <field name="many2one_id" ref="test_many2one_demo2"/>
+            <field name="boolean" eval="False"/>
+        </record>
+
+        <!-- Test base demo child two of one -->
+        <record id="test_base_child2_1" model="test.base">
+            <field name="name">Child2-1</field>
+            <field name="test_only_read" ref="test_base_only_read_demo"/>
+            <field name="parent_id" ref="test_base_parent2"/>
+            <field name="many2one_id" ref="test_many2one_demo2"/>
+            <field name="boolean" eval="False"/>
+        </record>
+    </data>
 </odoo>
