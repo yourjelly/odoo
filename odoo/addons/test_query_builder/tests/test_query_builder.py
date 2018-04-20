@@ -96,6 +96,11 @@ class TestSelect(common.TransactionCase):
         res = """SELECT "res_partner"."id" AS id FROM "res_partner\""""
         self.assertEqual(s.__to_sql__()[0], res)
 
+    def test_select_all(self):
+        s = Select([self.p])
+        res = """SELECT * FROM "res_partner\""""
+        self.assertEqual(s.__to_sql__()[0], res)
+
     def test_select_cartesian_product(self):
         s = Select([self.u.id, self.p.id])
         res = """SELECT "res_users"."id", "res_partner"."id" FROM "res_partner", "res_users\""""

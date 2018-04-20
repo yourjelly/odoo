@@ -274,9 +274,19 @@ class Select(object):
         self._aliased = isinstance(columns, dict)
 
         if self._aliased:
+            # If the columns argument is a dict, it can only contain Row objects.
             self._tables = sorted({self._columns[c]._row for c in self._columns})
         else:
-            self._tables = sorted({c._row for c in self._columns}, key=lambda r: r._table)
+            # If the columns argument is a list, it can contain Row objects.
+            # or Column objects.
+            tables = set()
+            for col in self._columns:
+                if isinstance(col, Row):
+                    tables.add(col)
+                else:
+                    tables.add(col._row)
+            self._tables = sorted(tables, key=lambda r: r._table)
+
 
     def columns(self, *cols):
         """ Create a similar Select object but with different output columns."""
@@ -326,7 +336,9 @@ class Select(object):
         res = []
 
         for c in self._columns:
-            if self._aliased:
+            if isinstance(c, Row):
+                sql = "*"
+            elif self._aliased:
                 sql = "%s AS %s" % (self._columns[c]._qualified, c)
                 c = self._columns[c]
             else:
