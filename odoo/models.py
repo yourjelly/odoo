@@ -553,26 +553,26 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         cls._onchange_methods = BaseModel._onchange_methods
 
     @classmethod
-    def _init_prewrite_postupdate(cls):
-        cls._prewrite_methods = BaseModel._prewrite_methods
+    def _init_preupdate_postupdate(cls):
+        cls._preupdate_methods = BaseModel._preupdate_methods
         cls._postupdate_methods = BaseModel._postupdate_methods
 
     @property
-    def _prewrite_methods(self):
-        """ Return a list of methods implementing prewrite method to update records before super call. """
-        def is_prewrite(func):
-            return callable(func) and hasattr(func, '_prewrite')
+    def _preupdate_methods(self):
+        """ Return a list of methods implementing preupdate method to update records before super call. """
+        def is_preupdate(func):
+            return callable(func) and hasattr(func, '_preupdate')
 
         cls = type(self)
         methods = []
-        for attr, func in getmembers(cls, is_prewrite):
-            for name in func._prewrite:
+        for attr, func in getmembers(cls, is_preupdate):
+            for name in func._preupdate:
                 field = cls._fields.get(name)
                 if not field:
-                    _logger.warning("method %s.%s: @prewrite parameter %r is not a field name", cls._name, attr, name)
+                    _logger.warning("method %s.%s: @preupdate parameter %r is not a field name", cls._name, attr, name)
             methods.append(func)
 
-        cls._prewrite_methods = methods
+        cls._preupdate_methods = methods
         return methods
 
     @property
@@ -1097,10 +1097,10 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             yield dbid, xid, converted, dict(extras, record=stream.index)
 
     @api.multi
-    def _prewrite_fields(self, vals):
+    def _preupdate_fields(self, vals):
         field_names = set(vals)
-        for func in self._prewrite_methods:
-            if set(func._prewrite) & field_names:
+        for func in self._preupdate_methods:
+            if set(func._preupdate) & field_names:
                 func(self, vals)
 
     @api.multi
@@ -2597,8 +2597,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         # register constraints and onchange methods
         cls._init_constraints_onchanges()
-        # register prewrite and postupdate methods
-        cls._init_prewrite_postupdate()
+        # register preupdate and postupdate methods
+        cls._init_preupdate_postupdate()
         # validate rec_name
         if cls._rec_name:
             assert cls._rec_name in cls._fields, \
@@ -3292,6 +3292,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         other_fields = []               # list of non-column fields
         single_lang = len(self.env['res.lang'].get_installed()) <= 1
         has_translation = self.env.lang and self.env.lang != 'en_US'
+        #update fields
+        self._preupdate_fields(vals)
 
         for name, val in vals.items():
             field = self._fields[name]
