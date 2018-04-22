@@ -614,20 +614,11 @@ class IrActionsTodo(models.Model):
     state = fields.Selection([('open', 'To Do'), ('done', 'Done')], string='Status', default='open', required=True)
     name = fields.Char()
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        todos = super(IrActionsTodo, self).create(vals_list)
-        for todo in todos:
+    @api.postupdate('state')
+    def _postupdate_open_todo(self):
+        for todo in self:
             if todo.state == "open":
-                self.ensure_one_open_todo()
-        return todos
-
-    @api.multi
-    def write(self, vals):
-        res = super(IrActionsTodo, self).write(vals)
-        if vals.get('state', '') == 'open':
-            self.ensure_one_open_todo()
-        return res
+                todo.ensure_one_open_todo()
 
     @api.model
     def ensure_one_open_todo(self):

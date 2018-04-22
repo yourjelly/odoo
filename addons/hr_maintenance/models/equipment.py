@@ -32,34 +32,17 @@ class MaintenanceEquipment(models.Model):
             self.employee_id = False
         self.assign_date = fields.Date.context_today(self)
 
-    @api.model
-    def create(self, vals):
-        equipment = super(MaintenanceEquipment, self).create(vals)
-        # subscribe employee or department manager when equipment assign to him.
+    @api.postupdate('employee_id', 'department_id')
+    def _postupdate_partner_ids(self):
         partner_ids = []
-        if equipment.employee_id and equipment.employee_id.user_id:
-            partner_ids.append(equipment.employee_id.user_id.partner_id.id)
-        if equipment.department_id and equipment.department_id.manager_id and equipment.department_id.manager_id.user_id:
-            partner_ids.append(equipment.department_id.manager_id.user_id.partner_id.id)
-        if partner_ids:
-            equipment.message_subscribe(partner_ids=partner_ids)
-        return equipment
-
-    @api.multi
-    def write(self, vals):
-        partner_ids = []
-        # subscribe employee or department manager when equipment assign to employee or department.
-        if vals.get('employee_id'):
-            user_id = self.env['hr.employee'].browse(vals['employee_id'])['user_id']
-            if user_id:
-                partner_ids.append(user_id.partner_id.id)
-        if vals.get('department_id'):
-            department = self.env['hr.department'].browse(vals['department_id'])
-            if department and department.manager_id and department.manager_id.user_id:
-                partner_ids.append(department.manager_id.user_id.partner_id.id)
-        if partner_ids:
-            self.message_subscribe(partner_ids=partner_ids)
-        return super(MaintenanceEquipment, self).write(vals)
+        for equipment in self:
+            # subscribe employee or department manager when equipment assign to employee or department.
+            if equipment.employee_id and equipment.employee_id.user_id:
+                partner_ids.append(equipment.employee_id.user_id.partner_id.id)
+            if equipment.department_id and equipment.department_id.manager_id and equipment.department_id.manager_id.user_id:
+                partner_ids.append(equipment.department_id.manager_id.user_id.partner_id.id)
+            if partner_ids:
+                equipment.message_subscribe(partner_ids=partner_ids)
 
     @api.multi
     def _track_subtype(self, init_values):
@@ -101,20 +84,11 @@ class MaintenanceRequest(models.Model):
             self.equipment_id = equipment
         return {'domain': {'equipment_id': domain}}
 
-    @api.model
-    def create(self, vals):
-        result = super(MaintenanceRequest, self).create(vals)
-        if result.employee_id.user_id:
-            result.message_subscribe(partner_ids=[result.employee_id.user_id.partner_id.id])
-        return result
-
-    @api.multi
-    def write(self, vals):
-        if vals.get('employee_id'):
-            employee = self.env['hr.employee'].browse(vals['employee_id'])
-            if employee and employee.user_id:
-                self.message_subscribe(partner_ids=[employee.user_id.partner_id.id])
-        return super(MaintenanceRequest, self).write(vals)
+    @api.postupdate('employee_id')
+    def _postupdate_employee_id(self):
+        for request in self:
+            if request.employee_id and request.employee_id.user_id:
+                request.message_subscribe(partner_ids=[request.employee_id.user_id.partner_id.id])
 
     @api.model
     def message_new(self, msg, custom_values=None):

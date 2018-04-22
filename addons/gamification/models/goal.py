@@ -109,23 +109,13 @@ class GoalDefinition(models.Model):
                 raise exceptions.UserError(
                     _("The model configuration for the definition %s seems incorrect, please check it.\n\n%s not found") % (definition.name, e))
 
-    @api.model
-    def create(self, vals):
-        definition = super(GoalDefinition, self).create(vals)
-        if definition.computation_mode in ('count', 'sum'):
-            definition._check_domain_validity()
-        if vals.get('field_id'):
-            definition._check_model_validity()
-        return definition
-
-    @api.multi
-    def write(self, vals):
-        res = super(GoalDefinition, self).write(vals)
-        if vals.get('computation_mode', 'count') in ('count', 'sum') and (vals.get('domain') or vals.get('model_id')):
-            self._check_domain_validity()
-        if vals.get('field_id') or vals.get('model_id') or vals.get('batch_mode'):
-            self._check_model_validity()
-        return res
+    @api.postupdate('computation_mode', 'field_id', 'domain', 'model_id', 'batch_mode')
+    def postupdate_validity(self):
+        for definition in self:
+            if definition.computation_mode in ('count', 'sum') and (definition.domain or definition.model_id):
+                definition._check_domain_validity()
+            if definition.field_id or definition.model_id or definition.batch_mode:
+                definition._check_model_validity()
 
     @api.onchange('model_id')
     def _change_model_id(self):

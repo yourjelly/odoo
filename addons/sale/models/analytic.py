@@ -16,19 +16,10 @@ class AccountAnalyticLine(models.Model):
 
     so_line = fields.Many2one('sale.order.line', string='Sales Order Line', domain=lambda self: self._default_sale_line_domain())
 
-    @api.model
-    def create(self, values):
-        result = super(AccountAnalyticLine, self).create(values)
-        if 'so_line' not in values and not result.so_line and result.product_id and result.product_id.expense_policy != 'no' and result.amount <= 0:  # allow to force a False value for so_line
-            result.sudo()._sale_determine_order_line()
-        return result
-
-    @api.multi
-    def write(self, values):
-        result = super(AccountAnalyticLine, self).write(values)
-        if 'so_line' not in values:  # allow to force a False value for so_line
-            # only take the AAL from expense or vendor bill, meaning having a negative amount
-            self.sudo().filtered(lambda aal: not aal.so_line and aal.product_id and aal.product_id.expense_policy != 'no' and aal.amount <= 0)._sale_determine_order_line()
+    @api.postupdate('product_id', 'so_line', 'amount')
+    def _postupdate_determine_order_line(self):
+        for analytic_line in self.sudo().filtered(lambda aal: not aal.so_line and aal.product_id and aal.product_id.expense_policy != 'no' and aal.amount <= 0):
+            analytic_line._sale_determine_order_line()
 
     # ----------------------------------------------------------
     # Vendor Bill / Expense : determine the Sale Order to reinvoice

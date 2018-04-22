@@ -61,16 +61,8 @@ class ResConfigSettings(models.TransientModel):
             _logger.info(_('Please double-check your Twitter API Key and Secret!'), exc_info=True)
             raise UserError(_('Twitter authorization error!') + ' ' + _('Please double-check your Twitter API Key and Secret!'))
 
-    @api.model
-    def create(self, vals):
-        TwitterConfig = super(ResConfigSettings, self).create(vals)
-        if vals.get('twitter_api_key') or vals.get('twitter_api_secret') or vals.get('twitter_screen_name'):
-            TwitterConfig._check_twitter_authorization()
-        return TwitterConfig
-
-    @api.multi
-    def write(self, vals):
-        TwitterConfig = super(ResConfigSettings, self).write(vals)
-        if vals.get('twitter_api_key') or vals.get('twitter_api_secret') or vals.get('twitter_screen_name'):
-            self._check_twitter_authorization()
-        return TwitterConfig
+    @api.postupdate('twitter_api_key', 'twitter_api_secret', 'twitter_screen_name')
+    def _postupdate_twitter_authorization(self):
+        for config in self:
+            if config.twitter_api_key or config.twitter_api_secret or config.twitter_screen_name:
+                config._check_twitter_authorization()

@@ -197,12 +197,14 @@ class FleetVehicle(models.Model):
         else:
             self.image_medium = False
 
-    @api.model
-    def create(self, vals):
-        res = super(FleetVehicle, self).create(vals)
-        if 'driver_id' in vals and vals['driver_id']:
-            res.create_driver_history(vals['driver_id'])
-        return res
+    @api.postupdate('driver_id')
+    def _postupdate_drive_history(self):
+        for vehicle in self.filtered(lambda v: v.driver_id):
+            self.env['fleet.vehicle.assignation.log'].create({
+                'vehicle_id': vehicle.id,
+                'driver_id': vehicle.driver_id.id,
+                'date_start': fields.Date.today(),
+            })
 
     @api.multi
     def write(self, vals):
@@ -218,7 +220,7 @@ class FleetVehicle(models.Model):
             self.env['fleet.vehicle.assignation.log'].create({
                 'vehicle_id': vehicle.id,
                 'driver_id': driver_id,
-                'date_start': fields.Date.today(), 
+                'date_start': fields.Date.today(),
             })
 
     @api.model
