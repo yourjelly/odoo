@@ -90,7 +90,6 @@ class IrModelFieldsAnonymization(models.Model):
                 global_state = self._get_global_state()
                 if global_state != 'unstable':
                     vals['state'] = global_state
-        return super(IrModelFieldsAnonymization, self).write(vals)
 
     @api.multi
     def unlink(self):

@@ -507,22 +507,13 @@ class PaymentIcon(models.Model):
     image_payment_form = fields.Binary(
         "Image displayed on the payment form", attachment=True)
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        for vals in vals_list:
-            if 'image' in vals:
-                image = ustr(vals['image'] or '').encode('utf-8')
-                vals['image_payment_form'] = image_resize_image(image, size=(45,30))
-                vals['image'] = image_resize_image(image, size=(64,64))
-        return super(PaymentIcon, self).create(vals_list)
-
-    @api.multi
-    def write(self, vals):
+    @api.preupdate('image')
+    def _preupdate_image(self, vals):
         if 'image' in vals:
             image = ustr(vals['image'] or '').encode('utf-8')
             vals['image_payment_form'] = image_resize_image(image, size=(45,30))
             vals['image'] = image_resize_image(image, size=(64,64))
-        return super(PaymentIcon, self).write(vals)
+
 
 class PaymentTransaction(models.Model):
     """ Transaction Model. Each specific acquirer can extend the model by adding

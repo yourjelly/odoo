@@ -41,7 +41,7 @@ __all__ = [
     'cr_uid_id', 'cr_uid_id_context',
     'cr_uid_ids', 'cr_uid_ids_context',
     'cr_uid_records', 'cr_uid_records_context',
-    'constrains', 'prewrite', 'postupdate', 'depends', 'onchange', 'returns',
+    'constrains', 'preupdate', 'postupdate', 'depends', 'onchange', 'returns',
     'call_kw',
 ]
 
@@ -65,7 +65,7 @@ _logger = logging.getLogger(__name__)
 #  - method._depends: set by @depends, specifies compute dependencies
 #  - method._returns: set by @returns, specifies return model
 #  - method._onchange: set by @onchange, specifies onchange fields
-#  - method._prewrite: set by @prewrite, specifies prewrite fields
+#  - method._preupdate: set by @preupdate, specifies preupdate fields
 #  - method._postupdate: set by @postupdate, specifies postupdate fields
 #  - method.clear_cache: set by @ormcache, used to clear the cache
 #
@@ -74,7 +74,7 @@ _logger = logging.getLogger(__name__)
 #  - method._orig: original method
 #
 
-WRAPPED_ATTRS = ('__module__', '__name__', '__doc__', '_constrains', '_prewrite', '_postupdate',
+WRAPPED_ATTRS = ('__module__', '__name__', '__doc__', '_constrains', '_preupdate', '_postupdate',
                  '_depends', '_onchange', '_returns', 'clear_cache')
 
 INHERITED_ATTRS = ('_returns',)
@@ -137,8 +137,8 @@ def propagate(method1, method2):
                 setattr(method2, attr, getattr(method1, attr))
     return method2
 
-def prewrite(*args):
-    return attrsetter('_prewrite', args)
+def preupdate(*args):
+    return attrsetter('_preupdate', args)
 
 def postupdate(*args):
     """ Return a decorator to decorate an postupdate method for given fields.

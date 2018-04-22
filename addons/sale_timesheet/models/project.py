@@ -92,20 +92,15 @@ class ProjectTask(models.Model):
                 if not task.sale_line_id.is_service or task.sale_line_id.is_expense:
                     raise ValidationError(_('You cannot link the order item %s - %s to this task because it is a re-invoiced expense.' % (task.sale_line_id.order_id.id, task.sale_line_id.product_id.name))) 
 
-    @api.model
-    def create(self, values):
-        # sub task has the same so line than their parent
-        parent_id = values['parent_id'] if 'parent_id' in values else self.env.context.get('default_parent_id')
-        if parent_id:
-            values['sale_line_id'] = self.env['project.task'].browse(parent_id).sudo().sale_line_id.id
-        return super(ProjectTask, self).create(values)
 
-    @api.multi
-    def write(self, values):
+    @api.preupdate('parent_id')
+    def _preupdate_parent_id(self, values):
         # sub task has the same so line than their parent
         if 'parent_id' in values:
             values['sale_line_id'] = self.env['project.task'].browse(values['parent_id']).sudo().sale_line_id.id
 
+    @api.multi
+    def write(self, values):
         result = super(ProjectTask, self).write(values)
         # reassign SO line on related timesheet lines
         if 'sale_line_id' in values:

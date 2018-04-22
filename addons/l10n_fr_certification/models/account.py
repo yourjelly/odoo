@@ -177,21 +177,11 @@ class AccountJournal(models.Model):
             raise UserError(_('It is not permitted to disable the data inalterability in this journal (%s) since journal entries have already been protected.') % (self.name, ))
         return True
 
-    @api.multi
-    def write(self, vals):
-        # restrict the operation in case we are trying to write a forbidden field
+    @api.preupdate('update_posted')
+    def _preupdate_update_posted(self, vals):
+       # restrict the operation in case we are trying to write a forbidden field
         for journal in self:
             if journal.company_id._is_accounting_unalterable():
                 if vals.get('update_posted'):
                     field_string = journal._fields['update_posted'].get_description(self.env)['string']
                     raise UserError(_("According to the French law, you cannot modify a journal in order for its posted data to be updated or deleted. Unauthorized field: %s.") % field_string)
-        return super(AccountJournal, self).write(vals)
-
-    @api.model
-    def create(self, vals):
-        # restrict the operation in case we are trying to set a forbidden field
-        if self.company_id._is_accounting_unalterable():
-            if vals.get('update_posted'):
-                field_string = self._fields['update_posted'].get_description(self.env)['string']
-                raise UserError(_("According to the French law, you cannot modify a journal in order for its posted data to be updated or deleted. Unauthorized field: %s.") % field_string)
-        return super(AccountJournal, self).create(vals)
