@@ -1,6 +1,50 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+"""
+This python module contains a low-level SQL query builder, the generated SQL statements
+are specific to the PostgreSQL idiom since its what Odoo uses, therefore it is guaranteed to work
+with PostgreSQL, however it may still work with other RDBMS, but this is not guaranteed.
+
+Usage:
+
+The basic object needed for creating SQL statements and expressions is the `Row` object, it
+represents (in an abstract manner) a row from a table, it requires  one argument for initialization
+which is the name of the table, it accepts a second, optional argument as a flag called `nullable`,
+this flag, when set to true, means "take the nulls from this table when performing a Join", which
+helps in the inference of join types.
+
+e.g. >>> res_partner = Row('res_partner', True)
+
+One can access a row's columns by using pythonic attribute getting / dot notation.
+
+e.g. >>> col = res_partner.id
+
+Note that these objects are not DB-validated, meaning that one could create a Row object of a
+table that does not exist in DB, or access a column that does not exist in a table's schema, the
+performance cost of this kind of validation does not warrant its use-case, it is to be used
+with caution as the "validation" will be done by Postgres itself.
+
+Once a row object is created, one can perform pythonic expressions with its columns,
+these expressions can then be translated into SQL expressions.
+
+e.g. >>> expr = res_partner.id == 5
+     >>> expr.__to_sql__()
+     ... ('"res_partner"."id" = %s', [5])
+
+Two things to note from the previous example:
+    * SQL Identifiers are automatically double-quoted
+    * Literals are not directly interpolated into the SQL string, instead string interpolation
+      placeholders are put in their place and the actual literals are appended to a list of
+      arguments (order matters!). This tuple can then be passed directly to cr.execute(), which
+      will properly perform the interpolation without the risk of SQL-Injections.
+
+Rows, Columns and Expressions are the building blocks of the query builder, but they're
+pretty useless by themselves, to create meaningful SQL statements, one should use
+the Select, Insert and Delete classes for creating the corresponding SQL statements, in order
+to see their usage, consult the respective class' documentation.
+"""
+
 
 def _quote(val):
     """ Helper function for quoting SQL identifiers. """
@@ -250,13 +294,17 @@ class Select(object):
         Stateless class for generating SQL SELECT statements.
 
         Args:
-            columns: Either a list of Column for the output table or a dictionary
-                of alias: Column, these will be used in the 'SELECT x' part of
-                the query.
-            where (Expression): An AST expression for filtering out the results of the query.
-            order: A list of (potentially modified) columns to order by.
-            joins: A list of expressions by which to join different tables based on a condition.
-            distinct: A list of columns to be fetched only if they're not the same.
+            columns: List of Column / Dictionary `{alias: Column}`.
+                Alternatively, a single-element list containing a Row object
+                can be provided, in which case it will be translated to 'SELECT *'
+            where (Expression): Expression for filtering out the results of the query.
+            order: List of (potentially modified) columns to order by.
+            joins: List of expressions by which to join different tables based on a condition.
+            distinct: Flag dictating whether records will be fetched if they're not the same.
+            group: List of columns to order by.
+            limit (int): Maximum amount of records to fetch.
+            offset (int): Skip the first X records when performing a Select with a limit,
+                has no effect if limit is not specified.
 
         Example:
             p = Row('res_partner', True)
@@ -296,7 +344,6 @@ class Select(object):
                 else:
                     tables.add(col._row)
             self._tables = sorted(tables, key=lambda r: r._table)
-
 
     def __add__(self, other):
         return SelectOp('UNION', self, other)
