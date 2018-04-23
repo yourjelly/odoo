@@ -263,11 +263,23 @@ ListRenderer.include({
         // as even if the grouped list doesn't support edition, it may contain
         // a widget allowing the edition in readonly (e.g. priority), so it
         // should be able to update a record as well)
+        debugger;
         var record;
         var rowIndex;
-        if (this.state.groupedBy.length) {
+        if (this.state.groupedBy.length && mode === 'edit') {
             var state = this.current_group;
-            rowIndex = 1;
+            rowIndex = -1;
+            var count = 0;
+            utils.traverse_records(state, function (r) {
+                if (r.id === recordID) {
+                    record = r;
+                    rowIndex = count;
+                }
+                count++;
+            });
+        } else if (this.state.groupedBy.length && mode === 'readonly') {
+            var state = this.previousGroup;
+            rowIndex = -1;
             var count = 0;
             utils.traverse_records(state, function (r) {
                 if (r.id === recordID) {
@@ -285,19 +297,9 @@ ListRenderer.include({
             return $.when();
         }
         var editMode = (mode === 'edit');
-        var $row;
         this.currentRow = editMode ? rowIndex : null;
-        if (this.state.groupedBy.length) {
-            var $rows = this.$('.o_data_row');
-            var row = _.find($rows, function (r) {
-                if (($(r).data('groupID') ===  self.current_group.id) && $(r).data('id') === recordID) {
-                    return r;
-                }
-            });
-            $row = $(row);
-        } else {
-            $row = this.$('.o_data_row:nth(' + rowIndex + ')');
-        }
+        var $row = this.state.groupedBy.length ? this._getRow(mode, recordID) : this.$('.o_data_row:nth(' + rowIndex + ')');
+
         var $tds = $row.children('.o_data_cell');
         var oldWidgets = _.clone(this.allFieldWidgets[record.id]);
 
@@ -374,8 +376,8 @@ ListRenderer.include({
         if (this.currentRow === null) {
             return $.when();
         }
-
-        var record = this.state.groupedBy.length ? this.current_group.data[this.currentRow] : this.state.data[this.currentRow];
+        debugger;
+        var record = (this.state.groupedBy.length && this.previousGroup) ? this.previousGroup.data[this.currentRow] : this.state.data[this.currentRow];
         var recordWidgets = this.allFieldWidgets[record.id];
         toggleWidgets(true);
 
@@ -425,6 +427,38 @@ ListRenderer.include({
             n++;
         }
         return n;
+    },
+    /**
+     * Returns the row so we can find that in which group our row belongs to
+     * based on that we can edit the row or save the row data
+     * @returns {$row}
+     */
+    _getRow: function (mode, recordID) {
+        var self = this;
+        var $row;
+        if (mode === 'edit') {
+            // If there are multiple groups we have to find that in which group exactly the
+            // the row is.
+            this.previousGroup = this.current_group;
+            var $rows = this.$('.o_data_row');
+            var row = _.find($rows, function (r) {
+                if (($(r).data('groupID') ===  self.current_group.id) && $(r).data('id') === recordID) {
+                    return r;
+                }
+            });
+            return $row = $(row);
+        } else if(mode === 'readonly') {
+            var $rows = this.$('.o_data_row');
+            var row = _.find($rows, function (r) {
+                if (($(r).data('groupID') ===  self.previousGroup.id) && $(r).data('id') === recordID) {
+                    return r;
+                }
+            });
+            // Store the current group as a previous one so that we can find the
+            // in which group our selected row belongs to
+            this.previousGroup = this.current_group;
+            return $row = $(row);
+        }
     },
     /**
      * Returns true iff the list is editable, i.e. if it isn't grouped and if
@@ -637,7 +671,7 @@ ListRenderer.include({
     _selectCell: function (rowIndex, fieldIndex, options) {
         options = options || {};
         // Do nothing if the user tries to select current cell
-        if (!options.force && rowIndex === this.currentRow && fieldIndex === this.currentFieldIndex) {
+        if (!options.force && rowIndex === this.currentRow && fieldIndex === this.currentFieldIndex && (this.previousGroup === this.current_group)) {
             return $.when();
         }
         var wrap = options.wrap === undefined ? true : options.wrap;
@@ -673,7 +707,7 @@ ListRenderer.include({
      */
     _selectRow: function (rowIndex) {
         // Do nothing if already selected
-        if (rowIndex === this.currentRow) {
+        if (rowIndex === this.currentRow && (this.previousGroup === this.current_group)) {
             return $.when();
         }
 
@@ -734,6 +768,7 @@ ListRenderer.include({
         if (!this._isEditable() || $(event.target).prop('special_click')) {
             return;
         }
+        debugger;
         var self = this;
         var $td = $(event.currentTarget);
         var $tr = $td.parent();
