@@ -225,6 +225,14 @@ class TestSelect(common.TransactionCase):
             """GROUP BY "res_partner"."name\""""
         )
 
+    def test_having(self):
+        s = Select([self.p.id, self.p.name], group=[self.p.name], having=self.p.name != 'johnny')
+        self.assertEqual(
+            s.__to_sql__(),
+            ("""SELECT "res_partner"."id", "res_partner"."name" FROM "res_partner" """
+             """GROUP BY "res_partner"."name" HAVING ("res_partner"."name" != %s)""", ['johnny'])
+        )
+
     def test_limit(self):
         s = Select([self.p.id], limit=5)
         self.assertEqual(
@@ -366,6 +374,21 @@ class TestSelect(common.TransactionCase):
             new.__to_sql__()[0],
             """SELECT "res_partner"."id", "res_partner"."name" FROM "res_partner" """
             """GROUP BY "res_partner"."name\""""
+        )
+
+    def test_new_having(self):
+        base = Select([self.p.id, self.p.name], group=[self.p.id], having=self.p.id > 5)
+        new = base.having(self.p.name != 'johnny')
+        self.assertIsNot(base, new)
+        self.assertEqual(
+            base.__to_sql__(),
+            ("""SELECT "res_partner"."id", "res_partner"."name" FROM "res_partner" """
+             """GROUP BY "res_partner"."id" HAVING ("res_partner"."id" > %s)""", [5])
+        )
+        self.assertEqual(
+            new.__to_sql__(),
+            ("""SELECT "res_partner"."id", "res_partner"."name" FROM "res_partner" """
+             """GROUP BY "res_partner"."id" HAVING ("res_partner"."name" != %s)""", ['johnny'])
         )
 
     def test_new_limit(self):

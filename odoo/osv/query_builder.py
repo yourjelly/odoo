@@ -289,7 +289,7 @@ class Select(object):
     # force a cartesian product
 
     def __init__(self, columns, where=None, order=[], joins=[], distinct=False,
-                 group=[], limit=None, offset=0):
+                 group=[], having=None, limit=None, offset=0):
         """
         Stateless class for generating SQL SELECT statements.
 
@@ -302,6 +302,7 @@ class Select(object):
             joins: List of expressions by which to join different tables based on a condition.
             distinct: Flag dictating whether records will be fetched if they're not the same.
             group: List of columns to order by.
+            having (Expression): Condition for the group by.
             limit (int): Maximum amount of records to fetch.
             offset (int): Skip the first X records when performing a Select with a limit,
                 has no effect if limit is not specified.
@@ -326,6 +327,7 @@ class Select(object):
         self.attrs['joins'] = self._joins = joins
         self.attrs['distinct'] = self._distinct = distinct
         self.attrs['group'] = self._group = group
+        self.attrs['having'] = self._having = having
         self.attrs['limit'] = self._limit = limit
         self.attrs['offset'] = self._offset = offset
 
@@ -381,6 +383,10 @@ class Select(object):
     def group(self, *expressions):
         """ Create a similar Select object but with a different group by clause."""
         return Select(**{**self.attrs, 'group': expressions})
+
+    def having(self, expression):
+        """ Create a similar Select object but with a different having clause. """
+        return Select(**{**self.attrs, 'having': expression})
 
     def limit(self, n):
         """ Create a similar Select object but with a different limit."""
@@ -438,6 +444,13 @@ class Select(object):
             return sql % ', '.join([g.__to_sql__()[0] for g in self._group])
         return ''
 
+    def _build_having(self):
+        sql = " HAVING %s"
+        if self._having:
+            having, args = self._having.__to_sql__()
+            return (sql % having, args)
+        return ('', [])
+
     def _build_limit(self):
         if self._limit:
             sql = " LIMIT %s OFFSET %s"
@@ -468,6 +481,7 @@ class Select(object):
         sql += self._build_order()
         sql += self._build_group()
 
+        with_args(self._build_having)
         with_args(self._build_limit)
 
         return (sql, args)
