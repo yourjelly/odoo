@@ -45,6 +45,8 @@ the Select, Insert and Delete classes for creating the corresponding SQL stateme
 to see their usage, consult the respective class' documentation.
 """
 
+from functools import partial
+
 
 def _quote(val):
     """ Helper function for quoting SQL identifiers. """
@@ -480,3 +482,15 @@ class Select(object):
         with_args(self._build_limit)
 
         return (sql, args)
+
+
+# SQL Functions and Aggregates
+AVG = partial(Func, 'AVG')
+COUNT = partial(Func, 'COUNT')
+SUM = partial(Func, 'SUM')
+MAX = partial(Func, 'MAX')
+MIN = partial(Func, 'MIN')
+COALESCE = partial(Func, 'COALESCE')
+NULLIF = partial(Func, 'NULLIF')
+CONCAT = partial(Func, 'CONCAT')
+NOW = partial(Func, 'NOW')

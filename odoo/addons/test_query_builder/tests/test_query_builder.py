@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.tests import common
-from odoo.osv.query_builder import Row, Select, Asc, Desc
+from odoo.osv.query_builder import Row, Select, Asc, Desc, COALESCE
 
 
 class TestExpressions(common.TransactionCase):
@@ -87,6 +87,11 @@ class TestExpressions(common.TransactionCase):
     def test_ilike_expression(self):
         expr = self.u.name.ilike('johnny')
         res = ("""("res_users"."name" ILIKE %s)""", ['johnny'])
+        self.assertEqual(expr.__to_sql__(), res)
+
+    def test_partial_func_expression(self):
+        expr = COALESCE(self.u.id, 5)
+        res = ("""(COALESCE("res_users"."id", %s))""", [5])
         self.assertEqual(expr.__to_sql__(), res)
 
 
