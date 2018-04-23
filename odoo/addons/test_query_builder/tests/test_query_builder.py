@@ -79,6 +79,16 @@ class TestExpressions(common.TransactionCase):
         res = ("""(MOD("res_users"."count", %s))""", [100])
         self.assertEqual(expr.__to_sql__(), res)
 
+    def test_like_expression(self):
+        expr = self.u.name @ 'johnny'
+        res = ("""("res_users"."name" LIKE %s)""", ['johnny'])
+        self.assertEqual(expr.__to_sql__(), res)
+
+    def test_ilike_expression(self):
+        expr = self.u.name.ilike('johnny')
+        res = ("""("res_users"."name" ILIKE %s)""", ['johnny'])
+        self.assertEqual(expr.__to_sql__(), res)
+
 
 class TestSelect(common.TransactionCase):
 
@@ -242,7 +252,7 @@ class TestSelect(common.TransactionCase):
         )
 
     def test_offset(self):
-        s= Select([self.p.id], limit=7, offset=2)
+        s = Select([self.p.id], limit=7, offset=2)
         self.assertEqual(
             s.__to_sql__(),
             ("""SELECT "res_partner"."id" FROM "res_partner" LIMIT %s OFFSET %s""",
@@ -252,7 +262,7 @@ class TestSelect(common.TransactionCase):
     def test_union(self):
         s1 = Select([self.p.id])
         s2 = Select([self.u.id])
-        s = s1 + s2
+        s = s1 | s2
         self.assertEqual(
             s.__to_sql__(),
             ("""(SELECT "res_partner"."id" FROM "res_partner") UNION """
@@ -262,7 +272,7 @@ class TestSelect(common.TransactionCase):
     def test_union_with_args(self):
         s1 = Select([self.p.id], where=self.p.id > 5)
         s2 = Select([self.u.id], where=self.u.id < 5)
-        s = s1 + s2
+        s = s1 | s2
         self.assertEqual(
             s.__to_sql__(),
             ("""(SELECT "res_partner"."id" FROM "res_partner" WHERE ("res_partner"."id" > %s))"""
@@ -274,7 +284,7 @@ class TestSelect(common.TransactionCase):
     def test_intersect(self):
         s1 = Select([self.p.id])
         s2 = Select([self.u.id])
-        s = s1 - s2
+        s = s1 & s2
         self.assertEqual(
             s.__to_sql__(),
             ("""(SELECT "res_partner"."id" FROM "res_partner") INTERSECT """
@@ -284,7 +294,7 @@ class TestSelect(common.TransactionCase):
     def test_except(self):
         s1 = Select([self.p.id])
         s2 = Select([self.u.id])
-        s = s1 / s2
+        s = s1 - s2
         self.assertEqual(
             s.__to_sql__(),
             ("""(SELECT "res_partner"."id" FROM "res_partner") EXCEPT """

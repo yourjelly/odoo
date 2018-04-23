@@ -100,6 +100,12 @@ class Expression(object):
     def __ge__(self, other):
         return Expression('>=', self, other)
 
+    def __matmul__(self, other):
+        return Expression('LIKE', self, other)
+
+    def ilike(self, other):
+        return Expression('ILIKE', self, other)
+
     def __abs__(self):
         return Func('ABS', self)
 
@@ -108,18 +114,6 @@ class Expression(object):
 
     def __mod__(self, other):
         return Func('MOD', self, other)
-
-    def __ceil__(self):
-        return Func('CEIL', self)
-
-    def __floor__(self):
-        return Func('FLOOR', self)
-
-    def __trunc__(self):
-        return Func('TRUNC', self)
-
-    def __round__(self, ndigits=2):
-        return Func('ROUND', self, ndigits)
 
     def __to_sql__(self):
         # TODO: Optimize parentheses generation
@@ -351,17 +345,14 @@ class Select(object):
 
         self._tables = sorted(tables, key=lambda r: r._table)
 
-    def __add__(self, other):
+    def __or__(self, other):
         return SelectOp('UNION', self, other)
 
-    def __sub__(self, other):
+    def __and__(self, other):
         return SelectOp('INTERSECT', self, other)
 
-    def __truediv__(self, other):
+    def __sub__(self, other):
         return SelectOp('EXCEPT', self, other)
-
-    # py2compat
-    __div__ = __truediv__
 
     def columns(self, *cols):
         """ Create a similar Select object but with different output columns."""
