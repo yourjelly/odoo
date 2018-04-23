@@ -57,6 +57,7 @@ class ResConfigSettings(models.TransientModel):
     tax_exigibility = fields.Boolean(string='Cash Basis', related='company_id.tax_exigibility')
     tax_cash_basis_journal_id = fields.Many2one('account.journal', related='company_id.tax_cash_basis_journal_id', string="Tax Cash Basis Journal")
     account_hide_setup_bar = fields.Boolean(string='Hide Setup Bar', related='company_id.account_setup_bar_closed',help="Tick if you wish to hide the setup bar on the dashboard")
+    writeoff_account_id = fields.Many2one(comodel_name='account.account', related='company_id.writeoff_account_id', string="Default Write-Off Account", help="Default account where to post payment writeoffs")
 
     @api.multi
     def set_values(self):

@@ -21,6 +21,7 @@ MAP_INVOICE_TYPE_PAYMENT_SIGN = {
     'out_refund': 1,
 }
 
+
 class account_payment_method(models.Model):
     _name = "account.payment.method"
     _description = "Payment Methods"
@@ -93,10 +94,12 @@ class account_abstract_payment(models.AbstractModel):
             for inv in invoices)
 
         currency = invoices[0].currency_id
+        writeoff_account = invoices[0].company_id.writeoff_account_id
 
         total_amount = self._compute_payment_amount(invoices=invoices, currency=currency)
 
         rec.update({
+            'writeoff_account_id': writeoff_account and writeoff_account.id or False,
             'amount': abs(total_amount),
             'currency_id': currency.id,
             'payment_type': total_amount > 0 and 'inbound' or 'outbound',
@@ -248,6 +251,7 @@ class account_register_payments(models.TransientModel):
         '''
         amount = self._compute_payment_amount(invoices=invoices) if self.multi else self.amount
         payment_type = ('inbound' if amount > 0 else 'outbound') if self.multi else self.payment_type
+        writeoff_account = self.journal_id.company_id.writeoff_account_id
         return {
             'journal_id': self.journal_id.id,
             'payment_method_id': self.payment_method_id.id,

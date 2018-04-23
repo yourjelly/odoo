@@ -50,6 +50,7 @@ If you have any queries regarding your account, Please contact us.
 Thank you in advance for your cooperation.
 Best Regards,'''))
     tax_exigibility = fields.Boolean(string='Use Cash Basis')
+    writeoff_account_id = fields.Many2one(comodel_name='account.account', string="Default Write-Off Account", help="Default account where to post payment writeoffs")
 
     #Fields of the setup step for opening move
     account_opening_move_id = fields.Many2one(string='Opening Journal Entry', comodel_name='account.move', help="The journal entry containing the initial balance of all this company's accounts.")
