@@ -291,9 +291,17 @@ class TestSelect(common.TransactionCase):
              """(SELECT "res_users"."id" FROM "res_users")""", [])
         )
 
-    ####################
+    def test_smart_joins(self):
+        s = Select([self.p.id, self.u.id], joins=[self.p.id == self.u.partner_id])
+        self.assertEqual(
+            s.__to_sql__()[0],
+            """SELECT "res_partner"."id", "res_users"."id" FROM "res_partner" """
+            """INNER JOIN "res_users" ON ("res_partner"."id" = "res_users"."partner_id")"""
+        )
+
+    #################################################
     # Test functions that return new Select instances
-    ####################
+    #################################################
 
     def test_new_columns(self):
         # TODO: Verify that any of these methods properly regenerate the corresponding tables

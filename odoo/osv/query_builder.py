@@ -226,8 +226,10 @@ class Join(object):
             of creating the appropriate Join objects /!\
 
         The type of join depends on each table's `_nullable` boolean flag:
-            If LHS is _nullable and RHS is _nullable, the type is a FULL JOIN
-            If LHS is _nullable and RHS is not _nullable, the type is a LEFT JOIN
+            If LHS is nullable and RHS is nullable, the type is a FULL JOIN
+            If LHS is nullable and RHS is not nullable, the type is a LEFT JOIN
+            If LHS is not nullable and RHS is nullable, the type is a RIGHT JOIN
+            If LHS is not nullable and RHS is not nullable, the type is an INNER JOIN
 
         Args:
             expression (Expression): an AST expression which will serve as the ON condition for the
@@ -283,10 +285,6 @@ class Desc(Modifier):
 
 
 class Select(object):
-    # TODO: Make smarter joins, if the table of the RHS operand of the join predicate
-    # is already in the select's _tables attribute, then remove it, this allows
-    # for the columns to be columns from the joined table without the need to
-    # force a cartesian product
 
     def __init__(self, columns, where=None, order=[], joins=[], distinct=False,
                  group=[], having=None, limit=None, offset=0):
@@ -324,7 +322,7 @@ class Select(object):
         self.attrs['columns'] = self._columns = columns
         self.attrs['where'] = self._where = where
         self.attrs['order'] = self._order = order
-        self.attrs['joins'] = self._joins = joins
+        self.attrs['joins'] = self._joins = [Join(j) for j in joins if not isinstance(j, Join)]
         self.attrs['distinct'] = self._distinct = distinct
         self.attrs['group'] = self._group = group
         self.attrs['having'] = self._having = having
@@ -333,19 +331,25 @@ class Select(object):
 
         self._aliased = isinstance(columns, dict)
 
-        if self._aliased:
-            # If the columns argument is a dict, it can only contain Row objects.
-            self._tables = sorted({self._columns[c]._row for c in self._columns})
-        else:
-            # If the columns argument is a list, it can contain Row objects.
-            # or Column objects.
-            tables = set()
-            for col in self._columns:
+        tables = set()
+        for col in self._columns:
+            if self._aliased:
+                # If the columns argument is a dict, it can only contain Row objects.
+                # SELECT <col> AS <alias>
+                t = self._columns[col]._row
+            else:
+                # If the columns argument is a list, it can contain Row or Column objects
                 if isinstance(col, Row):
-                    tables.add(col)
+                    # SELECT *
+                    t = col
                 else:
-                    tables.add(col._row)
-            self._tables = sorted(tables, key=lambda r: r._table)
+                    # SELECT <col>
+                    t = col._row
+
+            if t not in [j.t2 for j in self._joins]:
+                tables.add(t)
+
+        self._tables = sorted(tables, key=lambda r: r._table)
 
     def __add__(self, other):
         return SelectOp('UNION', self, other)
@@ -401,7 +405,7 @@ class Select(object):
         args = []
 
         for join in self._joins:
-            _sql, _args = Join(join).__to_sql__()
+            _sql, _args = join.__to_sql__()
             sql.append(_sql)
             args += _args
 
