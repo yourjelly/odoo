@@ -241,6 +241,48 @@ class TestSelect(common.TransactionCase):
              [7, 2])
         )
 
+    def test_union(self):
+        s1 = Select([self.p.id])
+        s2 = Select([self.u.id])
+        s = s1 + s2
+        self.assertEqual(
+            s.__to_sql__(),
+            ("""(SELECT "res_partner"."id" FROM "res_partner") UNION """
+             """(SELECT "res_users"."id" FROM "res_users")""", [])
+        )
+
+    def test_union_with_args(self):
+        s1 = Select([self.p.id], where=self.p.id > 5)
+        s2 = Select([self.u.id], where=self.u.id < 5)
+        s = s1 + s2
+        self.assertEqual(
+            s.__to_sql__(),
+            ("""(SELECT "res_partner"."id" FROM "res_partner" WHERE ("res_partner"."id" > %s))"""
+             """ UNION """
+             """(SELECT "res_users"."id" FROM "res_users" WHERE ("res_users"."id" < %s))""",
+             [5, 5])
+        )
+
+    def test_intersect(self):
+        s1 = Select([self.p.id])
+        s2 = Select([self.u.id])
+        s = s1 - s2
+        self.assertEqual(
+            s.__to_sql__(),
+            ("""(SELECT "res_partner"."id" FROM "res_partner") INTERSECT """
+             """(SELECT "res_users"."id" FROM "res_users")""", [])
+        )
+
+    def test_except(self):
+        s1 = Select([self.p.id])
+        s2 = Select([self.u.id])
+        s = s1 / s2
+        self.assertEqual(
+            s.__to_sql__(),
+            ("""(SELECT "res_partner"."id" FROM "res_partner") EXCEPT """
+             """(SELECT "res_users"."id" FROM "res_users")""", [])
+        )
+
     ####################
     # Test functions that return new Select instances
     ####################

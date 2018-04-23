@@ -127,6 +127,16 @@ class Func(Expression):
         return (sql, args)
 
 
+class SelectOp(Expression):
+
+    __slots__ = ('op', 'left', 'right')
+
+    def __to_sql__(self):
+        left, largs = self.left.__to_sql__()
+        right, rargs = self.right.__to_sql__()
+        return ("(%s) %s (%s)" % (left, self.op, right), largs + rargs)
+
+
 class Column(Expression):
 
     __slots__ = ('_row', '_name', '_qualified')
@@ -287,6 +297,18 @@ class Select(object):
                     tables.add(col._row)
             self._tables = sorted(tables, key=lambda r: r._table)
 
+
+    def __add__(self, other):
+        return SelectOp('UNION', self, other)
+
+    def __sub__(self, other):
+        return SelectOp('INTERSECT', self, other)
+
+    def __truediv__(self, other):
+        return SelectOp('EXCEPT', self, other)
+
+    # py2compat
+    __div__ = __truediv__
 
     def columns(self, *cols):
         """ Create a similar Select object but with different output columns."""
