@@ -59,7 +59,7 @@ def _initialize_db(id, db_name, demo, lang, user_password, login='admin', countr
             odoo.tools.config['load_language'] = lang
             cr.commit()
 
-        registry = odoo.modules.registry.Registry.new(db_name, demo, None, update_module=True)
+        odoo.modules.registry.Registry.new(db_name, demo, update_module=True)
 
         with closing(db.cursor()) as cr:
             env = odoo.api.Environment(cr, SUPERUSER_ID, {})

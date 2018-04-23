@@ -117,11 +117,10 @@ def force_demo(cr):
     env['ir.module.module'].invalidate_cache(['demo'])
 
 
-def load_module_graph(cr, graph, status=None, perform_checks=True,
+def load_module_graph(cr, graph, perform_checks=True,
                       skip_modules=None, report=None, models_to_check=None):
     """Migrates+Updates or Installs all module nodes from ``graph``
        :param graph: graph of module nodes to load
-       :param status: deprecated parameter, unused, left to avoid changing signature in 8.0
        :param perform_checks: whether module descriptors should be checked for validity (prints warnings
                               for same cases)
        :param skip_modules: optional list of module names (packages) which have previously been loaded and can be skipped
@@ -144,8 +143,6 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
     if models_to_check is None:
         models_to_check = set()
 
-    processed_modules = []
-    loaded_modules = []
     registry = odoo.registry(cr.dbname)
     migrations = odoo.modules.migration.MigrationManager(cr, graph)
     module_count = len(graph)
@@ -187,10 +184,7 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
 
         model_names = registry.load(cr, package)
 
-        loaded_modules.append(package.name)
         if needs_update:
-            models_updated |= set(model_names)
-            models_to_check -= set(model_names)
             registry.setup_models(cr)
             registry.init_models(cr, model_names, {'module': package.name})
         elif package.state != 'to remove':
@@ -258,8 +252,6 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
                     env = api.Environment(cr, SUPERUSER_ID, {})
                     module = env['ir.module.module'].browse(module_id)
 
-            processed_modules.append(package.name)
-
             ver = adapt_version(package.data['version'])
             # Set new modules and dependencies
             module.write({'state': 'installed', 'latest_version': ver})
@@ -276,7 +268,9 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
 
     _logger.log(25, "%s modules loaded in %.2fs, %s queries", len(graph), time.time() - t0, odoo.sql_db.sql_counter - t0_sql)
 
-    return loaded_modules, processed_modules
+    registry.clear_caches()
+
+    cr.commit()
 
 def _check_module_names(cr, module_names):
     mod_names = set(module_names)
@@ -292,33 +286,31 @@ def _check_module_names(cr, module_names):
             incorrect_names = mod_names.difference([x['name'] for x in cr.dictfetchall()])
             _logger.warning('invalid module names, ignored: %s', ", ".join(incorrect_names))
 
-def load_marked_modules(cr, graph, states, force, progressdict, report,
-                        loaded_modules, perform_checks, models_to_check=None):
+def load_marked_modules(cr, graph, states, force, report, perform_checks, models_to_check=None):
     """Loads modules marked with ``states``, adding them to ``graph`` and
        ``loaded_modules`` and returns a list of installed/upgraded modules."""
 
     if models_to_check is None:
         models_to_check = set()
 
-    processed_modules = []
-    while True:
-        cr.execute("SELECT name from ir_module_module WHERE state IN %s" ,(tuple(states),))
-        module_list = [name for (name,) in cr.fetchall() if name not in graph]
-        if not module_list:
-            break
-        graph.add_modules(cr, module_list, force)
-        _logger.debug('Updating graph with %d more modules', len(module_list))
-        loaded, processed = load_module_graph(
-            cr, graph, progressdict, report=report, skip_modules=loaded_modules,
-            perform_checks=perform_checks, models_to_check=models_to_check
-        )
-        processed_modules.extend(processed)
-        loaded_modules.extend(loaded)
-        if not processed:
-            break
-    return processed_modules
+    cr.execute("SELECT name from ir_module_module WHERE state IN %s" ,(tuple(states),))
+    module_list = [name for (name,) in cr.fetchall() if name not in graph]
+    if not module_list:
+        return
 
-def load_modules(db, force_demo=False, status=None, update_module=False):
+    # dict_keys are a live view, if the graph is updated the view also is ->
+    # we need to copy the keys in order to get a snapshot of the graph before
+    # add_modules runs
+    # also needs graph.keys() because iter() is overridden
+    loaded_modules = set(graph.keys())
+    graph.add_modules(cr, module_list, force)
+    _logger.debug('Updating graph with %d more modules', len(module_list))
+    load_module_graph(
+        cr, graph, report=report, skip_modules=loaded_modules, perform_checks=perform_checks,
+        models_to_check=models_to_check
+    )
+
+def load_modules(db, force_demo=False, update_module=False):
     initialize_sys_path()
 
     force = []
@@ -357,9 +349,10 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
         # processed_modules: for cleanup step after install
         # loaded_modules: to avoid double loading
         report = registry._assertion_report
-        loaded_modules, processed_modules = load_module_graph(
-            cr, graph, status, perform_checks=update_module,
-            report=report, models_to_check=models_to_check)
+        load_module_graph(
+            cr, graph, perform_checks=update_module, report=report,
+            models_to_check=models_to_check
+        )
 
         load_lang = tools.config.pop('load_language')
         if load_lang or update_module:
@@ -409,16 +402,20 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
         #              changed, and modules that depend on an uninstalled module
         #              will not be processed on the first pass.
         #              It's especially useful for migrations.
-        previously_processed = -1
-        while previously_processed < len(processed_modules):
-            previously_processed = len(processed_modules)
-            processed_modules += load_marked_modules(cr, graph,
+        # FIXME: better way to do this
+        processed_modules = []
+        loaded = -1
+        while loaded < len(graph):
+            cr.execute("select name from ir_module_module where state in ('to install', 'to upgrade')")
+            processed_modules.extend(n for [n] in cr.fetchall())
+
+            loaded = len(graph)
+            load_marked_modules(cr, graph,
                 ['installed', 'to upgrade', 'to remove'],
-                force, status, report, loaded_modules, update_module, models_to_check)
+                force, report, update_module, models_to_check)
             if update_module:
-                processed_modules += load_marked_modules(cr, graph,
-                    ['to install'], force, status, report,
-                    loaded_modules, update_module, models_to_check)
+                load_marked_modules(cr, graph,
+                    ['to install'], force, report, update_module, models_to_check)
 
         registry.loaded = True
         registry.setup_models(cr)
@@ -480,7 +477,7 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
                 _logger.info('Reloading registry once more after uninstalling modules')
                 api.Environment.reset()
                 registry = odoo.modules.registry.Registry.new(
-                    cr.dbname, force_demo, status, update_module
+                    cr.dbname, force_demo, update_module
                 )
                 registry.check_tables_exist(cr)
                 cr.commit()
