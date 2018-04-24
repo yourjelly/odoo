@@ -4,6 +4,7 @@ odoo.define('web_tour.Tip', function(require) {
 var config = require('web.config');
 var core = require('web.core');
 var Widget = require('web.Widget');
+var _t = core._t;
 
 var Tip = Widget.extend({
     template: "Tip",
@@ -138,10 +139,16 @@ var Tip = Widget.extend({
     _reposition: function () {
         if (this.tip_opened) return;
         this.$el.removeClass("o_animated");
+        var appendAT = this.info.position;
+        if (_t.database.parameters.direction === 'rtl' && this.info.position === 'right') {
+            appendAT = 'left';
+        } else if (_t.database.parameters.direction === 'rtl' && this.info.position === 'left') {
+            appendAT = 'right';
+        }
 
         this.$el.position({
-            my: this._get_spaced_inverted_position(this.info.position),
-            at: this.info.position,
+            my: this._get_spaced_inverted_position(appendAT),
+            at: appendAT,
             of: this.$anchor,
             collision: "none",
         });
@@ -208,6 +215,7 @@ var Tip = Widget.extend({
             this.$el.appendTo(document.body);
         }
 
+        var animateTo = _t.database.parameters.direction === 'rtl' ? 'right' : 'left';
         var mbLeft = 0;
         var mbTop = 0;
         var overflow = false;
@@ -217,7 +225,7 @@ var Tip = Widget.extend({
         } else {
             overflow = (offset.top + this.content_height + this.double_border_width + this.info.overlay.y > this.$window.height());
         }
-        if (posVertical && overflow || this.info.position === "left") {
+        if (posVertical && overflow || this.info.position === animateTo) {
             mbLeft -= (this.content_width - this.init_width);
         }
         if (!posVertical && overflow || this.info.position === "top") {

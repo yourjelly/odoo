@@ -45,3 +45,9 @@ select {
     @include o-text-overflow;
     max-width: 150px;
 }
+
+.o_rtl {
+    .navbar-right {
+        padding: 0;
+    }
+}
