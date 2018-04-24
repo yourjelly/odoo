@@ -32,8 +32,12 @@ e.g. >>> expr = res_partner.id == 5
      >>> expr.__to_sql__()
      ... ('"res_partner"."id" = %s', [5])
 
-Two things to note from the previous example:
-    * SQL Identifiers are automatically double-quoted
+Three things to note from the previous example:
+
+    * SQL Identifiers are automatically double-quoted.
+
+    * Expressions are automatically parenthesized.
+
     * Literals are not directly interpolated into the SQL string, instead string interpolation
       placeholders are put in their place and the actual literals are appended to a list of
       arguments (order matters!). This tuple can then be passed directly to cr.execute(), which
@@ -217,13 +221,19 @@ class SelectOp(object):
         self.right = right
 
     def __or__(self, other):
-        return SelectOp('UNION', self, other)
+        assert isinstance(other, SelectOp), "UNION is only possible between queries"
+        op = 'UNION ALL' if other._all else 'UNION'
+        return SelectOp(op, self, other)
 
     def __and__(self, other):
-        return SelectOp('INTERSECT', self, other)
+        assert isinstance(other, SelectOp), "INTERSECT is only possible between queries"
+        op = 'INTERSECT ALL' if other._all else 'INTERSECT'
+        return SelectOp(op, self, other)
 
     def __sub__(self, other):
-        return SelectOp('EXCEPT', self, other)
+        assert isinstance(other, SelectOp), "EXCEPT is only possible between queries"
+        op = 'EXCEPT ALL' if other._all else 'EXCEPT'
+        return SelectOp(op, self, other)
 
     def __to_sql__(self):
         left, largs = self.left.__to_sql__()
@@ -358,7 +368,7 @@ class Desc(Modifier):
 class Select(SelectOp):
 
     def __init__(self, columns, where=None, order=[], joins=[], distinct=False,
-                 group=[], having=None, limit=None, offset=0):
+                 group=[], having=None, limit=None, offset=0, _all=False):
         """
         Stateless class for generating SQL SELECT statements.
 
@@ -399,6 +409,7 @@ class Select(SelectOp):
         self.attrs['having'] = self._having = having
         self.attrs['limit'] = self._limit = limit
         self.attrs['offset'] = self._offset = offset
+        self.attrs['_all'] = self._all = _all
 
         self._aliased = isinstance(columns, dict)
 
@@ -459,6 +470,10 @@ class Select(SelectOp):
     def offset(self, n):
         """ Create a similar Select object but with a different offset."""
         return Select(**{**self.attrs, 'offset': n})
+
+    def all(self):
+        """ Create a similar Select object but with a different all."""
+        return Select(**{**self.attrs, '_all': not self.attrs['_all']})
 
     # Helper methods for building the final query
     def _build_joins(self):
@@ -556,3 +571,5 @@ COALESCE = partial(Func, 'COALESCE')
 NULLIF = partial(Func, 'NULLIF')
 CONCAT = partial(Func, 'CONCAT')
 NOW = partial(Func, 'NOW')
+EXISTS = partial(Func, 'EXISTS')
+ANY = partial(Func, 'ANY')

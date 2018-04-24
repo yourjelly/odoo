@@ -304,6 +304,16 @@ class TestSelect(common.TransactionCase):
              """(SELECT "res_users"."id" FROM "res_users")""", [])
         )
 
+    def test_union_all(self):
+        s1 = Select([self.p.id])
+        s2 = Select([self.u.id], _all=True)
+        s = s1 | s2
+        self.assertEqual(
+            s.__to_sql__(),
+            ("""(SELECT "res_partner"."id" FROM "res_partner") UNION ALL """
+             """(SELECT "res_users"."id" FROM "res_users")""", [])
+        )
+
     def test_union_with_args(self):
         s1 = Select([self.p.id], where=self.p.id > 5)
         s2 = Select([self.u.id], where=self.u.id < 5)
@@ -359,12 +369,7 @@ class TestSelect(common.TransactionCase):
             """INNER JOIN "res_users" ON ("res_partner"."id" = "res_users"."partner_id")"""
         )
 
-    #################################################
-    # Test functions that return new Select instances
-    #################################################
-
     def test_new_columns(self):
-        # TODO: Verify that any of these methods properly regenerate the corresponding tables
         base = Select([self.p.name])
         new = base.columns(self.p.id)
         self.assertIsNot(base, new)
@@ -487,4 +492,19 @@ class TestSelect(common.TransactionCase):
             new.__to_sql__(),
             ("""SELECT "res_partner"."id" FROM "res_partner" LIMIT %s OFFSET %s""",
              [100, 30])
+        )
+
+    def test_new_all(self):
+        base = Select([self.p.id])
+        new = base.all()
+        self.assertIsNot(base, new)
+        self.assertEqual(
+            (new & base).__to_sql__()[0],
+            """(SELECT "res_partner"."id" FROM "res_partner") INTERSECT """
+            """(SELECT "res_partner"."id" FROM "res_partner")"""
+        )
+        self.assertEqual(
+            (base & new).__to_sql__()[0],
+            """(SELECT "res_partner"."id" FROM "res_partner") INTERSECT ALL """
+            """(SELECT "res_partner"."id" FROM "res_partner")"""
         )
