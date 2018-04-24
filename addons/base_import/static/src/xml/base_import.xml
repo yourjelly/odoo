@@ -24,7 +24,7 @@
                         <button type="button" class="btn btn-default oe_import_file_reload" disabled="disabled">Reload File</button>
                       </span>
                     </div>
-                    <div class="template-import mt24 hidden">
+                    <div class="template-import mt24 d-none">
                         <h5>
                             <a href="#" class="import-link fa fa-download"></a>
                         </h5>

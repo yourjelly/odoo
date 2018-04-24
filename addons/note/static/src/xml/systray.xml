@@ -5,7 +5,7 @@
             <div class="o_note_show">
                 <a class="btn btn-block text-center">Add new note</a>
             </div>
-            <div class="o_note o_mail_channel_preview hidden">
+            <div class="o_note o_mail_channel_preview d-none">
                 <div class="o_mail_channel_image o_mail_channel_app">
                     <img src="/note/static/description/icon.png"/>
                 </div>

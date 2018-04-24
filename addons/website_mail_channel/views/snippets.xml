@@ -27,12 +27,12 @@
                         <button href="#" class="btn btn-primary js_follow_btn">Subscribe</button>
                     </span>
                 </div>
-                <p class="js_mg_details hidden well well-sm">
-                    <span class="js_mg_email hidden"><i class="fa fa-envelope-o"/><a href="#" class="js_mg_email"> send mail</a> - </span>
+                <p class="js_mg_details d-none well well-sm">
+                    <span class="js_mg_email d-none"><i class="fa fa-envelope-o"/><a href="#" class="js_mg_email"> send mail</a> - </span>
                     <i class="fa fa-file-o"/><a href="#" class="js_mg_link"> archives</a> -
                     <i class="fa fa-times"/><a href="#" class="js_unfollow_btn"> unsubscribe</a>
                 </p>
-                <p class="js_mg_confirmation hidden well well-sm">
+                <p class="js_mg_confirmation d-none well well-sm">
                     a confirmation email has been sent.
                 </p>
             </div>

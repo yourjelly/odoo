@@ -28,7 +28,7 @@
                         <input type="hidden" id="link_id" t-att-value="id" />
 
                         <h1 class="page-header mt0"><t t-esc="title"/></h1>
-                            
+
                         <div class="row">
                             <div class="col-sm-8">
                                 <div class="row">
@@ -48,12 +48,12 @@
                                         <p>
                                             <span class="o_website_links_short_url" id="short_url"><span id="short-url-host"><t t-esc="short_url_host"/></span><span id="o_website_links_code"><t t-esc="code"/></span></span>
                                             <span class="o_website_links_edit_tools" style="display:none;">
-                                                <a class="o_website_links_ok_edit btn btn-xs btn-primary" href="#">ok</a> or 
+                                                <a class="o_website_links_ok_edit btn btn-xs btn-primary" href="#">ok</a> or
                                                 <a class="o_website_links_cancel_edit" href="#">cancel</a>
                                             </span>
                                             <a class="o_website_links_edit_code"><span class="fa fa-pencil gray"></span></a>
                                             <a class="copy-to-clipboard" t-att-data-clipboard-text="short_url">copy</a>
-                                            
+
                                         </p>
                                         <p class='o_website_links_code_error' style='color:red;font-weight:bold;display:none'></p>
                                     </div>
@@ -105,7 +105,7 @@
                         </div>
 
                         <h1 class="page-header">Statistics
-                            <small class="pull-right hidden-xs mt16" id="filters">
+                            <small class="pull-right d-none d-md-block mt16" id="filters">
                                 <ul class="nav nav-tabs nav-tabs-inline graph-tabs" role="tablist">
                                     <li class="active"><a href="#all_time_charts" role="tab" data-toggle="tab">All Time</a></li>
                                     <li><a href="#last_month_charts" role="tab" data-toggle="tab">Last Month</a></li>
@@ -113,7 +113,7 @@
                                 </ul>
                             </small>
                         </h1>
-                        
+
                         <div class="row">
                             <div class="col-sm-12 mb8">
                                 <div class="tab-content">
