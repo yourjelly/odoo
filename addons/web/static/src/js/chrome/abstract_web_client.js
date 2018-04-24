@@ -110,6 +110,9 @@ var AbstractWebClient = Widget.extend(ServiceProviderMixin, KeyboardNavigationMi
 
         return session.is_bound
             .then(function () {
+                if (_t.database.parameters.direction === "rtl") {
+                    self.$el.addClass('o_rtl');
+                }
                 self.bind_events();
                 return $.when(
                     self.set_action_manager(),

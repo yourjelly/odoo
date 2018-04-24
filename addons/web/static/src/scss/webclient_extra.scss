@@ -50,3 +50,10 @@ select {
 .btn-icon {
     @include button-variant($btn-default-color, $btn-default-bg, $btn-default-border);
 }
+
+.o_rtl {
+    .navbar-right {
+        padding: 0;
+    }
+}
+
