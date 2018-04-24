@@ -219,7 +219,7 @@ var Followers = AbstractField.extend({
     _follow: function () {
         var kwargs = {
             partner_ids: [this.partnerID],
-            context: {}, // FIXME
+            context: this.record.context,
         };
         this._rpc({
                 model: this.model,
@@ -244,7 +244,7 @@ var Followers = AbstractField.extend({
                     [self.res_id],
                     ids.partner_ids,
                     ids.channel_ids,
-                    {}, // FIXME
+                    self.record.context,
                 ];
                 self._rpc({
                         model: self.model,
@@ -291,7 +291,7 @@ var Followers = AbstractField.extend({
         } else {
             var kwargs = _.extend({}, ids);
             kwargs.subtype_ids = checklist;
-            kwargs.context = {}; // FIXME
+            kwargs.context = this.record.context;
             this._rpc({
                     model: this.model,
                     method: 'message_subscribe',
