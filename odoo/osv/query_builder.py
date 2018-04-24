@@ -45,7 +45,11 @@ the Select, Insert and Delete classes for creating the corresponding SQL stateme
 to see their usage, consult the respective class' documentation.
 """
 
+from collections import Iterable
 from functools import partial
+from numbers import Number
+
+from odoo.tools.pycompat import text_type
 
 
 def _quote(val):
@@ -59,6 +63,19 @@ class Expression(object):
 
     """
     Main Abstract Syntax Tree of the query builder.
+
+    Valid expressions:
+        a & b  -> a AND b, both operands must be Expressions
+        a | b  -> a OR b, both operands must be Expressions
+        a ^ b  -> a IN b, b must be an iterable (tuple, list, set, ...)
+        ~a     -> NOT a, a must be an Expression
+        a == b -> a = b
+        a != b -> a != b
+        a < b  -> a < b
+        a <= b -> a <= b
+        a > b  -> a > b
+        a >= b -> a >= b
+        a @ b  -> a LIKE b, b must be a string type
     """
 
     __slots__ = ('left', 'op', 'right')
@@ -69,12 +86,15 @@ class Expression(object):
         self.right = right
 
     def __and__(self, other):
+        assert isinstance(other, Expression), "`&` operands must be Expressions."
         return Expression('AND', self, other)
 
     def __or__(self, other):
+        assert isinstance(other, Expression), "`|` operands must be Expressions."
         return Expression('OR', self, other)
 
     def __xor__(self, other):
+        assert isinstance(other, Iterable), "`^` RHS operand must be an Iterable."
         return Expression('IN', self, other)
 
     def __invert__(self):
@@ -103,21 +123,32 @@ class Expression(object):
         return Expression('>=', self, other)
 
     def __matmul__(self, other):
+        assert isinstance(other, text_type), "`@` RHS operand must be a text type."
         return Expression('LIKE', self, other)
 
     def ilike(self, other):
+        assert isinstance(other, text_type), "`ilike` argument must be a text type."
         return Expression('ILIKE', self, other)
 
     def __abs__(self):
         return Func('ABS', self)
 
     def __pow__(self, other):
+        assert isinstance(other, Number), "`**` RHS operand must be a numeric type."
         return Func('POW', self, other)
 
     def __mod__(self, other):
+        assert isinstance(other, Number), "`%` RHS operand must be a numeric type."
         return Func('MOD', self, other)
 
     def __to_sql__(self):
+        """
+        Generates SQL statements and expressions from the current object.
+
+        Returns:
+            A tuple containing an SQL string and a list of arguments to be interpolated into
+            the string, to be fed directly into cr.execute()
+        """
         # TODO: Optimize parentheses generation
         left, args = self.left.__to_sql__()
 
@@ -145,6 +176,13 @@ class Func(Expression):
     __slots__ = ('func', 'args')
 
     def __init__(self, func, *args):
+        """
+        Generic PostgreSQL Aggregate/Function, accepts any amount of arguments.
+
+        Args:
+            func (str): Name of the function
+            args: The function's arguments
+        """
         self.func = func
         self.args = args
 
@@ -167,9 +205,25 @@ class Func(Expression):
         return (sql, args)
 
 
-class SelectOp(Expression):
+class SelectOp(object):
 
     __slots__ = ('op', 'left', 'right')
+
+    """ Class for operators between Select objects """
+
+    def __init__(self, op, left, right):
+        self.op = op
+        self.left = left
+        self.right = right
+
+    def __or__(self, other):
+        return SelectOp('UNION', self, other)
+
+    def __and__(self, other):
+        return SelectOp('INTERSECT', self, other)
+
+    def __sub__(self, other):
+        return SelectOp('EXCEPT', self, other)
 
     def __to_sql__(self):
         left, largs = self.left.__to_sql__()
@@ -182,6 +236,15 @@ class Column(Expression):
     __slots__ = ('_row', '_name', '_qualified')
 
     def __init__(self, row, name):
+        """
+        A table's column.
+
+        Should rarely be used by the user, it is automatically handled by the Row class.
+
+        Args:
+            row (Row): Row that this column belongs to (table).
+            name (str): Name of the column.
+        """
         self._row = row
         self._name = _quote(name)
         self._qualified = '%s.%s' % (self._row._table, self._name)
@@ -256,6 +319,14 @@ class Join(object):
 class Modifier(object):
 
     def __init__(self, column, modifier, nfirst=False):
+        """
+        Appends the specified modifier to the result of column.__to_sql__()
+
+        Args:
+            column (Column): The column to be modified.
+            modifier (str): The modifier itself.
+            nfirst (bool): Whether `NULLS FIRST` should be specified (default: False)
+        """
         assert isinstance(column, Column), "Modifier requires a column!"
         self.column = column
         self.modifier = modifier
@@ -270,17 +341,21 @@ class Modifier(object):
 
 class Asc(Modifier):
 
+    """ Ascending order """
+
     def __init__(self, column, nfirst=False):
         super(Asc, self).__init__(column, 'ASC', nfirst)
 
 
 class Desc(Modifier):
 
+    """ Descending order """
+
     def __init__(self, column, nfirst=False):
         super(Desc, self).__init__(column, 'DESC', nfirst)
 
 
-class Select(object):
+class Select(SelectOp):
 
     def __init__(self, columns, where=None, order=[], joins=[], distinct=False,
                  group=[], having=None, limit=None, offset=0):
@@ -347,15 +422,7 @@ class Select(object):
 
         self._tables = sorted(tables, key=lambda r: r._table)
 
-    def __or__(self, other):
-        return SelectOp('UNION', self, other)
-
-    def __and__(self, other):
-        return SelectOp('INTERSECT', self, other)
-
-    def __sub__(self, other):
-        return SelectOp('EXCEPT', self, other)
-
+    # Generation of new Select objects
     def columns(self, *cols):
         """ Create a similar Select object but with different output columns."""
         return Select(**{**self.attrs, 'columns': cols})
@@ -393,6 +460,7 @@ class Select(object):
         """ Create a similar Select object but with a different offset."""
         return Select(**{**self.attrs, 'offset': n})
 
+    # Helper methods for building the final query
     def _build_joins(self):
         sql = []
         args = []
@@ -455,12 +523,6 @@ class Select(object):
         return '', []
 
     def __to_sql__(self):
-        """
-        Generate a SQL (Postgres) statement from the different parts of the Select object.
-
-        Returns:
-            tuple: The SQL query as a string and the arguments to be passed to cr.execute as list.
-        """
         sql = "SELECT %s%s FROM %s" % ('DISTINCT ' if self._distinct else '',
                                        self._build_columns(), self._build_tables())
         args = []

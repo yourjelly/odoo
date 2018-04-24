@@ -8,6 +8,7 @@ from odoo.osv.query_builder import Row, Select, Asc, Desc, COALESCE
 class TestExpressions(common.TransactionCase):
 
     def setUp(self):
+        super(TestExpressions, self).setUp()
         self.p = Row('res_partner')
         self.u = Row('res_users')
 
@@ -94,10 +95,39 @@ class TestExpressions(common.TransactionCase):
         res = ("""(COALESCE("res_users"."id", %s))""", [5])
         self.assertEqual(expr.__to_sql__(), res)
 
+    def test_and_type(self):
+        with self.assertRaises(AssertionError):
+            self.p.id & 5
+
+    def test_or_type(self):
+        with self.assertRaises(AssertionError):
+            self.p.id | 5
+
+    def test_in_type(self):
+        with self.assertRaises(AssertionError):
+            self.p.id ^ None
+
+    def test_like_type(self):
+        with self.assertRaises(AssertionError):
+            self.p.id @ [1, 2, 3]
+
+    def test_ilike_type(self):
+        with self.assertRaises(AssertionError):
+            self.p.id.ilike([1, 2, 3])
+
+    def test_pow_type(self):
+        with self.assertRaises(AssertionError):
+            self.p.count ** 'lol'
+
+    def test_mod_type(self):
+        with self.assertRaises(AssertionError):
+            self.p.count % []
+
 
 class TestSelect(common.TransactionCase):
 
     def setUp(self):
+        super(TestSelect, self).setUp()
         self.p = Row('res_partner')
         self.u = Row('res_users')
 
@@ -304,6 +334,21 @@ class TestSelect(common.TransactionCase):
             s.__to_sql__(),
             ("""(SELECT "res_partner"."id" FROM "res_partner") EXCEPT """
              """(SELECT "res_users"."id" FROM "res_users")""", [])
+        )
+
+    def test_chained_select_ops(self):
+        s1 = Select([self.p.id])
+        s2 = Select([self.u.id])
+        s3 = Select([self.p.name])
+        s = s1 & s2 | s3
+        self.assertEqual(
+            s.__to_sql__(),
+            (
+                """((SELECT "res_partner"."id" FROM "res_partner") INTERSECT """
+                """(SELECT "res_users"."id" FROM "res_users")) UNION """
+                """(SELECT "res_partner"."name" FROM "res_partner")""",
+                []
+            )
         )
 
     def test_smart_joins(self):
