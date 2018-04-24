@@ -153,7 +153,7 @@ var DataImport = AbstractAction.extend(ControlPanelMixin, {
     renderImportLink: function() {
         if (this.res_model == 'res.partner') {
             this.$(".import-link").prop({"text": _t(" Import Template for Customers"), "href": "/base_import/static/csv/res.partner.csv"});
-            this.$(".template-import").removeClass("hidden");
+            this.$(".template-import").removeClass('d-none');
         }
     },
     setup_encoding_picker: function () {

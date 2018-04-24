@@ -30,7 +30,7 @@
                 <thead>
                     <tr>
                         <th>Description</th>
-                        <th class="hidden">Source Document</th>
+                        <th class="d-none">Source Document</th>
                         <th class="text-right">Quantity</th>
                         <th class="text-right">Unit Price</th>
                         <th t-if="display_discount" class="text-right">Disc.(%)</th>
@@ -49,7 +49,7 @@
                 <tbody class="invoice_tbody">
                     <tr t-foreach="o.invoice_line_ids" t-as="l">
                         <td><span t-field="l.name"/><t t-if="l.product_id.l10n_in_hsn_code"><h6><strong class="ml16">HSN/SAC Code:</strong> <span t-field="l.product_id.l10n_in_hsn_code"/></h6></t></td>
-                        <td class="hidden"><span t-field="l.origin"/></td>
+                        <td class="d-none"><span t-field="l.origin"/></td>
                         <td class="text-right">
                             <span t-field="l.quantity"/>
                             <span t-field="l.uom_id"  groups="uom.group_uom"/>
@@ -104,7 +104,7 @@
                     </tr>
                     <tr t-foreach="range(max(5-len(o.invoice_line_ids),0))" t-as="l">
                         <td>&amp;nbsp;</td>
-                        <td class="hidden"></td>
+                        <td class="d-none"></td>
                         <td></td>
                         <td></td>
                         <td t-if="display_discount" groups="sale.group_discount_per_so_line"></td>

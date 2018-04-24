@@ -11,7 +11,7 @@ BaseImport.DataImport.include({
         this._super();
         if (this.res_model == 'product.template') {
             this.$(".import-link").prop({"text": _t(" Import Template for Products"), "href": "/product/static/csv/product.template.csv"});
-            this.$(".template-import").removeClass("hidden");
+            this.$(".template-import").removeClass('d-none');
         }
     },   
 });
