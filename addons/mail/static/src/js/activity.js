@@ -312,6 +312,13 @@ var KanbanActivity = AbstractActivityField.extend({
             }).join(' ');
         });
         $span.addClass('o_activity_color_' + (this.activity_state || 'default'));
+        // it's indicate when hover the clock icon
+        var clockTooltip = {
+            'today': 'Today', // it means clock is orange
+            'overdue': 'Late', // it means clock is red
+            'planned': 'Future' // it means clock is green
+        }
+        $span.attr('title', clockTooltip[this.activity_state] || '');
         if (this.$el.hasClass('open')) {
             // note: this part of the rendering might be asynchronous
             this._renderDropdown();
