@@ -22,7 +22,8 @@
             </t>
             <t t-set="head" t-value="head_website + (head or '')"/>
 
-            <div id="wrapwrap" t-att-class="pageName or ''">
+            <t t-set="is_rtl" t-value="' o_rtl' if request.env['res.lang'].search([('code', '=', request.env.lang)]).direction == 'rtl' else ''"/>
+            <div id="wrapwrap" t-att-class="(pageName or '') + is_rtl">
                 <header>
                     <div class="navbar navbar-default navbar-static-top">
                         <div class="container">

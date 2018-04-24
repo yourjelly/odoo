@@ -54,7 +54,9 @@
     $o-tip-arrow-delay-out: floor($o-tip-duration-out / 2);
 
     box-sizing: content-box;
+    /*rtl:begin:ignore*/
     @include o-position-absolute($top: 50%, $left: 50%);
+    /*rtl:end:ignore*/
     opacity: 0;
     width: $o-tip-size;
     height: $o-tip-size;
