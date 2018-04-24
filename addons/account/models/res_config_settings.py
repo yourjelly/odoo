@@ -19,6 +19,7 @@ class ResConfigSettings(models.TransientModel):
     has_chart_of_accounts = fields.Boolean(compute='_compute_has_chart_of_accounts', string='Company has a chart of accounts')
     chart_template_id = fields.Many2one('account.chart.template', string='Template',
         domain="[('visible','=', True)]")
+    hide_coa_choice_option = fields.Boolean(compute='_compute_has_chart_of_accounts', string='Hide option to set char of accounts')
     sale_tax_id = fields.Many2one('account.tax', string="Default Sale Tax", related='company_id.account_sale_tax_id')
     purchase_tax_id = fields.Many2one('account.tax', string="Default Purchase Tax", related='company_id.account_purchase_tax_id')
     tax_calculation_rounding_method = fields.Selection([
@@ -87,6 +88,11 @@ class ResConfigSettings(models.TransientModel):
         self.has_chart_of_accounts = bool(self.company_id.chart_template_id)
         self.chart_template_id = self.company_id.chart_template_id or False
         self.has_accounting_entries = self.env['wizard.multi.charts.accounts'].existing_accounting(self.company_id)
+        #If only invoicing in installed, we only display CoA choice option if none has been defined ; else, we display it if no entry has been made yet
+        if self.user_has_groups('account.group_account_user'):
+            self.hide_coa_choice_option = self.has_accounting_entries
+        else:
+            self.hide_coa_choice_option = self.has_chart_of_accounts
 
     @api.onchange('group_analytic_accounting')
     def onchange_analytic_accounting(self):

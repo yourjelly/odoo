@@ -117,6 +117,8 @@ class AccountChartTemplate(models.Model):
         string="Gain Exchange Rate Account", domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)])
     expense_currency_exchange_account_id = fields.Many2one('account.account.template',
         string="Loss Exchange Rate Account", domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)])
+    writeoff_account_id = fields.Many2one('account.account.template', string="Default Write-Off Account",
+        help="This account will be selected by default as the writeoff account when generating a payment for an invoice.") #TODO OCO rendre required quand tu auras complété les CoA des localisations
     property_account_receivable_id = fields.Many2one('account.account.template', string='Receivable Account', oldname="property_account_receivable")
     property_account_payable_id = fields.Many2one('account.account.template', string='Payable Account', oldname="property_account_payable")
     property_account_expense_categ_id = fields.Many2one('account.account.template', string='Category of Expense Account', oldname="property_account_expense_categ")
@@ -331,6 +333,8 @@ class AccountChartTemplate(models.Model):
         account_ref.update(account_template_ref)
 
         # writing account values after creation of accounts
+        if self.writeoff_account_id: #TODO OCO retirer le "if" quand le champ sera required
+            company.writeoff_account_id = account_template_ref[self.writeoff_account_id.id]
         company.transfer_account_id = account_template_ref[transfer_account_id.id]
         for key, value in generated_tax_res['account_dict'].items():
             if value['refund_account_id'] or value['account_id'] or value['cash_basis_account_id'] or value['cash_basis_base_account_id']:
