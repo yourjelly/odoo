@@ -77,7 +77,7 @@
     </xpath>
     <xpath expr="//table[@name='invoice_line_table']" position="after">
         <t groups="sale.group_sale_layout" t-foreach="o.order_lines_layouted()" t-as="page" name="lines_layouted">
-            <table t-attf-class="table table-condensed #{'' if not type_html else 'hidden-xs'}">
+            <table t-attf-class="table table-sm #{'' if not type_html else 'hidden-xs'}">
                 <thead>
                     <tr>
                         <th>Description</th>
