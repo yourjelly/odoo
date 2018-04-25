@@ -29,7 +29,7 @@ Once a row object is created, one can perform pythonic expressions with its colu
 these expressions can then be translated into SQL expressions.
 
 e.g. >>> expr = res_partner.id == 5
-     >>> expr.__to_sql__()
+     >>> expr._to_sql()
      ... ('"res_partner"."id" = %s', [5])
 
 Three things to note from the previous example:
@@ -61,6 +61,10 @@ def _quote(val):
     if '"' not in val:
         return '"%s"' % val
     return val
+
+
+def generate_aliases():
+    return iter('abcdefghijklmnopqrstuvwxyz')
 
 
 class Expression(object):
@@ -145,7 +149,7 @@ class Expression(object):
         assert isinstance(other, Number), "`%` RHS operand must be a numeric type."
         return Func('MOD', self, other)
 
-    def __to_sql__(self):
+    def _to_sql(self, alias_dict):
         """
         Generates SQL statements and expressions from the current object.
 
@@ -154,7 +158,7 @@ class Expression(object):
             the string, to be fed directly into cr.execute()
         """
         # TODO: Optimize parentheses generation
-        left, args = self.left.__to_sql__()
+        left, args = self.left._to_sql(alias_dict)
 
         if self.op == 'NOT':
             return ("(NOT %s)" % left, args)
@@ -162,7 +166,7 @@ class Expression(object):
         sql = "(%s %s " % (left, self.op)
 
         if isinstance(self.right, Expression):
-            right, _args = self.right.__to_sql__()
+            right, _args = self.right._to_sql(alias_dict)
             args += _args
             sql += right + ')'
         else:
@@ -173,6 +177,18 @@ class Expression(object):
                 sql += '%s)'
 
         return (sql, args)
+
+
+class AliasMapping(dict):
+
+    def __init__(self, *args, **kwargs):
+        super(AliasMapping, self).__init__()
+        self._generator = generate_aliases()
+
+    def __missing__(self, k):
+        alias = _quote(next(self._generator))
+        self[k] = alias
+        return alias
 
 
 class Func(Expression):
@@ -190,13 +206,13 @@ class Func(Expression):
         self.func = func
         self.args = args
 
-    def __to_sql__(self):
+    def _to_sql(self, alias_dict):
         sql = '(%s(' % self.func
         args = []
 
         for arg in self.args:
             if isinstance(arg, Expression):
-                _sql, _args = arg.__to_sql__()
+                _sql, _args = arg._to_sql(alias_dict)
                 sql += _sql
                 args += _args
             else:
@@ -235,15 +251,18 @@ class SelectOp(object):
         op = 'EXCEPT ALL' if other._all else 'EXCEPT'
         return SelectOp(op, self, other)
 
-    def __to_sql__(self):
-        left, largs = self.left.__to_sql__()
-        right, rargs = self.right.__to_sql__()
+    def _to_sql(self, alias_mapping):
+        left, largs = self.left._to_sql(alias_mapping)
+        right, rargs = self.right._to_sql(AliasMapping())
         return ("(%s) %s (%s)" % (left, self.op, right), largs + rargs)
+
+    def to_sql(self):
+        return self._to_sql(AliasMapping())
 
 
 class Column(Expression):
 
-    __slots__ = ('_row', '_name', '_qualified')
+    __slots__ = ('_row', '_name')
 
     def __init__(self, row, name):
         """
@@ -257,10 +276,13 @@ class Column(Expression):
         """
         self._row = row
         self._name = _quote(name)
-        self._qualified = '%s.%s' % (self._row._table, self._name)
 
-    def __to_sql__(self):
-        return (self._qualified, [])
+    def _to_sql(self, alias_dict=None):
+        qualified = "{alias}.%s" % self._name
+        row = self._row
+        if alias_dict is not None:
+            return (qualified.format(**{'alias': alias_dict[row]}), [])
+        return (qualified.format(**{'alias': row._table}), [])
 
 
 class Row(object):
@@ -321,16 +343,17 @@ class Join(object):
             else:
                 self.type = 'INNER JOIN'
 
-    def __to_sql__(self):
-        sql, args = self.expression.__to_sql__()
-        return (" %s %s ON %s" % (self.type, self.t2._table, sql), args)
+    def _to_sql(self, alias_dict):
+        sql, args = self.expression._to_sql(alias_dict)
+        return (" %s %s %s ON %s" % (self.type, self.t2._table, alias_dict[self.t2], sql),
+                args)
 
 
 class Modifier(object):
 
     def __init__(self, column, modifier, nfirst=False):
         """
-        Appends the specified modifier to the result of column.__to_sql__()
+        Appends the specified modifier to the result of column._to_sql()
 
         Args:
             column (Column): The column to be modified.
@@ -342,8 +365,8 @@ class Modifier(object):
         self.modifier = modifier
         self.nfirst = nfirst
 
-    def __to_sql__(self):
-        sql = self.column.__to_sql__()[0]
+    def _to_sql(self, alias_dict):
+        sql = self.column._to_sql(alias_dict)[0]
         sql += " %s " % self.modifier
         sql += "NULLS FIRST" if self.nfirst else "NULLS LAST"
         return sql, []
@@ -391,7 +414,7 @@ class Select(SelectOp):
             u = Row('res_users')
             s = Select({'id': p.id}, p.name != None, [Desc(p.id)], [p.id == u.partner_id])
 
-            >>> s.__to_sql__()
+            >>> s._to_sql()
 
             SELECT "res_partner"."id" AS id
             LEFT JOIN "res_users" ON "res_partner"."id" = "res_users"."partner_id"
@@ -412,8 +435,10 @@ class Select(SelectOp):
         self.attrs['_all'] = self._all = _all
 
         self._aliased = isinstance(columns, dict)
+        self._tables = self._get_tables()
 
-        tables = set()
+    def _get_tables(self):
+        tables = []
         for col in self._columns:
             if self._aliased:
                 # If the columns argument is a dict, it can only contain Row objects.
@@ -428,10 +453,9 @@ class Select(SelectOp):
                     # SELECT <col>
                     t = col._row
 
-            if t not in [j.t2 for j in self._joins]:
-                tables.add(t)
-
-        self._tables = sorted(tables, key=lambda r: r._table)
+            if t not in [j.t2 for j in self._joins] and t not in tables:
+                tables.append(t)
+        return tables
 
     # Generation of new Select objects
     def columns(self, *cols):
@@ -476,60 +500,60 @@ class Select(SelectOp):
         return Select(**{**self.attrs, '_all': not self.attrs['_all']})
 
     # Helper methods for building the final query
-    def _build_joins(self):
+    def _build_joins(self, alias_dict):
         sql = []
         args = []
 
         for join in self._joins:
-            _sql, _args = join.__to_sql__()
+            _sql, _args = join._to_sql(alias_dict)
             sql.append(_sql)
             args += _args
 
         return (''.join(sql), args)
 
-    def _build_columns(self):
+    def _build_columns(self, alias_dict):
         res = []
 
         for c in self._columns:
             if isinstance(c, Row):
                 sql = "*"
             elif self._aliased:
-                sql = "%s AS %s" % (self._columns[c]._qualified, c)
-                c = self._columns[c]
+                col = self._columns[c]
+                sql = "%s AS %s" % (col._to_sql(alias_dict)[0], c)
             else:
-                sql = "%s" % c._qualified
+                sql = "%s" % c._to_sql(alias_dict)[0]
             res.append(sql)
 
         return ', '.join(res)
 
-    def _build_tables(self):
-        return ', '.join(["%s" % t._table for t in self._tables])
+    def _build_tables(self, alias_dict):
+        return ', '.join(["%s %s" % (t._table, alias_dict[t]) for t in self._tables])
 
-    def _build_where(self):
+    def _build_where(self, alias_dict):
         sql = " WHERE %s"
         if self._where:
-            where, args = self._where.__to_sql__()
-            return (sql % where, args)
-        return ('', [])
+            where, args = self._where._to_sql(alias_dict)
+            return sql % where, args
+        return '', []
 
-    def _build_order(self):
+    def _build_order(self, alias_dict):
         if self._order:
             sql = " ORDER BY %s"
-            return sql % ', '.join([o.__to_sql__()[0] for o in self._order])
+            return sql % ', '.join([o._to_sql(alias_dict)[0] for o in self._order])
         return ''
 
-    def _build_group(self):
+    def _build_group(self, alias_dict):
         if self._group:
             sql = " GROUP BY %s"
-            return sql % ', '.join([g.__to_sql__()[0] for g in self._group])
+            return sql % ', '.join([g._to_sql(alias_dict)[0] for g in self._group])
         return ''
 
-    def _build_having(self):
+    def _build_having(self, alias_dict):
         sql = " HAVING %s"
         if self._having:
-            having, args = self._having.__to_sql__()
-            return (sql % having, args)
-        return ('', [])
+            having, args = self._having._to_sql(alias_dict)
+            return sql % having, args
+        return '', []
 
     def _build_limit(self):
         if self._limit:
@@ -537,28 +561,33 @@ class Select(SelectOp):
             return sql, [self._limit, self._offset]
         return '', []
 
-    def __to_sql__(self):
-        sql = "SELECT %s%s FROM %s" % ('DISTINCT ' if self._distinct else '',
-                                       self._build_columns(), self._build_tables())
+    def _to_sql(self, alias_dict):
+        sql = "SELECT %s%s FROM %s" % (
+            'DISTINCT ' if self._distinct else '', self._build_columns(alias_dict),
+            self._build_tables(alias_dict)
+        )
         args = []
 
-        def with_args(f):
+        def with_args(f, uses_alias_dict=True):
             # access parent f(x)'s query and args and modify them
-            nonlocal sql, args
-            _sql, _args = f()
+            nonlocal sql, args, alias_dict
+            _sql, _args = f(alias_dict) if uses_alias_dict else f()
             sql += "%s" % _sql
             args += _args
 
         with_args(self._build_joins)
         with_args(self._build_where)
 
-        sql += self._build_order()
-        sql += self._build_group()
+        sql += self._build_order(alias_dict)
+        sql += self._build_group(alias_dict)
 
         with_args(self._build_having)
-        with_args(self._build_limit)
+        with_args(self._build_limit, False)
 
         return (sql, args)
+
+    def to_sql(self):
+        return self._to_sql(AliasMapping())
 
 
 # SQL Functions and Aggregates
