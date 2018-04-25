@@ -340,8 +340,7 @@ class account_payment(models.Model):
     reconciled_invoice_ids = fields.Many2many('account.invoice', string='Reconciled Invoices', compute='_compute_reconciled_invoice_ids', help="Invoices whose journal items have been reconciled with this payment's.")
     has_invoices = fields.Boolean(compute="_compute_reconciled_invoice_ids", help="Technical field used for usability purposes")
 
-    # FIXME: ondelete='restrict' not working (eg. cancel a bank statement reconciliation with a payment)
-    move_line_ids = fields.One2many('account.move.line', 'payment_id', readonly=True, copy=False, ondelete='restrict')
+    move_line_ids = fields.One2many('account.move.line', 'payment_id', readonly=True, copy=False)
     move_reconciled = fields.Boolean(compute="_get_move_reconciled", readonly=True)
 
     def open_payment_matching_screen(self):
