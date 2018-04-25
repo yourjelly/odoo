@@ -24,7 +24,7 @@ class ReportProjectTaskUser(models.Model):
         digits=(16,2), readonly=True, group_operator="avg",
         help="Number of Working Days to Open the task")
     delay_endings_days = fields.Float(string='# Days to Deadline', digits=(16,2), readonly=True)
-    nbr = fields.Integer('# of Tasks', readonly=True)  # TDE FIXME master: rename into nbr_tasks
+    nbr_tasks = fields.Integer('# of Tasks', readonly=True, oldname='nbr')
     priority = fields.Selection([
         ('0', 'Low'),
         ('1', 'Normal'),
@@ -42,7 +42,7 @@ class ReportProjectTaskUser(models.Model):
     def _select(self):
         select_str = """
              SELECT
-                    (select 1 ) AS nbr,
+                    (select 1 ) AS nbr_tasks,
                     t.id as id,
                     t.date_start as date_start,
                     t.date_end as date_end,
