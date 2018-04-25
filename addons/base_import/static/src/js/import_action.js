@@ -510,9 +510,9 @@ var DataImport = AbstractAction.extend(ControlPanelMixin, {
     onresults: function (event, from, to, message) {
         var no_messages = _.isEmpty(message);
         this.$buttons.filter('.o_import_import').toggleClass('btn-primary', no_messages);
-        this.$buttons.filter('.o_import_import').toggleClass('btn-default', !no_messages);
+        this.$buttons.filter('.o_import_import').toggleClass('btn-secondary', !no_messages);
         this.$buttons.filter('.o_import_validate').toggleClass('btn-primary', !no_messages);
-        this.$buttons.filter('.o_import_validate').toggleClass('btn-default', no_messages);
+        this.$buttons.filter('.o_import_validate').toggleClass('btn-secondary', no_messages);
         if (no_messages) {
             message.push({
                 type: 'info',

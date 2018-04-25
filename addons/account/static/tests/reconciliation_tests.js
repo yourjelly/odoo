@@ -653,7 +653,7 @@ QUnit.module('account', {
             " 101200 2017-02-28 Camptocamp: INV/2017/0001 $ 4,610.00 111100 2017-02-28 Camptocamp: BILL/2017/0001 $ 10,000.00 111100 2017-02-28 ASUSTeK: BILL/2017/0002 $ 5,749.99 ",
             "should display the next 5 account move lines");
 
-        assert.ok(clientAction.widgets[0].$('caption button.btn-default:visible').length, "should display the 'validate' button");
+        assert.ok(clientAction.widgets[0].$('caption button.btn-secondary:visible').length, "should display the 'validate' button");
         assert.ok(clientAction.widgets[1].$('caption .text-danger:visible').length, "should display the 'Select a partner or choose a counterpart' message");
         assert.ok(clientAction.widgets[2].$('caption button.btn-primary:visible').length, "should display the 'Reconcile' button");
 
@@ -836,9 +836,9 @@ QUnit.module('account', {
         widget.$('.accounting_view .cell_left .line_info_button').trigger('click');
         assert.strictEqual(widget.$('.accounting_view .cell_left .line_info_button').length, 1, "should display a partial reconciliation alert");
         assert.notOk(widget.$('.accounting_view .cell_left .line_info_button').hasClass('do_partial_reconcile_true'), "should display the partial reconciliation information");
-        assert.ok( widget.$('button.btn-default:not(hidden)').length, "should display the validate button"); // FIXME
+        assert.ok( widget.$('button.btn-secondary:not(hidden)').length, "should display the validate button"); // FIXME
         assert.strictEqual( widget.$el.data('mode'), "inactive", "should be inactive mode");
-        widget.$('button.btn-default:not(hidden)').trigger('click'); // FIXME
+        widget.$('button.btn-secondary:not(hidden)').trigger('click'); // FIXME
 
         clientAction.destroy();
     });
@@ -1021,7 +1021,7 @@ QUnit.module('account', {
         assert.strictEqual(widget.$('.accounting_view tbody tr').length, 1, "should have ever only the created reconcile line");
         assert.strictEqual(widget.$('.accounting_view tbody tr').text().replace(/[\n\r\s$,]+/g, ' '), " 101200 SAJ/2014/002 and SAJ/2014/003 1100.00 ",
             "the new line should be update the amout");
-        assert.ok(widget.$('caption button.btn-default:visible').length, "should display the 'validate' button");
+        assert.ok(widget.$('caption button.btn-secondary:visible').length, "should display the 'validate' button");
 
         widget.$('.create .add_line').trigger('click').trigger('click');
         widget.$('.create .create_amount input').val('-100').trigger('input');

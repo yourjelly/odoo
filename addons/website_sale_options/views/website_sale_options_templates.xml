@@ -134,7 +134,7 @@
           </table>
         </div>
         <div class="modal-footer">
-          <a class="btn btn-default a-submit js_goto_shop"><i class="fa fa-chevron-left"></i> <span class="d-none d-md-inline">Continue Shopping</span><span class="d-inline d-md-none">Continue</span></a>
+          <a class="btn btn-secondary a-submit js_goto_shop"><i class="fa fa-chevron-left"></i> <span class="d-none d-md-inline">Continue Shopping</span><span class="d-inline d-md-none">Continue</span></a>
           <a class="btn btn-primary pull-right a-submit"><i class="fa fa-shopping-cart fa-fw"></i> <span class="d-none d-md-inline">Proceed to Checkout</span><span class="d-inline d-md-none">Checkout</span></a>
         </div>
       </div>

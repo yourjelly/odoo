@@ -8,7 +8,7 @@
                 <label string="This wizard will print report which display a pay head employee breakup for a specified dates."/>
                 <footer>
                     <button name="print_report" string="Print" type="object" class="btn-primary"/>
-                    <button string="Cancel" class="btn-default" special="cancel" />
+                    <button string="Cancel" class="btn-secondary" special="cancel" />
                 </footer>
                 <group>
                     <field name="date_from"/>

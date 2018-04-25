@@ -193,8 +193,8 @@ Discuss.include({
             // update Inbox page buttons
             if (inInbox) {
                 self.$('.o_mail_chat_mobile_inbox_buttons').removeClass('o_hidden');
-                self.$('.o_channel_inbox_item').removeClass('btn-primary').addClass('btn-default');
-                self.$('.o_channel_inbox_item[data-type=' + type + ']').removeClass('btn-default').addClass('btn-primary');
+                self.$('.o_channel_inbox_item').removeClass('btn-primary').addClass('btn-secondary');
+                self.$('.o_channel_inbox_item[data-type=' + type + ']').removeClass('btn-secondary').addClass('btn-primary');
             } else {
                 self.$('.o_mail_chat_mobile_inbox_buttons').addClass('o_hidden');
             }

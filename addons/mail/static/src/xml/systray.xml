@@ -9,7 +9,7 @@
             <ul class="o_mail_navbar_dropdown dropdown-menu" role="menu">
                 <li t-if="widget.isMobile">
                     <div class="o_mail_navbar_mobile_header">
-                        <button type="button" class="btn btn-default o_new_message"> New message </button>
+                        <button type="button" class="btn btn-secondary o_new_message"> New message </button>
                     </div>
                 </li>
                 <li t-if="!widget.isMobile" class="o_mail_navbar_dropdown_top">
