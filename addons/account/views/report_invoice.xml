@@ -96,7 +96,7 @@
                         </table>
                     </div>
 
-                    <table t-attf-class="table table-condensed #{'' if not type_html else 'hidden-xs'}" name="invoice_line_table">
+                    <table t-attf-class="table table-sm #{'' if not type_html else 'hidden-xs'}" name="invoice_line_table">
                         <thead>
                             <tr>
                                 <th>Description</th>
@@ -154,7 +154,7 @@
                     <div class="clearfix">
                         <div id="total" class="row">
                             <div t-attf-class="col-md-4 pull-right #{'col-4' if not type_html else ''}">
-                                <table class="table table-condensed" style="min-width: 250px;max-width: 400px;">
+                                <table class="table table-sm" style="min-width: 250px;max-width: 400px;">
                                     <tr class="border-black" style="border-bottom:1px solid #dddddd;">
                                         <td><strong>Subtotal</strong></td>
                                         <td class="text-right">
