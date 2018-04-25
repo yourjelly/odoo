@@ -20,7 +20,7 @@
 	color: white;}
 
 .btn-secondary .fa {
-	color: $gray-dark;}
+	color: gray('900');}
 
 /* TRANSPARENT BG --------------------------------------------------- */
 /* Used in snippets Prx Image Color and Prx Image Shade ------------- */
@@ -48,4 +48,4 @@ footer h4 {
     }
 footer .fa {
     color:  $color-beach;
-  }	
+  }
