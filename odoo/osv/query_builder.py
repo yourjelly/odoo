@@ -436,16 +436,26 @@ class Select(SelectOp):
 
         self._aliased = isinstance(columns, dict)
         self._tables = self._get_tables()
+        assert len(self._tables) > 0, "Select statements require at least one table."
 
     def _get_tables(self):
         tables = []
         for col in self._columns:
             if self._aliased:
+                if len(self._columns) == 1:
+                    obj = next(iter(self._columns.values()))
+                    if isinstance(obj, Select):
+                        # heuristic for using the return table of the sub-query in the FROM clause
+                        # of the main query if the only column is the sub-query.
+                        c = next(iter(obj._columns.values())) if obj._aliased else obj._columns[0]
+                        return [c._row]
                 # If the columns argument is a dict, it can only contain Row objects.
                 # SELECT <col> AS <alias>
                 t = self._columns[col]._row
+            elif isinstance(col, Select):
+                continue
             else:
-                # If the columns argument is a list, it can contain Row or Column objects
+                # If the columns argument is a list, it can contain Row or Column objects.
                 if isinstance(col, Row):
                     # SELECT *
                     t = col
@@ -513,18 +523,24 @@ class Select(SelectOp):
 
     def _build_columns(self, alias_dict):
         res = []
+        args = []
 
         for c in self._columns:
             if isinstance(c, Row):
                 sql = "*"
+                _args = []
             elif self._aliased:
                 col = self._columns[c]
-                sql = "%s AS %s" % (col._to_sql(alias_dict)[0], c)
+                _sql, _args = col._to_sql(alias_dict)
+                _sql = ('(%s)' % _sql) if isinstance(col, Select) else _sql
+                sql = "%s AS %s" % (_sql, _quote(c))
             else:
-                sql = "%s" % c._to_sql(alias_dict)[0]
+                _sql, _args = c._to_sql(alias_dict)
+                sql = "%s" % _sql
             res.append(sql)
+            args += _args
 
-        return ', '.join(res)
+        return ', '.join(res), args
 
     def _build_tables(self, alias_dict):
         return ', '.join(["%s %s" % (t._table, alias_dict[t]) for t in self._tables])
@@ -562,10 +578,8 @@ class Select(SelectOp):
         return '', []
 
     def _to_sql(self, alias_dict):
-        sql = "SELECT %s%s FROM %s" % (
-            'DISTINCT ' if self._distinct else '', self._build_columns(alias_dict),
-            self._build_tables(alias_dict)
-        )
+
+        sql = "SELECT %s%s FROM %s"
         args = []
 
         def with_args(f, uses_alias_dict=True):
@@ -574,6 +588,11 @@ class Select(SelectOp):
             _sql, _args = f(alias_dict) if uses_alias_dict else f()
             sql += "%s" % _sql
             args += _args
+
+        _sql, _args = self._build_columns(alias_dict)
+        args += _args
+
+        sql = sql % ('DISTINCT ' if self._distinct else '', _sql, self._build_tables(alias_dict))
 
         with_args(self._build_joins)
         with_args(self._build_where)
