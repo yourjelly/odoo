@@ -6,123 +6,113 @@ from collections import defaultdict
 from odoo.exceptions import AccessError, MissingError
 from odoo.tests.common import TransactionCase
 from odoo.tools import mute_logger, pycompat
+from odoo.addons.test_base.tests.common import TransactionCaseCommon
 
 
-class TestORM(TransactionCase):
+class TestORM(TransactionCaseCommon):
     """ test special behaviors of ORM CRUD functions """
 
     @mute_logger('odoo.models')
     def test_access_deleted_records(self):
         """ Verify that accessing deleted records works as expected """
-        p1 = self.env['res.partner'].create({'name': 'W'})
-        p2 = self.env['res.partner'].create({'name': 'Y'})
-        p1.unlink()
+        test_base1 = self.env['test.base'].create({'name': 'W'})
+        test_base2 = self.env['test.base'].create({'name': 'Y'})
+        test_base1.unlink()
 
         # read() is expected to skip deleted records because our API is not
         # transactional for a sequence of search()->read() performed from the
         # client-side... a concurrent deletion could therefore cause spurious
         # exceptions even when simply opening a list view!
         # /!\ Using unprileged user to detect former side effects of ir.rules!
-        user = self.env['res.users'].create({
-            'name': 'test user',
-            'login': 'test2',
-            'groups_id': [4, self.ref('base.group_user')],
-        })
-        ps = (p1 + p2).sudo(user)
-        self.assertEqual([{'id': p2.id, 'name': 'Y'}], ps.read(['name']), "read() should skip deleted records")
-        self.assertEqual([], ps[0].read(['name']), "read() should skip deleted records")
+        test_bases = (test_base1 + test_base2).sudo(self.user_test)
+        self.assertEqual([{'id': test_base2.id, 'name': 'Y'}], test_bases.read(['name']), "read() should skip deleted records")
+        self.assertEqual([], test_bases[0].read(['name']), "read() should skip deleted records")
 
         # Deleting an already deleted record should be simply ignored
-        self.assertTrue(p1.unlink(), "Re-deleting should be a no-op")
+        self.assertTrue(test_base1.unlink(), "Re-deleting should be a no-op")
 
         # Updating an already deleted record should raise, even as admin
         with self.assertRaises(MissingError):
-            p1.write({'name': 'foo'})
+            test_base1.write({'name': 'foo'})
 
     @mute_logger('odoo.models')
     def test_access_filtered_records(self):
         """ Verify that accessing filtered records works as expected for non-admin user """
-        p1 = self.env['res.partner'].create({'name': 'W'})
-        p2 = self.env['res.partner'].create({'name': 'Y'})
-        user = self.env['res.users'].create({
-            'name': 'test user',
-            'login': 'test2',
-            'groups_id': [4, self.ref('base.group_user')],
-        })
-
-        partner_model = self.env['ir.model'].search([('model','=','res.partner')])
+        test_base1 = self.env['test.base'].create({'name': 'W'})
+        test_base2 = self.env['test.base'].create({'name': 'Y'})
+        test_base_model = self.env['ir.model'].search([('model','=','test.base')])
         self.env['ir.rule'].create({
             'name': 'Y is invisible',
-            'domain_force': [('id', '!=', p1.id)],
-            'model_id': partner_model.id,
+            'domain_force': [('id', '!=', test_base1.id)],
+            'model_id': test_base_model.id,
         })
 
         # search as unprivileged user
-        partners = self.env['res.partner'].sudo(user).search([])
-        self.assertNotIn(p1, partners, "W should not be visible...")
-        self.assertIn(p2, partners, "... but Y should be visible")
+        test_bases = self.env['test.base'].sudo(self.user_test).search([])
+        self.assertNotIn(test_base1, test_bases, "W should not be visible...")
+        self.assertIn(test_base2, test_bases, "... but Y should be visible")
 
         # read as unprivileged user
         with self.assertRaises(AccessError):
-            p1.sudo(user).read(['name'])
+            test_base1.sudo(self.user_test).read(['name'])
         # write as unprivileged user
         with self.assertRaises(AccessError):
-            p1.sudo(user).write({'name': 'foo'})
+            test_base1.sudo(self.user_test).write({'name': 'foo'})
         # unlink as unprivileged user
         with self.assertRaises(AccessError):
-            p1.sudo(user).unlink()
+            test_base1.sudo(self.user_test).unlink()
 
-        # Prepare mixed case 
-        p2.unlink()
+        # Prepare mixed case
+        test_base2.unlink()
         # read mixed records: some deleted and some filtered
         with self.assertRaises(AccessError):
-            (p1 + p2).sudo(user).read(['name'])
+            (test_base1 + test_base2).sudo(self.user_test).read(['name'])
         # delete mixed records: some deleted and some filtered
         with self.assertRaises(AccessError):
-            (p1 + p2).sudo(user).unlink()
+            (test_base1 + test_base2).sudo(self.user_test).unlink()
 
     def test_read(self):
-        partner = self.env['res.partner'].create({'name': 'MyPartner1'})
-        result = partner.read()
+        test_base = self.env['test.base'].create({'name': 'Test1'})
+        result = test_base.read()
         self.assertIsInstance(result, list)
 
     @mute_logger('odoo.models')
     def test_search_read(self):
-        partner = self.env['res.partner']
+        TestBase = self.env['test.base']
 
         # simple search_read
-        partner.create({'name': 'MyPartner1'})
-        found = partner.search_read([('name', '=', 'MyPartner1')], ['name'])
+        TestBase.create({'name': 'Test1'})
+        found = TestBase.search_read([('name', '=', 'Test1')], ['name'])
         self.assertEqual(len(found), 1)
-        self.assertEqual(found[0]['name'], 'MyPartner1')
+        self.assertEqual(found[0]['name'], 'Test1')
         self.assertIn('id', found[0])
 
         # search_read correct order
-        partner.create({'name': 'MyPartner2'})
-        found = partner.search_read([('name', 'like', 'MyPartner')], ['name'], order="name")
+        TestBase.create({'name': 'Test2'})
+        found = TestBase.search_read([('name', 'like', 'Test')], ['name'], order="name")
         self.assertEqual(len(found), 2)
-        self.assertEqual(found[0]['name'], 'MyPartner1')
-        self.assertEqual(found[1]['name'], 'MyPartner2')
-        found = partner.search_read([('name', 'like', 'MyPartner')], ['name'], order="name desc")
+        self.assertEqual(found[0]['name'], 'Test1')
+        self.assertEqual(found[1]['name'], 'Test2')
+        found = TestBase.search_read([('name', 'like', 'Test')], ['name'], order="name desc")
         self.assertEqual(len(found), 2)
-        self.assertEqual(found[0]['name'], 'MyPartner2')
-        self.assertEqual(found[1]['name'], 'MyPartner1')
+        self.assertEqual(found[0]['name'], 'Test2')
+        self.assertEqual(found[1]['name'], 'Test1')
 
         # search_read that finds nothing
-        found = partner.search_read([('name', '=', 'Does not exists')], ['name'])
+        found = TestBase.search_read([('name', '=', 'Does not exists')], ['name'])
         self.assertEqual(len(found), 0)
 
     def test_exists(self):
-        partner = self.env['res.partner']
+        TestBase = self.env['test.base']
 
         # check that records obtained from search exist
-        recs = partner.search([])
-        self.assertTrue(recs)
-        self.assertEqual(recs.exists(), recs)
+        test_bases = TestBase.search([])
+        self.assertTrue(test_bases)
+        self.assertEqual(test_bases.exists(), test_bases)
 
         # check that there is no record with id 0
-        recs = partner.browse([0])
-        self.assertFalse(recs.exists())
+        test_bases = TestBase.browse([0])
+        self.assertFalse(test_bases.exists())
 
     def test_groupby_date(self):
         partners_data = dict(
