@@ -257,6 +257,23 @@ return core.Class.extend({
     ///////////////////////////////////////////////////////////////
 
     /**
+     * Determines (quite naively) if a node uses the `parent` key.
+     * The `parent` could either be in the modifiers or the context.
+     *
+     * @private
+     * @param {Object} node
+     * @returns {boolean}
+     */
+    _hasParent: function (node) {
+        if (typeof node.attrs.modifiers === 'string' && node.attrs.modifiers.match(/parent\./)) {
+            return true;
+        } else if (typeof node.attrs.context === 'string' && node.attrs.context.match(/parent\./)) {
+            return true;
+        } else {
+            return false;
+        }
+    },
+    /**
      * Process a field node, in particular, put a flag on the field to give
      * special directives to the BasicModel.
      *
@@ -423,6 +440,9 @@ return core.Class.extend({
             if (typeof node === 'string') {
                 return false;
             }
+
+            node.attrs.__hasParent = this._hasParent(node);
+
             if (!_.isObject(node.attrs.modifiers)) {
                 node.attrs.modifiers = node.attrs.modifiers ? JSON.parse(node.attrs.modifiers) : {};
             }

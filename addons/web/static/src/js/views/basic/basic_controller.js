@@ -413,6 +413,10 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
      *        Rejected if the record can't be saved
      */
     _saveRecord: function (recordID, options) {
+        if (this.mode === 'readonly') {
+            // not necessary to save anything in this case
+            return $.when([]);
+        }
         recordID = recordID || this.handle;
         options = _.defaults(options || {}, {
             stayInEdit: false,

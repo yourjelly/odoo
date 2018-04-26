@@ -292,7 +292,16 @@ var ListRenderer = BasicRenderer.extend({
             isPassword: 'password' in node.attrs,
         });
         this._handleAttributes($td, node);
-        return $td.html(formattedValue);
+
+        if (typeof formattedValue === 'string') {
+            // use a lower level method to optimize big list rendering
+            $td[0].innerHTML = formattedValue;
+        } else {
+            // some formatters (boolean for example) return a jQuery element
+            // instead of string
+            $td.append(formattedValue);
+        }
+        return $td;
     },
     /**
      * Renders the button element associated to the given node and record.
