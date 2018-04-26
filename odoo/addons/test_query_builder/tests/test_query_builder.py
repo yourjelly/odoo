@@ -138,7 +138,7 @@ class TestSelect(common.TransactionCase):
 
     def test_select_aliased(self):
         s = Select({'id': self.p.id})
-        res = """SELECT "a"."id" AS "id" FROM "res_partner" "a\""""
+        res = """SELECT "a"."id" AS id FROM "res_partner" "a\""""
         self.assertEqual(s.to_sql()[0], res)
 
     def test_select_all(self):
@@ -517,13 +517,4 @@ class TestSelect(common.TransactionCase):
             s.to_sql()[0],
             """SELECT "a"."id", "b"."id", "c"."id", "d"."id" """
             """FROM "res_partner" "a", "res_users" "b", "res_currency" "c", "res_groups" "d\""""
-        )
-
-    def test_select_where_subquery(self):
-        s = Select([self.p.id])
-        s2 = Select({'subquery': s})
-        self.assertEqual(
-            s2.to_sql()[0],
-            """SELECT (SELECT "a"."id" FROM "res_partner" "a") AS "subquery" """
-            """FROM "res_partner" "a\""""
         )
