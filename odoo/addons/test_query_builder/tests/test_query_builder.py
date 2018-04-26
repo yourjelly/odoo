@@ -518,3 +518,15 @@ class TestSelect(common.TransactionCase):
             """SELECT "a"."id", "b"."id", "c"."id", "d"."id" """
             """FROM "res_partner" "a", "res_users" "b", "res_currency" "c", "res_groups" "d\""""
         )
+
+    def test_sub_query(self):
+        sub = Select([self.p.id], limit=5)
+        s = Select([self.u.id], where=self.u.partner_id ^ sub)
+        self.assertEqual(
+            s.to_sql(),
+            (
+                """SELECT "a"."id" FROM "res_users" "a" """
+                """WHERE ("a"."partner_id" IN (SELECT "b"."id" FROM "res_partner" "b" """
+                """LIMIT %s OFFSET %s))""", [5, 0]
+            )
+        )

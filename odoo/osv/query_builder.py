@@ -102,7 +102,7 @@ class Expression(object):
         return Expression('OR', self, other)
 
     def __xor__(self, other):
-        assert isinstance(other, Iterable), "`^` RHS operand must be an Iterable."
+        assert isinstance(other, (Iterable, QueryExpression)), "`^` RHS operand must be Iterable."
         return Expression('IN', self, other)
 
     def __invert__(self):
@@ -167,6 +167,10 @@ class Expression(object):
 
         if isinstance(self.right, Expression):
             right, _args = self.right._to_sql(alias_dict)
+
+            if isinstance(self.right, QueryExpression):
+                right = '(%s)' % right
+
             args += _args
             sql += right + ')'
         else:
@@ -225,31 +229,26 @@ class Func(Expression):
         return (sql, args)
 
 
-class SelectOp(object):
+class QueryExpression(Expression):
 
     __slots__ = ('op', 'left', 'right')
 
     """ Class for operators between Select objects """
 
     def __init__(self, op, left, right):
-        self.op = op
-        self.left = left
-        self.right = right
+        super(QueryExpression, self).__init__(op, left, right)
 
     def __or__(self, other):
-        assert isinstance(other, SelectOp), "UNION is only possible between queries"
         op = 'UNION ALL' if other._all else 'UNION'
-        return SelectOp(op, self, other)
+        return QueryExpression(op, self, other)
 
     def __and__(self, other):
-        assert isinstance(other, SelectOp), "INTERSECT is only possible between queries"
         op = 'INTERSECT ALL' if other._all else 'INTERSECT'
-        return SelectOp(op, self, other)
+        return QueryExpression(op, self, other)
 
     def __sub__(self, other):
-        assert isinstance(other, SelectOp), "EXCEPT is only possible between queries"
         op = 'EXCEPT ALL' if other._all else 'EXCEPT'
-        return SelectOp(op, self, other)
+        return QueryExpression(op, self, other)
 
     def _to_sql(self, alias_mapping):
         left, largs = self.left._to_sql(alias_mapping)
@@ -388,7 +387,7 @@ class Desc(Modifier):
         super(Desc, self).__init__(column, 'DESC', nfirst)
 
 
-class Select(SelectOp):
+class Select(QueryExpression):
 
     def __init__(self, columns, where=None, order=[], joins=[], distinct=False,
                  group=[], having=None, limit=None, offset=0, _all=False):
