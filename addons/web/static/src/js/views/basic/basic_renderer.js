@@ -472,7 +472,8 @@ var BasicRenderer = AbstractRenderer.extend({
 
         // Evaluate if necessary
         if (!modifiersData.evaluatedModifiers[record.id]) {
-            modifiersData.evaluatedModifiers[record.id] = record.evalModifiers(modifiersData.modifiers);
+            var needParent = node.attrs.__hasParent;
+            modifiersData.evaluatedModifiers[record.id] = record.evalModifiers(modifiersData.modifiers, record.evalContext, needParent);
         }
 
         // Element might not be given yet (a second call to the function can
@@ -739,7 +740,7 @@ var BasicRenderer = AbstractRenderer.extend({
         var defs = [];
         this.defs = defs; // Potentially filled by widget rerendering
         _.each(this.allModifiersData, function (modifiersData) {
-            modifiersData.evaluatedModifiers[record.id] = record.evalModifiers(modifiersData.modifiers);
+            modifiersData.evaluatedModifiers[record.id] = record.evalModifiers(modifiersData.modifiers, record.evalContext);
             self._applyModifiers(modifiersData, record);
         });
         delete this.defs;

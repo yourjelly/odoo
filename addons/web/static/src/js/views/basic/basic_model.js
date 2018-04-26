@@ -1903,17 +1903,18 @@ var BasicModel = AbstractModel.extend({
      * @param {Object} element a valid element object, which will serve as eval
      *   context.
      * @param {Object} modifiers
+     * @param {Object} [evalContext] passed to avoid useless recomputation
+     * @param {boolean} [needParent]
      * @returns {Object}
      */
-    _evalModifiers: function (element, modifiers) {
+    _evalModifiers: function (element, modifiers, evalContext, needParent) {
         var result = {};
         var self = this;
-        var evalContext;
         function evalModifier(mod) {
             if (mod === undefined || mod === false || mod === true) {
                 return !!mod;
             }
-            evalContext = evalContext || self._getEvalContext(element);
+            evalContext = evalContext || self._getEvalContext(element, false, needParent);
             return new Domain(mod, evalContext).compute(evalContext);
         }
         if ('invisible' in modifiers) {
@@ -3007,9 +3008,11 @@ var BasicModel = AbstractModel.extend({
      * @param {Object} element - an element from the localData
      * @param {boolean} [forDomain=false] if true, evaluates x2manys as a list of
      *   ids instead of a list of commands
+     * @param {boolean} [needParent=true] if not set or true, the `parent` key
+     *   will be set on the evalContext
      * @returns {Object}
      */
-    _getEvalContext: function (element, forDomain) {
+    _getEvalContext: function (element, forDomain, needParent) {
         var evalContext = element.type === 'record' ? this._getRecordEvalContext(element, forDomain) : {};
 
         if (element.parentID) {
@@ -3017,7 +3020,8 @@ var BasicModel = AbstractModel.extend({
             if (parent.type === 'list' && parent.parentID) {
                 parent = this.localData[parent.parentID];
             }
-            if (parent.type === 'record') {
+            if (parent.type === 'record' && needParent !== false) {
+                // we only compute the parent eval context if needed
                 evalContext.parent = this._getRecordEvalContext(parent, forDomain);
             }
         }

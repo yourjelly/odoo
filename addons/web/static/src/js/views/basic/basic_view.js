@@ -90,6 +90,23 @@ var BasicView = AbstractView.extend({
         return FieldWidget || fieldRegistry.getAny([viewType + "." + field.type, field.type, "abstract"]);
     },
     /**
+     * Determines (quite naively) if a node uses the `parent` key.
+     * The `parent` could either be in the modifiers or the context.
+     *
+     * @private
+     * @param {Object} node
+     * @returns {boolean}
+     */
+    _hasParent: function (node) {
+        if (typeof node.attrs.modifiers === 'string' && node.attrs.modifiers.match(/parent\./)) {
+            return true;
+        } else if (typeof node.attrs.context === 'string' && node.attrs.context.match(/parent\./)) {
+            return true;
+        } else {
+            return false;
+        }
+    },
+    /**
      * In some cases, we already have a preloaded record
      *
      * @override
@@ -369,6 +386,9 @@ var BasicView = AbstractView.extend({
         if (typeof node === 'string') {
             return false;
         }
+
+        node.attrs.__hasParent = this._hasParent(node);
+
         if (!_.isObject(node.attrs.modifiers)) {
             node.attrs.modifiers = node.attrs.modifiers ? JSON.parse(node.attrs.modifiers) : {};
         }
