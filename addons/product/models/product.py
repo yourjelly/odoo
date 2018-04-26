@@ -334,13 +334,11 @@ class ProductProduct(models.Model):
     @api.multi
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
-        # TDE FIXME: clean context / variant brol
         if default is None:
             default = {}
-        if self._context.get('variant'):
-            # if we copy a variant or create one, we keep the same template
-            default['product_tmpl_id'] = self.product_tmpl_id.id
-        elif 'name' not in default:
+        # if we copy a variant or create one, we keep the same template
+        default['product_tmpl_id'] = self.product_tmpl_id.id
+        if 'name' not in default:
             default['name'] = self.name
 
         return super(ProductProduct, self).copy(default=default)
