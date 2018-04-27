@@ -1,0 +1,55 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* test_base
+#
+# Translators:
+# Jigar Vaghela <jva@odoo.com>, 2018
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 12.0alpha1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-04-30 11:56+0000\n"
+"PO-Revision-Date: 2018-04-30 11:56+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: test_base
+#: model:test_base.model,name:test_base.base_model_belgium
+#: model:test_base.model,name:test_base.test_one2many_belgium_test_base_model
+#: model:test_base.one2many,name:test_base.test_one2many_belgium
+msgid "Belgium"
+msgstr "Belgique"
+
+#. module: test_base
+#: model:test_base.model,name:test_base.base_model_child1_1
+#: model:test_base.model,name:test_base.test_one2many_child1_1_test_base_model
+#: model:test_base.one2many,name:test_base.test_one2many_child1_1
+msgid "Child1-1"
+msgstr "Enfant1-1"
+
+#. module: test_base
+#: model:test_base.model,name:test_base.base_model_child2_1
+#: model:test_base.model,name:test_base.test_one2many_child2_1_test_base_model
+#: model:test_base.one2many,name:test_base.test_one2many_child2_1
+msgid "Child2-1"
+msgstr "Enfant2-1"
+
+#. module: test_base
+#: model:test_base.model,name:test_base.base_model_parent1
+#: model:test_base.model,name:test_base.test_one2many_parent1_test_base_model
+#: model:test_base.one2many,name:test_base.test_one2many_parent1
+msgid "Parent1"
+msgstr "Parent1"
+
+#. module: test_base
+#: model:test_base.model,name:test_base.base_model_parent2
+#: model:test_base.model,name:test_base.test_one2many_parent2_test_base_model
+#: model:test_base.one2many,name:test_base.test_one2many_parent2
+msgid "Parent2"
+msgstr "Parent2"
+
+

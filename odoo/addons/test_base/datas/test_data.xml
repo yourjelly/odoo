@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Test base Child many2one-->
+        <record id="child_many2one_test" model="test_base.child.many2one">
+            <field name="name">Child M2O</field>
+        </record>
+
+        <!-- Test many2one -->
+        <record id="many2one_test" model="test_base.many2one">
+            <field name="name">M2O</field>
+            <field name="child_m2o_id" ref="child_many2one_test"/>
+        </record>
+
+        <!-- Test many2one for multi value -->
+        <record id="many2one_test2" model="test_base.many2one">
+            <field name="name">M2O 2</field>
+            <field name="child_m2o_id" ref="child_many2one_test"/>
+        </record>
+
+        <!-- access rights to group_system and only read access rights to group_user -->
+        <record id="m2o_group_system_test" model="test_base.m2o.group.system">
+            <field name="name">M2O group system</field>
+        </record>
+
+        <!-- Test many2many -->
+        <record id="many2many_test" model="test_base.many2many">
+            <field name="name">M2M</field>
+        </record>
+
+        <!-- Test base demo Parent one -->
+        <record id="test_base_model_parent1" model="test_base.model">
+            <field name="name">Parent1</field>
+            <field name="m2o_group_system_id" ref="m2o_group_system_test"/>
+            <field name="many2one_id" ref="many2one_test"/>
+            <field name="many2many_ids" eval="[(4, many2many_test)]"/>
+            <field name="boolean" eval="True"/>
+        </record>
+
+        <!-- Test base demo child one of one -->
+        <record id="test_base_model_child1_1" model="test_base.model">
+            <field name="name">Child1-1</field>
+            <field name="m2o_group_system_id" ref="m2o_group_system_test"/>
+            <field name="parent_id" ref="test_base_model_parent1"/>
+            <field name="many2one_id" ref="many2one_test"/>
+            <field name="many2many_ids" eval="[(4, many2many_test)]"/>
+            <field name="boolean" eval="True"/>
+        </record>
+
+        <!-- two parent child record for multi record test -->
+        <!-- Test base demo Parent two-->
+        <record id="test_base_model_parent2" model="test_base.model">
+            <field name="name">Parent2</field>
+            <field name="m2o_group_system_id" ref="m2o_group_system_test"/>
+            <field name="many2one_id" ref="many2one_test2"/>
+            <field name="boolean" eval="False"/>
+        </record>
+
+        <!-- Test base demo child two of one -->
+        <record id="test_base_model_child2_1" model="test_base.model">
+            <field name="name">Child2-1</field>
+            <field name="m2o_group_system_id" ref="m2o_group_system_test"/>
+            <field name="parent_id" ref="test_base_model_parent2"/>
+            <field name="many2one_id" ref="many2one_test2"/>
+            <field name="boolean" eval="False"/>
+        </record>
+
+        <!-- Test base demo Belgium for translation -->
+        <record id="test_base_model_belgium" model="test_base.model">
+            <field name="name">Belgium</field>
+            <field name="m2o_group_system_id" ref="m2o_group_system_test"/>
+            <field name="parent_id" ref="test_base_model_parent2"/>
+            <field name="many2one_id" ref="many2one_test2"/>
+            <field name="boolean" eval="False"/>
+        </record>
+
+        <!-- Test one2many for all test base-->
+        <record id="test_one2many_parent1" model="test_base.one2many">
+            <field name="login">O2M of Parent1</field>
+            <field name="test_base_model_id" ref="test_base_model_parent1"/>
+        </record>
+
+        <record id="test_one2many_child1_1" model="test_base.one2many">
+            <field name="login">O2M of child1 of 1</field>
+            <field name="test_base_model_id" ref="test_base_model_child1_1"/>
+        </record>
+
+        <record id="test_one2many_parent2" model="test_base.one2many">
+            <field name="login">O2M of Parent2</field>
+            <field name="test_base_model_id" ref="test_base_model_parent2"/>
+        </record>
+
+        <record id="test_one2many_child2_1" model="test_base.one2many">
+            <field name="login">O2M of child2 of 1</field>
+            <field name="test_base_model_id" ref="test_base_model_child2_1"/>
+        </record>
+
+        <record id="test_one2many_belgium" model="test_base.one2many">
+            <field name="login">O2M of Belgium</field>
+            <field name="test_base_model_id" ref="test_base_model_belgium"/>
+        </record>
+
+    </data>
+</odoo>

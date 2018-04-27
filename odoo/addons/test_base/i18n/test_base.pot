@@ -1,0 +1,250 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* test_base
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 12.0alpha1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-04-30 11:56+0000\n"
+"PO-Revision-Date: 2018-04-30 11:56+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_model__active
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many__active
+msgid "Active"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many__base_model_id
+msgid "Base Model"
+msgstr ""
+
+#. module: test_base
+#: model:test_base.model,name:test_base.base_model_belgium
+#: model:test_base.model,name:test_base.test_one2many_belgium_test_base_model
+#: model:test_base.one2many,name:test_base.test_one2many_belgium
+msgid "Belgium"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_model__boolean
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many__boolean
+msgid "Boolean"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_many2one__child_m2o_id
+msgid "Child M2O"
+msgstr ""
+
+#. module: test_base
+#: model:test_base.model,name:test_base.base_model_child1_1
+#: model:test_base.model,name:test_base.test_one2many_child1_1_test_base_model
+#: model:test_base.one2many,name:test_base.test_one2many_child1_1
+msgid "Child1-1"
+msgstr ""
+
+#. module: test_base
+#: model:test_base.model,name:test_base.base_model_child2_1
+#: model:test_base.model,name:test_base.test_one2many_child2_1_test_base_model
+#: model:test_base.one2many,name:test_base.test_one2many_child2_1
+msgid "Child2-1"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_many2many__child_ids
+#: model:ir.model.fields,field_description:test_base.field_test_base_model__child_ids
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many__child_ids
+msgid "Childs"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_model__color
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many__color
+msgid "Color Index"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_child_many2one__create_uid
+#: model:ir.model.fields,field_description:test_base.field_test_base_m2o_group_system__create_uid
+#: model:ir.model.fields,field_description:test_base.field_test_base_many2many__create_uid
+#: model:ir.model.fields,field_description:test_base.field_test_base_many2one__create_uid
+#: model:ir.model.fields,field_description:test_base.field_test_base_model__create_uid
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_child_many2one__create_date
+#: model:ir.model.fields,field_description:test_base.field_test_base_m2o_group_system__create_date
+#: model:ir.model.fields,field_description:test_base.field_test_base_many2many__create_date
+#: model:ir.model.fields,field_description:test_base.field_test_base_many2one__create_date
+#: model:ir.model.fields,field_description:test_base.field_test_base_model__create_date
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_model__date
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many__date
+msgid "Date"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_child_many2one__display_name
+#: model:ir.model.fields,field_description:test_base.field_test_base_m2o_group_system__display_name
+#: model:ir.model.fields,field_description:test_base.field_test_base_many2many__display_name
+#: model:ir.model.fields,field_description:test_base.field_test_base_many2one__display_name
+#: model:ir.model.fields,field_description:test_base.field_test_base_model__display_name
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_child_many2one__id
+#: model:ir.model.fields,field_description:test_base.field_test_base_m2o_group_system__id
+#: model:ir.model.fields,field_description:test_base.field_test_base_many2many__id
+#: model:ir.model.fields,field_description:test_base.field_test_base_many2one__id
+#: model:ir.model.fields,field_description:test_base.field_test_base_model__id
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many__id
+msgid "ID"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_child_many2one____last_update
+#: model:ir.model.fields,field_description:test_base.field_test_base_m2o_group_system____last_update
+#: model:ir.model.fields,field_description:test_base.field_test_base_many2many____last_update
+#: model:ir.model.fields,field_description:test_base.field_test_base_many2one____last_update
+#: model:ir.model.fields,field_description:test_base.field_test_base_model____last_update
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many____last_update
+msgid "Last Modified on"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_child_many2one__write_uid
+#: model:ir.model.fields,field_description:test_base.field_test_base_m2o_group_system__write_uid
+#: model:ir.model.fields,field_description:test_base.field_test_base_many2many__write_uid
+#: model:ir.model.fields,field_description:test_base.field_test_base_many2one__write_uid
+#: model:ir.model.fields,field_description:test_base.field_test_base_model__write_uid
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_child_many2one__write_date
+#: model:ir.model.fields,field_description:test_base.field_test_base_m2o_group_system__write_date
+#: model:ir.model.fields,field_description:test_base.field_test_base_many2many__write_date
+#: model:ir.model.fields,field_description:test_base.field_test_base_many2one__write_date
+#: model:ir.model.fields,field_description:test_base.field_test_base_model__write_date
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many__login
+msgid "Login Id"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_model__m2o_group_system_id
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many__m2o_group_system_id
+msgid "M2O Group System"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_model__many2many_ids
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many__many2many_ids
+msgid "Many2Many"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_model__many2one_id
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many__many2one_id
+msgid "Many2One"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_child_many2one__name
+#: model:ir.model.fields,field_description:test_base.field_test_base_m2o_group_system__name
+#: model:ir.model.fields,field_description:test_base.field_test_base_many2many__name
+#: model:ir.model.fields,field_description:test_base.field_test_base_many2one__name
+#: model:ir.model.fields,field_description:test_base.field_test_base_model__name
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many__name
+msgid "Name"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_model__one2many_ids
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many__one2many_ids
+msgid "One2Many"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_many2many__parent_id
+#: model:ir.model.fields,field_description:test_base.field_test_base_model__parent_id
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many__parent_id
+msgid "Parent"
+msgstr ""
+
+#. module: test_base
+#: model:test_base.model,name:test_base.base_model_parent1
+#: model:test_base.model,name:test_base.test_one2many_parent1_test_base_model
+#: model:test_base.one2many,name:test_base.test_one2many_parent1
+msgid "Parent1"
+msgstr ""
+
+#. module: test_base
+#: model:test_base.model,name:test_base.base_model_parent2
+#: model:test_base.model,name:test_base.test_one2many_parent2_test_base_model
+#: model:test_base.one2many,name:test_base.test_one2many_parent2
+msgid "Parent2"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model.fields,field_description:test_base.field_test_base_model__reference
+#: model:ir.model.fields,field_description:test_base.field_test_base_one2many__reference
+msgid "Related Document"
+msgstr ""
+
+#. module: test_base
+#: model:ir.ui.view,arch_db:test_base.view_test_base_model
+msgid "Test base"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model,name:test_base.model_test_base_child_many2one
+msgid "test_base.child.many2one"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model,name:test_base.model_test_base_m2o_group_system
+msgid "test_base.m2o.group.system"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model,name:test_base.model_test_base_many2many
+msgid "test_base.many2many"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model,name:test_base.model_test_base_many2one
+msgid "test_base.many2one"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model,name:test_base.model_test_base_model
+msgid "test_base.model"
+msgstr ""
+
+#. module: test_base
+#: model:ir.model,name:test_base.model_test_base_one2many
+msgid "test_base.one2many"
+msgstr ""
+

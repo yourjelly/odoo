@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="view_test_base_model" model="ir.ui.view">
+        <field name="name">test_base.model.form</field>
+        <field name="model">test_base.model</field>
+        <field name="arch" type="xml">
+            <form string="Test base">
+                <group>
+                    <group>
+                        <field name="name"/>
+                        <field name="color"/>
+                        <field name="reference"/>
+                    </group>
+                    <group>
+                        <field name="parent_id"/>
+                        <field name="many2one_id"/>
+                        <field name="m2o_group_system_id"/>
+                    </group>
+                    <notebook>
+                        <page>
+                            <field name="child_ids"/>
+                        </page>
+                        <page>
+                            <field name="many2many_ids"/>
+                        </page>
+                        <page>
+                            <field name="one2many_ids"/>
+                        </page>
+                    </notebook>
+                </group>
+            </form>
+        </field>
+    </record>
+
+     <record id="view_test_base_m2o_group_system" model="ir.ui.view">
+        <field name="name">test_base.m2o.group.system.form</field>
+        <field name="model">test_base.m2o.group.system</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </group>
+            </form>
+        </field>
+    </record>
+
+</odoo>
