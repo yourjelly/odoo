@@ -246,3 +246,25 @@
         display: none;
     }
 }
+
+.o_rtl {
+    $o-tip-size: 24px;
+    $o-tip-arrow-width: 20px;
+    .o_tooltip {
+        &.active {
+            &.bottom {
+                &::before, &::after {
+                    left: auto;
+                }
+            }
+        }
+        &.inverse {
+            &.top, &.bottom {
+                &::before, &.active::after {
+                    left: ($o-tip-size - $o-tip-arrow-width) / 2;
+                    right: auto !important;
+                }
+            }
+        }
+    }
+}

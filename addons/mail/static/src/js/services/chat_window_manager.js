@@ -6,7 +6,6 @@ var ExtendedChatWindow = require('mail.ExtendedChatWindow');
 var AbstractService = require('web.AbstractService');
 var config = require('web.config');
 var core = require('web.core');
-var session = require('web.session');
 var utils = require('web.utils');
 var web_client = require('web.web_client');
 
