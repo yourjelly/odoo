@@ -154,11 +154,13 @@ var Tip = Widget.extend({
         });
 
         var offset = this.$el.offset();
+        var setRight = _t.database.parameters.direction === 'rtl' ? "right" : "left";
+        var setLeft = _t.database.parameters.direction === 'rtl' ? "left" : "right";
         this.$tooltip_overlay.css({
             top: -Math.min((this.info.position === "bottom" ? this.info.space : this.info.overlay.y), offset.top),
-            right: -Math.min((this.info.position === "left" ? this.info.space : this.info.overlay.x), this.$window.width() - (offset.left + this.init_width + this.double_border_width)),
+            right: -Math.min((this.info.position === setRight ? this.info.space : this.info.overlay.x), this.$window.width() - (offset.left + this.init_width + this.double_border_width)),
             bottom: -Math.min((this.info.position === "top" ? this.info.space : this.info.overlay.y), this.$window.height() - (offset.top + this.init_height + this.double_border_width)),
-            left: -Math.min((this.info.position === "right" ? this.info.space : this.info.overlay.x), offset.left),
+            left: -Math.min((this.info.position === setLeft ? this.info.space : this.info.overlay.x), offset.left),
         });
 
         this.position = this.$el.position();
