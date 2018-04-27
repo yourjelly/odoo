@@ -68,7 +68,7 @@ class MigrationManager(object):
             }
 
         for pkg in self.graph:
-            if not (hasattr(pkg, 'update') or pkg.state == 'to upgrade' or
+            if not (pkg.update or
                     getattr(pkg, 'load_state', None) == 'to upgrade'):
                 continue
 
@@ -84,9 +84,7 @@ class MigrationManager(object):
             'post': '[%s>]',
             'end': '[$%s]',
         }
-        state = pkg.state if stage in ('pre', 'post') else getattr(pkg, 'load_state', None)
-
-        if not (hasattr(pkg, 'update') or state == 'to upgrade') or state == 'to install':
+        if pkg.init or not pkg.update:
             return
 
         def convert_version(version):

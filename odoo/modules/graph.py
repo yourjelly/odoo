@@ -2,7 +2,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 """ Modules dependency graph. """
-
 import itertools
 import logging
 
@@ -33,21 +32,24 @@ class Graph(dict):
     def update_from_db(self, cr):
         if not len(self):
             return
+
         # update the graph with values from the database (if exist)
-        ## First, we set the default values for each package in graph
-        additional_data = {key: {'id': 0, 'state': 'uninstalled', 'dbdemo': False, 'installed_version': None} for key in self.keys()}
         ## Then we get the values from the database
         cr.execute('SELECT name, id, state, demo AS dbdemo, latest_version AS installed_version'
                    '  FROM ir_module_module'
-                   ' WHERE name IN %s',(tuple(additional_data),)
+                   ' WHERE name IN %s',(tuple(self.keys()),)
                    )
 
-        ## and we update the default values with values from the database
-        additional_data.update((x['name'], x) for x in cr.dictfetchall())
-
-        for package in self.values():
-            for k, v in additional_data[package.name].items():
-                setattr(package, k, v)
+        for name, mid, state, demo, version in cr.fetchall():
+            package = self[name]
+            package.id = mid
+            if state == 'to install' or {name, 'all'} & tools.config['init'].keys():
+                package.init = True
+            if state == 'to upgrade' or {name, 'all'} & tools.config['update'].keys():
+                package.update = True
+            if {package, 'all'} & tools.config['demo'].keys() or (demo and (package.init or package.update)):
+                package.demo = True
+            package.installed_version = version
 
     def add_module(self, cr, module, force=None):
         self.add_modules(cr, [module], force)
@@ -82,9 +84,8 @@ class Graph(dict):
                 later.clear()
                 current.remove(package)
                 node = self.add_node(package, info)
-                for kind in ('init', 'demo', 'update'):
-                    if package in tools.config[kind] or 'all' in tools.config[kind] or kind in force:
-                        setattr(node, kind, True)
+                if 'demo' in force:
+                    node.demo = True
             else:
                 later.add(package)
                 packages.append((package, info))
@@ -120,22 +121,27 @@ class Node(object):
     ir_module_module (setted by Graph.update_from_db()).
 
     """
+    __slots__ = [
+        'name', 'graph', 'info', 'children', 'depth',
+        'id', 'installed_version',
+        'init', 'update', 'demo',
+        'load_state', 'load_version',
+    ]
     def __new__(cls, name, graph, info):
         if name in graph:
-            inst = graph[name]
-        else:
-            inst = object.__new__(cls)
-            graph[name] = inst
-        return inst
+            return graph[name]
+        inst = graph[name] = object.__new__(cls)
+        inst.name = name
+        inst.graph = graph
+        inst.info = info or {}
+        inst.children = []
+        inst.depth = 0
 
-    def __init__(self, name, graph, info):
-        self.name = name
-        self.graph = graph
-        self.info = info or getattr(self, 'info', {})
-        if not hasattr(self, 'children'):
-            self.children = []
-        if not hasattr(self, 'depth'):
-            self.depth = 0
+        inst.init = False
+        inst.update = False
+        inst.demo = False
+
+        return inst
 
     @property
     def data(self):
@@ -147,20 +153,21 @@ class Node(object):
         if node not in self.children:
             self.children.append(node)
         for attr in ('init', 'update', 'demo'):
-            if hasattr(self, attr):
+            if getattr(self, attr):
                 setattr(node, attr, True)
         self.children.sort(key=lambda x: x.name)
         return node
 
     def __setattr__(self, name, value):
         super(Node, self).__setattr__(name, value)
-        if name in ('init', 'update', 'demo'):
-            tools.config[name][self.name] = 1
+        # children should be marked as init/update/demo when parent is,
+        # but *not unmarked*
+        if name in ('init', 'update', 'demo') and value:
             for child in self.children:
-                setattr(child, name, value)
+                setattr(child, name, True)
         if name == 'depth':
             for child in self.children:
-                setattr(child, name, value + 1)
+                child.depth = value + 1
 
     def __iter__(self):
         return itertools.chain(

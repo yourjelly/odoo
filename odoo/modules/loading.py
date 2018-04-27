@@ -163,11 +163,7 @@ def load_module_graph(cr, graph, perform_checks=True,
 
         _logger.debug('loading module %s (%d/%d)', module_name, index, module_count)
 
-        needs_update = (
-            hasattr(package, "init")
-            or hasattr(package, "update")
-            or package.state in ("to install", "to upgrade")
-        )
+        needs_update = package.init or package.update
         if needs_update:
             if package.name != 'base':
                 registry.setup_models(cr)
@@ -175,8 +171,7 @@ def load_module_graph(cr, graph, perform_checks=True,
 
         load_openerp_module(package.name)
 
-        new_install = package.state == 'to install'
-        if new_install:
+        if package.init:
             py_module = sys.modules['odoo.addons.%s' % (module_name,)]
             pre_init = package.info.get('pre_init_hook')
             if pre_init:
@@ -198,7 +193,7 @@ def load_module_graph(cr, graph, perform_checks=True,
         idref = {}
 
         mode = 'update'
-        if hasattr(package, 'init') or package.state == 'to install':
+        if package.init:
             mode = 'init'
 
         if needs_update:
@@ -210,7 +205,7 @@ def load_module_graph(cr, graph, perform_checks=True,
             if perform_checks:
                 module._check()
 
-            if package.state == 'to upgrade':
+            if package.update:
                 # upgrading the module information
                 module.write(module.get_values_from_terp(package.data))
             load_data(cr, idref, mode, kind='data', package=package, report=report)
@@ -227,7 +222,7 @@ def load_module_graph(cr, graph, perform_checks=True,
             if package.name is not None:
                 registry._init_modules.add(package.name)
 
-            if new_install:
+            if package.init:
                 post_init = package.info.get('post_init_hook')
                 if post_init:
                     getattr(py_module, post_init)(cr, registry)
@@ -256,12 +251,10 @@ def load_module_graph(cr, graph, perform_checks=True,
             # Set new modules and dependencies
             module.write({'state': 'installed', 'latest_version': ver})
 
-            package.load_state = package.state
             package.load_version = package.installed_version
-            package.state = 'installed'
-            for kind in ('init', 'demo', 'update'):
-                if hasattr(package, kind):
-                    delattr(package, kind)
+            package.init = False
+            package.update = False
+            package.demo = False
 
         if package.name is not None:
             registry._init_modules.add(package.name)
