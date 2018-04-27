@@ -596,8 +596,7 @@ class Delete(object):
         Stateless class for generating SQL DELETE statements.
 
         Args:
-            rows: Either a List of Row instances of the tables from which records will be deleted
-                or a Dict in the form of {alias: row}.
+            rows: List of Row instances of the tables from which records will be deleted.
             using: List of Row instances that may appear in the query's expressions but that
                 won't be deleted from.
             where (Expression): Expression that will filter the table for records to be deleted.
@@ -620,11 +619,52 @@ class Delete(object):
             ["%s %s" % (r._table, alias_mapping[r]) for r in self._rows]
         )
 
+    def _build_using(self, alias_mapping):
+        if self._using:
+            return " USING %s" % ", ".join(
+                ["%s %s" % (r._table, alias_mapping[r]) for r in self._using]
+            )
+        return ''
+
+    def _build_where(self, alias_mapping):
+        if self._where:
+            _sql, _args = self._where._to_sql(alias_mapping)
+            return " WHERE %s" % _sql, _args
+        return '', []
+
+    def _build_returning(self, alias_mapping):
+        args = []
+
+        if self._returning:
+            sql = " RETURNING %s"
+            _q = []
+            for e in self._returning:
+                if isinstance(e, Row):
+                    _q.append('*')
+                    break
+                else:
+                    # Column or Expression
+                    _sql, _args = e._to_sql(alias_mapping)
+                    _q.append(_sql)
+                    args += _args
+            return sql % ', '.join(_q), args
+        return '', args
+
     def _to_sql(self, alias_mapping):
         sql = ""
         args = []
 
         sql += self._build_from(alias_mapping)
+        sql += self._build_using(alias_mapping)
+
+        _sql, _args = self._build_where(alias_mapping)
+        sql += _sql
+        args += _args
+
+        _sql, _args = self._build_returning(alias_mapping)
+        sql += _sql
+        args += _args
+
         return sql, args
 
     def to_sql(self):

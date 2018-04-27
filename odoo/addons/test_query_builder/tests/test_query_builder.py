@@ -572,6 +572,42 @@ class TestDelete(TestCase):
         self.p = Row('res_partner')
         self.u = Row('res_users')
 
-    def test_simple_delete(self):
+    def test_delete_simple(self):
         d = Delete([self.p])
         self.assertEqual(d.to_sql(), ("""DELETE FROM "res_partner" "a\"""", []))
+
+    def test_delete_where(self):
+        d = Delete([self.p], where=self.p.id >= 5)
+        self.assertEqual(
+            d.to_sql(),
+            ("""DELETE FROM "res_partner" "a" WHERE ("a"."id" >= %s)""", [5])
+        )
+
+    def test_delete_using(self):
+        d = Delete([self.p], using=[self.u], where=self.p.id == self.u.partner_id)
+        self.assertEqual(
+            d.to_sql(),
+            ("""DELETE FROM "res_partner" "a" USING "res_users" "b" """
+             """WHERE ("a"."id" = "b"."partner_id")""", [])
+        )
+
+    def test_delete_returning_all(self):
+        d = Delete([self.p], returning=[self.p])
+        self.assertEqual(
+            d.to_sql(),
+            ("""DELETE FROM "res_partner" "a" RETURNING *""", [])
+        )
+
+    def test_delete_returning_cols(self):
+        d = Delete([self.p], returning=[self.p.id, self.p.name])
+        self.assertEqual(
+            d.to_sql(),
+            ("""DELETE FROM "res_partner" "a" RETURNING "a"."id", "a"."name\"""", [])
+        )
+
+    def test_delete_returning_expr(self):
+        d = Delete([self.p], returning=[self.p.id <= 5])
+        self.assertEqual(
+            d.to_sql(),
+            ("""DELETE FROM "res_partner" "a" RETURNING ("a"."id" <= %s)""", [5])
+        )
