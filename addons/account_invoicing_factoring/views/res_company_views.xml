@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+		<record id="view_company_factoring_form" model="ir.ui.view">
+            <field name="name">res.company.factoring.form</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form" />
+            <field name="mode">primary</field>
+            <field name="priority">1025</field>
+            <field name="arch" type="xml">
+                <xpath expr="//h1" position="replace">
+	                <h2><field name="name"/></h2>
+	            </xpath>
+                <xpath expr="//sheet" position="inside">
+                    <hr />
+                    <footer>
+                        <button string="Save" type="object" class="oe_highlight" name="write"/>
+                        <button string="Cancel" class="oe_link" special="cancel" />
+                    </footer>
+                </xpath>
+            </field>
+        </record>
+	</data>
+</odoo>
