@@ -35,16 +35,3 @@
               transform: rotate(180deg);
     }
 }
-
-.o_tooltip {
-    transform: rotateY(180deg);
-}
-.o_tooltip_content {
-    transform: rotateY(180deg);
-    &.bottom, &.top {
-        transform: rotateY(180deg);
-        .o_tooltip_content {
-            transform: rotateY(180deg);
-        }
-    }
-}
