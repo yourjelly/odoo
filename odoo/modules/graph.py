@@ -29,33 +29,7 @@ class Graph(dict):
         else:
             return Node(name, self, info)
 
-    def update_from_db(self, cr):
-        if not len(self):
-            return
-
-        # update the graph with values from the database (if exist)
-        cr.execute('SELECT name, id, state, demo AS dbdemo, latest_version AS installed_version'
-                   '  FROM ir_module_module'
-                   ' WHERE name IN %s', (tuple(self.keys()),)
-                   )
-
-        for name, mid, state, demo, version in cr.fetchall():
-            package = self[name]
-            package.id = mid
-            if state == 'to install' or {name, 'all'} & tools.config['init'].keys():
-                package.init = True
-            if state == 'to upgrade' or {name, 'all'} & tools.config['update'].keys():
-                package.update = True
-            if {package, 'all'} & tools.config['demo'].keys() or (demo and (package.init or package.update)):
-                package.demo = True
-            package.installed_version = version
-
-    def add_module(self, cr, module, force=None):
-        self.add_modules(cr, [module], force)
-
-    def add_modules(self, cr, module_list, force=None):
-        if force is None:
-            force = []
+    def add_modules(self, module_list):
         packages = []
         len_graph = len(self)
         for module in module_list:
@@ -72,25 +46,19 @@ class Graph(dict):
         current, later = set([p for p, info in packages]), set()
 
         while packages and current > later:
-            package, info = packages[0]
+            package, info = packages.pop(0)
             deps = info['depends']
 
             # if all dependencies of 'package' are already in the graph, add 'package' in the graph
             if all(dep in self for dep in deps):
-                if not package in current:
-                    packages.pop(0)
+                if package not in current:
                     continue
                 later.clear()
                 current.remove(package)
-                node = self.add_node(package, info)
-                if 'demo' in force:
-                    node.demo = True
+                self.add_node(package, info)
             else:
                 later.add(package)
                 packages.append((package, info))
-            packages.pop(0)
-
-        self.update_from_db(cr)
 
         for package in later:
             unmet_deps = [p for p in dependencies[package] if p not in self]

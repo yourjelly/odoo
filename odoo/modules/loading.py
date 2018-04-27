@@ -280,25 +280,6 @@ def _check_module_names(cr, module_names):
             _logger.warning('invalid module names, ignored: %s', ", ".join(incorrect_names))
 
 
-def load_listed_modules(cr, graph, module_list, force, report, perform_checks, models_to_check=None):
-    if not module_list:
-        return
-
-    if models_to_check is None:
-        models_to_check = set()
-
-    # dict_keys are a live view, if the graph is updated the view also is ->
-    # we need to copy the keys in order to get a snapshot of the graph before
-    # add_modules runs
-    # also needs graph.keys() because iter() is overridden
-    loaded_modules = set(graph.keys())
-    graph.add_modules(cr, module_list, force)
-    _logger.debug('Updating graph with %d more modules', len(module_list))
-    load_module_graph(
-        cr, graph, report=report, skip_modules=loaded_modules, perform_checks=perform_checks,
-        models_to_check=models_to_check
-    )
-
 def load_modules(db, force_demo=False, update_module=False):
     initialize_sys_path()
 
@@ -308,6 +289,10 @@ def load_modules(db, force_demo=False, update_module=False):
 
     models_to_check = set()
 
+    to_init = tools.config['init']
+    to_update = tools.config['update']
+    to_demo = tools.config['demo']
+
     with db.cursor() as cr:
         if not odoo.modules.db.is_initialized(cr):
             if not update_module:
@@ -316,24 +301,36 @@ def load_modules(db, force_demo=False, update_module=False):
             _logger.info("init db")
             odoo.modules.db.initialize(cr)
             update_module = True # process auto-installed modules
-            tools.config["init"]["all"] = 1
-            tools.config['update']['all'] = 1
+            to_init["all"] = 1
+            to_update['all'] = 1
             if not tools.config['without_demo']:
-                tools.config["demo"]['all'] = 1
+                to_demo['all'] = 1
 
         # This is a brand new registry, just created in
         # odoo.modules.registry.Registry.new().
         registry = odoo.registry(cr.dbname)
 
-        if 'base' in tools.config['update'] or 'all' in tools.config['update']:
+        if {'base', 'all'} & to_update.keys():
             cr.execute("update ir_module_module set state=%s where name=%s and state=%s", ('to upgrade', 'base', 'installed'))
 
         # STEP 1: LOAD BASE (must be done before module dependencies can be computed for later steps)
         graph = odoo.modules.graph.Graph()
-        graph.add_module(cr, 'base', force)
+        graph.add_modules(['base'])
         if not graph:
             _logger.critical('module base cannot be loaded! (hint: verify addons-path)')
             raise ImportError('Module `base` cannot be loaded! (hint: verify addons-path)')
+
+        cr.execute("SELECT id, demo, latest_version FROM ir_module_module WHERE name = 'base'")
+        bid, bdemo, bversion = cr.fetchone()
+        base_module = graph['base']
+        base_module.id = bid
+        base_module.installed_version = bversion
+        if {'base', 'all'} & to_init.keys():
+            base_module.init = True
+        if {'base', 'all'} & to_update.keys():
+            base_module.update = True
+        if force_demo or {'name', 'all'} & to_demo.keys() or (bdemo and (base_module.init or base_module.update)):
+            base_module.demo = True
 
         # processed_modules: for cleanup step after install
         # loaded_modules: to avoid double loading
@@ -359,15 +356,15 @@ def load_modules(db, force_demo=False, update_module=False):
             _logger.info('updating modules list')
             Module.update_list()
 
-            _check_module_names(cr, itertools.chain(tools.config['init'], tools.config['update']))
+            _check_module_names(cr, itertools.chain(to_init, to_update))
 
-            module_names = [k for k, v in tools.config['init'].items() if v]
+            module_names = [k for k, v in to_init.items() if v]
             if module_names:
                 modules = Module.search([('state', '=', 'uninstalled'), ('name', 'in', module_names)])
                 if modules:
                     modules.button_install()
 
-            module_names = [k for k, v in tools.config['update'].items() if v]
+            module_names = [k for k, v in to_update.items() if v]
             if module_names:
                 modules = Module.search([('state', '=', 'installed'), ('name', 'in', module_names)])
                 if modules:
@@ -394,24 +391,57 @@ def load_modules(db, force_demo=False, update_module=False):
         # FIXME: better way to do this
         processed_modules = []
         loaded = -1
+        # NOTE: post-install hooks may mark modules as to install or to upgrade so need to loop & re-check
+        # NOTE: module update may add dependency on module being installed so need to loop as it won't be loaded first round
         while loaded < len(graph):
             loaded = len(graph)
 
-            cr.execute("SELECT name, state = 'to upgrade' FROM ir_module_module WHERE state in ('installed', 'to upgrade', 'to remove')")
-            mods = cr.fetchall()
-            processed_modules.extend(name for name, to_upgrade in mods if to_upgrade)
-            load_listed_modules(
-                cr, graph, [name for name, _ in mods], force, report, update_module,
-                models_to_check
-            )
+            cr.execute("""
+SELECT name, state='to install', state='to upgrade', id, demo, latest_version
+FROM ir_module_module
+WHERE state not in ('uninstalled', 'uninstallable')
+""")
+            all_load = cr.fetchall()
 
-            if update_module:
-                cr.execute("SELECT name FROM ir_module_module WHERE state = 'to install'")
-                mods = [n for [n] in cr.fetchall()]
-                processed_modules.extend(mods)
-                load_listed_modules(
-                    cr, graph, mods, force, report, update_module, models_to_check
-                )
+            # note: excludes both state-related values
+            to_install = [(name, *rest) for name, install, _, *rest in all_load if install]
+            # note: only excludes to_install-related value
+            to_load = [(name, *rest) for name, install, *rest in all_load if not install]
+
+            if to_load:
+                to_load_names = [name for name, *_ in to_load]
+                processed_modules.extend(name for name, to_upgrade, *_ in to_load if to_upgrade)
+                already_loaded = set(graph.keys())
+                graph.add_modules(to_load_names)
+                for name, to_upgrade, id_, demo, version in to_load:
+                    p = graph.get(name)
+                    if p is None: continue # missing deps => mod may be not loaded
+
+                    p.id = id_
+                    p.installed_version = version
+                    if to_upgrade or {name, 'all'} & to_update.keys():
+                        p.update = True
+                    if force_demo or {name, 'all'} & to_demo.keys() or (demo and to_upgrade):
+                        p.demo = True
+                load_module_graph(cr, graph, report=report, skip_modules=already_loaded,
+                                  perform_checks=update_module, models_to_check=models_to_check)
+
+            if update_module and to_install:
+                already_loaded = set(graph.keys())
+                to_install_names = [n for n, *_ in to_install]
+                processed_modules.extend(to_install_names)
+                graph.add_modules(to_install_names)
+                for name, id_, demo, version in to_install:
+                    p = graph.get(name)
+                    if p is None: continue
+
+                    p.id = id_
+                    p.installed_version = version
+                    p.init = True
+                    if force_demo or demo or {name, 'all'} & to_demo.keys():
+                        p.demo = True
+                load_module_graph(cr, graph, report=report, skip_modules=already_loaded,
+                                  perform_checks=update_module, models_to_check=models_to_check)
 
         registry.loaded = True
         registry.setup_models(cr)
