@@ -115,7 +115,7 @@ class TestORM(TransactionCaseCommon):
         self.assertFalse(test_bases.exists())
 
     def test_groupby_date(self):
-        partners_data = dict(
+        test_bases_data = dict(
             A='2012-11-19',
             B='2012-12-17',
             C='2012-12-31',
@@ -125,53 +125,48 @@ class TestORM(TransactionCaseCommon):
             G='2013-02-11',
         )
 
-        partner_ids = []
-        partner_ids_by_day = defaultdict(list)
-        partner_ids_by_month = defaultdict(list)
-        partner_ids_by_year = defaultdict(list)
+        test_base_ids = []
+        test_base_ids_by_day = defaultdict(list)
+        test_base_ids_by_month = defaultdict(list)
+        test_base_ids_by_year = defaultdict(list)
 
-        partners = self.env['res.partner']
-        for name, date in partners_data.items():
-            p = partners.create(dict(name=name, date=date))
-            partner_ids.append(p.id)
-            partner_ids_by_day[date].append(p.id)
-            partner_ids_by_month[date.rsplit('-', 1)[0]].append(p.id)
-            partner_ids_by_year[date.split('-', 1)[0]].append(p.id)
+        TestBase = self.env['test.base']
+        for name, date in test_bases_data.items():
+            test_base = TestBase.create(dict(name=name, date=date))
+            test_base_ids.append(test_base.id)
+            test_base_ids_by_day[date].append(test_base.id)
+            test_base_ids_by_month[date.rsplit('-', 1)[0]].append(test_base.id)
+            test_base_ids_by_year[date.split('-', 1)[0]].append(test_base.id)
 
         def read_group(interval):
-            domain = [('id', 'in', partner_ids)]
+            domain = [('id', 'in', test_base_ids)]
             result = {}
-            for grp in partners.read_group(domain, ['date'], ['date:' + interval]):
-                result[grp['date:' + interval]] = partners.search(grp['__domain'])
+            for grp in TestBase.read_group(domain, ['date'], ['date:' + interval]):
+                result[grp['date:' + interval]] = TestBase.search(grp['__domain'])
             return result
 
-        self.assertEqual(len(read_group('day')), len(partner_ids_by_day))
-        self.assertEqual(len(read_group('month')), len(partner_ids_by_month))
-        self.assertEqual(len(read_group('year')), len(partner_ids_by_year))
+        self.assertEqual(len(read_group('day')), len(test_base_ids_by_day))
+        self.assertEqual(len(read_group('month')), len(test_base_ids_by_month))
+        self.assertEqual(len(read_group('year')), len(test_base_ids_by_year))
 
-        res = partners.read_group([('id', 'in', partner_ids)], ['date'],
+        test_base = TestBase.read_group([('id', 'in', test_base_ids)], ['date'],
                                   ['date:month', 'date:day'], lazy=False)
-        self.assertEqual(len(res), len(partner_ids))
+        self.assertEqual(len(test_base), len(test_base_ids))
 
     def test_write_duplicate(self):
-        p1 = self.env['res.partner'].create({'name': 'W'})
-        (p1 + p1).write({'name': 'X'})
+        test_base = self.env['test.base'].create({'name': 'W'})
+        (test_base + test_base).write({'name': 'X'})
 
     def test_m2m_store_trigger(self):
         group_user = self.env.ref('base.group_user')
+        self.user_test.write({'groups_id': [(6, 0, [])]})
+        self.assertTrue(self.user_test.share)
 
-        user = self.env['res.users'].create({
-            'name': 'test',
-            'login': 'test_m2m_store_trigger',
-            'groups_id': [(6, 0, [])],
-        })
-        self.assertTrue(user.share)
+        group_user.write({'users': [(4, self.user_test.id)]})
+        self.assertFalse(self.user_test.share)
 
-        group_user.write({'users': [(4, user.id)]})
-        self.assertFalse(user.share)
-
-        group_user.write({'users': [(3, user.id)]})
-        self.assertTrue(user.share)
+        group_user.write({'users': [(3, self.user_test.id)]})
+        self.assertTrue(self.user_test.share)
 
 
 class TestInherits(TransactionCase):
@@ -181,27 +176,27 @@ class TestInherits(TransactionCase):
 
     def test_default(self):
         """ `default_get` cannot return a dictionary or a new id """
-        defaults = self.env['res.users'].default_get(['partner_id'])
-        if 'partner_id' in defaults:
-            self.assertIsInstance(defaults['partner_id'], (bool, pycompat.integer_types))
+        defaults = self.env['test.many2one'].default_get(['sub_many2one_id'])
+        if 'sub_many2one_id' in defaults:
+            self.assertIsInstance(defaults['sub_many2one_id'], (bool, pycompat.integer_types))
 
     def test_create(self):
         """ creating a user should automatically create a new partner """
-        partners_before = self.env['res.partner'].search([])
-        user_foo = self.env['res.users'].create({'name': 'Foo', 'login': 'foo'})
+        test_bases_before = self.env['test.base'].search([])
+        o2m_foo = self.env['test.one2many'].create({'name': 'Foo', 'login': 'foo'})
 
-        self.assertNotIn(user_foo.partner_id, partners_before)
+        self.assertNotIn(o2m_foo.test_base_id, test_bases_before)
 
     def test_create_with_ancestor(self):
         """ creating a user with a specific 'partner_id' should not create a new partner """
-        partner_foo = self.env['res.partner'].create({'name': 'Foo'})
-        partners_before = self.env['res.partner'].search([])
-        user_foo = self.env['res.users'].create({'partner_id': partner_foo.id, 'login': 'foo'})
-        partners_after = self.env['res.partner'].search([])
+        test_base_foo = self.env['test.base'].create({'name': 'Foo'})
+        test_bases_before = self.env['test.base'].search([])
+        o2m_foo = self.env['test.one2many'].create({'test_base_id': test_base_foo.id, 'login': 'foo'})
+        test_bases_after = self.env['test.base'].search([])
 
-        self.assertEqual(partners_before, partners_after)
-        self.assertEqual(user_foo.name, 'Foo')
-        self.assertEqual(user_foo.partner_id, partner_foo)
+        self.assertEqual(test_bases_before, test_bases_after)
+        self.assertEqual(o2m_foo.name, 'Foo')
+        self.assertEqual(o2m_foo.partner_id, test_base_foo)
 
     @mute_logger('odoo.models')
     def test_read(self):

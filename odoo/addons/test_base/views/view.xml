@@ -10,22 +10,34 @@
                     <group>
                         <field name="name"/>
                         <field name="color"/>
+                        <field name="reference"/>
                     </group>
                     <group>
                         <field name="parent_id"/>
-                        <field name="test_only_read"/>
+                        <field name="many2one_id"/>
+                        <field name="m2o_group_system_id"/>
                     </group>
-                    <field name="child_ids"/>
+                    <notebook>
+                        <page>
+                            <field name="child_ids"/>
+                        </page>
+                        <page>
+                            <field name="many2many_ids"/>
+                        </page>
+                        <page>
+                            <field name="one2many_ids"/>
+                        </page>
+                    </notebook>
                 </group>
             </form>
         </field>
     </record>
 
-     <record id="view_test_base_only_read" model="ir.ui.view">
-        <field name="name">test.base.only.read.form</field>
-        <field name="model">test.base.only.read</field>
+     <record id="view_test_m2o_group_system" model="ir.ui.view">
+        <field name="name">test.m2o.group.system.form</field>
+        <field name="model">test.m2o.group.system</field>
         <field name="arch" type="xml">
-            <form string="Test base only read">
+            <form>
                 <group>
                     <group>
                         <field name="name"/>
