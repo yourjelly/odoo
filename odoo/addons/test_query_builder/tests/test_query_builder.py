@@ -1,11 +1,27 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.tests import common
-from odoo.osv.query_builder import Row, Select, Asc, Desc, COALESCE
+from unittest import TestCase
+from odoo.tests.common import tagged
+from odoo.osv.query_builder import Row, Select, Asc, Desc, COALESCE, _quote
 
 
-class TestExpressions(common.TransactionCase):
+@tagged('standard', 'at_install')
+class TestMisc(TestCase):
+
+    def test_quote_unquoted(self):
+        self.assertEqual(_quote("foo"), '"foo"')
+
+    def test_quote_quoted(self):
+        self.assertEqual(_quote('"bar"'), '"bar"')
+
+    def test_row_dunder_access(self):
+        with self.assertRaises(AttributeError):
+            Row('res_partner').__name__
+
+
+@tagged('standard', 'at_install')
+class TestExpressions(TestCase):
 
     def setUp(self):
         super(TestExpressions, self).setUp()
@@ -124,7 +140,8 @@ class TestExpressions(common.TransactionCase):
             self.p.count % []
 
 
-class TestSelect(common.TransactionCase):
+@tagged('standard', 'at_install')
+class TestSelect(TestCase):
 
     def setUp(self):
         super(TestSelect, self).setUp()
