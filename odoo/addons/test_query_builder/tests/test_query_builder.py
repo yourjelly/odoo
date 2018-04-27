@@ -530,3 +530,18 @@ class TestSelect(common.TransactionCase):
                 """LIMIT %s OFFSET %s))""", [5, 0]
             )
         )
+
+    def test_nested_sub_query(self):
+        p = Row("res_partner")
+        s1 = Select([p.id])
+        s2 = Select([self.u.id], where=self.u.partner_id ^ s1)
+        s3 = Select([self.p.id], where=self.p.id ^ s2)
+        self.assertEqual(
+            s3.to_sql(),
+            (
+                """SELECT "a"."id" FROM "res_partner" "a" """
+                """WHERE ("a"."id" IN (SELECT "b"."id" FROM "res_users" "b" """
+                """WHERE ("b"."partner_id" IN (SELECT "c"."id" FROM "res_partner" "c"))))""",
+                []
+            )
+        )
