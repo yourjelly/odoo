@@ -91,7 +91,9 @@
         border-right-color: $o-tip-color;
     }
     &.top::before {
+        /*rtl:begin:ignore*/
         @include o-position-absolute($bottom: -$o-tip-arrow-length+$o-tip-arrow-integration, $left: ($o-tip-size - $o-tip-arrow-width) / 2);
+        /*rtl:end:ignore*/
         border-width: $o-tip-arrow-length $o-tip-arrow-width/2 0 $o-tip-arrow-width/2;
         border-top-color: $o-tip-color;
     }
@@ -196,7 +198,9 @@
                 border-top-color: $o-tip-color;
             }
             &::after {
+                /*rtl:begin:ignore*/
                 @include o-position-absolute($bottom: -$o-tip-arrow-length+$o-tip-border-width*2, $left: ($o-tip-size - $o-tip-arrow-width) / 2);
+                /*rtl:end:ignore*/
                 border-width: $o-tip-arrow-length $o-tip-arrow-width/2 0 $o-tip-arrow-width/2;
                 border-top-color: white;
                 transition: border-top-color $o-tip-white-arrow-duration-in ease $o-tip-white-arrow-delay-in;
