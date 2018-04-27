@@ -23,8 +23,8 @@
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-sm btn-primary btn-continue">Continue</button>
-                        <button type="button" class="btn btn-sm btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                        <button type="button" class="btn btn-primary btn-continue">Continue</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
                     </div>
                 </div>
             </div>

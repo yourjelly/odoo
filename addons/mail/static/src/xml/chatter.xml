@@ -42,7 +42,7 @@
 
         <!-- Add a button to open the full composer dialog -->
         <t t-jquery=".o_composer_button_add_attachment" t-operation="after">
-            <button tabindex="6" class="btn btn-sm btn-icon fa fa-expand o_composer_button_full_composer" type="button"/>
+            <button tabindex="6" class="btn btn-icon fa fa-expand o_composer_button_full_composer" type="button"/>
         </t>
     </t>
 
@@ -50,13 +50,13 @@
         Chatter (mail_thread widget) buttons
     -->
     <t t-name="mail.Chatter.Buttons">
-        <button t-if="new_message_btn" type="button" class="btn btn-sm btn-link o_chatter_button_new_message" title="Send a message" disabled="disabled">
+        <button t-if="new_message_btn" type="button" class="btn btn-link o_chatter_button_new_message" title="Send a message" disabled="disabled">
             Send message
         </button>
-        <button t-if="log_note_btn" class="btn btn-sm btn-link o_chatter_button_log_note" title="Log a note. Followers will not be notified." disabled="disabled">
+        <button t-if="log_note_btn" class="btn btn-link o_chatter_button_log_note" title="Log a note. Followers will not be notified." disabled="disabled">
             Log note
         </button>
-        <button t-if="schedule_activity_btn" class="btn btn-sm btn-link o_chatter_button_schedule_activity" title="Log or schedule an activity" disabled="disabled">
+        <button t-if="schedule_activity_btn" class="btn btn-link o_chatter_button_schedule_activity" title="Log or schedule an activity" disabled="disabled">
             <i class="fa fa-clock-o"/> <t t-if="isMobile">Activity</t><t t-else="">Schedule activity</t>
         </button>
     </t>
