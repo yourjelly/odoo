@@ -589,6 +589,48 @@ class Select(QueryExpression):
         return self._to_sql(AliasMapping())
 
 
+class Delete(object):
+
+    def __init__(self, rows, using=[], where=None, returning=[]):
+        """
+        Stateless class for generating SQL DELETE statements.
+
+        Args:
+            rows: Either a List of Row instances of the tables from which records will be deleted
+                or a Dict in the form of {alias: row}.
+            using: List of Row instances that may appear in the query's expressions but that
+                won't be deleted from.
+            where (Expression): Expression that will filter the table for records to be deleted.
+            returning: List of (Expression|Column|Row) to dictate what kind of output should be
+                returned after executing the query.
+
+        Example:
+            >>> r = Row('res_partner')
+            >>> d = Delete([r], where=r.active == False)
+            >>> d.to_sql()
+            DELETE FROM "res_partner" "a" WHERE "a"."active" = 'False'
+        """
+        self._rows = rows
+        self._using = using
+        self._where = where
+        self._returning = returning
+
+    def _build_from(self, alias_mapping):
+        return "DELETE FROM %s" % ", ".join(
+            ["%s %s" % (r._table, alias_mapping[r]) for r in self._rows]
+        )
+
+    def _to_sql(self, alias_mapping):
+        sql = ""
+        args = []
+
+        sql += self._build_from(alias_mapping)
+        return sql, args
+
+    def to_sql(self):
+        return self._to_sql(AliasMapping())
+
+
 # SQL Functions and Aggregates
 AVG = partial(Func, 'AVG')
 COUNT = partial(Func, 'COUNT')

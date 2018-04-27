@@ -3,7 +3,7 @@
 
 from unittest import TestCase
 from odoo.tests.common import tagged
-from odoo.osv.query_builder import Row, Select, Asc, Desc, COALESCE, _quote
+from odoo.osv.query_builder import Row, Select, Delete, Asc, Desc, COALESCE, _quote
 
 
 @tagged('standard', 'at_install')
@@ -562,3 +562,16 @@ class TestSelect(TestCase):
                 []
             )
         )
+
+
+@tagged('standard', 'at_install')
+class TestDelete(TestCase):
+
+    def setUp(self):
+        super(TestDelete, self).setUp()
+        self.p = Row('res_partner')
+        self.u = Row('res_users')
+
+    def test_simple_delete(self):
+        d = Delete([self.p])
+        self.assertEqual(d.to_sql(), ("""DELETE FROM "res_partner" "a\"""", []))
