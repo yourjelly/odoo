@@ -344,15 +344,13 @@ class ProductTemplate(models.Model):
         return res
 
     @api.multi
-    @api.returns('self', lambda value: value.id)
-    def copy(self, default=None):
-        # TDE FIXME: should probably be copy_data
+    def copy_data(self, default=None):
         self.ensure_one()
         if default is None:
             default = {}
         if 'name' not in default:
             default['name'] = _("%s (copy)") % self.name
-        return super(ProductTemplate, self).copy(default=default)
+        return super(ProductTemplate, self).copy_data(default=default)
 
     @api.multi
     def name_get(self):
