@@ -9,14 +9,20 @@
             <field name="priority">1025</field>
             <field name="arch" type="xml">
                 <xpath expr="//h1" position="replace">
-	                <h2><field name="name"/></h2>
+	                <h2><field name="name" readonly="1"/></h2>
 	            </xpath>
-                <xpath expr="//sheet" position="inside">
-                    <hr />
-                    <footer>
-                        <button string="Save" type="object" class="oe_highlight" name="write"/>
-                        <button string="Cancel" class="oe_link" special="cancel" />
-                    </footer>
+                <xpath expr="//notebook" position="replace">
+                    <notebook>
+                        <page string="Finexkap">
+                            <p>Get your finexkap credentials on website <a href="https://www.finexkap.com" target="_new">https://www.finexkap.com</a></p>
+                            <!-- TODO: Fields to add for finexkap -->
+                        </page>
+                        <hr />
+                        <footer>
+                            <button string="Save" type="object" class="oe_highlight" name="write"/>
+                            <button string="Cancel" class="oe_link" special="cancel" />
+                        </footer>
+                    </notebook>
                 </xpath>
             </field>
         </record>

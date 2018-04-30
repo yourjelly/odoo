@@ -10,7 +10,7 @@ class ResConfigSettings(models.TransientModel):
     def configure_invocing_factoring(self):
         view = self.env.ref('account_invoicing_factoring.view_company_factoring_form')
         return {
-            'name': _('Choose Your Documents to Process'),
+            'name': _('Set your Finexkap Credentials'),
             'type': 'ir.actions.act_window',
             'view_type': 'form',
             'view_mode': 'form',
@@ -22,7 +22,10 @@ class ResConfigSettings(models.TransientModel):
         }
 
 
-# class ResCompany(models.Model):
-    # _inherit = 'res.company'
+class ResCompany(models.Model):
+    _inherit = 'res.company'
+
+    # TODO: Add fields for finexkap
+    # Add fields for allowed currency (when open wizard fetch from service module)
 
 # Add columns to add for configuration of client finexkap apikey
