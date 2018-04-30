@@ -367,7 +367,7 @@ var ListController = BasicController.extend({
      */
     _onAddRecord: function (event) {
         event.stopPropagation();
-        if (this.activeActions.create) {
+        if (this.activeActions.create && !this.renderer.state.groupedBy.length) {
             this._addRecord();
         } else if (event.data.onFail) {
             event.data.onFail();
