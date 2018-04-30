@@ -10,8 +10,9 @@
     """,
     'category': 'Invoicing Management',
     'website': 'https://www.odoo.com/page/billing',
-    'depends': ['account_invoicing', 'l10n_fr'],
+    'depends': ['l10n_fr'],
     'data': [
+        'data/factoring_data.xml',
         'views/res_config_settings_view.xml',
         'views/res_company_views.xml',
         'views/factoring_views.xml'
