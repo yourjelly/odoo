@@ -1,6 +1,5 @@
 from . import test_base
 from . import test_db_cursor
-from . import test_expression
 from . import test_float
 from . import test_func
 from . import test_ir_actions
