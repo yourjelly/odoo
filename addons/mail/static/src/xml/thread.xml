@@ -281,7 +281,8 @@
         <div t-attf-class="o_attachment #{ editable ? 'o_attachment_editable' : '' } #{attachment.upload ? 'o_attachment_uploading' : ''}" t-att-title="attachment.name">
             <div class="o_attachment_wrap">
                 <t t-set="has_preview" t-value="type == 'image' or type == 'video' or attachment.mimetype == 'application/pdf'"/>
-                <t t-set="ext" t-value="attachment.filename.split('.').pop()"/>
+                <t t-if="attachment.filename" t-set="ext" t-value="attachment.filename.split('.').pop()"/>
+                <t t-elif="attachment.name" t-set="ext" t-value="attachment.name.split('.').pop()"/>
 
                 <div t-attf-class="o_image_box pull-left #{has_preview ? 'o_attachment_view' : ''}" t-att-data-id="attachment.id">
                     <div t-if="has_preview"
@@ -311,7 +312,7 @@
                     <a class="ml4 o_attachment_download pull-right" t-att-title="'Download ' + attachment.name" t-att-href='attachment.url'><i t-attf-class="fa fa-download"/></a>
                 </div>
                 <div t-if="editable" class="o_attachment_uploaded"><i class="text-success fa fa-check"/></div>
-                <div t-if="editable" class="o_attachment_delete" t-att-data-id="attachment.id"><span class="text-white">×</span></div>
+                <div t-if="editable" class="o_attachment_delete oe_delete" t-att-data-id="attachment.id"><span class="text-white">×</span></div>
             </div>
         </div>
     </t>

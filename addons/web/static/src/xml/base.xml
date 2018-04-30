@@ -427,7 +427,7 @@
 <t t-name="FormButton.tooltip">
     <div class="oe_tooltip_string">
         <div class="tooltip-inner">
-            Hit ENTER to 
+            Hit ENTER to
             <t t-esc="title"></t>
         </div>
     </div>
@@ -983,32 +983,27 @@
         </t>
     </div>
 </div>
-<div t-name="FieldBinaryFileUploader.files" class="oe_attachments">
+<div t-name="FieldBinaryFileUploader.files" class="oe_attachments o_attachments_list">
     <t t-if="widget.mode === 'readonly'">
         <div t-foreach="widget.value.data" t-as="file">
             <a target="_blank" t-att-href="widget.metadata[file.id].url" t-attf-title="#{(file.data.name || file.data.filename) + (file.data.date?' \n('+file.data.date+')':'' )}"><t t-raw="file.data.name || file.data.filename"/></a>
         </div>
     </t>
     <t t-else="1">
-        <div t-foreach="widget.value.data" t-as="file" class="oe_attachment">
-            <t t-if="!file.data.upload">
-                <div>
-                    <a href="#" class="fa fa-times pull-right oe_delete" title="Delete this file" t-att-data-id="file.data.id"/>
-                    <t t-raw="file.data.name || file.data.filename"/>
-                </div>
-                <a class="o_image" target="_blank" t-att-href="widget.metadata[file.id] ? widget.metadata[file.id].url : false"
-                   t-att-title="file.data.name"
-                   t-att-data-mimetype="file.data.mimetype"
-                   t-attf-data-src="/web/image/#{file.data.id}/100x80"/>
+        <!-- Uploaded files -->
+        <t t-foreach="widget.value.data" t-as="attachment">
+            <t t-call="mail.Attachment">
+                <t t-set="attachment" t-value="attachment.data"/>
+                <t t-set="editable" t-value="true"/>
             </t>
-        </div>
-        <div t-foreach="widget.uploadingFiles" t-as="file" class="oe_attachment">
-            <div>Uploading...</div>
-            <a t-att-title="file.name" t-att-name="file.name" class="o_image">
-                <i class="fa fa-spinner fa-spin fa-5x fa-fw"></i>
-            </a>
-            <div><t t-esc="file.name"/></div>
-        </div>
+        </t>
+        <!-- Uploading files -->
+        <t t-foreach="widget.uploadingFiles" t-as="attachment">
+            <t t-call="mail.Attachment">
+                <t t-set="attachment" t-value="attachment"/>
+                <t t-set="editable" t-value="true"/>
+            </t>
+        </t>
     </t>
 </div>
 <div t-name="SearchView" class="o_searchview">
