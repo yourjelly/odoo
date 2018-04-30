@@ -374,27 +374,16 @@ class Module(models.Model):
     @assert_log_admin_access
     @api.multi
     def button_install(self):
-        # domain to select auto-installable (but not yet installed) modules
-        auto_domain = [('state', '=', 'uninstalled'), ('auto_install', '=', True)]
-
         # determine whether an auto-install module must be installed:
         #  - all its dependencies are installed or to be installed,
         #  - at least one dependency is 'to install'
-        install_states = frozenset(('installed', 'to install', 'to upgrade'))
-        def must_install(module):
-            states = set(dep.state for dep in module.dependencies_id)
-            return states <= install_states and 'to install' in states
-
-        modules = self
-        while modules:
-            # Mark the given modules and their dependencies to be installed.
-            modules._state_update('to install', ['uninstalled'])
-
-            # Determine which auto-installable modules must be installed.
-            modules = self.search(auto_domain).filtered(must_install)
+        to_install = odoo.modules.db.expand_install(self.env.cr, self.mapped('name'))
+        self.search([
+            ('name', 'in', list(to_install))
+        ]).write({'state': 'to install'})
 
         # the modules that are installed/to install/to upgrade
-        install_mods = self.search([('state', 'in', list(install_states))])
+        install_mods = self.search([('state', 'in', ['installed', 'to install', 'to upgrade'])])
 
         # check individual exclusions
         install_names = {module.name for module in install_mods}

@@ -208,6 +208,7 @@ def load_module_graph(cr, graph, perform_checks=True,
             if package.update:
                 # upgrading the module information
                 module.write(module.get_values_from_terp(package.data))
+
             load_data(cr, idref, mode, kind='data', package=package, report=report)
             demo_loaded = load_demo(cr, package, idref, mode, report)
             cr.execute('update ir_module_module set demo=%s where id=%s', (demo_loaded, module_id))
@@ -329,7 +330,7 @@ def load_modules(db, force_demo=False, update_module=False):
             base_module.init = True
         if {'base', 'all'} & to_update.keys():
             base_module.update = True
-        if force_demo or {'name', 'all'} & to_demo.keys() or (bdemo and (base_module.init or base_module.update)):
+        if bdemo or force_demo or {'name', 'all'} & to_demo.keys():
             base_module.demo = True
 
         # processed_modules: for cleanup step after install
@@ -421,7 +422,7 @@ WHERE state not in ('uninstalled', 'uninstallable')
                     p.installed_version = version
                     if to_upgrade or {name, 'all'} & to_update.keys():
                         p.update = True
-                    if force_demo or {name, 'all'} & to_demo.keys() or (demo and to_upgrade):
+                    if demo or force_demo or {name, 'all'} & to_demo.keys():
                         p.demo = True
                 load_module_graph(cr, graph, report=report, skip_modules=already_loaded,
                                   perform_checks=update_module, models_to_check=models_to_check)

@@ -70,16 +70,57 @@ def initialize(cr):
             cr.execute('INSERT INTO ir_module_module_dependency \
                     (module_id,name) VALUES (%s, %s)', (id, d))
 
-    # Install recursively all auto-installing modules
-    while True:
-        cr.execute("""SELECT m.name FROM ir_module_module m WHERE m.auto_install AND state != 'to install'
-                      AND NOT EXISTS (
-                          SELECT 1 FROM ir_module_module_dependency d JOIN ir_module_module mdep ON (d.name = mdep.name)
-                                   WHERE d.module_id = m.id AND mdep.state != 'to install'
-                      )""")
-        to_auto_install = [x[0] for x in cr.fetchall()]
-        if not to_auto_install: break
-        cr.execute("""UPDATE ir_module_module SET state='to install' WHERE name in %s""", (tuple(to_auto_install),))
+    cr.execute("""UPDATE ir_module_module SET state='to install' WHERE name in %s""", (tuple(expand_install(cr, ())),))
+
+
+def expand_install(cr, installing):
+    """ From a number of selected modules, select both missing dependencies
+    and auto_install modules
+    """
+    cr.execute("""
+SELECT m.name, m.state, every(m.auto_install), 
+       array_remove(array_agg(d.name), NULL)
+FROM ir_module_module m
+LEFT JOIN ir_module_module_dependency d ON (m.id = d.module_id)
+GROUP BY m.name, m.state
+""")
+    rows = cr.fetchall()
+    installable = {name for name, st, *_ in rows if st not in ('installed', 'uninstallable')}
+    dependencies = {
+        name: set(deps) & installable
+        for name, *_, deps in rows
+        if name in installable
+    }
+    autos = {
+        name: set(deps) & installable
+        for name, _, auto, deps in rows
+        if auto
+        if name in installable
+    }
+
+    to_install = set()
+    to_check = list(installing)
+
+    # first add dependencies of explicitly selected modules
+    while to_check:
+        m = to_check.pop()
+        # already selected or already installed
+        if m in to_install or m not in dependencies:
+            continue
+
+        to_install.add(m)
+        to_check.extend(dependencies.get(m, ()))
+
+    # then add auto_installs
+    count = -1
+    while count < len(to_install):
+        count = len(to_install)
+        for name, deps in autos.items():
+            if name not in to_install and deps <= to_install:
+                to_install.add(name)
+
+    return to_install
+
 
 def create_categories(cr, categories):
     """ Create the ir_module_category entries for some categories.
