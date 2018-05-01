@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from datetime import datetime
+
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
@@ -11,10 +13,27 @@ class AccountInvoice(models.Model):
     @api.multi
     def action_view_factoring(self):
         self.ensure_one()
-        # TODO: Redirect to invoice factoring lists
+        fo_ids = self.env['invoice.financing.offer'].search([('invoice_ids', 'in', [self.id])])
+        if fo_ids:
+            return {
+                'name': _('Factoring'),
+                'view_type': 'form',
+                'view_mode': 'form',
+                'res_model': 'invoice.financing.offer',
+                'type': 'ir.actions.act_window',
+                'target': 'current',
+                'res_id': fo_ids[0].id,
+            }
+        else:
+            raise UserError(_('No Factoring found for invoice'))
 
-    def _valid_for_factoring(self):
+    def _validate_for_factoring(self):
         errorMessage = None
+        # Check for already in progress invoice
+        fo_ids = self.env['invoice.financing.offer'].search([('invoice_ids', 'in', [self.id])])
+        if fo_ids:
+            errorMessage = _('Invoice already submitted for Financing')
+
         if self.state != 'open' or self.partner_id.company_type != 'company':
             errorMessage = _('Only company invoices can be financed')
 
@@ -26,15 +45,18 @@ class AccountInvoice(models.Model):
         if self.currency_id.id != self.env.ref('base.EUR').id:
             errorMessage = _('You can only finance for Euro currency')
 
-        # TODO: Check for due date.
-
+        # FixMe: Check for due date.
+        date_due = datetime.strptime(self.date_due, "%Y-%m-%d")
+        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        if date_due < today:
+            errorMessage = _('You can only finance with future due date')
         return errorMessage
 
     @api.multi
     def action_request_financing(self):
         self.ensure_one()
         # Invoice must be open and partner must as company
-        errorMessage = self._valid_for_factoring()
+        errorMessage = self._validate_for_factoring()
         if errorMessage:
             raise UserError(errorMessage)
 

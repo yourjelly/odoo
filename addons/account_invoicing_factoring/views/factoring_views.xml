@@ -15,20 +15,10 @@
                             <field name="state" invisible="1"/>
                             <field name="number"/>
                             <field name="partner_id"/>
+                            <field name="date_due"/>
                             <field name="amount_total" string="Total" sum="Total"/>
                             <field name="currency_id" invisible="1"/>
                             <field name="company_currency_id" invisible="1"/>
-                        </tree>
-                    </field>
-                    <label for="ignored_invoice_ids" class="text-warning"/>
-                    <field name="ignored_invoice_ids">
-                        <tree create="false">
-                            <field name="number"/>
-                            <field name="partner_id"/>
-                            <field name="amount_total" string="Total" sum="Total"/>
-                            <field name="currency_id" invisible="1"/>
-                            <field name="company_currency_id" invisible="1"/>
-                            <field name="state"/>
                         </tree>
                     </field>
                     <footer>
@@ -91,6 +81,7 @@
                                     <tree>
                                         <field name="state" invisible="1"/>
                                         <field name="number"/>
+                                        <field name="date_due"/>
                                         <field name="partner_id"/>
                                         <field name="amount_total" string="Total" sum="Total"/>
                                         <field name="currency_id" invisible="1"/>

@@ -19,12 +19,11 @@ class InvoiceFinancingOffer(models.Model):
     invoice_ids = fields.Many2many('account.invoice', string='Invoices')
 
     state = fields.Selection([
-        ('draft', 'Draft'),
         ('request', 'Requested'),
         ('accept', 'Accepted'),
         ('reject', 'Rejected'),
         ('cancel', 'Cancelled')
-    ], track_visibility='onchange', string='Status', index=True, copy=False, default='draft')
+    ], track_visibility='onchange', string='Status', index=True, copy=False, default='request')
 
     @api.multi
     def _compute_invoice_amount(self):
@@ -41,7 +40,6 @@ class InvoiceFinancingRequest(models.TransientModel):
     _name = "account.invoice.financing"
 
     invoice_ids = fields.Many2many('account.invoice', string="Invoices ready for financing")
-    ignored_invoice_ids = fields.Many2many('account.invoice', string="Invoices not allowed for financing", readonly=True)
 
     @api.model
     def default_get(self, fields):
@@ -49,17 +47,18 @@ class InvoiceFinancingRequest(models.TransientModel):
         result = super(InvoiceFinancingRequest, self).default_get(fields)
         active_ids = self._context.get('active_ids', [])
         invoices = self.env['account.invoice'].browse(active_ids)
-        ignored_invoices = invoices.filtered(lambda i: i._valid_for_factoring() is not None)
-        open_invoices = invoices - ignored_invoices
-
+        open_invoices = invoices.filtered(lambda i: i._validate_for_factoring() is None)
         if not open_invoices:
-            raise UserError(_("No any open invoices for financing. Only Open and Company invoice allowed"))
+            raise UserError(_("No any open invoices for financing."))
         result['invoice_ids'] = list(open_invoices.ids)
-        result['ignored_invoice_ids'] = list(ignored_invoices.ids)
         return result
 
     @api.multi
     def send_for_financing(self):
+        self.ensure_one()
+
+        if not self.invoice_ids:
+            raise UserError(_('No invoices found for financing'))
         values = {
             'request_date': fields.Datetime.now(),
             'invoice_ids': [(6, False, self.invoice_ids.ids)]
