@@ -210,15 +210,22 @@ var ListController = BasicController.extend({
         var self = this;
         this._disableButtons();
         return this.renderer.unselectRow().then(function () {
-            return self.model.addDefaultRecord(self.handle, {
-                position: self.editable,
-            });
-        }).then(function (recordID) {
-            var state = self.model.get(self.handle);
-            self.renderer.updateState(state, {});
-            self.renderer.editRecord(recordID);
-            self._updatePager();
-        }).always(this._enableButtons.bind(this));
+            return self.model.createGroup(self.handle).then(function (new_group_id) {
+                self.renderer.groupedID = new_group_id;
+                return self.model.addDefaultRecord(new_group_id, {
+                    position: self.editable,
+                }).then(function (recordID) {
+                    console.log("recordID :::: ", recordID);
+                    var state = self.model.get(self.handle);
+                    self.renderer.updateState(state, {});
+                    var group = self.model.get(new_group_id);
+                    console.log("groupppppppppp ", group);
+                    self.renderer.current_group = group;
+                    self.renderer.editRecord(recordID);
+                    self._updatePager();
+                });
+            }).always(self._enableButtons.bind(self));
+        });
     },
     /**
      * Archive the current selection
@@ -367,7 +374,7 @@ var ListController = BasicController.extend({
      */
     _onAddRecord: function (event) {
         event.stopPropagation();
-        if (this.activeActions.create && !this.renderer.state.groupedBy.length) {
+        if (this.activeActions.create) {
             this._addRecord();
         } else if (event.data.onFail) {
             event.data.onFail();
@@ -399,7 +406,7 @@ var ListController = BasicController.extend({
             event.stopPropagation();
         }
         var state = this.model.get(this.handle, {raw: true});
-        if (this.editable && !state.groupedBy.length) {
+        if (this.editable) {
             this._addRecord();
         } else {
             this.trigger_up('switch_view', {view_type: 'form', res_id: undefined});

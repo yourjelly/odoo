@@ -3775,6 +3775,42 @@ var BasicModel = AbstractModel.extend({
         });
     },
     /**
+     * Creates a new group from a name (performs a name_create).
+     *
+     * @param {string} name
+     * @param {string} parentID localID of the parent of the group
+     * @returns {Deferred<string>} resolves to the local id of the new group
+     */
+    createGroup: function (parentID) {
+        var self = this;
+        var parent = this.localData[parentID];
+        var groupBy = parent.groupedBy[0];
+        var groupByField = parent.fields[groupBy];
+        if (!groupByField || groupByField.type !== 'many2one') {
+            return $.Deferred().reject(); // only supported when grouped on m2o
+        }
+        var newGroup = self._makeDataPoint({
+            modelName: parent.model,
+            context: parent.context,
+            // domain: parent.domain.concat([[groupBy,"=",result[0]]]),
+            domain: parent.domain,
+            fields: parent.fields,
+            fieldsInfo: parent.fieldsInfo,
+            isOpen: true,
+            limit: parent.limit,
+            parentID: parent.id,
+            openGroupByDefault: true,
+            orderedBy: parent.orderedBy,
+            // value: result,
+            value: false,
+            viewType: parent.viewType,
+        });
+
+        // newGroup.is_open = true;
+        parent.data.push(newGroup.id);
+       return $.when(newGroup.id);
+    },
+    /**
      * For a grouped list resource, this method fetches all group data by
      * performing a /read_group. It also tries to read open subgroups if they
      * were open before.

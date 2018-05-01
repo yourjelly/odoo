@@ -205,7 +205,8 @@ ListRenderer.include({
      * @param {string} recordID
      */
     editRecord: function (recordID) {
-        var rowIndex = _.findIndex(this.state.data, {id: recordID});
+        var data = this.state.groupedBy.length ? this.current_group.data : this.state.data;
+        var rowIndex = _.findIndex(data, {id: recordID});
         this._selectCell(rowIndex, 0);
     },
     /**
@@ -263,7 +264,6 @@ ListRenderer.include({
         // as even if the grouped list doesn't support edition, it may contain
         // a widget allowing the edition in readonly (e.g. priority), so it
         // should be able to update a record as well)
-        debugger;
         var record;
         var rowIndex;
         if (this.state.groupedBy.length && mode === 'edit') {
@@ -376,7 +376,6 @@ ListRenderer.include({
         if (this.currentRow === null) {
             return $.when();
         }
-        debugger;
         var record = (this.state.groupedBy.length && this.previousGroup) ? this.previousGroup.data[this.currentRow] : this.state.data[this.currentRow];
         var recordWidgets = this.allFieldWidgets[record.id];
         toggleWidgets(true);
@@ -723,6 +722,8 @@ ListRenderer.include({
             }
             // Notify the controller we want to make a record editable
             var def = $.Deferred();
+            console.trace();
+            debugger;
             self.trigger_up('edit_line', {
                 index: rowIndex,
                 groupID: self.current_group && self.current_group.id,
@@ -768,7 +769,6 @@ ListRenderer.include({
         if (!this._isEditable() || $(event.target).prop('special_click')) {
             return;
         }
-        debugger;
         var self = this;
         var $td = $(event.currentTarget);
         var $tr = $td.parent();
