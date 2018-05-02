@@ -139,28 +139,31 @@ var Tip = Widget.extend({
     _reposition: function () {
         if (this.tip_opened) return;
         this.$el.removeClass("o_animated");
-        var appendAT = this.info.position;
-        if (_t.database.parameters.direction === 'rtl' && this.info.position === 'right') {
-            appendAT = 'left';
-        } else if (_t.database.parameters.direction === 'rtl' && this.info.position === 'left') {
-            appendAT = 'right';
-        }
 
+        // Reverse left/right position if direction is right to left
+        if (_t.database.parameters.direction === 'rtl') {
+            if (this.info.position === 'right') {
+                this.info.position = 'left';
+            } else if (this.info.position === 'left') {
+                this.info.position = 'right';
+            }
+        }
         this.$el.position({
-            my: this._get_spaced_inverted_position(appendAT),
-            at: appendAT,
+            my: this._get_spaced_inverted_position(this.info.position),
+            at: this.info.position,
             of: this.$anchor,
             collision: "none",
         });
 
+        // Reverse overlay if direction is right to left
+        var positionRight = _t.database.parameters.direction === 'rtl' ? "right" : "left";
+        var positionLeft = _t.database.parameters.direction === 'rtl' ? "left" : "right";
         var offset = this.$el.offset();
-        var setRight = _t.database.parameters.direction === 'rtl' ? "right" : "left";
-        var setLeft = _t.database.parameters.direction === 'rtl' ? "left" : "right";
         this.$tooltip_overlay.css({
             top: -Math.min((this.info.position === "bottom" ? this.info.space : this.info.overlay.y), offset.top),
-            right: -Math.min((this.info.position === setRight ? this.info.space : this.info.overlay.x), this.$window.width() - (offset.left + this.init_width + this.double_border_width)),
+            right: -Math.min((this.info.position === positionRight ? this.info.space : this.info.overlay.x), this.$window.width() - (offset.left + this.init_width + this.double_border_width)),
             bottom: -Math.min((this.info.position === "top" ? this.info.space : this.info.overlay.y), this.$window.height() - (offset.top + this.init_height + this.double_border_width)),
-            left: -Math.min((this.info.position === setLeft ? this.info.space : this.info.overlay.x), offset.left),
+            left: -Math.min((this.info.position === positionLeft ? this.info.space : this.info.overlay.x), offset.left),
         });
 
         this.position = this.$el.position();
@@ -217,7 +220,6 @@ var Tip = Widget.extend({
             this.$el.appendTo(document.body);
         }
 
-        var animateTo = _t.database.parameters.direction === 'rtl' ? 'right' : 'left';
         var mbLeft = 0;
         var mbTop = 0;
         var overflow = false;
@@ -227,7 +229,7 @@ var Tip = Widget.extend({
         } else {
             overflow = (offset.top + this.content_height + this.double_border_width + this.info.overlay.y > this.$window.height());
         }
-        if (posVertical && overflow || this.info.position === animateTo) {
+        if (posVertical && overflow || this.info.position === "left" || (_t.database.parameters.direction === 'rtl' && this.info.position == "right")) {
             mbLeft -= (this.content_width - this.init_width);
         }
         if (!posVertical && overflow || this.info.position === "top") {
