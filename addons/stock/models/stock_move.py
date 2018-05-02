@@ -521,10 +521,7 @@ class StockMove(models.Model):
                 product_routes = move.product_id.route_ids | move.product_id.categ_id.total_route_ids
                 if product_routes:
                     rules = Push.search(expression.AND([[('route_id', 'in', product_routes.ids)], domain]), order='route_sequence, sequence', limit=1)
-            if not rules:
-                # TDE FIXME/ should those really be in a if / elif ??
-                # then we search on the warehouse if a rule can apply
-                if move.warehouse_id:
+                elif move.warehouse_id:
                     rules = Push.search(expression.AND([[('route_id', 'in', move.warehouse_id.route_ids.ids)], domain]), order='route_sequence, sequence', limit=1)
                 elif move.picking_id.picking_type_id.warehouse_id:
                     rules = Push.search(expression.AND([[('route_id', 'in', move.picking_id.picking_type_id.warehouse_id.route_ids.ids)], domain]), order='route_sequence, sequence', limit=1)
