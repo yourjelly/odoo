@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.tests.common import TransactionCase
+from odoo.addons.test_base.tests.common import TransactionCaseCommon
 
 
-class test_search(TransactionCase):
+class test_search(TransactionCaseCommon):
 
     def test_00_search_order(self):
         # Create 6 partners with a given name, and a given creation order to
@@ -12,13 +12,13 @@ class test_search(TransactionCase):
         # are by default excluded from the searches and to provide a second
         # `order` argument.
 
-        Partner = self.env['res.partner']
-        c = Partner.create({'name': 'test_search_order_C'})
-        d = Partner.create({'name': 'test_search_order_D', 'active': False})
-        a = Partner.create({'name': 'test_search_order_A'})
-        b = Partner.create({'name': 'test_search_order_B'})
-        ab = Partner.create({'name': 'test_search_order_AB'})
-        e = Partner.create({'name': 'test_search_order_E', 'active': False})
+        Test_baseModel = self.env['test_base.model']
+        c = Test_baseModel.create({'name': 'test_search_order_C'})
+        d = Test_baseModel.create({'name': 'test_search_order_D', 'active': False})
+        a = Test_baseModel.create({'name': 'test_search_order_A'})
+        b = Test_baseModel.create({'name': 'test_search_order_B'})
+        ab = Test_baseModel.create({'name': 'test_search_order_AB'})
+        e = Test_baseModel.create({'name': 'test_search_order_E', 'active': False})
 
         # The tests.
 
@@ -26,76 +26,75 @@ class test_search(TransactionCase):
         # The order of the returned ids should be given by the `order`
         # parameter of search().
 
-        name_asc = Partner.search([('name', 'like', 'test_search_order%')], order="name asc")
+        name_asc = Test_baseModel.search([('name', 'like', 'test_search_order%')], order="name asc")
         self.assertEqual([a, ab, b, c], list(name_asc), "Search with 'NAME ASC' order failed.")
-        name_desc = Partner.search([('name', 'like', 'test_search_order%')], order="name desc")
+        name_desc = Test_baseModel.search([('name', 'like', 'test_search_order%')], order="name desc")
         self.assertEqual([c, b, ab, a], list(name_desc), "Search with 'NAME DESC' order failed.")
-        id_asc = Partner.search([('name', 'like', 'test_search_order%')], order="id asc")
+        id_asc = Test_baseModel.search([('name', 'like', 'test_search_order%')], order="id asc")
         self.assertEqual([c, a, b, ab], list(id_asc), "Search with 'ID ASC' order failed.")
-        id_desc = Partner.search([('name', 'like', 'test_search_order%')], order="id desc")
+        id_desc = Test_baseModel.search([('name', 'like', 'test_search_order%')], order="id desc")
         self.assertEqual([ab, b, a, c], list(id_desc), "Search with 'ID DESC' order failed.")
 
         # The inactive records shouldn't be excluded as soon as a condition on
         # that field is present in the domain. The `order` parameter of
         # search() should support any legal coma-separated values.
 
-        active_asc_id_asc = Partner.search([('name', 'like', 'test_search_order%'), '|', ('active', '=', True), ('active', '=', False)], order="active asc, id asc")
+        active_asc_id_asc = Test_baseModel.search([('name', 'like', 'test_search_order%'), '|', ('active', '=', True), ('active', '=', False)], order="active asc, id asc")
         self.assertEqual([d, e, c, a, b, ab], list(active_asc_id_asc), "Search with 'ACTIVE ASC, ID ASC' order failed.")
-        active_desc_id_asc = Partner.search([('name', 'like', 'test_search_order%'), '|', ('active', '=', True), ('active', '=', False)], order="active desc, id asc")
+        active_desc_id_asc = Test_baseModel.search([('name', 'like', 'test_search_order%'), '|', ('active', '=', True), ('active', '=', False)], order="active desc, id asc")
         self.assertEqual([c, a, b, ab, d, e], list(active_desc_id_asc), "Search with 'ACTIVE DESC, ID ASC' order failed.")
-        active_asc_id_desc = Partner.search([('name', 'like', 'test_search_order%'), '|', ('active', '=', True), ('active', '=', False)], order="active asc, id desc")
+        active_asc_id_desc = Test_baseModel.search([('name', 'like', 'test_search_order%'), '|', ('active', '=', True), ('active', '=', False)], order="active asc, id desc")
         self.assertEqual([e, d, ab, b, a, c], list(active_asc_id_desc), "Search with 'ACTIVE ASC, ID DESC' order failed.")
-        active_desc_id_desc = Partner.search([('name', 'like', 'test_search_order%'), '|', ('active', '=', True), ('active', '=', False)], order="active desc, id desc")
+        active_desc_id_desc = Test_baseModel.search([('name', 'like', 'test_search_order%'), '|', ('active', '=', True), ('active', '=', False)], order="active desc, id desc")
         self.assertEqual([ab, b, a, c, e, d], list(active_desc_id_desc), "Search with 'ACTIVE DESC, ID DESC' order failed.")
-        id_asc_active_asc = Partner.search([('name', 'like', 'test_search_order%'), '|', ('active', '=', True), ('active', '=', False)], order="id asc, active asc")
+        id_asc_active_asc = Test_baseModel.search([('name', 'like', 'test_search_order%'), '|', ('active', '=', True), ('active', '=', False)], order="id asc, active asc")
         self.assertEqual([c, d, a, b, ab, e], list(id_asc_active_asc), "Search with 'ID ASC, ACTIVE ASC' order failed.")
-        id_asc_active_desc = Partner.search([('name', 'like', 'test_search_order%'), '|', ('active', '=', True), ('active', '=', False)], order="id asc, active desc")
+        id_asc_active_desc = Test_baseModel.search([('name', 'like', 'test_search_order%'), '|', ('active', '=', True), ('active', '=', False)], order="id asc, active desc")
         self.assertEqual([c, d, a, b, ab, e], list(id_asc_active_desc), "Search with 'ID ASC, ACTIVE DESC' order failed.")
-        id_desc_active_asc = Partner.search([('name', 'like', 'test_search_order%'), '|', ('active', '=', True), ('active', '=', False)], order="id desc, active asc")
+        id_desc_active_asc = Test_baseModel.search([('name', 'like', 'test_search_order%'), '|', ('active', '=', True), ('active', '=', False)], order="id desc, active asc")
         self.assertEqual([e, ab, b, a, d, c], list(id_desc_active_asc), "Search with 'ID DESC, ACTIVE ASC' order failed.")
-        id_desc_active_desc = Partner.search([('name', 'like', 'test_search_order%'), '|', ('active', '=', True), ('active', '=', False)], order="id desc, active desc")
+        id_desc_active_desc = Test_baseModel.search([('name', 'like', 'test_search_order%'), '|', ('active', '=', True), ('active', '=', False)], order="id desc, active desc")
         self.assertEqual([e, ab, b, a, d, c], list(id_desc_active_desc), "Search with 'ID DESC, ACTIVE DESC' order failed.")
 
     def test_10_inherits_m2order(self):
-        Users = self.env['res.users']
+        O2M = self.env['test_base.one2many']
 
-        # Find Employee group
-        group_employee = self.env.ref('base.group_user')
+        # Get m2o_test
+        m2o_1 = self.env.ref('test_base.many2one_test')
+        m2o_2 = self.env.ref('test_base.many2one_test2')
+        # Create m2o_group_system #other m2o with defrent model
+        m2o_group_system_id_a = self.env['test_base.m2o.group.system'].create({'name': 'A'})
+        m2o_group_system_id_b = self.env['test_base.m2o.group.system'].create({'name': 'B'})
 
-        # Get country/state data
-        country_be = self.env.ref('base.be')
-        country_us = self.env.ref('base.us')
-        states_us = country_us.state_ids[:2]
-
-        # Create test users
-        u = Users.create({'name': '__search', 'login': '__search', 'groups_id': [(6, 0, [group_employee.id])]})
-        a = Users.create({'name': '__test_A', 'login': '__test_A', 'country_id': country_be.id, 'state_id': country_be.id})
-        b = Users.create({'name': '__test_B', 'login': '__a_test_B', 'country_id': country_us.id, 'state_id': states_us[1].id})
-        c = Users.create({'name': '__test_B', 'login': '__z_test_B', 'country_id': country_us.id, 'state_id': states_us[0].id})
+        # Create test O2M
+        u = O2M.create({'name': '__search', 'login': '__search'})
+        a = O2M.create({'name': '__test_A', 'login': '__test_A', 'many2one_id': m2o_1.id, 'm2o_group_system_id': m2o_group_system_id_b.id})
+        b = O2M.create({'name': '__test_B', 'login': '__a_test_B', 'many2one_id': m2o_2.id, 'm2o_group_system_id': m2o_group_system_id_b.id})
+        c = O2M.create({'name': '__test_B', 'login': '__z_test_B', 'many2one_id': m2o_2.id, 'm2o_group_system_id': m2o_group_system_id_a.id})
 
         # Search as search user
-        Users = Users.sudo(u)
+        O2M = O2M.sudo(self.user_test)
 
-        # Do: search on res.users, order on a field on res.partner to try inherits'd fields, then res.users
+        # Do: search on res.users, order on a field on test_base.model to try inherits'd fields, then res.users
         expected_ids = [u.id, a.id, c.id, b.id]
-        user_ids = Users.search([('id', 'in', expected_ids)], order='name asc, login desc').ids
-        self.assertEqual(user_ids, expected_ids, 'search on res_users did not provide expected ids or expected order')
+        o2m_ids = O2M.search([('id', 'in', expected_ids)], order='name asc, login desc').ids
+        self.assertEqual(o2m_ids, expected_ids, 'search on test_base.one2many did not provide expected ids or expected order')
 
         # Do: order on many2one and inherits'd fields
         expected_ids = [c.id, b.id, a.id, u.id]
-        user_ids = Users.search([('id', 'in', expected_ids)], order='state_id asc, country_id desc, name asc, login desc').ids
-        self.assertEqual(user_ids, expected_ids, 'search on res_users did not provide expected ids or expected order')
+        o2m_ids = O2M.search([('id', 'in', expected_ids)], order='m2o_group_system_id asc, many2one_id desc, name asc, login desc').ids
+        self.assertEqual(o2m_ids, expected_ids, 'search on test_base.one2many did not provide expected ids or expected order')
 
         # Do: order on many2one and inherits'd fields
         expected_ids = [u.id, b.id, c.id, a.id]
-        user_ids = Users.search([('id', 'in', expected_ids)], order='country_id desc, state_id desc, name asc, login desc').ids
-        self.assertEqual(user_ids, expected_ids, 'search on res_users did not provide expected ids or expected order')
+        o2m_ids = O2M.search([('id', 'in', expected_ids)], order='many2one_id desc, m2o_group_system_id desc, name asc, login desc').ids
+        self.assertEqual(o2m_ids, expected_ids, 'search on test_base.one2many did not provide expected ids or expected order')
 
-        # Do: order on many2one, but not by specifying in order parameter of search, but by overriding _order of res_users
-        self.patch_order('res.users', 'country_id desc, name asc, login desc')
+        # Do: order on many2one, but not by specifying in order parameter of search, but by overriding _order of test_base.one2many
+        self.patch_order('test_base.one2many', 'many2one_id desc, name asc, login desc')
         expected_ids = [u.id, c.id, b.id, a.id]
-        user_ids = Users.search([('id', 'in', expected_ids)]).ids
-        self.assertEqual(user_ids, expected_ids, 'search on res_users did not provide expected ids or expected order')
+        o2m_ids = O2M.search([('id', 'in', expected_ids)]).ids
+        self.assertEqual(o2m_ids, expected_ids, 'search on test_base.one2many did not provide expected ids or expected order')
 
     def test_11_indirect_inherits_m2o_order(self):
         Cron = self.env['ir.cron']
@@ -112,22 +111,22 @@ class test_search(TransactionCase):
         self.assertEqual(ids, expected_ids)
 
     def test_12_m2o_order_loop_self(self):
-        Cats = self.env['ir.module.category']
-        cat_ids = {}
+        TestbaseModel = self.env['test_base.model']
+        test_base_model_ids = {}
         def create(name, **kw):
-            cat_ids[name] = Cats.create(dict(kw, name=name)).id
+            test_base_model_ids[name] = TestbaseModel.create(dict(kw, name=name)).id
 
-        self.patch_order('ir.module.category', 'parent_id desc, name')
+        self.patch_order('test_base.model', 'parent_id desc, name')
 
         create('A')
-        create('B', parent_id=cat_ids['A'])
-        create('C', parent_id=cat_ids['A'])
+        create('B', parent_id=test_base_model_ids['A'])
+        create('C', parent_id=test_base_model_ids['A'])
         create('D')
-        create('E', parent_id=cat_ids['D'])
-        create('F', parent_id=cat_ids['D'])
+        create('E', parent_id=test_base_model_ids['D'])
+        create('F', parent_id=test_base_model_ids['D'])
 
-        expected_ids = [cat_ids[x] for x in 'ADEFBC']
-        found_ids = Cats.search([('id', 'in', list(cat_ids.values()))]).ids
+        expected_ids = [test_base_model_ids[x] for x in 'ADEFBC']
+        found_ids = TestbaseModel.search([('id', 'in', list(test_base_model_ids.values()))]).ids
         self.assertEqual(found_ids, expected_ids)
 
     def test_13_m2o_order_loop_multi(self):
