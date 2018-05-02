@@ -92,18 +92,13 @@ return {
         $fixedTextarea = $('<textarea disabled>', {
             class: $textarea[0].className,});
 
-        _t.database.parameters.direction === 'rtl' ?  $fixedTextarea.css({
+        var direction = _t.database.parameters.direction === 'rtl' ? 'right' : 'left';
+        $fixedTextarea.css({
             position: 'absolute',
             opacity: 0,
             height: 10,
             top: -10000,
-            right: -10000,
-        }) : $fixedTextarea.css({
-            position: 'absolute',
-            opacity: 0,
-            height: 10,
-            top: -10000,
-            left: -10000,
+            direction: -10000,
         });
         $fixedTextarea.data("auto_resize", true);
 
