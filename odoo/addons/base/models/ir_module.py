@@ -144,7 +144,6 @@ STATES = [
     ('installed', 'Installed'),
     ('to upgrade', 'To be upgraded'),
     ('to remove', 'To be removed'),
-    ('to install', 'To be installed'),
 ]
 
 class Module(models.Model):
@@ -378,15 +377,11 @@ class Module(models.Model):
         #  - all its dependencies are installed or to be installed,
         #  - at least one dependency is 'to install'
         to_install = odoo.modules.db.expand_install(self.env.cr, self.mapped('name'))
-        self.search([
-            ('name', 'in', list(to_install))
-        ]).write({'state': 'to install'})
 
-        # the modules that are installed/to install/to upgrade
-        install_mods = self.search([('state', 'in', ['installed', 'to install', 'to upgrade'])])
+        install_mods = self.search([('state', 'in', ['installed', 'to upgrade'])])
 
         # check individual exclusions
-        install_names = {module.name for module in install_mods}
+        install_names = {module.name for module in install_mods} | to_install
         for module in install_mods:
             for exclusion in module.exclusion_ids:
                 if exclusion.name in install_names:
@@ -416,19 +411,28 @@ class Module(models.Model):
                     for module in modules
                 ]))
 
-        return dict(ACTION_DICT, name=_('Install'))
+        self._cr.commit()
+        api.Environment.reset()
 
-    @assert_log_admin_access
-    @api.multi
-    def button_immediate_install(self):
-        """ Installs the selected module(s) immediately and fully,
-        returns the next res.config action to execute
+        odoo.modules.registry.Registry.new(
+            self._cr.dbname, update_module=True,
+            to_install=to_install)
 
-        :returns: next res.config item to execute
-        :rtype: dict[str, object]
-        """
-        _logger.info('User #%d triggered module installation', self.env.uid)
-        return self._button_immediate_function(type(self).button_install)
+        self._cr.commit()
+        env = api.Environment(self._cr, self._uid, self._context)
+        # pylint: disable=next-method-called
+        config = env['ir.module.module'].next() or {}
+        if config.get('type') not in ('ir.actions.act_window_close',):
+            return config
+
+        # reload the client; open the first available root menu
+        menu = env['ir.ui.menu'].search([('parent_id', '=', False)])[:1]
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+            'params': {'menu_id': menu.id},
+        }
+    button_immediate_install = button_install
 
     @assert_log_admin_access
     @api.multi

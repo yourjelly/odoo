@@ -66,7 +66,7 @@ class Registry(Mapping):
                 threading.current_thread().dbname = db_name
 
     @classmethod
-    def new(cls, db_name, force_demo=False, update_module=False):
+    def new(cls, db_name, force_demo=False, update_module=False, *, to_install=()):
         """ Create and return a new registry for the given database name. """
         with cls._lock:
             with odoo.api.Environment.manage():
@@ -83,7 +83,7 @@ class Registry(Mapping):
                     registry.setup_signaling()
                     # This should be a method on Registry
                     try:
-                        odoo.modules.load_modules(registry._db, force_demo, update_module=update_module)
+                        odoo.modules.load_modules(registry._db, force_demo, update_module=update_module, to_install=to_install)
                     except Exception:
                         odoo.modules.reset_modules_state(db_name)
                         raise

@@ -1057,7 +1057,7 @@ def preload_registries(dbnames):
     for dbname in dbnames:
         try:
             update_module = config['init'] or config['update']
-            registry = Registry.new(dbname, update_module=update_module)
+            registry = Registry.new(dbname, update_module=update_module, to_install=config['init'].keys())
 
             # run test_file if provided
             if config['test_file']:

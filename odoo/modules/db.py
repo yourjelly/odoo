@@ -70,8 +70,7 @@ def initialize(cr):
             cr.execute('INSERT INTO ir_module_module_dependency \
                     (module_id,name) VALUES (%s, %s)', (id, d))
 
-    cr.execute("""UPDATE ir_module_module SET state='to install' WHERE name in %s""", (tuple(expand_install(cr, ())),))
-
+    return expand_install(cr, ())
 
 def expand_install(cr, installing):
     """ From a number of selected modules, select both missing dependencies

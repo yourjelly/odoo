@@ -53,7 +53,7 @@ CREATE TABLE ir_module_module (
     name character varying(128) NOT NULL,
     author character varying,
     icon varchar,
-    state character varying(16),
+    state character varying(16) CHECK (state in ('uninstallable', 'uninstalled', 'installed', 'to upgrade', 'to remove')),
     latest_version character varying(64),
     shortdesc character varying(256),
     category_id integer REFERENCES ir_module_category ON DELETE SET NULL,
