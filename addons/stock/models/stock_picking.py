@@ -397,8 +397,7 @@ class Picking(models.Model):
 
     @api.one
     def _has_scrap_move(self):
-        # TDE FIXME: better implementation
-        self.has_scrap_move = bool(self.env['stock.move'].search_count([('picking_id', '=', self.id), ('scrapped', '=', True)]))
+        self.has_scrap_move = any(move.scrapped for move in self.move_lines)
 
     @api.one
     def _compute_move_line_exist(self):
