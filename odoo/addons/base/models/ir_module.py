@@ -625,10 +625,8 @@ class Module(models.Model):
             for dep in module.dependencies_id:
                 if dep.state == 'unknown':
                     raise UserError(_('You try to upgrade the module %s that depends on the module: %s.\nBut this module is not available in your system.') % (module.name, dep.name,))
-                if dep.state == 'uninstalled':
-                    to_install += self.search([('name', '=', dep.name)]).ids
+                assert dep.state != 'uninstalled', "trying to update %s which depends on non-installed module %s" % (module.name, dep.name)
 
-        self.browse(to_install).button_install()
         return dict(ACTION_DICT, name=_('Apply Schedule Upgrade'))
 
     @assert_log_admin_access

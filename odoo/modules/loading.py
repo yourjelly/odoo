@@ -153,7 +153,7 @@ def load_module_graph(cr, graph, perform_checks=True,
     t0_sql = odoo.sql_db.sql_counter
 
     models_updated = set()
-
+    install_next = set()
     for index, package in enumerate(graph, 1):
         module_name = package.name
         module_id = package.id
@@ -182,7 +182,7 @@ def load_module_graph(cr, graph, perform_checks=True,
         if needs_update:
             registry.setup_models(cr)
             registry.init_models(cr, model_names, {'module': package.name})
-        elif not (package.init or package.update):
+        elif not needs_update:
             # The current module has simply been loaded. The models extended by this module
             # and for which we updated the schema, must have their schema checked again.
             # This is because the extension may have changed the model,
@@ -226,7 +226,7 @@ def load_module_graph(cr, graph, perform_checks=True,
             if package.init:
                 post_init = package.info.get('post_init_hook')
                 if post_init:
-                    getattr(py_module, post_init)(cr, registry)
+                    install_next.update(getattr(py_module, post_init)(cr, registry) or ())
 
             if mode == 'update':
                 # validate the views that have not been checked yet
@@ -265,6 +265,8 @@ def load_module_graph(cr, graph, perform_checks=True,
     registry.clear_caches()
 
     cr.commit()
+
+    return install_next
 
 def _check_module_names(cr, module_names):
     mod_names = set(module_names)
