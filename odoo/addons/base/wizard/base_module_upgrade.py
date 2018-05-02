@@ -13,7 +13,7 @@ class BaseModuleUpgrade(models.TransientModel):
     @api.model
     @api.returns('ir.module.module')
     def get_module_list(self):
-        states = ['to upgrade', 'to remove', 'to install']
+        states = ['to upgrade', 'to remove']
         return self.env['ir.module.module'].search([('state', 'in', states)])
 
     @api.model
@@ -47,8 +47,6 @@ class BaseModuleUpgrade(models.TransientModel):
         Module = self.env['ir.module.module']
         to_install = Module.search([('state', 'in', ['to upgrade', 'to remove'])])
         to_install.write({'state': 'installed'})
-        to_uninstall = Module.search([('state', '=', 'to install')])
-        to_uninstall.write({'state': 'uninstalled'})
         return {'type': 'ir.actions.act_window_close'}
 
     @api.multi
@@ -56,7 +54,7 @@ class BaseModuleUpgrade(models.TransientModel):
         Module = self.env['ir.module.module']
 
         # install/upgrade: double-check preconditions
-        mods = Module.search([('state', 'in', ['to upgrade', 'to install'])])
+        mods = Module.search([('state', '=', 'to upgrade')])
         if mods:
             query = """ SELECT d.name
                         FROM ir_module_module m

@@ -303,8 +303,8 @@ class Module(models.Model):
         if not self:
             return True
         for module in self:
-            if module.state in ('installed', 'to upgrade', 'to remove', 'to install'):
-                raise UserError(_('You are trying to remove a module that is installed or will be installed.'))
+            if module.state in ('installed', 'to upgrade', 'to remove'):
+                raise UserError(_('You try to remove a module that is installed'))
         self.clear_caches()
         return super(Module, self).unlink()
 
@@ -857,7 +857,7 @@ class Module(models.Model):
         elif not isinstance(filter_lang, (list, tuple)):
             filter_lang = [filter_lang]
 
-        update_mods = self.filtered(lambda r: r.state in ('installed', 'to install', 'to upgrade'))
+        update_mods = self.filtered(lambda r: r.state in ('installed', 'to upgrade'))
         mod_dict = {
             mod.name: mod.dependencies_id.mapped('name')
             for mod in update_mods

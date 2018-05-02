@@ -82,15 +82,7 @@ def _rpc_count_modules(addr='http://127.0.0.1', port=8069, dbname='mycompany'):
         dbname, uid, 'admin', 'ir.module.module', 'search', [('state', '=', 'installed')]
     )
     if modules and len(modules) > 1:
-        time.sleep(1)
-        toinstallmodules = xmlrpclib.ServerProxy('%s:%s/xmlrpc/object' % (addr, port)).execute(
-            dbname, uid, 'admin', 'ir.module.module', 'search', [('state', '=', 'to install')]
-        )
-        if toinstallmodules:
-            logging.error("Package test: FAILED. Not able to install dependencies of base.")
-            raise Exception("Installation of package failed")
-        else:
-            logging.info("Package test: successfuly installed %s modules" % len(modules))
+        logging.info("Package test: successfuly installed %s modules" % len(modules))
     else:
         logging.error("Package test: FAILED. Not able to install base.")
         raise Exception("Installation of package failed")

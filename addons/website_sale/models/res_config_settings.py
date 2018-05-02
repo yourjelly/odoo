@@ -44,9 +44,9 @@ class ResConfigSettings(models.TransientModel):
         res = super(ResConfigSettings, self).get_values()
 
         sale_delivery_settings = 'none'
-        if self.env['ir.module.module'].search([('name', '=', 'delivery')], limit=1).state in ('installed', 'to install', 'to upgrade'):
+        if self.env['ir.module.module'].search([('name', '=', 'delivery')], limit=1).state in ('installed', 'to upgrade'):
             sale_delivery_settings = 'internal'
-            if self.env['ir.module.module'].search([('name', '=', 'website_sale_delivery')], limit=1).state in ('installed', 'to install', 'to upgrade'):
+            if self.env['ir.module.module'].search([('name', '=', 'website_sale_delivery')], limit=1).state in ('installed', 'to upgrade'):
                 sale_delivery_settings = 'website'
 
         res.update(

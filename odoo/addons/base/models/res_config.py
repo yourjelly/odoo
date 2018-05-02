@@ -254,7 +254,7 @@ class ResConfigInstaller(models.TransientModel, ResConfigModuleInstallationMixin
         selectable = [name for name, field in self._fields.items()
                       if field.type == 'boolean']
         return self.env['ir.module.module'].search([('name', 'in', selectable),
-                            ('state', 'in', ['to install', 'installed', 'to upgrade'])])
+                            ('state', 'in', ['installed', 'to upgrade'])])
 
     def modules_to_install(self):
         """ selects all modules to install:
@@ -417,7 +417,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
         ModuleSudo = self.env['ir.module.module'].sudo()
         modules = ModuleSudo.search(
             [('name', '=', module_name.replace("module_", '')),
-            ('state', 'in', ['to install', 'installed', 'to upgrade'])])
+            ('state', 'in', ['installed', 'to upgrade'])])
 
         if modules and not int(field_value):
             deps = modules.sudo().downstream_dependencies()
@@ -512,7 +512,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
 
         # modules: which modules are installed/to install
         for name, module in classified['module']:
-            res[name] = module.state in ('installed', 'to install', 'to upgrade')
+            res[name] = module.state in ('installed', 'to upgrade')
             if self._fields[name].type == 'selection':
                 res[name] = str(int(res[name]))     # True, False -> '1', '0'
 
