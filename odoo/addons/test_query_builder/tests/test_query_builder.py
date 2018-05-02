@@ -3,7 +3,7 @@
 
 from unittest import TestCase
 from odoo.tests.common import tagged
-from odoo.osv.query_builder import Row, Select, Delete, Asc, Desc, COALESCE, _quote
+from odoo.osv.query_builder import Row, Select, Delete, With, Asc, Desc, COALESCE, _quote
 
 
 @tagged('standard', 'at_install')
@@ -611,3 +611,54 @@ class TestDelete(TestCase):
             d.to_sql(),
             ("""DELETE FROM "res_partner" "a" RETURNING ("a"."id" <= %s)""", [5])
         )
+
+
+@tagged('standard', 'at_install')
+class TestWith(TestCase):
+
+    def setUp(self):
+        self.maxDiff = None
+        self.p = Row('res_partner')
+        self.u = Row('res_users')
+        self.tmp_r = Row('my_temp_table', cols=['id'])
+        self.tmp_s = Select([self.u.partner_id])
+        self.s = Select([self.p.id], where=self.p.id == self.tmp_r.id)
+
+    def test_basic_with_select(self):
+        with_st = With([self.tmp_r], [self.tmp_s], self.s)
+        self.assertEqual(
+            with_st.to_sql()[0],
+            """WITH "my_temp_table"("id") AS """
+            """(SELECT "a"."partner_id" FROM "res_users" "a") """
+            """SELECT "b"."id" FROM "res_partner" "b" """
+            """WHERE ("b"."id" = "my_temp_table"."id")"""
+        )
+
+    def test_with_select_multi_col(self):
+        tmp_r = Row('my_temp_table', cols=['id', 'name', 'surname'])
+        with_st = With([tmp_r], [self.tmp_s], Select([self.p.id], where=self.p.id == tmp_r.id))
+        self.assertEqual(
+            with_st.to_sql()[0],
+            """WITH "my_temp_table"("id", "name", "surname") AS """
+            """(SELECT "a"."partner_id" FROM "res_users" "a") """
+            """SELECT "b"."id" FROM "res_partner" "b" """
+            """WHERE ("b"."id" = "my_temp_table"."id")"""
+        )
+
+    def test_with_select_multi_row(self):
+        other_r = Row('my_other_temp_table', cols=['id'])
+        other_s = Select([self.u.id])
+        s = Select([self.p.id], where=(self.p.id == self.tmp_r.id) & (self.p.id == other_r.id))
+        with_st = With([self.tmp_r, other_r], [self.tmp_s, other_s], s)
+        self.assertEqual(
+            with_st.to_sql()[0],
+            """WITH "my_temp_table"("id") AS """
+            """(SELECT "a"."partner_id" FROM "res_users" "a"), """
+            """"my_other_temp_table"("id") AS """
+            """(SELECT "a"."id" FROM "res_users" "a") """
+            """SELECT "b"."id" FROM "res_partner" "b" """
+            """WHERE (("b"."id" = "my_temp_table"."id") AND """
+            """("b"."id" = "my_other_temp_table"."id"))"""
+        )
+
+    # TODO: Test "WITH" with INSERT, DELETE and UPDATE

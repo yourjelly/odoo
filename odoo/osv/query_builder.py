@@ -49,7 +49,7 @@ the Select, Insert and Delete classes for creating the corresponding SQL stateme
 to see their usage, consult the respective class' documentation.
 """
 
-from collections import Iterable
+from collections import Iterable, OrderedDict
 from functools import partial
 from numbers import Number
 
@@ -286,9 +286,9 @@ class Column(Expression):
 
 class Row(object):
 
-    __slots__ = ('_table', '_nullable')
+    __slots__ = ('_table', '_nullable', '_cols')
 
-    def __init__(self, table, nullable=False):
+    def __init__(self, table, nullable=False, cols=[]):
         """
         Create an object that represents any row of a table.
 
@@ -299,10 +299,16 @@ class Row(object):
         """
         self._table = _quote(table)
         self._nullable = nullable
+        self._cols = OrderedDict()
+
+        for col in cols:
+            self._cols[col] = Column(self, col)
 
     def __getattr__(self, name):
         if name.startswith('__'):
             raise AttributeError
+        if name in self._cols:
+            return self._cols[name]
         return Column(self, name)
 
 
@@ -669,6 +675,40 @@ class Delete(object):
 
     def to_sql(self):
         return self._to_sql(AliasMapping())
+
+
+class With(object):
+
+    def __init__(self, rows, statements, tail):
+        assert len(rows) == len(statements), "Temporary tables and SQL statements must map 1:1"
+        self._rows = rows
+        self._statements = statements
+        self._tail = tail
+
+    def _to_sql(self, alias_mapping):
+        sql = []
+        args = []
+
+        for row, statement in zip(self._rows, self._statements):
+            alias_mapping[row] = row._table
+            _sql = [row._table, ', '.join(
+                [c._name for c in row._cols.values()])]
+            __sql, _args = statement._to_sql(alias_mapping)
+            _sql.append(__sql)
+            args += _args
+            sql.append("%s(%s) AS (%s)" % tuple(_sql))
+
+        _sql, _args = self._tail._to_sql(alias_mapping)
+        args += _args
+
+        return "WITH %s %s" % (', '.join(sql), _sql), args
+
+    def to_sql(self):
+        return self._to_sql(AliasMapping())
+
+
+class WithRecursive(With):
+    pass
 
 
 # SQL Functions and Aggregates
