@@ -20,12 +20,3 @@ class ResConfigSettings(models.TransientModel):
             'view_id': view.id,
             'target': 'new',
         }
-
-
-class ResCompany(models.Model):
-    _inherit = 'res.company'
-
-    # TODO: Add fields for finexkap
-    # Add fields for allowed currency (when open wizard fetch from service module)
-
-# Add columns to add for configuration of client finexkap apikey

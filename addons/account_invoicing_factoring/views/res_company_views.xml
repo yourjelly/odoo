@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data>
-		<record id="view_company_factoring_form" model="ir.ui.view">
+        <record id="view_company_factoring_form" model="ir.ui.view">
             <field name="name">res.company.factoring.form</field>
             <field name="model">res.company</field>
             <field name="inherit_id" ref="base.view_company_form" />
@@ -9,13 +9,21 @@
             <field name="priority">1025</field>
             <field name="arch" type="xml">
                 <xpath expr="//h1" position="replace">
-	                <h2><field name="name" readonly="1"/></h2>
-	            </xpath>
+                    <h2><field name="name" readonly="1"/></h2>
+                </xpath>
                 <xpath expr="//notebook" position="replace">
                     <notebook>
                         <page string="Finexkap">
-                            <p>Get your finexkap credentials on website <a href="https://www.finexkap.com" target="_new">https://www.finexkap.com</a></p>
-                            <!-- TODO: Fields to add for finexkap -->
+                            <group string="Finexkap Credentials">
+                                <group>
+                                    <p>Get your finexkap credentials on website <a href="https://www.finexkap.com" target="_new">https://www.finexkap.com</a></p>
+                                    <field name="finexkap_username"/>
+                                    <field name="finexkap_password" password="True" attrs="{'required': [('finexkap_username', '!=', False)]}"/>
+                                </group>
+                                <group>
+                                    <field name="siret" required="1"/>
+                                </group>
+                            </group>
                         </page>
                         <hr />
                         <footer>
@@ -26,5 +34,5 @@
                 </xpath>
             </field>
         </record>
-	</data>
+    </data>
 </odoo>
