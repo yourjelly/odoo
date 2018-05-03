@@ -679,19 +679,25 @@ class Delete(object):
 
 class With(object):
 
-    def __init__(self, body, tail):
+    def __init__(self, body, tail, recursive=False):
         """
         Class for creating WITH SQL statements.
 
         Args:
             body: List containing tuples in which the first element is a Row object, with defined
                 _cols attribute, and the second element is an SQL query that returns an amount
-                of rows equivalent to the amount of _cols defined.
+                of rows equivalent to the amount of _cols defined, if the recursive flag is True,
+                then these queries must be UNIONs between a base query and a recursive query.
             tail: An SQL query that (ideally) uses the results from the WITH table to generate
                 its own result.
+            recursive: Whether the WITH statement is RECURSIVE or not.
+
+        /!\ BEWARE: By PostgreSQL's doc, calling recursive terms inside data-modifying queries
+            is not permitted, therefore only SELECT queries can use recursive terms. /!\
         """
         self._body = body
         self._tail = tail
+        self._recur = recursive
 
     def _to_sql(self, alias_mapping):
         sql = []
@@ -709,14 +715,10 @@ class With(object):
         _sql, _args = self._tail._to_sql(alias_mapping)
         args += _args
 
-        return "WITH %s %s" % (', '.join(sql), _sql), args
+        return "WITH %s%s %s" % ("RECURSIVE " if self._recur else "", ', '.join(sql), _sql), args
 
     def to_sql(self):
         return self._to_sql(AliasMapping())
-
-
-class WithRecursive(With):
-    pass
 
 
 # SQL Functions and Aggregates

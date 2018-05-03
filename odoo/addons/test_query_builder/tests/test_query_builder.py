@@ -633,6 +633,18 @@ class TestWith(TestCase):
             """WHERE ("b"."id" = "my_temp_table"."id")"""
         )
 
+    def test_basic_with_recursive(self):
+        self.maxDiff = None
+        s = Select([self.tmp_r.id])
+        with_st = With([(self.tmp_r, self.tmp_s | s)], self.s, True)
+        self.assertEqual(
+            with_st.to_sql()[0],
+            """WITH RECURSIVE "my_temp_table"("id") AS """
+            """((SELECT "a"."partner_id" FROM "res_users" "a") """
+            """UNION (SELECT "a"."id" FROM "my_temp_table" "a")) """
+            """SELECT "b"."id" FROM "res_partner" "b" WHERE ("b"."id" = "my_temp_table"."id")"""
+        )
+
     def test_with_select_multi_col(self):
         tmp_r = Row('my_temp_table', cols=['id', 'name', 'surname'])
         with_st = With([(tmp_r, self.tmp_s)], Select([self.p.id], where=self.p.id == tmp_r.id))
