@@ -679,17 +679,25 @@ class Delete(object):
 
 class With(object):
 
-    def __init__(self, rows, statements, tail):
-        assert len(rows) == len(statements), "Temporary tables and SQL statements must map 1:1"
-        self._rows = rows
-        self._statements = statements
+    def __init__(self, body, tail):
+        """
+        Class for creating WITH SQL statements.
+
+        Args:
+            body: List containing tuples in which the first element is a Row object, with defined
+                _cols attribute, and the second element is an SQL query that returns an amount
+                of rows equivalent to the amount of _cols defined.
+            tail: An SQL query that (ideally) uses the results from the WITH table to generate
+                its own result.
+        """
+        self._body = body
         self._tail = tail
 
     def _to_sql(self, alias_mapping):
         sql = []
         args = []
 
-        for row, statement in zip(self._rows, self._statements):
+        for row, statement in self._body:
             alias_mapping[row] = row._table
             _sql = [row._table, ', '.join(
                 [c._name for c in row._cols.values()])]

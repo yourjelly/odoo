@@ -617,7 +617,6 @@ class TestDelete(TestCase):
 class TestWith(TestCase):
 
     def setUp(self):
-        self.maxDiff = None
         self.p = Row('res_partner')
         self.u = Row('res_users')
         self.tmp_r = Row('my_temp_table', cols=['id'])
@@ -625,7 +624,7 @@ class TestWith(TestCase):
         self.s = Select([self.p.id], where=self.p.id == self.tmp_r.id)
 
     def test_basic_with_select(self):
-        with_st = With([self.tmp_r], [self.tmp_s], self.s)
+        with_st = With([(self.tmp_r, self.tmp_s)], self.s)
         self.assertEqual(
             with_st.to_sql()[0],
             """WITH "my_temp_table"("id") AS """
@@ -636,7 +635,7 @@ class TestWith(TestCase):
 
     def test_with_select_multi_col(self):
         tmp_r = Row('my_temp_table', cols=['id', 'name', 'surname'])
-        with_st = With([tmp_r], [self.tmp_s], Select([self.p.id], where=self.p.id == tmp_r.id))
+        with_st = With([(tmp_r, self.tmp_s)], Select([self.p.id], where=self.p.id == tmp_r.id))
         self.assertEqual(
             with_st.to_sql()[0],
             """WITH "my_temp_table"("id", "name", "surname") AS """
@@ -649,7 +648,7 @@ class TestWith(TestCase):
         other_r = Row('my_other_temp_table', cols=['id'])
         other_s = Select([self.u.id])
         s = Select([self.p.id], where=(self.p.id == self.tmp_r.id) & (self.p.id == other_r.id))
-        with_st = With([self.tmp_r, other_r], [self.tmp_s, other_s], s)
+        with_st = With([(self.tmp_r, self.tmp_s), (other_r, other_s)], s)
         self.assertEqual(
             with_st.to_sql()[0],
             """WITH "my_temp_table"("id") AS """
