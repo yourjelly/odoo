@@ -63,7 +63,7 @@ class ProductAttributevalue(models.Model):
 
     @api.multi
     def name_get(self):
-        if not self._context.get('show_attribute', True):  # TDE FIXME: not used
+        if not self._context.get('show_attribute', True):
             return super(ProductAttributevalue, self).name_get()
         return [(value.id, "%s: %s" % (value.attribute_id.name, value.name)) for value in self]
 
