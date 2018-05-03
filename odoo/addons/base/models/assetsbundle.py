@@ -18,7 +18,6 @@ from subprocess import Popen, PIPE
 from collections import OrderedDict
 from odoo import fields, tools
 from odoo.tools.pycompat import string_types, to_text
-from odoo.exceptions import MissingError
 from odoo.http import request
 from odoo.modules.module import get_resource_path
 from .qweb import escape
@@ -99,9 +98,7 @@ class AssetsBundle(object):
         self.css_errors = []
         self._checksum = None
         self.files = files
-        # TODO: MSH: We may consider context language instead of user's lang as sometimes we forcefully pass different lang in context(consider report case where we want to print report in partner's lang)
-        # We can keep user's lang in fallback(may need to pass lang in context when calling _get_asset of test_assetsbundle)
-        self.user_direction = self.env['res.lang'].search([('code', '=', self.env.user.lang)]).direction
+        self.user_direction = self.env['res.lang'].search([('code', '=', (self.env.context.get('lang') or self.env.user.lang))]).direction
         for f in files:
             if f['atype'] == 'text/sass':
                 self.stylesheets.append(SassStylesheetAsset(self, url=f['url'], filename=f['filename'], inline=f['content'], media=f['media'], direction=self.user_direction))
@@ -515,6 +512,7 @@ class AssetsBundle(object):
     def get_rtlcss_error(self, stderr, source=None):
         """Improve and remove sensitive information from sass/less compilator error messages"""
         error = misc.ustr(stderr).split('Load paths')[0].replace('  Use --trace for backtrace.', '')
+        error += "This error occured while compiling the bundle '%s' containing:" % self.name
         return error
 
 class WebAsset(object):
