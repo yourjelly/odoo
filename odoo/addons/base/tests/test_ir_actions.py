@@ -15,39 +15,38 @@ class TestServerActionsBase(common.TransactionCase):
         super(TestServerActionsBase, self).setUp()
 
         # Data on which we will run the server action
-        self.test_country = self.env['res.country'].create({
-            'name': 'TestingCountry',
-            'code': 'TY',
-            'address_format': 'SuperFormat',
+        self.test_module_category = self.env['ir.module.category'].create({
+            'name': 'TestingModuleCategory',
+            'description': 'TestDescription'
         })
-        self.test_partner = self.env['res.partner'].create({
-            'name': 'TestingPartner',
-            'city': 'OrigCity',
-            'country_id': self.test_country.id,
+        self.test_module = self.env['ir.module.module'].create({
+            'name': 'TestingModule',
+            'shortdesc': 'Test',
+            'category_id': self.test_module_category.id,
         })
         self.context = {
-            'active_model': 'res.partner',
-            'active_id': self.test_partner.id,
+            'active_model': 'ir.module.category',
+            'active_id': self.test_module_category.id,
         }
 
         # Model data
         Model = self.env['ir.model']
         Fields = self.env['ir.model.fields']
-        self.res_partner_model = Model.search([('model', '=', 'res.partner')])
-        self.res_partner_name_field = Fields.search([('model', '=', 'res.partner'), ('name', '=', 'name')])
-        self.res_partner_city_field = Fields.search([('model', '=', 'res.partner'), ('name', '=', 'city')])
-        self.res_partner_country_field = Fields.search([('model', '=', 'res.partner'), ('name', '=', 'country_id')])
-        self.res_partner_parent_field = Fields.search([('model', '=', 'res.partner'), ('name', '=', 'parent_id')])
-        self.res_country_model = Model.search([('model', '=', 'res.country')])
-        self.res_country_name_field = Fields.search([('model', '=', 'res.country'), ('name', '=', 'name')])
-        self.res_country_code_field = Fields.search([('model', '=', 'res.country'), ('name', '=', 'code')])
+        self.ir_module_model = Model.search([('model', '=', 'ir.module.module')])
+        self.ir_module_name_field = Fields.search([('model', '=', 'ir.module.module'), ('name', '=', 'name')])
+        self.ir_module_shortdesc_field = Fields.search([('model', '=', 'ir.module.module'), ('name', '=', 'shortdesc')])
+        self.ir_module_category_field = Fields.search([('model', '=', 'ir.module.module'), ('name', '=', 'category_id')])
+        self.ir_module_category_parent_field = Fields.search([('model', '=', 'ir.module.category'), ('name', '=', 'parent_id')])
+        self.ir_module_category_model = Model.search([('model', '=', 'ir.module.category')])
+        self.ir_module_category_name_field = Fields.search([('model', '=', 'ir.module.category'), ('name', '=', 'name')])
+        self.ir_module_category_description_field = Fields.search([('model', '=', 'ir.module.category'), ('name', '=', 'description')])
 
         # create server action to
         self.action = self.env['ir.actions.server'].create({
             'name': 'TestAction',
-            'model_id': self.res_partner_model.id,
+            'model_id': self.ir_module_category_model.id,
             'state': 'code',
-            'code': 'record.write({"comment": "MyComment"})',
+            'code': 'record.write({"description": "Mydescription"})',
         })
 
 
@@ -55,12 +54,12 @@ class TestServerActions(TestServerActionsBase):
 
     def test_00_action(self):
         self.action.with_context(self.context).run()
-        self.assertEqual(self.test_partner.comment, 'MyComment', 'ir_actions_server: invalid condition check')
-        self.test_partner.write({'comment': False})
+        self.assertEqual(self.test_module_category.description, 'Mydescription', 'ir_actions_server: invalid condition check')
+        self.test_module_category.write({'description': False})
 
         # Do: create contextual action
         self.action.create_action()
-        self.assertEqual(self.action.binding_model_id.model, 'res.partner')
+        self.assertEqual(self.action.binding_model_id.model, 'ir.module.category')
 
         # Do: remove contextual action
         self.action.unlink_action()
@@ -69,51 +68,51 @@ class TestServerActions(TestServerActionsBase):
     def test_10_code(self):
         self.action.write({
             'state': 'code',
-            'code': ("partner_name = record.name + '_code'\n"
-                     "record.env['res.partner'].create({'name': partner_name})"),
+            'code': ("module_category_name = record.name + '_code'\n"
+                     "record.env['ir.module.category'].create({'name': module_category_name})"),
         })
         run_res = self.action.with_context(self.context).run()
         self.assertFalse(run_res, 'ir_actions_server: code server action correctly finished should return False')
 
-        partners = self.test_partner.search([('name', 'ilike', 'TestingPartner_code')])
-        self.assertEqual(len(partners), 1, 'ir_actions_server: 1 new partner should have been created')
+        partners = self.test_module_category.search([('name', 'ilike', 'TestingModuleCategory_code')])
+        self.assertEqual(len(partners), 1, 'ir_actions_server: 1 new Module category should have been created')
 
     def test_20_crud_create(self):
-        _city = 'TestCity'
+        _description = 'Testdescription'
         _name = 'TestNew'
 
         # Do: create a new record in the same model and link it
         self.action.write({
             'state': 'object_create',
             'crud_model_id': self.action.model_id.id,
-            'link_field_id': self.res_partner_parent_field.id,
-            'fields_lines': [(0, 0, {'col1': self.res_partner_name_field.id, 'value': _name}),
-                             (0, 0, {'col1': self.res_partner_city_field.id, 'value': _city})],
+            'link_field_id': self.ir_module_category_parent_field.id,
+            'fields_lines': [(0, 0, {'col1': self.ir_module_category_name_field.id, 'value': _name}),
+                             (0, 0, {'col1': self.ir_module_category_description_field.id, 'value': _description})],
         })
-        run_res = self.action.with_context(self.context).run()
-        self.assertFalse(run_res, 'ir_actions_server: create record action correctly finished should return False')
-        # Test: new partner created
-        partner = self.test_partner.search([('name', 'ilike', _name)])
-        self.assertEqual(len(partner), 1, 'ir_actions_server: TODO')
-        self.assertEqual(partner.city, _city, 'ir_actions_server: TODO')
+        run_action = self.action.with_context(self.context).run()
+        self.assertFalse(run_action, 'ir_actions_server: create record action correctly finished should return False')
+        # Test: new module_category created
+        module_category = self.test_module_category.search([('name', 'ilike', _name)])
+        self.assertEqual(len(module_category), 1, 'ir_actions_server: TODO')
+        self.assertEqual(module_category.description, _description, 'ir_actions_server: TODO')
         # Test: new partner linked
-        self.assertEqual(self.test_partner.parent_id, partner, 'ir_actions_server: TODO')
+        self.assertEqual(self.test_module_category.parent_id, module_category, 'ir_actions_server: TODO')
 
         # Do: create a new record in another model
         self.action.write({
             'state': 'object_create',
-            'crud_model_id': self.res_country_model.id,
+            'crud_model_id': self.ir_module_model.id,
             'link_field_id': False,
             'fields_lines': [(5,),
-                             (0, 0, {'col1': self.res_country_name_field.id, 'value': 'record.name', 'type': 'equation'}),
-                             (0, 0, {'col1': self.res_country_code_field.id, 'value': 'record.name[0:2]', 'type': 'equation'})],
+                             (0, 0, {'col1': self.ir_module_name_field.id, 'value': 'record.name', 'type': 'equation'}),
+                             (0, 0, {'col1': self.ir_module_shortdesc_field.id, 'value': 'record.name[0:2]', 'type': 'equation'})],
         })
-        run_res = self.action.with_context(self.context).run()
-        self.assertFalse(run_res, 'ir_actions_server: create record action correctly finished should return False')
+        run_action = self.action.with_context(self.context).run()
+        self.assertFalse(run_action, 'ir_actions_server: create record action correctly finished should return False')
         # Test: new country created
-        country = self.test_country.search([('name', 'ilike', 'TestingPartner')])
-        self.assertEqual(len(country), 1, 'ir_actions_server: TODO')
-        self.assertEqual(country.code, 'TE', 'ir_actions_server: TODO')
+        module = self.test_module.search([('name', 'ilike', 'TestingModuleCategory')])
+        self.assertEqual(len(module), 1, 'ir_actions_server: TODO')
+        self.assertEqual(module.shortdesc, 'Te', 'ir_actions_server: TODO')
 
     def test_30_crud_write(self):
         _name = 'TestNew'
@@ -121,14 +120,14 @@ class TestServerActions(TestServerActionsBase):
         # Do: update partner name
         self.action.write({
             'state': 'object_write',
-            'fields_lines': [(0, 0, {'col1': self.res_partner_name_field.id, 'value': _name})],
+            'fields_lines': [(0, 0, {'col1': self.ir_module_category_name_field.id, 'value': _name})],
         })
-        run_res = self.action.with_context(self.context).run()
-        self.assertFalse(run_res, 'ir_actions_server: create record action correctly finished should return False')
+        run_action = self.action.with_context(self.context).run()
+        self.assertFalse(run_action, 'ir_actions_server: create record action correctly finished should return False')
         # Test: partner updated
-        partner = self.test_partner.search([('name', 'ilike', _name)])
-        self.assertEqual(len(partner), 1, 'ir_actions_server: TODO')
-        self.assertEqual(partner.city, 'OrigCity', 'ir_actions_server: TODO')
+        module_category = self.test_module_category.search([('name', 'ilike', _name)])
+        self.assertEqual(len(module_category), 1, 'ir_actions_server: TODO')
+        self.assertEqual(module_category.description, 'TestDescription', 'ir_actions_server: TODO')
 
     @mute_logger('odoo.addons.base.models.ir_model', 'odoo.models')
     def test_40_multi(self):
@@ -136,23 +135,23 @@ class TestServerActions(TestServerActionsBase):
         action1 = self.action.create({
             'name': 'Subaction1',
             'sequence': 1,
-            'model_id': self.res_partner_model.id,
+            'model_id': self.ir_module_category_model.id,
             'state': 'code',
             'code': 'action = {"type": "ir.actions.act_window"}',
         })
         action2 = self.action.create({
             'name': 'Subaction2',
             'sequence': 2,
-            'model_id': self.res_partner_model.id,
-            'crud_model_id': self.res_partner_model.id,
+            'model_id': self.ir_module_category_model.id,
+            'crud_model_id': self.ir_module_category_model.id,
             'state': 'object_create',
-            'fields_lines': [(0, 0, {'col1': self.res_partner_name_field.id, 'value': 'RaoulettePoiluchette'}),
-                             (0, 0, {'col1': self.res_partner_city_field.id, 'value': 'TestingCity'})],
+            'fields_lines': [(0, 0, {'col1': self.ir_module_category_name_field.id, 'value': 'RaoulettePoiluchette'}),
+                             (0, 0, {'col1': self.ir_module_category_description_field.id, 'value': 'TestDescription'})],
         })
         action3 = self.action.create({
             'name': 'Subaction3',
             'sequence': 3,
-            'model_id': self.res_partner_model.id,
+            'model_id': self.ir_module_category_model.id,
             'state': 'code',
             'code': 'action = {"type": "ir.actions.act_url"}',
         })
@@ -162,14 +161,14 @@ class TestServerActions(TestServerActionsBase):
         })
 
         # Do: run the action
-        res = self.action.with_context(self.context).run()
+        run_action = self.action.with_context(self.context).run()
 
         # Test: new partner created
-        # currently res_partner overrides default['name'] whatever its value
-        partner = self.test_partner.search([('name', 'ilike', 'RaoulettePoiluchette')])
-        self.assertEqual(len(partner), 1)
+        # currently ir_mofule_category overrides default['name'] whatever its value
+        module_category = self.test_module_category.search([('name', 'ilike', 'RaoulettePoiluchette')])
+        self.assertEqual(len(module_category), 1)
         # Test: action returned
-        self.assertEqual(res.get('type'), 'ir.actions.act_url')
+        self.assertEqual(run_action.get('type'), 'ir.actions.act_url')
 
         # Test loops
         with self.assertRaises(ValidationError):
