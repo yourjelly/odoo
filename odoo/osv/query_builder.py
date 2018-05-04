@@ -186,6 +186,9 @@ class Expression(object):
 class AliasMapping(dict):
 
     def __init__(self, *args, **kwargs):
+        """
+        A special implementation of dict that generates appropriate table aliases on the fly.
+        """
         super(AliasMapping, self).__init__()
         self._generator = generate_aliases()
 
@@ -233,7 +236,7 @@ class QueryExpression(Expression):
 
     __slots__ = ('op', 'left', 'right')
 
-    """ Class for operators between Select objects """
+    """ Class for operators between Select objects."""
 
     def __init__(self, op, left, right):
         super(QueryExpression, self).__init__(op, left, right)
@@ -261,7 +264,7 @@ class QueryExpression(Expression):
 
 class Column(Expression):
 
-    __slots__ = ('_row', '_name')
+    __slots__ = ('_row', '_name', '_val')
 
     def __init__(self, row, name):
         """
@@ -275,13 +278,29 @@ class Column(Expression):
         """
         self._row = row
         self._name = _quote(name)
+        self._val = None
+
+    def __lshift__(self, other):
+        self._val = other
+        if isinstance(other, Column):
+            return (self, other)
+        else:
+            return (self, None)
 
     def _to_sql(self, alias_dict=None):
-        qualified = "{alias}.%s" % self._name
+        qualified = "{0}.%s" % self._name
         row = self._row
+
         if alias_dict is not None:
-            return (qualified.format(**{'alias': alias_dict[row]}), [])
-        return (qualified.format(**{'alias': row._table}), [])
+            col_name = qualified.format(alias_dict[row])
+        else:
+            col_name = qualified.format(row._table)
+
+        if self._val is not None:
+            if isinstance(self._val, Column):
+                return "%s = %s" % (col_name, self._val._to_sql(alias_dict))
+            return "{0} = %s".format(col_name), [self._val]
+        return col_name, []
 
 
 class Row(object):
@@ -716,6 +735,57 @@ class With(object):
         args += _args
 
         return "WITH %s%s %s" % ("RECURSIVE " if self._recur else "", ', '.join(sql), _sql), args
+
+    def to_sql(self):
+        return self._to_sql(AliasMapping())
+
+
+class Update(object):
+
+    def __init__(self, exprs, where=None):
+        self._exprs = exprs
+        self._where = where
+        # The main table is the left leaf's table
+        self._main = exprs[0][0]._row
+        # Auxiliary tables found in set expressions
+        self._auxiliary = [aux._row for main, aux in exprs if aux is not None]
+
+    def _build_set(self, alias_mapping):
+        sql = []
+        args = []
+
+        for left, right in self._exprs:
+            _sql, _args = left._to_sql(alias_mapping)
+            sql.append(_sql)
+            args += _args
+
+        return ', '.join(sql), args
+
+    def _build_where(self, alias_mapping):
+        if self._where:
+            _sql, _args = self._where._to_sql(alias_mapping)
+            return " WHERE %s" % _sql, _args
+        return '', []
+
+    def _build_from(self, alias_mapping):
+        if self._auxiliary:
+            sql = " FROM %s" % ', '.join(
+                ["%s %s" % (t._table, alias_mapping[t]) for t in self._auxiliary])
+            return sql
+        return ''
+
+    def _to_sql(self, alias_mapping):
+        sql = "UPDATE %s %s SET %s"
+        _sql, args = self._build_set(alias_mapping)
+
+        sql = sql % (self._main._table, alias_mapping[self._main], _sql)
+        sql += self._build_from(alias_mapping)
+
+        _sql, _args = self._build_where(alias_mapping)
+        sql += _sql
+        args += _args
+
+        return sql, args
 
     def to_sql(self):
         return self._to_sql(AliasMapping())

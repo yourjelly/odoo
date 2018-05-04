@@ -3,7 +3,7 @@
 
 from unittest import TestCase
 from odoo.tests.common import tagged
-from odoo.osv.query_builder import Row, Select, Delete, With, Asc, Desc, COALESCE, _quote
+from odoo.osv.query_builder import Row, Select, Delete, With, Update, Asc, Desc, COALESCE, _quote
 
 
 @tagged('standard', 'at_install')
@@ -15,7 +15,7 @@ class TestMisc(TestCase):
     def test_quote_quoted(self):
         self.assertEqual(_quote('"bar"'), '"bar"')
 
-    def test_row_dunder_access(self):
+    def test_row_dunder_getter(self):
         with self.assertRaises(AttributeError):
             Row('res_partner').__name__
 
@@ -110,6 +110,11 @@ class TestExpressions(TestCase):
         expr = COALESCE(self.u.id, 5)
         res = ("""(COALESCE("res_users"."id", %s))""", [5])
         self.assertEqual(expr._to_sql(None), res)
+
+    def test_col_attr_setting(self):
+        expr = self.p.id << 5
+        res = (""""res_partner"."id" = %s""", [5])
+        self.assertEqual(expr[0]._to_sql(None), res)
 
     def test_and_type(self):
         with self.assertRaises(AssertionError):
@@ -634,7 +639,6 @@ class TestWith(TestCase):
         )
 
     def test_basic_with_recursive(self):
-        self.maxDiff = None
         s = Select([self.tmp_r.id])
         with_st = With([(self.tmp_r, self.tmp_s | s)], self.s, True)
         self.assertEqual(
@@ -673,3 +677,20 @@ class TestWith(TestCase):
         )
 
     # TODO: Test "WITH" with INSERT, DELETE and UPDATE
+
+
+@tagged('standard', 'at_install')
+class TestUpdate(TestCase):
+
+    def setUp(self):
+        super(TestUpdate, self).setUp()
+        self.u = Row('res_users')
+        self.p = Row('res_partner')
+        self.g = Row('res_groups')
+
+    def test_basic_update(self):
+        u = Update([self.u.id << 5])
+        self.assertEqual(
+            u.to_sql(),
+            ("""UPDATE "res_users" "a" SET "a"."id" = %s""", [5])
+        )
