@@ -298,7 +298,8 @@ class Column(Expression):
 
         if self._val is not None:
             if isinstance(self._val, Column):
-                return "%s = %s" % (col_name, self._val._to_sql(alias_dict))
+                _sql, _args = self._val._to_sql(alias_dict)
+                return "%s = %s" % (col_name, _sql), _args
             return "{0} = %s".format(col_name), [self._val]
         return col_name, []
 
@@ -742,9 +743,10 @@ class With(object):
 
 class Update(object):
 
-    def __init__(self, exprs, where=None):
+    def __init__(self, exprs, where=None, returning=[]):
         self._exprs = exprs
         self._where = where
+        self._returning = returning
         # The main table is the left leaf's table
         self._main = exprs[0][0]._row
         # Auxiliary tables found in set expressions
@@ -774,6 +776,24 @@ class Update(object):
             return sql
         return ''
 
+    def _build_returning(self, alias_mapping):
+        args = []
+
+        if self._returning:
+            sql = " RETURNING %s"
+            _q = []
+            for e in self._returning:
+                if isinstance(e, Row):
+                    _q.append('*')
+                    break
+                else:
+                    # Column or Expression
+                    _sql, _args = e._to_sql(alias_mapping)
+                    _q.append(_sql)
+                    args += _args
+            return sql % ', '.join(_q), args
+        return '', args
+
     def _to_sql(self, alias_mapping):
         sql = "UPDATE %s %s SET %s"
         _sql, args = self._build_set(alias_mapping)
@@ -782,6 +802,10 @@ class Update(object):
         sql += self._build_from(alias_mapping)
 
         _sql, _args = self._build_where(alias_mapping)
+        sql += _sql
+        args += _args
+
+        _sql, _args = self._build_returning(alias_mapping)
         sql += _sql
         args += _args
 

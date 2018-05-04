@@ -694,3 +694,24 @@ class TestUpdate(TestCase):
             u.to_sql(),
             ("""UPDATE "res_users" "a" SET "a"."id" = %s""", [5])
         )
+
+    def test_update_with_where(self):
+        u = Update([self.u.name << "dummy"], self.u.id > 10)
+        self.assertEqual(
+            u.to_sql(),
+            ("""UPDATE "res_users" "a" SET "a"."name" = %s WHERE ("a"."id" > %s)""", ["dummy", 10])
+        )
+
+    def test_update_with_col(self):
+        u = Update([self.u.name << self.p.name])
+        self.assertEqual(
+            u.to_sql(),
+            ("""UPDATE "res_users" "a" SET "a"."name" = "b"."name" FROM "res_partner" "b\"""", [])
+        )
+
+    def test_update_with_returning(self):
+        u = Update([self.u.id << 5], returning=[self.u.id])
+        self.assertEqual(
+            u.to_sql(),
+            ("""UPDATE "res_users" "a" SET "a"."id" = %s RETURNING "a"."id\"""", [5])
+        )
