@@ -1,10 +1,34 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.base.tests.test_ir_actions import TestServerActionsBase
+from odoo.tests import common
 
 
-class TestServerActionsEmail(TestServerActionsBase):
+class TestServerActionsEmail(common.TransactionCase):
+
+    def setUp(self):
+        super(TestServerActionsEmail, self).setUp()
+
+        # Data on which we will run the server action
+        self.test_partner = self.env['res.partner'].create({
+            'name': 'TestingPartner'})
+        self.context = {
+            'active_model': 'res.partner',
+            'active_id': self.test_partner.id,
+        }
+
+        # Model data
+        Model = self.env['ir.model']
+        self.res_partner_model = Model.search([('model', '=', 'res.partner')])
+
+        # create server action to
+        self.action = self.env['ir.actions.server'].create({
+            'name': 'TestAction',
+            'model_id': self.res_partner_model.id,
+            'state': 'code',
+            'code': 'record.write({"comment": "MyComment"})',
+        })
+
 
     def test_action_email(self):
         email_template = self.env['mail.template'].create({
