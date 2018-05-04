@@ -48,6 +48,7 @@ var MessagingMenu = Widget.extend({
         var counter =  needactionCounter + unreadConversationCounter;
         this.$('.o_notification_counter').text(counter);
         this.$el.toggleClass('o_no_notification', !counter);
+        this.$el.toggleClass('o_unread_chat', !!(this.call('chat_manager', 'getChatUnreadCounter')))
         if (this.is_open()) {
             this.update_channels_preview();
         }

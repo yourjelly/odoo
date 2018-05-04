@@ -15,6 +15,9 @@
             display: none;
         }
     }
+    &.o_unread_chat > a > i {
+        color: $o-brand-optional;
+    }
     &.open .o_mail_navbar_dropdown {
         @include o-flex-display;
         @include o-flex-flow(column, nowrap);
@@ -25,6 +28,7 @@
         color: white;
         padding: 0em 0.3em;
         font-size: 0.7em;
+        border: 1px solid $navbar-inverse-bg;
     }
     .o_mail_navbar_dropdown {
         width: 350px;

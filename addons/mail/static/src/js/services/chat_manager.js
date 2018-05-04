@@ -121,6 +121,7 @@ var ChatManager =  AbstractService.extend({
         this.channels = [];
         this.channelsPreviewDef;
         this.channelDefs = {};
+        this.chatUnreadCounter = 0;
         this.unreadConversationCounter = 0;
         this.emojis = [];
         this.needactionCounter = 0;
@@ -537,6 +538,14 @@ var ChatManager =  AbstractService.extend({
      */
     getStarredCounter: function () {
         return this.starredCounter;
+    },
+    /**
+     * Gets the number of conversation which contains unread messages of direct chat
+     *
+     * @return {integer} unread conversation counter
+     */
+    getChatUnreadCounter: function () {
+        return this.chatUnreadCounter
     },
     /**
      * Gets the number of conversation which contains unread messages
@@ -1767,6 +1776,9 @@ var ChatManager =  AbstractService.extend({
             this.unreadConversationCounter = Math.max(0, this.unreadConversationCounter-1);
         } else if (channel.unread_counter === 0 && counter > 0) {
             this.unreadConversationCounter++;
+        }
+        if (channel.is_chat) {
+            this.chatUnreadCounter = Math.max(0, this.chatUnreadCounter - channel.unread_counter + counter);
         }
         channel.unread_counter = counter;
         this.chatBus.trigger("update_channel_unread_counter", channel);
