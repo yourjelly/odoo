@@ -232,19 +232,7 @@ class MailGroup(http.Controller):
         subscriber = request.env['mail.channel.partner'].search([('channel_id', '=', channel.id), ('partner_id', '=', partner_id)])
         if not subscriber:
             partner = request.env['res.partner'].browse(partner_id).sudo().exists()
-            # FIXME: remove try/except in master
-            try:
-                response = request.render(
-                    'website_mail_channel.not_subscribed',
-                    {'partner_id': partner})
-                # make sure the rendering (and thus error if template is
-                # missing) happens inside the try block
-                response.flatten()
-                return response
-            except ValueError:
-                return _("The address %s is already unsubscribed or was never subscribed to any mailing list") % (
-                    partner.email
-                )
+            return request.render('website_mail_channel.not_subscribed', {'partner_id': partner})
 
         subscriber_token = channel._generate_action_token(partner_id, action='unsubscribe')
         if token != subscriber_token:
