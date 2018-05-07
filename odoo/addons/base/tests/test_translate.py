@@ -228,10 +228,10 @@ class TestTranslation(TransactionCase):
     def setUp(self):
         super(TestTranslation, self).setUp()
         self.env['ir.translation'].load_module_terms(['base'], ['fr_FR'])
-        self.customers = self.env['res.partner.category'].create({'name': 'Customers'})
+        self.customers = self.env['ir.module.category'].create({'name': 'Customers'})
         self.env['ir.translation'].create({
             'type': 'model',
-            'name': 'res.partner.category,name',
+            'name': 'ir.module.category,name',
             'module':'base',
             'lang': 'fr_FR',
             'res_id': self.customers.id,
@@ -267,7 +267,7 @@ class TestTranslation(TransactionCase):
     def test_104_orderby_translated_field(self):
         """ Test search ordered by a translated field. """
         # create a category with a French translation
-        padawans = self.env['res.partner.category'].create({'name': 'Padawans'})
+        padawans = self.env['ir.module.category'].create({'name': 'Padawans'})
         padawans_fr = padawans.with_context(lang='fr_FR')
         padawans_fr.write({'name': 'Apprentis'})
         # search for categories, and sort them by (translated) name
