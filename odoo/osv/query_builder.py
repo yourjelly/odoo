@@ -57,7 +57,7 @@ from odoo.tools.pycompat import text_type
 
 
 def _quote(val):
-    """ Helper function for quoting SQL identifiers. """
+    """ Helper function for quoting SQL identifiers if necessary."""
     if '"' not in val:
         return '"%s"' % val
     return val
@@ -149,7 +149,7 @@ class Expression(object):
         assert isinstance(other, Number), "`%` RHS operand must be a numeric type."
         return Func('MOD', self, other)
 
-    def _to_sql(self, alias_dict):
+    def _to_sql(self, alias_mapping):
         """
         Generates SQL statements and expressions from the current object.
 
@@ -158,7 +158,7 @@ class Expression(object):
             the string, to be fed directly into cr.execute()
         """
         # TODO: Optimize parentheses generation
-        left, args = self.left._to_sql(alias_dict)
+        left, args = self.left._to_sql(alias_mapping)
 
         if self.op == 'NOT':
             return ("(NOT %s)" % left, args)
@@ -166,7 +166,7 @@ class Expression(object):
         sql = "(%s %s " % (left, self.op)
 
         if isinstance(self.right, Expression):
-            right, _args = self.right._to_sql(alias_dict)
+            right, _args = self.right._to_sql(alias_mapping)
 
             if isinstance(self.right, QueryExpression):
                 right = '(%s)' % right
@@ -183,53 +183,164 @@ class Expression(object):
         return (sql, args)
 
 
-class AliasMapping(dict):
+class Row(object):
 
-    def __init__(self, *args, **kwargs):
+    __slots__ = ('_table', '_nullable', '_cols')
+
+    def __init__(self, table, nullable=False, cols=[]):
         """
-        A special implementation of dict that generates appropriate table aliases on the fly.
-        """
-        super(AliasMapping, self).__init__()
-        self._generator = generate_aliases()
-
-    def __missing__(self, k):
-        alias = _quote(next(self._generator))
-        self[k] = alias
-        return alias
-
-
-class Func(Expression):
-
-    __slots__ = ('func', 'args')
-
-    def __init__(self, func, *args):
-        """
-        Generic PostgreSQL Aggregate/Function, accepts any amount of arguments.
+        Create an object that represents any row of a table.
 
         Args:
-            func (str): Name of the function
-            args: The function's arguments
+            table (str): Name of the table.
+            nullable (bool): In the case of a join, whether the NULLs of this
+                table should be used in the resulting joined table.
         """
-        self.func = func
-        self.args = args
+        self._table = _quote(table)
+        self._nullable = nullable
+        self._cols = OrderedDict()
 
-    def _to_sql(self, alias_dict):
-        sql = '(%s(' % self.func
+        for col in cols:
+            self._cols[col] = Column(self, col)
+
+    def __getattr__(self, name):
+        if name.startswith('__'):
+            raise AttributeError
+        if name in self._cols:
+            return self._cols[name]
+        return Column(self, name)
+
+    def _to_sql(self, alias_mapping):
+        return "%s %s" % (self._table, alias_mapping[self])
+
+
+class Column(Expression):
+
+    __slots__ = ('_row', '_name', '_val')
+
+    def __init__(self, row, name):
+        """
+        A table's column.
+
+        Should rarely be used by the user, it is automatically handled by the Row class.
+
+        Args:
+            row (Row): Row that this column belongs to (table).
+            name (str): Name of the column.
+        """
+        self._row = row
+        self._name = _quote(name)
+        self._val = None
+
+    def __lshift__(self, other):
+        self._val = other
+        if isinstance(other, Column):
+            return (self, other)
+        else:
+            return (self, None)
+
+    def _to_sql(self, alias_mapping=None):
+        qualified = "{0}.%s" % self._name
+        row = self._row
+
+        if alias_mapping is not None:
+            col_name = qualified.format(alias_mapping[row])
+        else:
+            col_name = qualified.format(row._table)
+
+        if self._val is not None:
+            if isinstance(self._val, Column):
+                _sql, _args = self._val._to_sql(alias_mapping)
+                return "%s = %s" % (col_name, _sql), _args
+            return "{0} = %s".format(col_name), [self._val]
+        return col_name, []
+
+
+class BaseQuery(object):
+
+    def __init__(self, *args, **kwargs):
+        self.sql = []
+        self.args = []
+
+    def _build_base(self, alias_mapping):
+        pass
+
+    def _build_from(self, alias_mapping):
+        rows = getattr(self, '_rows', False)
+
+        if rows:
+            sql = ', '.join([row._to_sql(alias_mapping) for row in rows])
+            self.sql.append("FROM %s" % sql)
+
+    def _build_joins(self, alias_mapping):
+        pass
+
+    def _build_using(self, alias_mapping):
+        pass
+
+    def _build_where(self, alias_mapping):
+        where = getattr(self, '_where', False)
+
+        if where:
+            sql, args = where._to_sql(alias_mapping)
+            self.sql.append("WHERE %s" % sql)
+            self.args += args
+
+    def _build_order(self, alias_mapping):
+        pass
+
+    def _build_group(self, alias_mapping):
+        pass
+
+    def _build_having(self, alias_mapping):
+        pass
+
+    def _build_limit(self, alias_mapping):
+        pass
+
+    def _build_returning(self, alias_mapping):
+        returning = getattr(self, '_returning', False)
         args = []
 
-        for arg in self.args:
-            if isinstance(arg, Expression):
-                _sql, _args = arg._to_sql(alias_dict)
-                sql += _sql
-                args += _args
-            else:
-                args.append(arg)
-                sql += '%s'
-            if arg is not self.args[-1]:
-                sql += ', '
+        if returning:
+            sql = []
 
-        sql += '))'
-        return (sql, args)
+            for e in returning:
+                if isinstance(e, Row):
+                    sql.append('*')
+                    break
+                else:
+                    # Column or Expression
+                    _sql, _args = e._to_sql(alias_mapping)
+                    sql.append(_sql)
+                    args += _args
+
+            self.sql.append("RETURNING %s" % ', '.join(sql))
+            self.args += args
+
+    def _build_all(self, alias_mapping):
+        # Order matters!!
+        self._build_base(alias_mapping)
+        self._build_from(alias_mapping)
+        self._build_joins(alias_mapping)
+        self._build_using(alias_mapping)
+        self._build_where(alias_mapping)
+        self._build_order(alias_mapping)
+        self._build_group(alias_mapping)
+        self._build_having(alias_mapping)
+        self._build_limit(alias_mapping)
+        self._build_returning(alias_mapping)
+
+    def _to_sql(self, alias_mapping):
+        self._build_all(alias_mapping)
+        self.sql = [sql for sql in self.sql if sql]
+        res = ' '.join(self.sql), self.args
+        self.sql = []
+        self.args = []
+        return res
+
+    def to_sql(self):
+        return self._to_sql(AliasMapping())
 
 
 class QueryExpression(Expression):
@@ -262,74 +373,53 @@ class QueryExpression(Expression):
         return self._to_sql(AliasMapping())
 
 
-class Column(Expression):
+class AliasMapping(dict):
 
-    __slots__ = ('_row', '_name', '_val')
-
-    def __init__(self, row, name):
+    def __init__(self, *args, **kwargs):
         """
-        A table's column.
+        A special implementation of dict that generates appropriate table aliases on the fly.
+        """
+        super(AliasMapping, self).__init__()
+        self._generator = generate_aliases()
 
-        Should rarely be used by the user, it is automatically handled by the Row class.
+    def __missing__(self, k):
+        alias = _quote(next(self._generator))
+        self[k] = alias
+        return alias
+
+
+class Func(Expression):
+
+    __slots__ = ('func', 'args')
+
+    def __init__(self, func, *args):
+        """
+        Generic PostgreSQL Aggregate/Function, accepts any amount of arguments.
 
         Args:
-            row (Row): Row that this column belongs to (table).
-            name (str): Name of the column.
+            func (str): Name of the function
+            args: The function's arguments
         """
-        self._row = row
-        self._name = _quote(name)
-        self._val = None
+        self.func = func
+        self.args = args
 
-    def __lshift__(self, other):
-        self._val = other
-        if isinstance(other, Column):
-            return (self, other)
-        else:
-            return (self, None)
+    def _to_sql(self, alias_mapping):
+        sql = '(%s(' % self.func
+        args = []
 
-    def _to_sql(self, alias_dict=None):
-        qualified = "{0}.%s" % self._name
-        row = self._row
+        for arg in self.args:
+            if isinstance(arg, Expression):
+                _sql, _args = arg._to_sql(alias_mapping)
+                sql += _sql
+                args += _args
+            else:
+                args.append(arg)
+                sql += '%s'
+            if arg is not self.args[-1]:
+                sql += ', '
 
-        if alias_dict is not None:
-            col_name = qualified.format(alias_dict[row])
-        else:
-            col_name = qualified.format(row._table)
-
-        if self._val is not None:
-            if isinstance(self._val, Column):
-                _sql, _args = self._val._to_sql(alias_dict)
-                return "%s = %s" % (col_name, _sql), _args
-            return "{0} = %s".format(col_name), [self._val]
-        return col_name, []
-
-
-class Row(object):
-
-    __slots__ = ('_table', '_nullable', '_cols')
-
-    def __init__(self, table, nullable=False, cols=[]):
-        """
-        Create an object that represents any row of a table.
-
-        Args:
-            table (str): Name of the table.
-            nullable (bool): In the case of a join, whether the NULLs of this
-                table should be used in the resulting joined table.
-        """
-        self._table = _quote(table)
-        self._nullable = nullable
-        self._cols = OrderedDict()
-
-        for col in cols:
-            self._cols[col] = Column(self, col)
-
-    def __getattr__(self, name):
-        if name.startswith('__'):
-            raise AttributeError
-        if name in self._cols:
-            return self._cols[name]
-        return Column(self, name)
+        sql += '))'
+        return (sql, args)
 
 
 class Join(object):
@@ -368,9 +458,9 @@ class Join(object):
             else:
                 self.type = 'INNER JOIN'
 
-    def _to_sql(self, alias_dict):
-        sql, args = self.expression._to_sql(alias_dict)
-        return (" %s %s %s ON %s" % (self.type, self.t2._table, alias_dict[self.t2], sql),
+    def _to_sql(self, alias_mapping):
+        sql, args = self.expression._to_sql(alias_mapping)
+        return ("%s %s %s ON %s" % (self.type, self.t2._table, alias_mapping[self.t2], sql),
                 args)
 
 
@@ -390,8 +480,8 @@ class Modifier(object):
         self.modifier = modifier
         self.nfirst = nfirst
 
-    def _to_sql(self, alias_dict):
-        sql = self.column._to_sql(alias_dict)[0]
+    def _to_sql(self, alias_mapping):
+        sql = self.column._to_sql(alias_mapping)[0]
         sql += " %s " % self.modifier
         sql += "NULLS FIRST" if self.nfirst else "NULLS LAST"
         return sql, []
@@ -413,7 +503,7 @@ class Desc(Modifier):
         super(Desc, self).__init__(column, 'DESC', nfirst)
 
 
-class Select(QueryExpression):
+class Select(BaseQuery, QueryExpression):
 
     def __init__(self, columns, where=None, order=[], joins=[], distinct=False,
                  group=[], having=None, limit=None, offset=0, _all=False):
@@ -446,6 +536,7 @@ class Select(QueryExpression):
             WHERE ("res_partner"."name" IS NOT NULL)
             ORDER BY "res_partner"."id" DESC NULLS LAST
         """
+        super(Select, self).__init__()
         self.attrs = {}
 
         self.attrs['columns'] = self._columns = columns
@@ -460,7 +551,7 @@ class Select(QueryExpression):
         self.attrs['_all'] = self._all = _all
 
         self._aliased = isinstance(columns, dict)
-        self._tables = self._get_tables()
+        self._rows = self._get_tables()
 
     def _get_tables(self):
         tables = []
@@ -524,98 +615,66 @@ class Select(QueryExpression):
         """ Create a similar Select object but with a different all."""
         return Select(**{**self.attrs, '_all': not self.attrs['_all']})
 
-    # Helper methods for building the final query
-    def _build_joins(self, alias_dict):
+    def _build_base(self, alias_mapping):
+        sql = ["SELECT"]
+
+        if self._distinct:
+            sql.append("DISTINCT")
+
+        _sql = []
+        for c in self._columns:
+            if isinstance(c, Row):
+                _sql.append("*")
+            elif self._aliased:
+                col = self._columns[c]
+                _sql.append("%s AS %s" % (col._to_sql(alias_mapping)[0], c))
+            else:
+                _sql.append("%s" % c._to_sql(alias_mapping)[0])
+
+        sql.append(', '.join(_sql))
+        self.sql.append(' '.join(sql))
+
+    def _build_joins(self, alias_mapping):
         sql = []
         args = []
 
         for join in self._joins:
-            _sql, _args = join._to_sql(alias_dict)
+            _sql, _args = join._to_sql(alias_mapping)
             sql.append(_sql)
             args += _args
 
-        return (''.join(sql), args)
+        self.sql.append(' '.join(sql))
+        self.args += args
 
-    def _build_columns(self, alias_dict):
-        res = []
+    def _build_from(self, alias_mapping):
+        tables = ', '.join(["%s %s" % (t._table, alias_mapping[t]) for t in self._rows])
+        self.sql.append("FROM %s" % tables)
 
-        for c in self._columns:
-            if isinstance(c, Row):
-                sql = "*"
-            elif self._aliased:
-                col = self._columns[c]
-                sql = "%s AS %s" % (col._to_sql(alias_dict)[0], c)
-            else:
-                sql = "%s" % c._to_sql(alias_dict)[0]
-            res.append(sql)
-
-        return ', '.join(res)
-
-    def _build_tables(self, alias_dict):
-        return ', '.join(["%s %s" % (t._table, alias_dict[t]) for t in self._tables])
-
-    def _build_where(self, alias_dict):
-        sql = " WHERE %s"
-        if self._where:
-            where, args = self._where._to_sql(alias_dict)
-            return sql % where, args
-        return '', []
-
-    def _build_order(self, alias_dict):
+    def _build_order(self, alias_mapping):
         if self._order:
-            sql = " ORDER BY %s"
-            return sql % ', '.join([o._to_sql(alias_dict)[0] for o in self._order])
-        return ''
+            sql = "ORDER BY %s"
+            self.sql.append(sql % ', '.join([o._to_sql(alias_mapping)[0] for o in self._order]))
 
-    def _build_group(self, alias_dict):
+    def _build_group(self, alias_mapping):
         if self._group:
-            sql = " GROUP BY %s"
-            return sql % ', '.join([g._to_sql(alias_dict)[0] for g in self._group])
-        return ''
+            sql = "GROUP BY %s"
+            self.sql.append(sql % ', '.join([g._to_sql(alias_mapping)[0] for g in self._group]))
 
-    def _build_having(self, alias_dict):
-        sql = " HAVING %s"
+    def _build_having(self, alias_mapping):
         if self._having:
-            having, args = self._having._to_sql(alias_dict)
-            return sql % having, args
-        return '', []
+            sql = "HAVING %s"
+            having, args = self._having._to_sql(alias_mapping)
+            self.sql.append(sql % having)
+            self.args += args
 
-    def _build_limit(self):
+    def _build_limit(self, alias_mapping):
         if self._limit:
-            sql = " LIMIT %s OFFSET %s"
-            return sql, [self._limit, self._offset]
-        return '', []
-
-    def _to_sql(self, alias_dict):
-        sql = "SELECT %s%s FROM %s" % (
-            'DISTINCT ' if self._distinct else '', self._build_columns(alias_dict),
-            self._build_tables(alias_dict)
-        )
-        args = []
-
-        def with_args(f, uses_alias_dict=True):
-            # access parent f(x)'s query and args and modify them
-            nonlocal sql, args, alias_dict
-            _sql, _args = f(alias_dict) if uses_alias_dict else f()
-            sql += "%s" % _sql
-            args += _args
-
-        with_args(self._build_joins)
-        with_args(self._build_where)
-
-        sql += self._build_order(alias_dict)
-        sql += self._build_group(alias_dict)
-
-        with_args(self._build_having)
-        with_args(self._build_limit, False)
-
-        return (sql, args)
-
-    def to_sql(self):
-        return self._to_sql(AliasMapping())
+            sql = "LIMIT %s OFFSET %s"
+            self.sql.append(sql)
+            self.args += [self._limit, self._offset]
 
 
-class Delete(object):
+class Delete(BaseQuery):
 
     def __init__(self, rows, using=[], where=None, returning=[]):
         """
@@ -635,66 +694,20 @@ class Delete(object):
             >>> d.to_sql()
             DELETE FROM "res_partner" "a" WHERE "a"."active" = 'False'
         """
+        super(Delete, self).__init__()
         self._rows = rows
         self._using = using
         self._where = where
         self._returning = returning
 
-    def _build_from(self, alias_mapping):
-        return "DELETE FROM %s" % ", ".join(
-            ["%s %s" % (r._table, alias_mapping[r]) for r in self._rows]
-        )
+    def _build_base(self, alias_mapping):
+        self.sql.append("DELETE")
 
     def _build_using(self, alias_mapping):
         if self._using:
-            return " USING %s" % ", ".join(
+            self.sql.append("USING %s" % ", ".join(
                 ["%s %s" % (r._table, alias_mapping[r]) for r in self._using]
-            )
-        return ''
-
-    def _build_where(self, alias_mapping):
-        if self._where:
-            _sql, _args = self._where._to_sql(alias_mapping)
-            return " WHERE %s" % _sql, _args
-        return '', []
-
-    def _build_returning(self, alias_mapping):
-        args = []
-
-        if self._returning:
-            sql = " RETURNING %s"
-            _q = []
-            for e in self._returning:
-                if isinstance(e, Row):
-                    _q.append('*')
-                    break
-                else:
-                    # Column or Expression
-                    _sql, _args = e._to_sql(alias_mapping)
-                    _q.append(_sql)
-                    args += _args
-            return sql % ', '.join(_q), args
-        return '', args
-
-    def _to_sql(self, alias_mapping):
-        sql = ""
-        args = []
-
-        sql += self._build_from(alias_mapping)
-        sql += self._build_using(alias_mapping)
-
-        _sql, _args = self._build_where(alias_mapping)
-        sql += _sql
-        args += _args
-
-        _sql, _args = self._build_returning(alias_mapping)
-        sql += _sql
-        args += _args
-
-        return sql, args
-
-    def to_sql(self):
-        return self._to_sql(AliasMapping())
+            ))
 
 
 class With(object):
@@ -741,78 +754,35 @@ class With(object):
         return self._to_sql(AliasMapping())
 
 
-class Update(object):
+class Update(BaseQuery):
 
     def __init__(self, exprs, where=None, returning=[]):
+        super(Update, self).__init__()
         self._exprs = exprs
         self._where = where
         self._returning = returning
         # The main table is the left leaf's table
         self._main = exprs[0][0]._row
         # Auxiliary tables found in set expressions
-        self._auxiliary = [aux._row for main, aux in exprs if aux is not None]
+        self._rows = [aux._row for main, aux in exprs if aux is not None]
 
-    def _build_set(self, alias_mapping):
-        sql = []
+    def _pre_build(self, alias_mapping):
+        return "UPDATE %s %s" % (self._main._table, alias_mapping[self._main])
+
+    def _build_base(self, alias_mapping):
+        sql = [self._pre_build(alias_mapping), "SET"]
         args = []
 
+        _set = []
         for left, right in self._exprs:
             _sql, _args = left._to_sql(alias_mapping)
-            sql.append(_sql)
+            _set.append(_sql)
             args += _args
 
-        return ', '.join(sql), args
-
-    def _build_where(self, alias_mapping):
-        if self._where:
-            _sql, _args = self._where._to_sql(alias_mapping)
-            return " WHERE %s" % _sql, _args
-        return '', []
-
-    def _build_from(self, alias_mapping):
-        if self._auxiliary:
-            sql = " FROM %s" % ', '.join(
-                ["%s %s" % (t._table, alias_mapping[t]) for t in self._auxiliary])
-            return sql
-        return ''
-
-    def _build_returning(self, alias_mapping):
-        args = []
-
-        if self._returning:
-            sql = " RETURNING %s"
-            _q = []
-            for e in self._returning:
-                if isinstance(e, Row):
-                    _q.append('*')
-                    break
-                else:
-                    # Column or Expression
-                    _sql, _args = e._to_sql(alias_mapping)
-                    _q.append(_sql)
-                    args += _args
-            return sql % ', '.join(_q), args
-        return '', args
-
-    def _to_sql(self, alias_mapping):
-        sql = "UPDATE %s %s SET %s"
-        _sql, args = self._build_set(alias_mapping)
-
-        sql = sql % (self._main._table, alias_mapping[self._main], _sql)
-        sql += self._build_from(alias_mapping)
-
-        _sql, _args = self._build_where(alias_mapping)
-        sql += _sql
-        args += _args
-
-        _sql, _args = self._build_returning(alias_mapping)
-        sql += _sql
-        args += _args
-
-        return sql, args
-
-    def to_sql(self):
-        return self._to_sql(AliasMapping())
+        _set = ', '.join(_set)
+        sql.append(_set)
+        self.sql.append(' '.join(sql))
+        self.args += args
 
 
 # SQL Functions and Aggregates
