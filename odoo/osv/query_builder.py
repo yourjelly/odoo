@@ -187,7 +187,7 @@ class Row(object):
 
     __slots__ = ('_table', '_nullable', '_cols')
 
-    def __init__(self, table, nullable=False, cols=[]):
+    def __init__(self, table, nullable=False):
         """
         Create an object that represents any row of a table.
 
@@ -200,8 +200,10 @@ class Row(object):
         self._nullable = nullable
         self._cols = OrderedDict()
 
-        for col in cols:
+    def __call__(self, *args):
+        for col in args:
             self._cols[col] = Column(self, col)
+        return self
 
     def __getattr__(self, name):
         if name.startswith('__'):
@@ -259,6 +261,9 @@ class Column(Expression):
 class BaseQuery(object):
 
     def __init__(self, *args, **kwargs):
+        """
+        Helper class for combining the different parts of any Query object.
+        """
         self.sql = []
         self.args = []
 
