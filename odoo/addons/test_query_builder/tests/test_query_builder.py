@@ -116,6 +116,11 @@ class TestExpressions(TestCase):
         res = (""""res_partner"."id" = %s""", [5])
         self.assertEqual(expr._to_sql(None), res)
 
+    def test_pow(self):
+        expr = self.p.count ** 5
+        res = ("""(POW("res_partner"."count", %s))""", [5])
+        self.assertEqual(expr._to_sql(None), res)
+
     def test_and_type(self):
         with self.assertRaises(AssertionError):
             self.p.id & 5

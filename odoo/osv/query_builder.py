@@ -268,7 +268,7 @@ class BaseQuery(object):
         self.args = []
 
     def _build_base(self, alias_mapping):
-        pass
+        return NotImplementedError
 
     def _build_from(self, alias_mapping):
         rows = getattr(self, '_rows', False)
