@@ -114,7 +114,7 @@ class TestExpressions(TestCase):
     def test_col_attr_setting(self):
         expr = self.p.id << 5
         res = (""""res_partner"."id" = %s""", [5])
-        self.assertEqual(expr[0]._to_sql(None), res)
+        self.assertEqual(expr._to_sql(None), res)
 
     def test_and_type(self):
         with self.assertRaises(AssertionError):
@@ -714,4 +714,14 @@ class TestUpdate(TestCase):
         self.assertEqual(
             u.to_sql(),
             ("""UPDATE "res_users" "a" SET "a"."id" = %s RETURNING "a"."id\"""", [5])
+        )
+
+    def test_update_with_sub_select(self):
+        s = Select([self.u.name], where=self.u.partner_id == self.p.id, limit=1)
+        u = Update([self.p.name << s])
+        self.assertEqual(
+            u.to_sql(),
+            ("""UPDATE "res_partner" "a" SET "a"."name" = """
+             """(SELECT "b"."name" FROM "res_users" "b" WHERE ("b"."partner_id" = "a"."id") """
+             """LIMIT %s OFFSET %s)""", [1, 0])
         )

@@ -236,10 +236,7 @@ class Column(Expression):
 
     def __lshift__(self, other):
         self._val = other
-        if isinstance(other, Column):
-            return (self, other)
-        else:
-            return (self, None)
+        return self
 
     def _to_sql(self, alias_mapping=None):
         qualified = "{0}.%s" % self._name
@@ -254,6 +251,9 @@ class Column(Expression):
             if isinstance(self._val, Column):
                 _sql, _args = self._val._to_sql(alias_mapping)
                 return "%s = %s" % (col_name, _sql), _args
+            elif isinstance(self._val, Select):
+                _sql, _args = self._val._to_sql(alias_mapping)
+                return "%s = (%s)" % (col_name, _sql), _args
             return "{0} = %s".format(col_name), [self._val]
         return col_name, []
 
@@ -767,9 +767,9 @@ class Update(BaseQuery):
         self._where = where
         self._returning = returning
         # The main table is the left leaf's table
-        self._main = exprs[0][0]._row
+        self._main = exprs[0]._row
         # Auxiliary tables found in set expressions
-        self._rows = [aux._row for main, aux in exprs if aux is not None]
+        self._rows = [expr._val._row for expr in exprs if isinstance(expr._val, Column)]
 
     def _pre_build(self, alias_mapping):
         return "UPDATE %s %s" % (self._main._table, alias_mapping[self._main])
@@ -779,8 +779,8 @@ class Update(BaseQuery):
         args = []
 
         _set = []
-        for left, right in self._exprs:
-            _sql, _args = left._to_sql(alias_mapping)
+        for expr in self._exprs:
+            _sql, _args = expr._to_sql(alias_mapping)
             _set.append(_sql)
             args += _args
 
@@ -788,6 +788,12 @@ class Update(BaseQuery):
         sql.append(_set)
         self.sql.append(' '.join(sql))
         self.args += args
+
+
+class Insert(BaseQuery):
+
+    def __init__(self,):
+        super(Insert, self).__init__()
 
 
 # SQL Functions and Aggregates
