@@ -34,6 +34,15 @@ class ProductTemplate(models.Model):
         string="Expense Account", oldname="property_account_expense",
         domain=[('deprecated', '=', False)],
         help="This account will be used for invoices instead of the default one to value expenses for the current product.")
+    current_company_id = fields.Many2one('res.company', compute='_compute_current_company')
+
+    @api.depends('company_id')
+    def _compute_current_company(self):
+        for template in self:
+            if template.company_id:
+                template.current_company_id = template.company_id.id
+            else:
+                template.current_company_id = self.env.user_id.company_id
 
     @api.multi
     def write(self, vals):

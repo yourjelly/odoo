@@ -11,16 +11,17 @@
                     <page string="Invoicing" name="invoicing" groups="account.group_account_invoice">
                         <group name="properties">
                             <group>
+                                <field name="current_company_id"/>
                                 <field name="property_account_income_id"
                                     domain="[('internal_type','=','other'),('deprecated','=',False)]"
                                     groups="account.group_account_user"/>
-                                <field name="taxes_id" widget="many2many_tags"/>
+                                <field name="taxes_id" widget="many2many_tags" domain="[('company_id', '=', current_company_id)]"/>
                             </group>
                             <group>
                                 <field name="property_account_expense_id"
                                     domain="[('internal_type','=','other'),('deprecated','=',False)]"
                                     groups="account.group_account_user"/>
-                                <field name="supplier_taxes_id" widget="many2many_tags"/>
+                                <field name="supplier_taxes_id" widget="many2many_tags" domain="[('company_id', '=', current_company_id)]"/>
                             </group>
                         </group>
                         <group name="accounting"/>
