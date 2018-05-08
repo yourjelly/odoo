@@ -104,6 +104,7 @@ class ProcurementRule(models.Model):
             'move_dest_ids': values.get('move_dest_ids', False) and [(4, x.id) for x in values['move_dest_ids']] or [],
             'rule_id': self.id,
             'procure_method': self.procure_method,
+            'orderpoint_id': values.get('orderpoint_id', False) and values['orderpoint_id'].id,
             'origin': origin,
             'picking_type_id': self.picking_type_id.id,
             'group_id': group_id,

@@ -111,6 +111,7 @@ class StockMove(models.Model):
         'Unit Price', help="Technical field used to record the product cost set by the user during a picking confirmation (when costing "
                            "method used is 'average price' or 'real'). Value given in company currency and in product uom.", copy=False)  # as it's a technical field, we intentionally don't provide the digits attribute
     backorder_id = fields.Many2one('stock.picking', 'Back Order of', related='picking_id.backorder_id', index=True)
+    orderpoint_id = fields.Many2one('stock.warehouse.orderpoint', 'Order Point')
     origin = fields.Char("Source Document")
     procure_method = fields.Selection([
         ('make_to_stock', 'Default: Take From Stock'),
@@ -753,7 +754,7 @@ class StockMove(models.Model):
         # create procurements for make to order moves
         for move in move_create_proc:
             values = move._prepare_procurement_values()
-            origin = (move.group_id and move.group_id.name or (move.rule_id and move.rule_id.name or move.origin or move.picking_id.name or "/"))
+            origin = ((move.group_id and move.group_id.name) or (move.orderpoint_id and move.orderpoint_id.name) or (move.rule_id and move.rule_id.name or move.origin or move.picking_id.name or "/"))
             self.env['procurement.group'].run(move.product_id, move.product_uom_qty, move.product_uom, move.location_id, move.rule_id and move.rule_id.name or "/", origin,
                                               values)
 
@@ -784,6 +785,7 @@ class StockMove(models.Model):
             'company_id': self.company_id,
             'date_planned': self.date,
             'move_dest_ids': self,
+            'orderpoint_id': self.orderpoint_id,
             'group_id': group_id,
             'route_ids': self.route_ids,
             'warehouse_id': self.warehouse_id or self.picking_id.picking_type_id.warehouse_id or self.picking_type_id.warehouse_id,
