@@ -212,7 +212,11 @@ class Row(object):
             return self._cols[name]
         return Column(self, name)
 
-    def _to_sql(self, alias_mapping):
+    def _to_sql(self, alias_mapping, with_cols=False):
+        if with_cols:
+            if self._cols:
+                return "%s(%s)" % (self._table, ', '.join([c._name for c in self._cols.values()]))
+            return "%s" % self._table
         return "%s %s" % (self._table, alias_mapping[self])
 
 
@@ -303,6 +307,9 @@ class BaseQuery(object):
     def _build_limit(self, alias_mapping):
         pass
 
+    def _build_do(self, alias_mapping):
+        pass
+
     def _build_returning(self, alias_mapping):
         returning = getattr(self, '_returning', False)
         args = []
@@ -334,6 +341,7 @@ class BaseQuery(object):
         self._build_group(alias_mapping)
         self._build_having(alias_mapping)
         self._build_limit(alias_mapping)
+        self._build_do(alias_mapping)
         self._build_returning(alias_mapping)
 
     def _to_sql(self, alias_mapping):
@@ -651,10 +659,6 @@ class Select(BaseQuery, QueryExpression):
         self.sql.append(' '.join(sql))
         self.args += args
 
-    def _build_from(self, alias_mapping):
-        tables = ', '.join(["%s %s" % (t._table, alias_mapping[t]) for t in self._rows])
-        self.sql.append("FROM %s" % tables)
-
     def _build_order(self, alias_mapping):
         if self._order:
             sql = "ORDER BY %s"
@@ -743,12 +747,11 @@ class With(object):
 
         for row, statement in self._body:
             alias_mapping[row] = row._table
-            _sql = [row._table, ', '.join(
-                [c._name for c in row._cols.values()])]
+            _sql = [row._to_sql(alias_mapping, with_cols=True)]
             __sql, _args = statement._to_sql(alias_mapping)
             _sql.append(__sql)
             args += _args
-            sql.append("%s(%s) AS (%s)" % tuple(_sql))
+            sql.append("%s AS (%s)" % tuple(_sql))
 
         _sql, _args = self._tail._to_sql(alias_mapping)
         args += _args
@@ -792,8 +795,62 @@ class Update(BaseQuery):
 
 class Insert(BaseQuery):
 
-    def __init__(self,):
+    def __init__(self, row, vals, do_nothing=False, returning=[]):
         super(Insert, self).__init__()
+        self._row = row
+        self._vals = vals
+        self._do_nothing = do_nothing
+        self._returning = returning
+
+    def _pre_build(self, alias_mapping):
+        return """INSERT INTO %s""" % self._row._to_sql(alias_mapping, with_cols=True)
+
+    def _build_base(self, alias_mapping):
+        self.sql.append(self._pre_build(alias_mapping))
+        args = []
+        sql = "VALUES %s"
+
+        if any([isinstance(x, Select) for x in self._vals]):
+            assert len(self._vals) == 1, "Only one sub-query per INSERT statement allowed."
+            _sql, _args = self._vals[0]._to_sql(alias_mapping)
+            sql = ("(%s)" % _sql)
+            self.args += _args
+            self.sql.append(sql)
+            return
+
+        values = []
+        for val in self._vals:
+            if val is NULL or val is DEFAULT:
+                values.append(val)
+            else:
+                values.append("%s")
+                args.append(val)
+
+        sql %= ("(%s)" % ', '.join(map(str, values)))
+        self.sql.append(sql)
+        self.args += args
+
+    def _build_do(self, alias_mapping):
+        if self._do_nothing:
+            self.sql.append("ON CONFLICT DO NOTHING")
+
+    def _build_returning(self, alias_mapping):
+        alias_mapping[self._row] = self._row._table
+        super(Insert, self)._build_returning(alias_mapping)
+
+
+# SQL Constants
+class Constant(object):
+
+    def __init__(self, sql):
+        self.sql = sql
+
+    def __str__(self):
+        return self.sql
+
+
+NULL = Constant('NULL')
+DEFAULT = Constant('DEFAULT')
 
 
 # SQL Functions and Aggregates

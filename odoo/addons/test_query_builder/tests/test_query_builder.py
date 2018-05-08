@@ -3,7 +3,8 @@
 
 from unittest import TestCase
 from odoo.tests.common import tagged
-from odoo.osv.query_builder import Row, Select, Delete, With, Update, Asc, Desc, COALESCE, _quote
+from odoo.osv.query_builder import Row, Select, Delete, With, Update, Insert, \
+    Asc, Desc, COALESCE, NULL, DEFAULT, _quote, BaseQuery
 
 
 @tagged('standard', 'at_install')
@@ -18,6 +19,10 @@ class TestMisc(TestCase):
     def test_row_dunder_getter(self):
         with self.assertRaises(AttributeError):
             Row('res_partner').__name__
+
+    def test_build_base_not_impl(self):
+        with self.assertRaises(NotImplementedError):
+            BaseQuery()._build_base(None)
 
 
 @tagged('standard', 'at_install')
@@ -691,7 +696,6 @@ class TestUpdate(TestCase):
         super(TestUpdate, self).setUp()
         self.u = Row('res_users')
         self.p = Row('res_partner')
-        self.g = Row('res_groups')
 
     def test_basic_update(self):
         u = Update([self.u.id << 5])
@@ -729,4 +733,54 @@ class TestUpdate(TestCase):
             ("""UPDATE "res_partner" "a" SET "a"."name" = """
              """(SELECT "b"."name" FROM "res_users" "b" WHERE ("b"."partner_id" = "a"."id") """
              """LIMIT %s OFFSET %s)""", [1, 0])
+        )
+
+
+@tagged('standard', 'at_install')
+class TestInsert(TestCase):
+
+    def setUp(self):
+        super(TestInsert, self).setUp()
+        self.p = Row('res_partner')
+        self.u = Row('res_users')
+
+    def test_insert_basic(self):
+        i = Insert(self.p('name', 'surname', 'company'), ['hello', 'world', 'mycompany'])
+        self.assertEqual(
+            i.to_sql(),
+            ("""INSERT INTO "res_partner"("name", "surname", "company") VALUES (%s, %s, %s)""",
+             ['hello', 'world', 'mycompany'])
+        )
+
+    def test_insert_sub_select(self):
+        s = Select([self.p.name], limit=1)
+        i = Insert(self.p('name'), [s])
+        self.assertEqual(
+            i.to_sql(),
+            ("""INSERT INTO "res_partner"("name") """
+             """(SELECT "a"."name" FROM "res_partner" "a" LIMIT %s OFFSET %s)""", [1, 0])
+        )
+
+    def test_insert_constants(self):
+        i = Insert(self.p('name', 'surname', 'company'), ['foo', NULL, DEFAULT])
+        self.assertEqual(
+            i.to_sql(),
+            ("""INSERT INTO "res_partner"("name", "surname", "company") """
+             """VALUES (%s, NULL, DEFAULT)""", ['foo'])
+        )
+
+    def test_insert_on_conflict(self):
+        i = Insert(self.p('name'), ['foo'], do_nothing=True)
+        self.assertEqual(
+            i.to_sql(),
+            ("""INSERT INTO "res_partner"("name") VALUES (%s) ON CONFLICT DO NOTHING""",
+             ['foo'])
+        )
+
+    def test_insert_returning(self):
+        i = Insert(self.p('name'), ['foo'], returning=[self.p.id])
+        self.assertEqual(
+            i.to_sql(),
+            ("""INSERT INTO "res_partner"("name") VALUES (%s) RETURNING "res_partner"."id\"""",
+             ['foo'])
         )
