@@ -106,6 +106,7 @@ ListRenderer.include({
         var self = this;
         return this._super.apply(this, arguments).then(function (widgets) {
             if (widgets.length) {
+                state = self.state.groupedBy.length ? self.current_group : state;
                 var rowIndex = _.findIndex(state.data, function (r) {
                     return r.id === id;
                 });
@@ -144,7 +145,8 @@ ListRenderer.include({
         // been applied
         var currentRowID, currentWidget, focusedElement, selectionRange;
         if (self.currentRow !== null) {
-            currentRowID = this.state.data[this.currentRow].id;
+            var data = this.state.groupedBy.length ? this.current_group.data : this.state.data;
+            currentRowID = data[this.currentRow].id;
             currentWidget = this.allFieldWidgets[currentRowID][this.currentFieldIndex];
             focusedElement = currentWidget.getFocusableElement().get(0);
             if (currentWidget.formatType !== 'boolean') {
@@ -152,12 +154,13 @@ ListRenderer.include({
             }
         }
 
-        var oldData = this.state.data;
+        var oldData = this.state.groupedBy.length ? this.current_group.data : this.state.data;
         this.state = state;
         return this.confirmChange(state, id, fields, ev).then(function () {
             // If no record with 'id' can be found in the state, the
             // confirmChange method will have rerendered the whole view already,
             // so no further work is necessary.
+            state = this.state.groupedBy.length ? this.current_group : state;
             var record = _.findWhere(state.data, {id: id});
             if (!record) {
                 return;
@@ -189,7 +192,8 @@ ListRenderer.include({
                 self.currentRow = newRowIndex;
                 return self._selectCell(newRowIndex, self.currentFieldIndex, {force: true}).then(function () {
                     // restore the cursor position
-                    currentRowID = self.state.data[newRowIndex].id;
+                    var data = this.state.groupedBy.length ? this.current_group.data : this.state.data;
+                    currentRowID = data[newRowIndex].id;
                     currentWidget = self.allFieldWidgets[currentRowID][self.currentFieldIndex];
                     focusedElement = currentWidget.getFocusableElement().get(0);
                     if (selectionRange) {
@@ -266,19 +270,8 @@ ListRenderer.include({
         // should be able to update a record as well)
         var record;
         var rowIndex;
-        if (this.state.groupedBy.length && mode === 'edit') {
+        if (this.state.groupedBy.length) {
             var state = this.current_group;
-            rowIndex = -1;
-            var count = 0;
-            utils.traverse_records(state, function (r) {
-                if (r.id === recordID) {
-                    record = r;
-                    rowIndex = count;
-                }
-                count++;
-            });
-        } else if (this.state.groupedBy.length && mode === 'readonly') {
-            var state = this.previousGroup;
             rowIndex = -1;
             var count = 0;
             utils.traverse_records(state, function (r) {
@@ -376,7 +369,7 @@ ListRenderer.include({
         if (this.currentRow === null) {
             return $.when();
         }
-        var record = (this.state.groupedBy.length && this.previousGroup) ? this.previousGroup.data[this.currentRow] : this.state.data[this.currentRow];
+        var record = (this.state.groupedBy.length) ? this.current_group.data[this.currentRow] : this.state.data[this.currentRow];
         var recordWidgets = this.allFieldWidgets[record.id];
         toggleWidgets(true);
 
@@ -435,29 +428,13 @@ ListRenderer.include({
     _getRow: function (mode, recordID) {
         var self = this;
         var $row;
-        if (mode === 'edit') {
-            // If there are multiple groups we have to find that in which group exactly the
-            // the row is.
-            this.previousGroup = this.current_group;
-            var $rows = this.$('.o_data_row');
-            var row = _.find($rows, function (r) {
-                if (($(r).data('groupID') ===  self.current_group.id) && $(r).data('id') === recordID) {
-                    return r;
-                }
-            });
-            return $row = $(row);
-        } else if(mode === 'readonly') {
-            var $rows = this.$('.o_data_row');
-            var row = _.find($rows, function (r) {
-                if (($(r).data('groupID') ===  self.previousGroup.id) && $(r).data('id') === recordID) {
-                    return r;
-                }
-            });
-            // Store the current group as a previous one so that we can find the
-            // in which group our selected row belongs to
-            this.previousGroup = this.current_group;
-            return $row = $(row);
-        }
+        var $rows = this.$('.o_data_row');
+        var row = _.find($rows, function (r) {
+            if (($(r).data('groupID') ===  self.current_group.id) && $(r).data('id') === recordID) {
+                return r;
+            }
+        });
+        return $row = $(row);
     },
     /**
      * Returns true iff the list is editable, i.e. if it isn't grouped and if
@@ -670,13 +647,13 @@ ListRenderer.include({
     _selectCell: function (rowIndex, fieldIndex, options) {
         options = options || {};
         // Do nothing if the user tries to select current cell
-        if (!options.force && rowIndex === this.currentRow && fieldIndex === this.currentFieldIndex && (this.previousGroup === this.current_group)) {
+        if (!options.force && rowIndex === this.currentRow && fieldIndex === this.currentFieldIndex) {
             return $.when();
         }
         var wrap = options.wrap === undefined ? true : options.wrap;
         // Select the row then activate the widget in the correct cell
         var self = this;
-        return this._selectRow(rowIndex).then(function () {
+        return this._selectRow(rowIndex, options.groupID).then(function () {
             var record = self.state.groupedBy.length ? self.current_group.data[rowIndex] : self.state.data[rowIndex];
             if (fieldIndex >= (self.allFieldWidgets[record.id] || []).length) {
                 return $.Deferred().reject();
@@ -704,15 +681,20 @@ ListRenderer.include({
      * @param {integer} rowIndex
      * @returns {Deferred}
      */
-    _selectRow: function (rowIndex) {
+    _selectRow: function (rowIndex, groupID) {
         // Do nothing if already selected
-        if (rowIndex === this.currentRow && (this.previousGroup === this.current_group)) {
+        if (rowIndex === this.currentRow) {
             return $.when();
         }
 
         // To select a row, the currently selected one must be unselected first
         var self = this;
         return this.unselectRow().then(function () {
+            _.each(self.$('.o_group_header'), function (groupRow) {
+                if ($(groupRow).data('group').id === groupID) {
+                    self.current_group = $(groupRow).data('group');
+                }
+            });
             var state = self.state.groupedBy.length ? self.current_group : self.state;
             if (state.data.length <= rowIndex) {
                 // The row to selected doesn't exist anymore (probably because
@@ -722,8 +704,6 @@ ListRenderer.include({
             }
             // Notify the controller we want to make a record editable
             var def = $.Deferred();
-            console.trace();
-            debugger;
             self.trigger_up('edit_line', {
                 index: rowIndex,
                 groupID: self.current_group && self.current_group.id,
@@ -772,7 +752,7 @@ ListRenderer.include({
         var self = this;
         var $td = $(event.currentTarget);
         var $tr = $td.parent();
-        var group = false;
+        var rowIndex;
         if (this.state.groupedBy.length) {
             var $headers = this.$('.o_group_header');
             var groupRow = _.find($headers, function (row) {
@@ -780,17 +760,13 @@ ListRenderer.include({
                     return row;
                 }
             });
-            self.current_group = $(groupRow).data('group');
-        }
-        var rowIndex;
-        if (this.state.groupedBy.length) {
-            var data = this.current_group.data;
+            var data = $(groupRow).data('group').data;
             rowIndex = _.indexOf(_.pluck(data, 'id'), $tr.data('id'));
         } else {
             rowIndex = this.$('.o_data_row').index($tr);
         }
         var fieldIndex = Math.max($tr.find('.o_data_cell').not('.o_list_button').index($td), 0);
-        this._selectCell(rowIndex, fieldIndex, {event: event});
+        this._selectCell(rowIndex, fieldIndex, {event: event, groupID:  $tr.data('groupID')});
     },
     /**
      * We need to manually unselect row, because noone else would do it

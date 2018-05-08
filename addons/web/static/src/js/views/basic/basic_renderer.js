@@ -14,6 +14,7 @@ var dom = require('web.dom');
 var widgetRegistry = require('web.widget_registry');
 
 var qweb = core.qweb;
+var utils = require('web.utils');
 
 var BasicRenderer = AbstractRenderer.extend({
     custom_events: {
@@ -90,8 +91,17 @@ var BasicRenderer = AbstractRenderer.extend({
      */
     confirmChange: function (state, id, fields, ev) {
         this.state = state;
+        var record;
 
-        var record = state.id === id ? state : _.findWhere(state.data, {id: id});
+        if (this.state.groupedBy.length && state.id != id) {
+            utils.traverse_records(state, function (r) {
+                if (r.id === id) {
+                    record = r;
+                }
+            });
+        } else {
+            record = state.id === id ? state : _.findWhere(state.data, {id: id});
+        }
         if (!record) {
             return this._render().then(_.constant([]));
         }
