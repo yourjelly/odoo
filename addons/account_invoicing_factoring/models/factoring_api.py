@@ -27,6 +27,7 @@ class FactoringAPI(models.AbstractModel):
                 'url': self.env['ir.config_parameter'].sudo().get_param('web.base.url'),
                 'siret': company.siret,
                 'country_code': company.country_id.code.lower(),
+                'currency_code': company.currency_id.name,
                 'city': company.city,
                 'phone': company.phone,
                 'email': company.email,
