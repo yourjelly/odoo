@@ -541,6 +541,8 @@ This example widget can be used in the following manner:
 This example illustrates a few of the features of the *Widget* class, including
 the event system, the template system, the constructor with the initial *parent* argument.
 
+.. _reference/javascript_reference/widget-lifecycle:
+
 Widget Lifecycle
 ----------------
 

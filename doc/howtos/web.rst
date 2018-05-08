@@ -4,10 +4,6 @@
 Customizing the web client
 =============================
 
-Note: this section is really really out of date. It will be updated someday,
-but meanwhile, this tutorial will probably be frustrating to follow, since it
-was written a long time ago.
-
 
 .. highlight:: javascript
 
@@ -40,31 +36,31 @@ following command:
 
 .. code-block:: console
 
-    $ git clone http://github.com/odoo/petstore
+    $ git clone http://github.com/jpr-odoo/petstore
 
 This will create a ``petstore`` folder wherever you executed the command.
 You then need to add that folder to Odoo's
 :option:`addons path <odoo-bin --addons-path>`, create a new database and
-install the ``oepetstore`` module.
+install the ``petstore`` module.
 
 If you browse the ``petstore`` folder, you should see the following content:
 
 .. code-block:: text
 
-    oepetstore
-    |-- images
-    |   |-- alligator.jpg
-    |   |-- ball.jpg
-    |   |-- crazy_circle.jpg
-    |   |-- fish.jpg
-    |   `-- mice.jpg
-    |-- __init__.py
-    |-- oepetstore.message_of_the_day.csv
-    |-- __manifest__.py
-    |-- petstore_data.xml
-    |-- petstore.py
-    |-- petstore.xml
+    petstore
+    |-- data
+    |   |-- petstore_data.xml
+    |   `-- petstore.message.csv
+    |-- models
+    |   |-- __init__.py
+    |   `-- petstore.py
     `-- static
+        |-- img
+            |-- alligator.jpg
+            |-- ball.jpg
+            |-- crazy_circle.jpg
+            |-- fish.jpg
+            `-- mice.jpg
         `-- src
             |-- css
             |   `-- petstore.css
@@ -72,6 +68,10 @@ If you browse the ``petstore`` folder, you should see the following content:
             |   `-- petstore.js
             `-- xml
                 `-- petstore.xml
+    |-- views
+    |   `-- petstore_views.xml
+    |-- __init__.py
+    |-- __manifest__.py
 
 The module already holds various server customizations. We'll come back to
 these later, for now let's focus on the web-related content, in the ``static``
@@ -82,33 +82,37 @@ folder so they are available to a web browser, files outside that folder can
 not be fetched by browsers. The ``src/css``, ``src/js`` and ``src/xml``
 sub-folders are conventional and not strictly necessary.
 
-``oepetstore/static/css/petstore.css``
+``petstore/static/css/petstore.css``
     Currently empty, will hold the CSS_ for pet store content
-``oepetstore/static/xml/petstore.xml``
+``petstore/static/xml/petstore.xml``
     Mostly empty, will hold :ref:`reference/qweb` templates
-``oepetstore/static/js/petstore.js``
+``petstore/static/js/petstore.js``
     The most important (and interesting) part, contains the logic of the
     application (or at least its web-browser side) as javascript. It should
     currently look like::
 
-        odoo.oepetstore = function(instance, local) {
-            var _t = instance.web._t,
-                _lt = instance.web._lt;
-            var QWeb = instance.web.qweb;
+      odoo.define('petstore.petstore', function (require) {
+      "use strict";
 
-            local.HomePage = instance.Widget.extend({
-                start: function() {
-                    console.log("pet store home page loaded");
-                },
-            });
+        var core = require('web.core');
+        var Widget = require('web.Widget');
 
-            instance.web.client_actions.add(
-                'petstore.homepage', 'instance.oepetstore.HomePage');
-        }
+        var _t = core._t,
+            _lt = core._lt,
+            QWeb = core.qweb;
+
+
+        var HomePage = Widget.extend({
+            start: function (){
+                console.log("pet store home page loaded");
+            },
+        });
+        core.action_registry.add('petstore.homepage', HomePage);
+      });
 
 Which only prints a small message in the browser's console.
 
-The files in the ``static`` folder, need to be defined within the module in order for them to be loaded correctly. Everything in ``src/xml`` is defined in ``__manifest__.py`` while the contents of ``src/css`` and ``src/js`` are defined in ``petstore.xml``, or a similar file.
+The files in the ``static`` folder, need to be defined within the module in order for them to be loaded correctly. Everything in ``src/xml`` is defined in ``__manifest__.py`` while the contents of ``src/css`` and ``src/js`` are defined in ``petstore_views.xml``, or a similar file.
 
 .. warning::
 
@@ -119,12 +123,8 @@ The files in the ``static`` folder, need to be defined within the module in orde
     individual files disappear and the code is made significantly less
     readable. It is possible to disable this process by enabling the
     "developer mode": log into your Odoo instance (user *admin* password
-    *admin* by default) open the user menu (in the top-right corner of the
-    Odoo screen) and select :guilabel:`About Odoo` then :guilabel:`Activate
-    the developer mode`:
-
-    .. image:: web/about_odoo.png
-        :align: center
+    *admin* by default) open the settings menu and select :guilabel:`Activate the developer Mode` or :guilabel:`Activate
+    the developer mode (with assets)`:
 
     .. image:: web/devmode.png
         :align: center
@@ -134,184 +134,316 @@ The files in the ``static`` folder, need to be defined within the module in orde
 
 .. todo:: qweb files hooked via __manifest__.py, but js and CSS use bundles
 
-Odoo JavaScript Module
-======================
+Odoo JavaScript Module System
+=============================
 
 Javascript doesn't have built-in modules. As a result variables defined in
 different files are all mashed together and may conflict. This has given rise
 to various module patterns used to build clean namespaces and limit risks of
 naming conflicts.
 
-The Odoo framework uses one such pattern to define modules within web addons,
-in order to both namespace code and correctly order its loading.
+Once we are able to load our javascript files into the browser, we need to make
+sure they are loaded in the correct order.  In order to do that, Odoo has defined
+a small module system (located in the file *addons/web/static/src/js/boot.js*,
+which needs to be loaded first).
 
-``oepetstore/static/js/petstore.js`` contains a module declaration::
+The Odoo module system, inspired by AMD, works by defining the function *define*
+on the global odoo object. We then define each javascript module by calling that
+function.  In the Odoo framework, a module is a piece of code that will be executed
+as soon as possible.  It has a name and potentially some dependencies.  When its
+dependencies are loaded, a module will then be loaded as well.  The value of the
+module is then the return value of the function defining the module.
 
-    odoo.oepetstore = function(instance, local) {
-        local.xxx = ...;
-    }
+As an example, it may look like this:
 
-In Odoo web, modules are declared as functions set on the global ``odoo``
-variable. The function's name must be the same as the addon (in this case
-``oepetstore``) so the framework can find it, and automatically initialize it.
 
-When the web client loads your module it will call the root function
-and provide two parameters:
+.. code-block:: javascript
 
-* the first parameter is the current instance of the Odoo web client, it gives
-  access to various capabilities defined by the Odoo (translations,
-  network services) as well as objects defined by the core or by other
-  modules.
-* the second parameter is your own local namespace automatically created by
-  the web client. Objects and variables which should be accessible from
-  outside your module (either because the Odoo web client needs to call them
-  or because others may want to customize them) should be set inside that
-  namespace.
+    // in file a.js
+    odoo.define('module.A', function (require) {
+        "use strict";
 
-Classes
+        var A = ...;
+
+        return A;
+    });
+
+    // in file b.js
+    odoo.define('module.B', function (require) {
+        "use strict";
+
+        var A = require('module.A');
+
+        var B = ...; // something that involves A
+
+        return B;
+    });
+
+An alternative way to define a module is to give explicitely a list of dependencies
+in the second argument.
+
+.. code-block:: javascript
+
+    odoo.define('module.Something', ['module.A', 'module.B'], function (require) {
+        "use strict";
+
+        var A = require('module.A');
+        var B = require('module.B');
+
+        // some code
+    });
+
+
+If some dependencies are missing/non ready, then the module will simply not be
+loaded.  There will be a warning in the console after a few seconds.
+
+Note that circular dependencies are not supported. It makes sense, but it means that one
+needs to be careful.
+
+
+Defining a module
+-----------------
+
+The *odoo.define* method is given three arguments:
+
+- *moduleName*: the name of the javascript module.  It should be a unique string.
+  The convention is to have the name of the odoo addon followed by a specific
+  description. For example, 'web.Widget' describes a module defined in the *web*
+  addon, which exports a *Widget* class (because the first letter is capitalized)
+
+  If the name is not unique, an exception will be thrown and displayed in the
+  console.
+
+- *dependencies*: the second argument is optional. If given, it should be a list
+  of strings, each corresponding to a javascript module.  This describes the
+  dependencies that are required to be loaded before the module is executed. If
+  the dependencies are not explicitely given here, then the module system will
+  extract them from the function by calling toString on it, then using a regexp
+  to find all *require* statements.
+
+- finally, the last argument is a function which defines the module. Its return
+  value is the value of the module, which may be passed to other modules requiring
+  it.  Note that there is a small exception for asynchronous modules, see the
+  next section.
+
+If an error happens, it will be logged (in debug mode) in the console:
+
+* ``Missing dependencies``:
+  These modules do not appear in the page. It is possible that the JavaScript
+  file is not in the page or that the module name is wrong
+* ``Failed modules``:
+  A javascript error is detected
+* ``Rejected modules``:
+  The module returns a rejected deferred. It (and its dependent modules) is not
+  loaded.
+* ``Rejected linked modules``:
+  Modules who depend on a rejected module
+* ``Non loaded modules``:
+  Modules who depend on a missing or a failed module
+
+
+Asynchronous modules
+---------------------
+
+It can happen that a module needs to perform some work before it is ready.  For
+example, it could do a rpc to load some data.  In that case, the module can
+simply return a deferred (promise).  In that case, the module system will simply
+wait for the deferred to complete before registering the module.
+
+.. code-block:: javascript
+
+    odoo.define('module.Something', ['web.ajax'], function (require) {
+        "use strict";
+
+        var ajax = require('web.ajax');
+
+        return ajax.rpc(...).then(function (result) {
+            // some code here
+            return something;
+        });
+    });
+
+
+Best practices
+----------------
+
+- remember the convention for a module name: *addon name* suffixed with *module
+  name*.
+- declare all your dependencies at the top of the module. Also, they should be
+  sorted alphabetically by module name. This makes it easier to understand your module.
+- declare all exported values at the end
+- try to avoid exporting too much things from one module.  It is usually better
+  to simply export one thing in one (small/smallish) module.
+- asynchronous modules can be used to simplify some use cases.  For example,
+  the *web.dom_ready* module returns a deferred which will be resolved when the
+  dom is actually ready.  So, another module that needs the DOM could simply have
+  a *require('web.dom_ready')* statement somewhere, and the code will only be
+  executed when the DOM is ready.
+- try to avoid defining more than one module in one file.  It may be convenient
+  in the short term, but this is actually harder to maintain.
+
+
+Class System
+============
+
+Odoo was developped before ECMAScript 6 classes were available.  In Ecmascript 5,
+the standard way to define a class is to define a function and to add methods
+on its prototype object.  This is fine, but it is slightly complex when we want
+to use inheritance, mixins.
+
+For these reasons, Odoo decided to use its own class system, inspired by John
+Resig `Simple JavaScript Inheritance`_. The base Class is located in *web.Class*, in the file *class.js*.
+
+Creating a subclass
+-------------------
+
+Let us discuss how classes are created.  The main mechanism is to use the
+*extend* method (this is more or less the equivalent of *extend* in ES6 classes).
+
+.. code-block:: javascript
+
+    var Class = require('web.Class');
+
+    var Animal = Class.extend({
+        init: function () {
+            this.x = 0;
+            this.hunger = 0;
+        },
+        move: function () {
+            this.x = this.x + 1;
+            this.hunger = this.hunger + 1;
+        },
+        eat: function () {
+            this.hunger = 0;
+        },
+    });
+
+
+In this example, the *init* function is the constructor.  It will be called when
+an instance is created.  Making an instance is done by using the *new* keyword.
+
+Inheritance
+-----------
+
+It is convenient to be able to inherit an existing class.  This is simply done
+by using the *extend* method on the superclass.  When a method is called, the
+framework will secretly rebind a special method: *_super* to the currently
+called method.  This allows us to use *this._super* whenever we need to call a
+parent method.
+
+
+.. code-block:: javascript
+
+    var Animal = require('web.Animal');
+
+    var Dog = Animal.extend({
+        move: function () {
+            this.bark();
+            this._super.apply(this, arguments);
+        },
+        bark: function () {
+            console.log('woof');
+        },
+    });
+
+    var dog = new Dog();
+    dog.move()
+
+Mixins
+------
+
+The odoo Class system does not support multiple inheritance, but for those cases
+when we need to share some behaviour, we have a mixin system: the *extend*
+method can actually take an arbitrary number of arguments, and will combine all
+of them in the new class.
+
+.. code-block:: javascript
+
+    var Animal = require('web.Animal');
+    var DanceMixin = {
+        dance: function () {
+            console.log('dancing...');
+        },
+    };
+
+    var Hamster = Hamster.extend(DanceMixin, {
+        sleep: function () {
+            console.log('sleeping');
+        },
+    });
+
+In this example, the *Hamster* class is a subclass of Animal, but it also mix
+the DanceMixin in.
+
+
+Patching an existing class
+--------------------------
+
+It is not common, but we sometimes need to modify another class *in place*. The
+goal is to have a mechanism to change a class and all future/present instances.
+This is done by using the *include* method:
+
+.. code-block:: javascript
+
+    var Hamster = require('web.Hamster');
+
+    Hamster.include({
+        sleep: function () {
+            this._super.apply(this, arguments);
+            console.log('zzzz');
+        },
+    });
+
+
+This is obviously a dangerous operation and should be done with care.  But with
+the way Odoo is structured, it is sometimes necessary in one addon to modify
+the behavior of a widget/class defined in another addon.  Note that it will
+modify all instances of the class, even if they have already been created.
+
+
+Widgets
 =======
 
-Much as modules, and contrary to most object-oriented languages, javascript
-does not build in *classes*\ [#classes]_ although it provides roughly
-equivalent (if lower-level and more verbose) mechanisms.
+The *Widget* class is really an important building block of the user interface.
+Pretty much everything in the user interface is under the control of a widget.
+The Widget class is defined in the module *web.Widget*, in *widget.js*.
 
-For simplicity and developer-friendliness Odoo web provides a class
-system based on John Resig's `Simple JavaScript Inheritance`_.
+In short, the features provided by the Widget class include:
 
-New classes are defined by calling the :func:`~odoo.web.Class.extend`
-method of :class:`odoo.web.Class`::
+* parent/child relationships between widgets (*PropertiesMixin*)
+* extensive lifecycle management with safety features (e.g.
+    automatically destroying children widgets during the destruction of a
+    parent)
+* automatic rendering with :ref:`qweb <reference/qweb>`
+* various utility functions to help interacting with the outside environment.
 
-    var MyClass = instance.web.Class.extend({
-        say_hello: function() {
-            console.log("hello");
-        },
-    });
-
-The :func:`~odoo.web.Class.extend` method takes a dictionary describing
-the new class's content (methods and static attributes). In this case, it will
-only have a ``say_hello`` method which takes no parameters.
-
-Classes are instantiated using the ``new`` operator::
-
-    var my_object = new MyClass();
-    my_object.say_hello();
-    // print "hello" in the console
-
-And attributes of the instance can be accessed via ``this``::
-
-    var MyClass = instance.web.Class.extend({
-        say_hello: function() {
-            console.log("hello", this.name);
-        },
-    });
-
-    var my_object = new MyClass();
-    my_object.name = "Bob";
-    my_object.say_hello();
-    // print "hello Bob" in the console
-
-Classes can provide an initializer to perform the initial setup of the
-instance, by defining an ``init()`` method. The initializer receives the
-parameters passed when using the ``new`` operator::
-
-    var MyClass = instance.web.Class.extend({
-        init: function(name) {
-            this.name = name;
-        },
-        say_hello: function() {
-            console.log("hello", this.name);
-        },
-    });
-
-    var my_object = new MyClass("Bob");
-    my_object.say_hello();
-    // print "hello Bob" in the console
-
-It is also possible to create subclasses from existing (used-defined) classes
-by calling :func:`~odoo.web.Class.extend` on the parent class, as is done
-to subclass :class:`~odoo.web.Class`::
-
-    var MySpanishClass = MyClass.extend({
-        say_hello: function() {
-            console.log("hola", this.name);
-        },
-    });
-
-    var my_object = new MySpanishClass("Bob");
-    my_object.say_hello();
-    // print "hola Bob" in the console
-
-When overriding a method using inheritance, you can use ``this._super()`` to
-call the original method::
-
-    var MySpanishClass = MyClass.extend({
-        say_hello: function() {
-            this._super();
-            console.log("translation in Spanish: hola", this.name);
-        },
-    });
-
-    var my_object = new MySpanishClass("Bob");
-    my_object.say_hello();
-    // print "hello Bob \n translation in Spanish: hola Bob" in the console
-
-.. warning::
-
-    ``_super`` is not a standard method, it is set on-the-fly to the next
-    method in the current inheritance chain, if any. It is only defined
-    during the *synchronous* part of a method call, for use in asynchronous
-    handlers (after network calls or in ``setTimeout`` callbacks) a reference
-    to its value should be retained, it should not be accessed via ``this``::
-
-        // broken, will generate an error
-        say_hello: function () {
-            setTimeout(function () {
-                this._super();
-            }.bind(this), 0);
-        }
-
-        // correct
-        say_hello: function () {
-            // don't forget .bind()
-            var _super = this._super.bind(this);
-            setTimeout(function () {
-                _super();
-            }.bind(this), 0);
-        }
-
-Widgets Basics
-==============
-
-The Odoo web client bundles jQuery_ for easy DOM manipulation. It is useful
-and provides a better API than standard `W3C DOM`_\ [#dombugs]_, but
-insufficient to structure complex applications leading to difficult
-maintenance.
-
-Much like object-oriented desktop UI toolkits (e.g. Qt_, Cocoa_ or GTK_),
-Odoo Web makes specific components responsible for sections of a page. In
-Odoo web, the base for such components is the :class:`~odoo.Widget`
-class, a component specialized in handling a page section and displaying
-information for the user.
 
 Your First Widget
 -----------------
 
 The initial demonstration module already provides a basic widget::
 
-    local.HomePage = instance.Widget.extend({
+    var Widget = require('web.Widget');
+
+    var HomePage = Widget.extend({
         start: function() {
             console.log("pet store home page loaded");
         },
     });
 
-It extends :class:`~odoo.Widget` and overrides the standard method
-:func:`~odoo.Widget.start`, which — much like the previous ``MyClass``
+It extends :class:`~web.Widget` and overrides the standard method
+:func:`~web.Widget.start`, which — much like the previous ``Animal``
 — does little for now.
 
 This line at the end of the file::
 
-    instance.web.client_actions.add(
-        'petstore.homepage', 'instance.oepetstore.HomePage');
+    core.action_registry.add(
+        'petstore.homepage', HomePage);
+
+action registry: we keep track of all client actions in this registry.  This
+is where the action manager looks up whenever it needs to create a client
+action.  In version 11, each value should simply be a subclass of *Widget*.
+However, in version 12, the values are required to be *AbstractAction*.
 
 registers our basic widget as a client action. Client actions will be
 explained later, for now this is just what allows our widget to
@@ -332,14 +464,14 @@ Widgets have a number of methods and features, but the basics are simple:
 * format the widget's data
 * display the widget
 
-The ``HomePage`` widget already has a :func:`~odoo.Widget.start`
-method. That method is part of the normal widget lifecycle and automatically
+The ``HomePage`` widget already has a :func:`~web.Widget.start`
+method. That method is part of the normal :ref:`reference/javascript_reference/widget-lifecycle` and automatically
 called once the widget is inserted in the page. We can use it to display some
 content.
 
-All widgets have a :attr:`~odoo.Widget.$el` which represents the
+All widgets have a :attr:`~Widget.$el` which represents the
 section of page they're in charge of (as a jQuery_ object). Widget content
-should be inserted there. By default, :attr:`~odoo.Widget.$el` is an
+should be inserted there. By default, :attr:`~Widget.$el` is an
 empty ``<div>`` element.
 
 A ``<div>`` element is usually invisible to the user if it has no content (or
@@ -348,7 +480,7 @@ on the page when ``HomePage`` is launched.
 
 Let's add some content to the widget's root element, using jQuery::
 
-    local.HomePage = instance.Widget.extend({
+    Var HomePage = Widget.extend({
         start: function() {
             this.$el.append("<div>Hello dear Odoo user!</div>");
         },
@@ -365,19 +497,19 @@ That message will now appear when you open :menuselection:`Pet Store
 The ``HomePage`` widget is used by Odoo Web and managed automatically.
 To learn how to use a widget "from scratch" let's create a new one::
 
-    local.GreetingsWidget = instance.Widget.extend({
+    var GreetingsWidget = Widget.extend({
         start: function() {
             this.$el.append("<div>We are so happy to see you again in this menu!</div>");
         },
     });
 
 We can now add our ``GreetingsWidget`` to the ``HomePage`` by using the
-``GreetingsWidget``'s :func:`~odoo.Widget.appendTo` method::
+``GreetingsWidget``'s :func:`~Widget.appendTo` method::
 
-    local.HomePage = instance.Widget.extend({
+    var HomePage = Widget.extend({
         start: function() {
             this.$el.append("<div>Hello dear Odoo user!</div>");
-            var greeting = new local.GreetingsWidget(this);
+            var greeting = new GreetingsWidget(this);
             return greeting.appendTo(this.$el);
         },
     });
@@ -385,24 +517,24 @@ We can now add our ``GreetingsWidget`` to the ``HomePage`` by using the
 * ``HomePage`` first adds its own content to its DOM root
 * ``HomePage`` then instantiates ``GreetingsWidget``
 * Finally it tells ``GreetingsWidget`` where to insert itself, delegating part
-  of its :attr:`~odoo.Widget.$el` to the ``GreetingsWidget``.
+  of its :attr:`~Widget.$el` to the ``GreetingsWidget``.
 
-When the :func:`~odoo.Widget.appendTo` method is called, it asks the
+When the :func:`~Widget.appendTo` method is called, it asks the
 widget to insert itself at the specified position and to display its content.
-The :func:`~odoo.Widget.start` method will be called during the call
-to :func:`~odoo.Widget.appendTo`.
+The :func:`~Widget.start` method will be called during the call
+to :func:`~Widget.appendTo`.
 
 To see what happens under the displayed interface, we will use the browser's
 DOM Explorer. But first let's alter our widgets slightly so we can more easily
 find where they are, by :attr:`adding a class to their root elements
-<odoo.Widget.className>`::
+<Widget.className>`::
 
-    local.HomePage = instance.Widget.extend({
-        className: 'oe_petstore_homepage',
+    var HomePage = Widget.extend({
+        className: 'o_petstore_homepage',
         ...
     });
-    local.GreetingsWidget = instance.Widget.extend({
-        className: 'oe_petstore_greetings',
+    var GreetingsWidget = Widget.extend({
+        className: 'o_petstore_greetings',
         ...
     });
 
@@ -411,21 +543,21 @@ then :guilabel:`Inspect Element`), it should look like this:
 
 .. code-block:: html
 
-    <div class="oe_petstore_homepage">
+    <div class="o_petstore_homepage">
         <div>Hello dear Odoo user!</div>
-        <div class="oe_petstore_greetings">
+        <div class="o_petstore_greetings">
             <div>We are so happy to see you again in this menu!</div>
         </div>
     </div>
 
 Which clearly shows the two ``<div>`` elements automatically created by
-:class:`~odoo.Widget`, because we added some classes on them.
+:class:`~Widget`, because we added some classes on them.
 
 We can also see the two message-holding divs we added ourselves
 
-Finally, note the ``<div class="oe_petstore_greetings">`` element which
+Finally, note the ``<div class="o_petstore_greetings">`` element which
 represents the ``GreetingsWidget`` instance is *inside* the
-``<div class="oe_petstore_homepage">`` which represents the ``HomePage``
+``<div class="o_petstore_homepage">`` which represents the ``HomePage``
 instance, since we appended
 
 Widget Parents and Children
@@ -433,7 +565,7 @@ Widget Parents and Children
 
 In the previous part, we instantiated a widget using this syntax::
 
-    new local.GreetingsWidget(this);
+    new GreetingsWidget(this);
 
 The first argument is ``this``, which in that case was a ``HomePage``
 instance. This tells the widget being created which other widget is its
@@ -447,33 +579,33 @@ of another widget, and exist on behalf of it. We call the container the
 Due to multiple technical and conceptual reasons, it is necessary for a widget
 to know who is its parent and who are its children.
 
-:func:`~odoo.Widget.getParent`
+:func:`~Widget.getParent`
     can be used to get the parent of a widget::
 
-        local.GreetingsWidget = instance.Widget.extend({
+        var GreetingsWidget = Widget.extend({
             start: function() {
                 console.log(this.getParent().$el );
-                // will print "div.oe_petstore_homepage" in the console
+                // will print "div.o_petstore_homepage" in the console
             },
         });
 
-:func:`~odoo.Widget.getChildren`
+:func:`~Widget.getChildren`
     can be used to get a list of its children::
 
-        local.HomePage = instance.Widget.extend({
+        var HomePage = Widget.extend({
             start: function() {
-                var greeting = new local.GreetingsWidget(this);
+                var greeting = new GreetingsWidget(this);
                 greeting.appendTo(this.$el);
                 console.log(this.getChildren()[0].$el);
-                // will print "div.oe_petstore_greetings" in the console
+                // will print "div.o_petstore_greetings" in the console
             },
         });
 
-When overriding the :func:`~odoo.Widget.init` method of a widget it is
+When overriding the :func:`~Widget.init` method of a widget it is
 *of the utmost importance* to pass the parent to the ``this._super()`` call,
 otherwise the relation will not be set up correctly::
 
-    local.GreetingsWidget = instance.Widget.extend({
+    var GreetingsWidget = Widget.extend({
         init: function(parent, name) {
             this._super(parent);
             this.name = name;
@@ -483,26 +615,26 @@ otherwise the relation will not be set up correctly::
 Finally, if a widget does not have a parent (e.g. because it's the root
 widget of the application), ``null`` can be provided as parent::
 
-    new local.GreetingsWidget(null);
+    new GreetingsWidget(null);
 
 Destroying Widgets
 ------------------
 
 If you can display content to your users, you should also be able to erase
-it. This is done via the :func:`~odoo.Widget.destroy` method::
+it. This is done via the :func:`~Widget.destroy` method::
 
     greeting.destroy();
 
 When a widget is destroyed it will first call
-:func:`~odoo.Widget.destroy` on all its children. Then it erases itself
+:func:`~Widget.destroy` on all its children. Then it erases itself
 from the DOM. If you have set up permanent structures in
-:func:`~odoo.Widget.init` or :func:`~odoo.Widget.start` which
+:func:`~Widget.init` or :func:`~Widget.start` which
 must be explicitly cleaned up (because the garbage collector will not handle
-them), you can override :func:`~odoo.Widget.destroy`.
+them), you can override :func:`~Widget.destroy`.
 
 .. danger::
 
-    when overriding :func:`~odoo.Widget.destroy`, ``_super()``
+    when overriding :func:`~Widget.destroy`, ``_super()``
     *must always* be called otherwise the widget and its children are not
     correctly cleaned up leaving possible memory leaks and "phantom events",
     even if no error is displayed
@@ -530,9 +662,9 @@ characteristics:
 
 * It's implemented fully in JavaScript and rendered in the browser
 * Each template file (XML files) contains multiple templates
-* It has special support in Odoo Web's :class:`~odoo.Widget`, though it
+* It has special support in Odoo Web's :class:`~web.Widget`, though it
   can be used outside of Odoo's web client (and it's possible to use
-  :class:`~odoo.Widget` without relying on QWeb)
+  :class:`~web.Widget` without relying on QWeb)
 
 .. note::
 
@@ -550,7 +682,7 @@ Using QWeb
 ----------
 
 First let's define a simple QWeb template in the almost-empty
-``oepetstore/static/src/xml/petstore.xml`` file:
+``petstore/static/src/xml/petstore.xml`` file:
 
 .. code-block:: xml
 
@@ -565,7 +697,7 @@ Now we can use this template inside of the ``HomePage`` widget. Using the
 ``QWeb`` loader variable defined at the top of the page, we can call to the
 template defined in the XML file::
 
-    local.HomePage = instance.Widget.extend({
+    var HomePage = Widget.extend({
         start: function() {
             this.$el.append(QWeb.render("HomePageTemplate"));
         },
@@ -574,11 +706,11 @@ template defined in the XML file::
 :func:`QWeb.render` looks for the specified template, renders it to a string
 and returns the result.
 
-However, because :class:`~odoo.Widget` has special integration for QWeb
+However, because :class:`~web.Widget` has special integration for QWeb
 the template can be set directly on the widget via its
-:attr:`~odoo.Widget.template` attribute::
+:attr:`~web.Widget.template` attribute::
 
-    local.HomePage = instance.Widget.extend({
+    var HomePage = Widget.extend({
         template: "HomePageTemplate",
         start: function() {
             ...
@@ -589,7 +721,7 @@ Although the result looks similar, there are two differences between these
 usages:
 
 * with the second version, the template is rendered right before
-  :func:`~odoo.Widget.start` is called
+  :func:`~web.Widget.start` is called
 * in the first version the template's content is added to the widget's root
   element, whereas in the second version the template's root element is
   directly *set as* the widget's root element. Which is why the "greetings"
@@ -598,7 +730,7 @@ usages:
 .. warning::
 
     templates should have a single non-``t`` root element, especially if
-    they're set as a widget's :attr:`~odoo.Widget.template`. If there are
+    they're set as a widget's :attr:`~web.Widget.template`. If there are
     multiple "root elements", results are undefined (usually only the first
     root element will be used and the others will be ignored)
 
@@ -626,11 +758,11 @@ will result in:
 
     <div>Hello Klaus</div>
 
-When using :class:`~odoo.Widget`'s integration it is not possible to
+When using :class:`~web.Widget`'s integration it is not possible to
 provide additional data to the template. The template will be given a single
 ``widget`` context variable, referencing the widget being rendered right
-before :func:`~odoo.Widget.start` is called (the widget's state will
-essentially be that set up by :func:`~odoo.Widget.init`):
+before :func:`~web.Widget.start` is called (the widget's state will
+essentially be that set up by :func:`~web.Widget.init`):
 
 .. code-block:: xml
 
@@ -640,7 +772,7 @@ essentially be that set up by :func:`~odoo.Widget.init`):
 
 ::
 
-    local.HomePage = instance.Widget.extend({
+    var HomePage = Widget.extend({
         template: "HomePageTemplate",
         init: function(parent) {
             this._super(parent);
@@ -847,7 +979,7 @@ Exercise
     The widget should display the given product names one under the other,
     each one in a separate box with a background color with the value of
     ``color`` and a border. You should use QWeb to render the HTML. Any
-    necessary CSS should be in ``oepetstore/static/src/css/petstore.css``.
+    necessary CSS should be in ``petstore/static/src/css/petstore.css``.
 
     Use the widget in ``HomePage`` with half a dozen products.
 
@@ -855,20 +987,25 @@ Exercise
 
         ::
 
-            odoo.oepetstore = function(instance, local) {
-                var _t = instance.web._t,
-                    _lt = instance.web._lt;
-                var QWeb = instance.web.qweb;
+            odoo.define('petstore.petstore', function (require) {
+            "use strict";
 
-                local.HomePage = instance.Widget.extend({
+                var core = require('web.core');
+                var Widget = require('web.Widget');
+
+                var _t = core._t,
+                    _lt = core._lt,
+                    QWeb = core.qweb;
+
+                var HomePage = Widget.extend({
                     start: function() {
-                        var products = new local.ProductsWidget(
+                        var products = new ProductsWidget(
                             this, ["cpu", "mouse", "keyboard", "graphic card", "screen"], "#00FF00");
                         products.appendTo(this.$el);
                     },
                 });
 
-                local.ProductsWidget = instance.Widget.extend({
+                var ProductsWidget = Widget.extend({
                     template: "ProductsWidget",
                     init: function(parent, products, color) {
                         this._super(parent);
@@ -877,9 +1014,9 @@ Exercise
                     },
                 });
 
-                instance.web.client_actions.add(
-                    'petstore.homepage', 'instance.oepetstore.HomePage');
-            }
+                core.action_registry.add(
+                    'petstore.homepage', HomePage);
+            });
 
         .. code-block:: xml
 
@@ -923,10 +1060,10 @@ Selecting DOM elements within a widget can be performed by calling the
 
     this.$el.find("input.my_input")...
 
-But because it's a common operation, :class:`~odoo.Widget` provides an
-equivalent shortcut through the :func:`~odoo.Widget.$` method::
+But because it's a common operation, :class:`~web.Widget` provides an
+equivalent shortcut through the :func:`~web.Widget.$` method::
 
-    local.MyWidget = instance.Widget.extend({
+    var MyWidget = Widget.extend({
         start: function() {
             this.$("input.my_input")...
         },
@@ -944,13 +1081,30 @@ equivalent shortcut through the :func:`~odoo.Widget.$` method::
 Easier DOM Events Binding
 -------------------------
 
-We have previously bound DOM events using normal jQuery event handlers (e.g.
-``.click()`` or ``.change()``) on widget elements::
+There are currently two event systems supported by Odoo: a simple system which
+allows adding listeners and triggering events, and a more complete system that
+also makes events 'bubble up'.
 
-    local.MyWidget = instance.Widget.extend({
+Both of these event systems are implemented in the *EventDispatcherMixin*, in
+the file *mixins.js*. This mixin is included in the *Widget* class.
+
+Base Event system
+-----------------
+
+This event system was historically the first.  It implements a simple bus
+pattern. We have 4 main methods:
+
+- *on*: this is used to register a listener on an event.
+- *off*: useful to remove events listener.
+- *once*: this is used to register a listener that will only be called once.
+- *trigger*: trigger an event. This will cause each listeners to be called.
+
+Here is an example on how this event system could be used::
+
+    var MyWidget = Widget.extend({
         start: function() {
             var self = this;
-            this.$(".my_button").click(function() {
+            this.$(".my_button").on('click', function(ev) {
                 self.button_clicked();
             });
         },
@@ -968,9 +1122,9 @@ While this works it has a few issues:
 3. it requires dealing with ``this``-binding issues
 
 Widgets thus provide a shortcut to DOM event binding via
-:attr:`~odoo.Widget.events`::
+:attr:`~web.Widget.events`::
 
-    local.MyWidget = instance.Widget.extend({
+    var MyWidget = Widget.extend({
         events: {
             "click .my_button": "button_clicked",
         },
@@ -979,7 +1133,7 @@ Widgets thus provide a shortcut to DOM event binding via
         }
     });
 
-:attr:`~odoo.Widget.events` is an object (mapping) of an event to the
+:attr:`~web.Widget.events` is an object (mapping) of an event to the
 function or method to call when the event is triggered:
 
 * the key is an event name, possibly refined with a CSS selector in which
@@ -1010,7 +1164,7 @@ Widgets provide an event system (separate from the DOM/jQuery event system
 described above): a widget can fire events on itself, and other widgets (or
 itself) can bind themselves and listen for these events::
 
-    local.ConfirmWidget = instance.Widget.extend({
+    var ConfirmWidget = Widget.extend({
         events: {
             'click button.ok_button': function () {
                 this.trigger('user_chose', true);
@@ -1030,16 +1184,16 @@ This widget acts as a facade, transforming user input (through DOM events)
 into a documentable internal event to which parent widgets can bind
 themselves.
 
-:func:`~odoo.Widget.trigger` takes the name of the event to trigger as
+:func:`~web.Widget.trigger` takes the name of the event to trigger as
 its first (mandatory) argument, any further arguments are treated as event
 data and passed directly to listeners.
 
 We can then set up a parent event instantiating our generic widget and
-listening to the ``user_chose`` event using :func:`~odoo.Widget.on`::
+listening to the ``user_chose`` event using :func:`~web.Widget.on`::
 
-    local.HomePage = instance.Widget.extend({
+    var HomePage = Widget.extend({
         start: function() {
-            var widget = new local.ConfirmWidget(this);
+            var widget = new ConfirmWidget(this);
             widget.on("user_chose", this, this.user_chose);
             widget.appendTo(this.$el);
         },
@@ -1052,11 +1206,11 @@ listening to the ``user_chose`` event using :func:`~odoo.Widget.on`::
         },
     });
 
-:func:`~odoo.Widget.on` binds a function to be called when the
+:func:`~web.Widget.on` binds a function to be called when the
 event identified by ``event_name`` is. The ``func`` argument is the
 function to call and ``object`` is the object to which that function is
 related if it is a method. The bound function will be called with the
-additional arguments of :func:`~odoo.Widget.trigger` if it has
+additional arguments of :func:`~web.Widget.trigger` if it has
 any. Example::
 
     start: function() {
@@ -1069,12 +1223,9 @@ any. Example::
         // will print "1 2 3"
     }
 
-.. note::
-
-    Triggering events on an other widget is generally a bad idea. The main
-    exception to that rule is ``odoo.web.bus`` which exists specifically
-    to broadcasts evens in which any widget could be interested throughout
-    the Odoo web application.
+.. warning::
+    the use of this event system is discouraged, we plan to replace each
+    *trigger* method by the *trigger_up* method from the extended event system
 
 Properties
 ----------
@@ -1124,12 +1275,17 @@ Exercise
 
         ::
 
-            odoo.oepetstore = function(instance, local) {
-                var _t = instance.web._t,
-                    _lt = instance.web._lt;
-                var QWeb = instance.web.qweb;
+            odoo.define('petstore.petstore', function (require) {
+            "use strict";
 
-                local.ColorInputWidget = instance.Widget.extend({
+                var core = require('web.core');
+                var Widget = require('web.Widget');
+
+                var _t = core._t,
+                    _lt = core._lt,
+                    QWeb = core.qweb;
+
+                var ColorInputWidget = Widget.extend({
                     template: "ColorInputWidget",
                     events: {
                         'change input': 'input_changed'
@@ -1149,10 +1305,10 @@ Exercise
                     },
                 });
 
-                local.HomePage = instance.Widget.extend({
+                var HomePage = Widget.extend({
                     template: "HomePage",
                     start: function() {
-                        this.colorInput = new local.ColorInputWidget(this);
+                        this.colorInput = new ColorInputWidget(this);
                         this.colorInput.on("change:color", this, this.color_changed);
                         return this.colorInput.appendTo(this.$el);
                     },
@@ -1161,8 +1317,8 @@ Exercise
                     },
                 });
 
-                instance.web.client_actions.add('petstore.homepage', 'instance.oepetstore.HomePage');
-            }
+                core.action_registry.add('petstore.homepage', HomePage);
+            });
 
         .. code-block:: xml
 
@@ -1196,7 +1352,7 @@ Modify existing widgets and classes
 The class system of the Odoo web framework allows direct modification of
 existing classes using the :func:`~odoo.web.Class.include` method::
 
-    var TestClass = instance.web.Class.extend({
+    var TestClass = Class.extend({
         testMethod: function() {
             return "hello";
         },
@@ -1221,52 +1377,50 @@ defined in the call to :func:`~odoo.web.Class.include`. This will also work
 if some instances of the class (or of any of its sub-classes) were created
 prior to the call to :func:`~odoo.Widget.include`.
 
-Translations
-============
 
-The process to translate text in Python and JavaScript code is very
-similar. You could have noticed these lines at the beginning of the
-``petstore.js`` file::
+Translation management
+======================
 
-    var _t = instance.web._t,
-        _lt = instance.web._lt;
+Some translations are made on the server side (basically all text strings rendered or
+processed by the server), but there are strings in the static files that need
+to be translated.  The way it currently works is the following:
 
-These lines are simply used to import the translation functions in the current
-JavaScript module. They are used thus::
+- each translatable string is tagged with the special function *_t* (available in
+  the JS module *web.core*
+- these strings are used by the server to generate the proper PO files
+- whenever the web client is loaded, it will call the route */web/webclient/translations*,
+  which returns a list of all translatable terms
+- in runtime, whenever the function *_t* is called, it will look up in this list
+  in order to find a translation, and return it or the original string if none
+  is found.
 
-    this.$el.text(_t("Hello user!"));
+Note that translations are explained in more details, from the server point of
+view, in the document :ref:`reference/translations`.
 
-In Odoo, translations files are automatically generated by scanning the source
-code. All piece of code that calls a certain function are detected and their
-content is added to a translation file that will then be sent to the
-translators. In Python, the function is ``_()``. In JavaScript the function is
-:func:`~odoo.web._t` (and also :func:`~odoo.web._lt`).
+There are two important functions for the translations in javascript: *_t* and
+*_lt*.  The difference is that *_lt* is lazily evaluated.
 
-``_t()`` will return the translation defined for the text it is given. If no
-translation is defined for that text, it will return the original text as-is.
+.. code-block:: javascript
 
-.. note::
+    var core = require('web.core');
 
-    To inject user-provided values in translatable strings, it is recommended
-    to use `_.str.sprintf
-    <http://gabceb.github.io/underscore.string.site/#sprintf>`_ with named
-    arguments *after* the translation::
+    var _t = core._t;
+    var _lt = core._lt;
 
-        this.$el.text(_.str.sprintf(
-            _t("Hello, %(user)s!"), {
-            user: "Ed"
-        }));
+    var SomeWidget = Widget.extend({
+        exampleString: _lt('this should be translated'),
+        ...
+        someMethod: function () {
+            var str = _t('some text');
+            ...
+        },
+    });
 
-    This makes translatable strings more readable to translators, and gives
-    them more flexibility to reorder or ignore parameters.
+In this example, the *_lt* is necessary because the translations are not ready
+when the module is loaded.
 
-:func:`~odoo.web._lt` ("lazy translate") is similar but somewhat more
-complex: instead of translating its parameter immediately, it returns
-an object which, when converted to a string, will perform the translation.
-
-It is used to define translatable terms before the translations system is
-initialized, for class attributes for instance (as modules are loaded before
-the user's language is configured and translations are downloaded).
+Note that translation functions need some care.  The string given in argument
+should not be dynamic.
 
 Communication with the Odoo Server
 ==================================
@@ -1288,8 +1442,9 @@ with a sample method:
 
 .. code-block:: python
 
-    class message_of_the_day(models.Model):
-        _name = "oepetstore.message_of_the_day"
+    class PetstoreMessage(models.Model):
+        _name = "petstore.message"
+        _description = 'Message of the day'
 
         @api.model
         def my_method(self):
@@ -1301,27 +1456,32 @@ with a sample method:
 This declares a model with two fields, and a method ``my_method()`` which
 returns a literal dictionary.
 
+The rpc functionality is supplied by the ajax service.  But most people will
+probably only interact with the *_rpc* helpers.
+
+There are typically two usecases when working on Odoo: one may need to call a
+method on a (python) model (this goes through a controller *call_kw*), or one
+may need to directly call a controller (available on some route).
+
 Here is a sample widget that calls ``my_method()`` and displays the result::
 
-    local.HomePage = instance.Widget.extend({
+    var HomePage = Widget.extend({
         start: function() {
             var self = this;
-            var model = new instance.web.Model("oepetstore.message_of_the_day");
-            model.call("my_method", {context: new instance.web.CompoundContext()}).then(function(result) {
+            this._rpc({
+                model:'petstore.message',
+                method:'my_method',
+            }).then(function (result) {
                 self.$el.append("<div>Hello " + result["hello"] + "</div>");
                 // will show "Hello world" to the user
             });
         },
     });
 
-The class used to call Odoo models is :class:`odoo.Model`. It is
-instantiated with the Odoo model's name as first parameter
-(``oepetstore.message_of_the_day`` here).
 
-:func:`~odoo.web.Model.call` can be used to call any (public) method of an
-Odoo model. It takes the following positional arguments:
-
-``name``
+``model``
+  the Odoo model's name as first parameter (petstore.message).
+``method``
   The name of the method to call, ``my_method`` here
 ``args``
   an array of `positional arguments`_ to provide to the method. Because the
@@ -1337,7 +1497,11 @@ Odoo model. It takes the following positional arguments:
 
   .. code-block:: javascript
 
-      model.call("my_method", [1, 2, 3], ...
+      this._rpc({
+          model:'petstore.message',
+          method:'my_method',
+          args: [1, 2, 3], ...
+      });
       // with this a=1, b=2 and c=3
 
 ``kwargs``
@@ -1351,97 +1515,16 @@ Odoo model. It takes the following positional arguments:
 
   .. code-block:: javascript
 
-      model.call("my_method", [], {a: 1, b: 2, c: 3, ...
+      this._rpc({
+          model:'petstore.message',
+          method:'my_method',
+          kwargs: {a: 1, b: 2, c: 3, ...
+      });
       // with this a=1, b=2 and c=3
 
-:func:`~odoo.Widget.call` returns a deferred resolved with the value
-returned by the model's method as first argument.
+:func:`~Widget._rpc` returns a deferred resolved with the value
+returned by the model's method as second argument.
 
-CompoundContext
----------------
-
-The previous section used a ``context`` argument which was not explained in
-the method call::
-
-    model.call("my_method", {context: new instance.web.CompoundContext()})
-
-The context is like a "magic" argument that the web client will always give to
-the server when calling a method. The context is a dictionary containing
-multiple keys. One of the most important key is the language of the user, used
-by the server to translate all the messages of the application. Another one is
-the time zone of the user, used to compute correctly dates and times if Odoo
-is used by people in different countries.
-
-The ``argument`` is necessary in all methods, otherwise bad things could
-happen (such as the application not being translated correctly). That's why,
-when you call a model's method, you should always provide that argument. The
-solution to achieve that is to use :class:`odoo.web.CompoundContext`.
-
-:class:`~odoo.web.CompoundContext` is a class used to pass the user's
-context (with language, time zone, etc...) to the server as well as adding new
-keys to the context (some models' methods use arbitrary keys added to the
-context). It is created by giving to its constructor any number of
-dictionaries or other :class:`~odoo.web.CompoundContext` instances. It will
-merge all those contexts before sending them to the server.
-
-.. code-block:: javascript
-
-    model.call("my_method", {context: new instance.web.CompoundContext({'new_key': 'key_value'})})
-
-.. code-block:: python
-
-    @api.model
-    def my_method(self):
-        print self.env.context
-        // will print: {'lang': 'en_US', 'new_key': 'key_value', 'tz': 'Europe/Brussels', 'uid': 1}
-
-You can see the dictionary in the argument ``context`` contains some keys that
-are related to the configuration of the current user in Odoo plus the
-``new_key`` key that was added when instantiating
-:class:`~odoo.web.CompoundContext`.
-
-Queries
--------
-
-While :func:`~odoo.Model.call` is sufficient for any interaction with Odoo
-models, Odoo Web provides a helper for simpler and clearer querying of models
-(fetching of records based on various conditions):
-:func:`~odoo.Model.query` which acts as a shortcut for the common
-combination of :py:meth:`~odoo.models.Model.search` and
-::py:meth:`~odoo.models.Model.read`. It provides a clearer syntax to search
-and read models::
-
-    model.query(['name', 'login', 'user_email', 'signature'])
-         .filter([['active', '=', true], ['company_id', '=', main_company]])
-         .limit(15)
-         .all().then(function (users) {
-        // do work with users records
-    });
-
-versus::
-
-    model.call('search', [['active', '=', true], ['company_id', '=', main_company]], {limit: 15})
-        .then(function (ids) {
-            return model.call('read', [ids, ['name', 'login', 'user_email', 'signature']]);
-        })
-        .then(function (users) {
-            // do work with users records
-        });
-
-* :func:`~odoo.web.Model.query` takes an optional list of fields as
-  parameter (if no field is provided, all fields of the model are fetched). It
-  returns a :class:`odoo.web.Query` which can be further customized before
-  being executed
-* :class:`~odoo.web.Query` represents the query being built. It is
-  immutable, methods to customize the query actually return a modified copy,
-  so it's possible to use the original and the new version side-by-side. See
-  :class:`~odoo.web.Query` for its customization options.
-
-When the query is set up as desired, simply call
-:func:`~odoo.web.Query.all` to execute it and return a
-deferred to its result. The result is the same as
-:py:meth:`~odoo.models.Model.read`'s, an array of dictionaries where each
-dictionary is a requested record, with each requested field a dictionary key.
 
 Exercises
 =========
@@ -1449,7 +1532,7 @@ Exercises
 .. exercise:: Message of the Day
 
     Create a ``MessageOfTheDay``  widget displaying the last record of the
-    ``oepetstore.message_of_the_day`` model. The widget should fetch its
+    ``petstore.message`` model. The widget should fetch its
     record as soon as it is displayed.
 
     Display the widget in the Pet Store home page.
@@ -1458,54 +1541,62 @@ Exercises
 
         .. code-block:: javascript
 
-            odoo.oepetstore = function(instance, local) {
-                var _t = instance.web._t,
-                    _lt = instance.web._lt;
-                var QWeb = instance.web.qweb;
+          odoo.define('petstore.petstore', function (require) {
+          "use strict";
 
-                local.HomePage = instance.Widget.extend({
-                    template: "HomePage",
-                    start: function() {
-                        return new local.MessageOfTheDay(this).appendTo(this.$el);
-                    },
+            var core = require('web.core');
+            var Widget = require('web.Widget');
+
+            var _t = core._t,
+                _lt = core._lt,
+                QWeb = core.qweb;
+
+            var MessageOfTheDay = Widget.extend({
+              template: "MessageOfTheDay",
+              start: function () {
+                var self = this;
+                return this._rpc({
+                  model: 'petstore.message',
+                  method: 'search_read',
+                  kwargs: {
+                    fields: ['message'],
+                    order: [{name: 'create_date', asc: false}, {name: 'id', asc: false}],
+                    limit: 1
+                  },
+                }).then(function (result) {
+                    self.$(".o_mywidget_message_of_the_day").text(result[0].message);
                 });
+              },
+            });
 
-                instance.web.client_actions.add('petstore.homepage', 'instance.oepetstore.HomePage');
+            var HomePage = Widget.extend({
+              template: "HomePage",
+              start: function () {
+                return new MessageOfTheDay(this).appendTo(this.$el);
+              },
+            });
+            core.action_registry.add('petstore.homepage', HomePage);
+          });
 
-                local.MessageOfTheDay = instance.Widget.extend({
-                    template: "MessageOfTheDay",
-                    start: function() {
-                        var self = this;
-                        return new instance.web.Model("oepetstore.message_of_the_day")
-                            .query(["message"])
-                            .order_by('-create_date', '-id')
-                            .first()
-                            .then(function(result) {
-                                self.$(".oe_mywidget_message_of_the_day").text(result.message);
-                            });
-                    },
-                });
-
-            }
 
         .. code-block:: xml
 
             <?xml version="1.0" encoding="UTF-8"?>
             <templates xml:space="preserve">
                 <t t-name="HomePage">
-                    <div class="oe_petstore_homepage">
+                    <div class="o_petstore_homepage">
                     </div>
                 </t>
                 <t t-name="MessageOfTheDay">
-                    <div class="oe_petstore_motd">
-                        <p class="oe_mywidget_message_of_the_day"></p>
+                    <div class="o_petstore_motd">
+                        <p class="o_mywidget_message_of_the_day"></p>
                     </div>
                 </t>
             </templates>
 
         .. code-block:: css
 
-            .oe_petstore_motd {
+            .o_petstore_motd {
                 margin: 5px;
                 padding: 5px;
                 border-radius: 3px;
@@ -1536,53 +1627,63 @@ Exercises
 
         .. code-block:: javascript
 
-            odoo.oepetstore = function(instance, local) {
-                var _t = instance.web._t,
-                    _lt = instance.web._lt;
-                var QWeb = instance.web.qweb;
+            odoo.define('petstore.petstore', function (require) {
+            "use strict";
+              var core = require('web.core');
+              var Widget = require('web.Widget');
 
-                local.HomePage = instance.Widget.extend({
-                    template: "HomePage",
-                    start: function () {
-                        return $.when(
-                            new local.PetToysList(this).appendTo(this.$('.oe_petstore_homepage_left')),
-                            new local.MessageOfTheDay(this).appendTo(this.$('.oe_petstore_homepage_right'))
-                        );
-                    }
-                });
-                instance.web.client_actions.add('petstore.homepage', 'instance.oepetstore.HomePage');
+              var _t = core._t,
+                  _lt = core._lt,
+                  QWeb = core.qweb;
 
-                local.MessageOfTheDay = instance.Widget.extend({
-                    template: 'MessageOfTheDay',
-                    start: function () {
-                        var self = this;
-                        return new instance.web.Model('oepetstore.message_of_the_day')
-                            .query(["message"])
-                            .order_by('-create_date', '-id')
-                            .first()
-                            .then(function (result) {
-                                self.$(".oe_mywidget_message_of_the_day").text(result.message);
-                            });
-                    }
-                });
+              var HomePage = Widget.extend({
+                  template: "HomePage",
+                  start: function () {
+                    return $.when(
+                        new PetToysList(this).appendTo(this.$('.o_petstore_homepage_left')),
+                        new MessageOfTheDay(this).appendTo(this.$('.o_petstore_homepage_right'))
+                    );
+                  }
+              });
+              core.action_registry.add('petstore.homepage', HomePage);
 
-                local.PetToysList = instance.Widget.extend({
-                    template: 'PetToysList',
-                    start: function () {
-                        var self = this;
-                        return new instance.web.Model('product.product')
-                            .query(['name', 'image'])
-                            .filter([['categ_id.name', '=', "Pet Toys"]])
-                            .limit(5)
-                            .all()
-                            .then(function (results) {
-                                _(results).each(function (item) {
-                                    self.$el.append(QWeb.render('PetToy', {item: item}));
-                                });
-                            });
-                    }
-                });
-            }
+              var MessageOfTheDay = Widget.extend({
+                  template: 'MessageOfTheDay',
+                  start: function () {
+                    var self = this;
+                    return this._rpc({
+                      model: 'petstore.message',
+                      method: 'search_read',
+                      kwargs: {
+                        fields: ['message'],
+                        order: [{name: 'create_date', asc: false}, {name: 'id', asc: false}],
+                        limit: 1
+                      },
+                    }).then(function (result) {
+                      self.$(".o_mywidget_message_of_the_day").text(result[0].message);
+                    });
+                  }
+              });
+
+              var PetToysList = Widget.extend({
+                  template: 'PetToysList',
+                  start: function () {
+                    var self = this;
+                    return this._rpc({
+                      model: 'product.product',
+                      method: 'search_read',
+                      args: [[['categ_id.name', '=', "Pet Toys"]], ['name', 'image']],
+                      kwargs: {
+                        limit: 5
+                      },
+                    }).then(function (results) {
+                        _(results).each(function (item) {
+                            self.$el.append(QWeb.render('PetToy', {item: item}));
+                        });
+                    });
+                  },
+              });
+            });
 
         .. code-block:: xml
 
@@ -1590,22 +1691,22 @@ Exercises
 
             <templates xml:space="preserve">
                 <t t-name="HomePage">
-                    <div class="oe_petstore_homepage">
-                        <div class="oe_petstore_homepage_left"></div>
-                        <div class="oe_petstore_homepage_right"></div>
+                    <div class="o_petstore_homepage">
+                        <div class="o_petstore_homepage_left"></div>
+                        <div class="o_petstore_homepage_right"></div>
                     </div>
                 </t>
                 <t t-name="MessageOfTheDay">
-                    <div class="oe_petstore_motd">
-                        <p class="oe_mywidget_message_of_the_day"></p>
+                    <div class="o_petstore_motd">
+                        <p class="o_mywidget_message_of_the_day"></p>
                     </div>
                 </t>
                 <t t-name="PetToysList">
-                    <div class="oe_petstore_pettoyslist">
+                    <div class="o_petstore_pettoyslist">
                     </div>
                 </t>
                 <t t-name="PetToy">
-                    <div class="oe_petstore_pettoy">
+                    <div class="o_petstore_pettoy">
                         <p><t t-esc="item.name"/></p>
                         <p><img t-att-src="'data:image/jpg;base64,'+item.image"/></p>
                     </div>
@@ -1614,28 +1715,28 @@ Exercises
 
         .. code-block:: css
 
-            .oe_petstore_homepage {
+            .o_petstore_homepage {
                 display: table;
             }
 
-            .oe_petstore_homepage_left {
+            .o_petstore_homepage_left {
                 display: table-cell;
                 width : 300px;
             }
 
-            .oe_petstore_homepage_right {
+            .o_petstore_homepage_right {
                 display: table-cell;
                 width : 300px;
             }
 
-            .oe_petstore_motd {
+            .o_petstore_motd {
                 margin: 5px;
                 padding: 5px;
                 border-radius: 3px;
                 background-color: #F0EEEE;
             }
 
-            .oe_petstore_pettoyslist {
+            .o_petstore_pettoyslist {
                 padding: 5px;
             }
 
@@ -1674,7 +1775,7 @@ type, and calling an action manager instance with it.
 :func:`~odoo.Widget.do_action` is a shortcut of :class:`~odoo.Widget`
 looking up the "current" action manager and executing the action::
 
-    instance.web.TestWidget = instance.Widget.extend({
+    var TestWidget = Widget.extend({
         dispatch_to_new_action: function() {
             this.do_action({
                 type: 'ir.actions.act_window',
@@ -1716,38 +1817,41 @@ attributes are:
 
         .. code-block:: javascript
 
-            local.PetToysList = instance.Widget.extend({
+            var PetToysList = Widget.extend({
                 template: 'PetToysList',
                 events: {
-                    'click .oe_petstore_pettoy': 'selected_item',
+                    'click .o_petstore_pettoy': '_onClickSelectedItem',
                 },
                 start: function () {
-                    var self = this;
-                    return new instance.web.Model('product.product')
-                        .query(['name', 'image'])
-                        .filter([['categ_id.name', '=', "Pet Toys"]])
-                        .limit(5)
-                        .all()
-                        .then(function (results) {
-                            _(results).each(function (item) {
-                                self.$el.append(QWeb.render('PetToy', {item: item}));
-                            });
-                        });
+                  var self = this;
+                  return this._rpc({
+                    model: 'product.product',
+                    method: 'search_read',
+                    args: [[['categ_id.name', '=', "Pet Toys"]], ['name', 'image']],
+                    kwargs: {
+                      limit: 5
+                    },
+                  }).then(function (results) {
+                      _(results).each(function (item) {
+                          self.$el.append(QWeb.render('PetToy', {item: item}));
+                      });
+                  });
                 },
-                selected_item: function (event) {
-                    this.do_action({
-                        type: 'ir.actions.act_window',
-                        res_model: 'product.product',
-                        res_id: $(event.currentTarget).data('id'),
-                        views: [[false, 'form']],
-                    });
+                _onClickSelectedItem: function (event) {
+                  this.do_action({
+                    type: 'ir.actions.act_window',
+                    res_model: 'product.product',
+                    res_id: $(event.currentTarget).data('id'),
+                    views: [[false, 'form']],
+                  });
                 },
             });
+
 
         .. code-block:: xml
 
             <t t-name="PetToy">
-                <div class="oe_petstore_pettoy" t-att-data-id="item.id">
+                <div class="o_petstore_pettoy" t-att-data-id="item.id">
                     <p><t t-esc="item.name"/></p>
                     <p><img t-attf-src="data:image/jpg;base64,{{item.image}}"/></p>
                 </div>
@@ -1768,10 +1872,10 @@ beyond that *everything* is handled by custom client code.
 
 Our widget is registered as the handler for the client action through this::
 
-    instance.web.client_actions.add('petstore.homepage', 'instance.oepetstore.HomePage');
+    core.action_registry.add('petstore.homepage', HomePage);
 
 
-``instance.web.client_actions`` is a :class:`~odoo.web.Registry` in which
+``core.action_registry`` is a :class:`~odoo.web.Registry` in which
 the action manager looks up client action handlers when it needs to execute
 one. The first parameter of :class:`~odoo.web.Registry.add` is the name
 (tag) of the client action, and the second parameter is the path to the widget
@@ -1801,52 +1905,75 @@ and a menu opening the action:
               name="Home Page" action="action_home_page"/>
 
 Architecture of the Views
--------------------------
+=========================
 
-Much of Odoo web's usefulness (and complexity) resides in views. Each view
-type is a way of displaying a model in the client.
+The word 'view' has more than one meaning. This section is about the design of
+the javascript code of the views, not the structure of the *arch* or anything
+else.
 
-The View Manager
-''''''''''''''''
+In 2017, Odoo replaced the previous view code with a new architecture.  The
+main need was to separate the rendering logic from the model logic.
 
-When an ``ActionManager`` instance receive an action of type
-``ir.actions.act_window``, it delegates the synchronization and handling of
-the views themselves to a *view manager*, which will then set up one or
-multiple views depending on the original action's requirements:
 
-.. image:: web/viewarchitecture.*
-   :align: center
-   :width: 40%
+Views (in a generic sense) are now described with  4 pieces: a View, a
+Controller, a Renderer and a Model.  The API of these 4 pieces is described in
+the AbstractView, AbstractController, AbstractRenderer and AbstractModel classes.
 
-The Views
-'''''''''
+.. raw:: html
 
-Most :ref:`Odoo views <reference/views>` are implemented through a subclass
-of :class:`odoo.web.View` which provides a bit of generic basic structure
-for handling events and displaying model information.
+    <svg width="550" height="173">
+        <!-- Created with Method Draw - http://github.com/duopixel/Method-Draw/ -->
+        <path id="svg_1" d="m147.42498,79.79206c0.09944,-8.18859 -0.06363,-16.38812 0.81774,-24.5623c21.65679,2.68895 43.05815,7.08874 64.35,11.04543c1.14304,-4.01519 0.60504,-7.34585 1.59817,-11.05817c13.67878,7.81176 27.23421,15.73476 40.23409,24.03505c-12.47212,9.41539 -26.77809,17.592 -40.82272,25.96494c-0.4548,-3.89916 -0.90967,-7.79828 -1.36448,-11.69744c-20.69972,3.77225 -42.59036,7.6724 -63.42391,11.12096c-1.41678,-7.95741 -1.37514,-16.62327 -1.38888,-24.84846z" stroke-width="1.5" stroke="#000" fill="#fff"/>
+        <rect id="svg_3" height="41" width="110" y="57.5" x="7" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="#fff"/>
+        <rect stroke="#000" id="svg_5" height="41" width="135" y="20.5" x="328" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" fill="#fff"/>
+        <rect stroke="#000" id="svg_6" height="41" width="128" y="102.5" x="262" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" fill="#fff"/>
+        <rect stroke="#000" id="svg_7" height="41" width="119" y="100.5" x="417" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" fill="#fff"/>
+        <line stroke-linecap="null" stroke-linejoin="null" id="svg_8" y2="96.5" x2="317" y1="65.5" x1="364" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+        <line stroke-linecap="null" stroke-linejoin="null" id="svg_9" y2="96.5" x2="467" y1="63.5" x1="425" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+        <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_10" y="83.5" x="38" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">View</text>
+        <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_11" y="44.5" x="346" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">Controller</text>
+        <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_12" y="128.5" x="276" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">Renderer</text>
+        <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_13" y="127.5" x="442" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">Model</text>
+    </svg>
 
-The *search view* is considered a view type by the main Odoo framework, but
-handled separately by the web client (as it's a more permanent fixture and
-can interact with other views, which regular views don't do).
+- the View is the factory. Its job is to get a set of fields, arch, context and
+  some other parameters, then to construct a Controller/Renderer/Model triplet.
 
-A view is responsible for loading its own description XML (using
-:py:class:`~odoo.models.Model.fields_view_get`) and any other data source
-it needs. To that purpose, views are provided with an optional view
-identifier set as the :attr:`~odoo.web.View.view_id` attribute.
+  The view's role is to properly setup each piece of the MVC pattern, with the correct
+  information.  Usually, it has to process the arch string and extract the
+  data necessary for each other parts of the view.
 
-Views are also provided with a :class:`~odoo.web.DataSet` instance which
-holds most necessary model information (the model name and possibly various
-record ids).
+  Note that the view is a class, not a widget.  Once its job has been done, it
+  can be discarded.
 
-Views may also want to handle search queries by overriding
-:func:`~odoo.web.View.do_search`, and updating their
-:class:`~odoo.web.DataSet` as necessary.
+- the Renderer has one job: representing the data being viewed in a DOM element.
+  Each view can render the data in a different way.  Also, it should listen on
+  appropriate user actions and notify its parent (the Controller) if necessary.
+
+  The Renderer is the V in the MVC pattern.
+
+- the Model: its job is to fetch and hold the state of the view.  Usually, it
+  represents in some way a set of records in the database.  The Model is the
+  owner of the 'business data'. It is the M in the MVC pattern.
+
+- the Controller: its job is to coordinate the renderer and the model.  Also, it
+  is the main entry point for the rest of the web client.  For example, when
+  the user changes something in the search view, the *update* method of the
+  controller will be called with the appropriate information.
+
+  It is the C in the MVC pattern.
+
+.. note::
+    The JS code for the views has been designed to be usable outside of the
+    context of a view manager/action manager.  They could be used in a client action,
+    or, they could be displayed in the public website (with some work on the assets).
 
 The Form View Fields
 --------------------
 
-A common need is the extension of the web form view to add new ways of
-displaying fields.
+A good part of the web client experience is about editing and creating data. Most
+of that work is done with the help of field widgets, which are aware of the field
+type and of the specific details on how a value should be displayed and edited.
 
 All built-in fields have a default display implementation, a new
 form widget may be necessary to correctly interact with a new field type
@@ -1876,10 +2003,32 @@ simply use the ``widget`` attribute in the view's XML description:
 Fields are instantiated by the form view after it has read its XML description
 and constructed the corresponding HTML representing that description. After
 that, the form view will communicate with the field objects using some
-methods. These methods are defined by the ``FieldInterface``
-interface. Almost all fields inherit the ``AbstractField`` abstract
+methods. These methods are defined by the ``AbstractField``
+abstract class. Almost all fields inherit the ``AbstractField`` abstract
 class. That class defines some default mechanisms that need to be implemented
 by most fields.
+
+AbstractField
+-------------
+
+The *AbstractField* class is the base class for all widgets in a view, for all
+views that support them (currently: Form, List, Kanban).
+
+There are many differences between the v11 field widgets and the previous versions.
+Let us mention the most important ones:
+
+- the widgets are shared between all views (well, Form/List/Kanban). No need to
+  duplicate the implementation anymore.  Note that it is possible to have a
+  specialized version of a widget for a view, by prefixing it with the view name
+  in the view registry: *list.many2one* will be chosen in priority over *many2one*.
+- the widgets are no longer the owner of the field value.  They only represent
+  the data and communicate with the rest of the view.
+- the widgets do no longer need to be able to switch between edit and readonly
+  mode.  Now, when such a change is necessary, the widget will be destroyed and
+  rerendered again.  It is not a problem, since they do not own their value
+  anyway
+- the field widgets can be used outside of a view.  Their API is slightly
+  awkward, but they are designed to be standalone.
 
 Here are some of the responsibilities of a field class:
 
@@ -1896,7 +2045,7 @@ Here are some of the responsibilities of a field class:
 
   * ``required``: The field must have a value before saving. If ``required``
     is ``true`` and the field doesn't have a value, the method
-    ``is_valid()`` of the field must return ``false``.
+    ``isValid()`` of the field must return ``false``.
   * ``invisible``: When this is ``true``, the field must be invisible. The
     ``AbstractField`` class already has a basic implementation of this
     behavior that fits most fields.
@@ -1908,23 +2057,8 @@ Here are some of the responsibilities of a field class:
     implement only one behavior, but this is necessary to ensure a good user
     experience.
 
-* Fields have two methods, ``set_value()`` and ``get_value()``, which are
-  called by the form view to give it the value to display and get back the new
-  value entered by the user. These methods must be able to handle the value as
-  given by the Odoo server when a ``read()`` is performed on a model and give
-  back a valid value for a ``write()``.  Remember that the JavaScript/Python
-  data types used to represent the values given by ``read()`` and given to
-  ``write()`` is not necessarily the same in Odoo. As example, when you read a
-  many2one, it is always a tuple whose first value is the id of the pointed
-  record and the second one is the name get (ie: ``(15, "Agrolait")``). But
-  when you write a many2one it must be a single integer, not a tuple
-  anymore. ``AbstractField`` has a default implementation of these methods
-  that works well for simple data type and set a widget property named
-  ``value``.
-
 Please note that, to better understand how to implement fields, you are
-strongly encouraged to look at the definition of the ``FieldInterface``
-interface and the ``AbstractField`` class directly in the code of the Odoo web
+strongly encouraged to look at the definition of the ``AbstractField`` class directly in the code of the Odoo web
 client.
 
 Creating a New Type of Field
@@ -1942,17 +2076,17 @@ user will not be able to modify the content of the field.
 
 .. code-block:: javascript
 
-    local.FieldChar2 = instance.web.form.AbstractField.extend({
+    var FieldChar2 = AbstractField.extend({
         init: function() {
             this._super.apply(this, arguments);
-            this.set("value", "");
+            this.value = "";
         },
-        render_value: function() {
-            this.$el.text(this.get("value"));
+        _render: function() {
+            this.$el.text(this.value);
         },
     });
 
-    instance.web.form.widgets.add('char2', 'instance.oepetstore.FieldChar2');
+    field_registry.add('char2', FieldChar2);
 
 In this example, we declare a class named ``FieldChar2`` inheriting from
 ``AbstractField``. We also register this class in the registry
@@ -1960,15 +2094,11 @@ In this example, we declare a class named ``FieldChar2`` inheriting from
 use this new field in any form view by specifying ``widget="char2"`` in the
 ``<field/>`` tag in the XML declaration of the view.
 
-In this example, we define a single method: ``render_value()``. All it does is
-display the widget property ``value``.  Those are two tools defined by the
-``AbstractField`` class. As explained before, the form view will call the
-method ``set_value()`` of the field to set the value to display. This method
+In this example, we define a single method: ``_render()``. All it does is
+display the widget property ``value``. the form view will call the
+method ``_setValue()`` of the field to set the value to display. This method
 already has a default implementation in ``AbstractField`` which simply sets
-the widget property ``value``. ``AbstractField`` also watch the
-``change:value`` event on itself and calls the ``render_value()`` when it
-occurs. So, ``render_value()`` is a convenience method to implement in child
-classes to perform some operation each time the value of the field changes.
+the widget property ``value``.
 
 In the ``init()`` method, we also define the default value of the field if
 none is specified by the form view (here we assume the default value of a
@@ -1985,77 +2115,61 @@ often completely different (for design and usability purpose) and the fields
 must be able to switch between modes at any moment.
 
 To know in which mode the current field should be, the ``AbstractField`` class
-sets a widget property named ``effective_readonly``. The field should watch
+sets a widget property named ``mode``. The field should watch
 for changes in that widget property and display the correct mode
 accordingly. Example::
 
-    local.FieldChar2 = instance.web.form.AbstractField.extend({
-        init: function() {
-            this._super.apply(this, arguments);
-            this.set("value", "");
+    var FieldChar2 = AbstractField.extend({
+        _renderReadonly: function() {
+            this.$el.text(this.value);
         },
-        start: function() {
-            this.on("change:effective_readonly", this, function() {
-                this.display_field();
-                this.render_value();
-            });
-            this.display_field();
-            return this._super();
-        },
-        display_field: function() {
+        _renderEdit: function() {
             var self = this;
             this.$el.html(QWeb.render("FieldChar2", {widget: this}));
-            if (! this.get("effective_readonly")) {
-                this.$("input").change(function() {
-                    self.internal_set_value(self.$("input").val());
-                });
-            }
-        },
-        render_value: function() {
-            if (this.get("effective_readonly")) {
-                this.$el.text(this.get("value"));
-            } else {
-                this.$("input").val(this.get("value"));
-            }
+            this.$("input").change(function() {
+                self._setValue(self.$("input").val());
+            });
+            this.$("input").val(this.value);
         },
     });
 
-    instance.web.form.widgets.add('char2', 'instance.oepetstore.FieldChar2');
+    field_registry.add('char2', FieldChar2);
 
 .. code-block:: xml
 
     <t t-name="FieldChar2">
-        <div class="oe_field_char2">
-            <t t-if="! widget.get('effective_readonly')">
+        <div class="o_field_char2">
+            <t t-if="widget.mode == 'edit'">
                 <input type="text"></input>
             </t>
         </div>
     </t>
 
-In the ``start()`` method (which is called immediately after a widget has been
-appended to the DOM), we bind on the event ``change:effective_readonly``. That
+In the ``_renderEdit()`` method (which is called immediately after a widget has been
+appended to the DOM), we bind on the event ``change`` for input. That
 allows us to redisplay the field each time the widget property
-``effective_readonly`` changes. This event handler will call
-``display_field()``, which is also called directly in ``start()``. This
-``display_field()`` was created specifically for this field, it's not a method
-defined in ``AbstractField`` or any other class. We can use this method
-to display the content of the field depending on the current mode.
+``mode`` changes. This event handler will call
+``_setValue()``, this method is called by the widget, to change its value and to notify.
+the outside world of its new state. This method also validates the new value.
+Note that this method does not rerender the widget, it should be
+handled by the widget itself, if necessary.
+We can use this method to display the content of the field depending on the current mode.
 
 From now on the conception of this field is typical, except there is a
-lot of verifications to know the state of the ``effective_readonly`` property:
+lot of verifications to know the state of the ``mode`` property:
 
 * In the QWeb template used to display the content of the widget, it displays
   an ``<input type="text" />`` if we are in read-write mode and nothing in
   particular in read-only mode.
-* In the ``display_field()`` method, we have to bind on the ``change`` event
+* In the ``_renderEdit()`` method, we have to bind on the ``change`` event
   of the ``<input type="text" />`` to know when the user has changed the
-  value. When it happens, we call the ``internal_set_value()`` method with the
+  value. When it happens, we call the ``_setValue()`` method with the
   new value of the field. This is a convenience method provided by the
   ``AbstractField`` class. That method will set a new value in the ``value``
-  property but will not trigger a call to ``render_value()`` (which is not
+  property but will not trigger a call to ``_renderReadonly()`` (which is not
   necessary since the ``<input type="text" />`` already contains the correct
   value).
-* In ``render_value()``, we use a completely different code to display the
+* In ``_renderReadonly()``, we use a completely different code to display the
   value of the field depending if we are in read-only or in read-write mode.
 
 .. exercise:: Create a Color Field
@@ -2078,47 +2192,32 @@ lot of verifications to know the state of the ``effective_readonly`` property:
 
         .. code-block:: javascript
 
-            local.FieldColor = instance.web.form.AbstractField.extend({
+            var color = AbstractField.extend({
+                template: 'FieldColor',
                 events: {
                     'change input': function (e) {
-                        if (!this.get('effective_readonly')) {
-                            this.internal_set_value($(e.currentTarget).val());
+                        if (this.mode === "edit") {
+                            this._setValue($(e.currentTarget).val());
                         }
                     }
                 },
-                init: function() {
-                    this._super.apply(this, arguments);
-                    this.set("value", "");
+                _renderReadonly: function() {
+                  this.$(".o_field_color_content").css("background-color", this.value || "#FFFFFF");
                 },
-                start: function() {
-                    this.on("change:effective_readonly", this, function() {
-                        this.display_field();
-                        this.render_value();
-                    });
-                    this.display_field();
-                    return this._super();
-                },
-                display_field: function() {
-                    this.$el.html(QWeb.render("FieldColor", {widget: this}));
-                },
-                render_value: function() {
-                    if (this.get("effective_readonly")) {
-                        this.$(".oe_field_color_content").css("background-color", this.get("value") || "#FFFFFF");
-                    } else {
-                        this.$("input").val(this.get("value") || "#FFFFFF");
-                    }
+                _renderEdit: function() {
+                  this.$("input").val(this.value|| "#FFFFFF");
                 },
             });
-            instance.web.form.widgets.add('color', 'instance.oepetstore.FieldColor');
+            field_registry.add('color', color);
 
         .. code-block:: xml
 
             <t t-name="FieldColor">
-                <div class="oe_field_color">
-                    <t t-if="widget.get('effective_readonly')">
-                        <div class="oe_field_color_content" />
+                <div class="o_field_color">
+                    <t t-if="widget.mode != 'edit'">
+                        <div class="o_field_color_content" />
                     </t>
-                    <t t-if="! widget.get('effective_readonly')">
+                    <t t-if="widget.mode == 'edit'">
                         <input type="color"></input>
                     </t>
                 </div>
@@ -2126,7 +2225,7 @@ lot of verifications to know the state of the ``effective_readonly`` property:
 
         .. code-block:: css
 
-            .oe_field_color_content {
+            .o_field_color_content {
                 height: 20px;
                 width: 50px;
                 border: 1px solid black;
