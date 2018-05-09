@@ -24,6 +24,20 @@ class TestMisc(TestCase):
         with self.assertRaises(NotImplementedError):
             BaseQuery()._build_base(None)
 
+    def test_multiple_to_sql_calls(self):
+        p = Row("res_partner")
+        s = Select([p.id], where=p.id > 5, order=[p.name], distinct=True)
+        first = s.to_sql()
+        second = s.to_sql()
+        self.assertEqual(first, second)
+
+    def test_lots_of_args(self):
+        p = Row("res_partner")
+        s = Select([p.id], where=(p.id > 5) & (p.name @ 'foo') | (p.my_company == [1, 2, 3]),
+                   limit=5, offset=3)
+        sql, args = s.to_sql()
+        self.assertEqual(args, [5, 'foo', [1, 2, 3], 5, 3])
+
 
 @tagged('standard', 'at_install')
 class TestExpressions(TestCase):
@@ -684,6 +698,44 @@ class TestWith(TestCase):
             """SELECT "b"."id" FROM "res_partner" "b" """
             """WHERE (("b"."id" = "my_temp_table"."id") AND """
             """("b"."id" = "my_other_temp_table"."id"))"""
+        )
+
+    def test_with_update(self):
+        u = Update([self.p.name << 'John'], where=self.p.name == 'Administrator',
+                   returning=[self.p.id])
+        w = With([(self.tmp_r("id"), u)], Select([self.u.id], where=self.u.id == self.tmp_r.id))
+        self.assertEqual(
+            w.to_sql(),
+            ("""WITH "my_temp_table"("id") AS """
+             """(UPDATE "res_partner" "a" SET "a"."name" = %s WHERE ("a"."name" = %s) """
+             """RETURNING "a"."id") """
+             """SELECT "b"."id" FROM "res_users" "b" WHERE ("b"."id" = "my_temp_table"."id")""",
+             ['John', 'Administrator'])
+        )
+
+    def test_with_delete(self):
+        d = Delete([self.u], where=self.u.id > 5, returning=[self.u.partner_id])
+        w = With([(self.tmp_r("id"), d)],
+                 Delete([self.p], where=self.p.id == self.tmp_r.id))
+        self.assertEqual(
+            w.to_sql(),
+            ("""WITH "my_temp_table"("id") AS """
+             """(DELETE FROM "res_users" "a" WHERE ("a"."id" > %s) RETURNING "a"."partner_id") """
+             """DELETE FROM "res_partner" "b" WHERE ("b"."id" = "my_temp_table"."id")""", [5])
+        )
+
+    def test_with_insert(self):
+        i = Insert(self.u('name', 'surname'), ['John', 'Wick'],
+                   returning=[self.u.name, self.u.surname])
+        w = With([(self.tmp_r("name", "surname"), i)],
+                 Insert(self.p('name', 'surname'), [Select([self.tmp_r])]))
+        self.assertEqual(
+            w.to_sql(),
+            ("""WITH "my_temp_table"("name", "surname") AS """
+             """(INSERT INTO "res_users"("name", "surname") VALUES (%s, %s) """
+             """RETURNING "res_users"."name", "res_users"."surname") """
+             """INSERT INTO "res_partner"("name", "surname") (SELECT * FROM "my_temp_table")""",
+             ['John', 'Wick'])
         )
 
     # TODO: Test "WITH" with INSERT, DELETE and UPDATE

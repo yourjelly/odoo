@@ -222,7 +222,10 @@ class Row(object):
             if self._cols:
                 return "%s(%s)" % (self._table, ', '.join([c._name for c in self._cols.values()]))
             return "%s" % self._table
-        return "%s %s" % (self._table, alias_mapping[self])
+        alias = alias_mapping[self]
+        if alias == self._table:
+            return "%s" % self._table
+        return "%s %s" % (self._table, alias)
 
 
 class Column(Expression):
