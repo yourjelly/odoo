@@ -4,6 +4,7 @@ odoo.define('barcodes.BarcodeEvents', function(require) {
 var core = require('web.core');
 var mixins = require('web.mixins');
 var session = require('web.session');
+var mobile = require('web_mobile.rpc');
 
 
 // For IE >= 9, use this, new CustomEvent(), instead of new Event()
@@ -64,7 +65,7 @@ var BarcodeEvents = core.Class.extend(mixins.PropertiesMixin, {
                     'position': 'fixed',
                     'top': '50%',
                     'transform': 'translateY(-50%)',
-                    'opacity': 0,
+                    //'opacity': 0,
                 },
             });
         }
@@ -216,9 +217,16 @@ var BarcodeEvents = core.Class.extend(mixins.PropertiesMixin, {
      * @param  {jQuery.Event} e keydown event
      */
     _listenBarcodeScanner: function (e) {
+        var self = this;
         if (!$('input:text:focus, textarea:focus, [contenteditable]:focus').length) {
             $('body').append(this.$barcodeInput);
-            this.$barcodeInput.focus();
+            var def;
+            if(mobile.methods.disableVirtualKeyboard){
+                def = mobile.methods.disableVirtualKeyboard();
+            }
+             $.when(def).then(function () {
+                 self.$barcodeInput.focus();
+             });
         }
         if (this.$barcodeInput.is(":focus")) {
             // Handle buffered keys immediately if the keypress marks the end
@@ -261,7 +269,10 @@ var BarcodeEvents = core.Class.extend(mixins.PropertiesMixin, {
     _removeBarcodeField: function () {
         if (this.$barcodeInput) {
             // Reset the value and remove from the DOM.
-            this.$barcodeInput.val('').remove();
+            //this.$barcodeInput.val('').remove();
+            this.$barcodeInput.val('');
+            // TODO: reactivate virtual keyboard after scanning
+            //mobile.methods.enableVirtualKeyboard();
         }
     },
 
