@@ -16,6 +16,7 @@ var Sidebar = require('web.Sidebar');
 
 var _t = core._t;
 var qweb = core.qweb;
+var utils = require('web.utils');
 
 var ListController = BasicController.extend({
     custom_events: _.extend({}, BasicController.prototype.custom_events, {
@@ -206,26 +207,23 @@ var ListController = BasicController.extend({
      * @todo make record creation a basic controller feature
      * @private
      */
-    _addRecord: function () {
+    _addRecord: function (groupID) {
         var self = this;
         this._disableButtons();
         return this.renderer.unselectRow().then(function () {
-            return self.model.createGroup(self.handle).then(function (new_group_id) {
-                self.renderer.groupedID = new_group_id;
-                return self.model.addDefaultRecord(new_group_id, {
-                    position: self.editable,
-                }).then(function (recordID) {
-                    console.log("recordID :::: ", recordID);
-                    var state = self.model.get(self.handle);
-                    self.renderer.updateState(state, {});
-                    var group = self.model.get(new_group_id);
-                    console.log("groupppppppppp ", group);
-                    self.renderer.current_group = group;
-                    self.renderer.editRecord(recordID);
-                    self._updatePager();
-                });
-            }).always(self._enableButtons.bind(self));
-        });
+            var handle = self.renderer.state.groupedBy.length ? groupID : self.handle;
+            return self.model.addDefaultRecord(handle, {
+                position: self.editable,
+            });
+        }).then(function (recordID) {
+            var state = self.model.get(self.handle);
+            self.renderer.updateState(state, {});
+            if (self.renderer.state.groupedBy.length) {
+                self.renderer.current_group = self.model.get(groupID);
+            }
+            self.renderer.editRecord(recordID);
+            self._updatePager();
+        }).always(this._enableButtons.bind(this));
     },
     /**
      * Archive the current selection
@@ -373,9 +371,12 @@ var ListController = BasicController.extend({
      * @param {OdooEvent} event
      */
     _onAddRecord: function (event) {
+        if (this.renderer.state.groupedBy.length) {
+            var groupID = event.data.groupID;
+        }
         event.stopPropagation();
         if (this.activeActions.create) {
-            this._addRecord();
+            this._addRecord(groupID);
         } else if (event.data.onFail) {
             event.data.onFail();
         }
@@ -406,7 +407,7 @@ var ListController = BasicController.extend({
             event.stopPropagation();
         }
         var state = this.model.get(this.handle, {raw: true});
-        if (this.editable) {
+        if (this.editable && !this.renderer.state.groupedBy.length) {
             this._addRecord();
         } else {
             this.trigger_up('switch_view', {view_type: 'form', res_id: undefined});

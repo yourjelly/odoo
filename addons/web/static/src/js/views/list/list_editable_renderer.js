@@ -110,7 +110,7 @@ ListRenderer.include({
                 var rowIndex = _.findIndex(state.data, function (r) {
                     return r.id === id;
                 });
-                var $row = self.$('.o_data_row:nth(' + rowIndex + ')');
+                var $row = self.state.groupedBy.length ? self._getRow(id) : self.$('.o_data_row:nth(' + rowIndex + ')');
                 self._setDecorationClasses(state.data[rowIndex], $row);
                 self._updateFooter();
             }
@@ -166,7 +166,7 @@ ListRenderer.include({
                 return;
             }
             var oldRowIndex = _.findIndex(oldData, {id: id});
-            var $row = self.$('.o_data_row:nth(' + oldRowIndex + ')');
+            var $row = this.state.groupedBy.length ? this._getRow(id) : this.$('.o_data_row:nth(' + oldRowIndex + ')');
             $row.nextAll('.o_data_row').remove();
             $row.prevAll().remove();
             _.each(oldData, function (rec) {
@@ -211,7 +211,11 @@ ListRenderer.include({
     editRecord: function (recordID) {
         var data = this.state.groupedBy.length ? this.current_group.data : this.state.data;
         var rowIndex = _.findIndex(data, {id: recordID});
-        this._selectCell(rowIndex, 0);
+        var options = {};
+        if (this.state.groupedBy.length) {
+            options.groupID = this.current_group.id;
+        }
+        this._selectCell(rowIndex, 0, options);
     },
     /**
      * Returns the recordID associated to the line which is currently in edition
@@ -291,7 +295,7 @@ ListRenderer.include({
         }
         var editMode = (mode === 'edit');
         this.currentRow = editMode ? rowIndex : null;
-        var $row = this.state.groupedBy.length ? this._getRow(mode, recordID) : this.$('.o_data_row:nth(' + rowIndex + ')');
+        var $row = this.state.groupedBy.length ? this._getRow(recordID) : this.$('.o_data_row:nth(' + rowIndex + ')');
 
         var $tds = $row.children('.o_data_cell');
         var oldWidgets = _.clone(this.allFieldWidgets[record.id]);
@@ -425,7 +429,7 @@ ListRenderer.include({
      * based on that we can edit the row or save the row data
      * @returns {$row}
      */
-    _getRow: function (mode, recordID) {
+    _getRow: function (recordID) {
         var self = this;
         var $row;
         var $rows = this.$('.o_data_row');
@@ -480,6 +484,7 @@ ListRenderer.include({
             var self = this;
             this.unselectRow().then(function () {
                 self.trigger_up('add_record', {
+                    groupID: self.current_group.id,
                     onFail: self._selectCell.bind(self, 0, 0, {}),
                 });
             });

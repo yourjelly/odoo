@@ -93,14 +93,14 @@ var BasicRenderer = AbstractRenderer.extend({
         this.state = state;
         var record;
 
-        if (this.state.groupedBy.length && state.id != id) {
+        if (state.id != id) {
             utils.traverse_records(state, function (r) {
                 if (r.id === id) {
                     record = r;
                 }
             });
         } else {
-            record = state.id === id ? state : _.findWhere(state.data, {id: id});
+            record = state;
         }
         if (!record) {
             return this._render().then(_.constant([]));
