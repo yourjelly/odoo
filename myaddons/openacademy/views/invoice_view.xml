@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+     <record id="invoice_line_form_view" model="ir.ui.view">
+        <field name="name">invoice_line.form</field>
+        <field name="model">openacademy.invoice.line</field>
+        <field name="arch" type="xml">
+            <form string="Invoice line form">
+                <sheet>
+                    <group>
+                        <separator string="Detail" colspan="2"/>
+                        <field name="name"/>
+                        <field name="invoice_id"/>
+                        <field name="session_id"/>
+                        <field name="session_cost"/>
+                        <field name="session_attendees_count"/>
+                        <field name="amount"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="invoice_form_view" model="ir.ui.view">
+        <field name="name">invoice.form</field>
+        <field name="model">openacademy.invoice</field>
+        <field name="arch" type="xml">
+            <form string="Invoice form">
+                <sheet>
+                    <group>
+                        <separator string="Detail" colspan="2"/>
+                        <field name="name"/>
+                        <field name="teacher_id"/>
+                        <field name="invoice_line_ids" string="Entries"/>
+                        <field name="total_amount"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="invoice_tree_view" model="ir.ui.view">
+        <field name="name">invoice.tree</field>
+        <field name="model">openacademy.invoice</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="teacher_id"/>
+                <field name="invoice_line_ids" string="Entries"/>
+                <field name="total_amount"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="openacademy_invoice_action" model="ir.actions.act_window">
+        <field name="name">Invoices</field>
+        <field name="res_model">openacademy.invoice</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="openacademy_invoice_menu"
+        parent="openacademy_menu"
+        action="openacademy_invoice_action"
+        name="Invoices" />
+</odoo>

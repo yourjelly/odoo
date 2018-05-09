@@ -1,0 +1,44 @@
+.o_library {
+    padding: 16px;
+    .o-flex-display();
+
+    .o_statistics {
+        .o-flex(1, 1, auto);
+        font-size: 14px;
+        line-height: 30px;
+    }
+    .o_fancy_pie_chart {
+        .o-flex(1, 1, 40%);
+    }
+    .o_fancy_money_chart {
+        .o-flex(1, 1, 40%);
+    }
+    
+}
+
+.o_field_late_boolean {
+    div {
+        width: 16px;
+        height: 16px;
+        border-radius: 100%;
+    }
+}
+
+.o_field_lost {
+    margin-left: 10px;
+    margin-bottom: 2px;
+    width: 16px;
+    height: 16px;
+}
+
+// Systray item
+@systray_input_height: 24px;
+.o_library_systray_item {
+    height: @odoo-navbar-height;
+    > input {
+        height: @systray_input_height;
+        margin-top: (@odoo-navbar-height - @systray_input_height) / 2;
+        padding: 4px;
+        color: black;
+    }
+}

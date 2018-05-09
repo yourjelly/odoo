@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <div t-name="LibraryDebtWarning" class="alert alert-danger" role="alert">
+        This customer owes <t t-esc="amount"/> euros. Ask him to pay right now!
+    </div>
+
+    <div t-name="LibrarySmallDebtWarning" class="alert alert-warning" role="alert">
+        This customer owes <t t-esc="amount"/> euros. Warn him !
+    </div>
+
+    <t t-name="LibraryCustomerButtons">
+        <button type="button" class="btn btn-primary o_geolocate">Geolocate</button>
+        <button type="button" class="btn btn-primary o_pay_amount">Pay Amount Owed</button>
+    </t>
+
+    <li t-name="LibrarySystrayItem" class="o_library_systray_item">
+        <input type="input" class="o_input"/>
+    </li>
+
+    <div t-name="AppSwitcherWarning" class="alert alert-info">
+        Do not forget about <strong>Friday promotion</strong>!
+    </div>
+</templates>

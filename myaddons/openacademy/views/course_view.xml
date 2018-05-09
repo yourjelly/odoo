@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="course_tree_view" model="ir.ui.view">
+        <field name="name">course.tree</field>
+        <field name="model">openacademy.course</field>
+        <field name="arch" type="xml">
+            
+            <tree string="Course list">
+                <field name="name"/>
+                <field name="description"/>
+                <field name="level"/>
+                <field name="session_ids"/>
+                <field name="responsible_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="course_form_view" model="ir.ui.view">
+        <field name="name">course.form</field>
+        <field name="model">openacademy.course</field>
+        <field name="arch" type="xml">
+            <form string="Course Form">
+                <sheet>
+                    <div class="oe_button_box" name="buttons">
+                        <button class="oe_stat_button" type="object"
+                                    name="action_show_all_particitants" icon="fa-users">
+                            <div class="o_stat_info">
+                                <field name="students_count" class="o_stat_value"/>
+                                <span class="o_stat_text">
+                                    Students
+                                </span>
+                            </div>
+                        </button>
+                    </div>
+                    <group>
+                        <field name="name"/>
+                        <field name="description"/>
+                        <field name="level"/>
+                        <field name="session_ids"/>
+                        <field name="responsible_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="openacademy_course_action" model="ir.actions.act_window">
+        <field name="name">Courses</field>
+        <field name="res_model">openacademy.course</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="openacademy_course_menu"
+        parent="openacademy_menu"
+        action="openacademy_course_action"
+        name="Courses" />
+</odoo>

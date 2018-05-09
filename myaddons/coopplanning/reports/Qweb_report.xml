@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+        <!-- Tasks for one person  -->
+        <report
+            id="report_tasks"
+            model="coopplanning.partner"
+            string="Tasks Report"
+            name="coopplanning.report_tasks_view"
+            file="coopplanning.report_tasks"
+            report_type="qweb-html" />
+
+        <!--              ??? why use the next lines ???             -->
+            <!-- report_type="qweb-pdf" /> -->
+
+        <!-- <record id="openacademy.report_session" model="ir.actions.report">
+            <field name="report_type">qweb-html</field>
+        </record> -->
+
+        <template id="report_tasks_view">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <h2><span t-field="doc.name"/>'s tasks </h2>
+                            <h3>Tasks :</h3>
+                            <t t-foreach="doc.task_ids" t-as="task">
+                                <p>Task name : <span t-field="task.name"/></p>
+                                <p>From <span t-field="task.start_time"/> to <span t-field="task.end_time"/></p>
+                                <p>Task type : <span t-field="task.task_type_id.name" /></p>
+                                <p>Area : <span t-field="task.task_type_id.area" /></p>
+                            </t>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

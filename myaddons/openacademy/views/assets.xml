@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="assets_backend" name="openacademy assets" inherit_id="web.assets_backend">
+        <!-- <xpath expr="//script[last()]" position="after">
+            <link rel="stylesheet" href="/openacademy/static/src/css/openacademy.css"/>
+        </xpath> -->
+
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/openacademy/static/src/js/openacademy_dashboard.js"></script>
+        </xpath>
+
+        <xpath expr="//link[last()]" position="after">
+              <link rel="stylesheet" href="/openacademy/static/src/css/openacademy.css"/>
+        </xpath>
+    </template>
+</odoo>

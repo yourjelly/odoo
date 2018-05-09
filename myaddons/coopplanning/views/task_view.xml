@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="task_form_view" model="ir.ui.view">
+        <field name="name">task.form</field>
+        <field name="model">coopplanning.task</field>
+        <field name="arch" type="xml">
+            <form string="Task Form">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="task_template_id" readonly="1"
+                               attrs="{ 'invisible' : [('task_template_id', '=', False)]}" />
+                        <field name="task_type_id"
+                               attrs="{ 'readonly' : [('task_template_id', '!=', False)]}" required="True" />
+                        <field name="start_time"/>
+                        <field name="worker_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="task_search_view" model="ir.ui.view">
+        <field name="name">task.search</field>
+        <field name="model">coopplanning.task</field>
+        <field name="arch" type="xml">
+            <search>
+                <group>
+                    <field name="name"/>
+                    <field name="task_type_id"/>
+                    <field name="worker_id"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="task_tree_view" model="ir.ui.view">
+        <field name="name">task.tree</field>
+        <field name="model">coopplanning.task</field>
+        <field name="arch" type="xml">
+            <tree string="Task list">
+                <field name="name"/>
+                <field name="task_type_id"/>
+                <field name="start_time"/>
+                <field name="end_time"/>
+                <field name="worker_id"/>
+            </tree>
+        </field>
+    </record>
+
+     <record id="coopplanning_task_action" model="ir.actions.act_window">
+        <field name="name">Task</field>
+        <field name="res_model">coopplanning.task</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="coopplanning_task_menu"
+        parent="coopplanning_root_menu"
+        action="coopplanning_task_action"
+        name="Task"
+        sequence="40" />
+
+
+</odoo>

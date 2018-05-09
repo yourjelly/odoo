@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="people_form_view" model="ir.ui.view">
+        <field name="name">people.instructor.form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <group name="purchase" position="after">
+                <group string="OpenAcademy" name="openacademy">
+                    <field name="isTeacher" string="is Instructor"/>
+                    <field name="invoice_id" string="Invoice"/>
+                    
+                </group>
+            </group>
+            <page name="sales_purchases" position="after">
+                <page string="Attended Sessions" name="openacademy">
+                    <separator name="Attended Sessions"/>
+                    <field name="session_ids"/>
+                </page>
+            </page>
+        </field>
+    </record>
+
+    <record id="people_tree_view" model="ir.ui.view">
+        <field name="name">people.tree</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <filter name="supplier" position="after">
+                 <filter name="isTeacher" string="Is Teacher" domain="[('isTeacher', '=', 1)]"/>
+            </filter>
+        </field>
+    </record>
+
+    <record id="openacademy_people_action" model="ir.actions.act_window">
+        <field name="name">People</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="openacademy_people_menu"
+        parent="openacademy_menu"
+        action="openacademy_people_action"
+        name="People" />
+</odoo>

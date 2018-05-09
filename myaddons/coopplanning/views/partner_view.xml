@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="partners_tree_view" model="ir.ui.view">
+        <field name="name">partners.tree</field>
+        <field name="model">coopplanning.partner</field>
+        <field name="arch" type="xml">
+            <tree string="Partners list">
+                <field name="name"/>
+                <field name="age"/>
+                <field name="phone"/>
+                <field name="email"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="coopplanning_partners_action" model="ir.actions.act_window">
+        <field name="name">Partners</field>
+        <field name="res_model">coopplanning.partner</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="coopplanning_partners_menu"
+        parent="coopplanning_root_menu"
+        action="coopplanning_partners_action"
+        name="Partners"
+        sequence="30" />
+
+
+</odoo>

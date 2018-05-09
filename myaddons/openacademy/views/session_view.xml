@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="session_tree_view" model="ir.ui.view">
+        <field name="name">session.tree</field>
+        <field name="model">openacademy.session</field>
+        <field name="arch" type="xml">
+            <tree string="Session list">
+                <field name="name"/>
+                <field name="description"/>
+                <field name="state"/>
+                <field name="course_id"/>
+                <field name="teacher_id"/>
+                <field name="capacity"/>
+                <field name="student_ids"/>
+                <field name="isFull"/>
+                <field name="cost"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="session_form_view" model="ir.ui.view">
+        <field name="name">session.form</field>
+        <field name="model">openacademy.session</field>
+        <field name="arch" type="xml">
+            <form string="Session Form">
+                <header>
+                    <field name="state" widget="statusbar" nolabel="1" statusbar_visible="draft,waiting,confirmed,canceled" clickable="True"/>
+                    <button string="Confirm session" type="object" name="action_confirm_session" class="oe_highlight" attrs="{'invisible' : [('state', 'in', ('canceled','draft','confirmed'))]}"/>
+                    <button string="Set session as waiting" type="object" name="action_waiting_session" attrs="{'invisible' : [('state', '=', 'waiting')]}"/>
+                    <button string="Cancel session" type="object" name="action_cancel_session" attrs="{'invisible' : [('state', '=', 'canceled')]}"/>
+                    
+                    <button string="Create invoice" type="object" name="action_create_invoice" class="oe_highlight" 
+                            attrs="{'invisible' : ['|', ('is_paid', '=', True), ('state' , 'in', ('canceled','draft','waiting'))]}"/>
+                    <button string="Recall invoice" type="object" name="action_recall_invoice" class="oe_highlight" 
+                            attrs="{'invisible' : [('is_paid', '=', False)]}"/>
+                </header>
+                <sheet>
+                    <group colspan="4">
+                        <group colspan="3" col="2">
+                            <separator string="General" colspan="2"/>
+                            <field name="name"/>
+                            <field name="course_id"/>
+                            <field name="teacher_id"/>
+                            <field name="state"/>
+                            <field name="cost"/>
+                            <field name="is_paid"/>
+                        </group>
+
+                        <group colspan="2" col="2">
+                            <separator string="Time" colspan="2"/>
+                            <field name="startDate"/>
+                            <field name="duration"/>
+                            <field name="endDate"/>
+                        </group>
+
+                        <notebook colspan="4">
+                            <page string="Description">
+                                <field name="description" nolabel="1"/>
+                            </page>
+                        </notebook>
+
+                        <group colspan="2" col="2">
+                            <separator string="Attendees" colspan="2"/>
+                            <field name="student_ids"/>
+                            <field name="capacity"/>
+                            <field name="capacity_index" readonly="1"  widget="progressbar"/>
+                            <field name="isFull"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="openacademy.people"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="session_calendar_view">
+        <field name="name">session.calendar</field>
+        <field name="model">openacademy.session</field>
+        <field name="arch" type="xml">
+            <calendar string="Session Calendar" date_start="startDate" date_stop="endDate" color="teacher_id">
+                <field name="name"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="session_gantt_view">
+        <field name="name">session.gantt</field>
+        <field name="model">openacademy.session</field>
+        <field name="arch" type="xml">
+            <gantt string="Session Gantt"
+                    date_start="startDate" date_stop="endDate"
+                    default_group_by='teacher_id'>
+                <!-- <field name="name"/> this is not required after Odoo 10.0 -->
+            </gantt>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="openacademy_session_graph_view">
+        <field name="name">openacademy.session.graph</field>
+        <field name="model">openacademy.session</field>
+        <field name="arch" type="xml">
+            <graph string="Participations by Courses">
+                <field name="course_id"/>
+                <field name="attendees_count" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="view_openacad_session_kanban">
+        <field name="name">openacad.session.kanban</field>
+        <field name="model">openacademy.session</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="teacher_id">
+                <field name="color"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div
+                                t-attf-class="oe_kanban_color_{{kanban_getcolor(record.color.raw_value)}}
+                                                oe_kanban_global_click_edit oe_semantic_html_override
+                                                oe_kanban_card {{record.group_fancy==1 ? 'oe_kanban_card_fancy' : ''}}">
+                            <div class="oe_dropdown_kanban">
+                                <!-- dropdown menu -->
+                                <div class="oe_dropdown_toggle">
+                                    <i class="fa fa-bars fa-lg"/>
+                                    <ul class="oe_dropdown_menu">
+                                        <li>
+                                            <a type="delete">Delete</a>
+                                        </li>
+                                        <li>
+                                            <ul class="oe_kanban_colorpicker"
+                                                data-field="color"/>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="oe_clear"></div>
+                            </div>
+                            <div t-attf-class="oe_kanban_content">
+                                <!-- title -->
+                                Session name:
+                                <field name="name"/>
+                                <br/>
+                                Start date:
+                                <field name="startDate"/>
+                                <br/>
+                                duration:
+                                <field name="duration"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="openacademy_session_action" model="ir.actions.act_window">
+        <field name="name">Session</field>
+        <field name="res_model">openacademy.session</field>
+        <field name="view_mode">tree,form,calendar,gantt,graph,kanban</field>
+    </record>
+
+    <menuitem
+        id="openacademy_session_menu"
+        parent="openacademy_menu"
+        action="openacademy_session_action"
+        name="Sessions" />
+</odoo>

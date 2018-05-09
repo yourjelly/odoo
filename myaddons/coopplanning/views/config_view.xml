@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="coopplanning_day_config_action" model="ir.actions.act_window">
+        <field name="name">Day Config</field>
+        <field name="res_model">coopplanning.daynumber</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+    <record id="coopplanning_task_type_config_action" model="ir.actions.act_window">
+        <field name="name">Task Type Config</field>
+        <field name="res_model">coopplanning.task.type</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="coopplanning_config_menu"
+        parent="coopplanning_root_menu"
+        name="Config"
+        sequence="99" />
+
+    <menuitem
+        id="coopplanning_day_config_menu"
+        parent="coopplanning_config_menu"
+        action="coopplanning_day_config_action"
+        name="Day" />
+
+    <menuitem
+        id="coopplanning_task_type_config_menu"
+        parent="coopplanning_config_menu"
+        action="coopplanning_task_type_config_action"
+        name="Task Type" />
+</odoo>

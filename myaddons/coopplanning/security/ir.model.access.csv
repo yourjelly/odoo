@@ -1,0 +1,7 @@
+id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
+partner_read_all,partner all,model_coopplanning_partner,,1,0,0,0
+task_read_all,task all,model_coopplanning_task,,1,0,0,0
+task_type_read_all,task_type all,model_coopplanning_task_type,,1,0,0,0
+task_template_read_all,task_template all,model_coopplanning_task_template,,1,0,0,0
+product_read_all,product all,model_coopplanning_product,,1,0,0,0
+daynumber_read_all,daynumber all,model_coopplanning_daynumber,,1,0,0,0

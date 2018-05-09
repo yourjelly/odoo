@@ -1,0 +1,3 @@
+id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
+army_read_all,army all,model_kingdom_army,,1,0,0,0
+city_read_all,city all,model_kingdom_city,,1,0,0,0

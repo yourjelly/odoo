@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="worker_1" model="coopplanning.partner">
+        <field name="name">Jack</field>
+        <field name="age">23</field>
+    </record>
+
+    <record id="worker_2" model="coopplanning.partner">
+        <field name="name">John</field>
+        <field name="age">25</field>
+    </record>
+
+    <record id="worker_3" model="coopplanning.partner">
+        <field name="name">Sylvia</field>
+        <field name="age">32</field>
+    </record>
+
+    <record id="worker_4" model="coopplanning.partner">
+        <field name="name">Romain</field>
+        <field name="age">52</field>
+    </record>
+
+    <record id="worker_5" model="coopplanning.partner">
+        <field name="name">Simon</field>
+        <field name="age">43</field>
+    </record>
+
+    <record id="worker_6" model="coopplanning.partner">
+        <field name="name">David</field>
+        <field name="age">27</field>
+    </record>
+
+    <record id="worker_7" model="coopplanning.partner">
+        <field name="name">Arnaud</field>
+        <field name="age">27</field>
+    </record>
+
+    <record id="worker_8" model="coopplanning.partner">
+        <field name="name">Peter</field>
+        <field name="age">35</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="index">
+        <t t-call="website.layout">
+            <title>Academy</title>
+            <div class="oe_structure">
+                <div class="container">
+                    <t t-foreach="teachers" t-as="teacher">
+                         <p><t t-esc="teacher.id"/> <t t-esc="teacher.name"/></p>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="teacher">
+        <t t-call="website.layout">
+            <title>Academy Teacher</title>
+            <div class="oe_structure">
+                <div class="container">
+                    <t t-foreach="teachers" t-as="teacher">
+                        <h2>Detail for teacher <t t-esc="teacher.name"/></h2>
+                         <p>Name : <t t-esc="teacher.name"/></p>
+                         <p>email : <t t-esc="teacher.email"/></p>
+                         <p>Phone : <t t-esc="teacher.phone"/></p>
+                         <p>Address : <t t-esc="teacher.street"/> <t t-esc="teacher.state_id.name"/></p>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="person">
+        <t t-call="website.layout">
+            <title>Academy Teacher</title>
+            <div class="oe_structure">
+                <div class="container">
+                    <h2>Detail for teacher <t t-esc="person.name"/></h2>
+                    <p>Name : <t t-esc="person.name"/></p>
+                    <p>email : <t t-esc="person.email"/></p>
+                    <p>Biography : </p>
+                    <div t-field="person.biography"/>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

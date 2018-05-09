@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="9990" model="res.partner">
+            <field name="name">Diana Padilla</field>
+            <field name="isTeacher">True</field>
+        </record>
+        <record id="9991" model="res.partner">
+            <field name="name">Jody Carroll</field>
+            <field name="isTeacher">True</field>
+        </record>
+        <record id="9992" model="res.partner">
+            <field name="name">Lester Vaughn</field>
+            <field name="isTeacher">True</field>
+        </record>
+</odoo>
