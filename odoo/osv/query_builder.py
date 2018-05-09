@@ -278,8 +278,15 @@ class BaseQuery(object):
         rows = getattr(self, '_rows', False)
 
         if rows:
-            sql = ', '.join([row._to_sql(alias_mapping) for row in rows])
-            self.sql.append("FROM %s" % sql)
+            sql = []
+            for row in rows:
+                if isinstance(row, tuple):
+                    sql.append(row[0]._to_sql(alias_mapping))
+                    self.args += row[1]
+                else:
+                    sql.append(row._to_sql(alias_mapping))
+
+            self.sql.append("FROM %s" % ', '.join(sql))
 
     def _build_joins(self, alias_mapping):
         pass
@@ -399,40 +406,6 @@ class AliasMapping(dict):
         alias = _quote(next(self._generator))
         self[k] = alias
         return alias
-
-
-class Func(Expression):
-
-    __slots__ = ('func', 'args')
-
-    def __init__(self, func, *args):
-        """
-        Generic PostgreSQL Aggregate/Function, accepts any amount of arguments.
-
-        Args:
-            func (str): Name of the function
-            args: The function's arguments
-        """
-        self.func = func
-        self.args = args
-
-    def _to_sql(self, alias_mapping):
-        sql = '(%s(' % self.func
-        args = []
-
-        for arg in self.args:
-            if isinstance(arg, Expression):
-                _sql, _args = arg._to_sql(alias_mapping)
-                sql += _sql
-                args += _args
-            else:
-                args.append(arg)
-                sql += '%s'
-            if arg is not self.args[-1]:
-                sql += ', '
-
-        sql += '))'
-        return (sql, args)
 
 
 class Join(object):
@@ -641,6 +614,10 @@ class Select(BaseQuery, QueryExpression):
             elif self._aliased:
                 col = self._columns[c]
                 _sql.append("%s AS %s" % (col._to_sql(alias_mapping)[0], c))
+            elif isinstance(c, Unnest):
+                # Special case, Unnest can be used in a FROM clause
+                r = c._row[0]
+                _sql.append(alias_mapping[r])
             else:
                 _sql.append("%s" % c._to_sql(alias_mapping)[0])
 
@@ -810,7 +787,7 @@ class Insert(BaseQuery):
         args = []
         sql = "VALUES %s"
 
-        if any([isinstance(x, Select) for x in self._vals]):
+        if any([isinstance(x, QueryExpression) for x in self._vals]):
             assert len(self._vals) == 1, "Only one sub-query per INSERT statement allowed."
             _sql, _args = self._vals[0]._to_sql(alias_mapping)
             sql = ("(%s)" % _sql)
@@ -854,6 +831,48 @@ DEFAULT = Constant('DEFAULT')
 
 
 # SQL Functions and Aggregates
+class Func(Expression):
+
+    __slots__ = ('func', 'args')
+
+    def __init__(self, func, *args):
+        """
+        Generic PostgreSQL Aggregate/Function, accepts any amount of arguments.
+
+        Args:
+            func (str): Name of the function
+            args: The function's arguments
+        """
+        self.func = func
+        self.args = args
+
+    def _to_sql(self, alias_mapping):
+        sql = '(%s(' % self.func
+        args = []
+
+        for arg in self.args:
+            if isinstance(arg, Expression):
+                _sql, _args = arg._to_sql(alias_mapping)
+                sql += _sql
+                args += _args
+            else:
+                args.append(arg)
+                sql += '%s'
+            if arg is not self.args[-1]:
+                sql += ', '
+
+        sql += '))'
+        return (sql, args)
+
+
+class Unnest(Func):
+
+    def __init__(self, *args):
+        super(Unnest, self).__init__('UNNEST', *args)
+        self._row = (Row(self.func), args)
+        self._row[0]._table += "(%s)"
+
+
 AVG = partial(Func, 'AVG')
 COUNT = partial(Func, 'COUNT')
 SUM = partial(Func, 'SUM')
@@ -865,4 +884,4 @@ CONCAT = partial(Func, 'CONCAT')
 NOW = partial(Func, 'NOW')
 EXISTS = partial(Func, 'EXISTS')
 ANY = partial(Func, 'ANY')
-UNNEST = partial(Func, 'UNNEST')
+UNNEST = Unnest

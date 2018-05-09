@@ -4,7 +4,7 @@
 from unittest import TestCase
 from odoo.tests.common import tagged
 from odoo.osv.query_builder import Row, Select, Delete, With, Update, Insert, \
-    Asc, Desc, COALESCE, NULL, DEFAULT, _quote, BaseQuery
+    Asc, Desc, COALESCE, UNNEST, NULL, DEFAULT, _quote, BaseQuery
 
 
 @tagged('standard', 'at_install')
@@ -752,6 +752,13 @@ class TestInsert(TestCase):
              ['hello', 'world', 'mycompany'])
         )
 
+    def test_insert_without_cols(self):
+        i = Insert(self.p, ['foo', 'bar'])
+        self.assertEqual(
+            i.to_sql(),
+            ("""INSERT INTO "res_partner" VALUES (%s, %s)""", ['foo', 'bar'])
+        )
+
     def test_insert_sub_select(self):
         s = Select([self.p.name], limit=1)
         i = Insert(self.p('name'), [s])
@@ -783,4 +790,30 @@ class TestInsert(TestCase):
             i.to_sql(),
             ("""INSERT INTO "res_partner"("name") VALUES (%s) RETURNING "res_partner"."id\"""",
              ['foo'])
+        )
+
+
+@tagged('standard', 'at_install')
+class TestRealWorldCases(TestCase):
+
+    def setUp(self):
+        self.maxDiff = None
+        super(TestRealWorldCases, self).setUp()
+        self.p = Row("res_partner")
+        self.u = Row("res_users")
+        self.g = Row("res_groups")
+
+    def test_insert_rwc(self):
+        r1 = UNNEST([1, 2, 3])
+        r2 = UNNEST([5, 6, 7])
+        s1 = Select([r1, r2])
+        s2 = Select([self.p.id1, self.p.id2], where=self.p.id1 ^ [1, 5, 4])
+        i = Insert(self.g('id1', 'id2'), [s1 - s2])
+
+        self.assertEqual(
+            i.to_sql(),
+            ("""INSERT INTO "res_groups"("id1", "id2") """
+             """((SELECT "a", "b" FROM "UNNEST"(%s) "a", "UNNEST"(%s) "b") """
+             """EXCEPT (SELECT "a"."id1", "a"."id2" FROM "res_partner" "a" """
+             """WHERE ("a"."id1" IN %s)))""", [[1, 2, 3], [5, 6, 7], [1, 5, 4]])
         )
