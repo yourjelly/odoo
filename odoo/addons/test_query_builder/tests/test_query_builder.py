@@ -725,6 +725,14 @@ class TestUpdate(TestCase):
             ("""UPDATE "res_users" "a" SET "a"."id" = %s RETURNING "a"."id\"""", [5])
         )
 
+    def test_update_multiple_cols(self):
+        u = Update([self.p.name << "John", self.p.surname << "Wick"])
+        self.assertEqual(
+            u.to_sql(),
+            ("""UPDATE "res_partner" "a" SET "a"."name" = %s, "a"."surname" = %s""",
+             ["John", "Wick"])
+        )
+
     def test_update_with_sub_select(self):
         s = Select([self.u.name], where=self.u.partner_id == self.p.id, limit=1)
         u = Update([self.p.name << s])

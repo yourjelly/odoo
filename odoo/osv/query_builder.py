@@ -9,7 +9,7 @@ with PostgreSQL, however it may still work with other RDBMS, but this is not gua
 Usage:
 
 The basic object needed for creating SQL statements and expressions is the `Row` object, it
-represents (in an abstract manner) a row from a table, it requires  one argument for initialization
+represents (in an abstract manner) a row from a table, it requires one argument for initialization
 which is the name of the table, it accepts a second, optional argument as a flag called `nullable`,
 this flag, when set to true, means "take the nulls from this table when performing a Join", which
 helps in the inference of join types.
@@ -45,8 +45,8 @@ Three things to note from the previous example:
 
 Rows, Columns and Expressions are the building blocks of the query builder, but they're
 pretty useless by themselves, to create meaningful SQL statements, one should use
-the Select, Insert and Delete classes for creating the corresponding SQL statements, in order
-to see their usage, consult the respective class' documentation.
+the Select, Insert, Update, Delete, etc. classes for creating the corresponding SQL statements,
+in order to see their usage, consult the respective class' documentation.
 """
 
 from collections import Iterable, OrderedDict
@@ -55,7 +55,9 @@ from numbers import Number
 
 from odoo.tools.pycompat import text_type
 
-# TODO: Use psycopg2 helpers (sql.SQL, sql.Identifier)
+# TODO: Use psycopg2 helpers (sql.SQL, sql.Identifier).
+# TODO: Either return args as a tuple and not a list, or implement an execute method
+# for queries that does the casting.
 
 
 def _quote(val):
@@ -66,6 +68,7 @@ def _quote(val):
 
 
 def generate_aliases():
+    # XXX: Increase the amount of possible table aliases
     return iter('abcdefghijklmnopqrstuvwxyz')
 
 
@@ -196,7 +199,7 @@ class Row(object):
         Args:
             table (str): Name of the table.
             nullable (bool): In the case of a join, whether the NULLs of this
-                table should be used in the resulting joined table.
+                table should be included in the resulting joined table.
         """
         self._table = _quote(table)
         self._nullable = nullable
@@ -255,11 +258,14 @@ class Column(Expression):
 
         if self._val is not None:
             if isinstance(self._val, Column):
+                # col = col
                 _sql, _args = self._val._to_sql(alias_mapping)
                 return "%s = %s" % (col_name, _sql), _args
             elif isinstance(self._val, Select):
+                # col = sub-select
                 _sql, _args = self._val._to_sql(alias_mapping)
                 return "%s = (%s)" % (col_name, _sql), _args
+            # col = literal value
             return "{0} = %s".format(col_name), [self._val]
         return col_name, []
 
@@ -269,6 +275,14 @@ class BaseQuery(object):
     def __init__(self, *args, **kwargs):
         """
         Helper class for combining the different parts of any Query object.
+
+        All the _build_* methods are called in the _build_all() method which itself
+        is called from the _to_sql method, all these methods take in an alias_mapping argument
+        which is an AliasMapping object, in order to determine potential table aliases.
+
+        All query classes (Select, Insert, Delete, ...) inherit from this one class in order
+        to generate their own SQL statements, some may override already-defined _build methods,
+        some may override _to_sql as they might have very specific behavior.
         """
         self.sql = []
         self.args = []
@@ -369,7 +383,7 @@ class QueryExpression(Expression):
 
     __slots__ = ('op', 'left', 'right')
 
-    """ Class for operators between Select objects."""
+    """Class for operators between Select objects."""
 
     def __init__(self, op, left, right):
         super(QueryExpression, self).__init__(op, left, right)
@@ -400,6 +414,21 @@ class AliasMapping(dict):
     def __init__(self, *args, **kwargs):
         """
         A special implementation of dict that generates appropriate table aliases on the fly.
+
+        Keys must be Row objects, if the key is missing from the AliasMapping, it will be added
+        to the AliasMapping and an alias will be assigned to it, the alias is a single letter
+        from the alphabet that is double-quoted.
+
+        If the key is already in the AliasMapping, then we will simply return its corresponding
+        alias.
+
+        Some constructs don't use or reset aliases:
+
+            * WITH statements will define a table but not give it any aliases, the table is called
+              by its fully-qualified name.
+
+            * SELECT query expressions (UNION, INTERSECT, EXCEPT) won't use the same AliasMapping
+              for both of their operands, i.e. each operand's first table will be "a".
         """
         super(AliasMapping, self).__init__()
         self._generator = generate_aliases()
@@ -415,9 +444,6 @@ class Join(object):
     def __init__(self, expression):
         """
         Create a join between two tables on a given condition.
-
-        /!\ This class should *NOT* be used on its own, the Select class already takes care
-            of creating the appropriate Join objects /!\
 
         The type of join depends on each table's `_nullable` boolean flag:
             If LHS is nullable and RHS is nullable, the type is a FULL JOIN
@@ -744,6 +770,22 @@ class With(BaseQuery):
 class Update(BaseQuery):
 
     def __init__(self, exprs, where=None, returning=[]):
+        """
+        Class for creating UPDATE SQL statements.
+
+        Args:
+            exprs: List of "assignment-expressions", this can be achieved with at least one column
+                (on the LHS) and the << operator, the RHS operand can be any primitive or Column.
+            where (Expression): Expression that will filter out the records to Update.
+            returning: List of columns that the UPDATE statement should return.
+
+        Example:
+            >>> r = Row("res_partner")
+            >>> u = Update([r.name << "John", r.surname << "Wick"], r.name == NULL, [r.id])
+            >>> u.to_sql()
+            ... ('UPDATE "res_partner" "a" SET "a"."name" = %s, "a"."surname" = %s WHERE \
+            ... ("a"."name" IS NULL) RETURNING "a"."id"', ('John', 'Wick'))
+        """
         super(Update, self).__init__()
         self._exprs = exprs
         self._where = where
@@ -775,6 +817,28 @@ class Update(BaseQuery):
 class Insert(BaseQuery):
 
     def __init__(self, row, vals, do_nothing=False, returning=[]):
+        """
+        Class for creating SQL INSERT statements.
+
+        Args:
+            row (Row): The table to insert to, can be used as a callable to pass (as strings) the
+                columns of the table that map to the vals argument.
+            vals: List of values to map to the specified columns. If no columns are specified then
+                it will implicitly assume that all the values map, in order, to all the available
+                columns, managed by PostgreSQL itself.
+            do_nothing (bool): Whether or not the insert should on conflict do nothing.
+            returning: List of columns that the INSERT statement should return.
+
+        Example:
+            >>> p = Row("res_partner")
+            >>> # in this case, only the columns name, surname and company will be defined
+            >>> i = Insert(p('name', 'surname', 'company'), ['John', 'Wick', 'MyCompany'],
+            ... do_nothing=True, returning=[p.id])
+            >>> i.to_sql()
+            ... ('INSERT INTO "res_partner"('name', 'surname', 'company') VALUES
+            ... (%s) ON CONFLICT DO NOTHING RETURNING "res_partner"."id"',
+            ... ['John', 'Wick', 'MyCompany'])
+        """
         super(Insert, self).__init__()
         self._row = row
         self._vals = vals
@@ -821,6 +885,15 @@ class Insert(BaseQuery):
 class CreateView(BaseQuery):
 
     def __init__(self, name, content, replace=False):
+        """
+        Class for creating CREATE VIEW statements.
+
+        Args:
+            name (str): Name given to the view.
+            content: Either a Select object or a With object, will be used to create the content
+                of the view.
+            replace (bool): Whether the view should be replaced if it already exists or not.
+        """
         assert isinstance(content, BaseQuery)
         super(CreateView, self).__init__()
         self._name = _quote(name)
@@ -838,6 +911,7 @@ class CreateView(BaseQuery):
 class Constant(object):
 
     def __init__(self, sql):
+        """ Class for creating SQL constants. """
         self.sql = sql
 
     def __str__(self):
@@ -886,6 +960,12 @@ class Func(Expression):
 class Unnest(Func):
 
     def __init__(self, *args):
+        """
+        Class for the UNNEST SQL function.
+
+        This function is special since it can be used as a table in the FROM clause of
+        some queries, therefore we create a Row object for it.
+        """
         super(Unnest, self).__init__('UNNEST', *args)
         self._row = (Row(self.func), args)
         self._row[0]._table += "(%s)"
