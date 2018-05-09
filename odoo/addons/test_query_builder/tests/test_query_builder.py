@@ -4,7 +4,7 @@
 from unittest import TestCase
 from odoo.tests.common import tagged
 from odoo.osv.query_builder import Row, Select, Delete, With, Update, Insert, \
-    Asc, Desc, COALESCE, UNNEST, NULL, DEFAULT, _quote, BaseQuery
+    Asc, Desc, COALESCE, UNNEST, NULL, DEFAULT, _quote, BaseQuery, CreateView
 
 
 @tagged('standard', 'at_install')
@@ -39,7 +39,7 @@ class TestExpressions(TestCase):
         self.assertEqual(expr._to_sql(None), res)
 
     def test_eq_expression_null(self):
-        expr = self.u.name == None  # noqa (Cannot override `is`)
+        expr = self.u.name == NULL
         res = ('("res_users"."name" IS NULL)', [])
         self.assertEqual(expr._to_sql(None), res)
 
@@ -49,7 +49,7 @@ class TestExpressions(TestCase):
         self.assertEqual(expr._to_sql(None), res)
 
     def test_ne_expression_null(self):
-        expr = self.u.id != None  # noqa
+        expr = self.u.id != NULL
         res = ('("res_users"."id" IS NOT NULL)', [])
         self.assertEqual(expr._to_sql(None), res)
 
@@ -81,12 +81,12 @@ class TestExpressions(TestCase):
         self.assertEqual(expr._to_sql(None), res)
 
     def test_multi_table_expression(self):
-        expr = (self.u.id != 5) & (self.p.name != None)  # noqa
+        expr = (self.u.id != 5) & (self.p.name != NULL)
         res = ("""(("res_users"."id" != %s) AND ("res_partner"."name" IS NOT NULL))""", [5])
         self.assertEqual(expr._to_sql(None), res)
 
     def test_func_expression(self):
-        expr = (self.u.name != None) & (abs(self.u.delta)) & (self.u.id > 5)  # noqa
+        expr = (self.u.name != NULL) & (abs(self.u.delta)) & (self.u.id > 5)
         res = ("""((("res_users"."name" IS NOT NULL) AND (ABS("res_users"."delta")))"""
                """ AND ("res_users"."id" > %s))""", [5])
         self.assertEqual(expr._to_sql(None), res)
@@ -190,7 +190,7 @@ class TestSelect(TestCase):
         self.assertEqual(s.to_sql(), res)
 
     def test_select_complex_where(self):
-        s = Select([self.p.id], (self.p.id == 5) & (self.p.active != None))  # noqa
+        s = Select([self.p.id], (self.p.id == 5) & (self.p.active != NULL))
         res = (("""SELECT "a"."id" FROM "res_partner" "a" """
                """WHERE (("a"."id" = %s) AND ("a"."active" IS NOT NULL))"""),
                [5])
@@ -794,16 +794,55 @@ class TestInsert(TestCase):
 
 
 @tagged('standard', 'at_install')
+class TestCreateView(TestCase):
+
+    def setUp(self):
+        super(TestCreateView, self).__init__()
+        self.p = Row("res_partner")
+        self.t = Row("my_temp_table")
+        self.g = Row("res_group")
+        self.w_s = Select([self.g.name], limit=1)
+        self.s = Select([self.p.id], where=self.p.name @ self.t.name)
+        self.w = With([(self.t("name"), self.w_s)], self.s)
+
+    def test_create_basic_view(self):
+        v = CreateView("my_view", self.w_s)
+        self.assertEqual(
+            v.to_sql(),
+            ("""CREATE VIEW "my_view" AS (SELECT "a"."name" FROM "res_group" "a" """
+             """LIMIT %s OFFSET %s)""", [1, 0])
+        )
+
+    def test_create_or_replace_view(self):
+        v = CreateView("my_view", self.w_s, replace=True)
+        self.assertEqual(
+            v.to_sql(),
+            ("""CREATE OR REPLACE VIEW "my_view" AS (SELECT "a"."name" FROM "res_group" "a" """
+             """LIMIT %s OFFSET %s)""", [1, 0])
+        )
+
+    def test_create_view_with(self):
+        v = CreateView("my_view", self.w)
+        self.assertEqual(
+            v.to_sql(),
+            ("""CREATE VIEW "my_view" AS (WITH "my_temp_table"("name") AS """
+             """(SELECT "a"."name" FROM "res_group" "a" LIMIT %s OFFSET %s) """
+             """SELECT "b"."id" FROM "res_partner" "b" WHERE """
+             """("b"."name" LIKE "my_temp_table"."name"))""", [1, 0])
+        )
+
+
+@tagged('standard', 'at_install')
 class TestRealWorldCases(TestCase):
 
     def setUp(self):
-        self.maxDiff = None
         super(TestRealWorldCases, self).setUp()
         self.p = Row("res_partner")
         self.u = Row("res_users")
         self.g = Row("res_groups")
 
     def test_insert_rwc(self):
+        # fields.py#2518
         r1 = UNNEST([1, 2, 3])
         r2 = UNNEST([5, 6, 7])
         s1 = Select([r1, r2])

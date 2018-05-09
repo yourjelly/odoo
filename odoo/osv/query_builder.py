@@ -55,6 +55,8 @@ from numbers import Number
 
 from odoo.tools.pycompat import text_type
 
+# TODO: Use psycopg2 helpers (sql.SQL, sql.Identifier)
+
 
 def _quote(val):
     """ Helper function for quoting SQL identifiers if necessary."""
@@ -109,12 +111,12 @@ class Expression(object):
         return Expression('NOT', self, None)
 
     def __eq__(self, other):
-        if other is None:
+        if other is NULL:
             return Expression('IS', self, 'NULL')
         return Expression('=', self, other)
 
     def __ne__(self, other):
-        if other is None:
+        if other is NULL:
             return Expression('IS NOT', self, 'NULL')
         return Expression('!=', self, other)
 
@@ -131,22 +133,22 @@ class Expression(object):
         return Expression('>=', self, other)
 
     def __matmul__(self, other):
-        assert isinstance(other, text_type), "`@` RHS operand must be a text type."
+        assert isinstance(other, (text_type, Column)), "`@` RHS operand must be a text type."
         return Expression('LIKE', self, other)
 
     def ilike(self, other):
-        assert isinstance(other, text_type), "`ilike` argument must be a text type."
+        assert isinstance(other, (text_type, Column)), "`ilike` argument must be a text type."
         return Expression('ILIKE', self, other)
 
     def __abs__(self):
         return Func('ABS', self)
 
     def __pow__(self, other):
-        assert isinstance(other, Number), "`**` RHS operand must be a numeric type."
+        assert isinstance(other, (Number, Column)), "`**` RHS operand must be a numeric type."
         return Func('POW', self, other)
 
     def __mod__(self, other):
-        assert isinstance(other, Number), "`%` RHS operand must be a numeric type."
+        assert isinstance(other, (Number, Column)), "`%` RHS operand must be a numeric type."
         return Func('MOD', self, other)
 
     def _to_sql(self, alias_mapping):
@@ -696,7 +698,7 @@ class Delete(BaseQuery):
             ))
 
 
-class With(object):
+class With(BaseQuery):
 
     def __init__(self, body, tail, recursive=False):
         """
@@ -814,6 +816,22 @@ class Insert(BaseQuery):
     def _build_returning(self, alias_mapping):
         alias_mapping[self._row] = self._row._table
         super(Insert, self)._build_returning(alias_mapping)
+
+
+class CreateView(BaseQuery):
+
+    def __init__(self, name, content, replace=False):
+        assert isinstance(content, BaseQuery)
+        super(CreateView, self).__init__()
+        self._name = _quote(name)
+        self._content = content
+        self._replace = replace
+
+    def _build_base(self, alias_mapping):
+        self.sql.append("CREATE %sVIEW %s" % ("OR REPLACE " if self._replace else "", self._name))
+        sql, args = self._content._to_sql(alias_mapping)
+        self.sql.append("AS (%s)" % sql)
+        self.args += args
 
 
 # SQL Constants
