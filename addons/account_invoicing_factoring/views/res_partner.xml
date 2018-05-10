@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="view_partner_factoring_form" model="ir.ui.view">
+            <field name="name">res.partner.factoring.form</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form" />
+            <field name="arch" type="xml">
+                <xpath expr="sheet" position="before">
+                    <header>
+                        <button name="action_request_financing_debtor" type="object" string="Request for Financing" attrs="{'invisible':[('company_type', '!=', 'company')]}" class="oe_highlight" />
+                    </header>
+                </xpath>
+                <notebook>
+                    <page string="Factoring" groups="base.group_no_one" attrs="{'invisible':[('company_type', '!=', 'company')]}">
+                        <group>
+                            <group>
+                                <field name="finexkap_uuid"/>
+                                <field name="finexkap_status"/>
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+            </field>
+        </record>
+    </data>
+</odoo>

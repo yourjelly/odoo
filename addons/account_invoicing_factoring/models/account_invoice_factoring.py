@@ -24,6 +24,7 @@ class InvoiceFinancingOffer(models.Model):
         ('reject', 'Rejected'),
         ('cancel', 'Cancelled')
     ], track_visibility='onchange', string='Status', index=True, copy=False, default='request')
+    request_uuid = fields.Char('Request UUID', readonly=True)
 
     @api.multi
     def _compute_invoice_amount(self):
@@ -45,6 +46,10 @@ class InvoiceFinancingRequest(models.TransientModel):
     def default_get(self, fields):
         """ Default get for valid invoices and ignored invoices"""
         result = super(InvoiceFinancingRequest, self).default_get(fields)
+
+        if self.env.user.company_id.finexkap_account_status != 'Accepted':
+            raise UserError(_('Your Finaxkap account is not activated yet.'))
+
         active_ids = self._context.get('active_ids', [])
         invoices = self.env['account.invoice'].browse(active_ids)
         open_invoices = invoices.filtered(lambda i: i._validate_for_factoring() is None)
@@ -64,6 +69,10 @@ class InvoiceFinancingRequest(models.TransientModel):
             'invoice_ids': [(6, False, self.invoice_ids.ids)]
         }
         offer = self.env['invoice.financing.offer'].create(values)
+
+        request_uuid = self.env['factoring.api']._request_invoices(offer)
+        offer.write({'request_uuid': request_uuid})
+
         return {
             'name': _('Factoring'),
             'view_type': 'form',

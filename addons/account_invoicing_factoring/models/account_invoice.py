@@ -28,29 +28,32 @@ class AccountInvoice(models.Model):
             raise UserError(_('No Factoring found for invoice'))
 
     def _validate_for_factoring(self):
-        errorMessage = None
+
+        if self.company_id.finexkap_account_status != 'Accepted':
+            return _('Your Finaxkap account is not activated yet.')
+
         # Check for already in progress invoice
         fo_ids = self.env['invoice.financing.offer'].search([('invoice_ids', 'in', [self.id])])
         if fo_ids:
-            errorMessage = _('Invoice already submitted for Financing')
+            return _('Invoice already submitted for Financing')
 
         if self.state != 'open' or self.partner_id.company_type != 'company':
-            errorMessage = _('Only company invoices can be financed')
+            return _('Only company invoices can be financed')
 
         # FixME: Limit should be from service module
         if self.amount_total < 1000:
-            errorMessage = _('Amount must be greater than 1000')
+            return _('Amount must be greater than 1000')
 
         # FixMe: Allowed currency from service module
         if self.currency_id.id != self.env.ref('base.EUR').id:
-            errorMessage = _('You can only finance for Euro currency')
+            return _('You can only finance for Euro currency')
 
         # FixMe: Check for due date.
         date_due = datetime.strptime(self.date_due, "%Y-%m-%d")
         today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         if date_due < today:
-            errorMessage = _('You can only finance with future due date')
-        return errorMessage
+            return _('You can only finance with future due date')
+        return None
 
     @api.multi
     def action_request_financing(self):

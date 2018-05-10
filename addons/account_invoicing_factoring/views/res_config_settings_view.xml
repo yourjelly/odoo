@@ -8,6 +8,10 @@
         <field name="arch" type="xml">
             <xpath expr="//div[@id='invocing_factoring_text']" position="after">
                 <div class="mt16">
+                    <div>
+                        <label for="finexkap_account_status"/>
+                        <field name="finexkap_account_status"/>
+                    </div>
                     <button name="configure_invocing_factoring" string="Configuration" type="object" class="oe_link" icon="fa-arrow-right"/>
                 </div>
             </xpath>

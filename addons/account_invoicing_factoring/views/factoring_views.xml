@@ -89,6 +89,13 @@
                                     </tree>
                                 </field>
                             </page>
+                            <page string="Other Informations" groups="base.group_no_one">
+                                <group>
+                                    <group>
+                                        <field name="request_uuid"/>
+                                    </group>
+                                </group>
+                            </page>
                         </notebook>
                     </sheet>
                     <div class="oe_chatter">
@@ -99,13 +106,22 @@
             </field>
         </record>
 
-        <record id="action_factoring_tree" model="ir.actions.act_window">
+        <record id="action_financing_offer" model="ir.actions.act_window">
             <field name="name">Financing Offers</field>
             <field name="res_model">invoice.financing.offer</field>
             <field name="view_type">tree</field>
             <field name="view_mode">tree,kanban,form</field>
         </record>
-        <menuitem action="action_factoring_tree" id="menu_action_financing_offer" parent="account.menu_finance_receivables_documents" sequence="99"/>
+
+        <menuitem
+            id="menu_financing"
+            name="Financing"
+            parent="account.menu_finance_receivables" />
+
+        <menuitem
+            id="menu_action_financing_offer"
+            action="action_financing_offer"
+            parent="menu_financing" />
 
 	</data>
 </odoo>

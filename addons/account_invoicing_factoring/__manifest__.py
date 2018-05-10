@@ -15,6 +15,7 @@
         'data/factoring_data.xml',
         'views/res_config_settings_view.xml',
         'views/res_company_views.xml',
+        'views/res_partner.xml',
         'views/factoring_views.xml'
     ],
     'demo': [
