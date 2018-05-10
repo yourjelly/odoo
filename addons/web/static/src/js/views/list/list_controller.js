@@ -407,7 +407,7 @@ var ListController = BasicController.extend({
             event.stopPropagation();
         }
         var state = this.model.get(this.handle, {raw: true});
-        if (this.editable && !this.renderer.state.groupedBy.length) {
+        if (this.editable) {
             this._addRecord();
         } else {
             this.trigger_up('switch_view', {view_type: 'form', res_id: undefined});

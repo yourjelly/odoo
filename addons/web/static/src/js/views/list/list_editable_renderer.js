@@ -238,7 +238,8 @@ ListRenderer.include({
      */
     removeLine: function (state, recordID) {
         var self = this;
-        var rowIndex = _.findIndex(this.state.data, {id: recordID});
+        var data = this.state.groupedBy.length ? this.current_group.data : this.state.data;
+        var rowIndex = _.findIndex(data, {id: recordID});
         this.state = state;
         if (rowIndex === -1) {
             return;
@@ -248,7 +249,7 @@ ListRenderer.include({
         }
 
         // remove the row
-        var $row = this.$('.o_data_row:nth(' + rowIndex + ')');
+        var $row = this.state.groupedBy.length ? this._getRow(recordID) : this.$('.o_data_row:nth(' + rowIndex + ')');
         if (this.state.count >= 4) {
             $row.remove();
         } else {
