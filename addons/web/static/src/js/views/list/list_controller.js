@@ -16,7 +16,6 @@ var Sidebar = require('web.Sidebar');
 
 var _t = core._t;
 var qweb = core.qweb;
-var utils = require('web.utils');
 
 var ListController = BasicController.extend({
     custom_events: _.extend({}, BasicController.prototype.custom_events, {
@@ -408,7 +407,11 @@ var ListController = BasicController.extend({
         }
         var state = this.model.get(this.handle, {raw: true});
         if (this.editable) {
-            this._addRecord();
+            if (this.renderer.state.groupedBy.length) {
+                this._toggleAllGroups(1);
+            } else {
+                this._addRecord();
+            }
         } else {
             this.trigger_up('switch_view', {view_type: 'form', res_id: undefined});
         }
@@ -517,6 +520,39 @@ var ListController = BasicController.extend({
         event.data.callback(env);
     },
     /**
+     * In Editable list if we have nested group or a single group then we have
+     * to toggle the first child group in nested groups and then add record and make
+     * the newly added record as editable row.
+     * @private
+     * @param {any} level
+     */
+    _toggleAllGroups: function (level) {
+        var self = this;
+        var group, hasRecord = false;
+        var currentState = this.renderer.state;
+
+        _.each(_.range(level), function () {
+            group = currentState.data[0];
+            if(group.type === 'record') {
+                hasRecord = true;
+                return;
+            }
+            currentState = group;
+        });
+
+        if (hasRecord) {
+            this._addRecord(currentState.id);
+            return;
+        }
+        if (group.isOpen) {
+            this._toggleAllGroups(++level);
+        } else {
+            this._onToggleGroup({ data: {group : group} }).then(function () {
+               self._toggleAllGroups(++level);
+            });
+        }
+    },
+    /**
      * Called when clicking on 'Archive' or 'Unarchive' in the sidebar.
      *
      * @private
@@ -553,7 +589,7 @@ var ListController = BasicController.extend({
      * @param {OdooEvent} event
      */
     _onToggleGroup: function (event) {
-        this.model
+        return this.model
             .toggleGroup(event.data.group.id)
             .then(this.update.bind(this, {}, {reload: false}));
     },

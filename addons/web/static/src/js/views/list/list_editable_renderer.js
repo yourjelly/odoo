@@ -297,7 +297,6 @@ ListRenderer.include({
         var editMode = (mode === 'edit');
         this.currentRow = editMode ? rowIndex : null;
         var $row = this.state.groupedBy.length ? this._getRow(recordID) : this.$('.o_data_row:nth(' + rowIndex + ')');
-
         var $tds = $row.children('.o_data_cell');
         var oldWidgets = _.clone(this.allFieldWidgets[record.id]);
 
