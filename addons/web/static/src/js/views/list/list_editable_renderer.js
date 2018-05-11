@@ -160,13 +160,13 @@ ListRenderer.include({
             // If no record with 'id' can be found in the state, the
             // confirmChange method will have rerendered the whole view already,
             // so no further work is necessary.
-            state = this.state.groupedBy.length ? this.current_group : state;
+            state = self.state.groupedBy.length ? self.current_group : state;
             var record = _.findWhere(state.data, {id: id});
             if (!record) {
                 return;
             }
             var oldRowIndex = _.findIndex(oldData, {id: id});
-            var $row = this.state.groupedBy.length ? this._getRow(id) : this.$('.o_data_row:nth(' + oldRowIndex + ')');
+            var $row = self.state.groupedBy.length ? self._getRow(id) : self.$('.o_data_row:nth(' + oldRowIndex + ')');
             $row.nextAll('.o_data_row').remove();
             $row.prevAll().remove();
             _.each(oldData, function (rec) {
@@ -192,7 +192,7 @@ ListRenderer.include({
                 self.currentRow = newRowIndex;
                 return self._selectCell(newRowIndex, self.currentFieldIndex, {force: true}).then(function () {
                     // restore the cursor position
-                    var data = this.state.groupedBy.length ? this.current_group.data : this.state.data;
+                    var data = self.state.groupedBy.length ? self.current_group.data : self.state.data;
                     currentRowID = data[newRowIndex].id;
                     currentWidget = self.allFieldWidgets[currentRowID][self.currentFieldIndex];
                     focusedElement = currentWidget.getFocusableElement().get(0);
@@ -652,7 +652,10 @@ ListRenderer.include({
     _selectCell: function (rowIndex, fieldIndex, options) {
         options = options || {};
         // Do nothing if the user tries to select current cell
-        if (!options.force && rowIndex === this.currentRow && fieldIndex === this.currentFieldIndex && this.current_group.id === options.groupID) {
+        if (!options.force && rowIndex === this.currentRow && fieldIndex === this.currentFieldIndex) {
+            if (this.state.groupedBy.length && this.current_group.id === options.groupID) {
+                return $.when();
+            }
             return $.when();
         }
         var wrap = options.wrap === undefined ? true : options.wrap;
@@ -688,8 +691,10 @@ ListRenderer.include({
      */
     _selectRow: function (rowIndex, groupID) {
         // Do nothing if already selected
-        debugger;
-        if (rowIndex === this.currentRow && this.current_group.id === groupID) {
+        if (rowIndex === this.currentRow) {
+            if (this.state.groupedBy.length && this.current_group.id === groupID) {
+                return $.when();
+            }
             return $.when();
         }
 
