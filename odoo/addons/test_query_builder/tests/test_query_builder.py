@@ -3,7 +3,7 @@
 
 from unittest import TestCase
 from odoo.tests.common import tagged
-from odoo.osv.query_builder import Row, Select, Delete, With, Update, Insert, \
+from odoo.tools.query import Row, Select, Delete, With, Update, Insert, \
     Asc, Desc, COALESCE, UNNEST, NULL, DEFAULT, _quote, BaseQuery, CreateView
 
 
