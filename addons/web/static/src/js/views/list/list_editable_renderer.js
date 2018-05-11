@@ -652,7 +652,7 @@ ListRenderer.include({
     _selectCell: function (rowIndex, fieldIndex, options) {
         options = options || {};
         // Do nothing if the user tries to select current cell
-        if (!options.force && rowIndex === this.currentRow && fieldIndex === this.currentFieldIndex) {
+        if (!options.force && rowIndex === this.currentRow && fieldIndex === this.currentFieldIndex && this.current_group.id === options.groupID) {
             return $.when();
         }
         var wrap = options.wrap === undefined ? true : options.wrap;
@@ -688,7 +688,8 @@ ListRenderer.include({
      */
     _selectRow: function (rowIndex, groupID) {
         // Do nothing if already selected
-        if (rowIndex === this.currentRow) {
+        debugger;
+        if (rowIndex === this.currentRow && this.current_group.id === groupID) {
             return $.when();
         }
 
