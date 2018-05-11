@@ -206,11 +206,10 @@ var ListController = BasicController.extend({
      * @todo make record creation a basic controller feature
      * @private
      */
-    _addRecord: function (groupID) {
+    _addRecord: function (handle) {
         var self = this;
         this._disableButtons();
         return this.renderer.unselectRow().then(function () {
-            var handle = self.renderer.state.groupedBy.length ? groupID : self.handle;
             return self.model.addDefaultRecord(handle, {
                 position: self.editable,
             });
@@ -218,7 +217,7 @@ var ListController = BasicController.extend({
             var state = self.model.get(self.handle);
             self.renderer.updateState(state, {});
             if (self.renderer.state.groupedBy.length) {
-                self.renderer.current_group = self.model.get(groupID);
+                self.renderer.current_group = self.model.get(handle);
             }
             self.renderer.editRecord(recordID);
             self._updatePager();
@@ -370,12 +369,10 @@ var ListController = BasicController.extend({
      * @param {OdooEvent} event
      */
     _onAddRecord: function (event) {
-        if (this.renderer.state.groupedBy.length) {
-            var groupID = event.data.groupID;
-        }
         event.stopPropagation();
         if (this.activeActions.create) {
-            this._addRecord(groupID);
+            var handle = this.renderer.state.groupedBy.length ? event.data.groupID : this.handle;
+            this._addRecord(handle);
         } else if (event.data.onFail) {
             event.data.onFail();
         }
@@ -410,7 +407,7 @@ var ListController = BasicController.extend({
             if (this.renderer.state.groupedBy.length) {
                 this._toggleAllGroups(1);
             } else {
-                this._addRecord();
+                this._addRecord(this.handle);
             }
         } else {
             this.trigger_up('switch_view', {view_type: 'form', res_id: undefined});

@@ -484,7 +484,7 @@ ListRenderer.include({
             var self = this;
             this.unselectRow().then(function () {
                 self.trigger_up('add_record', {
-                    groupID: self.current_group.id,
+                    groupID: self.state.groupedBy.length ? self.current_group.id : false,
                     onFail: self._selectCell.bind(self, 0, 0, {}),
                 });
             });
