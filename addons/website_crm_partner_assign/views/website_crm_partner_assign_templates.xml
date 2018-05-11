@@ -227,7 +227,7 @@
             </li>
             <li class="list-group-item">
                 <span class="badge" t-esc="opp_count"/>
-                <a href="/my/opportunities">My Opportunities</a>
+                <a href="/my/opportunities">Opportunities</a>
             </li>
         </xpath>
     </template>
