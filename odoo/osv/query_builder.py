@@ -55,10 +55,6 @@ from numbers import Number
 
 from odoo.tools.pycompat import text_type
 
-# TODO: Use psycopg2 helpers (sql.SQL, sql.Identifier).
-# TODO: Either return args as a tuple and not a list, or implement an execute method
-# for queries that does the casting.
-
 
 def _quote(val):
     """ Helper function for quoting SQL identifiers if necessary."""
@@ -107,21 +103,18 @@ class Expression(object):
         return Expression('OR', self, other)
 
     def __xor__(self, other):
-        assert isinstance(other, (Iterable, QueryExpression)), "`^` RHS operand must be Iterable."
         return Expression('IN', self, other)
 
     def __invert__(self):
         return Expression('NOT', self, None)
 
     def __eq__(self, other):
-        if other is NULL:
-            return Expression('IS', self, 'NULL')
-        return Expression('=', self, other)
+        op = 'IS' if other is NULL else '='
+        return Expression(op, self, other)
 
     def __ne__(self, other):
-        if other is NULL:
-            return Expression('IS NOT', self, 'NULL')
-        return Expression('!=', self, other)
+        op = 'IS NOT' if other is NULL else '!='
+        return Expression(op, self, other)
 
     def __lt__(self, other):
         return Expression('<', self, other)
@@ -166,9 +159,11 @@ class Expression(object):
         left, args = self.left._to_sql(alias_mapping)
 
         if self.op == 'NOT':
+            # Unary
             return ("(NOT %s)" % left, args)
 
-        sql = "(%s %s " % (left, self.op)
+        # Binary
+        sql = "({left} {op} {right})"
 
         if isinstance(self.right, Expression):
             right, _args = self.right._to_sql(alias_mapping)
@@ -177,15 +172,14 @@ class Expression(object):
                 right = '(%s)' % right
 
             args += _args
-            sql += right + ')'
         else:
-            if self.right == 'NULL':
-                sql += 'NULL)'
+            if self.right is NULL:
+                right = self.right
             else:
+                right = "%s"
                 args.append(self.right)
-                sql += '%s)'
 
-        return (sql, args)
+        return (sql.format(left=left, op=self.op, right=right), args)
 
 
 class Row(object):
@@ -251,7 +245,7 @@ class Column(Expression):
         return self
 
     def _to_sql(self, alias_mapping=None):
-        qualified = "{0}.%s" % self._name
+        qualified = "{}.%s" % self._name
         row = self._row
 
         if alias_mapping is not None:
@@ -269,7 +263,7 @@ class Column(Expression):
                 _sql, _args = self._val._to_sql(alias_mapping)
                 return "%s = (%s)" % (col_name, _sql), _args
             # col = literal value
-            return "{0} = %s".format(col_name), [self._val]
+            return "{} = %s".format(col_name), [self._val]
         return col_name, []
 
 
@@ -373,7 +367,7 @@ class BaseQuery(object):
     def _to_sql(self, alias_mapping):
         self._build_all(alias_mapping)
         self.sql = [sql for sql in self.sql if sql]
-        res = ' '.join(self.sql), self.args
+        res = ' '.join(self.sql), tuple(self.args)
         self.sql = []
         self.args = []
         return res
@@ -764,7 +758,8 @@ class With(BaseQuery):
         _sql, _args = self._tail._to_sql(alias_mapping)
         args += _args
 
-        return "WITH %s%s %s" % ("RECURSIVE " if self._recur else "", ', '.join(sql), _sql), args
+        return ("WITH %s%s %s" % ("RECURSIVE " if self._recur else "", ', '.join(sql), _sql),
+                tuple(args))
 
     def to_sql(self):
         return self._to_sql(AliasMapping())
@@ -872,7 +867,7 @@ class Insert(BaseQuery):
                 values.append("%s")
                 args.append(val)
 
-        sql %= ("(%s)" % ', '.join(map(str, values)))
+        sql %= ("(%s)" % ', '.join(values))
         self.sql.append(sql)
         self.args += args
 
@@ -911,18 +906,8 @@ class CreateView(BaseQuery):
 
 
 # SQL Constants
-class Constant(object):
-
-    def __init__(self, sql):
-        """ Class for creating SQL constants. """
-        self.sql = sql
-
-    def __str__(self):
-        return self.sql
-
-
-NULL = Constant('NULL')
-DEFAULT = Constant('DEFAULT')
+NULL = "NULL"
+DEFAULT = "DEFAULT"
 
 
 # SQL Functions and Aggregates
@@ -938,26 +923,25 @@ class Func(Expression):
             func (str): Name of the function
             args: The function's arguments
         """
-        self.func = func
+        self.func = _quote(func)
         self.args = args
 
     def _to_sql(self, alias_mapping):
-        sql = '(%s(' % self.func
+        sql = "{func}({params})"
         args = []
 
+        _sql = []
         for arg in self.args:
             if isinstance(arg, Expression):
-                _sql, _args = arg._to_sql(alias_mapping)
-                sql += _sql
+                __sql, _args = arg._to_sql(alias_mapping)
+                _sql.append(__sql)
                 args += _args
             else:
                 args.append(arg)
-                sql += '%s'
-            if arg is not self.args[-1]:
-                sql += ', '
+                _sql.append('%s')
 
-        sql += '))'
-        return (sql, args)
+        params = ', '.join(_sql)
+        return (sql.format(func=self.func, params=params), args)
 
 
 class Unnest(Func):

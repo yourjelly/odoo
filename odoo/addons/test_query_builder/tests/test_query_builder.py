@@ -36,7 +36,7 @@ class TestMisc(TestCase):
         s = Select([p.id], where=(p.id > 5) & (p.name @ 'foo') | (p.my_company == [1, 2, 3]),
                    limit=5, offset=3)
         sql, args = s.to_sql()
-        self.assertEqual(args, [5, 'foo', [1, 2, 3], 5, 3])
+        self.assertEqual(args, (5, 'foo', [1, 2, 3], 5, 3))
 
 
 @tagged('standard', 'at_install')
@@ -101,18 +101,18 @@ class TestExpressions(TestCase):
 
     def test_func_expression(self):
         expr = (self.u.name != NULL) & (abs(self.u.delta)) & (self.u.id > 5)
-        res = ("""((("res_users"."name" IS NOT NULL) AND (ABS("res_users"."delta")))"""
+        res = ("""((("res_users"."name" IS NOT NULL) AND "ABS"("res_users"."delta"))"""
                """ AND ("res_users"."id" > %s))""", [5])
         self.assertEqual(expr._to_sql(None), res)
 
     def test_single_arg_func_expression(self):
         expr = abs(self.u.delta)
-        res = ("""(ABS("res_users"."delta"))""", [])
+        res = (""""ABS"("res_users"."delta")""", [])
         self.assertEqual(expr._to_sql(None), res)
 
     def test_multi_arg_func_expression(self):
         expr = self.u.count % 100
-        res = ("""(MOD("res_users"."count", %s))""", [100])
+        res = (""""MOD"("res_users"."count", %s)""", [100])
         self.assertEqual(expr._to_sql(None), res)
 
     def test_like_expression(self):
@@ -127,7 +127,7 @@ class TestExpressions(TestCase):
 
     def test_partial_func_expression(self):
         expr = COALESCE(self.u.id, 5)
-        res = ("""(COALESCE("res_users"."id", %s))""", [5])
+        res = (""""COALESCE"("res_users"."id", %s)""", [5])
         self.assertEqual(expr._to_sql(None), res)
 
     def test_col_attr_setting(self):
@@ -137,7 +137,7 @@ class TestExpressions(TestCase):
 
     def test_pow(self):
         expr = self.p.count ** 5
-        res = ("""(POW("res_partner"."count", %s))""", [5])
+        res = (""""POW"("res_partner"."count", %s)""", [5])
         self.assertEqual(expr._to_sql(None), res)
 
     def test_and_type(self):
@@ -147,10 +147,6 @@ class TestExpressions(TestCase):
     def test_or_type(self):
         with self.assertRaises(AssertionError):
             self.p.id | 5
-
-    def test_in_type(self):
-        with self.assertRaises(AssertionError):
-            self.p.id ^ None
 
     def test_like_type(self):
         with self.assertRaises(AssertionError):
@@ -200,14 +196,14 @@ class TestSelect(TestCase):
     def test_select_simple_where(self):
         s = Select([self.p.id], self.p.id == 5)
         res = ("""SELECT "a"."id" FROM "res_partner" "a" WHERE ("a"."id" = %s)""",
-               [5])
+               (5,))
         self.assertEqual(s.to_sql(), res)
 
     def test_select_complex_where(self):
         s = Select([self.p.id], (self.p.id == 5) & (self.p.active != NULL))
         res = (("""SELECT "a"."id" FROM "res_partner" "a" """
                """WHERE (("a"."id" = %s) AND ("a"."active" IS NOT NULL))"""),
-               [5])
+               (5,))
         self.assertEqual(s.to_sql(), res)
 
     def test_select_right_join(self):
@@ -286,7 +282,7 @@ class TestSelect(TestCase):
             """INNER JOIN "res_users" "b" ON ("a"."id" = "b"."partner_id") """
             """WHERE ("a"."name" != %s) """
             """ORDER BY "a"."name" ASC NULLS LAST""",
-            ['johnny']
+            ('johnny',)
         )
         self.assertEqual(s.to_sql(), res)
 
@@ -321,7 +317,7 @@ class TestSelect(TestCase):
         self.assertEqual(
             s.to_sql(),
             ("""SELECT "a"."id", "a"."name" FROM "res_partner" "a" """
-             """GROUP BY "a"."name" HAVING ("a"."name" != %s)""", ['johnny'])
+             """GROUP BY "a"."name" HAVING ("a"."name" != %s)""", ('johnny',))
         )
 
     def test_limit(self):
@@ -329,7 +325,7 @@ class TestSelect(TestCase):
         self.assertEqual(
             s.to_sql(),
             ("""SELECT "a"."id" FROM "res_partner" "a" LIMIT %s OFFSET %s""",
-             [5, 0])
+             (5, 0))
         )
 
     def test_offset(self):
@@ -337,7 +333,7 @@ class TestSelect(TestCase):
         self.assertEqual(
             s.to_sql(),
             ("""SELECT "a"."id" FROM "res_partner" "a" LIMIT %s OFFSET %s""",
-             [7, 2])
+             (7, 2))
         )
 
     def test_union(self):
@@ -347,7 +343,7 @@ class TestSelect(TestCase):
         self.assertEqual(
             s.to_sql(),
             ("""(SELECT "a"."id" FROM "res_partner" "a") UNION """
-             """(SELECT "a"."id" FROM "res_users" "a")""", [])
+             """(SELECT "a"."id" FROM "res_users" "a")""", ())
         )
 
     def test_union_all(self):
@@ -357,7 +353,7 @@ class TestSelect(TestCase):
         self.assertEqual(
             s.to_sql(),
             ("""(SELECT "a"."id" FROM "res_partner" "a") UNION ALL """
-             """(SELECT "a"."id" FROM "res_users" "a")""", [])
+             """(SELECT "a"."id" FROM "res_users" "a")""", ())
         )
 
     def test_union_with_args(self):
@@ -369,7 +365,7 @@ class TestSelect(TestCase):
             ("""(SELECT "a"."id" FROM "res_partner" "a" WHERE ("a"."id" > %s))"""
              """ UNION """
              """(SELECT "a"."id" FROM "res_users" "a" WHERE ("a"."id" < %s))""",
-             [5, 5])
+             (5, 5))
         )
 
     def test_intersect(self):
@@ -379,7 +375,7 @@ class TestSelect(TestCase):
         self.assertEqual(
             s.to_sql(),
             ("""(SELECT "a"."id" FROM "res_partner" "a") INTERSECT """
-             """(SELECT "a"."id" FROM "res_users" "a")""", [])
+             """(SELECT "a"."id" FROM "res_users" "a")""", ())
         )
 
     def test_except(self):
@@ -389,7 +385,7 @@ class TestSelect(TestCase):
         self.assertEqual(
             s.to_sql(),
             ("""(SELECT "a"."id" FROM "res_partner" "a") EXCEPT """
-             """(SELECT "a"."id" FROM "res_users" "a")""", [])
+             """(SELECT "a"."id" FROM "res_users" "a")""", ())
         )
 
     def test_chained_select_ops(self):
@@ -403,7 +399,7 @@ class TestSelect(TestCase):
                 """((SELECT "a"."id" FROM "res_partner" "a") INTERSECT """
                 """(SELECT "a"."id" FROM "res_users" "a")) UNION """
                 """(SELECT "a"."name" FROM "res_partner" "a")""",
-                []
+                ()
             )
         )
 
@@ -442,12 +438,12 @@ class TestSelect(TestCase):
         self.assertEqual(
             base.to_sql(),
             ("""SELECT "a"."id" FROM "res_partner" "a" WHERE ("a"."id" > %s)""",
-             [5])
+             (5,))
         )
         self.assertEqual(
             new.to_sql(),
             ("""SELECT "a"."id" FROM "res_partner" "a" WHERE ("a"."id" < %s)""",
-             [5])
+             (5,))
         )
 
     def test_new_join(self):
@@ -502,12 +498,12 @@ class TestSelect(TestCase):
         self.assertEqual(
             base.to_sql(),
             ("""SELECT "a"."id", "a"."name" FROM "res_partner" "a" """
-             """GROUP BY "a"."id" HAVING ("a"."id" > %s)""", [5])
+             """GROUP BY "a"."id" HAVING ("a"."id" > %s)""", (5,))
         )
         self.assertEqual(
             new.to_sql(),
             ("""SELECT "a"."id", "a"."name" FROM "res_partner" "a" """
-             """GROUP BY "a"."id" HAVING ("a"."name" != %s)""", ['johnny'])
+             """GROUP BY "a"."id" HAVING ("a"."name" != %s)""", ('johnny',))
         )
 
     def test_new_limit(self):
@@ -517,12 +513,12 @@ class TestSelect(TestCase):
         self.assertEqual(
             base.to_sql(),
             ("""SELECT "a"."id" FROM "res_partner" "a" LIMIT %s OFFSET %s""",
-             [5, 0])
+             (5, 0))
         )
         self.assertEqual(
             new.to_sql(),
             ("""SELECT "a"."id" FROM "res_partner" "a" LIMIT %s OFFSET %s""",
-             [100, 0])
+             (100, 0))
         )
 
     def test_new_offset(self):
@@ -532,12 +528,12 @@ class TestSelect(TestCase):
         self.assertEqual(
             base.to_sql(),
             ("""SELECT "a"."id" FROM "res_partner" "a" LIMIT %s OFFSET %s""",
-             [100, 50])
+             (100, 50))
         )
         self.assertEqual(
             new.to_sql(),
             ("""SELECT "a"."id" FROM "res_partner" "a" LIMIT %s OFFSET %s""",
-             [100, 30])
+             (100, 30))
         )
 
     def test_new_all(self):
@@ -573,7 +569,7 @@ class TestSelect(TestCase):
             (
                 """SELECT "a"."id" FROM "res_users" "a" """
                 """WHERE ("a"."partner_id" IN (SELECT "b"."id" FROM "res_partner" "b" """
-                """LIMIT %s OFFSET %s))""", [5, 0]
+                """LIMIT %s OFFSET %s))""", (5, 0)
             )
         )
 
@@ -588,7 +584,7 @@ class TestSelect(TestCase):
                 """SELECT "a"."id" FROM "res_partner" "a" """
                 """WHERE ("a"."id" IN (SELECT "b"."id" FROM "res_users" "b" """
                 """WHERE ("b"."partner_id" IN (SELECT "c"."id" FROM "res_partner" "c"))))""",
-                []
+                ()
             )
         )
 
@@ -603,13 +599,13 @@ class TestDelete(TestCase):
 
     def test_delete_simple(self):
         d = Delete([self.p])
-        self.assertEqual(d.to_sql(), ("""DELETE FROM "res_partner" "a\"""", []))
+        self.assertEqual(d.to_sql(), ("""DELETE FROM "res_partner" "a\"""", ()))
 
     def test_delete_where(self):
         d = Delete([self.p], where=self.p.id >= 5)
         self.assertEqual(
             d.to_sql(),
-            ("""DELETE FROM "res_partner" "a" WHERE ("a"."id" >= %s)""", [5])
+            ("""DELETE FROM "res_partner" "a" WHERE ("a"."id" >= %s)""", (5,))
         )
 
     def test_delete_using(self):
@@ -617,28 +613,28 @@ class TestDelete(TestCase):
         self.assertEqual(
             d.to_sql(),
             ("""DELETE FROM "res_partner" "a" USING "res_users" "b" """
-             """WHERE ("a"."id" = "b"."partner_id")""", [])
+             """WHERE ("a"."id" = "b"."partner_id")""", ())
         )
 
     def test_delete_returning_all(self):
         d = Delete([self.p], returning=[self.p])
         self.assertEqual(
             d.to_sql(),
-            ("""DELETE FROM "res_partner" "a" RETURNING *""", [])
+            ("""DELETE FROM "res_partner" "a" RETURNING *""", ())
         )
 
     def test_delete_returning_cols(self):
         d = Delete([self.p], returning=[self.p.id, self.p.name])
         self.assertEqual(
             d.to_sql(),
-            ("""DELETE FROM "res_partner" "a" RETURNING "a"."id", "a"."name\"""", [])
+            ("""DELETE FROM "res_partner" "a" RETURNING "a"."id", "a"."name\"""", ())
         )
 
     def test_delete_returning_expr(self):
         d = Delete([self.p], returning=[self.p.id <= 5])
         self.assertEqual(
             d.to_sql(),
-            ("""DELETE FROM "res_partner" "a" RETURNING ("a"."id" <= %s)""", [5])
+            ("""DELETE FROM "res_partner" "a" RETURNING ("a"."id" <= %s)""", (5,))
         )
 
 
@@ -710,7 +706,7 @@ class TestWith(TestCase):
              """(UPDATE "res_partner" "a" SET "a"."name" = %s WHERE ("a"."name" = %s) """
              """RETURNING "a"."id") """
              """SELECT "b"."id" FROM "res_users" "b" WHERE ("b"."id" = "my_temp_table"."id")""",
-             ['John', 'Administrator'])
+             ('John', 'Administrator'))
         )
 
     def test_with_delete(self):
@@ -721,7 +717,7 @@ class TestWith(TestCase):
             w.to_sql(),
             ("""WITH "my_temp_table"("id") AS """
              """(DELETE FROM "res_users" "a" WHERE ("a"."id" > %s) RETURNING "a"."partner_id") """
-             """DELETE FROM "res_partner" "b" WHERE ("b"."id" = "my_temp_table"."id")""", [5])
+             """DELETE FROM "res_partner" "b" WHERE ("b"."id" = "my_temp_table"."id")""", (5,))
         )
 
     def test_with_insert(self):
@@ -735,10 +731,8 @@ class TestWith(TestCase):
              """(INSERT INTO "res_users"("name", "surname") VALUES (%s, %s) """
              """RETURNING "res_users"."name", "res_users"."surname") """
              """INSERT INTO "res_partner"("name", "surname") (SELECT * FROM "my_temp_table")""",
-             ['John', 'Wick'])
+             ('John', 'Wick'))
         )
-
-    # TODO: Test "WITH" with INSERT, DELETE and UPDATE
 
 
 @tagged('standard', 'at_install')
@@ -753,28 +747,28 @@ class TestUpdate(TestCase):
         u = Update([self.u.id << 5])
         self.assertEqual(
             u.to_sql(),
-            ("""UPDATE "res_users" "a" SET "a"."id" = %s""", [5])
+            ("""UPDATE "res_users" "a" SET "a"."id" = %s""", (5,))
         )
 
     def test_update_with_where(self):
         u = Update([self.u.name << "dummy"], self.u.id > 10)
         self.assertEqual(
             u.to_sql(),
-            ("""UPDATE "res_users" "a" SET "a"."name" = %s WHERE ("a"."id" > %s)""", ["dummy", 10])
+            ("""UPDATE "res_users" "a" SET "a"."name" = %s WHERE ("a"."id" > %s)""", ("dummy", 10))
         )
 
     def test_update_with_col(self):
         u = Update([self.u.name << self.p.name])
         self.assertEqual(
             u.to_sql(),
-            ("""UPDATE "res_users" "a" SET "a"."name" = "b"."name" FROM "res_partner" "b\"""", [])
+            ("""UPDATE "res_users" "a" SET "a"."name" = "b"."name" FROM "res_partner" "b\"""", ())
         )
 
     def test_update_with_returning(self):
         u = Update([self.u.id << 5], returning=[self.u.id])
         self.assertEqual(
             u.to_sql(),
-            ("""UPDATE "res_users" "a" SET "a"."id" = %s RETURNING "a"."id\"""", [5])
+            ("""UPDATE "res_users" "a" SET "a"."id" = %s RETURNING "a"."id\"""", (5,))
         )
 
     def test_update_multiple_cols(self):
@@ -782,7 +776,7 @@ class TestUpdate(TestCase):
         self.assertEqual(
             u.to_sql(),
             ("""UPDATE "res_partner" "a" SET "a"."name" = %s, "a"."surname" = %s""",
-             ["John", "Wick"])
+             ("John", "Wick"))
         )
 
     def test_update_with_sub_select(self):
@@ -792,7 +786,7 @@ class TestUpdate(TestCase):
             u.to_sql(),
             ("""UPDATE "res_partner" "a" SET "a"."name" = """
              """(SELECT "b"."name" FROM "res_users" "b" WHERE ("b"."partner_id" = "a"."id") """
-             """LIMIT %s OFFSET %s)""", [1, 0])
+             """LIMIT %s OFFSET %s)""", (1, 0))
         )
 
 
@@ -809,14 +803,14 @@ class TestInsert(TestCase):
         self.assertEqual(
             i.to_sql(),
             ("""INSERT INTO "res_partner"("name", "surname", "company") VALUES (%s, %s, %s)""",
-             ['hello', 'world', 'mycompany'])
+             ('hello', 'world', 'mycompany'))
         )
 
     def test_insert_without_cols(self):
         i = Insert(self.p, ['foo', 'bar'])
         self.assertEqual(
             i.to_sql(),
-            ("""INSERT INTO "res_partner" VALUES (%s, %s)""", ['foo', 'bar'])
+            ("""INSERT INTO "res_partner" VALUES (%s, %s)""", ('foo', 'bar'))
         )
 
     def test_insert_sub_select(self):
@@ -825,7 +819,7 @@ class TestInsert(TestCase):
         self.assertEqual(
             i.to_sql(),
             ("""INSERT INTO "res_partner"("name") """
-             """(SELECT "a"."name" FROM "res_partner" "a" LIMIT %s OFFSET %s)""", [1, 0])
+             """(SELECT "a"."name" FROM "res_partner" "a" LIMIT %s OFFSET %s)""", (1, 0))
         )
 
     def test_insert_constants(self):
@@ -833,7 +827,7 @@ class TestInsert(TestCase):
         self.assertEqual(
             i.to_sql(),
             ("""INSERT INTO "res_partner"("name", "surname", "company") """
-             """VALUES (%s, NULL, DEFAULT)""", ['foo'])
+             """VALUES (%s, NULL, DEFAULT)""", ('foo',))
         )
 
     def test_insert_on_conflict(self):
@@ -841,7 +835,7 @@ class TestInsert(TestCase):
         self.assertEqual(
             i.to_sql(),
             ("""INSERT INTO "res_partner"("name") VALUES (%s) ON CONFLICT DO NOTHING""",
-             ['foo'])
+             ('foo',))
         )
 
     def test_insert_returning(self):
@@ -849,7 +843,7 @@ class TestInsert(TestCase):
         self.assertEqual(
             i.to_sql(),
             ("""INSERT INTO "res_partner"("name") VALUES (%s) RETURNING "res_partner"."id\"""",
-             ['foo'])
+             ('foo',))
         )
 
 
@@ -870,7 +864,7 @@ class TestCreateView(TestCase):
         self.assertEqual(
             v.to_sql(),
             ("""CREATE VIEW "my_view" AS (SELECT "a"."name" FROM "res_group" "a" """
-             """LIMIT %s OFFSET %s)""", [1, 0])
+             """LIMIT %s OFFSET %s)""", (1, 0))
         )
 
     def test_create_or_replace_view(self):
@@ -878,7 +872,7 @@ class TestCreateView(TestCase):
         self.assertEqual(
             v.to_sql(),
             ("""CREATE OR REPLACE VIEW "my_view" AS (SELECT "a"."name" FROM "res_group" "a" """
-             """LIMIT %s OFFSET %s)""", [1, 0])
+             """LIMIT %s OFFSET %s)""", (1, 0))
         )
 
     def test_create_view_with(self):
@@ -888,7 +882,7 @@ class TestCreateView(TestCase):
             ("""CREATE VIEW "my_view" AS (WITH "my_temp_table"("name") AS """
              """(SELECT "a"."name" FROM "res_group" "a" LIMIT %s OFFSET %s) """
              """SELECT "b"."id" FROM "res_partner" "b" WHERE """
-             """("b"."name" LIKE "my_temp_table"."name"))""", [1, 0])
+             """("b"."name" LIKE "my_temp_table"."name"))""", (1, 0))
         )
 
 
@@ -914,5 +908,5 @@ class TestRealWorldCases(TestCase):
             ("""INSERT INTO "res_groups"("id1", "id2") """
              """((SELECT "a", "b" FROM "UNNEST"(%s) "a", "UNNEST"(%s) "b") """
              """EXCEPT (SELECT "a"."id1", "a"."id2" FROM "res_partner" "a" """
-             """WHERE ("a"."id1" IN %s)))""", [[1, 2, 3], [5, 6, 7], [1, 5, 4]])
+             """WHERE ("a"."id1" IN %s)))""", ([1, 2, 3], [5, 6, 7], [1, 5, 4]))
         )
