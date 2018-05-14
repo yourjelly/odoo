@@ -50,6 +50,8 @@ class FactoringAPI(models.AbstractModel):
                     'siret': partner.siret,
                     'address': partner.street,
                     'street': partner.street2,
+                    'phone': partner.phone,
+                    'mobile': partner.mobile,
                     'city': partner.city,
                     'country_code': partner.country_id.code.lower(),
                     'zip_code': partner.zip,
@@ -61,18 +63,21 @@ class FactoringAPI(models.AbstractModel):
                 'debtors': debtors
             }
             result = iap.jsonrpc("%s/factoring/send-debtors" % self._get_endpoint(), params=params)
+            invalid_partners = result['invalid']
+            success_partners = result['success']
             for partner in partners:
-                partner.write({
-                    'finexkap_uuid': result[partner.siret].get('uuid'),
-                    'finexkap_status': result[partner.siret].get('status')
-                })
+                if partner.siret not in invalid_partners:
+                    partner.write({
+                        'finexkap_uuid': success_partners[partner.siret].get('uuid'),
+                        'finexkap_status': success_partners[partner.siret].get('status')
+                    })
+            # TODO: Show skipped partners with reason
 
     def _request_invoices(self, offer):
 
         invoices = []
         for invoice in offer.invoice_ids:
             invoices.append({
-                
             })
 
         params = {
