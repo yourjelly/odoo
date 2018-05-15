@@ -3226,7 +3226,7 @@ QUnit.module('basic_fields', {
             res_id: 1,
             config: {
                 device: {
-                    size_class: config.device.SIZES.XS,
+                    size_class: config.device.SIZES.VSM,
                 },
             },
         });
@@ -3270,7 +3270,7 @@ QUnit.module('basic_fields', {
             arch: '<tree editable="bottom"><field name="foo"  widget="phone"/></tree>',
             config: {
                 device: {
-                    size_class: config.device.SIZES.XS,
+                    size_class: config.device.SIZES.VSM,
                 },
             },
         });
@@ -3326,7 +3326,7 @@ QUnit.module('basic_fields', {
             res_id: 1,
             config: {
                 device: {
-                    size_class: config.device.SIZES.SM,
+                    size_class: config.device.SIZES.MD,
                 },
             },
         });
@@ -3365,7 +3365,7 @@ QUnit.module('basic_fields', {
             arch: '<tree editable="bottom"><field name="foo"  widget="phone"/></tree>',
             config: {
                 device: {
-                    size_class: config.device.SIZES.SM,
+                    size_class: config.device.SIZES.MD,
                 },
             },
         });
@@ -3418,7 +3418,7 @@ QUnit.module('basic_fields', {
             },
             config: {
                 device: {
-                    size_class: config.device.SIZES.XS,
+                    size_class: config.device.SIZES.VSM,
                 },
             },
         });

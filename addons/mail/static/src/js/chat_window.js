@@ -104,7 +104,7 @@ return Widget.extend({
         this.fold();
     },
     focus_input: function () {
-        if (config.device.touch && config.device.size_class <= config.device.SIZES.SM) {
+        if (config.device.touch && config.device.size_class <= config.device.SIZES.MD) {
             return;
         }
         this.$input.focus();

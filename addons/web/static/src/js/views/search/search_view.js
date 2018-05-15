@@ -480,7 +480,7 @@ var SearchView = Widget.extend({
      * puts the focus on the search input
      */
     _focusInput: function () {
-        if (!config.device.touch && config.device.size_class >= config.device.SIZES.SM) {
+        if (!config.device.touch && config.device.size_class >= config.device.SIZES.MD) {
             this.$('input').focus();
         }
     },
