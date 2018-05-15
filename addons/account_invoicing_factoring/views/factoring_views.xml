@@ -36,6 +36,38 @@
             domain="[('state', '=', 'open')]"
             view_mode="form" target="new" view_type="form" />
 
+        <record id="account_invoice_debtor_response_view" model="ir.ui.view">
+            <field name="name">debtor.request.response.form</field>
+            <field name="model">debtor.request.response</field>
+            <field name="arch" type="xml">
+                <form string="Request Financing" edit='false' create='false'>
+                    <p>
+                        Some of customers are failed to process
+                    </p>
+                    <label for="request_ids" class="text-success"/>
+                    <field name="request_ids" readonly="1">
+                        <tree>
+                            <field name="partner_name"/>
+                            <field name="siret"/>
+                            <field name="reason"/>
+                            <field name="state"/>
+                        </tree>
+                    </field>
+                    <footer>
+                        <button string="OK" class="btn-default" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <act_window id="action_request_customer_for_financing"
+            multi="True"
+            key2="client_action_multi" name="Enable Financing"
+            res_model="res.partner.financing.request" src_model="res.partner"
+            domain="[('company_type', '=', 'company')]"
+            view_mode="form" target="new" view_type="form" />
+
+
         <record id="account_invoice_view_form_inherit_factoring" model="ir.ui.view">
             <field name="name">account.invoice.view.form.inherit.factoring</field>
             <field name="model">account.invoice</field>

@@ -7,3 +7,4 @@ from . import res_partner
 from . import res_company
 from . import account_invoice_factoring
 from . import account_invoice
+from . import factoring_api_response

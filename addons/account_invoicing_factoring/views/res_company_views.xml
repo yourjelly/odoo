@@ -17,8 +17,8 @@
                             <group string="Finexkap Credentials">
                                 <group>
                                     <p>Get your finexkap credentials on website <a href="https://www.finexkap.com" target="_new">https://www.finexkap.com</a></p>
-                                    <field name="finexkap_username"/>
-                                    <field name="finexkap_password" password="True"/>
+                                    <field name="finexkap_username" required="1"/>
+                                    <field name="finexkap_password" password="True" required="1"/>
                                 </group>
                                 <group>
                                     <field name="siret" required="1"/>

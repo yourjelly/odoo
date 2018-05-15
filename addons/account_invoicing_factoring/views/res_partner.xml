@@ -8,7 +8,7 @@
             <field name="arch" type="xml">
                 <xpath expr="sheet" position="before">
                     <header>
-                        <button name="action_request_financing_debtor" type="object" string="Request for Financing" attrs="{'invisible':[('company_type', '!=', 'company')]}" class="oe_highlight" />
+                        <button name="action_request_financing_debtor" type="object" string="Enable Financing" attrs="{'invisible':[('company_type', '!=', 'company')]}" class="oe_highlight" />
                     </header>
                 </xpath>
                 <notebook>
@@ -21,6 +21,45 @@
                         </group>
                     </page>
                 </notebook>
+            </field>
+        </record>
+
+        <record id="view_partner_factoring_tree" model="ir.ui.view">
+            <field name="name">res.partner.factoring.tree</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_tree" />
+            <field name="arch" type="xml">
+                <xpath expr="field[@name='email']" position="after">
+                    <field name="finexkap_status"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_partner_factoring_kanban" model="ir.ui.view">
+            <field name="name">res.partner.factoring.kanban</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.res_partner_kanban_view" />
+            <field name="arch" type="xml">
+                <xpath expr="//ul" position="after">
+                    <div t-if="record.finexkap_status.raw_value and record.is_company.raw_value">
+                        Financing Status: <strong><field name="finexkap_status"/></strong>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="account_invoice_customer_financing_view" model="ir.ui.view">
+            <field name="name">res.partner.financing.request.form</field>
+            <field name="model">res.partner.financing.request</field>
+            <field name="arch" type="xml">
+                <form string="Request Financing">
+                    <label for="partner_ids" class="text-success"/>
+                    <field name="partner_ids"/>
+                    <footer>
+                        <button string="Confirm" name="action_enable_financing" type="object" default_focus="1" class="btn-primary"/>
+                        <button string="Cancel" class="btn-default" special="cancel"/>
+                    </footer>
+                </form>
             </field>
         </record>
     </data>

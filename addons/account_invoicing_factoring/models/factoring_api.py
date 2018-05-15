@@ -14,7 +14,7 @@ class FactoringAPI(models.AbstractModel):
 
     @api.model
     def _get_endpoint(self):
-        return self.env['ir.config_parameter'].sudo().get_param('factoring.endpoing', DEFAULT_ENDPOINT)
+        return self.env['ir.config_parameter'].sudo().get_param('factoring.endpoint', DEFAULT_ENDPOINT)
 
     @api.model
     def _get_factoring_account(self):
@@ -27,7 +27,7 @@ class FactoringAPI(models.AbstractModel):
                 'name': company.name,
                 'url': self.env['ir.config_parameter'].sudo().get_param('web.base.url'),
                 'siret': company.siret,
-                'country_code': company.country_id.code.lower(),
+                'country_code': company.country_id.code,
                 'currency_code': company.currency_id.name,
                 'city': company.city,
                 'phone': company.phone,
@@ -53,7 +53,7 @@ class FactoringAPI(models.AbstractModel):
                     'phone': partner.phone,
                     'mobile': partner.mobile,
                     'city': partner.city,
-                    'country_code': partner.country_id.code.lower(),
+                    'country_code': partner.country_id.code,
                     'zip_code': partner.zip,
                     'finexkap_uuid': partner.finexkap_uuid
                 })
@@ -71,7 +71,19 @@ class FactoringAPI(models.AbstractModel):
                         'finexkap_uuid': success_partners[partner.siret].get('uuid'),
                         'finexkap_status': success_partners[partner.siret].get('status')
                     })
-            # TODO: Show skipped partners with reason
+            if invalid_partners:
+                return {
+                    'name': _('Debtor Response'),
+                    'view_type': 'form',
+                    'view_mode': 'form',
+                    'res_model': 'debtor.request.response',
+                    'type': 'ir.actions.act_window',
+                    'target': 'new',
+                    'context': {
+                        'partners': list(invalid_partners.values())
+                    }
+                }
+        return True
 
     def _request_invoices(self, offer):
 
@@ -83,5 +95,4 @@ class FactoringAPI(models.AbstractModel):
         params = {
             'account_token': self._get_factoring_account().account_token
         }
-        print(">>>>>>>", params)
         # return iap.jsonrpc("%s/factoring/request-invoices" % self._get_endpoint(), params=params)

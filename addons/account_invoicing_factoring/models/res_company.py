@@ -7,8 +7,8 @@ from odoo import models, fields, api
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
-    finexkap_username = fields.Char('Username', required=True)
-    finexkap_password = fields.Char('Password', required=True)
+    finexkap_username = fields.Char('Username')
+    finexkap_password = fields.Char('Password')
     finexkap_account_status = fields.Char('Account status', default='Unknown')
 
     @api.multi
