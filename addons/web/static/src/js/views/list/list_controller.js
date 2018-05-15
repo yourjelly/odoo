@@ -321,7 +321,7 @@ var ListController = BasicController.extend({
      * @returns {Deferred}
      */
     _setMode: function (mode, recordID) {
-        if ((recordID || this.handle) !== this.handle && this.renderer,editable) {
+        if ((recordID || this.handle) !== this.handle && this.renderer.editable) {
             this._updateButtons(mode);
             return this.renderer.setRowMode(recordID, mode);
         } else {

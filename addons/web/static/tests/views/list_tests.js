@@ -3249,6 +3249,8 @@ QUnit.module('Views', {
         assert.strictEqual(list.$('.o_data_row:first .o_toggle_button_success').length, 1,
             "boolean value of the first record should be true");
         list.$('.o_data_row:first .o_icon_button').click(); // toggle the value
+        list.$('.o_group_header:first').click();
+        list.$('.o_group_header:first').click();
         assert.strictEqual(list.$('.o_data_row:first .text-muted:not(.o_toggle_button_success)').length, 1,
             "boolean button should have been updated");
 
