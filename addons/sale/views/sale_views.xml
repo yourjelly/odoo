@@ -342,21 +342,21 @@
                                         <t t-name="kanban-box">
                                             <div t-attf-class="oe_kanban_card oe_kanban_global_click">
                                                 <div class="row">
-                                                    <div class="col-xs-8">
+                                                    <div class="col-8">
                                                         <strong><span><t t-esc="record.product_id.value"/></span></strong>
                                                     </div>
-                                                    <div class="col-xs-4">
+                                                    <div class="col-4">
                                                         <strong><span class="pull-right text-right">
                                                         <t t-esc="record.price_subtotal.value"/></span></strong>
                                                     </div>
                                                 </div>
                                                 <div class="row">
-                                                    <div class="col-xs-12 text-muted">
+                                                    <div class="col-12 text-muted">
                                                         <span>Quantity: <t t-esc="record.product_uom_qty.value"/> <t t-esc="record.product_uom.value"/></span>
                                                     </div>
                                                 </div>
                                                 <div class="row">
-                                                    <div class="col-xs-12 text-muted">
+                                                    <div class="col-12 text-muted">
                                                         <span>Unit Price: <t t-esc="record.price_unit.value"/></span>
                                                     </div>
                                                 </div>

@@ -56,7 +56,7 @@
                     <div class="container text-center" style="background-color:#875A7B;color:white">
                         <h2>Partner Program</h2>
                         <div class="row">
-                            <div class="col-md-12 mb16 mt16">
+                            <div class="col-lg-12 mb16 mt16">
                                 <p>
                                     The Odoo eco system is designed to offer the best customer experience to Odoo users, from the product to implementation services. In order to guarantee that, the Odoo Partner Program ensures that official partners have the resources and knowledge required to offer Odoo implementation services. 
                                 </p>
@@ -67,27 +67,27 @@
                 <section>
                     <div class="container text-center" style="background-color:#eeeeee">
                         <div class="row mt16 mb16">
-                            <div class="col-md-4">
+                            <div class="col-lg-4">
                                 <span class="fa fa-mortar-board fa-5x"></span>
                                 <p class="text-muted">Is fully trained on Odoo</p>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-lg-4">
                                 <span class="fa fa-github fa-5x"></span>
                                 <p class="text-muted">Has access to Odoo Enterprise source code on Github and latest bug fixes</p>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-lg-4">
                                 <span class="fa fa-bug fa-5x"></span>
                                 <p class="text-muted">Has a direct relationship with Odoo SA to escalate issues</p>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-lg-4">
                                 <span class="fa fa-file-text-o fa-5x"></span>
                                 <p class="text-muted">Publishes references directly on Odoo.com</p>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-lg-4">
                                 <span class="fa fa-certificate fa-5x"></span>
                                 <p class="text-muted">Follows a transparent ranking system. Ready - Silver - Gold</p>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-lg-4">
                                 <span class="fa fa-refresh fa-5x"></span>
                                 <p class="text-muted">Gets access to training sessions (updated weekly)</p>
                             </div>
@@ -99,7 +99,7 @@
                         <h2>Partners Commitment</h2>
                         <h3>An Odoo official partner commits to:</h3>
                         <div class="row">
-                            <div class="col-md-7 mb32">
+                            <div class="col-lg-7 mb32">
                                 <ul>
                                     <li>Train their staff by following Odoo training sessions</li>
                                     <li>Become a Certified Odoo Partner</li>
@@ -117,7 +117,7 @@
                         <h2 style="color:#741842">Benefits for a partner</h2>
                         <h3 class="text-muted">Odoo official partners will benefit from:</h3>
                         <div class="row">
-                            <div class="col-md-12 mb16 mt16">
+                            <div class="col-lg-12 mb16 mt16">
                                 <ul style="color:#636363">
                                     <li>The Odoo Enterprise GitHub repositories for all his developers</li>
                                     <li>The ability to report bugs to be fixed by Odoo on behalf of his customer (Enterprise contracts only)</li>
@@ -149,10 +149,10 @@
                 </section>
                 <section>
                     <div class="row">
-                        <div class="col-md-12 mb32">
+                        <div class="col-lg-12 mb32">
                             <p>These courses feature the same high quality course content found in our traditional classroom trainings, supplemented with modular sessions and cloud-based labs. Many of our online learning courses also include dozens of recorded webinars and live sessions by our senior instructors.</p>
                         </div>
-                        <div class="col-md-offset-1">
+                        <div class="offset-lg-1">
                             <h3>Your advantages</h3>
                             <ul>
                                 <li>Modular approach applied to the learning method</li>
@@ -161,13 +161,13 @@
                                 <li>Better comfort to facilitate your learning process</li>
                             </ul>
                         </div>
-                        <div class="col-md-12">
+                        <div class="col-lg-12">
                             <h2>Structure of the Training</h2>
                         </div>
-                        <div class="col-md-5 col-md-offset-1 mt16 mb16">
+                        <div class="col-lg-5 offset-lg-1 mt16 mb16">
                             <img class="img img-fluid" src="/website_quote/static/src/img/online_training.png"/>
                         </div>
-                        <div class="col-md-6 mt32">
+                        <div class="col-lg-6 mt32">
                             <h4><strong>There are three components to the training</strong></h4>
                             <ul>
                                 <li>Videos with detailed demos</li>
@@ -194,20 +194,20 @@
                 <section id="whatsuit">
                     <div class="container">
                         <div class="row">
-                            <div class="col-md-12 text-center mb8 mt0">
+                            <div class="col-lg-12 text-center mb8 mt0">
                                 <h2>Course Summary</h2>
                             </div>
-                            <div class="col-md-12 mt16 mb0">
+                            <div class="col-lg-12 mt16 mb0">
                                 <p><span style="text-align: -webkit-center; ">This course is dedicated to developers who need to grasp knowledge of the <strong>business applications development </strong>process. This course is for new developers or for IT professionals eager to learn more about technical aspects.</span></p>
                             </div>
                         </div>
                     </div>
                     <div class="container">
                         <div class="row">
-                            <div class="col-md-12 text-center mt0 mb16">
+                            <div class="col-lg-12 text-center mt0 mb16">
                                 <h2>What you will learn?</h2>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-lg-4">
                                 <div class="panel panel-info">
                                     <div class="panel-heading text-center">
                                         <h3 style="margin: 0">Day 1</h3>
@@ -226,7 +226,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-lg-4">
                                 <div class="panel panel-info">
                                     <div class="panel-heading text-center">
                                         <h3 style="margin: 0">Day 2</h3>
@@ -247,7 +247,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-lg-4">
                                 <div class="panel panel-info">
                                     <div class="panel-heading text-center">
                                         <h3 style="margin: 0">Day 3</h3>
@@ -273,11 +273,11 @@
                     </div>
                     <div class="container">
                         <div class="row">
-                            <div class="col-md-12 text-center mb16 mt0">
+                            <div class="col-lg-12 text-center mb16 mt0">
                                 <h2>Requirements</h2>
                             </div>
 
-                            <div class="col-md-12 mb16 mt16">
+                            <div class="col-lg-12 mb16 mt16">
                                 <p><strong>Objectives:</strong></p>
 
                                 <p><strong>Having attended this course, participants should be able to:</strong></p>

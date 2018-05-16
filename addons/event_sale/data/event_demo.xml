@@ -140,19 +140,19 @@
             </table>
             <br/>
             <div class="row">
-                <div class="col-xs-5">
+                <div class="col-5">
                 <p>
                     <i class="fa fa-twitter"/> #OpenDays
                 </p>
                 </div>
-                <div class="col-xs-6">
+                <div class="col-6">
                 <div class="small">Wifi network: opendays</div>
                 <div class="small">Wifi password: odoo2014</div>
                 </div>
             </div>
             <div class="row">
-                <small class="col-xs-3" style="float: left; padding-right: 0px; padding-left: 0px;">sponsored by</small>
-                <div class="col-xs-2" style="padding-right: 0px; padding-left: 0px;">
+                <small class="col-3" style="float: left; padding-right: 0px; padding-left: 0px;">sponsored by</small>
+                <div class="col-2" style="padding-right: 0px; padding-left: 0px;">
                 <span>
                     <img class="img img-fluid" src="/base/static/img/logo_white.png"/>
                 </span>

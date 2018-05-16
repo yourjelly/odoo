@@ -457,15 +457,15 @@
                                         <t t-name="kanban-box">
                                             <div t-attf-class="oe_kanban_card oe_kanban_global_click">
                                                 <div class="row">
-                                                    <div class="col-xs-12">
+                                                    <div class="col-12">
                                                         <strong><span><t t-esc="record.product_id.value or 'None'"/></span></strong>
                                                     </div>
                                                 </div>
                                                 <div class="row">
-                                                    <div class="col-xs-8 text-muted">
+                                                    <div class="col-8 text-muted">
                                                         <span><t t-esc="record.quantity.value"/> <t t-esc="record.uom_id.value"/></span>
                                                     </div>
-                                                    <div class="col-xs-4 text-muted">
+                                                    <div class="col-4 text-muted">
                                                         <span class="text-right"><t t-esc="record.price_subtotal.value"/></span>
                                                     </div>
                                                 </div>

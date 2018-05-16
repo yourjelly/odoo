@@ -1260,14 +1260,14 @@
     </p>
 
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-lg-6">
             <label>Export Type :</label>
             <div class="o_import_compat">
                 <div><input type="radio" name="o_import_compat_name" value="yes" checked="checked"/><label>Import-Compatible Export</label></div>
                 <div><input type="radio" name="o_import_compat_name" value=""/><label>Export all Data</label></div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-lg-6">
             <label>Export Formats :</label>
             <div class="o_export_format"/>
         </div>
@@ -1433,7 +1433,7 @@
 
 <t t-name="EnterpriseUpgrade">
     <div class="row">
-        <div class="col-xs-6">
+        <div class="col-6">
             Get this feature and much more with Odoo Enterprise!
             <ul class="list-unstyled">
                 <li><i class="fa fa-check"></i> Access to all Enterprise Apps</li>
@@ -1444,7 +1444,7 @@
                 <li><a href="http://www.odoo.com/editions" target="_blank"><i class="fa fa-plus"></i> And more</a></li>
             </ul>
         </div>
-        <div class="col-xs-6">
+        <div class="col-6">
             <img class="img-fluid" t-att-src='_s + "/web/static/src/img/enterprise_upgrade.jpg"' draggable="false"/>
         </div>
     </div>
