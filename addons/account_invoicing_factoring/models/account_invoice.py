@@ -10,6 +10,9 @@ from odoo.exceptions import UserError
 class AccountInvoice(models.Model):
     _inherit = 'account.invoice'
 
+    factoring_ref_uuid = fields.Char('Financing Ref', readonly=True)
+    factoring_status = fields.Char(string='Financing Status', default='unknown')
+
     @api.multi
     def action_view_factoring(self):
         self.ensure_one()
@@ -31,6 +34,10 @@ class AccountInvoice(models.Model):
 
         if self.company_id.finexkap_account_status != 'Accepted':
             return _('Your Finaxkap account is not activated yet.')
+
+        # Check for debtor's financing status must be accepted
+        if self.partner_id.finexkap_status != 'Accepted':
+            return _('Customer financing status not accepted')
 
         # Check for already in progress invoice
         fo_ids = self.env['invoice.financing.offer'].search([('invoice_ids', 'in', [self.id])])

@@ -17,6 +17,7 @@ class InvoiceFinancingOffer(models.Model):
     company_id = fields.Many2one('res.company', default=lambda self: self.env.user.company_id.id)
     currency_id = fields.Many2one('res.currency', related='company_id.currency_id')
     invoice_ids = fields.Many2many('account.invoice', string='Invoices')
+    request_uuid = fields.Char('Request UUID', readonly=True)
 
     state = fields.Selection([
         ('request', 'Requested'),
@@ -24,7 +25,6 @@ class InvoiceFinancingOffer(models.Model):
         ('reject', 'Rejected'),
         ('cancel', 'Cancelled')
     ], track_visibility='onchange', string='Status', index=True, copy=False, default='request')
-    request_uuid = fields.Char('Request UUID', readonly=True)
 
     @api.multi
     def _compute_invoice_amount(self):
@@ -70,8 +70,18 @@ class InvoiceFinancingRequest(models.TransientModel):
         }
         offer = self.env['invoice.financing.offer'].create(values)
 
-        request_uuid = self.env['factoring.api']._request_invoices(offer)
-        offer.write({'request_uuid': request_uuid})
+        result = self.env['factoring.api']._request_invoices(offer)
+        failed = result.get('failed')
+        if failed:
+            # WIP: Show proper error message for invoices with failed reason
+            # Possible errors missing data
+            raise UserError("Something gone wrong")
+
+        invoices_result = result.get('success')
+        for invoice in self.invoice_ids:
+            if invoice.number in invoices_result:
+                invoice.write({'factoring_ref_uuid': invoices_result[invoice.number]})
+        offer.write({'request_uuid': result.get('request_uuid')})
 
         return {
             'name': _('Factoring'),

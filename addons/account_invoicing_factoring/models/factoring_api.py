@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import base64
 
 from odoo import api, models, _
 from odoo.addons.iap.models import iap
@@ -86,13 +87,54 @@ class FactoringAPI(models.AbstractModel):
         return True
 
     def _request_invoices(self, offer):
-
         invoices = []
         for invoice in offer.invoice_ids:
+            partner = invoice.partner_id
+            name_parts = partner.name.split(" ")
+            firstname = name_parts[0]
+            lastname = name_parts[1] if len(name_parts) > 1 else ' '
+            pdf_data = self.env.ref('account.account_invoices').sudo().render_qweb_pdf([invoice.id])[0]
             invoices.append({
+                'InvoiceNumber': invoice.number,
+                'DebtorRegistrationNumber': partner.siret,
+                'DebtorReference': partner.finexkap_uuid,
+                'IssueDate': invoice.date_invoice,
+                'DueDate': invoice.date_due,
+                'BillingContact': {
+                    "FirstName": firstname,
+                    "LastName": lastname,
+                    "Email": partner.email,
+                    "Mobile": partner.mobile,
+                    "LandLine": partner.phone,
+                    "Address": {
+                        "Street": partner.street,
+                        "StreetComplementary": partner.street2,
+                        "ZipCode": partner.zip,
+                        "City": partner.city,
+                        "Region": "",
+                        "Country": partner.country_id.code or ''
+                    }
+                },
+                "BillingAddress": {
+                    "Street": partner.street,
+                    "StreetComplementary": partner.street2,
+                    "ZipCode": partner.zip,
+                    "City": partner.city,
+                    "Region": "",
+                    "Country": partner.country_id.code or ''
+                },
+                "TotalBeforeTax": invoice.amount_untaxed,
+                "TaxAmount": invoice.amount_tax,
+                "TotalInclTax": invoice.amount_total,
+                "InvoicePdf": {
+                    "MimeType": "application/pdf",
+                    "Base64FileContent": base64.b64encode(pdf_data).decode('ascii')
+                }
             })
 
         params = {
-            'account_token': self._get_factoring_account().account_token
+            'account_token': self._get_factoring_account().account_token,
+            'request_ref': offer.name,
+            'invoices': invoices
         }
-        # return iap.jsonrpc("%s/factoring/request-invoices" % self._get_endpoint(), params=params)
+        return iap.jsonrpc("%s/factoring/send-invoices" % self._get_endpoint(), params=params)
