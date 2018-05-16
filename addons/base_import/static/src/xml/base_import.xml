@@ -6,11 +6,11 @@
             <input type="hidden" name="session_id"
                t-att-value="widget.session.session_id"/>
             <input type="hidden" name="import_id"/>
-            <div class="oe_import_box col-sm-9">
-                <div class="col-sm-12">
+            <div class="oe_import_box col-md-9">
+                <div class="col-md-12">
                     <p>Select a CSV or Excel file to import. <a href="https://www.odoo.com/documentation/user/11.0/general/base_import/import_faq.html" target="new" class="pull-right">Help</a></p>
                 </div>
-                <div class="col-sm-10">
+                <div class="col-md-10">
                     <div class="input-group">
                       <input type="text" class="oe_import_file_show form-control" placeholder="No file chosen..."/>
                       <span class="input-group-btn">
@@ -31,10 +31,10 @@
                     </div>
                 </div>
 
-                <div class="oe_import_with_file col-sm-12">
+                <div class="oe_import_with_file col-md-12">
                     <a href="#" class="oe_import_toggle">
                         Options…</a>
-                    <div class="oe_import_toggled oe_import_options js_import_options col-sm-5">
+                    <div class="oe_import_toggled oe_import_options js_import_options col-md-5">
                         <p t-foreach="widget.opts" t-as="option">
                             <!-- no @name, avoid submission when file_update called -->
                             <label t-attf-for="#{option.name}_#{_id}">
@@ -44,7 +44,7 @@
                                    t-att-value="option.value"/>
                         </p>
                     </div>
-                    <div class="oe_import_toggled oe_import_options col-sm-5">
+                    <div class="oe_import_toggled oe_import_options col-md-5">
                         <p t-foreach="widget.parse_opts" t-as="option">
                             <!-- no @name, avoid submission when file_update called -->
                             <label t-attf-for="#{option.name}_#{_id}">
@@ -57,7 +57,7 @@
                 </div>
             </div>
 
-            <div class="oe_import_with_file oe_padding col-sm-12">
+            <div class="oe_import_with_file oe_padding col-md-12">
                 <h2>Map your columns to import</h2>
                 <div title="If the model uses openchatter, history tracking
                             will set up subscriptions and send notifications

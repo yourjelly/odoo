@@ -39,11 +39,11 @@ This is usually the first question from a web designer used to working with Word
 
 .. container:: row
 
-  .. container:: col-sm-4
+  .. container:: col-md-4
 
      .. image:: theme_tutorial_assets/img/cms.jpg
 
-  .. container:: col-sm-7
+  .. container:: col-md-7
 
     Indeed, when using common CMSs, you have to code several files (like header.php, page.php, post.php, etc.) in order to create a basic structure for your website. With those systems, this base structure acts as a design foundation that you have to update over time to ensure compatibility within your CMS. So, even after you have spent hours coding the files, you have not even started on the design yet.
 
@@ -58,7 +58,7 @@ Odoo default theme structure
 
 .. container:: row
 
-  .. container:: col-sm-8
+  .. container:: col-md-8
 
     Odoo comes with a default theme structure.
     It is a very basic “theme” that provides minimal structure and layout. When you create a new theme, you are actually extending this.
@@ -67,13 +67,13 @@ Odoo default theme structure
 
     As a result, you are totally free to focus on design while this structure does the job of providing integrations and functionality.
 
-  .. container:: col-sm-4
+  .. container:: col-md-4
 
      .. image:: theme_tutorial_assets/img/def_structure.jpg
 
 .. container:: row
 
-  .. container:: col-md-6
+  .. container:: col-lg-6
 
      **Main features:**
 
@@ -83,7 +83,7 @@ Odoo default theme structure
      * Automatic Less/Sass compiling
      * Automatic Js and CSS minification and combination
 
-  .. container:: col-md-6
+  .. container:: col-lg-6
 
      **Main technologies:**
 
@@ -110,14 +110,14 @@ Let’s take a tour of our “list” elements:
 .. container:: row
 
   .. figure:: theme_tutorial_assets/img/snippet.jpg
-     :figclass: col-sm-6
+     :figclass: col-md-6
 
      Snippets (or building-blocks)
 
      A piece of HTML code.  The user  will  drag&drop, modify and combine them using our built-in Website Builder interface. You can define sets of options and styles for each snippet. The user will choose from them according to their needs.
 
   .. figure:: theme_tutorial_assets/img/page.jpg
-     :figclass: col-sm-6
+     :figclass: col-md-6
 
      Pages
 
@@ -130,14 +130,14 @@ Let’s take a tour of our “list” elements:
 .. container:: row
 
   .. figure:: theme_tutorial_assets/img/styles.jpg
-     :figclass: col-sm-6
+     :figclass: col-md-6
 
      Styles
 
      Styles are defined using standard CSS files (or Less/Sass). You can define a style as **default** or **optional**. The default styles are always active in your theme, the optional styles can be enabled or disabled by the user.
 
   .. figure:: theme_tutorial_assets/img/functionalities.jpg
-     :figclass: col-sm-6
+     :figclass: col-md-6
 
      Functionalities
 
@@ -188,7 +188,7 @@ Update your theme
 
 .. container:: row
 
-  .. container:: col-sm-6
+  .. container:: col-md-6
 
     Since XML files are only loaded when you install the theme, you will have to force reloading every time you make changes on an xml file.
 
@@ -196,7 +196,7 @@ Update your theme
 
     .. image:: theme_tutorial_assets/img/restart.png
 
-  .. container:: col-sm-5
+  .. container:: col-md-5
 
     .. image:: theme_tutorial_assets/img/upgrade_module.png
 
@@ -659,17 +659,17 @@ The template contains the HTML markup that will be displayed by the snippet.
      <section class="snippet_testimonial">
        <div class="container text-center">
          <div class="row">
-           <div class="col-md-4">
+           <div class="col-lg-4">
              <img alt="client" class="img-circle" src="/theme_tutorial/static/src/img/client_1.jpg"/>
              <h3>Client Name</h3>
              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
            </div>
-           <div class="col-md-4">
+           <div class="col-lg-4">
              <img alt="client" class="img-circle" src="/theme_tutorial/static/src/img/client_2.jpg"/>
              <h3>Client Name</h3>
              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
            </div>
-           <div class="col-md-4">
+           <div class="col-lg-4">
              <img alt="client" class="img-circle" src="/theme_tutorial/static/src/img/client_3.jpg"/>
              <h3>Client Name</h3>
              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
@@ -692,7 +692,7 @@ The previous code will create the snippet’s content, but we still need to plac
      </xpath>
    </template>
 
-.. rst-class:: col-sm-6
+.. rst-class:: col-md-6
 
 Using xpath, we are targeting a particular element with id
 ``snippet_structure``. This means that the snippet will appear in the
@@ -701,7 +701,7 @@ Structure tab. If you want to change the destination tab, you have just to repla
 
 
 .. image:: theme_tutorial_assets/img/snippet_bar.png
-   :class: col-sm-6 shadow-0
+   :class: col-md-6 shadow-0
 
 
 
@@ -931,8 +931,8 @@ Layout
 ``<section />``
   Any section element can be edited like a block of content. The publisher can move or duplicate it. It’s also possible to set a background image or color. Section is the standard main container of any snippet.
 
-``.row > .col-md-*``
-  Any medium  bootstrap columns  directly descending from a .row element, will be resizable by the publisher.
+``.row > .col-lg-*``
+  Any large bootstrap columns directly descending from a .row element, will be resizable by the publisher.
 
 ``contenteditable="False"``
   This attribute will prevent editing to the element and all its children.
@@ -977,11 +977,11 @@ Let’s have a look to this example of a classic two column snippet, implemented
 
 .. container:: row
 
-  .. container:: col-sm-7
+  .. container:: col-md-7
 
     .. image:: theme_tutorial_assets/img/seo_snippet_wrong.png
 
-  .. container:: col-sm-5
+  .. container:: col-md-5
 
     **Bad**
 
@@ -989,11 +989,11 @@ Let’s have a look to this example of a classic two column snippet, implemented
 
 .. container:: row
 
-  .. container:: col-sm-7
+  .. container:: col-md-7
 
     .. image:: theme_tutorial_assets/img/seo_snippet_good.png
 
-  .. container:: col-sm-5
+  .. container:: col-md-5
 
     **Good**
 
