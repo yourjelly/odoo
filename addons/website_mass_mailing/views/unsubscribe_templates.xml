@@ -1,17 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <template id="unsubscribe">
+        <div class="container o_unsubscribe_form">
+            <div class="row">
+                <form action="/mail/mailing/unsubscribe" method="POST" id="unsubscribe_form">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="email" t-att-value="email"/>
+                    <input type="hidden" name="mailing_id" t-att-value="mailing_id"/>
+
+                    <div class="col-md-6 col-md-offset-3">
+
+                        <h1 class="page-header">Mailing Subscriptions</h1>
+
+                        <t t-if="contacts">
+                            <div class="alert alert-info text-center">
+                                <p>Choose your mailing subscriptions.</p>
+                            </div>
+
+                            <ul class="list-group">
+                                <t t-foreach="contacts" t-as="contact">
+                                    <li class="list-group-item">
+                                        <input type="checkbox" class="mail_list_checkbox" name="contact_ids"
+                                            t-att-value="contact['id']" t-att-checked="'checked' if contact['opt_out'] == False else None"/>
+                                        <t t-foreach="contact.list_ids" t-as="contact_list">
+                                            <t t-esc="contact_list.name"/>
+                                        </t>
+                                    </li>
+                                </t>
+                            </ul>
+
+                            <div class="text-center mb16">
+                                <input type="submit" id="send_form" class="btn btn-primary" value="Update my subscriptions"/>
+                            </div>
+                        </t>
+
+                        <t t-if="contacts == False">
+                            <div class="alert alert-info text-center">
+                                <p>You are not subscribed to any of our mailing list.</p>
+                            </div>
+                        </t>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </template>
+
     <template id="unsubscribed">
         <div class="container mt8">
             <div class="row">
-                <div class="col-md-6 col-md-offset-3">
-                    <h1 class="page-header">Mailing Subscriptions</h1>
+                <form action="/mail/mailing/unsubscribe" method="POST" id="unsubscribed_form">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="email" t-att-value="email"/>
+                    <input type="hidden" name="mailing_id" t-att-value="mailing_id"/>
+                    <input type="hidden" name="res_id" t-att-value="res_id"/>
+                    <input type="hidden" name="mailing_list_name" t-att-value="mailing_list_name"/>
 
-                    <div class="alert alert-success text-center">
-                        <p>You have been successfully <strong>unsubscribed</strong>!</p>
+                    <!-- Opt-out -->
+                    <div class="col-md-6 col-md-offset-3">
+                        <h1 class="page-header">Mailing Subscriptions</h1>
+
+                        <div id="div_unsubscribed">
+                            <div class="alert alert-success text-center">
+                                <p>You have been successfully <strong>unsubscribed</strong><span class="mailing_list_name"></span>!</p>
+                            </div>
+                            <div class="text-center mb16">
+                                <p>Oh, wait ! You changed your mind? You can re-subscribe here :</p>
+                                <div class="btn btn-primary" id="button_re_subscribe">Subscribe</div>
+                            </div>
+                        </div>
+
+                        <div id="div_contact_subscribed" style="display:none">
+                            <div class="alert alert-success text-center">
+                                <p>You have been successfully <strong>re-subscribed</strong><span class="mailing_list_name"></span>!</p>
+                            </div>
+                            <div class="text-center mb16">
+                                <p>You didn't want to re-subscribe? You can unsubscribe here :</p>
+                                <div class="btn btn-primary" id="button_unsubscribe">Unsubscribe</div>
+                            </div>
+                        </div>
+
+                        <div id="div_subscription_error" class="alert alert-error text-center" style="display:none">
+                            <p>An error occured. Please try again later or contact us.</p>
+                        </div>
                     </div>
-                </div>
+
+                    <!-- Blacklist -->
+                    <div id="div_blacklist" class="col-md-6 col-md-offset-3">
+                        <h1 class="page-header">Global Subscription</h1>
+
+                        <div id="div_state_blacklist" class="alert alert-info text-center" style="display:none">
+                            <p><span id="state_blacklist"></span></p>
+                        </div>
+
+                        <div id="div_confirm_blacklisted" class="alert alert-success text-center" style="display:none">
+                            <p>You have been successfully <strong>removed</strong> from our global mailing subscription!</p>
+                            <p>You will not be contacted anymore by our services.</p>
+                            <!--<br/>-->
+                            <!--<img src="http://japanory.typepad.co.uk/.a/6a00e553a4288588340162ffe8bf45970d-300wi" alt="Sad face" height="80" width="80"/>-->
+                             <!--<img src="https://punchpass.com/img/blog/32.png" alt="Sad face" height="80" width="80"/>-->
+                        </div>
+
+                        <div id="div_removed_blacklist" class="alert alert-success text-center" style="display:none">
+                            <p>Welcome back!</p>
+                            <p>You are now able to be contacted by our services.</p>
+                        </div>
+
+                        <div id="div_found" class="alert alert-warning text-center" style="display:none">
+                            <p>You were already blacklisted.</p>
+                            <p>If you still received a mail from us, please contact us to report the issue.</p>
+                        </div>
+
+                        <div id="div_not_found" class="alert alert-warning text-center" style="display:none">
+                            <p>You were not blacklisted.</p>
+                            <p>If you still not receive mails from us, please contact us to report the issue.</p>
+                        </div>
+
+                        <div id="div_error" class="alert alert-error text-center" style="display:none">
+                            <p>An error occured. Please try again later or contact us.</p>
+                        </div>
+
+                        <div id="div_blacklist_add" class="text-center mb16" style="display:none">
+                            <p>We would be very sad to see you go, but if you don't want to hear from us again, click here to unsubscribe completely</p>
+                            <div class="btn btn-primary" id="button_add_blacklist">Unsubscribe forever</div>
+                        </div>
+
+                        <div id="div_blacklist_remove" class="text-center mb16" style="display:none">
+                            <p>We would be very pleased if you changed your mind and you still want to receive news from us.</p>
+                            <div class="btn btn-primary" id="button_remove_blacklist">Come back</div>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
+    </template>
+
+    <template id="page_unsubscribe" name="Unsubscribe">
+        <t t-call="website.layout">
+            <t t-call="website_mass_mailing.unsubscribe"/>
+        </t>
     </template>
 
     <template id="page_unsubscribed" name="Unsubscribed">
