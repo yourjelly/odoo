@@ -3683,6 +3683,293 @@ QUnit.module('Views', {
         list.destroy();
     });
 
+    QUnit.test('Grouped Editable List: navigation with tab when last row of a group is selected', function (assert) {
+        assert.expect(2);
+        //The perpose of this test is to check when there is a group opened
+        // and last cell of last row of opned group is selected and when we press tab
+        // the current row is unselected and new row should be created in same group.
+
+        var list = createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree editable="top"><field name="foo" required="1"/></tree>',
+            groupBy: ['foo'],
+        });
+        // click on first td and press TAB
+        list.$('.o_group_header:first').click();// Open Group
+
+        assert.ok(list.$('.o_data_row').length, 1, "there should only one row in group");
+
+        list.$('.o_data_cell:first').click();// Select row of first group
+        list.$('.o_data_cell:first').trigger({type: 'keydown', which: 9}); //Tab
+
+        assert.ok(list.$('.o_data_row').length, 2, "there should two rows (One is newly created and second is previous row) in group");
+
+        list.destroy();
+    });
+
+    QUnit.test('Grouped Editable List:navigation with tab on a list with create="0"', function (assert) {
+        assert.expect(4);
+
+        var list = createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree editable="top" create="0"><field name="foo" required="1"/></tree>',
+            groupBy: ['bar'],
+        });
+
+        list.$('.o_group_header:first').click(); //Open group
+        list.$('.o_data_cell:first').click();// Select row of first group
+
+        assert.ok(list.$('.o_data_row:first').hasClass('o_selected_row'),
+            "third row should be in edition");
+
+        // Press 'Tab' -> should go to next line
+        list.$('.o_selected_row input').trigger({type: 'keydown', which: 9});
+
+        assert.ok(list.$('.o_data_row:nth(1)').hasClass('o_selected_row'),
+            "fourth row should be in edition");
+
+        // Press 'Tab' -> should go back to first line as the create action isn't available
+        list.$('.o_selected_row input').trigger({type: 'keydown', which: 9});
+
+        assert.ok(list.$('.o_data_row:nth(2)').hasClass('o_selected_row'),
+            "fourth row should be in edition");
+
+        list.$('.o_selected_row input').trigger({type: 'keydown', which: 9});
+
+        assert.ok(list.$('.o_data_row:first').hasClass('o_selected_row'),
+            "first row should be in edition");
+
+        list.destroy();
+    });
+
+    QUnit.test('Grouped Editable List: edition, then navigation with tab (with a readonly field)', function (assert) {
+        // This test makes sure that if we have 2 cells in a row, the first in
+        // edit mode, and the second one readonly, then if we edit and press TAB,
+        // (before debounce), the save operation is properly done (before
+        // selecting the next row)
+        assert.expect(5);
+
+        var list = createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree editable="bottom"><field name="foo"/><field name="int_field" readonly="1"/></tree>',
+            mockRPC: function (route, args) {
+                if (args.method) {
+                    assert.step(args.method);
+                }
+                return this._super.apply(this, arguments);
+            },
+            groupBy: ['bar'],
+            fieldDebounce: 1
+        });
+
+        list.$('.o_group_header:first').click(); //Open group
+        // click on first td and press TAB
+        list.$('td:contains(yop)').click();
+        list.$('tr.o_selected_row input[name="foo"]').val('new value').trigger('input');
+        list.$('tr.o_selected_row input[name="foo"]').trigger({type: 'keydown', which: $.ui.keyCode.TAB});
+        //TODO: Fix the reload issue when the data is get change in grouped editable row
+        assert.strictEqual(list.$('tbody tr:first td:contains(new value)').length, 1,
+            "should have the new value visible in dom");
+        assert.verifySteps(["read_group", "write", "read"]);
+        list.destroy();
+    });
+
+    QUnit.test('Grouped Editable List:navigation: moving down with keydown', function (assert) {
+        assert.expect(2);
+
+        var list = createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree editable="bottom"><field name="foo"/></tree>',
+            groupBy: ['bar']
+        });
+
+        list.$('.o_group_header:first').click(); //Open group
+        list.$('td:contains(yop)').click();
+
+        assert.ok(list.$('tr.o_data_row:eq(0)').hasClass('o_selected_row'),
+            "1st row should be selected");
+        list.$('tr.o_selected_row input[name="foo"]').trigger({type: 'keydown', which: $.ui.keyCode.DOWN});
+
+        assert.ok(list.$('tr.o_data_row:eq(1)').hasClass('o_selected_row'),
+            "2nd row should be selected");
+
+        list.destroy();
+    });
+
+    QUnit.test('Grouped Editable List: edit list line after line deletion', function (assert) {
+        assert.expect(5);
+
+        var list = createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree editable="top"><field name="foo"/><field name="int_field"/></tree>',
+            groupBy: ['bar']
+        });
+
+        list.$('.o_group_header:first').click();
+        list.$('.o_data_row:nth(2) > td:contains(gnap)').click();
+        assert.ok(list.$('.o_data_row:nth(2)').is('.o_selected_row'),
+            "third row should be in edition");
+        list.$buttons.find('.o_list_button_discard').click();
+        list.$buttons.find('.o_list_button_add').click();
+        assert.ok(list.$('.o_data_row:first').is('.o_selected_row'),
+            "first row should be in edition (creation)");
+        list.$buttons.find('.o_list_button_discard').click();
+        assert.strictEqual(list.$('.o_selected_row').length, 0,
+            "no row should be selected");
+        list.$('.o_data_row:nth(2) > td:contains(gnap)').click();
+        assert.ok(list.$('.o_data_row:nth(2)').is('.o_selected_row'),
+            "third row should be in edition");
+        assert.strictEqual(list.$('.o_selected_row').length, 1,
+            "no other row should be selected");
+
+        list.destroy();
+    });
+
+    QUnit.test('navigation: moving right with keydown from text field', function (assert) {
+        assert.expect(6);
+
+        this.data.foo.fields.foo.type = 'text';
+        var list = createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch:
+                '<tree editable="bottom">' +
+                    '<field name="foo"/>' +
+                    '<field name="bar"/>' +
+                '</tree>',
+            groupBy: ['bar']
+        });
+
+        list.$('.o_group_header:first').click();
+        list.$('td:contains(yop)').click();
+        var textarea = list.$('textarea[name="foo"]')[0];
+        assert.strictEqual(document.activeElement, textarea,
+            "textarea should be focused");
+        assert.strictEqual(textarea.selectionStart,  0,
+            "textarea selection start should be at the beginning");
+        assert.strictEqual(textarea.selectionEnd,  3,
+            "textarea selection end should be at the end");
+        textarea.selectionStart = 3; // Simulate browser keyboard right behavior (unselect)
+        assert.strictEqual(document.activeElement, textarea,
+            "textarea should still be focused");
+        assert.ok(textarea.selectionStart === 3 && textarea.selectionEnd === 3,
+            "textarea value ('yop') should not be selected and cursor should be at the end");
+        $(textarea).trigger({type: 'keydown', which: $.ui.keyCode.RIGHT});
+        assert.strictEqual(document.activeElement, list.$('[name="bar"] input')[0],
+            "next field (checkbox) should now be focused");
+        list.destroy();
+    });
+
+    QUnit.test('Grouped Editable List: inputs are disabled when unselecting rows', function (assert) {
+        assert.expect(1);
+
+        var list = createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree editable="bottom"><field name="foo"/></tree>',
+            mockRPC: function (route, args) {
+                if (args.method === 'write') {
+                    assert.strictEqual($input.prop('disabled'), true,
+                        "input should be disabled");
+                }
+                return this._super.apply(this, arguments);
+            },
+            groupBy: ['bar']
+        });
+
+        list.$('td:contains(yop)').click();
+        var $input = list.$('tr.o_selected_row input[name="foo"]');
+        $input.val('lemon').trigger('input');
+        $input.trigger({type: 'keydown', which: $.ui.keyCode.DOWN});
+        list.destroy();
+    });
+
+    QUnit.test('Grouped Editable List: invisible attrs in readonly and editable list', function (assert) {
+        assert.expect(5);
+
+        var list = createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree editable="top">' +
+                    '<button string="a button" name="button_action" icon="fa-car" ' +
+                        'type="object" attrs="{\'invisible\': [(\'id\',\'=\', 1)]}"/>' +
+                    '<field name="int_field"/>' +
+                    '<field name="qux"/>' +
+                    '<field name="foo" attrs="{\'invisible\': [(\'id\',\'=\', 1)]}"/>' +
+                '</tree>',
+            groupBy: ['bar']
+        });
+
+        list.$('.o_group_header:first').click();
+        assert.equal(list.$('.fa-car').first().html(), "",
+            "td that contains an invisible field should be empty");
+        assert.equal(list.$('.o_data_row:first td:nth(2)').html(), "",
+            "td that contains an invisible button should be empty");
+
+        // edit first row
+        list.$('.o_data_row:first td:nth(2)').click(); // click on first row to edit it
+        assert.strictEqual(list.$('.o_data_row:first td:nth(5) input.o_invisible_modifier').length, 1,
+            "td that contains an invisible field should not be empty in edition");
+        assert.strictEqual(list.$('.o_data_row:first td:nth(2) > button.o_invisible_modifier').length, 1,
+            "td that contains an invisible button should not be empty in edition");
+        list.$buttons.find('.o_list_button_discard').click(); // leave edition
+
+        // click on the invisible field's cell to edit first row
+        list.$('.o_data_row:first td:nth(5)').click();
+        assert.ok(list.$('.o_data_row:first').hasClass('o_selected_row'),
+            "first row should be in edition");
+        list.destroy();
+    });
+
+    QUnit.test('Grouped Editable List: pressing enter on last line of editable list view', function (assert) {
+        assert.expect(8);
+
+        var list = createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree editable="bottom"><field name="foo"/></tree>',
+            mockRPC: function (route) {
+                assert.step(route);
+                return this._super.apply(this, arguments);
+            },
+            groupBy: ['bar']
+        });
+
+        // click on 2rd line
+        list.$('.o_group_header:first').click();
+        list.$('td:contains(blip)').click();
+        assert.ok(list.$('tr.o_data_row:eq(1)').hasClass('o_selected_row'),
+            "3rd row should be selected");
+
+        // press enter in input
+        list.$('tr.o_selected_row input').trigger({type: 'keydown', which: 13}); // enter
+        assert.ok(list.$('tr.o_data_row:eq(2)').hasClass('o_selected_row'),
+            "4rd row should be selected");
+        assert.notOk(list.$('tr.o_data_row:eq(1)').hasClass('o_selected_row'),
+            "3rd row should no longer be selected");
+
+        // press enter on last row
+        list.$('tr.o_selected_row input').trigger({type: 'keydown', which: 13}); // enter
+        assert.strictEqual(list.$('tr.o_data_row').length, 4, "should have created a 4th row");
+
+        assert.verifySteps(['/web/dataset/call_kw/foo/read_group', '/web/dataset/search_read', '/web/dataset/call_kw/foo/default_get']);
+        list.destroy();
+    });
+
 });
 
 });
