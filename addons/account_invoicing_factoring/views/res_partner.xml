@@ -6,17 +6,24 @@
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="base.view_partner_form" />
             <field name="arch" type="xml">
-                <xpath expr="sheet" position="before">
-                    <header>
-                        <button name="action_request_financing_debtor" type="object" string="Enable Financing" attrs="{'invisible':[('company_type', '!=', 'company')]}" class="oe_highlight" />
-                    </header>
-                </xpath>
                 <notebook>
-                    <page string="Factoring" groups="base.group_no_one" attrs="{'invisible':[('company_type', '!=', 'company')]}">
+                    <page string="Factoring" groups="account.group_account_manager" attrs="{'invisible':[('company_type', '!=', 'company')]}">
                         <group>
                             <group>
                                 <field name="finexkap_uuid"/>
+                            </group>
+                            <group>
                                 <field name="finexkap_status"/>
+                            </group>
+                        </group>
+                        <group attrs="{'invisible': [('company_type', '!=', 'company')]}">
+                            <group attrs="{'invisible': [('finexkap_status', '!=', 'Unknown')]}">
+                                <p class="text-info">Enable financing for customer to get paid invoice quickly</p><br/>
+                                <button name="action_request_financing_debtor" type="object" string="Enable Financing" attrs="{'invisible':[('company_type', '!=', 'company')]}" />
+                            </group>
+                            <group attrs="{'invisible': [('finexkap_status', 'in', ('Accepted', 'Rejected', 'Unknown'))]}">
+                                <p class="text-info">Your request submitted waiting for approval</p><br/>
+                                <button name="action_request_financing_debtor" type="object" string="Check Status" />
                             </group>
                         </group>
                     </page>

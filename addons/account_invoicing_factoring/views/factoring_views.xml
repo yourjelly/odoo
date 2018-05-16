@@ -60,14 +60,6 @@
             </field>
         </record>
 
-        <act_window id="action_request_customer_for_financing"
-            multi="True"
-            key2="client_action_multi" name="Enable Financing"
-            res_model="res.partner.financing.request" src_model="res.partner"
-            domain="[('company_type', '=', 'company')]"
-            view_mode="form" target="new" view_type="form" />
-
-
         <record id="account_invoice_view_form_inherit_factoring" model="ir.ui.view">
             <field name="name">account.invoice.view.form.inherit.factoring</field>
             <field name="model">account.invoice</field>
@@ -101,7 +93,7 @@
                             <field name="request_date"/>
                             <field name="invoice_amount"/>
                         </group>
-                        <group groups="base.group_no_one">
+                        <group groups="account.group_account_manager">
                             <group>
                                 <field name="company_id"/>
                                 <field name="currency_id"/>
@@ -121,7 +113,7 @@
                                     </tree>
                                 </field>
                             </page>
-                            <page string="Other Informations" groups="base.group_no_one">
+                            <page string="Other Informations" groups="account.group_account_manager">
                                 <group>
                                     <group>
                                         <field name="request_uuid"/>
