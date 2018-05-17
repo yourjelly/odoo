@@ -276,7 +276,7 @@ ListRenderer.include({
         var record;
         var rowIndex;
         if (this.state.groupedBy.length) {
-            var state = this.current_group;
+            var state = this.editable ? this.current_group: this.state;
             rowIndex = -1;
             var count = 0;
             utils.traverse_records(state, function (r) {
@@ -296,7 +296,7 @@ ListRenderer.include({
         }
         var editMode = (mode === 'edit');
         this.currentRow = editMode ? rowIndex : null;
-        var $row = this.state.groupedBy.length ? this._getRow(recordID) : this.$('.o_data_row:nth(' + rowIndex + ')');
+        var $row = this.state.groupedBy.length && this.editable ? this._getRow(recordID) : this.$('.o_data_row:nth(' + rowIndex + ')');
         var $tds = $row.children('.o_data_cell');
         var oldWidgets = _.clone(this.allFieldWidgets[record.id]);
 
