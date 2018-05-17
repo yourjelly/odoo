@@ -24,6 +24,8 @@ require_command zerofree
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 __file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
 __base="$(basename ${__file} .sh)"
+__version=master
+
 
 MOUNT_POINT="${__dir}/root_mount"
 OVERWRITE_FILES_BEFORE_INIT_DIR="${__dir}/overwrite_before_init"
@@ -42,7 +44,7 @@ rm -rf "${CLONE_DIR}"
 if [ ! -d $CLONE_DIR ]; then
     echo "Clone Github repo"
     mkdir -p "${CLONE_DIR}"
-    git clone -b 8.0 --no-local --no-checkout --depth 1 https://github.com/odoo/odoo.git "${CLONE_DIR}"
+    git clone -b ${__version} --no-local --no-checkout --depth 1 https://github.com/odoo/odoo.git "${CLONE_DIR}"
     cd "${CLONE_DIR}"
     git config core.sparsecheckout true
     echo "addons/web
@@ -89,7 +91,7 @@ sleep 5
 e2fsck -f "${LOOP_MAPPER_PATH}" # resize2fs requires clean fs
 resize2fs "${LOOP_MAPPER_PATH}"
 
-mkdir "${MOUNT_POINT}"
+mkdir -p "${MOUNT_POINT}"
 mount "${LOOP_MAPPER_PATH}" "${MOUNT_POINT}"
 
 # 'overlay' the overwrite directory onto the mounted image filesystem
