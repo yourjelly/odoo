@@ -26,7 +26,13 @@ var trigger_download = function (session, response, c, action, options) {
         url: '/report/download',
         data: {data: JSON.stringify(response)},
         complete: framework.unblockUI,
-        error: c.rpc_error.bind(c),
+        error: function (error) {
+            if (!error.message && error.data && typeof error.data.title === 'string') {
+                error = JSON.parse(error.data.title);
+            }
+            c.rpc_error.apply(c, [error]);
+        },
+
         success: function () {
             if (action && options && !action.dialog) {
                 options.on_close();
