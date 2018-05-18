@@ -6,8 +6,8 @@ $o-list-group-header-color: lighten($o-brand-lightsecondary, 10%);
 
 // UI custom colors for tags, kanban records' colors, ...)
 // Note: the first value is the old BS3 gray-light value
-$o-colors: lighten(#000, 46.7%), #F06050, #F4A460, #F7CD1F, #6CC1ED, #814968,
-              #EB7E7F, #2C8397, #475577, #D6145F, #30C381, #9365B8;
+$o-colors: lighten(#000, 46.7%), #e15f41, #f0932b, #ad9f39, #4197c5, #6D214F,
+              #ff7675, #2da5a0, #596275, #c44569, #33825e, #574b90;
 
 $o-sheet-cancel-hpadding: $o-horizontal-padding;
 $o-sheet-cancel-bpadding: $o-horizontal-padding;
