@@ -1,4 +1,14 @@
 .o_kanban_view.o_kanban_dashboard.o_project_kanban {
+
+    .o_kanban_record.o_kanban_has_background {
+        .o_project_kanban_main {
+            position: relative;
+            min-height: 130px;
+            margin: (-$o-kanban-dashboard-vpadding) (-$o-kanban-dashboard-hpadding) $o-kanban-dashboard-vpadding;
+            padding: $o-kanban-dashboard-vpadding $o-kanban-dashboard-hpadding;
+        }
+    }
+
     .o_project_kanban_boxes {
         display: flex;
         flex-flow: row nowrap;
