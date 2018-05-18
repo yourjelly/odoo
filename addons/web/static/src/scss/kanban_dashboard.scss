@@ -127,11 +127,13 @@
         }
 
         // Uniform titles
-        .o_kanban_card_header_title .o_primary,
-        .o_kanban_primary_left .o_primary > span:first-child,
-        .oe_kanban_content > .o_title > h3 {
-            @include o-kanban-record-title($font-size: 16px);
-            display: block;
+        &:not(.o_kanban_has_background) {
+            .o_kanban_card_header_title .o_primary,
+            .o_kanban_primary_left .o_primary > span:first-child,
+            .oe_kanban_content > .o_title > h3 {
+                @include o-kanban-record-title($font-size: 16px);
+                display: block;
+            }
         }
 
         // Identify subtitles without classes
@@ -204,5 +206,84 @@
     // Emphasize records' colors when necessary
     &.o_emphasize_colors .o_kanban_record::after {
         width: $o-kanban-color-border-width * 2;
+    }
+
+
+    // =============================================================
+    // Dashboard Records with 'background' layout.
+    // =============================================================
+    // Background can be an image, a color or a combination of both.
+    // These records require a "o_kanban_has_background" class and a
+    // 'div.o_kanban_background' inner element.
+
+    .o_kanban_record.o_kanban_has_background {
+        margin: $o-kanban-record-margin;
+
+        // Remove the default left border color bar,
+        // .o_kanban_background:after will be used instead.
+        &:after { display: none;}
+
+        // o_kanban_background always fit the container size.
+        .o_kanban_background {
+            &, &:before, &:after {
+                @include o-position-absolute(0,0,0,0);
+            }
+
+            &:before, &:after {
+                content: "";
+            }
+        }
+
+        // General adaptations
+        .o_kanban_card_content {
+            position: relative;
+        }
+
+        .o_kanban_record_title {
+            font-size: 16px;
+        }
+
+        &.o_kanban_has_background_image, &:not(.oe_kanban_color_0) {
+            .fa.fa-star-o, .o_kanban_record_title, .o_kanban_record_subtitle, &:not(.o_dropdown_open) .o_kanban_manage_toggle_button {
+                text-shadow: 0 0 1px fade-out(black, 0.4);
+                color: white;
+            }
+        }
+
+        // Color Overlay
+        @for $size from 2 through length($o-colors) {
+            &.oe_kanban_color_#{$size - 1} .o_kanban_background:after {
+                background-color: nth($o-colors, $size);
+            }
+        }
+    }
+
+    // Target records with a background image defined
+    .o_kanban_record.o_kanban_has_background_image {
+        .o_kanban_background:before {
+            background-size: cover;
+            background-position: center;
+        }
+
+        .o_kanban_background:after {
+            @include o-linear-gradient(-4deg, fade-out(black, 1), fade-out(black, 0.5));
+        }
+
+        // Target record with color
+        &:not(.oe_kanban_color_0) {
+            .o_kanban_background:after {
+                opacity: 0.7;
+
+                // No need for gradients anymore
+                background-image: none;
+            }
+
+            .o_kanban_background:before {
+                // Images may contain colors conflicting with the overlay.
+                // Desaturate and adjust contrast.
+                -webkit-filter: grayscale(1) contrast(1.4);
+                        filter: grayscale(1) contrast(1.4);
+            }
+        }
     }
 }
