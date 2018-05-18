@@ -11,7 +11,12 @@ class AccountInvoice(models.Model):
     _inherit = 'account.invoice'
 
     factoring_ref_uuid = fields.Char('Financing Ref', readonly=True)
-    factoring_status = fields.Char(string='Financing Status', default='unknown')
+    factoring_status = fields.Selection([
+        ('unknown', 'Unknown'),
+        ('draft', 'Draft'),
+        ('submit', 'Submitted'),
+        ('Accepted', 'Accepted')
+    ], string='Financing Status', default='unknown')
 
     @api.multi
     def action_view_factoring(self):

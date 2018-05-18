@@ -107,6 +107,7 @@
                                         <field name="number"/>
                                         <field name="date_due"/>
                                         <field name="partner_id"/>
+                                        <field name="factoring_status"/>
                                         <field name="amount_total" string="Total" sum="Total"/>
                                         <field name="currency_id" invisible="1"/>
                                         <field name="company_currency_id" invisible="1"/>

@@ -80,7 +80,8 @@ class InvoiceFinancingRequest(models.TransientModel):
         invoices_result = result.get('success')
         for invoice in self.invoice_ids:
             if invoice.number in invoices_result:
-                invoice.write({'factoring_ref_uuid': invoices_result[invoice.number]})
+                data = invoices_result[invoice.number]
+                invoice.write({'factoring_ref_uuid': data.get('uuid'), 'factoring_status': data.get('status')})
         offer.write({'request_uuid': result.get('request_uuid')})
 
         return {
