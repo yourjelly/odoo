@@ -225,11 +225,11 @@
 
         // o_kanban_background always fit the container size.
         .o_kanban_background {
-            &, &:before, &:after {
+            &, .o_kanban_background_img, &:after {
                 @include o-position-absolute(0,0,0,0);
             }
 
-            &:before, &:after {
+            &:after {
                 content: "";
             }
         }
@@ -260,7 +260,7 @@
 
     // Target records with a background image defined
     .o_kanban_record.o_kanban_has_background_image {
-        .o_kanban_background:before {
+        .o_kanban_background_img {
             background-size: cover;
             background-position: center;
         }
@@ -278,7 +278,7 @@
                 background-image: none;
             }
 
-            .o_kanban_background:before {
+            .o_kanban_background_img {
                 // Images may contain colors conflicting with the overlay.
                 // Desaturate and adjust contrast.
                 -webkit-filter: grayscale(1) contrast(1.4);

@@ -4,6 +4,7 @@ odoo.define('project.update_kanban', function (require) {
 var core = require('web.core');
 var Dialog = require('web.Dialog');
 var KanbanRecord = require('web.KanbanRecord');
+var weWidgets = require('web_editor.widget');
 
 var QWeb = core.qweb;
 var _t = core._t;
@@ -46,6 +47,23 @@ KanbanRecord.include({
                     fields: ['id', 'name'],
                 })
                 .then(open_cover_images_dialog);
+        } else if (this.modelName === 'project.project' && $(ev.currentTarget).data('type') === 'set_cover') {
+            ev.preventDefault();
+            var editor = new weWidgets.MediaDialog(this, {
+                onlyImages: true,
+                returnJson: true,
+            }).open();
+            editor.on("save", this, function (attachment) {
+                self._updateRecord({
+                    displayed_image_id: {
+                        id: attachment.id,
+                        display_name: attachment.name
+                    }
+                });
+            });
+        } else if (this.modelName === 'project.project' && $(ev.currentTarget).data('type') === 'remove_cover') {
+            ev.preventDefault();
+            self._updateRecord({displayed_image_id: false});
         } else {
             this._super.apply(this, arguments, ev);
         }

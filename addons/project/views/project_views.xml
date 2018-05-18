@@ -299,11 +299,17 @@
                     <field name="is_favorite"/>
                     <field name="percentage_satisfaction_project"/>
                     <field name="rating_status"/>
+                    <field name="displayed_image_id" />
                     <templates>
                         <t t-name="kanban-box">
-                            <div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click o_has_icon o_kanban_has_background">
+                            <t t-set="has_image" t-value="record.displayed_image_id.raw_value"></t>
+                            <div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click o_has_icon o_kanban_has_background #{has_image ? 'o_kanban_has_background_image' : '' }">
                                 <div class="o_project_kanban_main">
-                                    <div class="o_kanban_background"/>
+                                    <div class="o_kanban_background">
+                                        <t t-if="has_image">
+                                            <div class="o_kanban_background_img" t-attf-style="#{'background-image: url(/web/image/'+record.displayed_image_id.raw_value+')'}"/>
+                                        </t>
+                                    </div>
                                     <div class="o_kanban_card_content">
                                         <div class="o_kanban_primary_left">
                                             <div class="o_primary">
@@ -334,8 +340,14 @@
                                             <div role="menuitem">
                                                 <a name="%(portal.portal_share_action)d" type="action">Share</a>
                                             </div>
+                                            <div>
+                                                <a type="set_cover">Set cover</a>
+                                            </div>
+                                            <div t-if="has_image">
+                                                <a type="remove_cover">Remove cover</a>
+                                            </div>
                                             <div role="menuitem">
-                                                <a type="edit">Edit</a>
+                                                <a type="edit">Edit Project</a>
                                             </div>
                                             <div role="menuitem" t-if="record.rating_status.raw_value != 'no'">
                                                 <a name="action_view_all_rating" type="object">Customer Ratings</a>

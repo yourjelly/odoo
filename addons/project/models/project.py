@@ -188,6 +188,7 @@ class Project(models.Model):
         help="Whether this project should be displayed on the dashboard or not")
     label_tasks = fields.Char(string='Use Tasks as', default='Tasks', help="Gives label to tasks on project's kanban view.")
     tasks = fields.One2many('project.task', 'project_id', string="Task Activities")
+    displayed_image_id = fields.Many2one('ir.attachment', domain="[('res_model', '=', 'project.project'), ('res_id', '=', id), ('mimetype', 'ilike', 'image')]", string='Cover Image')
     resource_calendar_id = fields.Many2one(
         'resource.calendar', string='Working Time',
         default=lambda self: self.env.user.company_id.resource_calendar_id.id,

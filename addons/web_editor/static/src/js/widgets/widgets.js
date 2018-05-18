@@ -223,6 +223,7 @@ var ImageWidget = MediaWidget.extend({
 
         this.firstFilters = options.firstFilters || [];
         this.lastFilters = options.lastFilters || [];
+        this.returnJson = options.returnJson;
 
         this.images = [];
     },
@@ -291,6 +292,9 @@ var ImageWidget = MediaWidget.extend({
         }
 
         var img = this.images[0];
+        if (this.returnJson) {
+            return img;
+        }
         if (!img) {
             return this.media;
         }
@@ -1138,6 +1142,7 @@ var MediaDialog = Dialog.extend({
         this.noDocuments = onlyImages || options.noDocuments;
         this.noIcons = onlyImages || options.noIcons;
         this.noVideos = onlyImages || options.noVideos;
+        this.returnJson = options.returnJson;
 
         if (!this.noImages) {
             this.imageDialog = new ImageWidget(this, this.media, options);
@@ -1208,7 +1213,7 @@ var MediaDialog = Dialog.extend({
         var self = this;
         var args = arguments;
         var _super = this._super;
-        if (this.multiImages) {
+        if (this.multiImages || this.returnJson) {
             // In the case of multi images selection we suppose this was not to
             // replace an old media, so we only retrieve the images and save.
             return $.when(this.active.save()).then(function (data) {
