@@ -16,7 +16,7 @@ class ScaleDriver(hw_proxy.Proxy):
     def value(self, path):
         pass
 
-    @http.route('/hw_drivers/value/{path}', type='json', auth='none', cors='*')
+    @http.route('/hw_drivers/value/<path>', type='json', auth='none', cors='*')
     def value(self, path):
         pass
 
