@@ -82,7 +82,7 @@ class Website(models.Model):
     google_management_client_id = fields.Char('Google Client ID')
     google_management_client_secret = fields.Char('Google Client Secret')
 
-    user_id = fields.Many2one('res.users', string='Public User', required=True, default=lambda self: self.env.ref('base.public_user').id)
+    user_id = fields.Many2one('res.users', string='Public User', required=True)
     cdn_activated = fields.Boolean('Activate CDN for assets')
     cdn_url = fields.Char('CDN Base URL', default='')
     cdn_filters = fields.Text('CDN Filters', default=lambda s: '\n'.join(DEFAULT_CDN_FILTERS), help="URL matching those filters will be rewritten using the CDN Base URL")
@@ -108,7 +108,28 @@ class Website(models.Model):
         pass
 
     @api.model
+    def _get_company_public_user(self, company_id):
+        if not company_id:
+            return self.env.ref('base.public_user')
+
+        public_users = self.env.ref('base.group_public').with_context(active_test=False).users
+        public_users_for_website = public_users.filtered(lambda user: user.company_id.id == company_id)
+
+        if public_users_for_website:
+            return public_users_for_website[0]
+        else:
+            return self.env.ref('base.public_user').copy({
+                'name': 'Public user for %s' % self.env['res.company'].browse(company_id).name,
+                'login': 'public_company_%s' % company_id,
+                'company_id': company_id,
+                'company_ids': [(6, 0, [company_id])],
+            })
+
+    @api.model
     def create(self, vals):
+        if 'user_id' not in vals:
+            vals['user_id'] = self._get_company_public_user(vals.get('company_id')).id
+
         res = super(Website, self).create(vals)
 
         # publish default homepage on new website so people can login
@@ -121,6 +142,9 @@ class Website(models.Model):
     @api.multi
     def write(self, values):
         self._get_languages.clear_cache(self)
+        if 'company_id' in values and 'user_id' not in values:
+            values['user_id'] = self._get_company_public_user(values['company_id']).id
+
         result = super(Website, self).write(values)
         if 'cdn_activated' in values or 'cdn_url' in values or 'cdn_filters' in values:
             # invalidate the caches from static node at compile time
