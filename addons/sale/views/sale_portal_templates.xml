@@ -236,7 +236,7 @@
               <t t-foreach="order.order_line" t-as="ol">
                 <div class="row orders_vertical_align">
                     <div class="d-none d-xl-block col-xl-1 text-center">
-                      <span t-field="ol.product_image" t-options="{'widget': 'image', 'class': 'img-rounded', 'style':'width: 48px;height:48px'}" />
+                      <span t-field="ol.product_image" t-options="{'widget': 'image', 'class': 'rounded', 'style':'width: 48px;height:48px'}" />
                     </div>
                     <div id='product_name' t-att-class="'col-xl-3 col-md-5 col-4' if display_discount else 'col-xl-4 col-md-6 col-3'">
                       <span t-esc="ol.product_id.name"/>
