@@ -39,33 +39,33 @@
 <!-- Page Properties -->
 
 <div t-name="website.pagesMenu.page_info" class="o_page_management_info">
-    <form class="form-horizontal">
+    <form>
         <ul class="nav nav-tabs">
             <li class="nav-item"><a data-toggle="tab" class="nav-link active" href="#basic_page_info">Name</a></li>
             <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#advances_page_info">Publish</a></li>
         </ul>
         <div class="tab-content mt16">
             <div id="basic_page_info" class="tab-pane fade in active">
-                <div class="form-group">
-                    <label class="control-label col-md-3" for="page_name">Page Name</label>
+                <div class="form-group row">
+                    <label class="col-form-label col-md-3 col-form-label" for="page_name">Page Name</label>
                     <div class="col-md-9">
-                        <input type="text" class="form-control input-sm" id="page_name" t-att-value="widget.page.name" />
+                        <input type="text" class="form-control form-control-sm" id="page_name" t-att-value="widget.page.name" />
                     </div>
                 </div>
                 <div class="form-group warn_about_call"></div>
-                <div class="form-group">
-                    <label class="control-label col-md-3" for="page_url">Page URL</label>
+                <div class="form-group row">
+                    <label class="col-form-label col-md-3 col-form-label" for="page_url">Page URL</label>
                     <div class="col-md-9">
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text" t-att-title="widget.serverUrl"><small><t t-esc="widget.serverUrlTrunc"/></small></span>
                             </div>
-                            <input type="text" class="form-control input-sm" id="page_url" t-att-value="widget.page.url" />
+                            <input type="text" class="form-control form-control-sm" id="page_url" t-att-value="widget.page.url" />
                         </div>
                     </div>
                 </div>
-                <div class="form-group ask_for_redirect">
-                    <label class="control-label col-md-3" for="create_redirect">Redirect Old URL</label>
+                <div class="form-group row ask_for_redirect">
+                    <label class="col-form-label col-md-3 col-form-label" for="create_redirect">Redirect Old URL</label>
                     <div class="col-md-2">
                         <a>
                             <label class="o_switch" for="create_redirect" >
@@ -78,8 +78,8 @@
                         <span class="text-muted" id="dependencies_redirect"></span>
                     </div>
                 </div>
-                <div class="form-group ask_for_redirect">
-                    <label class="control-label col-md-3 redirect_type" for="redirect_type">Type</label>
+                <div class="form-group row ask_for_redirect">
+                    <label class="col-form-label col-md-3 col-form-label redirect_type" for="redirect_type">Type</label>
                     <div class="col-md-6 redirect_type">
                         <select class="form-control" id="redirect_type">
                             <option t-foreach="widget.fields.type.selection" t-as="field" t-att-value="field[0]"><t t-esc="field[0] + ': ' + field[1]" /></option>
@@ -88,8 +88,8 @@
                 </div>
             </div>
             <div id="advances_page_info" class="tab-pane fade">
-                <div class="form-group">
-                    <label class="control-label col-md-3" for="is_menu">Show in Top Menu</label>
+                <div class="form-group row">
+                    <label class="col-form-label col-md-3 col-form-label" for="is_menu">Show in Top Menu</label>
                     <div class="col-md-2">
                         <a>
                             <label class="o_switch" for="is_menu" >
@@ -99,8 +99,8 @@
                         </a>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="control-label col-md-3" for="is_homepage">Use as Homepage</label>
+                <div class="form-group row">
+                    <label class="col-form-label col-md-3 col-form-label" for="is_homepage">Use as Homepage</label>
                     <div class="col-md-2">
                         <a>
                             <label class="o_switch" for="is_homepage" >
@@ -110,8 +110,8 @@
                         </a>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="control-label col-md-3" for="is_indexed">
+                <div class="form-group row">
+                    <label class="col-form-label col-md-3 col-form-label" for="is_indexed">
                         Indexed
                         <i class="fa fa-question-circle-o" title="Hide this page from search results" aria-hidden="true"></i>
                     </label>
@@ -124,8 +124,8 @@
                         </a>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="control-label col-md-3" for="is_published">Publish</label>
+                <div class="form-group row">
+                    <label class="col-form-label col-md-3 col-form-label" for="is_published">Publish</label>
                     <div class="col-md-2">
                         <a>
                             <button class="o_switch js_publish_btn bg-transparent">
@@ -135,8 +135,8 @@
                         </a>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="control-label col-md-3" for="date_publish">Publishing Date</label>
+                <div class="form-group row">
+                    <label class="col-form-label col-md-3 col-form-label" for="date_publish">Publishing Date</label>
                     <div class="col-md-9">
                         <div class='input-group date' id='date_publish_container'>
                             <input type='text' class="form-control" name="date_publish" id="date_publish" />
