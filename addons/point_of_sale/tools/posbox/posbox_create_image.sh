@@ -24,7 +24,7 @@ require_command zerofree
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 __file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
 __base="$(basename ${__file} .sh)"
-__version=master
+__version=master-iot-jco
 
 
 MOUNT_POINT="${__dir}/root_mount"
@@ -44,7 +44,7 @@ rm -rf "${CLONE_DIR}"
 if [ ! -d $CLONE_DIR ]; then
     echo "Clone Github repo"
     mkdir -p "${CLONE_DIR}"
-    git clone -b ${__version} --no-local --no-checkout --depth 1 https://github.com/odoo/odoo.git "${CLONE_DIR}"
+    git clone -b ${__version} --no-local --no-checkout --depth 1 https://github.com/odoo-dev/odoo.git "${CLONE_DIR}"
     cd "${CLONE_DIR}"
     git config core.sparsecheckout true
     echo "addons/web
@@ -71,6 +71,7 @@ dd if=/dev/zero bs=1M count=2048 >> posbox.img
 
 # resize partition table
 echo "Fdisking"
+#fdisk posbox.img
 START_OF_ROOT_PARTITION=$(fdisk -l posbox.img | tail -n 1 | awk '{print $2}')
 (echo 'p';                          # print
  echo 'd';                          # delete
@@ -109,7 +110,7 @@ umount "${MOUNT_POINT}"
 
 # from http://paulscott.co.za/blog/full-raspberry-pi-raspbian-emulation-with-qemu/
 # ssh pi@localhost -p10022
-QEMU_OPTS=(-kernel kernel-qemu -cpu arm1176 -m 256 -M versatilepb -no-reboot -serial stdio -append 'root=/dev/sda2 rootfstype=ext4 rw' -hda posbox.img -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::18069-:8069 -net nic)
+QEMU_OPTS=(-kernel kernel-qemu -cpu arm1176 -m 256 -M versatilepb -dtb versatile-pb.dtb -no-reboot -serial stdio -append 'root=/dev/sda2 rootfstype=ext4 rw' -hda posbox.img -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::18069-:8069 -net nic)
 if [ -z ${DISPLAY:-} ] ; then
     QEMU_OPTS+=(-nographic)
 fi
