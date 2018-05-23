@@ -25,7 +25,7 @@ PKGS_TO_INSTALL="adduser postgresql-client python3 python3-dateutil python3-deco
 
 # KEEP OWN CONFIG FILES DURING PACKAGE CONFIGURATION
 # http://serverfault.com/questions/259226/automatically-keep-current-version-of-config-files-when-apt-get-install
-apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --force-yes install ${PKGS_TO_INSTALL}
+apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install ${PKGS_TO_INSTALL}
 
 apt-get clean
 localepurge
