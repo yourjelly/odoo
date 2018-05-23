@@ -104,6 +104,7 @@ class Partner(models.Model):
             custom_values = self.env['mail.thread']._notify_specific_email_values_on_records(message, records=self.env[message.model].browse(message.res_id))
 
         mail_values = {
+            'mail_message': message,
             'mail_message_id': message.id,
             'mail_server_id': message.mail_server_id.id,
             'auto_delete': notif_values.pop('mail_auto_delete', True),
@@ -117,11 +118,7 @@ class Partner(models.Model):
         emails = self.env['mail.mail']
         recipients_nbr = len(recipients)
         for email_chunk in split_every(50, recipients.ids):
-            # TDE FIXME: missing message parameter. So we will find mail_message_id
-            # in the mail_values and browse it. It should already be in the
-            # cache so should not impact performances.
-            mail_message_id = mail_values.get('mail_message_id')
-            message = self.env['mail.message'].browse(mail_message_id) if mail_message_id else None
+            message = mail_values.get('mail_message') and mail_values.pop('mail_message')
             tig = self.env[message.model].browse(message.res_id) if message and message.model and message.res_id else False
             recipient_values = self.env['mail.thread']._notify_email_recipients_on_records(message, email_chunk, records=tig)
             create_values = {
