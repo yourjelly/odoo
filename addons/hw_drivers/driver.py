@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import logging
 import time
-
+from threading import Thread
 import usb
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
@@ -11,18 +11,18 @@ _logger = logging.getLogger('dispatcher')
 #----------------------------------------------------------
 # Driver controller
 #----------------------------------------------------------
-class ScaleDriver(hw_proxy.Proxy):
-    @http.route('/hw_drivers/list', type='json', auth='none', cors='*')
-    def value(self, path):
-        pass
+#class ScaleDriver(hw_proxy.Proxy):
+#    @http.route('/hw_drivers/list', type='json', auth='none', cors='*')
+#    def value(self, path):
+#        pass
 
-    @http.route('/hw_drivers/value/<path>', type='json', auth='none', cors='*')
-    def value(self, path):
-        pass
+#    @http.route('/hw_drivers/value/<path>', type='json', auth='none', cors='*')
+#    def value(self, path):
+#        pass
 
-    @http.route('/hw_drivers/action/path', type='json', auth='none', cors='*')
-    def scale_zero(self, path, action):
-        pass
+#    @http.route('/hw_drivers/action/path', type='json', auth='none', cors='*')
+#    def scale_zero(self, path, action):
+#        pass
 
 #----------------------------------------------------------
 # Driver common interface
