@@ -923,6 +923,7 @@ var FormRenderer = BasicRenderer.extend({
      */
     _setIDForLabel: function (widget, idForLabel) {
         widget.getFocusableElement().attr('id', idForLabel);
+        // FIXME assign "for" on checkbox internal label
     },
 
     //--------------------------------------------------------------------------
