@@ -36,7 +36,8 @@ rm -rf /usr/share/doc
 # this may be fixed with libusb>2:1.0.11-1, but that's the most recent one in raspbian
 # so we install the latest pyusb that works with this libusb
 pip3 install pyusb
-#pip install qrcode
+pip3 install qrcode
+pip3 install html2text
 pip3 install evdev
 pip3 install simplejson
 pip3 install unittest2
@@ -52,7 +53,7 @@ usermod -a -G usbusers pi
 usermod -a -G lp pi
 usermod -a -G input lightdm
 
-sudo -u postgres createuser -s pi
+#sudo -u postgres createuser -s pi
 mkdir /var/log/odoo
 chown pi:pi /var/log/odoo
 chown pi:pi -R /home/pi/odoo/

@@ -196,9 +196,9 @@ class EscposDriver(Thread):
     def print_status(self,eprint):
         localips = ['0.0.0.0','127.0.0.1','127.0.1.1']
         hosting_ap = os.system('pgrep hostapd') == 0
-        ssid = subprocess.check_output('iwconfig 2>&1 | grep \'ESSID:"\' | sed \'s/.*"\\(.*\\)"/\\1/\'', shell=True).rstrip()
-        mac = subprocess.check_output('ifconfig | grep -B 1 \'inet addr\' | grep -o \'HWaddr .*\' | sed \'s/HWaddr //\'', shell=True).rstrip()
-        ips =  [ c.split(':')[1].split(' ')[0] for c in subprocess.check_output("/sbin/ifconfig").split('\n') if 'inet addr' in c ]
+        ssid = subprocess.check_output('iwconfig 2>&1 | grep \'ESSID:"\' | sed \'s/.*"\\(.*\\)"/\\1/\'', shell=True).decode('utf-8').rstrip()
+        mac = subprocess.check_output('ifconfig | grep -B 1 \'inet addr\' | grep -o \'HWaddr .*\' | sed \'s/HWaddr //\'', shell=True).decode('utf-8').rstrip()
+        ips =  [ c.split(':')[1].split(' ')[0] for c in subprocess.check_output("/sbin/ifconfig").decode('utf-8').split('\n') if 'inet addr' in c ]
         ips =  [ ip for ip in ips if ip not in localips ] 
         eprint.text('\n\n')
         eprint.set(align='center',type='b',height=2,width=2)

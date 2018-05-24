@@ -173,4 +173,4 @@ if isfile("/home/pi/registered_blackbox_be"):
 
         @http.route('/hw_proxy/request_serial/', type='json', auth='none', cors='*')
         def request_serial(self):
-            return subprocess.check_output("ifconfig eth0 | grep -o 'HWaddr.*' | sed 's/HWaddr \\(.*\\)/\\1/' | sed 's/://g'", shell=True).rstrip()[-7:]
+            return subprocess.check_output("ifconfig eth0 | grep -o 'HWaddr.*' | sed 's/HWaddr \\(.*\\)/\\1/' | sed 's/://g'", shell=True).decode('utf-8').rstrip()[-7:]
