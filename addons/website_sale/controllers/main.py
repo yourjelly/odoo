@@ -245,7 +245,7 @@ class WebsiteSale(http.Controller):
         if attrib_list:
             post['attrib'] = attrib_list
 
-        categs = request.env['product.public.category'].search([('parent_id', '=', False)])
+        categs = request.env['product.public.category'].search([('parent_id', '=', False), ('website_published', '=', True)])
         Product = request.env['product.template']
 
         parent_category_ids = []
