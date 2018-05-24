@@ -116,7 +116,7 @@ class AssetsBundle(object):
         response = []
         if debug == 'assets':
             if css and self.stylesheets:
-                is_css_preprocessed, old_attachments = self.is_css_preprocessed(debug=debug)
+                is_css_preprocessed, old_attachments = self.is_css_preprocessed()
                 if not is_css_preprocessed:
                     self.preprocess_css(debug=debug, old_attachments=old_attachments)
                     if self.css_errors:
@@ -255,7 +255,6 @@ class AssetsBundle(object):
         if not attachments:
             # get css content
             css = self.preprocess_css()
-
             if self.css_errors:
                 return self.get_attachments('css', ignore_version=True)
 
@@ -319,10 +318,9 @@ class AssetsBundle(object):
             })("%s");
         """ % message.replace('"', '\\"').replace('\n', '&NewLine;')
 
-    def is_css_preprocessed(self, debug=False):
+    def is_css_preprocessed(self):
         preprocessed = True
         attachments = None
-
         asset_types = [SassStylesheetAsset, ScssStylesheetAsset, LessStylesheetAsset]
         if self.user_direction == 'rtl':
             asset_types.append(StylesheetAsset)
