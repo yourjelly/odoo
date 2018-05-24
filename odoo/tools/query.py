@@ -147,6 +147,19 @@ class Expression(object):
         assert isinstance(other, (Number, Column)), "`%` RHS operand must be a numeric type."
         return Func('MOD', self, other)
 
+    @property
+    def rows(self):
+        """Return a set containing all the rows of an expression via recursion."""
+        res = set()
+
+        for node in [self.left, self.right]:
+            if isinstance(node, Column):
+                res |= set([node._row])
+            elif isinstance(node, Expression):
+                res |= node.rows
+
+        return res
+
     def _to_sql(self, alias_mapping):
         """
         Generates SQL statements and expressions from the current object.
@@ -438,7 +451,7 @@ class AliasMapping(dict):
 
 class Join(object):
 
-    def __init__(self, expression):
+    def __init__(self, expression, t1):
         """
         Create a join between two tables on a given condition.
 
@@ -455,8 +468,10 @@ class Join(object):
                 condition expression.
         """
         self.expression = expression
-        self.t1 = self.expression.left._row
-        self.t2 = self.expression.right._row
+        self.t1 = t1
+
+        tables = self.expression.rows
+        self.t2 = list(tables - set([t1]))[0]
 
         if self.t1._nullable:
             if self.t2._nullable:
@@ -471,8 +486,7 @@ class Join(object):
 
     def _to_sql(self, alias_mapping):
         sql, args = self.expression._to_sql(alias_mapping)
-        return ("%s %s %s ON %s" % (self.type, self.t2._table, alias_mapping[self.t2], sql),
-                args)
+        return ("%s %s ON %s" % (self.type, self.t2._to_sql(alias_mapping), sql), args)
 
 
 class Modifier(object):
@@ -553,16 +567,26 @@ class Select(BaseQuery, QueryExpression):
         self.attrs['columns'] = self._columns = columns
         self.attrs['where'] = self._where = where
         self.attrs['order'] = self._order = order
-        self.attrs['joins'] = self._joins = [Join(j) for j in joins if not isinstance(j, Join)]
+        self.attrs['joins'] = self._joins = joins
         self.attrs['distinct'] = self._distinct = distinct
         self.attrs['group'] = self._group = group
         self.attrs['having'] = self._having = having
         self.attrs['limit'] = self._limit = limit
         self.attrs['offset'] = self._offset = offset
         self.attrs['_all'] = self._all = _all
-
         self._aliased = isinstance(columns, dict)
-        self._rows = self._get_tables()
+
+        # Joins must be exclusively implicit or explicit
+        # Good:
+        #   * FROM a, b ...
+        #   * FROM a, b, c ...
+        #   * FROM a INNER JOIN b ...
+        #   * FROM a INNER JOIN b ON TRUE INNER JOIN c ...
+        # Bad:
+        #   * FROM a, b INNER JOIN c ...
+        # There's no error-checking, but the resulting query won't be what the user expects.
+        rows = self._get_tables()
+        self._rows = rows[:1] if self._joins else rows
 
     def _get_tables(self):
         tables = []
@@ -579,8 +603,7 @@ class Select(BaseQuery, QueryExpression):
                 else:
                     # SELECT <col>
                     t = col._row
-
-            if t not in [j.t2 for j in self._joins] and t not in tables:
+            if t not in tables:
                 tables.append(t)
         return tables
 
@@ -650,10 +673,10 @@ class Select(BaseQuery, QueryExpression):
         self.sql.append(' '.join(sql))
 
     def _build_joins(self, alias_mapping):
-        sql = []
         args = []
+        sql = []
 
-        for join in self._joins:
+        for join in [Join(j, self._rows[0]) for j in self._joins]:
             _sql, _args = join._to_sql(alias_mapping)
             sql.append(_sql)
             args += _args

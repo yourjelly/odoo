@@ -47,6 +47,14 @@ class TestExpressions(TestCase):
         self.p = Row('res_partner')
         self.u = Row('res_users')
 
+    def test_base_row_property(self):
+        expr = self.p.id == self.u.partner_id
+        self.assertEqual(expr.rows, set([self.p, self.u]))
+
+    def test_recursive_row_property(self):
+        expr = (self.p.id == self.u.partner_id) & (self.p.count > 5)
+        self.assertEqual(expr.rows, set([self.p, self.u]))
+
     def test_eq_expression(self):
         expr = self.u.id == 5
         res = ('("res_users"."id" = %s)', [5])
@@ -409,6 +417,15 @@ class TestSelect(TestCase):
             s.to_sql()[0],
             """SELECT "a"."id", "b"."id" FROM "res_partner" "a" """
             """INNER JOIN "res_users" "b" ON ("a"."id" = "b"."partner_id")"""
+        )
+
+    def test_full_expr_join(self):
+        s = Select([self.p.id], joins=[(self.p.id == self.u.partner_id) & (self.p.id > 5)])
+        self.assertEqual(
+            s.to_sql(),
+            ("""SELECT "a"."id" FROM "res_partner" "a" """
+             """INNER JOIN "res_users" "b" ON (("a"."id" = "b"."partner_id") AND """
+             """("a"."id" > %s))""", (5,))
         )
 
     def test_new_columns(self):
