@@ -4,7 +4,7 @@
     <t t-name="mail.chat.MessagingMenu">
         <li class="o_mail_navbar_item">
             <a class="dropdown-toggle o-no-caret" data-toggle="dropdown" aria-expanded="false" title="Conversations" href="#">
-                <i class="fa fa-comments"/> <span class="o_notification_counter badge"/>
+                <i class="fa fa-comments"/> <span class="o_notification_counter badge badge-pill"/>
             </a>
             <div class="o_mail_navbar_dropdown dropdown-menu dropdown-menu-right" role="menu">
                 <t t-if="widget.isMobile">
@@ -85,7 +85,7 @@
     <t t-name="mail.chat.ActivityMenu">
         <li class="o_mail_navbar_item">
             <a class="dropdown-toggle o-no-caret" data-toggle="dropdown" aria-expanded="false" title="Activities" href="#">
-                <i class="fa fa-clock-o"/> <span class="o_notification_counter badge"/>
+                <i class="fa fa-clock-o"/> <span class="o_notification_counter badge badge-pill"/>
             </a>
             <div class="o_mail_navbar_dropdown dropdown-menu dropdown-menu-right" role="menu">
                 <div class="o_mail_navbar_dropdown_channels"/>

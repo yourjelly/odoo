@@ -682,7 +682,7 @@
             <t t-else="">
                 <t t-if="_.contains(['in', 'not in'], widget.operator)">
                     <div class="o_domain_leaf_value_input">
-                        <span class="badge" t-foreach="widget.displayValue" t-as="val">
+                        <span class="badge badge-pill" t-foreach="widget.displayValue" t-as="val">
                             <t t-esc="val"/> <i class="o_domain_leaf_value_remove_tag_button fa fa-times" t-att-data-value="val"/>
                         </span>
                     </div>
@@ -825,7 +825,7 @@
 <t t-name="FieldMany2ManyTag">
     <t t-foreach="elements" t-as="el">
         <t t-set="color" t-value="el[colorField] || 0"/>
-        <span t-attf-class="badge dropdown o_tag_color_#{color}" t-att-data-color="color" t-att-data-index="el_index" t-att-data-id="el.id">
+        <span t-attf-class="badge badge-pill dropdown o_tag_color_#{color}" t-att-data-color="color" t-att-data-index="el_index" t-att-data-id="el.id">
             <span class="o_badge_text"><t t-esc="el.display_name"/></span>
             <span t-if="!readonly" class="fa fa-times o_delete"/>
         </span>
