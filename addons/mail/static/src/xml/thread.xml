@@ -29,7 +29,7 @@
                     <t t-esc="widget.activeAttachment.name"/>
                     <a href="#" class="o_download_btn ml8 small" data-toggle="tooltip" data-placement="right" title="Download"><i class="fa fa-fw fa-download"/></a>
                 </span>
-                <a class="o_close_btn pull-right" href="#">×</a>
+                <a class="o_close_btn float-right" href="#">×</a>
             </div>
             <div class="o_viewer_img_wrapper">
                 <div class="o_viewer_zoomer">
@@ -322,7 +322,7 @@
                 <t t-set="has_preview" t-value="type == 'image' or type == 'video' or attachment.mimetype == 'application/pdf'"/>
                 <t t-set="ext" t-value="attachment.filename.split('.').pop()"/>
 
-                <div t-attf-class="o_image_box pull-left #{has_preview ? 'o_attachment_view' : ''}" t-att-data-id="attachment.id">
+                <div t-attf-class="o_image_box float-left #{has_preview ? 'o_attachment_view' : ''}" t-att-data-id="attachment.id">
                     <div t-if="has_preview"
                          class="o_image o_hover"
                          t-att-style="type == 'image' ? 'background-image:url(/web/image/' + attachment.id + '/38x38/?crop=true' : '' "
@@ -347,7 +347,7 @@
                 <div t-if="!editable" class="caption small">
                     <b t-if="has_preview" class="ml4 small text-uppercase o_attachment_view" t-att-data-id="attachment.id"><t t-esc="ext"/></b>
                     <a t-else="" class="ml4 small text-uppercase" t-att-href="attachment.url" t-att-title="'Download ' + attachment.name"><b><t t-esc='ext'/></b></a>
-                    <a class="ml4 o_attachment_download pull-right" t-att-title="'Download ' + attachment.name" t-att-href='attachment.url'><i t-attf-class="fa fa-download"/></a>
+                    <a class="ml4 o_attachment_download float-right" t-att-title="'Download ' + attachment.name" t-att-href='attachment.url'><i t-attf-class="fa fa-download"/></a>
                 </div>
                 <div t-if="editable" class="o_attachment_uploaded"><i class="text-success fa fa-check"/></div>
                 <div t-if="editable" class="o_attachment_delete" t-att-data-id="attachment.id"><span class="text-white">×</span></div>

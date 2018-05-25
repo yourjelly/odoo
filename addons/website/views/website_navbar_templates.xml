@@ -31,7 +31,7 @@
                     </li>
                 </ul>
 
-                <button type="button" class="fa fa-bars pull-right d-block d-md-none o_mobile_menu_toggle"/>
+                <button type="button" class="fa fa-bars float-right d-block d-md-none o_mobile_menu_toggle"/>
 
                 <ul class="o_menu_sections" groups="website.group_website_designer">
                     <!-- Content -->

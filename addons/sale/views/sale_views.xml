@@ -346,7 +346,7 @@
                                                         <strong><span><t t-esc="record.product_id.value"/></span></strong>
                                                     </div>
                                                     <div class="col-4">
-                                                        <strong><span class="pull-right text-right">
+                                                        <strong><span class="float-right text-right">
                                                         <t t-esc="record.price_subtotal.value"/></span></strong>
                                                     </div>
                                                 </div>
