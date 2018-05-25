@@ -2,13 +2,15 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import itertools
 import logging
+
+from ast import literal_eval
+
 from datetime import date, timedelta
 
 from dateutil.relativedelta import relativedelta, MO
 
 from odoo import api, models, fields, _, exceptions
 from odoo.tools import ustr
-from odoo.tools.safe_eval import safe_eval
 
 _logger = logging.getLogger(__name__)
 
@@ -284,8 +286,7 @@ class Challenge(models.Model):
         return True
 
     def _get_challenger_users(self, domain):
-        # FIXME: literal_eval?
-        user_domain = safe_eval(domain)
+        user_domain = literal_eval(domain)
         return self.env['res.users'].search(user_domain)
 
     def _recompute_challenge_users(self):
