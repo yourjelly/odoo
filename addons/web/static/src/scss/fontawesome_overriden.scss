@@ -29,9 +29,22 @@
     &.fa-arrow-circle-o-left,
     &.fa-arrow-circle-o-right,
     &.fa-caret-square-o-left {
-      -webkit-transform: rotate(180deg);
-          -ms-transform: rotate(180deg); // IE9 only
-           -o-transform: rotate(180deg);
-              transform: rotate(180deg);
+        -webkit-transform: rotate(180deg);
+        -ms-transform: rotate(180deg); // IE9 only
+        -o-transform: rotate(180deg);
+        transform: rotate(180deg);
+    }
+}
+
+
+.bootstrap-datetimepicker-widget {
+    .list-unstyled {
+    padding: 0;
+    .prev , .next {
+        -webkit-transform: rotate(180deg);
+        -ms-transform: rotate(180deg); // IE9 only
+        -o-transform: rotate(180deg);
+        transform: rotate(180deg);
+        }
     }
 }
