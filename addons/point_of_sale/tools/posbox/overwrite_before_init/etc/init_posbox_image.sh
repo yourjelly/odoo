@@ -53,7 +53,8 @@ usermod -a -G usbusers pi
 usermod -a -G lp pi
 usermod -a -G input lightdm
 
-#sudo -u postgres createuser -s pi
+sudo /etc/init.d/postgresql start
+sudo -u postgres createuser -s pi
 mkdir /var/log/odoo
 chown pi:pi /var/log/odoo
 chown pi:pi -R /home/pi/odoo/
@@ -111,6 +112,7 @@ create_ramdisk_dir "/var"
 create_ramdisk_dir "/etc"
 create_ramdisk_dir "/tmp"
 mkdir /root_bypass_ramdisks
+#sudo -u postgres createuser -s pi
 umount /dev/sda1
 
 reboot

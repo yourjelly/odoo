@@ -230,7 +230,7 @@ class Scale(Thread):
                                                    parity=protocol.parity,
                                                    timeout=1,      # longer timeouts for probing
                                                    writeTimeout=1) # longer timeouts for probing
-                        connection.write(protocol.weightCommand + protocol.commandTerminator)
+                        connection.write(bytes(protocol.weightCommand + protocol.commandTerminator, 'utf-8'))
                         time.sleep(protocol.commandDelay)
                         answer = self._get_raw_response(connection)
                         weight, weight_info, status = self._parse_weight_answer(protocol, answer)

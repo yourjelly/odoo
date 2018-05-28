@@ -3,6 +3,7 @@ import logging
 import time
 from threading import Thread
 import usb
+import serial
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
 _logger = logging.getLogger('dispatcher')
@@ -30,12 +31,16 @@ _logger = logging.getLogger('dispatcher')
 class Driver(Thread):
     def __init__(self, path):
         pass
+
     def supported(self):
         pass
+
     def value(self):
         pass
+
     def run(self):
         pass
+
     def action(self, action):
         pass
 
@@ -50,26 +55,42 @@ class UsbMetaClass(type):
         usbdrivers.append(newclass)
         return newclass
 
+
 class USBDriver(Driver,metaclass=UsbMetaClass):
     pass
+
 
 class SylvacUSBDriver(USBDriver):
     def __init__(self, dev):
         self.dev = dev
-        pass
+        self.value = ""
 
     def supported(self):
-        return getattr(self.dev, 'idVendor') == 0x046d and getattr(self.dev, 'idProduct') == 0xc077
+        return getattr(self.dev, 'idVendor') == 0x0403 and getattr(self.dev, 'idProduct') == 0x6001
 
+    @http.route('/sylvacusb/value', type='json', auth='none', cors='*')
     def value(self):
-
-        pass
+        return self.value
 
     def run(self):
-        pass
+        connection = serial.Serial('/dev/serial/by-id/usb-Sylvac_Power_USB_A32DV5VM-if00-port0',
+                                   baudrate=4800,
+                                   bytesize=7,
+                                   stopbits=2,
+                                   parity=serial.PARITY_EVEN)
+        measure = b''
+        while True:
+            char = self.connection.read(1)
+            if ord(char) == 13:
+                # Let's send measure
+                self.value = measure
+                measure = b''
+            else:
+                measure += char
 
     def action(self, action):
         pass
+
 
 class SylvacBluetoothDriver(USBDriver):
     def __init__(self, network):
@@ -86,6 +107,7 @@ class SylvacBluetoothDriver(USBDriver):
 
     def action(self, action):
         pass
+
 
 #----------------------------------------------------------
 # Bluetooth drivers
@@ -117,6 +139,9 @@ class DeviceManager(object):
                     if d.supported():
                         _logger.info('For device %s will be driven by %s',path,d)
                         # launch thread
+                        d.run()
+                    else:
+                        del d
             time.sleep(3)
 
 #----------------------------------------------------------
