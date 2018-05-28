@@ -55,6 +55,17 @@ class UsbMetaClass(type):
         usbdrivers.append(newclass)
         return newclass
 
+btdrivers = []
+
+class BtMetaClass(type):
+    def __new__(cls, clsname, bases, attrs):
+        newclass = super(BtMetaClass, cls).__new__(cls, clsname, bases, attrs)
+        usbdrivers.append(newclass)
+        return newclass
+
+
+
+
 
 class USBDriver(Driver,metaclass=UsbMetaClass):
     pass
@@ -68,7 +79,7 @@ class SylvacUSBDriver(USBDriver):
     def supported(self):
         return getattr(self.dev, 'idVendor') == 0x0403 and getattr(self.dev, 'idProduct') == 0x6001
 
-    @http.route('/sylvacusb/value', type='json', auth='none', cors='*')
+    #@http.route('/sylvacusb/value', type='json', auth='none', cors='*')
     def value(self):
         return self.value
 
@@ -79,22 +90,28 @@ class SylvacUSBDriver(USBDriver):
                                    stopbits=2,
                                    parity=serial.PARITY_EVEN)
         measure = b''
-        while True:
-            char = self.connection.read(1)
-            if ord(char) == 13:
-                # Let's send measure
-                self.value = measure
-                measure = b''
-            else:
-                measure += char
+        no_except = True
+        while no_except:
+            try:
+                char = connection.read(1)
+                if ord(char) == 13:
+                    # Let's send measure
+                    self.value = measure
+                    print(self.value)
+                    measure = b''
+                else:
+                    measure += char
+            except:
+                no_except = False
 
     def action(self, action):
         pass
 
 
-class SylvacBluetoothDriver(USBDriver):
+class SylvacBluetoothDriver(BtDriver):
     def __init__(self, network):
-        pass
+        self.dev = dev
+        self.value=""
 
     def supported(self):
         pass
@@ -134,10 +151,10 @@ class DeviceManager(object):
             print(len(self.devices))
             for path in added:
                 for driverclass in usbdrivers:
-                    _logger.info('For device %s checking driver %s',path,driverclass)
+                    _logger.info('For device %s checking driver %s', path, driverclass)
                     d = driverclass(updated_devices[path])
                     if d.supported():
-                        _logger.info('For device %s will be driven by %s',path,d)
+                        _logger.info('For device %s will be driven', path)
                         # launch thread
                         d.run()
                     else:
