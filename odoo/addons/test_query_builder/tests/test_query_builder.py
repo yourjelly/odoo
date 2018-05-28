@@ -605,6 +605,16 @@ class TestSelect(TestCase):
             )
         )
 
+    def test_infer_table_from_where(self):
+        s = Select([self.u.id], where=self.u.partner_id == self.p.id)
+        self.assertEqual(
+            s.to_sql(),
+            (
+                """SELECT "a"."id" FROM "res_users" "a", "res_partner" "b" """
+                """WHERE ("a"."partner_id" = "b"."id")""", ()
+            )
+        )
+
 
 @tagged('standard', 'at_install')
 class TestDelete(TestCase):
@@ -802,7 +812,8 @@ class TestUpdate(TestCase):
         self.assertEqual(
             u.to_sql(),
             ("""UPDATE "res_partner" "a" SET "a"."name" = """
-             """(SELECT "b"."name" FROM "res_users" "b" WHERE ("b"."partner_id" = "a"."id") """
+             """(SELECT "b"."name" FROM "res_users" "b", "res_partner" "a" """
+             """WHERE ("b"."partner_id" = "a"."id") """
              """LIMIT %s OFFSET %s)""", (1, 0))
         )
 

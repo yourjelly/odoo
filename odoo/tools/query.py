@@ -49,7 +49,7 @@ the Select, Insert, Update, Delete, etc. classes for creating the corresponding 
 in order to see their usage, consult the respective class' documentation.
 """
 
-from collections import Iterable, OrderedDict
+from collections import OrderedDict
 from functools import partial
 from numbers import Number
 
@@ -151,8 +151,9 @@ class Expression(object):
     def rows(self):
         """Return a set containing all the rows of an expression via recursion."""
         res = set()
+        nodes = [getattr(self, 'left', None), getattr(self, 'right', None)]
 
-        for node in [self.left, self.right]:
+        for node in nodes:
             if isinstance(node, Column):
                 res |= set([node._row])
             elif isinstance(node, Expression):
@@ -299,6 +300,13 @@ class BaseQuery(object):
 
     def _build_base(self, alias_mapping):
         raise NotImplementedError
+
+    @property
+    def attrs(self):
+        raise NotImplementedError
+
+    def copy(self):
+        return self.__class__(**self.attrs)
 
     def _build_from(self, alias_mapping):
         rows = getattr(self, '_rows', False)
@@ -562,18 +570,17 @@ class Select(BaseQuery, QueryExpression):
             ORDER BY "res_partner"."id" DESC NULLS LAST
         """
         super(Select, self).__init__()
-        self.attrs = {}
 
-        self.attrs['columns'] = self._columns = columns
-        self.attrs['where'] = self._where = where
-        self.attrs['order'] = self._order = order
-        self.attrs['joins'] = self._joins = joins
-        self.attrs['distinct'] = self._distinct = distinct
-        self.attrs['group'] = self._group = group
-        self.attrs['having'] = self._having = having
-        self.attrs['limit'] = self._limit = limit
-        self.attrs['offset'] = self._offset = offset
-        self.attrs['_all'] = self._all = _all
+        self._columns = columns
+        self._where = where
+        self._order = order
+        self._joins = joins
+        self._distinct = distinct
+        self._group = group
+        self._having = having
+        self._limit = limit
+        self._offset = offset
+        self._all = _all
         self._aliased = isinstance(columns, dict)
 
         # Joins must be exclusively implicit or explicit
@@ -587,6 +594,21 @@ class Select(BaseQuery, QueryExpression):
         # There's no error-checking, but the resulting query won't be what the user expects.
         rows = self._get_tables()
         self._rows = rows[:1] if self._joins else rows
+
+    @property
+    def attrs(self):
+        return {
+            'columns': self._columns,
+            'where': self._where,
+            'order': self._order,
+            'joins': self._joins,
+            'distinct': self._distinct,
+            'group': self._group,
+            'having': self._having,
+            'limit': self._limit,
+            'offset': self._offset,
+            '_all': self._all,
+        }
 
     def _get_tables(self):
         tables = []
@@ -605,6 +627,10 @@ class Select(BaseQuery, QueryExpression):
                     t = col._row
             if t not in tables:
                 tables.append(t)
+        if self._where is not None:
+            for t in self._where.rows:
+                if t not in tables and not t._cols:
+                    tables.append(t)
         return tables
 
     # Generation of new Select objects
@@ -734,6 +760,15 @@ class Delete(BaseQuery):
         self._where = where
         self._returning = returning
 
+    @property
+    def attrs(self):
+        return {
+            'rows': self._rows,
+            'using': self._using,
+            'where': self._where,
+            'returning': self._returning,
+        }
+
     def _build_base(self, alias_mapping):
         self.sql.append("DELETE")
 
@@ -763,7 +798,9 @@ class With(BaseQuery):
             is not permitted, therefore only SELECT queries can use recursive terms. /!\
         """
         self._body = body
-        self._tail = tail
+        # The tail must be recomputed in case a _vals attribute has been assigned since its
+        # instantiation.
+        self._tail = tail.copy()
         self._recur = recursive
 
     def _to_sql(self, alias_mapping):
@@ -816,6 +853,14 @@ class Update(BaseQuery):
         # Auxiliary tables found in set expressions
         self._rows = [expr._val._row for expr in exprs if isinstance(expr._val, Column)]
 
+    @property
+    def attrs(self):
+        return {
+            'exprs': self._exprs,
+            'where': self._where,
+            'returning': self._returning,
+        }
+
     def _pre_build(self, alias_mapping):
         return "UPDATE %s %s" % (self._main._table, alias_mapping[self._main])
 
@@ -865,6 +910,15 @@ class Insert(BaseQuery):
         self._vals = vals
         self._do_nothing = do_nothing
         self._returning = returning
+
+    @property
+    def attrs(self):
+        return {
+            'row': self._row,
+            'vals': self._vals,
+            'do_nothing': self._do_nothing,
+            'returning': self._returning,
+        }
 
     def _pre_build(self, alias_mapping):
         return """INSERT INTO %s""" % self._row._to_sql(alias_mapping, with_cols=True)
