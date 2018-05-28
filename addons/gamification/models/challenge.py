@@ -202,7 +202,7 @@ class Challenge(models.Model):
 
     ##### Update #####
 
-    @api.model # FIXME: check how cron functions are called to see if decorator necessary
+    @api.model
     def _cron_update(self, ids=False):
         """Daily cron check.
 
