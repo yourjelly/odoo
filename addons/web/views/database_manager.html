@@ -33,7 +33,7 @@
           if (modal.hasClass('o_database_backup')) {
             $(modal).modal('hide');
             if (!$('.alert-backup-long').length) {
-              $('.list-group').before("<div class='alert alert-info alert-backup-long'>The backup may take some time before being ready</div>");              
+              $('.list-group').before("<div class='alert alert-info alert-backup-long'>The backup may take some time before being ready</div>");
             }
           }
       });
@@ -221,7 +221,7 @@
                 <p class="form-text">In order to avoid conflicts between databases, Odoo needs to know if this database was moved or copied.
                 If you don't know, answer "This database is a copy".</p>
               <div class="radio">
-                <label>
+                <label><!-- FIXME -->
                   <input name="copy" type="radio" class="float-right" value="true" checked="1">
                   This database is a copy
                 </label>
