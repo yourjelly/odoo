@@ -356,8 +356,7 @@ class WebsiteForum(http.Controller):
     @http.route('/forum/<model("forum.forum"):forum>/post/<model("forum.post"):post>/comment', type='http', auth="user", methods=['POST'], website=True)
     def post_comment(self, forum, post, **kwargs):
         question = post.parent_id if post.parent_id else post
-        if kwargs.get('comment') and post.forum_id.id == forum.id:
-            # TDE FIXME: check that post_id is the question or one of its answers
+        if kwargs.get('comment') and post.forum_id.id == forum.id and post.post_type == 'question':
             body = tools.mail.plaintext2html(kwargs['comment'])
             post.with_context(mail_create_nosubscribe=True).message_post(
                 body=body,
