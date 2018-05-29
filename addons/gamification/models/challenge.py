@@ -229,10 +229,9 @@ class Challenge(models.Model):
         records = self.browse(ids) if ids else self.search([('state', '=', 'inprogress')])
 
         # in cron mode, will do intermediate commits
-        # FIXME: replace by parameter
-        return records.with_context(commit_gamification=True)._update_all()
+        return records._update_all(commit_gamification=True)
 
-    def _update_all(self):
+    def _update_all(self, commit_gamification=False):
         """Update the challenges and related goals
 
         :param list(int) ids: the ids of the challenges to update, if False will
@@ -262,10 +261,10 @@ class Challenge(models.Model):
                       GROUP BY gg.id
         """, [tuple(self.ids), yesterday])
 
-        Goals.browse(goal_id for [goal_id] in self.env.cr.fetchall()).update_goal()
+        Goals.browse(goal_id for [goal_id] in self.env.cr.fetchall()).update_goal(commit_gamification)
 
         self._recompute_challenge_users()
-        self._generate_goals_from_challenge()
+        self._generate_goals_from_challenge(commit_gamification)
 
         for challenge in self:
             if challenge.last_report_date != fields.Date.today():
@@ -282,7 +281,7 @@ class Challenge(models.Model):
                     # some goals need a final report
                     challenge.report_progress(subset_goals=closed_goals_to_report)
 
-        self._check_challenge_reward()
+        self._check_challenge_reward(commit_gamification=commit_gamification)
         return True
 
     def _get_challenger_users(self, domain):
@@ -327,7 +326,7 @@ class Challenge(models.Model):
 
     ##### Automatic actions #####
 
-    def _generate_goals_from_challenge(self):
+    def _generate_goals_from_challenge(self, commit_gamification=False):
         """Generate the goals for each line and user.
 
         If goals already exist for this line and user, the line is skipped. This
@@ -395,7 +394,7 @@ class Challenge(models.Model):
                     values['user_id'] = user_id
                     to_update |= Goals.create(values)
 
-            to_update.update_goal()
+            to_update.update_goal(commit_gamification)
 
         return True
 
@@ -613,7 +612,7 @@ class Challenge(models.Model):
         sudoed.message_post(body=_("%s has refused the challenge") % user.name)
         return sudoed.write({'invited_user_ids': (3, user.id)})
 
-    def _check_challenge_reward(self, force=False):
+    def _check_challenge_reward(self, force=False, commit_gamification=False):
         """Actions for the end of a challenge
 
         If a reward was selected, grant it to the correct users.
@@ -623,7 +622,7 @@ class Challenge(models.Model):
             - when a challenge is manually closed
         (if no end date, a running challenge is never rewarded)
         """
-        commit = self.env.context.get('commit_gamification') and self.env.cr.commit
+        commit = commit_gamification and self.env.cr.commit
 
         for challenge in self:
             (start_date, end_date) = start_end_date_for_period(challenge.period, challenge.start_date, challenge.end_date)

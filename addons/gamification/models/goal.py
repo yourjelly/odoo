@@ -254,7 +254,12 @@ class Goal(models.Model):
         return {self: result}
 
     @api.multi
-    def update_goal(self):
+    def action_refresh(self):
+        """ Web button add context as parameter, therefore created a new function """
+        return self.update_goal()
+
+    @api.multi
+    def update_goal(self, commit_gamification=False):
         """Update the goals to recomputes values and change of states
 
         If a manual goal is not updated for enough time, the user will be
@@ -361,7 +366,7 @@ class Goal(models.Model):
                 if not values:
                     continue
                 goal.write(values)
-            if self.env.context.get('commit_gamification'):
+            if commit_gamification:
                 self.env.cr.commit()
         return True
 
