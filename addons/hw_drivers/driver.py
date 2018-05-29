@@ -4,6 +4,8 @@ import time
 from threading import Thread
 import usb
 import serial
+import gatt
+
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
 _logger = logging.getLogger('dispatcher')
@@ -55,17 +57,6 @@ class UsbMetaClass(type):
         usbdrivers.append(newclass)
         return newclass
 
-btdrivers = []
-
-class BtMetaClass(type):
-    def __new__(cls, clsname, bases, attrs):
-        newclass = super(BtMetaClass, cls).__new__(cls, clsname, bases, attrs)
-        usbdrivers.append(newclass)
-        return newclass
-
-
-
-
 
 class USBDriver(Driver,metaclass=UsbMetaClass):
     pass
@@ -108,19 +99,57 @@ class SylvacUSBDriver(USBDriver):
         pass
 
 
-class SylvacBluetoothDriver(BtDriver):
-    def __init__(self, network):
+btdrivers = []
+
+class BtMetaClass(type):
+    def __new__(cls, clsname, bases, attrs):
+        newclass = super(BtMetaClass, cls).__new__(cls, clsname, bases, attrs)
+        usbdrivers.append(newclass)
+        return newclass
+
+
+class BtDriver(Driver,metaclass=BtMetaClass):
+    def __init__(self, manager, device):
+        self.manager = manager
+        self.device = device #As for USB, we could put init values here? (or maybe this structure is too complicated)
+
+
+class SylvacBluetoothDriver(BtDriver, gatt.Device):
+    def __init__(self, dev):
         self.dev = dev
-        self.value=""
+        self.value = ""
 
     def supported(self):
-        pass
+        return self.name=="SY295"
 
     def value(self):
-        pass
+        return self.value
 
-    def run(self):
-        pass
+
+    def services_resolved(self):
+        super().services_resolved()
+
+        device_information_service = next(
+            s for s in self.services
+            if s.uuid == '00005000-0000-1000-8000-00805f9b34fb')
+
+        measurement_characteristic = next(
+            c for c in device_information_service.characteristics if c.uuid == '00005020-0000-1000-8000-00805f9b34fb')
+        # m2 = next(c for c in device_information_service.characteristics if c.uuid == '00005021-0000-1000-8000-00805f9b34fb')
+        # print m2.read_value()
+        measurement_characteristic.enable_notifications()
+
+    def characteristic_value_updated(self, characteristic, value):
+        total = value[0] + value[1] * 256 + value[2] * 256 * 256 + value[3] * 256 * 256 * 256
+        print('SY295', total / 1000000.0)
+
+        # print "Supermeasurement ", characteristic, hex(value[0]), hex(value[1]), hex(value[2]), hex(value[3]), total
+
+    def characteristic_enable_notification_succeeded(self):
+        print("Success pied à coulisse Bluetooth!")
+
+    def characteristic_enable_notification_failed(self):
+        print("Problem connecting")
 
     def action(self, action):
         pass
@@ -133,7 +162,7 @@ class SylvacBluetoothDriver(BtDriver):
 #----------------------------------------------------------
 # DeviceManager
 #----------------------------------------------------------
-class DeviceManager(object):
+class DeviceManager(object, gatt.DeviceManager):
     def __init__(self):
         self.devices = {}
 
@@ -161,6 +190,18 @@ class DeviceManager(object):
                         del d
             time.sleep(3)
 
+
+    def device_discovered(self, device):
+        # TODO: need some kind of updated_devices mechanism
+        for driverclass in btdrivers:
+            d = driverclass(manager, device)
+            if d.supported():
+                d.run()
+            else:
+                del d
+        #print("Discovered [%s] %s" % (device.mac_address, device.alias()))
+
+
 #----------------------------------------------------------
 # Agent ? Push values
 #----------------------------------------------------------
@@ -172,6 +213,8 @@ if __name__ == '__main__':
     print (usbdrivers)
     dm = DeviceManager()
     dm.main()
+    dm.start_discovery() #bluetooth
+    dm.run() #bluetooth
 
 
 """
@@ -379,7 +422,6 @@ class SylvacBluetoothDriverFactory():
                 send_device('SY295 pied à coulisse Bluetooth', mac)
                 device = AnyDevice(mac_address=mac, manager=manager)
                 device.connect()
-
                 manager.run()
 
 bluetooth_driver_factories['Sylvac'] = SylvacBluetoothDriverFactory()
