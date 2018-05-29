@@ -45,7 +45,6 @@ class SaleReport(models.Model):
 
     def _select(self):
         select_str = """
-            WITH currency_rate as (%s)
              SELECT min(l.id) as id,
                     l.product_id as product_id,
                     t.uom_id as product_uom,
@@ -72,7 +71,7 @@ class SaleReport(models.Model):
                     partner.commercial_partner_id as commercial_partner_id,
                     sum(p.weight * l.product_uom_qty / u.factor * u2.factor) as weight,
                     sum(p.volume * l.product_uom_qty / u.factor * u2.factor) as volume
-        """ % self.env['res.currency']._select_companies_rates()
+        """ 
         return select_str
 
     def _from(self):
@@ -84,12 +83,9 @@ class SaleReport(models.Model):
                             left join product_template t on (p.product_tmpl_id=t.id)
                     left join product_uom u on (u.id=l.product_uom)
                     left join product_uom u2 on (u2.id=t.uom_id)
-                    left join product_pricelist pp on (s.pricelist_id = pp.id)
-                    left join currency_rate cr on (cr.currency_id = pp.currency_id and
-                        cr.company_id = s.company_id and
-                        cr.date_start <= coalesce(s.date_order, now()) and
-                        (cr.date_end is null or cr.date_end > coalesce(s.date_order, now())))
-        """
+                    join product_pricelist pp on (s.pricelist_id = pp.id)
+                    left join lateral (%s) as cr on True
+        """ % self.env['res.currency']._select_companies_rates(currency_id="pp.currency_id", company_id="s.company_id", rate_date="s.date_order")
         return from_str
 
     def _group_by(self):
@@ -115,7 +111,6 @@ class SaleReport(models.Model):
 
     @api.model_cr
     def init(self):
-        # self._table = sale_report
         tools.drop_view_if_exists(self.env.cr, self._table)
         self.env.cr.execute("""CREATE or REPLACE VIEW %s as (
             %s
