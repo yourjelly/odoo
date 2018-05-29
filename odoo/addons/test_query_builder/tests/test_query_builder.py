@@ -4,7 +4,7 @@
 from unittest import TestCase
 from odoo.tests.common import tagged
 from odoo.tools.query import Row, Select, Delete, With, Update, Insert, \
-    Asc, Desc, COALESCE, UNNEST, NULL, DEFAULT, _quote, BaseQuery, CreateView
+    Asc, Desc, COALESCE, UNNEST, NULL, DEFAULT, _quote, BaseQuery, CreateView, CONCAT, COUNT
 
 
 @tagged('standard', 'at_install')
@@ -214,6 +214,13 @@ class TestSelect(TestCase):
                (5,))
         self.assertEqual(s.to_sql(), res)
 
+    def test_select_aggregate(self):
+        s = Select([COUNT(self.p.id)])
+        self.assertEqual(
+            s.to_sql()[0],
+            """SELECT "COUNT"("a"."id") FROM "res_partner" "a\""""
+        )
+
     def test_select_right_join(self):
         self.p._nullable = True
         s = Select([self.u.id])
@@ -259,7 +266,7 @@ class TestSelect(TestCase):
         self.assertEqual(s.to_sql()[0], res)
 
     def test_order_by_asc_nfirst(self):
-        s = Select([self.p.id, self.p.name], order=[Asc(self.p.name, True)])
+        s = Select([self.p.id, self.p.name], order=[Asc(self.p.name, 'first')])
         res = (
             """SELECT "a"."id", "a"."name" FROM "res_partner" "a" """
             """ORDER BY "a"."name" ASC NULLS FIRST"""
@@ -664,6 +671,30 @@ class TestDelete(TestCase):
             ("""DELETE FROM "res_partner" "a" RETURNING ("a"."id" <= %s)""", (5,))
         )
 
+    def test_delete_new_rows(self):
+        d1 = Delete([self.p])
+        d2 = d1.rows(self.u)
+
+        self.assertIsNot(d1, d2)
+
+    def test_delete_new_using(self):
+        d1 = Delete([self.p], [self.u])
+        d2 = d1.using()
+
+        self.assertIsNot(d1, d2)
+
+    def test_delete_new_where(self):
+        d1 = Delete([self.p], where=self.p.id > 5)
+        d2 = d1.where(self.p.id < 5)
+
+        self.assertIsNot(d1, d2)
+
+    def test_delete_new_returning(self):
+        d1 = Delete([self.p])
+        d2 = d1.using(self.p.id)
+
+        self.assertIsNot(d1, d2)
+
 
 @tagged('standard', 'at_install')
 class TestWith(TestCase):
@@ -914,17 +945,18 @@ class TestCreateView(TestCase):
         )
 
 
-@tagged('standard', 'at_install')
+@tagged('standard', 'at_install', 'query_rwc')
 class TestRealWorldCases(TestCase):
 
     def setUp(self):
         super(TestRealWorldCases, self).setUp()
+        self.maxDiff = None
         self.p = Row("res_partner")
         self.u = Row("res_users")
         self.g = Row("res_groups")
 
-    def test_insert_rwc(self):
-        # fields.py#2518
+    def test_rwc_01(self):
+        # fields.py
         r1 = UNNEST([1, 2, 3])
         r2 = UNNEST([5, 6, 7])
         s1 = Select([r1, r2])
@@ -938,3 +970,28 @@ class TestRealWorldCases(TestCase):
              """EXCEPT (SELECT "a"."id1", "a"."id2" FROM "res_partner" "a" """
              """WHERE ("a"."id1" IN %s)))""", ([1, 2, 3], [5, 6, 7], [1, 5, 4]))
         )
+
+    def test_rwc_02(self):
+        # models.py @ _parent_store_compute
+        r = Row('dummy')
+        c = Row('__parent_store_compute')
+        s1 = Select([r.id, CONCAT(r.id, '/')], where=r.parent_id == NULL)
+        s2 = Select([r.id, CONCAT(c.parent_path, r.id, '/')], where=r.parent_id == c.id)
+        u = Update([r.parent_path << c.parent_path], where=r.id == c.id)
+        w = With([(c('id', 'parent_path'), s1 | s2)], u, True)
+
+        res = ("""WITH RECURSIVE "__parent_store_compute"("id", "parent_path") AS ("""
+               """(SELECT "a"."id", "CONCAT"("a"."id", %s) """
+               """FROM "dummy" "a" """
+               """WHERE ("a"."parent_id" IS NULL)) """
+               """UNION ("""
+               """SELECT "a"."id", """
+               """"CONCAT"("b"."parent_path", "a"."id", %s) """
+               """FROM "dummy" "a", "__parent_store_compute" "b" """
+               """WHERE ("a"."parent_id" = "b"."id"))) """
+               """UPDATE "dummy" "a" """
+               """SET "a"."parent_path" = "__parent_store_compute"."parent_path" """
+               """FROM "__parent_store_compute" """
+               """WHERE ("a"."id" = "__parent_store_compute"."id")""", ('/', '/'))
+
+        self.assertEqual(w.to_sql(), res)

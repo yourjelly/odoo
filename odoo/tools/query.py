@@ -159,6 +159,9 @@ class Expression(object):
             elif isinstance(node, Expression):
                 res |= node.rows
 
+        if hasattr(self, '_row'):
+            res.add(self._row)
+
         return res
 
     def _to_sql(self, alias_mapping):
@@ -524,16 +527,16 @@ class Asc(Modifier):
 
     """ Ascending order """
 
-    def __init__(self, column, nfirst=False):
-        super(Asc, self).__init__(column, 'ASC', nfirst)
+    def __init__(self, column, nulls='last'):
+        super(Asc, self).__init__(column, 'ASC', nulls == 'first')
 
 
 class Desc(Modifier):
 
     """ Descending order """
 
-    def __init__(self, column, nfirst=False):
-        super(Desc, self).__init__(column, 'DESC', nfirst)
+    def __init__(self, column, nulls='last'):
+        super(Desc, self).__init__(column, 'DESC', nulls == 'first')
 
 
 class Select(BaseQuery, QueryExpression):
@@ -622,11 +625,20 @@ class Select(BaseQuery, QueryExpression):
                 if isinstance(col, Row):
                     # SELECT *
                     t = col
+                elif isinstance(col, Func) and not isinstance(col, Unnest):
+                    t = col.rows
                 else:
                     # SELECT <col>
                     t = col._row
-            if t not in tables:
-                tables.append(t)
+
+            if isinstance(t, (Row, tuple)):
+                if t not in tables:
+                    tables.append(t)
+            else:
+                for _t in t:
+                    if _t not in tables:
+                        tables.append(_t)
+
         if self._where is not None:
             for t in self._where.rows:
                 if t not in tables and not t._cols:
@@ -677,6 +689,7 @@ class Select(BaseQuery, QueryExpression):
 
     def _build_base(self, alias_mapping):
         sql = ["SELECT"]
+        args = []
 
         if self._distinct:
             sql.append("DISTINCT")
@@ -687,16 +700,21 @@ class Select(BaseQuery, QueryExpression):
                 _sql.append("*")
             elif self._aliased:
                 col = self._columns[c]
-                _sql.append("%s AS %s" % (col._to_sql(alias_mapping)[0], c))
+                __sql, _args = col._to_sql(alias_mapping)
+                _sql.append("%s AS %s" % (__sql, c))
+                args += _args
             elif isinstance(c, Unnest):
                 # Special case, Unnest can be used in a FROM clause
                 r = c._row[0]
                 _sql.append(alias_mapping[r])
             else:
-                _sql.append("%s" % c._to_sql(alias_mapping)[0])
+                __sql, _args = c._to_sql(alias_mapping)
+                _sql.append("%s" % __sql)
+                args += _args
 
         sql.append(', '.join(_sql))
         self.sql.append(' '.join(sql))
+        self.args += args
 
     def _build_joins(self, alias_mapping):
         args = []
@@ -760,6 +778,18 @@ class Delete(BaseQuery):
         self._where = where
         self._returning = returning
 
+    def rows(self, *rows):
+        return Delete({**self.attrs, 'rows': rows})
+
+    def using(self, *tables):
+        return Delete({**self.attrs, 'using': tables})
+
+    def where(self, expr):
+        return Delete({**self.attrs, 'where': expr})
+
+    def returning(self, cols):
+        return Delete({**self.attrs, 'returning': cols})
+
     @property
     def attrs(self):
         return {
@@ -802,6 +832,19 @@ class With(BaseQuery):
         # instantiation.
         self._tail = tail.copy()
         self._recur = recursive
+
+    @property
+    def attrs(self):
+        return {'body': self._body, 'tail': self._tail, 'recursive': self._recur}
+
+    def body(self, *body):
+        return With({**self.attrs, 'body': body})
+
+    def tail(self, tail):
+        return With({**self.attrs, 'tail': tail})
+
+    def recursive(self):
+        return With({**self.attrs, 'recursive': not self._recur})
 
     def _to_sql(self, alias_mapping):
         sql = []
@@ -861,6 +904,15 @@ class Update(BaseQuery):
             'returning': self._returning,
         }
 
+    def set(self, *exprs):
+        return Update({**self.attrs, 'exprs': exprs})
+
+    def where(self, expr):
+        return Update({**self.attrs, 'where': expr})
+
+    def returning(self, *cols):
+        return Update({**self.attrs, 'returning': cols})
+
     def _pre_build(self, alias_mapping):
         return "UPDATE %s %s" % (self._main._table, alias_mapping[self._main])
 
@@ -919,6 +971,18 @@ class Insert(BaseQuery):
             'do_nothing': self._do_nothing,
             'returning': self._returning,
         }
+
+    def into(self, row):
+        return Insert({**self.attrs, 'row': row})
+
+    def values(self, *vals):
+        return Insert({**self.attrs, 'vals': vals})
+
+    def do_nothing(self):
+        return Insert({**self.attrs, 'do_nothing': not self._do_nothing})
+
+    def returning(self, *cols):
+        return Insert({**self.attrs, 'returning': cols})
 
     def _pre_build(self, alias_mapping):
         return """INSERT INTO %s""" % self._row._to_sql(alias_mapping, with_cols=True)
@@ -1002,6 +1066,14 @@ class Func(Expression):
         """
         self.func = _quote(func)
         self.args = args
+
+    @property
+    def rows(self):
+        rows = []
+        for arg in self.args:
+            if isinstance(arg, Expression):
+                rows += arg.rows
+        return rows
 
     def _to_sql(self, alias_mapping):
         sql = "{func}({params})"
