@@ -19,7 +19,7 @@
                     <div class="form-group">
                         <label for="seo_page_description" class="col-xs-3 control-label">Description</label>
                         <div class="col-xs-9">
-                            <textarea name="seo_page_description" class="form-control" style="max-width: 100%;height:145px;max-height:145px" t-att-maxlength="widget.maxDescriptionSize"/>
+                            <textarea name="seo_page_description" class="form-control" style="max-width: 100%;height:145px;max-height:145px"/>
                         </div>
                     </div>
                 </div>

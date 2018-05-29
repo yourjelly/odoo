@@ -325,13 +325,13 @@ var SeoConfigurator = Dialog.extend({
         'blur input[name=seo_page_title]': 'titleChanged',
         'blur textarea[name=seo_page_description]': 'descriptionChanged',
         'click button[data-action=add]': 'addKeyword',
+        'keyup textarea[name=seo_page_description]': '_onKeyupTextarea',
     },
     canEditTitle: false,
     canEditDescription: false,
     canEditKeywords: false,
     canEditLanguage: false,
     maxTitleSize: 65,
-    maxDescriptionSize: 160,  // TODO master: remove me and add warning
 
     init: function (parent, options) {
         options = options || {};
@@ -552,6 +552,33 @@ var SeoConfigurator = Dialog.extend({
              val = removed ? (this.$el.find('tbody > tr').length - 1) : (this.$el.find('tbody > tr').length);
         this.$('table').toggleClass('js_seo_has_content', val > 0 );
         this.$el.scrollTop(self.$el[0].scrollHeight);
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * Display a warning message after reaching the characters limit
+     *
+     * @private
+     * @param {keyEvent} ev
+     */
+    _onKeyupTextarea: function (ev) {
+        var $target = $(ev.target);
+        var $descAlert = $target.parent().find('span');
+        if ($descAlert.length) {
+            $descAlert.remove();
+            $target.css({'border-color': ''});
+        }
+        if ($target.val().length > 160) {
+            $target.css({'border-color': 'rgba(255, 0, 0, 0.4)'});
+            var $warning = $('<span>', {
+                style: 'color: rgba(255, 0, 0, 0.4);',
+                text: _t('A good description contains 160 characters and you have exceeds the characters.'),
+            });
+            $target.after($warning);
+        }
     },
 });
 
