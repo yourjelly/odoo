@@ -137,15 +137,15 @@ class Expression(object):
         return Expression('ILIKE', self, other)
 
     def __abs__(self):
-        return Func('ABS', self)
+        return Func('abs', self)
 
     def __pow__(self, other):
         assert isinstance(other, (Number, Column)), "`**` RHS operand must be a numeric type."
-        return Func('POW', self, other)
+        return Func('pow', self, other)
 
     def __mod__(self, other):
         assert isinstance(other, (Number, Column)), "`%` RHS operand must be a numeric type."
-        return Func('MOD', self, other)
+        return Func('mod', self, other)
 
     @property
     def rows(self):
@@ -1102,20 +1102,20 @@ class Unnest(Func):
         This function is special since it can be used as a table in the FROM clause of
         some queries, therefore we create a Row object for it.
         """
-        super(Unnest, self).__init__('UNNEST', *args)
+        super(Unnest, self).__init__('unnest', *args)
         self._row = (Row(self.func), args)
         self._row[0]._table += "(%s)"
 
 
-AVG = partial(Func, 'AVG')
-COUNT = partial(Func, 'COUNT')
-SUM = partial(Func, 'SUM')
-MAX = partial(Func, 'MAX')
-MIN = partial(Func, 'MIN')
-COALESCE = partial(Func, 'COALESCE')
-NULLIF = partial(Func, 'NULLIF')
-CONCAT = partial(Func, 'CONCAT')
-NOW = partial(Func, 'NOW')
-EXISTS = partial(Func, 'EXISTS')
-ANY = partial(Func, 'ANY')
-UNNEST = Unnest
+avg = partial(Func, 'avg')
+count = partial(Func, 'count')
+_sum = partial(Func, 'sum')
+_max = partial(Func, 'max')
+_min = partial(Func, 'min')
+coalesce = partial(Func, 'coalesce')
+nullif = partial(Func, 'nullif')
+concat = partial(Func, 'concat')
+now = partial(Func, 'now')
+exists = partial(Func, 'exists')
+_any = partial(Func, 'any')
+unnest = Unnest

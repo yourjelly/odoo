@@ -4,7 +4,7 @@
 from unittest import TestCase
 from odoo.tests.common import tagged
 from odoo.tools.query import Row, Select, Delete, With, Update, Insert, \
-    Asc, Desc, COALESCE, UNNEST, NULL, DEFAULT, _quote, BaseQuery, CreateView, CONCAT, COUNT
+    Asc, Desc, coalesce, unnest, NULL, DEFAULT, _quote, BaseQuery, CreateView, concat, count
 
 
 @tagged('standard', 'at_install')
@@ -109,18 +109,18 @@ class TestExpressions(TestCase):
 
     def test_func_expression(self):
         expr = (self.u.name != NULL) & (abs(self.u.delta)) & (self.u.id > 5)
-        res = ("""((("res_users"."name" IS NOT NULL) AND "ABS"("res_users"."delta"))"""
+        res = ("""((("res_users"."name" IS NOT NULL) AND "abs"("res_users"."delta"))"""
                """ AND ("res_users"."id" > %s))""", [5])
         self.assertEqual(expr._to_sql(None), res)
 
     def test_single_arg_func_expression(self):
         expr = abs(self.u.delta)
-        res = (""""ABS"("res_users"."delta")""", [])
+        res = (""""abs"("res_users"."delta")""", [])
         self.assertEqual(expr._to_sql(None), res)
 
     def test_multi_arg_func_expression(self):
         expr = self.u.count % 100
-        res = (""""MOD"("res_users"."count", %s)""", [100])
+        res = (""""mod"("res_users"."count", %s)""", [100])
         self.assertEqual(expr._to_sql(None), res)
 
     def test_like_expression(self):
@@ -134,8 +134,8 @@ class TestExpressions(TestCase):
         self.assertEqual(expr._to_sql(None), res)
 
     def test_partial_func_expression(self):
-        expr = COALESCE(self.u.id, 5)
-        res = (""""COALESCE"("res_users"."id", %s)""", [5])
+        expr = coalesce(self.u.id, 5)
+        res = (""""coalesce"("res_users"."id", %s)""", [5])
         self.assertEqual(expr._to_sql(None), res)
 
     def test_col_attr_setting(self):
@@ -145,7 +145,7 @@ class TestExpressions(TestCase):
 
     def test_pow(self):
         expr = self.p.count ** 5
-        res = (""""POW"("res_partner"."count", %s)""", [5])
+        res = (""""pow"("res_partner"."count", %s)""", [5])
         self.assertEqual(expr._to_sql(None), res)
 
     def test_and_type(self):
@@ -215,10 +215,10 @@ class TestSelect(TestCase):
         self.assertEqual(s.to_sql(), res)
 
     def test_select_aggregate(self):
-        s = Select([COUNT(self.p.id)])
+        s = Select([count(self.p.id)])
         self.assertEqual(
             s.to_sql()[0],
-            """SELECT "COUNT"("a"."id") FROM "res_partner" "a\""""
+            """SELECT "count"("a"."id") FROM "res_partner" "a\""""
         )
 
     def test_select_right_join(self):
@@ -957,8 +957,8 @@ class TestRealWorldCases(TestCase):
 
     def test_rwc_01(self):
         # fields.py
-        r1 = UNNEST([1, 2, 3])
-        r2 = UNNEST([5, 6, 7])
+        r1 = unnest([1, 2, 3])
+        r2 = unnest([5, 6, 7])
         s1 = Select([r1, r2])
         s2 = Select([self.p.id1, self.p.id2], where=self.p.id1 ^ [1, 5, 4])
         i = Insert(self.g('id1', 'id2'), [s1 - s2])
@@ -966,7 +966,7 @@ class TestRealWorldCases(TestCase):
         self.assertEqual(
             i.to_sql(),
             ("""INSERT INTO "res_groups"("id1", "id2") """
-             """((SELECT "a", "b" FROM "UNNEST"(%s) "a", "UNNEST"(%s) "b") """
+             """((SELECT "a", "b" FROM "unnest"(%s) "a", "unnest"(%s) "b") """
              """EXCEPT (SELECT "a"."id1", "a"."id2" FROM "res_partner" "a" """
              """WHERE ("a"."id1" IN %s)))""", ([1, 2, 3], [5, 6, 7], [1, 5, 4]))
         )
@@ -975,18 +975,18 @@ class TestRealWorldCases(TestCase):
         # models.py @ _parent_store_compute
         r = Row('dummy')
         c = Row('__parent_store_compute')
-        s1 = Select([r.id, CONCAT(r.id, '/')], where=r.parent_id == NULL)
-        s2 = Select([r.id, CONCAT(c.parent_path, r.id, '/')], where=r.parent_id == c.id)
+        s1 = Select([r.id, concat(r.id, '/')], where=r.parent_id == NULL)
+        s2 = Select([r.id, concat(c.parent_path, r.id, '/')], where=r.parent_id == c.id)
         u = Update([r.parent_path << c.parent_path], where=r.id == c.id)
         w = With([(c('id', 'parent_path'), s1 | s2)], u, True)
 
         res = ("""WITH RECURSIVE "__parent_store_compute"("id", "parent_path") AS ("""
-               """(SELECT "a"."id", "CONCAT"("a"."id", %s) """
+               """(SELECT "a"."id", "concat"("a"."id", %s) """
                """FROM "dummy" "a" """
                """WHERE ("a"."parent_id" IS NULL)) """
                """UNION ("""
                """SELECT "a"."id", """
-               """"CONCAT"("b"."parent_path", "a"."id", %s) """
+               """"concat"("b"."parent_path", "a"."id", %s) """
                """FROM "dummy" "a", "__parent_store_compute" "b" """
                """WHERE ("a"."parent_id" = "b"."id"))) """
                """UPDATE "dummy" "a" """
