@@ -100,19 +100,15 @@ body.o_connected_user {
 // MODALS
 body .modal {
     &.o_technical_modal {
-        @include o-w-preserve-base;
-        @include o-w-preserve-headings;
-        @include o-w-preserve-forms;
-        @include o-w-preserve-links;
-        @include o-w-preserve-btn;
-        @include o-w-preserve-wells;
-        @include o-w-preserve-modals;
-        @include o-w-preserve-tabs;
-
-        &:not(.oe_mobile_preview) button.close {
-            @include o-w-close-icon(12px);
-            margin-right: -2px;
-        }
+        // FIXME
+        // @include o-w-preserve-base;
+        // @include o-w-preserve-headings;
+        // @include o-w-preserve-forms;
+        // @include o-w-preserve-links;
+        // @include o-w-preserve-btn;
+        // @include o-w-preserve-wells;
+        // @include o-w-preserve-modals;
+        // @include o-w-preserve-tabs;
     }
 
     // MOBILE PREVIEW
@@ -122,13 +118,6 @@ body .modal {
         .modal-dialog {
             display: inline-block;
             width: auto;
-
-            .close {
-                color: lightgray;
-                opacity: 1;
-                font-size: 25px;
-                font-weight: normal;
-            }
 
             .modal-content {
                 background-color: black!important;
@@ -266,7 +255,7 @@ body .modal {
                                 font-weight: normal;
 
                                 .oe_remove {
-                                    @include o-w-close-icon(10px, white, $o-we-color-danger, 2px);
+                                    @include o-w-close-icon(10px, white, $o-we-color-danger, 2px); // FIXME
                                     @include o-position-absolute(5px, 5px);
                                 }
                             }
@@ -479,9 +468,10 @@ body .modal {
 
 // ACE EDITOR
 .o_ace_view_editor {
-    @include o-w-preserve-base;
-    @include o-w-preserve-btn;
-    @include o-w-preserve-forms;
+    // FIXME
+    // @include o-w-preserve-base;
+    // @include o-w-preserve-btn;
+    // @include o-w-preserve-forms;
 
     @include o-position-absolute($o-navbar-height, 0, 0);
     position: fixed;
@@ -535,4 +525,3 @@ body .modal {
         color: $o-brand-primary;
     }
 }
-
