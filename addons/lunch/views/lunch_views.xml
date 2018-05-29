@@ -398,13 +398,13 @@
                                 </div>
                                 <div class="row mt4">
                                     <div class="col-6">
-                                        <a class="btn btn-xs btn-success" name="order" string="Order" type="object" attrs="{'invisible': ['|',('state','=','confirmed'),('state','=','ordered')]}" groups="lunch.group_lunch_manager">
+                                        <a class="btn btn-sm btn-success" name="order" string="Order" type="object" attrs="{'invisible': ['|',('state','=','confirmed'),('state','=','ordered')]}" groups="lunch.group_lunch_manager">
                                             <i class="fa fa-phone"/>
                                         </a>
-                                        <a class="btn btn-xs btn-info" name="confirm" string="Receive" type="object" attrs="{'invisible': [('state','!=','ordered')]}" groups="lunch.group_lunch_manager">
+                                        <a class="btn btn-sm btn-info" name="confirm" string="Receive" type="object" attrs="{'invisible': [('state','!=','ordered')]}" groups="lunch.group_lunch_manager">
                                             <i class="fa fa-check"/>
                                         </a>
-                                        <a class="btn btn-xs btn-danger" name="cancel" string="Cancel" type="object" attrs="{'invisible': [('state','=','cancelled')]}" groups="lunch.group_lunch_manager">
+                                        <a class="btn btn-sm btn-danger" name="cancel" string="Cancel" type="object" attrs="{'invisible': [('state','=','cancelled')]}" groups="lunch.group_lunch_manager">
                                             <i class="fa fa-times"/>
                                         </a>
                                     </div>

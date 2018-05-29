@@ -15,7 +15,7 @@
                     <button
                         type="action"
                         name="%(sms.send_sms_form_action)d"
-                        class="btn-xs btn-link mb4 fa fa-envelope-o"
+                        class="btn-sm btn-link mb4 fa fa-envelope-o"
                         attrs="{'invisible':[('phone', '=', False)]}"
                         context="{'field_name': 'phone'}"
                     />
@@ -28,7 +28,7 @@
                     <button
                         type="action"
                         name="%(sms.send_sms_form_action)d"
-                        class="btn-xs btn-link mb4 fa fa-envelope-o"
+                        class="btn-sm btn-link mb4 fa fa-envelope-o"
                         attrs="{'invisible':[('mobile', '=', False)]}"
                         context="{'field_name': 'mobile'}"
                         />
