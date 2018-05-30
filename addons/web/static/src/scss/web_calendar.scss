@@ -32,6 +32,7 @@
         min-width: 0;
 
         .o_calendar_widget {
+            direction: ltr;
             height: 100%;
             background-color: $o-view-background-color;
             * {
