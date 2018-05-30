@@ -74,17 +74,18 @@ class Expression(object):
     Main Abstract Syntax Tree of the query builder.
 
     Valid expressions:
-        a & b  -> a AND b, both operands must be Expressions
-        a | b  -> a OR b, both operands must be Expressions
-        a ^ b  -> a IN b, b must be an iterable (tuple, list, set, ...)
-        ~a     -> NOT a, a must be an Expression
+        a & b  -> a AND b
+        a | b  -> a OR b
+        ~a     -> NOT a
         a == b -> a = b
         a != b -> a != b
         a < b  -> a < b
         a <= b -> a <= b
         a > b  -> a > b
         a >= b -> a >= b
-        a @ b  -> a LIKE b, b must be a string type
+        a.in_(b)  -> a IN b
+        a.like(b)  -> a LIKE b
+        a.ilike(b) -> a ILIKE b
     """
 
     __slots__ = ('left', 'op', 'right')
@@ -101,9 +102,6 @@ class Expression(object):
     def __or__(self, other):
         assert isinstance(other, Expression), "`|` operands must be Expressions."
         return Expression('OR', self, other)
-
-    def __xor__(self, other):
-        return Expression('IN', self, other)
 
     def __invert__(self):
         return Expression('NOT', self, None)
@@ -128,17 +126,6 @@ class Expression(object):
     def __ge__(self, other):
         return Expression('>=', self, other)
 
-    def __matmul__(self, other):
-        assert isinstance(other, (text_type, Column)), "`@` RHS operand must be a text type."
-        return Expression('LIKE', self, other)
-
-    def ilike(self, other):
-        assert isinstance(other, (text_type, Column)), "`ilike` argument must be a text type."
-        return Expression('ILIKE', self, other)
-
-    def __abs__(self):
-        return Func('abs', self)
-
     def __pow__(self, other):
         assert isinstance(other, (Number, Column)), "`**` RHS operand must be a numeric type."
         return Func('pow', self, other)
@@ -146,6 +133,20 @@ class Expression(object):
     def __mod__(self, other):
         assert isinstance(other, (Number, Column)), "`%` RHS operand must be a numeric type."
         return Func('mod', self, other)
+
+    def __abs__(self):
+        return Func('abs', self)
+
+    def like(self, other):
+        assert isinstance(other, (text_type, Column)), "`@` RHS operand must be a text type."
+        return Expression('LIKE', self, other)
+
+    def ilike(self, other):
+        assert isinstance(other, (text_type, Column)), "`ilike` argument must be a text type."
+        return Expression('ILIKE', self, other)
+
+    def in_(self, other):
+        return Expression('IN', self, other)
 
     @property
     def rows(self):

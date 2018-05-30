@@ -33,7 +33,7 @@ class TestMisc(TestCase):
 
     def test_lots_of_args(self):
         p = Row("res_partner")
-        s = Select([p.id], where=(p.id > 5) & (p.name @ 'foo') | (p.my_company == [1, 2, 3]),
+        s = Select([p.id], where=(p.id > 5) & (p.name.like('foo')) | (p.my_company == [1, 2, 3]),
                    limit=5, offset=3)
         sql, args = s.to_sql()
         self.assertEqual(args, (5, 'foo', [1, 2, 3], 5, 3))
@@ -124,7 +124,7 @@ class TestExpressions(TestCase):
         self.assertEqual(expr._to_sql(None), res)
 
     def test_like_expression(self):
-        expr = self.u.name @ 'johnny'
+        expr = self.u.name.like('johnny')
         res = ("""("res_users"."name" LIKE %s)""", ['johnny'])
         self.assertEqual(expr._to_sql(None), res)
 
@@ -158,7 +158,7 @@ class TestExpressions(TestCase):
 
     def test_like_type(self):
         with self.assertRaises(AssertionError):
-            self.p.id @ [1, 2, 3]
+            self.p.id.like([1, 2, 3])
 
     def test_ilike_type(self):
         with self.assertRaises(AssertionError):
@@ -572,7 +572,7 @@ class TestSelect(TestCase):
 
     def test_sub_query(self):
         sub = Select([self.p.id], limit=5)
-        s = Select([self.u.id], where=self.u.partner_id ^ sub)
+        s = Select([self.u.id], where=self.u.partner_id.in_(sub))
         self.assertEqual(
             s.to_sql(),
             (
@@ -585,8 +585,8 @@ class TestSelect(TestCase):
     def test_nested_sub_query(self):
         p = Row("res_partner")
         s1 = Select([p.id])
-        s2 = Select([self.u.id], where=self.u.partner_id ^ s1)
-        s3 = Select([self.p.id], where=self.p.id ^ s2)
+        s2 = Select([self.u.id], where=self.u.partner_id.in_(s1))
+        s3 = Select([self.p.id], where=self.p.id.in_(s2))
         self.assertEqual(
             s3.to_sql(),
             (
@@ -900,7 +900,7 @@ class TestCreateView(TestCase):
         self.t = Row("my_temp_table")
         self.g = Row("res_group")
         self.w_s = Select([self.g.name], limit=1)
-        self.s = Select([self.p.id], where=self.p.name @ self.t.name)
+        self.s = Select([self.p.id], where=self.p.name.like(self.t.name))
         self.w = With([(self.t("name"), self.w_s)], self.s)
 
     def test_create_basic_view(self):
@@ -945,7 +945,7 @@ class TestRealWorldCases(TestCase):
         r1 = unnest([1, 2, 3])
         r2 = unnest([5, 6, 7])
         s1 = Select([r1, r2])
-        s2 = Select([self.p.id1, self.p.id2], where=self.p.id1 ^ [1, 5, 4])
+        s2 = Select([self.p.id1, self.p.id2], where=self.p.id1.in_([1, 5, 4]))
         i = Insert(self.g('id1', 'id2'), [s1 - s2])
 
         self.assertEqual(
