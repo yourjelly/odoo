@@ -363,8 +363,8 @@ class TestSelect(TestCase):
 
     def test_union_all(self):
         s1 = Select([self.p.id])
-        s2 = Select([self.u.id], _all=True)
-        s = s1 | s2
+        s2 = Select([self.u.id])
+        s = s1.union_all(s2)
         self.assertEqual(
             s.to_sql(),
             ("""(SELECT "a"."id" FROM "res_partner" "a") UNION ALL """
@@ -558,21 +558,6 @@ class TestSelect(TestCase):
             new.to_sql(),
             ("""SELECT "a"."id" FROM "res_partner" "a" LIMIT %s OFFSET %s""",
              (100, 30))
-        )
-
-    def test_new_all(self):
-        base = Select([self.p.id])
-        new = base.all()
-        self.assertIsNot(base, new)
-        self.assertEqual(
-            (new & base).to_sql()[0],
-            """(SELECT "a"."id" FROM "res_partner" "a") INTERSECT """
-            """(SELECT "a"."id" FROM "res_partner" "a")"""
-        )
-        self.assertEqual(
-            (base & new).to_sql()[0],
-            """(SELECT "a"."id" FROM "res_partner" "a") INTERSECT ALL """
-            """(SELECT "a"."id" FROM "res_partner" "a")"""
         )
 
     def test_alias_multiple(self):

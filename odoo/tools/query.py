@@ -185,7 +185,7 @@ class Expression(object):
         if isinstance(self.right, Expression):
             right, _args = self.right._to_sql(alias_mapping)
 
-            if isinstance(self.right, QueryExpression):
+            if isinstance(self.right, Select):
                 right = '(%s)' % right
 
             args += _args
@@ -284,7 +284,7 @@ class Column(Expression):
         return col_name, []
 
 
-class BaseQuery(object):
+class BaseQuery(Expression):
 
     def __init__(self, *args, **kwargs):
         """
@@ -400,36 +400,6 @@ class BaseQuery(object):
         return self._to_sql(AliasMapping())
 
 
-class QueryExpression(Expression):
-
-    __slots__ = ('op', 'left', 'right')
-
-    """Class for operators between Select objects."""
-
-    def __init__(self, op, left, right):
-        super(QueryExpression, self).__init__(op, left, right)
-
-    def __or__(self, other):
-        op = 'UNION ALL' if other._all else 'UNION'
-        return QueryExpression(op, self, other)
-
-    def __and__(self, other):
-        op = 'INTERSECT ALL' if other._all else 'INTERSECT'
-        return QueryExpression(op, self, other)
-
-    def __sub__(self, other):
-        op = 'EXCEPT ALL' if other._all else 'EXCEPT'
-        return QueryExpression(op, self, other)
-
-    def _to_sql(self, alias_mapping):
-        left, largs = self.left._to_sql(alias_mapping)
-        right, rargs = self.right._to_sql(AliasMapping())
-        return ("(%s) %s (%s)" % (left, self.op, right), largs + rargs)
-
-    def to_sql(self):
-        return self._to_sql(AliasMapping())
-
-
 class AliasMapping(dict):
 
     def __init__(self, *args, **kwargs):
@@ -539,10 +509,10 @@ class Desc(Modifier):
         super(Desc, self).__init__(column, 'DESC', nulls == 'first')
 
 
-class Select(BaseQuery, QueryExpression):
+class Select(BaseQuery):
 
     def __init__(self, columns, where=None, order=[], joins=[], distinct=False,
-                 group=[], having=None, limit=None, offset=0, _all=False):
+                 group=[], having=None, limit=None, offset=0):
         """
         Stateless class for generating SQL SELECT statements.
 
@@ -583,7 +553,6 @@ class Select(BaseQuery, QueryExpression):
         self._having = having
         self._limit = limit
         self._offset = offset
-        self._all = _all
         self._aliased = isinstance(columns, dict)
 
         # Joins must be exclusively implicit or explicit
@@ -610,7 +579,6 @@ class Select(BaseQuery, QueryExpression):
             'having': self._having,
             'limit': self._limit,
             'offset': self._offset,
-            '_all': self._all,
         }
 
     def _get_tables(self):
@@ -644,6 +612,35 @@ class Select(BaseQuery, QueryExpression):
                 if t not in tables and not t._cols:
                     tables.append(t)
         return tables
+
+    # Select query operations
+    def union(self, other):
+        return QueryExpression('UNION', self, other)
+
+    def union_all(self, other):
+        return QueryExpression('UNION ALL', self, other)
+
+    def intersect(self, other):
+        return QueryExpression('INTERSECT', self, other)
+
+    def intersect_all(self, other):
+        return QueryExpression('INTERSECT ALL', self, other)
+
+    def ex(self, other):
+        return QueryExpression('EXCEPT', self, other)
+
+    def ex_all(self, other):
+        return QueryExpression('EXCEPT ALL', self, other)
+
+    # Select query operation shortcuts
+    def __or__(self, other):
+        return self.union(other)
+
+    def __and__(self, other):
+        return self.intersect(other)
+
+    def __sub__(self, other):
+        return self.ex(other)
 
     # Generation of new Select objects
     def columns(self, *cols):
@@ -682,10 +679,6 @@ class Select(BaseQuery, QueryExpression):
     def offset(self, n):
         """ Create a similar Select object but with a different offset."""
         return Select(**{**self.attrs, 'offset': n})
-
-    def all(self):
-        """ Create a similar Select object but with a different all."""
-        return Select(**{**self.attrs, '_all': not self.attrs['_all']})
 
     def _build_base(self, alias_mapping):
         sql = ["SELECT"]
@@ -750,6 +743,27 @@ class Select(BaseQuery, QueryExpression):
             sql = "LIMIT %s OFFSET %s"
             self.sql.append(sql)
             self.args += [self._limit, self._offset]
+
+
+class QueryExpression(Select):
+
+    __slots__ = ('op', 'left', 'right')
+
+    """Class for operators between Select objects."""
+
+    def __init__(self, op, left, right):
+        assert isinstance(left, Select) and isinstance(right, Select), "Operands must be Selects."
+        self.left = left
+        self.op = op
+        self.right = right
+
+    def _to_sql(self, alias_mapping):
+        left, largs = self.left._to_sql(alias_mapping)
+        right, rargs = self.right._to_sql(AliasMapping())
+        return ("(%s) %s (%s)" % (left, self.op, right), largs + rargs)
+
+    def to_sql(self):
+        return self._to_sql(AliasMapping())
 
 
 class Delete(BaseQuery):
@@ -992,7 +1006,7 @@ class Insert(BaseQuery):
         args = []
         sql = "VALUES %s"
 
-        if any([isinstance(x, QueryExpression) for x in self._vals]):
+        if any([isinstance(x, Select) for x in self._vals]):
             assert len(self._vals) == 1, "Only one sub-query per INSERT statement allowed."
             _sql, _args = self._vals[0]._to_sql(alias_mapping)
             sql = ("(%s)" % _sql)
