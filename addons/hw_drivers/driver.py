@@ -104,23 +104,32 @@ btdrivers = []
 class BtMetaClass(type):
     def __new__(cls, clsname, bases, attrs):
         newclass = super(BtMetaClass, cls).__new__(cls, clsname, bases, attrs)
-        usbdrivers.append(newclass)
+        btdrivers.append(newclass)
         return newclass
 
 
-class BtDriver(Driver,metaclass=BtMetaClass):
+class BtDriver(metaclass=BtMetaClass):
     def __init__(self, manager, device):
         self.manager = manager
         self.device = device #As for USB, we could put init values here? (or maybe this structure is too complicated)
 
+    def supported(self):
+        pass
+
+    def value(self):
+        pass
+
+    def run(self):
+        pass
+
+    def action(self, action):
+        pass
+
 
 class SylvacBluetoothDriver(BtDriver, gatt.Device):
-    def __init__(self, dev):
-        self.dev = dev
-        self.value = ""
 
     def supported(self):
-        return self.name=="SY295"
+        return self.device.alias =="SY295"
 
     def value(self):
         return self.value
@@ -162,9 +171,8 @@ class SylvacBluetoothDriver(BtDriver, gatt.Device):
 #----------------------------------------------------------
 # DeviceManager
 #----------------------------------------------------------
-class DeviceManager(object, gatt.DeviceManager):
-    def __init__(self):
-        self.devices = {}
+class DeviceManager(gatt.DeviceManager):
+    devices = {}
 
     def main(self):
         while 1:
@@ -193,8 +201,9 @@ class DeviceManager(object, gatt.DeviceManager):
 
     def device_discovered(self, device):
         # TODO: need some kind of updated_devices mechanism
+        print("Discovered")
         for driverclass in btdrivers:
-            d = driverclass(manager, device)
+            d = driverclass(self, device)
             if d.supported():
                 d.run()
             else:
@@ -211,10 +220,11 @@ class DeviceManager(object, gatt.DeviceManager):
 
 if __name__ == '__main__':
     print (usbdrivers)
-    dm = DeviceManager()
+    dm = DeviceManager(adapter_name='hci0')
+    #dm.start_discovery() #bluetooth
+    #dm.run() #bluetooth
     dm.main()
-    dm.start_discovery() #bluetooth
-    dm.run() #bluetooth
+
 
 
 """
