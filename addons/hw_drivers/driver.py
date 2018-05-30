@@ -5,6 +5,7 @@ from threading import Thread
 import usb
 import serial
 import gatt
+from odoo import http
 
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
@@ -70,7 +71,7 @@ class SylvacUSBDriver(USBDriver):
     def supported(self):
         return getattr(self.dev, 'idVendor') == 0x0403 and getattr(self.dev, 'idProduct') == 0x6001
 
-    #@http.route('/sylvacusb/value', type='json', auth='none', cors='*')
+    @http.route('/sylvacusb/value', type='http', auth='none', cors='*')
     def value(self):
         return self.value
 
@@ -218,12 +219,12 @@ class DeviceManager(gatt.DeviceManager):
 
 
 
-if __name__ == '__main__':
-    print (usbdrivers)
-    dm = DeviceManager(adapter_name='hci0')
-    #dm.start_discovery() #bluetooth
-    #dm.run() #bluetooth
-    dm.main()
+#if __name__ == '__main__':
+print (usbdrivers)
+dm = DeviceManager(adapter_name='hci0')
+#dm.start_discovery() #bluetooth
+#dm.run() #bluetooth
+dm.main()
 
 
 

@@ -3,10 +3,10 @@
 
 {
     'name': 'Hardware Proxy',
-    'category': 'Point Of Sale',
+    'category': 'IOT',
     'sequence': 6,
     'summary': 'Connect the Web Client to Hardware Peripherals',
-    'website': 'https://www.odoo.com/page/point-of-sale',
+    'website': 'https://www.odoo.com/page/iot',
     'description': """
 Hardware Poxy
 =============

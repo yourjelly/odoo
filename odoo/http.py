@@ -1437,6 +1437,8 @@ class Root(object):
             threading.current_thread().url = httprequest.url
 
             explicit_session = self.setup_session(httprequest)
+
+
             self.setup_db(httprequest)
             self.setup_lang(httprequest)
 
