@@ -3,6 +3,7 @@ odoo.define('web.DataManager', function (require) {
 
 var core = require('web.core');
 var rpc = require('web.rpc');
+var session = require('web.session');
 var utils = require('web.utils');
 
 return core.Class.extend({
@@ -40,12 +41,9 @@ return core.Class.extend({
         var key = this._gen_key(action_id, additional_context || {});
 
         if (!this._cache.actions[key]) {
-            this._cache.actions[key] = rpc.query({
-                route: "/web/action/load",
-                params: {
+            this._cache.actions[key] = session.rpc('/web/action/load', {
                     action_id: action_id,
                     additional_context : additional_context,
-                },
             }).then(function (action) {
                 self._cache.actions[key] = action.no_cache ? null : self._cache.actions[key];
                 return action;
