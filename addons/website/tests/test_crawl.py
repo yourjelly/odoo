@@ -49,9 +49,8 @@ class Crawler(odoo.tests.HttpCase):
                 # href with any fragment removed
                 href = parts.replace(fragment='').to_url()
 
-                # FIXME: handle relative link (not parts.path.startswith /)
                 if parts.netloc or \
-                    not parts.path.startswith('/') or \
+                    parts.path == '' or \
                     parts.path == '/web' or\
                     parts.path.startswith('/web/') or \
                     parts.path.startswith('/en_US/') or \
