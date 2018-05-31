@@ -17,8 +17,8 @@ class StatusController(http.Controller):
     @http.route('/drivers/status', type='http', auth='none', cors='*')
     def status(self):
         result = "<html><head></head><body>List of drivers and values: <br/> <ul>"
-        for path in dm.devices:
-            result += "<li>" + path + ":" + dm.devices[path].value() + "</li>"
+        for path in drivers:
+            result += "<li>" + path + ":" + str(drivers[path].value) + "</li>"
         result += "</ul></body></html>"
         return result
 
@@ -61,6 +61,7 @@ class Driver(Thread):
 # Usb drivers
 #----------------------------------------------------------
 usbdrivers = []
+drivers = {}
 
 class UsbMetaClass(type):
     def __new__(cls, clsname, bases, attrs):
@@ -85,6 +86,7 @@ class SylvacUSBDriver(USBDriver):
         return self.value
 
     def run(self):
+        drivers[self.dev.idVendor] = self #Change by path
         connection = serial.Serial('/dev/serial/by-id/usb-Sylvac_Power_USB_A32DV5VM-if00-port0',
                                    baudrate=4800,
                                    bytesize=7,
