@@ -12,6 +12,16 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(nam
 _logger = logging.getLogger('dispatcher')
 
 
+class StatusController(http.Controller):
+
+    @http.route('/drivers/status', type='http', auth='none', cors='*')
+    def status(self):
+        result = "<html><head></head><body>List of drivers and values: <br/> <ul>"
+        for path in dm.devices:
+            result += "<li>" + path + ":" + dm.devices[path].value() + "</li>"
+        result += "</ul></body></html>"
+        return result
+
 #----------------------------------------------------------
 # Driver controller
 #----------------------------------------------------------
@@ -71,7 +81,6 @@ class SylvacUSBDriver(USBDriver):
     def supported(self):
         return getattr(self.dev, 'idVendor') == 0x0403 and getattr(self.dev, 'idProduct') == 0x6001
 
-    @http.route('/sylvacusb/value', type='http', auth='none', cors='*')
     def value(self):
         return self.value
 
