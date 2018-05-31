@@ -221,19 +221,24 @@ class DeviceManager(gatt.DeviceManager):
         #print("Discovered [%s] %s" % (device.mac_address, device.alias()))
 
 
+class DM2(Thread):
+    def run(self):
+        dm.main()
+
 #----------------------------------------------------------
 # Agent ? Push values
 #----------------------------------------------------------
 # SDQFSQDFQSDF
-
-
+dm = DeviceManager(adapter_name='hci0')
+dm2 = DM2()
+dm2.start()
 
 #if __name__ == '__main__':
 print (usbdrivers)
-dm = DeviceManager(adapter_name='hci0')
+
 #dm.start_discovery() #bluetooth
 #dm.run() #bluetooth
-dm.main()
+#dm.main()
 
 
 

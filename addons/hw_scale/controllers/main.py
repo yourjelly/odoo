@@ -385,3 +385,4 @@ class ScaleDriver(hw_proxy.Proxy):
         if scale_thread:
             scale_thread.clear_tare()
         return True
+<
