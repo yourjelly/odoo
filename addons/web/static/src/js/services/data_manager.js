@@ -88,7 +88,7 @@ return core.Class.extend({
                 options.load_filters = !this._cache.filters[filters_key];
             }
 
-            this._cache.views[key] = rpc.query({
+            var query = rpc.buildQuery({
                 args: [],
                 kwargs: {
                     views: views_descr,
@@ -97,7 +97,8 @@ return core.Class.extend({
                 },
                 model: model,
                 method: 'load_views',
-            }).then(function (result) {
+            });
+            this._cache.views[key] = session.rpc(query.route, query.params).then(function (result) {
                 // Postprocess fields_views and insert them into the fields_views cache
                 result.fields_views = _.mapObject(result.fields_views, self._postprocess_fvg.bind(self));
                 self.processViews(result.fields_views, result.fields);
