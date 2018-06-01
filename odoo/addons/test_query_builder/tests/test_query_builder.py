@@ -138,11 +138,6 @@ class TestExpressions(TestCase):
         res = (""""coalesce"("res_users"."id", %s)""", [5])
         self.assertEqual(expr._to_sql(None), res)
 
-    def test_col_attr_setting(self):
-        expr = self.p.id << 5
-        res = (""""res_partner"."id" = %s""", [5])
-        self.assertEqual(expr._to_sql(None), res)
-
     def test_pow(self):
         expr = self.p.count ** 5
         res = (""""pow"("res_partner"."count", %s)""", [5])
@@ -740,13 +735,13 @@ class TestWith(TestCase):
         )
 
     def test_with_update(self):
-        u = Update([self.p.name << 'John'], where=self.p.name == 'Administrator',
+        u = Update({self.p.name: 'John'}, where=self.p.name == 'Administrator',
                    returning=[self.p.id])
         w = With([(self.tmp_r("id"), u)], Select([self.u.id], where=self.u.id == self.tmp_r.id))
         self.assertEqual(
             w.to_sql(),
             ("""WITH "my_temp_table"("id") AS """
-             """(UPDATE "res_partner" "a" SET "a"."name" = %s WHERE ("a"."name" = %s) """
+             """(UPDATE "res_partner" "a" SET "name" = %s WHERE ("a"."name" = %s) """
              """RETURNING "a"."id") """
              """SELECT "b"."id" FROM "res_users" "b" WHERE ("b"."id" = "my_temp_table"."id")""",
              ('John', 'Administrator'))
@@ -787,47 +782,47 @@ class TestUpdate(TestCase):
         self.p = Row('res_partner')
 
     def test_basic_update(self):
-        u = Update([self.u.id << 5])
+        u = Update({self.u.id: 5})
         self.assertEqual(
             u.to_sql(),
-            ("""UPDATE "res_users" "a" SET "a"."id" = %s""", (5,))
+            ("""UPDATE "res_users" "a" SET "id" = %s""", (5,))
         )
 
     def test_update_with_where(self):
-        u = Update([self.u.name << "dummy"], self.u.id > 10)
+        u = Update({self.u.name: "dummy"}, self.u.id > 10)
         self.assertEqual(
             u.to_sql(),
-            ("""UPDATE "res_users" "a" SET "a"."name" = %s WHERE ("a"."id" > %s)""", ("dummy", 10))
+            ("""UPDATE "res_users" "a" SET "name" = %s WHERE ("a"."id" > %s)""", ("dummy", 10))
         )
 
     def test_update_with_col(self):
-        u = Update([self.u.name << self.p.name])
+        u = Update({self.u.name: self.p.name})
         self.assertEqual(
             u.to_sql(),
-            ("""UPDATE "res_users" "a" SET "a"."name" = "b"."name" FROM "res_partner" "b\"""", ())
+            ("""UPDATE "res_users" "a" SET "name" = "b"."name" FROM "res_partner" "b\"""", ())
         )
 
     def test_update_with_returning(self):
-        u = Update([self.u.id << 5], returning=[self.u.id])
+        u = Update({self.u.id: 5}, returning=[self.u.id])
         self.assertEqual(
             u.to_sql(),
-            ("""UPDATE "res_users" "a" SET "a"."id" = %s RETURNING "a"."id\"""", (5,))
+            ("""UPDATE "res_users" "a" SET "id" = %s RETURNING "a"."id\"""", (5,))
         )
 
     def test_update_multiple_cols(self):
-        u = Update([self.p.name << "John", self.p.surname << "Wick"])
+        u = Update({self.p.name: "John", self.p.surname: "Wick"})
         self.assertEqual(
             u.to_sql(),
-            ("""UPDATE "res_partner" "a" SET "a"."name" = %s, "a"."surname" = %s""",
-             ("John", "Wick"))
+            ("""UPDATE "res_partner" "a" SET "surname" = %s, "name" = %s""",
+             ("Wick", "John"))
         )
 
     def test_update_with_sub_select(self):
         s = Select([self.u.name], where=self.u.partner_id == self.p.id, limit=1)
-        u = Update([self.p.name << s])
+        u = Update({self.p.name: s})
         self.assertEqual(
             u.to_sql(),
-            ("""UPDATE "res_partner" "a" SET "a"."name" = """
+            ("""UPDATE "res_partner" "a" SET "name" = """
              """(SELECT "b"."name" FROM "res_users" "b", "res_partner" "a" """
              """WHERE ("b"."partner_id" = "a"."id") """
              """LIMIT %s OFFSET %s)""", (1, 0))
@@ -962,7 +957,7 @@ class TestRealWorldCases(TestCase):
         c = Row('__parent_store_compute')
         s1 = Select([r.id, concat(r.id, '/')], where=r.parent_id == NULL)
         s2 = Select([r.id, concat(c.parent_path, r.id, '/')], where=r.parent_id == c.id)
-        u = Update([r.parent_path << c.parent_path], where=r.id == c.id)
+        u = Update({r.parent_path: c.parent_path}, where=r.id == c.id)
         w = With([(c('id', 'parent_path'), s1 | s2)], u, True)
 
         res = ("""WITH RECURSIVE "__parent_store_compute"("id", "parent_path") AS ("""
@@ -975,7 +970,7 @@ class TestRealWorldCases(TestCase):
                """FROM "dummy" "a", "__parent_store_compute" "b" """
                """WHERE ("a"."parent_id" = "b"."id"))) """
                """UPDATE "dummy" "a" """
-               """SET "a"."parent_path" = "__parent_store_compute"."parent_path" """
+               """SET "parent_path" = "__parent_store_compute"."parent_path" """
                """FROM "__parent_store_compute" """
                """WHERE ("a"."id" = "__parent_store_compute"."id")""", ('/', '/'))
 

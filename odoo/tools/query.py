@@ -242,7 +242,7 @@ class Row(object):
 
 class Column(Expression):
 
-    __slots__ = ('_row', '_name', '_val')
+    __slots__ = ('_row', '_name')
 
     def __init__(self, row, name):
         """
@@ -256,32 +256,33 @@ class Column(Expression):
         """
         self._row = row
         self._name = _quote(name)
-        self._val = None
 
-    def __lshift__(self, other):
-        self._val = other
-        return self
+    def __hash__(self):
+        return hash((self._row, self._name))
 
-    def _to_sql(self, alias_mapping=None):
+    def _to_sql(self, alias_mapping=None, val=None):
         qualified = "{}.%s" % self._name
         row = self._row
 
-        if alias_mapping is not None:
+        if alias_mapping is not None and val is None:
             col_name = qualified.format(alias_mapping[row])
+        elif val is not None:
+            col_name = self._name
         else:
             col_name = qualified.format(row._table)
 
-        if self._val is not None:
-            if isinstance(self._val, Column):
+        if val is not None:
+            # for update/set queries
+            if isinstance(val, Column):
                 # col = col
-                _sql, _args = self._val._to_sql(alias_mapping)
+                _sql, _args = val._to_sql(alias_mapping)
                 return "%s = %s" % (col_name, _sql), _args
-            elif isinstance(self._val, Select):
+            elif isinstance(val, Select):
                 # col = sub-select
-                _sql, _args = self._val._to_sql(alias_mapping)
+                _sql, _args = val._to_sql(alias_mapping)
                 return "%s = (%s)" % (col_name, _sql), _args
             # col = literal value
-            return "{} = %s".format(col_name), [self._val]
+            return "{} = %s".format(col_name), [val]
         return col_name, []
 
 
@@ -885,7 +886,7 @@ class With(BaseQuery):
 
 class Update(BaseQuery):
 
-    def __init__(self, exprs, where=None, returning=[]):
+    def __init__(self, _set, where=None, returning=[]):
         """
         Class for creating UPDATE SQL statements.
 
@@ -902,25 +903,38 @@ class Update(BaseQuery):
             ... ('UPDATE "res_partner" "a" SET "a"."name" = %s, "a"."surname" = %s WHERE \
             ... ("a"."name" IS NULL) RETURNING "a"."id"', ('John', 'Wick'))
         """
+        assert bool(_set)
         super(Update, self).__init__()
-        self._exprs = exprs
+        self._set = _set
         self._where = where
         self._returning = returning
-        # The main table is the left leaf's table
-        self._main = exprs[0]._row
+        # The main table is the row of the cols being used as keys.
+        cols = list(_set.keys())
+        assert all(col._row == cols[0]._row for col in cols)
+        self._main = list(_set.keys())[0]._row
         # Auxiliary tables found in set expressions
-        self._rows = [expr._val._row for expr in exprs if isinstance(expr._val, Column)]
+        self._rows = self._get_aux_rows()
+
+    def _get_aux_rows(self):
+        vals = list(self._set.values())
+        rows = set()
+
+        for val in vals:
+            if isinstance(val, Expression):
+                rows |= val.rows
+
+        return list(rows)
 
     @property
     def attrs(self):
         return {
-            'exprs': self._exprs,
+            '_set': self._set,
             'where': self._where,
             'returning': self._returning,
         }
 
-    def set(self, *exprs):
-        return Update({**self.attrs, 'exprs': exprs})
+    def set(self, _set):
+        return Update({**self.attrs, '_set': _set})
 
     def where(self, expr):
         return Update({**self.attrs, 'where': expr})
@@ -936,8 +950,8 @@ class Update(BaseQuery):
         args = []
 
         _set = []
-        for expr in self._exprs:
-            _sql, _args = expr._to_sql(alias_mapping)
+        for col, val in self._set.items():
+            _sql, _args = col._to_sql(alias_mapping, val)
             _set.append(_sql)
             args += _args
 
