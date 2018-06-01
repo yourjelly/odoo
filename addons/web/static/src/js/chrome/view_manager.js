@@ -263,7 +263,7 @@ var ViewManager = Widget.extend(ControlPanelMixin, {
 
             self.active_view = view;
 
-            if (!view.loaded || view.loaded.state() === 'rejected') {
+            if (!view.loaded) {
                 view_options = _.extend({}, view.options, view_options, self.env);
                 view.loaded = $.Deferred();
                 self.create_view(view, view_options).then(function(controller) {
