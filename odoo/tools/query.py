@@ -321,7 +321,10 @@ class BaseQuery(Expression):
             for row in rows:
                 if isinstance(row, tuple):
                     sql.append(row[0]._to_sql(alias_mapping))
-                    self.args += row[1]
+                    if isinstance(row[1], (list, tuple)):
+                        self.args += row[1]
+                    else:
+                        self.args.append(row[1])
                 else:
                     sql.append(row._to_sql(alias_mapping))
 
@@ -592,7 +595,7 @@ class Select(BaseQuery):
                 t = self._columns[col]._row
             else:
                 # If the columns argument is a list, it can contain Row or Column objects
-                if isinstance(col, Row):
+                if isinstance(col, (Row, tuple)):
                     # SELECT *
                     t = col
                 elif isinstance(col, Func) and not isinstance(col, Unnest):
@@ -701,6 +704,9 @@ class Select(BaseQuery):
                 # Special case, Unnest can be used in a FROM clause
                 r = c._row[0]
                 _sql.append(alias_mapping[r])
+            elif isinstance(c, tuple):
+                # Special case, using a literal in the select clause
+                _sql.append("%s")
             else:
                 __sql, _args = c._to_sql(alias_mapping)
                 _sql.append("%s" % __sql)

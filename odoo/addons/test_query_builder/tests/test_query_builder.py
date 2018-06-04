@@ -988,3 +988,11 @@ class TestRealWorldCases(TestCase):
                """WHERE ("a"."id" = "__parent_store_compute"."id")""", ('/', '/'))
 
         self.assertEqual(w.to_sql(), res)
+
+    def test_rwc_03(self):
+        # models.py @ _table_has_rows
+        s = Select([(self.p, 1)], limit=1)
+        self.assertEqual(
+            s.to_sql(),
+            ("""SELECT %s FROM "res_partner" "a" LIMIT %s OFFSET %s""", (1, 1, 0))
+        )
