@@ -5,7 +5,8 @@ from unittest import TestCase
 from collections import OrderedDict
 from odoo.tests.common import tagged
 from odoo.tools.query import Row, Select, Delete, With, Update, Insert, \
-    Asc, Desc, coalesce, unnest, NULL, DEFAULT, _quote, BaseQuery, CreateView, concat, count
+    Asc, Desc, coalesce, unnest, NULL, DEFAULT, _quote, BaseQuery, CreateView, \
+    concat, count, Join
 
 
 @tagged('standard', 'at_install')
@@ -612,6 +613,26 @@ class TestSelect(TestCase):
             (
                 """SELECT "a"."id" FROM "res_users" "a", "res_partner" "b" """
                 """WHERE ("a"."partner_id" = "b"."id")""", ()
+            )
+        )
+
+    def test_explicit_joins(self):
+        s = Select([self.p.id], joins=[Join(self.p, self.u, self.p.id == self.u.partner_id)])
+        self.assertEqual(
+            s.to_sql(),
+            (
+                """SELECT "a"."id" FROM "res_partner" "a" INNER JOIN "res_users" "b" """
+                """ON ("a"."id" = "b"."partner_id")""", ()
+            )
+        )
+
+    def test_conditionless_join(self):
+        s = Select([self.p.id], joins=[Join(self.p, self.u)])
+        self.assertEqual(
+            s.to_sql(),
+            (
+                """SELECT "a"."id" FROM "res_partner" "a" INNER JOIN "res_users" "b\"""",
+                ()
             )
         )
 

@@ -437,7 +437,7 @@ class AliasMapping(dict):
 
 class Join(object):
 
-    def __init__(self, expression, t1):
+    def __init__(self, main, join, condition=None):
         """
         Create a join between two tables on a given condition.
 
@@ -448,31 +448,35 @@ class Join(object):
             If LHS is not nullable and RHS is not nullable, the type is an INNER JOIN
 
         Args:
-            expression (Expression): an AST expression which will serve as the ON condition for the
-                Join. At the moment, both sides of the expression must be Columns, as it is
-                the most common case and this allows us to infer the tables to join from the
-                condition expression.
+            main (Row): the main row with which to join the join row.
+            join (Row): the row to join.
+            condition (Expression): an AST expression which will serve as the ON condition for the
+                Join, if not specified then there will be no condition (ON TRUE).
         """
-        self.expression = expression
-        self.t1 = t1
+        self._main = main
+        self._join = join
+        self._condition = condition
 
-        tables = self.expression.rows
-        self.t2 = list(tables - set([t1]))[0]
-
-        if self.t1._nullable:
-            if self.t2._nullable:
+        if self._main._nullable:
+            if self._join._nullable:
                 self.type = 'FULL JOIN'
             else:
                 self.type = 'LEFT JOIN'
         else:
-            if self.t2._nullable:
+            if self._join._nullable:
                 self.type = 'RIGHT JOIN'
             else:
                 self.type = 'INNER JOIN'
 
     def _to_sql(self, alias_mapping):
-        sql, args = self.expression._to_sql(alias_mapping)
-        return ("%s %s ON %s" % (self.type, self.t2._to_sql(alias_mapping), sql), args)
+        sql = "%s %s"
+        _join_sql = self._join._to_sql(alias_mapping)
+
+        if self._condition:
+            sql += " ON %s"
+            _sql, args = self._condition._to_sql(alias_mapping)
+            return (sql % (self.type, _join_sql, _sql), args)
+        return (sql % (self.type, _join_sql), ())
 
 
 class Modifier(object):
@@ -729,10 +733,29 @@ class Select(BaseQuery):
         args = []
         sql = []
 
-        for join in [Join(j, self._rows[0]) for j in self._joins]:
-            _sql, _args = join._to_sql(alias_mapping)
-            sql.append(_sql)
-            args += _args
+        for join in self._joins:
+            if isinstance(join, Join):
+                # explicit joins
+                _sql, _args = join._to_sql(alias_mapping)
+                sql.append(_sql)
+                args += _args
+            else:
+                # Implicit joins
+                # --------------
+                # This is a heuristic that determines a join based solely on its ON condition,
+                # this mean that implicit joins without an ON condition are not possible.
+                # In order for the implicit join detection to work, all rows referenced in the
+                # ON condition must already exist in the Select query, either in the FROM clause
+                # or in other JOIN clauses.
+                # The join table will be deduced by substracting from the set of rows referenced
+                # inside the ON expression the set of rows that are already referenced in the
+                # Select query, the remainder should be a single row, the join row.
+                join_table = (join.rows - set(self._rows)).pop()
+                main_table = self._rows[0]
+                j = Join(main_table, join_table, join)
+                _sql, _args = j._to_sql(alias_mapping)
+                sql.append(_sql)
+                args += _args
 
         self.sql.append(' '.join(sql))
         self.args += args
