@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from unittest import TestCase
+from collections import OrderedDict
 from odoo.tests.common import tagged
 from odoo.tools.query import Row, Select, Delete, With, Update, Insert, \
     Asc, Desc, coalesce, unnest, NULL, DEFAULT, _quote, BaseQuery, CreateView, concat, count
@@ -810,11 +811,11 @@ class TestUpdate(TestCase):
         )
 
     def test_update_multiple_cols(self):
-        u = Update({self.p.name: "John", self.p.surname: "Wick"})
+        u = Update(OrderedDict([(self.p.name, "John"), (self.p.surname, "Wick")]))
         self.assertEqual(
             u.to_sql(),
-            ("""UPDATE "res_partner" "a" SET "surname" = %s, "name" = %s""",
-             ("Wick", "John"))
+            ("""UPDATE "res_partner" "a" SET "name" = %s, "surname" = %s""",
+             ("John", "Wick"))
         )
 
     def test_update_with_sub_select(self):

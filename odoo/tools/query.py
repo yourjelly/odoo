@@ -1032,7 +1032,7 @@ class Insert(BaseQuery):
         values = []
         for val in self._vals:
             if val is NULL or val is DEFAULT:
-                values.append(val)
+                values.append(str(val))
             else:
                 values.append("%s")
                 args.append(val)
@@ -1076,8 +1076,17 @@ class CreateView(BaseQuery):
 
 
 # SQL Constants
-NULL = "NULL"
-DEFAULT = "DEFAULT"
+class Constant(object):
+
+    def __init__(self, name):
+        self.name = name
+
+    def __str__(self):
+        return self.name
+
+
+NULL = Constant('NULL')
+DEFAULT = Constant('DEFAULT')
 
 
 # SQL Functions and Aggregates
