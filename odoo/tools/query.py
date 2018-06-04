@@ -649,10 +649,9 @@ class Select(BaseQuery):
         """ Create a similar Select object but with different output columns."""
         return Select(**{**self.attrs, 'columns': cols})
 
-    def distinct(self):
+    def distinct(self, expressions):
         """ Create a similar Select object but toggle the distinct flag."""
-        # TODO: Optimize so as to never actually use the distinct keyword
-        return Select(**{**self.attrs, 'distinct': not self.attrs['distinct']})
+        return Select(**{**self.attrs, 'distinct': expressions})
 
     def where(self, expression):
         """ Create a similar Select object but with a different where clause."""
@@ -687,7 +686,7 @@ class Select(BaseQuery):
         args = []
 
         if self._distinct:
-            sql.append("DISTINCT")
+            sql.append(self._build_distinct(alias_mapping))
 
         _sql = []
         for c in self._columns:
@@ -710,6 +709,15 @@ class Select(BaseQuery):
         sql.append(', '.join(_sql))
         self.sql.append(' '.join(sql))
         self.args += args
+
+    def _build_distinct(self, alias_mapping):
+        if isinstance(self._distinct, bool):
+            return "DISTINCT"
+        elif isinstance(self._distinct, Column):
+            return "DISTINCT ON (%s)" % self._distinct._to_sql(alias_mapping)[0]
+        else:
+            return "DISTINCT ON (%s)" % ', '.join(
+                [d._to_sql(alias_mapping)[0] for d in self._distinct])
 
     def _build_joins(self, alias_mapping):
         args = []

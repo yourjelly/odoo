@@ -308,6 +308,18 @@ class TestSelect(TestCase):
                """"a"."surname" FROM "res_partner" "a\"""")
         self.assertEqual(s.to_sql()[0], res)
 
+    def test_distinct_on(self):
+        s = Select([self.p.name, self.p.surname], distinct=self.p.surname)
+        res = ("""SELECT DISTINCT ON ("a"."surname") "a"."name", "a"."surname" """
+               """FROM "res_partner" "a\"""")
+        self.assertEqual(s.to_sql()[0], res)
+
+    def test_distinct_on_multi(self):
+        s = Select([self.p.name, self.p.surname], distinct=[self.p.name, self.p.surname])
+        res = ("""SELECT DISTINCT ON ("a"."name", "a"."surname") "a"."name", "a"."surname" """
+               """FROM "res_partner" "a\"""")
+        self.assertEqual(s.to_sql()[0], res)
+
     def test_composite_select(self):
         s_base = Select([self.p.name, self.p.surname], where=self.p.name != 'johnny')
         s_composite = s_base.where(self.p.name == 'johnny')
@@ -442,7 +454,7 @@ class TestSelect(TestCase):
 
     def test_new_distinct(self):
         base = Select([self.p.id, self.p.name], distinct=True)
-        new = base.distinct()
+        new = base.distinct(False)
         self.assertIsNot(base, new)
         self.assertEqual(
             base.to_sql()[0],
