@@ -135,7 +135,7 @@ class Expression(object):
     def __mul__(self, other):
         return Expression('*', self, other)
 
-    def __div__(self, other):
+    def __truediv__(self, other):
         return Expression('/', self, other)
 
     def __pow__(self, other):

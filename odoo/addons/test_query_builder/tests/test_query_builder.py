@@ -145,6 +145,26 @@ class TestExpressions(TestCase):
         res = (""""pow"("res_partner"."count", %s)""", [5])
         self.assertEqual(expr._to_sql(None), res)
 
+    def test_math_add(self):
+        expr = self.p.count + 1
+        res = ("""("res_partner"."count" + %s)""", [1])
+        self.assertEqual(expr._to_sql(None), res)
+
+    def test_math_sub(self):
+        expr = self.p.count - 1
+        res = ("""("res_partner"."count" - %s)""", [1])
+        self.assertEqual(expr._to_sql(None), res)
+
+    def test_math_mul(self):
+        expr = self.p.count * 2
+        res = ("""("res_partner"."count" * %s)""", [2])
+        self.assertEqual(expr._to_sql(None), res)
+
+    def test_math_div(self):
+        expr = self.p.count / 2
+        res = ("""("res_partner"."count" / %s)""", [2])
+        self.assertEqual(expr._to_sql(None), res)
+
     def test_and_type(self):
         with self.assertRaises(AssertionError):
             self.p.id & 5
@@ -386,6 +406,16 @@ class TestSelect(TestCase):
              """(SELECT "a"."id" FROM "res_users" "a")""", ())
         )
 
+    def test_intersect_all(self):
+        s1 = Select([self.p.id])
+        s2 = Select([self.u.id])
+        s = s1.intersect_all(s2)
+        self.assertEqual(
+            s.to_sql(),
+            ("""(SELECT "a"."id" FROM "res_partner" "a") INTERSECT ALL """
+             """(SELECT "a"."id" FROM "res_users" "a")""", ())
+        )
+
     def test_except(self):
         s1 = Select([self.p.id])
         s2 = Select([self.u.id])
@@ -393,6 +423,16 @@ class TestSelect(TestCase):
         self.assertEqual(
             s.to_sql(),
             ("""(SELECT "a"."id" FROM "res_partner" "a") EXCEPT """
+             """(SELECT "a"."id" FROM "res_users" "a")""", ())
+        )
+
+    def test_except_all(self):
+        s1 = Select([self.p.id])
+        s2 = Select([self.u.id])
+        s = s1.ex_all(s2)
+        self.assertEqual(
+            s.to_sql(),
+            ("""(SELECT "a"."id" FROM "res_partner" "a") EXCEPT ALL """
              """(SELECT "a"."id" FROM "res_users" "a")""", ())
         )
 
