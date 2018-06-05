@@ -6,7 +6,7 @@ from collections import OrderedDict
 from odoo.tests.common import tagged
 from odoo.tools.query import Row, Select, Delete, With, Update, Insert, \
     Asc, Desc, coalesce, unnest, NULL, DEFAULT, _quote, BaseQuery, CreateView, \
-    concat, count, Join
+    concat, count, Join, substr, length
 
 
 @tagged('standard', 'at_install')
@@ -152,22 +152,6 @@ class TestExpressions(TestCase):
     def test_or_type(self):
         with self.assertRaises(AssertionError):
             self.p.id | 5
-
-    def test_like_type(self):
-        with self.assertRaises(AssertionError):
-            self.p.id.like([1, 2, 3])
-
-    def test_ilike_type(self):
-        with self.assertRaises(AssertionError):
-            self.p.id.ilike([1, 2, 3])
-
-    def test_pow_type(self):
-        with self.assertRaises(AssertionError):
-            self.p.count ** 'lol'
-
-    def test_mod_type(self):
-        with self.assertRaises(AssertionError):
-            self.p.count % []
 
 
 @tagged('standard', 'at_install')
@@ -1033,5 +1017,37 @@ class TestRealWorldCases(TestCase):
                 """(SELECT "a"."parent_path" FROM "dummy" "a" WHERE ("a"."id" = %s)), """
                 """"a"."id", %s)) WHERE ("a"."id" IN %s)""",
                 (parent_val, '/', ids)
+            )
+        )
+
+    def test_rwc_05(self):
+        # models.py @ _parent_store_update
+        r1 = Row('child')
+        r2 = Row('node')
+        ids = (1, 3, 4)
+        u = Update(
+            {
+                r1.parent_path: concat(
+                    'prefix',
+                    substr(
+                        r1.parent_path,
+                        length(r2.parent_path) - length(r2.id) + 1
+                    )
+                )
+            },
+            where=(r2.id.in_(ids)) & (r1.parent_path.like(concat(r2.parent_path, '%%'))),
+            returning=[r1.id]
+        )
+
+        self.assertEqual(
+            u.to_sql(),
+            (
+                """UPDATE "child" "a" """
+                """SET "parent_path" = ("concat"(%s, "substr"("a"."parent_path", """
+                """(("length"("b"."parent_path") - "length"("b"."id")) + %s)))) """
+                """FROM "node" "b" """
+                """WHERE (("b"."id" IN %s) AND ("a"."parent_path" """
+                """LIKE "concat"("b"."parent_path", %s))) """
+                """RETURNING "a"."id\"""", ('prefix', 1, ids, '%%')
             )
         )

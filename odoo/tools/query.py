@@ -126,23 +126,31 @@ class Expression(object):
     def __ge__(self, other):
         return Expression('>=', self, other)
 
+    def __add__(self, other):
+        return Expression('+', self, other)
+
+    def __sub__(self, other):
+        return Expression('-', self, other)
+
+    def __mul__(self, other):
+        return Expression('*', self, other)
+
+    def __div__(self, other):
+        return Expression('/', self, other)
+
     def __pow__(self, other):
-        assert isinstance(other, (Number, Column)), "`**` RHS operand must be a numeric type."
         return Func('pow', self, other)
 
     def __mod__(self, other):
-        assert isinstance(other, (Number, Column)), "`%` RHS operand must be a numeric type."
         return Func('mod', self, other)
 
     def __abs__(self):
         return Func('abs', self)
 
     def like(self, other):
-        assert isinstance(other, (text_type, Column)), "`@` RHS operand must be a text type."
         return Expression('LIKE', self, other)
 
     def ilike(self, other):
-        assert isinstance(other, (text_type, Column)), "`ilike` argument must be a text type."
         return Expression('ILIKE', self, other)
 
     def in_(self, other):
@@ -1196,4 +1204,6 @@ concat = partial(Func, 'concat')
 now = partial(Func, 'now')
 exists = partial(Func, 'exists')
 _any = partial(Func, 'any')
+substr = partial(Func, 'substr')
+length = partial(Func, 'length')
 unnest = Unnest
