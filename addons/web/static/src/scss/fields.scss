@@ -112,14 +112,14 @@
             // o-kanban-colorpicker without customizing
             // '&:first-child > a::before' (transparent red-crossed colorpick)
             @mixin o-tag-colorpicker {
-                $o-tag-colorpicker-padding-right: $o-dropdown-hpadding - 2 * 5px; // FIXME was $o-kanban-inner-hmargin before scss convertion
+                $o-tag-colorpicker-padding-right: $o-dropdown-hpadding - 2 * $o-kanban-inner-hmargin;
 
                 max-width: 100%;
                 padding: 3px $o-tag-colorpicker-padding-right 3px $o-dropdown-hpadding;
 
                 > li {
                     display: inline-block;
-                    margin: 5px 5px 0 0; // FIXME was $o-kanban-inner-hmargin before scss convertion
+                    margin: $o-kanban-inner-hmargin $o-kanban-inner-hmargin 0 0;
                     border: 1px solid white;
                     box-shadow: 0 0 0 1px $gray-lighter-dark;
 
