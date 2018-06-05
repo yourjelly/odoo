@@ -970,7 +970,7 @@ class TestRealWorldCases(TestCase):
         self.g = Row("res_groups")
 
     def test_rwc_01(self):
-        # fields.py
+        # fields.py @ write
         r1 = unnest([1, 2, 3])
         r2 = unnest([5, 6, 7])
         s1 = Select([r1, r2])
@@ -1016,4 +1016,22 @@ class TestRealWorldCases(TestCase):
         self.assertEqual(
             s.to_sql(),
             ("""SELECT %s FROM "res_partner" "a" LIMIT %s OFFSET %s""", (1, 1, 0))
+        )
+
+    def test_rwc_04(self):
+        # models.py @ _parent_store_create
+        r = Row('dummy')
+        parent_val = 5
+        ids = (1, 5, 7, 8)
+        s = Select([r.parent_path], where=r.id == parent_val)
+        u = Update({r.parent_path: concat(s, r.id, '/')}, where=r.id.in_(ids))
+
+        self.assertEqual(
+            u.to_sql(),
+            (
+                """UPDATE "dummy" "a" SET "parent_path" = ("concat"("""
+                """(SELECT "a"."parent_path" FROM "dummy" "a" WHERE ("a"."id" = %s)), """
+                """"a"."id", %s)) WHERE ("a"."id" IN %s)""",
+                (parent_val, '/', ids)
+            )
         )

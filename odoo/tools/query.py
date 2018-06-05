@@ -277,8 +277,8 @@ class Column(Expression):
                 # col = col
                 _sql, _args = val._to_sql(alias_mapping)
                 return "%s = %s" % (col_name, _sql), _args
-            elif isinstance(val, Select):
-                # col = sub-select
+            elif isinstance(val, Expression):
+                # col = sub-select/func/expression
                 _sql, _args = val._to_sql(alias_mapping)
                 return "%s = (%s)" % (col_name, _sql), _args
             # col = literal value
@@ -960,7 +960,7 @@ class Update(BaseQuery):
             if isinstance(val, Expression):
                 rows |= val.rows
 
-        return list(rows)
+        return list(rows - set([self._main]))
 
     @property
     def attrs(self):
@@ -1144,10 +1144,10 @@ class Func(Expression):
 
     @property
     def rows(self):
-        rows = []
+        rows = set()
         for arg in self.args:
             if isinstance(arg, Expression):
-                rows += arg.rows
+                rows |= arg.rows
         return rows
 
     def _to_sql(self, alias_mapping):
@@ -1158,7 +1158,10 @@ class Func(Expression):
         for arg in self.args:
             if isinstance(arg, Expression):
                 __sql, _args = arg._to_sql(alias_mapping)
-                _sql.append(__sql)
+                if isinstance(arg, Select):
+                    _sql.append("(%s)" % __sql)
+                else:
+                    _sql.append(__sql)
                 args += _args
             else:
                 args.append(arg)
