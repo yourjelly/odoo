@@ -19,8 +19,8 @@
     }
     .ui-datepicker-next, .ui-datepicker-prev {
         -webkit-transform: rotate(180deg);
-              -ms-transform: rotate(180deg); // IE9 only
-               -o-transform: rotate(180deg);
-                  transform: rotate(180deg);
+        -ms-transform: rotate(180deg); // IE9 only
+         -o-transform: rotate(180deg);
+        transform: rotate(180deg);
     }
 }
