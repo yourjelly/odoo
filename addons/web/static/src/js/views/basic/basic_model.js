@@ -90,6 +90,7 @@ var core = require('web.core');
 var Domain = require('web.Domain');
 var session = require('web.session');
 var utils = require('web.utils');
+var field_utils = require('web.field_utils');
 
 var _t = core._t;
 
@@ -200,6 +201,48 @@ var BasicModel = AbstractModel.extend({
             list._cache[record.res_id] = id;
             return id;
         });
+    },
+    /**
+     * set default context on group datapoint before create(default_get)
+     * default value will be set as per groupBy value.
+     *
+     * @private
+     * @param {string} groupID
+     */
+    _setDefaultContext: function (groupID) {
+        var defaultContext = {};
+        var group = this.localData[groupID];
+        var currentGroup = group;
+        while (group.parentID) {
+            var value;
+            var parent = this.localData[group.parentID];
+            var groupByField = parent.groupedBy[0];
+            var rawGroupField = groupByField.split(':')[0];
+            var fieldType = group.fields[rawGroupField].type;
+            if (fieldType === 'many2one') {
+                value = group.res_id || false;
+            } else if (fieldType === 'selection') {
+                var choice = _.find(group.fields[groupByField].selection, function (option) {
+                    return option[1] === group.value;
+                });
+                value = choice[0];
+            } else if (fieldType === 'date' || fieldType === 'datetime') {
+                try {
+                    value = field_utils.parse[fieldType](field_utils.format[fieldType](moment(group.value))).toJSON();
+                } catch (err) {
+                    value = '';
+                }
+            } else {
+                value = group.value;
+            }
+
+            // set default context if group field has proper value(value can be '' if date is invalid)
+            if (value) {
+                defaultContext['default_' + rawGroupField] = value;
+            }
+            group = parent;
+        }
+        currentGroup.context = _.extend(defaultContext, currentGroup.context);
     },
     /**
      * Add and process default values for a given record. Those values are
