@@ -53,7 +53,7 @@ select {
 
 .o_rtl {
     .navbar-right {
-        padding: 0;
+        padding: 0; // fix for user agent stylesheet -webkit-padding-start: 40px in rtl language
     }
 }
 

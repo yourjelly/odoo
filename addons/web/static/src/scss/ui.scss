@@ -10,7 +10,9 @@
     z-index: $zindex-modal + 1;
 }
 
-
+// This is rtl language specific fix
+// It will fix the extra space in ui-autocomplete class
+// and flip the next and previous symbols of jquery ui.
 .o_rtl {
     .ui-autocomplete {
         direction: ltr;
