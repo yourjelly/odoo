@@ -50,3 +50,12 @@
         border-right-color: $o-tooltip-arrow-color!important;
     }
 }
+
+.o_rtl {
+    .tooltip {
+        direction: ltr;
+        .tooltip-arrow {
+            left: auto;
+        }
+    }
+}
