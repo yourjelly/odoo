@@ -528,8 +528,8 @@ class Desc(Modifier):
 
 class Select(BaseQuery):
 
-    def __init__(self, columns, where=None, order=[], joins=[], distinct=False,
-                 group=[], having=None, limit=None, offset=0):
+    def __init__(self, columns, where=None, order=None, joins=None, distinct=False,
+                 group=None, having=None, limit=None, offset=0):
         """
         Stateless class for generating SQL SELECT statements.
 
@@ -563,10 +563,10 @@ class Select(BaseQuery):
 
         self._columns = columns
         self._where = where
-        self._order = order
-        self._joins = joins
+        self._order = order or []
+        self._joins = joins or []
         self._distinct = distinct
-        self._group = group
+        self._group = group or []
         self._having = having
         self._limit = limit
         self._offset = offset
@@ -815,7 +815,7 @@ class QueryExpression(Select):
 
 class Delete(BaseQuery):
 
-    def __init__(self, rows, using=[], where=None, returning=[]):
+    def __init__(self, rows, using=None, where=None, returning=None):
         """
         Stateless class for generating SQL DELETE statements.
 
@@ -835,9 +835,9 @@ class Delete(BaseQuery):
         """
         super(Delete, self).__init__()
         self._rows = rows
-        self._using = using
+        self._using = using or []
         self._where = where
-        self._returning = returning
+        self._returning = returning or []
 
     def rows(self, *rows):
         return Delete({**self.attrs, 'rows': rows})
@@ -931,7 +931,7 @@ class With(BaseQuery):
 
 class Update(BaseQuery):
 
-    def __init__(self, _set, where=None, returning=[]):
+    def __init__(self, _set, where=None, returning=None):
         """
         Class for creating UPDATE SQL statements.
 
@@ -952,7 +952,7 @@ class Update(BaseQuery):
         super(Update, self).__init__()
         self._set = _set
         self._where = where
-        self._returning = returning
+        self._returning = returning or []
         # The main table is the row of the cols being used as keys.
         cols = list(_set.keys())
         assert all(col._row == cols[0]._row for col in cols)
@@ -1008,7 +1008,7 @@ class Update(BaseQuery):
 
 class Insert(BaseQuery):
 
-    def __init__(self, row, vals, do_nothing=False, returning=[]):
+    def __init__(self, row, vals, do_nothing=False, returning=None):
         """
         Class for creating SQL INSERT statements.
 
@@ -1035,7 +1035,7 @@ class Insert(BaseQuery):
         self._row = row
         self._vals = vals
         self._do_nothing = do_nothing
-        self._returning = returning
+        self._returning = returning or []
 
     @property
     def attrs(self):
