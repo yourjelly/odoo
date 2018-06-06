@@ -96,21 +96,47 @@ ListRenderer.include({
         return this._super(recordID);
     },
     /**
+     * get Jquery row element of list view table by RecordID
+     *
+     * @param {string} [recordID]
+     * @returns {jQueryElement}
+     */
+    getRow: function (recordID){
+        var $row = this.$('.o_data_row').filter(function (index, el) {
+            return $(el).data('id') === recordID;
+        });
+        return $row;
+    },
+    /**
+     * for editable group by mode record could be deep down in dataPoint tree
+     * traverse state and get record
+     *
+     *  @param {string} [recordID]
+     * @returns {object}
+     */
+    getRecord: function (recordID) {
+        var record;
+        utils.traverse_records(this.state, function (r) {
+            if (r.id === recordID) {
+                record = r;
+            }
+        });
+        return record;
+    },
+    /**
      * We need to override the confirmChange method from BasicRenderer to
      * reevaluate the row decorations.  Since they depends on the current value
      * of the row, they might have changed between each edit.
      *
      * @override
      */
-    confirmChange: function (state, id) {
+    confirmChange: function (state, RecordID) {
         var self = this;
         return this._super.apply(this, arguments).then(function (widgets) {
             if (widgets.length) {
-                var rowIndex = _.findIndex(state.data, function (r) {
-                    return r.id === id;
-                });
-                var $row = self.$('.o_data_row:nth(' + rowIndex + ')');
-                self._setDecorationClasses(state.data[rowIndex], $row);
+                var $row = self.getRow(RecordID);
+                var recrod = self.getRecord(RecordID);
+                self._setDecorationClasses(recrod, $row);
                 self._updateFooter();
             }
             return widgets;
@@ -160,33 +186,20 @@ ListRenderer.include({
             // If no record with 'id' can be found in the state, the
             // confirmChange method will have rerendered the whole view already,
             // so no further work is necessary.
-            var record = _.findWhere(state.data, {id: id});
+            var record = self.getRecord(id);
             if (!record) {
                 return;
             }
-            var oldRowIndex = _.findIndex(oldData, {id: id});
-            var $row = self.$('.o_data_row:nth(' + oldRowIndex + ')');
-            $row.nextAll('.o_data_row').remove();
-            $row.prevAll().remove();
+            self.$('tbody').empty();
             _.each(oldData, function (rec) {
                 if (rec.id !== id) {
                     self._destroyFieldWidgets(rec.id);
                 }
             });
-            var newRowIndex = _.findIndex(state.data, {id: id});
-            var $lastRow = $row;
-            _.each(state.data, function (record, index) {
-                if (index === newRowIndex) {
-                    return;
-                }
-                var $newRow = self._renderRow(record);
-                if (index < newRowIndex) {
-                    $newRow.insertBefore($row);
-                } else {
-                    $newRow.insertAfter($lastRow);
-                    $lastRow = $newRow;
-                }
-            });
+            self.$('tbody').replaceWith(self._renderBody());
+            self.setRowMode(id, self.mode);
+            var $row = self.getRow(id);
+            var newRowIndex = $row.index();
             if (self.currentRow !== null) {
                 self.currentRow = newRowIndex;
                 return self._selectCell(newRowIndex, self.currentFieldIndex, {force: true}).then(function () {
@@ -232,18 +245,15 @@ ListRenderer.include({
      * @param {string} recordID
      */
     removeLine: function (state, recordID) {
-        var self = this;
-        var rowIndex = _.findIndex(this.state.data, {id: recordID});
         this.state = state;
-        if (rowIndex === -1) {
+        var $row = this.getRow(recordID);
+        if ($row.length === 0) {
             return;
         }
-        if (rowIndex === this.currentRow) {
+        if ($row.index() === this.currentRow) {
             this.currentRow = null;
         }
-
-        // remove the row
-        var $row = this.$('.o_data_row:nth(' + rowIndex + ')');
+        // TODO: RGA: this is gonna crazy when we discard first row and it replace with EmptyRow.
         if (this.state.count >= 4) {
             $row.remove();
         } else {
@@ -267,30 +277,13 @@ ListRenderer.include({
         // as even if the grouped list doesn't support edition, it may contain
         // a widget allowing the edition in readonly (e.g. priority), so it
         // should be able to update a record as well)
-        var record;
-        var rowIndex;
-        if (this.state.groupedBy.length) {
-            rowIndex = -1;
-            var count = 0;
-            utils.traverse_records(this.state, function (r) {
-                if (r.id === recordID) {
-                    record = r;
-                    rowIndex = count;
-                }
-                count++;
-            });
-        } else {
-            rowIndex = _.findIndex(this.state.data, {id: recordID});
-            record = this.state.data[rowIndex];
-        }
-
-        if (rowIndex < 0) {
+        var record = self.getRecord(recordID);
+        var $row = this.getRow(recordID);
+        if (!record) {
             return $.when();
         }
         var editMode = (mode === 'edit');
-
-        this.currentRow = editMode ? rowIndex : null;
-        var $row = this.$('.o_data_row:nth(' + rowIndex + ')');
+        this.currentRow = editMode ? $row.index() : null;
         var $tds = $row.children('.o_data_cell');
         var oldWidgets = _.clone(this.allFieldWidgets[record.id]);
 
@@ -345,7 +338,7 @@ ListRenderer.include({
 
         // Toggle selected class here so that style is applied at the end
         $row.toggleClass('o_selected_row', editMode);
-        $row.find('.o_list_record_selector input').prop('disabled', !record.res_id)
+        $row.find('.o_list_record_selector input').prop('disabled', !record.res_id);
 
         return $.when.apply($, defs);
     },
@@ -731,7 +724,7 @@ ListRenderer.include({
         }
         var $td = $(event.currentTarget);
         var $tr = $td.parent();
-        var rowIndex = this.$('.o_data_row').index($tr);
+        var rowIndex = $tr.index();
         var fieldIndex = Math.max($tr.find('.o_data_cell').not('.o_list_button').index($td), 0);
         this._selectCell(rowIndex, fieldIndex, {event: event});
     },
@@ -770,7 +763,7 @@ ListRenderer.include({
         var firstWidget = _.find(recordWidgets, function (widget) {
             var isFirst = widget.$el.is(':visible') && 
                                 (widget.$el.has('input').length > 0 ||
-                                widget.tagName== 'input') && 
+                                widget.tagName === 'input') &&
                             !widget.$el.hasClass('o_readonly_modifier');
             return isFirst;
         });
