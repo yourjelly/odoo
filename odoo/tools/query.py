@@ -1193,6 +1193,18 @@ class Unnest(Func):
         self._row[0]._table += "(%s)"
 
 
+class Now(Func):
+
+    def __init__(self):
+        super(Now, self).__init__('now')
+
+    def _to_sql(self, alias_mapping):
+        sql, args = super(Now, self)._to_sql(alias_mapping)
+        sql += " at timezone 'UTC'"
+
+        return (sql, args)
+
+
 avg = partial(Func, 'avg')
 count = partial(Func, 'count')
 _sum = partial(Func, 'sum')
@@ -1201,7 +1213,7 @@ _min = partial(Func, 'min')
 coalesce = partial(Func, 'coalesce')
 nullif = partial(Func, 'nullif')
 concat = partial(Func, 'concat')
-now = partial(Func, 'now')
+now = Now
 exists = partial(Func, 'exists')
 _any = partial(Func, 'any')
 substr = partial(Func, 'substr')

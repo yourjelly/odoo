@@ -6,7 +6,7 @@ from collections import OrderedDict
 from odoo.tests.common import tagged
 from odoo.tools.query import Row, Select, Delete, With, Update, Insert, \
     Asc, Desc, coalesce, unnest, NULL, DEFAULT, _quote, BaseQuery, CreateView, \
-    concat, count, Join, substr, length
+    concat, count, Join, substr, length, now
 
 
 @tagged('standard', 'at_install')
@@ -164,6 +164,11 @@ class TestExpressions(TestCase):
         expr = self.p.count / 2
         res = ("""("res_partner"."count" / %s)""", [2])
         self.assertEqual(expr._to_sql(None), res)
+
+    def test_now_func(self):
+        expr = self.p.time == now()
+        res = ("""("res_partner"."time" = "now"() at timezone 'UTC')""")
+        self.assertEqual(expr._to_sql(None)[0], res)
 
     def test_and_type(self):
         with self.assertRaises(AssertionError):
