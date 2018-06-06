@@ -58,11 +58,14 @@
     }
 }
 
+// This is rtl language specific fix
+// It will filp the content of tip in
+// rtl direction and adjust the arrow in rtl
 .o_rtl {
     .tooltip {
-        direction: ltr;
+    direction: ltr;
         .tooltip-arrow {
-            left: auto;
+            left: auto !important;
         }
     }
 }
