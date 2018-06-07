@@ -51,9 +51,6 @@ in order to see their usage, consult the respective class' documentation.
 
 from collections import OrderedDict
 from functools import partial
-from numbers import Number
-
-from odoo.tools.pycompat import text_type
 
 
 def _quote(val):
@@ -206,6 +203,70 @@ class Expression(object):
                 args.append(self.right)
 
         return (sql.format(left=left, op=self.op, right=right), args)
+
+
+class Case(Expression):
+
+    def __init__(self, cases, default=None, expr=None):
+        self.cases = cases
+        self.default = default
+        self.expr = expr
+
+    @property
+    def rows(self):
+        rows = set()
+
+        for when, then in self.cases:
+            if isinstance(when, Expression):
+                rows |= when.rows
+            if isinstance(then, Expression):
+                rows |= when.rows
+
+        if self.expr:
+            rows |= self.expr.rows
+
+        return rows
+
+    def _to_sql(self, alias_mapping):
+        sql = ['CASE']
+        args = []
+
+        if self.expr:
+            _sql, _args = self.expr._to_sql(alias_mapping)
+            sql.append(_sql)
+            args += _args
+
+        for when, then in self.cases:
+            _sql = "WHEN %s THEN %s"
+
+            if isinstance(when, Expression):
+                when_sql, when_args = when._to_sql(alias_mapping)
+            else:
+                when_sql = "%s"
+                when_args = [when]
+
+            if isinstance(then, Expression):
+                then_sql, then_args = then._to_sql(alias_mapping)
+            else:
+                then_sql = "%s"
+                then_args = [then]
+
+            sql.append(_sql % (when_sql, then_sql))
+            args += when_args + then_args
+
+        if self.default:
+            if isinstance(self.default, Expression):
+                _sql, _args = self.default._to_sql(alias_mapping)
+            else:
+                _sql = "%s"
+                _args = [self.default]
+
+            sql.append("ELSE %s" % _sql)
+            args += _args
+
+        sql.append("END")
+
+        return (' '.join(sql), args)
 
 
 class Row(object):
@@ -610,7 +671,8 @@ class Select(BaseQuery):
                 if isinstance(col, (Row, tuple)):
                     # SELECT *
                     t = col
-                elif isinstance(col, Func) and not isinstance(col, Unnest):
+                elif isinstance(col, (Func, Case)) and not isinstance(col, Unnest):
+                    # TODO: Optimize so as to get .rows
                     t = col.rows
                 else:
                     # SELECT <col>
@@ -1147,7 +1209,7 @@ class Func(Expression):
             func (str): Name of the function
             args: The function's arguments
         """
-        self.func = _quote(func)
+        self.func = func
         self.args = args
 
     @property
@@ -1188,6 +1250,7 @@ class Unnest(Func):
         This function is special since it can be used as a table in the FROM clause of
         some queries, therefore we create a Row object for it.
         """
+        # TODO: Make this better
         super(Unnest, self).__init__('unnest', *args)
         self._row = (Row(self.func), args)
         self._row[0]._table += "(%s)"

@@ -6,7 +6,7 @@ from collections import OrderedDict
 from odoo.tests.common import tagged
 from odoo.tools.query import Row, Select, Delete, With, Update, Insert, \
     Asc, Desc, coalesce, unnest, NULL, DEFAULT, _quote, BaseQuery, CreateView, \
-    concat, count, Join, substr, length, now
+    concat, count, Join, substr, length, now, Case
 
 
 @tagged('standard', 'at_install')
@@ -111,18 +111,18 @@ class TestExpressions(TestCase):
 
     def test_func_expression(self):
         expr = (self.u.name != NULL) & (abs(self.u.delta)) & (self.u.id > 5)
-        res = ("""((("res_users"."name" IS NOT NULL) AND "abs"("res_users"."delta"))"""
+        res = ("""((("res_users"."name" IS NOT NULL) AND abs("res_users"."delta"))"""
                """ AND ("res_users"."id" > %s))""", [5])
         self.assertEqual(expr._to_sql(None), res)
 
     def test_single_arg_func_expression(self):
         expr = abs(self.u.delta)
-        res = (""""abs"("res_users"."delta")""", [])
+        res = ("""abs("res_users"."delta")""", [])
         self.assertEqual(expr._to_sql(None), res)
 
     def test_multi_arg_func_expression(self):
         expr = self.u.count % 100
-        res = (""""mod"("res_users"."count", %s)""", [100])
+        res = ("""mod("res_users"."count", %s)""", [100])
         self.assertEqual(expr._to_sql(None), res)
 
     def test_like_expression(self):
@@ -137,12 +137,12 @@ class TestExpressions(TestCase):
 
     def test_partial_func_expression(self):
         expr = coalesce(self.u.id, 5)
-        res = (""""coalesce"("res_users"."id", %s)""", [5])
+        res = ("""coalesce("res_users"."id", %s)""", [5])
         self.assertEqual(expr._to_sql(None), res)
 
     def test_pow(self):
         expr = self.p.count ** 5
-        res = (""""pow"("res_partner"."count", %s)""", [5])
+        res = ("""pow("res_partner"."count", %s)""", [5])
         self.assertEqual(expr._to_sql(None), res)
 
     def test_math_add(self):
@@ -167,8 +167,27 @@ class TestExpressions(TestCase):
 
     def test_now_func(self):
         expr = self.p.time == now()
-        res = ("""("res_partner"."time" = "now"() at timezone 'UTC')""")
+        res = ("""("res_partner"."time" = now() at timezone 'UTC')""")
         self.assertEqual(expr._to_sql(None)[0], res)
+
+    def test_case_simple(self):
+        expr = Case([(self.p.number == 1, 'one'), (self.p.number == 2, 'two')], 'zero')
+        res = ("""CASE WHEN ("res_partner"."number" = %s) THEN %s """
+               """WHEN ("res_partner"."number" = %s) THEN %s """
+               """ELSE %s END""", [1, 'one', 2, 'two', 'zero'])
+        self.assertEqual(expr._to_sql(None), res)
+
+    def test_case_when_expression(self):
+        expr = Case([(self.p.number == self.u.number, 'match')], 'no match')
+        res = ("""CASE WHEN ("res_partner"."number" = "res_users"."number") THEN %s """
+               """ELSE %s END""", ['match', 'no match'])
+        self.assertEqual(expr._to_sql(None), res)
+
+    def test_case_expression(self):
+        expr = Case([(0, 1.0)], self.p.number, coalesce(self.p.number, 0))
+        res = ("""CASE coalesce("res_partner"."number", %s) WHEN %s THEN %s """
+               """ELSE "res_partner"."number" END""", [0, 0, 1.0])
+        self.assertEqual(expr._to_sql(None), res)
 
     def test_and_type(self):
         with self.assertRaises(AssertionError):
@@ -224,7 +243,7 @@ class TestSelect(TestCase):
         s = Select([count(self.p.id)])
         self.assertEqual(
             s.to_sql()[0],
-            """SELECT "count"("a"."id") FROM "res_partner" "a\""""
+            """SELECT count("a"."id") FROM "res_partner" "a\""""
         )
 
     def test_select_right_join(self):
@@ -665,6 +684,17 @@ class TestSelect(TestCase):
             )
         )
 
+    def test_select_case(self):
+        s = Select([Case([(self.p.count == 1, 'one'), (self.p.count == 2, 'two')], 'no')])
+        self.assertEqual(
+            s.to_sql(),
+            (
+                """SELECT CASE WHEN ("a"."count" = %s) THEN %s """
+                """WHEN ("a"."count" = %s) THEN %s ELSE %s END FROM "res_partner" "a\"""",
+                (1, 'one', 2, 'two', 'no')
+            )
+        )
+
 
 @tagged('standard', 'at_install')
 class TestDelete(TestCase):
@@ -1024,12 +1054,12 @@ class TestRealWorldCases(TestCase):
         w = With([(c('id', 'parent_path'), s1 | s2)], u, True)
 
         res = ("""WITH RECURSIVE "__parent_store_compute"("id", "parent_path") AS ("""
-               """(SELECT "a"."id", "concat"("a"."id", %s) """
+               """(SELECT "a"."id", concat("a"."id", %s) """
                """FROM "dummy" "a" """
                """WHERE ("a"."parent_id" IS NULL)) """
                """UNION ("""
                """SELECT "a"."id", """
-               """"concat"("b"."parent_path", "a"."id", %s) """
+               """concat("b"."parent_path", "a"."id", %s) """
                """FROM "dummy" "a", "__parent_store_compute" "b" """
                """WHERE ("a"."parent_id" = "b"."id"))) """
                """UPDATE "dummy" "a" """
@@ -1058,7 +1088,7 @@ class TestRealWorldCases(TestCase):
         self.assertEqual(
             u.to_sql(),
             (
-                """UPDATE "dummy" "a" SET "parent_path" = ("concat"("""
+                """UPDATE "dummy" "a" SET "parent_path" = (concat("""
                 """(SELECT "a"."parent_path" FROM "dummy" "a" WHERE ("a"."id" = %s)), """
                 """"a"."id", %s)) WHERE ("a"."id" IN %s)""",
                 (parent_val, '/', ids)
@@ -1088,11 +1118,11 @@ class TestRealWorldCases(TestCase):
             u.to_sql(),
             (
                 """UPDATE "child" "a" """
-                """SET "parent_path" = ("concat"(%s, "substr"("a"."parent_path", """
-                """(("length"("b"."parent_path") - "length"("b"."id")) + %s)))) """
+                """SET "parent_path" = (concat(%s, substr("a"."parent_path", """
+                """((length("b"."parent_path") - length("b"."id")) + %s)))) """
                 """FROM "node" "b" """
                 """WHERE (("b"."id" IN %s) AND ("a"."parent_path" """
-                """LIKE "concat"("b"."parent_path", %s))) """
+                """LIKE concat("b"."parent_path", %s))) """
                 """RETURNING "a"."id\"""", ('prefix', 1, ids, '%%')
             )
         )
