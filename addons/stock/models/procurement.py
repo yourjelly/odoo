@@ -32,14 +32,14 @@ class ProcurementRule(models.Model):
     group_propagation_option = fields.Selection([
         ('none', 'Leave Empty'),
         ('propagate', 'Propagate'),
-        ('fixed', 'Fixed')], string="Propagation of Procurement Group", default='propagate')
+        ('fixed', 'Fixed')], string="Propagation of Procurement Group", default='none')
     group_id = fields.Many2one('procurement.group', 'Fixed Procurement Group')
     action = fields.Selection(
-        selection=[('move', 'Move From Another Location')], string='Action',
+        selection=[('move', 'Pull'), ('push', 'Push'), ('pull_push', 'Pull & Push')], string='Action',
         required=True)
-    sequence = fields.Integer('Sequence', default=20)
+    sequence = fields.Integer('Sequence')
     company_id = fields.Many2one('res.company', 'Company')
-    location_id = fields.Many2one('stock.location', 'Procurement Location')
+    location_id = fields.Many2one('stock.location', 'Destination Location')
     location_src_id = fields.Many2one('stock.location', 'Source Location', help="Source location is action=move")
     route_id = fields.Many2one('stock.location.route', 'Route', required=True, ondelete='cascade')
     procure_method = fields.Selection([
@@ -52,7 +52,7 @@ class ProcurementRule(models.Model):
         'stock.picking.type', 'Operation Type',
         required=True,
         help="Operation Type determines the way the picking should be shown in the view, reports, ...")
-    delay = fields.Integer('Number of Days', default=0)
+    delay = fields.Integer('Delay', default=0)
     partner_address_id = fields.Many2one('res.partner', 'Partner Address')
     propagate = fields.Boolean(
         'Propagate cancel and split', default=True,
@@ -61,6 +61,12 @@ class ProcurementRule(models.Model):
     propagate_warehouse_id = fields.Many2one(
         'stock.warehouse', 'Warehouse to Propagate',
         help="The warehouse to propagate on the created move/procurement, which can be different of the warehouse this rule is for (e.g for resupplying rules from another warehouse)")
+    auto = fields.Selection([
+        ('manual', 'Manual Operation'),
+        ('transparent', 'Automatic No Step Added')], string='Automatic Move',
+        default='manual', index=True, required=True,
+        help="The 'Manual Operation' value will create a stock move after the current one. "
+             "With 'Automatic No Step Added', the location is replaced in the original move.")
 
     def _run_move(self, product_id, product_qty, product_uom, location_id, name, origin, values):
         if not self.location_src_id:

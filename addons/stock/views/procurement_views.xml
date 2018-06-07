@@ -37,7 +37,7 @@
             </field>
         </record>
 
-        <record model="ir.ui.view" id="view_procurement_rule_tree">
+        <!-- <record model="ir.ui.view" id="view_procurement_rule_tree">
             <field name="name">procurement.rule.tree</field>
             <field name="model">procurement.rule</field>
             <field eval="10" name="priority"/>
@@ -51,9 +51,80 @@
                     <field name='company_id' groups="base.group_multi_company"/>
                 </tree>
             </field>
+        </record> -->
+
+        <!-- <Rules> -->
+        <record id="view_procurement_rule_tree2" model="ir.ui.view">
+            <field name="name">procurement.rule.tree2</field>
+            <field name="model">procurement.rule</field>
+            <field name="arch" type="xml">
+                <tree string="Rules">
+                    <field name="sequence" widget="handle"/>
+                    <field name="action"/>
+                    <field name="location_src_id"/>
+                    <field name="location_id"/>
+                    <field name="route_id"/>
+                </tree>
+            </field>
         </record>
 
-        <record model="ir.ui.view" id="view_procurement_rule_form">
+        <record id="procurement_rule_form_view" model="ir.ui.view">
+            <field name="name">procurement.rule.form</field>
+            <field name="model">procurement.rule</field>
+            <field name="arch" type="xml">
+                <form string="Rules">
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only"/>
+                            <h1><field name="name"/></h1>
+                        <group>
+                            <field name="sequence" string="Sequence" groups="base.group_no_one"/>
+                        </group>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="action"/>
+                                <field name="location_src_id"/>
+                                <field name="location_id"/>
+                                <field name="procure_method"/>
+                                <field name="auto"/>
+                                <field name="picking_type_id"/>
+                            </group>
+                            <group>
+                                <field name="warehouse_id"/>
+                                <field name="route_id"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Options">
+                                <field name="partner_address_id"/>
+                                <field name="delay"/>
+                            </group>
+                            <group name="propagation_group" string="Propagation" groups="base.group_no_one">
+                                <field name="group_propagation_option"/>
+                                <field name="group_id" attrs="{'invisible': [('group_propagation_option', '!=', 'fixed')], 'required': [('group_propagation_option', '=', 'fixed')]}"/>
+                                <field name="propagate"/>
+                                <field name="propagate_warehouse_id"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_rules_form" model="ir.actions.act_window">
+            <field name="name">Rules</field>
+            <field name="res_model">procurement.rule</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem action="action_rules_form" id="menu_action_rules_form"
+        parent="menu_warehouse_config" sequence="2" groups="stock.group_stock_multi_locations"/>
+
+
+        <!-- <record model="ir.ui.view" id="view_procurement_rule_form">
             <field name="name">procurement.rule.form</field>
             <field name="model">procurement.rule</field>
             <field eval="10" name="priority"/>
@@ -99,6 +170,6 @@
                     </group>
                 </form>
             </field>
-        </record>
+        </record> -->
     </data>
 </odoo>
