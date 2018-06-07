@@ -61,12 +61,12 @@ class TestAccessRights(common.TransactionCase):
             'contact_ids': [
                 (4, mailing_contact_1.id),
                 (4, mailing_contact_2.id)
-            ]
+            ],
         })
 
         # Set Opt out
         MassMailingOptOut.search([('contact_id', '=', mailing_contact_1.id), ('list_id', '=', mailing_list_1.id)]).write({
-            'opt_out': True,
+            'state': 'opt_out',
         })
 
         # create mass mailing record
@@ -123,7 +123,7 @@ class TestAccessRights(common.TransactionCase):
 
         # Set Opt out
         MassMailingOptOut.search([('contact_id', '=', mailing_contact_1.id), ('list_id', '=', mailing_list_1.id)]).write({
-            'opt_out': True,
+            'state': 'opt_out',
         })
 
         # create mass mailing record

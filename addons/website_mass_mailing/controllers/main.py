@@ -3,7 +3,6 @@
 from odoo import http
 from odoo.http import route, request
 
-
 class MassMailController(http.Controller):
 
     @route('/website_mass_mailing/is_subscriber', type='json', website=True, auth="public")
@@ -16,8 +15,9 @@ class MassMailController(http.Controller):
 
         is_subscriber = False
         if email:
-            contacts_count = request.env['mail.mass_mailing.contact'].sudo().search_count([('list_ids', 'in', [int(list_id)]), ('email', '=', email), ('opt_out', '=', False)])
-            is_subscriber = contacts_count > 0
+            contacts = request.env['mail.mass_mailing.contact'].sudo().search([('list_ids', 'in', [int(list_id)]), ('email', '=', email)])
+            opt_in_contacts = contacts.filtered(lambda r: r.state == 'confirmed')
+            is_subscriber = len(opt_in_contacts) > 0
 
         return {'is_subscriber': is_subscriber, 'email': email}
 
@@ -33,8 +33,8 @@ class MassMailController(http.Controller):
         if not contact_ids:
             # inline add_to_list as we've already called half of it
             Contacts.create({'name': name, 'email': email, 'list_ids': [(6,0,[int(list_id)])]})
-        elif contact_ids.opt_out:
-            contact_ids.opt_out = False
+        elif contact_ids.state != 'confirmed':
+            contact_ids.state = 'confirmed'
         # add email to session
         request.session['mass_mailing_email'] = email
         return True

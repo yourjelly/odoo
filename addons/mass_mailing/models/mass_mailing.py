@@ -50,9 +50,22 @@ class MassMailingOptOutContactList(models.Model):
     _table = 'mass_mailing_list_contact_rel'
     _rec_name = 'contact_id'
 
-    contact_id = fields.Many2one('mail.mass_mailing.contact', required=True, string='Contact', ondelete='cascade')
-    list_id = fields.Many2one('mail.mass_mailing.list', required=True, string='Mailing List', ondelete='cascade')
-    opt_out = fields.Boolean(default=False)
+    @api.model
+    def _get_state_list(self):
+        list = []
+        if self.env.user.has_group('mass_mailing.group_mass_mailing_double_opt_in'):
+            list.append((('waiting', 'Waiting for confirmation')))
+        list.append(('confirmed', 'Confirmed'))
+        list.append(('opt_out', 'Opt-out'))
+        return list
+
+    contact_id = fields.Many2one('mail.mass_mailing.contact', string='Contact', ondelete='cascade')
+    list_id = fields.Many2one('mail.mass_mailing.list', string='Mailing List', ondelete='cascade')
+    # opt_out = fields.Boolean(default=False)
+    state = fields.Selection(selection=_get_state_list,
+        string='Status', default='confirmed')
+    state_message = fields.Char(invisible=True)
+
     unsubscription_date = fields.Datetime(string='Unsubscription Date')
     contact_count = fields.Integer(related='list_id.contact_nbr', store=False)
     message_bounce = fields.Integer(related='contact_id.message_bounce', store=False)
@@ -64,17 +77,29 @@ class MassMailingOptOutContactList(models.Model):
 
     @api.model
     def create(self, vals):
-        if 'opt_out' in vals:
-            vals['unsubscription_date'] = vals['opt_out'] and fields.Datetime.now()
+        if 'state' in vals:
+            vals['unsubscription_date'] = (vals['state'] == 'opt_out') and fields.Datetime.now()
+        if 'state' not in vals:
+            vals['state'] = 'confirmed'
         return super(MassMailingOptOutContactList, self).create(vals)
 
     @api.multi
     def write(self, vals):
-        if 'opt_out' in vals:
-            vals['unsubscription_date'] = vals['opt_out'] and fields.Datetime.now()
+        if 'state' in vals:
+            vals['unsubscription_date'] = (vals['state'] == 'opt_out') and fields.Datetime.now()
+            for rec in self:
+                if rec.state:
+                    if 'state_message' in vals and vals['state_message']:
+                        message = " %s" % (vals['state_message'])
+                    else:
+                        message = "<strong>Opt in status</strong> has been changed by %s for mailing list %s" % (self.env['res.users'].browse(self._uid).name, rec.list_id.name)
+                    message += " :<br/>%s --> <strong>%s</strong>"
+                    rec.contact_id.message_post(body=_(message) % (dict(rec._fields['state'].selection(self)).get(rec.state), dict(rec._fields['state'].selection(self)).get(vals['state'])))
         return super(MassMailingOptOutContactList, self).write(vals)
 
+    @api.multi
     def action_open_mailing_list_contact(self):
+        self.ensure_one()
         contact_id = self.contact_id
         action = {
             'name': _(contact_id.name),
@@ -94,6 +119,11 @@ class MassMailingList(models.Model):
     _order = 'name'
     _description = 'Mailing List'
 
+
+    # @api.model
+    # def _get_default_double_opt_in(self):
+    #     return self.env['ir.config_parameter'].sudo().get_param('mass_mailing.double_opt_in')
+
     name = fields.Char(string='Mailing List', required=True)
     active = fields.Boolean(default=True)
     create_date = fields.Datetime(string='Creation Date')
@@ -102,6 +132,9 @@ class MassMailingList(models.Model):
         'mail.mass_mailing.contact', 'mass_mailing_list_contact_rel', 'list_id', 'contact_id',
         string='Contact Lists')
     opt_out_contact_ids = fields.One2many('mail.mass_mailing.list_contact_rel', 'list_id', string='Mailing Contact')
+    double_opt_in = fields.Boolean(string="Double Opt-In", default=False)
+    # double_opt_in = fields.Boolean(string="Double Opt-In", default=_get_default_double_opt_in,
+    # help="If double opt in is activated, a recipient will receive a mail if he subscribed to this mailing list.")
 
     # Compute number of contacts non opt-out, blacklisted and not invalid for a mailing list
     #  NOPE ! Temporarilly take evething because result is wrong due to bug with init opt_out value (null is some case).
@@ -113,12 +146,29 @@ class MassMailingList(models.Model):
             from
                 mass_mailing_list_contact_rel r
                 left join mail_mass_mailing_contact c on (r.contact_id=c.id)
+            where 
+                r.state <> 'opt_out'
+                AND c.email NOT IN (select email from mail_mass_mailing_blacklist)
+                AND substring(c.email, '([^ ,;<@]+@[^> ,;]+)') IS NOT NULL
             group by
                 list_id
         ''')
         data = dict(self.env.cr.fetchall())
         for mailing_list in self:
             mailing_list.contact_nbr = data.get(mailing_list.id, 0)
+
+    @api.multi
+    def create(self, vals):
+        result = super(MassMailingList, self).create(vals)
+        if 'contact_ids' in vals:
+            contact_ids = []
+            for rec in vals['contact_ids']:
+                contact_ids.append(rec[1])
+
+            opt_out_list_contacts = self.env['mail.mass_mailing.list_contact_rel'].search([('contact_id', 'in', contact_ids)])
+            for rec in opt_out_list_contacts:
+                rec.state = 'confirmed'
+        return result
 
     @api.multi
     def action_merge(self, src_lists, archive):
@@ -164,7 +214,7 @@ class MassMailingList(models.Model):
                     mass_mailing_list_contact_rel contact_list_rel,
                     mail_mass_mailing_list mailing_list
                 WHERE contact.id=contact_list_rel.contact_id
-                AND COALESCE(contact_list_rel.opt_out,FALSE) = FALSE
+                AND contact_list_rel.state = 'confirmed'
                 AND contact.email NOT IN (select email from mail_mass_mailing_blacklist)
                 AND mailing_list.id=contact_list_rel.list_id
                 AND mailing_list.id IN %s
@@ -251,8 +301,8 @@ class MassMailingContact(models.Model):
         if 'list_ids' in vals:
             for rec in self:
                 for list in rec.opt_out_list_ids:
-                    if list.opt_out == None or list.opt_out == False:
-                        list.opt_out = False
+                    if list.state == None or list.state == False:
+                        list.state = 'confirmed'
         return result
 
     def get_name_email(self, name):
@@ -687,15 +737,19 @@ class MassMailing(models.Model):
             record = model.search([(email_fname, '=ilike', email)])
 
             if self.mailing_model_name == "mail.mass_mailing.list":
+                value = 'opt_out' if value else 'confirmed'
                 opt_out_records = self.env['mail.mass_mailing.list_contact_rel'].search([('contact_id', '=', record.id)])
                 for list_id in list_ids:
                     for rec in opt_out_records:
-                        if rec.list_id.id == list_id and rec.opt_out != value:
-                            rec.write({'opt_out': value})
-                            if value:
-                                record.sudo().message_post(body=_('Subscribed to %s mailing list' % (rec.list_id.name)))
-                            else:
-                                record.sudo().message_post(body=_('Unsubscribed from %s mailing list' % (rec.list_id.name)))
+                        if rec.list_id.id == list_id and rec.state != value:
+                            rec.write({
+                                'state': value,
+                                'state_message': "<strong>Opt in status</strong> has been changed by the recipient for mailing list %s using the subscription page" % (rec.list_id.name)
+                            })
+                            # if value == 'confirmed':
+                            #     record.sudo().message_post(body=_('Subscribed to %s mailing list' % (rec.list_id.name)))
+                            # else:
+                            #     record.sudo().message_post(body=_('Unsubscribed from %s mailing list' % (rec.list_id.name)))
             else:
                 record.write({'opt_out': value})
 
@@ -772,11 +826,11 @@ class MassMailing(models.Model):
             return set()
         if 'opt_out' in target._fields or 'opt_out_list_ids' in target._fields:
             if self.mailing_model_real == "mail.mass_mailing.contact":
-                # if user is opt_out on One list but not on another, send the mail anyway
+                # if user is not confirmed on One list but is on another, send the mail anyway
                 target_list_contacts = self.env['mail.mass_mailing.list_contact_rel'].search([('list_id', 'in', self.contact_list_ids.ids)])
-                opt_out_contacts = target_list_contacts.filtered(lambda rel: rel.opt_out == True).mapped('contact_id')
-                opt_in_contacts = target_list_contacts.filtered(lambda rel: rel.opt_out == False).mapped('contact_id')
-                for c in opt_out_contacts:
+                not_opt_in_contacts = target_list_contacts.filtered(lambda rel: rel.state != 'confirmed').mapped('contact_id')
+                opt_in_contacts = target_list_contacts.filtered(lambda rel: rel.state == 'confirmed').mapped('contact_id')
+                for c in not_opt_in_contacts:
                     if c not in opt_in_contacts:
                         unsubscribed_list.add(c['email'])
             else:
