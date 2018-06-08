@@ -171,10 +171,16 @@ class TestExpressions(TestCase):
         self.assertEqual(expr._to_sql(None)[0], res)
 
     def test_case_simple(self):
-        expr = Case([(self.p.number == 1, 'one'), (self.p.number == 2, 'two')], 'zero')
+        expr = Case([(self.p.number == 1, 'one'), (self.p.number == 2, 'two')])
         res = ("""CASE WHEN ("res_partner"."number" = %s) THEN %s """
                """WHEN ("res_partner"."number" = %s) THEN %s """
-               """ELSE %s END""", [1, 'one', 2, 'two', 'zero'])
+               """END""", [1, 'one', 2, 'two'])
+        self.assertEqual(expr._to_sql(None), res)
+
+    def test_case_with_else(self):
+        expr = Case([(self.p.number == 1, 'one')], 'zero')
+        res = ("""CASE WHEN ("res_partner"."number" = %s) THEN %s ELSE %s END""",
+               [1, 'one', 'zero'])
         self.assertEqual(expr._to_sql(None), res)
 
     def test_case_when_expression(self):
@@ -187,6 +193,12 @@ class TestExpressions(TestCase):
         expr = Case([(0, 1.0)], self.p.number, coalesce(self.p.number, 0))
         res = ("""CASE coalesce("res_partner"."number", %s) WHEN %s THEN %s """
                """ELSE "res_partner"."number" END""", [0, 0, 1.0])
+        self.assertEqual(expr._to_sql(None), res)
+
+    def test_case_then_expression(self):
+        expr = Case([(self.p.number > 5, self.u.number)])
+        res = ("""CASE WHEN ("res_partner"."number" > %s) """
+               """THEN "res_users"."number" END""", [5])
         self.assertEqual(expr._to_sql(None), res)
 
     def test_and_type(self):
@@ -692,6 +704,17 @@ class TestSelect(TestCase):
                 """SELECT CASE WHEN ("a"."count" = %s) THEN %s """
                 """WHEN ("a"."count" = %s) THEN %s ELSE %s END FROM "res_partner" "a\"""",
                 (1, 'one', 2, 'two', 'no')
+            )
+        )
+
+    def test_select_case_with_expression(self):
+        s = Select([Case([(5, 0), (3, 1)], expr=coalesce(self.p.count, 5))])
+        self.assertEqual(
+            s.to_sql(),
+            (
+                """SELECT CASE coalesce("a"."count", %s) WHEN %s THEN %s WHEN %s THEN %s END """
+                """FROM "res_partner" "a\"""",
+                (5, 5, 0, 3, 1)
             )
         )
 
