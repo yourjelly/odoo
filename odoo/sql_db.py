@@ -461,8 +461,11 @@ class TestCursor(object):
 
     def close(self):
         if not self._closed:
+            from . import api, SUPERUSER_ID
             self._closed = True
             self._cursor.execute('ROLLBACK TO SAVEPOINT "%s"' % self._savepoint)
+            # clear the caches for subsequent requests
+            api.Environment(self._cursor, SUPERUSER_ID, {}).cache.invalidate()
             self._lock.release()
 
     def autocommit(self, on):
