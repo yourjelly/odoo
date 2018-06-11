@@ -59,14 +59,13 @@ class TestStockScrap(TransactionCase):
     def test_stock_scrap_01(self):
         """ Standalone scrap a stockable product """
         with self.assertRaises(UserError):
-            scrap = self.scrap_obj.create({
+            self.scrap_obj.create({
                 'name': 'scrap - grand test',
                 'product_id': self.product_stockable.id,
                 'product_uom_id': self.ref('product.product_uom_unit'),
                 'scrap_qty': 120,
             })
-        self.assertEquals(scrap.state, 'done')
-        self.assertEquals(self.product_stockable.qty_available, 0.0)
+        self.assertEquals(self.product_stockable.qty_available, 100.0)
 
     def test_stock_scrap_02(self):
         """ Scrap a stockable product from a picking """
