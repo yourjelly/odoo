@@ -807,7 +807,6 @@
     <div t-if="widget.mode === 'edit'" class="o_field_widget o_field_many2one">
         <div class="o_input_dropdown">
             <input type="text" class="o_input"
-                t-att-barcode_events="widget.nodeOptions.barcode_events"
                 t-att-tabindex="widget.attrs.tabindex"
                 t-att-autofocus="widget.attrs.autofocus"
                 t-att-placeholder="widget.attrs.placeholder"

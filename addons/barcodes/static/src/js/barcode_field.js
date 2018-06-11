@@ -16,21 +16,6 @@ var FieldFloatScannable = basicFields.FieldFloat.extend({
     }),
 
     //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     * @private
-     */
-    _renderEdit: function() {
-        var self = this;
-        $.when(this._super()).then(function () {
-            self.$input.data('enableBarcode', true);
-        });
-    },
-
-    //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
 
@@ -40,6 +25,7 @@ var FieldFloatScannable = basicFields.FieldFloat.extend({
      */
     _onKeypress: function (e) {
         /* only simulate a keypress if it has been previously prevented */
+        // dispatched_by_barcode_reader ??
         if (e.dispatched_by_barcode_reader !== true) {
             e.preventDefault();
             return;
