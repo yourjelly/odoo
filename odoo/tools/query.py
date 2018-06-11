@@ -220,7 +220,7 @@ class Case(Expression):
             if isinstance(when, Expression):
                 rows |= when.rows
             if isinstance(then, Expression):
-                rows |= when.rows
+                rows |= then.rows
 
         if self.expr:
             rows |= self.expr.rows
@@ -667,13 +667,14 @@ class Select(BaseQuery):
                 # SELECT <col> AS <alias>
                 t = self._columns[col]._row
             else:
+                # TODO: Optimize so as to get .rows everywhere
                 # If the columns argument is a list, it can contain Row or Column objects
                 if isinstance(col, (Row, tuple)):
                     # SELECT *
                     t = col
                 elif isinstance(col, (Func, Case)) and not isinstance(col, Unnest):
-                    # TODO: Optimize so as to get .rows
-                    t = col.rows
+                    # sort since the rows property is a set, important for unittest determinism
+                    t = sorted(list(col.rows), key=lambda r: r._table)
                 else:
                     # SELECT <col>
                     t = col._row
@@ -902,16 +903,16 @@ class Delete(BaseQuery):
         self._returning = returning or []
 
     def rows(self, *rows):
-        return Delete({**self.attrs, 'rows': rows})
+        return Delete(**{**self.attrs, 'rows': rows})
 
     def using(self, *tables):
-        return Delete({**self.attrs, 'using': tables})
+        return Delete(**{**self.attrs, 'using': tables})
 
     def where(self, expr):
-        return Delete({**self.attrs, 'where': expr})
+        return Delete(**{**self.attrs, 'where': expr})
 
-    def returning(self, cols):
-        return Delete({**self.attrs, 'returning': cols})
+    def returning(self, *cols):
+        return Delete(**{**self.attrs, 'returning': cols})
 
     @property
     def attrs(self):
@@ -955,19 +956,6 @@ class With(BaseQuery):
         # instantiation.
         self._tail = tail.copy()
         self._recur = recursive
-
-    @property
-    def attrs(self):
-        return {'body': self._body, 'tail': self._tail, 'recursive': self._recur}
-
-    def body(self, *body):
-        return With({**self.attrs, 'body': body})
-
-    def tail(self, tail):
-        return With({**self.attrs, 'tail': tail})
-
-    def recursive(self):
-        return With({**self.attrs, 'recursive': not self._recur})
 
     def _to_sql(self, alias_mapping):
         sql = []
@@ -1041,13 +1029,13 @@ class Update(BaseQuery):
         }
 
     def set(self, _set):
-        return Update({**self.attrs, '_set': _set})
+        return Update(**{**self.attrs, '_set': _set})
 
     def where(self, expr):
-        return Update({**self.attrs, 'where': expr})
+        return Update(**{**self.attrs, 'where': expr})
 
     def returning(self, *cols):
-        return Update({**self.attrs, 'returning': cols})
+        return Update(**{**self.attrs, 'returning': cols})
 
     def _pre_build(self, alias_mapping):
         return "UPDATE %s %s" % (self._main._table, alias_mapping[self._main])
@@ -1109,16 +1097,16 @@ class Insert(BaseQuery):
         }
 
     def into(self, row):
-        return Insert({**self.attrs, 'row': row})
+        return Insert(**{**self.attrs, 'row': row})
 
     def values(self, *vals):
-        return Insert({**self.attrs, 'vals': vals})
+        return Insert(**{**self.attrs, 'vals': vals})
 
     def do_nothing(self):
-        return Insert({**self.attrs, 'do_nothing': not self._do_nothing})
+        return Insert(**{**self.attrs, 'do_nothing': not self._do_nothing})
 
     def returning(self, *cols):
-        return Insert({**self.attrs, 'returning': cols})
+        return Insert(**{**self.attrs, 'returning': cols})
 
     def _pre_build(self, alias_mapping):
         return """INSERT INTO %s""" % self._row._to_sql(alias_mapping, with_cols=True)

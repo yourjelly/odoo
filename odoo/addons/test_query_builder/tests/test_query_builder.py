@@ -6,7 +6,7 @@ from collections import OrderedDict
 from odoo.tests.common import tagged
 from odoo.tools.query import Row, Select, Delete, With, Update, Insert, \
     Asc, Desc, coalesce, unnest, NULL, DEFAULT, _quote, BaseQuery, CreateView, \
-    concat, count, Join, substr, length, now, Case
+    concat, count, Join, substr, length, now, Case, BaseQuery
 
 
 @tagged('standard', 'at_install')
@@ -23,8 +23,20 @@ class TestMisc(TestCase):
             Row('res_partner').__name__
 
     def test_build_base_not_impl(self):
+
+        class DummyQuery(BaseQuery):
+            pass
+
         with self.assertRaises(NotImplementedError):
-            BaseQuery()._build_base(None)
+            DummyQuery()._build_base(None)
+
+    def test_base_query_attrs_not_impl(self):
+
+        class DummyQuery(BaseQuery):
+            pass
+
+        with self.assertRaises(NotImplementedError):
+            DummyQuery().attrs
 
     def test_multiple_to_sql_calls(self):
         p = Row("res_partner")
@@ -718,6 +730,16 @@ class TestSelect(TestCase):
             )
         )
 
+    def test_select_case_then_expression(self):
+        s = Select([Case([(self.p.count == 1, self.u.count)], 'rip')])
+        self.assertEqual(
+            s.to_sql(),
+            (
+                """SELECT CASE WHEN ("a"."count" = %s) THEN "b"."count" ELSE %s END """
+                """FROM "res_partner" "a", "res_users" "b\"""", (1, 'rip')
+            )
+        )
+
 
 @tagged('standard', 'at_install')
 class TestDelete(TestCase):
@@ -772,24 +794,75 @@ class TestDelete(TestCase):
         d2 = d1.rows(self.u)
 
         self.assertIsNot(d1, d2)
+        self.assertEqual(
+            d1.to_sql(),
+            (
+                """DELETE FROM "res_partner" "a\"""", ()
+            )
+        )
+        self.assertEqual(
+            d2.to_sql(),
+            (
+                """DELETE FROM "res_users" "a\"""", ()
+            )
+        )
 
     def test_delete_new_using(self):
         d1 = Delete([self.p], [self.u])
         d2 = d1.using()
 
         self.assertIsNot(d1, d2)
+        self.assertEqual(
+            d1.to_sql(),
+            (
+                """DELETE FROM "res_partner" "a" USING "res_users" "b\"""", ()
+            )
+        )
+
+        self.assertEqual(
+            d2.to_sql(),
+            (
+                """DELETE FROM "res_partner" "a\"""", ()
+            )
+        )
 
     def test_delete_new_where(self):
         d1 = Delete([self.p], where=self.p.id > 5)
         d2 = d1.where(self.p.id < 5)
 
         self.assertIsNot(d1, d2)
+        self.assertEqual(
+            d1.to_sql(),
+            (
+                """DELETE FROM "res_partner" "a" WHERE ("a"."id" > %s)""", (5,)
+            )
+        )
+
+        self.assertEqual(
+            d2.to_sql(),
+            (
+                """DELETE FROM "res_partner" "a" WHERE ("a"."id" < %s)""", (5,)
+            )
+        )
 
     def test_delete_new_returning(self):
         d1 = Delete([self.p])
-        d2 = d1.using(self.p.id)
+        d2 = d1.returning(self.p.id)
 
         self.assertIsNot(d1, d2)
+        self.assertEqual(
+            d1.to_sql(),
+            (
+                """DELETE FROM "res_partner" "a\"""", ()
+            )
+        )
+
+        self.assertEqual(
+            d2.to_sql(),
+            (
+                """DELETE FROM "res_partner" "a" RETURNING "a"."id\"""", ()
+            )
+        )
 
 
 @tagged('standard', 'at_install')
@@ -944,6 +1017,65 @@ class TestUpdate(TestCase):
              """LIMIT %s OFFSET %s)""", (1, 0))
         )
 
+    def test_update_new_set(self):
+        u1 = Update({self.u.name: "dummy"})
+        u2 = u1.set({self.u.name: "no u"})
+
+        self.assertIsNot(u1, u2)
+        self.assertEqual(
+            u1.to_sql(),
+            (
+                """UPDATE "res_users" "a" SET "name" = %s""", ("dummy",)
+            )
+        )
+
+        self.assertEqual(
+            u2.to_sql(),
+            (
+                """UPDATE "res_users" "a" SET "name" = %s""", ("no u",)
+            )
+        )
+
+    def test_update_new_where(self):
+        u1 = Update({self.u.name: "dummy"}, where=self.u.id > 5)
+        u2 = u1.where(self.u.id < 5)
+
+        self.assertIsNot(u1, u2)
+        self.assertEqual(
+            u1.to_sql(),
+            (
+                """UPDATE "res_users" "a" SET "name" = %s WHERE ("a"."id" > %s)""",
+                ("dummy", 5)
+            )
+        )
+
+        self.assertEqual(
+            u2.to_sql(),
+            (
+                """UPDATE "res_users" "a" SET "name" = %s WHERE ("a"."id" < %s)""",
+                ("dummy", 5)
+            )
+        )
+
+    def test_update_new_returning(self):
+        u1 = Update({self.u.name: "dummy"}, returning=[self.u.id])
+        u2 = u1.returning(self.u.name)
+
+        self.assertIsNot(u1, u2)
+        self.assertEqual(
+            u1.to_sql(),
+            (
+                """UPDATE "res_users" "a" SET "name" = %s RETURNING "a"."id\"""", ("dummy",)
+            )
+        )
+
+        self.assertEqual(
+            u2.to_sql(),
+            (
+                """UPDATE "res_users" "a" SET "name" = %s RETURNING "a"."name\"""", ("dummy",)
+            )
+        )
+
 
 @tagged('standard', 'at_install')
 class TestInsert(TestCase):
@@ -1001,6 +1133,84 @@ class TestInsert(TestCase):
              ('foo',))
         )
 
+    def test_insert_new_into(self):
+        i1 = Insert(self.p('name'), ['foo'])
+        i2 = i1.into(self.u('name'))
+
+        self.assertIsNot(i1, i2)
+        self.assertEqual(
+            i1.to_sql(),
+            (
+                """INSERT INTO "res_partner"("name") VALUES (%s)""", ('foo',)
+            )
+        )
+
+        self.assertEqual(
+            i2.to_sql(),
+            (
+                """INSERT INTO "res_users"("name") VALUES (%s)""", ('foo',)
+            )
+        )
+
+    def test_insert_new_values(self):
+        i1 = Insert(self.p('name'), ['foo'])
+        i2 = i1.values('bar')
+
+        self.assertIsNot(i1, i2)
+        self.assertEqual(
+            i1.to_sql(),
+            (
+                """INSERT INTO "res_partner"("name") VALUES (%s)""", ('foo',)
+            )
+        )
+
+        self.assertEqual(
+            i2.to_sql(),
+            (
+                """INSERT INTO "res_partner"("name") VALUES (%s)""", ('bar',)
+            )
+        )
+
+    def test_insert_new_do_nothing(self):
+        i1 = Insert(self.p('name'), ['foo'])
+        i2 = i1.do_nothing()
+
+        self.assertIsNot(i1, i2)
+        self.assertEqual(
+            i1.to_sql(),
+            (
+                """INSERT INTO "res_partner"("name") VALUES (%s)""", ('foo',)
+            )
+        )
+
+        self.assertEqual(
+            i2.to_sql(),
+            (
+                """INSERT INTO "res_partner"("name") VALUES (%s) ON CONFLICT DO NOTHING""",
+                ('foo',)
+            )
+        )
+
+    def test_insert_new_returning(self):
+        i1 = Insert(self.p('name'), ['foo'], returning=[self.p.id])
+        i2 = i1.returning(self.p.name)
+
+        self.assertIsNot(i1, i2)
+        self.assertEqual(
+            i1.to_sql(),
+            (
+                """INSERT INTO "res_partner"("name") VALUES (%s) RETURNING "res_partner"."id\"""",
+                ('foo',)
+            )
+        )
+
+        self.assertEqual(
+            i2.to_sql(),
+            (
+                """INSERT INTO "res_partner"("name") VALUES (%s) """
+                """RETURNING "res_partner"."name\"""", ('foo',)
+            )
+        )
 
 @tagged('standard', 'at_install')
 class TestCreateView(TestCase):
