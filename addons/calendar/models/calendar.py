@@ -192,7 +192,6 @@ class Attendee(models.Model):
         mails_to_send = self.env['mail.mail']
         for attendee in self:
             if attendee.email or attendee.partner_id.email:
-                # FIXME: is ics_file text or bytes?
                 ics_file = ics_files.get(attendee.event_id.id)
                 mail_id = invitation_template.send_mail(attendee.id)
 
