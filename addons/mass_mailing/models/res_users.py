@@ -15,3 +15,7 @@ class ResUsers(models.Model):
     has_group_mass_mailing_campaign = fields.Boolean(
         'Manage Mass Mailing Campaigns', compute='_compute_groups_id', inverse='_inverse_groups_id',
         group_xml_id='mass_mailing.group_mass_mailing_campaign')
+
+    has_group_mass_mailing_double_opt_in = fields.Boolean(
+        'Manage Mass Mailing Double Opt In', compute='_compute_groups_id', inverse='_inverse_groups_id',
+        group_xml_id='mass_mailing.group_mass_mailing_double_opt_in')

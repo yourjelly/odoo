@@ -14,6 +14,10 @@
                 <div>
                     <field name='has_group_mass_mailing_campaign' colspan="1" class="oe_inline"/>
                 </div>
+                <label for="has_group_mass_mailing_double_opt_in" colspan="3"/>
+                <div>
+                    <field name='has_group_mass_mailing_double_opt_in' colspan="1" class="oe_inline"/>
+                </div>
             </group>
         </field>
     </record>

@@ -54,16 +54,23 @@ class MassMailingOptOutContactList(models.Model):
     def _get_state_list(self):
         list = []
         if self.env.user.has_group('mass_mailing.group_mass_mailing_double_opt_in'):
-            list.append((('waiting', 'Waiting for confirmation')))
+            list.append(('waiting', 'Waiting for confirmation'))
         list.append(('confirmed', 'Confirmed'))
         list.append(('opt_out', 'Opt-out'))
         return list
+
+    def _default_state(self):
+        # if self.env['ir.config_parameter'].sudo().get_param('mass_mailing.double_opt_in'):
+        if self.env.user.has_group('mass_mailing.group_mass_mailing_double_opt_in'):
+            return 'waiting'
+        else:
+            return 'confirmed'
 
     contact_id = fields.Many2one('mail.mass_mailing.contact', string='Contact', ondelete='cascade')
     list_id = fields.Many2one('mail.mass_mailing.list', string='Mailing List', ondelete='cascade')
     # opt_out = fields.Boolean(default=False)
     state = fields.Selection(selection=_get_state_list,
-        string='Status', default='confirmed')
+        string='Status', default=_default_state)
     state_message = fields.Char(invisible=True)
 
     unsubscription_date = fields.Datetime(string='Unsubscription Date')
@@ -89,13 +96,24 @@ class MassMailingOptOutContactList(models.Model):
             vals['unsubscription_date'] = (vals['state'] == 'opt_out') and fields.Datetime.now()
             for rec in self:
                 if rec.state:
-                    if 'state_message' in vals and vals['state_message']:
-                        message = " %s" % (vals['state_message'])
-                    else:
-                        message = "<strong>Opt in status</strong> has been changed by %s for mailing list %s" % (self.env['res.users'].browse(self._uid).name, rec.list_id.name)
-                    message += " :<br/>%s --> <strong>%s</strong>"
-                    rec.contact_id.message_post(body=_(message) % (dict(rec._fields['state'].selection(self)).get(rec.state), dict(rec._fields['state'].selection(self)).get(vals['state'])))
+                    # if not rec.list_id.double_opt_in and vals['state'] == 'waiting':
+                    #     vals['state'] = 'confirmed'
+                    if rec.state and rec.state != vals['state']:
+                        if 'state_message' in vals and vals['state_message']:
+                            message = " %s" % (vals['state_message'])
+                        else:
+                            message = "<strong>Opt in status</strong> has been changed by %s for mailing list <strong>%s</strong>" % (self.env['res.users'].browse(self._uid).name, rec.list_id.name)
+                        message += " :<br/>%s --> <strong>%s</strong>"
+                        rec.contact_id.message_post(body=_(message) % (dict(rec._fields['state'].selection(self)).get(rec.state), dict(rec._fields['state'].selection(self)).get(vals['state'])))
         return super(MassMailingOptOutContactList, self).write(vals)
+
+    @api.onchange('list_id')
+    def _onchange_list_id(self):
+        for rec in self:
+            if rec.list_id.double_opt_in:
+                rec.state = 'waiting'
+            else:
+                rec.state = 'confirmed'
 
     @api.multi
     def action_open_mailing_list_contact(self):
@@ -120,9 +138,9 @@ class MassMailingList(models.Model):
     _description = 'Mailing List'
 
 
-    # @api.model
-    # def _get_default_double_opt_in(self):
-    #     return self.env['ir.config_parameter'].sudo().get_param('mass_mailing.double_opt_in')
+    @api.model
+    def _get_default_double_opt_in(self):
+        return self.env.user.has_group('mass_mailing.group_mass_mailing_double_opt_in')
 
     name = fields.Char(string='Mailing List', required=True)
     active = fields.Boolean(default=True)
@@ -132,9 +150,9 @@ class MassMailingList(models.Model):
         'mail.mass_mailing.contact', 'mass_mailing_list_contact_rel', 'list_id', 'contact_id',
         string='Contact Lists')
     opt_out_contact_ids = fields.One2many('mail.mass_mailing.list_contact_rel', 'list_id', string='Mailing Contact')
-    double_opt_in = fields.Boolean(string="Double Opt-In", default=False)
-    # double_opt_in = fields.Boolean(string="Double Opt-In", default=_get_default_double_opt_in,
-    # help="If double opt in is activated, a recipient will receive a mail if he subscribed to this mailing list.")
+    # double_opt_in = fields.Boolean(string="Double Opt-In", default=False)
+    double_opt_in = fields.Boolean(string="Double Opt-In", default=_get_default_double_opt_in,
+        help="Recipients will receive a confirmation mail if they subscribe to this mailing list.")
 
     # Compute number of contacts non opt-out, blacklisted and not invalid for a mailing list
     #  NOPE ! Temporarilly take evething because result is wrong due to bug with init opt_out value (null is some case).
@@ -157,7 +175,7 @@ class MassMailingList(models.Model):
         for mailing_list in self:
             mailing_list.contact_nbr = data.get(mailing_list.id, 0)
 
-    @api.multi
+    @api.model
     def create(self, vals):
         result = super(MassMailingList, self).create(vals)
         if 'contact_ids' in vals:

@@ -44,17 +44,19 @@
                                     </div>
                                 </div>
                             </div>
-                            <!--<div class="col-md-6 o_setting_box col-xs-12">-->
-                                <!--<div class="o_setting_left_pane" title="The double opt-in can be done by mailing list. If double opt in is activated on a mailing list, a recipient will receive a mail if he subscribed to that mailing list">-->
-                                    <!--<field name="mass_mailing_double_opt_in"/>-->
-                                <!--</div>-->
-                                <!--<div class="o_setting_right_pane">-->
-                                    <!--<label for="mass_mailing_double_opt_in"/>-->
-                                    <!--<div class="text-muted">-->
-                                        <!--Send contacts a confirmation email when they subscribe to a mailing list-->
-                                    <!--</div>-->
-                                <!--</div>-->
-                            <!--</div>-->
+                            <div class="col-md-6 o_setting_box col-xs-12">
+                                <div class="o_setting_left_pane" title="The double opt-in can be done by mailing list. If double opt in is activated on a mailing list, a recipient will receive a mail if he subscribed to that mailing list">
+                                    <field name="group_mass_mailing_double_opt_in"/>
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <label for="group_mass_mailing_double_opt_in"/>
+                                    <div class="text-muted">
+                                        Send contacts a confirmation email when they subscribe to a mailing list.
+                                        <br/>
+                                        <strong>Warning</strong> : If you deactivate the double opt in option, all the mailing list won't use anymore double opt-in and all the recipients with state 'Waiting for confirmation' will be set to 'Confirmed'.
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <h2>Mailing Lists</h2>
                         <div id="mailing_list" class="row mt16 o_settings_container"/>
