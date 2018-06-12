@@ -26,6 +26,7 @@ var GroupByMenu = DropdownMenu.extend({
      *      fieldName: string; field name without interval!
      *      description: string; label printed on screen
      *      groupId: string;
+     *      isDate: boolean;
      *      isActive: boolean; (optional) determines if the groupby is considered active
      *      isOpen: boolean; (optional) in case there are options the submenu presenting the options
      *                                is opened or closed according to isOpen
@@ -46,11 +47,11 @@ var GroupByMenu = DropdownMenu.extend({
         this.generatorMenuIsOpen = false;
         // determines list of options used by groupbys of type 'date'
         this.intervalOptions = [
-            {description: 'Day', optionId: 'day'},
-            {description: 'Week', optionId: 'week'},
-            {description: 'Month', optionId: 'month'},
-            {description: 'Quarter', optionId: 'quarter'},
-            {description: 'Year', optionId: 'year'},
+            {description: 'Day', optionId: 'day', groupId: 1},
+            {description: 'Week', optionId: 'week', groupId: 1},
+            {description: 'Month', optionId: 'month', groupId: 1},
+            {description: 'Quarter', optionId: 'quarter', groupId: 1},
+            {description: 'Year', optionId: 'year', groupId: 1},
         ];
         // determines the default option used in case
         // it has not been provided for a groupby
@@ -133,7 +134,9 @@ var GroupByMenu = DropdownMenu.extend({
         this._prepareItem(groupby);
         if (groupby.hasOptions) {
             groupby.currentOptionId = groupby.defaultOptionId;
+            groupby.isDate = true;
             eventData.optionId = groupby.currentOptionId;
+            eventData.isDate = true;
         }
         this.items.push(groupby);
         var fieldIndex = this.presentedFields.indexOf(field);

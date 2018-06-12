@@ -43,6 +43,9 @@
                 }
             }
         }
+        li.divider:first-child {
+            display: none;
+        }
         .o_item_option {
             padding-left: 20px;
         }

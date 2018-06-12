@@ -29,6 +29,8 @@ var FiltersMenu = DropdownMenu.extend({
      *   interface IFilter {
      *      itemId: string; unique id associated with the filter
      *      domain: string;
+     *      isPeriod: boolean
+     *      fieldName: string; fieldName used to generate a domain in case isDate is true (and domain empty)
      *      description: string; label printed on screen
      *      groupId: string;
      *      isActive: boolean; (optional) determines if the filter is considered active
@@ -47,15 +49,21 @@ var FiltersMenu = DropdownMenu.extend({
         this.isMobile = config.device.isMobile;
         // determines list of options used by filter of type 'date'
         // TO DO: simplify optionIds below
-        this.intervalOptions = [
-            {description: _t('Day'), optionId: '__interval__day__'},
-            {description: _t('Week'), optionId: '__interval__week__'},
-            {description: _t('Month'), optionId: '__interval__month__'},
-            {description: _t('Year'), optionId: '__interval__year__'},
+        this.periodOptions = [
+            {description: _t('Today'), optionId: 'today', groupId: 1},
+            {description: _t('This Week'), optionId: 'this_week', groupId: 1},
+            {description: _t('This Month'), optionId: 'this_month', groupId: 1},
+            {description: _t('This Quarter'), optionId: 'this_quarter', groupId: 1},
+            {description: _t('This Year'), optionId: 'this_year', groupId: 1},
+            {description: _t('Yesterday'), optionId: 'yesterday', groupId: 2},
+            {description: _t('Last Week'), optionId: 'last_week', groupId: 2},
+            {description: _t('Last Month'), optionId: 'last_month', groupId: 2},
+            {description: _t('Last Quarter'), optionId: 'last_quarter', groupId: 2},
+            {description: _t('Last Year'), optionId: 'last_year', groupId: 2},
+            {description: _t('Last 7 Days'), optionId: 'last_7_days', groupId: 3},
+            {description: _t('Last 30 Days'), optionId: 'last_30_days', groupId: 3},
+            {description: _t('Last 365 Days'), optionId: 'last_365_days', groupId: 3},
         ];
-        // determines the default option used in case
-        // it has not been provided for a filter
-        this.defaultOptionId = "__interval__month__";
         // determines when the 'Add custom filter' submenu is open
         this.generatorMenuIsOpen = false;
         this.propositions = [];
@@ -112,7 +120,7 @@ var FiltersMenu = DropdownMenu.extend({
         var self = this;
         var filters = _.invoke(this.propositions, 'get_filter');
         var groupId = _.uniqueId('__group__');
-        var toSendToSearchView = [];
+        var data = [];
         filters.forEach(function (filter) {
             var filterName = _.uniqueId('__filter__');
             var filterItem = {
@@ -122,7 +130,7 @@ var FiltersMenu = DropdownMenu.extend({
                 isActive: true,
             };
             self._prepareItem(filterItem);
-            toSendToSearchView.push({
+            data.push({
                 itemId: filterName,
                 groupId: groupId,
                 filter: filter,
@@ -130,11 +138,27 @@ var FiltersMenu = DropdownMenu.extend({
             self.items.push(filterItem);
         });
         this._renderMenuItems();
-        this.trigger_up('new_filter', toSendToSearchView);
+        this.trigger_up('new_filters', data);
         _.invoke(this.propositions, 'destroy');
         this.propositions = [];
         // this._appendProposition();
         this._toggleCustomFilterMenu();
+    },
+    /**
+     * override
+     *
+     * @private
+     * @param {Object} item
+     */
+     _prepareItem: function (item) {
+        if (item.isPeriod) {
+            item.options = this.periodOptions;
+            item.defaultOptionId = item.defaultOptionId;
+        }
+        // super has to be called here because we need to add options to groupby
+        // before to call it since some keys in a groupby are initialized using
+        // the keys 'options' and 'defaultOptionId'
+        this._super.apply(this, arguments);
     },
     /**
      * Hide and display the sub menu which allows adding custom filters

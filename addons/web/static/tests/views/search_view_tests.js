@@ -159,13 +159,14 @@ QUnit.module('Search View', {
         actionManager.doAction(2);
         $('span.fa-bars').click();
         $('.o_submenu_switcher').click();
-        $('.o_item_option:first').click();
-        assert.strictEqual($('.o_searchview .o_searchview_facet .o_facet_values span').length, 1,
-            'should have a facet');
+        // Don't forget there is a hidden li.divider element at first place among children
         $('.o_item_option:nth-child(2)').click();
         assert.strictEqual($('.o_searchview .o_searchview_facet .o_facet_values span').length, 1,
             'should have a facet');
-        $('.o_item_option:nth-child(2)').click();
+        $('.o_item_option:nth-child(3)').click();
+        assert.strictEqual($('.o_searchview .o_searchview_facet .o_facet_values span').length, 1,
+            'should have a facet');
+        $('.o_item_option:nth-child(3)').click();
         assert.strictEqual($('.o_searchview .o_searchview_facet .o_facet_values span').length, 0,
             'should have no facet');
         actionManager.destroy();
@@ -229,29 +230,29 @@ QUnit.module('Search View', {
         // by default, data should be grouped by the field 'Date' using the interval 'day'
         assert.strictEqual($('div.o_facet_values span').text().trim(),'Date: Day');
         assert.strictEqual($('.o_content tr.o_group_header').length, 5);
-        // open submenu with interval options
+        // // open submenu with interval options
         $('.o_group_by_menu .o_menu_item .o_submenu_switcher').click();
-        // select option 'month'
-        $('.o_group_by_menu .o_menu_item .o_item_option:nth-child(3)').click();
-        // data should be grouped by the field 'Date' using the interval 'month'
+        // // select option 'month'
+        $('.o_group_by_menu .o_menu_item .o_item_option[data-option_id="month"]').click();
+        // // data should be grouped by the field 'Date' using the interval 'month'
         assert.strictEqual($('div.o_facet_values span').text().trim(),'Date: Month');
         assert.strictEqual($('.o_content tr.o_group_header').length, 3);
-        // deactivate option 'month'
-        $('.o_group_by_menu .o_menu_item .o_item_option:nth-child(3)').click();
-        // no groupby is applied
+        // // deactivate option 'month'
+        $('.o_group_by_menu .o_menu_item .o_item_option[data-option_id="month"]').click();
+        // // no groupby is applied
         assert.strictEqual($('div.o_facet_values span').length, 0);
-        // open 'Add custom Groupby' menu
+        // // open 'Add custom Groupby' menu
         $('.o_group_by_menu .o_add_custom_group a').click();
-        // click on 'Apply' button
+        // // click on 'Apply' button
         $('.o_group_by_menu .o_generator_menu button').click();
-        // data should be grouped by the field 'Birthday' using the interval 'month'
+        // // data should be grouped by the field 'Birthday' using the interval 'month'
         assert.strictEqual($('div.o_facet_values span').text().trim(),'Birthday: Month');
         assert.strictEqual($('.o_content tr.o_group_header').length, 5);
-        // open submenu with interval options
+        // // open submenu with interval options
         $('.o_group_by_menu .o_menu_item .o_submenu_switcher').eq(1).click();
-        // select option 'year'
+        // // select option 'year'
         $('.o_group_by_menu .o_menu_item .o_item_option').eq(9).click();
-        // data should be grouped by the field 'Birthday' using the interval 'year'
+        // // data should be grouped by the field 'Birthday' using the interval 'year'
         assert.strictEqual($('div.o_facet_values span').text().trim(),'Birthday: Year');
         assert.strictEqual($('.o_content tr.o_group_header').length, 4);
         actionManager.destroy();
@@ -294,6 +295,78 @@ QUnit.module('Search View', {
         assert.strictEqual($('.o_searchview .o_searchview_facet .o_facet_values span').length, 0,
             'no facet should be in the search view');
         actionManager.destroy();
+    });
+
+    QUnit.test('filter by a date field using period works', function (assert) {
+
+        assert.expect(14);
+
+        this.archs['partner,4,search'] = '<search>'+
+            '<filter string="AAA" name="some_filter" date="date_field" default_period="this_week"></filter>' +
+        '</search>';
+
+        var domains = [
+            [],
+            ['&', ["date_field", ">=", "2017-03-20"],["date_field", "<=", "2017-03-26"]],
+            [["date_field", "=", "2017-03-22"]],
+            [["date_field", ">=", "2017-03-01"]],
+            ['&', ["date_field", ">=", "2017-01-01"],["date_field", "<=", "2017-03-31"]],
+            [["date_field", ">=", "2017-01-01"]],
+            [["date_field", "=", "2017-03-21"]],
+            ['&', ["date_field", ">=", "2017-03-13"],["date_field", "<=", "2017-03-19"]],
+            ['&', ["date_field", ">=", "2017-02-01"],["date_field", "<=", "2017-02-28"]],
+            ['&', ["date_field", ">=", "2016-10-01"],["date_field", "<=", "2016-12-31"]],
+            ['&', ["date_field", ">=", "2016-01-01"],["date_field", "<=", "2016-12-31"]],
+            ['&', ["date_field", ">=", "2017-03-15"],["date_field", "<=", "2017-03-21"]],
+            ['&', ["date_field", ">=", "2017-02-20"],["date_field", "<=", "2017-03-21"]],
+            ['&', ["date_field", ">=", "2016-03-22"],["date_field", "<=", "2017-03-21"]],
+        ];
+
+        var RealDate = window.Date;
+
+        window.Date = function TestDate() {
+            return new RealDate(2017,2, 22);
+        };
+        window.Date.now = function Test() {
+            return new Date(2017,2,22);
+        };
+
+        var actionManager = createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            mockRPC: function (route, args) {
+                if (route === '/web/dataset/search_read') {
+                    assert.deepEqual(args.domain, domains.shift());
+                }
+                return this._super.apply(this, arguments);
+            },
+        });
+
+        actionManager.doAction(5);
+
+        // open menu 'Filter'
+        $('.o_search_options .fa-filter').click();
+
+        // activate first and only filter gives (since default_period is 'this_week')
+        // the week of 2017-03-22
+        $('li.o_menu_item').click();
+        $('li.o_menu_item .o_submenu_switcher').click();
+        $('li.o_menu_item .o_item_option[data-option_id="today"]').click();
+        $('li.o_menu_item .o_item_option[data-option_id="this_month"]').click();
+        $('li.o_menu_item .o_item_option[data-option_id="this_quarter"]').click();
+        $('li.o_menu_item .o_item_option[data-option_id="this_year"]').click();
+        $('li.o_menu_item .o_item_option[data-option_id="yesterday"]').click();
+        $('li.o_menu_item .o_item_option[data-option_id="last_week"]').click();
+        $('li.o_menu_item .o_item_option[data-option_id="last_month"]').click();
+        $('li.o_menu_item .o_item_option[data-option_id="last_quarter"]').click();
+        $('li.o_menu_item .o_item_option[data-option_id="last_year"]').click();
+        $('li.o_menu_item .o_item_option[data-option_id="last_7_days"]').click();
+        $('li.o_menu_item .o_item_option[data-option_id="last_30_days"]').click();
+        $('li.o_menu_item .o_item_option[data-option_id="last_365_days"]').click();
+
+        actionManager.destroy();
+        window.Date = RealDate;
     });
 });
 });

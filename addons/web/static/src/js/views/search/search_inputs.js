@@ -518,7 +518,7 @@ var FilterGroup = Input.extend(/** @lends instance.web.search.FilterGroup# */{
      *                   is the current interval used
      *                   (necessarily the field is of type 'date' or 'datetime')
      */
-    init: function (filters, parent, intervalMapping) {
+    init: function (filters, parent, intervalMapping, periodMapping) {
         // If all filters are group_by and we're not initializing a GroupbyGroup,
         // create a GroupbyGroup instead of the current FilterGroup
         if (!(this instanceof GroupbyGroup) &&
@@ -532,6 +532,7 @@ var FilterGroup = Input.extend(/** @lends instance.web.search.FilterGroup# */{
         this.filters = filters;
         this.searchview = parent;
         this.intervalMapping = intervalMapping;
+        this.periodMapping = periodMapping || [];
         this.searchview.query.on('add remove change reset', this.proxy('search_change'));
     },
     start: function () {
@@ -640,16 +641,29 @@ var FilterGroup = Input.extend(/** @lends instance.web.search.FilterGroup# */{
      * Handles domains-fetching for all the filters within it: groups them.
      *
      * @param {VS.model.SearchFacet} facet
+     * @param {boolean} evaluate
      * @return {*} combined domains of the enabled filters in this group
      */
-    get_domain: function (facet) {
+    get_domain: function (facet, evaluate) {
+        var self = this;
         var userContext = this.getSession().user_context;
         var domains = facet.values.chain()
-            .map(function (f) { return f.get('value').attrs.domain; })
+            .map(function (f) {
+                var filter = f.get('value');
+                var attributes = filter.attrs;
+                var domain = attributes.domain;
+                var fieldName = attributes.date;
+                if (!domain && fieldName) {
+                    var couple = _.findWhere(self.periodMapping, {filter: filter});
+                    var period = couple ? couple.period: 'this_month';
+                    domain = self._constructDomain(fieldName, period);
+                }
+                return domain;
+            })
             .without('[]')
             .reject(_.isEmpty)
             .map(function (d) {
-                return Domain.prototype.stringToArray(d, userContext);
+                return Domain.prototype.stringToArray(d, userContext, evaluate);
             })
             .value();
 
@@ -705,14 +719,112 @@ var FilterGroup = Input.extend(/** @lends instance.web.search.FilterGroup# */{
         }));
     },
     /*
-     * private
-     *
      * @param {Object} intervalMapping
      */
     updateIntervalMapping: function (intervalMapping) {
         this.intervalMapping = intervalMapping;
-    }
+    },
+    /*
+     * @param {Object} periodMapping
+     */
+    updatePeriodMapping: function (periodMapping) {
+        this.intervalMapping = periodMapping;
+    },
 
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /*
+     * @param {string} fieldName
+     * @param {string} period
+     */
+    _constructDomain: function (fieldName, period) {
+        switch (period) {
+            case 'today':
+                return "[['" + fieldName + "', '=', context_today().strftime('%Y-%m-%d')]]";
+
+            case 'this_week':
+                return "['&'," +
+                    "('" + fieldName + "', '>=', (context_today() + relativedelta(weeks=-1,days=1,weekday=0)).strftime('%Y-%m-%d'))," +
+                    "('" + fieldName + "', '<=', (context_today() + relativedelta(weekday=6)).strftime('%Y-%m-%d'))," +
+                    "]";
+
+            case 'this_month':
+                return "[('" + fieldName + "','>=',time.strftime('%%Y-%%m-01'))]";
+
+            case 'this_quarter':
+                return "['&'," +
+                    "('" + fieldName + "', '>=', (context_today() + relativedelta(" +
+                            "months= - (context_today().month - 1) % 3," +
+                            "day=1" +
+                        ")).strftime('%Y-%m-%d'))," +
+                    "('" + fieldName + "', '<=', (context_today() + relativedelta(" +
+                            "months= 3 - (context_today().month -1 ) % 3," +
+                            "day=1," +
+                            "days=-1" +
+                        ")).strftime('%Y-%m-%d'))," +
+                    "]";
+
+            case 'this_year':
+                return "[('" + fieldName + "','>=',time.strftime('%%Y-01-01'))]";
+
+            case 'yesterday':
+                return "[('" + fieldName + "', '=', (context_today() + relativedelta(days=-1)).strftime('%Y-%m-%d'))]";
+
+            case 'last_week':
+                return "['&'," +
+                    "('" + fieldName + "', '>=', (context_today() + relativedelta(weeks=-2,days=1,weekday=0)).strftime('%Y-%m-%d'))," +
+                    "('" + fieldName + "', '<=', (context_today() + relativedelta(weeks=-1,weekday=6)).strftime('%Y-%m-%d'))," +
+                    "]";
+
+            case 'last_month':
+                return "['&'," +
+                    "('" + fieldName + "', '>=', (context_today() + relativedelta(months=-1,day=1)).strftime('%Y-%m-%d'))," +
+                    "('" + fieldName + "', '<=', (context_today() + relativedelta(day=1,days=-1)).strftime('%Y-%m-%d'))," +
+                    "]";
+
+            case 'last_quarter':
+                return "['&'," +
+                    "('" + fieldName + "', '>=', (context_today() + relativedelta(" +
+                            "months= - 3 - (context_today().month - 1) % 3," +
+                            "day=1" +
+                        ")).strftime('%Y-%m-%d'))," +
+                    "('" + fieldName + "', '<=', (context_today() + relativedelta(" +
+                            "months= - (context_today().month - 1) % 3," +
+                            "day=1," +
+                            "days=-1" +
+                        ")).strftime('%Y-%m-%d'))," +
+                    "]";
+
+            case 'last_year':
+                return  "['&'," +
+                    "('" + fieldName + "', '>=', (context_today() + relativedelta(month=1,day=1,years=-1)).strftime('%Y-%m-%d'))," +
+                    "('" + fieldName + "', '<=', (context_today() + relativedelta(month=1,day=1,days=-1)).strftime('%Y-%m-%d'))," +
+                    "]";
+
+            case 'last_7_days':
+                return "['&'," +
+                    "('" + fieldName + "', '>=', (context_today() + relativedelta(days=-7)).strftime('%Y-%m-%d'))," +
+                    "('" + fieldName + "', '<=', (context_today() + relativedelta(days=-1)).strftime('%Y-%m-%d'))," +
+                    "]";
+
+            case 'last_30_days':
+                return "['&'," +
+                    "('" + fieldName + "', '>=', (context_today() + relativedelta(days=-30)).strftime('%Y-%m-%d'))," +
+                    "('" + fieldName + "', '<=', (context_today() + relativedelta(days=-1)).strftime('%Y-%m-%d'))," +
+                    "]";
+
+            case 'last_365_days':
+                return "['&'," +
+                    "('" + fieldName + "', '>=', (context_today() + relativedelta(days=-365)).strftime('%Y-%m-%d'))," +
+                    "('" + fieldName + "', '<=', (context_today() + relativedelta(days=-1)).strftime('%Y-%m-%d'))," +
+                    "]";
+
+            default:
+                return [];
+        }
+    },
 });
 
 var GroupbyGroup = FilterGroup.extend({

@@ -30,7 +30,7 @@ var DropdownMenu = Widget.extend({
      *                      - 'style' (button style)
      * @param {Object} items list of menu items (type IGMenuItem below)
      *   interface IMenuItem {
-     *      itemId: string; unique id associated with the item
+     *      itemId: string; (optional) unique id associated with the item
      *      description: string; label printed on screen
      *      groupId: string;
      *      isActive: boolean; (optional) determines if the item is considered active
@@ -57,7 +57,9 @@ var DropdownMenu = Widget.extend({
         this.items = _.sortBy(items, 'groupId');
         _.each(this.items, this._prepareItem.bind(this));
     },
-
+    /**
+     * override
+     */
     start: function () {
         this.$menu = this.$('.o_dropdown_menu');
     },
@@ -117,13 +119,15 @@ var DropdownMenu = Widget.extend({
      * @param {Object} item
      */
      _prepareItem: function (item) {
+        item.itemId = item.itemId || _.uniqueId('__item__');
         item.isOpen = item.isOpen || false;
         item.isRemovable = item.isRemovable || false;
-        item.hasOptions = item.options && item.options.length !== 0 ? true : false;
-        item.defaultOptionId = item.hasOptions ?
-            (item.defaultOptionId || item.options[0].optionId) :
-            false;
-        item.currentOptionId = item.isActive ? (item.currentOptionId || item.defaultOptionId ) : false;
+        if (item.options && item.options.length !== 0) {
+            item.options = _.sortBy(item.options, 'groupId');
+            item.hasOptions = true;
+            item.defaultOptionId = item.defaultOptionId || item.options[0].optionId;
+            item.currentOptionId = item.isActive ? (item.currentOptionId || item.defaultOptionId ) : false;
+        }
     },
     /**
      * @private
