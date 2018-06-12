@@ -124,7 +124,7 @@ class StockMove(models.Model):
     scrap_ids = fields.One2many('stock.scrap', 'move_id')
     group_id = fields.Many2one('procurement.group', 'Procurement Group', default=_default_group_id)
     rule_id = fields.Many2one('procurement.rule', 'Procurement Rule', ondelete='restrict', help='The procurement rule that created this stock move')
-    push_rule_id = fields.Many2one('stock.location.path', 'Push Rule', ondelete='restrict', help='The push rule that created this stock move')
+    push_rule_id = fields.Many2one('procurement.rule', 'Push Rule', ondelete='restrict', help='The push rule that created this stock move')
     propagate = fields.Boolean(
         'Propagate cancel and split', default=True,
         help='If checked, when this move is cancelled, cancel the linked move too')
@@ -506,16 +506,16 @@ class StockMove(models.Model):
 
     def _push_apply(self):
         # TDE CLEANME: I am quite sure I already saw this code somewhere ... in routing ??
-        Push = self.env['stock.location.path']
+        Push = self.env['procurement.rule']
         for move in self:
             # if the move is already chained, there is no need to check push rules
             if move.move_dest_ids:
                 continue
             # if the move is a returned move, we don't want to check push rules, as returning a returned move is the only decent way
             # to receive goods without triggering the push rules again (which would duplicate chained operations)
-            domain = [('location_from_id', '=', move.location_dest_id.id)]
+            domain = [('location_src_id', '=', move.location_dest_id.id), ('action', 'in', ('push', 'pull_push'))]
             # first priority goes to the preferred routes defined on the move itself (e.g. coming from a SO line)
-            rules = self.env['stock.location.path']
+            rules = self.env['procurement.rule']
             if move.route_ids:
                 rules = Push.search(expression.AND([[('route_id', 'in', move.route_ids.ids)], domain]), order='route_sequence, sequence', limit=1)
             # second priority goes to the route defined on the product and product category

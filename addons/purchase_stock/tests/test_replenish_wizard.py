@@ -45,15 +45,13 @@ class TestReplenishWizard(TestStockCommon):
             'quantity': self.product_uom_qty,
             'warehouse_id': self.wh.id,
         })
-
         replenish_wizard.launch_replenishment()
         last_po_id = self.env['purchase.order'].search([
             ('origin', '=', 'Manual Replenishment'),
-            ('partner_id','=', self.vendor.id)
-            ])[-1]
+            ('partner_id', '=', self.vendor.id)
+            ])
         self.assertTrue(last_po_id, 'Purchase Order not found')
         order_line = last_po_id.order_line.search([('product_id','=', self.product1.id)])
         self.assertTrue(order_line,'The product is not in the Purchase Order')
         self.assertEqual(order_line.product_qty, self.product_uom_qty, 'Quantities does not match')
         self.assertEqual(order_line.price_unit, self.product1_price, 'Prices does not match')
-

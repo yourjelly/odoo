@@ -97,11 +97,6 @@ class TestPurchaseLeadTime(TestPurchase):
 
         # Update warehouse_1 with Incoming Shipments 3 steps
         self.warehouse_1.write({'reception_steps': 'three_steps'})
-
-        # Set delay on push rule
-        for push_rule in self.warehouse_1.reception_route_id.push_ids:
-            push_rule.write({'delay': 2})
-
         date_planned = fields.Datetime.to_string(fields.datetime.now() + timedelta(days=10))
         # Create procurement order of product_1
         self.env['procurement.group'].run(self.product_1, 5.000, self.uom_unit, self.warehouse_1.lot_stock_id, 'Test scheduler for RFQ', '/', {

@@ -1939,10 +1939,12 @@ class TestRoutes(TestStockCommon):
         # TODO: maybe add a new type on the "applicable on" fields?
         route = self.env['stock.location.route'].create({
             'name': 'new route',
-            'push_ids': [(0, False, {
+            'pull_ids': [(0, False, {
                 'name': 'create a move to push location',
-                'location_from_id': stock_location.id,
-                'location_dest_id': push_location.id,
+                'location_src_id': stock_location.id,
+                'location_id': push_location.id,
+                'company_id': self.env.user.company_id.id,
+                'action': 'push',
                 'auto': 'manual',
                 'picking_type_id': self.env.ref('stock.picking_type_in').id,
             })],

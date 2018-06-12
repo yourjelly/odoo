@@ -20,8 +20,7 @@ class ProcurementRule(models.Model):
             .filtered(lambda r: (not r.company_id or r.company_id == values['company_id']) and (not r.product_id or r.product_id == product_id))
         if not suppliers:
             msg = _('There is no vendor associated to the product %s. Please define a vendor for this product.') % (product_id.display_name,)
-            raise UserError(msg)
-
+            raise UserError(msg)   
         supplier = self._make_po_select_supplier(values, suppliers)
         partner = supplier.name
         # we put `supplier_info` in values for extensibility purposes

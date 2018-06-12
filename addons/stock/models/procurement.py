@@ -32,7 +32,7 @@ class ProcurementRule(models.Model):
     group_propagation_option = fields.Selection([
         ('none', 'Leave Empty'),
         ('propagate', 'Propagate'),
-        ('fixed', 'Fixed')], string="Propagation of Procurement Group", default='none')
+        ('fixed', 'Fixed')], string="Propagation of Procurement Group", default='propagate')
     group_id = fields.Many2one('procurement.group', 'Fixed Procurement Group')
     action = fields.Selection(
         selection=[('move', 'Pull'), ('push', 'Push'), ('pull_push', 'Pull & Push')], string='Action',
@@ -67,6 +67,39 @@ class ProcurementRule(models.Model):
         default='manual', index=True, required=True,
         help="The 'Manual Operation' value will create a stock move after the current one. "
              "With 'Automatic No Step Added', the location is replaced in the original move.")
+
+    def _apply(self, move):
+        new_date = (datetime.strptime(move.date_expected, DEFAULT_SERVER_DATETIME_FORMAT) + relativedelta(days=self.delay)).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        if move.procure_method != 'make_to_order':
+            if self.auto == 'transparent':
+                move.write({
+                    'date': new_date,
+                    'date_expected': new_date,
+                    'location_dest_id': self.location_id.id})
+                # avoid looping if a push rule is not well configured; otherwise call again push_apply to see if a next step is defined
+                if self.location_id != move.location_dest_id:
+                    # TDE FIXME: should probably be done in the move model IMO
+                    move._push_apply()
+            else:
+                new_move_vals = self._prepare_move_copy_values(move, new_date)
+                new_move = move.copy(new_move_vals)
+                move.write({'move_dest_ids': [(4, new_move.id)]})
+                new_move._action_confirm()
+
+    def _prepare_move_copy_values(self, move_to_copy, new_date):
+        new_move_vals = {
+                'origin': move_to_copy.origin or move_to_copy.picking_id.name or "/",
+                'location_id': move_to_copy.location_dest_id.id,
+                'location_dest_id': self.location_id.id,
+                'date': new_date,
+                'date_expected': new_date,
+                'company_id': self.company_id.id,
+                'picking_id': False,
+                'picking_type_id': self.picking_type_id.id,
+                'propagate': self.propagate,
+                'warehouse_id': self.warehouse_id.id,
+            }
+        return new_move_vals
 
     def _run_move(self, product_id, product_qty, product_uom, location_id, name, origin, values):
         if not self.location_src_id:
@@ -185,14 +218,14 @@ class ProcurementGroup(models.Model):
         values.setdefault('priority', '1')
         values.setdefault('date_planned', fields.Datetime.now())
         rule = self._get_rule(product_id, location_id, values)
-
+        action = 'move' if rule.action == 'pull_push' else rule.action
         if not rule:
             raise UserError(_('No procurement rule found. Please verify the configuration of your routes'))
 
-        if hasattr(rule, '_run_%s' % rule.action):
-            getattr(rule, '_run_%s' % rule.action)(product_id, product_qty, product_uom, location_id, name, origin, values)
+        if hasattr(rule, '_run_%s' % action):
+            getattr(rule, '_run_%s' % action)(product_id, product_qty, product_uom, location_id, name, origin, values)
         else:
-            _logger.error("The method _run_%s doesn't exist on the procument rules" % rule.action)
+            _logger.error("The method _run_%s doesn't exist on the procument rules" % action)
         return True
 
     @api.model
@@ -201,7 +234,7 @@ class ProcurementGroup(models.Model):
         group; then try on the routes defined for the product; finally fallback
         on the default behavior """
         if values.get('warehouse_id', False):
-            domain = expression.AND([['|', ('warehouse_id', '=', values['warehouse_id'].id), ('warehouse_id', '=', False)], domain])
+            domain = expression.AND([['|', ('warehouse_id', '=', values['warehouse_id'].id),  ('warehouse_id', '=', False)], domain])
         Pull = self.env['procurement.rule']
         res = self.env['procurement.rule']
         if values.get('route_ids', False):
@@ -221,7 +254,7 @@ class ProcurementGroup(models.Model):
         result = False
         location = location_id
         while (not result) and location:
-            result = self._search_rule(product_id, values, [('location_id', '=', location.id)])
+            result = self._search_rule(product_id, values, [('location_id', '=', location.id), ('action', '!=', 'push')])
             location = location.location_id
         return result
 

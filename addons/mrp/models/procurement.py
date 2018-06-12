@@ -65,3 +65,8 @@ class ProcurementRule(models.Model):
         date_planned = format_date_planned - relativedelta(days=product_id.produce_delay or 0.0)
         date_planned = date_planned - relativedelta(days=values['company_id'].manufacturing_lead)
         return date_planned
+
+    def _prepare_move_copy_values(self, move_to_copy, new_date):
+        new_move_vals = super(ProcurementRule, self)._prepare_move_copy_values(move_to_copy, new_date)
+        new_move_vals['production_id'] = False
+        return new_move_vals

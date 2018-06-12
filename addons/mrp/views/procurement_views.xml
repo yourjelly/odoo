@@ -8,7 +8,7 @@
             <field name="inherit_id" ref="stock.view_procurement_rule_form"/>
             <field name="arch" type="xml">
                 <field name="location_src_id" position="attributes">
-                    <attribute name="attrs">{'required': [('action', '=', 'move')], 'invisible': [('action', 'not in', ['move', 'manufacture'])]}</attribute>
+                    <attribute name="attrs">{'required': [('action', 'not in', ('buy', 'manufacture'))], 'invisible': [('action', '=', 'buy')]}</attribute>
                 </field>
             </field>
         </record>
