@@ -293,6 +293,39 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
         _.extend(this, result);
         return $.when();
     },
+    check_rpc_response: function (p, shadow) {
+        var self = this;
+        p = p.then(function (result) {
+            if (! shadow)
+                self.trigger('response');
+            return result;
+        }, function (type, error, textStatus, errorThrown) {
+            if (type === "server") {
+                if (! shadow)
+                    self.trigger('response');
+                if (error.code === 100) {
+                    self.uid = false;
+                }
+                return $.Deferred().reject(error, $.Event());
+            } else {
+                if (! shadow)
+                    self.trigger('response_failed');
+                var nerror = {
+                    code: -32098,
+                    message: "XmlHttpRequestError " + errorThrown,
+                    data: {type: "xhr"+textStatus, debug: error.responseText, objects: [error, errorThrown] }
+                };
+                return $.Deferred().reject(nerror, $.Event());
+            }
+        });
+        return p.fail(function () { // Allow deferred user to disable rpc_error call in fail
+            p.fail(function (error, event) {
+                if (!event.isDefaultPrevented()) {
+                    self.trigger('error', error, event);
+                }
+            });
+        });
+    },
     check_session_id: function () {
         var self = this;
         if (this.avoid_recursion)
@@ -363,36 +396,7 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
                 options.session_id = self.session_id || '';
             }
             var p = fct(url, "call", params, options);
-            p = p.then(function (result) {
-                if (! shadow)
-                    self.trigger('response');
-                return result;
-            }, function (type, error, textStatus, errorThrown) {
-                if (type === "server") {
-                    if (! shadow)
-                        self.trigger('response');
-                    if (error.code === 100) {
-                        self.uid = false;
-                    }
-                    return $.Deferred().reject(error, $.Event());
-                } else {
-                    if (! shadow)
-                        self.trigger('response_failed');
-                    var nerror = {
-                        code: -32098,
-                        message: "XmlHttpRequestError " + errorThrown,
-                        data: {type: "xhr"+textStatus, debug: error.responseText, objects: [error, errorThrown] }
-                    };
-                    return $.Deferred().reject(nerror, $.Event());
-                }
-            });
-            return p.fail(function () { // Allow deferred user to disable rpc_error call in fail
-                p.fail(function (error, event) {
-                    if (!event.isDefaultPrevented()) {
-                        self.trigger('error', error, event);
-                    }
-                });
-            });
+            return self.check_rpc_response(p, shadow);
         });
     },
     url: function (path, params) {

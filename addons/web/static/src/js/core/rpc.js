@@ -2,6 +2,7 @@ odoo.define('web.rpc', function (require) {
 "use strict";
 
 var ajax = require('web.ajax');
+var session = require('web.session');
 
 return {
     /**
@@ -14,8 +15,10 @@ return {
      * @returns {Deferred<any>}
      */
     query: function (params, options) {
+        var shadow = options && options.shadow || false;
         var query = this.buildQuery(params);
-        return ajax.rpc(query.route, query.params, options);
+        var response = ajax.rpc(query.route, query.params, shadow);
+        return session.check_rpc_response(response, false);
     },
     /**
      * @param {Object} options
