@@ -2,6 +2,8 @@ odoo.define('web.rpc', function (require) {
 "use strict";
 
 var ajax = require('web.ajax');
+var core = require('web.core');
+var session = require('web.session');
 
 return {
     /**
@@ -14,8 +16,46 @@ return {
      * @returns {Deferred<any>}
      */
     query: function (params, options) {
+        var shadow = options && options.shadow || false;
         var query = this.buildQuery(params);
-        return ajax.rpc(query.route, query.params, options);
+
+        var p = ajax.rpc(query.route, query.params, options).then(function (result) {
+            if (!shadow) {
+                core.bus.trigger('response');
+            }
+            return result;
+        }, function (type, error, textStatus, errorThrown) {
+            if (type === "server") {
+                if (!shadow) {
+                    core.bus.trigger('response');
+                }
+                if (error.code === 100) {
+                    session.uid = false;
+                }
+                return $.Deferred().reject(error, $.Event());
+            } else {
+                if (!shadow) {
+                    core.bus.trigger('response_failed');
+                }
+                var nerror = {
+                    code: -32098,
+                    message: "XmlHttpRequestError " + errorThrown,
+                    data: {
+                        type: "xhr"+textStatus,
+                        debug: error.responseText,
+                        objects: [error, errorThrown]
+                    },
+                };
+                return $.Deferred().reject(nerror, $.Event());
+            }
+        });
+        return p.fail(function () { // Allow deferred user to disable rpc_error call in fail
+            p.fail(function (error, event) {
+                if (!event.isDefaultPrevented()) {
+                    core.bus.trigger('error', error, event);
+                }
+            });
+        });
     },
     /**
      * @param {Object} options

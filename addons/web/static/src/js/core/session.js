@@ -365,19 +365,19 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
             var p = fct(url, "call", params, options);
             p = p.then(function (result) {
                 if (! shadow)
-                    self.trigger('response');
+                    core.bus.trigger('response');
                 return result;
             }, function (type, error, textStatus, errorThrown) {
                 if (type === "server") {
                     if (! shadow)
-                        self.trigger('response');
+                        core.bus.trigger('response');
                     if (error.code === 100) {
                         self.uid = false;
                     }
                     return $.Deferred().reject(error, $.Event());
                 } else {
                     if (! shadow)
-                        self.trigger('response_failed');
+                        core.bus.trigger('response_failed');
                     var nerror = {
                         code: -32098,
                         message: "XmlHttpRequestError " + errorThrown,
@@ -389,7 +389,7 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
             return p.fail(function () { // Allow deferred user to disable rpc_error call in fail
                 p.fail(function (error, event) {
                     if (!event.isDefaultPrevented()) {
-                        self.trigger('error', error, event);
+                        core.bus.trigger('error', error, event);
                     }
                 });
             });
