@@ -36,8 +36,9 @@
                 }
         }
         .o_web_settings_dashboard_pills {
+            display: flex;
             margin-top: 10px;
-
+            width: auto;
             > a {
                 padding: 10px;
 
