@@ -18,12 +18,11 @@ class ResConfigSettings(models.TransientModel):
         if not self.mass_mailing_outgoing_mail_server:
             self.mass_mailing_mail_server_id = False
 
-    @api.onchange('group_mass_mailing_double_opt_in')
-    def _onchange_group_mass_mailing_double_opt_in(self):
+    @api.multi
+    def execute(self):
+        self.ensure_one()
         if not self.group_mass_mailing_double_opt_in:
             self.env['mail.mass_mailing.list'].search([]).write({
                 'double_opt_in': False,
             })
-            self.env['mail.mass_mailing.list_contact_rel'].search([('state', '=', 'waiting')]).write({
-                'state': 'confirmed',
-            })
+        return super(ResConfigSettings, self).execute()

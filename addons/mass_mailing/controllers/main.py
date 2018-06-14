@@ -38,6 +38,10 @@ class MassMailController(http.Controller):
     def mailing(self, mailing_id, email=None, res_id=None, token="", **post):
         mailing = request.env['mail.mass_mailing'].sudo().browse(mailing_id)
         if mailing.exists():
+            res_ids = [res_id and int(res_id)]
+            right_token = mailing._unsubscribe_token(res_id, email)
+            if not consteq(str(token), right_token):
+                raise exceptions.AccessDenied()
             if mailing.mailing_model_name == 'mail.mass_mailing.contact':
                 contacts = request.env['mail.mass_mailing.contact'].sudo().search([('email', '=', email)])
                 return request.render('mass_mailing.page_unsubscribe', {
@@ -46,7 +50,7 @@ class MassMailController(http.Controller):
                     'mailing_id': mailing_id})
             elif mailing.mailing_model_name == 'mail.mass_mailing.list':
                 contact = request.env['mail.mass_mailing.contact'].sudo().search([('email', '=ilike', email)])
-                opt_out_list_ids = contact.opt_out_list_ids.filtered(lambda rel: rel.opt_out == True).mapped('list_id')
+                opt_out_list_ids = contact.opt_out_list_ids.filtered(lambda rel: rel.state != 'confirmed').mapped('list_id')
                 return request.render('mass_mailing.page_list_subscription', {
                     'email': email,
                     'mailing_id': mailing_id,
@@ -55,10 +59,6 @@ class MassMailController(http.Controller):
                     'contact': contact
                 })
             else:
-                res_ids = [res_id and int(res_id)]
-                right_token = mailing._unsubscribe_token(res_id, email)
-                if not consteq(str(token), right_token):
-                    raise exceptions.AccessDenied()
                 mailing.update_opt_out(email, res_ids, True)
                 return request.render('mass_mailing.page_unsubscribed', {
                     'email': email,
@@ -95,17 +95,23 @@ class MassMailController(http.Controller):
         return 'error'
 
     @route('/mail/mailing/feedback', type='json', auth='none')
-    def send_feedback(self, mailing_id, email, feedback):
-        mailing = request.env['mail.mass_mailing'].sudo().browse(mailing_id)
-        if mailing.exists() and email:
-            model = request.env[mailing.mailing_model_real]
-            email_field = 'email' if 'email' in model._fields else 'email_from'
-            record = model.sudo().search([(email_field, '=ilike', email)])
-            if record:
-                record.sudo().message_post(body=_("Feedback from %s: %s" % (email, feedback)))
-                return 'success'
-            return 'not found'
-        return 'error'
+    def send_feedback(self, email, feedback, *mailing_id):
+        if mailing_id:
+            mailing = request.env['mail.mass_mailing'].sudo().browse(mailing_id)
+            if mailing.exists() and email:
+                model = request.env[mailing.mailing_model_real]
+                email_field = 'email' if 'email' in model._fields else 'email_from'
+            else:
+                return 'not found'
+        else:
+            model = request.env['mail.mass_mailing.contact']
+            email_field = 'email'
+
+        record = model.sudo().search([(email_field, '=ilike', email)])
+        if record:
+            record.sudo().message_post(body=_("Feedback from %s: %s" % (email, feedback)))
+            return 'success'
+        return 'not found'
 
     @route('/mail/mailing/blacklist/check', type='json', auth='none')
     def check_blacklist(self, email):

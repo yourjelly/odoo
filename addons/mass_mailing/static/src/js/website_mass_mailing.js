@@ -100,7 +100,7 @@ odoo.define('mass_mailing.unsubscribed', function (require) {
     // ==================
     $('#button_feedback').click(function (e) {
         var feedback = $("textarea[name='opt_out_feedback']").val();
-        send_feedback(ajax, e, mailing_id, email, feedback);
+        send_feedback(ajax, e, email, feedback, mailing_id);
     });
 });
 
@@ -155,6 +155,36 @@ odoo.define('mass_mailing.mailing_list_subcription', function (require) {
         }
     });
 
+    $('#button_update_subscription_mail').click(function (e) {
+        if ($('#button_update_subscription_mail').hasClass('clickable')) {
+            e.preventDefault();
+
+            var checked_ids = [];
+            $("input[type='checkbox']:checked").each(function (i){
+              checked_ids[i] = parseInt($(this).val());
+            });
+
+            var unchecked_ids = [];
+            $("input[type='checkbox']:not(:checked)").each(function (i){
+              unchecked_ids[i] = parseInt($(this).val());
+            });
+
+            ajax.jsonRpc('/mail/mailing/update_subscriptions', 'call', {'opt_in_ids': checked_ids, 'opt_out_ids': unchecked_ids, 'email': email, 'mailing_id': mailing_id})
+                .then(function (result) {
+                    $('#subscription_info').html(_t('Your changes have been saved successfully.'))
+                         .removeClass('alert-warning').removeClass('alert-info')
+                         .addClass('alert-success');
+                })
+                .fail(function () {
+                    $('#subscription_info').html(_t('Your changes have not been saved, try again later.')).removeClass('alert-info').addClass('alert-warning');
+                });
+
+            check_blacklist_state(ajax, email, function(){
+                $('[name="button_subscription"]').attr('disabled',true).removeClass('clickable');
+            });
+        }
+    });
+
     $(".mail_list_checkbox").click(function (){
         $('#subscription_info').html(_t('Choose your mailing subscriptions.')).removeClass('alert-success').addClass('alert-info');
         $('[name="button_subscription"]').attr('disabled',false).addClass('clickable');
@@ -178,7 +208,11 @@ odoo.define('mass_mailing.mailing_list_subcription', function (require) {
     // ==================
     $('#button_feedback_subscription').click(function (e) {
         var feedback = $("textarea[name='opt_out_feedback_subscription']").val();
-        send_feedback(ajax, e, mailing_id, email, feedback);
+        send_feedback(ajax, e, email, feedback, mailing_id);
+    });
+    $('#button_feedback_subscription_mail').click(function (e) {
+        var feedback = $("textarea[name='opt_out_feedback_subscription']").val();
+        send_feedback(ajax, e, email, feedback);
     });
 });
 
@@ -316,9 +350,13 @@ function check_blacklist_state(ajax, email, callback){
         });
 }
 
-function send_feedback(ajax, e, mailing_id, email, feedback){
+function send_feedback(ajax, e, email, feedback, mailing_id){
     e.preventDefault();
-    ajax.jsonRpc('/mail/mailing/feedback', 'call', {'mailing_id': mailing_id, 'email': email, 'feedback': feedback})
+    var args = {'email': email, 'feedback': feedback};
+    if (mailing_id != undefined)
+        args.mailing_id = mailing_id;
+
+    ajax.jsonRpc('/mail/mailing/feedback', 'call', args)
         .then(function (result) {
              $('#div_feedback_confirmation').show();
              $("#div_feedback").hide();

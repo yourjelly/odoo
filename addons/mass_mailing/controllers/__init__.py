@@ -3,3 +3,4 @@
 
 from . import main
 from . import web_editor
+from . import subscription_mail

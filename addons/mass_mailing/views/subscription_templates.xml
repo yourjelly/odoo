@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="mailing_list_subscription_mail">
+            <table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: white; color: #454748; border-collapse:separate;">
+            <tbody>
+                <!-- HEADER -->
+                <tr>
+                    <td align="center" style="min-width: 590px;">
+                        <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                            <tr>
+                                <td valign="middle" align="right">
+                                <a t-att-href="(user.company_id.website) or '#'" style="text-decoration:none;">
+                                    <img border="0" src="/mass_mailing/static/src/img/theme_default/s_default_image_logo.png" style="height:auto;max-width:400px;" alt="Your Logo" />
+                                </a>
+                            </td></tr>
+                            <tr><td colspan="2" style="text-align:center;">
+                              <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;"/>
+                            </td></tr>
+                        </table>
+                    </td>
+                </tr>
+                <!-- CONTENT -->
+                <tr>
+                    <td align="center" style="min-width: 590px;">
+                        <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                             <tr>
+                                <td valign="top" colspan="2" style="font-size: 14px;">
+                                    <p style="margin:0">Dear <t t-esc="mailing.list_contact_id.contact_id.name"/></p>
+                                    <p style="margin:0">You are receiving this email because you opted in at our mailing list: <t t-esc="mailing.list_contact_id.list_id.name"/></p>
+                                    <p style="margin:0"></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding-left: 130px; text-align: center; height: 40px;">
+                                     <a summary="o_mail_notification" style="text-decoration: none; margin-right: 5px; margin-top:0px; max-width: 100px; height: 40px; color:white; background-color: #875A7B; font-weight: bold;
+                                        border: 2px solid #ffffff; border-radius: 5px; text-align: center; vertical-align: middle; padding: 8px 24px 8px 24px;" t-att-href="accept_link" target="_blank">
+                                            Accept
+                                    </a>
+                                </td>
+                                <td summary="o_mail_notification" style="padding-right: 130px; text-align: center; height: 40px;">
+                                    <a style="text-decoration: none; margin-left: 5px; margin-top:0px;max-width: 100px; height: 40px; color:white; background-color: #875A7B; font-weight: bold;
+                                        border: 2px solid #ffffff; border-radius: 5px; text-align: center; vertical-align: middle; padding: 8px 24px 8px 24px;" t-att-href="decline_link" target="_blank">
+                                            Decline
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr><td colspan="2" style="text-align:center;">
+                              <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                            </td></tr>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+            </table>
+            </td></tr>
+            <!-- POWERED BY -->
+            <tr><td colspan="3" align="center" style="min-width: 590px;">
+                <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+                  <tr><td style="text-align: center; font-size: 14px;">
+                      <strong>Sent by <t t-esc="user.company_id.name"/> using <a href="www.odoo.com" style="text-decoration:none; color: #875A7B;">Odoo</a></strong>
+                  </td></tr>
+                </table>
+            </td></tr>
+            </table>
+        </template>
+    </data>
+
+    <template id="mailing_list_accept_subscription">
+        <div class="container mt8">
+            <div class="row">
+                <form action="/mail/mailing/unsubscribe" method="POST" id="mailing_list_subscription_form">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="email" t-att-value="email"/>
+                    <input type="hidden" name="mailing_id" t-att-value="mailing_id"/>
+                    <input type="hidden" name="current_list_id" t-att-value="current_list_id"/>
+                    <input type="hidden" name="list_ids" t-att-value="list_ids"/>
+                    <input type="hidden" name="opt_out_list_ids" t-att-value="opt_out_list_ids"/>
+
+                    <!--Confirm accept subscription-->
+                     <div id="div_opt_out" class="col-md-6 col-md-offset-3">
+                        <div class="alert alert-success text-center">
+                            <p>Thank you for subscribing to <strong><t t-esc="current_list_id.name"/></strong>!</p>
+                        </div>
+                     </div>
+
+                    <!-- Opt-out -->
+                    <div id="div_opt_out" class="col-md-6 col-md-offset-3">
+                        <h1 class="page-header">Mailing Subscriptions</h1>
+
+                        <t t-if="contact">
+                            <div id="subscription_info" class="alert alert-info text-center">
+                                <p>You can choose your mailing subscriptions.</p>
+                            </div>
+
+                            <ul class="list-group">
+                                <t t-foreach="list_ids" t-as="list_id">
+                                    <li class="list-group-item">
+                                        <input type="checkbox" class="mail_list_checkbox" name="contact_ids"
+                                            t-att-value="list_id['id']" t-att-checked="None if list_id in opt_out_list_ids else 'checked'"/>
+                                        <t t-esc="list_id.display_name"/>
+                                    </li>
+                                </t>
+                            </ul>
+
+                            <div class="text-center mb16">
+                                <div class="btn btn-primary" name="button_subscription" id="button_update_subscription_mail">Update my preferences</div>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Blacklist -->
+                    <div id="div_blacklist" class="col-md-6 col-md-offset-3">
+                        <h1 class="page-header">Global Subscription</h1>
+
+                        <div id="div_state_blacklist" class="alert alert-info text-center" style="display:none">
+                            <p><span id="state_blacklist"></span></p>
+                        </div>
+
+                        <div id="div_confirm_blacklisted" class="alert alert-success text-center" style="display:none">
+                            <p>You have been successfully <strong>removed</strong> from our global mailing subscription!</p>
+                            <p>You will not be contacted anymore by our services.</p>
+                            <!--<br/>-->
+                            <!--<img src="http://japanory.typepad.co.uk/.a/6a00e553a4288588340162ffe8bf45970d-300wi" alt="Sad face" height="80" width="80"/>-->
+                             <!--<img src="https://punchpass.com/img/blog/32.png" alt="Sad face" height="80" width="80"/>-->
+                        </div>
+
+                        <div id="div_removed_blacklist" class="alert alert-success text-center" style="display:none">
+                            <p>Welcome back!</p>
+                            <p>You are now able to be contacted by our services.</p>
+                        </div>
+
+                        <div id="div_found" class="alert alert-warning text-center" style="display:none">
+                            <p>You were already blacklisted.</p>
+                            <p>If you still received a mail from us, please contact us to report the issue.</p>
+                        </div>
+
+                        <div id="div_not_found" class="alert alert-warning text-center" style="display:none">
+                            <p>You were not blacklisted.</p>
+                            <p>If you still not receive mails from us, please contact us to report the issue.</p>
+                        </div>
+
+                        <div id="div_error" class="alert alert-warning text-center" style="display:none">
+                            <p>An error occured. Please try again later or contact us.</p>
+                        </div>
+
+                        <div id="div_blacklist_add" class="text-center mb16" style="display:none">
+                            <p>We would be very sad to see you go, but if you don't want to hear from us again, click here to unsubscribe completely</p>
+                            <div class="btn btn-primary" id="button_add_blacklist_subscription">Unsubscribe forever</div>
+                        </div>
+
+                        <div id="div_blacklist_remove" class="text-center mb16" style="display:none">
+                            <p>We would be very pleased if you changed your mind and you still want to receive news from us.</p>
+                            <div class="btn btn-primary" id="button_remove_blacklist_subscription">Come back</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-md-offset-3">
+                        <h1 class="page-header">Feedback</h1>
+                        <div class="text-center mb16">
+                            <div id="div_feedback_confirmation" class="alert alert-success text-center" style="display:none">
+                                <p>Thank you! Your feedback has been sent successfully!</p>
+                            </div>
+                            <div id="div_feedback">
+                                <p>Your feedback is really important to us to improve our service.</p>
+                                <textarea name="opt_out_feedback_subscription" cols="60" rows="5"></textarea>
+
+                                <div class="text-center mb16">
+                                    <div class="btn btn-primary" id="button_feedback_subscription_mail">Send</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </template>
+
+    <template id="mailing_list_decline_subscription">
+        <div class="container mt8">
+            <div class="row">
+                <form action="/mail/mailing/unsubscribe" method="POST" id="mailing_list_subscription_form">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="email" t-att-value="email"/>
+                    <input type="hidden" name="mailing_id" t-att-value="mailing_id"/>
+                    <input type="hidden" name="current_list_id" t-att-value="current_list_id"/>
+                    <input type="hidden" name="list_ids" t-att-value="list_ids"/>
+                    <input type="hidden" name="opt_out_list_ids" t-att-value="opt_out_list_ids"/>
+
+                    <!--Confirm accept subscription-->
+                     <div id="div_opt_out" class="col-md-6 col-md-offset-3">
+                        <div class="alert alert-success text-center">
+                            <p>You have been successfully unsubscribed from <strong><t t-esc="current_list_id.name"/></strong>!</p>
+                        </div>
+                     </div>
+
+                    <!-- Opt-out -->
+                    <div id="div_opt_out" class="col-md-6 col-md-offset-3">
+                        <h1 class="page-header">Mailing Subscriptions</h1>
+
+                        <t t-if="contact">
+                            <div id="subscription_info" class="alert alert-info text-center">
+                                <p>You can choose your mailing subscriptions.</p>
+                            </div>
+
+                            <ul class="list-group">
+                                <t t-foreach="list_ids" t-as="list_id">
+                                    <li class="list-group-item">
+                                        <input type="checkbox" class="mail_list_checkbox" name="contact_ids"
+                                            t-att-value="list_id['id']" t-att-checked="None if list_id in opt_out_list_ids else 'checked'"/>
+                                        <t t-esc="list_id.display_name"/>
+                                    </li>
+                                </t>
+                            </ul>
+
+                            <div class="text-center mb16">
+                                <div class="btn btn-primary" name="button_subscription" id="button_update_subscription_mail">Update my preferences</div>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Blacklist -->
+                    <div id="div_blacklist" class="col-md-6 col-md-offset-3">
+                        <h1 class="page-header">Global Subscription</h1>
+
+                        <div id="div_state_blacklist" class="alert alert-info text-center" style="display:none">
+                            <p><span id="state_blacklist"></span></p>
+                        </div>
+
+                        <div id="div_confirm_blacklisted" class="alert alert-success text-center" style="display:none">
+                            <p>You have been successfully <strong>removed</strong> from our global mailing subscription!</p>
+                            <p>You will not be contacted anymore by our services.</p>
+                            <!--<br/>-->
+                            <!--<img src="http://japanory.typepad.co.uk/.a/6a00e553a4288588340162ffe8bf45970d-300wi" alt="Sad face" height="80" width="80"/>-->
+                             <!--<img src="https://punchpass.com/img/blog/32.png" alt="Sad face" height="80" width="80"/>-->
+                        </div>
+
+                        <div id="div_removed_blacklist" class="alert alert-success text-center" style="display:none">
+                            <p>Welcome back!</p>
+                            <p>You are now able to be contacted by our services.</p>
+                        </div>
+
+                        <div id="div_found" class="alert alert-warning text-center" style="display:none">
+                            <p>You were already blacklisted.</p>
+                            <p>If you still received a mail from us, please contact us to report the issue.</p>
+                        </div>
+
+                        <div id="div_not_found" class="alert alert-warning text-center" style="display:none">
+                            <p>You were not blacklisted.</p>
+                            <p>If you still not receive mails from us, please contact us to report the issue.</p>
+                        </div>
+
+                        <div id="div_error" class="alert alert-warning text-center" style="display:none">
+                            <p>An error occured. Please try again later or contact us.</p>
+                        </div>
+
+                        <div id="div_blacklist_add" class="text-center mb16" style="display:none">
+                            <p>We would be very sad to see you go, but if you don't want to hear from us again, click here to unsubscribe completely</p>
+                            <div class="btn btn-primary" id="button_add_blacklist_subscription">Unsubscribe forever</div>
+                        </div>
+
+                        <div id="div_blacklist_remove" class="text-center mb16" style="display:none">
+                            <p>We would be very pleased if you changed your mind and you still want to receive news from us.</p>
+                            <div class="btn btn-primary" id="button_remove_blacklist_subscription">Come back</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-md-offset-3">
+                        <h1 class="page-header">Feedback</h1>
+                        <div class="text-center mb16">
+                            <div id="div_feedback_confirmation" class="alert alert-success text-center" style="display:none">
+                                <p>Thank you! Your feedback has been sent successfully!</p>
+                            </div>
+                            <div id="div_feedback">
+                                <p>Your feedback is really important to us to improve our service.</p>
+                                <textarea name="opt_out_feedback_subscription" cols="60" rows="5"></textarea>
+
+                                <div class="text-center mb16">
+                                    <div class="btn btn-primary" id="button_feedback_subscription_mail">Send</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </template>
+
+    <template id="page_decline_subscription" name="Decline Subscription">
+        <t t-call="mass_mailing.layout">
+            <t t-call="mass_mailing.mailing_list_decline_subscription"/>
+        </t>
+    </template>
+
+    <template id="page_accept_subscription" name="Accept Subscription">
+        <t t-call="mass_mailing.layout">
+            <t t-call="mass_mailing.mailing_list_accept_subscription"/>
+        </t>
+    </template>
+</odoo>

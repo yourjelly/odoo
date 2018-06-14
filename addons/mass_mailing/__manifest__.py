@@ -40,6 +40,7 @@
         'views/res_users_views.xml',
         'views/mail_channel_partners_view.xml',
         'views/unsubscribe_templates.xml',
+        'views/subscription_templates.xml',
     ],
     'demo': [
         'data/mass_mailing_demo.xml',

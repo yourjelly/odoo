@@ -33,7 +33,7 @@ class MassMailController(http.Controller):
         if not contact_ids:
             # inline add_to_list as we've already called half of it
             Contacts.create({'name': name, 'email': email, 'list_ids': [(6,0,[int(list_id)])]})
-        elif contact_ids.state != 'confirmed':
+        elif contact_ids.opt_out_list_ids.filtered(lambda r: r.list_id.id == int(list_id)).state != 'confirmed':
             contact_ids.state = 'confirmed'
         # add email to session
         request.session['mass_mailing_email'] = email
