@@ -2,15 +2,16 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 """
-This python module contains a low-level SQL query builder, the generated SQL statements
-are specific to the PostgreSQL idiom since its what Odoo uses, therefore it is guaranteed to work
-with PostgreSQL, however it may still work with other RDBMS, but this is not guaranteed.
+This python module contains a high-level abstraction for building SQL queries,
+the generated SQL statements are specific to the PostgreSQL idiom since it's what Odoo uses,
+therefore it is guaranteed to work with PostgreSQL, however it may still work with other RDBMS,
+but this is not guaranteed.
 
 Usage:
 
 The basic object needed for creating SQL statements and expressions is the `Row` object, it
-represents (in an abstract manner) a row from a table, it requires one argument for initialization
-which is the name of the table, it accepts a second, optional argument as a flag called `nullable`,
+represents a row from a table, it requires one argument for initialization which is the name of
+the table containing such row, it accepts a second, optional argument as a flag called `nullable`,
 this flag, when set to true, means "take the nulls from this table when performing a Join", which
 helps in the inference of join types.
 
@@ -151,6 +152,8 @@ class Expression(object):
         return Expression('ILIKE', self, other)
 
     def in_(self, other):
+        if isinstance(other, tuple) and not other:
+            raise ValueError("Cannot perform IN operation on an empty tuple.")
         return Expression('IN', self, other)
 
     @property
@@ -160,9 +163,7 @@ class Expression(object):
         nodes = [getattr(self, 'left', None), getattr(self, 'right', None)]
 
         for node in nodes:
-            if isinstance(node, Column):
-                res |= set([node._row])
-            elif isinstance(node, Expression):
+            if isinstance(node, Expression):
                 res |= node.rows
 
         if hasattr(self, '_row'):
@@ -208,6 +209,16 @@ class Expression(object):
 class Case(Expression):
 
     def __init__(self, cases, default=None, expr=None):
+        """
+        Generates a `CASE WHEN` SQL expression.
+
+        Arguments:
+            cases: List of tuples, each containing two elements, the first being the
+                expression for the WHEN clause and the second one being the expression for the
+                THEN clause.
+            default: Expression for the ELSE clause.
+            expr: Optional expression between the CASE and the WHEN clauses.
+        """
         self.cases = cases
         self.default = default
         self.expr = expr
@@ -357,6 +368,8 @@ class Column(Expression):
 
 class BaseQuery(Expression):
 
+    __slots__ = ('sql', 'args', '_rows', '_returning', '_where')
+
     def __init__(self, *args, **kwargs):
         """
         Helper class for combining the different parts of any Query object.
@@ -369,8 +382,23 @@ class BaseQuery(Expression):
         to generate their own SQL statements, some may override already-defined _build methods,
         some may override _to_sql as they might have very specific behavior.
         """
+        self._rows = []
+        self._returning = []
+        self._where = None
         self.sql = []
         self.args = []
+
+    def __hash__(self):
+        return hash(tuple(self._rows + self._returning + self.sql + self.args) + (self._where,))
+
+    def __getattr__(self, name):
+        if name.startswith('__'):
+            raise AttributeError
+        return Column(self, name)
+
+    @property
+    def rows(self):
+        return set()
 
     def _build_base(self, alias_mapping):
         raise NotImplementedError
@@ -383,20 +411,23 @@ class BaseQuery(Expression):
         return self.__class__(**self.attrs)
 
     def _build_from(self, alias_mapping):
-        rows = getattr(self, '_rows', False)
-
-        if rows:
-            sql = []
-            for row in rows:
-                if isinstance(row, tuple):
-                    sql.append(row[0]._to_sql(alias_mapping))
-                    if isinstance(row[1], (list, tuple)):
-                        self.args += row[1]
-                    else:
-                        self.args.append(row[1])
+        sql = []
+        for row in self._rows:
+            if isinstance(row, tuple):
+                sql.append(row[0]._to_sql(alias_mapping))
+                if isinstance(row[1], (list, tuple)):
+                    self.args += row[1]
+                else:
+                    self.args.append(row[1])
+            else:
+                if isinstance(row, BaseQuery):
+                    _sql, _args = row._to_sql(alias_mapping)
+                    sql.append("(%s) %s" % (_sql, alias_mapping[row]))
+                    self.args += _args
                 else:
                     sql.append(row._to_sql(alias_mapping))
 
+        if sql:
             self.sql.append("FROM %s" % ', '.join(sql))
 
     def _build_joins(self, alias_mapping):
@@ -406,10 +437,8 @@ class BaseQuery(Expression):
         pass
 
     def _build_where(self, alias_mapping):
-        where = getattr(self, '_where', False)
-
-        if where:
-            sql, args = where._to_sql(alias_mapping)
+        if self._where is not None:
+            sql, args = self._where._to_sql(alias_mapping)
             self.sql.append("WHERE %s" % sql)
             self.args += args
 
@@ -429,22 +458,20 @@ class BaseQuery(Expression):
         pass
 
     def _build_returning(self, alias_mapping):
-        returning = getattr(self, '_returning', False)
         args = []
+        sql = []
 
-        if returning:
-            sql = []
+        for e in self._returning:
+            if isinstance(e, Row):
+                sql.append('*')
+                break
+            else:
+                # Column or Expression
+                _sql, _args = e._to_sql(alias_mapping)
+                sql.append(_sql)
+                args += _args
 
-            for e in returning:
-                if isinstance(e, Row):
-                    sql.append('*')
-                    break
-                else:
-                    # Column or Expression
-                    _sql, _args = e._to_sql(alias_mapping)
-                    sql.append(_sql)
-                    args += _args
-
+        if sql:
             self.sql.append("RETURNING %s" % ', '.join(sql))
             self.args += args
 
@@ -589,6 +616,11 @@ class Desc(Modifier):
 
 class Select(BaseQuery):
 
+    __slots__ = (
+        '_columns', '_order', '_joins', '_distinct', '_group', '_having', '_limit',
+        '_offset', '_aliased',
+    )
+
     def __init__(self, columns, where=None, order=None, joins=None, distinct=False,
                  group=None, having=None, limit=None, offset=0):
         """
@@ -660,12 +692,27 @@ class Select(BaseQuery):
         }
 
     def _get_tables(self):
+        # TODO: Generalize
         tables = []
         for col in self._columns:
             if self._aliased:
-                # If the columns argument is a dict, it can only contain Row objects.
-                # SELECT <col> AS <alias>
-                t = self._columns[col]._row
+                if col is None:
+                    # Aliased and Non-Aliased columns
+                    t = set()
+                    for c in self._columns[col]:
+                        t |= c.rows
+                    t = list(t)
+                else:
+                    t = self._columns[col]
+                    if isinstance(t, (Row, tuple)):
+                        # SELECT *
+                        pass
+                    elif isinstance(t, (Func, Case)) and not isinstance(t, Unnest):
+                        # sort since the rows property is a set, important for unittest determinism
+                        t = sorted(list(t.rows), key=lambda r: r._table)
+                    else:
+                        # SELECT <col> AS <alias>
+                        t = t.rows
             else:
                 # TODO: Optimize so as to get .rows everywhere
                 # If the columns argument is a list, it can contain Row or Column objects
@@ -679,7 +726,7 @@ class Select(BaseQuery):
                     # SELECT <col>
                     t = col._row
 
-            if isinstance(t, (Row, tuple)):
+            if isinstance(t, (Row, Select, tuple)):
                 if t not in tables:
                     tables.append(t)
             else:
@@ -768,13 +815,34 @@ class Select(BaseQuery):
 
         _sql = []
         for c in self._columns:
+            # TODO: Generalize and simplify
             if isinstance(c, Row):
                 _sql.append("*")
             elif self._aliased:
-                col = self._columns[c]
-                __sql, _args = col._to_sql(alias_mapping)
-                _sql.append("%s AS %s" % (__sql, c))
-                args += _args
+                if c is None:
+                    cols = self._columns[c]
+                    for col in cols:
+                        __sql, _args = col._to_sql(alias_mapping)
+                        if isinstance(col, (Case, BaseQuery)):
+                            _sql.append("(%s)" % __sql)
+                        elif isinstance(col, tuple):
+                            # Special case, using a literal in the select clause
+                            _sql.append("%s")
+                        else:
+                            _sql.append("%s" % __sql)
+                        args += _args
+                else:
+                    col = self._columns[c]
+                    if isinstance(col, tuple):
+                        _sql.append("%%s AS %s" % c)
+                        _args = [col[1]]
+                    else:
+                        __sql, _args = col._to_sql(alias_mapping)
+                        if isinstance(col, (Case, BaseQuery)):
+                            _sql.append("(%s) AS %s" % (__sql, c))
+                        else:
+                            _sql.append("%s AS %s" % (__sql, c))
+                    args += _args
             elif isinstance(c, Unnest):
                 # Special case, Unnest can be used in a FROM clause
                 r = c._row[0]
@@ -814,10 +882,10 @@ class Select(BaseQuery):
                 # Implicit joins
                 # --------------
                 # This is a heuristic that determines a join based solely on its ON condition,
-                # this mean that implicit joins without an ON condition are not possible.
+                # this means that implicit joins without an ON condition are not possible.
                 # In order for the implicit join detection to work, all rows referenced in the
                 # ON condition must already exist in the Select query, either in the FROM clause
-                # or in other JOIN clauses.
+                # or in other JOIN clauses, except for the row to be joined.
                 # The join table will be deduced by substracting from the set of rows referenced
                 # inside the ON expression the set of rows that are already referenced in the
                 # Select query, the remainder should be a single row, the join row.
@@ -878,12 +946,14 @@ class QueryExpression(Select):
 
 class Delete(BaseQuery):
 
-    def __init__(self, rows, using=None, where=None, returning=None):
+    __slots__ = ('_using')
+
+    def __init__(self, table, using=None, where=None, returning=None):
         """
         Stateless class for generating SQL DELETE statements.
 
         Args:
-            rows: List of Row instances of the tables from which records will be deleted.
+            table: List of Row instances of the tables from which records will be deleted.
             using: List of Row instances that may appear in the query's expressions but that
                 won't be deleted from.
             where (Expression): Expression that will filter the table for records to be deleted.
@@ -897,13 +967,13 @@ class Delete(BaseQuery):
             DELETE FROM "res_partner" "a" WHERE "a"."active" = 'False'
         """
         super(Delete, self).__init__()
-        self._rows = rows
+        self._rows = table
         self._using = using or []
         self._where = where
         self._returning = returning or []
 
-    def rows(self, *rows):
-        return Delete(**{**self.attrs, 'rows': rows})
+    def table(self, *rows):
+        return Delete(**{**self.attrs, 'table': rows})
 
     def using(self, *tables):
         return Delete(**{**self.attrs, 'using': tables})
@@ -917,7 +987,7 @@ class Delete(BaseQuery):
     @property
     def attrs(self):
         return {
-            'rows': self._rows,
+            'table': self._rows,
             'using': self._using,
             'where': self._where,
             'returning': self._returning,
@@ -934,6 +1004,8 @@ class Delete(BaseQuery):
 
 
 class With(BaseQuery):
+
+    __slots__ = ('_body', '_tail', '_recur')
 
     def __init__(self, body, tail, recursive=False):
         """
@@ -981,19 +1053,21 @@ class With(BaseQuery):
 
 class Update(BaseQuery):
 
+    __slots__ = ('_set', '_main')
+
     def __init__(self, _set, where=None, returning=None):
         """
         Class for creating UPDATE SQL statements.
 
         Args:
-            exprs: List of "assignment-expressions", this can be achieved with at least one column
-                (on the LHS) and the << operator, the RHS operand can be any primitive or Column.
+            exprs: Dict of columns to update as keys and the value to set as values, if order
+                is important, then an OrderedDict can be passed-in.
             where (Expression): Expression that will filter out the records to Update.
             returning: List of columns that the UPDATE statement should return.
 
         Example:
             >>> r = Row("res_partner")
-            >>> u = Update([r.name << "John", r.surname << "Wick"], r.name == NULL, [r.id])
+            >>> u = Update({r.name: "John", r.surname: "Wick"}, r.name == NULL, [r.id])
             >>> u.to_sql()
             ... ('UPDATE "res_partner" "a" SET "a"."name" = %s, "a"."surname" = %s WHERE \
             ... ("a"."name" IS NULL) RETURNING "a"."id"', ('John', 'Wick'))
@@ -1057,6 +1131,8 @@ class Update(BaseQuery):
 
 
 class Insert(BaseQuery):
+
+    __slots__ = ('_vals', '_do_nothing', '_row')
 
     def __init__(self, row, vals, do_nothing=False, returning=None):
         """
@@ -1147,6 +1223,8 @@ class Insert(BaseQuery):
 
 class CreateView(BaseQuery):
 
+    __slots__ = ('_name', '_content', '_replace')
+
     def __init__(self, name, content, replace=False):
         """
         Class for creating CREATE VIEW statements.
@@ -1214,7 +1292,9 @@ class Func(Expression):
 
         _sql = []
         for arg in self.args:
-            if isinstance(arg, Expression):
+            if isinstance(arg, Row):
+                _sql.append("*")
+            elif isinstance(arg, Expression):
                 __sql, _args = arg._to_sql(alias_mapping)
                 if isinstance(arg, Select):
                     _sql.append("(%s)" % __sql)

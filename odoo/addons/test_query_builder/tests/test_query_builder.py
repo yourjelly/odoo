@@ -6,7 +6,7 @@ from collections import OrderedDict
 from odoo.tests.common import tagged
 from odoo.tools.query import Row, Select, Delete, With, Update, Insert, \
     Asc, Desc, coalesce, unnest, NULL, DEFAULT, _quote, BaseQuery, CreateView, \
-    concat, count, Join, substr, length, now, Case, BaseQuery
+    concat, count, Join, substr, length, now, Case, _sum, _any
 
 
 @tagged('standard', 'at_install')
@@ -51,6 +51,12 @@ class TestMisc(TestCase):
                    limit=5, offset=3)
         sql, args = s.to_sql()
         self.assertEqual(args, (5, 'foo', [1, 2, 3], 5, 3))
+
+    def test_in_empty_tuple(self):
+        p = Row("res_partner")
+
+        with self.assertRaises(ValueError):
+            p.id.in_(())
 
 
 @tagged('standard', 'at_install')
@@ -740,6 +746,17 @@ class TestSelect(TestCase):
             )
         )
 
+    def test_select_from_subselect(self):
+        s1 = Select([self.p.id, self.p.name])
+        s2 = Select([s1.name])
+        self.assertEqual(
+            s2.to_sql(),
+            (
+                """SELECT "a"."name" FROM (SELECT "b"."id", "b"."name" FROM "res_partner" "b") "a\"""",
+                ()
+            )
+        )
+
 
 @tagged('standard', 'at_install')
 class TestDelete(TestCase):
@@ -791,7 +808,7 @@ class TestDelete(TestCase):
 
     def test_delete_new_rows(self):
         d1 = Delete([self.p])
-        d2 = d1.rows(self.u)
+        d2 = d1.table(self.u)
 
         self.assertIsNot(d1, d2)
         self.assertEqual(
@@ -1212,6 +1229,7 @@ class TestInsert(TestCase):
             )
         )
 
+
 @tagged('standard', 'at_install')
 class TestCreateView(TestCase):
 
@@ -1359,3 +1377,101 @@ class TestRealWorldCases(TestCase):
                 """RETURNING "a"."id\"""", ('prefix', 1, ids, '%%')
             )
         )
+
+    def test_rwc_06(self):
+        # account_invoice_report.py
+        ail = Row("account_invoice_line")
+        ai = Row("account_invoice")
+        partner = Row("res_partner")
+        pr = Row("product_product", True)
+        pt = Row("product_template", True)
+        u = Row("uom_uom", True)
+        u2 = Row("uom_uom", True)
+        it = Select({
+            None: [ai.id],
+            'sign': Case([(ai.type == _any(['in_refund', 'in_invoice']), -1)], 1)
+        })
+        s1 = Select([count(ail)], where=ail.invoice_id == ai.id)
+        sub = Select({
+            'id': ail.id,
+            'date': ai.date,
+            'uom_name': u2.name,
+            'nbr': (ail, 1),
+            'account_line_id': ail.account_id,
+            'product_qty': _sum((it.sign * ail.quantity) / u.factor * u2.factor),
+            'price_total': _sum(ail.price_subtotal_signed * it.sign),
+            'price_average': _sum(abs(ail.price_subtotal_signed)) / Case(
+                [(_sum(ail.quantity / u.factor * u2.factor) != 0,
+                  _sum(ail.quantity / u.factor * u2.factor))], 1
+            ),
+            'residual': ai.residual_company_signed / s1 * count(ail) * it.sign,
+            'commercial_partner_id': ai.commercial_partner_id,
+            None: [
+                ail.product_id,
+                ai.partner_id,
+                ai.payment_term_id,
+                ail.account_analytic_id,
+                ai.currency_id,
+                ai.journal_id,
+                ai.fiscal_position_id,
+                ai.user_id,
+                ai.company_id,
+                ai.type,
+                ai.state,
+                pt.categ_id,
+                ai.date_due,
+                ai.account_id,
+                ai.partner_bank_id,
+                partner.country_id,
+            ]
+        }, joins=[
+            ai.id == ail.invoice_id,
+            ai.commercial_partner_id == partner.id,
+            pr.id == ail.product_id,
+            pt.id == pr.product_tmpl_id,
+            u.id == ail.uom_id,
+            u2.id == pt.uom_id,
+            it.id == ai.id,
+        ], group=[
+            ail.id, ail.product_id, ail.account_analytic_id, ai.date_invoice, ai.id,
+            ai.partner_id, ai.payment_term_id, u2.name, u2.id, ai.currency_id, ai.journal_id,
+            ai.fiscal_position_id, ai.user_id, ai.company_id, ai.type, it.sign, ai.state,
+            pt.categ_id, ai.date_due, ai.account_id, ail.account_id, ai.partner_bank_id,
+            ai.residual_company_signed, ai.amount_total_company_signed, ai.commercial_partner_id,
+            partner.country_id,
+        ])
+        r = Row("res_currency_rate")
+        r2 = Row("res_currency_rate")
+        c = Row("res_company")
+        s2 = Select(
+            [r2.name],
+            where=(r2.name > r.name) & (r2.currency_id == r.currency_id) & (
+                (r2.company_id == NULL) | (r2.company_id == c.id)
+            ), order=[Asc(r2.name)], limit=1,
+        )
+        company_rates = Select({
+            None: [r.currency_id, r.rate],
+            'company_id': coalesce(r.company_id, c.id),
+            'date_start': r.name,
+            'date_end': s2,
+        }, joins=[(r.company_id == NULL) | (r.company_id == c.id)])
+        cr = Row("currency_rate", True)
+        s3 = Select({
+            None: [
+                sub.id, sub.date, sub.product_id, sub.partner_id, sub.country_id,
+                sub.account_analytic_id, sub.payment_term_id, sub.uom_name, sub.currency_id,
+                sub.journal_id, sub.fiscal_position_id, sub.user_id, sub.company_id, sub.nbr,
+                sub.type, sub.state, sub.categ_id, sub.date_due, sub.account_id,
+                sub.account_line_id, sub.partner_bank_id, sub.product_qty
+            ],
+            'price_total': sub.price_total,
+            'price_average': sub.price_average,
+            'currency_rate': coalesce(cr.rate, 1),
+            'residual': sub.residual,
+            'commercial_partner_id': sub.commercial_partner_id,
+        }, joins=[(cr.currency_id == sub.currency_id)
+                  & (cr.company_id == sub.company_id)
+                  & (cr.date_start <= coalesce(sub.date, now()))
+                  & ((cr.date_end == NULL) | (cr.date_end > coalesce(sub.date, now())))])
+        w = With([(cr, company_rates)], s3)
+        v = CreateView("account_invoice_report", w, True)
