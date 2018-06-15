@@ -228,7 +228,7 @@ class TestExpressions(TestCase):
             self.p.id | 5
 
 
-@tagged('standard', 'at_install')
+@tagged('standard', 'at_install', 'query_select')
 class TestSelect(TestCase):
 
     def setUp(self):
@@ -752,8 +752,33 @@ class TestSelect(TestCase):
         self.assertEqual(
             s2.to_sql(),
             (
-                """SELECT "a"."name" FROM (SELECT "b"."id", "b"."name" FROM "res_partner" "b") "a\"""",
+                """SELECT "a"."name" """
+                """FROM (SELECT "b"."id", "b"."name" FROM "res_partner" "b") "a\"""",
                 ()
+            )
+        )
+
+    def test_select_join_with_joined_table(self):
+        g = Row("res_groups", True)
+        s = Select([self.p.id], joins=[self.p.id == self.u.partner_id, self.u.group_id == g.id])
+        self.assertEqual(
+            s.to_sql(),
+            (
+                """SELECT "a"."id" FROM "res_partner" "a" """
+                """INNER JOIN "res_users" "b" ON ("a"."id" = "b"."partner_id") """
+                """RIGHT JOIN "res_groups" "c" ON ("b"."group_id" = "c"."id")""", ()
+            )
+        )
+
+    def test_select_join_sub_select(self):
+        s1 = Select([self.p.id])
+        s2 = Select([self.u.id], joins=[self.u.partner_id == s1.id])
+        self.assertEqual(
+            s2.to_sql(),
+            (
+                """SELECT "a"."id" FROM "res_users" "a" """
+                """INNER JOIN (SELECT "a"."id" FROM "res_partner" "a") "b" """
+                """ON ("a"."partner_id" = "b"."id")""", ()
             )
         )
 
@@ -1475,3 +1500,4 @@ class TestRealWorldCases(TestCase):
                   & ((cr.date_end == NULL) | (cr.date_end > coalesce(sub.date, now())))])
         w = With([(cr, company_rates)], s3)
         v = CreateView("account_invoice_report", w, True)
+        print(v.to_sql())

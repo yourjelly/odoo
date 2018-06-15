@@ -553,7 +553,10 @@ class Join(object):
         self._join = join
         self._condition = condition
 
-        if self._main._nullable:
+        if isinstance(self._join, BaseQuery):
+            # TODO: Find a way to properly handle sub-queries in JOINs
+            self.type = 'INNER JOIN'
+        elif self._main._nullable:
             if self._join._nullable:
                 self.type = 'FULL JOIN'
             else:
@@ -564,15 +567,28 @@ class Join(object):
             else:
                 self.type = 'INNER JOIN'
 
+    @property
+    def rows(self):
+        if self._condition:
+            return {self._join, self._main} | self._condition.rows
+        return {self._join, self._main}
+
     def _to_sql(self, alias_mapping):
         sql = "%s %s"
-        _join_sql = self._join._to_sql(alias_mapping)
+        args = []
+        if isinstance(self._join, BaseQuery):
+            _join_sql, _join_args = self._join._to_sql(AliasMapping())
+            _join_sql = "(%s) %s" % (_join_sql, alias_mapping[self._join])
+            args += _join_args
+        else:
+            # FIXME: ._to_sql() should always return a tuple
+            _join_sql = self._join._to_sql(alias_mapping)
 
         if self._condition:
             sql += " ON %s"
-            _sql, args = self._condition._to_sql(alias_mapping)
-            return (sql % (self.type, _join_sql, _sql), args)
-        return (sql % (self.type, _join_sql), ())
+            _sql, _args = self._condition._to_sql(alias_mapping)
+            return (sql % (self.type, _join_sql, _sql), args + _args)
+        return (sql % (self.type, _join_sql), args)
 
 
 class Modifier(object):
@@ -872,9 +888,14 @@ class Select(BaseQuery):
         args = []
         sql = []
 
+        # TODO: Allow when UNNEST is fixed
+        if self._joins:
+            available_tables = set(self._rows)
+
         for join in self._joins:
             if isinstance(join, Join):
-                # explicit joins
+                # Explicit joins
+                available_tables |= join.rows
                 _sql, _args = join._to_sql(alias_mapping)
                 sql.append(_sql)
                 args += _args
@@ -884,14 +905,19 @@ class Select(BaseQuery):
                 # This is a heuristic that determines a join based solely on its ON condition,
                 # this means that implicit joins without an ON condition are not possible.
                 # In order for the implicit join detection to work, all rows referenced in the
-                # ON condition must already exist in the Select query, either in the FROM clause
-                # or in other JOIN clauses, except for the row to be joined.
-                # The join table will be deduced by substracting from the set of rows referenced
-                # inside the ON expression the set of rows that are already referenced in the
-                # Select query, the remainder should be a single row, the join row.
-                join_table = (join.rows - set(self._rows)).pop()
-                main_table = self._rows[0]
-                j = Join(main_table, join_table, join)
+                # ON condition must be in the FROM clause, or have been processed previously
+                # in another JOIN object, except for the row to be joined.
+                # The `join_table` is deduced from the rows appearing in the ON condition minus
+                # the rows in the FROM clause or the rows appearing in preceding join conditions.
+                # `join_table` must always equal to a set of size one, if it is larger than one
+                # then a table being referenced in the condition has not been joined yet.
+                # The `main_table` is deduced from the rows appearing in the ON condition and the
+                # rows already in available_tables (common denominator).
+                join_table = join.rows - available_tables
+                assert len(join_table) == 1, "Table(s) referenced before join: %s" % join_table
+                main_table = join.rows & available_tables
+                available_tables |= join_table
+                j = Join(main_table.pop(), join_table.pop(), join)
                 _sql, _args = j._to_sql(alias_mapping)
                 sql.append(_sql)
                 args += _args
