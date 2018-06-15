@@ -667,16 +667,12 @@
                         ]"/>
 
                     <separator/>
-                    <filter string="Creation Date" name="creation_date" date="create_date" default_period="this_week"/>
+                    <filter string="Creation Date" name="creation_date" date="create_date" default_period="this_month"/>
+                    <filter string="Expected closing" name="close_this_month" date="date_deadline" default_period="this_month"/>
                     <filter string="Overdue Opportunities" name="overdue_opp"
                             domain="[('date_deadline', '&lt;', context_today().strftime('%Y-%m-%d')), ('date_closed', '=', False)]"
                             help="Opportunities with a date of Expected Closing which is in the past"/>
 
-                    <filter string="To Close This Month" name="close_this_month" domain="[
-                                '&amp;',
-                                ('date_deadline', '&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d')),
-                                ('date_deadline', '&lt;=', (context_today() + relativedelta(months=1, day=1, days=-1)).strftime('%Y-%m-%d')),
-                            ]"/>
                     <separator/>
                     <filter string="Lost" name="lost" domain="['&amp;', ('active', '=', False), ('probability', '=', 0)]"/>
                     <filter string="Won" name="won" domain="['&amp;', ('active', '=', True), ('stage_id.probability', '=', 100)]"/>
