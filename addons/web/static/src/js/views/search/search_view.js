@@ -221,7 +221,7 @@ var FacetView = Widget.extend({
                 }
                 var couple;
                 var option;
-                if (value.attributes.value.attrs) {
+                if (value.attributes.value && value.attributes.value.attrs) {
                     if (value.attributes.value.attrs.isPeriod) {
                         couple = _.findWhere(self.periodMapping, {filter: value.attributes.value});
                         option = couple ? couple.period : value.attributes.value.attrs.default_period;
