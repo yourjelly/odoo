@@ -81,6 +81,7 @@ return Widget.extend({
         this.toggle_save_menu(false);
     },
     save_favorite: function () {
+        debugger
         var self = this,
             filter_name = this.$inputs[0].value,
             default_filter = this.$inputs[1].checked,

@@ -641,10 +641,12 @@ var FilterGroup = Input.extend(/** @lends instance.web.search.FilterGroup# */{
      * Handles domains-fetching for all the filters within it: groups them.
      *
      * @param {VS.model.SearchFacet} facet
-     * @param {boolean} evaluate
+     * @param {boolean} evaluate determine if the domain need to be evaluated
      * @return {*} combined domains of the enabled filters in this group
      */
     get_domain: function (facet, evaluate) {
+        // evaluate = evaluate === undefined ? true : evaluate;
+        evaluate = evaluate === undefined ? true : true;
         var self = this;
         var userContext = this.getSession().user_context;
         var domains = facet.values.chain()
@@ -663,7 +665,11 @@ var FilterGroup = Input.extend(/** @lends instance.web.search.FilterGroup# */{
             .without('[]')
             .reject(_.isEmpty)
             .map(function (d) {
-                return Domain.prototype.stringToArray(d, userContext, evaluate);
+                if (evaluate) {
+                    return Domain.prototype.stringToArray(d, userContext);
+                } else {
+                    return Domain.prototype.stringToArrayNonEvaluated(d);
+                }
             })
             .value();
 

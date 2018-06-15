@@ -243,6 +243,20 @@ var Domain = collections.Tree.extend({
         return pyeval.eval("domain", domain ? domain.replace(/%%/g, '%') : "[]", evalContext);
     },
     /**
+     * Converts a string representation of the Python prefix-array
+     * representation of a domain to a JS prefix-array representation of this
+     * domain. No evaluation is made.
+     *
+     * @static
+     * @param {string|Array} domain
+     * @param {Object} [evalContext]
+     * @returns {Array}
+     */
+    stringToArrayNonEvaluated: function (domain) {
+        if (!_.isString(domain)) return _.clone(domain);
+        return;
+    },
+    /**
      * Makes implicit "&" operators explicit in the given JS prefix-array
      * representation of domain (e.g [A, B] -> ["&", A, B])
      *
