@@ -40,7 +40,7 @@ rm -rf /usr/share/doc
 # the latest pyusb from pip does not work either, usb.core.find() never returns
 # this may be fixed with libusb>2:1.0.11-1, but that's the most recent one in raspbian
 # so we install the latest pyusb that works with this libusb
-pip3 install pyusb
+pip3 install pyusb==1.0.0b1
 pip3 install qrcode
 pip3 install html2text
 pip3 install evdev
