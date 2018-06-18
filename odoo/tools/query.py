@@ -735,7 +735,7 @@ class Select(BaseQuery):
         tables = (tables_to_join & tables) or tables
         # TODO: Ensure determinism by sorting by an extra key
 
-        return sorted(list(tables), key=lambda t: t._table)
+        return sorted(list(tables), key=lambda r: (r._table, r._nullable, r._cols))
 
     # Select query operations
     def union(self, other):
@@ -1340,7 +1340,10 @@ class Unnest(Func):
         some queries, therefore we create a Row object for it.
         """
         super(Unnest, self).__init__('unnest', *args)
+        # Mimic a row
         self._table = self.func
+        self._cols = self.args
+        self._nullable = False
 
     @property
     def rows(self):
