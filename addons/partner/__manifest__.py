@@ -13,6 +13,7 @@ Extedn Partner.
     'data': [
     ],
     'demo': [
+        'data/res_partner_bank_demo.xml',
     ],
     'installable': True,
     'auto_install': False,

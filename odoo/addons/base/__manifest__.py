@@ -71,7 +71,6 @@ The kernel of Odoo, needed for all installation.
     'demo': [
         'data/res_company_demo.xml',
         'data/res_users_demo.xml',
-        'data/res_partner_bank_demo.xml',
         'data/res_currency_rate_demo.xml',
         'data/res_bank_demo.xml',
         'data/res_partner_demo.xml',
