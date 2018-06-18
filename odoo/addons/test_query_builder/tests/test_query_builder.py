@@ -1310,7 +1310,6 @@ class TestRealWorldCases(TestCase):
         # fields.py @ write
         r1 = unnest((1, 2, 3))
         r2 = unnest((5, 6, 7))
-        # import ipdb; ipdb.set_trace()
         s1 = Select([r1, r2])
         s2 = Select([self.p.id1, self.p.id2], where=self.p.id1.in_([1, 5, 4]))
         i = Insert(self.g('id1', 'id2'), [s1 - s2])
@@ -1504,5 +1503,3 @@ class TestRealWorldCases(TestCase):
                   & ((cr.date_end == NULL) | (cr.date_end > coalesce(sub.date, now())))])
         w = With([(cr, company_rates)], s3)
         v = CreateView("account_invoice_report", w, True)
-        # import pudb; pudb.set_trace()
-        # s3.to_sql()
