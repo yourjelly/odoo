@@ -23,7 +23,7 @@ class Usb(Escpos):
         @param out_ep    : Output end point
         """
 
-        self.errorText = "ERROR PRINTER\n\n\n\n\n\n"+PAPER_FULL_CUT
+        self.errorText = b"ERROR PRINTER\n\n\n\n\n\n"+PAPER_FULL_CUT
 
         self.idVendor  = idVendor
         self.idProduct = idProduct
@@ -83,7 +83,7 @@ class Usb(Escpos):
 
     def _raw(self, msg):
         """ Print any command sent in raw format """
-        if len(msg) != self.device.write(self.out_ep, msg, self.interface, timeout=5000):
+        if len(msg) != self.device.write(self.out_ep, msg, self.interface): #, timeout=5000
             self.device.write(self.out_ep, self.errorText, self.interface)
             raise TicketNotPrinted()
     

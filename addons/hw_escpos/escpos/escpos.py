@@ -206,7 +206,7 @@ class XmlSerializer:
     def end_entity(self):
         """ ends the entity definition. (but does not cancel the active style!) """
         if self.stack[-1] == 'block' and self.dirty:
-            self.escpos._raw('\n')
+            self.escpos._raw(b'\n')
             self.dirty = False
         if len(self.stack) > 1:
             self.stack = self.stack[:-1]
@@ -230,7 +230,7 @@ class XmlSerializer:
     def linebreak(self):
         """ inserts a linebreak in the entity """
         self.dirty = False
-        self.escpos._raw('\n')
+        self.escpos._raw(b'\n')
 
     def style(self,stylestack):
         """ apply a style to the entity (only applies to content added after the definition) """
@@ -254,8 +254,8 @@ class XmlLineSerializer:
         self.rwidth = max(0, self.width - self.lwidth)
         self.clwidth = 0
         self.crwidth = 0
-        self.lbuffer  = ''
-        self.rbuffer  = ''
+        self.lbuffer  = b''
+        self.rbuffer  = b''
         self.left    = True
 
     def _txt(self,txt):
@@ -809,8 +809,9 @@ class Escpos:
             return encoded
         
         def encode_str(txt):
-            buffer = ''
+            buffer = b''
             for c in txt:
+                #import pdb; pdb.set_trace()
                 buffer += encode_char(c)
             return buffer
 
