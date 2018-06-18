@@ -297,6 +297,10 @@ class Row(object):
         self._nullable = nullable
         self._cols = OrderedDict()
 
+    @property
+    def rows(self):
+        return {self}
+
     def __call__(self, *args):
         for col in args:
             self._cols[col] = Column(self, col)
@@ -312,12 +316,12 @@ class Row(object):
     def _to_sql(self, alias_mapping, with_cols=False):
         if with_cols:
             if self._cols:
-                return "%s(%s)" % (self._table, ', '.join([c._name for c in self._cols.values()]))
-            return "%s" % self._table
+                return "%s(%s)" % (self._table, ', '.join([c._name for c in self._cols.values()])), []
+            return "%s" % self._table, []
         alias = alias_mapping[self]
         if alias == self._table:
-            return "%s" % self._table
-        return "%s %s" % (self._table, alias)
+            return "%s" % self._table, []
+        return "%s %s" % (self._table, alias), []
 
 
 class Column(Expression):
@@ -413,19 +417,12 @@ class BaseQuery(Expression):
     def _build_from(self, alias_mapping):
         sql = []
         for row in self._rows:
-            if isinstance(row, tuple):
-                sql.append(row[0]._to_sql(alias_mapping))
-                if isinstance(row[1], (list, tuple)):
-                    self.args += row[1]
-                else:
-                    self.args.append(row[1])
+            _sql, _args = row._to_sql(alias_mapping)
+            if isinstance(row, BaseQuery):
+                sql.append("(%s) %s" % (_sql, alias_mapping[row]))
             else:
-                if isinstance(row, BaseQuery):
-                    _sql, _args = row._to_sql(alias_mapping)
-                    sql.append("(%s) %s" % (_sql, alias_mapping[row]))
-                    self.args += _args
-                else:
-                    sql.append(row._to_sql(alias_mapping))
+                sql.append(_sql)
+            self.args += _args
 
         if sql:
             self.sql.append("FROM %s" % ', '.join(sql))
@@ -576,13 +573,14 @@ class Join(object):
     def _to_sql(self, alias_mapping):
         sql = "%s %s"
         args = []
+
         if isinstance(self._join, BaseQuery):
             _join_sql, _join_args = self._join._to_sql(AliasMapping())
             _join_sql = "(%s) %s" % (_join_sql, alias_mapping[self._join])
-            args += _join_args
         else:
-            # FIXME: ._to_sql() should always return a tuple
-            _join_sql = self._join._to_sql(alias_mapping)
+            _join_sql, _join_args = self._join._to_sql(alias_mapping)
+
+        args += _join_args
 
         if self._condition:
             sql += " ON %s"
@@ -708,53 +706,36 @@ class Select(BaseQuery):
         }
 
     def _get_tables(self):
-        # TODO: Generalize
-        tables = []
-        for col in self._columns:
-            if self._aliased:
-                if col is None:
-                    # Aliased and Non-Aliased columns
-                    t = set()
-                    for c in self._columns[col]:
-                        t |= c.rows
-                    t = list(t)
-                else:
-                    t = self._columns[col]
-                    if isinstance(t, (Row, tuple)):
-                        # SELECT *
-                        pass
-                    elif isinstance(t, (Func, Case)) and not isinstance(t, Unnest):
-                        # sort since the rows property is a set, important for unittest determinism
-                        t = sorted(list(t.rows), key=lambda r: r._table)
-                    else:
-                        # SELECT <col> AS <alias>
-                        t = t.rows
-            else:
-                # TODO: Optimize so as to get .rows everywhere
-                # If the columns argument is a list, it can contain Row or Column objects
-                if isinstance(col, (Row, tuple)):
-                    # SELECT *
-                    t = col
-                elif isinstance(col, (Func, Case)) and not isinstance(col, Unnest):
-                    # sort since the rows property is a set, important for unittest determinism
-                    t = sorted(list(col.rows), key=lambda r: r._table)
-                else:
-                    # SELECT <col>
-                    t = col._row
+        columns = []
 
-            if isinstance(t, (Row, Select, tuple)):
-                if t not in tables:
-                    tables.append(t)
+        # Normalize arguments
+        # XXX: Do in __init__ ?
+        if self._aliased:
+            columns += [] if None not in self._columns else self._columns.pop(None)
+            columns += list(self._columns.values())
+        else:
+            columns += self._columns
+
+        tables = set()
+
+        for col in columns:
+            if isinstance(col, tuple):
+                # TODO: Convert to Literal
+                tables.add(col[0])
             else:
-                for _t in t:
-                    if _t not in tables:
-                        tables.append(_t)
+                tables |= col.rows
 
         if self._where is not None:
-            for t in self._where.rows:
-                if t not in tables and not t._cols:
-                    tables.append(t)
-        return tables
+            tables |= self._where.rows
+
+        tables_to_join = set()
+        for j in self._joins:
+            tables_to_join |= j.rows
+
+        tables = (tables_to_join & tables) or tables
+        # TODO: Ensure determinism by sorting by an extra key
+
+        return sorted(list(tables), key=lambda t: t._table)
 
     # Select query operations
     def union(self, other):
@@ -859,13 +840,13 @@ class Select(BaseQuery):
                         else:
                             _sql.append("%s AS %s" % (__sql, c))
                     args += _args
-            elif isinstance(c, Unnest):
-                # Special case, Unnest can be used in a FROM clause
-                r = c._row[0]
-                _sql.append(alias_mapping[r])
             elif isinstance(c, tuple):
                 # Special case, using a literal in the select clause
                 _sql.append("%s")
+                args.append(c[1])
+            elif isinstance(c, Func) and c.func == 'unnest':
+                # Function acting as a row
+                _sql.append(alias_mapping[c])
             else:
                 __sql, _args = c._to_sql(alias_mapping)
                 _sql.append("%s" % __sql)
@@ -1060,8 +1041,11 @@ class With(BaseQuery):
         args = []
 
         for row, statement in self._body:
+            _sql = []
             alias_mapping[row] = row._table
-            _sql = [row._to_sql(alias_mapping, with_cols=True)]
+            rsql, rargs = row._to_sql(alias_mapping, with_cols=True)
+            _sql.append(rsql)
+            args += rargs
             __sql, _args = statement._to_sql(alias_mapping)
             _sql.append(__sql)
             args += _args
@@ -1211,7 +1195,9 @@ class Insert(BaseQuery):
         return Insert(**{**self.attrs, 'returning': cols})
 
     def _pre_build(self, alias_mapping):
-        return """INSERT INTO %s""" % self._row._to_sql(alias_mapping, with_cols=True)
+        _sql, _args = self._row._to_sql(alias_mapping, with_cols=True)
+        self.args += _args
+        return """INSERT INTO %s""" % _sql
 
     def _build_base(self, alias_mapping):
         self.sql.append(self._pre_build(alias_mapping))
@@ -1304,6 +1290,15 @@ class Func(Expression):
         self.func = func
         self.args = args
 
+    def __key(self):
+        return hash(tuple(self.func) + tuple(self.args))
+
+    def __eq__(self, other):
+        return self.__key() == other.__key()
+
+    def __hash__(self):
+        return hash(self.__key())
+
     @property
     def rows(self):
         rows = set()
@@ -1344,10 +1339,17 @@ class Unnest(Func):
         This function is special since it can be used as a table in the FROM clause of
         some queries, therefore we create a Row object for it.
         """
-        # TODO: Make this better
         super(Unnest, self).__init__('unnest', *args)
-        self._row = (Row(self.func), args)
-        self._row[0]._table += "(%s)"
+        self._table = self.func
+
+    @property
+    def rows(self):
+        return set([self])
+
+    def _to_sql(self, alias_mapping):
+        sql, args = super(Unnest, self)._to_sql(alias_mapping)
+        sql += " %s" % alias_mapping[self]
+        return sql, args
 
 
 class Now(Func):

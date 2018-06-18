@@ -253,7 +253,7 @@ class TestSelect(TestCase):
 
     def test_select_cartesian_product(self):
         s = Select([self.u.id, self.p.id])
-        res = """SELECT "a"."id", "b"."id" FROM "res_users" "a", "res_partner" "b\""""
+        res = """SELECT "a"."id", "b"."id" FROM "res_partner" "b", "res_users" "a\""""
         self.assertEqual(s.to_sql()[0], res)
 
     def test_select_simple_where(self):
@@ -654,7 +654,7 @@ class TestSelect(TestCase):
         self.assertEqual(
             s.to_sql()[0],
             """SELECT "a"."id", "b"."id", "c"."id", "d"."id" """
-            """FROM "res_partner" "a", "res_users" "b", "res_currency" "c", "res_groups" "d\""""
+            """FROM "res_currency" "c", "res_groups" "d", "res_partner" "a", "res_users" "b\""""
         )
 
     def test_sub_query(self):
@@ -689,7 +689,7 @@ class TestSelect(TestCase):
         self.assertEqual(
             s.to_sql(),
             (
-                """SELECT "a"."id" FROM "res_users" "a", "res_partner" "b" """
+                """SELECT "a"."id" FROM "res_partner" "b", "res_users" "a" """
                 """WHERE ("a"."partner_id" = "b"."id")""", ()
             )
         )
@@ -907,7 +907,7 @@ class TestDelete(TestCase):
         )
 
 
-@tagged('standard', 'at_install')
+@tagged('standard', 'at_install', 'query_with')
 class TestWith(TestCase):
 
     def setUp(self):
@@ -923,7 +923,7 @@ class TestWith(TestCase):
             with_st.to_sql()[0],
             """WITH "my_temp_table"("id") AS """
             """(SELECT "a"."partner_id" FROM "res_users" "a") """
-            """SELECT "b"."id" FROM "res_partner" "b" """
+            """SELECT "b"."id" FROM "my_temp_table", "res_partner" "b" """
             """WHERE ("b"."id" = "my_temp_table"."id")"""
         )
 
@@ -935,7 +935,8 @@ class TestWith(TestCase):
             """WITH RECURSIVE "my_temp_table"("id") AS """
             """((SELECT "a"."partner_id" FROM "res_users" "a") """
             """UNION (SELECT "a"."id" FROM "my_temp_table" "a")) """
-            """SELECT "b"."id" FROM "res_partner" "b" WHERE ("b"."id" = "my_temp_table"."id")"""
+            """SELECT "b"."id" FROM "my_temp_table", "res_partner" "b" """
+            """WHERE ("b"."id" = "my_temp_table"."id")"""
         )
 
     def test_with_select_multi_col(self):
@@ -945,7 +946,7 @@ class TestWith(TestCase):
             with_st.to_sql()[0],
             """WITH "my_temp_table"("id", "name", "surname") AS """
             """(SELECT "a"."partner_id" FROM "res_users" "a") """
-            """SELECT "b"."id" FROM "res_partner" "b" """
+            """SELECT "b"."id" FROM "my_temp_table", "res_partner" "b" """
             """WHERE ("b"."id" = "my_temp_table"."id")"""
         )
 
@@ -960,7 +961,7 @@ class TestWith(TestCase):
             """(SELECT "a"."partner_id" FROM "res_users" "a"), """
             """"my_other_temp_table"("id") AS """
             """(SELECT "a"."id" FROM "res_users" "a") """
-            """SELECT "b"."id" FROM "res_partner" "b" """
+            """SELECT "b"."id" FROM "my_other_temp_table", "my_temp_table", "res_partner" "b" """
             """WHERE (("b"."id" = "my_temp_table"."id") AND """
             """("b"."id" = "my_other_temp_table"."id"))"""
         )
@@ -974,7 +975,8 @@ class TestWith(TestCase):
             ("""WITH "my_temp_table"("id") AS """
              """(UPDATE "res_partner" "a" SET "name" = %s WHERE ("a"."name" = %s) """
              """RETURNING "a"."id") """
-             """SELECT "b"."id" FROM "res_users" "b" WHERE ("b"."id" = "my_temp_table"."id")""",
+             """SELECT "b"."id" FROM "my_temp_table", "res_users" "b" """
+             """WHERE ("b"."id" = "my_temp_table"."id")""",
              ('John', 'Administrator'))
         )
 
@@ -1054,7 +1056,7 @@ class TestUpdate(TestCase):
         self.assertEqual(
             u.to_sql(),
             ("""UPDATE "res_partner" "a" SET "name" = """
-             """(SELECT "b"."name" FROM "res_users" "b", "res_partner" "a" """
+             """(SELECT "b"."name" FROM "res_partner" "a", "res_users" "b" """
              """WHERE ("b"."partner_id" = "a"."id") """
              """LIMIT %s OFFSET %s)""", (1, 0))
         )
@@ -1289,7 +1291,7 @@ class TestCreateView(TestCase):
             v.to_sql(),
             ("""CREATE VIEW "my_view" AS (WITH "my_temp_table"("name") AS """
              """(SELECT "a"."name" FROM "res_group" "a" LIMIT %s OFFSET %s) """
-             """SELECT "b"."id" FROM "res_partner" "b" WHERE """
+             """SELECT "b"."id" FROM "my_temp_table", "res_partner" "b" WHERE """
              """("b"."name" LIKE "my_temp_table"."name"))""", (1, 0))
         )
 
@@ -1306,18 +1308,20 @@ class TestRealWorldCases(TestCase):
 
     def test_rwc_01(self):
         # fields.py @ write
-        r1 = unnest([1, 2, 3])
-        r2 = unnest([5, 6, 7])
+        r1 = unnest((1, 2, 3))
+        r2 = unnest((5, 6, 7))
+        # import ipdb; ipdb.set_trace()
         s1 = Select([r1, r2])
         s2 = Select([self.p.id1, self.p.id2], where=self.p.id1.in_([1, 5, 4]))
         i = Insert(self.g('id1', 'id2'), [s1 - s2])
+        s1.to_sql()
 
         self.assertEqual(
             i.to_sql(),
             ("""INSERT INTO "res_groups"("id1", "id2") """
-             """((SELECT "a", "b" FROM "unnest"(%s) "a", "unnest"(%s) "b") """
+             """((SELECT "a", "b" FROM unnest(%s) "a", unnest(%s) "b") """
              """EXCEPT (SELECT "a"."id1", "a"."id2" FROM "res_partner" "a" """
-             """WHERE ("a"."id1" IN %s)))""", ([1, 2, 3], [5, 6, 7], [1, 5, 4]))
+             """WHERE ("a"."id1" IN %s)))""", ((1, 2, 3), (5, 6, 7), [1, 5, 4]))
         )
 
     def test_rwc_02(self):
@@ -1336,7 +1340,7 @@ class TestRealWorldCases(TestCase):
                """UNION ("""
                """SELECT "a"."id", """
                """concat("b"."parent_path", "a"."id", %s) """
-               """FROM "dummy" "a", "__parent_store_compute" "b" """
+               """FROM "__parent_store_compute" "b", "dummy" "a" """
                """WHERE ("a"."parent_id" = "b"."id"))) """
                """UPDATE "dummy" "a" """
                """SET "parent_path" = "__parent_store_compute"."parent_path" """
@@ -1500,4 +1504,5 @@ class TestRealWorldCases(TestCase):
                   & ((cr.date_end == NULL) | (cr.date_end > coalesce(sub.date, now())))])
         w = With([(cr, company_rates)], s3)
         v = CreateView("account_invoice_report", w, True)
-        print(v.to_sql())
+        # import pudb; pudb.set_trace()
+        # s3.to_sql()
