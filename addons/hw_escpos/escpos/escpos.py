@@ -30,11 +30,11 @@ from .exceptions import *
 
 def utfstr(stuff):
     """ converts stuff to string and does without failing if stuff is a utf8 string """
-    return bytes(stuff)
-#    if isinstance(stuff,pycompat.string_types):
-#        return stuff
-#    else:
-#        return bytes(stuff)
+    #return bytes(stuff)
+    if isinstance(stuff,pycompat.string_types):
+        return stuff
+    else:
+        return str(stuff)
 
 class StyleStack:
     """ 
@@ -129,7 +129,7 @@ class StyleStack:
         level = len(self.stack) -1
         while level >= 0:
             if style in self.stack[level]:
-                return self.stack[level][style].decode()
+                return self.stack[level][style]
             else:
                 level = level - 1
         return None
@@ -193,14 +193,14 @@ class XmlSerializer:
         """ starts an inline entity with an optional style definition """
         self.stack.append('inline')
         if self.dirty:
-            self.escpos._raw(b' ')
+            self.escpos._raw(' ')
         if stylestack:
             self.style(stylestack)
 
     def start_block(self,stylestack=None):
         """ starts a block entity with an optional style definition """
         if self.dirty:
-            self.escpos._raw(b'\n')
+            self.escpos._raw('\n')
             self.dirty = False
         self.stack.append('block')
         if stylestack:
@@ -209,7 +209,7 @@ class XmlSerializer:
     def end_entity(self):
         """ ends the entity definition. (but does not cancel the active style!) """
         if self.stack[-1] == 'block' and self.dirty:
-            self.escpos._raw(b'\n')
+            self.escpos._raw('\n')
             self.dirty = False
         if len(self.stack) > 1:
             self.stack = self.stack[:-1]
@@ -225,7 +225,7 @@ class XmlSerializer:
         if text:
             text = utfstr(text)
             text = text.strip()
-            text = re.sub(b'\s+',b' ',text)
+            text = re.sub('\s+',' ',text)
             if text:
                 self.dirty = True
                 self.escpos.text(text)
@@ -233,7 +233,7 @@ class XmlSerializer:
     def linebreak(self):
         """ inserts a linebreak in the entity """
         self.dirty = False
-        self.escpos._raw(b'\n')
+        self.escpos._raw('\n')
 
     def style(self,stylestack):
         """ apply a style to the entity (only applies to content added after the definition) """
@@ -257,8 +257,8 @@ class XmlLineSerializer:
         self.rwidth = max(0, self.width - self.lwidth)
         self.clwidth = 0
         self.crwidth = 0
-        self.lbuffer  = b''
-        self.rbuffer  = b''
+        self.lbuffer  = ''
+        self.rbuffer  = ''
         self.left    = True
 
     def _txt(self,txt):
@@ -305,7 +305,7 @@ class XmlLineSerializer:
         self.left = False
 
     def get_line(self):
-        return b' ' * self.indent * self.tabwidth + self.lbuffer + ' ' * (self.width - self.clwidth - self.crwidth) + self.rbuffer
+        return ' ' * self.indent * self.tabwidth + self.lbuffer + ' ' * (self.width - self.clwidth - self.crwidth) + self.rbuffer
     
 
 class Escpos:
@@ -334,7 +334,7 @@ class Escpos:
        
         self._raw(S_RASTER_N)
         buffer = b"%02X%02X%02X%02X" % (int((size[0]/size[1])/8), 0, size[1], 0)
-        self._raw(buffer.decode('hex'))
+        self._raw(codecs.decode(buffer, 'hex'))
         buffer = ""
 
         while i < len(line):
@@ -343,7 +343,7 @@ class Escpos:
             i += 8
             cont += 1
             if cont % 4 == 0:
-                self._raw(buffer.decode("hex"))
+                self._raw(codecs.decode(buffer, "hex"))
                 buffer = ""
                 cont = 0
 
@@ -361,19 +361,19 @@ class Escpos:
                 self._raw(string)
        
         raw += S_RASTER_N
-        buffer = b"%02X%02X%02X%02X" % (int((size[0]/size[1])/8), 0, size[1], 0)
+        buffer = "%02X%02X%02X%02X" % (int((size[0]/size[1])/8), 0, size[1], 0)
 
         raw += codecs.decode(buffer, 'hex')
-        buffer = b""
+        buffer = ""
 
         while i < len(line):
             hex_string = int(line[i:i+8],2)
-            buffer += b"%02X" % hex_string
+            buffer += "%02X" % hex_string
             i += 8
             cont += 1
             if cont % 4 == 0:
                 raw += codecs.decode(buffer, 'hex')
-                buffer = b""
+                buffer = ""
                 cont = 0
 
         return raw
