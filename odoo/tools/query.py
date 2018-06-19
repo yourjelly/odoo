@@ -811,46 +811,33 @@ class Select(BaseQuery):
             sql.append(self._build_distinct(alias_mapping))
 
         _sql = []
+
         for c in self._columns:
-            # TODO: Generalize and simplify
-            if isinstance(c, Row):
+            # Type normalization
+            # XXX: Do in __init__ ?
+            val = c if not self._aliased else self._columns[c]
+            alias = " AS %s" % c if self._aliased and c is not val else ""
+
+            if isinstance(val, Row):
+                # All
                 _sql.append("*")
-            elif self._aliased:
-                if c is None:
-                    cols = self._columns[c]
-                    for col in cols:
-                        __sql, _args = col._to_sql(alias_mapping)
-                        if isinstance(col, (Case, BaseQuery)):
-                            _sql.append("(%s)" % __sql)
-                        elif isinstance(col, tuple):
-                            # Special case, using a literal in the select clause
-                            _sql.append("%s")
-                        else:
-                            _sql.append("%s" % __sql)
-                        args += _args
-                else:
-                    col = self._columns[c]
-                    if isinstance(col, tuple):
-                        _sql.append("%%s AS %s" % c)
-                        _args = [col[1]]
-                    else:
-                        __sql, _args = col._to_sql(alias_mapping)
-                        if isinstance(col, (Case, BaseQuery)):
-                            _sql.append("(%s) AS %s" % (__sql, c))
-                        else:
-                            _sql.append("%s AS %s" % (__sql, c))
-                    args += _args
-            elif isinstance(c, tuple):
-                # Special case, using a literal in the select clause
-                _sql.append("%s")
-                args.append(c[1])
-            elif isinstance(c, Func) and c.func == 'unnest':
-                # Function acting as a row
-                _sql.append(alias_mapping[c])
             else:
-                __sql, _args = c._to_sql(alias_mapping)
-                _sql.append("%s" % __sql)
-                args += _args
+                if isinstance(val, (Case, BaseQuery)):
+                    # Sub-query / Sub-statement
+                    __sql, _args = val._to_sql(alias_mapping)
+                    _sql.append("(%s)%s" % (__sql, alias))
+                    args += _args
+                elif isinstance(val, tuple):
+                    # Literal
+                    _sql.append("%%s%s" % alias)
+                    args.append(val[1])
+                elif isinstance(val, Func) and val.func == 'unnest':
+                    _sql.append(alias_mapping[val])
+                else:
+                    # Common case
+                    __sql, _args = val._to_sql(alias_mapping)
+                    _sql.append("%s%s" % (__sql, alias))
+                    args += _args
 
         sql.append(', '.join(_sql))
         self.sql.append(' '.join(sql))

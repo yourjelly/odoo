@@ -58,6 +58,14 @@ class TestMisc(TestCase):
         with self.assertRaises(ValueError):
             p.id.in_(())
 
+    def test_func_equality(self):
+        self.assertFalse(count() == concat())
+        self.assertTrue(count(1, 2) == count(1, 2))
+
+    def test_invalid_getattr(self):
+        with self.assertRaises(AttributeError):
+            BaseQuery().__dict__
+
 
 @tagged('standard', 'at_install')
 class TestExpressions(TestCase):
@@ -218,6 +226,11 @@ class TestExpressions(TestCase):
         res = ("""CASE WHEN ("res_partner"."number" > %s) """
                """THEN "res_users"."number" END""", [5])
         self.assertEqual(expr._to_sql(None), res)
+
+    def test_func_all_expression(self):
+        expr = count(self.p)
+        res = ("count(*)")
+        self.assertEqual(expr._to_sql(None)[0], res)
 
     def test_and_type(self):
         with self.assertRaises(AssertionError):
@@ -719,8 +732,8 @@ class TestSelect(TestCase):
         self.assertEqual(
             s.to_sql(),
             (
-                """SELECT CASE WHEN ("a"."count" = %s) THEN %s """
-                """WHEN ("a"."count" = %s) THEN %s ELSE %s END FROM "res_partner" "a\"""",
+                """SELECT (CASE WHEN ("a"."count" = %s) THEN %s """
+                """WHEN ("a"."count" = %s) THEN %s ELSE %s END) FROM "res_partner" "a\"""",
                 (1, 'one', 2, 'two', 'no')
             )
         )
@@ -730,7 +743,7 @@ class TestSelect(TestCase):
         self.assertEqual(
             s.to_sql(),
             (
-                """SELECT CASE coalesce("a"."count", %s) WHEN %s THEN %s WHEN %s THEN %s END """
+                """SELECT (CASE coalesce("a"."count", %s) WHEN %s THEN %s WHEN %s THEN %s END) """
                 """FROM "res_partner" "a\"""",
                 (5, 5, 0, 3, 1)
             )
@@ -741,7 +754,7 @@ class TestSelect(TestCase):
         self.assertEqual(
             s.to_sql(),
             (
-                """SELECT CASE WHEN ("a"."count" = %s) THEN "b"."count" ELSE %s END """
+                """SELECT (CASE WHEN ("a"."count" = %s) THEN "b"."count" ELSE %s END) """
                 """FROM "res_partner" "a", "res_users" "b\"""", (1, 'rip')
             )
         )
