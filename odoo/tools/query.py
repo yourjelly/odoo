@@ -316,7 +316,8 @@ class Row(object):
     def _to_sql(self, alias_mapping, with_cols=False):
         if with_cols:
             if self._cols:
-                return "%s(%s)" % (self._table, ', '.join([c._name for c in self._cols.values()])), []
+                return "%s(%s)" % (self._table,
+                                   ', '.join([c._name for c in self._cols.values()])), []
             return "%s" % self._table, []
         alias = alias_mapping[self]
         if alias == self._table:
@@ -811,12 +812,11 @@ class Select(BaseQuery):
             sql.append(self._build_distinct(alias_mapping))
 
         _sql = []
-
         for c in self._columns:
             # Type normalization
             # XXX: Do in __init__ ?
             val = c if not self._aliased else self._columns[c]
-            alias = " AS %s" % c if self._aliased and c is not val else ""
+            alias = " AS %s" % c if self._aliased and not isinstance(c, int) else ""
 
             if isinstance(val, Row):
                 # All
@@ -1354,6 +1354,8 @@ class Now(Func):
         return (sql, args)
 
 
+now = Now
+unnest = Unnest
 avg = partial(Func, 'avg')
 count = partial(Func, 'count')
 _sum = partial(Func, 'sum')
@@ -1362,9 +1364,7 @@ _min = partial(Func, 'min')
 coalesce = partial(Func, 'coalesce')
 nullif = partial(Func, 'nullif')
 concat = partial(Func, 'concat')
-now = Now
 exists = partial(Func, 'exists')
 _any = partial(Func, 'any')
 substr = partial(Func, 'substr')
 length = partial(Func, 'length')
-unnest = Unnest

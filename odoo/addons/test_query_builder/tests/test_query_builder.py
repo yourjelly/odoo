@@ -795,6 +795,16 @@ class TestSelect(TestCase):
             )
         )
 
+    def test_select_aliased_and_unaliased(self):
+        s = Select({1: self.p.id, 'foo': self.p.foo})
+        self.assertEqual(
+            s.to_sql(),
+            (
+                """SELECT "a"."id", "a"."foo" AS foo FROM "res_partner" "a\"""",
+                ()
+            )
+        )
+
 
 @tagged('standard', 'at_install')
 class TestDelete(TestCase):
@@ -1516,3 +1526,4 @@ class TestRealWorldCases(TestCase):
                   & ((cr.date_end == NULL) | (cr.date_end > coalesce(sub.date, now())))])
         w = With([(cr, company_rates)], s3)
         v = CreateView("account_invoice_report", w, True)
+        # print(s3.to_sql())
