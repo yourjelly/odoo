@@ -7,6 +7,7 @@ import io
 import math
 import re
 import traceback
+import codecs
 from hashlib import md5
 
 from PIL import Image
@@ -169,7 +170,7 @@ class StyleStack:
 
     def to_escpos(self):
         """ converts the current style to an escpos command string """
-        cmd = ''
+        cmd = b''
         ordered_cmds = sorted(self.cmds, key=lambda x: self.cmds[x]['_order'])
         for style in ordered_cmds:
             cmd += self.cmds[style][self.get(style)]
@@ -318,9 +319,9 @@ class Escpos:
         else:
             image_border = 32 - (size % 32)
             if (image_border % 2) == 0:
-                return (image_border / 2, image_border / 2)
+                return (int(image_border / 2), int(image_border / 2))
             else:
-                return (image_border / 2, (image_border / 2) + 1)
+                return (int(image_border / 2), int((image_border / 2) + 1))
 
     def _print_image(self, line, size):
         """ Print formatted image """
@@ -330,7 +331,7 @@ class Escpos:
 
        
         self._raw(S_RASTER_N)
-        buffer = "%02X%02X%02X%02X" % (((size[0]/size[1])/8), 0, size[1], 0)
+        buffer = b"%02X%02X%02X%02X" % (int((size[0]/size[1])/8), 0, size[1], 0)
         self._raw(buffer.decode('hex'))
         buffer = ""
 
@@ -349,7 +350,7 @@ class Escpos:
         i = 0
         cont = 0
         buffer = ""
-        raw = ""
+        raw = b""
 
         def __raw(string):
             if output:
@@ -358,18 +359,19 @@ class Escpos:
                 self._raw(string)
        
         raw += S_RASTER_N
-        buffer = "%02X%02X%02X%02X" % (((size[0]/size[1])/8), 0, size[1], 0)
-        raw += buffer.decode('hex')
-        buffer = ""
+        buffer = b"%02X%02X%02X%02X" % (int((size[0]/size[1])/8), 0, size[1], 0)
+
+        raw += codecs.decode(buffer, 'hex')
+        buffer = b""
 
         while i < len(line):
             hex_string = int(line[i:i+8],2)
-            buffer += "%02X" % hex_string
+            buffer += b"%02X" % hex_string
             i += 8
             cont += 1
             if cont % 4 == 0:
-                raw += buffer.decode("hex")
-                buffer = ""
+                raw += codecs.decode(buffer, 'hex')
+                buffer = b""
                 cont = 0
 
         return raw
@@ -430,17 +432,20 @@ class Escpos:
         self._print_image(pix_line, img_size)
 
     def print_base64_image(self,img):
+        """
 
+        :param bytes img: base64-encoded image data
+        """
         print('print_b64_img')
 
-        id = md5(img.encode('utf-8')).digest()
+        id = md5(img).digest()
 
         if id not in self.img_cache:
             print('not in cache')
 
-            img = img[img.find(',')+1:]
-            f = io.BytesIO('img')
-            f.write(base64.decodestring(img))
+            img = img[img.find(b',')+1:]
+            f = io.BytesIO(b'img')
+            f.write(base64.decodebytes(img))
             f.seek(0)
             img_rgba = Image.open(f)
             img = Image.new('RGB', img_rgba.size, (255,255,255))
@@ -677,7 +682,7 @@ class Escpos:
 
             elif elem.tag == 'img':
                 if 'src' in elem.attrib and 'data:' in elem.attrib['src']:
-                    self.print_base64_image(elem.attrib['src'])
+                    self.print_base64_image(bytes(elem.attrib['src'], 'utf-8'))
 
             elif elem.tag == 'barcode' and 'encoding' in elem.attrib:
                 serializer.start_block(stylestack)
