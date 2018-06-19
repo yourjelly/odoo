@@ -30,10 +30,11 @@ from .exceptions import *
 
 def utfstr(stuff):
     """ converts stuff to string and does without failing if stuff is a utf8 string """
-    if isinstance(stuff,pycompat.string_types):
-        return stuff
-    else:
-        return str(stuff)
+    return bytes(stuff)
+#    if isinstance(stuff,pycompat.string_types):
+#        return stuff
+#    else:
+#        return bytes(stuff)
 
 class StyleStack:
     """ 
@@ -128,7 +129,7 @@ class StyleStack:
         level = len(self.stack) -1
         while level >= 0:
             if style in self.stack[level]:
-                return self.stack[level][style]
+                return self.stack[level][style].decode()
             else:
                 level = level - 1
         return None
@@ -173,7 +174,8 @@ class StyleStack:
         cmd = b''
         ordered_cmds = sorted(self.cmds, key=lambda x: self.cmds[x]['_order'])
         for style in ordered_cmds:
-            cmd += self.cmds[style][self.get(style)]
+            style2 = self.get(style)
+            cmd += self.cmds[style][style2]
         return cmd
 
 class XmlSerializer:
@@ -191,14 +193,14 @@ class XmlSerializer:
         """ starts an inline entity with an optional style definition """
         self.stack.append('inline')
         if self.dirty:
-            self.escpos._raw(' ')
+            self.escpos._raw(b' ')
         if stylestack:
             self.style(stylestack)
 
     def start_block(self,stylestack=None):
         """ starts a block entity with an optional style definition """
         if self.dirty:
-            self.escpos._raw('\n')
+            self.escpos._raw(b'\n')
             self.dirty = False
         self.stack.append('block')
         if stylestack:
@@ -223,7 +225,7 @@ class XmlSerializer:
         if text:
             text = utfstr(text)
             text = text.strip()
-            text = re.sub('\s+',' ',text)
+            text = re.sub(b'\s+',b' ',text)
             if text:
                 self.dirty = True
                 self.escpos.text(text)
@@ -303,7 +305,7 @@ class XmlLineSerializer:
         self.left = False
 
     def get_line(self):
-        return ' ' * self.indent * self.tabwidth + self.lbuffer + ' ' * (self.width - self.clwidth - self.crwidth) + self.rbuffer
+        return b' ' * self.indent * self.tabwidth + self.lbuffer + ' ' * (self.width - self.clwidth - self.crwidth) + self.rbuffer
     
 
 class Escpos:
