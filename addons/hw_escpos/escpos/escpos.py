@@ -171,7 +171,7 @@ class StyleStack:
 
     def to_escpos(self):
         """ converts the current style to an escpos command string """
-        cmd = b''
+        cmd = ''
         ordered_cmds = sorted(self.cmds, key=lambda x: self.cmds[x]['_order'])
         for style in ordered_cmds:
             style2 = self.get(style)
@@ -804,21 +804,20 @@ class Escpos:
                         (encoding, _) = remaining.popitem()
                     else:
                         encoding = 'cp437'
-                        encoded  = '\xb1'    # could not encode, output error character
+                        encoded  = b'\xb1'    # could not encode, output error character
                         break;
 
             if encoding != self.encoding:
                 # if the encoding changed, remember it and prefix the character with
                 # the esc-pos encoding change sequence
                 self.encoding = encoding
-                encoded = encodings[encoding] + encoded
+                encoded = bytes(encodings[encoding], 'utf-8') + encoded
 
             return encoded
         
         def encode_str(txt):
             buffer = b''
             for c in txt:
-                #import pdb; pdb.set_trace()
                 buffer += encode_char(c)
             return buffer
 
@@ -828,7 +827,7 @@ class Escpos:
         # remove double spaces to try to restore the original string length
         # and prevent printing alignment issues
         while self.extra_chars > 0: 
-            dspace = txt.find('  ')
+            dspace = txt.find(b'  ')
             if dspace > 0:
                 txt = txt[:dspace] + txt[dspace+1:]
                 self.extra_chars -= 1
