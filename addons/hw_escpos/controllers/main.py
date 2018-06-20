@@ -231,8 +231,10 @@ class EscposDriver(Thread):
                 eprint.text(ip+'\n')
 
         if len(ips) >= 1:
+            ips_filtered = [i for i in ips if i != '127.0.0.1']
+            main_ips = ips_filtered and ips_filtered[0] or '127.0.0.1'
             eprint.text('\nMAC Address:\n' + str(mac) + '\n')
-            eprint.text('\nHomepage:\nhttp://'+ips[0]+':8069\n')
+            eprint.text('\nHomepage:\nhttp://' + main_ips + ':8069\n')
 
         eprint.text('\n\n')
         eprint.cut()
