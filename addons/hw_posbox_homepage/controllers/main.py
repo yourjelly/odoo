@@ -9,7 +9,6 @@ import werkzeug
 import odoo
 from odoo import http
 from odoo.tools import misc
-from odoo.http import request
 
 
 _logger = logging.getLogger(__name__)
