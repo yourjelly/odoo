@@ -8,6 +8,7 @@ import os
 import os.path
 import subprocess
 import time
+import netifaces as ni
 import traceback
 
 try: 
@@ -197,9 +198,18 @@ class EscposDriver(Thread):
         localips = ['0.0.0.0','127.0.0.1','127.0.1.1']
         hosting_ap = os.system('pgrep hostapd') == 0
         ssid = subprocess.check_output('iwconfig 2>&1 | grep \'ESSID:"\' | sed \'s/.*"\\(.*\\)"/\\1/\'', shell=True).decode('utf-8').rstrip()
-        mac = subprocess.check_output('ifconfig | grep -B 1 \'inet addr\' | grep -o \'HWaddr .*\' | sed \'s/HWaddr //\'', shell=True).decode('utf-8').rstrip()
-        ips =  [ c.split(':')[1].split(' ')[0] for c in subprocess.check_output("/sbin/ifconfig").decode('utf-8').split('\n') if 'inet addr' in c ]
-        ips =  [ ip for ip in ips if ip not in localips ] 
+        from uuid import getnode as get_mac
+        mac = get_mac()
+        h = iter(hex(mac)[2:].zfill(12))
+        mac = ":".join(i + next(h) for i in h)
+        interfaces = ni.interfaces()
+        ips = []
+        for iface_id in interfaces:
+            iface_obj = ni.ifaddresses(iface_id)
+            ifconfigs = iface_obj.get(ni.AF_INET, [])
+            for conf in ifconfigs:
+                if conf.get('addr'):
+                    ips.append(conf.get('addr'))
         eprint.text('\n\n')
         eprint.set(align='center',type='b',height=2,width=2)
         eprint.text('PosBox Status\n')
@@ -221,7 +231,7 @@ class EscposDriver(Thread):
                 eprint.text(ip+'\n')
 
         if len(ips) >= 1:
-            eprint.text('\nMAC Address:\n' + mac + '\n')
+            eprint.text('\nMAC Address:\n' + str(mac) + '\n')
             eprint.text('\nHomepage:\nhttp://'+ips[0]+':8069\n')
 
         eprint.text('\n\n')
