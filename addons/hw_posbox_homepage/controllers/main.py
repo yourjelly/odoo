@@ -10,6 +10,7 @@ import odoo
 from odoo import http
 from odoo.tools import misc
 
+
 _logger = logging.getLogger(__name__)
 
 index_style = """
@@ -89,6 +90,7 @@ class PosboxHomepage(odoo.addons.web.controllers.main.Home):
 
     @http.route('/wifi', type='http', auth='none', website=True)
     def wifi(self):
+
         wifi_template = """
 <!DOCTYPE HTML>
 <html>
@@ -111,7 +113,10 @@ class PosboxHomepage(odoo.addons.web.controllers.main.Home):
                     </td>
                     <td>
                         <select name="essid">
+                        <input type="hidden" name="csrf_token" value=
 """
+        wifi_template += "\"" + odoo.http.WebRequest.csrf_token() + "\""
+        wifi_template += "/>"
         try:
             f = open('/tmp/scanned_networks.txt', 'r')
             for line in f:
