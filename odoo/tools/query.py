@@ -689,8 +689,7 @@ class Select(BaseQuery):
         # Bad:
         #   * FROM a, b INNER JOIN c ...
         # There's no error-checking, but the resulting query won't be what the user expects.
-        rows = self._get_tables()
-        self._rows = rows[:1] if self._joins else rows
+        self._rows = self._get_tables()
 
     @property
     def attrs(self):
@@ -729,13 +728,9 @@ class Select(BaseQuery):
         if self._where is not None:
             tables |= self._where.rows
 
-        tables_to_join = set()
-        for j in self._joins:
-            tables_to_join |= j.rows
+        tables_to_join = {j._join for j in self._joins}
 
-        tables = (tables_to_join & tables) or tables
-        # TODO: Ensure determinism by sorting by an extra key
-
+        tables -= tables_to_join
         return sorted(list(tables), key=lambda r: (r._table, r._nullable, r._cols))
 
     # Select query operations
@@ -856,39 +851,10 @@ class Select(BaseQuery):
         args = []
         sql = []
 
-        # TODO: Allow when UNNEST is fixed
-        if self._joins:
-            available_tables = set(self._rows)
-
         for join in self._joins:
-            if isinstance(join, Join):
-                # Explicit joins
-                available_tables |= join.rows
-                _sql, _args = join._to_sql(alias_mapping)
-                sql.append(_sql)
-                args += _args
-            else:
-                # Implicit joins
-                # --------------
-                # This is a heuristic that determines a join based solely on its ON condition,
-                # this means that implicit joins without an ON condition are not possible.
-                # In order for the implicit join detection to work, all rows referenced in the
-                # ON condition must be in the FROM clause, or have been processed previously
-                # in another JOIN object, except for the row to be joined.
-                # The `join_table` is deduced from the rows appearing in the ON condition minus
-                # the rows in the FROM clause or the rows appearing in preceding join conditions.
-                # `join_table` must always equal to a set of size one, if it is larger than one
-                # then a table being referenced in the condition has not been joined yet.
-                # The `main_table` is deduced from the rows appearing in the ON condition and the
-                # rows already in available_tables (common denominator).
-                join_table = join.rows - available_tables
-                assert len(join_table) == 1, "Table(s) referenced before join: %s" % join_table
-                main_table = join.rows & available_tables
-                available_tables |= join_table
-                j = Join(main_table.pop(), join_table.pop(), join)
-                _sql, _args = j._to_sql(alias_mapping)
-                sql.append(_sql)
-                args += _args
+            _sql, _args = join._to_sql(alias_mapping)
+            sql.append(_sql)
+            args += _args
 
         self.sql.append(' '.join(sql))
         self.args += args

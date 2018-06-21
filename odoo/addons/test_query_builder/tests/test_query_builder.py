@@ -292,7 +292,7 @@ class TestSelect(TestCase):
     def test_select_right_join(self):
         self.p._nullable = True
         s = Select([self.u.id])
-        s = s.join(self.u.partner_id == self.p.id)
+        s = s.join(Join(self.u, self.p, self.u.partner_id == self.p.id))
         res = ("""SELECT "a"."id" FROM "res_users" "a" """
                """RIGHT JOIN "res_partner" "b" ON ("a"."partner_id" = "b"."id")""")
         self.assertEqual(s.to_sql()[0], res)
@@ -300,7 +300,7 @@ class TestSelect(TestCase):
     def test_select_left_join(self):
         self.p._nullable = True
         s = Select([self.p.id])
-        s = s.join(self.p.id == self.u.partner_id)
+        s = s.join(Join(self.p, self.u, self.p.id == self.u.partner_id))
         res = ("""SELECT "a"."id" FROM "res_partner" "a" """
                """LEFT JOIN "res_users" "b" ON ("a"."id" = "b"."partner_id")""")
         self.assertEqual(s.to_sql()[0], res)
@@ -309,14 +309,14 @@ class TestSelect(TestCase):
         self.u._nullable = True
         self.p._nullable = True
         s = Select([self.p.id])
-        s = s.join(self.p.id == self.u.partner_id)
+        s = s.join(Join(self.p, self.u, self.p.id == self.u.partner_id))
         res = ("""SELECT "a"."id" FROM "res_partner" "a" """
                """FULL JOIN "res_users" "b" ON ("a"."id" = "b"."partner_id")""")
         self.assertEqual(s.to_sql()[0], res)
 
     def test_select_inner_join(self):
         s = Select([self.p.id])
-        s = s.join(self.p.id == self.u.partner_id)
+        s = s.join(Join(self.p, self.u, self.p.id == self.u.partner_id))
         res = ("""SELECT "a"."id" FROM "res_partner" "a" """
                """INNER JOIN "res_users" "b" ON ("a"."id" = "b"."partner_id")""")
         self.assertEqual(s.to_sql()[0], res)
@@ -325,7 +325,10 @@ class TestSelect(TestCase):
         self.p._nullable = True
         x = Row('res_currency', True)
         s = Select([self.p.id])
-        s = s.join(self.p.id == self.u.partner_id, self.p.active == x.active)
+        s = s.join(
+            Join(self.p, self.u, self.p.id == self.u.partner_id),
+            Join(self.p, x, self.p.active == x.active),
+        )
         res = (
             """SELECT "a"."id" FROM "res_partner" "a" """
             """LEFT JOIN "res_users" "b" ON ("a"."id" = "b"."partner_id") """
@@ -359,7 +362,7 @@ class TestSelect(TestCase):
 
     def test_full_select_query(self):
         s = Select([self.p.id], where=self.p.name != 'johnny', order=[Asc(self.p.name)])
-        s = s.join(self.p.id == self.u.partner_id)
+        s = s.join(Join(self.p, self.u, self.p.id == self.u.partner_id))
         res = (
             """SELECT "a"."id" FROM "res_partner" "a" """
             """INNER JOIN "res_users" "b" ON ("a"."id" = "b"."partner_id") """
@@ -519,7 +522,8 @@ class TestSelect(TestCase):
         )
 
     def test_smart_joins(self):
-        s = Select([self.p.id, self.u.id], joins=[self.p.id == self.u.partner_id])
+        s = Select([self.p.id, self.u.id], joins=[Join(self.p, self.u,
+                                                       self.p.id == self.u.partner_id)])
         self.assertEqual(
             s.to_sql()[0],
             """SELECT "a"."id", "b"."id" FROM "res_partner" "a" """
@@ -527,7 +531,8 @@ class TestSelect(TestCase):
         )
 
     def test_full_expr_join(self):
-        s = Select([self.p.id], joins=[(self.p.id == self.u.partner_id) & (self.p.id > 5)])
+        s = Select([self.p.id], joins=[Join(self.p, self.u,
+                                            (self.p.id == self.u.partner_id) & (self.p.id > 5))])
         self.assertEqual(
             s.to_sql(),
             ("""SELECT "a"."id" FROM "res_partner" "a" """
@@ -571,8 +576,8 @@ class TestSelect(TestCase):
         )
 
     def test_new_join(self):
-        base = Select([self.p.id], joins=[self.p.id == self.u.partner_id])
-        new = base.join(self.p.name == self.u.name)
+        base = Select([self.p.id], joins=[Join(self.p, self.u, self.p.id == self.u.partner_id)])
+        new = base.join(Join(self.p, self.u, self.p.name == self.u.name))
         self.assertIsNot(base, new)
         self.assertEqual(
             base.to_sql()[0],
@@ -773,7 +778,10 @@ class TestSelect(TestCase):
 
     def test_select_join_with_joined_table(self):
         g = Row("res_groups", True)
-        s = Select([self.p.id], joins=[self.p.id == self.u.partner_id, self.u.group_id == g.id])
+        s = Select([self.p.id], joins=[
+            Join(self.p, self.u, self.p.id == self.u.partner_id),
+            Join(self.u, g, self.u.group_id == g.id),
+        ])
         self.assertEqual(
             s.to_sql(),
             (
@@ -785,7 +793,7 @@ class TestSelect(TestCase):
 
     def test_select_join_sub_select(self):
         s1 = Select([self.p.id])
-        s2 = Select([self.u.id], joins=[self.u.partner_id == s1.id])
+        s2 = Select([self.u.id], joins=[Join(self.u, s1, self.u.partner_id == s1.id)])
         self.assertEqual(
             s2.to_sql(),
             (
@@ -796,7 +804,7 @@ class TestSelect(TestCase):
         )
 
     def test_select_aliased_and_unaliased(self):
-        s = Select({1: self.p.id, 'foo': self.p.foo})
+        s = Select(OrderedDict([(1, self.p.id), ('foo', self.p.foo)]))
         self.assertEqual(
             s.to_sql(),
             (
@@ -1439,7 +1447,7 @@ class TestRealWorldCases(TestCase):
         u = Row("uom_uom", True)
         u2 = Row("uom_uom", True)
         it = Select({
-            None: [ai.id],
+            1: ai.id,
             'sign': Case([(ai.type == _any(['in_refund', 'in_invoice']), -1)], 1)
         })
         s1 = Select([count(ail)], where=ail.invoice_id == ai.id)
@@ -1457,32 +1465,30 @@ class TestRealWorldCases(TestCase):
             ),
             'residual': ai.residual_company_signed / s1 * count(ail) * it.sign,
             'commercial_partner_id': ai.commercial_partner_id,
-            None: [
-                ail.product_id,
-                ai.partner_id,
-                ai.payment_term_id,
-                ail.account_analytic_id,
-                ai.currency_id,
-                ai.journal_id,
-                ai.fiscal_position_id,
-                ai.user_id,
-                ai.company_id,
-                ai.type,
-                ai.state,
-                pt.categ_id,
-                ai.date_due,
-                ai.account_id,
-                ai.partner_bank_id,
-                partner.country_id,
-            ]
+            1: ail.product_id,
+            2: ai.partner_id,
+            3: ai.payment_term_id,
+            4: ail.account_analytic_id,
+            5: ai.currency_id,
+            6: ai.journal_id,
+            7: ai.fiscal_position_id,
+            8: ai.user_id,
+            9: ai.company_id,
+            10: ai.type,
+            11: ai.state,
+            12: pt.categ_id,
+            13: ai.date_due,
+            14: ai.account_id,
+            15: ai.partner_bank_id,
+            16: partner.country_id,
         }, joins=[
-            ai.id == ail.invoice_id,
-            ai.commercial_partner_id == partner.id,
-            pr.id == ail.product_id,
-            pt.id == pr.product_tmpl_id,
-            u.id == ail.uom_id,
-            u2.id == pt.uom_id,
-            it.id == ai.id,
+            Join(ai, ail, ai.id == ail.invoice_id),
+            Join(ai, partner, ai.commercial_partner_id == partner.id),
+            Join(ail, pr, pr.id == ail.product_id),
+            Join(pr, pt, pt.id == pr.product_tmpl_id),
+            Join(ail, u, u.id == ail.uom_id),
+            Join(pt, u2, u2.id == pt.uom_id),
+            Join(ai, it, it.id == ai.id),
         ], group=[
             ail.id, ail.product_id, ail.account_analytic_id, ai.date_invoice, ai.id,
             ai.partner_id, ai.payment_term_id, u2.name, u2.id, ai.currency_id, ai.journal_id,
@@ -1501,29 +1507,45 @@ class TestRealWorldCases(TestCase):
             ), order=[Asc(r2.name)], limit=1,
         )
         company_rates = Select({
-            None: [r.currency_id, r.rate],
+            1: r.currency_id,
+            2: r.rate,
             'company_id': coalesce(r.company_id, c.id),
             'date_start': r.name,
             'date_end': s2,
-        }, joins=[(r.company_id == NULL) | (r.company_id == c.id)])
+        }, joins=[Join(r, c, (r.company_id == NULL) | (r.company_id == c.id))])
         cr = Row("currency_rate", True)
-        s3 = Select({
-            None: [
-                sub.id, sub.date, sub.product_id, sub.partner_id, sub.country_id,
-                sub.account_analytic_id, sub.payment_term_id, sub.uom_name, sub.currency_id,
-                sub.journal_id, sub.fiscal_position_id, sub.user_id, sub.company_id, sub.nbr,
-                sub.type, sub.state, sub.categ_id, sub.date_due, sub.account_id,
-                sub.account_line_id, sub.partner_bank_id, sub.product_qty
-            ],
-            'price_total': sub.price_total,
-            'price_average': sub.price_average,
-            'currency_rate': coalesce(cr.rate, 1),
-            'residual': sub.residual,
-            'commercial_partner_id': sub.commercial_partner_id,
-        }, joins=[(cr.currency_id == sub.currency_id)
-                  & (cr.company_id == sub.company_id)
-                  & (cr.date_start <= coalesce(sub.date, now()))
-                  & ((cr.date_end == NULL) | (cr.date_end > coalesce(sub.date, now())))])
+        s3 = Select(OrderedDict([
+            (1, sub.id),
+            (2, sub.date),
+            (3, sub.product_id),
+            (4, sub.partner_id),
+            (5, sub.country_id),
+            (6, sub.account_analytic_id),
+            (7, sub.payment_term_id),
+            (8, sub.uom_name),
+            (9, sub.currency_id),
+            (10, sub.journal_id),
+            (11, sub.fiscal_position_id),
+            (12, sub.user_id),
+            (13, sub.company_id),
+            (14, sub.nbr),
+            (15, sub.type),
+            (16, sub.state),
+            (17, sub.categ_id),
+            (18, sub.date_due),
+            (19, sub.account_id),
+            (20, sub.account_line_id),
+            (21, sub.partner_bank_id),
+            (22, sub.product_qty),
+            ('price_total', sub.price_total),
+            ('price_average', sub.price_average),
+            ('currency_rate', coalesce(cr.rate, 1)),
+            ('residual', sub.residual),
+            ('commercial_partner_id', sub.commercial_partner_id),
+        ]), joins=[Join(sub, cr, (cr.currency_id == sub.currency_id)
+                   & (cr.company_id == sub.company_id)
+                   & (cr.date_start <= coalesce(sub.date, now()))
+                   & ((cr.date_end == NULL) | (cr.date_end > coalesce(sub.date, now()))))])
         w = With([(cr, company_rates)], s3)
         v = CreateView("account_invoice_report", w, True)
-        # print(s3.to_sql())
+        print(sub.to_sql())
