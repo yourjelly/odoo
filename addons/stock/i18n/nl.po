@@ -366,17 +366,17 @@ msgstr "Actief"
 #. module: stock
 #: model:ir.actions.act_window,help:stock.action_production_lot_form
 msgid "Add a lot/serial number"
-msgstr ""
+msgstr "Voeg een partij/serienummer toe"
 
 #. module: stock
 #: model:ir.actions.act_window,help:stock.action_location_form
 msgid "Add a new location"
-msgstr ""
+msgstr "Voeg een nieuwe locatie toe"
 
 #. module: stock
 #: model:ir.actions.act_window,help:stock.action_routes_form
 msgid "Add a new route"
-msgstr ""
+msgstr "Voeg een nieuwe route toe"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_res_config_settings__group_stock_adv_location
@@ -4454,7 +4454,8 @@ msgstr "Aantallen"
 #, python-format
 msgid "Quants cannot be created for consumables or services."
 msgstr ""
-"Quants kunnen niet worden aangemaakt voor verbruiksartikelen of diensten."
+"Hoeveelheden kunnen niet worden aangemaakt voor verbruiksartikelen of "
+"diensten."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking_type__rate_picking_backorders
@@ -5429,8 +5430,8 @@ msgid ""
 "Technical field used to compute whether the mark as todo button should be "
 "shown."
 msgstr ""
-"Technisch veld waarmee berekend wordt of de markeer als ToDo zichtbaar mag "
-"zijn."
+"Technisch veld waarmee berekend wordt of de markeer als \"Te doen\" "
+"zichtbaar mag zijn."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking__show_validate

@@ -5,7 +5,7 @@ from babel.dates import format_datetime, format_date
 
 from odoo import models, api, _, fields
 from odoo.release import version
-from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DF
+from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DF, safe_eval
 from odoo.tools.misc import formatLang
 
 class account_journal(models.Model):
@@ -324,7 +324,7 @@ class account_journal(models.Model):
             elif self.type == 'sale':
                 action_name = 'action_invoice_tree1'
             elif self.type == 'purchase':
-                action_name = 'action_invoice_tree2'
+                action_name = 'action_vendor_bill_template'
             else:
                 action_name = 'action_move_journal_line'
 
@@ -354,11 +354,14 @@ class account_journal(models.Model):
         action['context'] = ctx
         action['domain'] = self._context.get('use_domain', [])
         account_invoice_filter = self.env.ref('account.view_account_invoice_filter', False)
-        if action_name in ['action_invoice_tree1', 'action_invoice_tree2']:
+        if action_name in ['action_invoice_tree1', 'action_vendor_bill_template']:
             action['search_view_id'] = account_invoice_filter and account_invoice_filter.id or False
         if action_name in ['action_bank_statement_tree', 'action_view_bank_statement_tree']:
             action['views'] = False
             action['view_id'] = False
+        if self.type == 'purchase':
+            new_help = self.env['account.invoice'].with_context(ctx).complete_empty_list_help()
+            action.update({'help': action.get('help', '') + new_help})
         return action
 
     @api.multi
@@ -374,19 +377,18 @@ class account_journal(models.Model):
         return self.open_payments_action('transfer')
 
     @api.multi
-    def open_payments_action(self, payment_type):
-        ctx = self._context.copy()
-        ctx.update({
-            'default_payment_type': payment_type,
-            'default_journal_id': self.id
-        })
-        ctx.pop('group_by', None)
-        action_rec = self.env['ir.model.data'].xmlid_to_object('account.action_account_payments')
-        if action_rec:
-            action = action_rec.read([])[0]
-            action['context'] = ctx
-            action['domain'] = [('journal_id','=',self.id),('payment_type','=',payment_type)]
-            return action
+    def open_payments_action(self, payment_type, mode='tree'):
+        if payment_type == 'outbound':
+            action_ref = 'account.action_account_payments_payable'
+        elif payment_type == 'transfer':
+            action_ref = 'account.action_account_payments_transfer'
+        else:
+            action_ref = 'account.action_account_payments'
+        [action] = self.env.ref(action_ref).read()
+        action['context'] = dict(safe_eval(action.get('context')), default_journal_id=self.id, search_default_journal_id=self.id)
+        if mode == 'form':
+            action['views'] = [[False, 'form']]
+        return action
 
     @api.multi
     def open_action_with_context(self):
@@ -409,13 +411,27 @@ class account_journal(models.Model):
     @api.multi
     def create_bank_statement(self):
         """return action to create a bank statements. This button should be called only on journals with type =='bank'"""
-        self.bank_statements_source = 'manual'
         action = self.env.ref('account.action_bank_statement_tree').read()[0]
         action.update({
             'views': [[False, 'form']],
             'context': "{'default_journal_id': " + str(self.id) + "}",
         })
         return action
+
+    @api.multi
+    def create_customer_payment(self):
+        """return action to create a customer payment"""
+        return self.open_payments_action('inbound', mode='form')
+
+    @api.multi
+    def create_supplier_payment(self):
+        """return action to create a supplier payment"""
+        return self.open_payments_action('outbound', mode='form')
+
+    @api.multi
+    def create_internal_transfer(self):
+        """return action to create a internal transfer"""
+        return self.open_payments_action('transfer', mode='form')
 
     #####################
     # Setup Steps Stuff #

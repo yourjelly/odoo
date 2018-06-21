@@ -12,6 +12,7 @@
     'data': [
         'wizard/invite_view.xml',
         'wizard/mail_compose_message_view.xml',
+        'wizard/mail_resend_message_views.xml',
         'views/mail_message_subtype_views.xml',
         'views/mail_tracking_views.xml',
         'views/mail_message_views.xml',
@@ -24,6 +25,7 @@
         'data/mail_data.xml',
         'data/mail_channel_data.xml',
         'data/mail_activity_data.xml',
+        'data/ir_cron_data.xml',
         'security/mail_security.xml',
         'security/ir.model.access.csv',
         'views/mail_alias_views.xml',
@@ -31,6 +33,7 @@
         'views/mail_templates.xml',
         'wizard/email_template_preview_view.xml',
         'views/mail_template_views.xml',
+        'views/mail_moderation_views.xml',
         'views/ir_actions_views.xml',
         'views/ir_model_views.xml',
         'views/res_partner_views.xml',

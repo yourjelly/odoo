@@ -178,7 +178,7 @@ def module_installed_bypass_session(dbname):
     return {}
 
 def module_boot(db=None):
-    server_wide_modules = odoo.conf.server_wide_modules or ['web']
+    server_wide_modules = {'base', 'web'} | set(odoo.conf.server_wide_modules)
     serverside = []
     dbside = []
     for i in server_wide_modules:
@@ -1047,8 +1047,12 @@ class Binary(http.Controller):
         elif status != 200 and download:
             return request.not_found()
 
-        height = int(height or 0)
-        width = int(width or 0)
+        if headers and dict(headers).get('Content-Type', '') == 'image/svg+xml':  # we shan't resize svg images
+            height = 0
+            width = 0
+        else:
+            height = int(height or 0)
+            width = int(width or 0)
 
         if crop and (width or height):
             content = crop_image(content, type='center', size=(width, height), ratio=(1, 1))
@@ -1116,7 +1120,7 @@ class Binary(http.Controller):
             if request.httprequest.user_agent.browser == 'safari':
                 # Safari sends NFD UTF-8 (where é is composed by 'e' and [accent])
                 # we need to send it the same stuff, otherwise it'll fail
-                filename = unicodedata.normalize('NFD', ufile.filename).encode('UTF-8')
+                filename = unicodedata.normalize('NFD', ufile.filename)
 
             try:
                 attachment = Model.create({

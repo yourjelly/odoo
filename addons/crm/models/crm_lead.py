@@ -107,6 +107,7 @@ class Lead(models.Model):
     # Only used for type opportunity
     probability = fields.Float('Probability', group_operator="avg", default=lambda self: self._default_probability())
     planned_revenue = fields.Monetary('Expected Revenue', currency_field='company_currency', track_visibility='always')
+    expected_revenue = fields.Monetary('Prorated Revenue', currency_field='company_currency', store=True, compute="_compute_expected_revenue")
     date_deadline = fields.Date('Expected Closing', help="Estimate of the date on which the opportunity will be won.")
     color = fields.Integer('Color Index', default=0)
     partner_address_name = fields.Char('Partner Contact Name', related='partner_id.name', readonly=True)
@@ -163,6 +164,11 @@ class Lead(models.Model):
                 else:
                     kanban_state = 'red'
             lead.kanban_state = kanban_state
+
+    @api.depends('planned_revenue', 'probability')
+    def _compute_expected_revenue(self):
+        for lead in self:
+            lead.expected_revenue = round((lead.planned_revenue or 0.0) * (lead.probability or 0) / 100.0, 2)
 
     @api.depends('date_open')
     def _compute_day_open(self):
@@ -237,6 +243,8 @@ class Lead(models.Model):
     @api.model
     def _onchange_user_values(self, user_id):
         """ returns new values when user_id has changed """
+        if not user_id:
+            return {}
         if user_id and self._context.get('team_id'):
             team = self.env['crm.team'].browse(self._context['team_id'])
             if user_id in team.member_ids.ids:
@@ -914,7 +922,7 @@ class Lead(models.Model):
         if self._context.get('default_type') == 'lead':
             help_title = _('Add a new lead')
         else:
-            help_title = _('Create a new opportunity to add it to your pipeline')
+            help_title = _('Create an opportunity in your pipeline')
         alias_record = self.env['mail.alias'].search([
             ('alias_name', '!=', False),
             ('alias_name', '!=', ''),
@@ -1110,11 +1118,15 @@ class Lead(models.Model):
 
         return [new_group] + groups
 
-    @api.model
-    def _notify_get_reply_to(self, res_ids, default=None):
-        leads = self.sudo().browse(res_ids)
-        aliases = self.env['crm.team']._notify_get_reply_to(leads.mapped('team_id').ids, default=default)
-        return {lead.id: aliases.get(lead.team_id.id or 0, False) for lead in leads}
+    @api.multi
+    def _notify_get_reply_to(self, default=None, records=None, company=None, doc_names=None):
+        """ Override to set alias of lead and opportunities to their sales team if any. """
+        aliases = self.mapped('team_id')._notify_get_reply_to(default=default, records=None, company=company, doc_names=None)
+        res = {lead.id: aliases.get(lead.team_id.id) for lead in self}
+        leftover = self.filtered(lambda rec: not rec.team_id)
+        if leftover:
+            res.update(super(Lead, leftover)._notify_get_reply_to(default=default, records=None, company=company, doc_names=doc_names))
+        return res
 
     @api.multi
     def get_formview_id(self, access_uid=None):

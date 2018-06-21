@@ -132,6 +132,11 @@ class Employee(models.Model):
         ('widower', 'Widower'),
         ('divorced', 'Divorced')
     ], string='Marital Status', groups="hr.group_hr_user", default='single')
+    spouse_complete_name = fields.Char(string="Spouse Complete Name", groups="hr.group_hr_user")
+    spouse_birthdate = fields.Date(string="Spouse Birthdate", groups="hr.group_hr_user")
+    children = fields.Integer(string='Number of Children', groups="hr.group_hr_user")
+    place_of_birth = fields.Char('Place of Birth', groups="hr.group_hr_user")
+    country_of_birth = fields.Many2one('res.country', string="Country of Birth", groups="hr.group_hr_user")
     birthday = fields.Date('Date of Birth', groups="hr.group_hr_user")
     ssnid = fields.Char('SSN No', help='Social Security Number', groups="hr.group_hr_user")
     sinid = fields.Char('SIN No', help='Social Insurance Number', groups="hr.group_hr_user")
@@ -145,6 +150,19 @@ class Employee(models.Model):
     permit_no = fields.Char('Work Permit No', groups="hr.group_hr_user")
     visa_no = fields.Char('Visa No', groups="hr.group_hr_user")
     visa_expire = fields.Date('Visa Expire Date', groups="hr.group_hr_user")
+    additional_note = fields.Text(string='Additional Note', groups="hr.group_hr_user")
+    certificate = fields.Selection([
+        ('bachelor', 'Bachelor'),
+        ('master', 'Master'),
+        ('other', 'Other'),
+    ], 'Certificate Level', default='master', groups="hr.group_hr_user")
+    study_field = fields.Char("Field of Study", placeholder='Computer Science', groups="hr.group_hr_user")
+    study_school = fields.Char("School", groups="hr.group_hr_user")
+    emergency_contact = fields.Char("Emergency Contact", groups="hr.group_hr_user")
+    emergency_phone = fields.Char("Emergency Phone", groups="hr.group_hr_user")
+    km_home_work = fields.Integer(string="Km home-work", groups="hr.group_hr_user")
+    google_drive_link = fields.Char(string="Employee Documents", groups="hr.group_hr_user")
+    job_title = fields.Char("Job Title")
 
     # image: all image fields are base64 encoded and PIL-supported
     image = fields.Binary(
@@ -185,7 +203,12 @@ class Employee(models.Model):
     def _check_parent_id(self):
         for employee in self:
             if not employee._check_recursion():
-                raise ValidationError(_('Error! You cannot create recursive hierarchy of Employee(s).'))
+                raise ValidationError(_('You cannot create a recursive hierarchy.'))
+
+    @api.onchange('job_id')
+    def _onchange_job_id(self):
+        if self.job_id:
+            self.job_title = self.job_id.name
 
     @api.onchange('address_id')
     def _onchange_address(self):
@@ -205,6 +228,11 @@ class Employee(models.Model):
     def _onchange_user(self):
         if self.user_id:
             self.update(self._sync_user(self.user_id))
+
+    @api.onchange('user_id', 'resource_calendar_id')
+    def _onchange_timezone(self):
+        if self.user_id or self.resource_calendar_id:
+            self.tz = self.user_id.tz or self.resource_calendar_id.tz
 
     def _sync_user(self, user):
         return dict(
@@ -276,7 +304,7 @@ class Department(models.Model):
     @api.constrains('parent_id')
     def _check_parent_id(self):
         if not self._check_recursion():
-            raise ValidationError(_('Error! You cannot create recursive departments.'))
+            raise ValidationError(_('You cannot create recursive departments.'))
 
     @api.model
     def create(self, vals):

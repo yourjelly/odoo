@@ -107,9 +107,11 @@ class ThreadedWSGIServerReloadable(LoggingBaseWSGIServerMixIn, werkzeug.serving.
         if os.environ.get('LISTEN_FDS') == '1' and os.environ.get('LISTEN_PID') == str(os.getpid()):
             self.reload_socket = True
             self.socket = socket.fromfd(SD_LISTEN_FDS_START, socket.AF_INET, socket.SOCK_STREAM)
+            _logger.info('HTTP service (werkzeug) running through socket activation')
         else:
             self.reload_socket = False
             super(ThreadedWSGIServerReloadable, self).server_bind()
+            _logger.info('HTTP service (werkzeug) running on %s:%s', self.server_name, self.server_port)
 
     def server_activate(self):
         if not self.reload_socket:
@@ -203,6 +205,9 @@ class ThreadedServer(CommonServer):
                 os._exit(0)
             # interrupt run() to start shutdown
             raise KeyboardInterrupt()
+        elif sig == signal.SIGXCPU:
+            sys.stderr.write("CPU time limit exceeded! Shutting down immediately\n")
+            os._exit(0)
         elif sig == signal.SIGHUP:
             # restart on kill -HUP
             odoo.phoenix = True
@@ -253,7 +258,6 @@ class ThreadedServer(CommonServer):
         t = threading.Thread(target=self.http_thread, name="odoo.service.httpd")
         t.setDaemon(True)
         t.start()
-        _logger.info('HTTP service (werkzeug) running on %s:%s', self.interface, self.port)
 
     def start(self, stop=False):
         _logger.debug("Setting signal handlers")
@@ -262,6 +266,7 @@ class ThreadedServer(CommonServer):
             signal.signal(signal.SIGTERM, self.signal_handler)
             signal.signal(signal.SIGCHLD, self.signal_handler)
             signal.signal(signal.SIGHUP, self.signal_handler)
+            signal.signal(signal.SIGXCPU, self.signal_handler)
             signal.signal(signal.SIGQUIT, dumpstacks)
             signal.signal(signal.SIGUSR1, log_ormcache_stats)
         elif os.name == 'nt':
@@ -359,7 +364,10 @@ class GeventServer(CommonServer):
 
     def start(self):
         import gevent
-        from gevent.wsgi import WSGIServer
+        try:
+            from gevent.pywsgi import WSGIServer
+        except ImportError:
+            from gevent.wsgi import WSGIServer
 
 
         if os.name == 'posix':
@@ -369,7 +377,7 @@ class GeventServer(CommonServer):
             signal.signal(signal.SIGQUIT, dumpstacks)
             signal.signal(signal.SIGUSR1, log_ormcache_stats)
             gevent.spawn(self.watchdog)
-        
+
         self.httpd = WSGIServer((self.interface, self.port), self.app)
         _logger.info('Evented Service (longpolling) running on %s:%s', self.interface, self.port)
         try:
@@ -824,7 +832,6 @@ class WorkerCron(Worker):
 
             from odoo.addons import base
             base.models.ir_cron.ir_cron._acquire_job(db_name)
-            odoo.modules.registry.Registry.delete(db_name)
 
             # dont keep cursors in multi database mode
             if len(db_names) > 1:
@@ -858,7 +865,8 @@ class WorkerCron(Worker):
 server = None
 
 def load_server_wide_modules():
-    for m in odoo.conf.server_wide_modules:
+    server_wide_modules = {'base', 'web'} | set(odoo.conf.server_wide_modules)
+    for m in server_wide_modules:
         try:
             odoo.modules.module.load_openerp_module(m)
         except Exception:

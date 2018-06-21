@@ -1358,6 +1358,34 @@ Let us mention the most important ones:
 - the field widgets can be used outside of a view.  Their API is slightly
   awkward, but they are designed to be standalone.
 
+Decorations
+-----------
+
+Like the list view, field widgets have a simple support for decorations. The
+goal of decorations is to have a simple way to specify a text color depending on
+the record current state.  For example,
+
+.. code-block:: xml
+
+    <field name="state" decoration-danger="amount &lt; 10000"/>
+
+The valid decoration names are:
+
+- decoration-bf
+- decoration-it
+- decoration-danger
+- decoration-info
+- decoration-muted
+- decoration-primary
+- decoration-success
+- decoration-warning
+
+Each decoration *decoration-X* will be mapped to a css class *text-X*, which is
+a standard bootstrap css class (except for *text-it* and *text-bf*, which are
+handled by odoo and correspond to italic and bold, respectively).  Note that the
+value of the decoration attribute should be a valid python expression, which
+will be evaluated with the record as evaluation context.
+
 Non relational fields
 ---------------------
 
@@ -1407,10 +1435,26 @@ order.
 
     - Supported field types: *date*, *datetime*
 
+    Options:
+
+    - datepicker: extra settings for the datepicker_ widget.
+
+    .. code-block:: xml
+
+        <field name="datefield" options='{"datepicker": {"daysOfWeekDisabled": [0, 6]}}'/>
+
 - datetime (FieldDateTime)
     This is the default field type for fields of type *datetime*.
 
     - Supported field types: *date*, *datetime*
+
+    Options:
+
+    - datepicker: extra settings for the datepicker_ widget.
+
+    .. code-block:: xml
+
+        <field name="datefield" options='{"datepicker": {"daysOfWeekDisabled": [0, 6]}}'/>
 
 - monetary (FieldMonetary)
     This is the default field type for fields of type 'monetary'. It is used to
@@ -1756,6 +1800,16 @@ Relational fields
         <field name="recommended_activity_type_id" widget="radio"
             options="{'horizontal':true}"/>
 
+- selection_badge (FieldSelectionBadge)
+    This is a subfield of FieldSelection, but specialized to display all the
+    valid choices as rectangular badges.
+
+    - Supported field types: *selection, many2one*
+
+    .. code-block:: xml
+
+        <field name="recommended_activity_type_id" widget="selection_badge"/>
+
 - many2one (FieldMany2One)
     Default widget for many2one fields.
 
@@ -1899,5 +1953,7 @@ Relational fields
 
 .. _event delegation:
     http://api.jquery.com/delegate/
+
+.. _datepicker: https://github.com/Eonasdan/bootstrap-datetimepicker
 
 .. _deferred: http://api.jquery.com/category/deferred-object/

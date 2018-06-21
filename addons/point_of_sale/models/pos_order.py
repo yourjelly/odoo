@@ -176,7 +176,7 @@ class PosOrder(models.Model):
             'comment': self.note or '',
             # considering partner's sale pricelist's currency
             'currency_id': self.pricelist_id.currency_id.id,
-            'user_id': self.env.uid,
+            'user_id': self.user_id.id,
         }
 
     @api.model
@@ -477,6 +477,7 @@ class PosOrder(models.Model):
         domain="[('state', '=', 'opened')]", states={'draft': [('readonly', False)]},
         readonly=True, default=_default_session)
     config_id = fields.Many2one('pos.config', related='session_id.config_id', string="Point of Sale")
+    invoice_group = fields.Boolean(related="config_id.module_account_invoicing")
     state = fields.Selection(
         [('draft', 'New'), ('cancel', 'Cancelled'), ('paid', 'Paid'), ('done', 'Posted'), ('invoiced', 'Invoiced')],
         'Status', readonly=True, copy=False, default='draft')
@@ -746,7 +747,6 @@ class PosOrder(models.Model):
             # when the pos.config has no picking_type_id set only the moves will be created
             if moves and not return_picking and not order_picking:
                 moves._action_assign()
-                moves.filtered(lambda m: m.state in ['confirmed', 'waiting'])._force_assign()
                 moves.filtered(lambda m: m.product_id.tracking == 'none')._action_done()
 
         return True
@@ -755,7 +755,6 @@ class PosOrder(models.Model):
         """Force picking in order to be set as done."""
         self.ensure_one()
         picking.action_assign()
-        picking.force_assign()
         wrong_lots = self.set_pack_operation_lot(picking)
         if not wrong_lots:
             picking.action_done()
@@ -995,7 +994,7 @@ class PosOrderLine(models.Model):
     def _onchange_qty(self):
         if self.product_id:
             if not self.order_id.pricelist_id:
-                raise UserError(_('You have to select a pricelist in the sale form !'))
+                raise UserError(_('You have to select a pricelist in the sale form.'))
             price = self.price_unit * (1 - (self.discount or 0.0) / 100.0)
             self.price_subtotal = self.price_subtotal_incl = price * self.qty
             if (self.product_id.taxes_id):

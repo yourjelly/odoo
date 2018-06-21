@@ -6,6 +6,7 @@ import werkzeug
 from odoo import http, _
 from odoo.addons.auth_signup.models.res_users import SignupError
 from odoo.addons.web.controllers.main import ensure_db, Home
+from odoo.addons.web_settings_dashboard.controllers.main import WebSettingsDashboard as Dashboard
 from odoo.exceptions import UserError
 from odoo.http import request
 
@@ -42,7 +43,6 @@ class AuthSignupHome(Home):
                         template.sudo().with_context(
                             lang=user_sudo.lang,
                             auth_login=werkzeug.url_encode({'auth_login': user_sudo.email}),
-                            password=request.params.get('password')
                         ).send_mail(user_sudo.id, force_send=True)
                 return super(AuthSignupHome, self).web_login(*args, **kw)
             except UserError as e:
@@ -133,3 +133,10 @@ class AuthSignupHome(Home):
         uid = request.session.authenticate(db, login, password)
         if not uid:
             raise SignupError(_('Authentication Failed.'))
+
+class WebSettingsDashboard(Dashboard):
+    @http.route('/web_settings_dashboard/data', type='json', auth='user')
+    def web_settings_dashboard_data(self, **kw):
+        res = super(WebSettingsDashboard, self).web_settings_dashboard_data(**kw)
+        res['users_info'].update({'resend_invitation': True})
+        return res

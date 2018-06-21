@@ -162,6 +162,15 @@
                                 <field name="active" widget="boolean_button" options='{"terminology": "active"}'/>
                             </button>
                         </div>
+                        <div class="alert alert-info text-center o_form_header" attrs="{'invisible': [('active', '=', True)]}">
+                          <a class="close" data-dismiss="alert" href="#" aria-hidden="true">x</a>
+                          <div>
+                            <strong>The contact linked to this user is still active</strong>
+                          </div>
+                          <div>You can archive the contact
+                            <field name="partner_id" required="0" readonly="1"/>
+                          </div>
+                        </div>
                         <field name="image" widget='image' class="oe_avatar" options='{"preview_image": "image_medium"}'/>
                         <div class="oe_title">
                             <label for="name" class="oe_edit_only"/>
@@ -204,6 +213,10 @@
                                     <label for="has_group_partner_manager" colspan="3"/>
                                     <div>
                                         <field name='has_group_partner_manager' colspan="1" class="oe_inline"/>
+                                    </div>
+                                    <label for="has_group_private_addresses" colspan="3"/>
+                                    <div>
+                                        <field name="has_group_private_addresses" colspan="1" class="oe_inline"/>
                                     </div>
                                 </group>
                             </page>
@@ -270,7 +283,7 @@
                         <t t-name="kanban-box">
                             <div t-attf-class="oe_kanban_global_click">
                                 <div class="o_kanban_image">
-                                    <img t-att-src="kanban_image('res.users', 'image_medium', record.id.value)"/>
+                                    <img t-att-src="kanban_image('res.users', 'image_medium', record.id.raw_value)"/>
                                 </div>
                                 <div class="oe_kanban_details">
                                     <ul>

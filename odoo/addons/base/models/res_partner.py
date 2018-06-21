@@ -81,7 +81,7 @@ class PartnerCategory(models.Model):
     @api.constrains('parent_id')
     def _check_parent_id(self):
         if not self._check_recursion():
-            raise ValidationError(_('Error ! You can not create recursive tags.'))
+            raise ValidationError(_('You can not create recursive tags.'))
 
     @api.multi
     def name_get(self):
@@ -106,13 +106,14 @@ class PartnerCategory(models.Model):
         return res
 
     @api.model
-    def name_search(self, name, args=None, operator='ilike', limit=100):
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
         args = args or []
         if name:
             # Be sure name_search is symetric to name_get
             name = name.split(' / ')[-1]
             args = [('name', operator, name)] + args
-        return self.search(args, limit=limit).name_get()
+        partner_category_ids = self._search(args, limit=limit, access_rights_uid=name_get_uid)
+        return self.browse(partner_category_ids).name_get()
 
 
 class PartnerTitle(models.Model):
@@ -177,7 +178,9 @@ class Partner(models.Model):
         [('contact', 'Contact'),
          ('invoice', 'Invoice address'),
          ('delivery', 'Shipping address'),
-         ('other', 'Other address')], string='Address Type',
+         ('other', 'Other address'),
+         ("private", "Private Address"),
+        ], string='Address Type',
         default='contact',
         help="Used to select automatically the right address according to the context in sales and purchases documents.")
     street = fields.Char()
@@ -232,6 +235,13 @@ class Partner(models.Model):
     _sql_constraints = [
         ('check_name', "CHECK( (type='contact' AND name IS NOT NULL) or (type!='contact') )", 'Contacts require a name.'),
     ]
+
+    @api.multi
+    def toggle_active(self):
+        for partner in self:
+            if partner.active and partner.user_ids:
+                raise ValidationError(_('You cannot archive a contact linked to an internal user.'))
+        super(Partner, self).toggle_active()
 
     @api.depends('is_company', 'name', 'parent_id.name', 'type', 'company_name')
     def _compute_display_name(self):
@@ -485,6 +495,10 @@ class Partner(models.Model):
 
     @api.multi
     def write(self, vals):
+        if vals.get('active') is False:
+            for partner in self:
+                if partner.active and partner.user_ids:
+                    raise ValidationError(_('You cannot archive a contact linked to an internal user.'))
         # res.partner must only allow to set the company_id of a partner if it
         # is the same as the company of all users that inherit from this partner
         # (this is to allow the code from res_users to write to the partner!) or
@@ -634,7 +648,8 @@ class Partner(models.Model):
                                             count=count, access_rights_uid=access_rights_uid)
 
     @api.model
-    def name_search(self, name, args=None, operator='ilike', limit=100):
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+        self = self.sudo(name_get_uid or self.env.uid)
         if args is None:
             args = []
         if name and operator in ('=', 'ilike', '=ilike', 'like', '=like'):
@@ -681,7 +696,7 @@ class Partner(models.Model):
                 return self.browse(partner_ids).name_get()
             else:
                 return []
-        return super(Partner, self).name_search(name, args, operator=operator, limit=limit)
+        return super(Partner, self)._name_search(name, args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
     @api.model
     def find_or_create(self, email):

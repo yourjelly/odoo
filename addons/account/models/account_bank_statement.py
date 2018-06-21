@@ -316,7 +316,7 @@ class AccountBankStatementLine(models.Model):
         # Allow to enter bank statement line with an amount of 0,
         # so that user can enter/import the exact bank statement they have received from their bank in Odoo
         if self.journal_id.type != 'bank' and self.currency_id.is_zero(self.amount):
-            raise ValidationError(_('A Cash transaction can\'t have a 0 amount.'))
+            raise ValidationError(_('The amount of a cash transaction cannot be 0.'))
 
     @api.one
     @api.constrains('amount', 'amount_currency')
@@ -695,7 +695,7 @@ class AccountBankStatementLine(models.Model):
             # Create write-offs
             for aml_dict in new_aml_dicts:
                 aml_dict['payment_id'] = payment and payment.id or False
-                aml_obj.with_context(check_move_validity=False, apply_taxes=True).create(aml_dict)
+                aml_obj.with_context(check_move_validity=False).create(aml_dict)
 
             # Create counterpart move lines and reconcile them
             for aml_dict in counterpart_aml_dicts:

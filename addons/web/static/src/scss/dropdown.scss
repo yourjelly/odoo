@@ -45,7 +45,7 @@
             top: 0;
             left: 100%;
         }
-        &:hover > .dropdown-menu {
+        &:hover .dropdown-menu {
             display: block;
         }
     }
@@ -66,7 +66,7 @@
             @extend %dropdown-li-a-padding;
             color: $o-main-text-color;
 
-            @media (max-width: $screen-xs-max) {
+            @media (max-width: $screen-sm-max) {
                 color: white;
                 text-decoration: underline;
             }

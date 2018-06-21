@@ -427,7 +427,7 @@
                             <div id="o-carousel-product" class="carousel slide" data-ride="carousel" data-interval="0">
                               <div class="carousel-outer">
                                 <div class="carousel-inner">
-                                    <div t-if="variant_img" class="item active" itemprop="image" t-field="product.product_variant_id.image" t-options="{'widget': 'image', 'class': 'product_detail_img js_variant_img', 'alt-field': 'name', 'zoom': 'image', 'unique': product['__last_update'] + (product.product_variant_id['__last_update'] or '')}"/>
+                                    <div t-if="variant_img" class="item active" itemprop="image" t-field="product[:1].product_variant_id.image" t-options="{'widget': 'image', 'class': 'product_detail_img js_variant_img', 'alt-field': 'name', 'zoom': 'image', 'unique': product['__last_update'] + (product.product_variant_id['__last_update'] or '')}"/>
                                     <div t-attf-class="item#{'' if variant_img else ' active'}" itemprop="image" t-field="product.image" t-options="{'widget': 'image', 'class': 'product_detail_img', 'alt-field': 'name', 'zoom': 'image', 'unique': product['__last_update']}"/>
                                     <t t-if="len(image_ids)" t-foreach="image_ids" t-as="pimg">
                                         <div class="item" t-field="pimg.image" t-options='{"widget": "image", "class": "product_detail_img", "alt-field": "name", "zoom": "image" }'/>
@@ -1099,7 +1099,7 @@
                 </t>
                 <input type='submit'/>
             </form>
-            <a t-if="not actual_partner or (ship.id in actual_partner.ids + actual_partner.child_ids.ids)" class='btn btn-link pull-right fa fa-edit js_edit_address no-decoration' title="Edit this address"></a>
+            <a t-if="not actual_partner or (ship.id in actual_partner.ids + actual_partner.child_ids.ids)" class='btn btn-link pull-right js_edit_address no-decoration' title="Edit this address"><i class='fa fa-edit'/></a>
             <div t-att-class="'panel panel-default %s' % (selected and 'border_primary' or 'js_change_shipping')">
                 <div class='panel-body' style='min-height: 130px;'>
                     <t t-esc="contact" t-options="dict(widget='contact', fields=['name', 'address'], no_marker=True)"/>
@@ -1152,7 +1152,7 @@
                                 <t t-if="error" t-foreach="error.get('error_message', [])" t-as="err">
                                     <h4 class="text-danger" t-esc="err" />
                                 </t>
-                                <form name="/shop/checkout" method="post" class="checkout_autoformat">
+                                <form action="/shop/address" method="post" class="checkout_autoformat">
                                     <div t-attf-class="form-group #{error.get('name') and 'has-error' or ''} col-md-12 div_name">
                                         <label class="control-label" for="name">Name</label>
                                         <input type="text" name="name" class="form-control" t-att-value="'name' in checkout and checkout['name']" />
@@ -1471,7 +1471,7 @@
                                     <tbody>
                                         <tr>
                                             <td colspan="2">
-                                                <t t-esc="order.payment_acquirer_id.name" />
+                                                <t t-esc="order.get_portal_last_transaction().acquirer_id.name" />
                                             </td>
                                             <td class="text-right" width="100">
                                                 <strong>Total:</strong>
@@ -1560,48 +1560,42 @@
 
     <template id="payment_confirmation_status">
         <div class="oe_website_sale_tx_status" t-att-data-order-id="order.id">
+            <t t-set="payment_tx_id" t-value="order.get_portal_last_transaction()"/>
             <div t-att-class="'panel %s' % (
-                    (order.payment_tx_id.state == 'pending' and 'panel-info') or
-                    (order.payment_tx_id.state == 'done' and 'panel-success') or
-                    (order.payment_tx_id.state == 'authorized' and 'panel-success') or
+                    (payment_tx_id.state == 'pending' and 'panel-info') or
+                    (payment_tx_id.state == 'done' and 'panel-success') or
+                    (payment_tx_id.state == 'authorized' and 'panel-success') or
                     'panel-danger')">
                 <a groups="base.group_system" class="btn pull-right" target="_blank"
-                        t-att-href="'/web#model=%s&amp;id=%s&amp;action=%s&amp;view_type=form' % ('payment.acquirer', order.payment_acquirer_id.id, 'payment.action_payment_acquirer')">
+                        t-att-href="'/web#model=%s&amp;id=%s&amp;action=%s&amp;view_type=form' % ('payment.acquirer', payment_tx_id.acquirer_id.id, 'payment.action_payment_acquirer')">
                     <i class="fa fa-pencil"></i>
                 </a>
                 <div class="panel-heading">
-                    <t t-if="order.payment_tx_id.state == 'pending'">
-                        <t t-raw="order.payment_acquirer_id.pending_msg"/>
+                    <t t-if="payment_tx_id.state == 'pending'">
+                        <t t-raw="payment_tx_id.acquirer_id.pending_msg"/>
                     </t>
-                    <t t-if="order.payment_tx_id.state == 'done'">
-                        <t t-raw="order.payment_acquirer_id.done_msg"/>
+                    <t t-if="payment_tx_id.state == 'done'">
+                        <t t-raw="payment_tx_id.acquirer_id.done_msg"/>
                     </t>
-                    <t t-if="order.payment_tx_id.state == 'cancel'">
-                        <t t-raw="order.payment_acquirer_id.cancel_msg"/>
+                    <t t-if="payment_tx_id.state == 'cancel'">
+                        <t t-raw="payment_tx_id.acquirer_id.cancel_msg"/>
                     </t>
-                    <t t-if="order.payment_tx_id.state == 'error'">
-                        <t t-raw="order.payment_acquirer_id.error_msg"/>
-                    </t>
-                    <t t-if="order.payment_tx_id.state == 'authorized'">
+                    <t t-if="payment_tx_id.state == 'authorized'">
                         Your payment has been authorized.
                     </t>
                 </div>
-                <div class="panel-body" t-if="order.payment_acquirer_id.post_msg">
-                    <t t-raw="order.payment_acquirer_id.post_msg" />
+                <div class="panel-body" t-if="payment_tx_id.acquirer_id.post_msg">
+                    <t t-raw="payment_tx_id.acquirer_id.post_msg" />
                 </div>
             </div>
         </div>
     </template>
 
-    <template id="website.layout_footer_copyright" inherit_id="website.layout" name="Footer Copyright">
-        <xpath expr="//footer" position="inside">
-            <div class="container mt16 mb8">
-                <div class="pull-right" t-ignore="true" t-if="not editable">
-                                                      Powered by <a target="_blank" class="label label-danger" href="http://www.odoo.com/page/website-builder">Odoo</a>,
-                                                      the #1 <a target="_blank" href="http://www.odoo.com/page/e-commerce">Open Source eCommerce</a>.
-                                                    </div>
-                <div class="pull-left text-muted">
-                                                      Copyright &amp;copy; <span t-field="res_company.name">Company name</span></div>
+    <template id="website_sale.brand_promotion" inherit_id="website.brand_promotion">
+        <xpath expr="//div[hasclass('o_brand_promotion')]" position="replace">
+            <div class="o_brand_promotion">
+                Powered by <a target="_blank" class="label label-danger" href="http://www.odoo.com/page/website-builder">Odoo</a>,
+                the #1 <a target="_blank" href="http://www.odoo.com/page/e-commerce">Open Source eCommerce</a>.
             </div>
         </xpath>
     </template>

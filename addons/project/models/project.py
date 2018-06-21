@@ -84,7 +84,7 @@ class Project(models.Model):
     def unlink(self):
         for project in self:
             if project.tasks:
-                raise UserError(_('You cannot delete a project containing tasks. You can either delete all the project\'s tasks and then delete the project or simply deactivate the project.'))
+                raise UserError(_('You cannot delete a project containing tasks. You can either archive it or first delete all of its tasks.'))
         return super(Project, self).unlink()
 
     def _compute_attached_docs_count(self):
@@ -218,6 +218,9 @@ class Project(models.Model):
     doc_count = fields.Integer(compute='_compute_attached_docs_count', string="Number of documents attached")
     date_start = fields.Date(string='Start Date')
     date = fields.Date(string='Expiration Date', index=True, track_visibility='onchange')
+    subtask_project_id = fields.Many2one('project.project', string='Sub-task Project', ondelete="restrict",
+        help="Choosing a sub-tasks project will both enable sub-tasks and set their default project (possibly the project itself)")
+
     # rating fields
     percentage_satisfaction_task = fields.Integer(
         compute='_compute_percentage_satisfaction_task', string="Happy % on Task", store=True, default=-1)
@@ -295,6 +298,8 @@ class Project(models.Model):
         # Prevent double project creation
         self = self.with_context(mail_create_nosubscribe=True)
         project = super(Project, self).create(vals)
+        if not vals.get('subtask_project_id'):
+            project.subtask_project_id = project.id
         if project.privacy_visibility == 'portal' and project.partner_id:
             project.message_subscribe(project.partner_id.ids)
         return project
@@ -508,6 +513,7 @@ class Task(models.Model):
     legend_normal = fields.Char(related='stage_id.legend_normal', string='Kanban Ongoing Explanation', readonly=True, related_sudo=False)
     parent_id = fields.Many2one('project.task', string='Parent Task', index=True)
     child_ids = fields.One2many('project.task', 'parent_id', string="Sub-tasks", context={'active_test': False})
+    subtask_project_id = fields.Many2one('project.project', related="project_id.subtask_project_id", string='Sub-task Project', readonly=True)
     subtask_count = fields.Integer("Sub-task count", compute='_compute_subtask_count')
     email_from = fields.Char(string='Email', help="These people will receive email.", index=True)
     email_cc = fields.Char(string='Watchers Emails', help="""These email addresses will be added to the CC field of all inbound
@@ -540,13 +546,13 @@ class Task(models.Model):
             if task.date_assign:
                 dt_date_assign = fields.Datetime.from_string(task.date_assign)
                 task.working_hours_open = task.project_id.resource_calendar_id.get_work_hours_count(
-                        dt_create_date, dt_date_assign, False, compute_leaves=True)
+                        dt_create_date, dt_date_assign, compute_leaves=True)
                 task.working_days_open = task.working_hours_open / 24.0
 
             if task.date_end:
                 dt_date_end = fields.Datetime.from_string(task.date_end)
                 task.working_hours_close = task.project_id.resource_calendar_id.get_work_hours_count(
-                    dt_create_date, dt_date_end, False, compute_leaves=True)
+                    dt_create_date, dt_date_end, compute_leaves=True)
                 task.working_days_close = task.working_hours_close / 24.0
 
         (self - task_linked_to_calendar).update(dict.fromkeys(
@@ -609,7 +615,7 @@ class Task(models.Model):
     def _check_subtask_level(self):
         for task in self:
             if task.parent_id and task.child_ids:
-                raise ValidationError(_('Task %s can not have a parent task and subtasks. Only one subtask level is allowed.' % (task.name,)))
+                raise ValidationError(_('Task %s cannot have several subtask levels.' % (task.name,)))
 
     @api.multi
     @api.returns('self', lambda value: value.id)
@@ -619,6 +625,12 @@ class Task(models.Model):
         if not default.get('name'):
             default['name'] = _("%s (copy)") % self.name
         return super(Task, self).copy(default)
+
+    @api.constrains('parent_id')
+    def _check_parent_id(self):
+        for task in self:
+            if not task._check_recursion():
+                raise ValidationError(_('Error! You cannot create recursive hierarchy of task(s).'))
 
     # Override view according to the company definition
     @api.model
@@ -821,7 +833,11 @@ class Task(models.Model):
         test_task = self[0]
         changes, tracking_value_ids = tracking[test_task.id]
         if 'stage_id' in changes and test_task.stage_id.mail_template_id:
-            res['stage_id'] = (test_task.stage_id.mail_template_id, {'composition_mode': 'mass_mail'})
+            res['stage_id'] = (test_task.stage_id.mail_template_id, {
+                'auto_delete_message': True,
+                'subtype_id': self.env['ir.model.data'].xmlid_to_res_id('mail.mt_note'),
+                'notif_layout': 'mail.mail_notification_light'
+            })
         return res
 
     @api.multi
@@ -856,19 +872,21 @@ class Task(models.Model):
             groups = [new_group] + groups
 
         for group_name, group_method, group_data in groups:
-            if group_name in ('customer'):
+            if group_name == 'customer':
                 continue
             group_data['has_button_access'] = True
 
         return groups
 
-    @api.model
-    def _notify_get_reply_to(self, res_ids, default=None):
-        """ Override to get the reply_to of the parent project. """
-        tasks = self.sudo().browse(res_ids)
-        project_ids = tasks.mapped('project_id').ids
-        aliases = self.env['project.project']._notify_get_reply_to(project_ids, default=default)
-        return {task.id: aliases.get(task.project_id.id, False) for task in tasks}
+    @api.multi
+    def _notify_get_reply_to(self, default=None, records=None, company=None, doc_names=None):
+        """ Override to set alias of tasks to their project if any. """
+        aliases = self.mapped('project_id')._notify_get_reply_to(default=default, records=None, company=company, doc_names=None)
+        res = {task.id: aliases.get(task.project_id.id) for task in self}
+        leftover = self.filtered(lambda rec: not rec.project_id)
+        if leftover:
+            res.update(super(Task, leftover)._notify_get_reply_to(default=default, records=None, company=company, doc_names=doc_names))
+        return res
 
     @api.multi
     def email_split(self, msg):
@@ -966,6 +984,20 @@ class Task(models.Model):
             'res_id': self.parent_id.id,
             'type': 'ir.actions.act_window'
         }
+
+    def action_subtask(self):
+        action = self.env.ref('project.project_task_action_sub_task').read()[0]
+        ctx = self.env.context.copy()
+        ctx.update({
+            'default_parent_id': self.id,
+            'default_project_id': self.env.context.get('project_id', self.project_id.id),
+            'default_name': self.env.context.get('name', self.name) + ':',
+            'default_partner_id': self.env.context.get('partner_id', self.partner_id.id),
+            'search_default_project_id': self.env.context.get('project_id', self.project_id.id),
+        })
+        action['context'] = ctx
+        action['domain'] = [('id', 'child_of', self.id), ('id', '!=', self.id)]
+        return action
 
     # ---------------------------------------------------
     # Rating business

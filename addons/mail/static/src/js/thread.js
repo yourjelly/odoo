@@ -35,13 +35,16 @@ var Thread = Widget.extend({
         "click .o_attachment_download": "_onAttachmentDownload",
         "click .o_attachment_view": "_onAttachmentView",
         "click .o_thread_message_needaction": function (event) {
-            var message_id = $(event.currentTarget).data('message-id');
-            this.trigger("mark_as_read", message_id);
+            var messageId = $(event.currentTarget).data('message-id');
+            this.trigger("mark_as_read", messageId);
         },
+        "click .o_thread_message_moderation": "_onClickMessageModeration",
+        "change .moderation_checkbox": "_onChangeModerationCheckbox",
         "click .o_thread_message_star": function (event) {
-            var message_id = $(event.currentTarget).data('message-id');
-            this.trigger("toggle_star_status", message_id);
+            var messageId = $(event.currentTarget).data('message-id');
+            this.trigger("toggle_star_status", messageId);
         },
+        "click .o_thread_message_email_exception": "_onClickMailException",
         "click .o_thread_message_reply": function (event) {
             this.selected_id = $(event.currentTarget).data('message-id');
             this.$('.o_thread_message').removeClass('o_thread_selected_message');
@@ -141,7 +144,6 @@ var Thread = Widget.extend({
             }
             prev_msg = msg;
         });
-
         this.$el.html(QWeb.render('mail.ChatThread', {
             messages: msgs,
             options: options,
@@ -313,6 +315,15 @@ var Thread = Widget.extend({
     destroy: function () {
         clearInterval(this.update_timestamps_interval);
     },
+    /**
+     * Toggle all the moderation checkboxes in the thread
+     *
+     * @param {boolean} checked if true, check the boxes,
+     *      otherwise uncheck them.
+     */
+    toggleModerationCheckboxes: function (checked) {
+        this.$('.moderation_checkbox').prop('checked', checked);
+    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -380,11 +391,41 @@ var Thread = Widget.extend({
      * @param {MouseEvent} event
      */
     _onAttachmentView: function (event) {
+        event.stopPropagation();
         var activeAttachmentID = $(event.currentTarget).data('id');
         if (activeAttachmentID) {
             var attachmentViewer = new DocumentViewer(this, this.attachments, activeAttachmentID);
             attachmentViewer.appendTo($('body'));
         }
+    },
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onChangeModerationCheckbox: function (ev) {
+        this.trigger_up('update_moderation_buttons');
+    },
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+     _onClickMessageModeration: function (ev) {
+        var $button = $(ev.currentTarget);
+        var messageID = $button.data('message-id');
+        var decision = $button.data('decision');
+        this.trigger_up('message_moderation', { messageID: messageID, decision: decision });
+    },
+    /**
+     * @private
+     * @param {MouseEvent} event
+     */
+    _onClickMailException: function (event) {
+        var messageId = $(event.currentTarget).data('message-id');
+        this.do_action('mail.mail_resend_message_action', {
+            additional_context: { 
+                mail_message_to_resend: messageId 
+            }
+        });
     },
 });
 

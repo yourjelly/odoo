@@ -9,7 +9,7 @@ class Project(models.Model):
     _inherit = "project.project"
 
     allow_timesheets = fields.Boolean("Allow timesheets", default=True)
-    analytic_account_id = fields.Many2one('account.analytic.account', string="Analytic Account", ondelete='set null',
+    analytic_account_id = fields.Many2one('account.analytic.account', string="Analytic Account", copy=False, ondelete='set null',
         help="Link this project to an analytic account if you need financial management on projects. "
              "It enables you to connect projects with budgets, planning, cost and revenue analysis, timesheets on projects, etc.")
 
@@ -111,7 +111,7 @@ class Task(models.Model):
     @api.depends('timesheet_ids.unit_amount')
     def _compute_effective_hours(self):
         for task in self:
-            task.effective_hours = sum(task.timesheet_ids.mapped('unit_amount'))
+            task.effective_hours = round(sum(task.timesheet_ids.mapped('unit_amount')), 2)
 
     @api.depends('effective_hours', 'subtask_effective_hours', 'planned_hours')
     def _compute_progress_hours(self):
@@ -153,9 +153,11 @@ class Task(models.Model):
             project_id = values.get('project_id')
             # a timesheet must have an analytic account (and a project)
             if self and not project_id:
-                raise UserError(_('This task must have a project since they are linked to timesheets.'))
+                raise UserError(_('This task must be part of a project because they some timesheets are linked to it.'))
+            account_id = self.env['project.project'].browse(project_id).sudo().analytic_account_id
             self.sudo().mapped('timesheet_ids').write({
                 'project_id': project_id,
-                'account_id': self.env['project.project'].browse(project_id).sudo().analytic_account_id.id
+                'account_id': account_id.id,
+                'company_id': account_id.company_id.id,
             })
         return result

@@ -33,11 +33,9 @@
                     <filter name="group_name" string="Description" context="{'group_by':'name'}"/>
                     <filter name="group_employee" string="Employee" context="{'group_by':'employee_id'}"/>
                     <filter name="group_category" string="Category" context="{'group_by':'category_id'}"/>
-                    <filter name="group_manager" string="Manager" context="{'group_by':'manager_id'}"/>
-                    <filter name="group_second_approver_id" string="Validator" context="{'group_by':'second_approver_id'}"/>
                     <filter name="group_type" string="Type" context="{'group_by':'holiday_status_id'}"/>
                     <separator/>
-                    <filter name="group_date_from" string="Start Month" context="{'group_by':'date_from'}"/>
+                    <filter name="group_date_from" string="Start Date" context="{'group_by':'date_from'}"/>
                 </group>
             </search>
         </field>
@@ -48,12 +46,13 @@
         <field name="model">hr.leave.report</field>
         <field name="arch" type="xml">
             <tree create="0" edit="0" delete="0">
-                <field name="type"/>
-                <field name="name"/>
+                <field name="employee_id"/>
                 <field name="number_of_days" string="Number of Days" sum="Remaining Days"/>
                 <field name="date_from"/>
                 <field name="date_to"/>
                 <field name="state"/>
+                <field name="type"/>
+                <field name="name"/>
             </tree>
         </field>
     </record>
@@ -118,7 +117,7 @@
         <field name="res_model">hr.leave.report</field>
         <field name="src_model">hr.employee</field>
         <field name="view_type">form</field>
-        <field name="view_mode">tree,kanban</field>
+        <field name="view_mode">tree,kanban,form</field>
         <field name="view_id" eval="hr_leave_report_tree"/>
         <field name="context">{
             'search_default_group_type': 1,
@@ -151,7 +150,7 @@
         <field name="context">{'search_default_employee_id': [active_id], 'default_employee_id': active_id, 'search_default_group_type': 1,
             'search_default_year': 1}</field>
         <field name="domain">[('holiday_type','=','employee'), ('holiday_status_id.limit', '=', False), ('state','!=', 'refuse')]</field>
-        <field name="search_view_id" ref="view_hr_leave_allocation_filter"/>
+        <field name="search_view_id" ref="view_hr_holidays_filter_report"/>
     </record>
 
     <menuitem

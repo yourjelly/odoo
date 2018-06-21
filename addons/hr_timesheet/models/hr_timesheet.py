@@ -11,7 +11,7 @@ class AccountAnalyticLine(models.Model):
     @api.model
     def default_get(self, field_list):
         result = super(AccountAnalyticLine, self).default_get(field_list)
-        if 'employee_id' in field_list and result.get('user_id'):
+        if not self.env.context.get('default_employee_id') and 'employee_id' in field_list and result.get('user_id'):
             result['employee_id'] = self.env['hr.employee'].search([('user_id', '=', result['user_id'])], limit=1).id
         return result
 
@@ -23,10 +23,11 @@ class AccountAnalyticLine(models.Model):
 
     @api.onchange('project_id')
     def onchange_project_id(self):
-        # reset task when changing project
-        self.task_id = False
         # force domain on task when project is set
         if self.project_id:
+            if self.project_id != self.task_id.project_id:
+                # reset task when changing project
+                self.task_id = False
             return {'domain': {
                 'task_id': [('project_id', '=', self.project_id.id)]
             }}
@@ -73,6 +74,7 @@ class AccountAnalyticLine(models.Model):
         if vals.get('project_id') and not vals.get('account_id'):
             project = self.env['project.project'].browse(vals.get('project_id'))
             vals['account_id'] = project.analytic_account_id.id
+            vals['company_id'] = project.analytic_account_id.company_id.id
             if not project.analytic_account_id.active:
                 raise UserError(_('The project you are timesheeting on is not linked to a active analytic account. Please the project configuration.'))
         # employee implies user

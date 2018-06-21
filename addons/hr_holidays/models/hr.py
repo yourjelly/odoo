@@ -6,6 +6,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+from odoo.tools.float_utils import float_round
 
 
 class Department(models.Model):
@@ -112,7 +113,7 @@ class Employee(models.Model):
     def _compute_remaining_leaves(self):
         remaining = self._get_remaining_leaves()
         for employee in self:
-            employee.remaining_leaves = remaining.get(employee.id, 0.0)
+            employee.remaining_leaves = float_round(remaining.get(employee.id, 0.0), precision_digits=2)
 
     @api.multi
     def _inverse_remaining_leaves(self):
@@ -132,7 +133,7 @@ class Employee(models.Model):
             if not status:
                 continue
             # if a status is found, then compute remaing leave for current employee
-            difference = employee.remaining_leaves - actual_remaining.get(employee.id, 0)
+            difference = float_round(employee.remaining_leaves - actual_remaining.get(employee.id, 0), precision_digits=2)
             if difference > 0:
                 leave = self.env['hr.leave.allocation'].create({
                     'name': _('Allocation for %s') % employee.name,
@@ -145,7 +146,7 @@ class Employee(models.Model):
                 if leave.validation_type == 'both':
                     leave.action_validate()
             elif difference < 0:
-                raise UserError(_('You cannot reduce validated allocation requests'))
+                raise UserError(_('You cannot reduce validated allocation requests.'))
 
     @api.multi
     def _compute_leave_status(self):
@@ -179,7 +180,7 @@ class Employee(models.Model):
         ], fields=['number_of_days', 'employee_id'], groupby=['employee_id'])
         mapping = dict([(leave['employee_id'][0], leave['number_of_days']) for leave in all_leaves])
         for employee in self:
-            employee.leaves_count = mapping.get(employee.id)
+            employee.leaves_count = float_round(mapping.get(employee.id, 0), precision_digits=2)
 
     @api.multi
     def _compute_show_leaves(self):
@@ -224,11 +225,13 @@ class Employee(models.Model):
     def write(self, values):
         res = super(Employee, self).write(values)
         if 'parent_id' in values or 'department_id' in values:
-            holidays = self.env['hr.leave'].search([('state', 'in', ['draft', 'confirm']), ('employee_id', 'in', self.ids)])
             hr_vals = {}
             if values.get('parent_id') is not None:
                 hr_vals['manager_id'] = values['parent_id']
             if values.get('department_id') is not None:
                 hr_vals['department_id'] = values['department_id']
+            holidays = self.env['hr.leave'].search([('state', 'in', ['draft', 'confirm']), ('employee_id', 'in', self.ids)])
             holidays.write(hr_vals)
+            allocations = self.env['hr.leave.allocation'].search([('state', 'in', ['draft', 'confirm']), ('employee_id', 'in', self.ids)])
+            allocations.write(hr_vals)
         return res

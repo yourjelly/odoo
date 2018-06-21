@@ -292,7 +292,7 @@ msgstr "Voeg een omschrijving toe..."
 #. module: mrp
 #: model:ir.actions.act_window,help:mrp.action_work_orders
 msgid "Add a work center"
-msgstr ""
+msgstr "Voeg een werkcenter toe"
 
 #. module: mrp
 #: model:ir.ui.view,arch_db:mrp.res_config_settings_view_form
@@ -3604,7 +3604,7 @@ msgid ""
 "link to your file."
 msgstr ""
 "U kan een bestand van uw computer uploaden of een internet link "
-"kopiëren/plakken die linkt naar uw bestand"
+"kopiëren/plakken die linkt naar uw bestand."
 
 #. module: mrp
 #: code:addons/mrp/models/mrp_production.py:523

@@ -220,6 +220,11 @@ class EventEvent(models.Model):
         else:
             self.date_end_located = False
 
+    @api.onchange('is_online')
+    def _onchange_is_online(self):
+        if self.is_online:
+            self.address_id = False
+
     @api.onchange('event_type_id')
     def _onchange_type(self):
         if self.event_type_id:
@@ -261,7 +266,7 @@ class EventEvent(models.Model):
     @api.constrains('date_begin', 'date_end')
     def _check_closing_date(self):
         if self.date_end < self.date_begin:
-            raise ValidationError(_('Closing Date cannot be set before Beginning Date.'))
+            raise ValidationError(_('The closing date cannot be earlier than the beginning date.'))
 
     @api.multi
     @api.depends('name', 'date_begin', 'date_end')
@@ -439,9 +444,14 @@ class EventRegistration(models.Model):
     @api.multi
     def message_get_suggested_recipients(self):
         recipients = super(EventRegistration, self).message_get_suggested_recipients()
+        public_users = self.env['res.users'].sudo()
+        public_groups = self.env.ref("base.group_public", raise_if_not_found=False)
+        if public_groups:
+            public_users = public_groups.sudo().with_context(active_test=False).mapped("users")
         try:
             for attendee in self:
-                if attendee.partner_id:
+                is_public = attendee.sudo().with_context(active_test=False).partner_id.user_ids in public_users if public_users else False
+                if attendee.partner_id and not is_public:
                     attendee._message_add_suggested_recipient(recipients, partner=attendee.partner_id, reason=_('Customer'))
                 elif attendee.email:
                     attendee._message_add_suggested_recipient(recipients, email=attendee.email, reason=_('Customer Email'))
@@ -477,6 +487,7 @@ class EventRegistration(models.Model):
             default_use_template=bool(template),
             default_template_id=template.id,
             default_composition_mode='comment',
+            custom_layout="mail.mail_notification_light",
         )
         return {
             'name': _('Compose Email'),

@@ -1,14 +1,20 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import date
+from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
+from unittest.mock import patch
+from unittest.mock import DEFAULT
 
-from odoo import exceptions
+import pytz
+
+from odoo import exceptions, tests
 from odoo.addons.test_mail.tests.common import BaseFunctionalTest
+from odoo.addons.test_mail.models.test_mail_models import MailTestActivity
 from odoo.tools import mute_logger
 
-    
+
+@tests.tagged('mail_activity')
 class TestMailActivity(BaseFunctionalTest):
 
     @classmethod
@@ -70,14 +76,18 @@ class TestMailActivity(BaseFunctionalTest):
                 })
 
     def test_activity_mixin(self):
-        today = date.today()
+        self.user_employee.tz = self.user_admin.tz
         with self.sudoAs('ernest'):
             self.assertEqual(self.test_record.env.user, self.user_employee)
+
+            now_utc = datetime.now(pytz.UTC)
+            now_user = now_utc.astimezone(pytz.timezone(self.env.user.tz or 'UTC'))
+            today_user = now_user.date()
 
             # Test various scheduling of activities
             act1 = self.test_record.activity_schedule(
                 'test_mail.mail_act_test_todo',
-                today + relativedelta(days=1),
+                today_user + relativedelta(days=1),
                 user_id=self.user_admin.id)
             self.assertEqual(act1.automated, True)
 
@@ -88,13 +98,13 @@ class TestMailActivity(BaseFunctionalTest):
 
             act2 = self.test_record.activity_schedule(
                 'test_mail.mail_act_test_meeting',
-                today + relativedelta(days=-1))
+                today_user + relativedelta(days=-1))
             self.assertEqual(self.test_record.activity_state, 'overdue')
             self.assertEqual(self.test_record.activity_user_id, self.user_employee)
 
             act3 = self.test_record.activity_schedule(
                 'test_mail.mail_act_test_todo',
-                today + relativedelta(days=3),
+                today_user + relativedelta(days=3),
                 user_id=self.user_employee.id)
             self.assertEqual(self.test_record.activity_state, 'overdue')
             self.assertEqual(self.test_record.activity_user_id, self.user_employee)
@@ -113,7 +123,7 @@ class TestMailActivity(BaseFunctionalTest):
             self.assertEqual(self.test_record.activity_state, 'overdue')
             self.test_record.activity_reschedule(
                 ['test_mail.mail_act_test_meeting', 'test_mail.mail_act_test_todo'],
-                date_deadline=today + relativedelta(days=3)
+                date_deadline=today_user + relativedelta(days=3)
             )
             self.assertEqual(self.test_record.activity_state, 'planned')
 
@@ -133,3 +143,30 @@ class TestMailActivity(BaseFunctionalTest):
             # Canceling activities should simply remove them
             self.assertEqual(self.test_record.activity_ids, self.env['mail.activity'])
             self.assertEqual(len(self.test_record.message_ids), 2)
+
+    def test_activity_security_user_access(self):
+        activity = self.test_record.activity_schedule(
+            'test_mail.mail_act_test_todo',
+            user_id=self.user_employee.id)
+
+        activity2 = self.test_record.activity_schedule('test_mail.mail_act_test_todo')
+        activity2.write({'user_id': self.user_employee.id})
+
+    def test_activity_security_user_noaccess(self):
+
+        def _employee_crash(*args, **kwargs):
+            """ If employee is test employee, consider he has no access on document """
+            recordset = args[0]
+            if recordset.env.uid == self.user_employee.id:
+                raise exceptions.AccessError('Hop hop hop Ernest, please step back.')
+            return DEFAULT
+
+        with patch.object(MailTestActivity, 'check_access_rights', autospec=True, side_effect=_employee_crash):
+            with self.assertRaises(exceptions.UserError):
+                activity = self.test_record.activity_schedule(
+                    'test_mail.mail_act_test_todo',
+                    user_id=self.user_employee.id)
+
+            activity2 = self.test_record.activity_schedule('test_mail.mail_act_test_todo')
+            with self.assertRaises(exceptions.UserError):
+                activity2.write({'user_id': self.user_employee.id})

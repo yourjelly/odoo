@@ -206,6 +206,13 @@ var InputField = DebouncedField.extend({
             this.isDirty = false;
         }
         if (this.isDirty || (event && event.target === this && event.data.changes[this.name] === this.value)) {
+            if (this.attrs.decorations) {
+                // if a field is modified, then it could have triggered an onchange
+                // which changed some of its decorations. Since we bypass the
+                // render function, we need to apply decorations here to make
+                // sure they are recomputed.
+                this._applyDecorations();
+            }
             return $.when();
         } else {
             return this._render();
@@ -491,7 +498,13 @@ var FieldDate = InputField.extend({
      * @private
      */
     _makeDatePicker: function () {
-        return new datepicker.DateWidget(this, {defaultDate: this.value});
+        return new datepicker.DateWidget(
+            this,
+            _.defaults(
+                this.nodeOptions.datepicker || {},
+                {defaultDate: this.value}
+            )
+        );
     },
 
     /**
@@ -622,7 +635,7 @@ var FieldMonetary = InputField.extend({
         this.$el.empty();
 
         // Prepare and add the input
-        this._prepareInput().appendTo(this.$el);
+        this._prepareInput(this.$input).appendTo(this.$el);
 
         if (this.currency) {
             // Prepare and add the currency symbol
@@ -867,6 +880,10 @@ var FieldFloatTime = FieldFloat.extend({
     // 'float_time', but for the sake of clarity, we explicitely define a
     // FieldFloatTime widget with formatType = 'float_time'.
     formatType: 'float_time',
+});
+
+var FieldPercentage = FieldFloat.extend({
+    formatType:'percentage',
 });
 
 var FieldText = InputField.extend(TranslatableFieldMixin, {
@@ -1301,9 +1318,6 @@ var FieldPdfViewer = FieldBinaryFile.extend({
      * @param {DOMElement} iframe
      */
     _disableButtons: function (iframe) {
-        if (this.mode === 'readonly') {
-            $(iframe).contents().find('button#download').hide();
-        }
         $(iframe).contents().find('button#openFile').hide();
     },
     /**
@@ -2631,6 +2645,7 @@ return {
     FieldDomain: FieldDomain,
     FieldFloat: FieldFloat,
     FieldFloatTime: FieldFloatTime,
+    FieldPercentage : FieldPercentage,
     FieldInteger: FieldInteger,
     FieldMonetary: FieldMonetary,
     FieldPercentPie: FieldPercentPie,

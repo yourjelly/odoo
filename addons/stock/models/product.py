@@ -98,13 +98,13 @@ class Product(models.Model):
 
         domain_move_in = [('product_id', 'in', self.ids)] + domain_move_in_loc
         domain_move_out = [('product_id', 'in', self.ids)] + domain_move_out_loc
-        if lot_id:
+        if lot_id is not None:
             domain_quant += [('lot_id', '=', lot_id)]
-        if owner_id:
+        if owner_id is not None:
             domain_quant += [('owner_id', '=', owner_id)]
             domain_move_in += [('restrict_partner_id', '=', owner_id)]
             domain_move_out += [('restrict_partner_id', '=', owner_id)]
-        if package_id:
+        if package_id is not None:
             domain_quant += [('package_id', '=', package_id)]
         if dates_in_the_past:
             domain_move_in_done = list(domain_move_in)
@@ -411,8 +411,11 @@ class ProductTemplate(models.Model):
     outgoing_qty = fields.Float(
         'Outgoing', compute='_compute_quantities', search='_search_outgoing_qty',
         digits=dp.get_precision('Product Unit of Measure'))
-    location_id = fields.Many2one('stock.location', 'Location')
-    warehouse_id = fields.Many2one('stock.warehouse', 'Warehouse')
+    # The goal of these fields is not to be able to search a location_id/warehouse_id but
+    # to properly make these fields "dummy": only used to put some keys in context from
+    # the search view in order to influence computed field
+    location_id = fields.Many2one('stock.location', 'Location', store=False, search=lambda operator, operand, vals: [])
+    warehouse_id = fields.Many2one('stock.warehouse', 'Warehouse', store=False, search=lambda operator, operand, vals: [])
     route_ids = fields.Many2many(
         'stock.location.route', 'stock_route_product', 'product_id', 'route_id', 'Routes',
         domain=[('product_selectable', '=', True)],
@@ -504,9 +507,9 @@ class ProductTemplate(models.Model):
         if 'uom_id' in vals:
             new_uom = self.env['uom.uom'].browse(vals['uom_id'])
             updated = self.filtered(lambda template: template.uom_id != new_uom)
-            done_moves = self.env['stock.move'].search([('product_id', 'in', updated.mapped('product_variant_ids').ids)], limit=1)
+            done_moves = self.env['stock.move'].search([('product_id', 'in', updated.with_context(active_test=False).mapped('product_variant_ids').ids)], limit=1)
             if done_moves:
-                raise UserError(_("You can not change the unit of measure of a product that has already been used in a done stock move. If you need to change the unit of measure, you may deactivate this product."))
+                raise UserError(_("You cannot change the unit of measure as there are already stock moves for this product. If you want to change the unit of measure, you should rather archive this product and create a new one."))
         if 'type' in vals and vals['type'] != 'product' and sum(self.mapped('nbr_reordering_rules')) != 0:
             raise UserError(_('You still have some active reordering rules on this product. Please archive or delete them first.'))
         if any('type' in vals and vals['type'] != prod_tmpl.type for prod_tmpl in self):

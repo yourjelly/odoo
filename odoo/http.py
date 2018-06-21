@@ -166,7 +166,7 @@ def redirect_with_hash(url, code=303):
     # FIXME: decide whether urls should be bytes or text, apparently
     # addons/website/controllers/main.py:91 calls this with a bytes url
     # but addons/web/controllers/main.py:481 uses text... (blows up on login)
-    url = pycompat.to_text(url)
+    url = pycompat.to_text(url).strip()
     if urls.url_parse(url, scheme='http').scheme not in ('http', 'https'):
         url = u'http://' + url
     url = url.replace("'", "%27").replace("<", "%3C")
@@ -1038,7 +1038,7 @@ class OpenERPSession(werkzeug.contrib.sessions.Session):
         self.db = db
         self.uid = uid
         self.login = login
-        self.session_token = uid and security.compute_session_token(self)
+        self.session_token = uid and security.compute_session_token(self, request.env)
         request.uid = uid
         request.disable_db = False
 
@@ -1053,9 +1053,11 @@ class OpenERPSession(werkzeug.contrib.sessions.Session):
         """
         if not self.db or not self.uid:
             raise SessionExpiredException("Session expired")
-
+        # We create our own environment instead of the request's one.
+        # to avoid creating it without the uid since request.uid isn't set yet
+        env = odoo.api.Environment(request.cr, self.uid, self.context)
         # here we check if the session is still valid
-        if not security.check_session(self):
+        if not security.check_session(self, env):
             raise SessionExpiredException("Session expired")
 
     def logout(self, keep_db=False):
@@ -1402,6 +1404,10 @@ class Root(object):
         else:
             response = result
 
+        save_session = (not request.endpoint) or request.endpoint.routing.get('save_session', True)
+        if not save_session:
+            return response
+
         if httprequest.session.should_save:
             if httprequest.session.rotate:
                 self.session_store.delete(httprequest.session)
@@ -1633,11 +1639,6 @@ def content_disposition(filename):
 # RPC controller
 #----------------------------------------------------------
 class CommonController(Controller):
-
-    @route('/jsonrpc', type='json', auth="none")
-    def jsonrpc(self, service, method, args):
-        """ Method used by client APIs to contact OpenERP. """
-        return dispatch_rpc(service, method, args)
 
     @route('/gen_session_id', type='json', auth="none")
     def gen_session_id(self):

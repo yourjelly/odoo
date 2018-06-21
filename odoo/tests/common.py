@@ -211,16 +211,16 @@ class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
             yield
             count = self.cr.sql_log_count - count0
             if count > (expected + margin):
-                msg = "Too much query count: user %s: got %d instead of %d (margin %s)"
-                self.fail(msg % (login, count, expected, margin))
+                msg = "Query count beyond margin for user %s: %d > %d"
+                self.fail(msg % (login, count, expected + margin))
             elif count > expected and count <= (expected + margin):
                 logger = logging.getLogger(type(self).__module__)
-                msg = "Query count greater but still in margin : user %s: got %d instead of %d (margin %s)"
-                logger.warn(msg, login, count, expected, margin)
+                msg = "Query count within margin for user %s: %d > %d (margin %s)"
+                logger.info(msg, login, count, expected, margin)
             elif count < expected:
                 logger = logging.getLogger(type(self).__module__)
-                msg = "Better query count: user %s: got %d instead of %d (margin %s)"
-                logger.info(msg, login, count, expected, margin)
+                msg = "Query count less than expected for user %s: %d < %d"
+                logger.info(msg, login, count, expected)
         else:
             yield
 
@@ -367,7 +367,7 @@ class HttpCase(TransactionCase):
         session.db = db
         session.uid = uid
         session.login = user
-        session.session_token = uid and security.compute_session_token(session)
+        session.session_token = uid and security.compute_session_token(session, env)
         session.context = env['res.users'].context_get() or {}
         session.context['uid'] = uid
         session._fix_lang(session.context)

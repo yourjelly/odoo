@@ -42,7 +42,7 @@ class Pricelist(models.Model):
         return [(pricelist.id, '%s (%s)' % (pricelist.name, pricelist.currency_id.name)) for pricelist in self]
 
     @api.model
-    def name_search(self, name, args=None, operator='ilike', limit=100):
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
         if name and operator == '=' and not args:
             # search on the name of the pricelist and its currency, opposite of name_get(),
             # Used by the magic context filter in the product search view.
@@ -75,10 +75,10 @@ class Pricelist(models.Model):
             self._cr.execute(query, query_args)
             ids = [r[0] for r in self._cr.fetchall()]
             # regular search() to apply ACLs - may limit results below limit in some cases
-            pricelists = self.search([('id', 'in', ids)], limit=limit)
-            if pricelists:
-                return pricelists.name_get()
-        return super(Pricelist, self).name_search(name, args, operator=operator, limit=limit)
+            pricelist_ids = self._search([('id', 'in', ids)], limit=limit, access_rights_uid=name_get_uid)
+            if pricelist_ids:
+                return self.browse(pricelist_ids).name_get()
+        return super(Pricelist, self)._name_search(name, args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
     def _compute_price_rule_multi(self, products_qty_partner, date=False, uom_id=False):
         """ Low-level method - Multi pricelist, multi products
@@ -418,13 +418,13 @@ class PricelistItem(models.Model):
     @api.constrains('base_pricelist_id', 'pricelist_id', 'base')
     def _check_recursion(self):
         if any(item.base == 'pricelist' and item.pricelist_id and item.pricelist_id == item.base_pricelist_id for item in self):
-            raise ValidationError(_('Error! You cannot assign the Main Pricelist as Other Pricelist in PriceList Item!'))
+            raise ValidationError(_('You cannot assign the Main Pricelist as Other Pricelist in PriceList Item'))
         return True
 
     @api.constrains('price_min_margin', 'price_max_margin')
     def _check_margin(self):
         if any(item.price_min_margin > item.price_max_margin for item in self):
-            raise ValidationError(_('Error! The minimum margin should be lower than the maximum margin.'))
+            raise ValidationError(_('The minimum margin should be lower than the maximum margin.'))
         return True
 
     @api.one

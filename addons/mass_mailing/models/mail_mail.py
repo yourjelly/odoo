@@ -71,20 +71,20 @@ class MailMail(models.Model):
                     new_href = href.replace(url, url + '/m/' + str(self.statistics_ids[0].id))
                     body = body.replace(href, new_href)
 
-        body = self.env['mail.thread']._replace_local_links(body)
-
-        # generate tracking URL
-        if self.statistics_ids:
+            # generate tracking URL
             tracking_url = self._get_tracking_url()
             if tracking_url:
                 body = tools.append_content_to_html(body, tracking_url, plaintext=False, container_tag='div')
+
+        body = self.env['mail.thread']._replace_local_links(body)
+
         return body
 
     @api.multi
     def _send_prepare_values(self, partner=None):
         # TDE: temporary addition (mail was parameter) due to semi-new-API
         res = super(MailMail, self)._send_prepare_values(partner)
-        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url').rstrip('/')
         if self.mailing_id and res.get('body') and res.get('email_to'):
             emails = tools.email_split(res.get('email_to')[0])
             email_to = emails and emails[0] or False
@@ -95,10 +95,13 @@ class MailMail(models.Model):
         return res
 
     @api.multi
-    def _postprocess_sent_message(self, mail_sent=True):
+    def _postprocess_sent_message(self, failure_type='NONE', **kwargs):
+        mail_sent = failure_type == 'NONE'  # we consider that a recipient error is a failure with mass mailling and show them as failed
         for mail in self:
-            if mail_sent is True and mail.statistics_ids:
-                mail.statistics_ids.write({'sent': fields.Datetime.now(), 'exception': False})
-            elif mail_sent is False and mail.statistics_ids:
-                mail.statistics_ids.write({'exception': fields.Datetime.now()})
-        return super(MailMail, self)._postprocess_sent_message(mail_sent=mail_sent)
+            if mail.mailing_id:
+                if mail_sent is True and mail.statistics_ids:
+                    mail.statistics_ids.write({'sent': fields.Datetime.now(), 'exception': False})
+                elif mail_sent is False and mail.statistics_ids:
+                    mail.statistics_ids.write({'exception': fields.Datetime.now()})
+        return super(MailMail, self)._postprocess_sent_message(failure_type=failure_type, **kwargs)
+    

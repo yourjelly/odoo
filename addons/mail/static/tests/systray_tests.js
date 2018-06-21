@@ -20,6 +20,7 @@ QUnit.module('ActivityMenu', {
                 fields: {
                     name: { type: "char" },
                     model: { type: "char" },
+                    type: { type: "char" },
                     planned_count: { type: "integer"},
                     today_count: { type: "integer"},
                     overdue_count: { type: "integer"},
@@ -28,6 +29,7 @@ QUnit.module('ActivityMenu', {
                 records: [{
                         name: "Contact",
                         model: "res.partner",
+                        type: "activity",
                         planned_count: 0,
                         today_count: 1,
                         overdue_count: 0,
@@ -35,6 +37,7 @@ QUnit.module('ActivityMenu', {
                     },
                     {
                         name: "Task",
+                        type: "activity",
                         model: "project.task",
                         planned_count: 1,
                         today_count: 0,
@@ -43,6 +46,7 @@ QUnit.module('ActivityMenu', {
                     },
                     {
                         name: "Issue",
+                        type: "activity",
                         model: "project.issue",
                         planned_count: 1,
                         today_count: 1,
@@ -61,7 +65,7 @@ QUnit.test('activity menu widget: menu with no records', function (assert) {
     testUtils.addMockEnvironment(activityMenu, {
             services: this.services,
             mockRPC: function (route, args) {
-                if (args.method === 'activity_user_count') {
+                if (args.method === 'systray_get_activities') {
                     return $.when([]);
                 }
                 return this._super(route, args);
@@ -79,7 +83,7 @@ QUnit.test('activity menu widget: activity menu with 3 records', function (asser
     testUtils.addMockEnvironment(activityMenu, {
         services: this.services,
         mockRPC: function (route, args) {
-            if (args.method === 'activity_user_count') {
+            if (args.method === 'systray_get_activities') {
                 return $.when(self.data['mail.activity.menu']['records']);
             }
             return this._super(route, args);
@@ -318,6 +322,54 @@ QUnit.test('messaging menu widget: no crash when clicking on inbox notification 
     } finally {
         messagingMenu.destroy();
     }
+});
+
+QUnit.test("messaging menu widget: messaging menu with 1 message", function ( assert ) {
+    assert.expect(5);
+
+    var records = [{
+        "channel_ids": ['channel_inbox'],
+        "res_id": 126,
+        'is_needaction': true,
+        "module_icon": "/crm/static/description/icon.png",
+        "date": "2018-04-05 06:37:26",
+        "subject": "Re: Interest in your Graphic Design Project",
+        "model": "crm.lead",
+        "body": "<span>Testing Messaging</span>"
+    }];
+
+    var messagingMenu = new systray.MessagingMenu();
+    testUtils.addMockEnvironment(messagingMenu, {
+        services: [ChatManager, createBusService()],
+        mockRPC: function (route, args) {
+            if (args.method === "message_fetch") {
+                return $.when(records);
+            }
+            return this._super(route, args);
+        },
+    });
+
+    messagingMenu.appendTo($('#qunit-fixture'));
+    messagingMenu.$('.dropdown-toggle').click();
+    assert.ok(messagingMenu.$el.hasClass('o_mail_navbar_item'),
+        'should be the instance of widget');
+    assert.strictEqual(messagingMenu.$el.hasClass("open"), true,
+        'MessagingMenu should be open');
+    assert.strictEqual(messagingMenu.$('.o_channel_unread').length, 1,
+        "should have one unread message for channel");
+    assert.strictEqual(messagingMenu.$('.o_mail_channel_mark_read').length, 1,
+        "should have mark as read icon");
+    testUtils.intercept(messagingMenu, 'call_service', function (event) {
+        if (event.data.method === 'markAllAsRead') {
+            assert.deepEqual(
+                event.data.args[1],
+                [["model", "=" , "crm.lead"], ["res_id", "=" ,126]],
+                "The message has been read"
+            );
+        }
+    });
+    messagingMenu.$(".o_mail_channel_mark_read").click();
+    messagingMenu.destroy();
 });
 
 });

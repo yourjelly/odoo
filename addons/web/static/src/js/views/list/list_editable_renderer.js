@@ -146,9 +146,11 @@ ListRenderer.include({
         if (self.currentRow !== null) {
             currentRowID = this.state.data[this.currentRow].id;
             currentWidget = this.allFieldWidgets[currentRowID][this.currentFieldIndex];
-            focusedElement = currentWidget.getFocusableElement().get(0);
-            if (currentWidget.formatType !== 'boolean') {
-                selectionRange = dom.getSelectionRange(focusedElement);
+            if (currentWidget) {
+                focusedElement = currentWidget.getFocusableElement().get(0);
+                if (currentWidget.formatType !== 'boolean') {
+                    selectionRange = dom.getSelectionRange(focusedElement);
+                }
             }
         }
 
@@ -191,9 +193,11 @@ ListRenderer.include({
                     // restore the cursor position
                     currentRowID = self.state.data[newRowIndex].id;
                     currentWidget = self.allFieldWidgets[currentRowID][self.currentFieldIndex];
-                    focusedElement = currentWidget.getFocusableElement().get(0);
-                    if (selectionRange) {
-                        dom.setSelectionRange(focusedElement, selectionRange);
+                    if (currentWidget) {
+                        focusedElement = currentWidget.getFocusableElement().get(0);
+                        if (selectionRange) {
+                            dom.setSelectionRange(focusedElement, selectionRange);
+                        }
                     }
                 });
             }
@@ -539,8 +543,13 @@ ListRenderer.include({
      * @returns {Deferred} this deferred is resolved immediately
      */
     _renderView: function () {
+        var self = this;
         this.currentRow = null;
-        return this._super.apply(this, arguments);
+        return this._super.apply(this, arguments).then(function () {
+            if (self._isEditable()) {
+                self.$('table').addClass('o_editable_list');
+            }
+        });
     },
     /**
      * Force the resequencing of the items in the list.

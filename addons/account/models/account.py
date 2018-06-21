@@ -2,6 +2,7 @@
 
 import time
 import math
+import re
 
 from odoo.osv import expression
 from odoo.tools.float_utils import float_round as round
@@ -84,6 +85,15 @@ class AccountAccount(models.Model):
         ('code_company_uniq', 'unique (code,company_id)', 'The code of the account must be unique per company !')
     ]
 
+    @api.model
+    def _search_new_account_code(self, company, digits, prefix):
+        for num in range(1, 100):
+            new_code = str(prefix.ljust(digits - 1, '0')) + str(num)
+            rec = self.search([('code', '=', new_code), ('company_id', '=', company.id)], limit=1)
+            if not rec:
+                return new_code
+        raise UserError(_('Cannot generate an unused account code.'))
+
     def _compute_opening_debit_credit(self):
         for record in self:
             opening_debit = opening_credit = 0.0
@@ -113,7 +123,7 @@ class AccountAccount(models.Model):
         opening_move = self.company_id.account_opening_move_id
 
         if not opening_move:
-            raise UserError(_("No opening move defined !"))
+            raise UserError(_("You must first define an opening move."))
 
         if opening_move.state == 'draft':
             # check whether we should create a new move line or modify an existing one
@@ -164,15 +174,15 @@ class AccountAccount(models.Model):
         return super(AccountAccount, contextual_self).default_get(default_fields)
 
     @api.model
-    def name_search(self, name, args=None, operator='ilike', limit=100):
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
         args = args or []
         domain = []
         if name:
-            domain = ['|', ('code', '=ilike', name + '%'), ('name', operator, name)]
+            domain = ['|', ('code', '=ilike', name.split(' ')[0] + '%'), ('name', operator, name)]
             if operator in expression.NEGATIVE_TERM_OPERATORS:
                 domain = ['&', '!'] + domain[1:]
-        accounts = self.search(domain + args, limit=limit)
-        return accounts.name_get()
+        account_ids = self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
+        return self.browse(account_ids).name_get()
 
     @api.onchange('internal_type')
     def onchange_internal_type(self):
@@ -252,7 +262,7 @@ class AccountAccount(models.Model):
             ('matched_credit_ids', '!=', False),
         ])
         if partial_lines_count > 0:
-            raise UserError(_('You cannot switch an account to not allow the reconciliation'
+            raise UserError(_('You cannot switch an account to prevent the reconciliation '
                               'if some partial reconciliations are still pending.'))
         query = """
             UPDATE account_move_line
@@ -279,7 +289,7 @@ class AccountAccount(models.Model):
     @api.multi
     def unlink(self):
         if self.env['account.move.line'].search([('account_id', 'in', self.ids)], limit=1):
-            raise UserError(_('You cannot do that on an account that contains journal items.'))
+            raise UserError(_('You cannot perform this action on an account that contains journal items.'))
         #Checking whether the account is set as a property to any Partner or not
         values = ['account.account,%s' % (account_id,) for account_id in self.ids]
         partner_prop_acc = self.env['ir.property'].search([('value_reference', 'in', values)], limit=1)
@@ -328,12 +338,14 @@ class AccountGroup(models.Model):
         return result
 
     @api.model
-    def name_search(self, name='', args=None, operator='ilike', limit=100):
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
         if not args:
             args = []
         criteria_operator = ['|'] if operator not in expression.NEGATIVE_TERM_OPERATORS else ['&', '!']
         domain = criteria_operator + [('code_prefix', '=ilike', name + '%'), ('name', operator, name)]
-        return self.search(domain + args, limit=limit).name_get()
+        group_ids = self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
+        return self.browse(group_ids).name_get()
+
 
 class AccountJournal(models.Model):
     _name = "account.journal"
@@ -345,6 +357,12 @@ class AccountJournal(models.Model):
 
     def _default_outbound_payment_methods(self):
         return self.env.ref('account.account_payment_method_manual_out')
+
+    def __get_bank_statements_available_sources(self):
+        return [('undefined', _('Undefined Yet'))]
+
+    def _get_bank_statements_available_sources(self):
+        return self.__get_bank_statements_available_sources()
 
     name = fields.Char(string='Journal Name', required=True)
     code = fields.Char(string='Short Code', size=5, required=True, help="The journal entries of this journal will be named using this prefix.")
@@ -393,12 +411,12 @@ class AccountJournal(models.Model):
     refund_sequence = fields.Boolean(string='Dedicated Credit Note Sequence', help="Check this box if you don't want to share the same sequence for invoices and credit notes made from this journal", default=False)
 
     inbound_payment_method_ids = fields.Many2many('account.payment.method', 'account_journal_inbound_payment_method_rel', 'journal_id', 'inbound_payment_method',
-        domain=[('payment_type', '=', 'inbound')], string='Debit Methods', default=lambda self: self._default_inbound_payment_methods(),
+        domain=[('payment_type', '=', 'inbound')], string='For Incoming Payments', default=lambda self: self._default_inbound_payment_methods(),
         help="Manual: Get paid by cash, check or any other method outside of Odoo.\n"\
              "Electronic: Get paid automatically through a payment acquirer by requesting a transaction on a card saved by the customer when buying or subscribing online (payment token).\n"\
              "Batch Deposit: Encase several customer checks at once by generating a batch deposit to submit to your bank. When encoding the bank statement in Odoo,you are suggested to reconcile the transaction with the batch deposit. Enable this option from the settings.")
     outbound_payment_method_ids = fields.Many2many('account.payment.method', 'account_journal_outbound_payment_method_rel', 'journal_id', 'outbound_payment_method',
-        domain=[('payment_type', '=', 'outbound')], string='Payment Methods', default=lambda self: self._default_outbound_payment_methods(),
+        domain=[('payment_type', '=', 'outbound')], string='For Outgoing Payments', default=lambda self: self._default_outbound_payment_methods(),
         help="Manual:Pay bill by cash or any other method outside of Odoo.\n"\
              "Check:Pay bill by check and print it from Odoo.\n"\
              "SEPA Credit Transfer: Pay bill from a SEPA Credit Transfer file you submit to your bank. Enable this option from the settings.")
@@ -412,13 +430,24 @@ class AccountJournal(models.Model):
     # Bank journals fields
     company_partner_id = fields.Many2one('res.partner', related='company_id.partner_id', string='Account Holder', readonly=True, store=False)
     bank_account_id = fields.Many2one('res.partner.bank', string="Bank Account", ondelete='restrict', copy=False, domain="[('partner_id','=', company_partner_id)]")
-    bank_statements_source = fields.Selection([('undefined', 'Undefined'),('manual', 'Record Manually')], string='Bank Feeds', default='undefined')
+    bank_statements_source = fields.Selection(selection=_get_bank_statements_available_sources, string='Bank Feeds', default='undefined', help="Defines how the bank statements will be registered")
     bank_acc_number = fields.Char(related='bank_account_id.acc_number')
     bank_id = fields.Many2one('res.bank', related='bank_account_id.bank_id')
+
+    # alias configuration for 'purchase' type journals
+    alias_id = fields.Many2one('mail.alias', string='Alias')
+    alias_domain = fields.Char('Alias domain', compute='_compute_alias_domain', default=lambda self: self.env["ir.config_parameter"].sudo().get_param("mail.catchall.domain"))
+    alias_name = fields.Char('Alias Name for Vendor Bills', related='alias_id.alias_name', help="It creates draft vendor bill by sending an email.")
 
     _sql_constraints = [
         ('code_company_uniq', 'unique (code, name, company_id)', 'The code and name of the journal must be unique per company !'),
     ]
+
+    @api.multi
+    def _compute_alias_domain(self):
+        alias_domain = self.env["ir.config_parameter"].sudo().get_param("mail.catchall.domain")
+        for record in self:
+            record.alias_domain = alias_domain
 
     @api.multi
     # do not depend on 'sequence_id.date_range_ids', because
@@ -473,9 +502,9 @@ class AccountJournal(models.Model):
     def _check_currency(self):
         if self.currency_id:
             if self.default_credit_account_id and not self.default_credit_account_id.currency_id.id == self.currency_id.id:
-                raise ValidationError(_('Configuration error!\nThe currency of the journal should be the same than the default credit account.'))
+                raise ValidationError(_('The currency of the journal should be the same than the default credit account.'))
             if self.default_debit_account_id and not self.default_debit_account_id.currency_id.id == self.currency_id.id:
-                raise ValidationError(_('Configuration error!\nThe currency of the journal should be the same than the default debit account.'))
+                raise ValidationError(_('The currency of the journal should be the same than the default debit account.'))
 
     @api.one
     @api.constrains('type', 'bank_account_id')
@@ -499,12 +528,26 @@ class AccountJournal(models.Model):
             self.default_debit_account_id = self.default_credit_account_id
 
     @api.multi
+    def _get_alias_values(self, alias_name=None):
+        if not alias_name:
+            alias_name = self.name
+            if self.company_id != self.env.ref('base.main_company'):
+                alias_name += '-' + str(self.company_id.name)
+        return {
+            'alias_defaults': {'type': 'in_invoice'},
+            'alias_user_id': self.env.user.id,
+            'alias_parent_thread_id': self.id,
+            'alias_name': re.sub(r'[^\w]+', '-', alias_name)
+        }
+
+    @api.multi
     def unlink(self):
         bank_accounts = self.env['res.partner.bank'].browse()
         for bank_account in self.mapped('bank_account_id'):
             accounts = self.search([('bank_account_id', '=', bank_account.id)])
             if accounts <= self:
                 bank_accounts += bank_account
+        self.mapped('alias_id').unlink()
         ret = super(AccountJournal, self).unlink()
         bank_accounts.unlink()
         return ret
@@ -517,6 +560,19 @@ class AccountJournal(models.Model):
             code=_("%s (copy)") % (self.code or ''),
             name=_("%s (copy)") % (self.name or ''))
         return super(AccountJournal, self).copy(default)
+
+    def _update_mail_alias(self, vals):
+        self.ensure_one()
+        alias_values = self._get_alias_values(alias_name=vals.get('alias_name'))
+        if self.alias_id:
+            self.alias_id.write(alias_values)
+        else:
+            self.alias_id = self.env['mail.alias'].with_context(alias_model_name='account.invoice',
+                alias_parent_model_name='account.journal').create(alias_values)
+
+        if vals.get('alias_name'):
+            # remove alias_name to avoid useless write on alias
+            del(vals['alias_name'])
 
     @api.multi
     def write(self, vals):
@@ -553,7 +609,8 @@ class AccountJournal(models.Model):
                     bank_account = self.env['res.partner.bank'].browse(vals['bank_account_id'])
                     if bank_account.partner_id != company.partner_id:
                         raise UserError(_("The partners of the journal's company and the related bank account mismatch."))
-
+            if vals.get('type') == 'purchase':
+                self._update_mail_alias(vals)
         result = super(AccountJournal, self).write(vals)
 
         # Create the bank_account_id if necessary
@@ -620,22 +677,25 @@ class AccountJournal(models.Model):
             account_code_prefix = company.bank_account_code_prefix or ''
         else:
             account_code_prefix = company.cash_account_code_prefix or company.bank_account_code_prefix or ''
-        for num in range(1, 100):
-            new_code = str(account_code_prefix.ljust(digits - 1, '0')) + str(num)
-            rec = self.env['account.account'].search([('code', '=', new_code), ('company_id', '=', company.id)], limit=1)
-            if not rec:
-                break
-        else:
-            raise UserError(_('Cannot generate an unused account code.'))
 
         liquidity_type = self.env.ref('account.data_account_type_liquidity')
         return {
                 'name': name,
                 'currency_id': currency_id or False,
-                'code': new_code,
+                'code': self.env['account.account']._search_new_account_code(company, digits, account_code_prefix),
                 'user_type_id': liquidity_type and liquidity_type.id or False,
                 'company_id': company.id,
         }
+
+    @api.model
+    def get_next_bank_cash_default_code(self, journal_type, company_id):
+        journal_code_base = (journal_type == 'cash' and 'CSH' or 'BNK')
+        journals = self.env['account.journal'].search([('code', 'like', journal_code_base + '%'), ('company_id', '=', company_id)])
+        for num in range(1, 100):
+            # journal_code has a maximal size of 5, hence we can enforce the boundary num < 100
+            journal_code = journal_code_base + str(num)
+            if journal_code not in journals.mapped('code'):
+                return journal_code
 
     @api.model
     def create(self, vals):
@@ -647,15 +707,8 @@ class AccountJournal(models.Model):
 
             # If no code provided, loop to find next available journal code
             if not vals.get('code'):
-                journal_code_base = (vals['type'] == 'cash' and 'CSH' or 'BNK')
-                journals = self.env['account.journal'].search([('code', 'like', journal_code_base + '%'), ('company_id', '=', company_id)])
-                for num in range(1, 100):
-                    # journal_code has a maximal size of 5, hence we can enforce the boundary num < 100
-                    journal_code = journal_code_base + str(num)
-                    if journal_code not in journals.mapped('code'):
-                        vals['code'] = journal_code
-                        break
-                else:
+                vals['code'] = self.get_next_bank_cash_default_code(vals['type'], company_id)
+                if not vals['code']:
                     raise UserError(_("Cannot generate an unused journal code. Please fill the 'Shortcode' field."))
 
             # Create a default debit/credit account if not given
@@ -672,8 +725,10 @@ class AccountJournal(models.Model):
             vals.update({'sequence_id': self.sudo()._create_sequence(vals).id})
         if vals.get('type') in ('sale', 'purchase') and vals.get('refund_sequence') and not vals.get('refund_sequence_id'):
             vals.update({'refund_sequence_id': self.sudo()._create_sequence(vals, refund=True).id})
-
         journal = super(AccountJournal, self).create(vals)
+        if journal.type == 'purchase':
+            # create a mail alias for purchase journals (always, deactivated if alias_name isn't set)
+            journal._update_mail_alias(vals)
 
         # Create the bank_account_id if necessary
         if journal.type == 'bank' and not journal.bank_account_id and vals.get('bank_acc_number'):
@@ -703,13 +758,13 @@ class AccountJournal(models.Model):
         return res
 
     @api.model
-    def name_search(self, name='', args=None, operator='ilike', limit=100):
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
         args = args or []
         connector = '|'
         if operator in expression.NEGATIVE_TERM_OPERATORS:
             connector = '&'
-        recs = self.search([connector, ('code', operator, name), ('name', operator, name)] + args, limit=limit)
-        return recs.name_get()
+        journal_ids = self._search([connector, ('code', operator, name), ('name', operator, name)] + args, limit=limit, access_rights_uid=name_get_uid)
+        return self.browse(journal_ids).name_get()
 
     @api.multi
     @api.depends('company_id')
@@ -734,14 +789,12 @@ class AccountJournal(models.Model):
             journal.at_least_one_inbound = bool(len(journal.inbound_payment_method_ids))
             journal.at_least_one_outbound = bool(len(journal.outbound_payment_method_ids))
 
-    def setup_save_journal_and_create_more(self):
-        """ This function is triggered by the button allowing to create more
-        bank accounts, displayed in the "Bank Accounts" wizard of the setup bar.
-
-        Button execution is done in Python, so that the model is validated and saved
-        before executing the action.
+    def action_configure_bank_journal(self):
+        """ This function is called by the "configure" button of bank journals,
+        visible on dashboard if no bank statement source has been defined yet
         """
-        return self.env.ref('account.action_account_bank_journal_form').read()[0]
+        # We simply call the setup bar function.
+        return self.env['res.company'].setting_init_bank_account_action()
 
 
 class ResPartnerBank(models.Model):
@@ -754,7 +807,7 @@ class ResPartnerBank(models.Model):
     @api.constrains('journal_id')
     def _check_journal_id(self):
         if len(self.journal_id) > 1:
-            raise ValidationError(_('A bank account can only belong to one journal.'))
+            raise ValidationError(_('A bank account can belong to only one journal.'))
 
 
 #----------------------------------------------------------
@@ -801,7 +854,7 @@ class AccountTax(models.Model):
     tag_ids = fields.Many2many('account.account.tag', 'account_tax_account_tag', string='Tags', help="Optional tags you may want to assign for custom reporting")
     tax_group_id = fields.Many2one('account.tax.group', string="Tax Group", default=_default_tax_group, required=True)
     # Technical field to make the 'tax_exigibility' field invisible if the same named field is set to false in 'res.company' model
-    hide_tax_exigibility = fields.Boolean(string='Hide Use Cash Basis Option', related='company_id.tax_exigibility')
+    hide_tax_exigibility = fields.Boolean(string='Hide Use Cash Basis Option', related='company_id.tax_exigibility', readonly=True)
     tax_exigibility = fields.Selection(
         [('on_invoice', 'Based on Invoice'),
          ('on_payment', 'Based on Payment'),
@@ -831,7 +884,7 @@ class AccountTax(models.Model):
         if not self._check_m2m_recursion('children_tax_ids'):
             raise ValidationError(_("Recursion found for tax '%s'.") % (self.name,))
         if not all(child.type_tax_use in ('none', self.type_tax_use) for child in self.children_tax_ids):
-            raise ValidationError(_('The application scope of taxes in a group must be either the same as the group or "None".'))
+            raise ValidationError(_('The application scope of taxes in a group must be either the same as the group or left empty.'))
 
     @api.multi
     @api.returns('self', lambda value: value.id)
@@ -839,8 +892,14 @@ class AccountTax(models.Model):
         default = dict(default or {}, name=_("%s (Copy)") % self.name)
         return super(AccountTax, self).copy(default=default)
 
+    @api.depends('name', 'type_tax_use')
+    def name_get(self):
+        if not self._context.get('append_type_to_tax_name'):
+            return super(AccountTax, self).name_get()
+        return [(tax.id, '%s (%s)' % (tax.name, tax.type_tax_use)) for tax in self]
+
     @api.model
-    def name_search(self, name, args=None, operator='ilike', limit=80):
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
         """ Returns a list of tuples containing id, name, as internally it is called {def name_get}
             result format: {[(id, name), (id, name), ...]}
         """
@@ -849,11 +908,11 @@ class AccountTax(models.Model):
             domain = [('description', operator, name), ('name', operator, name)]
         else:
             domain = ['|', ('description', operator, name), ('name', operator, name)]
-        taxes = self.search(expression.AND([domain, args]), limit=limit)
-        return taxes.name_get()
+        tax_ids = self._search(expression.AND([domain, args]), limit=limit, access_rights_uid=name_get_uid)
+        return self.browse(tax_ids).name_get()
 
     @api.model
-    def search(self, args, offset=0, limit=None, order=None, count=False):
+    def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
         context = self._context or {}
 
         if context.get('type'):
@@ -867,7 +926,7 @@ class AccountTax(models.Model):
             if journal.type in ('sale', 'purchase'):
                 args += [('type_tax_use', '=', journal.type)]
 
-        return super(AccountTax, self).search(args, offset, limit, order, count=count)
+        return super(AccountTax, self)._search(args, offset, limit, order, count=count, access_rights_uid=access_rights_uid)
 
     @api.onchange('amount')
     def onchange_amount(self):

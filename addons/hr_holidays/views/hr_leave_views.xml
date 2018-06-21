@@ -20,6 +20,9 @@
         <field name="model">hr.leave</field>
         <field name="arch" type="xml">
             <search string="Search Leave">
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="holiday_status_id"/>
                 <field name="name"/>
                 <filter domain="[('state','in',('confirm','validate1'))]" string="To Approve" name="approve"/>
                 <filter string="Approved Leaves" domain="[('state', '=', 'validate')]" name="validated"/>
@@ -40,10 +43,6 @@
                 <separator/>
                 <filter string="My Leaves" name="my_leaves" domain="[('employee_id.user_id', '=', uid)]"/>
                 <separator/>
-                <field name="employee_id"/>
-                <field name="department_id"/>
-                <field name="holiday_status_id"/>
-                <separator/>
                 <filter string="Late Activities" name="activities_overdue"
                     domain="[('activity_ids.date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"
                     help="Show all records which has next action date is before today"/>
@@ -60,7 +59,7 @@
                     <filter name="group_second_approver_id" string="Validator" context="{'group_by':'second_approver_id'}"/>
                     <filter name="group_type" string="Type" context="{'group_by':'holiday_status_id'}"/>
                     <separator/>
-                    <filter name="group_date_from" string="Start Month" context="{'group_by':'date_from'}"/>
+                    <filter name="group_date_from" string="Start Date" context="{'group_by':'date_from'}"/>
                 </group>
             </search>
         </field>
@@ -104,13 +103,36 @@
                         <field name="holiday_status_id" context="{'employee_id':employee_id, 'default_date_from':date_from}"/>
                         <label for="number_of_days_temp" string="Duration"/>
                         <div>
+                            <field name="leave_type_request_unit" invisible="1"/>
                             <div>
-                                <field name="date_from" class="oe_inline"/>
-                                <label string="-" class="oe_inline"/>
-                                <field name="date_to" class="oe_inline"/>
+                              <field name="request_unit_all" widget="radio" attrs="{'readonly': [('state', '=', 'validate')], 'invisible': [('leave_type_request_unit', '=', 'day')]}"/>
+                              <field name="request_unit_day" widget="radio" attrs="{'readonly': [('state', '=', 'validate')], 'invisible': [('leave_type_request_unit', '!=', 'day')]}"/>
+
+                              <div>
+                                  <div class="o_row">
+                                      <span attrs="{'invisible': [('request_unit_all', '!=', 'period')]}">From </span>
+                                      <field name="request_date_from" attrs="{'readonly': [('state', '=', 'validate')], 'invisible': [('leave_type_request_unit', '=', 'hour'), ('request_unit_all', '=', 'period')]}"/>
+                                      <field name="date_from" attrs="{'readonly': [('state', '=', 'validate')], 'invisible': ['|', ('leave_type_request_unit', '!=', 'hour'), ('request_unit_all', '!=', 'period')]}"/>
+                                      <span class="ml8" attrs="{'invisible': ['|', '&amp;', ('request_unit_all', '!=', 'half'), ('leave_type_request_unit', '!=', 'half'), '&amp;', ('request_unit_all', '=', 'day'), ('leave_type_request_unit', '=', 'half')]}"/>
+                                      <field name="request_date_from_period" options="{'horizontal': True}"
+                                          attrs="{'readonly': [('state', '=', 'validate')], 'invisible': ['|', '|', ('leave_type_request_unit', '=', 'day'), '&amp;', ('leave_type_request_unit', '=', 'half'), ('request_unit_all', '=', 'day'), '&amp;', ('leave_type_request_unit', '=', 'hour'), ('request_unit_all', '!=', 'half')]}"/>
+                                  </div>
+                                  <div class="o_row">
+                                      <span  attrs="{'invisible': [('request_unit_all', '!=', 'period')]}">To </span>
+                                      <field name="request_date_to" attrs="{'readonly': [('state', '=', 'validate')], 'invisible': ['|', ('request_unit_all', '!=', 'period'), ('leave_type_request_unit', '=', 'hour')]}"/>
+                                      <field name="date_to" attrs="{'readonly': [('state', '=', 'validate')], 'invisible': ['|', ('leave_type_request_unit', '!=', 'hour'), ('request_unit_all', '!=', 'period')], 'required': ['|', ('request_unit_all', '=', 'period'), ('request_unit_day', '=', 'period')]}"/>
+                                      <span class="ml8" attrs="{'invisible': ['|', ('leave_type_request_unit', '!=', 'half'), ('request_unit_all', '!=', 'period')]}"/>
+                                      <field name="request_date_to_period" options="{'horizontal': True}"
+                                          attrs="{'readonly': [('state', '=', 'validate')], 'invisible': ['|', ('leave_type_request_unit', '!=', 'half'), ('request_unit_all', '!=', 'period')]}"/>
+                                  </div>
+                              </div>
+                          </div>
+
+                            <div attrs="{'invisible': [('leave_type_request_unit', '=', 'hour')]}">
+                                <field name="number_of_days_temp" class="oe_inline"/> day(s)
                             </div>
-                            <div>
-                                <field name="number_of_days_temp" class="oe_inline"/> days
+                            <div attrs="{'invisible': [('leave_type_request_unit', '!=', 'hour')]}">
+                                <field name="number_of_hours" class="oe_inline"/> hour(s)
                             </div>
                         </div>
                     </group>
@@ -148,7 +170,7 @@
                 <field name="name"/>
                 <field name="date_from"/>
                 <field name="date_to"/>
-                <field name="number_of_days" string="Number of Days" sum="Remaining Days"/>
+                <field name="number_of_days" string="Number of Days" sum="Total leaves"/>
                 <field name="state"/>
                 <field name="payslip_status" widget="toggle_button" options='{"active": "Reported in last payslips", "inactive": "To Report in Payslip"}' groups="hr_holidays.group_hr_holidays_manager"/>
                 <field name="category_id" invisible="1"/>
@@ -313,7 +335,7 @@
                 <field name="holiday_type"/>
                 <field name="holiday_status_id"/>
                 <field name="name" readonly="1"/>
-                <field name="number_of_days_temp" string="Allocated Days" sum="Remaining Days"/>
+                <field name="number_of_days_temp" string="Allocated Days" sum="Total leaves"/>
                 <field name="state"/>
             </tree>
         </field>

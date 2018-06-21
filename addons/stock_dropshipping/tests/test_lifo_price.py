@@ -82,7 +82,8 @@ class TestLifoPrice(common.TransactionCase):
         # Let us send some goods
         out_form = Form(self.env['stock.picking'])
         out_form.picking_type_id = self.env.ref('stock.picking_type_out')
-        with out_form.move_lines.new() as move:
+        out_form.immediate_transfer = True
+        with out_form.move_ids_without_package.new() as move:
             move.product_id = product_lifo_icecream
             move.quantity_done = 20.0
             move.date_expected = fields.Date.context_today(self.env['stock.move.line'])

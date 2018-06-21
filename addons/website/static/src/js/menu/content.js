@@ -55,6 +55,14 @@ var PagePropertiesDialog = weWidgets.Dialog.extend({
                 },
             });
         }
+        buttons.push({
+            text: _t("Delete Page"),
+            icon: 'fa-trash',
+            classes: 'btn-link pull-right',
+            click: function (e) {
+                _deletePage.call(this, self.page_id, options.fromPageManagement);
+            },
+        });
         this._super(parent, _.extend({}, {
             title: _t("Page Properties"),
             size: 'medium',
@@ -136,7 +144,6 @@ var PagePropertiesDialog = weWidgets.Dialog.extend({
             });
         }));
 
-        var l10n = _t.database.parameters;
         var datepickersOptions = {
             minDate: moment({y: 1900}),
             maxDate: moment().add(200, 'y'),
@@ -346,9 +353,6 @@ var MenuEntryDialog = weWidgets.LinkDialog.extend({
     xmlDependencies: weWidgets.LinkDialog.prototype.xmlDependencies.concat(
         ['/website/static/src/xml/website.contentMenu.xml']
     ),
-    events: _.extend({}, weWidgets.LinkDialog.prototype.events || {}, {
-        'change input[name="link_menu_options"]': '_onNewMenuOptionChange',
-    }),
 
     /**
      * @constructor
@@ -357,7 +361,6 @@ var MenuEntryDialog = weWidgets.LinkDialog.extend({
         data.text = data.name || '';
         data.isNewWindow = data.new_window;
         this.data = data;
-        this.menu_link_options = options.menu_link_options;
         this._super(parent, _.extend({}, {
             title: _t("Create Menu"),
         }, options || {}), editor, data);
@@ -375,12 +378,7 @@ var MenuEntryDialog = weWidgets.LinkDialog.extend({
         // Adapt URL label
         this.$('label[for="o_link_dialog_label_input"]').text(_t("Menu Label"));
 
-        // If new menu, adapt URL field to new page / existing page
-        if (this.menu_link_options) {
-            this.$('input[name="label"]').closest('.form-group').after(qweb.render('website.contentMenu.dialog.edit.link_menu_options'));
-            this.$('input[name="url"]').closest('.form-group').addClass('hidden');
-            this.$('label[for="o_link_dialog_url_input"]').html('');
-        }
+        this.$('#o_link_dialog_url_input').after(qweb.render('website.contentMenu.dialog.edit.link_menu_hint'));
 
         return this._super.apply(this, arguments);
     },
@@ -399,23 +397,9 @@ var MenuEntryDialog = weWidgets.LinkDialog.extend({
             $e.focus();
             return;
         }
-        if (this.$('input[name=link_menu_options]:checked').val() === 'new_page') {
-            window.location = '/website/add/' + encodeURIComponent($e.val()) + '?add_menu=1';
-            return;
-        }
         return this._super.apply(this, arguments);
     },
 
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     */
-    _onNewMenuOptionChange: function () {
-        this.$('input[name="url"]').closest('.form-group').toggleClass('hidden');
-    },
 });
 
 var SelectEditMenuDialog = weWidgets.Dialog.extend({
@@ -581,7 +565,7 @@ var EditMenuDialog = weWidgets.Dialog.extend({
      */
     _onAddMenuButtonClick: function () {
         var self = this;
-        var dialog = new MenuEntryDialog(this, {menu_link_options: true}, undefined, {});
+        var dialog = new MenuEntryDialog(this, {}, undefined, {});
         dialog.on('save', this, function (link) {
             var new_menu = {
                 id: _.uniqueId('new-'),
@@ -784,35 +768,54 @@ var PageManagement = Widget.extend({
     },
     _onDeletePageButtonClick: function (ev) {
         var pageId = $(ev.currentTarget).data('id');
-        var self = this;
-        var context = weContext.get();
-
-        var def = $.Deferred();
-        // Search the page dependencies
-        this._getPageDependencies(pageId, context)
-        .then(function (dependencies) {
-        // Inform the user about those dependencies and ask him confirmation
-            var confirmDef = $.Deferred();
-            Dialog.safeConfirm(self, "", {
-                title: _t("Delete Page"),
-                $content: $(qweb.render('website.delete_page', {dependencies: dependencies})),
-                confirm_callback: confirmDef.resolve.bind(confirmDef),
-                cancel_callback: def.resolve.bind(self),
-            });
-            return confirmDef;
-        }).then(function () {
-        // Delete the page if the user confirmed
-            return self._rpc({
-                model: 'website.page',
-                method: 'delete_page',
-                args: [pageId],
-                context: context,
-            });
-        }).then(function () {
-            window.location.reload(true);
-        }, def.reject.bind(def));
+        _deletePage.call(this, pageId, true);
     },
 });
+
+/**
+ * Deletes the page after showing a dependencies warning for the given page id.
+ *
+ * @private
+ * @param {integer} pageId - The ID of the page to be deleted
+ * @param {Boolean} fromPageManagement
+ *                  Is the function called by the page manager?
+ *                  It will affect redirect after page deletion: reload or '/'
+ */
+// TODO: This function should be integrated in a widget in the future
+function _deletePage(pageId, fromPageManagement) {
+    var self = this;
+    var context = weContext.get();
+    var def = $.Deferred();
+
+    // Search the page dependencies
+    this._getPageDependencies(pageId, context)
+    .then(function (dependencies) {
+    // Inform the user about those dependencies and ask him confirmation
+        var confirmDef = $.Deferred();
+        Dialog.safeConfirm(self, "", {
+            title: _t("Delete Page"),
+            $content: $(qweb.render('website.delete_page', {dependencies: dependencies})),
+            confirm_callback: confirmDef.resolve.bind(confirmDef),
+            cancel_callback: def.resolve.bind(self),
+        });
+        return confirmDef;
+    }).then(function () {
+    // Delete the page if the user confirmed
+        return self._rpc({
+            model: 'website.page',
+            method: 'delete_page',
+            args: [pageId],
+            context: context,
+        });
+    }).then(function () {
+        if (fromPageManagement) {
+            window.location.reload(true);
+        }
+        else {
+            window.location.href = '/';
+        }
+    }, def.reject.bind(def));
+}
 
 websiteNavbarData.websiteNavbarRegistry.add(ContentMenu, '#content-menu');
 websiteRootData.websiteRootRegistry.add(PageManagement, '#edit_website_pages');

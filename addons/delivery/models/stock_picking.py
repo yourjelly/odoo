@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import json
+
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
@@ -14,12 +16,8 @@ class StockQuantPackage(models.Model):
     @api.depends('quant_ids')
     def _compute_weight(self):
         weight = 0.0
-        if self.env.context.get('picking_id'):
-            for ml in self.current_picking_move_line_ids:
-                weight += ml.product_uom_id._compute_quantity(ml.qty_done,ml.product_id.uom_id) * ml.product_id.weight
-        else:
-            for quant in self.quant_ids:
-                weight += quant.quantity * quant.product_id.weight
+        for quant in self.quant_ids:
+            weight += quant.quantity * quant.product_id.weight
         self.weight = weight
 
     weight = fields.Float(compute='_compute_weight', help="Weight computed based on the sum of the weights of the products.")
@@ -159,8 +157,11 @@ class StockPicking(models.Model):
     def send_to_shipper(self):
         self.ensure_one()
         res = self.carrier_id.send_shipping(self)[0]
+        if self.carrier_id.free_over and self.sale_id and self.sale_id._compute_amount_total_without_delivery() >= self.carrier_id.amount:
+            res['exact_price'] = 0.0
         self.carrier_price = res['exact_price']
-        self.carrier_tracking_ref = res['tracking_number']
+        if res['tracking_number']:
+            self.carrier_tracking_ref = res['tracking_number']
         order_currency = self.sale_id.currency_id or self.company_id.currency_id
         msg = _("Shipment sent to carrier %s for shipping with tracking number %s<br/>Cost: %.2f %s") % (self.carrier_id.name, self.carrier_tracking_ref, self.carrier_price, order_currency.name)
         self.message_post(body=msg)
@@ -178,12 +179,26 @@ class StockPicking(models.Model):
         if not self.carrier_tracking_url:
             raise UserError(_("Your delivery method has no redirect on courier provider's website to track this order."))
 
-        client_action = {'type': 'ir.actions.act_url',
-                         'name': "Shipment Tracking Page",
-                         'target': 'new',
-                         'url': self.carrier_tracking_url,
-                         }
-        return client_action
+        carrier_trackers = []
+        try:
+            carrier_trackers = json.loads(self.carrier_tracking_url)
+        except ValueError:
+            carrier_trackers = self.carrier_tracking_url
+
+        if len(carrier_trackers) > 1:
+            msg = "Tracking links for shipment: <br/>"
+            for tracker in carrier_trackers:
+                msg += '<a href=' + tracker[1] + '>' + tracker[0] + '</a><br/>'
+            self.message_post(body=msg)
+            return self.env.ref('delivery.act_delivery_trackers_url').read()[0]
+        else:
+            client_action = {
+                'type': 'ir.actions.act_url',
+                'name': "Shipment Tracking Page",
+                'target': 'new',
+                'url': self.carrier_tracking_url,
+            }
+            return client_action
 
     @api.one
     def cancel_shipment(self):

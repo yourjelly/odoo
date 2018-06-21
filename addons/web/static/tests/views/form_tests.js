@@ -206,6 +206,70 @@ QUnit.module('Views', {
         def.resolve();
     });
 
+    QUnit.test('decoration works on widgets', function (assert) {
+        assert.expect(2);
+
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<field name="int_field"/>' +
+                    '<field name="display_name" decoration-danger="int_field &lt; 5"/>' +
+                    '<field name="foo" decoration-danger="int_field &gt; 5"/>' +
+                '</form>',
+            res_id: 2,
+        });
+        assert.ok(!form.$('span[name="display_name"]').hasClass('text-danger'),
+            'field display name should not have decoration');
+        assert.ok(form.$('span[name="foo"]').hasClass('text-danger'),
+            'field foo should have decoration');
+        form.destroy();
+    });
+
+    QUnit.test('decoration on widgets are reevaluated if necessary', function (assert) {
+        assert.expect(2);
+
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<field name="int_field"/>' +
+                    '<field name="display_name" decoration-danger="int_field &lt; 5"/>' +
+                '</form>',
+            res_id: 2,
+            viewOptions: {mode: 'edit'},
+        });
+        assert.ok(!form.$('input[name="display_name"]').hasClass('text-danger'),
+            'field display name should not have decoration');
+        form.$('input[name="int_field"]').val(3).trigger('input');
+        assert.ok(form.$('input[name="display_name"]').hasClass('text-danger'),
+            'field display name should now have decoration');
+        form.destroy();
+    });
+
+    QUnit.test('decoration on widgets works on same widget', function (assert) {
+        assert.expect(2);
+
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<field name="int_field" decoration-danger="int_field &lt; 5"/>' +
+                '</form>',
+            res_id: 2,
+            viewOptions: {mode: 'edit'},
+        });
+        assert.ok(!form.$('input[name="int_field"]').hasClass('text-danger'),
+            'field should not have decoration');
+        form.$('input[name="int_field"]').val(3).trigger('input');
+        assert.ok(form.$('input[name="int_field"]').hasClass('text-danger'),
+            'field should now have decoration');
+        form.destroy();
+    });
+
     QUnit.test('only necessary fields are fetched with correct context', function (assert) {
         assert.expect(2);
 
@@ -7248,6 +7312,35 @@ QUnit.module('Views', {
         assert.ok("Behavior can't be tested");
     });
 
+    QUnit.test('asynchronous rendering of a widget tag', function (assert) {
+        assert.expect(1);
+
+        var def1 = $.Deferred();
+
+        var MyWidget = Widget.extend({
+            willStart: function() {
+                return def1;
+            },
+        });
+
+        widgetRegistry.add('test', MyWidget);
+
+        createAsyncView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form>' +
+                        '<widget name="test"/>' +
+                    '</form>',
+        }).then(function(form) {
+            assert.strictEqual(form.$('div.o_widget').length, 1,
+                "there should be a div with widget class");
+            form.destroy();
+            delete widgetRegistry.map.test;
+        });
+
+        def1.resolve();
+    });
 });
 
 });

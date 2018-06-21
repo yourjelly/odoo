@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tools.safe_eval import safe_eval
 
 from odoo.addons import decimal_precision as dp
@@ -33,7 +33,7 @@ class HrPayrollStructure(models.Model):
     @api.constrains('parent_id')
     def _check_parent_id(self):
         if not self._check_recursion():
-            raise ValidationError(_('Error ! You cannot create a recursive Salary Structure.'))
+            raise ValidationError(_('You cannot create a recursive salary structure.'))
 
     @api.multi
     @api.returns('self', lambda value: value.id)

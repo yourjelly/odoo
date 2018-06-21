@@ -22,6 +22,7 @@ var framework = require('web.framework');
 var pyeval = require('web.pyeval');
 var Widget = require('web.Widget');
 
+var _t = core._t;
 var ActionManager = Widget.extend({
     className: 'o_content',
     custom_events: {
@@ -547,7 +548,13 @@ var ActionManager = Widget.extend({
             framework.redirect(url);
             return $.Deferred();
         } else {
-            window.open(url, '_blank');
+            var w = window.open(url, '_blank');
+            if (!w || w.closed || typeof w.closed === 'undefined') {
+                var message = _t('A popup window has been blocked. You ' +
+                             'may need to change your browser settings to allow ' +
+                             'popup windows for this page.');
+                this.do_warn(_t('Warning'), message, true);
+            }
         }
 
         options.on_close();
@@ -768,17 +775,17 @@ var ActionManager = Widget.extend({
      * @param {Object} options see @doAction options
      */
     _preprocessAction: function (action, options) {
-        action._originalAction = JSON.stringify(action);
-
-        action.jsID = _.uniqueId('action_');
-        action.pushState = options.pushState;
-
         // ensure that the context and domain are evaluated
         var context = new Context(this.userContext, options.additional_context, action.context);
         action.context = pyeval.eval('context', context);
         if (action.domain) {
             action.domain = pyeval.eval('domain', action.domain, action.context);
         }
+
+        action._originalAction = JSON.stringify(action);
+
+        action.jsID = _.uniqueId('action_');
+        action.pushState = options.pushState;
     },
     /**
      * Unlinks the given action and its controller from the internal structures

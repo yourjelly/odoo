@@ -28,7 +28,7 @@ SAFE_EVAL_BASE = {
 def make_compute(text, deps):
     """ Return a compute function from its code body and dependencies. """
     func = lambda self: safe_eval(text, SAFE_EVAL_BASE, {'self': self}, mode="exec")
-    deps = [arg.strip() for arg in (deps or "").split(",")]
+    deps = [arg.strip() for arg in deps.split(",")] if deps else []
     return api.depends(*deps)(func)
 
 
@@ -177,7 +177,7 @@ class IrModel(models.Model):
         if not self._context.get(MODULE_UNINSTALL_FLAG):
             for model in self:
                 if model.state != 'manual':
-                    raise UserError(_("Model '%s' contains module data and cannot be removed!") % model.name)
+                    raise UserError(_("Model '%s' contains module data and cannot be removed.") % model.name)
                 # prevent screwing up fields that depend on these models' fields
                 model.field_id._prepare_update()
 

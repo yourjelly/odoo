@@ -637,9 +637,24 @@ var SnippetsMenu = Widget.extend({
         _.each(this.snippetEditors, function (snippetEditor) {
             snippetEditor.cleanForSave();
         });
+
         this.$editable.find('[contentEditable]')
             .removeAttr('contentEditable')
             .removeProp('contentEditable');
+
+        this.$editable.find('.o_we_selected_image')
+            .removeClass('o_we_selected_image');
+
+        // Removing query_string used to invalidate cache during image crop
+        _.each(this.$editable.find('.o_cropped_img_to_clean'), function (croppedImg) {
+            var $croppedImg = $(croppedImg);
+            var s = $croppedImg.attr('src').split('?');
+            var src = s[0];
+            var urlParams = s[1] || '';
+            urlParams = $.param(_.omit($.deparam(urlParams), 'unique'));
+            $croppedImg.attr('src', src + (urlParams ? ('?' + urlParams) : ''));
+            $croppedImg.removeClass('o_cropped_img_to_clean');
+        });
     },
 
     //--------------------------------------------------------------------------

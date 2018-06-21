@@ -133,28 +133,6 @@
         </field>
         </record>
 
-        <record id="crm_case_pivot_view_leads" model="ir.ui.view">
-            <field name="name">crm.lead.pivot.lead</field>
-            <field name="model">crm.lead</field>
-            <field name="arch" type="xml">
-                <pivot string="Opportunities" display_quantity="true">
-                    <field name="stage_id" type="row"/>
-                    <field name="planned_revenue" type="measure"/>
-                </pivot>
-            </field>
-        </record>
-
-        <record id="crm_case_graph_view_leads" model="ir.ui.view">
-            <field name="name">crm.lead.graph.lead</field>
-            <field name="model">crm.lead</field>
-            <field name="arch" type="xml">
-                <graph string="Opportunities" type="bar">
-                    <field name="stage_id" type="row"/>
-                    <field name="planned_revenue" type="measure"/>
-                </graph>
-            </field>
-        </record>
-
         <record id="crm_case_tree_view_leads" model="ir.ui.view">
             <field name="name">crm.lead.tree.lead</field>
             <field name="model">crm.lead</field>
@@ -439,7 +417,7 @@
                         <filter string="Campaign" name="groupby_campaign"  domain="[]" context="{'group_by':'campaign_id'}"/>
                         <filter string="Source" name="groupby_source" domain="[]" context="{'group_by':'source_id'}"/>
                         <filter string="Medium" name="groupby_channel" domain="[]" context="{'group_by':'medium_id'}"/>
-                        <filter string="Creation Month" name="groupby_createmonth" domain="[]" context="{'group_by':'create_date'}"/>
+                        <filter string="Creation Date" name="groupby_createmonth" domain="[]" context="{'group_by':'create_date'}"/>
                     </group>
                 </search>
             </field>
@@ -711,7 +689,7 @@
                         <filter string="Medium" name="medium" domain="[]" context="{'group_by':'medium_id'}"/>
                         <filter string="Source" name="source" domain="[]" context="{'group_by':'source_id'}"/>
                         <separator orientation="vertical" />
-                        <filter string="Creation Month" context="{'group_by':'create_date:month'}" name="month"/>
+                        <filter string="Creation Date" context="{'group_by':'create_date:month'}" name="month"/>
                         <filter string="Expected Closing Date" name="date_deadline" context="{'group_by':'date_deadline'}"/>
                         <filter string="Lost Reason" name="lostreason" context="{'group_by':'lost_reason'}"/>
                     </group>
