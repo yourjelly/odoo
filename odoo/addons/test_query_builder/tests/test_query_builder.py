@@ -266,7 +266,7 @@ class TestSelect(TestCase):
 
     def test_select_cartesian_product(self):
         s = Select([self.u.id, self.p.id])
-        res = """SELECT "a"."id", "b"."id" FROM "res_partner" "b", "res_users" "a\""""
+        res = """SELECT "a"."id", "b"."id" FROM "res_users" "a", "res_partner" "b\""""
         self.assertEqual(s.to_sql()[0], res)
 
     def test_select_simple_where(self):
@@ -672,7 +672,7 @@ class TestSelect(TestCase):
         self.assertEqual(
             s.to_sql()[0],
             """SELECT "a"."id", "b"."id", "c"."id", "d"."id" """
-            """FROM "res_currency" "c", "res_groups" "d", "res_partner" "a", "res_users" "b\""""
+            """FROM "res_partner" "a", "res_users" "b", "res_currency" "c", "res_groups" "d\""""
         )
 
     def test_sub_query(self):
@@ -707,7 +707,7 @@ class TestSelect(TestCase):
         self.assertEqual(
             s.to_sql(),
             (
-                """SELECT "a"."id" FROM "res_partner" "b", "res_users" "a" """
+                """SELECT "a"."id" FROM "res_users" "a", "res_partner" "b" """
                 """WHERE ("a"."partner_id" = "b"."id")""", ()
             )
         )
@@ -954,7 +954,7 @@ class TestWith(TestCase):
             with_st.to_sql()[0],
             """WITH "my_temp_table"("id") AS """
             """(SELECT "a"."partner_id" FROM "res_users" "a") """
-            """SELECT "b"."id" FROM "my_temp_table", "res_partner" "b" """
+            """SELECT "b"."id" FROM "res_partner" "b", "my_temp_table" """
             """WHERE ("b"."id" = "my_temp_table"."id")"""
         )
 
@@ -966,7 +966,7 @@ class TestWith(TestCase):
             """WITH RECURSIVE "my_temp_table"("id") AS """
             """((SELECT "a"."partner_id" FROM "res_users" "a") """
             """UNION (SELECT "a"."id" FROM "my_temp_table" "a")) """
-            """SELECT "b"."id" FROM "my_temp_table", "res_partner" "b" """
+            """SELECT "b"."id" FROM "res_partner" "b", "my_temp_table" """
             """WHERE ("b"."id" = "my_temp_table"."id")"""
         )
 
@@ -977,7 +977,7 @@ class TestWith(TestCase):
             with_st.to_sql()[0],
             """WITH "my_temp_table"("id", "name", "surname") AS """
             """(SELECT "a"."partner_id" FROM "res_users" "a") """
-            """SELECT "b"."id" FROM "my_temp_table", "res_partner" "b" """
+            """SELECT "b"."id" FROM "res_partner" "b", "my_temp_table" """
             """WHERE ("b"."id" = "my_temp_table"."id")"""
         )
 
@@ -992,7 +992,7 @@ class TestWith(TestCase):
             """(SELECT "a"."partner_id" FROM "res_users" "a"), """
             """"my_other_temp_table"("id") AS """
             """(SELECT "a"."id" FROM "res_users" "a") """
-            """SELECT "b"."id" FROM "my_other_temp_table", "my_temp_table", "res_partner" "b" """
+            """SELECT "b"."id" FROM "res_partner" "b", "my_temp_table", "my_other_temp_table" """
             """WHERE (("b"."id" = "my_temp_table"."id") AND """
             """("b"."id" = "my_other_temp_table"."id"))"""
         )
@@ -1006,7 +1006,7 @@ class TestWith(TestCase):
             ("""WITH "my_temp_table"("id") AS """
              """(UPDATE "res_partner" "a" SET "name" = %s WHERE ("a"."name" = %s) """
              """RETURNING "a"."id") """
-             """SELECT "b"."id" FROM "my_temp_table", "res_users" "b" """
+             """SELECT "b"."id" FROM "res_users" "b", "my_temp_table" """
              """WHERE ("b"."id" = "my_temp_table"."id")""",
              ('John', 'Administrator'))
         )
@@ -1087,7 +1087,7 @@ class TestUpdate(TestCase):
         self.assertEqual(
             u.to_sql(),
             ("""UPDATE "res_partner" "a" SET "name" = """
-             """(SELECT "b"."name" FROM "res_partner" "a", "res_users" "b" """
+             """(SELECT "b"."name" FROM "res_users" "b", "res_partner" "a" """
              """WHERE ("b"."partner_id" = "a"."id") """
              """LIMIT %s OFFSET %s)""", (1, 0))
         )
@@ -1292,7 +1292,7 @@ class TestInsert(TestCase):
 class TestCreateView(TestCase):
 
     def setUp(self):
-        super(TestCreateView, self).__init__()
+        super(TestCreateView, self).setUp()
         self.p = Row("res_partner")
         self.t = Row("my_temp_table")
         self.g = Row("res_group")
@@ -1322,7 +1322,7 @@ class TestCreateView(TestCase):
             v.to_sql(),
             ("""CREATE VIEW "my_view" AS (WITH "my_temp_table"("name") AS """
              """(SELECT "a"."name" FROM "res_group" "a" LIMIT %s OFFSET %s) """
-             """SELECT "b"."id" FROM "my_temp_table", "res_partner" "b" WHERE """
+             """SELECT "b"."id" FROM "res_partner" "b", "my_temp_table" WHERE """
              """("b"."name" LIKE "my_temp_table"."name"))""", (1, 0))
         )
 
@@ -1332,7 +1332,6 @@ class TestRealWorldCases(TestCase):
 
     def setUp(self):
         super(TestRealWorldCases, self).setUp()
-        self.maxDiff = None
         self.p = Row("res_partner")
         self.u = Row("res_users")
         self.g = Row("res_groups")
@@ -1370,7 +1369,7 @@ class TestRealWorldCases(TestCase):
                """UNION ("""
                """SELECT "a"."id", """
                """concat("b"."parent_path", "a"."id", %s) """
-               """FROM "__parent_store_compute" "b", "dummy" "a" """
+               """FROM "dummy" "a", "__parent_store_compute" "b" """
                """WHERE ("a"."parent_id" = "b"."id"))) """
                """UPDATE "dummy" "a" """
                """SET "parent_path" = "__parent_store_compute"."parent_path" """
@@ -1506,13 +1505,13 @@ class TestRealWorldCases(TestCase):
                 (r2.company_id == NULL) | (r2.company_id == c.id)
             ), order=[Asc(r2.name)], limit=1,
         )
-        company_rates = Select({
-            1: r.currency_id,
-            2: r.rate,
-            'company_id': coalesce(r.company_id, c.id),
-            'date_start': r.name,
-            'date_end': s2,
-        }, joins=[Join(r, c, (r.company_id == NULL) | (r.company_id == c.id))])
+        company_rates = Select(OrderedDict([
+            (1, r.currency_id),
+            (2, r.rate),
+            ('company_id', coalesce(r.company_id, c.id)),
+            ('date_start', r.name),
+            ('date_end', s2),
+        ]), joins=[Join(r, c, (r.company_id == NULL) | (r.company_id == c.id))])
         cr = Row("currency_rate", True)
         s3 = Select(OrderedDict([
             (1, sub.id),
@@ -1548,4 +1547,21 @@ class TestRealWorldCases(TestCase):
                    & ((cr.date_end == NULL) | (cr.date_end > coalesce(sub.date, now()))))])
         w = With([(cr, company_rates)], s3)
         v = CreateView("account_invoice_report", w, True)
-        print(sub.to_sql())
+
+        cr_sql = (
+            """SELECT "a"."currency_id", "a"."rate", """
+            """coalesce("a"."company_id", "b"."id") AS company_id, """
+            """"a"."name" AS date_start, (SELECT "c"."name" """
+            """FROM "res_currency_rate" "c", "res_currency_rate" "a", "res_company" "b" """
+            """WHERE ((("c"."name" > "a"."name") AND ("c"."currency_id" = "a"."currency_id")) AND """
+            """(("c"."company_id" IS NULL) OR ("c"."company_id" = "b"."id"))) """
+            """ORDER BY "c"."name" ASC NULLS LAST LIMIT %s OFFSET %s) AS date_end """
+            """FROM "res_currency_rate" "a" INNER JOIN "res_company" "b" ON """
+            """(("a"."company_id" IS NULL) OR ("a"."company_id" = "b"."id"))""",
+            (1, 0)
+        )
+
+        self.assertEqual(
+            company_rates.to_sql(),
+            cr_sql
+        )

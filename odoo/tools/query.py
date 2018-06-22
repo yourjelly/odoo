@@ -53,6 +53,8 @@ in order to see their usage, consult the respective class' documentation.
 from collections import OrderedDict
 from functools import partial
 
+from .misc import OrderedSet
+
 
 def _quote(val):
     """ Helper function for quoting SQL identifiers if necessary."""
@@ -159,7 +161,7 @@ class Expression(object):
     @property
     def rows(self):
         """Return a set containing all the rows of an expression via recursion."""
-        res = set()
+        res = OrderedSet()
         nodes = [getattr(self, 'left', None), getattr(self, 'right', None)]
 
         for node in nodes:
@@ -225,7 +227,7 @@ class Case(Expression):
 
     @property
     def rows(self):
-        rows = set()
+        rows = OrderedSet()
 
         for when, then in self.cases:
             if isinstance(when, Expression):
@@ -299,7 +301,7 @@ class Row(object):
 
     @property
     def rows(self):
-        return {self}
+        return OrderedSet([self])
 
     def __call__(self, *args):
         for col in args:
@@ -403,7 +405,7 @@ class BaseQuery(Expression):
 
     @property
     def rows(self):
-        return set()
+        return OrderedSet()
 
     def _build_base(self, alias_mapping):
         raise NotImplementedError
@@ -565,12 +567,6 @@ class Join(object):
             else:
                 self.type = 'INNER JOIN'
 
-    @property
-    def rows(self):
-        if self._condition:
-            return {self._join, self._main} | self._condition.rows
-        return {self._join, self._main}
-
     def _to_sql(self, alias_mapping):
         sql = "%s %s"
         args = []
@@ -716,7 +712,7 @@ class Select(BaseQuery):
         else:
             columns += self._columns
 
-        tables = set()
+        tables = OrderedSet()
 
         for col in columns:
             if isinstance(col, tuple):
@@ -728,10 +724,10 @@ class Select(BaseQuery):
         if self._where is not None:
             tables |= self._where.rows
 
-        tables_to_join = {j._join for j in self._joins}
+        tables_to_join = OrderedSet([j._join for j in self._joins])
 
         tables -= tables_to_join
-        return sorted(list(tables), key=lambda r: (r._table, r._nullable, r._cols))
+        return list(tables)
 
     # Select query operations
     def union(self, other):
@@ -1254,7 +1250,7 @@ class Func(Expression):
 
     @property
     def rows(self):
-        rows = set()
+        rows = OrderedSet()
         for arg in self.args:
             if isinstance(arg, Expression):
                 rows |= arg.rows
@@ -1300,7 +1296,7 @@ class Unnest(Func):
 
     @property
     def rows(self):
-        return set([self])
+        return OrderedSet([self])
 
     def _to_sql(self, alias_mapping):
         sql, args = super(Unnest, self)._to_sql(alias_mapping)
