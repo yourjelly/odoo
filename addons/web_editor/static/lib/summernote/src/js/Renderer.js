@@ -75,7 +75,7 @@ define([
      * @param {String} content
      */
     var tplPopover = function (className, content) {
-      var $popover = $('<div class="' + className + ' popover bottom in" style="display: none !important;">' +
+      var $popover = $('<div class="' + className + ' popover bottom in" style="display: none;">' +
                '<div class="arrow"></div>' +
                '<div class="popover-content">' +
                '</div>' +
