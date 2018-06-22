@@ -45,11 +45,11 @@ tour.register('rte', {
     }
 }, {
     content: "simulate triple click and change text bg-color",
-    trigger: '#editable_area > section .row > div:first',
-    run: function () {
-        var $h1 = $('h1', this.$anchor);
-        $.summernote.core.range.create($h1[0].firstChild, 0, $('p', this.$anchor)[0], 0).select();
-        simulateClickEvent($h1[0], 'mouseup');
+    trigger: '#editable_area > section .row > div:first h1',
+    run: function (actions) {
+        actions.tripleclick();
+        $.summernote.core.range.create(this.$anchor[0].firstChild, 0, this.$anchor.next()[0], 0).select();
+        simulateClickEvent(this.$anchor[0], 'mouseup');
     }
 }, {
     content: "change text bg-color after triple click",
