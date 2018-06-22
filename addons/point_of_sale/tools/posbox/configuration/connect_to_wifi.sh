@@ -55,7 +55,7 @@ function connect () {
 	sudo service dhcpcd restart
 
 	# give dhcp some time
-	timeout 30 sh -c 'until ifconfig wlan0 | grep "inet addr:" ; do sleep 0.1 ; done'
+	timeout 30 sh -c 'until ifconfig wlan0 | grep "inet " ; do sleep 0.1 ; done'
 	TIMEOUT_RETURN=$?
 
 	if [ ${TIMEOUT_RETURN} -eq 124 ] && [ -z "${NO_AP}" ] ; then
