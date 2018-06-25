@@ -771,7 +771,7 @@ class TestSelect(TestCase):
             s2.to_sql(),
             (
                 """SELECT "a"."name" """
-                """FROM (SELECT "b"."id", "b"."name" FROM "res_partner" "b") "a\"""",
+                """FROM (SELECT "a"."id", "a"."name" FROM "res_partner" "a") "a\"""",
                 ()
             )
         )
@@ -942,6 +942,7 @@ class TestDelete(TestCase):
 class TestWith(TestCase):
 
     def setUp(self):
+        self.maxDiff = None
         self.p = Row('res_partner')
         self.u = Row('res_users')
         self.tmp_r = Row('my_temp_table')
@@ -954,8 +955,8 @@ class TestWith(TestCase):
             with_st.to_sql()[0],
             """WITH "my_temp_table"("id") AS """
             """(SELECT "a"."partner_id" FROM "res_users" "a") """
-            """SELECT "b"."id" FROM "res_partner" "b", "my_temp_table" """
-            """WHERE ("b"."id" = "my_temp_table"."id")"""
+            """SELECT "a"."id" FROM "res_partner" "a", "my_temp_table" "b" """
+            """WHERE ("a"."id" = "b"."id")"""
         )
 
     def test_basic_with_recursive(self):
@@ -966,8 +967,8 @@ class TestWith(TestCase):
             """WITH RECURSIVE "my_temp_table"("id") AS """
             """((SELECT "a"."partner_id" FROM "res_users" "a") """
             """UNION (SELECT "a"."id" FROM "my_temp_table" "a")) """
-            """SELECT "b"."id" FROM "res_partner" "b", "my_temp_table" """
-            """WHERE ("b"."id" = "my_temp_table"."id")"""
+            """SELECT "a"."id" FROM "res_partner" "a", "my_temp_table" "b" """
+            """WHERE ("a"."id" = "b"."id")"""
         )
 
     def test_with_select_multi_col(self):
@@ -977,8 +978,8 @@ class TestWith(TestCase):
             with_st.to_sql()[0],
             """WITH "my_temp_table"("id", "name", "surname") AS """
             """(SELECT "a"."partner_id" FROM "res_users" "a") """
-            """SELECT "b"."id" FROM "res_partner" "b", "my_temp_table" """
-            """WHERE ("b"."id" = "my_temp_table"."id")"""
+            """SELECT "a"."id" FROM "res_partner" "a", "my_temp_table" "b" """
+            """WHERE ("a"."id" = "b"."id")"""
         )
 
     def test_with_select_multi_row(self):
@@ -992,9 +993,10 @@ class TestWith(TestCase):
             """(SELECT "a"."partner_id" FROM "res_users" "a"), """
             """"my_other_temp_table"("id") AS """
             """(SELECT "a"."id" FROM "res_users" "a") """
-            """SELECT "b"."id" FROM "res_partner" "b", "my_temp_table", "my_other_temp_table" """
-            """WHERE (("b"."id" = "my_temp_table"."id") AND """
-            """("b"."id" = "my_other_temp_table"."id"))"""
+            """SELECT "a"."id" FROM "res_partner" "a", "my_temp_table" "b", """
+            """"my_other_temp_table" "c" """
+            """WHERE (("a"."id" = "b"."id") AND """
+            """("a"."id" = "c"."id"))"""
         )
 
     def test_with_update(self):
@@ -1006,20 +1008,21 @@ class TestWith(TestCase):
             ("""WITH "my_temp_table"("id") AS """
              """(UPDATE "res_partner" "a" SET "name" = %s WHERE ("a"."name" = %s) """
              """RETURNING "a"."id") """
-             """SELECT "b"."id" FROM "res_users" "b", "my_temp_table" """
-             """WHERE ("b"."id" = "my_temp_table"."id")""",
+             """SELECT "a"."id" FROM "res_users" "a", "my_temp_table" "b" """
+             """WHERE ("a"."id" = "b"."id")""",
              ('John', 'Administrator'))
         )
 
     def test_with_delete(self):
         d = Delete([self.u], where=self.u.id > 5, returning=[self.u.partner_id])
         w = With([(self.tmp_r("id"), d)],
-                 Delete([self.p], where=self.p.id == self.tmp_r.id))
+                 Delete([self.p], using=[self.tmp_r], where=self.p.id == self.tmp_r.id))
         self.assertEqual(
             w.to_sql(),
             ("""WITH "my_temp_table"("id") AS """
              """(DELETE FROM "res_users" "a" WHERE ("a"."id" > %s) RETURNING "a"."partner_id") """
-             """DELETE FROM "res_partner" "b" WHERE ("b"."id" = "my_temp_table"."id")""", (5,))
+             """DELETE FROM "res_partner" "a" USING "my_temp_table" "b" """
+             """WHERE ("a"."id" = "b"."id")""", (5,))
         )
 
     def test_with_insert(self):
@@ -1032,7 +1035,7 @@ class TestWith(TestCase):
             ("""WITH "my_temp_table"("name", "surname") AS """
              """(INSERT INTO "res_users"("name", "surname") VALUES (%s, %s) """
              """RETURNING "res_users"."name", "res_users"."surname") """
-             """INSERT INTO "res_partner"("name", "surname") (SELECT * FROM "my_temp_table")""",
+             """INSERT INTO "res_partner"("name", "surname") (SELECT * FROM "my_temp_table" "a")""",
              ('John', 'Wick'))
         )
 
@@ -1322,8 +1325,8 @@ class TestCreateView(TestCase):
             v.to_sql(),
             ("""CREATE VIEW "my_view" AS (WITH "my_temp_table"("name") AS """
              """(SELECT "a"."name" FROM "res_group" "a" LIMIT %s OFFSET %s) """
-             """SELECT "b"."id" FROM "res_partner" "b", "my_temp_table" WHERE """
-             """("b"."name" LIKE "my_temp_table"."name"))""", (1, 0))
+             """SELECT "a"."id" FROM "res_partner" "a", "my_temp_table" "b" WHERE """
+             """("a"."name" LIKE "b"."name"))""", (1, 0))
         )
 
 
@@ -1331,6 +1334,7 @@ class TestCreateView(TestCase):
 class TestRealWorldCases(TestCase):
 
     def setUp(self):
+        self.maxDiff = None
         super(TestRealWorldCases, self).setUp()
         self.p = Row("res_partner")
         self.u = Row("res_users")
@@ -1372,9 +1376,9 @@ class TestRealWorldCases(TestCase):
                """FROM "dummy" "a", "__parent_store_compute" "b" """
                """WHERE ("a"."parent_id" = "b"."id"))) """
                """UPDATE "dummy" "a" """
-               """SET "parent_path" = "__parent_store_compute"."parent_path" """
-               """FROM "__parent_store_compute" """
-               """WHERE ("a"."id" = "__parent_store_compute"."id")""", ('/', '/'))
+               """SET "parent_path" = "b"."parent_path" """
+               """FROM "__parent_store_compute" "b" """
+               """WHERE ("a"."id" = "b"."id")""", ('/', '/'))
 
         self.assertEqual(w.to_sql(), res)
 
@@ -1441,52 +1445,68 @@ class TestRealWorldCases(TestCase):
         ail = Row("account_invoice_line")
         ai = Row("account_invoice")
         partner = Row("res_partner")
-        pr = Row("product_product", True)
-        pt = Row("product_template", True)
-        u = Row("uom_uom", True)
-        u2 = Row("uom_uom", True)
-        it = Select({
-            1: ai.id,
-            'sign': Case([(ai.type == _any(['in_refund', 'in_invoice']), -1)], 1)
-        })
+        pr = Row("product_product")
+        pt = Row("product_template")
+        u = Row("uom_uom")
+        u2 = Row("uom_uom")
+        it = Select(OrderedDict([
+            (1, ai.id),
+            ('sign', Case([(ai.type == _any(['in_refund', 'in_invoice']), -1)], 1))
+        ]))
+
+        it_sql = (
+            """SELECT "a"."id", (CASE WHEN ("a"."type" = any(%s)) THEN %s ELSE %s END) AS sign """
+            """FROM "account_invoice" "a\"""", (['in_refund', 'in_invoice'], -1, 1)
+        )
+
+        self.assertEqual(it.to_sql(), it_sql)
+
         s1 = Select([count(ail)], where=ail.invoice_id == ai.id)
-        sub = Select({
-            'id': ail.id,
-            'date': ai.date,
-            'uom_name': u2.name,
-            'nbr': (ail, 1),
-            'account_line_id': ail.account_id,
-            'product_qty': _sum((it.sign * ail.quantity) / u.factor * u2.factor),
-            'price_total': _sum(ail.price_subtotal_signed * it.sign),
-            'price_average': _sum(abs(ail.price_subtotal_signed)) / Case(
+
+        s1_sql = (
+            """SELECT count(*) FROM "account_invoice_line" "a", "account_invoice" "b" """
+            """WHERE ("a"."invoice_id" = "b"."id")""", ()
+        )
+
+        self.assertEqual(s1.to_sql(), s1_sql)
+
+        sub = Select(OrderedDict([
+            ('id', ail.id),
+            ('date', ai.date),
+            ('uom_name', u2.name),
+            ('nbr', (ail, 1)),
+            ('account_line_id', ail.account_id),
+            ('product_qty', _sum((it.sign * ail.quantity) / u.factor * u2.factor)),
+            ('price_total', _sum(ail.price_subtotal_signed * it.sign)),
+            ('price_average', _sum(abs(ail.price_subtotal_signed)) / Case(
                 [(_sum(ail.quantity / u.factor * u2.factor) != 0,
                   _sum(ail.quantity / u.factor * u2.factor))], 1
-            ),
-            'residual': ai.residual_company_signed / s1 * count(ail) * it.sign,
-            'commercial_partner_id': ai.commercial_partner_id,
-            1: ail.product_id,
-            2: ai.partner_id,
-            3: ai.payment_term_id,
-            4: ail.account_analytic_id,
-            5: ai.currency_id,
-            6: ai.journal_id,
-            7: ai.fiscal_position_id,
-            8: ai.user_id,
-            9: ai.company_id,
-            10: ai.type,
-            11: ai.state,
-            12: pt.categ_id,
-            13: ai.date_due,
-            14: ai.account_id,
-            15: ai.partner_bank_id,
-            16: partner.country_id,
-        }, joins=[
+            )),
+            ('residual', ai.residual_company_signed / s1 * count(ail) * it.sign),
+            ('commercial_partner_id', ai.commercial_partner_id),
+            (1, ail.product_id),
+            (2, ai.partner_id),
+            (3, ai.payment_term_id),
+            (4, ail.account_analytic_id),
+            (5, ai.currency_id),
+            (6, ai.journal_id),
+            (7, ai.fiscal_position_id),
+            (8, ai.user_id),
+            (9, ai.company_id),
+            (10, ai.type),
+            (11, ai.state),
+            (12, pt.categ_id),
+            (13, ai.date_due),
+            (14, ai.account_id),
+            (15, ai.partner_bank_id),
+            (16, partner.country_id),
+        ]), joins=[
             Join(ai, ail, ai.id == ail.invoice_id),
             Join(ai, partner, ai.commercial_partner_id == partner.id),
-            Join(ail, pr, pr.id == ail.product_id),
-            Join(pr, pt, pt.id == pr.product_tmpl_id),
-            Join(ail, u, u.id == ail.uom_id),
-            Join(pt, u2, u2.id == pt.uom_id),
+            Join(ail, pr, pr.id == ail.product_id, 'LEFT JOIN'),
+            Join(pr, pt, pt.id == pr.product_tmpl_id, 'LEFT JOIN'),
+            Join(ail, u, u.id == ail.uom_id, 'LEFT JOIN'),
+            Join(pt, u2, u2.id == pt.uom_id, 'LEFT JOIN'),
             Join(ai, it, it.id == ai.id),
         ], group=[
             ail.id, ail.product_id, ail.account_analytic_id, ai.date_invoice, ai.id,
@@ -1496,6 +1516,47 @@ class TestRealWorldCases(TestCase):
             ai.residual_company_signed, ai.amount_total_company_signed, ai.commercial_partner_id,
             partner.country_id,
         ])
+
+        sub_sql = (
+            """SELECT "a"."id" AS id, "b"."date" AS date, "c"."name" AS uom_name, """
+            """%s AS nbr, "a"."account_id" AS account_line_id, """
+            """sum(((("d"."sign" * "a"."quantity") / "e"."factor") * "c"."factor")) """
+            """AS product_qty, sum(("a"."price_subtotal_signed" * "d"."sign")) AS price_total, """
+            """(sum(abs("a"."price_subtotal_signed")) / CASE WHEN """
+            """(sum((("a"."quantity" / "e"."factor") * "c"."factor")) != %s) THEN """
+            """sum((("a"."quantity" / "e"."factor") * "c"."factor")) ELSE %s END) """
+            """AS price_average, """
+            """((("b"."residual_company_signed" / ({s1})) * count(*)) * "d"."sign") """
+            """AS residual, """
+            """"b"."commercial_partner_id" AS commercial_partner_id, "a"."product_id", """
+            """"b"."partner_id", "b"."payment_term_id", "a"."account_analytic_id", """
+            """"b"."currency_id", "b"."journal_id", "b"."fiscal_position_id", "b"."user_id", """
+            """"b"."company_id", "b"."type", "b"."state", "f"."categ_id", "b"."date_due", """
+            """"b"."account_id", "b"."partner_bank_id", "g"."country_id" """
+            """FROM "account_invoice" "b" """
+            """INNER JOIN "account_invoice_line" "a" ON ("b"."id" = "a"."invoice_id") """
+            """INNER JOIN "res_partner" "g" ON ("b"."commercial_partner_id" = "g"."id") """
+            """LEFT JOIN "product_product" "h" ON ("h"."id" = "a"."product_id") """
+            """LEFT JOIN "product_template" "f" ON ("f"."id" = "h"."product_tmpl_id") """
+            """LEFT JOIN "uom_uom" "e" ON ("e"."id" = "a"."uom_id") """
+            """LEFT JOIN "uom_uom" "c" ON ("c"."id" = "f"."uom_id") """
+            """INNER JOIN ({it}) "d" ON ("d"."id" = "b"."id") """
+            """GROUP BY "a"."id", "a"."product_id", "a"."account_analytic_id", """
+            """"b"."date_invoice", "b"."id", "b"."partner_id", "b"."payment_term_id", """
+            """"c"."name", """
+            """"c"."id", "b"."currency_id", "b"."journal_id", "b"."fiscal_position_id", """
+            """"b"."user_id", "b"."company_id", "b"."type", "d"."sign", "b"."state", """
+            """"f"."categ_id", "b"."date_due", "b"."account_id", "a"."account_id", """
+            """"b"."partner_bank_id", "b"."residual_company_signed", """
+            """"b"."amount_total_company_signed", "b"."commercial_partner_id", """
+            """"g"."country_id\"""", (1, 0, 1) + s1_sql[1] + it_sql[1]
+        )
+
+        self.assertEqual(
+            sub.to_sql(),
+            (sub_sql[0].format(s1=s1_sql[0], it=it_sql[0]), sub_sql[1])
+        )
+
         r = Row("res_currency_rate")
         r2 = Row("res_currency_rate")
         c = Row("res_company")
@@ -1505,6 +1566,17 @@ class TestRealWorldCases(TestCase):
                 (r2.company_id == NULL) | (r2.company_id == c.id)
             ), order=[Asc(r2.name)], limit=1,
         )
+
+        s2_sql = (
+            """SELECT "a"."name" FROM "res_currency_rate" "a", "res_currency_rate" "b", """
+            """"res_company" "c" """
+            """WHERE ((("a"."name" > "b"."name") AND ("a"."currency_id" = "b"."currency_id")) """
+            """AND (("a"."company_id" IS NULL) OR ("a"."company_id" = "c"."id"))) """
+            """ORDER BY "a"."name" ASC NULLS LAST LIMIT %s OFFSET %s""", (1, 0)
+        )
+
+        self.assertEqual(s2.to_sql(), s2_sql)
+
         company_rates = Select(OrderedDict([
             (1, r.currency_id),
             (2, r.rate),
@@ -1512,7 +1584,21 @@ class TestRealWorldCases(TestCase):
             ('date_start', r.name),
             ('date_end', s2),
         ]), joins=[Join(r, c, (r.company_id == NULL) | (r.company_id == c.id))])
-        cr = Row("currency_rate", True)
+
+        cr_sql = (
+            """SELECT "a"."currency_id", "a"."rate", """
+            """coalesce("a"."company_id", "b"."id") AS company_id, """
+            """"a"."name" AS date_start, ({s2}) AS date_end """
+            """FROM "res_currency_rate" "a" INNER JOIN "res_company" "b" ON """
+            """(("a"."company_id" IS NULL) OR ("a"."company_id" = "b"."id"))""", s2_sql[1]
+        )
+
+        self.assertEqual(
+            company_rates.to_sql(),
+            (cr_sql[0].format(s2=s2_sql[0]), cr_sql[1])
+        )
+
+        cr = Row("currency_rate")
         s3 = Select(OrderedDict([
             (1, sub.id),
             (2, sub.date),
@@ -1544,24 +1630,44 @@ class TestRealWorldCases(TestCase):
         ]), joins=[Join(sub, cr, (cr.currency_id == sub.currency_id)
                    & (cr.company_id == sub.company_id)
                    & (cr.date_start <= coalesce(sub.date, now()))
-                   & ((cr.date_end == NULL) | (cr.date_end > coalesce(sub.date, now()))))])
+                   & ((cr.date_end == NULL) | (cr.date_end > coalesce(sub.date, now()))),
+                   'LEFT JOIN')])
+
+        s3_sql = (
+            """SELECT "a"."id", "a"."date", "a"."product_id", "a"."partner_id", """
+            """"a"."country_id", "a"."account_analytic_id", "a"."payment_term_id", """
+            """"a"."uom_name", "a"."currency_id", "a"."journal_id", "a"."fiscal_position_id", """
+            """"a"."user_id", "a"."company_id", "a"."nbr", "a"."type", "a"."state", """
+            """"a"."categ_id", "a"."date_due", "a"."account_id", "a"."account_line_id", """
+            """"a"."partner_bank_id", "a"."product_qty", "a"."price_total" AS price_total, """
+            """"a"."price_average" AS price_average, coalesce("b"."rate", %s) AS currency_rate, """
+            """"a"."residual" AS residual, "a"."commercial_partner_id" AS """
+            """commercial_partner_id FROM ({sub}) "a" """
+            """LEFT JOIN "currency_rate" "b" ON (((("b"."currency_id" = "a"."currency_id") AND """
+            """("b"."company_id" = "a"."company_id")) AND """
+            """("b"."date_start" <= coalesce("a"."date", now() at timezone 'UTC'))) AND """
+            """(("b"."date_end" IS NULL) OR ("b"."date_end" > coalesce("a"."date", """
+            """now() at timezone 'UTC'))))""", (1,)
+        )
+
+        _sub_sql, _sub_args = sub.to_sql()
+        self.assertEqual(
+            s3.to_sql(),
+            (s3_sql[0].format(sub=_sub_sql), s3_sql[1] + _sub_args)
+        )
+
         w = With([(cr, company_rates)], s3)
         v = CreateView("account_invoice_report", w, True)
 
-        cr_sql = (
-            """SELECT "a"."currency_id", "a"."rate", """
-            """coalesce("a"."company_id", "b"."id") AS company_id, """
-            """"a"."name" AS date_start, (SELECT "c"."name" """
-            """FROM "res_currency_rate" "c", "res_currency_rate" "a", "res_company" "b" """
-            """WHERE ((("c"."name" > "a"."name") AND ("c"."currency_id" = "a"."currency_id")) AND """
-            """(("c"."company_id" IS NULL) OR ("c"."company_id" = "b"."id"))) """
-            """ORDER BY "c"."name" ASC NULLS LAST LIMIT %s OFFSET %s) AS date_end """
-            """FROM "res_currency_rate" "a" INNER JOIN "res_company" "b" ON """
-            """(("a"."company_id" IS NULL) OR ("a"."company_id" = "b"."id"))""",
-            (1, 0)
+        v_sql = (
+            """CREATE OR REPLACE VIEW "account_invoice_report" AS """
+            """(WITH "currency_rate" AS ({cr}) {s3})"""
         )
 
+        _cr_sql, _cr_args = company_rates.to_sql()
+        _s3_sql, _s3_args = s3.to_sql()
+
         self.assertEqual(
-            company_rates.to_sql(),
-            cr_sql
+            v.to_sql(),
+            (v_sql.format(cr=_cr_sql, s3=_s3_sql), _cr_args + _s3_args)
         )

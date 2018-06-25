@@ -420,10 +420,11 @@ class BaseQuery(Expression):
     def _build_from(self, alias_mapping):
         sql = []
         for row in self._rows:
-            _sql, _args = row._to_sql(alias_mapping)
             if isinstance(row, BaseQuery):
+                _sql, _args = row._to_sql(AliasMapping())
                 sql.append("(%s) %s" % (_sql, alias_mapping[row]))
             else:
+                _sql, _args = row._to_sql(alias_mapping)
                 sql.append(_sql)
             self.args += _args
 
@@ -533,7 +534,7 @@ class AliasMapping(dict):
 
 class Join(object):
 
-    def __init__(self, main, join, condition=None):
+    def __init__(self, main, join, condition=None, _type=None):
         """
         Create a join between two tables on a given condition.
 
@@ -556,6 +557,8 @@ class Join(object):
         if isinstance(self._join, BaseQuery):
             # TODO: Find a way to properly handle sub-queries in JOINs
             self.type = 'INNER JOIN'
+        elif _type is not None:
+            self.type = _type
         elif self._main._nullable:
             if self._join._nullable:
                 self.type = 'FULL JOIN'
@@ -707,7 +710,6 @@ class Select(BaseQuery):
         # Normalize arguments
         # XXX: Do in __init__ ?
         if self._aliased:
-            columns += [] if None not in self._columns else self._columns.pop(None)
             columns += list(self._columns.values())
         else:
             columns += self._columns
@@ -815,7 +817,7 @@ class Select(BaseQuery):
             else:
                 if isinstance(val, (Case, BaseQuery)):
                     # Sub-query / Sub-statement
-                    __sql, _args = val._to_sql(alias_mapping)
+                    __sql, _args = val._to_sql(AliasMapping())
                     _sql.append("(%s)%s" % (__sql, alias))
                     args += _args
                 elif isinstance(val, tuple):
@@ -1000,7 +1002,7 @@ class With(BaseQuery):
             args += _args
             sql.append("%s AS (%s)" % tuple(_sql))
 
-        _sql, _args = self._tail._to_sql(alias_mapping)
+        _sql, _args = self._tail._to_sql(AliasMapping())
         args += _args
 
         return ("WITH %s%s %s" % ("RECURSIVE " if self._recur else "", ', '.join(sql), _sql),
