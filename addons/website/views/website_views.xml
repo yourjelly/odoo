@@ -142,6 +142,8 @@
                                 <field name="name"/>
                                 <field name="url"/>
                                 <field name="view_id"/>
+                                <field groups="base.group_no_one" name="is_published"/>
+                                <field groups="base.group_no_one" name="website_id"/>  <!-- todo jov this field will disappear -->
                             </group>
                             <group>
                                 <field name="website_indexed"/>
@@ -149,7 +151,6 @@
                                 <field name="date_publish"/>
                             </group>
                         </group>
-                        <field groups="base.group_no_one" name="website_ids"/>
                         <label for="menu_ids" string="Related Menu Items"/>
                         <field name="menu_ids"/>
                     </sheet>

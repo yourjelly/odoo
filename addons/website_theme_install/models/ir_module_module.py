@@ -70,7 +70,7 @@ class IrModuleModule(models.Model):
             menus.with_context(no_cow=True).write({'website_id': website.id})
 
             pages = module._get_module_data('website.page')
-            pages.with_context(no_cow=True).write({'website_ids': [(6, 0, [website.id])]})
+            pages.with_context(no_cow=True).write({'website_id': website.id})
             pages.with_context(no_cow=True).mapped('view_id').write({'website_id': website.id})
 
     @api.multi
@@ -80,7 +80,7 @@ class IrModuleModule(models.Model):
             menus.filtered(lambda menu: menu.website_id == website).unlink()
 
             pages = module._get_module_data('website.page')
-            pages.with_context(no_cow=True).write({'website_ids': [(3, website.id, 0)]})
+            pages.filtered(lambda page: page.website_id == website).unlink()
 
     @api.model
     def update_list(self):

@@ -109,19 +109,12 @@ class Website(models.Model):
 
     @api.model
     def create(self, vals):
+        # todo jov make company required
         if 'user_id' not in vals:
-            # todo jov make company required
-            company = self.env['res.company'].browse(vals['company_id'])
-            vals['user_id'] = company._get_public_user().id
+            company = self.env['res.company'].browse(vals.get('company_id'))
+            vals['user_id'] = company._get_public_user().id if company else self.env.ref('base.public_user').id
 
-        res = super(Website, self).create(vals)
-
-        # publish default homepage on new website so people can login
-        default_homepage = self.env.ref('website.homepage_page', raise_if_not_found=False)
-        if default_homepage:
-            default_homepage.website_ids |= res
-
-        return res
+        return super(Website, self).create(vals)
 
     @api.multi
     def write(self, values):
@@ -184,8 +177,8 @@ class Website(models.Model):
         if ispage:
             page = self.env['website.page'].create({
                 'url': page_url,
-                'website_ids': [(6, None, [self.get_current_website().id])],
-                'view_id': view.id
+                'website_id': self.get_current_website().id,
+                'view_id': view.id,
             })
             result['view_id'] = view.id
         if add_menu:
@@ -208,7 +201,7 @@ class Website(models.Model):
         """
         website_id = self.get_current_website().id
         inc = 0
-        domain_static = ['|', ('website_ids', '=', False), ('website_ids', 'in', website_id)]
+        domain_static = ['|', ('website_id', '=', False), ('website_id', '=', website_id)]
         page_temp = page_url
         while self.env['website.page'].with_context(active_test=False).sudo().search([('url', '=', page_temp)] + domain_static):
             inc += 1
@@ -231,7 +224,7 @@ class Website(models.Model):
         #Look for unique key
         key_copy = string
         inc = 0
-        domain_static = ['|', ('website_ids', '=', False), ('website_ids', 'in', website_id)]
+        domain_static = ['|', ('website_id', '=', False), ('website_id', '=', website_id)]
         while self.env['website.page'].with_context(active_test=False).sudo().search([('key', '=', key_copy)] + domain_static):
             inc += 1
             key_copy = string + (inc and "-%s" % inc or "")
@@ -262,7 +255,7 @@ class Website(models.Model):
 
         # search for website_page with link
         website_page_search_dom = [
-            '|', ('website_ids', 'in', website_id), ('website_ids', '=', False), ('view_id.arch_db', 'ilike', url)
+            '|', ('website_id', '=', False), ('website_id', '=', website_id), ('view_id.arch_db', 'ilike', url)
         ]
         pages = self.env['website.page'].search(website_page_search_dom)
         page_key = _('Page')
@@ -330,7 +323,7 @@ class Website(models.Model):
 
         # search for website_page with link
         website_page_search_dom = [
-            '|', ('website_ids', 'in', website_id), ('website_ids', '=', False), ('view_id.arch_db', 'ilike', key),
+            '|', ('website_id', '=', False), ('website_id', '=', website_id), ('view_id.arch_db', 'ilike', key),
             ('id', '!=', page.id),
         ]
         pages = self.env['website.page'].search(website_page_search_dom)
@@ -606,7 +599,7 @@ class Website(models.Model):
 
     @api.multi
     def get_website_pages(self, domain=[], order='name', limit=None):
-        domain += ['|', ('website_ids', 'in', self.get_current_website().id), ('website_ids', '=', False)]
+        domain += ['|', ('website_id', '=', False), ('website_id', '=', self.get_current_website().id)]
         pages = request.env['website.page'].search(domain, order='name', limit=limit)
         return pages
 
@@ -664,32 +657,27 @@ class WebsitePublishedMixin(models.AbstractModel):
                                        compute='_compute_website_published',
                                        inverse='_inverse_website_published',
                                        search='_search_website_published')
-    website_ids = fields.Many2many('website', string='Published on Websites', help='Determines on what websites this record will be visible.')
+    is_published = fields.Boolean('Is published')
+    website_id = fields.Many2one('website', string='Website', help='Restrict publishing to this website.')
     website_url = fields.Char('Website URL', compute='_compute_website_url', help='The full URL to access the document through the website.')
 
     @api.multi
+    @api.depends('is_published', 'website_id')
     def _compute_website_published(self):
+        current_website_id = self._context.get('website_id')
         for record in self:
-            current_website_id = self._context.get('website_id')
             if current_website_id:
-                record.website_published = current_website_id in record.website_ids.ids
-            else:  # should be in the backend, return things that are published anywhere
-                record.website_published = bool(record.website_ids)
+                record.website_published = record.is_published and (not record.website_id or record.website_id.id == current_website_id)
+            else:
+                record.website_published = record.is_published
 
     @api.multi
     def _inverse_website_published(self):
+        current_website_id = self._context.get('website_id')
         for record in self:
-            current_website_id = self._context.get('website_id')
-            if current_website_id:
-                current_website = self.env['website'].browse(current_website_id)
-
-                if record.website_published:
-                    record.website_ids |= current_website
-                else:
-                    record.website_ids -= current_website
-
-            else:  # this happens during e.g. demo data installation -> publish on all websites
-                record.website_ids = self.env['website'].search([])
+            record.is_published = record.website_published
+            if record.website_published and current_website_id:
+                record.write({'website_id': current_website_id})
 
     def _search_website_published(self, operator, value):
         if not isinstance(value, bool) or operator not in ('=', '!='):
@@ -701,9 +689,11 @@ class WebsitePublishedMixin(models.AbstractModel):
 
         current_website_id = self._context.get('website_id')
         if current_website_id:
-            return [('website_ids', 'in' if value is True else 'not in', current_website_id)]
+            is_published = [('is_published', '=', True)]
+            on_current_website = expression.OR([[('website_id', '=', False)], [('website_id', '=', current_website_id)]])
+            return (['!'] if value is False else []) + expression.AND([is_published, on_current_website])
         else:  # should be in the backend, return things that are published anywhere
-            return [('website_ids', '!=' if value is True else '=', False)]
+            return [('is_published', '=', value)]
 
     @api.multi
     def _compute_website_url(self):
@@ -713,34 +703,9 @@ class WebsitePublishedMixin(models.AbstractModel):
     @api.multi
     def website_publish_button(self):
         self.ensure_one()
-        if self.env['website'].search_count([]) <= 1:
-            return super(WebsitePublishedMixin, self).website_publish_button()
-        else:
-            # Some models using the mixin put the base url in the
-            # website_url (e.g. website_slides' slide.slide), other
-            # ones use a relative url (e.g. website_sale's
-            # product.template). Since we are going to construct the
-            # urls ourselves filter that out.
-            base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
-            self.website_url = self.website_url.replace(base_url, '')
-
-            wizard = self.env['website.urls.wizard'].create({
-                'path': self.website_url,
-                'record_id': self.id,
-                'model_name': self._name,
-            })
-            return {
-                'type': 'ir.actions.act_window',
-                'res_model': 'website.urls.wizard',
-                'view_mode': 'form',
-                'res_id': wizard.id,
-                'target': 'new',
-            }
-
-    @api.multi
-    def toggle_publish(self):
-        for record in self:
-            record.website_published = not record.website_published
+        if self.env.user.has_group('website.group_website_publisher') and self.website_url != '#':
+            return self.open_website_url()
+        return self.write({'website_published': not self.website_published})
 
     def open_website_url(self):
         return {
@@ -789,7 +754,7 @@ class Page(models.Model):
         self.is_visible = self.website_published and (not self.date_publish or self.date_publish < fields.Datetime.now())
 
     @api.multi
-    @api.depends('website_ids', 'view_id.website_id')
+    @api.depends('view_id.website_id', 'website_id')
     def _compute_specifity(self):
         '''This defines a specificity as follows:
 
@@ -806,10 +771,8 @@ class Page(models.Model):
         specific one will be chosen.
         '''
         for page in self:
-            if page.view_id.website_id:
+            if page.view_id.website_id or page.website_id:
                 page.specificity = 0
-            elif page.website_ids:
-                page.specificity = len(page.website_ids) - 1
             else:
                 # This is an arbitrary maximum, the important thing is
                 # that this should always be greater than #websites - 1.
@@ -828,7 +791,7 @@ class Page(models.Model):
 
     @api.model
     def get_page_info(self, id, website_id):
-        domain = ['|', ('website_ids', 'in', website_id), ('website_ids', '=', False), ('id', '=', id)]
+        domain = ['|', ('website_id', '=', False), ('website_id', '=', website_id), ('id', '=', id)]
         item = self.search_read(domain, fields=['id', 'name', 'url', 'website_published', 'website_indexed', 'date_publish', 'menu_ids', 'is_homepage'], limit=1)
         return item
 

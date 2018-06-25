@@ -59,11 +59,11 @@ class TestPage(common.TransactionCase):
         self.assertEqual(total_views + 2, View.search_count([]))
 
         self.assertEqual(self.page_1.arch, '<div>modified base content</div>')
-        self.assertEqual(bool(self.page_1.website_ids), False)
+        self.assertEqual(bool(self.page_1.website_id), False)
         self.assertEqual(bool(self.page_1_menu.website_id), False)
 
         new_page = Page.search([('url', '=', '/page_1'), ('id', '!=', self.page_1.id)])
-        self.assertEqual(new_page.website_ids, self.page_1.website_ids)  # should be published on same websites
+        # self.assertEqual(new_page.website_id, self.page_1.website_ids)  # should be published on same websites, todo jov this will be removed
         self.assertEqual(new_page.view_id.website_id.id, 1)
         self.assertEqual(new_page.view_id.inherit_children_ids[0].website_id.id, 1)
         self.assertEqual(new_page.arch, '<div>website 1 content</div>')
@@ -97,7 +97,7 @@ class TestPage(common.TransactionCase):
         self.assertEqual(total_views + 1, View.search_count([]))
 
         self.assertEqual(self.extension_view.arch, '<div>modified extension content</div>')
-        self.assertEqual(bool(self.page_1.website_ids), False)
+        # self.assertEqual(bool(self.page_1.website_ids), False)  todo jov this will be removed
         self.assertEqual(bool(self.page_1_menu.website_id), False)
 
         new_view = View.search([('name', '=', 'Extension'), ('website_id', '=', 1)])

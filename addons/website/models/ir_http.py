@@ -119,13 +119,13 @@ class Http(models.AbstractModel):
         req_page = request.httprequest.path
         page_domain = [('url', '=', req_page), '|', ('view_id.website_id', '=', False), ('view_id.website_id', '=', request.website.id)]
 
-        published_domain = page_domain + [('website_ids', 'in', request.website.id)]
+        published_domain = page_domain + [('website_published', '=', True)]
         pages = request.env['website.page'].search(published_domain)
 
         if not pages:
             # Since there are no published pages, try to find a page
             # that could potentially be published.
-            unpublished_domain = page_domain + [('website_ids', 'not in', request.website.id)]
+            unpublished_domain = page_domain + [('website_published', '=', False)]
             pages = request.env['website.page'].search(unpublished_domain)
 
         if not request.website.is_publisher():
