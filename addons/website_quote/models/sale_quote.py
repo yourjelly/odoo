@@ -3,8 +3,9 @@
 
 from odoo import api, fields, models, _
 from odoo.tools.translate import html_translate
-from odoo.addons import decimal_precision as dp
+from odoo.addons.base.models import decimal_precision as dp
 from odoo.exceptions import ValidationError, UserError
+
 
 class SaleQuoteTemplate(models.Model):
     _name = "sale.quote.template"
