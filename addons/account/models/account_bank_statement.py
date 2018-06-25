@@ -570,7 +570,7 @@ class AccountBankStatementLine(models.Model):
             domain_matching = expression.AND([domain_matching, [('account_id.internal_type', 'in', ['payable', 'receivable'])]])
         else:
             # TODO : find out what use case this permits (match a check payment, registered on a journal whose account type is other instead of liquidity)
-            domain_matching = expression.AND([domain_matching, [('account_id.reconcile', '=', True)]])
+            domain_matching = expression.AND([domain_matching, [('account_id.reconcile', '=', True), ('account_id.internal_type', 'not in', ['payable', 'receivable'])]])
 
         # Let's add what applies to both
         domain = expression.OR([domain_reconciliation, domain_matching])
