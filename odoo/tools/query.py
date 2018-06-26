@@ -284,9 +284,9 @@ class Case(Expression):
 
 class Row(object):
 
-    __slots__ = ('_table', '_nullable', '_cols')
+    __slots__ = ('_table', '_cols')
 
-    def __init__(self, table, nullable=False):
+    def __init__(self, table):
         """
         Create an object that represents any row of a table.
 
@@ -296,7 +296,6 @@ class Row(object):
                 table should be included in the resulting joined table.
         """
         self._table = _quote(table)
-        self._nullable = nullable
         self._cols = OrderedDict()
 
     @property
@@ -534,7 +533,7 @@ class AliasMapping(dict):
 
 class Join(object):
 
-    def __init__(self, main, join, condition=None, _type=None):
+    def __init__(self, main, join, condition=None, _type='inner'):
         """
         Create a join between two tables on a given condition.
 
@@ -553,25 +552,12 @@ class Join(object):
         self._main = main
         self._join = join
         self._condition = condition
-
-        if isinstance(self._join, BaseQuery):
-            # TODO: Find a way to properly handle sub-queries in JOINs
-            self.type = 'INNER JOIN'
-        elif _type is not None:
-            self.type = _type
-        elif self._main._nullable:
-            if self._join._nullable:
-                self.type = 'FULL JOIN'
-            else:
-                self.type = 'LEFT JOIN'
-        else:
-            if self._join._nullable:
-                self.type = 'RIGHT JOIN'
-            else:
-                self.type = 'INNER JOIN'
+        permitted_types = ['inner', 'full', 'left', 'right']
+        assert _type in permitted_types, "Join type must be one of (inner, full, left, right)"
+        self._type = _type.upper()
 
     def _to_sql(self, alias_mapping):
-        sql = "%s %s"
+        sql = "%s JOIN %s"
         args = []
 
         if isinstance(self._join, BaseQuery):
@@ -585,8 +571,8 @@ class Join(object):
         if self._condition:
             sql += " ON %s"
             _sql, _args = self._condition._to_sql(alias_mapping)
-            return (sql % (self.type, _join_sql, _sql), args + _args)
-        return (sql % (self.type, _join_sql), args)
+            return (sql % (self._type, _join_sql, _sql), args + _args)
+        return (sql % (self._type, _join_sql), args)
 
 
 class Modifier(object):
@@ -1317,7 +1303,6 @@ class Unnest(Func):
         # Mimic a row
         self._table = self.func
         self._cols = self.args
-        self._nullable = False
 
     @property
     def rows(self):

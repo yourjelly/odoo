@@ -339,26 +339,22 @@ class TestSelect(TestCase):
         )
 
     def test_select_right_join(self):
-        self.p._nullable = True
         s = Select([self.u.id])
-        s = s.join(Join(self.u, self.p, self.u.partner_id == self.p.id))
+        s = s.join(Join(self.u, self.p, self.u.partner_id == self.p.id, 'right'))
         res = ("""SELECT "a"."id" FROM "res_users" "a" """
                """RIGHT JOIN "res_partner" "b" ON ("a"."partner_id" = "b"."id")""")
         self.assertEqual(s.to_sql()[0], res)
 
     def test_select_left_join(self):
-        self.p._nullable = True
         s = Select([self.p.id])
-        s = s.join(Join(self.p, self.u, self.p.id == self.u.partner_id))
+        s = s.join(Join(self.p, self.u, self.p.id == self.u.partner_id, 'left'))
         res = ("""SELECT "a"."id" FROM "res_partner" "a" """
                """LEFT JOIN "res_users" "b" ON ("a"."id" = "b"."partner_id")""")
         self.assertEqual(s.to_sql()[0], res)
 
     def test_select_full_join(self):
-        self.u._nullable = True
-        self.p._nullable = True
         s = Select([self.p.id])
-        s = s.join(Join(self.p, self.u, self.p.id == self.u.partner_id))
+        s = s.join(Join(self.p, self.u, self.p.id == self.u.partner_id, 'full'))
         res = ("""SELECT "a"."id" FROM "res_partner" "a" """
                """FULL JOIN "res_users" "b" ON ("a"."id" = "b"."partner_id")""")
         self.assertEqual(s.to_sql()[0], res)
@@ -371,12 +367,11 @@ class TestSelect(TestCase):
         self.assertEqual(s.to_sql()[0], res)
 
     def test_select_multi_join(self):
-        self.p._nullable = True
-        x = Row('res_currency', True)
+        x = Row('res_currency')
         s = Select([self.p.id])
         s = s.join(
-            Join(self.p, self.u, self.p.id == self.u.partner_id),
-            Join(self.p, x, self.p.active == x.active),
+            Join(self.p, self.u, self.p.id == self.u.partner_id, 'left'),
+            Join(self.p, x, self.p.active == x.active, 'full'),
         )
         res = (
             """SELECT "a"."id" FROM "res_partner" "a" """
@@ -826,10 +821,10 @@ class TestSelect(TestCase):
         )
 
     def test_select_join_with_joined_table(self):
-        g = Row("res_groups", True)
+        g = Row("res_groups")
         s = Select([self.p.id], joins=[
             Join(self.p, self.u, self.p.id == self.u.partner_id),
-            Join(self.u, g, self.u.group_id == g.id),
+            Join(self.u, g, self.u.group_id == g.id, 'right'),
         ])
         self.assertEqual(
             s.to_sql(),
@@ -859,22 +854,6 @@ class TestSelect(TestCase):
             (
                 """SELECT "a"."id", "a"."foo" AS foo FROM "res_partner" "a\"""",
                 ()
-            )
-        )
-
-    def test_explicit_join_type(self):
-        self.p._nullable = True
-        self.u._nullable = True
-        s = Select([self.p.id], joins=[Join(self.p, self.u, self.p.id == self.u.partner_id,
-                                            "INNER JOIN")])
-        # Normally the join type would be a FULL JOIN since both table's _nullable attr is True,
-        # however, when explicitly indicating the join type, this one takes precedence over
-        # the implied one.
-        self.assertEqual(
-            s.to_sql(),
-            (
-                """SELECT "a"."id" FROM "res_partner" "a" """
-                """INNER JOIN "res_users" "b" ON ("a"."id" = "b"."partner_id")""", ()
             )
         )
 
@@ -1568,10 +1547,10 @@ class TestRealWorldCases(TestCase):
         ]), joins=[
             Join(ai, ail, ai.id == ail.invoice_id),
             Join(ai, partner, ai.commercial_partner_id == partner.id),
-            Join(ail, pr, pr.id == ail.product_id, 'LEFT JOIN'),
-            Join(pr, pt, pt.id == pr.product_tmpl_id, 'LEFT JOIN'),
-            Join(ail, u, u.id == ail.uom_id, 'LEFT JOIN'),
-            Join(pt, u2, u2.id == pt.uom_id, 'LEFT JOIN'),
+            Join(ail, pr, pr.id == ail.product_id, 'left'),
+            Join(pr, pt, pt.id == pr.product_tmpl_id, 'left'),
+            Join(ail, u, u.id == ail.uom_id, 'left'),
+            Join(pt, u2, u2.id == pt.uom_id, 'left'),
             Join(ai, it, it.id == ai.id),
         ], group=[
             ail.id, ail.product_id, ail.account_analytic_id, ai.date_invoice, ai.id,
@@ -1696,7 +1675,7 @@ class TestRealWorldCases(TestCase):
                    & (cr.company_id == sub.company_id)
                    & (cr.date_start <= coalesce(sub.date, now()))
                    & ((cr.date_end == NULL) | (cr.date_end > coalesce(sub.date, now()))),
-                   'LEFT JOIN')])
+                   'left')])
 
         s3_sql = (
             """SELECT "a"."id", "a"."date", "a"."product_id", "a"."partner_id", """
