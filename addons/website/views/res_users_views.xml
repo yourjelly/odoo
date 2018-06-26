@@ -9,11 +9,6 @@
             <group name="applications" position="inside">
                 <field name="group_website_user"/>
             </group>
-            <group name="messaging" position="before">
-                <group name="multi_website" string="Multi-website">
-                    <field name="website_id"/>
-                </group>
-            </group>
         </field>
     </record>
 </odoo>

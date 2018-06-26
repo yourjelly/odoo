@@ -13,7 +13,7 @@ def urlplus(url, params):
 class Partner(models.Model):
     _inherit = "res.partner"
 
-    website_id = fields.Many2one('website', string='Registration website')
+    website_id = fields.Many2one('website', string='Registration Website')
 
     @api.multi
     def google_map_img(self, zoom=8, width=298, height=298):
