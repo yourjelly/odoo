@@ -117,7 +117,7 @@ class Http(models.AbstractModel):
     @classmethod
     def _serve_page(cls):
         req_page = request.httprequest.path
-        page_domain = [('url', '=', req_page), '|', ('view_id.website_id', '=', False), ('view_id.website_id', '=', request.website.id)]
+        page_domain = [('url', '=', req_page), '|', ('website_id', '=', False), ('website_id', '=', request.website.id)]
 
         published_domain = page_domain + [('website_published', '=', True)]
         pages = request.env['website.page'].search(published_domain)

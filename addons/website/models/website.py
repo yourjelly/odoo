@@ -735,6 +735,9 @@ class Page(models.Model):
                              to least specific (i.e. not belonging to a website.). Note that this is defined
                              in ascending order, so a specificity of 0 is a page for 1 website (i.e. most specific).''')
 
+    # don't use mixin website_id but use website_id on ir.ui.view instead
+    website_id = fields.Many2one(related='view_id.website_id', store=True)
+
     @api.one
     def _compute_homepage(self):
         self.is_homepage = self == self.env['website'].get_current_website().homepage_id
