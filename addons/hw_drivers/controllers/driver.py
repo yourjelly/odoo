@@ -86,7 +86,7 @@ class SylvacUSBDriver(USBDriver):
         return self.value
 
     def run(self):
-        drivers[self.dev.idVendor] = self #Change by path
+        drivers[str(self.dev.idVendor)] = self #Change by path
         connection = serial.Serial('/dev/serial/by-id/usb-Sylvac_Power_USB_A32DV5VM-if00-port0',
                                    baudrate=4800,
                                    bytesize=7,
