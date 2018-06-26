@@ -813,6 +813,22 @@ class TestSelect(TestCase):
             )
         )
 
+    def test_explicit_join_type(self):
+        self.p._nullable = True
+        self.u._nullable = True
+        s = Select([self.p.id], joins=[Join(self.p, self.u, self.p.id == self.u.partner_id,
+                                            "INNER JOIN")])
+        # Normally the join type would be a FULL JOIN since both table's _nullable attr is True,
+        # however, when explicitly indicating the join type, this one takes precedence over
+        # the implied one.
+        self.assertEqual(
+            s.to_sql(),
+            (
+                """SELECT "a"."id" FROM "res_partner" "a" """
+                """INNER JOIN "res_users" "b" ON ("a"."id" = "b"."partner_id")""", ()
+            )
+        )
+
 
 @tagged('standard', 'at_install')
 class TestDelete(TestCase):
