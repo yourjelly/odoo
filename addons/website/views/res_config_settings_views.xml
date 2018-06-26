@@ -14,7 +14,7 @@
                             <div class="row mt16 o_settings_container" id="website_selection_settings">
                                 <div class="col-xs-12 col-md-6 o_setting_box" id="website">
                                     <div class="o_setting_right_pane">
-                                        <label string="Website"/>
+                                        <label string="Website" for="website_id"/>
                                         <div class="text-muted">
                                             Settings on this page will apply to this website
                                         </div>
