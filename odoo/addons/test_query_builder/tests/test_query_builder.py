@@ -6,7 +6,7 @@ from collections import OrderedDict
 from odoo.tests.common import tagged
 from odoo.tools.query import Row, Select, Delete, With, Update, Insert, \
     Asc, Desc, coalesce, unnest, NULL, DEFAULT, _quote, BaseQuery, CreateView, \
-    concat, count, Join, substr, length, now, Case, _sum, _any
+    concat, count, Join, substr, length, now, Case, _sum, _any, Query
 
 
 @tagged('standard', 'at_install')
@@ -16,7 +16,8 @@ class TestMisc(TestCase):
         self.assertEqual(_quote("foo"), '"foo"')
 
     def test_quote_quoted(self):
-        self.assertEqual(_quote('"bar"'), '"bar"')
+        with self.assertRaises(ValueError):
+            Row('"hello_world')
 
     def test_row_dunder_getter(self):
         with self.assertRaises(AttributeError):
@@ -239,6 +240,54 @@ class TestExpressions(TestCase):
     def test_or_type(self):
         with self.assertRaises(AssertionError):
             self.p.id | 5
+
+
+@tagged('standard', 'at_install')
+class TestQuery(TestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.p = Row("res_partner")
+        self.u = Row("res_users")
+
+    def test_query_select(self):
+        s = Query.select(self.p.id, self.p.name).where(self.p.name != 'Administrator')
+        self.assertEqual(
+            s.to_sql(),
+            (
+                """SELECT "a"."id", "a"."name" FROM "res_partner" "a" """
+                """WHERE ("a"."name" != %s)""", ('Administrator',)
+            )
+        )
+
+    def test_query_delete(self):
+        d = Query.delete(self.p).where(self.p.id > 5)
+        self.assertEqual(
+            d.to_sql(),
+            (
+                """DELETE FROM "res_partner" "a" WHERE ("a"."id" > %s)""", (5,)
+            )
+        )
+
+    def test_query_update(self):
+        u = Query.update({self.p.name: 'Dummy'}).where(self.p.name == NULL)
+        self.assertEqual(
+            u.to_sql(),
+            (
+                """UPDATE "res_partner" "a" SET "name" = %s WHERE ("a"."name" IS NULL)""",
+                ('Dummy',)
+            )
+        )
+
+    def test_query_insert(self):
+        i = Query.insert(self.p('name', 'surname'), ['johnny', 'deep']).returning(self.p.id)
+        self.assertEqual(
+            i.to_sql(),
+            (
+                """INSERT INTO "res_partner"("name", "surname") VALUES (%s, %s) """
+                """RETURNING "res_partner"."id\"""", ('johnny', 'deep')
+            )
+        )
 
 
 @tagged('standard', 'at_install', 'query_select')

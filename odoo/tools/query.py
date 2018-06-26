@@ -60,7 +60,7 @@ def _quote(val):
     """ Helper function for quoting SQL identifiers if necessary."""
     if '"' not in val:
         return '"%s"' % val
-    return val
+    raise ValueError("The string to be quoted must not already contain quotes.")
 
 
 def generate_aliases():
@@ -626,6 +626,29 @@ class Desc(Modifier):
 
     def __init__(self, column, nulls='last'):
         super(Desc, self).__init__(column, 'DESC', nulls == 'first')
+
+
+class Query(object):
+
+    """
+    Proxy class for creating SQL queries in FP-style.
+    """
+
+    @staticmethod
+    def select(*args):
+        return Select(args)
+
+    @staticmethod
+    def delete(*args):
+        return Delete(args)
+
+    @staticmethod
+    def update(_set):
+        return Update(_set)
+
+    @staticmethod
+    def insert(row, vals):
+        return Insert(row, vals)
 
 
 class Select(BaseQuery):
