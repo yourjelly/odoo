@@ -11,7 +11,7 @@
             </group>
             <group name="messaging" position="before">
                 <group name="multi_website" string="Multi-website">
-                    <field name="registered_on_website_id"/>
+                    <field name="website_id"/>
                 </group>
             </group>
         </field>
