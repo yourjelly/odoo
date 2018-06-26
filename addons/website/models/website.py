@@ -720,7 +720,7 @@ class Page(models.Model):
     _inherits = {'ir.ui.view': 'view_id'}
     _inherit = 'website.published.mixin'
     _description = 'Page'
-    _order = 'specificity'
+    _order = 'website_id'  # todo jov probably don't do this and instead use _is_most_specific_page everywhere
 
     url = fields.Char('Page URL')
     view_id = fields.Many2one('ir.ui.view', string='View', required=True, ondelete="cascade")
@@ -730,10 +730,6 @@ class Page(models.Model):
     menu_ids = fields.One2many('website.menu', 'page_id', 'Related Menus')
     is_homepage = fields.Boolean(compute='_compute_homepage', inverse='_set_homepage', string='Homepage')
     is_visible = fields.Boolean(compute='_compute_visible', string='Is Visible')
-    specificity = fields.Integer(compute='_compute_specifity', store=True,
-                             help='''Used to order pages from most specific (i.e. belonging to 1 website)
-                             to least specific (i.e. not belonging to a website.). Note that this is defined
-                             in ascending order, so a specificity of 0 is a page for 1 website (i.e. most specific).''')
 
     # don't use mixin website_id but use website_id on ir.ui.view instead
     website_id = fields.Many2one(related='view_id.website_id', store=True)
@@ -757,37 +753,11 @@ class Page(models.Model):
         self.is_visible = self.website_published and (not self.date_publish or self.date_publish < fields.Datetime.now())
 
     @api.multi
-    @api.depends('view_id.website_id', 'website_id')
-    def _compute_specifity(self):
-        '''This defines a specificity as follows:
-
-        |--------------------+-------------|
-        | amount of websites | specificity |
-        |--------------------+-------------|
-        |                  1 |           0 |
-        |                  2 |           1 |
-        |                ... |         ... |
-        |                  0 |         MAX |
-        |--------------------+-------------|
-
-        So when there are multiple pages for a given url, the most
-        specific one will be chosen.
-        '''
-        for page in self:
-            if page.view_id.website_id or page.website_id:
-                page.specificity = 0
-            else:
-                # This is an arbitrary maximum, the important thing is
-                # that this should always be greater than #websites - 1.
-                # Presumably noone is going to create >1024 websites...
-                page.specificity = 1024
-
-    @api.multi
     def _is_most_specific_page(self, page_to_test):
         '''This will test if page_to_test is the most specific page in self.'''
         pages_for_url = self.filtered(lambda page: page.url == page_to_test.url)
 
-        # this works because pages are _order'ed by specificity
+        # this works because pages are _order'ed by website_id
         most_specific_page = pages_for_url[0]
 
         return most_specific_page == page_to_test
