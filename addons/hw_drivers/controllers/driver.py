@@ -42,8 +42,8 @@ class StatusController(http.Controller):
 # Driver common interface
 #----------------------------------------------------------
 class Driver(Thread):
-    def __init__(self, path):
-        pass
+#    def __init__(self, path):
+#        pass
 
     def supported(self):
         pass
@@ -71,13 +71,13 @@ class UsbMetaClass(type):
 
 
 class USBDriver(Driver,metaclass=UsbMetaClass):
-    pass
+    def __init__(self, dev):
+        super(USBDriver, self).__init__()
+        self.dev = dev
+        self.value = ""
 
 
 class SylvacUSBDriver(USBDriver):
-    def __init__(self, dev):
-        self.dev = dev
-        self.value = ""
 
     def supported(self):
         return getattr(self.dev, 'idVendor') == 0x0403 and getattr(self.dev, 'idProduct') == 0x6001
