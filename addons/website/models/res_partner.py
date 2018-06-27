@@ -15,6 +15,14 @@ class Partner(models.Model):
 
     website_id = fields.Many2one('website', string='Registration Website')
 
+    def _get_base_name(self):
+        res = super(Partner, self)._get_base_name()
+
+        if self._context.get('display_website') and self.website_id:
+            res += ' [%s]' % self.website_id.name
+
+        return res
+
     @api.multi
     def google_map_img(self, zoom=8, width=298, height=298):
         google_maps_api_key = self.env['ir.config_parameter'].sudo().get_param('google_maps_api_key')
