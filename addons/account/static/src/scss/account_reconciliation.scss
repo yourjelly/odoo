@@ -197,12 +197,12 @@
         /* Icons */
 
         .toggle_match, .toggle_create {
-            @include o-transform(rotate(0deg));
+            transform: rotate(0deg);
             @include o-transition(transform, 300ms);
         }
         .visible_toggle, &[data-mode="match"] .toggle_match, &[data-mode="create"] .toggle_create {
             visibility: visible !important;
-            @include o-transform(rotate(90deg));
+            transform: rotate(90deg);
         }
         .toggle_create {
             font-size: 10px;

@@ -74,7 +74,7 @@
     &.o_animated {
         @include o-animation(move-bottom-top, 500ms, ease-in, 0ms, infinite, alternate);
         &.right, &.left {
-            @include animation-name(move-left-right);
+            animation-name: move-left-right;
         }
     }
 

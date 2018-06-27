@@ -549,7 +549,7 @@ div.carousel {
     }
     @media (min-width: $screen-sm-min) {
         .row {
-            @include o-flex-display;
+            display: flex;
             > div {
                 margin: auto 0;
             }
