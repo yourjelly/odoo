@@ -310,7 +310,6 @@ var AbstractField = Widget.extend({
      */
     removeInvalidClass: function () {
         this.$el.removeClass('o_field_invalid');
-        this.$el.removeAttr('aria-invalid');
     },
 
     /**
@@ -318,7 +317,6 @@ var AbstractField = Widget.extend({
      */
     setInvalidClass: function () {
         this.$el.addClass('o_field_invalid');
-        this.$el.attr('aria-invalid', 'true');
     },
 
     /**

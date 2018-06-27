@@ -94,18 +94,18 @@ define([
      * @param {String} [footer='']
      */
     var tplDialog = function (className, title, body, footer) {
-      return '<div class="' + className + ' modal" role="dialog" aria-hidden="false">' +
+      return '<div class="' + className + ' modal" aria-hidden="false">' +
                '<div class="modal-dialog">' +
                  '<div class="modal-content">' +
                    (title ?
-                   '<header class="modal-header">' +
+                   '<div class="modal-header">' +
                      '<button type="button" class="close" aria-hidden="true" tabindex="-1">&times;</button>' +
                      '<h4 class="modal-title">' + title + '</h4>' +
-                   '</header>' : ''
+                   '</div>' : ''
                    ) +
-                   '<main class="modal-body">' + body + '</main>' +
+                   '<div class="modal-body">' + body + '</div>' +
                    (footer ?
-                   '<header class="modal-footer">' + footer + '</header>' : ''
+                   '<div class="modal-footer">' + footer + '</div>' : ''
                    ) +
                  '</div>' +
                '</div>' +
@@ -817,7 +817,7 @@ define([
       $dialog.addClass('note-air-layout');
       $dialog.attr('id', 'note-dialog-' + id);
       $dialog.find('button.close, a.modal-close').click(function () {
-        $(this).closest('[role="dialog"]').modal('hide');
+        $(this).closest('.modal').modal('hide');
       });
       $dialog.appendTo($container);
     };
@@ -905,7 +905,7 @@ define([
       var $dialogContainer = options.dialogsInBody ? $(document.body) : $editor;
       var $dialog = $(tplDialogs(langInfo, options)).prependTo($dialogContainer);
       $dialog.find('button.close, a.modal-close').click(function () {
-        $(this).closest('[role="dialog"]').modal('hide');
+        $(this).closest('.modal').modal('hide');
       });
 
       //09. Editor/Holder switch

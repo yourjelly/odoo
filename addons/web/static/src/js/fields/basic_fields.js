@@ -397,10 +397,9 @@ var LinkButton = AbstractField.extend({
         if (this.value) {
             var className = this.attrs.icon || 'fa-globe';
 
-            this.$el.html("<span role='img'/>");
+            this.$el.html("<span />");
             this.$el.addClass("fa "+ className);
             this.$el.attr('title', this.value);
-            this.$el.attr('aria-label', this.value);
         }
     },
 
@@ -1532,7 +1531,6 @@ var PriorityWidget = AbstractField.extend({
     _renderStar: function (tag, isFull, index, tip) {
         return $(tag)
             .attr('title', tip)
-            .attr('aria-label', tip)
             .attr('data-index', index)
             .addClass('o_priority_star fa')
             .toggleClass('fa-star', isFull)
@@ -1602,8 +1600,7 @@ var AttachmentImage = AbstractField.extend({
         if (this.value) {
             this.$el.empty().append($('<img>/', {
                 src: "/web/image/" + this.value.data.id + "?unique=1",
-                title: this.value.data.display_name,
-                alt: _("Image")
+                title: this.value.data.display_name
             }));
         }
     }
@@ -1672,9 +1669,7 @@ var StateSelectionWidget = AbstractField.extend({
         this.$('.o_status')
             .removeClass('o_status_red o_status_green')
             .addClass(currentState.state_class)
-            .prop('special_click', true)
-            .parent().attr('title', currentState.state_name)
-            .attr('aria-label', currentState.state_name);
+            .prop('special_click', true);
 
         // Render "FormSelection.Items" and move it into "FormSelection"
         var $items = $(qweb.render('FormSelection.items', {
@@ -1738,9 +1733,8 @@ var FavoriteWidget = AbstractField.extend({
      * @private
      */
     _render: function () {
-        var tip = this.value ? _t('Remove from Favorites') : _t('Add to Favorites');
-        var template = this.attrs.nolabel ? '<a href="#"><i class="fa %s" title="%s" aria-label="%s" role="img"></i></a>' : '<a href="#"><i class="fa %s" role="img" aria-label="%s"> %s</i></a>';
-        this.$el.empty().append(_.str.sprintf(template, this.value ? 'fa-star' : 'fa-star-o', tip, tip));
+        var template = this.attrs.nolabel ? '<a href="#"><i class="fa %s" title="%s"></i></a>' : '<a href="#"><i class="fa %s"></i> %s</a>';
+        this.$el.empty().append(_.str.sprintf(template, this.value ? 'fa-star' : 'fa-star-o', this.value ? _t('Remove from Favorites') : _t('Add to Favorites')));
     },
 
     //--------------------------------------------------------------------------
@@ -2120,10 +2114,7 @@ var FieldProgressBar = AbstractField.extend({
             widthComplete = 100;
         }
 
-        this.$('.o_progress').toggleClass('o_progress_overflow', value > max_value)
-            .attr('aria-valuemin', '0')
-            .attr('aria-valuemax', max_value)
-            .attr('aria-valuenow', value);
+        this.$('.o_progress').toggleClass('o_progress_overflow', value > max_value);
         this.$('.o_progressbar_complete').css('width', widthComplete + '%');
 
         if (!this.write_mode) {
@@ -2180,7 +2171,6 @@ var FieldToggleBoolean = AbstractField.extend({
             .toggleClass('text-muted', !this.value);
         var title = this.value ? this.attrs.options.active : this.attrs.options.inactive;
         this.$el.attr('title', title);
-        this.$el.attr('aria-pressed', this.value);
     },
 
     //--------------------------------------------------------------------------

@@ -87,7 +87,7 @@
     </t>
 
     <t t-name="website.seo_tip">
-        <div t-attf-class="alert alert-#{ widget.type }" role="alert">
+        <div t-attf-class="alert alert-#{ widget.type }">
             <t t-raw="widget.message"/>
         </div>
     </t>

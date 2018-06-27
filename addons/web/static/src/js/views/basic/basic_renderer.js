@@ -50,7 +50,6 @@ var BasicRenderer = AbstractRenderer.extend({
                 invalidFields.push(widget.name);
             }
             widget.$el.toggleClass('o_field_invalid', !canBeSaved);
-            widget.$el.attr('aria-invalid', !canBeSaved);
         });
         return invalidFields;
     },

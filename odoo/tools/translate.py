@@ -143,11 +143,8 @@ TRANSLATED_ELEMENTS = {
 
 # which attributes must be translated
 TRANSLATED_ATTRS = {
-    'string', 'help', 'sum', 'avg', 'confirm', 'placeholder', 'alt', 'title', 'aria-label',
-    'aria-keyshortcuts', 'aria-placeholder', 'aria-roledescription', 'aria-valuetext',
+    'string', 'help', 'sum', 'avg', 'confirm', 'placeholder', 'alt', 'title',
 }
-
-TRANSLATED_ATTRS = TRANSLATED_ATTRS | {'t-attf-' + attr for attr in TRANSLATED_ATTRS}
 
 avoid_pattern = re.compile(r"\s*<!DOCTYPE", re.IGNORECASE | re.MULTILINE | re.UNICODE)
 node_pattern = re.compile(r"<[^>]*>(.*)</[^<]*>", re.DOTALL | re.MULTILINE | re.UNICODE)

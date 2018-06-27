@@ -5,7 +5,7 @@
             <field name="model">yearly.salary.detail</field>
             <field name="arch" type="xml">
             <form string="Pay Head Employee Breakup">
-                <span class="o_form_label">This wizard will print report which display a pay head employee breakup for a specified dates.</span>
+                <label string="This wizard will print report which display a pay head employee breakup for a specified dates."/>
                 <footer>
                     <button name="print_report" string="Print" type="object" class="btn-primary"/>
                     <button string="Cancel" class="btn-default" special="cancel" />

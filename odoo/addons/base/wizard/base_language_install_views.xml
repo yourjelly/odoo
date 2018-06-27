@@ -13,8 +13,8 @@
                         <field name="overwrite"/>
                     </group>
                     <group states="done" colspan="4">
-                        <span class="o_form_label">The selected language has been successfully installed.
-You must change the preferences of the user to view the changes.</span>
+                        <label string="The selected language has been successfully installed.
+You must change the preferences of the user to view the changes."/>
                     </group>
                     <footer states="init">
                         <button name="lang_install" string="Load" type="object" class="btn-primary"/>
