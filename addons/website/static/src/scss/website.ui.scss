@@ -100,15 +100,14 @@ body.o_connected_user {
 // MODALS
 body .modal {
     &.o_technical_modal {
-        // FIXME
-        // @include o-w-preserve-base;
-        // @include o-w-preserve-headings;
-        // @include o-w-preserve-forms;
-        // @include o-w-preserve-links;
-        // @include o-w-preserve-btn;
-        // @include o-w-preserve-wells;
-        // @include o-w-preserve-modals;
-        // @include o-w-preserve-tabs;
+        @include o-w-preserve-base;
+        @include o-w-preserve-headings;
+        @include o-w-preserve-forms;
+        @include o-w-preserve-links;
+        @include o-w-preserve-btn;
+        @include o-w-preserve-cards;
+        @include o-w-preserve-modals;
+        @include o-w-preserve-tabs;
     }
 
     // MOBILE PREVIEW
@@ -468,10 +467,9 @@ body .modal {
 
 // ACE EDITOR
 .o_ace_view_editor {
-    // FIXME
-    // @include o-w-preserve-base;
-    // @include o-w-preserve-btn;
-    // @include o-w-preserve-forms;
+    @include o-w-preserve-base;
+    @include o-w-preserve-btn;
+    @include o-w-preserve-forms;
 
     @include o-position-absolute($o-navbar-height, 0, 0);
     position: fixed;
