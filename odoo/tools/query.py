@@ -107,12 +107,14 @@ class Expression(object):
         return Expression('NOT', self, None)
 
     def __eq__(self, other):
-        op = 'IS' if other is NULL else '='
-        return Expression(op, self, other)
+        if other is None or other is NULL:
+            return Expression('IS', self, NULL)
+        return Expression('=', self, other)
 
     def __ne__(self, other):
-        op = 'IS NOT' if other is NULL else '!='
-        return Expression(op, self, other)
+        if other is None or other is NULL:
+            return Expression('IS NOT', self, NULL)
+        return Expression('!=', self, other)
 
     def __lt__(self, other):
         return Expression('<', self, other)

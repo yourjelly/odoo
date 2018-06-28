@@ -241,6 +241,20 @@ class TestExpressions(TestCase):
         with self.assertRaises(AssertionError):
             self.p.id | 5
 
+    def test_eq_none(self):
+        expr = self.p.active == None  # noqa
+        self.assertEqual(
+            expr._to_sql(None),
+            ("""("res_partner"."active" IS NULL)""", [])
+        )
+
+    def test_ne_none(self):
+        expr = self.p.active != None  # noqa
+        self.assertEqual(
+            expr._to_sql(None),
+            ("""("res_partner"."active" IS NOT NULL)""", [])
+        )
+
 
 @tagged('standard', 'at_install')
 class TestQuery(TestCase):
