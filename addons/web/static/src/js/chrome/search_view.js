@@ -133,8 +133,8 @@ var SearchQuery = Backbone.Collection.extend({
 var InputView = Widget.extend({
     template: 'SearchView.InputView',
     events: {
-        focus: function () { this.trigger('focused', this); },
-        blur: function () { this.$el.val(''); this.trigger('blurred', this); },
+        focus: function () { this.trigger('focused', this); console.log('INPUT focus' + this.$el.val());},
+        blur: function () {console.log('INPUT blur' + this.$el.val()), this.$el.val(''); this.trigger('blurred', this);},
         keydown: 'onKeydown',
     },
     onKeydown: function (e) {
@@ -160,14 +160,19 @@ var InputView = Widget.extend({
                 }
                 break;
         }
+    },
+
+    init: function() {
+        console.log('INIT INPUT VIEW' + arguments[0].$el.val());
+        this._super.apply(this, arguments);
     }
 });
 
 var FacetView = Widget.extend({
     template: 'SearchView.FacetView',
     events: {
-        'focus': function () { this.trigger('focused', this); },
-        'blur': function () { this.trigger('blurred', this); },
+        'focus': function () { this.trigger('focused', this); console.log('FACET focus');},
+        'blur': function () { this.trigger('blurred', this); console.log('FACET blur');},
         'click': function (e) {
             if ($(e.target).hasClass('o_facet_remove')) {
                 this.model.destroy();
@@ -529,10 +534,12 @@ var SearchView = Widget.extend({
         });
     },
     childFocused: function () {
+        console.log('CHILD focus');
         this.$el.addClass('active');
     },
     childBlurred: function () {
         this.$el.val('').removeClass('active').trigger('blur');
+        console.log('CHILD Blur');
         this.autocomplete.close();
     },
     /**
