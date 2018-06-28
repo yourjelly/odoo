@@ -456,7 +456,7 @@ class BaseQuery(Expression):
     def _build_limit(self, alias_mapping):
         pass
 
-    def _build_do(self, alias_mapping):
+    def _build_on_conflict(self, alias_mapping):
         pass
 
     def _build_returning(self, alias_mapping):
@@ -488,7 +488,7 @@ class BaseQuery(Expression):
         self._build_group(alias_mapping)
         self._build_having(alias_mapping)
         self._build_limit(alias_mapping)
-        self._build_do(alias_mapping)
+        self._build_on_conflict(alias_mapping)
         self._build_returning(alias_mapping)
 
     def _to_sql(self, alias_mapping):
@@ -1104,9 +1104,9 @@ class Update(BaseQuery):
 
 class Insert(BaseQuery):
 
-    __slots__ = ('_vals', '_do_nothing', '_row')
+    __slots__ = ('_vals', '_on_conflict', '_row')
 
-    def __init__(self, row, vals, do_nothing=False, returning=None):
+    def __init__(self, row, vals, on_conflict=False, returning=None):
         """
         Class for creating SQL INSERT statements.
 
@@ -1132,7 +1132,7 @@ class Insert(BaseQuery):
         super(Insert, self).__init__()
         self._row = row
         self._vals = vals
-        self._do_nothing = do_nothing
+        self._on_conflict = on_conflict
         self._returning = returning or []
 
     @property
@@ -1140,7 +1140,7 @@ class Insert(BaseQuery):
         return {
             'row': self._row,
             'vals': self._vals,
-            'do_nothing': self._do_nothing,
+            'on_conflict': self._on_conflict,
             'returning': self._returning,
         }
 
@@ -1150,8 +1150,8 @@ class Insert(BaseQuery):
     def values(self, *vals):
         return Insert(**{**self.attrs, 'vals': vals})
 
-    def do_nothing(self):
-        return Insert(**{**self.attrs, 'do_nothing': not self._do_nothing})
+    def on_conflict(self, args):
+        return Insert(**{**self.attrs, 'on_conflict': args})
 
     def returning(self, *cols):
         return Insert(**{**self.attrs, 'returning': cols})
@@ -1186,9 +1186,29 @@ class Insert(BaseQuery):
         self.sql.append(sql)
         self.args += args
 
-    def _build_do(self, alias_mapping):
-        if self._do_nothing:
+    def _build_on_conflict(self, alias_mapping):
+        if self._on_conflict is None:
             self.sql.append("ON CONFLICT DO NOTHING")
+        elif self._on_conflict:
+            cols, do = self._on_conflict
+            assert bool(cols), "ON CONFLICT DO UPDATE requires a conflict_target"
+            assert isinstance(do, Update), "ON CONFLICT requires its conflict_action to be an\
+                Update query"
+
+            _cols_sql = []
+            _cols_args = []
+
+            for col in cols:
+                _sql, _args = col._to_sql(None)
+                _cols_sql.append(_sql)
+                _cols_args += _args
+
+            self.sql.append("ON CONFLICT (%s) DO" % ', '.join(_cols_sql))
+            self.args += _cols_args
+
+            _do_sql, _do_args = do._to_sql(alias_mapping)
+            self.sql.append(_do_sql)
+            self.args += _do_args
 
     def _build_returning(self, alias_mapping):
         alias_mapping[self._row] = self._row._table

@@ -1254,7 +1254,7 @@ class TestInsert(TestCase):
         )
 
     def test_insert_on_conflict(self):
-        i = Insert(self.p('name'), ['foo'], do_nothing=True)
+        i = Insert(self.p('name'), ['foo'], on_conflict=None)
         self.assertEqual(
             i.to_sql(),
             ("""INSERT INTO "res_partner"("name") VALUES (%s) ON CONFLICT DO NOTHING""",
@@ -1309,7 +1309,7 @@ class TestInsert(TestCase):
 
     def test_insert_new_do_nothing(self):
         i1 = Insert(self.p('name'), ['foo'])
-        i2 = i1.do_nothing()
+        i2 = i1.on_conflict(None)
 
         self.assertIsNot(i1, i2)
         self.assertEqual(
@@ -1345,6 +1345,20 @@ class TestInsert(TestCase):
             (
                 """INSERT INTO "res_partner"("name") VALUES (%s) """
                 """RETURNING "res_partner"."name\"""", ('foo',)
+            )
+        )
+
+    def test_on_conflict_do_update(self):
+        u = Update({self.p.name: concat(self.p.name, ' ', '(dup)')})
+        i = Insert(self.p('name'), ['foo'], on_conflict=([self.p.name], u))
+
+        self.assertEqual(
+            i.to_sql(),
+            (
+                """INSERT INTO "res_partner"("name") VALUES (%s) """
+                """ON CONFLICT ("res_partner"."name") DO """
+                """UPDATE "res_partner" "a" SET "name" = (concat("a"."name", %s, %s))""",
+                ('foo', ' ', '(dup)')
             )
         )
 
