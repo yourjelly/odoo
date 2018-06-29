@@ -31,9 +31,9 @@ module.exports = function ( results ) {
 
     if ( summary.errors.length > 0 || summary.warnings.length > 0 ) {
         var lines = summary.errors.concat( summary.warnings ).map( function ( msg ) {
-            return '\n' + msg.type +':' + ' ' + msg.ruleId + '\n  ' + msg.filePath + ':' + msg.line + ':' + msg.column;
+            return '\n' + msg.type + ' ' + msg.ruleId + '\n  ' + msg.filePath + ':' + msg.line + ':' + msg.column;
         } ).join( '\n' );
 
-        return lines + '\n';
+        return lines + '\n' +'Errors: ' + summary.errors.length + ', Warnings: ' + summary.warnings.length + '\n';
     }
 };

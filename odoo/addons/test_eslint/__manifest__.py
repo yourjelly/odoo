@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': 'test-eval',
+    'name': 'test-eslint',
     'version': '0.1',
     'category': 'Tests',
     'description': """A module to test Odoo with eslint.""",
