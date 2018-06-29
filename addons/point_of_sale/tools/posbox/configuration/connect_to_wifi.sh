@@ -40,17 +40,22 @@ function connect () {
 	sudo service hostapd stop
 	sudo service isc-dhcp-server stop
 
-	sudo pkill wpa_supplicant
 	sudo ifconfig wlan0 down
 	sudo ifconfig wlan0 0.0.0.0  # this is how you clear the interface's configuration
 	sudo ifconfig wlan0 up
 
-	if [ -z "${PASSWORD}" ] ; then
-		sudo iwconfig wlan0 essid "${ESSID}"
+    sudo wpa_cli -i wlan0 scan
+    NETWORK=$(sudo wpa_cli -i wlan0 add_network)
+    sudo wpa_cli -i wlan0 set_network ${NETWORK} ssid "${ESSID}"
+    if [ -z "${PASSWORD}" ] ; then
+		sudo wpa_cli -i wlan0 set_network ${NETWORK} key_mgmt NONE
 	else
-		sudo wpa_passphrase "${ESSID}" "${PASSWORD}" > "${WPA_PASS_FILE}"
-		sudo wpa_supplicant -B -i wlan0 -c "${WPA_PASS_FILE}"
-	fi
+	    sudo wpa_cli -i wlan0 set_network ${NETWORK} key_mgmt WPA2
+	    sudo wpa_cli -i wlan0 set_network ${NETWORK} password "${PASSWORD}"
+    fi
+    sudo wpa_cli -i wlan0 enable_network ${NETWORK}
+    #sudo wpa_supplicant -B -i wlan0 -c "${WPA_PASS_FILE}"
+
 
 	sudo service dhcpcd restart
 
