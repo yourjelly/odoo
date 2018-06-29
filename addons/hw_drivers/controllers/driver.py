@@ -86,7 +86,6 @@ class SylvacUSBDriver(USBDriver):
         return self.value
 
     def run(self):
-        drivers[str(self.dev.idVendor)] = self #Change by path
         connection = serial.Serial('/dev/serial/by-id/usb-Sylvac_Power_USB_A32DV5VM-if00-port0',
                                    baudrate=4800,
                                    bytesize=7,
@@ -121,9 +120,8 @@ class BtMetaClass(type):
 
 
 class BtDriver(metaclass=BtMetaClass):
-    def __init__(self, manager, device):
-        self.manager = manager
-        self.device = device #As for USB, we could put init values here? (or maybe this structure is too complicated)
+    def __init__(self, mac_address, manager):
+        pass #handled by gatt.Device
 
     def supported(self):
         pass
@@ -141,11 +139,10 @@ class BtDriver(metaclass=BtMetaClass):
 class SylvacBluetoothDriver(BtDriver, gatt.Device):
 
     def supported(self):
-        return self.device.alias =="SY295"
+        return self.device.alias() =="SY295"
 
     def value(self):
         return self.value
-
 
     def services_resolved(self):
         super().services_resolved()
@@ -158,6 +155,7 @@ class SylvacBluetoothDriver(BtDriver, gatt.Device):
             c for c in device_information_service.characteristics if c.uuid == '00005020-0000-1000-8000-00805f9b34fb')
         # m2 = next(c for c in device_information_service.characteristics if c.uuid == '00005021-0000-1000-8000-00805f9b34fb')
         # print m2.read_value()
+        print('Check services')
         measurement_characteristic.enable_notifications()
 
     def characteristic_value_updated(self, characteristic, value):
@@ -204,22 +202,38 @@ class DeviceManager(gatt.DeviceManager):
                     d = driverclass(updated_devices[path])
                     if d.supported():
                         _logger.info('For device %s will be driven', path)
+                        drivers[path] = d
                         # launch thread
+                        d.daemon = True
                         d.run()
                     else:
+                        if path in drivers:
+                            del drivers[path]
                         del d
             time.sleep(3)
 
 
     def device_discovered(self, device):
-        # TODO: need some kind of updated_devices mechanism
-        print("Discovered")
+        # TODO: need some kind of updated_devices mechanism or not?
         for driverclass in btdrivers:
-            d = driverclass(self, device)
+            d = driverclass(mac_address = device.mac_address, manager=self)
+            path = "bt/%s/%s" % (device.mac_address, device.alias())
             if d.supported():
-                d.run()
-            else:
-                del d
+                if path not in drivers:
+                    drivers[path] = d
+                    d.connect()
+                    print("New Driver", path, drivers)
+                    #d.daemon=True
+                    #d.run()
+                #Otherwise, we should try to reanimate driver
+                #else:
+                #    print('Weird error with driver')
+                #    drivers[path].run()
+            #else:
+            #    if path in drivers:
+            #        print("Del driver", path)
+            #        del drivers[path]
+            #    del d
         #print("Discovered [%s] %s" % (device.mac_address, device.alias()))
 
 
@@ -233,7 +247,11 @@ class DM2(Thread):
 # SDQFSQDFQSDF
 dm = DeviceManager(adapter_name='hci0')
 dm2 = DM2()
+dm2.daemon = True
 dm2.start()
+dm.start_discovery()
+dm.run()
+print("AFTER RUN")
 
 #if __name__ == '__main__':
 print (usbdrivers)
