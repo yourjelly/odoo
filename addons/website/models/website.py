@@ -765,7 +765,7 @@ class Page(models.Model):
     @api.model
     def get_page_info(self, id, website_id):
         domain = ['|', ('website_id', '=', False), ('website_id', '=', website_id), ('id', '=', id)]
-        item = self.search_read(domain, fields=['id', 'name', 'url', 'website_published', 'website_indexed', 'date_publish', 'menu_ids', 'is_homepage'], limit=1)
+        item = self.search_read(domain, fields=['id', 'name', 'url', 'website_published', 'website_indexed', 'date_publish', 'menu_ids', 'is_homepage', 'website_id'], limit=1)
         return item
 
     @api.multi
@@ -811,11 +811,15 @@ class Page(models.Model):
                     'website_id': website.id,
                 })
 
-        page.write({
+        # Edits via the page manager shouldn't trigger the COW
+        # mechanism and generate new pages. The user manages page
+        # visibility manually with is_published here.
+        page.with_context(no_cow=True).write({
             'key': page_key,
             'name': data['name'],
             'url': url,
-            'website_published': data['website_published'],
+            'is_published': data['website_published'],
+            'website_id': website.id if data['restrict_to_current_website'] else False,
             'website_indexed': data['website_indexed'],
             'date_publish': data['date_publish'] or None,
             'is_homepage': data['is_homepage'],
