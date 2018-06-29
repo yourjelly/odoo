@@ -11,15 +11,22 @@ Usage:
 
 The basic object needed for creating SQL statements and expressions is the `Row` object, it
 represents a row from a table, it requires one argument for initialization which is the name of
-the table containing such row, it accepts a second, optional argument as a flag called `nullable`,
-this flag, when set to true, means "take the nulls from this table when performing a Join", which
-helps in the inference of join types.
+the table containing such row.
 
-e.g. >>> res_partner = Row('res_partner', True)
+e.g.:
+    >>> res_partner = Row('res_partner')
+
+Proper identifier quoting is done automatically by the AST and its elements, therefore there is no
+need for whoever uses the tool to explicitly quote an identifier, and in fact this will raise
+a ValueError, this is done to avoid SQL Injections to the best of our ability.
 
 One can access a row's columns by using pythonic attribute getting / dot notation.
 
-e.g. >>> col = res_partner.id
+e.g.:
+    >>> col = res_partner.id
+
+Columns are created on-the-fly, meaning that they are created as the Row object's attributes
+are being accessed, this means that two column accesses will never have the same identity!
 
 Note that these objects are not DB-validated, meaning that one could create a Row object of a
 table that does not exist in DB, or access a column that does not exist in a table's schema, the
@@ -29,14 +36,12 @@ with caution as the "validation" will be done by Postgres itself.
 Once a row object is created, one can perform pythonic expressions with its columns,
 these expressions can then be translated into SQL expressions.
 
-e.g. >>> expr = res_partner.id == 5
-     >>> expr._to_sql()
-     ... ('"res_partner"."id" = %s', [5])
+e.g.:
+    >>> expr = res_partner.id == 5
+    >>> expr._to_sql(None)
+    ... ('("res_partner"."id" = %s)', [5])
 
-Three things to note from the previous example:
-
-    * SQL Identifiers are automatically double-quoted.
-
+Two things to note from the previous example:
     * Expressions are automatically parenthesized.
 
     * Literals are not directly interpolated into the SQL string, instead string interpolation
@@ -57,7 +62,7 @@ from .misc import OrderedSet
 
 
 def _quote(val):
-    """ Helper function for quoting SQL identifiers if necessary."""
+    """ Helper function for quoting SQL identifiers."""
     if '"' not in val:
         return '"%s"' % val
     raise ValueError("The string to be quoted must not already contain quotes.")
@@ -72,6 +77,11 @@ class Expression(object):
 
     """
     Main Abstract Syntax Tree of the query builder.
+
+    Args:
+        op (str): The operation of the expression.
+        left: The left operand of the expression.
+        right: The right operand of the expression.
 
     Valid expressions:
         a & b  -> a AND b
@@ -156,13 +166,14 @@ class Expression(object):
         return Expression('ILIKE', self, other)
 
     def in_(self, other):
+        # Optimization
         if isinstance(other, tuple) and not other:
             raise ValueError("Cannot perform IN operation on an empty tuple.")
         return Expression('IN', self, other)
 
     @property
     def rows(self):
-        """Return a set containing all the rows of an expression via recursion."""
+        """Return an OrderedSet containing all the rows of an expression via recursion."""
         res = OrderedSet()
         nodes = [getattr(self, 'left', None), getattr(self, 'right', None)]
 
@@ -177,11 +188,11 @@ class Expression(object):
 
     def _to_sql(self, alias_mapping):
         """
-        Generates SQL statements and expressions from the current object.
+        Generates a string representation for the current AST expression.
 
         Returns:
-            A tuple containing an SQL string and a list of arguments to be interpolated into
-            the string, to be fed directly into cr.execute()
+            A tuple containing an SQL string and a list of arguments that cannot be directly
+            interpolated into the string for security reasons, to be fed directly into cr.execute()
         """
         # TODO: Optimize parentheses generation
         left, args = self.left._to_sql(alias_mapping)
@@ -194,13 +205,16 @@ class Expression(object):
         sql = "({left} {op} {right})"
 
         if isinstance(self.right, Expression):
+            # Another AST expression
             right, _args = self.right._to_sql(alias_mapping)
 
             if isinstance(self.right, Select):
+                # Sub-queries must be parenthesized
                 right = '(%s)' % right
 
             args += _args
         else:
+            # Literal or Constant
             if self.right is NULL:
                 right = self.right
             else:
@@ -229,6 +243,7 @@ class Case(Expression):
 
     @property
     def rows(self):
+        """Returns an OrderedSet containing all the rows appearing in the Case expression."""
         rows = OrderedSet()
 
         for when, then in self.cases:
@@ -290,12 +305,10 @@ class Row(object):
 
     def __init__(self, table):
         """
-        Create an object that represents any row of a table.
+        Create an object that represents a table's row.
 
         Args:
             table (str): Name of the table.
-            nullable (bool): In the case of a join, whether the NULLs of this
-                table should be included in the resulting joined table.
         """
         self._table = _quote(table)
         self._cols = OrderedDict()
@@ -305,6 +318,8 @@ class Row(object):
         return OrderedSet([self])
 
     def __call__(self, *args):
+        # For insert queries, used to define the columns that the specified values to be
+        # inserted apply to.
         for col in args:
             self._cols[col] = Column(self, col)
         return self
@@ -322,10 +337,7 @@ class Row(object):
                 return "%s(%s)" % (self._table,
                                    ', '.join([c._name for c in self._cols.values()])), []
             return "%s" % self._table, []
-        alias = alias_mapping[self]
-        if alias == self._table:
-            return "%s" % self._table, []
-        return "%s %s" % (self._table, alias), []
+        return "%s %s" % (self._table, alias_mapping[self]), []
 
 
 class Column(Expression):
@@ -334,9 +346,10 @@ class Column(Expression):
 
     def __init__(self, row, name):
         """
-        A table's column.
+        A Row object's column.
 
-        Should rarely be used by the user, it is automatically handled by the Row class.
+        Should rarely be instantiated by the user, the Row class should be used instead as a proxy
+        for Column objects.
 
         Args:
             row (Row): Row that this column belongs to (table).
@@ -400,6 +413,7 @@ class BaseQuery(Expression):
         return hash(tuple(self._rows + self._returning + self.sql + self.args) + (self._where,))
 
     def __getattr__(self, name):
+        # Query objects can be used as rows.
         if name.startswith('__'):
             raise AttributeError
         return Column(self, name)
@@ -409,13 +423,32 @@ class BaseQuery(Expression):
         return OrderedSet()
 
     def _build_base(self, alias_mapping):
+        """
+        Builds the basic part of the query, the identifying part.
+
+        This part is mandatory for all queries.
+
+        Examples:
+            For the select query, the base would be "SELECT"
+            For the insert query, the base would be "INSERT INTO x"
+        """
         raise NotImplementedError
 
     @property
     def attrs(self):
+        """
+        The arguments required for instantiation of a BaseQuery sub-class.
+
+        Mandatory for all queries.
+        """
         raise NotImplementedError
 
     def copy(self):
+        """
+        Creates a copy of any BaseQuery sub-class.
+
+        Used mainly for the WITH query.
+        """
         return self.__class__(**self.attrs)
 
     def _build_from(self, alias_mapping):
@@ -509,9 +542,9 @@ class AliasMapping(dict):
         """
         A special implementation of dict that generates appropriate table aliases on the fly.
 
-        Keys must be Row objects, if the key is missing from the AliasMapping, it will be added
-        to the AliasMapping and an alias will be assigned to it, the alias is a single letter
-        from the alphabet that is double-quoted.
+        Keys must be Row or pseudo-Row objects (sub-selects), if the key is missing
+        from the AliasMapping, it will be added to the AliasMapping and an alias will be assigned
+        to it, the alias is a single letter from the alphabet that is double-quoted.
 
         If the key is already in the AliasMapping, then we will simply return its corresponding
         alias.
@@ -523,6 +556,8 @@ class AliasMapping(dict):
 
             * SELECT query expressions (UNION, INTERSECT, EXCEPT) won't use the same AliasMapping
               for both of their operands, i.e. each operand's first table will be "a".
+
+            * Sub-queries use a different AliasMapping than the one of its encompassing query.
         """
         super(AliasMapping, self).__init__()
         self._generator = generate_aliases()
@@ -539,17 +574,13 @@ class Join(object):
         """
         Create a join between two tables on a given condition.
 
-        The type of join depends on each table's `_nullable` boolean flag:
-            If LHS is nullable and RHS is nullable, the type is a FULL JOIN
-            If LHS is nullable and RHS is not nullable, the type is a LEFT JOIN
-            If LHS is not nullable and RHS is nullable, the type is a RIGHT JOIN
-            If LHS is not nullable and RHS is not nullable, the type is an INNER JOIN
-
         Args:
-            main (Row): the main row with which to join the join row.
+            main (Row): the main row of the join.
             join (Row): the row to join.
             condition (Expression): an AST expression which will serve as the ON condition for the
                 Join, if not specified then there will be no condition (ON TRUE).
+            _type (str): the type of the join, possible values are 'inner', 'left', 'right' and
+                'full'. (default: 'inner')
         """
         self._main = main
         self._join = join
@@ -594,10 +625,10 @@ class Modifier(object):
         self.nfirst = nfirst
 
     def _to_sql(self, alias_mapping):
-        sql = self.column._to_sql(alias_mapping)[0]
+        sql, args = self.column._to_sql(alias_mapping)
         sql += " %s " % self.modifier
         sql += "NULLS FIRST" if self.nfirst else "NULLS LAST"
-        return sql, []
+        return sql, args
 
 
 class Asc(Modifier):
@@ -619,7 +650,7 @@ class Desc(Modifier):
 class Query(object):
 
     """
-    Proxy class for creating SQL queries in FP-style.
+    Proxy class for creating SQL queries in a functional programming style.
     """
 
     @staticmethod
@@ -649,27 +680,36 @@ class Select(BaseQuery):
     def __init__(self, columns, where=None, order=None, joins=None, distinct=False,
                  group=None, having=None, limit=None, offset=0):
         """
-        Stateless class for generating SQL SELECT statements.
+        Class for generating SQL SELECT statements.
 
         Args:
-            columns: List of Column / Dictionary `{alias: Column}`.
-                Alternatively, a single-element list containing a Row object
-                can be provided, in which case it will be translated to 'SELECT *'
+            columns: This argument can take multiple forms:
+                * A list of columns, in this case no columns will be aliased.
+                * A mapping of (alias, column), in this case all columns with a string as key
+                    will have the string as their alias, if the key is an integer then it will
+                    not have an alias. Use OrderedDict if the order of the columns is important.
+                * A single-element list containing a Row object, in this case all the columns
+                    of the Row will be selected, equivalent to SELECT *, if there is more than
+                    one element in the list, all others will be ignored.
             where (Expression): Expression for filtering out the results of the query.
             order: List of (potentially modified) columns to order by.
-            joins: List of expressions by which to join different tables based on a condition.
-            distinct: Flag dictating whether records will be fetched if they're not the same.
+            joins: List of Join objects.
+            distinct: This argument can take multiple forms:
+                * A boolean value, True meaning distinct on the whole query, False meaning
+                    no distinct at all. (default: False)
+                * A column, meaning that only that column must be unique.
+                * A list of columns, all of which must be unique.
             group: List of columns to order by.
             having (Expression): Condition for the group by.
             limit (int): Maximum amount of records to fetch.
             offset (int): Skip the first X records when performing a Select with a limit,
-                has no effect if limit is not specified.
+            has no effect if limit is not specified. (default: 0)
 
         Example:
-            p = Row('res_partner', True)
+            p = Row('res_partner')
             u = Row('res_users')
-            s = Select({'id': p.id}, p.name != None, [Desc(p.id)], [p.id == u.partner_id])
-
+            s = Select({'id': p.id}, p.name != None, [Desc(p.id)],
+                       [Join(self.p, self.u, p.id == u.partner_id, 'left')])
             >>> s._to_sql()
 
             SELECT "res_partner"."id" AS id
@@ -698,7 +738,7 @@ class Select(BaseQuery):
         #   * FROM a INNER JOIN b ON TRUE INNER JOIN c ...
         # Bad:
         #   * FROM a, b INNER JOIN c ...
-        # There's no error-checking, but the resulting query won't be what the user expects.
+        # There's no error-checking, but the resulting query won't be what the user expects!
         self._rows = self._get_tables()
 
     @property
@@ -896,7 +936,7 @@ class QueryExpression(Select):
 
     __slots__ = ('op', 'left', 'right')
 
-    """Class for operators between Select objects."""
+    """Class for operations between Select objects."""
 
     def __init__(self, op, left, right):
         assert isinstance(left, Select) and isinstance(right, Select), "Operands must be Selects."
@@ -919,7 +959,7 @@ class Delete(BaseQuery):
 
     def __init__(self, table, using=None, where=None, returning=None):
         """
-        Stateless class for generating SQL DELETE statements.
+        Class for generating SQL DELETE statements.
 
         Args:
             table: List of Row instances of the tables from which records will be deleted.
@@ -978,13 +1018,14 @@ class With(BaseQuery):
 
     def __init__(self, body, tail, recursive=False):
         """
-        Class for creating WITH SQL statements.
+        Class for creating WITH SQL statements (temporary tables).
 
         Args:
-            body: List containing tuples in which the first element is a Row object, with defined
-                _cols attribute, and the second element is an SQL query that returns an amount
-                of rows equivalent to the amount of _cols defined, if the recursive flag is True,
-                then these queries must be UNIONs between a base query and a recursive query.
+            body: List containing tuples in which the first element is a Row object, optionally
+                defining _cols attribute via __call__, and the second element is an SQL query that
+                returns rows with an amount of cols equivalent to the amount of _cols defined,
+                if the recursive flag is True, then these queries must be UNIONs between a
+                base query and a recursive query.
             tail: An SQL query that (ideally) uses the results from the WITH table to generate
                 its own result.
             recursive: Whether the WITH statement is RECURSIVE or not.
@@ -1032,7 +1073,7 @@ class Update(BaseQuery):
         Class for creating UPDATE SQL statements.
 
         Args:
-            exprs: Dict of columns to update as keys and the value to set as values, if order
+            _set: Dict of columns to update as keys and the value to set as values, if order
                 is important, then an OrderedDict can be passed-in.
             where (Expression): Expression that will filter out the records to Update.
             returning: List of columns that the UPDATE statement should return.
@@ -1116,14 +1157,18 @@ class Insert(BaseQuery):
             vals: List of values to map to the specified columns. If no columns are specified then
                 it will implicitly assume that all the values map, in order, to all the available
                 columns, managed by PostgreSQL itself.
-            do_nothing (bool): Whether or not the insert should on conflict do nothing.
+            on_conflict: This argument can take on multiple forms:
+                * False, meaning that no conflict management should be done, this is the default.
+                * None, meaning that on conflict we will do nothing.
+                * A two-tuple, the first element being a list of columns that can conflict and
+                    the second element being an Update query object.
             returning: List of columns that the INSERT statement should return.
 
         Example:
             >>> p = Row("res_partner")
             >>> # in this case, only the columns name, surname and company will be defined
             >>> i = Insert(p('name', 'surname', 'company'), ['John', 'Wick', 'MyCompany'],
-            ... do_nothing=True, returning=[p.id])
+            ...            returning=[p.id])
             >>> i.to_sql()
             ... ('INSERT INTO "res_partner"('name', 'surname', 'company') VALUES
             ... (%s) ON CONFLICT DO NOTHING RETURNING "res_partner"."id"',
@@ -1339,6 +1384,11 @@ class Unnest(Func):
 class Now(Func):
 
     def __init__(self):
+        """
+        Class for the NOW SQL function.
+
+        It is a bit special since at Odoo we usually use it with `at timezone 'UTC'`.
+        """
         super(Now, self).__init__('now')
 
     def _to_sql(self, alias_mapping):
