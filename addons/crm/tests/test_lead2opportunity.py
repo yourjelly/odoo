@@ -100,19 +100,19 @@ class TestLead2opportunity2win(TestCrmCases):
         test_crm_lead_01 = LeadSaleman.create({
             'type': 'lead',
             'name': 'Test lead 1',
-            'email_from': 'Raoul Grosbedon <raoul@grosbedon.fr>',
+            'email_from': 'Raoul Grosbedon <raoul1@grosbedon.fr>',
             'stage_id': default_stage_id
         })
         test_crm_lead_02 = LeadSaleman.create({
             'type': 'lead',
             'name': 'Test lead 2',
-            'email_from': 'Raoul Grosbedon <raoul@grosbedon.fr>',
+            'email_from': 'Raoul Grosbedon <raoul2@grosbedon.fr>',
             'stage_id': default_stage_id
         })
         test_crm_lead_03 = LeadSaleman.create({
             'type': 'lead',
             'name': 'Test lead 3',
-            'email_from': 'Raoul Grosbedon <raoul@grosbedon.fr>',
+            'email_from': 'Raoul Grosbedon <raoul3@grosbedon.fr>',
             'stage_id': default_stage_id
         })
         test_crm_lead_04 = LeadSaleman.create({

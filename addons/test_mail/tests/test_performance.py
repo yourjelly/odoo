@@ -13,18 +13,20 @@ class TestMailPerformance(TransactionCase):
 
     def setUp(self):
         super(TestMailPerformance, self).setUp()
-        self.user_employee = self.env['res.users'].with_context({
-            'no_reset_password': True,
-            'mail_create_nolog': True,
-            'mail_create_nosubscribe': True,
-            'mail_notrack': True,
-        }).create({
-            'name': 'Ernest Employee',
-            'login': 'emp',
-            'email': 'e.e@example.com',
-            'notification_type': 'inbox',
-            'groups_id': [(6, 0, [self.env.ref('base.group_user').id])],
-        })
+	email = 'e.e@example.com'
+	if not self.env['res.users'].search([('email', '=', email)]):
+            self.user_employee = self.env['res.users'].with_context({
+                'no_reset_password': True,
+                'mail_create_nolog': True,
+                'mail_create_nosubscribe': True,
+                'mail_notrack': True,
+            }).create({
+                'name': 'Ernest Employee',
+                'login': 'emp',
+                'email': email,
+                'notification_type': 'inbox',
+                'groups_id': [(6, 0, [self.env.ref('base.group_user').id])],
+            })
 
     @users('admin', 'demo')
     @warmup
@@ -126,24 +128,30 @@ class TestAdvMailPerformance(TransactionCase):
             'mail_create_nosubscribe': True,
             'mail_notrack': True,
         }
-        self.user_employee = self.env['res.users'].with_context(self._quick_create_ctx).create({
-            'name': 'Ernest Employee',
-            'login': 'emp',
-            'email': 'e.e@example.com',
-            'signature': '--\nErnest',
-            'notification_type': 'inbox',
-            'groups_id': [(6, 0, [self.env.ref('base.group_user').id])],
+	email = 'e.e@example.com'
+	if not self.env['res.users'].search([('email', '=', email)]):
+            self.user_employee = self.env['res.users'].with_context(self._quick_create_ctx).create({
+            	'name': 'Ernest Employee',
+            	'login': 'emp',
+            	'email': email,
+            	'signature': '--\nErnest',
+            	'notification_type': 'inbox',
+            	'groups_id': [(6, 0, [self.env.ref('base.group_user').id])],
         })
-        self.customer = self.env['res.partner'].with_context(self._quick_create_ctx).create({
-            'name': 'Test Customer',
-            'email': 'test@example.com',
+	email = 'test@example.com'
+	if not self.env['res.users'].search([('email', '=', email)]):
+            self.customer = self.env['res.partner'].with_context(self._quick_create_ctx).create({
+                'name': 'Test Customer',
+                'email': email,
         })
-        self.user_test = self.env['res.users'].with_context(self._quick_create_ctx).create({
-            'name': 'Paulette Testouille',
-            'login': 'paul',
-            'email': 'p.p@example.com',
-            'notification_type': 'inbox',
-            'groups_id': [(6, 0, [self.env.ref('base.group_user').id])],
+	email = 'p.p@example.com'
+	if not self.env['res.users'].search([('email', '=', email)]):
+            self.user_test = self.env['res.users'].with_context(self._quick_create_ctx).create({
+                'name': 'Paulette Testouille',
+                'login': 'paul',
+                'email': email,
+                'notification_type': 'inbox',
+                'groups_id': [(6, 0, [self.env.ref('base.group_user').id])],
         })
 
         # automatically follow activities, for backward compatibility concerning query count
@@ -309,18 +317,22 @@ class TestHeavyMailPerformance(TransactionCase):
             'mail_create_nosubscribe': True,
             'mail_notrack': True,
         }
-        self.user_employee = self.env['res.users'].with_context(self._quick_create_ctx).create({
-            'name': 'Ernest Employee',
-            'login': 'emp',
-            'email': 'e.e@example.com',
-            'signature': '--\nErnest',
-            'notification_type': 'inbox',
-            'groups_id': [(6, 0, [self.env.ref('base.group_user').id])],
+	email = 'e.e@example.com'
+	if not self.env['res.users'].search([('email', '=', email)]):
+            self.user_employee = self.env['res.users'].with_context(self._quick_create_ctx).create({
+                'name': 'Ernest Employee',
+                'login': 'emp',
+                'email': 'e.e@example.com',
+                'signature': '--\nErnest',
+                'notification_type': 'inbox',
+                'groups_id': [(6, 0, [self.env.ref('base.group_user').id])],
         })
+	email = 'p.p@example.com'
+	if not self.env['res.users'].search([('email', '=', email)]):
         self.user_portal = self.env['res.users'].with_context(self._quick_create_ctx).create({
             'name': 'Olivia Portal',
             'login': 'port',
-            'email': 'p.p@example.com',
+            'email': email,
             'signature': '--\nOlivia',
             'notification_type': 'email',
             'groups_id': [(6, 0, [self.env.ref('base.group_portal').id])],

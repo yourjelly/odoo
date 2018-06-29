@@ -16,14 +16,14 @@ class StockQuant(TransactionCase):
         self.demo_user = Users.create({
             'name': 'Pauline Poivraisselle',
             'login': 'pauline',
-            'email': 'p.p@example.com',
+            'email': 'pauline.p@example.com',
             'notification_type': 'inbox',
             'groups_id': [(6, 0, [self.env.ref('base.group_user').id])]
         })
         self.stock_user = Users.create({
             'name': 'Pauline Poivraisselle',
             'login': 'pauline2',
-            'email': 'p.p@example.com',
+            'email': 'pauline2.p@example.com',
             'notification_type': 'inbox',
             'groups_id': [(6, 0, [self.env.ref('stock.group_stock_user').id])]
         })
