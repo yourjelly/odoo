@@ -44,8 +44,10 @@ function connect () {
 	sudo ifconfig wlan0 0.0.0.0  # this is how you clear the interface's configuration
 	sudo ifconfig wlan0 up
 
+    sleep 3
     sudo wpa_cli -i wlan0 scan
     NETWORK=$(sudo wpa_cli -i wlan0 add_network)
+    sleep 1
     sudo wpa_cli -i wlan0 set_network ${NETWORK} ssid "${ESSID}"
     if [ -z "${PASSWORD}" ] ; then
 		sudo wpa_cli -i wlan0 set_network ${NETWORK} key_mgmt NONE
