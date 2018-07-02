@@ -674,11 +674,11 @@ class Select(BaseQuery):
 
     __slots__ = (
         '_columns', '_order', '_joins', '_distinct', '_group', '_having', '_limit',
-        '_offset', '_aliased',
+        '_offset', '_aliased', '_from',
     )
 
     def __init__(self, columns, where=None, order=None, joins=None, distinct=False,
-                 group=None, having=None, limit=None, offset=0):
+                 group=None, having=None, limit=None, offset=0, _from=None):
         """
         Class for generating SQL SELECT statements.
 
@@ -728,6 +728,7 @@ class Select(BaseQuery):
         self._having = having
         self._limit = limit
         self._offset = offset
+        self._from = OrderedSet([_from]) if _from is not None else OrderedSet([])
         self._aliased = isinstance(columns, dict)
 
         # Joins must be exclusively implicit or explicit
@@ -765,14 +766,14 @@ class Select(BaseQuery):
         else:
             columns += self._columns
 
-        tables = OrderedSet()
+        tables = self._from
 
         for col in columns:
-            if isinstance(col, tuple):
-                # TODO: Convert to Literal
-                tables.add(col[0])
-            else:
+            try:
                 tables |= col.rows
+            except Exception:
+                # Literals have no tables
+                pass
 
         if self._where is not None:
             tables |= self._where.rows
@@ -871,17 +872,18 @@ class Select(BaseQuery):
                     __sql, _args = val._to_sql(AliasMapping())
                     _sql.append("(%s)%s" % (__sql, alias))
                     args += _args
-                elif isinstance(val, tuple):
-                    # Literal
-                    _sql.append("%%s%s" % alias)
-                    args.append(val[1])
                 elif isinstance(val, Func) and val.func == 'unnest':
                     _sql.append(alias_mapping[val])
                 else:
                     # Common case
-                    __sql, _args = val._to_sql(alias_mapping)
-                    _sql.append("%s%s" % (__sql, alias))
-                    args += _args
+                    try:
+                        __sql, _args = val._to_sql(alias_mapping)
+                    except Exception:
+                        # Literal
+                        __sql, _args = "%s", [val]
+                    finally:
+                        _sql.append("%s%s" % (__sql, alias))
+                        args += _args
 
         sql.append(', '.join(_sql))
         self.sql.append(' '.join(sql))

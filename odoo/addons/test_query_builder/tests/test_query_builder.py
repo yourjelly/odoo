@@ -871,6 +871,15 @@ class TestSelect(TestCase):
             )
         )
 
+    def test_select_literal(self):
+        s = Select([1], _from=self.p)
+        self.assertEqual(
+            s.to_sql(),
+            (
+                """SELECT %s FROM "res_partner" "a\"""", (1,)
+            )
+        )
+
 
 @tagged('standard', 'at_install')
 class TestDelete(TestCase):
@@ -1093,7 +1102,8 @@ class TestWith(TestCase):
             ("""WITH "my_temp_table"("name", "surname") AS """
              """(INSERT INTO "res_users"("name", "surname") VALUES (%s, %s) """
              """RETURNING "res_users"."name", "res_users"."surname") """
-             """INSERT INTO "res_partner"("name", "surname") (SELECT * FROM "my_temp_table" "a")""",
+             """INSERT INTO "res_partner"("name", "surname") """
+             """(SELECT * FROM "my_temp_table" "a")""",
              ('John', 'Wick'))
         )
 
@@ -1454,14 +1464,6 @@ class TestRealWorldCases(TestCase):
 
         self.assertEqual(w.to_sql(), res)
 
-    def test_rwc_03(self):
-        # models.py @ _table_has_rows
-        s = Select([(self.p, 1)], limit=1)
-        self.assertEqual(
-            s.to_sql(),
-            ("""SELECT %s FROM "res_partner" "a" LIMIT %s OFFSET %s""", (1, 1, 0))
-        )
-
     def test_rwc_04(self):
         # models.py @ _parent_store_create
         r = Row('dummy')
@@ -1546,7 +1548,7 @@ class TestRealWorldCases(TestCase):
             ('id', ail.id),
             ('date', ai.date),
             ('uom_name', u2.name),
-            ('nbr', (ail, 1)),
+            ('nbr', 1),
             ('account_line_id', ail.account_id),
             ('product_qty', _sum((it.sign * ail.quantity) / u.factor * u2.factor)),
             ('price_total', _sum(ail.price_subtotal_signed * it.sign)),
@@ -1587,7 +1589,7 @@ class TestRealWorldCases(TestCase):
             pt.categ_id, ai.date_due, ai.account_id, ail.account_id, ai.partner_bank_id,
             ai.residual_company_signed, ai.amount_total_company_signed, ai.commercial_partner_id,
             partner.country_id,
-        ])
+        ], _from=ail)
 
         sub_sql = (
             """SELECT "a"."id" AS id, "b"."date" AS date, "c"."name" AS uom_name, """
