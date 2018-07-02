@@ -13,6 +13,7 @@ class TestPage(common.TransactionCase):
             'name': 'Base',
             'type': 'qweb',
             'arch': '<div>content</div>',
+            'key': 'test.base_view',
         })
 
         self.extension_view = View.create({
@@ -102,3 +103,34 @@ class TestPage(common.TransactionCase):
         new_view = View.search([('name', '=', 'Extension'), ('website_id', '=', 1)])
         self.assertEqual(new_view.arch, '<div>website 1 content</div>')
         self.assertEqual(new_view.website_id.id, 1)
+
+    def test_cou_page_backend(self):
+        Menu = self.env['website.menu']
+        Page = self.env['website.page']
+        View = self.env['ir.ui.view']
+
+        # currently the view unlink of website.page can't handle views with inherited views
+        self.extension_view.unlink()
+
+        self.page_1.unlink()
+        self.assertEqual(Menu.search_count([('name', '=', 'Page 1 menu')]), 0)
+        self.assertEqual(Page.search_count([('url', '=', '/page_1')]), 0)
+        self.assertEqual(View.search_count([('name', 'in', ('Base', 'Extension'))]), 0)
+
+    def test_cou_page_frontend(self):
+        Menu = self.env['website.menu']
+        Page = self.env['website.page']
+        View = self.env['ir.ui.view']
+
+        # currently the view unlink of website.page can't handle views with inherited views
+        self.extension_view.unlink()
+
+        self.page_1.with_context(website_id=1).unlink()
+
+        self.assertEqual(bool(self.base_view.exists()), False)
+        self.assertEqual(bool(self.page_1.exists()), False)
+        self.assertEqual(bool(self.page_1_menu.exists()), False)
+
+        self.assertEqual(Menu.search([('name', '=', 'Page 1 menu')]).website_id.id, 2)
+        self.assertEqual(Page.search([('url', '=', '/page_1')]).website_id.id, 2)
+        self.assertEqual(View.search([('name', 'in', ('Base', 'Extension'))]).mapped('website_id').id, 2)

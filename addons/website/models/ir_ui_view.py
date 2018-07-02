@@ -69,6 +69,21 @@ class View(models.Model):
 
     @api.multi
     def unlink(self):
+        '''This implements COU (copy-on-unlink). When deleting a generic page
+        website-specific pages will be created so only the current
+        website is affected.
+        '''
+        current_website_id = self._context.get('website_id')
+
+        # todo jov remove all these search_count >1's
+        if current_website_id and not self._context.get('no_cow'):
+            for view in self.filtered(lambda view: not view.website_id):
+                for website in self.env['website'].search([('id', '!=', current_website_id)]):
+                    # reuse the COW mechanism to create
+                    # website-specific copies, it will take
+                    # care of creating pages and menus.
+                    view.with_context(website_id=website.id).write({'key': '%s [website %s]' % (view.key, website.id)})
+
         self |= self.with_context(active_test=False).search([('key', 'in', self.filtered('key').mapped('key'))])
         result = super(View, self).unlink()
         self.clear_caches()

@@ -805,7 +805,7 @@ function _deletePage(pageId, fromPageManagement) {
     // Delete the page if the user confirmed
         return self._rpc({
             model: 'website.page',
-            method: 'delete_page',
+            method: 'unlink',
             args: [pageId],
             context: context,
         });

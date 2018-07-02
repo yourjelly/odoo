@@ -653,7 +653,7 @@ class WebsitePublishedMixin(models.AbstractModel):
     website_published = fields.Boolean('Visible on current website',
                                        compute='_compute_website_published',
                                        inverse='_inverse_website_published',
-                                       search='_search_website_published')
+                                       search='_search_website_published')  # todo jov evaluate places where this is used, we can probably replace some with is_published
     is_published = fields.Boolean('Is published')
     website_id = fields.Many2one('website', string='Website', help='Restrict publishing to this website.')
     website_url = fields.Char('Website URL', compute='_compute_website_url', help='The full URL to access the document through the website.')
@@ -868,34 +868,19 @@ class Page(models.Model):
 
     @api.multi
     def unlink(self):
-        """ When a website_page is deleted, the ORM does not delete its ir_ui_view.
-            So we got to delete it ourself, but only if the ir_ui_view is not used by another website_page.
-        """
-        # Handle it's ir_ui_view
+        # When a website_page is deleted, the ORM does not delete its
+        # ir_ui_view. So we got to delete it ourself, but only if the
+        # ir_ui_view is not used by another website_page.
         for page in self:
             # Other pages linked to the ir_ui_view of the page being deleted (will it even be possible?)
             pages_linked_to_iruiview = self.search(
                 [('view_id', '=', page.view_id.id), ('id', '!=', page.id)]
             )
-            if len(pages_linked_to_iruiview) == 0:
+            if len(pages_linked_to_iruiview) == 0 and not page.view_id.inherit_children_ids:
                 # If there is no other pages linked to that ir_ui_view, we can delete the ir_ui_view
-                self.env['ir.ui.view'].search([('id', '=', page.view_id.id)]).unlink()
-        # And then delete the website_page itself
-        return super(Page, self).unlink()
+                page.view_id.unlink()
 
-    @api.model
-    def delete_page(self, page_id):
-        """ Delete a page, given its identifier
-            :param page_id : website.page identifier
-        """
-        # If we are deleting a page (that could possibly be a menu with a page)
-        page = self.env['website.page'].browse(int(page_id))
-        if page:
-            # Check if it is a menu with a page and also delete menu if so
-            menu = self.env['website.menu'].search([('page_id', '=', page.id)], limit=1)
-            if menu:
-                menu.unlink()
-            page.unlink()
+        return super(Page, self).unlink()
 
     @api.multi
     def write(self, vals):
@@ -936,7 +921,7 @@ class Menu(models.Model):
         if current_website_id and not self._context.get('no_cow') and self.env['website'].search_count([]) > 1:
             for menu in self.filtered(lambda menu: not menu.website_id):
                 for website in self.env['website'].search([('id', '!=', current_website_id)]):
-                    # reuse the COW mechanism to create website specific copies
+                    # reuse the COW mechanism to create website-specific copies
                     menu.with_context(website_id=website.id).write({})
 
         return super(Menu, self).unlink()
