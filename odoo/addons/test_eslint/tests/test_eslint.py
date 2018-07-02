@@ -25,18 +25,14 @@ class TestEsLint(TransactionCase):
         for module in get_modules():
             module_path = get_module_path(module)
             if not module_path.startswith(join(tools.config['root_path'], 'addons')):
-                for root, subFolder, files in os.walk(module_path):
-                    subFolder[:] = [d for d in subFolder if not d.startswith('lib')]
-                    for file in files:
-                        if file.endswith(".js"):
-                            paths.append(root)
+                paths.append(module_path)
 
         options = [
             '--config=%s' % (join(HERE, '../config/eslintrc.js')),
+            '--format=%s' % (join(HERE, '../config/output_formatter.js')),
+            '--ignore-pattern=lib/',
             '--ext=.js',
-            '--ignore-path=%s' % (join(HERE, 'eslintignore.js')),
             '--no-eslintrc',
-            '--format=%s' % (join(HERE, 'table.js'))
         ]
         pypath = HERE + os.pathsep + os.environ.get('PYTHONPATH', '')
         env = dict(os.environ, PYTHONPATH=pypath)
