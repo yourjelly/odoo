@@ -928,10 +928,24 @@ class Menu(models.Model):
     is_visible = fields.Boolean(compute='_compute_visible', string='Is Visible')
 
     @api.multi
+    def unlink(self):
+        '''This implements COU (copy-on-unlink). When deleting a generic menu
+        item website-specific menu items will be created.'''
+        current_website_id = self._context.get('website_id')
+
+        if current_website_id and not self._context.get('no_cow') and self.env['website'].search_count([]) > 1:
+            for menu in self.filtered(lambda menu: not menu.website_id):
+                for website in self.env['website'].search([('id', '!=', current_website_id)]):
+                    # reuse the COW mechanism to create website specific copies
+                    menu.with_context(website_id=website.id).write({})
+
+        return super(Menu, self).unlink()
+
+    @api.multi
     def write(self, vals):
-        '''COW for ir.ui.view. This way editing websites does not
-        impact other websites and so that newly created websites will
-        only contain the default views.
+        '''This implements COW (copy-on-write). This way editing websites does
+        not impact other websites and newly created websites will only
+        contain the default menus.
         '''
         current_website_id = self._context.get('website_id')
 
