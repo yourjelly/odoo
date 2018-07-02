@@ -58,6 +58,28 @@ return core.Class.extend({
     },
 
     /**
+     * Processes fields and fields_views. For each field, writes its name inside
+     * the field description to make it self-contained. For each fields_view,
+     * completes its fields with the missing ones.
+     *
+     * @param {Object} fieldsViews object of fields_views (keys are view types)
+     * @param {Object} fields all the fields of the model
+     */
+    processViews: function (fieldsViews, fields) {
+        var fieldName, viewType, fieldsView;
+        for (fieldName in fields) {
+            fields[fieldName].name = fieldName;
+        }
+        for (viewType in fieldsViews) {
+            fieldsView = fieldsViews[viewType];
+            // write the field name inside the description for fields in view
+            for (fieldName in fieldsView.fields) {
+                fieldsView.fields[fieldName].name = fieldName;
+            }
+        }
+    },
+
+    /**
      * Loads various information concerning views: fields_view for each view,
      * the fields of the corresponding model, and optionally the filters.
      *
@@ -97,6 +119,7 @@ return core.Class.extend({
                 model: model,
                 method: 'load_views',
             }).then(function (result) {
+                self.processViews(result.fields_views, result.fields);
                 // Freeze the fields dict as it will be shared between views and
                 // no one should edit it
                 utils.deepFreeze(result.fields);
