@@ -81,6 +81,11 @@ class Website(Home):
 
         raise request.not_found()
 
+    @http.route('/website/set_session_website', type='json', auth="user")
+    def set_session_website(self, domain):
+        request.session['force_website_domain'] = domain
+        return True
+
     #------------------------------------------------------
     # Login - overwrite of the web login so that regular users are redirected to the backend
     # while portal users are redirected to the frontend by default

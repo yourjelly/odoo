@@ -423,24 +423,21 @@ class Website(models.Model):
 
     @api.model
     def get_current_website(self):
-        domain_name = request and request.httprequest.environ.get('HTTP_HOST', '').split(':')[0] or None
+        domain_name = request and request.session.get('force_website_domain')
+
+        if not domain_name:
+            domain_name = request and request.httprequest.environ.get('HTTP_HOST', '').split(':')[0] or None
+
         website_id = self._get_current_website_id(domain_name)
         if request:
             request.context = dict(request.context, website_id=website_id)
         return self.browse(website_id)
 
+    @tools.cache('domain_name')
     def _get_current_website_id(self, domain_name):
-        forced_website_id = self.env['ir.config_parameter'].sudo().get_param('website_multi.force_website_id', '')
-        # todo jov public user
-        website = False
-        if forced_website_id.isdigit():
-            website = request.env['website'].browse(int(forced_website_id))
-            logger.debug('forcing website %s (ID: %s)', website.name, website.id)
-
+        website = self.search([('domain', '=', domain_name)], limit=1)
         if not website:
-            website = self.search([('domain', '=', domain_name)], limit=1)
-            if not website:
-                website = self.search([], limit=1)
+            website = self.search([], limit=1)
 
         return website.id
 

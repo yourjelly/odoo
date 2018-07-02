@@ -96,11 +96,10 @@ class View(models.Model):
 
     def _create_website_specific_pages_for_view(self, new_view, website):
         for page in self.page_ids:
-            #  create new pages for this view
+            # create new pages for this view
             new_page = page.copy({
                 'view_id': new_view.id,
             })
-            # page.website_ids -= website  todo jov
             for menu in page.menu_ids:
                 # trigger COW
                 menu.write({'page_id': new_page.id})
@@ -242,6 +241,7 @@ class View(models.Model):
         qcontext = super(View, self)._prepare_qcontext()
 
         if request and getattr(request, 'is_frontend', False):
+            Website = self.env['website']
             editable = request.website.is_publisher()
             translatable = editable and self._context.get('lang') != request.env['ir.http']._get_default_lang().code
             editable = not translatable and editable
@@ -249,15 +249,15 @@ class View(models.Model):
             if 'main_object' not in qcontext:
                 qcontext['main_object'] = self
 
-            domain_based_info = {'id': 'domain_based', 'name': 'Domain Based'}
-            forced_website_id = request.env['ir.config_parameter'].sudo().get_param('website_multi.force_website_id')
-            if forced_website_id and forced_website_id.isdigit():
-                selected_website = self.env['website'].browse(int(forced_website_id))
-                qcontext['multi_website_selected_website'] = {'id': selected_website.id, 'name': selected_website.name}
+            domain_based_info = {'domain': '', 'name': 'Domain Based'}
+            force_website_domain = request.session.get('force_website_domain', '')
+            if force_website_domain:
+                selected_website = Website.browse(Website._get_current_website_id(force_website_domain))
+                qcontext['multi_website_selected_website'] = {'domain': selected_website.domain, 'name': selected_website.name}
             else:
                 qcontext['multi_website_selected_website'] = domain_based_info
 
-            qcontext['multi_website_websites'] = [{'id': website.id, 'name': website.name} for website in self.env['website'].search([])]
+            qcontext['multi_website_websites'] = [{'domain': website.domain, 'name': website.name} for website in Website.search([])]
             qcontext['multi_website_websites'] += [domain_based_info]
 
             qcontext.update(dict(

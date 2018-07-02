@@ -289,12 +289,12 @@ var WebsiteRoot = BodyManager.extend({
      * @param {OdooEvent} ev
      */
     _multiWebsiteSwitch: function (ev) {
-        var id_to_switch_to = ev.target.id.substring('multi_website_'.length);
-        return ajax.jsonRpc('/web/dataset/call_kw', 'call', {
-            model: 'ir.config_parameter',
-            method: 'set_param',
-            args: ['website_multi.force_website_id', id_to_switch_to],
-            kwargs: {},
+        var domain_to_switch_to = ev.target.getAttribute('domain');
+        this._rpc({
+            route: '/website/set_session_website',
+            params: {
+                domain: domain_to_switch_to || false,
+            },
         }).then(function () {
             window.location.reload(true);
         });
