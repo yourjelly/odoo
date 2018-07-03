@@ -43,21 +43,14 @@ function connect () {
 	sudo ifconfig wlan0 down
 	sudo ifconfig wlan0 0.0.0.0  # this is how you clear the interface's configuration
 	sudo ifconfig wlan0 up
+	sudo pkill wpa_supplicant
 
-    sleep 3
-    sudo wpa_cli -i wlan0 scan
-    NETWORK=$(sudo wpa_cli -i wlan0 add_network)
-    sleep 1
-    sudo wpa_cli -i wlan0 set_network ${NETWORK} ssid "${ESSID}"
-    if [ -z "${PASSWORD}" ] ; then
-		sudo wpa_cli -i wlan0 set_network ${NETWORK} key_mgmt NONE
+	if [ -z "${PASSWORD}" ] ; then
+		sudo iwconfig wlan0 essid "${ESSID}"
 	else
-	    sudo wpa_cli -i wlan0 set_network ${NETWORK} key_mgmt WPA2
-	    sudo wpa_cli -i wlan0 set_network ${NETWORK} password "${PASSWORD}"
-    fi
-    sudo wpa_cli -i wlan0 enable_network ${NETWORK}
-    #sudo wpa_supplicant -B -i wlan0 -c "${WPA_PASS_FILE}"
-
+		sudo wpa_passphrase "${ESSID}" "${PASSWORD}" > "${WPA_PASS_FILE}"
+		sudo wpa_supplicant -B -i wlan0 -c "${WPA_PASS_FILE}"
+	fi
 
 	sudo service dhcpcd restart
 
