@@ -918,7 +918,7 @@ class Menu(models.Model):
         item website-specific menu items will be created.'''
         current_website_id = self._context.get('website_id')
 
-        if current_website_id and not self._context.get('no_cow') and self.env['website'].search_count([]) > 1:
+        if current_website_id and not self._context.get('no_cow'):
             for menu in self.filtered(lambda menu: not menu.website_id):
                 for website in self.env['website'].search([('id', '!=', current_website_id)]):
                     # reuse the COW mechanism to create website-specific copies
@@ -934,8 +934,7 @@ class Menu(models.Model):
         '''
         current_website_id = self._context.get('website_id')
 
-        # if generic menu in multi-website context
-        if current_website_id and not self.website_id and not self._context.get('no_cow') and self.env['website'].search_count([]) > 1:
+        if current_website_id and not self.website_id and not self._context.get('no_cow'):
             new_website_specific_menu = self.copy({'website_id': current_website_id})
 
             for child in self.child_id:
