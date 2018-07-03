@@ -527,4 +527,9 @@
             <field name="url">/website/static/src/img/snippets_demo/s_team_member_4.png</field>
         </record>
     </data>
+    <data>
+        <record id="group_multi_website" model="res.groups">
+            <field name="name">Multi-website</field>
+        </record>
+    </data>
 </odoo>

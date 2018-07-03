@@ -241,7 +241,8 @@
                 <attribute name="context">{'display_website': True}</attribute>
             </field>
             <field name="origin" position="after">
-                <field name="website_id"/>
+                <!-- todo jov this will be replaced with a related to the partner -->
+                <field name="website_id" groups="website.group_multi_website"/>
             </field>
         </field>
     </record>

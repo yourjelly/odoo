@@ -96,7 +96,7 @@
                                 <field name="url_to"/>
                             </group>
                             <group>
-                                <field name="website_id"/>
+                                <field name="website_id" groups="website.group_multi_website"/>
                                 <field name="active"/>
                             </group>
                         </group>
@@ -113,7 +113,7 @@
                     <field name="type"/>
                     <field name="url_from"/>
                     <field name="url_to"/>
-                    <field name="website_id"/>
+                    <field name="website_id" groups="website.group_multi_website"/>
                     <field name="active"/>
                     <field name="sequence" widget="handle" />
                 </tree>
@@ -143,7 +143,7 @@
                                 <field name="url"/>
                                 <field name="view_id"/>
                                 <field groups="base.group_no_one" name="is_published"/>
-                                <field groups="base.group_no_one" name="website_id"/>  <!-- todo jov this field will disappear -->
+                                <field groups="website.group_multi_website" name="website_id"/>
                             </group>
                             <group>
                                 <field name="website_indexed"/>
@@ -199,7 +199,7 @@
                             <group>
                                 <field name="new_window"/>
                                 <field name="sequence"/>
-                                <field name="website_id"/>
+                                <field name="website_id" groups="website.group_multi_website"/>
                             </group>
                             <group>
                                 <field name="parent_id"/>
@@ -225,7 +225,7 @@
             <field name="arch" type="xml">
                 <tree string="Website menu" editable="bottom">
                     <field name="sequence" widget="handle"/>
-                    <field name="website_id" options="{'no_create': True}"/>
+                    <field name="website_id" options="{'no_create': True}" groups="website.group_multi_website"/>
                     <field name="name"/>
                     <field name="url"/>
                     <field name="new_window"/>
@@ -269,7 +269,7 @@
             <field name="inherit_id" ref="base.view_view_form"/>
             <field name="arch" type="xml">
                 <field name="name" position="after">
-                    <field name="website_id"/>
+                    <field name="website_id" groups="website.group_multi_website"/>
                     <field name="theme_id" groups="base.group_no_one"/>
                     <field name="key" readonly="1"/>
                     <field name="page_ids" invisible="1" />

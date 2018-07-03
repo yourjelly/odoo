@@ -44,6 +44,8 @@ class ResConfigSettings(models.TransientModel):
     has_google_analytics_dashboard = fields.Boolean("Google Analytics in Dashboard", config_parameter='website.has_google_analytics_dashboard')
     has_google_maps = fields.Boolean("Google Maps", config_parameter='website.has_google_maps')
 
+    group_multi_website = fields.Boolean("Multi-website", implied_group="website.group_multi_website")
+
     @api.onchange('has_google_analytics')
     def onchange_has_google_analytics(self):
         if not self.has_google_analytics:

@@ -71,7 +71,7 @@
                     <li class="o_mobile_preview" id="mobile-menu">
                         <a data-action="show-mobile-preview" href="#"><span title="Mobile preview" role="img" aria-label="Mobile preview" class="fa fa-mobile"/></a>
                     </li>
-                    <li class="dropdown">
+                    <li class="dropdown" groups="website.group_multi_website">
                         <a class="dropdown-toggle waves" data-toggle="dropdown" href="#"><t t-esc="multi_website_selected_website['name']"/> <span class="caret"/></a>
                         <ul class="dropdown-menu" role="menu">
                             <li t-as="multi_website_website" t-foreach="multi_website_websites">

@@ -144,6 +144,16 @@ var PagePropertiesDialog = weWidgets.Dialog.extend({
             });
         }));
 
+        defs.push(this._rpc({model: 'res.users',
+                             method: 'has_group',
+                             args: ['website.group_multi_website'],
+                             context: context})
+                  .then(function (has_group) {
+                      if (!has_group) {
+                          self.$('#website_restriction').addClass('hidden');
+                      }
+                  }));
+
         var datepickersOptions = {
             minDate: moment({y: 1900}),
             maxDate: moment().add(200, 'y'),
