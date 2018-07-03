@@ -2447,11 +2447,11 @@ QUnit.module('basic_fields', {
                 time_format: '%H:%M',
             },
         });
-        testUtils.patch(basicFields.FieldDate, {
-            _setValue: function () {
-                throw "The time format of the language must be taken into account.";
-            },
-        });
+        // testUtils.patch(basicFields.FieldDate, {
+        //     _setValue: function () {
+        //         throw "The time format of the language must be taken into account.";
+        //     },
+        // });
         form.$buttons.find('.o_form_button_create').click();
         var expectedDateString = "08/02/2017 12:00"; // 10:00:00 without timezone
         assert.strictEqual(form.$('.o_field_date input').val(), expectedDateString,
