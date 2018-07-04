@@ -48,6 +48,7 @@ pip3 install simplejson
 pip3 install unittest2
 pip3 install passlib
 pip3 install libsass
+pip3 install gatt
 
 # --upgrade because websocket_client in wheezy is bad:
 # https://github.com/docker/compose/issues/1288

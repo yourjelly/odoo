@@ -249,8 +249,8 @@ dm = DeviceManager(adapter_name='hci0')
 dm2 = DM2()
 dm2.daemon = True
 dm2.start()
-dm.start_discovery()
-dm.run()
+#dm.start_discovery()
+#dm.run()
 print("AFTER RUN")
 
 #if __name__ == '__main__':
