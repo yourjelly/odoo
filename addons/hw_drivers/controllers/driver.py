@@ -116,7 +116,7 @@ class USBDeviceManager(Thread):
                         drivers[path] = d
                         # launch thread
                         d.daemon = True
-                        d.run()
+                        d.start()
                     else:
                         if path in drivers:
                             del drivers[path]
