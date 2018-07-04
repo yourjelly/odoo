@@ -23,22 +23,6 @@ class StatusController(http.Controller):
         return result
 
 #----------------------------------------------------------
-# Driver controller
-#----------------------------------------------------------
-#class ScaleDriver(hw_proxy.Proxy):
-#    @http.route('/hw_drivers/list', type='json', auth='none', cors='*')
-#    def value(self, path):
-#        pass
-
-#    @http.route('/hw_drivers/value/<path>', type='json', auth='none', cors='*')
-#    def value(self, path):
-#        pass
-
-#    @http.route('/hw_drivers/action/path', type='json', auth='none', cors='*')
-#    def scale_zero(self, path, action):
-#        pass
-
-#----------------------------------------------------------
 # Driver common interface
 #----------------------------------------------------------
 class Driver(Thread):
@@ -109,6 +93,76 @@ class SylvacUSBDriver(USBDriver):
     def action(self, action):
         pass
 
+class USBDeviceManager(Thread):
+    def run(self):
+        while 1:
+            devs = usb.core.find(find_all=True)
+            updated_devices = {}
+            for dev in devs:
+                path =  "usb/%03d/%03d/%04x:%04x" % (dev.bus, dev.address, dev.idVendor, dev.idProduct)
+                updated_devices[path] = self.devices.get(path, dev)
+            added = updated_devices.keys() - self.devices.keys()
+            removed = self.devices.keys() - updated_devices.keys()
+            self.devices = updated_devices
+            print('added %s removed %s'%(added, removed))
+            print(len(self.devices))
+            for path in added:
+                for driverclass in usbdrivers:
+                    _logger.info('For device %s checking driver %s', path, driverclass)
+                    d = driverclass(updated_devices[path])
+                    if d.supported():
+                        _logger.info('For device %s will be driven', path)
+                        drivers[path] = d
+                        # launch thread
+                        d.daemon = True
+                        d.run()
+                    else:
+                        if path in drivers:
+                            del drivers[path]
+                        del d
+            time.sleep(3)
+
+udm = USBDeviceManager()
+udm.daemon = True
+udm.start()
+
+
+#----------------------------------------------------------
+# Bluetooth
+#----------------------------------------------------------
+class DeviceManager(gatt.DeviceManager):
+    devices = {}
+
+    def device_discovered(self, device):
+        # TODO: need some kind of updated_devices mechanism or not?
+        for driverclass in btdrivers:
+            d = driverclass(mac_address = device.mac_address, manager=self)
+            path = "bt/%s/%s" % (device.mac_address, device.alias())
+            if d.supported():
+                if path not in drivers:
+                    drivers[path] = d
+                    d.connect()
+                    print("New Driver", path, drivers)
+                    #d.daemon=True
+                    #d.run()
+                #Otherwise, we should try to reanimate driver
+                #else:
+                #    print('Weird error with driver')
+                #    drivers[path].run()
+            #else:
+            #    if path in drivers:
+            #        print("Del driver", path)
+            #        del drivers[path]
+            #    del d
+        #print("Discovered [%s] %s" % (device.mac_address, device.alias()))
+
+
+
+
+
+#----------------------------------------------------------
+# Bluetooth drivers
+#----------------------------------------------------------
 
 btdrivers = []
 
@@ -175,86 +229,17 @@ class SylvacBluetoothDriver(BtDriver, gatt.Device):
 
 
 #----------------------------------------------------------
-# Bluetooth drivers
-#----------------------------------------------------------
-
-#----------------------------------------------------------
-# DeviceManager
-#----------------------------------------------------------
-class DeviceManager(gatt.DeviceManager):
-    devices = {}
-
-    def main(self):
-        while 1:
-            devs = usb.core.find(find_all=True)
-            updated_devices = {}
-            for dev in devs:
-                path =  "usb/%03d/%03d/%04x:%04x" % (dev.bus, dev.address, dev.idVendor, dev.idProduct)
-                updated_devices[path] = self.devices.get(path, dev)
-            added = updated_devices.keys() - self.devices.keys()
-            removed = self.devices.keys() - updated_devices.keys()
-            self.devices = updated_devices
-            print('added %s removed %s'%(added, removed))
-            print(len(self.devices))
-            for path in added:
-                for driverclass in usbdrivers:
-                    _logger.info('For device %s checking driver %s', path, driverclass)
-                    d = driverclass(updated_devices[path])
-                    if d.supported():
-                        _logger.info('For device %s will be driven', path)
-                        drivers[path] = d
-                        # launch thread
-                        d.daemon = True
-                        d.run()
-                    else:
-                        if path in drivers:
-                            del drivers[path]
-                        del d
-            time.sleep(3)
-
-
-    def device_discovered(self, device):
-        # TODO: need some kind of updated_devices mechanism or not?
-        for driverclass in btdrivers:
-            d = driverclass(mac_address = device.mac_address, manager=self)
-            path = "bt/%s/%s" % (device.mac_address, device.alias())
-            if d.supported():
-                if path not in drivers:
-                    drivers[path] = d
-                    d.connect()
-                    print("New Driver", path, drivers)
-                    #d.daemon=True
-                    #d.run()
-                #Otherwise, we should try to reanimate driver
-                #else:
-                #    print('Weird error with driver')
-                #    drivers[path].run()
-            #else:
-            #    if path in drivers:
-            #        print("Del driver", path)
-            #        del drivers[path]
-            #    del d
-        #print("Discovered [%s] %s" % (device.mac_address, device.alias()))
-
-
-class DM2(Thread):
-    def run(self):
-        dm.main()
-
-#----------------------------------------------------------
 # Agent ? Push values
 #----------------------------------------------------------
 # SDQFSQDFQSDF
-dm = DeviceManager(adapter_name='hci0')
-dm2 = DM2()
-dm2.daemon = True
-dm2.start()
+#dm = DeviceManager(adapter_name='hci0')
+
 #dm.start_discovery()
 #dm.run()
-print("AFTER RUN")
+#print("AFTER RUN")
 
 #if __name__ == '__main__':
-print (usbdrivers)
+#print (usbdrivers)
 
 #dm.start_discovery() #bluetooth
 #dm.run() #bluetooth
