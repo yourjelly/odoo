@@ -71,6 +71,7 @@ OdooClass.extend = function() {
     var This = this;
     var prototype = new This();
     initializing = false;
+    prototype['__uid'] = _.uniqueId("_ocls_");
 
     // Copy the properties over onto the new prototype
     _.each(prop, function(val, name) {
