@@ -40,6 +40,13 @@
         }
     }
 
+    .o_kanban_header{
+        position: sticky;
+        top: 0;
+        background-color: $gray-lighter;
+        z-index:5;
+    }
+
     .o_kanban_record {
         position: relative;
         display: inline-block; // Force the creation of a block formatting context to clear float items
@@ -423,6 +430,8 @@
             white-space: nowrap;
             color: $text-muted;
             opacity: 0.6;
+            position: sticky;
+            top: 0px;
             &:hover {
                 opacity: 1;
             }
