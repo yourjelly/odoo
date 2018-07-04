@@ -7,7 +7,6 @@ import serial
 import gatt
 from odoo import http
 
-
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
 _logger = logging.getLogger('dispatcher')
 
@@ -19,7 +18,8 @@ class StatusController(http.Controller):
         result = "<html><head></head><body>List of drivers and values: <br/> <ul>"
         for path in drivers:
             result += "<li>" + path + ":" + str(drivers[path].value) + "</li>"
-        result += "</ul></body></html>"
+        result += "</ul>"
+        result +=" </body></html>"
         return result
 
 #----------------------------------------------------------
@@ -94,6 +94,7 @@ class SylvacUSBDriver(USBDriver):
         pass
 
 class USBDeviceManager(Thread):
+    devices = {}
     def run(self):
         while 1:
             devs = usb.core.find(find_all=True)
@@ -131,7 +132,7 @@ udm.start()
 # Bluetooth
 #----------------------------------------------------------
 class DeviceManager(gatt.DeviceManager):
-    devices = {}
+
 
     def device_discovered(self, device):
         # TODO: need some kind of updated_devices mechanism or not?
