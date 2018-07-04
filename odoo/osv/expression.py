@@ -444,7 +444,7 @@ def select_from_where(cr, select_field, from_table, where_field, where_ids, wher
         else:
             q = query.Select([c1])
             for i in range(0, len(where_ids), cr.IN_MAX):
-                cr.execute(q.where(c1._in(where_ids[i:i + cr.IN_MAX])).to_sql())
+                cr.execute(q.where(c1.in_(where_ids[i:i + cr.IN_MAX])).to_sql())
                 res.extend([r[0] for r in cr.fetchall()])
     return res
 
