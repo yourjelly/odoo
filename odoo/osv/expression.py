@@ -121,7 +121,7 @@ from functools import partial
 from zlib import crc32
 
 import odoo.modules
-from odoo.tools import pycompat
+from odoo.tools import pycompat, query
 from ..models import MAGIC_COLUMNS, BaseModel
 import odoo.tools as tools
 
@@ -430,21 +430,21 @@ def is_leaf(element, internal=False):
 # --------------------------------------------------
 # SQL utils
 # --------------------------------------------------
-
 def select_from_where(cr, select_field, from_table, where_field, where_ids, where_operator):
     # todo: merge into parent query as sub-query
     res = []
     if where_ids:
+        r = query.Row(from_table)
+        c1 = getattr(r, select_field)
+        c2 = getattr(r, where_field)
         if where_operator in ['<', '>', '>=', '<=']:
-            cr.execute('SELECT "%s" FROM "%s" WHERE "%s" %s %%s' % \
-                (select_field, from_table, where_field, where_operator),
-                (where_ids[0],))  # TODO shouldn't this be min/max(where_ids) ?
+            expr = query.Expression(where_operator, c2, where_ids[0])
+            cr.execute(query.Select([c1], expr).to_sql())
             res = [r[0] for r in cr.fetchall()]
-        else:  # TODO where_operator is supposed to be 'in'? It is called with child_of...
+        else:
+            q = query.Select([c1])
             for i in range(0, len(where_ids), cr.IN_MAX):
-                subids = where_ids[i:i + cr.IN_MAX]
-                cr.execute('SELECT "%s" FROM "%s" WHERE "%s" IN %%s' % \
-                    (select_field, from_table, where_field), (tuple(subids),))
+                cr.execute(q.where(c1._in(where_ids[i:i + cr.IN_MAX])).to_sql())
                 res.extend([r[0] for r in cr.fetchall()])
     return res
 
