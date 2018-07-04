@@ -439,12 +439,12 @@ def select_from_where(cr, select_field, from_table, where_field, where_ids, wher
         c2 = getattr(r, where_field)
         if where_operator in ['<', '>', '>=', '<=']:
             expr = query.Expression(where_operator, c2, where_ids[0])
-            cr.execute(query.Select([c1], expr).to_sql())
+            cr.execute(*query.Select([c1], expr).to_sql())
             res = [r[0] for r in cr.fetchall()]
         else:
             q = query.Select([c1])
             for i in range(0, len(where_ids), cr.IN_MAX):
-                cr.execute(q.where(c1.in_(where_ids[i:i + cr.IN_MAX])).to_sql())
+                cr.execute(*q.where(c1.in_(where_ids[i:i + cr.IN_MAX])).to_sql())
                 res.extend([r[0] for r in cr.fetchall()])
     return res
 
