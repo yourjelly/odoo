@@ -198,10 +198,9 @@ ListRenderer.include({
 
         // store the cursor position to restore it once potential onchanges have
         // been applied
-        var currentRowID, currentWidget, focusedElement, selectionRange;
-        if (self.currentRow !== null) {
-            currentRowID = self.getRecordId(this.currentRow);
-            currentWidget = this.allFieldWidgets[currentRowID][this.currentFieldIndex];
+        var currentWidget, focusedElement, selectionRange;
+        if (self.currentRowID !== null) {
+            currentWidget = this.allFieldWidgets[self.currentRowID][this.currentFieldIndex];
             if (currentWidget) {
                 focusedElement = currentWidget.getFocusableElement().get(0);
                 if (currentWidget.formatType !== 'boolean') {
@@ -237,13 +236,12 @@ ListRenderer.include({
                 self._registerModifiers(node, record, null, {mode: 'edit'});
             });
             self.$('tbody').replaceWith($body);
-            var newRowIndex = $editRow.prop('rowIndex') - 1;
-            if (self.currentRow !== null) {
-                self.currentRow = newRowIndex;
-                return self._selectCell(newRowIndex, self.currentFieldIndex, {force: true}).then(function () {
+            var newRowId = $editRow.data('id');
+            if (self.currentRowID !== null) {
+                self.currentRowID = newRowId;
+                return self._selectCell(newRowId, self.currentFieldIndex, {force: true}).then(function () {
                     // restore the cursor position
-                    currentRowID = self.getRecordId(newRowIndex);
-                    currentWidget = self.allFieldWidgets[currentRowID][self.currentFieldIndex];
+                    currentWidget = self.allFieldWidgets[self.currentRowID][self.currentFieldIndex];
                     if (currentWidget) {
                         focusedElement = currentWidget.getFocusableElement().get(0);
                         if (selectionRange) {
@@ -260,9 +258,7 @@ ListRenderer.include({
      * @param {string} recordID
      */
     editRecord: function (recordID) {
-        var $row = this.getRow(recordID);
-        var rowIndex = $row.prop('rowIndex') - 1;
-        this._selectCell(rowIndex, 0);
+        this._selectCell(recordID, 0);
     },
     /**
      * Returns the recordID associated to the line which is currently in edition
@@ -271,8 +267,8 @@ ListRenderer.include({
      * @returns {string|null}
      */
     getEditableRecordID: function () {
-        if (this.currentRow !== null) {
-            return this.getRecordId(this.currentRow);
+        if (this.currentRowID !== null) {
+            return this.currentRowID;
         }
         return null;
     },
@@ -289,8 +285,8 @@ ListRenderer.include({
         if ($row.length === 0) {
             return;
         }
-        if ($row.prop('rowIndex') - 1 === this.currentRow) {
-            this.currentRow = null;
+        if (recordID === this.currentRowID) {
+            this.currentRowID = null;
         }
         // TODO: RGA: when we discard first row and it replace with EmptyRow that's not we want to do.
         if (this.state.count >= 4) {
@@ -322,7 +318,7 @@ ListRenderer.include({
             return $.when();
         }
         var editMode = (mode === 'edit');
-        this.currentRow = editMode ? $row.prop('rowIndex') - 1 : null;
+        this.currentRowID = editMode ? recordID : null;
         var $tds = $row.children('.o_data_cell');
         var oldWidgets = _.clone(this.allFieldWidgets[record.id]);
 
@@ -396,16 +392,15 @@ ListRenderer.include({
      */
     unselectRow: function () {
         // Protect against calling this method when no row is selected
-        if (this.currentRow === null) {
+        if (this.currentRowID === null) {
             return $.when();
         }
-        var recordID = this.getRecordId(this.currentRow);
-        var recordWidgets = this.allFieldWidgets[recordID];
+        var recordWidgets = this.allFieldWidgets[this.currentRowID];
         toggleWidgets(true);
 
         var def = $.Deferred();
         this.trigger_up('save_line', {
-            recordID: recordID,
+            recordID: this.currentRowID,
             onSuccess: def.resolve.bind(def),
             onFailure: def.reject.bind(def),
         });
@@ -463,14 +458,13 @@ ListRenderer.include({
     /**
      *
      * @private
-     * @param {integer} index
+     * @param {string} recordID
      * @param {object} options
      * @param {position} [options.position] position previous and next
      * @param {group} [options.group] length of group
      * @returns {integer}
      */
-    _getNavigationIndex: function (index, options) {
-        var recordID = this.getRecordId(index);
+    _getNavigationIndex: function (recordID, options) {
         var recordList = this.getRecordList();
         var newIndex;
         var indexPos = recordList.indexOf(recordID);
@@ -480,8 +474,7 @@ ListRenderer.include({
             newIndex = options.group ? (indexPos === 0) && recordList.length - 1 || indexPos - 1 : indexPos - 1;
         }
         var $row = this.getRow(recordList[newIndex]);
-        var rowIndex = $row.prop('rowIndex') - 1;
-        return rowIndex;
+        return $row.data('id') || 0;
     },
     /**
      * Move the cursor on the end of the previous line, if possible.
@@ -490,12 +483,12 @@ ListRenderer.include({
      * @private
      */
     _moveToPreviousLine: function () {
-        var prevRowIndex = this._getNavigationIndex(this.currentRow, {
+        var prevRowId = this._getNavigationIndex(this.currentRowID, {
             position: 'previous',
             group: this.state.groupedBy.length
         });
-        if (prevRowIndex >= 0) {
-            this._selectCell(prevRowIndex, this.columns.length - 1);
+        if (prevRowId !== 0) {
+            this._selectCell(prevRowId, this.columns.length - 1);
         } else {
             this.unselectRow().then(this.trigger_up.bind(this, 'add_record'));
         }
@@ -507,22 +500,21 @@ ListRenderer.include({
      * @private
      */
     _moveToNextLine: function () {
-        var recordID = this.getRecordId(this.currentRow);
-        var fieldNames = this.canBeSaved(recordID);
+        var fieldNames = this.canBeSaved(this.currentRowID);
         if (fieldNames.length) {
             return;
         }
-        var nextRowIndex = this._getNavigationIndex(this.currentRow, {
+        var nextRowId = this._getNavigationIndex(this.currentRowID, {
             position: 'next',
             group: this.state.groupedBy.length
         });
-        if (nextRowIndex >= 0) {
-            this._selectCell(nextRowIndex, 0);
+        if (nextRowId !== 0) {
+            this._selectCell(nextRowId, 0);
         } else {
             var self = this;
             this.unselectRow().then(function () {
                 self.trigger_up('add_record', {
-                    onFail: self._selectCell.bind(self, 0, 0, {}),
+                    onFail: self._selectCell.bind(self, self.getRecordId(0), 0, {}),
                 });
             });
         }
@@ -532,7 +524,7 @@ ListRenderer.include({
      * @returns {Deferred}
      */
     _render: function () {
-        this.currentRow = null;
+        this.currentRowID = null;
         this.currentFieldIndex = null;
         return this._super.apply(this, arguments);
     },
@@ -605,7 +597,7 @@ ListRenderer.include({
      */
     _renderView: function () {
         var self = this;
-        this.currentRow = null;
+        this.currentRowID = null;
         return this._super.apply(this, arguments).then(function () {
             if (self._isEditable()) {
                 self.$('table').addClass('o_editable_list');
@@ -679,7 +671,7 @@ ListRenderer.include({
      * unselect the current row, and activate the line where the selected cell
      * is, if necessary.
      *
-     * @param {integer} rowIndex
+     * @param {string} rowID
      * @param {integer} fieldIndex
      * @param {Object} [options]
      * @param {Event} [options.event] original target of the event which
@@ -692,19 +684,18 @@ ListRenderer.include({
      *   rendering, to reset the focus on the correct field)
      * @return {Deferred} fails if no cell could be selected
      */
-    _selectCell: function (rowIndex, fieldIndex, options) {
+    _selectCell: function (rowID, fieldIndex, options) {
         options = options || {};
         // Do nothing if the user tries to select current cell
-        if (!options.force && rowIndex === this.currentRow && fieldIndex === this.currentFieldIndex) {
+        if (!options.force && rowID === this.currentRowID && fieldIndex === this.currentFieldIndex) {
             return $.when();
         }
         var wrap = options.wrap === undefined ? true : options.wrap;
 
         // Select the row then activate the widget in the correct cell
         var self = this;
-        return this._selectRow(rowIndex).then(function () {
-            var recordID = self.getRecordId(rowIndex);
-            var record = self.getRecord(recordID);
+        return this._selectRow(rowID).then(function () {
+            var record = self.getRecord(rowID);
             if (fieldIndex >= (self.allFieldWidgets[record.id] || []).length) {
                 return $.Deferred().reject();
             }
@@ -726,21 +717,20 @@ ListRenderer.include({
         });
     },
     /**
-     * Activates the row at the given row index.
+     * Activates the row at the given row id.
      *
-     * @param {integer} rowIndex
+     * @param {string} rowID
      * @returns {Deferred}
      */
-    _selectRow: function (rowIndex) {
+    _selectRow: function (rowID) {
         // Do nothing if already selected
-        if (rowIndex === this.currentRow) {
+        if (rowID === this.currentRowID) {
             return $.when();
         }
-        var recrodID = this.getRecordId(rowIndex);
         // To select a row, the currently selected one must be unselected first
         var self = this;
         return this.unselectRow().then(function () {
-            if (!recrodID) {
+            if (!rowID) {
                 // The row to selected doesn't exist anymore (probably because
                 // an onchange triggered when unselecting the previous one
                 // removes rows)
@@ -749,7 +739,7 @@ ListRenderer.include({
             // Notify the controller we want to make a record editable
             var def = $.Deferred();
             self.trigger_up('edit_line', {
-                recrodID: recrodID,
+                recrodID: rowID,
                 onSuccess: def.resolve.bind(def),
             });
             return def;
@@ -815,9 +805,9 @@ ListRenderer.include({
         }
         var $td = $(event.currentTarget);
         var $tr = $td.parent();
-        var rowIndex = $tr.prop('rowIndex') - 1;
+        var rowID = $tr.data('id');
         var fieldIndex = Math.max($tr.find('.o_data_cell').not('.o_list_button').index($td), 0);
-        this._selectCell(rowIndex, fieldIndex, {event: event});
+        this._selectCell(rowID, fieldIndex, {event: event});
     },
     /**
      * We need to manually unselect row, because noone else would do it
@@ -849,8 +839,7 @@ ListRenderer.include({
      * @returns {Class} Widget returns first widget
      */
     _getFirstWidget: function () {
-        var recordID = this.getRecordId(this.currentRow);
-        var recordWidgets = this.allFieldWidgets[recordID];
+        var recordWidgets = this.allFieldWidgets[this.currentRowID];
         var firstWidget = _.find(recordWidgets, function (widget) {
             var isFirst = widget.$el.is(':visible') && 
                                 (widget.$el.has('input').length > 0 ||
@@ -884,30 +873,34 @@ ListRenderer.include({
      */
     _onNavigationMove: function (ev) {
         ev.stopPropagation(); // stop the event, the action is done by this renderer
+        var $row = this.getRow(this.currentRowID);
+        var rowIndex =  $row.prop('rowIndex') - 1;
         switch (ev.data.direction) {
             case 'up':
-                if (this.currentRow > 0) {
-                    this._selectCell(this.currentRow - 1, this.currentFieldIndex);
+                if (rowIndex > 0) {
+                    var prevRowId = this.getRecordId(rowIndex-1);
+                    this._selectCell(prevRowId, this.currentFieldIndex);
                 }
                 break;
             case 'right':
                 if (this.currentFieldIndex + 1 < this.columns.length) {
-                    this._selectCell(this.currentRow, this.currentFieldIndex + 1);
+                    this._selectCell(this.currentRowID, this.currentFieldIndex + 1);
                 }
                 break;
             case 'down':
-                if (this.currentRow < this.$('table.o_list_view > tbody tr').length - 1) {
-                    this._selectCell(this.currentRow + 1, this.currentFieldIndex);
+                if (rowIndex < this.$('table.o_list_view > tbody tr').length - 1) {
+                    var nextRowId = this.getRecordId(rowIndex+1);
+                    this._selectCell(nextRowId, this.currentFieldIndex);
                 }
                 break;
             case 'left':
                 if (this.currentFieldIndex > 0) {
-                    this._selectCell(this.currentRow, this.currentFieldIndex - 1);
+                    this._selectCell(this.currentRowID, this.currentFieldIndex - 1);
                 }
                 break;
             case 'previous':
                 if (this.currentFieldIndex > 0) {
-                    this._selectCell(this.currentRow, this.currentFieldIndex - 1, {wrap: false})
+                    this._selectCell(this.currentRowID, this.currentFieldIndex - 1, {wrap: false})
                         .fail(this._moveToPreviousLine.bind(this));
                 } else {
                     this._moveToPreviousLine();
@@ -922,7 +915,7 @@ ListRenderer.include({
                     this.trigger_up('activate_next_widget');
                 } else {
                     if (this.currentFieldIndex + 1 < this.columns.length) {
-                        this._selectCell(this.currentRow, this.currentFieldIndex + 1, {wrap: false})
+                        this._selectCell(this.currentRowID, this.currentFieldIndex + 1, {wrap: false})
                             .fail(this._moveToNextLine.bind(this));
                     } else {
                         this._moveToNextLine();
@@ -972,7 +965,7 @@ ListRenderer.include({
      * @private
      */
     _onSortColumn: function () {
-        if (this.currentRow === null) {
+        if (this.currentRowID === null) {
             this._super.apply(this, arguments);
         }
     },
@@ -996,7 +989,7 @@ ListRenderer.include({
         }
 
         // there is currently no selected row
-        if (this.currentRow === null) {
+        if (this.currentRowID === null) {
             return;
         }
 
