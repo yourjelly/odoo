@@ -861,7 +861,7 @@ class Select(BaseQuery):
             # Type normalization
             # XXX: Do in __init__ ?
             val = c if not self._aliased else self._columns[c]
-            alias = " AS %s" % c if self._aliased and not isinstance(c, int) else ""
+            alias = " AS %s" % _quote(c) if self._aliased and not isinstance(c, int) else ""
 
             if isinstance(val, Row):
                 # All

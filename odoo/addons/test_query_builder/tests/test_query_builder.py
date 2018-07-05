@@ -319,7 +319,7 @@ class TestSelect(TestCase):
 
     def test_select_aliased(self):
         s = Select({'id': self.p.id})
-        res = """SELECT "a"."id" AS id FROM "res_partner" "a\""""
+        res = """SELECT "a"."id" AS "id" FROM "res_partner" "a\""""
         self.assertEqual(s.to_sql()[0], res)
 
     def test_select_all(self):
@@ -866,7 +866,7 @@ class TestSelect(TestCase):
         self.assertEqual(
             s.to_sql(),
             (
-                """SELECT "a"."id", "a"."foo" AS foo FROM "res_partner" "a\"""",
+                """SELECT "a"."id", "a"."foo" AS "foo" FROM "res_partner" "a\"""",
                 ()
             )
         )
@@ -1529,8 +1529,8 @@ class TestRealWorldCases(TestCase):
         ]))
 
         it_sql = (
-            """SELECT "a"."id", (CASE WHEN ("a"."type" = any(%s)) THEN %s ELSE %s END) AS sign """
-            """FROM "account_invoice" "a\"""", (['in_refund', 'in_invoice'], -1, 1)
+            """SELECT "a"."id", (CASE WHEN ("a"."type" = any(%s)) THEN %s ELSE %s END) """
+            """AS "sign" FROM "account_invoice" "a\"""", (['in_refund', 'in_invoice'], -1, 1)
         )
 
         self.assertEqual(it.to_sql(), it_sql)

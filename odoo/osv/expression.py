@@ -435,14 +435,12 @@ def select_from_where(cr, select_field, from_table, where_field, where_ids, wher
     res = []
     if where_ids:
         r = query.Row(from_table)
-        c1 = getattr(r, select_field)
         c2 = getattr(r, where_field)
+        q = query.Select([getattr(r, select_field)])
         if where_operator in ['<', '>', '>=', '<=']:
-            expr = query.Expression(where_operator, c2, where_ids[0])
-            cr.execute(*query.Select([c1], expr).to_sql())
+            cr.execute(*q.where(query.Expression(where_operator, c2, where_ids[0])).to_sql())
             res = [r[0] for r in cr.fetchall()]
         else:
-            q = query.Select([c1])
             for i in range(0, len(where_ids), cr.IN_MAX):
                 cr.execute(*q.where(c2.in_(tuple(where_ids[i:i + cr.IN_MAX]))).to_sql())
                 res.extend([r[0] for r in cr.fetchall()])
@@ -552,6 +550,9 @@ class ExtendedLeaf(object):
         self._models.append(model)
         # check validity
         self.check_leaf(internal)
+
+    def _get_row(self):
+        return query.Row(self.model._table)
 
     def __str__(self):
         return '<osv.ExtendedLeaf: %s on %s (ctx: %s)>' % (str(self.leaf), self.model._table, ','.join(self._get_context_debug()))
@@ -1159,6 +1160,7 @@ class expression(object):
         model = eleaf.model
         leaf = eleaf.leaf
         left, operator, right = leaf
+        row = eleaf._get_row()
 
         # final sanity checks - should never fail
         assert operator in (TERM_OPERATORS + ('inselect', 'not inselect')), \
@@ -1192,8 +1194,10 @@ class expression(object):
             if isinstance(right, bool):
                 _logger.warning("The domain term '%s' should use the '=' or '!=' operator." % (leaf,))
                 if (operator == 'in' and right) or (operator == 'not in' and not right):
+                    expr = getattr(row, left) != query.NULL
                     query = '(%s."%s" IS NOT NULL)' % (table_alias, left)
                 else:
+                    expr = getattr(row, left) == query.NULL
                     query = '(%s."%s" IS NULL)' % (table_alias, left)
                 params = []
             elif isinstance(right, (list, tuple)):
