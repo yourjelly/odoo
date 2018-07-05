@@ -114,7 +114,9 @@ class Website(models.Model):
             company = self.env['res.company'].browse(vals.get('company_id'))
             vals['user_id'] = company._get_public_user().id if company else self.env.ref('base.public_user').id
 
-        return super(Website, self).create(vals)
+        res = super(Website, self).create(vals)
+        res._bootstrap_homepage()
+        return res
 
     @api.multi
     def write(self, values):
@@ -141,6 +143,21 @@ class Website(models.Model):
     #----------------------------------------------------------
     # Page Management
     #----------------------------------------------------------
+    def _bootstrap_homepage(self):
+        standard_homepage = self.env.ref('website.homepage', raise_if_not_found=False)
+        if not standard_homepage:
+            return
+
+        new_homepage_view = '''<t name="Homepage" t-name="website.homepage%s">
+    <t t-call="website.layout">
+%s
+    </t>
+</t>''' % (self.id, self.env['ir.ui.view'].render_template('website.default_homepage', values={'website': self}).decode())
+        standard_homepage.with_context(website_id=self.id).arch_db = new_homepage_view
+
+        self.homepage_id = self.env['website.page'].search([('website_id', '=', self.id),
+                                                            ('key', '=', standard_homepage.key)])
+
     @api.model
     def new_page(self, name=False, add_menu=False, template='website.default_page', ispage=True, namespace=None):
         """ Create a new website page, and assign it a xmlid based on the given one

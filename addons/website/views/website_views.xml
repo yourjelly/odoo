@@ -14,10 +14,6 @@
             <field name="model">website</field>
             <field name="arch" type="xml">
                 <form string="Website Settings">
-                     <header>
-                        <button string="Apply" type="object" name="noop" class="oe_highlight"/>
-                        <button string="Cancel" type="object" name="noop" class="oe_link"/>
-                    </header>
                     <div name="domain">
                         <separator name="domain" string="Domain"/>
                         <group name="domain">
@@ -82,6 +78,15 @@
             </field>
         </record>
 
+        <record id="action_website_list" model="ir.actions.act_window">
+            <field name="name">Websites</field>
+            <field name="res_model">website</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_website_tree"/>
+            <field name="target">current</field>
+        </record>
+        
         <!-- website.redirect views -->
         <record id="website_redirect_form_view" model="ir.ui.view">
             <field name="name">website.redirect.form</field>
