@@ -24,7 +24,7 @@ require_command zerofree
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 __file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
 __base="$(basename ${__file} .sh)"
-__version=master-iot-qle
+__version=master-iot-jco
 
 
 MOUNT_POINT="${__dir}/root_mount"
