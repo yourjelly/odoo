@@ -718,6 +718,7 @@ class PurchaseOrderLine(models.Model):
             price_unit = self.env['product.uom']._compute_price(seller.product_uom.id, price_unit, to_uom_id=self.product_uom.id)
 
         self.price_unit = price_unit
+        self.name = seller.product_name
 
     def _suggest_quantity(self):
         '''
