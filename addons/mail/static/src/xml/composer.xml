@@ -12,6 +12,7 @@
                     <textarea class="o_input o_composer_text_field" tabindex="2" placeholder="Write something..."/>
                     <div class="o_chatter_composer_tools">
                         <button tabindex="4" class="btn btn-sm btn-icon fa fa-smile-o o_composer_button_emoji" type="button" data-toggle="popover" title="Emojis" aria-label="Emojis"/>
+                        <button tabindex="4" class="btn btn-sm btn-icon fa fa-picture-o o_composer_button_gif" type="button" data-toggle="popover" title="GIF" aria-label="GIF" />
                         <button tabindex="5" class="btn btn-sm btn-icon fa fa-paperclip o_composer_button_add_attachment" type="button" aria-label="Add attachment" title="Add attachment"/>
                         <button t-if="widget.options.isMobile" tabindex="3" class="btn btn-sm btn-icon fa fa-paper-plane-o o_composer_button_send" type="button" title="Send" aria-label="Send"/>
                     </div>
@@ -41,6 +42,28 @@
             </button>
         </t>
     </div>
+
+    <div t-name="mail.Composer.gif" class="o_mail_gif_container">
+        <div class="searchConainer">
+            <input tabindex="1" type="text" placeholder="Search on giphy..." class="o_input o_search_gif_input"/>
+        </div>
+        <div class="gifContiner"></div>
+    </div>
+
+    <t t-name="mail.Composer.gif.items">
+        <t t-if="gifs.error">
+            <p class="text-center gif-error">Something went wrong</p>
+            <p class="text-center">please check API key or internet connection</p>
+        </t>
+        <t t-elif="gifs.data.length">
+            <t t-foreach="gifs.data" t-as="gif">
+                <img class="gif_image" t-att-data-url="gif.images.fixed_height.webp" t-att-src="gif.images.fixed_width_small.webp" />
+            </t>
+        </t>
+        <t t-else="">
+            <p class="text-center gif-error">No GIF Found</p>
+        </t>
+    </t>
 
     <!--
         @param {Object[]} suggestions

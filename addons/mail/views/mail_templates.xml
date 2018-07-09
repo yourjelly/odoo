@@ -37,6 +37,7 @@
                 <script type="text/javascript" src="/mail/static/src/js/document_viewer.js"></script>
                     <!-- composers -->
                     <script type="text/javascript" src="/mail/static/src/js/composers/basic_composer.js"></script>
+                    <script type="text/javascript" src="/mail/static/src/js/composers/gif.js"></script>
                     <script type="text/javascript" src="/mail/static/src/js/composers/chatter_composer.js"></script>
                     <script type="text/javascript" src="/mail/static/src/js/composers/extended_composer.js"></script>
                     <script type="text/javascript" src="/mail/static/src/js/composers/mention_manager.js"></script>

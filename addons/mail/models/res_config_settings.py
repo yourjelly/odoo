@@ -16,6 +16,7 @@ class ResConfigSettings(models.TransientModel):
     fail_counter = fields.Integer('Fail Mail', readonly=True)
     alias_domain = fields.Char('Alias Domain', help="If you have setup a catch-all email domain redirected to "
                                "the Odoo server, enter the domain name here.", config_parameter='mail.catchall.domain')
+    giphy_key = fields.Char("GIPHY Secret Key", config_parameter='giphy.secret_key')
 
     @api.model
     def get_values(self):

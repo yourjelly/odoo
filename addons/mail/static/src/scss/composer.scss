@@ -105,6 +105,7 @@
         }
 
         .o_composer_container {
+            width: 80%;
             position: relative;
         }
 
@@ -524,5 +525,36 @@ $o-mail-attachment-margin: 5px;
         left: $grid-gutter-width*0.5;
         right: auto;
         padding: 12px 18px 11px 16px;
+    }
+}
+
+
+.o_mail_gif_container {
+    width: 100%;
+    .searchConainer {
+        padding-top: 10px;
+        padding-bottom: 5px;
+
+        input {
+            border: 1px solid #efefef;
+            padding: 5px;
+            margin: auto;
+            width: 70%;
+        }
+    }
+    .gifContiner {
+        overflow: auto;
+        white-space: nowrap;
+        padding: 5px;
+
+        .gif_image {
+            cursor: pointer;
+            display: inline-block;
+            height: 100px;
+        }
+        .gif-error {
+            padding-top: 10px;
+            font-size: 20px;
+        }
     }
 }
