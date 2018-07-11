@@ -988,6 +988,16 @@ var FieldPhone = FieldEmail.extend({
     className: 'o_field_phone',
     prefix: 'tel',
 
+    /**
+     * In readonly, VOIP not install then phone is not a link.
+     *
+     * @override
+     */
+    init: function () {
+        this._super.apply(this, arguments);
+        this.tagName = this.mode === 'readonly' ? 'span' : 'input';
+    },
+
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -1002,6 +1012,7 @@ var FieldPhone = FieldEmail.extend({
         // This class should technically be there in case of a very very long
         // phone number, but it breaks the o_row mechanism, which is more
         // important right now.
+        this.$el.removeClass('o_form_uri');
         this.$el.removeClass('o_text_overflow');
     },
 });
