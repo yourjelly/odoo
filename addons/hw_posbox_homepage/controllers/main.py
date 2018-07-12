@@ -186,7 +186,7 @@ class PosboxHomepage(odoo.addons.web.controllers.main.Home):
         return "connecting to wifi"
 
     # Set server address
-    @http.route('/server', type='http', auth='none', cors='*')
+    @http.route('/server', type='http', auth='none', website=True)
     def server(self):
         server_template = """
     <!DOCTYPE HTML>
