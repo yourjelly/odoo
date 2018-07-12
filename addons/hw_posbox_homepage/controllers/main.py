@@ -183,7 +183,7 @@ class PosboxHomepage(odoo.addons.web.controllers.main.Home):
         subprocess.call(['sudo mount -o remount,rw /'])
         subprocess.call(['echo ' + url + ' > /home/pi/odoo-remote-server.conf'])
         subprocess.call(['sudo mount -o remount,ro /'])
-        return self.server()
+        return "connecting to wifi"
 
     # Set server address
     @http.route('/server', type='http', auth='none', cors='*')
