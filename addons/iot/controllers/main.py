@@ -11,25 +11,8 @@ from odoo.http import request
 
 class IoTController(http.Controller):
 
-    @http.route('/iot1', type='http', auth='public', csrf=False)
-    def post_measurement(self, iot_identifier, device_identifier, message):
-        values = {
-            'iot_identifier': iot_identifier,
-            'device_identifier': device_identifier,
-            'message': message
-            }
-        existing_box = request.env['iot.box'].sudo().search([('identifier', '=', iot_identifier)], limit=1)
-        if existing_box:
-            values['iot_id'] = existing_box.id
-
-        existing_device = request.env['iot.device'].sudo().search([('identifier', '=', device_identifier)], limit=1)
-        if existing_device:
-            values['device_id'] = existing_device.id
-        request.env['iot.message'].sudo().create(values)
-        return 'ok'
-
     @http.route('/iot2', type='http', auth='public', csrf=False)
-    def check_device(self, iot_identifier, name, identifier):
+    def update_device(self, iot_identifier, name, identifier):
         # Search id of iotbox that corresponds to this identifier
         existing_devices = request.env['iot.device'].sudo().search([('iot_id.identifier', '=', iot_identifier),
                                                                ('identifier', '=', identifier)])
@@ -43,11 +26,15 @@ class IoTController(http.Controller):
         return 'ok'
 
     @http.route('/iot3', type='http', auth='public', csrf=False)
-    def check_box(self, name, identifier):
+    def update_box(self, name, identifier, ip):
         existing_box = request.env['iot.box'].sudo().search([('identifier', '=', identifier)])
         if not existing_box:
             request.env['iot.box'].sudo().create({
                 'name': name,
                 'identifier': identifier,
+                'ip': ip,
             })
+        else:
+            existing_box[0].ip = ip #Might set name to
+
         return 'ok'
