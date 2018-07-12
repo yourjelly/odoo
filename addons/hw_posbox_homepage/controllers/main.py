@@ -176,6 +176,64 @@ class PosboxHomepage(odoo.addons.web.controllers.main.Home):
         os.system('/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/clear_wifi_configuration.sh')
         return "configuration cleared"
 
+    @http.route('/server_connect', type='http', auth='none', cors='*', csrf=False)
+    def connect_to_server(self, url):
+        subprocess.call(['/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/connect_to_server.sh', url])
+        return "connecting to server"
+
+    # Set server address
+    @http.route('/server', type='http', auth='none', website=True)
+    def server(self):
+        server_template = """
+    <!DOCTYPE HTML>
+    <html>
+        <head>
+            <title>IoT -> Odoo server configuration</title>
+        """ + index_style + """
+        </head>
+        <body>
+            <h1>Configure Odoo server</h1>
+            <p>
+            Here you can configure how the still hidden IoT sauce on your IoT infiltrated posbox
+            can connect with the Odoo server. 
+            </p>
+            <form action='/server_connect' method='POST'>
+                <table>
+                    <tr>
+                        <td>
+                            Server URL:
+                        </td>
+                        <td>
+                            <input type="text" name="url">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td/>
+                        <td>
+                            <input type="submit" value="connect"/>
+                        </td>
+                    </tr>
+                </table>
+                <p>
+                Your current server is: 
+        """
+
+        try:
+            f = open('/home/pi/odoo-remote-server.conf', 'r')
+            for line in f:
+                server_template += line
+            f.close()
+        except:
+            server_template += "No server configured yet"
+
+        server_template += """
+            </p>
+            </form>
+        </body>
+    </html>
+        """
+        return server_template
+
     @http.route('/remote_connect', type='http', auth='none', cors='*')
     def remote_connect(self):
         ngrok_template = """

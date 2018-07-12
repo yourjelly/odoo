@@ -22,6 +22,13 @@ class StatusController(http.Controller):
         result +=" </body></html>"
         return result
 
+
+    @http.route('/driverdetails/<string:identifier>', type='http', auth='none', cors='*')
+    def statusdetail(self, identifier):
+        #if identifier[:3] == 'usb':
+        #    drivers.keys().filtered(lambda d: d[:13] == identifier)
+        return "On est bien dans la route" + identifier
+
 #----------------------------------------------------------
 # Driver common interface
 #----------------------------------------------------------
@@ -100,7 +107,7 @@ class USBDeviceManager(Thread):
             devs = usb.core.find(find_all=True)
             updated_devices = {}
             for dev in devs:
-                path =  "usb/%03d/%03d/%04x:%04x" % (dev.bus, dev.address, dev.idVendor, dev.idProduct)
+                path =  "usb/%04x:%04x/%03d/%03d/" % (dev.idVendor, dev.idProduct, dev.bus, dev.address)
                 updated_devices[path] = self.devices.get(path, dev)
             added = updated_devices.keys() - self.devices.keys()
             removed = self.devices.keys() - updated_devices.keys()
@@ -113,6 +120,7 @@ class USBDeviceManager(Thread):
                     d = driverclass(updated_devices[path])
                     if d.supported():
                         _logger.info('For device %s will be driven', path)
+                        send_device("To be completed", "%04x:%04x" % (dev.idVendor, dev.idProduct))
                         drivers[path] = d
                         # launch thread
                         d.daemon = True
@@ -122,6 +130,56 @@ class USBDeviceManager(Thread):
                             del drivers[path]
                         del d
             time.sleep(3)
+
+# Part that sends stuff to the internet
+from urllib import request, parse
+from uuid import getnode as get_mac
+import netifaces as ni
+mac = get_mac()
+server = "" # read from file
+url = ""
+try:
+    f = open('/home/pi/odoo-remote-server.conf', 'r')
+    for line in f:
+        server += line
+    f.close()
+except:
+    pass
+
+if server: #TODO: Needs try catches too, because server might not be available e.g.
+    server = server.split('\n')[0]
+    url = server + "/iot3/"#/check_box"
+    interfaces = ni.interfaces()
+    ips = []
+    for iface_id in interfaces:
+        iface_obj = ni.ifaddresses(iface_id)
+        ifconfigs = iface_obj.get(ni.AF_INET, [])
+        for conf in ifconfigs:
+            if conf.get('addr'):
+                ips.append(conf.get('addr'))
+    values = {'name': "IoT-on-laptop", 'identifier': mac, 'ip': ips}
+
+    data = parse.urlencode(values).encode()
+    req =  request.Request(url, data=data)
+    try:
+        response = request.urlopen(req)
+    except:
+        _logger.warning('Could not reach configured server')
+
+
+def send_device(name, identifier):
+    if server:
+        url = server + "/iot2/"  # /check_device"
+        values = {'iot_identifier': mac,
+                  'name': name,
+                  'identifier': identifier}
+        data = parse.urlencode(values).encode()
+        req = request.Request(url, data=data)
+        try:
+            response = request.urlopen(req)
+        except:
+            _logger.warning('Could not reach configured server')
+
 
 udm = USBDeviceManager()
 udm.daemon = True
