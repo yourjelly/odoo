@@ -3172,7 +3172,7 @@ QUnit.module('basic_fields', {
     QUnit.module('PhoneWidget');
 
     QUnit.test('phone field in form view on extra small screens', function (assert) {
-        assert.expect(7);
+        assert.expect(5);
 
         var form = createView({
             View: FormView,
@@ -3193,13 +3193,11 @@ QUnit.module('basic_fields', {
             },
         });
 
-        var $phoneLink = form.$('a.o_form_uri.o_field_widget');
+        var $phoneLink = form.$('.o_field_widget');
         assert.strictEqual($phoneLink.length, 1,
-            "should have a anchor with correct classes");
+            "should have a with correct classes");
         assert.strictEqual($phoneLink.text(), 'yop',
             "value should be displayed properly");
-        assert.strictEqual($phoneLink.attr('href'), 'tel:yop',
-            "should have proper tel prefix");
 
         // switch to edit mode and check the result
         form.$buttons.find('.o_form_button_edit').click();
@@ -3213,17 +3211,15 @@ QUnit.module('basic_fields', {
 
         // save
         form.$buttons.find('.o_form_button_save').click();
-        $phoneLink = form.$('a.o_form_uri.o_field_widget');
+        $phoneLink = form.$('.o_field_widget');
         assert.strictEqual($phoneLink.text(), 'new',
             "new value should be displayed properly");
-        assert.strictEqual($phoneLink.attr('href'), 'tel:new',
-            "should still have proper tel prefix");
 
         form.destroy();
     });
 
     QUnit.test('phone field in editable list view on extra small screens', function (assert) {
-        assert.expect(10);
+        assert.expect(8);
 
         var list = createView({
             View: ListView,
@@ -3241,12 +3237,10 @@ QUnit.module('basic_fields', {
             "should have 5 cells");
         assert.strictEqual(list.$('tbody td:not(.o_list_record_selector)').first().text(), 'yop',
             "value should be displayed properly");
-
-        var $phoneLink = list.$('a.o_form_uri.o_field_widget');
+        var $phoneLink = list.$('.o_field_widget');
         assert.strictEqual($phoneLink.length, 5,
-            "should have anchors with correct classes");
-        assert.strictEqual($phoneLink.first().attr('href'), 'tel:yop',
-            "should have proper tel prefix");
+           "should have with correct classes");
+
 
         // Edit a line and check the result
         var $cell = list.$('tbody td:not(.o_list_record_selector)').first();
@@ -3262,12 +3256,9 @@ QUnit.module('basic_fields', {
         assert.ok(!$cell.parent().hasClass('o_selected_row'), 'should not be in edit mode anymore');
         assert.strictEqual(list.$('tbody td:not(.o_list_record_selector)').first().text(), 'new',
             "value should be properly updated");
-        $phoneLink = list.$('a.o_form_uri.o_field_widget');
+        $phoneLink = list.$('.o_field_widget');
         assert.strictEqual($phoneLink.length, 5,
             "should still have anchors with correct classes");
-        assert.strictEqual($phoneLink.first().attr('href'), 'tel:new',
-            "should still have proper tel prefix");
-
         list.destroy();
     });
 
@@ -3293,9 +3284,9 @@ QUnit.module('basic_fields', {
             },
         });
 
-        var $phone = form.$('a.o_field_widget.o_form_uri');
+        var $phone = form.$('.o_field_widget');
         assert.strictEqual($phone.length, 1,
-            "should have rendered the phone number as a link with correct classes");
+            "should have rendered the phone number as a span with correct classes");
         assert.strictEqual($phone.text(), 'yop',
             "value should be displayed properly");
 
@@ -3311,7 +3302,7 @@ QUnit.module('basic_fields', {
 
         // save
         form.$buttons.find('.o_form_button_save').click();
-        assert.strictEqual(form.$('a.o_field_widget.o_form_uri').text(), 'new',
+        assert.strictEqual(form.$('.o_field_widget').text(), 'new',
             "new value should be displayed properly");
 
         form.destroy();
@@ -3337,7 +3328,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(list.$('tbody td:not(.o_list_record_selector)').first().text(), 'yop',
             "value should be displayed properly");
 
-        assert.strictEqual(list.$('a.o_field_widget.o_form_uri').length, 5,
+        assert.strictEqual(list.$('.o_field_widget').length, 5,
             "should have the correct classnames");
 
         // Edit a line and check the result
@@ -3354,8 +3345,8 @@ QUnit.module('basic_fields', {
         assert.ok(!$cell.parent().hasClass('o_selected_row'), 'should not be in edit mode anymore');
         assert.strictEqual(list.$('tbody td:not(.o_list_record_selector)').first().text(), 'new',
             "value should be properly updated");
-        assert.strictEqual(list.$('a.o_field_widget.o_form_uri').length, 5,
-            "should still have links with correct classes");
+        assert.strictEqual(list.$('.o_field_widget').length, 5,
+            "should still have with correct classes");
 
         list.destroy();
     });

@@ -3900,7 +3900,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('navigation with tab key in readonly form view', function (assert) {
-        assert.expect(3);
+        assert.expect(2);
 
         this.data.partner.records[1].product_id = 37;
 
@@ -3932,14 +3932,6 @@ QUnit.module('Views', {
         form.$('[name="foo"]:eq(1)').trigger($.Event('keydown', {which: $.ui.keyCode.TAB}));
         assert.strictEqual(form.$('[name="display_name"]')[0], document.activeElement,
             "display_name should be focused");
-
-        // simulate shift+tab on active element
-        $(document.activeElement).trigger($.Event('keydown', {which: $.ui.keyCode.TAB, shiftKey: true}));
-        $(document.activeElement).trigger($.Event('keydown', {which: $.ui.keyCode.TAB, shiftKey: true}));
-        $(document.activeElement).trigger($.Event('keydown', {which: $.ui.keyCode.TAB, shiftKey: true}));
-        $(document.activeElement).trigger($.Event('keydown', {which: $.ui.keyCode.TAB, shiftKey: true}));
-        assert.strictEqual(document.activeElement, form.$('[name="trululu"]')[0],
-            "first many2one should be focused");
 
         form.destroy();
     });
