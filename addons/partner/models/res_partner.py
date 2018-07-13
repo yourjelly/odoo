@@ -82,10 +82,6 @@ class Partner(models.Model):
     title = fields.Many2one('res.partner.title')
     ref = fields.Char(string='Internal Reference', index=True)
     tz_offset = fields.Char(compute='_compute_tz_offset', string='Timezone offset', invisible=True)
-    vat = fields.Char(string='TIN', help="Tax Identification Number. "
-                                         "Fill it if the company is subjected to taxes. "
-                                         "Used by the some of the legal statements.")
-    website = fields.Char(help="Website of Partner or Company")
     comment = fields.Text(string='Notes')
     bank_ids = fields.One2many('res.partner.bank', 'partner_id', string='Banks')
     category_id = fields.Many2many('res.partner.category', column1='partner_id',
@@ -94,8 +90,6 @@ class Partner(models.Model):
     barcode = fields.Char(oldname='ean13')
     employee = fields.Boolean(help="Check this box if this contact is an Employee.")
     function = fields.Char(string='Job Position')
-    phone = fields.Char()
-    mobile = fields.Char()
     color = fields.Integer(string='Color Index', default=0)
     industry_id = fields.Many2one('res.partner.industry', 'Industry')
     commercial_partner_id = fields.Many2one('res.partner', compute='_compute_commercial_partner',
@@ -118,26 +112,6 @@ class Partner(models.Model):
     def _compute_partner_share(self):
         for partner in self:
             partner.partner_share = not partner.user_ids or any(user.share for user in partner.user_ids)
-
-    def _clean_website(self, website):
-        url = urls.url_parse(website)
-        if not url.scheme:
-            if not url.netloc:
-                url = url.replace(netloc=url.path, path='')
-            website = url.replace(scheme='http').to_url()
-        return website
-
-    @api.multi
-    def write(self, vals):
-        if vals.get('website'):
-            vals['website'] = self._clean_website(vals['website'])
-        return super(Partner, self).write(vals)
-
-    @api.multi
-    def create(self, vals):
-        if vals.get('website'):
-            vals['website'] = self._clean_website(vals['website'])
-        return super(Partner, self).create(vals)
 
     @api.depends('is_company', 'parent_id.commercial_partner_id')
     def _compute_commercial_partner(self):
@@ -227,6 +201,14 @@ class Partner(models.Model):
             if values.get('parent_id'):
                 self._commercial_sync_from_company()
         return super(Partner, self)._fields_sync(values)
+
+    @api.multi
+    def _display_address(self, without_company=False):
+        address = super(Partner, self)._display_address(without_company)
+        if self.commercial_company_name and not without_company:
+            address = '%(company_name)s\n' % self.commercial_company_name + address
+        return address
+
 
 class ResPartnerIndustry(models.Model):
     _description = 'Industry'

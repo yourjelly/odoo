@@ -4,7 +4,7 @@
 {
     'name': 'Indian Payroll',
     'category': 'Localization',
-    'depends': ['hr_payroll'],
+    'depends': ['hr_payroll', 'partner'],
     'description': """
 Indian Payroll Salary Rules.
 ============================

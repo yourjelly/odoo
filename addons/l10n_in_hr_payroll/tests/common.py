@@ -16,7 +16,7 @@ class TestPaymentAdviceBase(TransactionCase):
         self.Advice = self.env['hr.payroll.advice']
 
         self.partner = self.env.ref('base.res_partner_4')
-        self.bank_1 = self.env.ref('base.res_bank_1')
+        self.bank_1 = self.env.ref('partner.res_bank_1')
         self.in_country = self.env.ref('base.in')
         self.rd_dept = self.env.ref('hr.dep_rd')
         self.employee_fp = self.env.ref('hr.employee_root')

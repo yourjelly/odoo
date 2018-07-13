@@ -113,6 +113,9 @@ class Partner(models.Model):
     city = fields.Char()
     state_id = fields.Many2one("res.country.state", string='State', ondelete='restrict')
     country_id = fields.Many2one('res.country', string='Country', ondelete='restrict')
+    phone = fields.Char()
+    mobile = fields.Char()
+    website = fields.Char(help="Website of Partner or Company")
     email = fields.Char()
     email_formatted = fields.Char(
         'Formatted Email', compute='_compute_email_formatted',
@@ -213,6 +216,14 @@ class Partner(models.Model):
         self.ensure_one()
         default = dict(default or {}, name=_('%s (copy)') % self.name)
         return super(Partner, self).copy(default)
+
+    def _clean_website(self, website):
+        url = urls.url_parse(website)
+        if not url.scheme:
+            if not url.netloc:
+                url = url.replace(netloc=url.path, path='')
+            website = url.replace(scheme='http').to_url()
+        return website
 
     @api.onchange('parent_id')
     def onchange_parent_id(self):
@@ -345,6 +356,8 @@ class Partner(models.Model):
         # (this is to allow the code from res_users to write to the partner!) or
         # if setting the company_id to False (this is compatible with any user
         # company)
+        if vals.get('website'):
+            vals['website'] = self._clean_website(vals['website'])
         if vals.get('parent_id'):
             vals['company_name'] = False
         if vals.get('company_id'):
@@ -370,6 +383,8 @@ class Partner(models.Model):
 
     @api.model
     def create(self, vals):
+        if vals.get('website'):
+            vals['website'] = self._clean_website(vals['website'])
         if vals.get('parent_id'):
             vals['company_name'] = False
         # compute default image in create, because computing gravatar in the onchange
@@ -621,15 +636,10 @@ class Partner(models.Model):
             'state_code': self.state_id.code or '',
             'state_name': self.state_id.name or '',
             'country_code': self.country_id.code or '',
-            'country_name': self.country_id.name or '',
-            'company_name': self.commercial_company_name or '',
+            'country_name': self.country_id.name or ''
         }
         for field in self._address_fields():
             args[field] = getattr(self, field) or ''
-        if without_company:
-            args['company_name'] = ''
-        elif self.commercial_company_name:
-            address_format = '%(company_name)s\n' + address_format
         return address_format % args
 
     def _display_address_depends(self):

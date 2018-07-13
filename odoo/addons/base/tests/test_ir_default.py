@@ -24,38 +24,38 @@ class TestIrDefault(TransactionCase):
 
         # set a default value for all users
         IrDefault1.search([('field_id.model', '=', 'res.partner')]).unlink()
-        IrDefault1.set('res.partner', 'ref', 'GLOBAL', user_id=False, company_id=False)
-        self.assertEqual(IrDefault1.get_model_defaults('res.partner'), {'ref': 'GLOBAL'},
+        IrDefault1.set('res.partner', 'street', 'GLOBAL', user_id=False, company_id=False)
+        self.assertEqual(IrDefault1.get_model_defaults('res.partner'), {'street': 'GLOBAL'},
                          "Can't retrieve the created default value for all users.")
-        self.assertEqual(IrDefault2.get_model_defaults('res.partner'), {'ref': 'GLOBAL'},
+        self.assertEqual(IrDefault2.get_model_defaults('res.partner'), {'street': 'GLOBAL'},
                          "Can't retrieve the created default value for all users.")
-        self.assertEqual(IrDefault3.get_model_defaults('res.partner'), {'ref': 'GLOBAL'},
+        self.assertEqual(IrDefault3.get_model_defaults('res.partner'), {'street': 'GLOBAL'},
                          "Can't retrieve the created default value for all users.")
 
         # set a default value for current company (behavior of 'set default' from debug mode)
-        IrDefault1.set('res.partner', 'ref', 'COMPANY', user_id=False, company_id=True)
-        self.assertEqual(IrDefault1.get_model_defaults('res.partner'), {'ref': 'COMPANY'},
+        IrDefault1.set('res.partner', 'street', 'COMPANY', user_id=False, company_id=True)
+        self.assertEqual(IrDefault1.get_model_defaults('res.partner'), {'street': 'COMPANY'},
                          "Can't retrieve the created default value for company.")
-        self.assertEqual(IrDefault2.get_model_defaults('res.partner'), {'ref': 'COMPANY'},
+        self.assertEqual(IrDefault2.get_model_defaults('res.partner'), {'street': 'COMPANY'},
                          "Can't retrieve the created default value for company.")
-        self.assertEqual(IrDefault3.get_model_defaults('res.partner'), {'ref': 'GLOBAL'},
+        self.assertEqual(IrDefault3.get_model_defaults('res.partner'), {'street': 'GLOBAL'},
                          "Unexpected default value for company.")
 
         # set a default value for current user (behavior of 'set default' from debug mode)
-        IrDefault2.set('res.partner', 'ref', 'USER', user_id=True, company_id=True)
-        self.assertEqual(IrDefault1.get_model_defaults('res.partner'), {'ref': 'COMPANY'},
+        IrDefault2.set('res.partner', 'street', 'USER', user_id=True, company_id=True)
+        self.assertEqual(IrDefault1.get_model_defaults('res.partner'), {'street': 'COMPANY'},
                          "Can't retrieve the created default value for user.")
-        self.assertEqual(IrDefault2.get_model_defaults('res.partner'), {'ref': 'USER'},
+        self.assertEqual(IrDefault2.get_model_defaults('res.partner'), {'street': 'USER'},
                          "Unexpected default value for user.")
-        self.assertEqual(IrDefault3.get_model_defaults('res.partner'), {'ref': 'GLOBAL'},
+        self.assertEqual(IrDefault3.get_model_defaults('res.partner'), {'street': 'GLOBAL'},
                          "Unexpected default value for company.")
 
         # check default values on partners
-        default1 = IrDefault1.env['res.partner'].default_get(['ref']).get('ref')
+        default1 = IrDefault1.env['res.partner'].default_get(['street']).get('street')
         self.assertEqual(default1, 'COMPANY', "Wrong default value.")
-        default2 = IrDefault2.env['res.partner'].default_get(['ref']).get('ref')
+        default2 = IrDefault2.env['res.partner'].default_get(['street']).get('street')
         self.assertEqual(default2, 'USER', "Wrong default value.")
-        default3 = IrDefault3.env['res.partner'].default_get(['ref']).get('ref')
+        default3 = IrDefault3.env['res.partner'].default_get(['street']).get('street')
         self.assertEqual(default3, 'GLOBAL', "Wrong default value.")
 
     def test_conditions(self):
@@ -64,22 +64,22 @@ class TestIrDefault(TransactionCase):
 
         # default without condition
         IrDefault.search([('field_id.model', '=', 'res.partner')]).unlink()
-        IrDefault.set('res.partner', 'ref', 'X')
+        IrDefault.set('res.partner', 'street', 'X')
         self.assertEqual(IrDefault.get_model_defaults('res.partner'),
-                         {'ref': 'X'})
+                         {'street': 'X'})
         self.assertEqual(IrDefault.get_model_defaults('res.partner', condition='name=Agrolait'),
                          {})
 
         # default with a condition
-        IrDefault.search([('field_id.model', '=', 'res.partner.title')]).unlink()
-        IrDefault.set('res.partner.title', 'shortcut', 'X')
-        IrDefault.set('res.partner.title', 'shortcut', 'Mr', condition='name=Mister')
-        self.assertEqual(IrDefault.get_model_defaults('res.partner.title'),
-                         {'shortcut': 'X'})
-        self.assertEqual(IrDefault.get_model_defaults('res.partner.title', condition='name=Miss'),
+        IrDefault.search([('field_id.model', '=', 'res.country')]).unlink()
+        IrDefault.set('res.country', 'code', 'X')
+        IrDefault.set('res.country', 'code', 'IN', condition='name=India')
+        self.assertEqual(IrDefault.get_model_defaults('res.country'),
+                         {'code': 'X'})
+        self.assertEqual(IrDefault.get_model_defaults('res.country', condition='name=XYZ'),
                          {})
-        self.assertEqual(IrDefault.get_model_defaults('res.partner.title', condition='name=Mister'),
-                         {'shortcut': 'Mr'})
+        self.assertEqual(IrDefault.get_model_defaults('res.country', condition='name=India'),
+                         {'code': 'IN'})
 
     def test_invalid(self):
         """ check error cases with 'ir.default' """
@@ -91,7 +91,7 @@ class TestIrDefault(TransactionCase):
         with self.assertRaises(ValidationError):
             IrDefault.set('res.partner', 'lang', 'some_LANG')
         with self.assertRaises(ValidationError):
-            IrDefault.set('res.partner', 'credit_limit', 'foo')
+            IrDefault.set('res.partner', 'company_type', 112)
 
     def test_removal(self):
         """ check defaults for many2one with their value being removed """
@@ -99,10 +99,10 @@ class TestIrDefault(TransactionCase):
         IrDefault.search([('field_id.model', '=', 'res.partner')]).unlink()
 
         # set a record as a default value
-        title = self.env['res.partner.title'].create({'name': 'President'})
-        IrDefault.set('res.partner', 'title', title.id)
-        self.assertEqual(IrDefault.get_model_defaults('res.partner'), {'title': title.id})
+        country = self.env['res.country'].create({'name': 'US'})
+        IrDefault.set('res.partner', 'country_id', country.id)
+        self.assertEqual(IrDefault.get_model_defaults('res.partner'), {'country_id': country.id})
 
         # delete the record, and check the presence of the default value
-        title.unlink()
+        country.unlink()
         self.assertEqual(IrDefault.get_model_defaults('res.partner'), {})

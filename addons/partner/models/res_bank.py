@@ -120,5 +120,3 @@ class Company(models.Model):
     _inherit = 'res.company'
 
     bank_ids = fields.One2many('res.partner.bank', 'company_id', string='Bank Accounts', help='Bank accounts related to this company')
-    phone = fields.Char(related='partner_id.phone', store=True)
-    website = fields.Char(related='partner_id.website')

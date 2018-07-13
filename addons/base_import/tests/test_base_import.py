@@ -379,7 +379,7 @@ class test_convert_import_data(TransactionCase):
 
     def test_date_fields(self):
         import_wizard = self.env['base_import.import'].create({
-            'res_model': 'res.partner',
+            'res_model': 'base_import.tests.models.date.with.parent',
             'file': u'name,date,create_date\n'
                     u'"foo","2013年07月18日","2016-10-12 06:06"\n'.encode('utf-8'),
             'file_type': 'text/csv'
@@ -404,10 +404,14 @@ class test_convert_import_data(TransactionCase):
         """ Ensure that relational fields float and date are correctly
         parsed during the import call.
         """
+        ir_model_data = self.env['ir.model.data']
+        ir_model_data._update('base_import.tests.models.date.with.parent', 'base_import', {
+            'name': 'parent'}, xml_id="date_with_parent_1", store=True, noupdate=True, mode='init', res_id=False)
+
         import_wizard = self.env['base_import.import'].create({
-            'res_model': 'res.partner',
-            'file': u'name,parent_id/id,parent_id/date,parent_id/credit_limit\n'
-                    u'"foo","__export__.res_partner_1","2017年10月12日","5,69"\n'.encode('utf-8'),
+            'res_model': 'base_import.tests.models.date.with.parent',
+            'file': u'name,parent_id/id,parent_id/date,parent_id/float_value\n'
+                    u'"foo","__export__.date_with_parent_1","2017年10月12日","5,69"\n'.encode('utf-8'),
             'file_type': 'text/csv'
 
         })
@@ -420,7 +424,7 @@ class test_convert_import_data(TransactionCase):
             'headers': True
         }
         data, import_fields = import_wizard._convert_import_data(
-            ['name', 'parent_id/.id', 'parent_id/date', 'parent_id/credit_limit'],
+            ['name', 'parent_id/.id', 'parent_id/date', 'parent_id/float_value'],
             options
         )
         result = import_wizard._parse_import_data(data, import_fields, options)

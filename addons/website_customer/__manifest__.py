@@ -15,6 +15,7 @@ Odoo Customer References
         'website_crm_partner_assign',
         'website_partner',
         'website_google_map',
+        'partner'
     ],
     'demo': [
         'data/res_partner_demo.xml',

@@ -31,6 +31,8 @@
                                     <field name="report_header" placeholder="e.g. Global Business Solutions"/>
                                 </group>
                                 <group>
+                                    <field name="website" widget="url" placeholder="e.g. www.odoo.com"/>
+                                    <field name="phone"/>
                                     <field name="email"/>
                                     <field name="vat"/>
                                     <field name="company_registry"/>
@@ -77,8 +79,14 @@
                                     <div t-if="record.email.value" class="col-xs-6 text-center">
                                         <strong>Email:</strong>
                                     </div>
+                                    <div t-if="record.phone.value" class="col-xs-6 text-center">
+                                        <strong>Phone</strong>
+                                    </div>
                                     <div t-if="record.email.value" class="col-xs-6 text-center">
                                         <field name="email"/>
+                                    </div>
+                                    <div t-if="record.phone.value" class="col-xs-6 text-center">
+                                        <field name="phone"/>
                                     </div>
                                 </div>
                             </div>

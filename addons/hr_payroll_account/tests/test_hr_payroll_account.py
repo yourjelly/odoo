@@ -29,7 +29,7 @@ class TestHrPayrollAccount(common.TransactionCase):
             'acc_number': '001-9876543-21',
             'partner_id': self.ref('base.res_partner_12'),
             'acc_type': 'bank',
-            'bank_id': self.ref('base.res_bank_1'),
+            'bank_id': self.ref('partner.res_bank_1'),
         })
 
         self.hr_employee_john = self.env['hr.employee'].create({

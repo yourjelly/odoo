@@ -1,6 +1,12 @@
 "id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
-access_res_partner_title,access_res_partner_title,model_res_partner_title,,1,0,0,0
-access_res_partner_category,access_res_partner_category,model_res_partner_category,,1,0,0,0
-access_res_partner_industry,access_res_partner_industry,model_res_partner_industry,,1,0,0,0
-access_res_bank,access_res_bank,model_res_bank,,1,0,0,0
-access_res_partner_bank,access_res_partner_bank,model_res_partner_bank,,1,0,0,0
+"access_res_partner_bank_group_user","res_partner_bank group_user","model_res_partner_bank","base.group_user",1,0,0,0
+"access_res_partner_bank_group_partner_manager","res_partner_bank group_partner_manager","model_res_partner_bank","base.group_partner_manager",1,1,1,1
+"access_res_partner_category_group_user","res_partner_category group_user","model_res_partner_category","base.group_user",1,0,0,0
+"access_res_partner_category_group_partner_manager","res_partner_category group_partner_manager","model_res_partner_category","base.group_partner_manager",1,1,1,1
+"access_res_partner_industry_group_user","res_partner_industry group_user","model_res_partner_industry","base.group_user",1,0,0,0
+"access_res_partner_industry_group_system","res_partner_industry group_system","model_res_partner_industry","base.group_system",1,1,1,1
+"access_res_partner_title_group_user","res_partner_title group_user","model_res_partner_title","base.group_partner_manager",1,1,1,1
+"access_res_partner_title_group_partner_manager","res_partner_title group_partner_manager","model_res_partner_title",,1,0,0,0
+"access_res_bank_group_system","res_bank_group_system","model_res_bank","base.group_system",1,1,1,1
+"access_res_bank_group_partner_manager","res_bank_group_partner_manager","model_res_bank","base.group_partner_manager",1,1,1,1
+"access_res_bank_user","res_bank user","model_res_bank","base.group_user",1,0,0,0

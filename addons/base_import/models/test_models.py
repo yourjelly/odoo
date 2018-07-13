@@ -74,3 +74,11 @@ class PreviewModel(models.Model):
     name = fields.Char('Name')
     somevalue = fields.Integer(string='Some Value', required=True)
     othervalue = fields.Integer(string='Other Variable')
+
+class DateWithParent(models.Model):
+    _name = name('date.with.parent')
+
+    parent_id = fields.Many2one(name('date.with.parent'))
+    name = fields.Char()
+    date = fields.Date()
+    float_value = fields.Float()
