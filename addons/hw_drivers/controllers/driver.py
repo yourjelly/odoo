@@ -113,6 +113,7 @@ class USBDeviceManager(Thread):
                     d = driverclass(updated_devices[path])
                     if d.supported():
                         _logger.info('For device %s will be driven', path)
+                        send_device("To be completed", "%04x:%04x" % (dev.idVendor, dev.idProduct))
                         drivers[path] = d
                         # launch thread
                         d.daemon = True
@@ -128,7 +129,7 @@ from urllib import request, parse
 from uuid import getnode as get_mac
 import netifaces as ni
 mac = get_mac()
-server = "" #read from file
+server = "" # read from file
 url = ""
 try:
     f = open('/home/pi/odoo-remote-server.conf', 'r')
@@ -138,7 +139,7 @@ try:
 except:
     pass
 
-if server:
+if server: #TODO: Needs try catches too, because server might not be available e.g.
     server = server.split('\n')[0]
     url = server + "/iot3/"#/check_box"
     interfaces = ni.interfaces()
@@ -155,7 +156,15 @@ if server:
     req =  request.Request(url, data=data)
     response = request.urlopen(req)
 
-
+def send_device(name, identifier):
+    if server:
+        url = server + "/iot2/"  # /check_device"
+        values = {'iot_identifier': mac,
+                  'name': name,
+                  'identifier': identifier}
+        data = parse.urlencode(values).encode()
+        req = request.Request(url, data=data)
+        response = request.urlopen(req)
 
 
 udm = USBDeviceManager()
