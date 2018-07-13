@@ -129,6 +129,7 @@ from uuid import getnode as get_mac
 import netifaces as ni
 mac = get_mac()
 server = "" #read from file
+url = ""
 try:
     f = open('/home/pi/odoo-remote-server.conf', 'r')
     for line in f:
@@ -138,6 +139,7 @@ except:
     pass
 
 if server:
+    server = server.split('\n')[0]
     url = server + "/iot3/update_box"#/check_box"
     interfaces = ni.interfaces()
     ips = []
@@ -153,7 +155,7 @@ if server:
     req =  request.Request(url, data=data)
     response = request.urlopen(req)
 
-    
+
 
 
 udm = USBDeviceManager()
