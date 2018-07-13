@@ -140,7 +140,7 @@ except:
 
 if server:
     server = server.split('\n')[0]
-    url = server + "/iot3/update_box"#/check_box"
+    url = server + "/iot3/"#/check_box"
     interfaces = ni.interfaces()
     ips = []
     for iface_id in interfaces:
