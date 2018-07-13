@@ -5,6 +5,7 @@ from threading import Thread
 import usb
 import serial
 import gatt
+import evdev
 from odoo import http
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
@@ -19,6 +20,7 @@ class StatusController(http.Controller):
         for path in drivers:
             result += "<li>" + path + ":" + str(drivers[path].value) + "</li>"
         result += "</ul>"
+
         result +=" </body></html>"
         return result
 
@@ -90,7 +92,6 @@ class SylvacUSBDriver(USBDriver):
                 if ord(char) == 13:
                     # Let's send measure
                     self.value = measure
-                    print(self.value)
                     measure = b''
                 else:
                     measure += char
@@ -100,8 +101,71 @@ class SylvacUSBDriver(USBDriver):
     def action(self, action):
         pass
 
+class KeyboardUSBDriver(USBDriver):
+
+    def supported(self):
+        return getattr(self.dev, 'idVendor') == 0x046d and getattr(self.dev, 'idProduct') == 0xc31c
+
+    def value(self):
+        return self.value
+        
+    def run(self):
+        devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
+        for device in devices:
+            if ('Keyboard' in device.name) & ('input0' in device.phys):
+                path = device.path
+
+        device = evdev.InputDevice(path)
+
+        for event in device.read_loop():
+            if event.type == evdev.ecodes.EV_KEY:
+                data = evdev.categorize(event)
+                if data.scancode == 96:
+                    return {}
+                elif data.scancode == 28:
+                    self.value = ''
+                elif data.keystate:
+                    self.value += data.keycode.replace('KEY_','')
+
+    def action(self, action):
+        pass
+
+
+class BarcodeScannerdUSBDriver(USBDriver):
+
+    def supported(self):
+        return getattr(self.dev, 'idVendor') == 0x0c2e and getattr(self.dev, 'idProduct') == 0x0200
+
+    def value(self):
+        return self.value
+        
+    def run(self):
+
+        devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
+        for device in devices:
+            if ('Scanner' in device.name) & ('input0' in device.phys):
+                path = device.path
+
+        device = evdev.InputDevice(path)
+
+        for event in device.read_loop():
+            if event.type == evdev.ecodes.EV_KEY:
+                data = evdev.categorize(event)
+                _logger.warning(data)
+                if data.scancode == 96:
+                    return {}
+                elif data.scancode == 28:
+                    _logger.warning(self.value)
+                    self.value = ''
+                elif data.keystate:
+                    self.value += data.keycode.replace('KEY_','')
+
+    def action(self, action):
+        pass
+
 class USBDeviceManager(Thread):
     devices = {}
+    
     def run(self):
         while 1:
             devs = usb.core.find(find_all=True)
@@ -112,8 +176,10 @@ class USBDeviceManager(Thread):
             added = updated_devices.keys() - self.devices.keys()
             removed = self.devices.keys() - updated_devices.keys()
             self.devices = updated_devices
-            print('added %s removed %s'%(added, removed))
-            print(len(self.devices))
+            if (removed):
+                for path in list(drivers):
+                    if (path in removed):
+                        del drivers[path]
             for path in added:
                 for driverclass in usbdrivers:
                     _logger.info('For device %s checking driver %s', path, driverclass)
@@ -125,10 +191,6 @@ class USBDeviceManager(Thread):
                         # launch thread
                         d.daemon = True
                         d.start()
-                    else:
-                        if path in drivers:
-                            del drivers[path]
-                        del d
             time.sleep(3)
 
 # Part that sends stuff to the internet
