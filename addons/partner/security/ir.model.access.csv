@@ -1,0 +1,6 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+access_res_partner_title,access_res_partner_title,model_res_partner_title,,1,0,0,0
+access_res_partner_category,access_res_partner_category,model_res_partner_category,,1,0,0,0
+access_res_partner_industry,access_res_partner_industry,model_res_partner_industry,,1,0,0,0
+access_res_bank,access_res_bank,model_res_bank,,1,0,0,0
+access_res_partner_bank,access_res_partner_bank,model_res_partner_bank,,1,0,0,0

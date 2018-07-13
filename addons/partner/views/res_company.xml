@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+    	<record id="view_company_form01" model="ir.ui.view">
+            <field name="name">res.company.form</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="arch" type="xml">
+            	<xpath expr="//field[@name='email']" position="before">
+            		<field name="website" widget="url" placeholder="e.g. www.odoo.com"/>
+                    <field name="phone"/>
+            	</xpath>
+            </field>
+        </record>
+
+        <record id="view_res_company_kanban01" model="ir.ui.view">
+            <field name="name">res.company.form</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_res_company_kanban"/>
+            <field name="arch" type="xml">
+            	<xpath expr="//div[hasclass('row')]" position="inside">
+            		<div t-if="record.phone.value" class="col-xs-6 text-center">
+                        <strong>Phone</strong>
+                    </div>
+                    <div t-if="record.phone.value" class="col-xs-6 text-center">
+                        <field name="phone"/>
+                    </div>
+            	</xpath>
+            </field>
+        </record>
+	</data>
+</odoo>

@@ -18,7 +18,8 @@
         'fetchmail',
         'utm',
         'web_tour',
-        'contacts'
+        'contacts',
+        'partner'
     ],
     'data': [
         'security/crm_security.xml',

@@ -140,10 +140,10 @@
                             <label for="company_id" class="oe_edit_only" groups="base.group_multi_company"/>
                             <field name="company_id" context="{'user_preference': 0}" groups="base.group_multi_company"/>
                         </div>
-                        <group>
+                        <!-- <group>
                             <field name="phone" widget="phone"/>
                             <field name="mobile" widget="phone"/>
-                        </group>
+                        </group> -->
                     </sheet>
                 </form>
             </field>

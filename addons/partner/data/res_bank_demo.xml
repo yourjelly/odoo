@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record model="res.bank" id="bank_ing">
+            <field name="name">ING</field>
+            <field name="bic">BBRUBEBB</field>
+        </record>
+
+        <record model="res.bank" id="bank_crelan">
+            <field name="name">Crelan</field>
+            <field name="bic">NICABEBB</field>
+        </record>
+
+        <record model="res.bank" id="bank_cbc">
+            <field name="name">CBC</field>
+            <field name="bic">CREGBEBB</field>
+        </record>
+
+        <record id="res_bank_1" model="res.bank">
+            <field name="name">Reserve</field>
+            <field name="active" eval="False"/>
+        </record>
+        
+    </data>
+</odoo>

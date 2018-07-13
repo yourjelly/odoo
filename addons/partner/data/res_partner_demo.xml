@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!--
+        Resource: res.partner.category
+        -->
+
+        <record id="res_partner_category_0" model="res.partner.category">
+            <field name="name">Partner</field>
+            <field name="color" eval="1"/>
+        </record>
+        <record id="res_partner_category_1" model="res.partner.category">
+            <field name="name">Vendor</field>
+            <field name="color" eval="2"/>
+        </record>
+        <record id="res_partner_category_2" model="res.partner.category">
+            <field name="name">Prospect</field>
+            <field name="color" eval="3"/>
+        </record>
+        <record id="res_partner_category_3" model="res.partner.category">
+            <field name="name">Employee</field>
+            <field name="color" eval="4"/>
+        </record>
+        <record id="res_partner_category_4" model="res.partner.category">
+            <field name="name">Gold</field>
+            <field name="color" eval="2"/>
+            <field name="parent_id" ref="res_partner_category_0"/>
+        </record>
+        <record id="res_partner_category_5" model="res.partner.category">
+            <field name="name">Silver</field>
+            <field name="color" eval="3"/>
+            <field name="parent_id" ref="res_partner_category_0"/>
+        </record>
+        <record id="res_partner_category_6" model="res.partner.category">
+            <field name="name">Bronze</field>
+            <field name="color" eval="4"/>
+            <field name="parent_id" ref="res_partner_category_0"/>
+        </record>
+        <record id="res_partner_category_7" model="res.partner.category">
+            <field name="name">IT Services</field>
+            <field name="color" eval="5"/>
+            <field name="parent_id" ref="res_partner_category_0"/>
+        </record>
+        <record id="res_partner_category_8" model="res.partner.category">
+            <field name="name">Consultancy Services</field>
+            <field name="color" eval="5"/>
+        </record>
+        <record id="res_partner_category_9" model="res.partner.category">
+            <field name="name">Components Buyer</field>
+            <field name="color" eval="6"/>
+        </record>
+        <record id="res_partner_category_11" model="res.partner.category">
+            <field name="name">Services</field>
+            <field name="color" eval="7"/>
+        </record>
+        <record id="res_partner_category_12" model="res.partner.category">
+            <field name="name">Office Supplies</field>
+            <field name="color" eval="8"/>
+        </record>
+        <record id="res_partner_category_13" model="res.partner.category">
+            <field name="name">Distributor</field>
+            <field name="color" eval="9"/>
+        </record>
+        <record id="res_partner_category_14" model="res.partner.category">
+            <field name="name">Manufacturer</field>
+            <field name="color" eval="10"/>
+        </record>
+        <record id="res_partner_category_15" model="res.partner.category">
+            <field name="name">Wholesaler</field>
+            <field name="color" eval="1"/>
+        </record>
+        <record id="res_partner_category_16" model="res.partner.category">
+            <field name="name">Retailer</field>
+            <field name="color" eval="2"/>
+        </record>
+        <record id="res_partner_category_17" model="res.partner.category">
+            <field name="name">Company Contact</field>
+            <field name="color" eval="3"/>
+        </record>
+
+       <!--
+        Resource: res.partner
+        -->
+
+        <record id="base.res_partner_1" model="res.partner">
+            <field eval="[(6, 0, [ref('res_partner_category_13'), ref('res_partner_category_12')])]" name="category_id"/>
+            <field name="city">Taipei</field>
+            <field name="zip">106</field>
+            <field name="street">31 Hong Kong street</field>
+            <field name="phone">(+886) (02) 4162 2023</field>
+            <field name="website">http://www.asustek.com</field>
+        </record>
+        <record id="base.res_partner_2" model="res.partner">
+            <field eval="[(6, 0, [ref('partner.res_partner_category_7'), ref('partner.res_partner_category_9')])]" name="category_id"/>
+            <field name="city">Wavre</field>
+            <field name="zip">1300</field>
+            <field name="street">69 rue de Namur</field>
+            <field name="phone">+32 10 588 558</field>
+            <field name="website">http://www.agrolait.com</field>
+        </record>
+        <record id="base.res_partner_3" model="res.partner">
+            <field eval="[(6, 0, [ref('res_partner_category_8'), ref('res_partner_category_14')])]" name="category_id"/>
+            <field name="city">Shanghai</field>
+            <field name="zip">200000</field>
+            <field name="street">52 Chop Suey street</field>
+            <field name="phone">+86 21 6484 5671</field>
+            <field name="website">http://www.chinaexport.com/</field>
+        </record>
+        
+        <record id="base.res_partner_4" model="res.partner">
+            <field eval="[(6, 0, [ref('res_partner_category_13'), ref('res_partner_category_12')])]" name="category_id"/>
+            <field name="city">Fremont</field>
+            <field name="zip">94538</field>
+            <field name="street">3661 Station Street</field>
+            <field name="phone">+1 510 340 2385</field>
+            <field name="website">http://www.distribpc.com/</field>
+        </record>
+
+        <record id="base.res_partner_10" model="res.partner">
+            <field eval="[(6, 0, [ref('res_partner_category_4'), ref('res_partner_category_7')])]" name="category_id"/>
+            <field name="city">Miami</field>
+            <field name="zip">33169</field>
+            <field name="phone">+1 786 525 0724</field>
+            <field name="street">3203 Lamberts Branch Road</field>
+        </record>
+  
+        <record id="base.res_partner_12" model="res.partner">
+            <field eval="[(6, 0, [ref('res_partner_category_11'), ref('res_partner_category_4')])]" name="category_id"/>
+            <field name="city">Le Bourget du Lac</field>
+            <field name="zip">73377</field>
+            <field name="phone">+33 4 49 23 44 54</field>
+            <field name="street">93, Press Avenue</field>
+            <field name="website">http://www.camptocamp.com</field>
+        </record>
+
+        <record id="base.res_partner_18" model="res.partner">
+            <field eval="[(6, 0, [ref('res_partner_category_5')])]" name="category_id"/>
+            <field name="city">London</field>
+            <field name="phone">+1 857 349 3049</field>
+            <field name="street">89 Lingfield Tower</field>
+            <field name="website">http://www.think-big.com</field>
+        </record>
+
+        <record id="base.res_partner_address_1" model="res.partner">
+            <field name="function">Service Manager</field>
+        </record>
+        <record id="base.res_partner_address_2" model="res.partner">
+            <field name="function">Store Manager</field>
+        </record>
+        <record id="base.res_partner_address_3" model="res.partner">
+            <field name="function">Functional Consultant</field>
+        </record>
+        <record id="base.res_partner_address_4" model="res.partner">
+            <field name="function">Analyst</field>
+        </record>
+        <record id="base.res_partner_address_5" model="res.partner">
+            <field name="function">Marketing Manager</field>
+        </record>
+        <record id="base.res_partner_address_7" model="res.partner">
+            <field name="function">Production Supervisor</field>
+        </record>
+        <record id="base.res_partner_address_10" model="res.partner">
+            <field name="function">Senior Consultant</field>
+        </record>
+        <record id="base.res_partner_address_11" model="res.partner">
+            <field name="function">Director</field>
+        </record>
+        <record id="base.res_partner_address_12" model="res.partner">
+            <field name="function">Electrical Supervisor</field>
+        </record>
+        <record id="base.res_partner_address_13" model="res.partner">
+            <field name="function">Senior Associate</field>
+        </record>
+        <record id="base.res_partner_address_14" model="res.partner">
+            <field name="function">Analyst</field>
+        </record>
+        <record id="base.res_partner_address_15" model="res.partner">
+            <field name="function">Creative Director</field>
+        </record>
+        <record id="base.res_partner_address_16" model="res.partner">
+            <field name="function">Director</field>
+        </record>
+        <record id="base.res_partner_address_17" model="res.partner">
+            <field name="function">Managing Partner</field>
+        </record>
+        <record id="base.res_partner_address_18" model="res.partner">
+            <field name="function">Senior Consultant</field>
+        </record>
+        <record id="base.res_partner_address_22" model="res.partner">
+            <field name="function">Director</field>
+        </record>
+        <record id="base.res_partner_address_24" model="res.partner">
+            <field name="function">System Analyst</field>
+        </record>
+        <record id="base.res_partner_address_25" model="res.partner">
+            <field name="function">Order Clerk</field>
+        </record>
+        <record id="base.res_partner_address_28" model="res.partner">
+            <field name="function">Business Executive</field>
+        </record>
+        <record id="base.res_partner_address_30" model="res.partner">
+            <field name="function">Functional Consultant</field>
+        </record>
+        <record id="base.res_partner_address_31" model="res.partner">
+            <field name="function">Sales Representative</field>
+        </record>
+        <record id="base.res_partner_address_32" model="res.partner">
+            <field name="function">Sales Manager</field>
+        </record>
+        <record id="base.res_partner_address_33" model="res.partner">
+            <field name="function">Financial Manager</field>
+        </record>
+        <record id="base.res_partner_address_34" model="res.partner">
+            <field name="function">Knowledge Manager</field>
+        </record>
+        <record id="base.res_partner_address_27" model="res.partner">
+            <field name="function">Software Developer</field>
+        </record>
+        <record id="base.res_partner_address_26" model="res.partner">
+            <field name="function">Technical Director</field>
+        </record>
+        <record id="base.res_partner_address_35" model="res.partner">
+            <field name="function">Store Manager</field>
+        </record>
+        <record id="base.res_partner_main1" model="res.partner">
+          <field name="function">Chief Executive Officer (CEO)</field>
+        </record>
+        <record id="base.res_partner_main2" model="res.partner">
+          <field name="function">Chief Operations Officer (COO)</field>
+        </record>
+    </data>
+</odoo>

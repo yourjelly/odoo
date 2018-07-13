@@ -345,10 +345,10 @@
             <field name="currency_subunit_label">Cents</field>
         </record>
 
-        <record id="res_bank_1" model="res.bank">
+        <!-- <record id="res_bank_1" model="res.bank">
             <field name="name">Reserve</field>
             <field name="active" eval="False"/>
-        </record>
+        </record> -->
 
         <record id="CRC" model="res.currency">
             <field name="name">CRC</field>

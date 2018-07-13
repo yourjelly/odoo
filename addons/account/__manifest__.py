@@ -11,7 +11,7 @@ Core mechanisms for the accounting modules. To display the menuitems, install th
     'category': 'Accounting',
     'website': 'https://www.odoo.com/page/billing',
     'images' : ['images/accounts.jpeg','images/bank_statement.jpeg','images/cash_register.jpeg','images/chart_of_accounts.jpeg','images/customer_invoice.jpeg','images/journal_entries.jpeg'],
-    'depends' : ['base_setup', 'product', 'analytic', 'portal'],
+    'depends' : ['base_setup', 'product', 'analytic', 'portal','partner',],
     'data': [
         'security/account_security.xml',
         'security/ir.model.access.csv',
