@@ -22,6 +22,13 @@ class StatusController(http.Controller):
         result +=" </body></html>"
         return result
 
+
+    @http.route('/driverdetails/<string:identifier>', type='http', auth='none', cors='*')
+    def status(self, identifier):
+        #if identifier[:3] == 'usb':
+        #    drivers.keys().filtered(lambda d: d[:13] == identifier)
+        return "On est bien dans la route" + identifier
+
 #----------------------------------------------------------
 # Driver common interface
 #----------------------------------------------------------
@@ -100,7 +107,7 @@ class USBDeviceManager(Thread):
             devs = usb.core.find(find_all=True)
             updated_devices = {}
             for dev in devs:
-                path =  "usb/%03d/%03d/%04x:%04x" % (dev.bus, dev.address, dev.idVendor, dev.idProduct)
+                path =  "usb/%04x:%04x/%03d/%03d/" % (dev.idVendor, dev.idProduct, dev.bus, dev.address)
                 updated_devices[path] = self.devices.get(path, dev)
             added = updated_devices.keys() - self.devices.keys()
             removed = self.devices.keys() - updated_devices.keys()
