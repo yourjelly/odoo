@@ -3221,6 +3221,10 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         with self.env.protecting(protected_fields, self):
             # write stored fields with (low-level) method _write
+
+            #update fields
+            self._preupdate_fields(store_vals)
+
             if store_vals:
                 self._write(store_vals)
 
@@ -3292,8 +3296,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         other_fields = []               # list of non-column fields
         single_lang = len(self.env['res.lang'].get_installed()) <= 1
         has_translation = self.env.lang and self.env.lang != 'en_US'
-        #update fields
-        self._preupdate_fields(vals)
 
         for name, val in vals.items():
             field = self._fields[name]
@@ -3496,6 +3498,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                     for data in data_list
                     if not inv_names.isdisjoint(data['inversed'])
                 ]
+
 
                 # If a field is not stored, its inverse method will probably
                 # write on its dependencies, which will invalidate the field on
