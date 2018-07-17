@@ -484,7 +484,7 @@ class AssetsBundle(object):
                 ['rtlcss', '--version'], stdout=PIPE, stderr=PIPE
             )
         except (OSError, IOError):
-            _logger.info('You need rtlcss to convert css file to right to left compatible.')
+            _logger.warning('You need rtlcss to convert css file to right to left compatible.')
             return source
 
         try:
