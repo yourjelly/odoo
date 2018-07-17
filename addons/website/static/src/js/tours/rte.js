@@ -22,7 +22,7 @@ tour.register('rte_translator', {
     content: "go to english version",
     trigger: '.js_language_selector a[data-lang="en_US"]',
     extra_trigger: 'html[lang*="fr"]',
-    timeout: 60000,
+    timeout: 160000,
 }, {
     content: "Open new page menu",
     trigger: '#new-content-menu > a',
