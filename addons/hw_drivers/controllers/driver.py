@@ -175,7 +175,10 @@ def send_device(name, identifier):
                   'identifier': identifier}
         data = parse.urlencode(values).encode()
         req = request.Request(url, data=data)
-        response = request.urlopen(req)
+        try:
+            response = request.urlopen(req)
+        except:
+            _logger.warning('Could not reach configured server')
 
 
 udm = USBDeviceManager()
