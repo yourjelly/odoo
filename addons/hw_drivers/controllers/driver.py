@@ -161,7 +161,11 @@ if server: #TODO: Needs try catches too, because server might not be available e
 
     data = parse.urlencode(values).encode()
     req =  request.Request(url, data=data)
-    response = request.urlopen(req)
+    try:
+        response = request.urlopen(req)
+    except:
+        _logger.warning('Could not reach configured server')
+
 
 def send_device(name, identifier):
     if server:
