@@ -98,7 +98,9 @@ class AssetsBundle(object):
         self.css_errors = []
         self._checksum = None
         self.files = files
-        self.user_direction = self.env['res.lang'].search([('code', '=', (self.env.context.get('lang') or self.env.user.lang))]).direction
+        self.user_direction = self.env['res.lang'].search(
+            [('code', '=', (self.env.context.get('lang') or self.env.user.lang))]
+        ).direction
         for f in files:
             if f['atype'] == 'text/sass':
                 self.stylesheets.append(SassStylesheetAsset(self, url=f['url'], filename=f['filename'], inline=f['content'], media=f['media'], direction=self.user_direction))
@@ -212,7 +214,10 @@ class AssetsBundle(object):
         """
         ira = self.env['ir.attachment']
         domain = [
-            ('url', '=like', '/web/content/%-%/{0}{1}%.{2}'.format(self.name, ('.%s' % self.user_direction if type == 'css' else ''), type)),  # The wilcards are id, version and pagination number (if any)
+            ('url', '=like', '/web/content/%-%/{0}{1}%.{2}'.format(  # The wilcards are id, version and pagination number (if any)
+                self.name,
+                ('.%s' % self.user_direction if type == 'css' else ''),
+                type)),
             '!', ('url', '=like', '/web/content/%-{}/%'.format(self.version))
         ]
 
@@ -230,7 +235,13 @@ class AssetsBundle(object):
         by file name and only return the one with the max id for each group.
         """
         version = "%" if ignore_version else self.version
-        url_pattern = '/web/content/%-{0}/{1}{2}{3}.{4}'.format(version, self.name, ('.%s' % self.user_direction if type == 'css' else ''), '.%' if type == 'css' else '', type)
+        url_pattern = '/web/content/%-{0}/{1}{2}{3}.{4}'.format(
+            version,
+            self.name,
+            ('.%s' % self.user_direction if type == 'css' else ''),
+            '.%' if type == 'css' else '',
+            type
+        )
         self.env.cr.execute("""
              SELECT max(id)
                FROM ir_attachment
@@ -245,8 +256,16 @@ class AssetsBundle(object):
         assert type in ('js', 'css')
         ira = self.env['ir.attachment']
 
-        # Set user direction in name, we will store two bundles 1 for ltr and 1 for rtl, this will help while clearing assets bundle, we will only clear current direction bundle(this applies to css bundles only)
-        fname = '%s%s%s.%s' % (self.name, ('.%s' % self.user_direction if type == 'css' else ''), ('' if inc is None else '.%s' % inc), type)
+        # Set user direction in name to store two bundles
+        # 1 for ltr and 1 for rtl, this will help during cleaning of assets bundle
+        # and allow to only clear the current direction bundle
+        # (this applies to css bundles only)
+        fname = '%s%s%s.%s' % (
+            self.name,
+            ('.%s' % self.user_direction if type == 'css' else ''),
+            ('' if inc is None else '.%s' % inc),
+            type
+        )
         mimetype = 'application/javascript' if type == 'js' else 'text/css'
         values = {
             'name': "/web/content/%s" % type,
@@ -478,22 +497,25 @@ class AssetsBundle(object):
         rtlcss = 'rtlcss'
         cmd = [rtlcss, '-']
 
-        # Check the presence of rtlcss, if rtlcss not available then we should return normal less file
-        try:
-            process = Popen(
-                ['rtlcss', '--version'], stdout=PIPE, stderr=PIPE
-            )
-        except (OSError, IOError):
-            _logger.warning('You need rtlcss to convert css file to right to left compatible.')
-            return source
 
         try:
             rtlcss = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         except Exception:
+
+            # Check the presence of rtlcss, if rtlcss not available then we should return normal less file
+            try:
+                process = Popen(
+                    ['rtlcss', '--version'], stdout=PIPE, stderr=PIPE
+                )
+            except (OSError, IOError):
+                _logger.warning('You need rtlcss to convert css file to right to left compatiblity.')
+                return source
+
             msg = "Could not execute command %r" % cmd[0]
             _logger.error(msg)
             self.css_errors.append(msg)
             return ''
+
         result = rtlcss.communicate(input=source.encode('utf-8'))
         if rtlcss.returncode:
             cmd_output = ''.join(misc.ustr(result))
