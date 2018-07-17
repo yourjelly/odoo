@@ -24,7 +24,7 @@ class StatusController(http.Controller):
 
 
     @http.route('/driverdetails/<string:identifier>', type='http', auth='none', cors='*')
-    def status(self, identifier):
+    def statusdetail(self, identifier):
         #if identifier[:3] == 'usb':
         #    drivers.keys().filtered(lambda d: d[:13] == identifier)
         return "On est bien dans la route" + identifier
