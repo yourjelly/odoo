@@ -109,6 +109,7 @@
                 </div>
                 <!-- Page Content -->
                 <div id="invoice_content" class="col-md-9 o_portal_page_content hidden-print">
+                    <div class="mb48"><a role="button" class="btn btn-info pull-right" t-att-href="'/web#model=account.invoice&amp;id=%s&amp;view_type=form' % (invoice.id)">Edit Invoice</a></div>
                     <t t-if="error or warning" t-call="account.portal_invoice_error"/>
                     <t t-if="success and (not error and not warning)" t-call="account.portal_invoice_success"/>
                     <div class="o_portal_html_view">
