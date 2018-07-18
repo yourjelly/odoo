@@ -270,15 +270,9 @@ class PaymentAcquirer(models.Model):
             journals += acquirer.journal_id
         return journals
 
-    @api.model
-    def create(self, vals):
+    @api.preupdate('image', 'image_medium', 'image_small')
+    def _preupdate_images(self, vals):
         image_resize_images(vals)
-        return super(PaymentAcquirer, self).create(vals)
-
-    @api.multi
-    def write(self, vals):
-        image_resize_images(vals)
-        return super(PaymentAcquirer, self).write(vals)
 
     @api.multi
     def toggle_website_published(self):

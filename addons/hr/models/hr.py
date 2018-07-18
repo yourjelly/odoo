@@ -241,11 +241,14 @@ class Employee(models.Model):
             work_email=user.email,
         )
 
+    @api.preupdate('image', 'image_medium', 'image_small')
+    def _preupdate_images(self, vals):
+        tools.image_resize_images(vals)
+
     @api.model
     def create(self, vals):
         if vals.get('user_id'):
             vals.update(self._sync_user(self.env['res.users'].browse(vals['user_id'])))
-        tools.image_resize_images(vals)
         return super(Employee, self).create(vals)
 
     @api.multi
@@ -254,7 +257,6 @@ class Employee(models.Model):
             account_id = vals.get('bank_account_id') or self.bank_account_id.id
             if account_id:
                 self.env['res.partner.bank'].browse(account_id).partner_id = vals['address_home_id']
-        tools.image_resize_images(vals)
         return super(Employee, self).write(vals)
 
     @api.multi
