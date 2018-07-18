@@ -805,7 +805,7 @@ for rec in records:
 
         <menuitem id="res_partner_menu_crm"
             parent="crm_menu_root"
-            action="base.action_partner_form"
+            action="partner.action_partner_form"
             sequence="2"/>
 
         <!-- Lead Menu -->

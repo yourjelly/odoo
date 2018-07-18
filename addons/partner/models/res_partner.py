@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
+import base64
 import datetime
 import pytz
-from lxml import etree
-from email.utils import formataddr
-from werkzeug import urls
 
-from odoo import api, fields, models, tools, SUPERUSER_ID, _
-from odoo.exceptions import UserError, ValidationError
+from odoo.modules import get_module_resource
+from odoo.osv.expression import get_unaccent_wrapper
+from odoo import api, fields, models, tools, _
 
 class PartnerCategory(models.Model):
     _description = 'Partner Tags'
@@ -23,11 +21,6 @@ class PartnerCategory(models.Model):
     active = fields.Boolean(default=True, help="The active field allows you to hide the category without removing it.")
     parent_path = fields.Char(index=True)
     partner_ids = fields.Many2many('res.partner', column1='category_id', column2='partner_id', string='Partners')
-
-    @api.constrains('parent_id')
-    def _check_parent_id(self):
-        if not self._check_recursion():
-            raise ValidationError(_('You can not create recursive tags.'))
 
     @api.multi
     def name_get(self):
@@ -100,6 +93,11 @@ class Partner(models.Model):
         'Share Partner', compute='_compute_partner_share', store=True,
         help="Either customer (not a user), either shared user. Indicated the current partner is a customer without "
              "access or with a limited access created for sharing data.")
+    type = fields.Selection(selection_add=[
+         ('invoice', 'Invoice address'),
+         ('delivery', 'Shipping address'),
+         ('other', 'Other address'),
+         ("private", "Private Address")])
 
     # technical field used for managing commercial fields
 
@@ -127,11 +125,6 @@ class Partner(models.Model):
             p = partner.commercial_partner_id
             partner.commercial_company_name = p.is_company and p.name or partner.company_name
 
-    @api.constrains('parent_id')
-    def _check_parent_id(self):
-        if not self._check_recursion():
-            raise ValidationError(_('You cannot create recursive Partner hierarchies.'))
-
     @api.multi
     def open_commercial_entity(self):
         """ Utility method used to add an "Open Company" button in partner views """
@@ -142,6 +135,74 @@ class Partner(models.Model):
                 'res_id': self.commercial_partner_id.id,
                 'target': 'current',
                 'flags': {'form': {'action_buttons': True}}}
+
+    @api.model
+    def _get_default_image(self, partner_type, is_company, parent_id):
+        img_path, image = False, False
+        res = super(Partner, self)._get_default_image(partner_type, is_company, parent_id)
+        if partner_type in ['other'] and parent_id:
+            parent_image = self.browse(parent_id).image
+            image = parent_image and base64.b64decode(parent_image) or None
+
+        if not image and partner_type == 'invoice':
+            img_path = get_module_resource('base', 'static/img', 'money.png')
+        elif not image and partner_type == 'delivery':
+            img_path = get_module_resource('base', 'static/img', 'truck.png')
+        if img_path:
+            with open(img_path, 'rb') as f:
+                image = f.read()
+        if image:
+            return tools.image_resize_image_big(base64.b64encode(image))
+        return res
+
+    @api.model
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+        self = self.sudo(name_get_uid or self.env.uid)
+        if args is None:
+            args = []
+        if name and operator in ('=', 'ilike', '=ilike', 'like', '=like'):
+            self.check_access_rights('read')
+            where_query = self._where_calc(args)
+            self._apply_ir_rules(where_query, 'read')
+            from_clause, where_clause, where_clause_params = where_query.get_sql()
+            where_str = where_clause and (" WHERE %s AND " % where_clause) or ' WHERE '
+
+            # search on the name of the contacts and of its company
+            search_name = name
+            if operator in ('ilike', 'like'):
+                search_name = '%%%s%%' % name
+            if operator in ('=ilike', '=like'):
+                operator = operator[1:]
+
+            unaccent = get_unaccent_wrapper(self.env.cr)
+
+            query = """SELECT id
+                         FROM res_partner
+                      {where} ({email} {operator} {percent}
+                           OR {display_name} {operator} {percent}
+                           OR {reference} {operator} {percent}
+                           OR {vat} {operator} {percent})
+                           -- don't panic, trust postgres bitmap
+                     ORDER BY {display_name} {operator} {percent} desc,
+                              {display_name}
+                    """.format(where=where_str,
+                               operator=operator,
+                               email=unaccent('email'),
+                               display_name=unaccent('display_name'),
+                               reference=unaccent('ref'),
+                               percent=unaccent('%s'),
+                               vat=unaccent('vat'),)
+            where_clause_params += [search_name] * 5
+            if limit:
+                query += ' limit %s'
+                where_clause_params.append(limit)
+            self.env.cr.execute(query, where_clause_params)
+            partner_ids = [row[0] for row in self.env.cr.fetchall()]
+            if partner_ids:
+                return self.browse(partner_ids).name_get()
+            else:
+                return []
+        return super(Partner, self)._name_search(name, args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
     @api.multi
     def name_get(self):
@@ -193,13 +254,20 @@ class Partner(models.Model):
 
     @api.multi
     def _fields_sync(self, values):
-        """ Sync commercial fields and address fields from company and to children after create/update,
-        just as if those were all modeled as fields.related to the parent """
-        # 1. From UPSTREAM: sync from parent
         if values.get('parent_id') or values.get('type', 'contact'):
             # 1a. Commercial fields: sync if parent changed
             if values.get('parent_id'):
                 self._commercial_sync_from_company()
+        if self.child_ids:
+            # 2a. Commercial Fields: sync if commercial entity
+            if self.commercial_partner_id == self:
+                commercial_fields = self._commercial_fields()
+                if any(field in values for field in commercial_fields):
+                    self._commercial_sync_to_children()
+            for child in self.child_ids.filtered(lambda c: not c.is_company):
+                if child.commercial_partner_id != self.commercial_partner_id :
+                    self._commercial_sync_to_children()
+                    break
         return super(Partner, self)._fields_sync(values)
 
     @api.multi

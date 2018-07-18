@@ -15,7 +15,6 @@ from werkzeug import urls
 
 from odoo import api, fields, models, tools, SUPERUSER_ID, _
 from odoo.modules import get_module_resource
-from odoo.osv.expression import get_unaccent_wrapper
 from odoo.exceptions import UserError, ValidationError
 
 # Global variables used for the warning fields declared on the res.partner
@@ -98,13 +97,8 @@ class Partner(models.Model):
     supplier = fields.Boolean(string='Is a Vendor',
                                help="Check this box if this contact is a vendor. "
                                "If it's not checked, purchase people will not see it when encoding a purchase order.")
-    type = fields.Selection(
-        [('contact', 'Contact'),
-         ('invoice', 'Invoice address'),
-         ('delivery', 'Shipping address'),
-         ('other', 'Other address'),
-         ("private", "Private Address"),
-        ], string='Address Type',
+    type = fields.Selection([('contact', 'Contact')],
+        string='Address Type',
         default='contact',
         help="Used to select automatically the right address according to the context in sales and purchases documents.")
     street = fields.Char()
@@ -150,6 +144,11 @@ class Partner(models.Model):
         ('check_name', "CHECK( (type='contact' AND name IS NOT NULL) or (type!='contact') )", 'Contacts require a name.'),
     ]
 
+    @api.constrains('parent_id')
+    def _check_parent_id(self):
+        if not self._check_recursion():
+            raise ValidationError(_('You can not create recursive tags.'))
+
     @api.multi
     def toggle_active(self):
         for partner in self:
@@ -180,20 +179,11 @@ class Partner(models.Model):
 
         colorize, img_path, image = False, False, False
 
-        if partner_type in ['other'] and parent_id:
-            parent_image = self.browse(parent_id).image
-            image = parent_image and base64.b64decode(parent_image) or None
-
-        if not image and partner_type == 'invoice':
-            img_path = get_module_resource('base', 'static/img', 'money.png')
-        elif not image and partner_type == 'delivery':
-            img_path = get_module_resource('base', 'static/img', 'truck.png')
-        elif not image and is_company:
+        if not image and is_company:
             img_path = get_module_resource('base', 'static/img', 'company_image.png')
         elif not image:
             img_path = get_module_resource('base', 'static/img', 'avatar.png')
             colorize = True
-
         if img_path:
             with open(img_path, 'rb') as f:
                 image = f.read()
@@ -319,15 +309,6 @@ class Partner(models.Model):
 
         # 2. To DOWNSTREAM: sync children
         if self.child_ids:
-            # 2a. Commercial Fields: sync if commercial entity
-            if self.commercial_partner_id == self:
-                commercial_fields = self._commercial_fields()
-                if any(field in values for field in commercial_fields):
-                    self._commercial_sync_to_children()
-            for child in self.child_ids.filtered(lambda c: not c.is_company):
-                if child.commercial_partner_id != self.commercial_partner_id :
-                    self._commercial_sync_to_children()
-                    break
             # 2b. Address fields: sync if address changed
             address_fields = self._address_fields()
             if any(field in values for field in address_fields):
@@ -482,57 +463,6 @@ class Partner(models.Model):
             self = self.with_context(active_test=False)
         return super(Partner, self)._search(args, offset=offset, limit=limit, order=order,
                                             count=count, access_rights_uid=access_rights_uid)
-
-    @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
-        self = self.sudo(name_get_uid or self.env.uid)
-        if args is None:
-            args = []
-        if name and operator in ('=', 'ilike', '=ilike', 'like', '=like'):
-            self.check_access_rights('read')
-            where_query = self._where_calc(args)
-            self._apply_ir_rules(where_query, 'read')
-            from_clause, where_clause, where_clause_params = where_query.get_sql()
-            where_str = where_clause and (" WHERE %s AND " % where_clause) or ' WHERE '
-
-            # search on the name of the contacts and of its company
-            search_name = name
-            if operator in ('ilike', 'like'):
-                search_name = '%%%s%%' % name
-            if operator in ('=ilike', '=like'):
-                operator = operator[1:]
-
-            unaccent = get_unaccent_wrapper(self.env.cr)
-
-            query = """SELECT id
-                         FROM res_partner
-                      {where} ({email} {operator} {percent}
-                           OR {display_name} {operator} {percent}
-                           OR {reference} {operator} {percent}
-                           OR {vat} {operator} {percent})
-                           -- don't panic, trust postgres bitmap
-                     ORDER BY {display_name} {operator} {percent} desc,
-                              {display_name}
-                    """.format(where=where_str,
-                               operator=operator,
-                               email=unaccent('email'),
-                               display_name=unaccent('display_name'),
-                               reference=unaccent('ref'),
-                               percent=unaccent('%s'),
-                               vat=unaccent('vat'),)
-
-            where_clause_params += [search_name]*5
-            if limit:
-                query += ' limit %s'
-                where_clause_params.append(limit)
-            self.env.cr.execute(query, where_clause_params)
-            partner_ids = [row[0] for row in self.env.cr.fetchall()]
-
-            if partner_ids:
-                return self.browse(partner_ids).name_get()
-            else:
-                return []
-        return super(Partner, self)._name_search(name, args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
     @api.model
     def find_or_create(self, email):

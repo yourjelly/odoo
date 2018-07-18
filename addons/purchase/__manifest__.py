@@ -9,7 +9,7 @@
     'summary': 'Purchase Orders, Receipts, Vendor Bills',
     'description': "",
     'website': 'https://www.odoo.com/page/purchase',
-    'depends': ['account'],
+    'depends': ['account', 'partner'],
     'data': [
         'security/purchase_security.xml',
         'security/ir.model.access.csv',

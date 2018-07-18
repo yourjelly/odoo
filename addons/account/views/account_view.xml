@@ -2179,7 +2179,7 @@
 
         <menuitem id="menu_account_customer" name="Customers"
             parent="menu_finance_receivables_master_data"
-            action="base.action_partner_customer_form" sequence="100"/>
+            action="partner.action_partner_customer_form" sequence="100"/>
 
         <record id="product_product_view_tree" model="ir.ui.view">
             <field name="name">product.product.tree</field>
@@ -2241,7 +2241,7 @@
 
         <menuitem id="menu_account_supplier" name="Vendors"
             parent="menu_finance_payables_master_data"
-            action="base.action_partner_supplier_form" sequence="100"/>
+            action="partner.action_partner_supplier_form" sequence="100"/>
 
         <!-- Account Financial Report -->
 
