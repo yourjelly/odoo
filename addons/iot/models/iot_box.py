@@ -11,3 +11,4 @@ class IotBox(models.Model):
     identifier = fields.Char(string='Serial Number (Mac Address)')
     device_ids = fields.One2many('iot.device', 'iot_id', string="devices")
     ip = fields.Char('IP Address')
+    test_float = fields.Char('Test Float')
