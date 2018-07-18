@@ -109,22 +109,17 @@ class Website(models.Model):
 
     @api.model
     def create(self, vals):
-        # todo jov make company required
         if 'user_id' not in vals:
-            company = self.env['res.company'].browse(vals.get('company_id'))
-            vals['user_id'] = company._get_public_user().id if company else self.env.ref('base.public_user').id
+            vals['user_id'] = self.env.ref('base.public_user').id
 
         res = super(Website, self).create(vals)
+        res._create_public_user()
         res._bootstrap_homepage()
         return res
 
     @api.multi
     def write(self, values):
         self._get_languages.clear_cache(self)
-        if 'company_id' in values and 'user_id' not in values:
-            company = self.env['res.company'].browse(values['company_id'])
-            values['user_id'] = company._get_public_user().id
-
         result = super(Website, self).write(values)
         if 'cdn_activated' in values or 'cdn_url' in values or 'cdn_filters' in values:
             # invalidate the caches from static node at compile time
@@ -139,6 +134,17 @@ class Website(models.Model):
         self.social_linkedin = self.company_id.social_linkedin
         self.social_youtube = self.company_id.social_youtube
         self.social_googleplus = self.company_id.social_googleplus
+
+    @api.multi
+    def _create_public_user(self):
+        self.ensure_one()
+        self.user_id = self.env.ref('base.public_user').copy({
+            'name': 'Public user for %s' % self.name,
+            'login': 'public_user_website_%s' % self.id,
+            'company_id': self.company_id.id,
+            'company_ids': [(6, 0, [self.company_id.id])],
+            'website_id': self.id,
+        })
 
     #----------------------------------------------------------
     # Page Management
