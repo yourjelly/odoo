@@ -41,13 +41,12 @@ class TestJavascriptAssetsBundle(TransactionCase):
         files, remains = env['ir.qweb']._get_asset_content(xmlid, env.context)
         return AssetsBundle(xmlid, files, env=env)
 
-    def _any_ira_for_bundle(self, type, env=None):
+    def _any_ira_for_bundle(self, type, lang=None):
         """ Returns all ir.attachments associated to a bundle, regardless of the verion.
         """
-        env = (env or self.env)
-        user_direction = env['res.lang'].search([('code', '=', (env.context.get('lang') or env.user.lang))]).direction
+        user_direction = self.env['res.lang'].search([('code', '=', (lang or self.env.user.lang))]).direction
         bundle = self.jsbundle_xmlid if type == 'js' else self.cssbundle_xmlid
-        return env['ir.attachment'].search([
+        return self.env['ir.attachment'].search([
             ('url', '=like', '/web/content/%-%/{0}{1}%.{2}'.format(bundle, ('.%s' % user_direction if type == 'css' else ''), type))
         ])
 
@@ -324,14 +323,14 @@ class TestJavascriptAssetsBundle(TransactionCase):
         self.bundle = self._get_asset(self.cssbundle_xmlid, env=self.env(context={'lang': 'ar_SY'}))
 
         # there shouldn't be any attachment associated to this bundle
-        self.assertEquals(len(self._any_ira_for_bundle('css', env=self.env(context={'lang': 'ar_SY'}))), 0)
+        self.assertEquals(len(self._any_ira_for_bundle('css', lang='ar_SY')), 0)
         self.assertEquals(len(self.bundle.get_attachments('css')), 0)
 
         # trigger the first generation and, thus, the first save in database
         self.bundle.css()
 
         # there should be one attachment associated to this bundle
-        self.assertEquals(len(self._any_ira_for_bundle('css', env=self.env(context={'lang': 'ar_SY'}))), 1)
+        self.assertEquals(len(self._any_ira_for_bundle('css', lang='ar_SY')), 1)
         self.assertEquals(len(self.bundle.get_attachments('css')), 1)
 
     def test_16_ltr_and_rtl_css_access(self):
@@ -365,19 +364,19 @@ class TestJavascriptAssetsBundle(TransactionCase):
         rtl_bundle0 = self._get_asset(self.cssbundle_xmlid, env=self.env(context={'lang': 'ar_SY'}))
         rtl_bundle0.css()
 
-        self.assertEquals(len(self._any_ira_for_bundle('css', env=self.env(context={'lang': 'ar_SY'}))), 1)
+        self.assertEquals(len(self._any_ira_for_bundle('css', lang='ar_SY')), 1)
 
         rtl_version0 = rtl_bundle0.version
-        rtl_ira0 = self._any_ira_for_bundle('css', env=self.env(context={'lang': 'ar_SY'}))
+        rtl_ira0 = self._any_ira_for_bundle('css', lang='ar_SY')
         rtl_date0 = rtl_ira0.create_date
 
         rtl_bundle1 = self._get_asset(self.cssbundle_xmlid, env=self.env(context={'lang': 'ar_SY'}))
         rtl_bundle1.css()
 
-        self.assertEquals(len(self._any_ira_for_bundle('css', env=self.env(context={'lang': 'ar_SY'}))), 1)
+        self.assertEquals(len(self._any_ira_for_bundle('css', lang='ar_SY')), 1)
 
         rtl_version1 = rtl_bundle1.version
-        rtl_ira1 = self._any_ira_for_bundle('css', env=self.env(context={'lang': 'ar_SY'}))
+        rtl_ira1 = self._any_ira_for_bundle('css', lang='ar_SY')
         rtl_date1 = rtl_ira1.create_date
 
         self.assertEquals(rtl_version0, rtl_version1)
@@ -425,7 +424,7 @@ class TestJavascriptAssetsBundle(TransactionCase):
         rtl_bundle1.css()
         rtl_last_modified1 = rtl_bundle1.last_modified
         rtl_version1 = rtl_bundle1.version
-        rtl_ira1 = self._any_ira_for_bundle('css', env=self.env(context={'lang': 'ar_SY'}))
+        rtl_ira1 = self._any_ira_for_bundle('css', lang='ar_SY')
         self.assertNotEquals(rtl_last_modified0, rtl_last_modified1)
         self.assertNotEquals(rtl_version0, rtl_version1)
 
@@ -446,13 +445,11 @@ class TestJavascriptAssetsBundle(TransactionCase):
         ltr_bundle0 = self._get_asset(self.cssbundle_xmlid)
         ltr_bundle0.css()
         ltr_files0 = ltr_bundle0.files
-        ltr_remains0 = ltr_bundle0.remains
         ltr_version0 = ltr_bundle0.version
 
         rtl_bundle0 = self._get_asset(self.cssbundle_xmlid, env=self.env(context={'lang': 'ar_SY'}))
         rtl_bundle0.css()
         rtl_files0 = rtl_bundle0.files
-        rtl_remains0 = rtl_bundle0.remains
         rtl_version0 = rtl_bundle0.version
 
         css_bundles = self.env['ir.attachment'].search([
@@ -478,23 +475,19 @@ class TestJavascriptAssetsBundle(TransactionCase):
         ltr_bundle1 = self._get_asset(self.cssbundle_xmlid, env=self.env(context={'check_view_ids': view.ids}))
         ltr_bundle1.css()
         ltr_files1 = ltr_bundle1.files
-        ltr_remains1 = ltr_bundle1.remains
         ltr_version1 = ltr_bundle1.version
         ltr_ira1 = self._any_ira_for_bundle('css')
 
         self.assertNotEquals(ltr_files0, ltr_files1)
-        self.assertEquals(ltr_remains0, ltr_remains1)
         self.assertNotEquals(ltr_version0, ltr_version1)
 
         rtl_bundle1 = self._get_asset(self.cssbundle_xmlid, env=self.env(context={'check_view_ids': view.ids, 'lang': 'ar_SY'}))
         rtl_bundle1.css()
         rtl_files1 = rtl_bundle1.files
-        rtl_remains1 = rtl_bundle1.remains
         rtl_version1 = rtl_bundle1.version
-        rtl_ira1 = self._any_ira_for_bundle('css', env=self.env(context={'lang': 'ar_SY'}))
+        rtl_ira1 = self._any_ira_for_bundle('css', lang='ar_SY')
 
         self.assertNotEquals(rtl_files0, rtl_files1)
-        self.assertEquals(rtl_remains0, rtl_remains1)
         self.assertNotEquals(rtl_version0, rtl_version1)
 
         # Checks rtl and ltr bundles are different

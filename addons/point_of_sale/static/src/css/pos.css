@@ -1431,6 +1431,7 @@ td {
 .pos .pos-receipt-container {
     font-size: 0.75em;
     text-align: center;
+    direction: ltr;
 }
 
 .pos .pos-sale-ticket {
