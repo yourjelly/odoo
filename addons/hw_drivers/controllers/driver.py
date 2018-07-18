@@ -5,6 +5,8 @@ from threading import Thread
 import usb
 import serial
 import gatt
+import evdev
+import subprocess
 from odoo import http
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
@@ -115,12 +117,17 @@ class USBDeviceManager(Thread):
             print('added %s removed %s'%(added, removed))
             print(len(self.devices))
             for path in added:
+                dev = updated_devices[path]
                 for driverclass in usbdrivers:
                     _logger.info('For device %s checking driver %s', path, driverclass)
                     d = driverclass(updated_devices[path])
                     if d.supported():
                         _logger.info('For device %s will be driven', path)
-                        send_device("To be completed", "%04x:%04x" % (dev.idVendor, dev.idProduct))
+                        lsusb = str(subprocess.check_output('lsusb')).split("\\n")
+                        for usbtre in lsusb:
+                            if "%04x:%04x" % (dev.idVendor, dev.idProduct) in usbtre:
+                                name = usbtre.split("%04x:%04x" % (dev.idVendor, dev.idProduct))
+                        send_device("%s" % (name[1]), "%04x:%04x" % (dev.idVendor, dev.idProduct))
                         drivers[path] = d
                         # launch thread
                         d.daemon = True
