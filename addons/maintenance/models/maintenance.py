@@ -352,14 +352,14 @@ class MaintenanceRequest(models.Model):
         if self.stage_id.done and 'stage_id' in vals:
             self.write({'close_date': fields.Date.today()})
             self.activity_feedback(['maintenance.mail_act_maintenance_request'])
-        if 'schedule_date' in vals:
+        if any(val in vals.keys() for val in ('technician_user_id', 'equipment_id', 'schedule_date')):
+            self.activity_unlink(['maintenance.mail_act_maintenance_request'])
             self.activity_update()
         return res
 
     def activity_update(self):
         """ Update maintenance activities based on current record set state.
         It reschedule, unlink or create maintenance request activities. """
-        self.filtered(lambda request: not request.schedule_date).activity_unlink(['maintenance.mail_act_maintenance_request'])
         for request in self.filtered(lambda request: request.schedule_date):
             date_dl = fields.Datetime.from_string(request.schedule_date).date()
             updated = request.activity_reschedule(
