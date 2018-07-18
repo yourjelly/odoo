@@ -934,6 +934,14 @@ class AccountInvoice(models.Model):
 
         return groups
 
+    def preview_invoice(self):
+        return {
+            'type': 'ir.actions.act_url',
+            'url': '/my/invoices/%s?access_token=%s' % (self.id, self.access_token),
+            'target': 'self',
+            'res_id': self.id,
+            }
+
     @api.multi
     def get_access_action(self, access_uid=None):
         """ Instead of the classic form view, redirect to the online invoice for portal users. """
