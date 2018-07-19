@@ -14,6 +14,7 @@ Extedn Partner.
         'views/partner_views.xml',
         'views/res_bank_views.xml',
         'security/ir.model.access.csv',
+        'security/bank_security.xml',
     ],
     'demo': [
         'data/res_partner_bank_demo.xml',

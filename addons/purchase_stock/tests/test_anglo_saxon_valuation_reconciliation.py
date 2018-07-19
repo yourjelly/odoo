@@ -88,7 +88,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCase):
         # entries get automatically reconciled (and you cannot modify a reconciled entry).
         # So, we have to make sure that "today"'s rate will always be the last rate we
         # created in order to ensure complete control of the test.
-        self.env.ref('base.rateUSDbis').unlink()
+        self.env.ref('account.rateUSDbis').unlink()
 
 
         # Create a PO and an invoice for it

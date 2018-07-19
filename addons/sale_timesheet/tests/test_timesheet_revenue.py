@@ -14,10 +14,10 @@ class TestSaleTimesheet(TestSale):
         super(TestSaleTimesheet, self).setUp()
 
         # NOTE JEM
-        # The tests below are based on the `base.rateUSD` currency rate. It
-        # is required to remove the `base.rateUSDbis` to avoid rounding error
+        # The tests below are based on the `account.rateUSD` currency rate. It
+        # is required to remove the `account.rateUSDbis` to avoid rounding error
         # after the 6 june of current year.
-        self.env.ref('base.rateUSDbis').unlink()
+        self.env.ref('account.rateUSDbis').unlink()
 
         # Make sure the company is in USD
         self.env.cr.execute(

@@ -275,7 +275,7 @@ class TestReconciliation(AccountingTestCase):
         # will lead to an exchange loss, that should be handled correctly within the journal items.
         env = api.Environment(self.cr, self.uid, {})
         # We update the currency rate of the currency USD in order to force the gain/loss exchanges in next steps
-        rateUSDbis = env.ref("base.rateUSDbis")
+        rateUSDbis = env.ref("account.rateUSDbis")
         rateUSDbis.write({
             'name': time.strftime('%Y-%m-%d') + ' 00:00:00',
             'rate': 0.033,

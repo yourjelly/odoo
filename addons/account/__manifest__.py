@@ -68,9 +68,12 @@ Core mechanisms for the accounting modules. To display the menuitems, install th
         'views/res_users_views.xml',
         'data/service_cron_reverse.xml',
         'views/account_fiscal_year_view.xml',
+        'views/res_currency_views.xml',
+        'data/res_currency_data.xml',
     ],
     'demo': [
         'demo/account_demo.xml',
+        'demo/res_currency_rate_demo.xml',
     ],
     'qweb': [
         "static/src/xml/account_reconciliation.xml",
