@@ -1687,5 +1687,69 @@ QUnit.module('account', {
 
         clientAction.destroy();
     });
+
+    QUnit.only('Don\'t loose pager', function (assert) {
+        assert.expect(4);
+
+        function standard_partner (list, partner_id) {
+            _.each(list, function (item) {
+                item.partner_id = partner_id;
+            });
+        };
+
+        this.params.options.params.limitMoveLines = 1;
+        standard_partner(this.params.mv_lines['[5,"",0,6]'], 8);
+
+        this.params.mv_lines['[5,"",0,1]'] = this.params.mv_lines['[5,"",0,6]'].slice(0,1);
+        this.params.mv_lines['[5,"",1,1]'] = this.params.mv_lines['[5,"",0,6]'].slice(1,2);
+
+        var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
+        testUtils.addMockEnvironment(clientAction, {
+            data: this.params.data,
+            mockRPC: function (route, args) {
+                if (args.method === 'process_reconciliations') {
+                    assert.deepEqual(args.args,
+                        [
+                            [5], // Id of the bank statement line
+
+                            [{counterpart_aml_dicts:
+                                [{name:"INV/2017/0002",
+                                  debit: 0,
+                                  credit: 650,
+                                  counterpart_aml_id: 109},
+
+                                 {name: "INV/2017/0003",
+                                  debit: 0,
+                                  credit: 525,
+                                  counterpart_aml_id: 112}],
+
+                              payment_aml_ids: [],
+                              partner_id: 8,
+                              new_aml_dicts: []}]
+                        ], "should call process_reconciliations with partial reconcile values");
+                }
+                console.log(route);
+                console.log(args);
+                return this._super(route, args).always(function () {
+                    console.log(arguments);
+                });
+            },
+            session: {
+                currencies: {
+                    3: {
+                        digits: [69, 2],
+                        position: "before",
+                        symbol: "$"
+                    }
+                }
+            },
+        });
+        //clientAction.appendTo($('#qunit-fixture'));
+
+         var $body = $('body');
+        $body.addClass('debug');
+        clientAction.appendTo($body);
+
+    });
 });
 });

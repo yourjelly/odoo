@@ -130,6 +130,24 @@ var StatementModel = BasicModel.extend({
         this._addProposition(line, prop);
         return $.when(this._computeLine(line), this._performMoveLine(handle));
     },
+
+    countPropositions: function (handle, data) {
+        var self = this;
+        var line = this.getLine(handle);
+        var excluded_ids = _.compact(_.flatten(_.map(this.lines, function (line) {
+            return _.map(line.reconciliation_proposition, function (prop) {
+                return !prop.partial_reconcile && _.isNumber(prop.id) ? prop.id : null;
+            });
+        })));
+        var filter = line.filter || "";
+        return this._rpc({
+                model: 'account.bank.statement.line',
+                method: 'count_propositions_for widget',
+                args: [line.id, line.st_line.partner_id, excluded_ids, filter],
+            }).then(function (res) {
+                line.propositionsNumber = res;
+            });
+    },
     /**
      * send information 'account.bank.statement.line' model to reconciliate
      * lines, call rpc to 'reconciliation_widget_auto_reconcile'
@@ -1055,7 +1073,7 @@ var StatementModel = BasicModel.extend({
         })));
         var filter = line.filter || "";
         var offset = line.offset;
-        var limit = this.limitMoveLines+1;
+        var limit = this.limitMoveLines;
         return this._rpc({
                 model: 'account.bank.statement.line',
                 method: 'get_move_lines_for_reconciliation_widget',

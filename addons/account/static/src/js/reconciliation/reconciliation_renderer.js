@@ -281,6 +281,7 @@ var LineRenderer = Widget.extend(FieldManagerMixin, {
 
         this.model = model;
         this._initialState = state;
+        this.trigger('count_propositions');
     },
 
     /**
@@ -350,7 +351,7 @@ var LineRenderer = Widget.extend(FieldManagerMixin, {
             $panel.css('transition', '');
         });
         this.$el.data('mode', state.mode).attr('data-mode', state.mode);
-        this.$('.create, .match').each(function () {
+        this.$('.create, .match table').each(function () {
             $(this).removeAttr('style');
         });
 
@@ -415,9 +416,9 @@ var LineRenderer = Widget.extend(FieldManagerMixin, {
             }
             $mv_lines.append($line);
         });
-        this.$('.match .fa-chevron-right').toggleClass('disabled', state.mv_lines.length <= state.limitMoveLines);
+        this.$('.match .fa-chevron-right').toggleClass('disabled', state.propositionsNumber <= state.limitMoveLines);
         this.$('.match .fa-chevron-left').toggleClass('disabled', !state.offset);
-        this.$('.match').css('max-height', !state.mv_lines.length && !state.filter.length ? '0px' : '');
+        this.$('.match').css('max-height', !state.propositionsNumber && !state.filter.length ? '0px' : '');
 
         // balance
         this.$('.popover').remove();
