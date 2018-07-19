@@ -545,7 +545,7 @@ class Meeting(models.Model):
 
     _name = 'calendar.event'
     _description = "Event"
-    _order = "id desc"
+    _order = "start_date asc, id desc"
     _inherit = ["mail.thread"]
 
     @api.model
@@ -1624,12 +1624,30 @@ class Meeting(models.Model):
 
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
-        if 'date' in groupby:
-            raise UserError(_('Group by date is not supported, use the calendar view instead.'))
-        return super(Meeting, self.with_context(virtual_id=False)).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+        #if 'date' in groupby:
+            #raise UserError(_('Group by date is not supported, use the calendar view instead.'))
+        #return super(Meeting, self.with_context(virtual_id=False)).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
 
-    @api.multi
-    def read(self, fields=None, load='_classic_read'):
+        groups = super(Meeting, self.with_context(virtual_id=False)).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+        debug = []
+
+        for group in groups:
+            ids = self.search(group['__domain'])
+            # events = self.get_reccurrent_events(self, ids, fields)
+            events = []
+            debug.append({
+                'ids': ids,
+                'events': events,
+                'domain': group['__domain'],
+                'fields': fields,
+                'groupby': groupby
+            })
+        return {
+            'groups': groups,
+            'debug': debug
+        }
+
+    def get_reccurrent_events(self, ids, fields=None, load='_classic_read'):
         if not fields:
             fields = list(self._fields)
         fields2 = fields and fields[:]
@@ -1638,7 +1656,7 @@ class Meeting(models.Model):
             if fields and (f not in fields):
                 fields2.append(f)
 
-        select = [(x, calendar_id2real_id(x)) for x in self.ids]
+        select = [(x, calendar_id2real_id(x)) for x in ids]
         real_events = self.browse([real_id for calendar_id, real_id in select])
         real_data = super(Meeting, real_events).read(fields=fields2, load=load)
         real_data = dict((d['id'], d) for d in real_data)
@@ -1689,6 +1707,75 @@ class Meeting(models.Model):
                 if (k in r) and (fields and (k not in fields)):
                     del r[k]
         return result
+
+
+    @api.multi
+    def read(self, fields=None, load='_classic_read'):
+
+        result = self.get_reccurrent_events(self, self.ids, fields, load)
+    return result
+
+    # @api.multi
+    # def read(self, fields=None, load='_classic_read'):
+    #     if not fields:
+    #         fields = list(self._fields)
+    #     fields2 = fields and fields[:]
+    #     EXTRAFIELDS = ('privacy', 'user_id', 'duration', 'allday', 'start', 'rrule')
+    #     for f in EXTRAFIELDS:
+    #         if fields and (f not in fields):
+    #             fields2.append(f)
+    #
+    #     select = [(x, calendar_id2real_id(x)) for x in self.ids]
+    #     real_events = self.browse([real_id for calendar_id, real_id in select])
+    #     real_data = super(Meeting, real_events).read(fields=fields2, load=load)
+    #     real_data = dict((d['id'], d) for d in real_data)
+    #     print(self.ids)
+    #     result = []
+    #     for calendar_id, real_id in select:
+    #         if not real_data.get(real_id):
+    #             continue
+    #         res = real_data[real_id].copy()
+    #         ls = calendar_id2real_id(calendar_id, with_date=res and res.get('duration', 0) > 0 and res.get('duration') or 1)
+    #         if not isinstance(ls, (pycompat.string_types, pycompat.integer_types)) and len(ls) >= 2:
+    #             res['start'] = ls[1]
+    #             res['stop'] = ls[2]
+    #
+    #             if res['allday']:
+    #                 res['start_date'] = ls[1]
+    #                 res['stop_date'] = ls[2]
+    #             else:
+    #                 res['start_datetime'] = ls[1]
+    #                 res['stop_datetime'] = ls[2]
+    #
+    #             if 'display_time' in fields:
+    #                 res['display_time'] = self._get_display_time(ls[1], ls[2], res['duration'], res['allday'])
+    #
+    #         res['id'] = calendar_id
+    #         result.append(res)
+    #
+    #     for r in result:
+    #         if r['user_id']:
+    #             user_id = type(r['user_id']) in (tuple, list) and r['user_id'][0] or r['user_id']
+    #             partner_id = self.env.user.partner_id.id
+    #             if user_id == self.env.user.id or partner_id in r.get("partner_ids", []):
+    #                 continue
+    #         if r['privacy'] == 'private':
+    #             for f in r:
+    #                 recurrent_fields = self._get_recurrent_fields()
+    #                 public_fields = list(set(recurrent_fields + ['id', 'allday', 'start', 'stop', 'display_start', 'display_stop', 'duration', 'user_id', 'state', 'interval', 'count', 'recurrent_id_date', 'rrule']))
+    #                 if f not in public_fields:
+    #                     if isinstance(r[f], list):
+    #                         r[f] = []
+    #                     else:
+    #                         r[f] = False
+    #                 if f == 'name':
+    #                     r[f] = _('Busy')
+    #
+    #     for r in result:
+    #         for k in EXTRAFIELDS:
+    #             if (k in r) and (fields and (k not in fields)):
+    #                 del r[k]
+    #     return result
 
     @api.multi
     def unlink(self, can_be_deleted=True):
