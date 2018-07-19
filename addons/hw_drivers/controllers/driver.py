@@ -95,7 +95,7 @@ class SylvacUSBDriver(USBDriver):
                 char = connection.read(1)
                 if ord(char) == 13:
                     # Let's send measure
-                    self.value = measure
+                    self.value = measure.decode("utf-8")
                     measure = b''
                 else:
                     measure += char
