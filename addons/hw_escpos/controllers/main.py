@@ -123,7 +123,7 @@ class EscposDriver(Thread):
         printer.cashdraw(5)
 
     def set_status(self, status, message = None):
-        # _logger.info(status+' : '+ (message or 'no message')) 
+        _logger.info(status+' : '+ (message or 'no message')) 
         if status == self.status['status']:
             if message != None and (len(self.status['messages']) == 0 or message != self.status['messages'][-1]):
                 self.status['messages'].append(message)
@@ -137,7 +137,7 @@ class EscposDriver(Thread):
         if status == 'error' and message:
             _logger.error('ESC/POS Error: %s', message)
         elif status == 'disconnected' and message:
-            # _logger.warning('ESC/POS Device Disconnected: %s', message)
+            _logger.warning('ESC/POS Device Disconnected: %s', message)
 
     def run(self):
         printer = None
