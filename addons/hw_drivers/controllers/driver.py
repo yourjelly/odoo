@@ -27,9 +27,12 @@ class StatusController(http.Controller):
 
     @http.route('/driverdetails/<string:identifier>', type='http', auth='none', cors='*')
     def statusdetail(self, identifier):
-        #if identifier[:3] == 'usb':
-        #    drivers.keys().filtered(lambda d: d[:13] == identifier)
-        return "On est bien dans la route" + identifier
+        for path in drivers:
+            if identifier in path:
+                return str(drivers[path].value)
+            else:
+                result = 'device not found'
+        return result
 
 #----------------------------------------------------------
 # Driver common interface
