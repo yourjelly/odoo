@@ -65,6 +65,8 @@ class Website(models.Model):
 
     name = fields.Char('Website Name')
     domain = fields.Char('Website Domain', required=True)
+    country_group_ids = fields.Many2many('res.country.group', 'website_country_group_rel', 'website_id', 'country_group_id',
+                                         string='Country Groups', help='Used when multiple websites have the same domain.')
     company_id = fields.Many2one('res.company', string="Company", default=lambda self: self.env.ref('base.main_company').id)
     language_ids = fields.Many2many('res.lang', 'website_lang_rel', 'website_id', 'lang_id', 'Languages', default=_active_languages)
     default_lang_id = fields.Many2one('res.lang', string="Default Language", default=_default_language, required=True)
@@ -440,23 +442,33 @@ class Website(models.Model):
 
     @api.model
     def get_current_website(self):
-        domain_name = request and request.session.get('force_website_domain')
+        if request and request.session.get('force_website_id'):
+            return self.browse(request.session['force_website_id'])
 
-        if not domain_name:
-            domain_name = request and request.httprequest.environ.get('HTTP_HOST', '').split(':')[0] or None
+        domain_name = request and request.httprequest.environ.get('HTTP_HOST', '').split(':')[0] or None
 
-        website_id = self._get_current_website_id(domain_name)
+        country = request.session.geoip.get('country_code') if request and request.session.geoip else False
+        country_id = False
+        if country:
+            country_id = request.env['res.country'].search([('code', '=', country)], limit=1).id
+
+        website_id = self._get_current_website_id(domain_name, country_id)
         if request:
             request.context = dict(request.context, website_id=website_id)
         return self.browse(website_id)
 
-    @tools.cache('domain_name')
-    def _get_current_website_id(self, domain_name):
-        website = self.search([('domain', '=', domain_name)], limit=1)
-        if not website:
-            website = self.search([], limit=1)
+    @tools.cache('domain_name', 'country_id')
+    def _get_current_website_id(self, domain_name, country_id):
+        # sort on country_group_ids so that we fall back on a generic website (empty country_group_ids)
+        websites = self.search([('domain', '=', domain_name)]).sorted('country_group_ids')
 
-        return website.id
+        if not websites:
+            return self.search([], limit=1).id
+        elif len(websites) == 1:
+            return websites.id
+        else:  # > 1 website with the same domain
+            country_specific_websites = websites.filtered(lambda website: country_id in website.country_group_ids.mapped('country_ids').ids)
+            return country_specific_websites[0].id if country_specific_websites else websites[0].id
 
     @api.model
     def is_publisher(self):

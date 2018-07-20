@@ -4,7 +4,7 @@
 import logging
 from itertools import groupby
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo import tools
 from odoo.addons.http_routing.models.ir_http import url_for
 from odoo.osv import expression
@@ -264,15 +264,15 @@ class View(models.Model):
             if 'main_object' not in qcontext:
                 qcontext['main_object'] = self
 
-            domain_based_info = {'domain': '', 'name': 'Domain Based'}
-            force_website_domain = request.session.get('force_website_domain', '')
-            if force_website_domain:
-                selected_website = Website.browse(Website._get_current_website_id(force_website_domain))
-                qcontext['multi_website_selected_website'] = {'domain': selected_website.domain, 'name': selected_website.name}
+            domain_based_info = {'website_id': '', 'name': _('Domain Based')}
+            force_website_id = request.session.get('force_website_id', False)
+            if force_website_id:
+                selected_website = Website.browse(force_website_id)
+                qcontext['multi_website_selected_website'] = {'website_id': selected_website.id, 'name': selected_website.name}
             else:
                 qcontext['multi_website_selected_website'] = domain_based_info
 
-            qcontext['multi_website_websites'] = [{'domain': website.domain, 'name': website.name} for website in Website.search([])]
+            qcontext['multi_website_websites'] = [{'website_id': website.id, 'name': website.name} for website in Website.search([])]
             qcontext['multi_website_websites'] += [domain_based_info]
 
             qcontext.update(dict(
