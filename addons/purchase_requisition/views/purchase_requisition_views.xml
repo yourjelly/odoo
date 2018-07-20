@@ -79,7 +79,7 @@
         <field name="inherit_id" ref="purchase.purchase_order_form"/>
         <field name="arch" type="xml">
           <field name="partner_id" position="replace">
-            <field name="partner_id" context="{'search_default_supplier':1, 'default_supplier':1, 'default_customer':0}"
+            <field name="partner_id" context="{'search_default_supplier':1, 'default_supplier':1, 'default_customer':0, 'partner_id':partner_id}"
               domain="[('supplier','=',True)]"
               attrs="{'readonly': ['&amp;', ('partner_id', '!=', False), ('requisition_id','!=', False)]}" force_save="1"/>
             </field>
@@ -187,7 +187,7 @@
                     <page string="Products">
                         <field name="line_ids">
                             <tree string="Products" editable="bottom">
-                                <field name="product_id"/>
+                                <field name="product_id" context="{'partner_id':parent.vendor_id, 'quantity':product_qty,'uom':product_uom_id, 'company_id': parent.company_id}" />
                                 <field name="product_qty"/>
                                 <field name="qty_ordered"/>
                                 <field name="product_uom_id" groups="uom.group_uom"/>

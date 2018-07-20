@@ -292,6 +292,19 @@ class PurchaseOrder(models.Model):
 
     requisition_id = fields.Many2one('purchase.requisition', string='Purchase Agreement', copy=False)
 
+    @api.onchange('partner_id')
+    def _onchange_partner_id(self):
+        product_supplierinfo_records = []
+        for product in self.order_line:
+            product_id = product.product_id
+            product_supplierinfo_records = self.env['product.supplierinfo'].search([('product_tmpl_id', '=', int(product_id.product_tmpl_id)), ('name', '=', int(self.partner_id))])
+
+            if product_supplierinfo_records:
+                product_lang = product_id.with_context(lang=self.partner_id.lang, partner_id=self.partner_id.id,)
+                product.name = product_lang.display_name
+                if product_lang.description_purchase:
+                    product.name += '\n' + product_lang.description_purchase
+
     @api.onchange('requisition_id')
     def _onchange_requisition_id(self):
         if not self.requisition_id:
