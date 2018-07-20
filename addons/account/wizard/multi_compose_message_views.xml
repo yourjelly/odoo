@@ -6,40 +6,41 @@
             <field name="model">multi.compose.message</field>
             <field name="groups_id" eval="[(4,ref('base.group_user'))]"/>
             <field name="arch" type="xml">
-                <form string="Compose Email &amp; Print">
+                <form string="Compose Email &amp; Print" class="o_snailmail_wizard">
                     <field name="print_attachment_id" invisible="1"/>
-                    <div name="option_print" class="col-md-12 mb16">
-                        <field name="is_print" widget="boolean_toggle"/>
-                        <b><label for="is_print"/></b>
-                    </div>
-                    <div class="col-md-12 mb16" style="border-bottom: 1px solid #e5e5e5;"></div>
-                    <div name="option_email" class="col-md-12 mb16">
-                        <field name="is_email" widget="boolean_toggle"/>
-                        <b><label for="is_email"/></b>
-                    </div>
-                    <div name="mail_form"  attrs="{'invisible': [('is_email', '=', False)]}">
-                        <group>
-                            <!-- truly invisible fields for control and options -->
-                            <field name="printed" invisible="1"/>
-                            <field name="model" invisible="1"/>
-                            <field name="res_id" invisible="1"/>
-                            <field name="is_log" invisible="1"/>
-                            <field name="company_id" invisible="1"/>
-                            <!-- visible wizard -->
-                            <label for="partner_ids" string="Recipients" groups="base.group_user"/>
-                            <div groups="base.group_user">
-                                <span attrs="{'invisible':['|', ('model', '=', False)]}">Followers of the document and</span>
-                                <field name="partner_ids" widget="many2many_tags_email" placeholder="Add contacts to notify..."
-                                    context="{'force_email':True, 'show_email':True}"/>
-                            </div>
-                            <field name="subject" placeholder="Subject..." required="True"/>
-                        </group>
-                        <field name="body" options="{'style-inline': true}"/>
-                        <group col="4">
-                            <field name="attachment_ids" widget="many2many_binary" string="Attach a file" nolabel="1" colspan="2"/>
-                            <field name="template_id" options="{'no_create': True}"
-                                context="{'default_model': model, 'default_body_html': body, 'default_subject': subject}"/>
-                        </group>
+                    <div class="row">
+                        <div name="option_print" class="col-md-12 o_snailmail_option_header">
+                            <field name="is_print" widget="boolean_toggle"/>
+                            <b><label for="is_print"/></b>
+                        </div>
+                        <div name="option_email" class="col-md-12 o_snailmail_option_header">
+                            <field name="is_email" widget="boolean_toggle"/>
+                            <b><label for="is_email"/></b>
+                        </div>
+                        <div class="col-md-12 o_snailmail_option_content" name="mail_form"  attrs="{'invisible': [('is_email', '=', False)]}">
+                            <group>
+                                <!-- truly invisible fields for control and options -->
+                                <field name="printed" invisible="1"/>
+                                <field name="model" invisible="1"/>
+                                <field name="res_id" invisible="1"/>
+                                <field name="is_log" invisible="1"/>
+                                <field name="company_id" invisible="1"/>
+                                <!-- visible wizard -->
+                                <label for="partner_ids" string="Recipients" groups="base.group_user"/>
+                                <div groups="base.group_user">
+                                    <span attrs="{'invisible':['|', ('model', '=', False)]}">Followers of the document and</span>
+                                    <field name="partner_ids" widget="many2many_tags_email" placeholder="Add contacts to notify..."
+                                        context="{'force_email':True, 'show_email':True}"/>
+                                </div>
+                                <field name="subject" placeholder="Subject..." required="True"/>
+                            </group>
+                            <field name="body" options="{'style-inline': true}"/>
+                            <group col="4">
+                                <field name="attachment_ids" widget="many2many_binary" string="Attach a file" nolabel="1" colspan="2"/>
+                                <field name="template_id" options="{'no_create': True}"
+                                    context="{'default_model': model, 'default_body_html': body, 'default_subject': subject}"/>
+                            </group>
+                        </div>
                     </div>
                     <footer>
                         <button string="Send &amp; Print"

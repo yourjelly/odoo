@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="snailmail_assets_backend" name="snailmail backend assets" inherit_id="web.assets_backend">
+    <xpath expr="." position="inside">
+        <link rel="stylesheet" type="text/scss" href="/snailmail/static/src/scss/snailmail_backend.scss"/>
+    </xpath>
+</template>
+
+</odoo>

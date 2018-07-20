@@ -15,5 +15,6 @@ Allows users to send invoices by post
         'data/mail_activity_data.xml',
         'wizard/multi_compose_message_views.xml',
         'views/res_config_settings_views.xml',
+        'views/snailmail_assets.xml',
     ],
 }

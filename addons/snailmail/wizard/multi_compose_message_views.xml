@@ -7,7 +7,7 @@
             <field name="inherit_id" ref="account.multi_compose_message_wizard_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//div[@name='option_email']" position='before'>
-                    <div name="option_letter" class="col-md-12 mb16">
+                    <div name="option_letter" class="col-md-12 o_snailmail_option_header">
                         <div name="option" class="pull-left">
                             <field name="snailmail_send_by_letter" widget="boolean_toggle"/>
                             <b><label for="snailmail_send_by_letter"/></b>
@@ -15,14 +15,14 @@
                         <div class="pull-right" name='cost' attrs="{'invisible': [('snailmail_send_by_letter','=',False)]}">
                             <field name="currency_id" invisible="1"/>
                             <b><field name="snailmail_cost" widget='monetary' options="{'currency_field': 'currency_id'}"/></b>
-                        </div>  
+                        </div>
                     </div>
-                    <div name="address_form"  attrs="{'invisible': [('snailmail_send_by_letter', '=', False)]}">
+                    <div name="address_form" class="col-md-12 o_snailmail_option_content" attrs="{'invisible': [('snailmail_send_by_letter', '=', False)]}">
                         <group>
                             <field string="Delivery Address" name="partner_id" readonly="1" force_save="1" context="{'show_address': 1}" options="{'always_reload': True, 'no_quick_create': True}" />
                         </group>
                     </div>
-                    <div class="col-md-12 mb16" style="border-bottom: 1px solid #e5e5e5;"></div>
+                    <!-- <div class="col-md-12 mb16" style="border-bottom: 1px solid #e5e5e5;"></div> -->
                 </xpath>
                 <xpath expr="//footer/button[@name='send_and_print_action']" position='attributes'>
                     <attribute name="attrs">{'invisible': ['|', '|', ('is_log', '=', True), ('printed', '=', True), '|', ('is_print', '=', False), '&amp;', '&amp;', ('is_print', '=', True), ('snailmail_send_by_letter', '=', False), ('is_email', '=', False)]}</attribute>
