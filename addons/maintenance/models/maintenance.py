@@ -328,16 +328,18 @@ class MaintenanceRequest(models.Model):
         if not self.technician_user_id or not self.equipment_id or (self.technician_user_id and not self.equipment_id.technician_user_id):
             self.technician_user_id = self.category_id.technician_user_id
 
+    @api.postupdate('owner_user_id', 'technician_user_id', 'schedule_date')
+    def _postupdate_activity_update(self):
+        self.filtered(lambda a: a.owner_user_id or a.technician_user_id)._add_followers()
+        self.filtered(lambda a: a.schedule_date).activity_update()
+
     @api.model
     def create(self, vals):
         # context: no_log, because subtype already handle this
         self = self.with_context(mail_create_nolog=True)
         request = super(MaintenanceRequest, self).create(vals)
-        if request.owner_user_id or request.technician_user_id:
-            request._add_followers()
         if request.equipment_id and not request.maintenance_team_id:
             request.maintenance_team_id = request.equipment_id.maintenance_team_id
-        request.activity_update()
         return request
 
     @api.multi
@@ -347,13 +349,9 @@ class MaintenanceRequest(models.Model):
         if vals and 'kanban_state' not in vals and 'stage_id' in vals:
             vals['kanban_state'] = 'normal'
         res = super(MaintenanceRequest, self).write(vals)
-        if vals.get('owner_user_id') or vals.get('technician_user_id'):
-            self._add_followers()
         if self.stage_id.done and 'stage_id' in vals:
             self.write({'close_date': fields.Date.today()})
             self.activity_feedback(['maintenance.mail_act_maintenance_request'])
-        if 'schedule_date' in vals:
-            self.activity_update()
         return res
 
     def activity_update(self):

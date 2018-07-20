@@ -374,24 +374,13 @@ class PurchaseOrder(models.Model):
                 po.requisition_id.action_done()
         return res
 
-    @api.model
-    def create(self, vals):
-        purchase = super(PurchaseOrder, self).create(vals)
-        if purchase.requisition_id:
-            purchase.message_post_with_view('mail.message_origin_link',
+    @api.postupdate('requisition_id')
+    def _postupdate_requisition(self):
+        for purchase in self:
+            if purchase.requisition_id:
+                purchase.message_post_with_view('mail.message_origin_link',
                     values={'self': purchase, 'origin': purchase.requisition_id},
                     subtype_id=self.env['ir.model.data'].xmlid_to_res_id('mail.mt_note'))
-        return purchase
-
-    @api.multi
-    def write(self, vals):
-        result = super(PurchaseOrder, self).write(vals)
-        if vals.get('requisition_id'):
-            self.message_post_with_view('mail.message_origin_link',
-                    values={'self': self, 'origin': self.requisition_id, 'edit': True},
-                    subtype_id=self.env['ir.model.data'].xmlid_to_res_id('mail.mt_note'))
-        return result
-
 
 class PurchaseOrderLine(models.Model):
     _inherit = "purchase.order.line"

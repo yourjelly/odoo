@@ -26,10 +26,9 @@ class Invoice(models.Model):
 class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'
 
-    @api.multi
-    def write(self, vals):
+    @api.postupdate('invoice_id', 'product_id')
+    def _postupdate_invoice_type(self):
         MemberLine = self.env['membership.membership_line']
-        res = super(AccountInvoiceLine, self).write(vals)
         for line in self.filtered(lambda line: line.invoice_id.type == 'out_invoice'):
             member_lines = MemberLine.search([('account_invoice_line', '=', line.id)])
             if line.product_id.membership and not member_lines:
@@ -50,27 +49,3 @@ class AccountInvoiceLine(models.Model):
             if line.product_id and not line.product_id.membership and member_lines:
                 # Product line has changed to a non membership product
                 member_lines.unlink()
-        return res
-
-    @api.model
-    def create(self, vals):
-        MemberLine = self.env['membership.membership_line']
-        invoice_line = super(AccountInvoiceLine, self).create(vals)
-        if invoice_line.invoice_id.type == 'out_invoice' and \
-                invoice_line.product_id.membership and \
-                not MemberLine.search([('account_invoice_line', '=', invoice_line.id)]):
-            # Product line is a membership product
-            date_from = invoice_line.product_id.membership_date_from
-            date_to = invoice_line.product_id.membership_date_to
-            if date_from and date_from < (invoice_line.invoice_id.date_invoice or '0000-00-00') < (date_to or '0000-00-00'):
-                date_from = invoice_line.invoice_id.date_invoice
-            MemberLine.create({
-                'partner': invoice_line.invoice_id.partner_id.id,
-                'membership_id': invoice_line.product_id.id,
-                'member_price': invoice_line.price_unit,
-                'date': fields.Date.today(),
-                'date_from': date_from,
-                'date_to': date_to,
-                'account_invoice_line': invoice_line.id,
-            })
-        return invoice_line

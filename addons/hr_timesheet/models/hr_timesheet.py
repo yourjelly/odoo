@@ -46,6 +46,11 @@ class AccountAnalyticLine(models.Model):
         for line in self:
             line.department_id = line.employee_id.department_id
 
+    @api.postupdate('project_id')
+    def _postupdate_timesheet(self):
+        # applied only for timesheet
+        self.filtered(lambda t: t.project_id)._timesheet_postprocess(values)
+
     @api.model
     def create(self, values):
         # compute employee only for timesheet lines, makes no sense for other lines
@@ -58,17 +63,12 @@ class AccountAnalyticLine(models.Model):
 
         values = self._timesheet_preprocess(values)
         result = super(AccountAnalyticLine, self).create(values)
-        if result.project_id:  # applied only for timesheet
-            result._timesheet_postprocess(values)
         return result
 
     @api.multi
     def write(self, values):
         values = self._timesheet_preprocess(values)
-        result = super(AccountAnalyticLine, self).write(values)
-        # applied only for timesheet
-        self.filtered(lambda t: t.project_id)._timesheet_postprocess(values)
-        return result
+        return super(AccountAnalyticLine, self).write(values)
 
     def _timesheet_preprocess(self, vals):
         """ Deduce other field values from the one given.

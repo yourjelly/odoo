@@ -131,30 +131,23 @@ class StockPackageLevel(models.Model):
                         'package_level_id': package_level.id,
                     })
 
-    def create(self, vals):
-        result = super(StockPackageLevel, self).create(vals)
-        if vals.get('location_dest_id'):
-            result.mapped('move_line_ids').write({'location_dest_id': vals['location_dest_id']})
-            result.mapped('move_ids').write({'location_dest_id': vals['location_dest_id']})
-        if not result.is_fresh_package and vals.get('location_id'):
-            result.mapped('move_line_ids').write({'location_id': vals['location_id']})
-            result.mapped('move_ids').write({'location_id': vals['location_id']})
-        if result.picking_id.state != 'draft' and result.location_id and result.location_dest_id and not result.move_ids and not result.move_line_ids:
-            result._generate_moves()
-        return result
-
-    def write(self, vals):
-        result = super(StockPackageLevel, self).write(vals)
-        if vals.get('location_dest_id'):
-            self.mapped('move_line_ids').write({'location_dest_id': vals['location_dest_id']})
-            self.mapped('move_ids').write({'location_dest_id': vals['location_dest_id']})
-        if vals.get('location_id'):
-            fresh_packages = self.env['stock.package_level']
-            for package_level in self:
+    @api.postupdate('location_dest_id', 'location_id')
+    def _postupdate_location(self):
+        fresh_packages = self.env['stock.package_level']
+        for package_level in self:
+            if package_level.location_dest_id:
+                package_level.move_line_ids.write({'location_dest_id': package_level.location_dest_id})
+                package_level.move_ids.write({'location_dest_id': package_level.location_dest_id})
+            if package_level.location_id:
                 if package_level.is_fresh_package:
                     fresh_packages |= package_level
-            fresh_packages.mapped('move_line_ids').write({'location_id': vals['location_id']})
-            fresh_packages.mapped('move_ids').write({'location_id': vals['location_id']})
+            fresh_packages.move_line_ids.write({'location_id': package_level.location_id})
+            fresh_packages.move_ids.write({'location_id': package_level.location_id})
+
+    def create(self, vals):
+        result = super(StockPackageLevel, self).create(vals)
+        if result.picking_id.state != 'draft' and result.location_id and result.location_dest_id and not result.move_ids and not result.move_line_ids:
+            result._generate_moves()
         return result
 
     def unlink(self):

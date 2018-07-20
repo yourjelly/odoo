@@ -246,7 +246,7 @@ class Inventory(models.Model):
         if self.company_id:
             domain += ' AND company_id = %s'
             args += (self.company_id.id,)
-        
+
         #case 1: Filter on One owner only or One product for a specific owner
         if self.partner_id:
             domain += ' AND owner_id = %s'
@@ -389,11 +389,9 @@ class InventoryLine(models.Model):
         res._check_no_duplicate_line()
         return res
 
-    @api.multi
-    def write(self,vals):
-        res = super(InventoryLine, self).write(vals)
+    @api.postupdate('product_id', 'location_id', 'partner_id', 'package_id', 'prod_lot_id')
+    def _postupdate_duplicate_line(self):
         self._check_no_duplicate_line()
-        return res
 
     def _check_no_duplicate_line(self):
         for line in self:

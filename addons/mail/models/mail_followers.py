@@ -46,19 +46,15 @@ class Followers(models.Model):
             if record.res_id:
                 self.env[record.res_model].invalidate_cache(ids=[record.res_id])
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        res = super(Followers, self).create(vals_list)
-        res._invalidate_documents()
-        return res
+    @api.postupdate('res_model', 'res_id', 'partner_id')
+    def _postupdate_invalidate_documents(self):
+        self._invalidate_documents()
 
     @api.multi
     def write(self, vals):
         if 'res_model' in vals or 'res_id' in vals:
             self._invalidate_documents()
         res = super(Followers, self).write(vals)
-        if any(x in vals for x in ['res_model', 'res_id', 'partner_id']):
-            self._invalidate_documents()
         return res
 
     @api.multi

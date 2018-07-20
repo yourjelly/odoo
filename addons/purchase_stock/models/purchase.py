@@ -221,12 +221,9 @@ class PurchaseOrderLine(models.Model):
     orderpoint_id = fields.Many2one('stock.warehouse.orderpoint', 'Orderpoint')
     move_dest_ids = fields.One2many('stock.move', 'created_purchase_line_id', 'Downstream Moves')
 
-    @api.model
-    def create(self, values):
-        line = super(PurchaseOrderLine, self).create(values)
-        if line.order_id.state == 'purchase':
-            line._create_or_update_picking()
-        return line
+    @api.postupdate('product_qty')
+    def _postupdate_picking(self):
+        self.filtered(lambda l: l.order_id.state == 'purchase' and l.product_qty)._create_or_update_picking()
 
     @api.multi
     def write(self, values):
@@ -236,8 +233,6 @@ class PurchaseOrderLine(models.Model):
             self.env['stock.move'].search([
                 ('purchase_line_id', 'in', self.ids), ('state', '!=', 'done')
             ]).write({'date_expected': values['date_planned']})
-        if 'product_qty' in values:
-            self.filtered(lambda l: l.order_id.state == 'purchase')._create_or_update_picking()
         return result
 
     # --------------------------------------------------
