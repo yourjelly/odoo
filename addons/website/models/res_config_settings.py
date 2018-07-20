@@ -16,6 +16,9 @@ class ResConfigSettings(models.TransientModel):
     website_id = fields.Many2one('website', string="website",
                                  default=_default_website, required=True, ondelete='cascade')
     website_name = fields.Char('Website Name', related='website_id.name')
+    website_domain = fields.Char('Website Domain', related='website_id.domain')
+    website_country_group_ids = fields.Many2many(related='website_id.country_group_ids')
+    website_company_id = fields.Many2one(related='website_id.company_id', string='Website Company')
     language_ids = fields.Many2many(related='website_id.language_ids', relation='res.lang')
     language_count = fields.Integer(string='Number of languages', compute='_compute_language_count', readonly=True)
     website_default_lang_id = fields.Many2one(
@@ -43,6 +46,13 @@ class ResConfigSettings(models.TransientModel):
     has_google_analytics = fields.Boolean("Google Analytics", config_parameter='website.has_google_analytics')
     has_google_analytics_dashboard = fields.Boolean("Google Analytics in Dashboard", config_parameter='website.has_google_analytics_dashboard')
     has_google_maps = fields.Boolean("Google Maps", config_parameter='website.has_google_maps')
+
+    social_twitter = fields.Char(related='website_id.social_twitter')
+    social_facebook = fields.Char(related='website_id.social_facebook')
+    social_github = fields.Char(related='website_id.social_github')
+    social_linkedin = fields.Char(related='website_id.social_linkedin')
+    social_youtube = fields.Char(related='website_id.social_youtube')
+    social_googleplus = fields.Char(related='website_id.social_googleplus')
 
     group_multi_website = fields.Boolean("Multi-website", implied_group="website.group_multi_website")
 

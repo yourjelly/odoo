@@ -18,7 +18,7 @@
                                         <div class="text-muted">
                                             Settings on this page will apply to this website
                                         </div>
-                                        <field name="website_id"/>
+                                        <field name="website_id" options="{'no_open': True, 'no_create_edit': True}"/>
                                     </div>
                                 </div>
                             </div>
@@ -26,7 +26,7 @@
                             <div class="row mt16 o_settings_container" id="webmaster_settings">
                                 <div class="col-xs-12 col-md-6 o_setting_box" id="domain_setting">
                                     <div class="o_setting_right_pane">
-                                        <span class="o_form_label">Website Title</span>
+                                        <label for="website_name" string="Website Title"/>
                                         <span class="fa fa-lg fa-globe" title="Values set here are website-specific." groups="website.group_multi_website"/>
                                         <div class="text-muted">
                                             Name and favicon of your website
@@ -41,6 +41,36 @@
                                                 <field name="favicon" widget="image" class="pull-left oe_avatar"/>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-md-6 o_setting_box" id="company_settings" groups="base.group_multi_company">
+                                    <div class="o_setting_right_pane">
+                                        <label string="Company" for="website_company_id"/>
+                                        <span class="fa fa-lg fa-globe" title="Values set here are website-specific." groups="website.group_multi_website"/>
+                                        <div class="text-muted">
+                                            The company this website belongs to
+                                        </div>
+                                        <field name="website_company_id"/>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-md-6 o_setting_box" id="domain_settings" groups="website.group_multi_website">
+                                    <div class="o_setting_right_pane">
+                                        <label string="Domain" for="website_domain"/>
+                                        <span class="fa fa-lg fa-globe" title="Values set here are website-specific." groups="website.group_multi_website"/>
+                                        <div class="text-muted">
+                                            Display this website when users visit this domain
+                                        </div>
+                                        <field name="website_domain"/>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-md-6 o_setting_box" id="website_geoip_settings" groups="website.group_multi_website">
+                                    <div class="o_setting_right_pane">
+                                        <label string="Country Groups" for="website_country_group_ids"/>
+                                        <span class="fa fa-lg fa-globe" title="Values set here are website-specific." groups="website.group_multi_website"/>
+                                        <div class="text-muted">
+                                            Display this website for users from these country groups
+                                        </div>
+                                        <field name="website_country_group_ids" widget="many2many_tags"/>
                                     </div>
                                 </div>
                                 <div class="col-xs-12 col-md-6 o_setting_box" id="languages_setting">
@@ -166,6 +196,42 @@
                                         <div class="content-group">
                                             <div class="mt16">
                                                 <button type="object" name="open_template_user" string="Default Access Rights" icon="fa-arrow-right" class="btn-link"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-md-6 o_setting_box">
+                                    <div class="o_setting_left_pane"/>
+                                    <div class="o_setting_right_pane">
+                                        <label string="Social Media" for="social_twitter"/>
+                                        <span class="fa fa-lg fa-globe" title="Values set here are website-specific." groups="website.group_multi_website"/>
+                                        <div class="text-muted">
+                                            Add links to social media on your website
+                                        </div>
+                                        <div class="content-group">
+                                            <div class="row">
+                                                <label for="social_twitter" string="Twitter" class="col-md-3 o_light_label"/>
+                                                <field name="social_twitter"/>
+                                            </div>
+                                            <div class="row">
+                                                <label for="social_facebook" string="Facebook" class="col-md-3 o_light_label"/>
+                                                <field name="social_facebook"/>
+                                            </div>
+                                            <div class="row">
+                                                <label for="social_github" string="GitHub" class="col-md-3 o_light_label"/>
+                                                <field name="social_github"/>
+                                            </div>
+                                            <div class="row">
+                                                <label for="social_linkedin" string="LinkedIn" class="col-md-3 o_light_label"/>
+                                                <field name="social_linkedin"/>
+                                            </div>
+                                            <div class="row">
+                                                <label for="social_youtube" string="YouTube" class="col-md-3 o_light_label"/>
+                                                <field name="social_youtube"/>
+                                            </div>
+                                            <div class="row">
+                                                <label for="social_googleplus" string="Google Plus" class="col-md-3 o_light_label"/>
+                                                <field name="social_googleplus"/>
                                             </div>
                                         </div>
                                     </div>

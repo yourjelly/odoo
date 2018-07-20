@@ -64,7 +64,7 @@ class Website(models.Model):
         return self.env.ref('base.main_company').social_googleplus
 
     name = fields.Char('Website Name')
-    domain = fields.Char('Website Domain', required=True)
+    domain = fields.Char('Website Domain')
     country_group_ids = fields.Many2many('res.country.group', 'website_country_group_rel', 'website_id', 'country_group_id',
                                          string='Country Groups', help='Used when multiple websites have the same domain.')
     company_id = fields.Many2one('res.company', string="Company", default=lambda self: self.env.ref('base.main_company').id)
