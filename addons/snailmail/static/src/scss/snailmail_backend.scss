@@ -1,23 +1,26 @@
-.o_snailmail_wizard {
+.o_snailmail_wizard.o_form_view {
+    // ==== Scoped Variables =====
     $o-snailmail-padding-large: $grid-gutter-width*0.5;
-    $o-snailmail-padding-medium: $o-snailmail-padding-large*0.5;
+    $o-snailmail-padding-medium: $o-snailmail-padding-large*0.7;
 
-    .o_snailmail_option_header {
-        // background: yellow;
-        padding-bottom: $o-snailmail-padding-medium;
+    padding: 0;
+
+    .o_snailmail_option_header, .o_snailmail_option_content {
+        width: 100%;
+        float: left;
+        padding: $o-snailmail-padding-large $o-snailmail-padding-large $o-snailmail-padding-medium;
         border-bottom: 1px solid $gray-lighter-darker;
 
-        &:not(:first-child) {
-            padding-top: $o-snailmail-padding-large;
+        &:last-child {
+            border-bottom: 0;
         }
     }
+
+    .o_snailmail_option_header .o_field_widget{
+        margin-bottom: 0;
+    }
+
     .o_snailmail_option_content {
-        // background-color: green;
-        box-shadow: inset 0 10px 10px $gray-lighter-dark;
-
-        &:not(:last-child) {
-            padding-bottom: $o-snailmail-padding-large;
-        }
+        box-shadow: inset 0 5px 10px $gray-lighter-dark;
     }
-
 }
