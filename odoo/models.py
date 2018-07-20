@@ -3269,8 +3269,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
                 # check Python constraints for inversed fields
                 self._validate_fields(set(inverse_vals) - set(store_vals))
-                # update fields
-                self._postupdate_fields(store_vals)
+
+            # update fields
+            self._postupdate_fields(store_vals)
 
             # recompute fields
             if self.env.recompute and self._context.get('recompute', True):

@@ -385,6 +385,12 @@ class HolidaysRequest(models.Model):
                     raise UserError(_('You can take %s only between %s and %s') % (leave.holiday_status_id.display_name, \
                                                                                   leave.holiday_status_id.validity_start, leave.holiday_status_id.validity_stop))
 
+    @api.postupdate('employee_id')
+    def _postupdate_add_employee(self):
+        for holiday in self:
+            holiday.add_follower(holiday.employee_id.id)
+            holiday._onchange_employee_id()
+
     @api.model
     def create(self, values):
         """ Override to avoid automatic logging of creation """
@@ -392,20 +398,8 @@ class HolidaysRequest(models.Model):
         if not values.get('department_id'):
             values.update({'department_id': self.env['hr.employee'].browse(employee_id).department_id.id})
         holiday = super(HolidaysRequest, self.with_context(mail_create_nolog=True, mail_create_nosubscribe=True)).create(values)
-        holiday.add_follower(employee_id)
-        if 'employee_id' in values:
-            holiday._onchange_employee_id()
         holiday.activity_update()
         return holiday
-
-    @api.multi
-    def write(self, values):
-        employee_id = values.get('employee_id', False)
-        result = super(HolidaysRequest, self).write(values)
-        self.add_follower(employee_id)
-        if 'employee_id' in values:
-            self._onchange_employee_id()
-        return result
 
     @api.multi
     def unlink(self):
