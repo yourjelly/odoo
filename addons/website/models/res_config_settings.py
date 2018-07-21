@@ -94,7 +94,7 @@ class ResConfigSettings(models.TransientModel):
         return action
 
     def website_go_to(self):
-        self.env['website']._force_session_website(self.website_id.id)
+        self.website_id._fix_to_session()
         return {
             'type': 'ir.actions.act_url',
             'url': '/',

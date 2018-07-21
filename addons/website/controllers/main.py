@@ -83,7 +83,7 @@ class Website(Home):
 
     @http.route('/website/set_session_website', type='json', auth="user")
     def set_session_website(self, website_id):
-        request.env['website']._force_session_website(int(website_id) if website_id else False)
+        request.env['website'].browse(int(website_id) if website_id else False)._fix_to_session()
         return True
 
     #------------------------------------------------------
