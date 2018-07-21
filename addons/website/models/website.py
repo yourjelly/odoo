@@ -471,6 +471,11 @@ class Website(models.Model):
             return country_specific_websites[0].id if country_specific_websites else websites[0].id
 
     @api.model
+    def _force_session_website(self, website_id):
+        if request:
+            request.session['force_website_id'] = website_id
+
+    @api.model
     def is_publisher(self):
         return self.env['ir.model.access'].check('ir.ui.view', 'write', False)
 

@@ -19,6 +19,9 @@
                                             Settings on this page will apply to this website
                                         </div>
                                         <field name="website_id" options="{'no_open': True, 'no_create_edit': True}"/>
+                                        <div>
+                                            <button name="website_go_to" type="object" string="Go to website"/>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

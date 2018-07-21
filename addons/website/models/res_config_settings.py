@@ -92,3 +92,11 @@ class ResConfigSettings(models.TransientModel):
         action['res_id'] = literal_eval(self.env['ir.config_parameter'].sudo().get_param('base.template_portal_user_id', 'False'))
         action['views'] = [[self.env.ref('base.view_users_form').id, 'form']]
         return action
+
+    def website_go_to(self):
+        self.env['website']._force_session_website(self.website_id.id)
+        return {
+            'type': 'ir.actions.act_url',
+            'url': '/',
+            'target': 'self',
+        }
