@@ -121,17 +121,9 @@ class IrRule(models.Model):
         self.clear_caches()
         return res
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        res = super(IrRule, self).create(vals_list)
+    @api.postupdate()
+    def _postupdate_clear_caches(self):
         self.clear_caches()
-        return res
-
-    @api.multi
-    def write(self, vals):
-        res = super(IrRule, self).write(vals)
-        self.clear_caches()
-        return res
 
 #
 # Hack for field 'global': this field cannot be defined like others, because

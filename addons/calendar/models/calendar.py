@@ -505,17 +505,9 @@ class Alarm(models.Model):
             return False
         return cron.toggle(model=self._name, domain=[('type', '=', 'email')])
 
-    @api.model
-    def create(self, values):
-        result = super(Alarm, self).create(values)
+    @api.postupdate()
+    def _postupdate_cron(self):
         self._update_cron()
-        return result
-
-    @api.multi
-    def write(self, values):
-        result = super(Alarm, self).write(values)
-        self._update_cron()
-        return result
 
     @api.multi
     def unlink(self):

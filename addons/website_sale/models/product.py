@@ -32,17 +32,9 @@ class ProductPricelist(models.Model):
         website = self.env['website']
         website._get_pl_partner_order.clear_cache(website)
 
-    @api.model
-    def create(self, data):
-        res = super(ProductPricelist, self).create(data)
+    @api.postupdate()
+    def _postupdate_clear_cache(self):
         self.clear_cache()
-        return res
-
-    @api.multi
-    def write(self, data):
-        res = super(ProductPricelist, self).write(data)
-        self.clear_cache()
-        return res
 
     @api.multi
     def unlink(self):
