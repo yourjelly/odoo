@@ -173,14 +173,18 @@ class IrModuleModule(models.Model):
                 website.theme_ids -= uninstalled_modules
                 _logger.info('removed themes %s from %s', uninstalled_modules.mapped('name'), website.name)
 
-            # Unmark all related modules from current website. This is
+            # Attempt to uninstall upstream dependencies. This is
             # necessary for uninstalling e.g. theme_zap, when doing so
             # theme_treehouse should also be removed from the current
             # website. This way the user can install a completely new
             # theme.
-            upstream_dependencies = self.get_upstream_theme_dependencies()
-            current_website.installed_theme_id -= upstream_dependencies
-            current_website.theme_ids -= upstream_dependencies
-            _logger.info('removed themes %s from %s', upstream_dependencies.mapped('name'), current_website.name)
+            #
+            # Make sure to only uninstall every module once with
+            # context. Otherwise it might get removed from the current
+            # website the first time and the second time it might end
+            # up being wrongly uninstalled.
+            if self._context.get('uninstall_upstream') is not False:
+                for upstream_dependency in self.get_upstream_theme_dependencies().filtered(lambda mod: mod.name.startswith('theme_')):
+                    upstream_dependency.with_context(uninstall_upstream=False).button_uninstall()
 
             return res
