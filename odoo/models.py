@@ -1100,8 +1100,10 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     def _preupdate_fields(self, vals):
         field_names = set(vals)
         for func in self._preupdate_methods:
-            if set(func._preupdate) or field_names:
+            if set(func._preupdate) and field_names:
                 func(self, vals)
+            if not func._preupdate:
+                func(self)
 
     @api.multi
     def _postupdate_fields(self, vals):
