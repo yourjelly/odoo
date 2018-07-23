@@ -263,7 +263,7 @@ class Http(models.AbstractModel):
         if website_id and website_id.installed_theme_id:
             obj = env['ir.attachment'].search([('key', '=', xmlid), ('theme_id', '=', website_id.installed_theme_id.id)])
             if obj:
-                obj = obj[0]  # todo jov why?
+                obj = obj[0]
                 logger.info('returned website-specific attachment for %s (ID: %s)', xmlid, obj.ids)
                 return obj
 

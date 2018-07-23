@@ -75,7 +75,6 @@ class View(models.Model):
         '''
         current_website_id = self._context.get('website_id')
 
-        # todo jov remove all these search_count >1's
         if current_website_id and not self._context.get('no_cow'):
             for view in self.filtered(lambda view: not view.website_id):
                 for website in self.env['website'].search([('id', '!=', current_website_id)]):
@@ -183,9 +182,13 @@ class View(models.Model):
         return view_id
 
     @api.model
+    def _get_inheriting_views_arch_website(self, view_id):
+        return self.env['website'].browse(self._context.get('website_id'))
+
+    @api.model
     def _get_inheriting_views_arch_domain(self, view_id, model):
         domain = super(View, self)._get_inheriting_views_arch_domain(view_id, model)
-        current_website = self.env['website'].browse(self._context.get('website_id'))
+        current_website = self._get_inheriting_views_arch_website(view_id)
 
         website_views_domain = [('theme_id', '=', False), '|', ('website_id', '=', False), ('website_id', '=', current_website.id)]
         # when rendering for the website we have to include inactive views

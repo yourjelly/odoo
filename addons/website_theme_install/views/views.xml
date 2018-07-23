@@ -65,7 +65,7 @@
 
     <!-- themes should be installed through website_theme_install -->
     <record id="base.open_module_tree" model="ir.actions.act_window">
-        <field name="domain">['|', '!', ('name', '=like', 'theme_%'), ('state', '=', 'installed')]</field>
+        <field name="domain">['!', ('name', '=like', 'theme_%')]</field>
     </record>
 
     <!-- Actions to list themes with custom kanban (launched on module installation) -->
@@ -80,11 +80,6 @@
             '|', ('category_id', '=', ref('base.module_category_theme', False)), ('category_id.parent_id', '=', ref('base.module_category_theme', False))
         ]"/>
     </record>
-
-    <menuitem id="theme_install" name="Themes"
-              parent="base.menu_management"
-              sequence="10"
-              action="website_theme_install.theme_install_kanban_action"/>
 
     <record id="theme_install_todo_action" model="ir.actions.server">
         <field name="name">Config: Choose Your Theme</field>

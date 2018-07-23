@@ -111,7 +111,6 @@ class Website(models.Model):
 
     @api.model
     def create(self, vals):
-        # todo jov make company required
         if 'user_id' not in vals:
             company = self.env['res.company'].browse(vals.get('company_id'))
             vals['user_id'] = company._get_public_user().id if company else self.env.ref('base.public_user').id
@@ -751,7 +750,7 @@ class Page(models.Model):
     _inherits = {'ir.ui.view': 'view_id'}
     _inherit = 'website.published.mixin'
     _description = 'Page'
-    _order = 'website_id'  # todo jov probably don't do this and instead use _is_most_specific_page everywhere
+    _order = 'website_id'
 
     url = fields.Char('Page URL')
     view_id = fields.Many2one('ir.ui.view', string='View', required=True, ondelete="cascade")

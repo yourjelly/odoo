@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="website.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <button name="website_go_to" position="after">
-                <button name="website_install_theme" type="object" string="Install theme"/>
+                <button name="website_install_theme" type="object" string="Change theme"/>
             </button>
         </field>
     </record>

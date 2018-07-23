@@ -21,7 +21,7 @@ class IrModuleModule(models.Model):
     @api.multi
     def _compute_is_installed_on_current_website(self):
         for module in self:
-            module.is_installed_on_current_website = module in self.env['website'].get_current_website().theme_ids
+            module.is_installed_on_current_website = module == self.env['website'].get_current_website().installed_theme_id
 
     @api.multi
     def write(self, vals):
@@ -46,7 +46,7 @@ class IrModuleModule(models.Model):
             theme_deps = module.get_upstream_theme_dependencies()
             websites = self.env['website'].search([]).filtered(lambda w: len(theme_deps - w.theme_ids) == 0)
             if websites:
-                _logger.info('auto-installing %s on %s', module.name, websites.mapped('name'))
+                _logger.info('auto-loading %s on %s', module.name, websites.mapped('name'))
                 websites.write({'theme_ids': [(4, module.id, 0)]})
                 module._assign_views()
 
@@ -135,10 +135,12 @@ class IrModuleModule(models.Model):
         modules_belonging_to_theme = self + self.get_upstream_theme_dependencies()
         current_website.installed_theme_id = self
         current_website.theme_ids |= modules_belonging_to_theme
+
         next_action = self.button_immediate_install() # Then install the new chosen one
         modules_belonging_to_theme._assign_views()
         modules_belonging_to_theme._make_demo_data_website_specific(current_website)
         self._handle_auto_installs()
+        _logger.info('installed themes %s on %s', modules_belonging_to_theme.mapped('name'), current_website.name)
 
         if next_action.get('tag') == 'reload' and not next_action.get('params', {}).get('menu_id'):
             next_action = self.env.ref('website.action_website').read()[0]
@@ -153,21 +155,32 @@ class IrModuleModule(models.Model):
         # only one theme can be uninstalled
         self.ensure_one()
 
-        modules_belonging_to_theme = self + self.get_upstream_theme_dependencies() + self.downstream_dependencies()
         Website = self.env['website']
+        current_website = Website.get_current_website()
         if Website.search_count([('theme_ids', 'in', self.id)]) > 1:
-            current_website = Website.get_current_website()
+            modules_belonging_to_theme = self + self.get_upstream_theme_dependencies() + self.downstream_dependencies()
             current_website.installed_theme_id -= modules_belonging_to_theme
             current_website.theme_ids -= modules_belonging_to_theme
             modules_belonging_to_theme._remove_website_specific_demo_data(current_website)
-            _logger.info('removed %s from %s', modules_belonging_to_theme.mapped('name'), current_website.name)
+            _logger.info('removed themes %s from %s', modules_belonging_to_theme.mapped('name'), current_website.name)
             return True
         else:
+            uninstalled_modules = self + self.downstream_dependencies()
             res = super(IrModuleModule, self).button_uninstall()
 
             for website in Website.search([]):
-                website.installed_theme_id -= modules_belonging_to_theme
-                website.theme_ids -= modules_belonging_to_theme
-                _logger.info('removed %s from %s', modules_belonging_to_theme.mapped('name'), website.name)
+                website.installed_theme_id -= uninstalled_modules
+                website.theme_ids -= uninstalled_modules
+                _logger.info('removed themes %s from %s', uninstalled_modules.mapped('name'), website.name)
+
+            # Unmark all related modules from current website. This is
+            # necessary for uninstalling e.g. theme_zap, when doing so
+            # theme_treehouse should also be removed from the current
+            # website. This way the user can install a completely new
+            # theme.
+            upstream_dependencies = self.get_upstream_theme_dependencies()
+            current_website.installed_theme_id -= upstream_dependencies
+            current_website.theme_ids -= upstream_dependencies
+            _logger.info('removed themes %s from %s', upstream_dependencies.mapped('name'), current_website.name)
 
             return res
