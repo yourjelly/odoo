@@ -1107,7 +1107,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     def _postupdate_fields(self, vals):
         field_names = set(vals)
         for func in self._postupdate_methods:
-            if set(func._postupdate) & field_names:
+            if set(func._postupdate) or field_names:
                 func(self)
 
     @api.multi
