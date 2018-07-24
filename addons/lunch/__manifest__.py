@@ -30,6 +30,7 @@ If you want to save your employees' time and avoid them to always have coins in 
         'wizard/lucky_order_view.xml',
         'views/lunch_views.xml',
         'views/res_users_views.xml',
+        'views/lunch_location.xml',
         'data/lunch_data.xml',
     ],
     'demo': ['data/lunch_demo.xml'],

@@ -71,6 +71,26 @@
             </field>
         </record>
 
+        <record id="lunch_product_view_search" model="ir.ui.view">
+            <field name="name">lunch.product.search</field>
+            <field name="model">lunch.product</field>
+            <field name="arch" type="xml">
+                <search string="Product Search">
+                    <field name="name"/>
+                    <field name="category_id"/>
+                    <field name="supplier"/>
+                    <field name="description"/>
+                    <separator />
+                    <filter name='is_available' string="Available For You" domain="[('is_available','=','True')]"/>
+                    <group expand="0" string="Group By">
+                        <filter name="supplier" string="Vendor" context="{'group_by': 'supplier'}"/>
+                        <filter name="category" string="Product Category" context="{'group_by': 'category_id'}"/>
+                        <filter name="inactive" string="Archived" domain="[('active','=',False)]"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
         <!--view for cashmove-->
         <record id="lunch_cashmove_view_tree" model="ir.ui.view">
             <field name="name">lunch.cashmove.tree</field>
@@ -285,6 +305,8 @@
             <field name="name">Products</field>
             <field name="res_model">lunch.product</field>
             <field name="view_mode">tree,kanban,form</field>
+            <field name="context">{"search_default_is_available":1}</field>
+            <field name="search_view_id" ref="lunch_product_view_search"/>
             <field name="help" type="html">
               <p class="o_view_nocontent_smiling_face">
                 Create a new product for lunch
@@ -438,6 +460,7 @@
             <field name="model">lunch.order</field>
             <field name="arch" type="xml">
                 <form string='Orders Form' class="o_lunch">
+                    <field name='available_product_ids' invisible='1'/>
                     <header>
                         <button name="%(action_lunch_order_line_lucky)d" type="action" string="Feeling Lucky" class="oe_highlight"/>
                         <field name='state' widget='statusbar' statusbar_visible='new,confirmed'/>
@@ -460,7 +483,7 @@
 
                         <group>
                             <group>
-                                <field name='user_id' class="oe_inline" required='1'/>
+                                <field name='user_id' class="oe_inline" required='1' group='group_lunch_user'/>
                                 <field name='date'/>
                             </group>
                             <div>
@@ -477,7 +500,7 @@
                         <separator string='Select your order'/>
                         <field name='order_line_ids'>
                             <tree string='List' editable='bottom'>
-                                <field name='product_id'/>
+                                <field name='product_id' />
                                 <field name='note' />
                                 <field name='price'/>
                                 <field name='supplier' invisible="1"/>
@@ -524,6 +547,7 @@
                     <field name="supplier"/>
                     <field name="description"/>
                     <field name="price"/>
+                    <field name="location_ids"/>
                     <templates>
                         <t t-name="kanban-box">
                             <div t-attf-class="oe_kanban_global_click">
@@ -557,24 +581,6 @@
             <field name="code">records.toggle_active()</field>
         </record>
 
-        <!-- Search for product -->
-        <record id="lunch_product_view_search" model="ir.ui.view">
-            <field name="name">lunch.product.search</field>
-            <field name="model">lunch.product</field>
-            <field name="arch" type="xml">
-                <search string="Product Search">
-                    <field name="name"/>
-                    <field name="category_id"/>
-                    <field name="supplier"/>
-                    <field name="description"/>
-                    <group expand="0" string="Group By">
-                        <filter name="supplier" string="Vendor" context="{'group_by': 'supplier'}"/>
-                        <filter name="category" string="Product Category" context="{'group_by': 'category_id'}"/>
-                        <filter name="inactive" string="Archived" domain="[('active','=',False)]"/>
-                    </group>
-                </search>
-            </field>
-        </record>
 
         <record id="lunch_product_view_form" model="ir.ui.view">
             <field name="name">lunch.product.form</field>
@@ -595,6 +601,7 @@
                             <group>
                                 <field name='name'/>
                                 <field name='category_id'/>
+                                <field name='location_ids'/>
                             </group>
                             <group>
                                 <field name='supplier'/>
