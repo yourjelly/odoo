@@ -50,11 +50,6 @@ class AccountAnalyticLine(models.Model):
     def _preupdate_timesheet_preprocess(self, values):
         self._timesheet_preprocess(values)
 
-    @api.postupdate('project_id')
-    def _postupdate_timesheet(self):
-        # applied only for timesheet
-        self.filtered(lambda t: t.project_id)._timesheet_postprocess(values)
-
     @api.model
     def create(self, values):
         # compute employee only for timesheet lines, makes no sense for other lines
@@ -65,6 +60,15 @@ class AccountAnalyticLine(models.Model):
                 ts_user_id = self._default_user()
             values['employee_id'] = self.env['hr.employee'].search([('user_id', '=', ts_user_id)], limit=1).id
         result = super(AccountAnalyticLine, self).create(values)
+        if result.project_id:  # applied only for timesheet
+            result._timesheet_postprocess(values)
+        return result
+
+    @api.multi
+    def write(self, values):
+        result = super(AccountAnalyticLine, self).write(values)
+        # applied only for timesheet
+        self.filtered(lambda t: t.project_id)._timesheet_postprocess(values)
         return result
 
     def _timesheet_preprocess(self, vals):
