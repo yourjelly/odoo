@@ -1767,11 +1767,239 @@ var CropImageDialog = Dialog.extend({
         }
     },
 });
+// Widget should be in separate file.
+var ColorPickerWidget = Widget.extend({
+    template: 'web_editor.color_picker',
+    xmlDependencies: ['/web_editor/static/src/xml/editor.xml'],
+    events : {
+        'click .o_colorpicker_container' : '_onPickerMove',
+        'mousemove .o_colorpicker_container' : '_onPickerMove',
+        'click .o_color_picker_slider' : '_onSiderMove',
+        'mousemove .o_color_picker_slider' : '_onSiderMove',
+        //[TO-DO] underscore class name
+        'change .o-color-picker-form' : '_onOptionChange',
+    },
+    /**
+     * @constructor
+     */
+    init: function (parent, options) {
+        this._super.apply(this, arguments);
+        this.colors = _.extend({hex: '#ff0000'}, options);
+        // support all colors during widget initialization use common method _onOptionChange
+        this._setHexToRgb();
+        this._setRgbToHsl();
+    },
+    start: function () {
+        this._setColorInputs();
+        return this._super.apply(this, arguments);
+    },
+    _setColorInputs: function () {
+        var self = this;
+        _.each(this.colors, function (value, color) {
+            self.$('.o-' + color + '-input').val(value);
+        });
+        this.$('.o-color-preview').css('background-color', '#' + this.colors.hex);
+        // TODO
+        this._updatePointerPosition((99-this.colors.lightness) * 2, this.colors.saturation * 2);
+        this._updateSliderPosition();
+    },
+    _isValidRGBValue: function (value) {
+        return (typeof(value) === 'number' && isNaN(value) === false && value >= 0 && value <= 255);
+    },
+    setRGB: function (red, green, blue) {
+        // Display warning for wrong input value
+        if (!this._isValidRGBValue(red) || !this._isValidRGBValue(green) || !this._isValidRGBValue(blue)) {
+            return;
+        }
+        this.colors.red = red || 0;
+        this.colors.green = green || 0;
+        this.colors.blue = blue || 0;
+    },
+    // calculation based on this https://en.wikipedia.org/wiki/HSL_and_HSV#Converting_to_RGB
+    _setHslToRgb: function () {
+        var sat = this.colors.saturation / 100;
+        var light = this.colors.lightness / 100;
+        var chroma = sat * (1 - Math.abs(2 * light - 1));
+        var huePrime = this.colors.hue / 60;
+        var secondComponent = chroma * (1 - Math.abs(huePrime % 2 - 1));
+        var lightnessAdjustment = light - chroma/2;
+        var precision = 255;
+
+        chroma = (chroma + lightnessAdjustment) * precision | 0;
+        secondComponent = (secondComponent + lightnessAdjustment) * precision | 0;
+        lightnessAdjustment = lightnessAdjustment * precision | 0;
+        // TO-DO
+        if (huePrime >= 0 && huePrime < 1) {this.setRGB(chroma, secondComponent, lightnessAdjustment);return; }
+        if (huePrime >= 1 && huePrime < 2) {this.setRGB(secondComponent, chroma, lightnessAdjustment);return; }
+        if (huePrime >= 2 && huePrime < 3) {this.setRGB(lightnessAdjustment, chroma, secondComponent);return; }
+        if (huePrime >= 3 && huePrime < 4) {this.setRGB(lightnessAdjustment, secondComponent, chroma);return; }
+        if (huePrime >= 4 && huePrime < 5) {this.setRGB(secondComponent, lightnessAdjustment, chroma);return; }
+        if (huePrime >= 5 && huePrime < 6) {this.setRGB(chroma, lightnessAdjustment, secondComponent);return; }
+    },
+    _setRgbToHsl: function () {
+        var red = this.colors.red / 255;
+        var green = this.colors.green / 255;
+        var blue = this.colors.blue / 255;
+
+        var maxColor = Math.max(red, green, blue);
+        var minColor = Math.min(red, green, blue);
+        var delta = maxColor - minColor;
+        var hue = 0;
+        var saturation = 0;
+        var lightness = (maxColor + minColor) / 2;
+        var X = (1 - Math.abs(2 * lightness - 1));
+
+        if (delta) {
+            if (maxColor === red ) { hue = ((green - blue) / delta); }
+            if (maxColor === green ) { hue = 2 + (blue - red) / delta; }
+            if (maxColor === blue ) { hue = 4 + (red - green) / delta; }
+            if (maxColor) saturation = delta / X;
+        }
+
+        this.colors.hue = 60 * hue | 0;
+        if (this.colors.hue < 0) this.colors.hue += 360;
+        this.colors.saturation = (saturation * 100) | 0;
+        this.colors.lightness = (lightness * 100) | 0;
+    },
+    _setHexToRgb: function () {
+        var valid  = /(^#{0,1}[0-9A-F]{6}$)|(^#{0,1}[0-9A-F]{3}$)/i.test(this.colors.hex);
+
+        if (valid !== true)
+            return;
+
+        if (this.colors.hex[0] === '#')
+            this.colors.hex = this.colors.hex.slice(1, this.colors.hex.length);
+
+        if (this.colors.hex.length === 3)
+            this.colors.hex = this.colors.hex.replace(/([0-9A-F])([0-9A-F])([0-9A-F])/i,'$1$1$2$2$3$3');
+        this.colors.red = parseInt(this.colors.hex.substr(0, 2), 16);
+        this.colors.green = parseInt(this.colors.hex.substr(2, 2), 16);
+        this.colors.blue = parseInt(this.colors.hex.substr(4, 2), 16);
+        this.colors.hex = '#' + this.colors.hex;
+    },
+    _updateValues: function () {
+        this._setHslToRgb();
+        this._setRgbToHex();
+        this._setColorInputs();
+    },
+    _setRgbToHex: function () {
+        var red = this.colors.red < 16 ? '0' + this.colors.red.toString(16) : this.colors.red.toString(16);
+        var green = this.colors.green < 16 ? '0' + this.colors.green.toString(16) : this.colors.green.toString(16);
+        var blue = this.colors.blue < 16 ? '0' + this.colors.blue.toString(16) : this.colors.blue.toString(16);
+        this.colors.hex = '#' + red + green + blue;
+    },
+    // [TO-DO] remove top left params set top left based on HSL value
+    _updatePointerPosition: function (top, left) {
+        // restrict pointer to go out of picking area
+        left = left < 0 ? 0 : left;
+        top = top < 0 ? 0 : top;
+        left = left > 198 ? 198 : left;
+        top = top > 198 ? 198 : top;
+        // make pointer in center
+        this.$('.o_picker_poiner').css({'top': top -5+"px", left:left- 5+"px"});
+    },
+    _setHSL: function (h, s, l) {
+        this.colors.hue = h;
+        this.colors.saturation = s;
+        this.colors.lightness = l;
+        this.colors.saturation = this.colors.saturation < 0 ? 0 : this.colors.saturation;
+        this.colors.lightness = this.colors.lightness < 0 ? 0 : this.colors.lightness;
+        this.colors.saturation = this.colors.saturation > 100 ? 100 : this.colors.saturation;
+        this.colors.lightness = this.colors.lightness > 100 ? 100 : this.colors.lightness;
+    },
+    _updateSliderPosition: function () {
+        var height = this.$('.o_color_picker_slider').height();
+        var y = ((this.colors.hue * height) / 359);
+        this.$('.o_slider_picker').css('top', Math.round(y - 2));
+        this.$('.o_picking_area').css('background-color', "hsl("+this.colors.hue+",100%,50%)");
+    },
+    _onPickerMove: function (ev) {
+        ev.preventDefault();
+        if (ev.which !== 1) {
+            return;
+        }
+        var $container = this.$('.o_colorpicker_container');
+        var padding = parseInt($container.css('padding'));
+        var top = Math.round(ev.clientY - $container.offset().top - padding);
+        var left = Math.round(ev.clientX - $container.offset().left - padding);
+        // [TO-DO] use percentage insted of round
+        this._setHSL(this.colors.hue, Math.round(left/2), Math.round((198 - top)/2));
+        // [TO-DO] remove top left params form the method
+        this._updatePointerPosition(top, left);
+        this._updateValues();
+    },
+    _onOptionChange: function (ev) {
+        var self = this;
+        var type = $(ev.target).data('color-type');
+        switch (type) {
+            case 'hex':
+                this.colors.hex = ev.target.value;
+                this._setHexToRgb();
+                this._setRgbToHsl();
+                break;
+            case 'hsl':
+                _.each(['hue', 'saturation', 'lightness'], function (color) {
+                    self.colors[color] = parseInt(self.$(".o-"+color+"-input").val());
+                });
+                this._setHslToRgb();
+                this._setRgbToHex();
+                break;
+            case 'rgb':
+                _.each(['red', 'green', 'blue'], function (color) {
+                    self.colors[color] = parseInt(self.$(".o-"+color+"-input").val());
+                });
+                this._setRgbToHex();
+                this._setRgbToHsl();
+                break;
+        }
+        this._setColorInputs();
+        this.$('.o_picking_area').css('background-color', "hsl("+this.colors.hue+",100%,50%)");
+    },
+    _onSiderMove: function (ev) {
+        ev.preventDefault();
+        if (ev.which !== 1) {
+            return;
+        }
+        var y = ev.clientY - this.$('.o_color_picker_slider').offset().top;
+        var height = this.$('.o_color_picker_slider').height();
+        if (y < 0) y = 0;
+        if (y > height) y = height;
+
+        this.colors.hue = ((359 * y) / height) | 0;
+        this._updateSliderPosition();
+        this._setHSL(this.colors.hue, this.colors.saturation, this.colors.lightness);
+        this._updateValues();
+    },
+});
+
+var ColorPickerDialog = Dialog.extend({
+    /**
+     * @constructor
+     */
+    init: function (parent, options) {
+        this._super(parent, _.extend({
+            title: _t("Color Picker"),
+            size: 'medium'
+        }, options || {}));
+    },
+    start: function () {
+        var self = this;
+        // TODO
+        this.opened().then(function () {
+            self.colorPicker = new ColorPickerWidget(this, {
+                hex: '#67d2a3'
+            });
+            self.colorPicker.appendTo(self.$el);
+        });
+        return this._super.apply(this, arguments);
+    },
+});
 
 return {
     Dialog: Dialog,
     AltDialog: AltDialog,
     MediaDialog: MediaDialog,
+    ColorPickerDialog: ColorPickerDialog,
     LinkDialog: LinkDialog,
     CropImageDialog: CropImageDialog,
     ImageWidget: ImageWidget,

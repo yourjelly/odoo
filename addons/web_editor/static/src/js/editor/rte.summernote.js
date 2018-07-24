@@ -442,6 +442,14 @@ $.summernote.pluginEvents.cropImage = function (event, editor, layoutInfo, sorte
     });
 };
 
+$.summernote.pluginEvents.customColor = function (event, editor, layoutInfo, customColor) {
+    core.bus.trigger('color_picker_dialog_demand', {
+        onSave: function (color) {
+            if (customColor === 'foreColor') { $.summernote.pluginEvents.foreColor(event, editor, layoutInfo, color); }
+            if (customColor === 'backColor') { $.summernote.pluginEvents.backColor(event, editor, layoutInfo, color); }
+        },
+    });
+};
 // Utils
 var fn_is_void = dom.isVoid || function () {};
 dom.isVoid = function (node) {
@@ -1054,6 +1062,7 @@ var SummernoteManager = Class.extend(mixins.EventDispatcherMixin, {
         core.bus.on('crop_image_dialog_demand', this, this._onCropImageDialogDemand);
         core.bus.on('link_dialog_demand', this, this._onLinkDialogDemand);
         core.bus.on('media_dialog_demand', this, this._onMediaDialogDemand);
+        core.bus.on('color_picker_dialog_demand', this, this._onColorPickerDialogDemand);
     },
     /**
      * @override
@@ -1065,6 +1074,7 @@ var SummernoteManager = Class.extend(mixins.EventDispatcherMixin, {
         core.bus.off('crop_image_dialog_demand', this, this._onCropImageDialogDemand);
         core.bus.off('link_dialog_demand', this, this._onLinkDialogDemand);
         core.bus.off('media_dialog_demand', this, this._onMediaDialogDemand);
+        core.bus.off('color_picker_dialog_demand', this, this._onColorPickerDialogDemand);
     },
 
     //--------------------------------------------------------------------------
@@ -1108,10 +1118,7 @@ var SummernoteManager = Class.extend(mixins.EventDispatcherMixin, {
         }
         data.__alreadyDone = true;
         var cropImageDialog = new weWidgets.CropImageDialog(this,
-            _.extend({
-                res_model: data.$editable.data('oe-model'),
-                res_id: data.$editable.data('oe-id'),
-            }, data.options || {}),
+            data.options || {},
             data.$editable,
             data.media
         );
@@ -1122,6 +1129,28 @@ var SummernoteManager = Class.extend(mixins.EventDispatcherMixin, {
             cropImageDialog.on('cancel', this, data.onCancel);
         }
         cropImageDialog.open();
+    },
+    /**
+     * Called when a demand to open a color picker dialog is received on the bus.
+     *
+     * @private
+     * @param {Object} data
+     */
+    _onColorPickerDialogDemand: function(data) {
+        if (data.__alreadyDone) {
+            return;
+        }
+        data.__alreadyDone = true;
+        var colorPickerDialog = new weWidgets.ColorPickerDialog(this);
+        if (data.onSave) {
+            colorPickerDialog.on('save', this, function () {
+                data.onSave(colorPickerDialog.colorPicker.colors.hex);
+            });
+        }
+        if (data.onCancel) {
+            colorPickerDialog.on('cancel', this, data.onCancel);
+        }
+        colorPickerDialog.open();
     },
     /**
      * Called when a demand to open a link dialog is received on the bus.

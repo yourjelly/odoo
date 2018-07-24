@@ -337,7 +337,70 @@
            </div>
        </t>
     </div>
-
+    <t t-name="web_editor.color_picker">
+        <div class="o-color-picker">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="o_colorpicker_container">
+                        <div class="o_picking_area">
+                            <div class="o_picker_poiner"/>
+                        </div>
+                    </div>
+                    <div class="o_color_picker_slider_container">
+                        <div class="o_color_picker_slider">
+                            <div class="o_slider_picker"/>
+                        </div>
+                    </div>
+                </div>
+                <form class="col-md-6 o-color-picker-form mt8">
+                    <div class="col-md-12">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <div class="o-color-preview"/>
+                            </span>
+                            <input data-color-type="hex" class="form-control o-color-input o-hex-input" />
+                        </div>
+                    </div>
+                    <div class="col-md-4 mt32">
+                        <div class="input-group">
+                            <span class="input-group-addon">H</span>
+                            <input type="text" data-color-type="hsl" class="form-control o-color-input o-hue-input"/>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mt32">
+                        <div class="input-group">
+                            <span class="input-group-addon">S</span>
+                            <input type="text" data-color-type="hsl" class="form-control o-color-input o-saturation-input"/>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mt32">
+                        <div class="input-group">
+                            <span class="input-group-addon">L</span>
+                            <input type="text" data-color-type="hsl" class="form-control o-color-input o-lightness-input"/>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mt32">
+                        <div class="input-group">
+                            <span class="input-group-addon">R</span>
+                            <input type="text" data-color-type="rgb" class="form-control o-color-input o-red-input"/>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mt32">
+                        <div class="input-group">
+                            <span class="input-group-addon">G</span>
+                            <input type="text" data-color-type="rgb" class="form-control o-color-input o-green-input"/>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mt32">
+                        <div class="input-group">
+                            <span class="input-group-addon">B</span>
+                            <input type="text" data-color-type="rgb" class="form-control o-color-input o-blue-input"/>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </t>
     <!--=================-->
     <!-- Snippet options -->
     <!--=================-->
