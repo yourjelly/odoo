@@ -46,6 +46,10 @@ class AccountAnalyticLine(models.Model):
         for line in self:
             line.department_id = line.employee_id.department_id
 
+    @api.preupdate('project_id', 'employee_id', 'task_id')
+    def _preupdate_timesheet_preprocess(self, values):
+        self._timesheet_preprocess(values)
+
     @api.postupdate('project_id')
     def _postupdate_timesheet(self):
         # applied only for timesheet
@@ -60,15 +64,8 @@ class AccountAnalyticLine(models.Model):
             else:
                 ts_user_id = self._default_user()
             values['employee_id'] = self.env['hr.employee'].search([('user_id', '=', ts_user_id)], limit=1).id
-
-        values = self._timesheet_preprocess(values)
         result = super(AccountAnalyticLine, self).create(values)
         return result
-
-    @api.multi
-    def write(self, values):
-        values = self._timesheet_preprocess(values)
-        return super(AccountAnalyticLine, self).write(values)
 
     def _timesheet_preprocess(self, vals):
         """ Deduce other field values from the one given.

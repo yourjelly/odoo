@@ -97,8 +97,6 @@ class Alias(models.Model):
         """
         model_name = self._context.get('alias_model_name')
         parent_model_name = self._context.get('alias_parent_model_name')
-        if vals.get('alias_name'):
-            vals['alias_name'] = self._clean_and_make_unique(vals.get('alias_name'))
         if model_name:
             model = self.env['ir.model']._get(model_name)
             vals['alias_model_id'] = model.id
@@ -107,12 +105,11 @@ class Alias(models.Model):
             vals['alias_parent_model_id'] = model.id
         return super(Alias, self).create(vals)
 
-    @api.multi
-    def write(self, vals):
+    @api.preupdate('alias_name')
+    def _preupdate_alias_name(self, vals):
         """"give a unique alias name if given alias name is already assigned"""
         if vals.get('alias_name') and self.ids:
             vals['alias_name'] = self._clean_and_make_unique(vals.get('alias_name'), alias_ids=self.ids)
-        return super(Alias, self).write(vals)
 
     @api.multi
     def name_get(self):

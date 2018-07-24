@@ -339,7 +339,6 @@ class ProductTemplate(models.Model):
 
     @api.multi
     def write(self, vals):
-        tools.image_resize_images(vals)
         res = super(ProductTemplate, self).write(vals)
         if 'attribute_line_ids' in vals or vals.get('active'):
             self.create_variant_ids()
