@@ -132,7 +132,7 @@ class StockPackageLevel(models.Model):
                     })
 
     @api.postupdate('location_dest_id', 'location_id')
-    def _postupdate_location(self):
+    def _postupdate_location(self, vals):
         fresh_packages = self.env['stock.package_level']
         for package_level in self:
             if package_level.location_dest_id:

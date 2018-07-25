@@ -279,10 +279,14 @@ class CrmTeam(models.Model):
         """
         self.ensure_one()
 
-
     @api.postupdate('member_ids')
-    def _postupdate_members(self):
-        self.filtered('member_ids')._add_members_to_favorites()
+    def _postupdate_members(self, vals):
+        if vals.get('member_ids'):
+            self._add_members_to_favorites()
+
+    @api.model
+    def create(self, values):
+        return super(CrmTeam, self.with_context(mail_create_nosubscribe=True)).create(values)
 
     def _add_members_to_favorites(self):
         for team in self:

@@ -222,7 +222,7 @@ class PurchaseOrderLine(models.Model):
     move_dest_ids = fields.One2many('stock.move', 'created_purchase_line_id', 'Downstream Moves')
 
     @api.postupdate('product_qty')
-    def _postupdate_picking(self):
+    def _postupdate_picking(self, vals):
         self.filtered(lambda l: l.order_id.state == 'purchase' and l.product_qty)._create_or_update_picking()
 
     @api.multi

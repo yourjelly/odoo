@@ -375,7 +375,7 @@ class PurchaseOrder(models.Model):
         return res
 
     @api.postupdate('requisition_id')
-    def _postupdate_requisition(self):
+    def _postupdate_requisition(self, vals):
         for purchase in self:
             if purchase.requisition_id:
                 purchase.message_post_with_view('mail.message_origin_link',

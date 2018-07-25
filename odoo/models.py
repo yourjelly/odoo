@@ -1109,7 +1109,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     def _postupdate_fields(self, vals):
         field_names = set(vals)
         for func in self._postupdate_methods:
-            if set(func._postupdate) or field_names:
+            if set(func._postupdate) and field_names:
+                func(self, vals)
+            if not func._postupdate:
                 func(self)
 
     @api.multi
@@ -3520,10 +3522,11 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 # trick: no need to mark non-stored fields as modified, thanks
                 # to the transitive closure made over non-stored dependencies
 
-            # check Python constraints for inversed fields
-            record._validate_fields(set(inverse_vals) - set(store_vals))
+        # check Python constraints for non-stored inversed fields
+        for data in data_list:
+            data['record']._validate_fields(set(data['inversed']) - set(data['stored']))
             # postupdate update fields
-            record._postupdate_fields(store_vals)
+            data['record']._postupdate_fields(data['stored'])
 
         # recompute fields
         if self.env.recompute and self._context.get('recompute', True):

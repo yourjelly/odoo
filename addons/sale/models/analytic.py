@@ -17,7 +17,7 @@ class AccountAnalyticLine(models.Model):
     so_line = fields.Many2one('sale.order.line', string='Sales Order Line', domain=lambda self: self._default_sale_line_domain())
 
     @api.postupdate('product_id', 'so_line', 'amount')
-    def _postupdate_determine_order_line(self):
+    def _postupdate_determine_order_line(self, vals):
         for analytic_line in self.sudo().filtered(lambda aal: not aal.so_line and aal.product_id and aal.product_id.expense_policy != 'no' and aal.amount <= 0):
             analytic_line._sale_determine_order_line()
 

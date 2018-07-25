@@ -122,7 +122,7 @@ class IrRule(models.Model):
         return res
 
     @api.postupdate()
-    def _postupdate_clear_caches(self):
+    def _postupdate_clear_caches(self, vals):
         self.clear_caches()
 
 #

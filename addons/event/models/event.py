@@ -281,7 +281,7 @@ class EventEvent(models.Model):
         return result
 
     @api.postupdate('organizer_id')
-    def _postupdate_organizer_id(self):
+    def _postupdate_organizer_id(self, vals):
         for event in self:
             if event.organizer_id:
                 event.message_subscribe([event.organizer_id.id])

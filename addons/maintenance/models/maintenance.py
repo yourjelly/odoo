@@ -329,7 +329,7 @@ class MaintenanceRequest(models.Model):
             self.technician_user_id = self.category_id.technician_user_id
 
     @api.postupdate('owner_user_id', 'technician_user_id', 'schedule_date')
-    def _postupdate_activity_update(self):
+    def _postupdate_activity_update(self, vals):
         self.filtered(lambda a: a.owner_user_id or a.technician_user_id)._add_followers()
         self.filtered(lambda a: a.schedule_date).activity_update()
 

@@ -47,8 +47,9 @@ class Followers(models.Model):
                 self.env[record.res_model].invalidate_cache(ids=[record.res_id])
 
     @api.postupdate('res_model', 'res_id', 'partner_id')
-    def _postupdate_invalidate_documents(self):
-        self._invalidate_documents()
+    def _postupdate_invalidate_documents(self, vals):
+        if any(x in vals for x in ['res_model', 'res_id', 'partner_id']):
+            self._invalidate_documents()
 
     @api.multi
     def write(self, vals):

@@ -33,7 +33,7 @@ class ProductPricelist(models.Model):
         website._get_pl_partner_order.clear_cache(website)
 
     @api.postupdate()
-    def _postupdate_clear_cache(self):
+    def _postupdate_clear_cache(self, vals):
         self.clear_cache()
 
     @api.multi

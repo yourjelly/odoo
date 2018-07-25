@@ -26,7 +26,7 @@ class DecimalPrecision(models.Model):
         self.clear_caches()
 
     @api.postupdate()
-    def _postupdate_clear_caches(self):
+    def _postupdate_clear_caches(self, vals):
         self.clear_caches()
 
     @api.multi

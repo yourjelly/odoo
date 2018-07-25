@@ -390,7 +390,7 @@ class InventoryLine(models.Model):
         return res
 
     @api.postupdate('product_id', 'location_id', 'partner_id', 'package_id', 'prod_lot_id')
-    def _postupdate_duplicate_line(self):
+    def _postupdate_duplicate_line(self, vals):
         self._check_no_duplicate_line()
 
     def _check_no_duplicate_line(self):

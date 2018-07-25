@@ -386,7 +386,7 @@ class HolidaysRequest(models.Model):
                                                                                   leave.holiday_status_id.validity_start, leave.holiday_status_id.validity_stop))
 
     @api.postupdate('employee_id')
-    def _postupdate_add_employee(self):
+    def _postupdate_add_employee(self, vals):
         for holiday in self:
             holiday.add_follower(holiday.employee_id.id)
             holiday._onchange_employee_id()

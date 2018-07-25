@@ -62,7 +62,7 @@ class ResConfigSettings(models.TransientModel):
             raise UserError(_('Twitter authorization error!') + ' ' + _('Please double-check your Twitter API Key and Secret!'))
 
     @api.postupdate('twitter_api_key', 'twitter_api_secret', 'twitter_screen_name')
-    def _postupdate_twitter_authorization(self):
+    def _postupdate_twitter_authorization(self, vals):
         for config in self:
             if config.twitter_api_key or config.twitter_api_secret or config.twitter_screen_name:
                 config._check_twitter_authorization()

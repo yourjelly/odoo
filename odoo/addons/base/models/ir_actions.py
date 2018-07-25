@@ -615,7 +615,7 @@ class IrActionsTodo(models.Model):
     name = fields.Char()
 
     @api.postupdate('state')
-    def _postupdate_open_todo(self):
+    def _postupdate_open_todo(self, vals):
         for todo in self:
             if todo.state == "open":
                 todo.ensure_one_open_todo()

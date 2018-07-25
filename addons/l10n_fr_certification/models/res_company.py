@@ -14,7 +14,7 @@ class ResCompany(models.Model):
     l10n_fr_secure_sequence_id = fields.Many2one('ir.sequence', 'Sequence to use to ensure the securisation of data', readonly=True)
 
     @api.postupdate('l10n_fr_secure_sequence_id')
-    def _postupdate_l10n_fr_secure_sequence_id(self):
+    def _postupdate_l10n_fr_secure_sequence_id(self, vals):
         for company in self:
             if company._is_accounting_unalterable():
                 sequence_fields = ['l10n_fr_secure_sequence_id']

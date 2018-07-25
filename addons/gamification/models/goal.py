@@ -110,7 +110,7 @@ class GoalDefinition(models.Model):
                     _("The model configuration for the definition %s seems incorrect, please check it.\n\n%s not found") % (definition.name, e))
 
     @api.postupdate('computation_mode', 'field_id', 'domain', 'model_id', 'batch_mode')
-    def postupdate_validity(self):
+    def postupdate_validity(self, vals):
         for definition in self:
             if definition.computation_mode in ('count', 'sum') and (definition.domain or definition.model_id):
                 definition._check_domain_validity()

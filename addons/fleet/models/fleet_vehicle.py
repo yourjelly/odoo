@@ -198,7 +198,7 @@ class FleetVehicle(models.Model):
             self.image_medium = False
 
     @api.postupdate('driver_id')
-    def _postupdate_drive_history(self):
+    def _postupdate_drive_history(self, vals):
         for vehicle in self.filtered(lambda v: v.driver_id):
             self.env['fleet.vehicle.assignation.log'].create({
                 'vehicle_id': vehicle.id,

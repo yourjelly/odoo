@@ -27,7 +27,7 @@ class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'
 
     @api.postupdate('invoice_id', 'product_id')
-    def _postupdate_invoice_type(self):
+    def _postupdate_invoice_type(self, vals):
         MemberLine = self.env['membership.membership_line']
         for line in self.filtered(lambda line: line.invoice_id.type == 'out_invoice'):
             member_lines = MemberLine.search([('account_invoice_line', '=', line.id)])

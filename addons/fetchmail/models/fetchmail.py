@@ -81,7 +81,7 @@ class FetchmailServer(models.Model):
         """ % conf
 
     @api.postupdate()
-    def _postupdate_cron(self):
+    def _postupdate_cron(self, vals):
         self._update_cron()
 
     @api.multi

@@ -33,7 +33,7 @@ class MaintenanceEquipment(models.Model):
         self.assign_date = fields.Date.context_today(self)
 
     @api.postupdate('employee_id', 'department_id')
-    def _postupdate_partner_ids(self):
+    def _postupdate_partner_ids(self, vals):
         partner_ids = []
         for equipment in self:
             # subscribe employee or department manager when equipment assign to employee or department.
@@ -85,7 +85,7 @@ class MaintenanceRequest(models.Model):
         return {'domain': {'equipment_id': domain}}
 
     @api.postupdate('employee_id')
-    def _postupdate_employee_id(self):
+    def _postupdate_employee_id(self, vals):
         for request in self:
             if request.employee_id and request.employee_id.user_id:
                 request.message_subscribe(partner_ids=[request.employee_id.user_id.partner_id.id])
