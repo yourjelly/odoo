@@ -99,8 +99,7 @@ return {
             opacity: 0,
             height: 10,
             top: -10000,
-            direction: -10000,
-        });
+        }).css(direction, -10000);
         $fixedTextarea.data("auto_resize", true);
 
         var style = window.getComputedStyle($textarea[0], null);
