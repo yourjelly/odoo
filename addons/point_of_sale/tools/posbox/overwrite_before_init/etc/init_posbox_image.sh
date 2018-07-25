@@ -42,6 +42,8 @@ rm -rf /usr/share/doc
 # Even in stretch, we had an error with langid (but worked otherwise)
 pip3 install pyusb==1.0.0b1
 pip3 install evdev
+pip3 install gatt
+
 
 groupadd usbusers
 usermod -a -G usbusers pi
