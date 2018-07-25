@@ -51,25 +51,17 @@ class LunchOrder(models.Model):
     balance_visible = fields.Boolean(compute='_compute_cash_move_balance', multi='cash_move_balance')
     previous_order_ids = fields.Many2many('lunch.order.line', compute='_compute_previous_order')
     previous_order_widget = fields.Text(compute='_compute_previous_order')
-    product_ids = fields.Many2many('lunch.product', string='Products')
-    available_product_ids = fields.Many2many('lunch.product', compute='_compute_available_product_ids')
+    available_product_ids = fields.Many2many('lunch.product', string='Available Products', compute='_compute_available_product_ids')
 
     @api.multi
     @api.depends('user_id')
     def _compute_available_product_ids(self):
-        self.ensure_one()
-        products = self.env.get('lunch.product').search([])
-        # Set the 'is_available' in each product to True depending on the user_id.
-        # Criteria: The product with location_ids containing the user_id.lunch_location_id
-        ids = []
-        for product in products:
-            if self.user_id.lunch_location_id.name in product.location_ids.mapped(lambda loc: loc.name):
-                product.write({'is_available': True})
-                ids.append(product.id)
-            else:
-                product.write({'is_available': False})
-                pass
-        self.available_product_ids = self.env.get('lunch.product').browse(ids)
+        user_id = self.user_id
+        all_products = self.env.get('lunch.product').search([])
+        if user_id:
+            self.available_product_ids = all_products.filtered(lambda product: user_id.lunch_location_id in product.location_ids)
+        else:
+            self.available_product_ids = all_products
 
     @api.one
     @api.depends('order_line_ids')
@@ -183,7 +175,7 @@ class LunchOrderLine(models.Model):
 
     name = fields.Char(related='product_id.name', string="Product Name", readonly=True)
     order_id = fields.Many2one('lunch.order', 'Order', ondelete='cascade', required=True)
-    product_id = fields.Many2one('lunch.product', 'Product', required=True, domain=[('is_available', '=', True)])
+    product_id = fields.Many2one('lunch.product', 'Product', required=True)
     category_id = fields.Many2one('lunch.product.category', string='Product Category',
                                   related='product_id.category_id', readonly=True, store=True)
     date = fields.Date(string='Date', related='order_id.date', readonly=True, store=True)
@@ -201,6 +193,12 @@ class LunchOrderLine(models.Model):
                              'Status', readonly=True, index=True, default='new')
     cashmove = fields.One2many('lunch.cashmove', 'order_id', 'Cash Move')
     currency_id = fields.Many2one('res.currency', related='order_id.currency_id')
+
+    @api.onchange('product_id')
+    def _onchange_order_id(self):
+        available_products = self.order_id.available_product_ids
+        available_ids = available_products.mapped(lambda product: product.id)
+        return {'domain': {'product_id': [('id', 'in', available_ids)]}}
 
     @api.one
     def order(self):
@@ -256,7 +254,6 @@ class LunchProduct(models.Model):
     supplier = fields.Many2one('res.partner', 'Vendor')
     location_ids = fields.Many2many('lunch.location', string='Available in this locations')
     active = fields.Boolean(default=True)
-    is_available = fields.Boolean(default=False)
 
 class LunchProductCategory(models.Model):
     """ Category of the product such as pizza, sandwich, pasta, chinese, burger... """

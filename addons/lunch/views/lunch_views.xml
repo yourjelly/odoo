@@ -81,7 +81,6 @@
                     <field name="supplier"/>
                     <field name="description"/>
                     <separator />
-                    <filter name='is_available' string="Available For You" domain="[('is_available','=','True')]"/>
                     <group expand="0" string="Group By">
                         <filter name="supplier" string="Vendor" context="{'group_by': 'supplier'}"/>
                         <filter name="category" string="Product Category" context="{'group_by': 'category_id'}"/>
