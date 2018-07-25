@@ -390,6 +390,7 @@ class TestPreview(TransactionCase):
             ['aux', '5', '6'],
         ])
 
+
 class test_convert_import_data(TransactionCase):
     """ Tests conversion of base_import.import input into data which
     can be fed to Model.load

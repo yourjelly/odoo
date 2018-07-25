@@ -1083,16 +1083,16 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         # m2o fields can't be on multiple lines so exclude them from the
         # is_relational field rows filter, but special-case it later on to
         # be handled with relational fields (as it can have subfields)
-        is_relational = lambda field: fields[field].relational
+        is_relational = lambda field: fields.get(field) and fields[field].relational
         get_o2m_values = itemgetter_tuple([
             index
             for index, fnames in enumerate(fields_)
-            if fields[fnames[0]].type == 'one2many'
+            if fields.get(fnames[0]) and fields[fnames[0]].type == 'one2many'
         ])
         get_nono2m_values = itemgetter_tuple([
             index
             for index, fnames in enumerate(fields_)
-            if fields[fnames[0]].type != 'one2many'
+            if fields.get(fnames[0]) and fields[fnames[0]].type != 'one2many'
         ])
         # Checks if the provided row has any non-empty one2many fields
         def only_o2m_values(row):
@@ -3444,6 +3444,11 @@ Record ids: %(records)s
             will set the field ``foo`` to ``1`` and the field ``bar`` to
             ``"Qux"`` if those are valid (otherwise it will trigger an error).
 
+            field key may have field_name:language_code, this will add translation entry
+            in ir.translation with given value for that field, for that source field is needed::
+
+                [{'bar': "Qux", 'bar:fr_BE': "Qux in FR", ...}, ...]
+
         :raise AccessError: * if user has no write rights on the requested object
                             * if user tries to bypass access rules for write on the requested object
         :raise ValidationError: if user tries to enter invalid value for a field that is not in selection
@@ -3524,6 +3529,8 @@ Record ids: %(records)s
         protected = set()
         check_company = False
         for fname in vals:
+            field_name = fname
+            fname = fname.split(':')[0]
             field = self._fields.get(fname)
             if not field:
                 raise ValueError("Invalid field %r on model %r" % (fname, self._name))
@@ -3535,13 +3542,13 @@ Record ids: %(records)s
                     # will not be computed and default to an empty recordset. So
                     # make sure the field's value is in cache before writing, in
                     # order to avoid an inconsistent update.
-                    self[fname]
+                    self[field_name]
                 determine_inverses[field.inverse].append(field)
                 # DLE P150: `test_cancel_propagation`, `test_manufacturing_3_steps`, `test_manufacturing_flow`
                 # TODO: check whether still necessary
                 records_to_inverse[field] = self.filtered('id')
             if field.relational or self._field_inverses[field]:
-                relational_names.append(fname)
+                relational_names.append(field_name)
             if field.inverse or (field.compute and not field.readonly):
                 if field.store or field.type not in ('one2many', 'many2many'):
                     # Protect the field from being recomputed while being
@@ -3554,7 +3561,7 @@ Record ids: %(records)s
                     # forcing its value to be recomputed once dependencies are
                     # up-to-date.
                     protected.update(self._field_computed.get(field, [field]))
-            if fname == 'company_id' or (field.relational and field.check_company):
+            if field_name == 'company_id' or (field.relational and field.check_company):
                 check_company = True
 
         # protect fields being written against recomputation
@@ -3643,11 +3650,16 @@ Record ids: %(records)s
 
         # determine SQL values
         columns = []                    # list of (column_name, format, value)
+        translated_term_fields = []     # list of translated term fields
 
         for name, val in vals.items():
             if self._log_access and name in LOG_ACCESS_COLUMNS and not val:
                 continue
-            field = self._fields[name]
+            splitted_name = name.split(':')
+            field = self._fields[splitted_name[0]]
+            if len(splitted_name) > 1 and field.translate is True:
+                translated_term_fields.append(name)
+                continue
             assert field.store
 
             if field.deprecated:
@@ -3675,6 +3687,17 @@ Record ids: %(records)s
                         _('One of the records you are trying to modify has already been deleted (Document type: %s).') % self._description
                         + '\n\n({} {}, {} {})'.format(_('Records:'), sub_ids[:6], _('User:'), self._uid)
                     )
+
+            Translations = self.env['ir.translation']
+
+            for name in translated_term_fields:
+                splitted_name = name.split(':')
+                if splitted_name[0] in vals:
+                    tname = '%s,%s' % (self._name, splitted_name[0])
+                    val = vals[name]
+                    Translations._set_ids(tname, 'model', splitted_name[1], self.ids, val)
+                else:
+                    raise MissingError(_('Missing source value for the field %s') % splitted_name[0])
 
         # update parent_path
         if parent_records:
@@ -3736,6 +3759,8 @@ Record ids: %(records)s
             data['inherited'] = inherited = defaultdict(dict)
             data['protected'] = protected = set()
             for key, val in vals.items():
+                field_name = key
+                key = key.split(':')[0]
                 if key in bad_names:
                     continue
                 field = self._fields.get(key)
@@ -3752,11 +3777,11 @@ Record ids: %(records)s
                         # field inverse saves 4 SQL queries
                         continue
                 if field.store:
-                    stored[key] = val
+                    stored[field_name] = val
                 if field.inherited:
-                    inherited[field.related_field.model_name][key] = val
+                    inherited[field.related_field.model_name][field_name] = val
                 elif field.inverse:
-                    inversed[key] = val
+                    inversed[field_name] = val
                     inversed_fields.add(field)
                 # protect non-readonly computed fields against (re)computation
                 if field.compute and not field.readonly:
@@ -3837,6 +3862,7 @@ Record ids: %(records)s
         ids = []                        # ids of created records
         other_fields = set()            # non-column fields
         translated_fields = set()       # translated fields
+        translated_term_fields = set()  # translated terms fields
 
         # column names, formats and values (for common fields)
         columns0 = [('id', "nextval(%s)", self._sequence)]
@@ -3851,6 +3877,11 @@ Record ids: %(records)s
             stored = data['stored']
             columns = [column for column in columns0 if column[0] not in stored]
             for name, val in sorted(stored.items()):
+                splitted_name = name.split(':')
+                field = self._fields[splitted_name[0]]
+                if len(splitted_name) > 1 and field.translate is True:
+                    translated_term_fields.add(name)
+                    continue
                 field = self._fields[name]
                 assert field.store
 
@@ -3940,8 +3971,8 @@ Record ids: %(records)s
         records.check_access_rule('create')
 
         # add translations
+        Translations = self.env['ir.translation']
         if self.env.lang and self.env.lang != 'en_US':
-            Translations = self.env['ir.translation']
             for field in translated_fields:
                 tname = "%s,%s" % (field.model_name, field.name)
                 for data in data_list:
@@ -3949,6 +3980,17 @@ Record ids: %(records)s
                         record = data['record']
                         val = data['stored'][field.name]
                         Translations._set_ids(tname, 'model', self.env.lang, record.ids, val, val)
+
+        for name in translated_term_fields:
+            splitted_name = name.split(':')
+            for data in data_list:
+                if splitted_name[0] in data['stored'] and name in data['stored']:
+                    tname = '%s,%s' % (self._name, splitted_name[0])
+                    record = data['record']
+                    val = data['stored'][name]
+                    Translations._set_ids(tname, 'model', splitted_name[1], record.ids, val)
+                else:
+                    raise MissingError(_('Missing source value for the field %s') % splitted_name[0])
 
         return records
 
@@ -5779,6 +5821,8 @@ Record ids: %(records)s
             # merge dependency trees to evaluate all triggers at once
             tree = {}
             for fname in fnames:
+                if len(fname.split(':')) > 1:
+                    continue
                 node = self._field_triggers.get(self._fields[fname])
                 if node:
                     trigger_tree_merge(tree, node)

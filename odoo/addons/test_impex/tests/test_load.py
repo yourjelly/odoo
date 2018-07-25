@@ -415,6 +415,26 @@ class test_required_string_field(ImporterCase):
             u"Found more than 10 errors and more than one error per 10 records, interrupted to avoid showing too many errors."
         )
 
+class test_translate_string_field(ImporterCase):
+    model_name = 'export.string.translate'
+
+    def test_imported(self):
+        result = self.import_(['value', 'value:fr_BE'], [
+            ['chhagan', 'lagan'],
+            ['magan', 'bhagan']
+        ])
+        self.assertEqual(len(result['ids']), 2)
+        self.assertFalse(result['messages'])
+
+    def test_without_source(self):
+        result = self.import_(['value:fr_BE'], [
+            ['shaktimaan'],
+            ['gangadhar']
+        ])
+        self.assertFalse(result['ids'])
+        self.assertEqual(len(result['messages']), 2)
+
+
 class test_text(ImporterCase):
     model_name = 'export.text'
 
