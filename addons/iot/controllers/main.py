@@ -33,9 +33,10 @@ class IoTController(http.Controller):
             })
         return 'ok'
 
-    @http.route('/iot3', type='http', auth='public', csrf=False)
+    @http.route('/iot3', type='json', auth='public', csrf=False)
     def update_box(self, name, identifier, ip):
         existing_box = request.env['iot.box'].sudo().search([('identifier', '=', identifier)])
+        import pdb;pdb.set_trace()
         if not existing_box:
             request.env['iot.box'].sudo().create({
                 'name': name,

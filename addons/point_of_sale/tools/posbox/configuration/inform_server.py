@@ -38,8 +38,12 @@ if server:
                 'identifier': mac[9],
                 'ip': ips}
     data = parse.urlencode(values).encode()
-    req =  request.Request(url, data=data)
-    try:
-        response = request.urlopen(req)
-    except:
-        _logger.warning('Could not reach configured server')
+    # req =  request.Request(url, data=data)
+    # try:
+    #     response = request.urlopen(req)
+    # except:
+    #     _logger.warning('Could not reach configured server')
+
+    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+    data_json = json.dumps(values)
+    req = request.Request(url, data_json, headers, type='POST')
