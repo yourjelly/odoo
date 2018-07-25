@@ -180,8 +180,10 @@ class USBDeviceManager(Thread):
             added = updated_devices.keys() - self.devices.keys()
             removed = self.devices.keys() - updated_devices.keys()
             self.devices = updated_devices
-            print('added %s removed %s'%(added, removed))
-            print(len(self.devices))
+            if (removed):
+                for path in list(drivers):
+                    if (path in removed):
+                        del drivers[path]
             for path in added:
                 dev = updated_devices[path]
                 for driverclass in usbdrivers:
@@ -198,10 +200,6 @@ class USBDeviceManager(Thread):
                         # launch thread
                         d.daemon = True
                         d.start()
-                    else:
-                        if path in drivers:
-                            del drivers[path]
-                        del d
             time.sleep(3)
 
 subprocess.call("/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/inform_server.py")
