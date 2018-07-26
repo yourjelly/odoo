@@ -175,6 +175,36 @@ class BarcodeScannerdUSBDriver(USBDriver):
     def action(self, action):
         pass
 
+
+class ZebraPrinterUSBDriver(USBDriver):
+
+    ep = False
+    def supported(self):
+        return getattr(self.dev, 'idVendor') == 0x0a5f and getattr(self.dev, 'idProduct') == 0x0080
+
+    def value(self):
+        return False #There is no real value in a printer
+
+    def run(self):
+        # We don't listen to the printer, it just needs to do what we ask, so the thread does not need to stay alive
+        dev = self.dev
+        if dev.is_kernel_driver_active(0):
+            dev.detach_kernel_driver(0)
+        dev.set_configuration()
+        cfg = dev.get_active_configuration()
+        intf = cfg[(0, 0)]
+        is_OUT = lambda e: usb.util.endpoint_direction(e.bEndpointAddress) == usb.util.ENDPOINT_OUT
+        self.ep = usb.util.find_descriptor(intf, custom_match=is_OUT)
+
+    def action(self, action):
+        """
+        :param action: dictionary with the type of action and the info of the action
+        :return:
+        """
+        if action.get('zpl'):
+            self.dev.send(self.ep, action['zpl'], self.ep.wMaxPacketSize)
+
+
 class USBDeviceManager(Thread):
     devices = {}
     def run(self):
