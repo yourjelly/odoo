@@ -351,6 +351,7 @@ if tax > result:result=tax</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('sgst_sale_9'),ref('cgst_sale_9'),])]"/>
         <field name="tax_group_id" ref="gst_group"/>
         <field name="l10n_in_description">18.0</field>
+        <field name="sequence">0</field>
     </record>
 
     <record id="sgst_sale_6" model="account.tax.template">
@@ -766,6 +767,7 @@ if tax > result:result=tax</field>
         <field name="children_tax_ids" eval="[(6, 0, [ref('sgst_purchase_9'),ref('cgst_purchase_9'),])]"/>
         <field name="tax_group_id" ref="gst_group"/>
         <field name="l10n_in_description">18.0</field>
+        <field name="sequence">0</field>
     </record>
 
     <record id="sgst_purchase_6" model="account.tax.template">
