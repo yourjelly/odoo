@@ -64,6 +64,7 @@ class L10nInAccountInvoiceReport(models.Model):
     gst_format_date = fields.Char(string="Formated Date")
     gst_format_refund_date = fields.Char(string="Formated Refund Date")
     gst_format_shipping_bill_date = fields.Char(string="Formated Shipping Bill Date")
+    sale_from_bonded_wh = fields.Char('Sale From Bonded WH')
 
     def _select(self):
         select_str = """
@@ -133,13 +134,13 @@ class L10nInAccountInvoiceReport(models.Model):
                     END) AS supply_type,
                 (CASE WHEN am.l10n_in_export_type in ('deemed', 'export_with_igst', 'sez_with_igst')
                     THEN 'EXPWP'
-                    WHEN am.l10n_in_export_type in ('export_lut', 'sez_without_igst')
+                    WHEN am.l10n_in_export_type in ('sale_from_bonded_wh', 'sez_without_igst')
                     THEN 'EXPWOP'
                     ELSE ''
                     END) AS export_type,
                 (CASE WHEN refund_ai.l10n_in_export_type in ('deemed', 'export_with_igst', 'sez_with_igst')
                     THEN 'EXPWP'
-                    WHEN refund_ai.l10n_in_export_type in ('export_lut', 'sez_without_igst')
+                    WHEN refund_ai.l10n_in_export_type in ('sale_from_bonded_wh', 'sez_without_igst')
                     THEN 'EXPWOP'
                     ELSE 'B2CL'
                     END) AS refund_export_type,
@@ -147,7 +148,7 @@ class L10nInAccountInvoiceReport(models.Model):
                     THEN 'Regular'
                     WHEN ai.l10n_in_export_type = 'deemed'
                     THEN 'Deemed'
-                    WHEN ai.l10n_in_export_type = 'export_lut'
+                    WHEN ai.l10n_in_export_type = 'sale_from_bonded_wh'
                     THEN 'Sale from Bonded WH'
                     WHEN ai.l10n_in_export_type = 'export_with_igst'
                     THEN 'Export with IGST'
@@ -173,8 +174,11 @@ class L10nInAccountInvoiceReport(models.Model):
                 (CASE WHEN am.l10n_in_shipping_bill_date IS NOT NULL
                     THEN TO_CHAR(am.l10n_in_shipping_bill_date, 'DD-MON-YYYY')
                     ELSE ''
-                    END) as gst_format_shipping_bill_date
-
+                    END) as gst_format_shipping_bill_date,
+                (CASE WHEN ai.l10n_in_export_type = 'sale_from_bonded_wh'
+                    THEN 'Y'
+                    ELSE 'N'
+                    END) AS sale_from_bonded_wh
         """
         return select_str
 
