@@ -8,13 +8,6 @@ class ResCompany(models.Model):
     _inherit = "res.company"
 
     #for Multi GSTIN.
+    l10n_in_multi_gstin_numbers = fields.Boolean("Multiple GSTIN registered",
+        help="Use this if setup with more than one state and obtained multiple registrations.")
     l10n_in_gstin_partner_ids = fields.One2many('res.partner', 'l10n_in_gstin_company_id', string="GST")
-
-    @api.model
-    def create(self, vals):
-        """update company partner in l10n_in_gstin_partner_ids relation.
-        For use in domain of l10n_in_gstin_partner_id.
-        """
-        company = super(ResCompany, self).create(vals)
-        company.partner_id.write({'l10n_in_gstin_company_id': company.id})
-        return company
