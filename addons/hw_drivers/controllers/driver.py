@@ -10,7 +10,7 @@ import subprocess
 import netifaces as ni
 import json
 from odoo import http
-from urllib2 import request, parse
+from urllib import request, parse
 from uuid import getnode as get_mac
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
@@ -36,6 +36,8 @@ class StatusController(http.Controller):
             else:
                 result = 'device not found'
         return result
+
+
 
     @http.route('/send_iot_box', type='http', auth='none', cors='*')
     def send_iot_box(self):
