@@ -62,6 +62,7 @@ class TestPyLint(TransactionCase):
         'unpacking-in-except',
 
         'no-comma-exception',
+        'sql-injection',
     ]
 
     BAD_FUNCTIONS = [
@@ -134,7 +135,7 @@ class TestPyLint(TransactionCase):
             '--enable=%s' % ','.join(self.ENABLED_CODES),
             '--reports=n',
             "--msg-template='{msg} ({msg_id}) at {path}:{line}'",
-            '--load-plugins=pylint.extensions.bad_builtin,_odoo_checkers',
+            '--load-plugins=pylint.extensions.bad_builtin,_odoo_checkers,sql_injection_checker',
             '--bad-functions=%s' % ','.join(self.BAD_FUNCTIONS),
             '--deprecated-modules=%s' % ','.join(self.BAD_MODULES)
         ]
