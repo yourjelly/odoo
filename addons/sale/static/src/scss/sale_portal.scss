@@ -8,3 +8,68 @@
 .orders_label_text_align {
     vertical-align: 15%;
 }
+
+.o_portal_sidebar .bs-sidebar {
+    .nav {
+        > .active > a, > .active:hover > a, > .active:focus > a {
+            font-weight: bold;
+            color: #563d7c;
+            background-color: transparent;
+            border-right: 1px solid #563d7c;
+        }
+        > li > a {
+            display: block;
+            color: #716b7a;
+            padding: 5px 20px;
+        }
+        .nav {
+            display: none;
+            margin-bottom: 8px;
+            > li > a {
+                padding: 3px 30px;
+                font-size: 90%;
+            }
+        }
+    }
+    .bs-sidenav {
+        padding: 10px 0px;
+    }
+    .o_portal_sale_ask_changes {
+        width: 56%;
+    }
+    .o_portal_sale_reject {
+        width: 42%;
+    }
+    @media (max-width: $screen-sm-max) {
+        .o_portal_sale_ask_changes {
+            width: 50%;
+        }
+        .o_portal_sale_reject {
+            width: 49%;
+        }
+    }
+    @media (max-width: $screen-xs-max) {
+        .o_portal_sale_ask_changes, .o_portal_sale_reject {
+            width: 100%;
+        }
+    }
+}
+ .wq-table {
+    table-layout: auto !important;
+    th, td {
+        border-top: none !important;
+    }
+}
+ .wq-table:not(:first-of-type) thead {
+    display: none;
+}
+ @media (min-width: 992px) {
+    .o_portal_sidebar .bs-sidebar .nav > .active > ul {
+        display: block;
+    }
+}
+ @media print {
+    body {
+        padding: 0;
+    }
+}
