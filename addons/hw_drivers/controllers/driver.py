@@ -9,6 +9,7 @@ import evdev
 import subprocess
 import netifaces as ni
 import json
+import re
 from odoo import http
 from urllib import request, parse
 from uuid import getnode as get_mac
@@ -235,7 +236,7 @@ class USBDeviceManager(Thread):
                         # launch thread
                         d.daemon = True
                         d.start()
-                send_iot_box_device()
+                        send_iot_box_device()
             time.sleep(3)
 
 def send_iot_box_device():
@@ -258,19 +259,52 @@ def send_iot_box_device():
                     ips = conf.get('addr')
                     break
 
-        data = {}
         devicesList = {}
         for path in drivers:
             lsusb = str(subprocess.check_output('lsusb')).split("\\n")
-            for usbtre in lsusb:
+            for usbpath in lsusb:
                 device = drivers[path].dev
-                if "%04x:%04x" % (device.idVendor, device.idProduct) in usbtre:
-                    name = usbtre.split("%04x:%04x" % (device.idVendor, device.idProduct))
-                    devicesList["%04x:%04x" % (device.idVendor, device.idProduct)] = name[1]
+                if "%04x:%04x" % (device.idVendor, device.idProduct) in usbpath:
+                    name = usbpath.split("%04x:%04x" % (device.idVendor, device.idProduct))
+                    devicesList["%04x:%04x" % (device.idVendor, device.idProduct)] = {
+                                                                                        'name': name[1],
+                                                                                        'device_connection': 'usb',
+                                                                                    }
 
+        printerList = {}
+        printers = subprocess.check_output("sudo lpinfo -l -v", shell=True).decode('utf-8').split('Device')
+        x = 0
+        for printer in printers:
+            printerTab = printer.split('\n')
+            if printer and printerTab[4].split('=')[1] != ' ':
+                device_connection = printerTab[1].split('= ')[1]
+                name = printerTab[2].split('= ')[1]
+                serial = re.sub('[^a-zA-Z0-9 ]+', '', name).replace(' ','_')
+                if device_connection == 'direct':
+                    identifier = serial + '_' + mac[9]  #name + macIOTBOX
+                elif (device_connection == 'network') and ( 'socket' in printerTab[0]):
+                    socketIP = printerTab[0].split('://')[1]
+                    arp = str(subprocess.check_output("arp -a " + socketIP, shell=True))
+                    macprinter = arp.split(' ')
+                    identifier = serial + '_' + macprinter[2]  #name + macPRINTER
+                else:
+                    uuid = printerTab[0].split('=')[2]
+                    identifier = serial + '_' + uuid  #name + uuid
+
+                printerList[x] = {
+                                    'name': name,
+                                    'identifier': identifier,
+                                    'device_connection': device_connection,
+                }
+                # install these printers
+                # sudo lpadmin -p 'printer_name' -E -v 'url'
+                x += 1
+
+        data = {}
         hostname = subprocess.check_output('hostname').decode('utf-8')
         data['iotbox'] = {'name': hostname,'identifier': mac[9], 'ip': ips}
         data['devices'] = devicesList
+        data['printers'] = printerList
         data_json = json.dumps(data).encode('utf8')
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
         req = request.Request(url, data_json, headers)
