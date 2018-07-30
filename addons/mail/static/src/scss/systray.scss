@@ -1,6 +1,5 @@
 // Systray icon and dropdown
 .o_mail_systray_item {
-    direction: ltr;
     > a {
         opacity: 1;
         > i {
@@ -28,6 +27,7 @@
         font-size: 0.7em;
     }
     .o_mail_systray_dropdown {
+        direction: ltr;
         width: 350px;
         padding: 0;
 
