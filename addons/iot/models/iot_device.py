@@ -11,6 +11,19 @@ class IotDevice(models.Model):
     name = fields.Char('Name')
     identifier = fields.Char(string='Serial Number')
     last_message_date = fields.Datetime('Last Message', compute="_compute_last_message")
+    device_type = fields.Selection([
+        ('device', 'Device'),
+        ('printer', 'Printer'),
+        ('camera', 'Camera'),
+        ('pedal', 'Pedal')
+        ], default='device',
+        help="Type of device.")
+    device_connection = fields.Selection([
+        ('network', 'Network'),
+        ('direct', 'USB'),
+        ('bluetooht', 'Bluetooht')
+        ],
+        help="Type of connection.")
 
     def _compute_last_message(self):
         for device in self:

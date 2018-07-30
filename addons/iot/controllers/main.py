@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# import logging
+import logging
 #import os
 #import re
 #import time
@@ -35,13 +35,32 @@ class IoTController(http.Controller):
                 existing_box[0].name = data['iotbox']['name']
             if 'devices' in data.keys():
                 for device in data['devices'].keys():
-                    existing_devices = request.env['iot.device'].sudo().search([('iot_id.identifier', '=', data['iotbox']['identifier']),('identifier', '=', device)])
+                    existing_devices = request.env['iot.device'].sudo().search([('iot_id.identifier', '=', data['iotbox']['identifier']),
+                        ('identifier', '=', device)])
                     if not existing_devices:
                         box = request.env['iot.box'].sudo().search([('identifier', '=', data['iotbox']['identifier'])], limit=1)
                         request.env['iot.device'].sudo().create({
                             'iot_id': box.id, #Might return error code when not successful
-                            'name': data['devices'][device],
+                            'name': data['devices'][device]['name'],
                             'identifier': device,
+                            'device_type': 'device',
+                            'device_connection': data['devices'][device]['device_connection'],
                         })
+            if 'printers' in data.keys():
+                for printer in data['printers'].keys():
+                    existing_printers = request.env['iot.device'].sudo().search([('identifier', '=', data['printers'][printer]['identifier'])])
+                    if not existing_printers:
+                        box = request.env['iot.box'].sudo().search([('identifier', '=', data['iotbox']['identifier'])], limit=1)
+                        request.env['iot.device'].sudo().create({
+                            'iot_id': box.id, #Might return error code when not successful
+                            'name': data['printers'][printer]['name'],
+                            'identifier': data['printers'][printer]['identifier'],
+                            'device_type': 'printer',
+                            'device_connection': data['printers'][printer]['device_connection'],
+                        })
+                    else:
+                        existing_printers[0].name = data['printers'][printer]['name']
+
+
 
         return 'ok'
