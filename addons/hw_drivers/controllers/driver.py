@@ -11,8 +11,9 @@ import netifaces as ni
 import json
 import re
 from odoo import http
-from urllib import request, parse
+import urllib3
 from odoo.http import request as httprequest
+
 from uuid import getnode as get_mac
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
@@ -318,12 +319,14 @@ def send_iot_box_device():
         data['printers'] = printerList
         data_json = json.dumps(data).encode('utf8')
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-        req = request.Request(url, data_json, headers)
+        http = urllib3.PoolManager()
         try:
-            response = request.urlopen(req)
+            req = http.request('POST',
+                                url,
+                                body=data_json,
+                                headers=headers)
         except:
             _logger.warning('Could not reach configured server')
-
 
 udm = USBDeviceManager()
 udm.daemon = True
