@@ -309,7 +309,7 @@ def send_iot_box_device():
                                     'device_connection': device_connection,
                 }
                 # install these printers
-                # sudo lpadmin -p 'printer_name' -E -v 'url'
+                subprocess.call("sudo lpadmin -p '" + identifier + "' -E -v '" + printerTab[0].split('= ')[1] + "'", shell=True)
                 x += 1
 
         data = {}
