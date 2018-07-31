@@ -33,3 +33,15 @@ class IotDevice(models.Model):
     @api.depends('iot_id.name', 'name')
     def name_get(self):
         return [(i.id, i.iot_id.name + " " + i.name) for i in self]
+
+
+class IrActionReport(models.Model):
+    _inherit = 'ir.actions.report'
+
+    device_id = fields.Many2one('iot.device', string='IoT Device', help='When setting a device here, the report will be printed through this device on the iotbox') #TODO: domain for printers?
+
+    def iot_render(self, res_ids, data=None):
+        device = self.mapped('device_id')[0]
+        composite_url = "http://" + device.iot_id.ip + ":8069/driveraction/" + device.identifier
+        datas = self.render(res_ids, data=data)
+        return composite_url, datas

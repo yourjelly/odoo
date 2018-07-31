@@ -12,6 +12,7 @@ import json
 import re
 from odoo import http
 from urllib import request, parse
+from odoo.http import request as httprequest
 from uuid import getnode as get_mac
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
@@ -38,7 +39,17 @@ class StatusController(http.Controller):
                 result = 'device not found'
         return result
 
-
+    @http.route('/driveraction/<string:identifier>', type='json', auth='none', cors='*', csrf=False)
+    def driveraction(self, identifier):
+        data = httprequest.jsonrequest
+        result = 'device not found'
+        for path in drivers:
+            if identifier in path:
+                action=False
+                drivers[path].action(action)
+                #print(data)
+                result = 'ok'
+        return result
 
     @http.route('/send_iot_box', type='http', auth='none', cors='*')
     def send_iot_box(self):

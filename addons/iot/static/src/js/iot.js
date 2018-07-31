@@ -58,7 +58,47 @@ var IotFieldFloat = FieldFloat.extend({
         //    self.$input.value =
     }
 
+
+
+})
+registry.add('iot', IotFieldFloat);
+
+var ActionManager = require('web.ActionManager');
+ActionManager.include({
+    _executeReportAction: function (action, options) {
+        if (action.device_id) {
+        // Call new route that sends you report to send to printer
+            console.log('In case you would have defined a device');
+            var self = this;
+            self.action=action;
+            this._rpc({model: 'ir.actions.report',
+                       method: 'iot_render',
+                       args: [action.id, action.context.active_ids]
+                      }).then(function (result) {
+                        var data = {action: 'print',
+                                    type: result[1][1],
+                                    data: result[1][0]};
+                        $.ajax({ //code from hw_screen pos
+                            type: 'POST',
+                            url: result[0],
+                            dataType: 'json',
+                            beforeSend: function(xhr){xhr.setRequestHeader('Content-Type', 'application/json');},
+                            data: JSON.stringify(data),
+                            success: function(data) {
+                                console.log('success!');
+                            }});
+                        });
+            return this._super.apply(this, arguments); //if we still want the download
+        }
+        else {
+            return this._super.apply(this, arguments);
+        }
+    }
 })
 
-registry.add('iot', IotFieldFloat);
+
+
+
 });
+
+

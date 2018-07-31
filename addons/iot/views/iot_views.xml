@@ -127,6 +127,17 @@
         </field>
     </record>
 
+    <record id="act_report_xml_view_iot" model="ir.ui.view">
+        <field name="name">ir.actions.report.iot</field>
+        <field name="model">ir.actions.report</field>
+        <field name="inherit_id" ref="base.act_report_xml_view"/>
+         <field name="arch" type="xml">
+            <field name="report_type" position="after">
+                <field name="device_id"/>
+            </field>
+         </field>
+    </record>
+
     <record id="iot_box_action" model="ir.actions.act_window">
         <field name="name">Iot Boxes</field>
         <field name="res_model">iot.box</field>
