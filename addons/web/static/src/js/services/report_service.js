@@ -20,7 +20,6 @@ var ReportService = AbstractService.extend({
      *   (possible values are 'ok', 'broken', 'install', 'upgrade', 'workers').
      */
     checkWkhtmltopdf: function () {
-        debugger;
         if (!this.wkhtmltopdfState) {
             this.wkhtmltopdfState = this._rpc({
                 route:'/report/check_wkhtmltopdf'
