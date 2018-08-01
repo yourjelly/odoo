@@ -44,12 +44,9 @@ class StatusController(http.Controller):
     def driveraction(self, identifier):
         data = httprequest.jsonrequest
         result = 'device not found'
-        for path in drivers:
-            if identifier in path:
-                action=False
-                drivers[path].action(action)
-                #print(data)
-                result = 'ok'
+        if data.get('action') == 'print':
+            subprocess.call("echo " + data['data'] + " | base64 -d | lp -d " + identifier, shell=True)
+            result = 'ok'
         return result
 
     @http.route('/send_iot_box', type='http', auth='none', cors='*')
@@ -300,7 +297,7 @@ def send_iot_box_device():
                     macprinter = arp.split(' ')
                     identifier = serial + '_' + macprinter[2]  #name + macPRINTER
                 else:
-                    uuid = printerTab[0].split('=')[2]
+                    uuid = "test" #uuid = printerTab[0].split('=')[2]
                     identifier = serial + '_' + uuid  #name + uuid
 
                 printerList[x] = {
