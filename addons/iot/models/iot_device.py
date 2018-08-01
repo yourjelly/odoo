@@ -1,5 +1,5 @@
 from odoo import api, fields, models, exceptions
-
+import base64
 
 # ----------------------------------------------------------
 # Models for client
@@ -44,4 +44,7 @@ class IrActionReport(models.Model):
         device = self.mapped('device_id')[0]
         composite_url = "http://" + device.iot_id.ip + ":8069/driveraction/" + device.identifier
         datas = self.render(res_ids, data=data)
-        return composite_url, datas
+        type = datas[1]
+        data_bytes = datas[0]
+        data_base64 = base64.b64encode(data_bytes)
+        return composite_url, type, data_base64

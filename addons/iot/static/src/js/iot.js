@@ -76,8 +76,8 @@ ActionManager.include({
                        args: [action.id, action.context.active_ids]
                       }).then(function (result) {
                         var data = {action: 'print',
-                                    type: result[1][1],
-                                    data: result[1][0]};
+                                    type: result[1],
+                                    data: result[2]};
                         $.ajax({ //code from hw_screen pos
                             type: 'POST',
                             url: result[0],
