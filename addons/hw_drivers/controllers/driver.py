@@ -281,7 +281,7 @@ def send_iot_box_device():
                                                                                     }
 
         printerList = {}
-        printers = subprocess.check_output("sudo lpinfo -l -v", shell=True).decode('utf-8').split('Device')
+        printers = subprocess.check_output("sudo lpinfo -lv", shell=True).decode('utf-8').split('Device')
         x = 0
         for printer in printers:
             printerTab = printer.split('\n')
@@ -289,6 +289,7 @@ def send_iot_box_device():
                 device_connection = printerTab[1].split('= ')[1]
                 name = printerTab[2].split('= ')[1]
                 serial = re.sub('[^a-zA-Z0-9 ]+', '', name).replace(' ','_')
+                identifier = ''
                 if device_connection == 'direct':
                     identifier = serial + '_' + mac[9]  #name + macIOTBOX
                 elif (device_connection == 'network') and ( 'socket' in printerTab[0]):
@@ -296,18 +297,28 @@ def send_iot_box_device():
                     arp = str(subprocess.check_output("arp -a " + socketIP, shell=True))
                     macprinter = arp.split(' ')
                     identifier = serial + '_' + macprinter[2]  #name + macPRINTER
-                else:
+                elif device_connection == 'network' and 'dnssd' in printerTab[0]:
                     uuid = "test" #uuid = printerTab[0].split('=')[2]
                     identifier = serial + '_' + uuid  #name + uuid
 
-                printerList[x] = {
-                                    'name': name,
-                                    'identifier': identifier,
-                                    'device_connection': device_connection,
-                }
-                # install these printers
-                subprocess.call("sudo lpadmin -p '" + identifier + "' -E -v '" + printerTab[0].split('= ')[1] + "'", shell=True)
-                x += 1
+                if identifier:
+                    printerList[x] = {
+                                        'name': name,
+                                        'identifier': identifier,
+                                        'device_connection': device_connection,
+                    }
+                    # install these printers
+                    for device_id in printerTab[4].split('= ')[1].split(';'):
+                        if ('MDL' or 'MODEL') in device_id:
+                            try:
+                                ppd = subprocess.check_output("sudo lpinfo -m |grep '" + device_id.split(':')[1] + "'", shell=True).decode('utf-8').split('\n')
+                                if len(ppd) > 2:
+                                    subprocess.call("sudo lpadmin -p '" + identifier + "' -E -v '" + printerTab[0].split('= ')[1] + "'", shell=True)
+                                else:
+                                    subprocess.call("sudo lpadmin -p '" + identifier + "' -E -v '" + printerTab[0].split('= ')[1] + "' -m '" + ppd[0].split(' ')[0] + "'", shell=True)
+                        else:
+                            subprocess.call("sudo lpadmin -p '" + identifier + "' -E -v '" + printerTab[0].split('= ')[1] + "'", shell=True)
+                    x += 1
 
         data = {}
         hostname = subprocess.check_output('hostname').decode('utf-8')
