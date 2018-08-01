@@ -38,7 +38,9 @@
                 <th t-if="display_cess" class="text-right">CESS</th>
             </t>
         </xpath>
-
+        <xpath expr="//td[@name='account_invoice_line_name']" position="inside">
+            <t t-if="line.product_id.l10n_in_hsn_code"><h6><strong class="ml16">HSN/SAC Code:</strong> <span t-field="line.product_id.l10n_in_hsn_code"/></h6></t>
+        </xpath>
         <xpath expr="//t[@name='account_invoice_line_accountable']" position="inside">
             <td>
               <span t-if="line.product_id.l10n_in_hsn_code" t-field="line.product_id.l10n_in_hsn_code"></span>
