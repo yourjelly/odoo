@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <menuitem name='Lunch' id='menu_lunch' sequence="105" web_icon="lunch,static/description/icon.png"/>
+        <menuitem name="Configuration" id="menu_lunch_config" parent="menu_lunch" sequence="99"/>
+    </data>
+</odoo>

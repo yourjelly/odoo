@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="lunch_location_tree" model="ir.ui.view">
+            <field name="name">Location Tree</field>
+            <field name="model">res.partner</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name='name' />
+                    <field name='company_id' />
+                    <field name='user_ids' />
+                </tree>
+            </field>
+        </record>
+
+        <record id="lunch_location_form" model="ir.ui.view">
+            <field name="name">Location Form</field>
+            <field name="model">res.partner</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name='name' />
+                            <field name='company_id' />
+                            <field name='user_ids' />
+                            <field name='supplier_ids' />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        
+        <record id="lunch_location_action" model="ir.actions.act_window">
+            <field name="name">Locations</field>
+            <field name="res_model">res.partner</field>
+            <field name="domain">[('is_work_location', '=', True)]</field>
+            <field 
+                name="view_ids" 
+                eval="[
+                    (5, 0, 0),
+                    (0, 0, {'view_mode': 'tree', 'view_id': ref('lunch_location_tree')}),
+                    (0, 0, {'view_mode': 'form', 'view_id': ref('lunch_location_form')})
+                ]"
+            />
+            <field name="view_mode">kanban,tree,form</field>
+        </record>
+
+       <menuitem name="Locations" id="lunch_location_menu" parent="menu_lunch_config" action="lunch_location_action"/>
+    </data>
+</odoo>

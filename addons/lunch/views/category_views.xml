@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="lunch_product_category_action" model="ir.actions.act_window">
+            <field name="name">Product Categories</field>
+            <field name="res_model">lunch.product.category</field>
+            <field name="view_mode">kanban,form</field>
+        </record>
+
+        <menuitem name="Product Categories" id='lunch_product_category_menu' parent='menu_lunch_config' action='lunch_product_category_action'/>
+    </data>
+</odoo>
