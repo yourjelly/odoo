@@ -18,7 +18,6 @@ class IrActionsReport(models.Model):
         # OVERRIDE
         # Embed the Factur-x xml file inside the invoice report document.
         if record._name == 'account.invoice' and record.type in ('out_invoice', 'out_refund') and record.state != 'draft':
-            xml_filename = record._get_facturx_export_filename()
             xml_content = record._export_as_facturx_xml()
 
             # Create pdf metadata.
@@ -35,11 +34,13 @@ class IrActionsReport(models.Model):
             }
 
             # Add attachment.
-            writer = pdf.OdooPdfFileWriter(reader=PdfFileReader(buffer), metadata=pdf_metadata)
-            writer.addAttachments([{'filename': xml_filename, 'content': xml_content, 'subtype': '/text#2Fxml'}])
+            writer = pdf.OdooPdfFileWriter(reader=pdf.OdooPdfFileReader(buffer), metadata=pdf_metadata)
+            writer.addAttachments([{'filename': 'factur-x.xml', 'content': xml_content, 'subtype': '/text#2Fxml'}])
 
             # Add attachment metadata.
-            facturx_metadata = self.env.ref('account_invoice_import.embedded_facturx_file_metadata').render({'metadata': writer.getMetadata()})
+            facturx_metadata = self.env.ref('account_facturx.embedded_facturx_file_metadata').render({'metadata': writer.getMetadata()})
+            facturx_metadata = u'<?xpacket begin="\ufeff" id="W5M0MpCehiHzreSzNTczkc9d"?>%s<?xpacket end="w"?>'.encode('utf-8') % facturx_metadata
+
             writer.addAttachmentsMetadata(facturx_metadata, subtype='/XML')
 
             buffer = io.BytesIO()
