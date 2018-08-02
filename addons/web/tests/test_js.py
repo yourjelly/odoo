@@ -12,7 +12,7 @@ class WebSuite(odoo.tests.HttpCase):
 
     def test_01_js(self):
         # webclient desktop test suite
-        self.phantom_js('/web/tests?mod=web&failfast', "", "", login='admin', timeout=1800)
+        self.phantom_js('/web/tests?mod=web&failfast', "", "", login='admin', timeout=50000)
 
     def test_02_js(self):
         # webclient mobile test suite
