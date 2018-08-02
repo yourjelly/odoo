@@ -1088,7 +1088,7 @@
                                 </div>
                             </t>
                             <div class="clearfix" />
-                            <div>
+                            <div class="mt-2">
                                 <a role="button" href="/shop/cart" class="btn btn-secondary mb32">
                                     <span class="fa fa-chevron-left" /> Return to Cart</a>
                                 <a role="button" class="btn btn-primary float-right mb32 " href="/shop/confirm_order">Confirm <span class="fa fa-chevron-right" /></a>
