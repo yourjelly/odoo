@@ -47,6 +47,10 @@ class StatusController(http.Controller):
         if data.get('action') == 'print':
             subprocess.call("echo " + data['data'] + " | base64 -d | lp -d " + identifier, shell=True)
             result = 'ok'
+        if data.get('action') == 'camera':
+            subprocess.call("fswebcam /tmp/testimage", shell=True)
+            image_bytes = subprocess.check_output('cat /tmp/testimage | base64',shell=True)
+            result = {'image': image_bytes}
         return result
 
     @http.route('/send_iot_box', type='http', auth='none', cors='*')
