@@ -254,7 +254,6 @@ class USBDeviceManager(Thread):
 
 def send_iot_box_device():
     maciotbox = subprocess.check_output("/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5}", shell=True).decode('utf-8')
-    #macline = subprocess.check_output("/sbin/ifconfig eth0 |grep 'ether '", shell=True).decode('utf-8')
     server = "" # read from file
     f = open('/home/pi/odoo-remote-server.conf', 'r')
     for line in f:
@@ -281,7 +280,7 @@ def send_iot_box_device():
                     name = usbpath.split("%04x:%04x" % (device.idVendor, device.idProduct))
                     devicesList["%04x:%04x" % (device.idVendor, device.idProduct)] = {
                                                                                         'name': name[1],
-                                                                                        'device_connection': 'usb',
+                                                                                        'device_connection': 'direct',
                                                                                     }
 
         printerList = {}
@@ -298,12 +297,12 @@ def send_iot_box_device():
                     identifier = serial + '_' + maciotbox  #name + macIOTBOX
                 elif device_connection == 'network' and 'socket' in printerTab[0]:
                     socketIP = printerTab[0].split('://')[1]
-                    macprinter = str(subprocess.check_output("arp -a " + socketIP + " |awk NR==1'{print $4}'", shell=True))
+                    macprinter = subprocess.check_output("arp -a " + socketIP + " |awk NR==1'{print $4}'", shell=True).decode('utf-8')
                     identifier = serial + '_' + macprinter  #name + macPRINTER
                 elif device_connection == 'network' and 'dnssd' in printerTab[0]:
-                    hostname_printer = "test" # ippfind -n 'DCP-7065DN' | awk '{split($0,a,"/"); print a[3]}' | awk '{split($0,b,":"); print b[1]}'
-                    uuid = "test" #uuid = printerTab[0].split('=')[2]
-                    identifier = serial + '_' + uuid  #name + uuid
+                    hostname_printer = subprocess.check_output("ippfind -n '" + name + "' | awk '{split($0,a,"/"); print a[3]}' | awk '{split($0,b,":"); print b[1]}'", shell=True).decode('utf-8')
+                    macprinter = subprocess.check_output("arp -a " + hostname_printer + " |awk NR==1'{print $4}'", shell=True).decode('utf-8')
+                    identifier = serial + '_' + macprinter  #name + macprinter
 
                 if identifier:
                     printerList[x] = {
