@@ -7,7 +7,6 @@ export HOME=/tmp
 URL_LOCAL='http://localhost:8069/point_of_sale/display'
 
 maciotbox=$(/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5})
-#maciotbox=$(/sbin/ifconfig eth0 |grep 'ether ' | awk '{split($0, a, " "); print a[2]}')
 
 if [ -e /home/pi/odoo-remote-server.conf ]
 then
