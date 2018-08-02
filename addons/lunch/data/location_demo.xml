@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id='location_1' model='res.partner'>
+            <field name='name' eval="'Brussels'" />
+            <field name="is_work_location" eval="True" />
+            <field name="company_id" ref="base.main_company" />
+        </record>
+        <record id='location_2' model='res.partner'>
+            <field name='name' eval="'Grand Rosiere'" />
+            <field name="is_work_location" eval="True" />
+            <field name="company_id" ref="base.main_company" />
+        </record>
+        <record id='location_3' model='res.partner'>
+            <field name='name' eval="'Hong Kong'" />
+            <field name="is_work_location" eval="True" />
+            <field name="company_id" ref="base.main_company" />
+        </record>
+        <record id='location_4' model='res.partner'>
+            <field name='name' eval="'Location 4'" />
+            <field name="is_work_location" eval="True" />
+            <field name="company_id" ref="other_company" />
+        </record>
+    </data>
+</odoo>

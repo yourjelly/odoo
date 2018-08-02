@@ -1,27 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record id="lunch_company_form" model="ir.ui.view">
-            <field name="name">Company Form</field>
+       <record id="company_tree_view" model="ir.ui.view">
+            <field name="name">company form</field>
+            <field name="model">res.company</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name" />
+                    <field name="location_ids" />
+                </tree>
+            </field>
+        </record> 
+
+        <record id="company_form_view" model="ir.ui.view">
+            <field name="name">company form</field>
             <field name="model">res.company</field>
             <field name="arch" type="xml">
                 <form>
                     <sheet>
                         <group>
-                            <field name='name' />
-                            <field name='location_ids' />
+                            <field name="name" />
+                            <field name="location_ids" widget="many2many" />
                         </group>
                     </sheet>
                 </form>
             </field>
         </record>
 
-        <record id="lunch_company_action" model="ir.actions.act_window">
+        <record id="company_action" model="ir.actions.act_window">
             <field name="name">Companies</field>
             <field name="res_model">res.company</field>
+            <field 
+                name="view_ids" 
+                eval="[
+                    (5, 0, 0),
+                    (0, 0, {'view_mode': 'tree', 'view_id': ref('company_tree_view')}),
+                    (0, 0, {'view_mode': 'form', 'view_id': ref('company_form_view')})
+                ]"
+            />
             <field name="view_mode">kanban,tree,form</field>
         </record>
-        
-        <menuitem name="Company" id="lunch_company_menu" parent="menu_lunch_config" action="lunch_company_action"/>
     </data>
 </odoo>

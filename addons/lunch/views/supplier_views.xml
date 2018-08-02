@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record id="lunch_supplier_action" model="ir.actions.act_window">
+        <record id="supplier_action" model="ir.actions.act_window">
             <field name="name">Suppliers</field>
             <field name="res_model">lunch.supplier</field>
-            <field name="view_mode">kanban,tree,form</field>
+            <field name="view_mode">tree,kanban,form</field>
         </record>
-
-        <menuitem name="Suppliers" id="lunch_supplier_menu" parent="menu_lunch_config" action="lunch_supplier_action"/>
     </data>
 </odoo>

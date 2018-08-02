@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record id="lunch_user_form" model="ir.ui.view">
+        <record id="user_form_view" model="ir.ui.view">
             <field name="name">User Form</field>
             <field name="model">res.users</field>
             <field name="arch" type="xml">
@@ -9,6 +9,7 @@
                     <sheet>
                         <group>
                             <field name='name' />
+                            <field name='company_id' />
                             <field name='location_id' />
                         </group>
                     </sheet>
@@ -16,7 +17,7 @@
             </field>
         </record>
 
-        <record id="lunch_user_tree" model="ir.ui.view">
+        <record id="user_tree_view" model="ir.ui.view">
             <field name="name">Users List</field>
             <field name="model">res.users</field>
             <field name="arch" type="xml">
@@ -27,20 +28,18 @@
             </field>
         </record>
 
-        <record id="lunch_user_action" model="ir.actions.act_window">
+        <record id="user_action" model="ir.actions.act_window">
             <field name="name">Users</field>
             <field name="res_model">res.users</field>
             <field 
                 name="view_ids" 
                 eval="[
                     (5, 0, 0),
-                    (0, 0, {'view_mode': 'tree', 'view_id': ref('lunch_user_tree')}),
-                    (0, 0, {'view_mode': 'form', 'view_id': ref('lunch_user_form')})
+                    (0, 0, {'view_mode': 'tree', 'view_id': ref('user_tree_view')}),
+                    (0, 0, {'view_mode': 'form', 'view_id': ref('user_form_view')})
                 ]"
             />
             <field name="view_mode">kanban,tree,form</field>
         </record>
-        
-        <menuitem name="User" id="lunch_user_menu" parent="menu_lunch_config" action="lunch_user_action"/>
     </data>
 </odoo>

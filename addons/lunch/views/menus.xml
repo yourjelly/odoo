@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Icon menu -->
+        <menuitem 
+            name='Lunch' 
+            id='lunch_app_menu' 
+            sequence="105" 
+            web_icon="lunch,static/description/icon.png"
+        />
+
+        <!-- Configuration - Top menu -->
+        <menuitem 
+            name="Configuration" 
+            id="configuration_top_menu" 
+            parent="lunch_app_menu" 
+            sequence="99"
+        />
+            <!-- Configuration - Sub menus -->
+            <menuitem 
+                name="Product Categories" 
+                id="product_category_menu" 
+                parent="configuration_top_menu" 
+                action="product_category_action" 
+                groups="group_lunch_manager"
+                sequence="22"
+            />
+            <menuitem 
+                name="Company" 
+                id="company_menu" 
+                parent="configuration_top_menu" 
+                action="company_action"
+                sequence="24"
+            />
+            <menuitem 
+                name="Locations" 
+                id="location_menu" 
+                parent="configuration_top_menu" 
+                action="location_action"
+                sequence="23"
+            />
+            <menuitem 
+                name="Products" 
+                id="product_menu" 
+                parent="configuration_top_menu" 
+                action="product_action"
+                sequence="21"
+            />
+            <menuitem 
+                name="Suppliers" 
+                id="supplier_menu" 
+                parent="configuration_top_menu" 
+                action="supplier_action"
+                sequence="20"
+            />
+            <menuitem 
+                name="Users" 
+                id="user_menu" 
+                parent="configuration_top_menu" 
+                action="user_action"
+                sequence="25"
+            />
+
+        <!--  -->
+    </data>
+</odoo>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="supplier_coin_gourmand" model="lunch.supplier">
+            <field name="name">Coin gourmand</field>
+            <field name="location_ids" eval="[(4, ref('location_1'))]" />
+        </record>
+        <record id="supplier_coin_gourmand" model="lunch.supplier">
+            <field name="location_ids" eval="[(4, ref('location_2'))]" />
+        </record>
+
+        <record id="supplier_pizza_inn" model="lunch.supplier">
+            <field name="name">Pizza Inn</field>
+            <field name="location_ids" eval="[(4, ref('location_2'))]" />
+        </record>
+    </data>
+</odoo>

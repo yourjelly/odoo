@@ -1,30 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
-
-        <!-- <record id="base.user_demo" model="res.users">
-            <field name="groups_id" eval="[(4, ref('lunch.group_lunch_user'))]"/>
-        </record> -->
-
-        <record model="lunch.product.category" id="categ_sandwich">
-            <field name="name">Sandwich</field>
-        </record>
-
-        <record model="lunch.product.category" id="categ_pizza">
-            <field name="name">Pizza</field>
-        </record>
-
-        <record model="lunch.product.category" id="categ_pasta">
-            <field name="name">Pasta</field>
-        </record>
-
-        <record model="lunch.supplier" id="supplier_coin_gourmand">
-            <field name="name">Coin gourmand</field>
-        </record>
-
-        <record model="lunch.supplier" id="supplier_pizza_inn">
-            <field name="name">Pizza Inn</field>
-        </record>
+    <data noupdate="0">
 
         <record model="lunch.product" id="product_cheese_ham">
             <field name="name">Cheese And Ham</field>

@@ -1,5 +1,11 @@
 id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
-product_manager,"Product user",model_lunch_product,group_lunch_manager,1,1,1,1
-product_category_manager,"Product category user",model_lunch_product_category,group_lunch_manager,1,1,1,1
-product_user,"Product user",model_lunch_product,group_lunch_user,1,0,0,0
-product_category_user,"Product category user",model_lunch_product_category,group_lunch_user,1,0,0,0
+category_manager,"Category Manager",model_lunch_product_category,group_lunch_manager,1,1,1,1
+location_manager,"Location Manager",model_res_partner,group_lunch_manager,1,1,1,1
+product_manager,"Product Manager",model_lunch_product,group_lunch_manager,1,1,1,1
+supplier_manager,"Supplier Manager",model_lunch_supplier,group_lunch_manager,1,1,1,1
+user_manager,"User Manager",model_res_users,group_lunch_manager,1,1,1,1
+category_user,"Category User",model_lunch_product_category,group_lunch_user,1,0,0,0
+location_user,"Location User",model_res_partner,group_lunch_user,1,0,0,0
+product_user,"Product User",model_lunch_product,group_lunch_user,1,0,0,0
+supplier_user,"Supplier User",model_lunch_supplier,group_lunch_user,1,0,0,0
+user_user,"User User",model_res_users,group_lunch_user,1,0,0,0
