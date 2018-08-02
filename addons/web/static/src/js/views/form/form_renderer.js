@@ -483,7 +483,7 @@ var FormRenderer = BasicRenderer.extend({
             var $tds;
             if (child.tag === 'field') {
                 $tds = self._renderInnerGroupField(child);
-            } else if (child.tag === 'label') {
+            } else if (child.tag === 'label' || child.attrs.class === 'o_form_label') {
                 $tds = self._renderInnerGroupLabel(child);
             } else {
                 $tds = $('<td/>').append(self._renderNode(child));
