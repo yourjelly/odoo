@@ -253,8 +253,8 @@ class USBDeviceManager(Thread):
             time.sleep(3)
 
 def send_iot_box_device():
-    macline = subprocess.check_output("/sbin/ifconfig eth0 |grep 'ether '", shell=True).decode('utf-8')
-    mac = macline.split(' ')
+    maciotbox = subprocess.check_output("/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5}", shell=True).decode('utf-8')
+    #macline = subprocess.check_output("/sbin/ifconfig eth0 |grep 'ether '", shell=True).decode('utf-8')
     server = "" # read from file
     f = open('/home/pi/odoo-remote-server.conf', 'r')
     for line in f:
@@ -295,13 +295,13 @@ def send_iot_box_device():
                 serial = re.sub('[^a-zA-Z0-9 ]+', '', name).replace(' ','_')
                 identifier = ''
                 if device_connection == 'direct':
-                    identifier = serial + '_' + mac[9]  #name + macIOTBOX
-                elif (device_connection == 'network') and ( 'socket' in printerTab[0]):
+                    identifier = serial + '_' + maciotbox  #name + macIOTBOX
+                elif device_connection == 'network' and 'socket' in printerTab[0]:
                     socketIP = printerTab[0].split('://')[1]
-                    arp = str(subprocess.check_output("arp -a " + socketIP, shell=True))
-                    macprinter = arp.split(' ')
-                    identifier = serial + '_' + macprinter[2]  #name + macPRINTER
+                    macprinter = str(subprocess.check_output("arp -a " + socketIP + " |awk NR==1'{print $4}'", shell=True))
+                    identifier = serial + '_' + macprinter  #name + macPRINTER
                 elif device_connection == 'network' and 'dnssd' in printerTab[0]:
+                    hostname_printer = "test" # ippfind -n 'DCP-7065DN' | awk '{split($0,a,"/"); print a[3]}' | awk '{split($0,b,":"); print b[1]}'
                     uuid = "test" #uuid = printerTab[0].split('=')[2]
                     identifier = serial + '_' + uuid  #name + uuid
 
@@ -328,7 +328,7 @@ def send_iot_box_device():
 
         data = {}
         hostname = subprocess.check_output('hostname').decode('utf-8')
-        data['iotbox'] = {'name': hostname,'identifier': mac[9], 'ip': ips}
+        data['iotbox'] = {'name': hostname,'identifier': maciotbox, 'ip': ips}
         data['devices'] = devicesList
         data['printers'] = printerList
         data_json = json.dumps(data).encode('utf8')

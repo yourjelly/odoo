@@ -6,11 +6,12 @@ export HOME=/tmp
 
 URL_LOCAL='http://localhost:8069/point_of_sale/display'
 
-MAC=$(/sbin/ifconfig eth0 |grep 'ether ' | awk '{split($0, a, " "); print a[2]}')
+maciotbox=$(/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5})
+#maciotbox=$(/sbin/ifconfig eth0 |grep 'ether ' | awk '{split($0, a, " "); print a[2]}')
 
 if [ -e /home/pi/odoo-remote-server.conf ]
 then
-URL_SERVER=$(grep -r "" /home/pi/odoo-remote-server.conf)/get_url/${MAC}
+URL_SERVER=$(grep -r "" /home/pi/odoo-remote-server.conf)/get_url/${maciotbox}
 until wget -q "${URL_SERVER}" -O /dev/null; do sleep 1; done
 DISPLAY_URL=$(curl ${URL_SERVER})
 else DISPLAY_URL="${URL_LOCAL}"
