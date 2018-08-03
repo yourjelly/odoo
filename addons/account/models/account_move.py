@@ -362,6 +362,7 @@ class AccountMoveLine(models.Model):
 
     @api.depends('debit', 'credit', 'move_id.matched_percentage', 'move_id.journal_id')
     def _compute_cash_basis(self):
+        print("_compute_cash_basis (%s)" % len(self.ids))
         for move_line in self:
             if move_line.journal_id.type in ('sale', 'purchase'):
                 move_line.debit_cash_basis = move_line.debit * move_line.move_id.matched_percentage
@@ -375,8 +376,8 @@ class AccountMoveLine(models.Model):
     def _compute_tax_base_amount(self):
         for move_line in self:
             if move_line.tax_line_id:
-                base_lines = move_line.move_id.line_ids.filtered(lambda line: move_line.tax_line_id in line.tax_ids)
-                move_line.tax_base_amount = abs(sum(base_lines.mapped('balance')))
+                res = self.read_group([('move_id', '=', move_line.move_id.id), ('tax_ids', '=', move_line.tax_line_id.id)], ['balance', 'move_id'], ['move_id'])
+                move_line.tax_base_amount = abs(res[0].get('balance')) if res else 0.0
             else:
                 move_line.tax_base_amount = 0
 
@@ -1654,6 +1655,7 @@ class AccountPartialReconcile(models.Model):
         self.ensure_one()
         move_date = self.debit_move_id.date
         newly_created_move = self.env['account.move']
+        newly_created_move_lines = []
         for move in (self.debit_move_id.move_id, self.credit_move_id.move_id):
             #move_date is the max of the 2 reconciled items
             if move_date < move.date:
@@ -1708,7 +1710,7 @@ class AccountPartialReconcile(models.Model):
                         #create cash basis entry for the base
                         for tax in line.tax_ids:
                             account_id = self._get_tax_cash_basis_base_account(line, tax)
-                            self.env['account.move.line'].with_context(check_move_validity=False).create({
+                            newly_created_move_lines.append([0,0,{
                                 'name': line.name,
                                 'debit': rounded_amt > 0 and rounded_amt or 0.0,
                                 'credit': rounded_amt < 0 and abs(rounded_amt) or 0.0,
@@ -1719,8 +1721,8 @@ class AccountPartialReconcile(models.Model):
                                 'currency_id': line.currency_id.id,
                                 'amount_currency': self.amount_currency and line.currency_id.round(line.amount_currency * amount / line.balance) or 0.0,
                                 'partner_id': line.partner_id.id,
-                            })
-                            self.env['account.move.line'].with_context(check_move_validity=False).create({
+                            }])
+                            newly_created_move_lines.append([0,0,{
                                 'name': line.name,
                                 'credit': rounded_amt > 0 and rounded_amt or 0.0,
                                 'debit': rounded_amt < 0 and abs(rounded_amt) or 0.0,
@@ -1730,14 +1732,20 @@ class AccountPartialReconcile(models.Model):
                                 'currency_id': line.currency_id.id,
                                 'amount_currency': self.amount_currency and line.currency_id.round(-line.amount_currency * amount / line.balance) or 0.0,
                                 'partner_id': line.partner_id.id,
-                            })
+                            }])
         if newly_created_move:
+            newly_created_move_lines
+            to_write = {}
+            if newly_created_move_lines:
+                to_write['move_ids'] = newly_created_move_lines
             if move_date > (self.company_id.period_lock_date or '0000-00-00') and newly_created_move.date != move_date:
                 # The move date should be the maximum date between payment and invoice (in case
                 # of payment in advance). However, we should make sure the move date is not
                 # recorded before the period lock date as the tax statement for this period is
                 # probably already sent to the estate.
-                newly_created_move.write({'date': move_date})
+                to_write['date'] = move_date
+            if to_write:
+                newly_created_move.write(to_write)
             # post move
             newly_created_move.post()
 
