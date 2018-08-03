@@ -1784,14 +1784,47 @@ var ColorPickerWidget = Widget.extend({
      */
     init: function (parent, options) {
         this._super.apply(this, arguments);
-        this.colors = _.extend({hex: '#ff0000'}, options);
-        // support all colors during widget initialization use common method _onOptionChange
+        this.colors = {hex: options.defaultHex || '#FF0000'};
         this._setHexToRgb();
         this._setRgbToHsl();
     },
     start: function () {
-        this._setColorInputs();
+        this._updatePickerPosition((99 - this.colors.lightness) * 2, this.colors.saturation * 2);
+        this._updateSliderPosition();
         return this._super.apply(this, arguments);
+    },
+    _setHslToRgb: function () {
+        var colors = this.convertHslToRgb(this.colors.hue, this.colors.saturation, this.colors.lightness);
+        if (!colors) {
+            console.log("invalid");
+        }
+        _.extend(this.colors, colors);
+    },
+    _setRgbToHsl: function () {
+        var colors = this.convertRgbToHsl(this.colors.red, this.colors.green, this.colors.blue);
+        if (!colors) {
+            console.log("invalid");
+        }
+        _.extend(this.colors, colors);
+    },
+    _setHexToRgb: function () {
+        var colors = this.convertHexToRgb(this.colors.hex);
+        if (!colors) {
+            console.log("invalid");
+        }
+        _.extend(this.colors, colors);
+    },
+    _setRgbToHex: function () {
+        var colors = this.convertRgbToHex(this.colors.red, this.colors.green, this.colors.blue);
+        if (!colors) {
+            console.log("invalid");
+        }
+        _.extend(this.colors, colors);
+    },
+    _updateValues: function () {
+        this._setHslToRgb();
+        this._setRgbToHex();
+        this._setColorInputs();
     },
     _setColorInputs: function () {
         var self = this;
@@ -1800,27 +1833,37 @@ var ColorPickerWidget = Widget.extend({
         });
         this.$('.o-color-preview').css('background-color', '#' + this.colors.hex);
         // TODO
-        this._updatePointerPosition((99-this.colors.lightness) * 2, this.colors.saturation * 2);
+        this._updatePickerPosition((99 - this.colors.lightness) * 2, this.colors.saturation * 2);
         this._updateSliderPosition();
     },
-    _isValidRGBValue: function (value) {
-        return (typeof(value) === 'number' && isNaN(value) === false && value >= 0 && value <= 255);
+    //--------------------------------------------------------------------------
+    // Latest
+    //--------------------------------------------------------------------------
+    _isValidRgbValue: function (value) {
+        return typeof(value) === 'number' && isNaN(value) === false && value >= 0 && value <= 255;
     },
-    setRGB: function (red, green, blue) {
-        // Display warning for wrong input value
-        if (!this._isValidRGBValue(red) || !this._isValidRGBValue(green) || !this._isValidRGBValue(blue)) {
-            return;
+    _isValidRgbValues: function (r, g, b) {
+        return this._isValidRgbValue(r) && this._isValidRgbValue(g) && this._isValidRgbValue(b);
+    },
+    _isValidHslValue: function (value) {
+        return typeof(value) === 'number' && isNaN(value) === false && value >= 0 && value <= 360;
+    },
+    _isValidHslValues: function (h, s, l) {
+        return typeof(h) === 'number' && isNaN(h) === false && h >= 0 && h <= 360 &&
+                typeof(s) === 'number' && isNaN(s) === false && s >= 0 && s <= 100 &&
+                typeof(l) === 'number' && isNaN(l) === false && l >= 0 && l <= 100;
+    },
+    _isValidHexValue: function (hex) {
+        return /(^#[0-9A-F]{6}$)|(^#{0,1}[0-9A-F]{3}$)/i.test(hex);
+    },
+    convertHslToRgb: function (hsl) {
+        if (!this._isValidHslValues(h, s, l)) {
+            return false;
         }
-        this.colors.red = red || 0;
-        this.colors.green = green || 0;
-        this.colors.blue = blue || 0;
-    },
-    // calculation based on this https://en.wikipedia.org/wiki/HSL_and_HSV#Converting_to_RGB
-    _setHslToRgb: function () {
-        var sat = this.colors.saturation / 100;
-        var light = this.colors.lightness / 100;
+        var sat = s / 100;
+        var light = l / 100;
         var chroma = sat * (1 - Math.abs(2 * light - 1));
-        var huePrime = this.colors.hue / 60;
+        var huePrime = h / 60;
         var secondComponent = chroma * (1 - Math.abs(huePrime % 2 - 1));
         var lightnessAdjustment = light - chroma/2;
         var precision = 255;
@@ -1828,18 +1871,33 @@ var ColorPickerWidget = Widget.extend({
         chroma = (chroma + lightnessAdjustment) * precision | 0;
         secondComponent = (secondComponent + lightnessAdjustment) * precision | 0;
         lightnessAdjustment = lightnessAdjustment * precision | 0;
-        // TO-DO
-        if (huePrime >= 0 && huePrime < 1) {this.setRGB(chroma, secondComponent, lightnessAdjustment);return; }
-        if (huePrime >= 1 && huePrime < 2) {this.setRGB(secondComponent, chroma, lightnessAdjustment);return; }
-        if (huePrime >= 2 && huePrime < 3) {this.setRGB(lightnessAdjustment, chroma, secondComponent);return; }
-        if (huePrime >= 3 && huePrime < 4) {this.setRGB(lightnessAdjustment, secondComponent, chroma);return; }
-        if (huePrime >= 4 && huePrime < 5) {this.setRGB(secondComponent, lightnessAdjustment, chroma);return; }
-        if (huePrime >= 5 && huePrime < 6) {this.setRGB(chroma, lightnessAdjustment, secondComponent);return; }
+
+        if (huePrime >= 0 && huePrime < 1) {
+            return {red: chroma, green: secondComponent, blue: lightnessAdjustment};
+        }
+        if (huePrime >= 1 && huePrime < 2) {
+            return {red: secondComponent, green: chroma, blue: lightnessAdjustment};
+        }
+        if (huePrime >= 2 && huePrime < 3) {
+            return {red: lightnessAdjustment, green: chroma, blue: secondComponent};
+        }
+        if (huePrime >= 3 && huePrime < 4) {
+            return {red: lightnessAdjustment, green: secondComponent, blue: chroma};
+        }
+        if (huePrime >= 4 && huePrime < 5) {
+            return {red: secondComponent, green: lightnessAdjustment, blue: chroma};
+        }
+        if (huePrime >= 5 && huePrime < 6) {
+            return {red: chroma, green: lightnessAdjustment, blue: secondComponent};
+        }
     },
-    _setRgbToHsl: function () {
-        var red = this.colors.red / 255;
-        var green = this.colors.green / 255;
-        var blue = this.colors.blue / 255;
+    convertRgbToHsl: function (r, g, b) {
+        if (!this._isValidRgbValues(r, g, b)) {
+            return false;
+        }
+        var red = r / 255;
+        var green = g / 255;
+        var blue = b / 255;
 
         var maxColor = Math.max(red, green, blue);
         var minColor = Math.min(red, green, blue);
@@ -1847,49 +1905,57 @@ var ColorPickerWidget = Widget.extend({
         var hue = 0;
         var saturation = 0;
         var lightness = (maxColor + minColor) / 2;
-        var X = (1 - Math.abs(2 * lightness - 1));
+        var X = 1 - Math.abs(2 * lightness - 1);
 
         if (delta) {
-            if (maxColor === red ) { hue = ((green - blue) / delta); }
-            if (maxColor === green ) { hue = 2 + (blue - red) / delta; }
-            if (maxColor === blue ) { hue = 4 + (red - green) / delta; }
-            if (maxColor) saturation = delta / X;
+            if (maxColor === red) {
+                hue = (green - blue) / delta; 
+            }
+            if (maxColor === green) {
+                hue = 2 + (blue - red) / delta;
+            }
+            if (maxColor === blue) {
+                hue = 4 + (red - green) / delta;
+            }
+            if (maxColor) {
+                saturation = delta / X;
+            }
         }
-
-        this.colors.hue = 60 * hue | 0;
-        if (this.colors.hue < 0) this.colors.hue += 360;
-        this.colors.saturation = (saturation * 100) | 0;
-        this.colors.lightness = (lightness * 100) | 0;
+        hue = 60 * hue | 0;
+        return {
+            hue: hue < 0 ? hue += 360 : hue,
+            saturation: (saturation * 100) | 0,
+            lightness: (lightness * 100) | 0,
+        };
     },
-    _setHexToRgb: function () {
-        var valid  = /(^#{0,1}[0-9A-F]{6}$)|(^#{0,1}[0-9A-F]{3}$)/i.test(this.colors.hex);
-
-        if (valid !== true)
-            return;
-
-        if (this.colors.hex[0] === '#')
-            this.colors.hex = this.colors.hex.slice(1, this.colors.hex.length);
-
-        if (this.colors.hex.length === 3)
-            this.colors.hex = this.colors.hex.replace(/([0-9A-F])([0-9A-F])([0-9A-F])/i,'$1$1$2$2$3$3');
-        this.colors.red = parseInt(this.colors.hex.substr(0, 2), 16);
-        this.colors.green = parseInt(this.colors.hex.substr(2, 2), 16);
-        this.colors.blue = parseInt(this.colors.hex.substr(4, 2), 16);
-        this.colors.hex = '#' + this.colors.hex;
+    convertHexToRgb: function (hex) {
+        if (!this._isValidHexValue(hex)) {
+            return false;
+        }
+        hex = hex.substring(1, hex.length);
+        if (hex.length === 3) {
+            hex = hex.replace(/([0-9A-F])([0-9A-F])([0-9A-F])/i, '$1$1$2$2$3$3');
+        }
+        return {
+            red: parseInt(hex.substr(0, 2), 16),
+            green: parseInt(hex.substr(2, 2), 16),
+            blue: parseInt(hex.substr(4, 2), 16),
+        };
     },
-    _updateValues: function () {
-        this._setHslToRgb();
-        this._setRgbToHex();
-        this._setColorInputs();
+    convertRgbToHex: function (r, g, b) {
+        if (!this._isValidRgbValues(r, g, b)) {
+            return false;
+        }
+        var red = r < 16 ? '0' + r.toString(16) : r.toString(16);
+        var green = g < 16 ? '0' + g.toString(16) : g.toString(16);
+        var blue = b < 16 ? '0' + b.toString(16) : b.toString(16);
+        return {hex: _.str.sprintf('#%s%s%s', red, green, blue)};
     },
-    _setRgbToHex: function () {
-        var red = this.colors.red < 16 ? '0' + this.colors.red.toString(16) : this.colors.red.toString(16);
-        var green = this.colors.green < 16 ? '0' + this.colors.green.toString(16) : this.colors.green.toString(16);
-        var blue = this.colors.blue < 16 ? '0' + this.colors.blue.toString(16) : this.colors.blue.toString(16);
-        this.colors.hex = '#' + red + green + blue;
-    },
+    //--------------------------------------------------------------------------
+    // Latest End Here
+    //--------------------------------------------------------------------------
     // [TO-DO] remove top left params set top left based on HSL value
-    _updatePointerPosition: function (top, left) {
+    _updatePickerPosition: function (top, left) {
         // restrict pointer to go out of picking area
         left = left < 0 ? 0 : left;
         top = top < 0 ? 0 : top;
@@ -1925,7 +1991,7 @@ var ColorPickerWidget = Widget.extend({
         // [TO-DO] use percentage insted of round
         this._setHSL(this.colors.hue, Math.round(left/2), Math.round((198 - top)/2));
         // [TO-DO] remove top left params form the method
-        this._updatePointerPosition(top, left);
+        this._updatePickerPosition(top, left);
         this._updateValues();
     },
     _onOptionChange: function (ev) {
@@ -1934,8 +2000,12 @@ var ColorPickerWidget = Widget.extend({
         switch (type) {
             case 'hex':
                 this.colors.hex = ev.target.value;
-                this._setHexToRgb();
-                this._setRgbToHsl();
+                var colors = this.convertHexToRgb(this.colors.hex);
+                if (!colors) {
+                    console.log("invalid");
+                } else {
+                    this.convertRgbToHsl(this.colors.red, this.colors.green, this.color.blue);
+                }
                 break;
             case 'hsl':
                 _.each(['hue', 'saturation', 'lightness'], function (color) {
@@ -1979,7 +2049,6 @@ var ColorPickerDialog = Dialog.extend({
     init: function (parent, options) {
         this._super(parent, _.extend({
             title: _t("Color Picker"),
-            size: 'medium'
         }, options || {}));
     },
     start: function () {
@@ -1987,7 +2056,7 @@ var ColorPickerDialog = Dialog.extend({
         // TODO
         this.opened().then(function () {
             self.colorPicker = new ColorPickerWidget(this, {
-                hex: '#67d2a3'
+                defaultHex: '#67d2a3'
             });
             self.colorPicker.appendTo(self.$el);
         });
