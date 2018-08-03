@@ -305,7 +305,7 @@ def send_iot_box_device():
                     identifier = serial + '_' + macprinter  #name + macPRINTER
                 elif device_connection == 'network' and 'dnssd' in printerTab[0]:
                     hostname_printer = subprocess.check_output("ippfind -n \"" + model + "\" | awk \'{split($0,a,\"/\"); print a[3]}\' | awk \'{split($0,b,\":\"); print b[1]}\'", shell=True).decode('utf-8').split('\n')[0]
-                    macprinter = subprocess.check_output("arp -a " + hostname_printer + " |awk NR==1'{print $4}'", shell=True).decode('utf-8')
+                    macprinter = subprocess.check_output("arp -a " + hostname_printer + " |awk NR==1'{print $4}'", shell=True).decode('utf-8').split('\n')[0]
                     identifier = serial + '_' + macprinter  #name + macprinter
 
                 if identifier:
