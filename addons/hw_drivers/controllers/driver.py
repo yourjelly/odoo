@@ -290,39 +290,42 @@ def send_iot_box_device():
             printerTab = printer.split('\n')
             if printer and printerTab[4].split('=')[1] != ' ':
                 device_connection = printerTab[1].split('= ')[1]
-                name = printerTab[2].split('= ')[1]
-                serial = re.sub('[^a-zA-Z0-9 ]+', '', name).replace(' ','_')
+                model = ''
+                for device_id in printerTab[4].split('= ')[1].split(';'):
+                    if ('MDL' or 'MODEL') in device_id:
+                        model = device_id.split(':')[1]
+
+                serial = re.sub('[^a-zA-Z0-9 ]+', '', model).replace(' ','_')
                 identifier = ''
                 if device_connection == 'direct':
                     identifier = serial + '_' + maciotbox  #name + macIOTBOX
                 elif device_connection == 'network' and 'socket' in printerTab[0]:
                     socketIP = printerTab[0].split('://')[1]
-                    macprinter = subprocess.check_output("arp -a " + socketIP + " |awk NR==1'{print $4}'", shell=True).decode('utf-8')
+                    macprinter = subprocess.check_output("arp -a " + socketIP + " |awk NR==1'{print $4}'", shell=True).decode('utf-8').split('\n')[0]
                     identifier = serial + '_' + macprinter  #name + macPRINTER
                 elif device_connection == 'network' and 'dnssd' in printerTab[0]:
-                    hostname_printer = subprocess.check_output("ippfind -n '" + name + "' | awk '{split($0,a,"/"); print a[3]}' | awk '{split($0,b,":"); print b[1]}'", shell=True).decode('utf-8')
+                    hostname_printer = subprocess.check_output("ippfind -n \"" + model + "\" | awk \'{split($0,a,\"/\"); print a[3]}\' | awk \'{split($0,b,\":\"); print b[1]}\'", shell=True).decode('utf-8').split('\n')[0]
                     macprinter = subprocess.check_output("arp -a " + hostname_printer + " |awk NR==1'{print $4}'", shell=True).decode('utf-8')
                     identifier = serial + '_' + macprinter  #name + macprinter
 
                 if identifier:
                     printerList[x] = {
-                                        'name': name,
+                                        'name': model,
                                         'identifier': identifier,
                                         'device_connection': device_connection,
                     }
                     # install these printers
-                    for device_id in printerTab[4].split('= ')[1].split(';'):
-                        if ('MDL' or 'MODEL') in device_id:
-                            try:
-                                ppd = subprocess.check_output("sudo lpinfo -m |grep '" + device_id.split(':')[1] + "'", shell=True).decode('utf-8').split('\n')
-                                if len(ppd) > 2:
-                                    subprocess.call("sudo lpadmin -p '" + identifier + "' -E -v '" + printerTab[0].split('= ')[1] + "'", shell=True)
-                                else:
-                                    subprocess.call("sudo lpadmin -p '" + identifier + "' -E -v '" + printerTab[0].split('= ')[1] + "' -m '" + ppd[0].split(' ')[0] + "'", shell=True)
-                            except:
-                                pass
-                        else:
-                            subprocess.call("sudo lpadmin -p '" + identifier + "' -E -v '" + printerTab[0].split('= ')[1] + "'", shell=True)
+                    if model:
+                        try:
+                            ppd = subprocess.check_output("sudo lpinfo -m |grep '" + model + "'", shell=True).decode('utf-8').split('\n')
+                            if len(ppd) > 2:
+                                subprocess.call("sudo lpadmin -p '" + identifier + "' -E -v '" + printerTab[0].split('= ')[1] + "'", shell=True)
+                            else:
+                                subprocess.call("sudo lpadmin -p '" + identifier + "' -E -v '" + printerTab[0].split('= ')[1] + "' -m '" + ppd[0].split(' ')[0] + "'", shell=True)
+                        except:
+                            pass
+                    else:
+                        subprocess.call("sudo lpadmin -p '" + identifier + "' -E -v '" + printerTab[0].split('= ')[1] + "'", shell=True)
                     x += 1
 
         data = {}
