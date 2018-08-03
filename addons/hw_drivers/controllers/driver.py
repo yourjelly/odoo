@@ -224,6 +224,7 @@ class ZebraPrinterUSBDriver(USBDriver):
 class USBDeviceManager(Thread):
     devices = {}
     def run(self):
+        sendJSON = False
         while 1:
             devs = usb.core.find(find_all=True)
             updated_devices = {}
@@ -237,7 +238,7 @@ class USBDeviceManager(Thread):
                 for path in list(drivers):
                     if (path in removed):
                         del drivers[path]
-                        send_iot_box_device()
+                        sendJSON = True
             for path in added:
                 dev = updated_devices[path]
                 for driverclass in usbdrivers:
@@ -249,8 +250,10 @@ class USBDeviceManager(Thread):
                         # launch thread
                         d.daemon = True
                         d.start()
-                        send_iot_box_device()
+                        sendJSON = True
             time.sleep(3)
+        if sendJSON:
+            send_iot_box_device()
 
 def send_iot_box_device():
     maciotbox = subprocess.check_output("/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5}", shell=True).decode('utf-8')
