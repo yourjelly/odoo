@@ -9,6 +9,21 @@ body {
 .border-black td {
     border-top: 1px solid black !important;
 }
+.row {
+    display: -webkit-box;
+}
+table {
+    > thead > tr > th {
+        text-align: left;
+    }
+}
+.float-right {
+   margin-left: 640px;
+}
+.float-left {
+    margin-left: 0px;
+}
+
 
 /* See https://github.com/wkhtmltopdf/wkhtmltopdf/issues/1524 */
 .table-sm {
