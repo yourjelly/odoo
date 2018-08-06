@@ -299,6 +299,18 @@ def send_iot_box_device():
                     except:
                         subprocess.call("sudo lpadmin -p '" + identifier + "' -E -v '" + printerTab[0].split('= ')[1] + "'", shell=True)
 
+        # Build camera JSON
+        cameraList = {}
+        cameras = subprocess.check_output("v4l2-ctl --list-devices", shell=True).decode('utf-8').split('\n\n')
+        for camera in cameras:
+            if camera:
+                camera = camera.split('\n\t')
+                serial = re.sub('[^a-zA-Z0-9 ]+', '', camera[0]).replace(' ','_')
+                cameraList[serial] = {
+                                        'name': camera[0],
+                                        'device_connectkion': 'direct'
+                                    }
+
         #build JSON with all devices
         data = {}
         hostname = subprocess.check_output('hostname').decode('utf-8').split('\n')[0]
