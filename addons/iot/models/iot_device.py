@@ -31,7 +31,7 @@ class IotDevice(models.Model):
                                                                     order='create_date desc', limit=1).create_date
 
     def name_get(self):
-        return [(i.id, i.iot_id.name + " " + i.name) for i in self]
+        return [(i.id, "[" + i.iot_id.name +"] " + i.name) for i in self]
 
 
 class IrActionReport(models.Model):
