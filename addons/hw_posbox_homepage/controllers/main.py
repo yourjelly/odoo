@@ -207,7 +207,7 @@ class PosboxHomepage(odoo.addons.web.controllers.main.Home):
                 <table>
                     <tr>
                         <td>
-                            Server IoT Name:
+                            IoTBox Name:
                         </td>
                         <td>
                             <input type="text" name="iotname" value=""" + hostname + """>
