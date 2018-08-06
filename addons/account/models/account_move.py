@@ -1734,7 +1734,6 @@ class AccountPartialReconcile(models.Model):
                                 'partner_id': line.partner_id.id,
                             }])
         if newly_created_move:
-            newly_created_move_lines
             to_write = {}
             if newly_created_move_lines:
                 to_write['move_ids'] = newly_created_move_lines
