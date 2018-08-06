@@ -145,7 +145,7 @@
                             </div>
                         </t>
                     </div>
-                    <div class="card">
+                    <div class="card mb-3">
                         <h3 class="card-header">Keep Informed</h3>
                         <div class="card-body">
                             <t t-call="website_mail.follow">
@@ -154,7 +154,7 @@
                             </t>
                         </div>
                     </div>
-                    <div class="card" id="about_forum">
+                    <div class="card mb-3" id="about_forum">
                         <h3 class="card-header">About This Community</h3>
                         <div class="card-body">
                             <span t-field="forum.description"/>
