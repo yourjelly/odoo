@@ -256,7 +256,7 @@ class USBDeviceManager(Thread):
             time.sleep(3)
 
 def send_iot_box_device():
-    maciotbox = subprocess.check_output("/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5}", shell=True).decode('utf-8')
+    maciotbox = subprocess.check_output("/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5}", shell=True).decode('utf-8').split('\n')[0]
     server = "" # read from file
     f = open('/home/pi/odoo-remote-server.conf', 'r')
     for line in f:

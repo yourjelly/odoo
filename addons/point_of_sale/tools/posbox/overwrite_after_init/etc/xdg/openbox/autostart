@@ -9,10 +9,15 @@ URL_LOCAL='http://localhost:8069/point_of_sale/display'
 maciotbox=$(/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5})
 
 if [ -e /home/pi/odoo-remote-server.conf ]
-then
-URL_SERVER=$(grep -r "" /home/pi/odoo-remote-server.conf)/get_url/${maciotbox}
-until wget -q "${URL_SERVER}" -O /dev/null; do sleep 1; done
-DISPLAY_URL=$(curl ${URL_SERVER})
+	then
+	URL_SERVER=$(grep -r "" /home/pi/odoo-remote-server.conf)/get_url/${maciotbox}
+	until wget -q "${URL_SERVER}" -O /dev/null; do sleep 1; done
+	if [ -z "${URL_SERVER}" ];
+		then
+		DISPLAY_URL=${URL_LOCAL}
+		else
+		DISPLAY_URL=$(curl ${URL_SERVER})
+		fi
 else DISPLAY_URL="${URL_LOCAL}"
 fi
 
