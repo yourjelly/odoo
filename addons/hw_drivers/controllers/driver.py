@@ -251,9 +251,9 @@ class USBDeviceManager(Thread):
                         d.daemon = True
                         d.start()
                         sendJSON = True
+            if sendJSON:
+                send_iot_box_device()
             time.sleep(3)
-        if sendJSON:
-            send_iot_box_device()
 
 def send_iot_box_device():
     maciotbox = subprocess.check_output("/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5}", shell=True).decode('utf-8')
