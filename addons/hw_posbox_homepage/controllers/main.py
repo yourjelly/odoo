@@ -54,6 +54,9 @@ index_template = """
         Wi-Fi can be configured by visiting the <a href='/wifi'>Wi-Fi configuration page</a>.
         </p>
         <p>
+        Odoo server can be configured by visiting the <a href='/server'>Server configuration page</a>.
+        </p>
+        <p>
         If you need to grant remote debugging access to a developer, you can do it <a href='/remote_connect'>here</a>.
         </p>
         %s
