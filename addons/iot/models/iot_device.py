@@ -22,7 +22,7 @@ class IotDevice(models.Model):
         ('network', 'Network'),
         ('direct', 'USB'),
         ('bluetooht', 'Bluetooht')
-        ],
+        ], readonly = True,
         help="Type of connection.")
 
     def _compute_last_message(self):
@@ -30,7 +30,6 @@ class IotDevice(models.Model):
             self.last_message_date = self.env['iot.message'].search([('device_id', '=', device.id)],
                                                                     order='create_date desc', limit=1).create_date
 
-    @api.depends('iot_id.name', 'name')
     def name_get(self):
         return [(i.id, i.iot_id.name + " " + i.name) for i in self]
 

@@ -330,7 +330,7 @@ def send_iot_box_device():
 
         #build JSON with all devices
         data = {}
-        hostname = subprocess.check_output('hostname').decode('utf-8')
+        hostname = subprocess.check_output('hostname').decode('utf-8').split('\n')[0]
         data['iotbox'] = {'name': hostname,'identifier': maciotbox, 'ip': ips}
         data['devices'] = devicesList
         data['printers'] = printerList
