@@ -2,11 +2,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import datetime
+from psycopg2 import sql
 
 from odoo import models, fields, api, _
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tools import pycompat
-
 
 class Category(models.Model):
     _name = 'test_new_api.category'
@@ -152,9 +152,9 @@ class Message(models.Model):
         if operator not in ('=', '!=', '<', '<=', '>', '>=', 'in', 'not in'):
             return []
         # retrieve all the messages that match with a specific SQL query
-        query = """SELECT id FROM "%s" WHERE char_length("body") %s %%s""" % \
-                (self._table, operator)
-        self.env.cr.execute(query, (value,))
+        query = sql.SQL("""SELECT id FROM {table} WHERE char_length("body") {operator} {value}""").format(
+            table=sql.Identifier(self._table), operator=sql.SQL(operator), value=sql.Placeholder('value'))
+        self.env.cr.execute(query, {'value': value})
         ids = [t[0] for t in self.env.cr.fetchall()]
         return [('id', 'in', ids)]
 

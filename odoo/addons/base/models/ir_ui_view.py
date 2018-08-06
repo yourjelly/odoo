@@ -21,6 +21,8 @@ from lxml import etree
 from lxml.etree import LxmlError
 from lxml.builder import E
 
+from psycopg2 import sql
+
 from odoo import api, fields, models, tools, SUPERUSER_ID, _
 from odoo.exceptions import ValidationError
 from odoo.http import request
@@ -1371,11 +1373,11 @@ actual arch.
                 return
             params += (names,)
 
-        query = """SELECT max(v.id)
+        query = sql.SQL("""SELECT max(v.id)
                      FROM ir_ui_view v
                 LEFT JOIN ir_model_data md ON (md.model = 'ir.ui.view' AND md.res_id = v.id)
                     WHERE md.module = %s {0}
-                 GROUP BY coalesce(v.inherit_id, v.id)""".format(xmlid_filter)
+                 GROUP BY coalesce(v.inherit_id, v.id)""").format(sql.SQL(xmlid_filter))
         self._cr.execute(query, params)
 
         for vid, in self._cr.fetchall():

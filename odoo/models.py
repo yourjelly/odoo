@@ -44,6 +44,7 @@ import psycopg2
 from lxml import etree
 from lxml.builder import E
 from psycopg2.extensions import AsIs
+from psycopg2 import sql
 
 import odoo
 from . import SUPERUSER_ID
@@ -2064,25 +2065,24 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         prefix_terms = lambda prefix, terms: (prefix + " " + ",".join(terms)) if terms else ''
         prefix_term = lambda prefix, term: ('%s %s' % (prefix, term)) if term else ''
 
-        query = """
-            SELECT min("%(table)s".id) AS id, count("%(table)s".id) AS "%(count_field)s" %(extra_fields)s
-            FROM %(from)s
-            %(where)s
-            %(groupby)s
-            %(orderby)s
-            %(limit)s
-            %(offset)s
-        """ % {
-            'table': self._table,
-            'count_field': count_field,
-            'extra_fields': prefix_terms(',', select_terms),
-            'from': from_clause,
-            'where': prefix_term('WHERE', where_clause),
-            'groupby': prefix_terms('GROUP BY', groupby_terms),
-            'orderby': prefix_terms('ORDER BY', orderby_terms),
-            'limit': prefix_term('LIMIT', int(limit) if limit else None),
-            'offset': prefix_term('OFFSET', int(offset) if limit else None),
-        }
+        query = sql.SQL("""
+                    SELECT min({table}.id) AS id, count({table}.id) AS {count_field} {extra_fields}
+                    FROM {from_cl}
+                    {where}
+                    {groupby}
+                    {orderby}
+                    {limit}
+                    {offset}
+                """).format(
+                table=sql.Identifier(self._table),
+                count_field=sql.Identifier(count_field),
+                extra_fields=sql.SQL(prefix_terms(',', select_terms)),
+                from_cl=sql.SQL(from_clause),
+                where=sql.SQL(prefix_term('WHERE', where_clause)),
+                groupby=sql.SQL(prefix_terms('GROUP BY', groupby_terms)),
+                orderby=sql.SQL(prefix_terms('ORDER BY', orderby_terms)),
+                limit=sql.SQL(prefix_term('LIMIT', int(limit) if limit else None)),
+                offset=sql.SQL(prefix_term('OFFSET', int(offset) if limit else None)))
         self._cr.execute(query, where_clause_params)
         fetched_data = self._cr.dictfetchall()
 
@@ -2175,7 +2175,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         # Note: the final '/' is necessary to match subtrees correctly: '42/63'
         # is a prefix of '42/630', but '42/63/' is not a prefix of '42/630/'.
         _logger.info('Computing parent_path for table %s...', self._table)
-        query = """
+        query = sql.SQL("""
             WITH RECURSIVE __parent_store_compute(id, parent_path) AS (
                 SELECT row.id, concat(row.id, '/')
                 FROM {table} row
@@ -2188,7 +2188,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             UPDATE {table} row SET parent_path = comp.parent_path
             FROM __parent_store_compute comp
             WHERE row.id = comp.id
-        """.format(table=self._table, parent=self._parent_name)
+            """).format(table=sql.Identifier(self._table), parent=sql.Identifier(self._parent_name))
         self.env.cr.execute(query)
         self.invalidate_cache(['parent_path'])
         return True
@@ -2236,16 +2236,17 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         if necessary:
             _logger.debug("Table '%s': setting default value of new column %s to %r",
                           self._table, column_name, value)
-            query = 'UPDATE "%s" SET "%s"=%s WHERE "%s" IS NULL' % (
-                self._table, column_name, field.column_format, column_name)
-            self._cr.execute(query, (value,))
+            query = sql.SQL('UPDATE {table} SET {column}={value} WHERE {name} IS NULL').format(
+                table=sql.Identifier(self._table), column=sql.Identifier(column_name),
+                name=sql.Identifier(column_name), value=sql.Placeholder('value'))
+            self._cr.execute(query, {'value': value})
 
     @ormcache()
     def _table_has_rows(self):
         """ Return whether the model's table has rows. This method should only
             be used when updating the database schema (:meth:`~._auto_init`).
         """
-        self.env.cr.execute('SELECT 1 FROM "%s" LIMIT 1' % self._table)
+        self.env.cr.execute(sql.SQL('SELECT 1 FROM {table} LIMIT 1').format(table=sql.Identifier(self._table)))
         return self.env.cr.rowcount
 
     @api.model_cr_context
@@ -2774,7 +2775,10 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         # determine the actual query to execute
         from_clause, where_clause, params = query.get_sql()
-        query_str = "SELECT %s FROM %s WHERE %s" % (",".join(qual_names), from_clause, where_clause)
+        query_str = sql.SQL("SELECT {name} FROM {from_cl} WHERE {where_cl}").format(
+            name=sql.SQL(",".join(qual_names)),
+            from_cl=sql.SQL(from_clause),
+            where_cl=sql.SQL(where_clause))
 
         result = []
         param_pos = params.index(param_ids)
@@ -2857,11 +2861,15 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             fields += LOG_ACCESS_COLUMNS
         quoted_table = '"%s"' % self._table
         fields_str = ",".join('%s.%s' % (quoted_table, field) for field in fields)
-        query = '''SELECT %s, __imd.noupdate, __imd.module, __imd.name
-                   FROM %s LEFT JOIN ir_model_data __imd
-                       ON (__imd.model = %%s and __imd.res_id = %s.id)
-                   WHERE %s.id IN %%s''' % (fields_str, quoted_table, quoted_table, quoted_table)
-        self._cr.execute(query, (self._name, tuple(self.ids)))
+        query = sql.SQL('''SELECT {fields}, __imd.noupdate, __imd.module, __imd.name
+                           FROM {table} LEFT JOIN ir_model_data __imd
+                               ON (__imd.model = {name} and __imd.res_id = {table}.id)
+                           WHERE {table}.id IN {ids}''').format(
+                           fields=sql.SQL(fields_str),
+                           table=sql.Identifier(self._table),
+                           name=sql.Placeholder('name'),
+                           ids=sql.Placeholder('ids'))
+        self._cr.execute(query, {'name': self._name, 'ids': tuple(self.ids)})
         res = self._cr.dictfetchall()
 
         uids = set(r[k] for r in res for k in ['write_uid', 'create_uid'] if r.get(k))
@@ -2892,7 +2900,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                     params.extend([id, update_date])
             if not nclauses:
                 continue
-            query = "SELECT id FROM %s WHERE %s" % (self._table, " OR ".join([check_clause] * nclauses))
+            query = sql.SQL("SELECT id FROM {table} WHERE {clause}").format(
+                table=sql.Identifier(self._table), clause=sql.SQL(" OR ".join([check_clause] * nclauses))
+                )
             self._cr.execute(query, tuple(params))
             res = self._cr.fetchone()
             if res:
@@ -2909,7 +2919,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         if missing_ids:
             # Attempt to distinguish record rule restriction vs deleted records,
             # to provide a more specific error message
-            self._cr.execute('SELECT id FROM %s WHERE id IN %%s' % self._table, (tuple(missing_ids),))
+            self._cr.execute(sql.SQL('SELECT id FROM {table} WHERE id IN {ids}').format(
+                table=sql.Identifier(self._table), ids=sql.Placeholder('ids')), {'ids': tuple(missing_ids)})
             forbidden_ids = [x[0] for x in self._cr.fetchall()]
             if forbidden_ids:
                 # the missing ids are (at least partially) hidden by access rules
@@ -2953,16 +2964,19 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             # have log_access enabled so that the create_uid column is always there.
             # And even with _inherits, these fields are always present in the local
             # table too, so no need for JOINs.
-            query = "SELECT DISTINCT create_uid FROM %s WHERE id IN %%s" % self._table
-            self._cr.execute(query, (tuple(self.ids),))
+            query = sql.SQL("SELECT DISTINCT create_uid FROM {table} WHERE id IN {ids}").format(
+                table=sql.Identifier(self._table),
+                ids=sql.Placeholder('ids'))
+            self._cr.execute(query, {'ids': tuple(self.ids)})
             uids = [x[0] for x in self._cr.fetchall()]
             if len(uids) != 1 or uids[0] != self._uid:
                 raise AccessError(_('For this kind of document, you may only access records you created yourself.\n\n(Document type: %s)') % (self._description,))
         else:
             where_clause, where_params, tables = self.env['ir.rule'].domain_get(self._name, operation)
             if where_clause:
-                query = "SELECT %s.id FROM %s WHERE %s.id IN %%s AND " % (self._table, ",".join(tables), self._table)
-                query = query + " AND ".join(where_clause)
+                query = sql.SQL("SELECT {table}.id FROM {tables} WHERE {table}.id IN %s AND ").format(
+                    table=sql.Identifier(self._table), tables=sql.SQL(",".join(tables)))
+                query = query + sql.SQL(" AND ".join(where_clause))
                 for sub_ids in self._cr.split_for_in_conditions(self.ids):
                     self._cr.execute(query, [sub_ids] + where_params)
                     returned_ids = [x[0] for x in self._cr.fetchall()]
@@ -3006,8 +3020,10 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             Attachment = self.env['ir.attachment']
 
             for sub_ids in cr.split_for_in_conditions(self.ids):
-                query = "DELETE FROM %s WHERE id IN %%s" % self._table
-                cr.execute(query, (sub_ids,))
+                query = sql.SQL("DELETE FROM {table} WHERE id IN {sub_ids}").format(
+                    table=sql.Identifier(self._table),
+                    sub_ids=sql.Placeholder('sub_ids'))
+                cr.execute(query, {'sub_ids': sub_ids})
 
                 # Removing the ir_model_data reference if the record being deleted
                 # is a record created by xml/csv file, as these are not connected
@@ -3174,9 +3190,12 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 parent_name = self._inherits[model_name]
                 # optimization of self.mapped(parent_name)
                 parent_ids = set()
-                query = "SELECT %s FROM %s WHERE id IN %%s" % (parent_name, self._table)
+                query = sql.SQL("SELECT {parent_name} FROM {table} WHERE id IN {sub_ids}").format(
+                    parent_name=sql.Identifier(parent_name),
+                    table=sql.Identifier(self._table),
+                    sub_ids=sql.Placeholder('sub_ids'))
                 for sub_ids in cr.split_for_in_conditions(self.ids):
-                    cr.execute(query, [sub_ids])
+                    cr.execute(query, {'sub_ids': sub_ids})
                     parent_ids.update(row[0] for row in cr.fetchall())
 
                 self.env[model_name].browse(parent_ids).write(parent_vals)
@@ -3263,8 +3282,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         # update columns
         if columns:
             self.check_access_rule('write')
-            query = 'UPDATE "%s" SET %s WHERE id IN %%s' % (
-                self._table, ','.join('"%s"=%s' % (column[0], column[1]) for column in columns),
+            query = sql.SQL('UPDATE {table} SET {column} WHERE id IN %s').format(
+                table=sql.Identifier(self._table),
+                column=sql.SQL(','.join('"%s"=%s' % (column[0], column[1]) for column in columns)),
             )
             params = [column[2] for column in columns]
             for sub_ids in cr.split_for_in_conditions(set(self.ids)):
@@ -3506,10 +3526,10 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                     other_fields.add(field)
 
             # insert a row with the given columns
-            query = "INSERT INTO {} ({}) VALUES ({}) RETURNING id".format(
-                quote(self._table),
-                ", ".join(quote(name) for name, fmt, val in columns),
-                ", ".join(fmt for name, fmt, val in columns),
+            query = sql.SQL("INSERT INTO {table} ({name}) VALUES ({column}) RETURNING id").format(
+                table=sql.SQL(quote(self._table)),
+                name=sql.SQL(", ".join(quote(name) for name, fmt, val in columns)),
+                column=sql.SQL(", ".join(fmt for name, fmt, val in columns)),
             )
             params = [val for name, fmt, val in columns]
             cr.execute(query, params)
@@ -3570,12 +3590,12 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         if not self._parent_store:
             return
 
-        query = """
+        query = sql.SQL("""
             UPDATE {0} node
             SET parent_path=concat((SELECT parent.parent_path FROM {0} parent
                                     WHERE parent.id=node.{1}), node.id, '/')
             WHERE node.id IN %s
-        """.format(self._table, self._parent_name)
+                """).format(sql.Identifier(self._table), sql.Identifier(self._parent_name))
         self._cr.execute(query, [tuple(self.ids)])
 
     def _parent_store_update_prepare(self, vals):
@@ -3952,14 +3972,22 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         if count:
             # Ignore order, limit and offset when just counting, they don't make sense and could
             # hurt performance
-            query_str = 'SELECT count(1) FROM ' + from_clause + where_str
+            query_str = sql.SQL('SELECT count(1) FROM {from_cl}{where_cl}').format(
+                from_cl=sql.SQL(from_clause),
+                where_cl=sql.SQL(where_str))
             self._cr.execute(query_str, where_clause_params)
             res = self._cr.fetchone()
             return res[0]
 
         limit_str = limit and ' limit %d' % limit or ''
         offset_str = offset and ' offset %d' % offset or ''
-        query_str = 'SELECT "%s".id FROM ' % self._table + from_clause + where_str + order_by + limit_str + offset_str
+        query_str = sql.SQL('SELECT {table}.id FROM {from_cl} {where} {order_by} {limit} {offset}').format(
+            table=sql.Identifier(self._table),
+            from_cl=sql.SQL(from_clause),
+            where=sql.SQL(where_str),
+            order_by=sql.SQL(order_by),
+            limit=sql.SQL(limit_str),
+            offset=sql.SQL(offset_str))
         self._cr.execute(query_str, where_clause_params)
         res = self._cr.fetchall()
 
@@ -4139,8 +4167,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             (ids if isinstance(i, pycompat.integer_types) else new_ids).append(i)
         if not ids:
             return self
-        query = """SELECT id FROM "%s" WHERE id IN %%s""" % self._table
-        self._cr.execute(query, [tuple(ids)])
+        query = sql.SQL("""SELECT id FROM {table} WHERE id IN {ids}""").format(table=sql.Identifier(self._table),
+            ids=sql.Placeholder('ids'))
+        self._cr.execute(query, {'ids': tuple(ids)})
         ids = [r[0] for r in self._cr.fetchall()]
         existing = self.browse(ids + new_ids)
         if len(existing) < len(self):
@@ -4164,11 +4193,13 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         # must ignore 'active' flag, ir.rules, etc. => direct SQL query
         cr = self._cr
-        query = 'SELECT "%s" FROM "%s" WHERE id = %%s' % (parent, self._table)
+        query = sql.SQL('SELECT {parent} FROM {table} WHERE id = {current_id}').format(parent=sql.Identifier(parent),
+            table=sql.Identifier(self._table),
+            current_id=sql.Placeholder('current_id'))
         for id in self.ids:
             current_id = id
             while current_id:
-                cr.execute(query, (current_id,))
+                cr.execute(query, {'current_id': current_id})
                 result = cr.fetchone()
                 current_id = result[0] if result else None
                 if current_id == id:
@@ -4191,15 +4222,18 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             raise ValueError('invalid field_name: %r' % (field_name,))
 
         cr = self._cr
-        query = 'SELECT "%s", "%s" FROM "%s" WHERE "%s" IN %%s AND "%s" IS NOT NULL' % \
-                    (field.column1, field.column2, field.relation, field.column1, field.column2)
+        query = sql.SQL('SELECT {column1}, {column2} FROM {relation} WHERE {column1} IN {todo} AND {column2} IS NOT NULL').format(
+            column1=sql.Identifier(field.column1),
+            column2=sql.Identifier(field.column2),
+            relation=sql.Identifier(field.relation),
+            todo=sql.Placeholder('todo'))
 
         succs = defaultdict(set)        # transitive closure of successors
         preds = defaultdict(set)        # transitive closure of predecessors
         todo, done = set(self.ids), set()
         while todo:
             # retrieve the respective successors of the nodes in 'todo'
-            cr.execute(query, [tuple(todo)])
+            cr.execute(query, {'todo': tuple(todo)})
             done.update(todo)
             todo.clear()
             for id1, id2 in cr.fetchall():
@@ -4274,9 +4308,10 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         assert self._transient, "Model %s is not transient, it cannot be vacuumed!" % self._name
         # Never delete rows used in last 5 minutes
         seconds = max(seconds, 300)
-        query = ("SELECT id FROM " + self._table + " WHERE"
-            " COALESCE(write_date, create_date, (now() at time zone 'UTC'))::timestamp"
-            " < ((now() at time zone 'UTC') - interval %s)")
+        query = sql.SQL("SELECT id FROM {table} WHERE \
+            COALESCE(write_date, create_date, (now() at time zone 'UTC'))::timestamp\
+            < ((now() at time zone 'UTC') - interval %s)").format(
+            table=sql.Identifier(self._table))
         self._cr.execute(query, ("%s seconds" % seconds,))
         ids = [x[0] for x in self._cr.fetchall()]
         self.sudo().browse(ids).unlink()
@@ -4284,7 +4319,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     @api.model_cr
     def _transient_clean_old_rows(self, max_count):
         # Check how many rows we have in the table
-        self._cr.execute("SELECT count(*) AS row_count FROM " + self._table)
+        self._cr.execute(sql.SQL("SELECT count(*) AS row_count FROM {table} ").format(
+            table=sql.Identifier(self._table)))
         res = self._cr.fetchall()
         if res[0][0] <= max_count:
             return  # max not reached, nothing to do

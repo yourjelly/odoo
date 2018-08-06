@@ -9,6 +9,8 @@ import threading
 
 from email.utils import formataddr
 
+from psycopg2 import sql
+
 import requests
 from lxml import etree
 from werkzeug import urls
@@ -680,7 +682,7 @@ class Partner(models.Model):
 
             unaccent = get_unaccent_wrapper(self.env.cr)
 
-            query = """SELECT id
+            query = sql.SQL("""SELECT id
                          FROM res_partner
                       {where} ({email} {operator} {percent}
                            OR {display_name} {operator} {percent}
@@ -689,17 +691,17 @@ class Partner(models.Model):
                            -- don't panic, trust postgres bitmap
                      ORDER BY {display_name} {operator} {percent} desc,
                               {display_name}
-                    """.format(where=where_str,
-                               operator=operator,
-                               email=unaccent('email'),
-                               display_name=unaccent('display_name'),
-                               reference=unaccent('ref'),
-                               percent=unaccent('%s'),
-                               vat=unaccent('vat'),)
+                                """).format(where=sql.SQL(where_str),
+                               operator=sql.SQL(operator),
+                               email=sql.SQL(unaccent('email')),
+                               display_name=sql.SQL(unaccent('display_name')),
+                               reference=sql.SQL(unaccent('ref')),
+                               percent=sql.SQL(unaccent('%s')),
+                               vat=sql.SQL(unaccent('vat')),)
 
             where_clause_params += [search_name]*5
             if limit:
-                query += ' limit %s'
+                query += sql.SQL(' limit %s')
                 where_clause_params.append(limit)
             self.env.cr.execute(query, where_clause_params)
             partner_ids = [row[0] for row in self.env.cr.fetchall()]

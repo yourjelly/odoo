@@ -236,12 +236,12 @@ class Cursor(object):
         if self.sql_log:
             delay = (time.time() - now) * 1E6
 
-            res_from = re_from.match(query.lower())
+            res_from = re_from.match(str(query).lower())
             if res_from:
                 self.sql_from_log.setdefault(res_from.group(1), [0, 0])
                 self.sql_from_log[res_from.group(1)][0] += 1
                 self.sql_from_log[res_from.group(1)][1] += delay
-            res_into = re_into.match(query.lower())
+            res_into = re_into.match(str(query).lower())
             if res_into:
                 self.sql_into_log.setdefault(res_into.group(1), [0, 0])
                 self.sql_into_log[res_into.group(1)][0] += 1

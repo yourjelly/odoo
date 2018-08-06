@@ -4,6 +4,7 @@
 import logging
 from collections import defaultdict
 from difflib import get_close_matches
+from psycopg2 import sql
 
 from odoo import api, fields, models, tools, SUPERUSER_ID, _
 from odoo.exceptions import AccessError, UserError, ValidationError
@@ -88,38 +89,38 @@ class IrTranslationImport(object):
             params['name'] = 'ir.ui.view,arch_db'
             params['imd_model'] = "ir.ui.view"
 
-        query = """ INSERT INTO %s (name, lang, res_id, src, type, imd_model, module, imd_name, value, state, comments)
-                    VALUES (%%(name)s, %%(lang)s, %%(res_id)s, %%(src)s, %%(type)s, %%(imd_model)s, %%(module)s,
-                            %%(imd_name)s, %%(value)s, %%(state)s, %%(comments)s) """ % self._table
+        query = sql.SQL(""" INSERT INTO {table} (name, lang, res_id, src, type, imd_model, module, imd_name, value, state, comments)
+                    VALUES (%(name)s, %(lang)s, %(res_id)s, %(src)s, %(type)s, %(imd_model)s, %(module)s,
+                    %(imd_name)s, %(value)s, %(state)s, %(comments)s) """).format(table=sql.Identifier(self._table))
         self._cr.execute(query, params)
 
     def finish(self):
         """ Transfer the data from the temp table to ir.translation """
         cr = self._cr
         if self._debug:
-            cr.execute("SELECT count(*) FROM %s" % self._table)
+            cr.execute(sql.SQL("SELECT count(*) FROM {table}").format(table=sql.Identifier(self._table)))
             count = cr.fetchone()[0]
             _logger.debug("ir.translation.cursor: We have %d entries to process", count)
 
         # Step 1: resolve ir.model.data references to res_ids
-        cr.execute(""" UPDATE %s AS ti
+        cr.execute(sql.SQL(""" UPDATE {table} AS ti
                           SET res_id = imd.res_id,
                               noupdate = imd.noupdate
                        FROM ir_model_data AS imd
                        WHERE ti.res_id IS NULL
                        AND ti.module IS NOT NULL AND ti.imd_name IS NOT NULL
                        AND ti.module = imd.module AND ti.imd_name = imd.name
-                       AND ti.imd_model = imd.model; """ % self._table)
+                       AND ti.imd_model = imd.model; """).format(table=sql.Identifier(self._table)))
 
         if self._debug:
-            cr.execute(""" SELECT module, imd_name, imd_model FROM %s
-                           WHERE res_id IS NULL AND module IS NOT NULL """ % self._table)
+            cr.execute(sql.SQL(""" SELECT module, imd_name, imd_model FROM {table}
+                            WHERE res_id IS NULL AND module IS NOT NULL """).format(table=sql.Identifier(self._table)))
             for row in cr.fetchall():
                 _logger.info("ir.translation.cursor: missing res_id for %s.%s <%s> ", *row)
 
         # Records w/o res_id must _not_ be inserted into our db, because they are
         # referencing non-existent data.
-        cr.execute("DELETE FROM %s WHERE res_id IS NULL AND module IS NOT NULL" % self._table)
+        cr.execute(sql.SQL("DELETE FROM {table} WHERE res_id IS NULL AND module IS NOT NULL").format(table=sql.Identifier(self._table)))
 
         # detect the xml_translate fields, where the src must be the same
         env = api.Environment(cr, SUPERUSER_ID, {})
@@ -145,32 +146,35 @@ class IrTranslationImport(object):
 
         # Step 2: update existing (matching) translations
         if self._overwrite:
-            cr.execute(""" UPDATE ONLY %s AS irt
+            cr.execute(sql.SQL(""" UPDATE ONLY {model_table} AS irt
                            SET value = ti.value,
                                src = ti.src,
                                state = 'translated'
-                           FROM %s AS ti
-                          WHERE %s
+                           FROM {table} AS ti
+                          WHERE {expr}
                             AND ti.value IS NOT NULL
                             AND ti.value != ''
                             AND noupdate IS NOT TRUE
-                       """ % (self._model_table, self._table, find_expr),
+                                """).format(model_table=sql.Identifier(self._model_table),
+                                table=sql.Identifier(self._table), expr=sql.SQL(find_expr)),
                        (tuple(src_relevant_fields), tuple(src_relevant_fields)))
 
         # Step 3: insert new translations
-        cr.execute(""" INSERT INTO %s(name, lang, res_id, src, type, value, module, state, comments)
+        cr.execute(sql.SQL(""" INSERT INTO {}(name, lang, res_id, src, type, value, module, state, comments)
                        SELECT name, lang, res_id, src, type, value, module, state, comments
-                       FROM %s AS ti
-                       WHERE NOT EXISTS(SELECT 1 FROM ONLY %s AS irt WHERE %s)
+                       FROM {} AS ti
+                       WHERE NOT EXISTS(SELECT 1 FROM ONLY {} AS irt WHERE {})
                        ON CONFLICT DO NOTHING;
-                   """ % (self._model_table, self._table, self._model_table, find_expr),
+                   """).format(sql.Identifier(self._model_table), sql.Identifier(self._table),
+                   sql.Identifier(self._model_table), sql.SQL(find_expr)),
                    (tuple(src_relevant_fields), tuple(src_relevant_fields)))
 
         if self._debug:
-            cr.execute("SELECT COUNT(*) FROM ONLY %s" % self._model_table)
+            cr.execute(sql.SQL("SELECT COUNT(*) FROM ONLY {table}").format(table=sql.Identifier(self._model_table)))
             total = cr.fetchone()[0]
-            cr.execute("SELECT COUNT(*) FROM ONLY %s AS irt, %s AS ti WHERE %s" % \
-                       (self._model_table, self._table, find_expr),
+            cr.execute(sql.SQL("SELECT COUNT(*) FROM ONLY {model_table} AS irt, {table} AS ti WHERE {expr}").format(
+                       model_table=sql.Identifier(self._model_table),
+                       table=sql.Identifier(self._table), expr=sql.SQL(find_expr)),
                        (tuple(src_relevant_fields), tuple(src_relevant_fields)))
             count = cr.fetchone()[0]
             _logger.debug("ir.translation.cursor: %d entries now in ir.translation, %d common entries with tmp", total, count)

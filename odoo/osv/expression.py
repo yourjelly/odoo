@@ -119,13 +119,13 @@ import logging
 import traceback
 from functools import partial
 from zlib import crc32
+from psycopg2 import sql
 
 from datetime import date, datetime, time
 import odoo.modules
 from odoo.tools import pycompat
 from ..models import MAGIC_COLUMNS, BaseModel
 import odoo.tools as tools
-
 
 # Domain operators.
 NOT_OPERATOR = '!'
@@ -437,20 +437,24 @@ def select_from_where(cr, select_field, from_table, where_field, where_ids, wher
     res = []
     if where_ids:
         if where_operator in ['<', '>', '>=', '<=']:
-            cr.execute('SELECT "%s" FROM "%s" WHERE "%s" %s %%s' % \
-                (select_field, from_table, where_field, where_operator),
-                (where_ids[0],))  # TODO shouldn't this be min/max(where_ids) ?
+            cr.execute(sql.SQL('SELECT {select} FROM {table} WHERE {where} {operator} {ids}').format(
+                select=sql.Identifier(select_field), table=sql.Identifier(from_table),
+                where=sql.Identifier(where_field), operator=sql.Identifier(where_operator),
+                ids=sql.Placeholder('ids')),
+                {'ids': where_ids[0]})  # TODO shouldn't this be min/max(where_ids) ?
             res = [r[0] for r in cr.fetchall()]
         else:  # TODO where_operator is supposed to be 'in'? It is called with child_of...
             for i in range(0, len(where_ids), cr.IN_MAX):
                 subids = where_ids[i:i + cr.IN_MAX]
-                cr.execute('SELECT "%s" FROM "%s" WHERE "%s" IN %%s' % \
-                    (select_field, from_table, where_field), (tuple(subids),))
+                cr.execute(sql.SQL('SELECT {select_field} FROM {table} WHERE {where} IN {subids}').format(
+                    select_field=sql.Identifier(select_field), table=sql.Identifier(from_table),
+                    where=sql.Identifier(where_field), subids=sql.Placeholder('subids')), {'subids': tuple(subids)})
                 res.extend([r[0] for r in cr.fetchall()])
     return res
 
 def select_distinct_from_where_not_null(cr, select_field, from_table):
-    cr.execute('SELECT distinct("%s") FROM "%s" where "%s" is not null' % (select_field, from_table, select_field))
+    cr.execute(sql.SQL('SELECT distinct({select}) FROM {table} where {select} is not null').format(
+        select=sql.Identifier(select_field), table=sql.Identifier(from_table)))
     return [r[0] for r in cr.fetchall()]
 
 def get_unaccent_wrapper(cr):
@@ -1007,8 +1011,8 @@ class expression(object):
                     if comodel == model:
                         push(create_substitution_leaf(leaf, ('id', 'in', ids2), model))
                     else:
-                        subquery = 'SELECT "%s" FROM "%s" WHERE "%s" IN %%s' % (rel_id1, rel_table, rel_id2)
-                        push(create_substitution_leaf(leaf, ('id', 'inselect', (subquery, [tuple(ids2)])), internal=True))
+                        subquery = sql.SQL('SELECT {id1} FROM {table} WHERE {id2} IN %s').format(id1=sql.SQL(rel_id1), table=sql.SQL(rel_table), id2=sql.SQL(rel_id2))
+                        push(create_substitution_leaf(leaf, ('id', 'inselect', (subquery.as_string(cr), [tuple(ids2)])), internal=True))
 
                 elif right is not False:
                     # determine ids2 in comodel
@@ -1026,9 +1030,9 @@ class expression(object):
 
                     # rewrite condition in terms of ids2
                     subop = 'not inselect' if operator in NEGATIVE_TERM_OPERATORS else 'inselect'
-                    subquery = 'SELECT "%s" FROM "%s" WHERE "%s" IN %%s' % (rel_id1, rel_table, rel_id2)
+                    subquery = sql.SQL('SELECT {id1} FROM {table} WHERE {id2} IN %s').format(id1=sql.SQL(rel_id1), table=sql.SQL(rel_table), id2=sql.SQL(rel_id2))
                     ids2 = tuple(it for it in ids2 if it) or (None,)
-                    push(create_substitution_leaf(leaf, ('id', subop, (subquery, [ids2])), internal=True))
+                    push(create_substitution_leaf(leaf, ('id', subop, (subquery.as_string(cr), [ids2])), internal=True))
 
                 else:
                     # determine ids1 = records with relations
@@ -1132,7 +1136,7 @@ class expression(object):
                     if sql_operator == 'in':
                         right = tuple(right)
 
-                    subselect = """WITH temp_irt_current (id, name) as (
+                    subselect = sql.SQL("""WITH temp_irt_current (id, name) as (
                             SELECT ct.id, coalesce(it.value,ct.{quote_left})
                             FROM {current_table} ct
                             LEFT JOIN ir_translation it ON (it.name = %s and
@@ -1142,8 +1146,8 @@ class expression(object):
                                         it.value != '')
                             )
                             SELECT id FROM temp_irt_current WHERE {name} {operator} {right} order by name
-                            """.format(current_table=model._table, quote_left=_quote(left), name=unaccent('name'),
-                                       operator=sql_operator, right=instr)
+                            """).format(current_table=sql.SQL(model._table), quote_left=sql.SQL(_quote(left)), name=sql.SQL(unaccent('name')),
+                                       operator=sql.SQL(sql_operator), right=sql.SQL(instr))
 
                     params = (
                         model._name + ',' + left,
@@ -1151,7 +1155,7 @@ class expression(object):
                         'model',
                         right,
                     )
-                    push(create_substitution_leaf(leaf, ('id', inselect_operator, (subselect, params)), model, internal=True))
+                    push(create_substitution_leaf(leaf, ('id', inselect_operator, (subselect.as_string(cr), params)), model, internal=True))
 
                 else:
                     push_result(leaf)

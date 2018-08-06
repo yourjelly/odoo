@@ -6,12 +6,12 @@ from functools import partial
 from lxml import etree
 from lxml.builder import E
 from psycopg2 import IntegrityError
+from psycopg2 import sql
 
 from odoo.osv.orm import modifiers_tests
 from odoo.exceptions import ValidationError
 from odoo.tests import common
 from odoo.tools import mute_logger
-
 
 class ViewXMLID(common.TransactionCase):
     def test_model_data_id(self):
@@ -1978,10 +1978,10 @@ class TestQWebRender(ViewCase):
         self.assertEqual(content1, content2)
 
         # render view and child view with an xmlid
-        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
-                            "VALUES ('dummy', 'ir.ui.view', %s, 'base')" % view1.id)
-        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
-                            "VALUES ('dummy_ext', 'ir.ui.view', %s, 'base')" % view2.id)
+        self.env.cr.execute(sql.SQL("INSERT INTO ir_model_data(name, model, res_id, module)"
+                                    "VALUES ('dummy', 'ir.ui.view', {view1}, 'base')").format(view1=sql.SQL(str(view1.id))))
+        self.env.cr.execute(sql.SQL("INSERT INTO ir_model_data(name, model, res_id, module)"
+                                    "VALUES ('dummy_ext', 'ir.ui.view', {view2}, 'base')").format(view2=sql.SQL(str(view2.id))))
 
         content1 = self.env['ir.qweb'].with_context(check_view_ids=[view1.id, view2.id]).render('base.dummy')
         content2 = self.env['ir.qweb'].with_context(check_view_ids=[view1.id, view2.id]).render('base.dummy_ext')
@@ -1995,8 +1995,8 @@ class TestQWebRender(ViewCase):
         self.assertNotEqual(content1, content3)
 
         # render view and primary extension with an xmlid
-        self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
-                            "VALUES ('dummy_primary_ext', 'ir.ui.view', %s, 'base')" % view3.id)
+        self.env.cr.execute(sql.SQL("INSERT INTO ir_model_data(name, model, res_id, module)"
+                                    "VALUES ('dummy_primary_ext', 'ir.ui.view', {view3}, 'base')").format(view3=sql.SQL(str(view3.id))))
 
         content1 = self.env['ir.qweb'].with_context(check_view_ids=[view1.id, view2.id, view3.id]).render('base.dummy')
         content3 = self.env['ir.qweb'].with_context(check_view_ids=[view1.id, view2.id, view3.id]).render('base.dummy_primary_ext')

@@ -16,6 +16,8 @@ from lxml import etree
 from lxml.builder import E
 import passlib.context
 
+from psycopg2 import sql
+
 from odoo import api, fields, models, tools, SUPERUSER_ID, _
 from odoo.exceptions import AccessDenied, AccessError, UserError, ValidationError
 from odoo.http import request
@@ -619,9 +621,10 @@ class Users(models.Model):
         """ Compute a session token given a session id and a user id """
         # retrieve the fields used to generate the session token
         session_fields = ', '.join(sorted(self._get_session_token_fields()))
-        self.env.cr.execute("""SELECT %s, (SELECT value FROM ir_config_parameter WHERE key='database.secret')
-                                FROM res_users
-                                WHERE id=%%s""" % (session_fields), (self.id,))
+        self.env.cr.execute(sql.SQL("""SELECT {session}, (SELECT value FROM ir_config_parameter WHERE key='database.secret')
+                        FROM res_users
+                        WHERE id={ids}""").format(
+                        session=sql.SQL(session_fields), ids=sql.Placeholder('ids')), {'ids': self.id})
         if self.env.cr.rowcount != 1:
             self._invalidate_session_cache()
             return False

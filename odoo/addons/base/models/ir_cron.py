@@ -7,6 +7,7 @@ import psycopg2
 import pytz
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
+from psycopg2 import sql
 
 import odoo
 from odoo import api, fields, models, _
@@ -142,8 +143,11 @@ class ir_cron(models.Model):
                 addsql = ''
                 if not numbercall:
                     addsql = ', active=False'
-                cron_cr.execute("UPDATE ir_cron SET nextcall=%s, numbercall=%s"+addsql+" WHERE id=%s",
-                                (fields.Datetime.to_string(nextcall.astimezone(pytz.UTC)), numbercall, job['id']))
+                cron_cr.execute(sql.SQL("UPDATE ir_cron SET nextcall={date}, numbercall={numbercall} {addsql} WHERE id={job}").format(
+                    date=sql.Placeholder('date'), numbercall=sql.Placeholder('numbercall'), addsql=sql.SQL(addsql), job=sql.Placeholder('job')),
+                    {'date': fields.Datetime.to_string(nextcall.astimezone(pytz.UTC)),
+                    'numbercall': numbercall,
+                    'job': job['id']})
                 cron.invalidate_cache()
 
         finally:
@@ -276,8 +280,9 @@ class ir_cron(models.Model):
            to make sure a following write() or unlink() will not block due
            to a process currently executing those cron tasks"""
         try:
-            self._cr.execute("""SELECT id FROM "%s" WHERE id IN %%s FOR UPDATE NOWAIT""" % self._table,
-                             [tuple(self.ids)], log_exceptions=False)
+            self._cr.execute(sql.SQL("""SELECT id FROM {table} WHERE id IN {ids} FOR UPDATE NOWAIT""").format(
+                    table=sql.Identifier(self._table), ids=sql.Placeholder('ids')),
+                    {'ids': tuple(self.ids)}, log_exceptions=False)
         except psycopg2.OperationalError:
             self._cr.rollback()  # early rollback to allow translations to work for the user feedback
             raise UserError(_("Record cannot be modified right now: "
@@ -298,8 +303,9 @@ class ir_cron(models.Model):
     def try_write(self, values):
         try:
             with self._cr.savepoint():
-                self._cr.execute("""SELECT id FROM "%s" WHERE id IN %%s FOR UPDATE NOWAIT""" % self._table,
-                                 [tuple(self.ids)], log_exceptions=False)
+                self._cr.execute(sql.SQL("""SELECT id FROM {table} WHERE id IN {ids} FOR UPDATE NOWAIT""").format(
+                    table=sql.Identifier(self._table), ids=sql.Placeholder('ids')),
+                    {'ids': tuple(self.ids)}, log_exceptions=False)
         except psycopg2.OperationalError:
             pass
         else:

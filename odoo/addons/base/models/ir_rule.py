@@ -2,12 +2,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import time
 from collections import defaultdict
+from psycopg2 import sql
 
 from odoo import api, fields, models, tools, SUPERUSER_ID, _
 from odoo.exceptions import ValidationError
 from odoo.osv import expression
 from odoo.tools.safe_eval import safe_eval
-
 
 class IrRule(models.Model):
     _name = 'ir.rule'
@@ -69,14 +69,15 @@ class IrRule(models.Model):
         if self._uid == SUPERUSER_ID:
             return None
 
-        query = """ SELECT r.id FROM ir_rule r JOIN ir_model m ON (r.model_id=m.id)
-                    WHERE m.model=%s AND r.active AND r.perm_{mode}
+        query = sql.SQL(""" SELECT r.id FROM ir_rule r JOIN ir_model m ON (r.model_id=m.id)
+                    WHERE m.model={model} AND r.active AND r.perm_{mode}
                     AND (r.id IN (SELECT rule_group_id FROM rule_group_rel rg
                                   JOIN res_groups_users_rel gu ON (rg.group_id=gu.gid)
-                                  WHERE gu.uid=%s)
+                                  WHERE gu.uid={uid})
                          OR r.global)
-                """.format(mode=mode)
-        self._cr.execute(query, (model_name, self._uid))
+                        """).format(mode=sql.SQL(mode),
+                        model=sql.Placeholder('model'), uid=sql.Placeholder('uid'))
+        self._cr.execute(query, {'model': model_name, 'uid': self._uid})
         rule_ids = [row[0] for row in self._cr.fetchall()]
         if not rule_ids:
             return []

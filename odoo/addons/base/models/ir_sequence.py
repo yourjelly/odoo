@@ -3,6 +3,7 @@
 from datetime import datetime, timedelta
 import logging
 import pytz
+from psycopg2 import sql
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
@@ -49,8 +50,10 @@ def _select_nextval(cr, seq_name):
 
 def _update_nogap(self, number_increment):
     number_next = self.number_next
-    self._cr.execute("SELECT number_next FROM %s WHERE id=%s FOR UPDATE NOWAIT" % (self._table, self.id))
-    self._cr.execute("UPDATE %s SET number_next=number_next+%s WHERE id=%s " % (self._table, number_increment, self.id))
+    self._cr.execute(sql.SQL("SELECT number_next FROM {table} WHERE id={ids} FOR UPDATE NOWAIT").format(
+        table=sql.Identifier(self._table), ids=sql.SQL(str(self.id))))
+    self._cr.execute(sql.SQL("UPDATE {table} SET number_next=number_next+{number} WHERE id={id} ").format(
+        table=sql.Identifier(self._table), number=sql.SQL(str(number_increment)), id=sql.SQL(str(self.id))))
     self.invalidate_cache(['number_next'], [self.id])
     return number_next
 

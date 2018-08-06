@@ -20,6 +20,7 @@ except ImportError:
     from xmlrpclib import MAXINT
 
 import psycopg2
+from psycopg2 import sql as psycopg2_sql
 
 from .sql_db import LazyCursor
 from .tools import float_repr, float_round, frozendict, html_sanitize, human_size, pg_varchar,\
@@ -2600,13 +2601,19 @@ class Many2many(_RelationalMulti):
         comodel._apply_ir_rules(wquery, 'read')
         order_by = comodel._generate_order_by(None, wquery)
         from_c, where_c, where_params = wquery.get_sql()
-        query = """ SELECT {rel}.{id1}, {rel}.{id2} FROM {rel}, {from_c}
-                    WHERE {where_c} AND {rel}.{id1} IN %s AND {rel}.{id2} = {tbl}.id
-                    {order_by} {limit} OFFSET {offset}
-                """.format(rel=self.relation, id1=self.column1, id2=self.column2,
-                           tbl=comodel._table, from_c=from_c, where_c=where_c or '1=1',
-                           limit=(' LIMIT %d' % self.limit) if self.limit else '',
-                           offset=0, order_by=order_by)
+        query = psycopg2_sql.SQL(""" SELECT {rel}.{id1}, {rel}.{id2} FROM {rel}, {from_c}
+                            WHERE {where_c} AND {rel}.{id1} IN %s AND {rel}.{id2} = {tbl}.id
+                            {order_by} {limit} {offset}
+                        """).format(
+                        rel=psycopg2_sql.Identifier(self.relation),
+                        id1=psycopg2_sql.Identifier(self.column1),
+                        id2=psycopg2_sql.Identifier(self.column2),
+                        tbl=psycopg2_sql.Identifier(comodel._table),
+                        from_c=psycopg2_sql.SQL(from_c),
+                        where_c=psycopg2_sql.SQL(where_c or '1=1'),
+                        limit=psycopg2_sql.SQL((' LIMIT %d' % self.limit) if self.limit else ''),
+                        offset=psycopg2_sql.SQL(' OFFSET %d' % 0),
+                        order_by=psycopg2_sql.SQL(order_by))
         where_params.append(tuple(records.ids))
 
         # retrieve lines and group them by record
@@ -2667,11 +2674,13 @@ class Many2many(_RelationalMulti):
 
         # add links
         if links:
-            query = """
+            query = psycopg2_sql.SQL("""
                 INSERT INTO {rel} ({id1}, {id2}) VALUES {values}
-            """.format(
-                rel=self.relation, id1=self.column1, id2=self.column2,
-                values=", ".join(["%s"] * len(links)),
+                    """).format(
+                rel=psycopg2_sql.Identifier(self.relation),
+                id1=psycopg2_sql.Identifier(self.column1),
+                id2=psycopg2_sql.Identifier(self.column2),
+                values=psycopg2_sql.SQL(', ').join(psycopg2_sql.Placeholder() * len(links))
             )
             model.env.cr.execute(query, tuple(links))
 
@@ -2686,13 +2695,16 @@ class Many2many(_RelationalMulti):
         clauses, params, tables = comodel.env['ir.rule'].domain_get(comodel._name)
         if '"%s"' % self.relation not in tables:
             tables.append('"%s"' % self.relation)
-        query = """
+        query = psycopg2_sql.SQL("""
             SELECT {rel}.{id1}, {rel}.{id2} FROM {tables}
             WHERE {rel}.{id1} IN %s AND {rel}.{id2}={table}.id AND {cond}
-        """.format(
-            rel=self.relation, id1=self.column1, id2=self.column2,
-            table=comodel._table, tables=",".join(tables),
-            cond=" AND ".join(clauses) if clauses else "1=1",
+                """).format(
+            rel=psycopg2_sql.Identifier(self.relation),
+            id1=psycopg2_sql.Identifier(self.column1),
+            id2=psycopg2_sql.Identifier(self.column2),
+            table=psycopg2_sql.Identifier(comodel._table),
+            tables=psycopg2_sql.SQL(",".join(tables)),
+            cond=psycopg2_sql.SQL(" AND ".join(clauses) if clauses else "1=1"),
         )
         cr.execute(query, [tuple(records.ids)] + params)
         old_links = set(cr.fetchall())
@@ -2738,13 +2750,15 @@ class Many2many(_RelationalMulti):
         # add links (beware of duplicates)
         links = new_links - old_links
         if links:
-            query = """
+            query = psycopg2_sql.SQL("""
                 INSERT INTO {rel} ({id1}, {id2})
                 VALUES {values}
                 ON CONFLICT DO NOTHING
-            """.format(
-                rel=self.relation, id1=self.column1, id2=self.column2,
-                values=", ".join(["%s"] * len(links)),
+                        """).format(
+                rel=psycopg2_sql.Identifier(self.relation),
+                id1=psycopg2_sql.Identifier(self.column1),
+                id2=psycopg2_sql.Identifier(self.column2),
+                values=psycopg2_sql.SQL(", ").join(psycopg2_sql.Placeholder() * len(links)),
             )
             cr.execute(query, tuple(links))
 
@@ -2752,11 +2766,11 @@ class Many2many(_RelationalMulti):
         links = old_links - new_links
         if links:
             cond = "{id1}=%s AND {id2}=%s".format(id1=self.column1, id2=self.column2)
-            query = """
+            query = psycopg2_sql.SQL("""
                 DELETE FROM {rel} WHERE {cond}
-            """.format(
-                rel=self.relation,
-                cond=" OR ".join([cond] * len(links)),
+                    """).format(
+                rel=psycopg2_sql.Identifier(self.relation),
+                cond=psycopg2_sql.SQL(" OR ".join([cond] * len(links)))
             )
             cr.execute(query, tuple(arg for pair in links for arg in pair))
 

@@ -59,8 +59,9 @@ class SQLInjectionChecker(checkers.BaseChecker):
 
     def visit_default(self, node):
         val = self._evaluate_ast(node)
-        if self._check_string(val[1]):
-            self.add_message('sql-injection', node=node, line=node.fromlineno)
+        if val[1] != '<osv.Query: "SELECT ... FROM %s WHERE %s" with params: %r>':
+            if self._check_string(val[1]):
+                self.add_message('sql-injection', node=node, line=node.fromlineno)
 
 
 def register(linter):

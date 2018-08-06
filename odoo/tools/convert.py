@@ -13,6 +13,7 @@ from dateutil.relativedelta import relativedelta
 
 import pytz
 from lxml import etree, builder
+from psycopg2 import sql
 
 import odoo
 from . import assertion_report, pycompat
@@ -474,7 +475,8 @@ form: module.record_id""" % (xml_id,)
 
             if not values.get('name') and action_type in ('act_window', 'wizard', 'url', 'client', 'server'):
                 a_table = 'ir_act_%s' % action_type.replace('act_', '')
-                self.cr.execute('select name from "%s" where id=%%s' % a_table, (int(action_id),))
+                self.cr.execute(sql.SQL('select name from {table} where id={action_id}').format(
+                    table=sql.Identifier(a_table), action_id=sql.Placeholder('action_id')), {'action_id': int(action_id)})
                 resw = self.cr.fetchone()
                 if resw:
                     values['name'] = resw[0]

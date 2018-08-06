@@ -15,6 +15,7 @@ from contextlib import closing
 from decorator import decorator
 
 import psycopg2
+from psycopg2 import sql
 
 import odoo
 from odoo import SUPERUSER_ID
@@ -143,11 +144,12 @@ def _drop_conn(cr, db_name):
         # http://www.postgresql.org/docs/9.2/static/release-9-2.html#AEN110389
         pid_col = 'pid' if cr._cnx.server_version >= 90200 else 'procpid'
 
-        cr.execute("""SELECT pg_terminate_backend(%(pid_col)s)
-                      FROM pg_stat_activity
-                      WHERE datname = %%s AND
-                            %(pid_col)s != pg_backend_pid()""" % {'pid_col': pid_col},
-                   (db_name,))
+        cr.execute(sql.SQL("""SELECT pg_terminate_backend({pid_col})
+                              FROM pg_stat_activity
+                              WHERE datname = {db_name} AND
+                                    {pid_col} != pg_backend_pid()""").format(
+                    db_name=sql.Placeholder('db_name'), pid_col=sql.Placeholder('pid_col')),
+                   {'db_name': db_name, 'pid_col': pid_col})
     except Exception:
         pass
 

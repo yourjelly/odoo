@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from psycopg2 import sql
+
 import odoo
 from odoo import api, fields, models, tools, SUPERUSER_ID, _
 from odoo.exceptions import MissingError, UserError, ValidationError, AccessError
@@ -244,7 +246,7 @@ class IrActionsActWindow(models.Model):
     @api.model
     @tools.ormcache()
     def _existing(self):
-        self._cr.execute("SELECT id FROM %s" % self._table)
+        self._cr.execute(sql.SQL("SELECT id FROM {table}").format(table=sql.Identifier(self._table)))
         return set(row[0] for row in self._cr.fetchall())
 
 

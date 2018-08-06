@@ -5,6 +5,7 @@ import dateutil
 import logging
 import time
 from collections import defaultdict
+from psycopg2 import sql
 
 from odoo import api, fields, models, SUPERUSER_ID, tools,  _
 from odoo.exceptions import AccessError, UserError, ValidationError
@@ -123,7 +124,7 @@ class IrModel(models.Model):
         for model in self:
             records = self.env[model.model]
             if not records._abstract:
-                cr.execute('SELECT COUNT(*) FROM "%s"' % records._table)
+                cr.execute(sql.SQL('SELECT COUNT(*) FROM {table}').format(table=sql.Identifier(records._table)))
                 model.count = cr.fetchone()[0]
 
     @api.constrains('model')
@@ -1136,12 +1137,12 @@ class IrModelAccess(models.Model):
         if isinstance(group_ids, pycompat.integer_types):
             group_ids = [group_ids]
 
-        query = """ SELECT 1 FROM ir_model_access a
+        query = sql.SQL(""" SELECT 1 FROM ir_model_access a
                     JOIN ir_model m ON (m.id = a.model_id)
                     WHERE a.active AND a.perm_{mode} AND
-                        m.model=%s AND (a.group_id IN %s OR a.group_id IS NULL)
-                """.format(mode=mode)
-        self._cr.execute(query, (model_name, tuple(group_ids)))
+                        m.model={name} AND (a.group_id IN {ids} OR a.group_id IS NULL)
+                        """).format(mode=sql.SQL(mode), ids=sql.Placeholder('ids'), name=sql.Placeholder('name'))
+        self._cr.execute(query, {'name': model_name, 'ids': tuple(group_ids)})
         return bool(self._cr.rowcount)
 
     @api.model_cr
@@ -1151,13 +1152,14 @@ class IrModelAccess(models.Model):
            :rtype: list
         """
         assert access_mode in ('read', 'write', 'create', 'unlink'), 'Invalid access mode'
-        self._cr.execute("""SELECT c.name, g.name
+        self._cr.execute(sql.SQL("""SELECT c.name, g.name
                             FROM ir_model_access a
                                 JOIN ir_model m ON (a.model_id=m.id)
                                 JOIN res_groups g ON (a.group_id=g.id)
                                 LEFT JOIN ir_module_category c ON (c.id=g.category_id)
-                            WHERE m.model=%s AND a.active IS TRUE AND a.perm_""" + access_mode,
-                         (model_name,))
+                            WHERE m.model={model} AND a.active IS TRUE AND a.perm_{access_mode}""").format(
+                            access_mode=sql.SQL(access_mode), model=sql.Placeholder('model')),
+                            {'model': model_name})
         return [('%s/%s' % x) if x[0] else x[1] for x in self._cr.fetchall()]
 
     # The context parameter is useful when the method translates error messages.
@@ -1181,25 +1183,26 @@ class IrModelAccess(models.Model):
             return True
 
         # We check if a specific rule exists
-        self._cr.execute("""SELECT MAX(CASE WHEN perm_{mode} THEN 1 ELSE 0 END)
+        self._cr.execute(sql.SQL("""SELECT MAX(CASE WHEN perm_{mode} THEN 1 ELSE 0 END)
                               FROM ir_model_access a
                               JOIN ir_model m ON (m.id = a.model_id)
                               JOIN res_groups_users_rel gu ON (gu.gid = a.group_id)
-                             WHERE m.model = %s
-                               AND gu.uid = %s
-                               AND a.active IS TRUE""".format(mode=mode),
-                         (model, self._uid,))
+                             WHERE m.model = {model}
+                               AND gu.uid = {uid}
+                               AND a.active IS TRUE""").format(mode=sql.SQL(mode),
+                            model=sql.Placeholder('model'), uid=sql.Placeholder('uid')),
+                            {'model': model, 'uid': self._uid})
         r = self._cr.fetchone()[0]
 
         if not r:
             # there is no specific rule. We check the generic rule
-            self._cr.execute("""SELECT MAX(CASE WHEN perm_{mode} THEN 1 ELSE 0 END)
+            self._cr.execute(sql.SQL("""SELECT MAX(CASE WHEN perm_{mode} THEN 1 ELSE 0 END)
                                   FROM ir_model_access a
                                   JOIN ir_model m ON (m.id = a.model_id)
                                  WHERE a.group_id IS NULL
-                                   AND m.model = %s
-                                   AND a.active IS TRUE""".format(mode=mode),
-                             (model,))
+                                   AND m.model = {model}
+                                   AND a.active IS TRUE""").format(mode=sql.SQL(mode),
+                                model=sql.Placeholder('model')), {'model': model})
             r = self._cr.fetchone()[0]
 
         if not r and raise_exception:
@@ -1430,11 +1433,11 @@ class IrModelData(models.Model):
         result = []
         cr = self.env.cr
         for prefix, suffixes in bymodule.items():
-            query = """
+            query = sql.SQL("""
                 SELECT d.id, d.module, d.name, d.model, d.res_id, d.noupdate, r.id
                 FROM ir_model_data d LEFT JOIN "{}" r on d.res_id=r.id
                 WHERE d.module=%s AND d.name IN %s
-            """.format(model._table)
+                    """).format(sql.SQL(model._table))
             for subsuffixes in cr.split_for_in_conditions(suffixes):
                 cr.execute(query, (prefix, subsuffixes))
                 result.extend(cr.fetchall())
@@ -1474,14 +1477,14 @@ class IrModelData(models.Model):
 
         for sub_rows in self.env.cr.split_for_in_conditions(rows):
             # insert rows or update them
-            query = """
+            query = sql.SQL("""
                 INSERT INTO ir_model_data (module, name, model, res_id, noupdate, date_init, date_update)
                 VALUES {rows}
                 ON CONFLICT (module, name)
                 DO UPDATE SET date_update=(now() at time zone 'UTC') {where}
-            """.format(
-                rows=", ".join([rowf] * len(sub_rows)),
-                where="WHERE NOT ir_model_data.noupdate" if update else "",
+                    """).format(
+                rows=sql.SQL(", ".join([rowf] * len(sub_rows))),
+                where=sql.SQL("WHERE NOT ir_model_data.noupdate" if update else ""),
             )
             try:
                 self.env.cr.execute(query, [arg for row in sub_rows for arg in row])

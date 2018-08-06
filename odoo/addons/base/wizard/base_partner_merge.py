@@ -6,6 +6,7 @@ import functools
 import itertools
 import logging
 import psycopg2
+from psycopg2 import sql
 
 from odoo import api, fields, models
 from odoo import SUPERUSER_ID, _
@@ -110,7 +111,7 @@ class MergePartnerAutomatic(models.TransientModel):
                 continue
 
             # get list of columns of current table (exept the current fk column)
-            query = "SELECT column_name FROM information_schema.columns WHERE table_name LIKE '%s'" % (table)
+            query = sql.SQL("SELECT column_name FROM information_schema.columns WHERE table_name LIKE {table}").format(sql.SQL(table))
             self._cr.execute(query, ())
             columns = []
             for data in self._cr.fetchall():
@@ -118,32 +119,45 @@ class MergePartnerAutomatic(models.TransientModel):
                     columns.append(data[0])
 
             # do the update for the current table/column in SQL
-            query_dic = {
-                'table': table,
-                'column': column,
-                'value': columns[0],
-            }
             if len(columns) <= 1:
                 # unique key treated
-                query = """
-                    UPDATE "%(table)s" as ___tu
-                    SET %(column)s = %%s
+                query = sql.SQL("""
+                    UPDATE "{table}" as ___tu
+                    SET {column} = {dst_partner}
                     WHERE
-                        %(column)s = %%s AND
+                        {column} = {partner} AND
                         NOT EXISTS (
                             SELECT 1
-                            FROM "%(table)s" as ___tw
+                            FROM "{table}" as ___tw
                             WHERE
-                                %(column)s = %%s AND
-                                ___tu.%(value)s = ___tw.%(value)s
-                        )""" % query_dic
+                                {column} = {dst_partner} AND
+                                ___tu.{value} = ___tw.{value}
+                        )""").format(
+                        table=sql.Placeholder('table'),
+                        column=sql.Placeholder('column'),
+                        value=sql.Placeholder('value'),
+                        dst_partner=sql.Placeholder('dst_partner'),
+                        partner=sql.Placeholder('partner'))
                 for partner in src_partners:
-                    self._cr.execute(query, (dst_partner.id, partner.id, dst_partner.id))
+                    self._cr.execute(query, {
+                        'table': table,
+                        'column': column,
+                        'value': columns[0],
+                        'dst_partner': dst_partner.id,
+                        'partner': partner.id})
             else:
                 try:
                     with mute_logger('odoo.sql_db'), self._cr.savepoint():
-                        query = 'UPDATE "%(table)s" SET %(column)s = %%s WHERE %(column)s IN %%s' % query_dic
-                        self._cr.execute(query, (dst_partner.id, tuple(src_partners.ids),))
+                        query = sql.SQL('UPDATE "{table}" SET {column} = {dst_partner} WHERE {column} IN {src_partners}').format(
+                            table=sql.Placeholder('table'),
+                            column=sql.Placeholder('column'),
+                            dst_partner=sql.Placeholder('dst_partner'),
+                            src_partners=sql.Placeholder('src_partners'))
+                        self._cr.execute(query, {
+                            'table': table,
+                            'column': column,
+                            'dst_partner': dst_partner.id,
+                            'src_partners': tuple(src_partners.ids)})
 
                         # handle the recursivity with parent relation
                         if column == Partner._parent_name and table == 'res_partner':
@@ -163,8 +177,11 @@ class MergePartnerAutomatic(models.TransientModel):
                 except psycopg2.Error:
                     # updating fails, most likely due to a violated unique constraint
                     # keeping record with nonexistent partner_id is useless, better delete it
-                    query = 'DELETE FROM "%(table)s" WHERE "%(column)s" IN %%s' % query_dic
-                    self._cr.execute(query, (tuple(src_partners.ids),))
+                    query = sql.SQL('DELETE FROM {table} WHERE {column} IN {src_partners}').format(
+                        table=sql.Placeholder('table'),
+                        column=sql.Placeholder('column'),
+                        src_partners=sql.Placeholder('src_partners'))
+                    self._cr.execute(query, {'table': table, 'column': column, 'src_partners': tuple(src_partners.ids)})
 
     @api.model
     def _update_reference_fields(self, src_partners, dst_partner):
