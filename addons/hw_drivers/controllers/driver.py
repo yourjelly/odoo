@@ -48,8 +48,16 @@ class StatusController(http.Controller):
             subprocess.call("echo " + data['data'] + " | base64 -d | lp -d " + identifier, shell=True)
             result = 'ok'
         if data.get('action') == 'camera':
+            cameras = subprocess.check_output("v4l2-ctl --list-devices", shell=True).decode('utf-8').split('\n\n')
+            adrress = '/dev/video0'
+            for camera in cameras:
+                if camera:
+                    camera = camera.split('\n\t')
+                    serial = re.sub('[^a-zA-Z0-9 ]+', '', camera[0].split(': ')[0]).replace(' ','_')
+                    if serial == data.get('identifier'):
+                        adrress = camera[1]
             picture = subprocess.check_output("v4l2-ctl --list-formats-ext|grep 'Size'|awk NR==1'{print $3}'", shell=True).decode('utf-8')
-            subprocess.call("fswebcam /tmp/testimage -r " + picture, shell=True)
+            subprocess.call("fswebcam -d " + adrress + "/tmp/testimage -r " + picture, shell=True)
             image_bytes = subprocess.check_output('cat /tmp/testimage | base64',shell=True)
             result = {'image': image_bytes}
         return result
@@ -261,16 +269,20 @@ def send_iot_box_device():
                                                                                     }
 
         # Build camera JSON
-        cameras = subprocess.check_output("v4l2-ctl --list-devices", shell=True).decode('utf-8').split('\n\n')
-        for camera in cameras:
-            if camera:
-                camera = camera.split('\n\t')
-                serial = re.sub('[^a-zA-Z0-9 ]+', '', camera[0].split(': ')[0]).replace(' ','_')
-                devicesList[serial] = {
-                                        'name': camera[0].split(': ')[0],
-                                        'device_connection': 'direct',
-                                        'device_type': 'camera'
-                                    }
+        try:
+            cameras = subprocess.check_output("v4l2-ctl --list-devices", shell=True).decode('utf-8').split('\n\n')
+            for camera in cameras:
+                if camera:
+                    camera = camera.split('\n\t')
+                    serial = re.sub('[^a-zA-Z0-9 ]+', '', camera[0].split(': ')[0]).replace(' ','_')
+                    devicesList[serial] = {
+                                            'name': camera[0].split(': ')[0],
+                                            'device_connection': 'direct',
+                                            'device_type': 'camera'
+                                        }
+        except:
+            pass
+
         # Build printer JSON
         printerList = {}
         printers = subprocess.check_output("sudo lpinfo -lv", shell=True).decode('utf-8').split('Device')
