@@ -195,8 +195,8 @@ class BarcodeScannerdUSBDriver(USBDriver):
 class USBDeviceManager(Thread):
     devices = {}
     def run(self):
-        sendJSON = False
         while 1:
+            sendJSON = False
             devs = usb.core.find(find_all=True)
             updated_devices = {}
             for dev in devs:
