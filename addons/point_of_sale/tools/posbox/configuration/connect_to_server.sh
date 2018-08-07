@@ -25,7 +25,7 @@ function connect () {
 	fi
 	sudo mount -o remount,ro /
 	sudo mount -o remount,ro /root_bypass_ramdisks
-	sudo service odoo restart
+	sudo reboot
 }
 
 connect "${1}" "${2}" &
