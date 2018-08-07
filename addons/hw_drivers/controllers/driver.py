@@ -48,7 +48,8 @@ class StatusController(http.Controller):
             subprocess.call("echo " + data['data'] + " | base64 -d | lp -d " + identifier, shell=True)
             result = 'ok'
         if data.get('action') == 'camera':
-            subprocess.call("fswebcam /tmp/testimage", shell=True)
+            picture = subprocess.check_output("v4l2-ctl --list-formats-ext|grep 'Size'|awk NR==1'{print $3}'", shell=True).decode('utf-8')
+            subprocess.call("fswebcam /tmp/testimage -r " + picture, shell=True)
             image_bytes = subprocess.check_output('cat /tmp/testimage | base64',shell=True)
             result = {'image': image_bytes}
         return result
@@ -318,7 +319,7 @@ def send_iot_box_device():
         hostname = subprocess.check_output('hostname').decode('utf-8').split('\n')[0]
         data['iotbox'] = {'name': hostname,'identifier': maciotbox, 'ip': ips}
         data['devices'] = devicesList
-        data['printers'] = printerList
+        data['printers'] = printerList<
         data_json = json.dumps(data).encode('utf8')
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
         http = urllib3.PoolManager()
