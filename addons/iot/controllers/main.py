@@ -19,7 +19,7 @@ class IoTController(http.Controller):
         else:
             return '' # Can not we throw 404?
 
-    @http.route('/iotbox_conf', type='json', auth='public', csrf=False)
+    @http.route('/iotbox_conf', type='json', auth='public')
     def update_box(self):
         data = request.jsonrequest
         if 'iotbox' in data.keys():
