@@ -339,122 +339,59 @@
     </div>
     <t t-name="web_editor.color_picker">
         <div class="o-color-picker">
-            <div class="row">
+            <div class="row no-gutters">
                 <div class="col col-auto">
-                    <div class="o_colorpicker_container">
-                        <div class="o_picking_area">
-                            <div class="o_picker_poiner"/>
-                        </div>
+                    <div class="o_color_pick_area d-inline-block border">
+                        <div class="o_picker_poiner rounded-circle"/>
                     </div>
-                    <div class="o_color_picker_slider_container">
-                        <div class="o_color_picker_slider">
-                            <div class="o_slider_picker"/>
-                        </div>
+                    <div class="o_color_slider d-inline-block ml8 border">
+                        <div class="o_slider_pointer"/>
                     </div>
                 </div>
-                <div class="col">
-                    <form>
+                <div class="col ml16">
+                    <form class="o-color-picker-inputs">
                         <div class="row">
-                            <div class="col">
-                                <div class="form-group row">
-                                    <label for="staticEmail" class="col-sm-6 col-form-label">Preview</label>
-                                    <div class="col-sm-4">
-                                        <input type="text" class="form-control form-control-sm" id="staticEmail" value="email@example.com"/>
+                            <div class="col-12">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text rounded-0 o-color-preview"></span>
                                     </div>
+                                    <input type="text" class="form-control o-hex-input" data-color-method="hex"/>
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row mt8">
                             <div class="col">
-                                <div class="form-group row">
-                                    <label for="staticEmail" class="col-sm-6 col-form-label">Red</label>
-                                    <div class="col-sm-4">
-                                        <input type="text" class="form-control form-control-sm" id="staticEmail"/>
-                                    </div>
+                                <div class="form-group">
+                                    <label for="red">Red</label>
+                                    <input type="text" class="form-control o-red-input" data-color-method="rgb" id="red"/>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="staticEmail" class="col-sm-6 col-form-label">Green</label>
-                                    <div class="col-sm-4">
-                                        <input type="text" class="form-control form-control-sm" id="staticEmail"/>
-                                    </div>
+                                <div class="form-group">
+                                    <label for="green">Green</label>
+                                    <input type="text" class="form-control o-green-input" data-color-method="rgb" id="green"/>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="staticEmail" class="col-sm-6 col-form-label">Blue</label>
-                                    <div class="col-sm-4">
-                                        <input type="text" class="form-control form-control-sm" id="staticEmail"/>
-                                    </div>
+                                <div class="form-group">
+                                    <label for="blue">Blue</label>
+                                    <input type="text" class="form-control o-blue-input" data-color-method="rgb" id="blue"/>
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="form-group row">
-                                    <label for="staticEmail" class="col-sm-6 col-form-label">Hue</label>
-                                    <div class="col-sm-4">
-                                        <input type="text" class="form-control form-control-sm" id="staticEmail"/>
-                                    </div>
+                                <div class="form-group">
+                                    <label for="hue">Hue</label>
+                                    <input type="text" class="form-control o-hue-input" data-color-method="hsl" id="hue"/>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="staticEmail" class="col-sm-6 col-form-label">Saturation</label>
-                                    <div class="col-sm-4">
-                                        <input type="text" class="form-control form-control-sm" id="staticEmail"/>
-                                    </div>
+                                <div class="form-group">
+                                    <label for="saturation">Saturation %</label>
+                                    <input type="text" class="form-control o-saturation-input" data-color-method="hsl" id="saturation"/>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="staticEmail" class="col-sm-6 col-form-label">Lightness</label>
-                                    <div class="col-sm-4">
-                                        <input type="text" class="form-control form-control-sm" id="staticEmail"/>
-                                    </div>
+                                <div class="form-group">
+                                    <label for="lightness">Lightness %</label>
+                                    <input type="text" class="form-control o-lightness-input" data-color-method="hsl" id="lightness"/>
                                 </div>
                             </div>
                         </div>
                     </form>
                 </div>
-                <!-- <form class="col o-color-picker-form mt8">
-                    <t t-set="colors" t-value="widget.colors"/>
-                    <div class="col-md-12">
-                        <div class="input-group">
-                            <span class="input-group-addon">
-                                <div class="o-color-preview"/>
-                            </span>
-                            <input data-color-type="hex" class="form-control o-color-input o-hex-input" t-att-value="colors.hex"/>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mt32">
-                        <div class="input-group">
-                            <span class="input-group-addon">H</span>
-                            <input type="text" data-color-type="hsl" class="form-control o-color-input o-hue-input" t-att-value="colors.hue"/>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mt32">
-                        <div class="input-group">
-                            <span class="input-group-addon">S</span>
-                            <input type="text" data-color-type="hsl" class="form-control o-color-input o-saturation-input" t-att-value="colors.saturation"/>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mt32">
-                        <div class="input-group">
-                            <span class="input-group-addon">L</span>
-                            <input type="text" data-color-type="hsl" class="form-control o-color-input o-lightness-input" t-att-value="colors.lightness"/>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mt32">
-                        <div class="input-group">
-                            <span class="input-group-addon">R</span>
-                            <input type="text" data-color-type="rgb" class="form-control o-color-input o-red-input" t-att-value="colors.red"/>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mt32">
-                        <div class="input-group">
-                            <span class="input-group-addon">G</span>
-                            <input type="text" data-color-type="rgb" class="form-control o-color-input o-green-input" t-att-value="colors.green"/>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mt32">
-                        <div class="input-group">
-                            <span class="input-group-addon">B</span>
-                            <input type="text" data-color-type="rgb" class="form-control o-color-input o-blue-input" t-att-value="colors.blue"/>
-                        </div>
-                    </div>
-                </form> -->
             </div>
         </div>
     </t>

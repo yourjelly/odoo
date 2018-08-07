@@ -1722,96 +1722,56 @@ img.o_we_selected_image {
 .fa.o_we_selected_image::before {
     @extend %o-we-selected-image;
 }
-// [TO-DO] need to improve scss
-.o_colorpicker_container {
-    height: 220px;
-    width: 220px;
-    padding: 10px;
-    display: inline-block;
-    .o_picking_area {
-        box-sizing: content-box;
-        width: 198px;
-        height: 198px;
-        border: 1px solid #DDD;
+.o-color-picker {
+    .o_color_pick_area {
         position: relative;
-        float: left;
-        display: table;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(to bottom, hsl(0, 0%, 100%) 0%, hsla(0, 0%, 100%, 0) 50%,
+            hsla(0, 0%, 0%, 0) 50%, hsl(0, 0%, 0%) 100%),
+            linear-gradient(to right, hsl(0, 0%, 50%) 0%, hsla(0, 0%, 50%, 0) 100%);
+        cursor: crosshair;
         .o_picker_poiner {
-            box-sizing: content-box;
+            position: absolute;
             width: 10px;
             height: 10px;
-            border-radius: 50%;
-            border: 1px solid #FFF;
+            border: 1px solid white;
+            box-shadow: 0px 0px 2px 1px gray('400');
+        }
+    }
+    .o_color_slider {
+        position: relative;
+        width: 18px;
+        height: 200px;
+        background: linear-gradient(#F00 0%, #FF0 16.66%, #0F0 33.33%, #0FF 50%,
+            #00F 66.66%, #F0F 83.33%, #F00 100%);
+        cursor: pointer;
+        .o_slider_pointer {
             position: absolute;
-            &:before {
-                box-sizing: content-box;
-                width: 8px;
-                height: 8px;
-                content: "";
-                position: absolute;
-                border: 1px solid #999;
-                border-radius: 50%;
+            width: 23px;
+            height: 6px;
+            border: 1px solid white;
+            box-shadow: 0px 0px 2px 1px gray('600');
+            left: -4px;
+        }
+    }
+    .o-color-picker-inputs {
+        .o-color-preview {
+            padding: 0.375rem 1.2rem;
+        }
+        .form-group {
+            margin-bottom: 0.3rem;
+            label {
+                margin-bottom: 0px;
+                font-size: 0.7rem;
+                font-weight: bold;
             }
         }
-        // TO-DO write mixin for all browsers
-        background: -webkit-linear-gradient(top, hsl(0, 0%, 100%) 0%, hsla(0, 0%, 100%, 0) 50%,
-        hsla(0, 0%, 0%, 0) 50%, hsl(0, 0%, 0%) 100%),
-        -webkit-linear-gradient(left, hsl(0, 0%, 50%) 0%, hsla(0, 0%, 50%, 0) 100%);
-        background-color: rgb(255, 0, 0);
-    }
-}
-.o_color_picker_slider_container {
-    display: inline-block;
-    vertical-align: top;
-    padding: 10px;
-    .o_color_picker_slider {
-        // TO-DO write mixin for all browsers
-        background: -webkit-linear-gradient(top, #F00 0%, #FF0 16.66%, #0F0 33.33%, #0FF 50%,
-                    #00F 66.66%, #F0F 83.33%, #F00 100%);
-        width: 15px;
-        height: 198px;
-        border: 1px solid #DDD;
-        display: inline-block;
-        box-sizing: content-box;
-        .o_slider_picker {
-            width: 100%;
-            padding: 1px;
-            border: 1px solid #777;
-            background-color: #FFF;
-            position: relative;
-            top: -1px;
+        .input-group, .form-group {
+            .form-control {
+                height: 28px;
+                font-weight: bold;
+            }
         }
     }
-}
-.o-color-picker {
-    .o-color-picker-form {
-        padding: 0;
-        .o-color-preview {
-            height: 18px;
-            width: 18px;
-            background: red;
-        }
-        .input-group-addon {
-            padding: 2px 8px;
-        }
-        .o-color-input.form-control {
-            padding: 2px 8px;
-            height: 30px;
-            border-bottom-right-radius: 3px;
-            border-top-right-radius: 3px;
-        }
-    }
-}
-.o-color-preview {
-    height: 34px;
-    border: 1px solid #CCC;
-}
-.o-custom-form-group.form-group {
-    input.form-control {
-        height: 28px;
-    }
-}
-// Not here
-.note-custom-color {
-    cursor: pointer;
 }

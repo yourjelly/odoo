@@ -285,6 +285,8 @@ eventHandler.modules.popover.button.update = function ($container, oStyle) {
 
         $(oStyle.image).trigger('attributes_change');
     } else {
+        $container.find('.note-custom-color[data-value="foreColor"]').attr('data-color', oStyle['color']);
+        $container.find('.note-custom-color[data-value="backColor"]').attr('data-color', oStyle['background-color']);
         $container.find('i#colors_preview')
             .toggleClass('bg-transparent', oStyle['background-color'] === 'rgba(0, 0, 0, 0)')
             .css({'color': oStyle['color'], 'background-color': oStyle['background-color']});
@@ -1136,7 +1138,7 @@ var SummernoteManager = Class.extend(mixins.EventDispatcherMixin, {
      * @private
      * @param {Object} data
      */
-    _onColorPickerDialogDemand: function(data) {
+    _onColorPickerDialogDemand: function (data) {
         if (data.__alreadyDone) {
             return;
         }
