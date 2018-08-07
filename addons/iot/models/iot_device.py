@@ -30,7 +30,6 @@ class IotDevice(models.Model):
             self.last_message_date = self.env['iot.message'].search([('device_id', '=', device.id)],
                                                                     order='create_date desc', limit=1).create_date
 
-    @api.depends('iot_id.name', 'name')
     def name_get(self):
         return [(i.id, i.iot_id.name + " " + i.name) for i in self]
 
@@ -41,7 +40,10 @@ class IrActionReport(models.Model):
     device_id = fields.Many2one('iot.device', string='IoT Device', help='When setting a device here, the report will be printed through this device on the iotbox') #TODO: domain for printers?
 
     def iot_render(self, res_ids, data=None):
-        device = self.mapped('device_id')[0]
+        if self.mapped('device_id'):
+            device = self.mapped('device_id')[0]
+        else:
+            device = self.env['iot.device'].browse(data['device_id'][0])
         composite_url = "http://" + device.iot_id.ip + ":8069/driveraction/" + device.identifier
         datas = self.render(res_ids, data=data)
         type = datas[1]
