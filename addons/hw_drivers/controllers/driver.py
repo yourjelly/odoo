@@ -317,6 +317,7 @@ def send_iot_box_device():
         data['iotbox'] = {'name': hostname,'identifier': maciotbox, 'ip': ips}
         data['devices'] = devicesList
         data['printers'] = printerList
+        data['cameras'] = cameraList
         data_json = json.dumps(data).encode('utf8')
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
         http = urllib3.PoolManager()
