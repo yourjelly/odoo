@@ -23,6 +23,11 @@
                             <field name="last_message_date" groups="base.group_no_one"/>
                         </group>
                     </group>
+                    <notebook>
+                        <page string="Printer Reports" name="reports" attrs="{'invisible': [('device_type', '!=', 'printer')]}">
+                            <field name="report_ids" readonly="1"/>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

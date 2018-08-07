@@ -11,6 +11,7 @@ class IotDevice(models.Model):
     name = fields.Char('Name')
     identifier = fields.Char(string='Serial Number')
     last_message_date = fields.Datetime('Last Message', compute="_compute_last_message")
+    report_ids = fields.One2many('ir.actions.report', 'device_id', string='Reports')
     device_type = fields.Selection([
         ('device', 'Device'),
         ('printer', 'Printer'),
