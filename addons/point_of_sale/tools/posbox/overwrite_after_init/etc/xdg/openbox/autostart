@@ -12,11 +12,12 @@ if [ -e /home/pi/odoo-remote-server.conf ]
 	then
 	URL_SERVER=$(grep -r "" /home/pi/odoo-remote-server.conf)/get_url/${maciotbox}
 	until wget -q "${URL_SERVER}" -O /dev/null; do sleep 1; done
+	URL_SERVER=$(curl ${URL_SERVER})
 	if [ -z "${URL_SERVER}" ];
 		then
 		DISPLAY_URL=${URL_LOCAL}
 		else
-		DISPLAY_URL=$(curl ${URL_SERVER})
+		DISPLAY_URL=${URL_SERVER}
 		fi
 else DISPLAY_URL="${URL_LOCAL}"
 fi
