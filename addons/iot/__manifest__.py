@@ -11,10 +11,10 @@ This module provides management of your IoT boxes inside Odoo.
 """,
     'depends': ['web'],
     'data': [
-        #'security/ir.model.access.csv',
-        #'security/ir_rule.xml',
-        #'views/assets.xml',
+        'security/iot.xml',
+        'security/ir.model.access.csv',
         'views/iot_views.xml',
+        'views/res_users_view.xml',
     ],
     'qweb': [
         #'static/src/xml/iap_templates.xml',
