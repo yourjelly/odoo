@@ -43,21 +43,8 @@ class IoTController(http.Controller):
                             'iot_id': box.id, #Might return error code when not successful
                             'name': data['devices'][device]['name'],
                             'identifier': device,
-                            'device_type': 'device',
+                            'device_type': data['devices'][device]['device_type'],
                             'device_connection': data['devices'][device]['device_connection'],
-                        })
-            if 'cameras' in data.keys():
-                for device in data['cameras'].keys():
-                    existing_devices = request.env['iot.device'].sudo().search([('iot_id.identifier', '=', data['iotbox']['identifier']),
-                        ('identifier', '=', device)])
-                    if not existing_devices:
-                        box = request.env['iot.box'].sudo().search([('identifier', '=', data['iotbox']['identifier'])], limit=1)
-                        request.env['iot.device'].sudo().create({
-                            'iot_id': box.id, #Might return error code when not successful
-                            'name': data['cameras'][device]['name'],
-                            'identifier': device,
-                            'device_type': 'camera',
-                            'device_connection': data['cameras'][device]['device_connection'],
                         })
 
             if 'printers' in data.keys():
