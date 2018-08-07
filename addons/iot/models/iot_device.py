@@ -40,7 +40,10 @@ class IrActionReport(models.Model):
     device_id = fields.Many2one('iot.device', string='IoT Device', help='When setting a device here, the report will be printed through this device on the iotbox') #TODO: domain for printers?
 
     def iot_render(self, res_ids, data=None):
-        device = self.mapped('device_id')[0]
+        if self.mapped('device_id'):
+            device = self.mapped('device_id')[0]
+        else:
+            device = self.env['iot.device'].browse(data['device_id'][0])
         composite_url = "http://" + device.iot_id.ip + ":8069/driveraction/" + device.identifier
         datas = self.render(res_ids, data=data)
         type = datas[1]
