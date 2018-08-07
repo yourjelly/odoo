@@ -88,7 +88,13 @@
                     </group>
                     <notebook>
                         <page string="devices">
-                            <field name="device_ids"/>
+                            <field name="device_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="device_type"/>
+                                    <field name="identifier"/>
+                                </tree>
+                            </field>
                         </page>
                     </notebook>
                 </sheet>
