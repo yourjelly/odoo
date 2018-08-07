@@ -1775,13 +1775,11 @@ var ColorPickerWidget = Widget.extend({
         // Picker Events
         'mousedown .o_color_pick_area': '_onMouseDownPicker',
         'mousemove .o_color_pick_area' : '_onMouseMovePicker',
-        'mouseup .o_color_pick_area': '_onMouseLeavePicker',
-        'mouseleave .o_color_pick_area': '_onMouseLeavePicker',
+        'mouseup .o_color_pick_area': '_onMouseUpPicker',
         // Slider Events
         'mousedown .o_color_slider': '_onMouseDownSlider',
         'mousemove .o_color_slider' : '_onMouseMoveSlider',
-        'mouseup .o_color_slider': '_onMouseLeaveSlider',
-        'mouseleave .o_color_slider': '_onMouseLeaveSlider',
+        'mouseup .o_color_slider': '_onMouseUpSlider',
         // Inputs Events
         'change .o-color-picker-inputs' : '_onChangeInputs',
     },
@@ -1789,13 +1787,21 @@ var ColorPickerWidget = Widget.extend({
      * @param {Widget} parent
      * @param {Object} [options]
      * @param {string} [options.defaultHex]
+     * @param {string} [options.defaultRGB]
      */
     init: function (parent, options) {
         this._super.apply(this, arguments);
         this.pickerFlag = false;
         this.sliderFlag = false;
-        this.colors = {hex: options.defaultHex || '#FF0000'};
-        this._updateHex(this.colors.hex);
+        this.colors = {};
+        if (options.defaultHex) {
+            this._updateHex(options.defaultHex);
+        } else if (options.defaultRGB) {
+            var rgb = options.defaultRGB.match(/rgb\((\d{1,3}), ?(\d{1,3}), ?(\d{1,3})\)/);
+            this._updateRgb(parseInt(rgb[1]), parseInt(rgb[2]), parseInt(rgb[3]));
+        } else {
+            this._updateHex('#FF0000');
+        }
     },
     /**
      * @override
@@ -1928,7 +1934,7 @@ var ColorPickerWidget = Widget.extend({
      * @private
      * @param {Event} ev
      */
-    _onMouseLeavePicker: function (ev) {
+    _onMouseUpPicker: function (ev) {
         ev.preventDefault();
         this.pickerFlag = false;
     },
@@ -1969,7 +1975,7 @@ var ColorPickerWidget = Widget.extend({
      * @private
      * @param {Event} ev
      */
-    _onMouseLeaveSlider: function (ev) {
+    _onMouseUpSlider: function (ev) {
         this.sliderFlag = false;
     },
     /**
