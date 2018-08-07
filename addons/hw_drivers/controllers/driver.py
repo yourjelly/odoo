@@ -308,7 +308,8 @@ def send_iot_box_device():
                 serial = re.sub('[^a-zA-Z0-9 ]+', '', camera[0].split(': ')[0]).replace(' ','_')
                 cameraList[serial] = {
                                         'name': camera[0].split(': ')[0],
-                                        'device_connectkion': 'direct'
+                                        'device_connection': 'direct',
+                                        'device_type': 'camera'
                                     }
 
         #build JSON with all devices
