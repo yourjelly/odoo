@@ -256,7 +256,20 @@ def send_iot_box_device():
                     devicesList["%04x:%04x" % (device.idVendor, device.idProduct)] = {
                                                                                         'name': name[1],
                                                                                         'device_connection': 'direct',
+                                                                                        'device_type': 'device'
                                                                                     }
+
+        # Build camera JSON
+        cameras = subprocess.check_output("v4l2-ctl --list-devices", shell=True).decode('utf-8').split('\n\n')
+        for camera in cameras:
+            if camera:
+                camera = camera.split('\n\t')
+                serial = re.sub('[^a-zA-Z0-9 ]+', '', camera[0].split(': ')[0]).replace(' ','_')
+                devicesList[serial] = {
+                                        'name': camera[0].split(': ')[0],
+                                        'device_connection': 'direct',
+                                        'device_type': 'camera'
+                                    }
         # Build printer JSON
         printerList = {}
         printers = subprocess.check_output("sudo lpinfo -lv", shell=True).decode('utf-8').split('Device')
@@ -288,6 +301,7 @@ def send_iot_box_device():
                     printerList[identifier] = {
                                         'name': model,
                                         'device_connection': device_connection,
+                                        'device_type': 'printer'
                     }
                     # install these printers
                     try:
@@ -298,19 +312,6 @@ def send_iot_box_device():
                             subprocess.call("sudo lpadmin -p '" + identifier + "' -E -v '" + printerTab[0].split('= ')[1] + "' -m '" + ppd[0].split(' ')[0] + "'", shell=True)
                     except:
                         subprocess.call("sudo lpadmin -p '" + identifier + "' -E -v '" + printerTab[0].split('= ')[1] + "'", shell=True)
-
-        # Build camera JSON
-        cameraList = {}
-        cameras = subprocess.check_output("v4l2-ctl --list-devices", shell=True).decode('utf-8').split('\n\n')
-        for camera in cameras:
-            if camera:
-                camera = camera.split('\n\t')
-                serial = re.sub('[^a-zA-Z0-9 ]+', '', camera[0].split(': ')[0]).replace(' ','_')
-                cameraList[serial] = {
-                                        'name': camera[0].split(': ')[0],
-                                        'device_connection': 'direct',
-                                        'device_type': 'camera'
-                                    }
 
         #build JSON with all devices
         data = {}
