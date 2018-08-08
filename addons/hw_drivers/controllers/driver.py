@@ -204,6 +204,7 @@ class BarcodeScannerdUSBDriver(USBDriver):
 class USBDeviceManager(Thread):
     devices = {}
     def run(self):
+        first_time = True
         while 1:
             sendJSON = False
             devs = usb.core.find(find_all=True)
@@ -231,8 +232,9 @@ class USBDeviceManager(Thread):
                         d.daemon = True
                         d.start()
                         sendJSON = True
-            if sendJSON:
+            if sendJSON or first_time:
                 send_iot_box_device()
+                first_time = False
             time.sleep(3)
 
 def send_iot_box_device():
