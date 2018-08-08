@@ -467,6 +467,8 @@ class AccountJournal(models.Model):
     alias_domain = fields.Char('Alias domain', compute='_compute_alias_domain', default=lambda self: self.env["ir.config_parameter"].sudo().get_param("mail.catchall.domain"))
     alias_name = fields.Char('Alias Name for Vendor Bills', related='alias_id.alias_name', help="It creates draft vendor bill by sending an email.")
 
+    group_id = fields.Many2one('journal.group')
+
     _sql_constraints = [
         ('code_company_uniq', 'unique (code, name, company_id)', 'The code and name of the journal must be unique per company !'),
     ]
@@ -829,6 +831,34 @@ class AccountJournal(models.Model):
         """
         # We simply call the setup bar function.
         return self.env['res.company'].setting_init_bank_account_action()
+
+class JournalGroup(models.Model):
+    _name = "journal.group"
+    _parent_store = True
+    _order = 'code_prefix'
+
+    parent_id = fields.Many2one('journal.group', index=True, ondelete='cascade')
+    parent_path = fields.Char(index=True)
+    name = fields.Char(required=True)
+    code_prefix = fields.Char()
+
+    def name_get(self):
+        result = []
+        for group in self:
+            name = group.name
+            if group.code_prefix:
+                name = group.code_prefix + ' ' + name
+            result.append((group.id, name))
+        return result
+
+    @api.model
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+        if not args:
+            args = []
+        criteria_operator = ['|'] if operator not in expression.NEGATIVE_TERM_OPERATORS else ['&', '!']
+        domain = criteria_operator + [('code_prefix', '=ilike', name + '%'), ('name', operator, name)]
+        group_ids = self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
+        return self.browse(group_ids).name_get()
 
 
 class ResPartnerBank(models.Model):

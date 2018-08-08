@@ -318,6 +318,7 @@
                                         <field name="default_debit_account_id" domain="[('deprecated', '=', False)]" groups="account.group_account_user"/>
                                         <field name="default_credit_account_id" domain="[('deprecated', '=', False)]" groups="account.group_account_user"/>
                                         <field name="currency_id" options="{'no_create': True}" groups="base.group_multi_currency"/>
+                                        <field name="group_id"/>
                                     </group>
                                 </group>
                             </page>
@@ -2298,7 +2299,6 @@
 
         <menuitem id="menu_account_financial_reports_tree" name="Account Reports" parent="menu_account_reports" action="action_account_financial_report_tree"/>
 
-
         <!-- Manual reconciliation -->
         <record id="action_manual_reconciliation" model="ir.actions.client">
             <field name="name">Reconciliation</field>
@@ -2344,6 +2344,20 @@
             </field>
         </record>
 
+        <record id="view_journal_group_form" model="ir.ui.view">
+            <field name="name">journal.group.form</field>
+            <field name="model">journal.group</field>
+            <field name="arch" type="xml">
+                <form string="Journal Group">
+                    <group>
+                        <field name="name"/>
+                        <field name="code_prefix"/>
+                        <field name="parent_id"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
         <record id="action_account_group_tree" model="ir.actions.act_window">
             <field name="name">Account Groups</field>
             <field name="res_model">account.group</field>
@@ -2353,6 +2367,42 @@
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     Create a new account group
+                </p>
+            </field>
+        </record>
+
+        <record id="view_journal_group_search" model="ir.ui.view">
+            <field name="name">journal.group.search</field>
+            <field name="model">journal.group</field>
+            <field name="arch" type="xml">
+                <search string="Journal groups">
+                    <field name="name"
+                           filter_domain="['|', ('code_prefix', '=like', str(self) + '%'), ('name', 'ilike', self)]"
+                           string="Journal group"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="view_journal_group_tree" model="ir.ui.view">
+            <field name="name">journal.group.tree</field>
+            <field name="model">journal.group</field>
+            <field name="arch" type="xml">
+                <tree string="Journal Group">
+                    <field name="code_prefix"/>
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_journal_group_tree" model="ir.actions.act_window">
+            <field name="name">Journal Groups</field>
+            <field name="res_model">journal.group</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_journal_group_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create a new journal group
                 </p>
             </field>
         </record>
