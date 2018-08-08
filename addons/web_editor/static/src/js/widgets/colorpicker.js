@@ -154,8 +154,9 @@ return Widget.extend({
             return;
         }
         var $picker = this.$('.o_color_pick_area');
-        var top = Math.round(ev.clientY - $picker.offset().top);
-        var left = Math.round(ev.clientX - $picker.offset().left);
+        var offset = $picker.offset();
+        var top = ev.pageY - offset.top;
+        var left = ev.pageX - offset.left;
         var saturation = Math.round((left * 100) / $picker.width());
         var lightness = Math.round(($picker.height() - top) * 100/$picker.height());
         // Handle when pointer out of box
@@ -195,7 +196,7 @@ return Widget.extend({
         if (!this.sliderFlag) {
             return;
         }
-        var y = ev.clientY - this.$('.o_color_slider').offset().top;
+        var y = ev.pageY - this.$('.o_color_slider').offset().top;
         var height = this.$('.o_color_slider').height();
         if (y < 0) {
             y = 0;
