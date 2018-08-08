@@ -7,9 +7,10 @@ from odoo import fields, models
 class L10nInPortCode(models.Model):
     """Port code must be mentioned in export and import of goods under GST."""
     _name = 'l10n_in.port.code'
+    _description = "Indian port code"
     _rec_name = 'code'
 
-    sequence = fields.Integer(default=1)
+    sequence = fields.Integer(default=16)
     code = fields.Char(string="Port Code", required=True)
     name = fields.Char(string="Port", required=True)
     state_id = fields.Many2one('res.country.state', string="State")

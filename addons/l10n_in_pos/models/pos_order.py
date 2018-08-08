@@ -13,14 +13,14 @@ class PosOrder(models.Model):
     amount_return = fields.Float(compute='_compute_amount_all', string='Returned', digits=0, store=True)
 
     @api.model
-    def _get_account_move_line_group_data_type_key(self, data_type, values):
-        res = super(PosOrder, self)._get_account_move_line_group_data_type_key(data_type, values)
+    def _get_account_move_line_group_data_type_key(self, data_type, values, options={}):
+        res = super(PosOrder, self)._get_account_move_line_group_data_type_key(data_type, values, options)
         if data_type == 'product' and res:
             return res + (values['l10n_in_pos_order_id'],)
         return res
 
-    def _prepare_move_line(self, line, partner_id, current_company, cur):
-        res = super(PosOrder, self)._prepare_move_line(line, partner_id, current_company, cur)
+    def _prepare_account_move_line(self, line, partner_id, current_company, currency_id):
+        res = super(PosOrder, self)._prepare_account_move_line(line, partner_id, current_company, currency_id)
         for line_values in res:
             if line_values.get('data_type') == 'product':
                 price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
@@ -43,12 +43,11 @@ class PosOrder(models.Model):
                     'l10n_in_place_of_supply': l10n_in_place_of_supply and l10n_in_place_of_supply.id})
             payment = self.env['account.payment']
             move = self.env['account.move']
-            for statement_line_id in order.statement_ids:
-                for journal_entry_id in statement_line_id.journal_entry_ids:
-                    if journal_entry_id.move_id not in move:
-                        move += journal_entry_id.move_id
-                    if journal_entry_id.payment_id not in payment:
-                        payment += journal_entry_id.payment_id
+            for journal_entry_id in order.statement_ids.mapped('journal_entry_ids'):
+                if journal_entry_id.move_id not in move:
+                    move += journal_entry_id.move_id
+                if journal_entry_id.payment_id not in payment:
+                    payment += journal_entry_id.payment_id
             move.write({
                 'l10n_in_gstin_partner_id': l10n_in_gstin_partner_id,
                 'l10n_in_place_of_supply': l10n_in_place_of_supply and l10n_in_place_of_supply.id})
