@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- External layouts styles -->
 
@@ -50,6 +51,9 @@
         <xpath expr="//img[@t-if='company.logo']" position="replace">
             <img t-if="l10n_in_gstin_partner.image" t-att-src="'data:image/png;base64,%s' % to_text(l10n_in_gstin_partner.image)" alt="Logo"/>
         </xpath>
+        <xpath expr="//span[@t-field='company.partner_id']" position="replace">
+            <span class="company_address" t-esc="l10n_in_gstin_partner" t-options='{"widget": "contact", "fields": ["address"], "no_marker": true}'/>
+        </xpath>
         <xpath expr="//li[@t-if='company.name']" position="replace">
             <li t-if="l10n_in_gstin_partner.name"><span t-field="l10n_in_gstin_partner.name"/></li>
         </xpath>
@@ -74,7 +78,7 @@
         <xpath expr="//div[@t-if='company.logo or company.report_header']" position="attributes">
             <attribute name="t-if">l10n_in_gstin_partner.image or company.report_header</attribute>
         </xpath> 
-        <xpath expr="//span[@t-field='company.partner_id']" position="replace">
+        <xpath expr="//div[@t-field='company.partner_id']" position="replace">
             <span t-esc="l10n_in_gstin_partner" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}' style="border-bottom: 1px solid black; display:inline-block;"/>
         </xpath>
         <xpath expr="//li[@t-if='company.phone']" position="replace">

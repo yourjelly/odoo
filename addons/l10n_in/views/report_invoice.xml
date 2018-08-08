@@ -72,7 +72,5 @@
                 <span t-field="o.number"/>
             </h2>
         </xpath>
-
     </template>
-
 </odoo>
