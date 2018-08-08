@@ -16,16 +16,17 @@ function connect () {
 	then
 		echo "${SERVER}" > ${CURRENT_SERVER_FILE}
 	fi
-	if [ ! -z "${2}" ]
+	if [ "${IOT_NAME}" -ne "${HOSTNAME}"]
 	then
 		sudo sed -i "s/${HOSTNAME}/${IOT_NAME}/g" ${HOSTS}
 		echo "${IOT_NAME}" > /tmp/hostname
 		sudo cp /tmp/hostname "${HOST_FILE}"
 		sudo hostname "${IOT_NAME}"
+		sudo reboot
 	fi
 	sudo mount -o remount,ro /
 	sudo mount -o remount,ro /root_bypass_ramdisks
-	sudo reboot
+	sudo service odoo restart
 }
 
 connect "${1}" "${2}" &
