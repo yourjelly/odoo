@@ -57,7 +57,7 @@ class StatusController(http.Controller):
                     if serial == data.get('identifier'):
                         adrress = camera[1]
             picture = subprocess.check_output("v4l2-ctl --list-formats-ext|grep 'Size'|awk NR==1'{print $3}'", shell=True).decode('utf-8')
-            subprocess.call("fswebcam -d " + adrress + "/tmp/testimage -r " + picture, shell=True)
+            subprocess.call("fswebcam -d " + adrress + " /tmp/testimage -r " + picture, shell=True)
             image_bytes = subprocess.check_output('cat /tmp/testimage | base64',shell=True)
             result = {'image': image_bytes}
         return result
