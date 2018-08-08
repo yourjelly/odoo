@@ -6,6 +6,7 @@ from odoo import api, fields, models, tools
 
 class L10nInPaymentReport(models.AbstractModel):
     _name = "l10n_in.payment.report"
+    _description = "Indian accounting payment report"
 
     account_move_id = fields.Many2one('account.move', string="Account Move")
     payment_id = fields.Many2one('account.payment', string='Payment')
@@ -81,7 +82,6 @@ class L10nInPaymentReport(models.AbstractModel):
 
 
 class AdvancesPaymentReport(models.Model):
-
     _name = "l10n_in.advances.payment.report"
     _inherit = 'l10n_in.payment.report'
     _description = "Advances Payment Analysis"
@@ -124,7 +124,6 @@ class AdvancesPaymentReport(models.Model):
 
 
 class L10nInAdvancesPaymentAdjustmentReport(models.Model):
-
     _name = "l10n_in.advances.payment.adjustment.report"
     _inherit = 'l10n_in.payment.report'
     _description = "Advances Payment Adjustment Analysis"

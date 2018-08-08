@@ -7,11 +7,11 @@ from odoo import api, fields, models
 class L10nInRefundReason(models.Model):
     """Refund reason for credit or debite note as per GST rules.
     so add new model for flexibility."""
-
     _name = "l10n_in.refund.reason"
+    _description = "Refund reason for Indian accounting"
 
     code = fields.Char("Sequence Code", required=True)
-    name = fields.Char("Name", required=True)
+    name = fields.Char("Name", required=True, translate=True)
 
     _sql_constraints = [
         ('code_uniq', 'unique (code)', 'The Sequence Code must be unique!')
