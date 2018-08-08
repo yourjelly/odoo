@@ -25,7 +25,7 @@
                     </group>
                     <notebook>
                         <page string="Printer Reports" name="reports" attrs="{'invisible': [('device_type', '!=', 'printer')]}">
-                            <field name="report_ids" readonly="1"/>
+                            <field name="report_ids" widget="many2many"/>
                         </page>
                     </notebook>
                 </sheet>
