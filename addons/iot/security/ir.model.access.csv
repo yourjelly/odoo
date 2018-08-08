@@ -1,7 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_iot_box_user,iot.box,iot.model_iot_box,iot.group_iot_user,1,0,0,0
-access_iot_box_manager,iot.box,iot.model_iot_box,iot.group_iot_manager,1,1,1,1
+access_iot_box_manager,iot.box,iot.model_iot_box,iot.group_iot_manager,1,1,0,1
 access_iot_device_user,iot.device,iot.model_iot_device,iot.group_iot_user,1,0,0,0
-access_iot_device_manager,iot.device,iot.model_iot_device,iot.group_iot_manager,1,1,1,1
+access_iot_device_manager,iot.device,iot.model_iot_device,iot.group_iot_manager,1,1,0,1
 access_iot_message_user,iot.message,iot.model_iot_message,iot.group_iot_user,1,0,0,0
-access_iot_message_manager,iot.message,iot.model_iot_message,iot.group_iot_manager,1,1,1,1
+access_iot_message_manager,iot.message,iot.model_iot_message,iot.group_iot_manager,1,1,0,1
