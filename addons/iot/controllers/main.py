@@ -17,7 +17,7 @@ class IoTController(http.Controller):
         if iotbox:
             return iotbox.url
         else:
-            return '' # Can not we throw 404?
+            return request.render('website.404')
 
     @http.route('/iotbox_conf', type='json', auth='public')
     def update_box(self):
@@ -61,7 +61,4 @@ class IoTController(http.Controller):
                         })
                     else:
                         existing_printers[0].name = data['printers'][printer]['name']
-
-
-
         return 'ok'
