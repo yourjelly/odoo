@@ -30,7 +30,9 @@ if [ -z "${WIRED_IP}" ] ; then
 
 			ip addr add 10.11.12.1/24 dev wlan0
 
-			service isc-dhcp-server restart
+			service dnsmasq restart
+
+			service nginx restart
 
 			service odoo restart
 		fi

@@ -38,7 +38,8 @@ function connect () {
 
 	logger -t posbox_connect_to_wifi "Connecting to ${ESSID}"
 	sudo service hostapd stop
-	sudo service isc-dhcp-server stop
+	sudo service nginx stop
+	sudo service dnsmasq stop
 
 	sudo pkill wpa_supplicant
 	sudo ifconfig wlan0 down
