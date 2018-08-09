@@ -18,7 +18,7 @@ if [ -e /home/pi/odoo-remote-server.conf ]
 				break
 			fi
 		sleep 1;
-
+		done
 		status_code=$(curl --write-out %{http_code} --silent --output /dev/null ${URL_SERVER})
 		if [ "${status_code}" == '200' ]
 			then
@@ -27,7 +27,6 @@ if [ -e /home/pi/odoo-remote-server.conf ]
 				DISPLAY_URL=$(curl ${URL_SERVER})
 				fi
 			fi
-		done
 fi
 
 # wait until odoo is ready, otherwise you will have to plug a
