@@ -387,7 +387,7 @@
                                             <a role="button" class="dropdown-toggle o-no-caret btn" data-toggle="dropdown" href="#" aria-label="Dropdown menu" title="Dropdown menu">
                                                 <span class="fa fa-ellipsis-v"/>
                                             </a>
-                                            <div class="dropdown-menu" role="menu">
+                                            <div class="dropdown-menu dropdown-menu-right" role="menu">
                                                 <a t-if="widget.editable" role="menuitem" type="edit" class="dropdown-item">Edit</a>
                                                 <a t-if="widget.deletable" role="menuitem" type="delete" class="dropdown-item">Delete</a>
                                             </div>
@@ -665,7 +665,7 @@
                                     <a role="button" class="dropdown-toggle o-no-caret btn" data-toggle="dropdown" href="#" aria-label="Dropdown menu" title="Dropdown menu">
                                         <span class="fa fa-ellipsis-v"/>
                                     </a>
-                                    <div class="dropdown-menu" role="menu">
+                                    <div class="dropdown-menu dropdown-menu-right" role="menu">
                                         <ul class="oe_kanban_colorpicker" data-field="color"/>
                                         <t t-if="widget.deletable">
                                             <a role="menuitem" type="delete" class="dropdown-item">Delete</a>
@@ -1019,7 +1019,7 @@
                                     <a role="button" class="dropdown-toggle o-no-caret btn" data-toggle="dropdown" href="#" aria-label="Dropdown menu" title="Dropdown menu">
                                         <span class="fa fa-ellipsis-v"/>
                                     </a>
-                                    <div class="dropdown-menu" role="menu">
+                                    <div class="dropdown-menu dropdown-menu-rigth" role="menu">
                                         <t t-if="widget.editable">
                                             <a role="menuitem" type="edit" class="dropdown-item">Settings</a>
                                         </t>

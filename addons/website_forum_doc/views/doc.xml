@@ -40,7 +40,7 @@
                                 <a role="button" class="dropdown-toggle o-no-caret btn" data-toggle="dropdown" href="#" aria-label="Dropdown menu" title="Dropdown menu">
                                     <span class="fa fa-ellipsis-v"/>
                                 </a>
-                                <div class="dropdown-menu" role="menu">
+                                <div class="dropdown-menu dropdown-menu-right" role="menu">
                                     <a role="menuitem" type="edit" class="dropdown-item" t-if="widget.editable">Edit Post</a>
                                     <a role="menuitem" type="delete" class="dropdown-item" t-if="widget.deletable">Delete</a>
                                     <ul class="oe_kanban_colorpicker" data-field="color"/>

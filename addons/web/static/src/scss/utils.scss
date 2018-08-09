@@ -251,7 +251,7 @@
     border-color: gray('400');
 }
 @mixin o-kanban-colorpicker {
-    max-width: 150px;
+    width: 150px;
     padding: 3px ($o-dropdown-hpadding - $o-kanban-inner-hmargin) 3px $o-dropdown-hpadding;
 
     > li {

@@ -207,6 +207,9 @@
                 @include o-kanban-dropdown-menu;
                 right: (-$o-kanban-inside-hgutter - 1);
             }
+            .dropdown-menu.dropdown-menu-right {
+                margin-right: -1px;
+            }
         }
 
         &:hover .o_dropdown_kanban, .o_dropdown_kanban.show {
