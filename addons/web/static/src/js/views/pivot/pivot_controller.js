@@ -164,16 +164,12 @@ var PivotController = AbstractController.extend({
             fields: fields
         }));
 
-        if (_t.database.parameters.direction === "rtl") {
-            // We have to append the dropdown at right place in rtl direction.
-            this.$fieldSelection.find('.dropdown-menu').first()
-                .css({top: top, right: this.$el.width() - left})
-                .addClass('show');
-        } else {
-            this.$fieldSelection.find('.dropdown-menu').first()
-                .css({top: top, left: left})
-                .addClass('show');
-        }
+        var cssProps = {top: top};
+        cssProps[_t.database.parameters.direction === 'rtl' ? 'right' : 'left'] =
+            _t.database.parameters.direction === 'rtl' ? this.$el.width() - left : left;
+        this.$fieldSelection.find('.dropdown-menu').first()
+            .css(cssProps)
+            .addClass('show');
     },
     /**
      * @private

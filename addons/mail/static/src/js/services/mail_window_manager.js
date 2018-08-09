@@ -519,8 +519,9 @@ MailManager.include({
         var index = 0;
         while (index < count && index < this._threadWindows.length) {
             var threadWindow = this._threadWindows[index];
-            _t.database.parameters.direction === "rtl" ? threadWindow.$el.css({left: THREAD_WINDOW_WIDTH*index, bottom: 0}) :
-                threadWindow.$el.css({right: THREAD_WINDOW_WIDTH*index, bottom: 0});
+            var cssProps = {bottom: 0};
+            cssProps[_t.database.parameters.direction === 'rtl' ? 'left' : 'right'] = THREAD_WINDOW_WIDTH*index;
+            threadWindow.$el.css(cssProps);
             threadWindow.do_show();
             index++;
         }
