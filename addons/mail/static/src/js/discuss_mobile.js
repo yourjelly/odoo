@@ -8,7 +8,7 @@ var core = require('web.core');
 
 var QWeb = core.qweb;
 
-if (!config.device.isMobile) {
+if (config.device.size_class > config.device.SIZES.SM) {
     return;
 }
 
