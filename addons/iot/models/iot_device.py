@@ -7,23 +7,23 @@ import base64
 class IotDevice(models.Model):
     _name = 'iot.device'
 
-    iot_id = fields.Many2one('iot.box', required = True)
+    iot_id = fields.Many2one('iot.box', string='IoT Box', required = True)
     name = fields.Char('Name')
     identifier = fields.Char(string='Serial Number')
-    last_message_date = fields.Datetime('Last Message', compute="_compute_last_message")
+    last_message_date = fields.Datetime('Last Ping', compute="_compute_last_message")
     report_ids = fields.One2many('ir.actions.report', 'device_id', string='Reports')
     device_type = fields.Selection([
-        ('device', 'Device'),
+        ('device', 'Other'),
         ('printer', 'Printer'),
         ('camera', 'Camera'),
-        ('pedal', 'Pedal')
-        ], default='device',
+        ('trigger', 'Trigger')
+        ], default='device', string='Type',
         help="Type of device.")
     device_connection = fields.Selection([
         ('network', 'Network'),
         ('direct', 'USB'),
         ('bluetooht', 'Bluetooht')
-        ], readonly = True,
+        ], readonly = True, string='Connection',
         help="Type of connection.")
 
     def _compute_last_message(self):
