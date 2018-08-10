@@ -45,7 +45,9 @@ class StatusController(http.Controller):
         data = httprequest.jsonrequest
         result = 'device not found'
         if data.get('action') == 'print':
-            subprocess.call("echo " + data['data'] + " | base64 -d | lp -d " + identifier, shell=True)
+            with open('/tmp/toprinter.pdf', 'wb') as file:
+                file.write(data['data'])
+            subprocess.call("cat /tmp/toprinter.pdf | base64 -d | lp -d " + identifier, shell=True)
             result = 'ok'
         if data.get('action') == 'camera':
             cameras = subprocess.check_output("v4l2-ctl --list-devices", shell=True).decode('utf-8').split('\n\n')
