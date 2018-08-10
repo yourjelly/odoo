@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_port_code_user,port.code.user,model_l10n_in_port_code,,1,0,0,0
+access_refund_reason_user,refund.reason.user,model_l10n_in_refund_reason,,1,0,0,0
