@@ -51,11 +51,6 @@ var IotFieldFloat = FieldFloat.extend({
             self._setValue(data);
             self._render();
         });
-        //this._rpc()
-        //})
-        //self = this;
-        //$.ajax().then(function(result) {
-        //    self.$input.value =
     }
 
 
@@ -68,7 +63,7 @@ ActionManager.include({
     _executeReportAction: function (action, options) {
         if (action.device_id) {
         // Call new route that sends you report to send to printer
-            console.log('In case you would have defined a device');
+            console.log('Printing to IoT device...');
             var self = this;
             self.action=action;
             this._rpc({model: 'ir.actions.report',
@@ -85,10 +80,10 @@ ActionManager.include({
                             beforeSend: function(xhr){xhr.setRequestHeader('Content-Type', 'application/json');},
                             data: JSON.stringify(data),
                             success: function(data) {
-                                console.log('success!');
+                                console.log('Printed successfully!');
                             }});
                         });
-            return this._super.apply(this, arguments); //if we still want the download
+            return $.when();
         }
         else {
             return this._super.apply(this, arguments);

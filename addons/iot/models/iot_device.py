@@ -9,21 +9,21 @@ class IotDevice(models.Model):
 
     iot_id = fields.Many2one('iot.box', string='IoT Box', required = True)
     name = fields.Char('Name')
-    identifier = fields.Char(string='Serial Number')
-    last_message_date = fields.Datetime('Last Ping', compute="_compute_last_message")
+    identifier = fields.Char(string='Serial Number', readonly=True)
+    last_message_date = fields.Datetime('Last Message', compute="_compute_last_message")
     report_ids = fields.One2many('ir.actions.report', 'device_id', string='Reports')
     device_type = fields.Selection([
         ('device', 'Other'),
         ('printer', 'Printer'),
         ('camera', 'Camera'),
         ('trigger', 'Trigger')
-        ], default='device', string='Type',
+        ], readonly=True, default='device', string='Type',
         help="Type of device.")
     device_connection = fields.Selection([
         ('network', 'Network'),
         ('direct', 'USB'),
-        ('bluetooht', 'Bluetooht')
-        ], readonly = True, string='Connection',
+        ('bluetooth', 'Bluetooth')
+        ], readonly=True, string="Connection",
         help="Type of connection.")
 
     def _compute_last_message(self):
@@ -38,13 +38,14 @@ class IotDevice(models.Model):
 class IrActionReport(models.Model):
     _inherit = 'ir.actions.report'
 
-    device_id = fields.Many2one('iot.device', string='IoT Device', help='When setting a device here, the report will be printed through this device on the iotbox') #TODO: domain for printers?
+    device_id = fields.Many2one('iot.device', string='IoT Device', domain="[('device_type', '=', 'printer')]",
+                                help='When setting a device here, the report will be printed through this device on the iotbox')
 
     def iot_render(self, res_ids, data=None):
         if self.mapped('device_id'):
             device = self.mapped('device_id')[0]
         else:
-            device = self.env['iot.device'].browse(data['device_id'][0])
+            device = self.env['iot.device'].browse(data['device_id'])
         composite_url = "http://" + device.iot_id.ip + ":8069/driveraction/" + device.identifier
         datas = self.render(res_ids, data=data)
         type = datas[1]
