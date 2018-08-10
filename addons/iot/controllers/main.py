@@ -14,10 +14,10 @@ class IoTController(http.Controller):
     @http.route('/get_url/<string:identifier>', type='http', auth='public')
     def get_url(self, identifier):
         iotbox = request.env['iot.box'].sudo().search([('identifier', '=', identifier)], limit=1)
-        if iotbox:
+        if iotbox.url:
             return iotbox.url
         else:
-            return request.render('website.404')
+            return 'http://localhost:8069/point_of_sale/display' # ne trouve rien
 
     @http.route('/iotbox_conf', type='json', auth='public')
     def update_box(self):
