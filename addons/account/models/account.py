@@ -841,6 +841,8 @@ class JournalGroup(models.Model):
     parent_path = fields.Char(index=True)
     name = fields.Char(required=True)
     code_prefix = fields.Char()
+    company_id = fields.Many2one('res.company', string='Company', required=True, index=True, default=lambda self: self.env.user.company_id,
+    help="Company related to this journal group")
 
     def name_get(self):
         result = []
