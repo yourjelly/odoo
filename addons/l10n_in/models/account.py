@@ -30,6 +30,13 @@ class AccountMove(models.Model):
     l10n_in_shipping_port_code_id = fields.Many2one('l10n_in.port.code', 'Shipping port code', states={'posted': [('readonly', True)]})
     l10n_in_reseller_partner_id = fields.Many2one('res.partner', 'Reseller', domain=[('vat', '!=', False)], states={'posted': [('readonly', True)]})
     l10n_in_reverse_charge = fields.Boolean('Reverse Charge', states={'posted': [('readonly', True)]})
+    l10n_in_import_type = fields.Selection([
+        ('regular', 'Regular'),
+        ('import_goods', 'Import of Goods'),
+        ('import_goods_sez', 'Import of Goods from SEZ'),
+        ('import_service', 'Import of Service'),
+        ('import_service_sez', 'Import of Service from SEZ')],
+        string='Import Type', default='regular', required=True)
     l10n_in_place_of_supply = fields.Many2one(
         'res.country.state', string="Place Of Supply",
         states={'posted': [('readonly', True)]}, domain=[("country_id.code", "=", "IN")])

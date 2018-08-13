@@ -10,6 +10,8 @@ class ResPartner(models.Model):
 
     # Use in view attrs. Need to required state_id if Country is India.
     country_code = fields.Char(related="country_id.code", string="Country code")
+    # In GSTR-2 report We need to specify that vendor is under composition scheme or not.
+    l10n_in_composition = fields.Boolean(string="Is Composition", help="Check this box if this vendor is under composition scheme")
 
     @api.multi
     def name_get(self):
