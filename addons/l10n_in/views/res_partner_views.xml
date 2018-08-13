@@ -9,6 +9,9 @@
             <xpath expr="//field[@name='vat']" position="attributes">
                 <attribute name="string">GSTIN</attribute>
             </xpath>
+            <xpath expr="//page[@name='sales_purchases']//field[@name='company_id']" position="after">
+                <field name="l10n_in_gstin_company_id" groups="base.group_no_one"/>
+            </xpath>
             <xpath expr="//field[@name='state_id']" position="before">
                 <field name="country_code" invisible="1"/>
             </xpath>
@@ -18,6 +21,17 @@
             <xpath expr="//page[@name='sales_purchases']//field[@name='supplier']" position="after">
                 <field name="l10n_in_composition" attrs="{'invisible': [('supplier', '=', False)]}"/>
             </xpath>
+        </field>
+    </record>
+
+    <record id="view_account_position_form" model="ir.ui.view">
+        <field name="name">account.fiscal.position.form</field>
+        <field name="model">account.fiscal.position</field>
+        <field name="inherit_id" ref="account.view_account_position_form"/>
+        <field name="arch" type="xml">
+            <field name="vat_required" position="after">
+                <field name="l10n_in_supply_type" attrs="{'invisible': [('auto_apply', '!=', True)]}"/>
+            </field>
         </field>
     </record>
 </odoo>

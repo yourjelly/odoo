@@ -24,6 +24,7 @@ class L10nInProductHsnReport(models.Model):
     l10n_in_sgst_amount = fields.Monetary(string="State/UT Tax Amount")
     l10n_in_cess_amount = fields.Monetary(string="Cess Amount")
     company_id = fields.Many2one('res.company', string="Company")
+    l10n_in_gstin_partner_id = fields.Many2one('res.partner', string="GSTIN")
     journal_id = fields.Many2one('account.journal', string="Journal")
 
     hsn_code = fields.Char(string="HSN")
@@ -45,6 +46,7 @@ class L10nInProductHsnReport(models.Model):
             aml.l10n_in_cgst_amount,
             aml.l10n_in_sgst_amount,
             aml.l10n_in_cess_amount,
+            am.l10n_in_gstin_partner_id,
             am.journal_id,
             (ABS(aml.balance) + ABS(aml.l10n_in_igst_amount) + ABS(aml.l10n_in_cgst_amount) + ABS(aml.l10n_in_sgst_amount) + ABS(aml.l10n_in_cess_amount)) * sign(aml.balance) * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END)  AS total,
             aj.company_id,

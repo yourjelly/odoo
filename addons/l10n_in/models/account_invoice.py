@@ -29,6 +29,13 @@ class AccountInvoice(models.Model):
     l10n_in_shipping_port_code_id = fields.Many2one('l10n_in.port.code', 'Shipping port code', states={'draft': [('readonly', False)]})
     l10n_in_reseller_partner_id = fields.Many2one('res.partner', 'Reseller', domain=[('vat', '!=', False)], help="Only Registered Reseller", readonly=True, states={'draft': [('readonly', False)]})
     l10n_in_reverse_charge = fields.Boolean('Reverse Charge', readonly=True, states={'draft': [('readonly', False)]})
+    l10n_in_gstin_partner_id = fields.Many2one(
+        'res.partner',
+        string="GSTIN",
+        required=True,
+        default=lambda self: self.env['res.company']._company_default_get('account.invoice').partner_id,
+        readonly=True, states={'draft': [('readonly', False)]}
+        )
     l10n_in_refund_reason_id = fields.Many2one('l10n_in.refund.reason', string="Refund Reason")
     l10n_in_import_type = fields.Selection([
         ('regular', 'Regular'),
@@ -47,6 +54,7 @@ class AccountInvoice(models.Model):
         """This list of fields value pass to refund invoice."""
         return super(AccountInvoice, self)._get_refund_common_fields() + [
             'l10n_in_reverse_charge',
+            'l10n_in_gstin_partner_id',
             'l10n_in_place_of_supply']
 
     def _get_printed_report_name(self):
@@ -96,6 +104,7 @@ class AccountInvoice(models.Model):
                 'l10n_in_shipping_port_code_id': inv.l10n_in_shipping_port_code_id.id,
                 'l10n_in_reseller_partner_id': inv.l10n_in_reseller_partner_id.id,
                 'l10n_in_reverse_charge': inv.l10n_in_reverse_charge,
+                'l10n_in_gstin_partner_id': inv.l10n_in_gstin_partner_id.id,
                 'l10n_in_import_type': inv.l10n_in_import_type,
                 'l10n_in_place_of_supply': inv.l10n_in_place_of_supply.id
             })
@@ -125,14 +134,18 @@ class AccountInvoice(models.Model):
         """For update tax_lines."""
         return self._onchange_invoice_line_ids()
 
-    @api.onchange('partner_id', 'company_id')
+    @api.onchange('company_id')
+    def _onchange_l10n_in_company(self):
+        self.l10n_in_gstin_partner_id = self.company_id.partner_id
+
+    @api.onchange('partner_id', 'company_id', 'l10n_in_gstin_partner_id')
     def _onchange_partner_id(self):
         if not self.env.context.get('from_purchase_order_change'):
             if self.partner_id.state_id.country_id.code == 'IN':
                 self.l10n_in_place_of_supply = self.partner_id.state_id
             else:
                 self.l10n_in_place_of_supply = self.env.ref('l10n_in.state_in_ot')
-        return super(AccountInvoice, self)._onchange_partner_id()
+        return super(AccountInvoice, self.with_context(l10n_in_gstin_partner_id=self.l10n_in_gstin_partner_id.id))._onchange_partner_id()
 
 
 class AccountInvoiceLine(models.Model):

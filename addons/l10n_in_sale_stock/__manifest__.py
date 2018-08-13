@@ -2,16 +2,16 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'Indian - Point of Sale',
+    'name': 'Indian - Sales and Warehouse Management',
     'version': '1.0',
-    'description': """GST Point of Sale""",
+    'description': """GST Quotation, Sales Orders, Delivery""",
     'category': 'Localization',
     'depends': [
         'l10n_in',
-        'point_of_sale'
+        'sale_stock'
     ],
     'data': [
-        'views/pos_config_views.xml'
+        'views/sale_views.xml'
     ],
     'auto_install': True,
 }

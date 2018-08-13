@@ -17,6 +17,9 @@
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="l10n_in_reseller_partner_id" groups="l10n_in.group_l10n_in_reseller"/>
             </xpath>
+            <xpath expr="//page[@name='other_info']//field[@name='account_id']" position="after">
+                <field name="l10n_in_gstin_partner_id" groups='l10n_in.group_l10n_in_multi_gstin' options="{'no_create': True, 'always_reload': True}" domain="[('l10n_in_gstin_company_id', '=', company_id)]" context="{'show_vat':True}"/>
+            </xpath>
             <xpath expr="//page[@name='other_info']//field[@name='name']" position="after">
                 <field name="l10n_in_refund_reason_id" attrs="{'invisible': [('type', 'not in', ('in_refund','out_refund'))], 'readonly': [('state','!=','draft')]}"/>
             </xpath>
@@ -42,6 +45,9 @@
             <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='name']" position="after">
                 <field name="l10n_in_is_eligible_for_itc"/>
                 <field name="l10n_in_itc_percentage" attrs="{'readonly':[('l10n_in_is_eligible_for_itc', '=', False)]}"/>
+            </xpath>
+            <xpath expr="//page[@name='other_info']//field[@name='account_id']" position="after">
+                <field name="l10n_in_gstin_partner_id" groups='l10n_in.group_l10n_in_multi_gstin' options="{'no_create': True, 'always_reload': True}" context="{'show_vat':True}"/>
             </xpath>
         </field>
     </record>

@@ -20,3 +20,18 @@ class AccountChartTemplate(models.Model):
                 {'type': 'sale', 'name': _('Export Invoices'), 'code': 'EXPINV', 'company_id': company.id, 'show_on_dashboard': True, 'l10n_in_import_export': True}
             ]
         return res
+
+    @api.multi
+    def _get_fp_vals(self, company, position):
+        res = super(AccountChartTemplate, self)._get_fp_vals(company=company, position=position)
+        res.update({'l10n_in_supply_type': position.l10n_in_supply_type})
+        return res
+
+
+class AccountFiscalPositionTemplate(models.Model):
+    _inherit = 'account.fiscal.position.template'
+
+    l10n_in_supply_type = fields.Selection([
+        ('inter_state', 'Inter State'),
+        ('export_import', 'Export/Import')
+    ], string="Supply Type")

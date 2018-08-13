@@ -13,6 +13,7 @@ class L10nInPaymentReport(models.AbstractModel):
     amount = fields.Monetary(string="Amount")
     payment_amount = fields.Monetary(string="Payment Amount")
     partner_id = fields.Many2one('res.partner', string="Customer")
+    l10n_in_gstin_partner_id = fields.Many2one('res.partner', string="GSTIN")
     payment_type = fields.Selection([('outbound', 'Send Money'), ('inbound', 'Receive Money')], string='Payment Type')
     journal_id = fields.Many2one('account.journal', string="Journal")
     company_id = fields.Many2one(related="journal_id.company_id", string="Company")
@@ -37,6 +38,7 @@ class L10nInPaymentReport(models.AbstractModel):
         return """SELECT aml.id AS id,
             aml.move_id as account_move_id,
             ap.id AS payment_id,
+            ap.l10n_in_gstin_partner_id,
             ap.payment_type,
             ap.l10n_in_tax_id as l10n_in_tax_id,
             tt.name AS tax_rate_tag,
@@ -49,9 +51,9 @@ class L10nInPaymentReport(models.AbstractModel):
                 THEN concat(pos.l10n_in_tin,'-',pos.name)
                 ELSE ''
                 END) AS place_of_supply,
-            (CASE WHEN pos.id = cps.id
+            (CASE WHEN pos.id = gstin_ps.id
                 THEN 'Intra State'
-                WHEN pos.id != cps.id
+                WHEN pos.id != gstin_ps.id
                 THEN 'Inter State'
                 END) AS supply_type"""
 
@@ -64,10 +66,9 @@ class L10nInPaymentReport(models.AbstractModel):
             JOIN account_tax_account_tag ttr ON ttr.account_tax_id = at.id
             JOIN account_account_tag tt ON tt.id = ttr.account_account_tag_id
             JOIN res_partner p ON p.id = aml.partner_id
-            JOIN res_company c ON c.id = am.company_id
             LEFT JOIN res_country_state pos ON pos.id = am.l10n_in_place_of_supply
-            LEFT JOIN res_partner cp ON cp.id = c.partner_id
-            LEFT JOIN res_country_state cps ON cps.id = cp.state_id
+            LEFT JOIN res_partner gstin_p ON gstin_p.id = ap.l10n_in_gstin_partner_id
+            LEFT JOIN res_country_state gstin_ps ON gstin_ps.id = gstin_p.state_id
             """
 
     def _where(self):

@@ -18,6 +18,7 @@ class L10nInExemptedReport(models.Model):
     non_gst_supplies = fields.Monetary("Non GST Supplies")
     date = fields.Date("Date")
     company_id = fields.Many2one('res.company', string="Company")
+    l10n_in_gstin_partner_id = fields.Many2one('res.partner', string="GSTIN")
     journal_id = fields.Many2one('account.journal', string="Journal")
     currency_id = fields.Many2one('res.currency', string="Currency")
     l10n_in_igst_amount = fields.Monetary(string="IGST Amount")
@@ -30,6 +31,7 @@ class L10nInExemptedReport(models.Model):
             aml.partner_id AS partner_id,
             aml.date_maturity AS date,
             aml.balance * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END) AS price_total,
+            am.l10n_in_gstin_partner_id,
             am.journal_id,
             aj.company_id,
             aml.move_id as account_move_id,
@@ -43,15 +45,15 @@ class L10nInExemptedReport(models.Model):
                     THEN 'Intra-State supplies to registered persons'
                     ELSE 'Intra-State supplies to unregistered persons'
                     END)
-                WHEN am.l10n_in_place_of_supply != cp.state_id
+                WHEN am.l10n_in_place_of_supply != gstin_p.state_id
                 THEN (CASE WHEN p.vat IS NOT NULL
                     THEN 'Inter-State supplies to registered persons'
                     ELSE 'Inter-State supplies to unregistered persons'
                     END)
             END) AS out_supply_type,
-            (CASE WHEN am.l10n_in_place_of_supply = cp.state_id
+            (CASE WHEN am.l10n_in_place_of_supply = gstin_p.state_id
             THEN 'Intra-State supplies'
-            WHEN am.l10n_in_place_of_supply != cp.state_id
+            WHEN am.l10n_in_place_of_supply != gstin_p.state_id
             THEN 'Inter-State supplies'
             END) AS in_supply_type,
 
@@ -90,10 +92,9 @@ class L10nInExemptedReport(models.Model):
             JOIN account_move am ON am.id = aml.move_id
             JOIN account_account aa ON aa.id = aml.account_id
             JOIN account_journal aj ON aj.id = am.journal_id
-            JOIN res_company c ON c.id = am.company_id
             LEFT JOIN res_partner p ON p.id = am.partner_id
             LEFT JOIN res_country pc ON pc.id = p.country_id
-            LEFT JOIN res_partner cp ON cp.id = c.partner_id
+            LEFT JOIN res_partner gstin_p ON gstin_p.id = am.l10n_in_gstin_partner_id
             WHERE aa.internal_type = 'other' and aml.tax_line_id IS NULL
         """
         return from_str

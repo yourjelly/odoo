@@ -6,6 +6,7 @@
         <field name="model">l10n_in.account.invoice.report</field>
         <field name="arch" type="xml">
             <tree string="GST Account Invoice Report">
+                <field name="l10n_in_gstin_partner_id" groups='l10n_in.group_l10n_in_multi_gstin'/>
                 <field name="name"/>
                 <field name="date"/>
                 <field name="partner_id"/>
@@ -29,6 +30,7 @@
         <field name="model">l10n_in.account.invoice.report</field>
         <field name="arch" type="xml">
             <search string="GST Account Invoice Report">
+                <field name="l10n_in_gstin_partner_id" groups='l10n_in.group_l10n_in_multi_gstin'/>
                 <field name="name" string="Invoice Number" filter_domain="[('name', 'ilike', self)]"/>
                 <separator/>
                 <filter name="b2b" string="B2B Invoice" domain="[('partner_vat','!=', False), ('l10n_in_export_type', 'in', ['regular', 'deemed', 'sale_from_bonded_wh', 'sez_with_igst', 'sez_without_igst']),('invoice_type', 'not in', ('out_refund','in_refund'))]"/>
@@ -44,6 +46,9 @@
                 <separator/>
                 <filter string="This Month" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%%Y-%%m-01')), ('date', '&lt;', (context_today() + relativedelta(months=1)).strftime('%%Y-%%m-01'))]"/>
                 <filter string="Last Month" name="last_month" domain="['&amp;', ('date', '&gt;=', (context_today() - relativedelta(months=1)).strftime('%%Y-%%m-01')), ('date', '&lt;', context_today().strftime('%%Y-%%m-01'))]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_l10n_in_gstin_partner_id" string="GSTIN" context="{'group_by':'l10n_in_gstin_partner_id'}" groups='l10n_in.group_l10n_in_multi_gstin'/>
+                </group>
             </search>
         </field>
     </record>

@@ -13,6 +13,7 @@ class L10nInAccountInvoiceReport(models.Model):
     account_move_id = fields.Many2one('account.move', string="Account Move")
     invoice_id = fields.Many2one('account.invoice', string="Invoice")
     company_id = fields.Many2one('res.company', string="Company")
+    l10n_in_gstin_partner_id = fields.Many2one('res.partner', string="GSTIN")
     date = fields.Date(string="Accounting Date")
     name = fields.Char(string="Invoice Number")
     partner_id = fields.Many2one('res.partner', string="Customer")
@@ -75,6 +76,7 @@ class L10nInAccountInvoiceReport(models.Model):
                 aml.partner_id,
                 am.date,
                 am.l10n_in_export_type AS l10n_in_export_type,
+                am.l10n_in_gstin_partner_id,
                 am.l10n_in_reseller_partner_id AS ecommerce_partner_id,
                 am.l10n_in_shipping_bill_number AS shipping_bill_number,
                 am.l10n_in_shipping_bill_date AS shipping_bill_date,
@@ -119,9 +121,9 @@ class L10nInAccountInvoiceReport(models.Model):
                     THEN 'E'
                     ELSE 'OE'
                     END) as b2cs_is_ecommerce,
-                (CASE WHEN pos.id = cps.id
+                (CASE WHEN pos.id = gstin_ps.id
                     THEN 'Intra State'
-                    WHEN pos.id != cps.id
+                    WHEN pos.id != gstin_ps.id
                     THEN 'Inter State'
                     END) AS supply_type,
                 (CASE WHEN am.l10n_in_export_type in ('deemed', 'export_with_igst', 'sez_with_igst')
@@ -176,7 +178,6 @@ class L10nInAccountInvoiceReport(models.Model):
             FROM account_move_line aml
                 JOIN account_move am ON am.id = aml.move_id
                 JOIN account_journal aj ON aj.id = am.journal_id
-                JOIN res_company c ON c.id = am.company_id
                 JOIN account_tax at ON at.id = aml.l10n_in_tax_id
                 JOIN account_tax_account_tag ttr ON ttr.account_tax_id = at.id
                 JOIN account_account_tag tt ON tt.id = ttr.account_account_tag_id
@@ -184,8 +185,8 @@ class L10nInAccountInvoiceReport(models.Model):
                 LEFT JOIN account_invoice refund_ai ON refund_ai.id = ai.refund_invoice_id
                 LEFT JOIN res_partner p ON p.id = aml.partner_id
                 LEFT JOIN res_country_state pos ON pos.id = am.l10n_in_place_of_supply
-                LEFT JOIN res_partner cp ON cp.id = c.partner_id
-                LEFT JOIN res_country_state cps ON cps.id = cp.state_id
+                LEFT JOIN res_partner gstin_p ON gstin_p.id = am.l10n_in_gstin_partner_id
+                LEFT JOIN res_country_state gstin_ps ON gstin_ps.id = gstin_p.state_id
                 LEFT JOIN res_partner rp ON rp.id = am.l10n_in_reseller_partner_id
         """
         return from_str
@@ -210,6 +211,7 @@ class L10nInAccountInvoiceReport(models.Model):
             am.date,
             am.l10n_in_reverse_charge,
             am.l10n_in_export_type,
+            am.l10n_in_gstin_partner_id,
             am.l10n_in_reseller_partner_id,
             am.l10n_in_shipping_bill_number,
             am.l10n_in_shipping_bill_date,
@@ -227,11 +229,11 @@ class L10nInAccountInvoiceReport(models.Model):
             pos.l10n_in_tin,
             pos.name,
             p.id,
-            cps.l10n_in_tin,
-            cps.name,
+            gstin_ps.l10n_in_tin,
+            gstin_ps.name,
             refund_ai.date,
             pos.id,
-            cps.id,
+            gstin_ps.id,
             refund_ai.l10n_in_export_type,
             ai.l10n_in_export_type,
             aj.type
