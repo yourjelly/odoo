@@ -843,6 +843,7 @@ class JournalGroup(models.Model):
     code_prefix = fields.Char()
     company_id = fields.Many2one('res.company', string='Company', required=True, index=True, default=lambda self: self.env.user.company_id,
     help="Company related to this journal group")
+    journal_ids = fields.One2many('account.journal', 'group_id', string='Account Journal', readonly=True)
 
     def name_get(self):
         result = []
