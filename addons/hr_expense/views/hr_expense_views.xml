@@ -197,8 +197,7 @@
                     <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
                     <separator />
                     <filter domain="[('sheet_id', '=', False)]" string="To report" name="no_report"/>
-                    <filter domain="[('state', '=', 'draft')]" string="To Submit" name="to_report" help="New Expense"/>
-                    <filter domain="[('state', '!=', 'draft')]" string="Reported" name="submitted" help="Confirmed Expenses"/>
+                    <filter domain="[('sheet_id', '!=', False)]" string="Reported" name="submitted" help="Confirmed Expenses"/>
                     <filter domain="[('state', '=', 'refused')]" string="Refused" name="refused" help="Refused Expenses"/>
                     <filter domain="['|', ('state', '=', 'approved'), ('state', '=', 'done')]" string="Approved" name="approved" help="Actual expense sheets, not the refused ones"/>
                     <separator />
@@ -404,10 +403,11 @@
             <field name="arch" type="xml">
                 <tree string="Expense Reports" decoration-warning="state=='draft'" decoration-bf="message_unread == True" decoration-danger="state=='cancel'">
                     <field name="name" string="Expense Report"/>
-                    <field name="accounting_date"/>
                     <field name="employee_id"/>
-                    <field name="currency_id" invisible="1"/>
+                    <field name="create_date"/>
+                    <field name="accounting_date" groups="account.group_account_manager"/>
                     <field name="total_amount" sum="Total Amount"/>
+                    <field name="currency_id" invisible="1"/>
                     <field name="state"/>
                     <field name="message_unread" invisible="1"/>
                 </tree>
