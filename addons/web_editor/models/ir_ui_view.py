@@ -35,6 +35,10 @@ class IrUiView(models.Model):
         return arch.xpath('//*[@data-oe-model != "ir.ui.view"]')
 
     @api.model
+    def extract_oe_structures(self, arch):
+        return arch.xpath('//*[hasclass("oe_structure")][contains(@id, "oe_structure")]')
+
+    @api.model
     def get_default_lang_code(self):
         return False
 
@@ -54,6 +58,33 @@ class IrUiView(models.Model):
             else:
                 Model.browse(int(el.get('data-oe-id'))).write({field: value})
 
+    @api.multi
+    def save_oe_structure(self, el):
+        self.ensure_one()
+
+        if el.get('id') in self.key:
+            # Do not inherit if the oe_structure already has its own inheriting view
+            return False
+
+        arch = etree.Element('data')
+        xpath = etree.Element('xpath', expr="//*[hasclass('oe_structure')][@id='{}']".format(el.get('id')), position="replace")
+        arch.append(xpath)
+        structure = etree.Element(el.tag, attrib=el.attrib)
+        xpath.append(structure)
+        for child in el.iterchildren(tag=etree.Element):
+            structure.append(copy.deepcopy(child))
+
+        self.create({
+            'inherit_id': self.id,
+            'name': '{} ({})'.format(self.name, el.get('id')),
+            'arch': self._pretty_arch(arch),
+            'key': '{}_{}'.format(self.key, el.get('id')),
+            'type': 'qweb',
+        })
+
+        return True
+
+    @api.model
     def _pretty_arch(self, arch):
         # remove_blank_string does not seem to work on HTMLParser, and
         # pretty-printing with lxml more or less requires stripping
@@ -65,6 +96,22 @@ class IrUiView(models.Model):
             parser=etree.XMLParser(encoding='utf-8', remove_blank_text=True))
         return etree.tostring(
             arch_no_whitespace, encoding='unicode', pretty_print=True)
+
+    @api.model
+    def _are_archs_equal(self, arch1, arch2):
+        # Note that comparing the strings would not be ok as attributes order
+        # must not be relevant
+        if arch1.tag != arch2.tag:
+            return False
+        if arch1.text != arch2.text:
+            return False
+        if arch1.tail != arch2.tail:
+            return False
+        if arch1.attrib != arch2.attrib:
+            return False
+        if len(arch1) != len(arch2):
+            return False
+        return all(self._are_archs_equal(arch1, arch2) for arch1, arch2 in zip(arch1, arch2))
 
     @api.multi
     def replace_arch_section(self, section_xpath, replacement):
@@ -99,6 +146,12 @@ class IrUiView(models.Model):
         out.tail = el.tail
         return out
 
+    @api.model
+    def to_empty_oe_structure(self, el):
+        out = html.html_parser.makeelement(el.tag, attrib=el.attrib)
+        out.tail = el.tail
+        return out
+
     @api.multi
     def save(self, value, xpath=None):
         """ Update a view section. The view section may embed fields to write
@@ -106,6 +159,7 @@ class IrUiView(models.Model):
         :param str xpath: valid xpath to the tag to replace
         """
         self.ensure_one()
+
         arch_section = html.fromstring(
             value, parser=html.HTMLParser(encoding='utf-8'))
 
@@ -120,11 +174,16 @@ class IrUiView(models.Model):
             # transform embedded field back to t-field
             el.getparent().replace(el, self.to_field_ref(el))
 
-        for view in self:
-            arch = view.replace_arch_section(xpath, arch_section)
-            view.write({'arch': view._pretty_arch(arch)})
+        for el in self.extract_oe_structures(arch_section):
+            if self.save_oe_structure(el):
+                # empty oe_structure in parent view
+                el.getparent().replace(el, self.to_empty_oe_structure(el))
 
-        self.sudo().mapped('model_data_id').write({'noupdate': True})
+        new_arch = self.replace_arch_section(xpath, arch_section)
+        old_arch = etree.fromstring(self.arch.encode('utf-8'))
+        if not self._are_archs_equal(old_arch, new_arch):
+            self.sudo().model_data_id.write({'noupdate': True})
+            self.write({'arch': self._pretty_arch(new_arch)})
 
     @api.model
     def _view_obj(self, view_id):
