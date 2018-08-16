@@ -81,8 +81,7 @@ class HolidaysType(models.Model):
     time_type = fields.Selection([('leave', 'Leave'), ('other', 'Other')], default='leave', string="Kind of Leave",
                                  help="Whether this should be computed as a holiday or as work time (eg: formation)")
     request_unit = fields.Selection([('day', 'Day'),
-                               ('half', 'Half-day'),
-                               ('hour', 'Hours')], default='day', string='Take Leaves in', required=True)
+                               ('hour', 'Day or Hours')], default='day', string='Take Leaves in', required=True)
 
     accrual = fields.Boolean('Accrual', default=False,
                              help='This option forces this type of leave to be allocated accrually')
@@ -169,10 +168,10 @@ class HolidaysType(models.Model):
 
         for request in requests:
             status_dict = result[request.holiday_status_id.id]
-            status_dict['virtual_remaining_leaves'] -= request.number_of_days_temp
+            status_dict['virtual_remaining_leaves'] -= request.number_of_days
             if request.state == 'validate':
-                status_dict['leaves_taken'] += request.number_of_days_temp
-                status_dict['remaining_leaves'] -= request.number_of_days_temp
+                status_dict['leaves_taken'] += request.number_of_days
+                status_dict['remaining_leaves'] -= request.number_of_days
 
         for allocation in allocations:
             status_dict = result[allocation.holiday_status_id.id]
@@ -180,9 +179,9 @@ class HolidaysType(models.Model):
                 # note: add only validated allocation even for the virtual
                 # count; otherwise pending then refused allocation allow
                 # the employee to create more leaves than possible
-                status_dict['virtual_remaining_leaves'] += allocation.number_of_days_temp
-                status_dict['max_leaves'] += allocation.number_of_days_temp
-                status_dict['remaining_leaves'] += allocation.number_of_days_temp
+                status_dict['virtual_remaining_leaves'] += allocation.number_of_days
+                status_dict['max_leaves'] += allocation.number_of_days
+                status_dict['remaining_leaves'] += allocation.number_of_days
 
         return result
 

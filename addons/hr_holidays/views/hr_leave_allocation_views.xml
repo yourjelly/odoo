@@ -72,18 +72,18 @@
                     </div>
                     <group>
                         <group>
-                            <field name="type_request_unit" invisible="1"/>
+                            <field name="request_unit" invisible="1"/>
                             <field name="name" attrs="{'readonly':[('state','!=','draft'),('state','!=','confirm')]}"/>
                             <field name="holiday_status_id" context="{'employee_id':employee_id}"/>
 
-                            <label for="number_of_days_temp" string="Duration" attrs="{'readonly': [('state', '=', 'validate')], 'invisible': ['|', ('type_request_unit', '=', 'hour'),('accrual', '=', True)]}"/>
-                            <div attrs="{'readonly': [('state', '=', 'validate')], 'invisible': ['|', ('type_request_unit', '=', 'hour'),('accrual', '=', True)]}">
-                                <field name="number_of_days_temp" class="oe_inline" nolabel="1" string="Duration"/>
+                            <label for="number_of_days" string="Duration" attrs="{'readonly': [('state', '=', 'validate')], 'invisible': ['|', ('request_unit', '=', 'hour'),('accrual', '=', True)]}"/>
+                            <div attrs="{'readonly': [('state', '=', 'validate')], 'invisible': ['|', ('request_unit', '=', 'hour'),('accrual', '=', True)]}">
+                                <field name="number_of_days" class="oe_inline" nolabel="1" string="Duration"/>
                                 <span class="ml8">Days</span>
                             </div>
 
-                            <label for="number_of_hours" string="Duration" attrs="{'readonly': [('state', '=', 'validate')], 'invisible': ['|', ('type_request_unit', '!=', 'hour'),('accrual', '=', True)]}"/>
-                            <div attrs="{'readonly': [('state', '=', 'validate')], 'invisible': ['|', ('type_request_unit', '!=', 'hour'),('accrual', '=', True)]}">
+                            <label for="number_of_hours" string="Duration" attrs="{'readonly': [('state', '=', 'validate')], 'invisible': ['|', ('request_unit', '!=', 'hour'),('accrual', '=', True)]}"/>
+                            <div attrs="{'readonly': [('state', '=', 'validate')], 'invisible': ['|', ('request_unit', '!=', 'hour'),('accrual', '=', True)]}">
                                 <field name="number_of_hours" class="oe_inline" nolabel="1" string="Duration"/>
                                 <span class="ml8">Hours</span>
                             </div>

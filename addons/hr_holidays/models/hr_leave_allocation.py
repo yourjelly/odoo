@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-# Copyright (c) 2005-2006 Axelor SARL. (http://www.axelor.com)
-
 import logging
 
 import pytz
@@ -66,24 +64,15 @@ class HolidaysAllocation(models.Model):
             "\nThe status is 'To Approve', when leave request is confirmed by user." +
             "\nThe status is 'Refused', when leave request is refused by manager." +
             "\nThe status is 'Approved', when leave request is approved by manager.")
-    date_from = fields.Datetime('Start Date', readonly=True, index=True, copy=False,
-        states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]}, track_visibility='onchange')
-    date_to = fields.Datetime('End Date', readonly=True, copy=False,
-        states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]}, track_visibility='onchange')
     holiday_status_id = fields.Many2one("hr.leave.type", string="Leave Type", required=True, readonly=True,
         states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]},
         domain=lambda self: self._default_domain_holiday_status_id(), default=_default_holiday_status_id)
     employee_id = fields.Many2one('hr.employee', string='Employee', index=True, readonly=True,
         states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]}, default=_default_employee, track_visibility='onchange')
     notes = fields.Text('Reasons', readonly=True, states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]})
-    number_of_days_temp = fields.Float(
-        'Duration (days)', copy=False, readonly=True,
-        states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]},
-        help='Number of days of the leave request according to your working schedule.')
-    number_of_days = fields.Float('Number of Days', compute='_compute_number_of_days', store=True, track_visibility='onchange')
-    number_of_hours = fields.Float('Duration (hours)', help="Number of hours of the leave allocation according to your working schedule.")
-    parent_id = fields.Many2one('hr.leave.allocation', string='Parent')
-    linked_request_ids = fields.One2many('hr.leave.allocation', 'parent_id', string='Linked Requests')
+    number_of_days = fields.Float('Number of Days', track_visibility='onchange')
+    number_of_hours = fields.Float('Number of Hours')
+
     department_id = fields.Many2one('hr.department', string='Department', readonly=True, states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]})
     category_id = fields.Many2one('hr.employee.category', string='Employee Tag', readonly=True,
         states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]}, help='Category of Employee')
@@ -101,7 +90,7 @@ class HolidaysAllocation(models.Model):
     validation_type = fields.Selection('Validation Type', related='holiday_status_id.validation_type')
     can_reset = fields.Boolean('Can reset', compute='_compute_can_reset')
     can_approve = fields.Boolean('Can Approve', compute='_compute_can_approve')
-    type_request_unit = fields.Selection(related='holiday_status_id.request_unit')
+    request_unit = fields.Selection(related='holiday_status_id.request_unit')
     accrual = fields.Boolean("Accrual", related='holiday_status_id.accrual', store=True, readonly=True)
     number_per_interval = fields.Float("Number of unit per interval", readonly=True, states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]}, default=1)
     interval_number = fields.Integer("Number of unit between two intervals", readonly=True, states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]}, default=1)
@@ -115,11 +104,14 @@ class HolidaysAllocation(models.Model):
         ('years', 'Year(s)')
         ], string="Unit of time between two intervals", default='weeks', readonly=True, states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]})
     nextcall = fields.Date("Date of the next accrual allocation", default=False, readonly=True)
+    date_to = fields.Datetime('End Date', readonly=True, copy=False,
+        states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]}, track_visibility='onchange')
+
 
     _sql_constraints = [
         ('type_value', "CHECK( (holiday_type='employee' AND employee_id IS NOT NULL) or (holiday_type='category' AND category_id IS NOT NULL) or (holiday_type='department' AND department_id IS NOT NULL) )",
          "The employee, department or employee category of this request is missing. Please make sure that your user login is linked to an employee."),
-        ('date_check', "CHECK ( number_of_days_temp >= 0 )", "The number of days must be greater than 0."),
+        ('date_check', "CHECK ( number_of_days >= 0 )", "The number of days must be greater than 0."),
         ('number_per_interval_check', "CHECK(number_per_interval > 0)", "The number per interval should be greater than 0"),
         ('interval_number_check', "CHECK(interval_number > 0)", "The interval number should be greater than 0"),
     ]
@@ -177,27 +169,14 @@ class HolidaysAllocation(models.Model):
                 # mean number of hours set on the employee's calendar
                 days_to_give = days_to_give / holiday.employee_id.resource_calendar_id.hours_per_day or HOURS_PER_DAY
 
-            values['number_of_days_temp'] = holiday.number_of_days_temp + days_to_give * prorata
+            values['number_of_days'] = holiday.number_of_days + days_to_give * prorata
 
             if holiday.holiday_status_id.balance_limit > 0:
-                values['number_of_days_temp'] = min(values['number_of_days_temp'], holiday.holiday_status_id.balance_limit)
+                values['number_of_days'] = min(values['number_of_days'], holiday.holiday_status_id.balance_limit)
 
-            values['number_of_hours'] = values['number_of_days_temp'] * holiday.employee_id.resource_calendar_id.hours_per_day or HOURS_PER_DAY
+            values['number_of_hours'] = values['number_of_days'] * holiday.employee_id.resource_calendar_id.hours_per_day or HOURS_PER_DAY
 
             holiday.write(values)
-
-    @api.multi
-    @api.depends('number_of_days_temp', 'type_request_unit', 'number_of_hours', 'holiday_status_id', 'employee_id')
-    def _compute_number_of_days(self):
-        for holiday in self:
-            number_of_days = holiday.number_of_days_temp
-            if holiday.type_request_unit == 'hour':
-                # In this case we need the number of days to reflect the number of hours taken
-                number_of_days = holiday.number_of_hours / holiday.employee_id.resource_calendar_id.hours_per_day or HOURS_PER_DAY
-            if holiday.holiday_status_id.balance_limit > 0:
-                number_of_days = min(number_of_days, holiday.holiday_status_id.balance_limit)
-
-            holiday.number_of_days = number_of_days
 
     @api.multi
     def _compute_can_reset(self):
@@ -238,20 +217,20 @@ class HolidaysAllocation(models.Model):
         if self.holiday_type == 'employee':
             self.department_id = self.employee_id.department_id
 
-    @api.onchange('number_of_days_temp')
-    def _onchange_number_of_days_temp(self):
-        self.number_of_hours = self.number_of_days_temp * self.employee_id.resource_calendar_id.hours_per_day
+    @api.onchange('number_of_days')
+    def _onchange_number_of_days(self):
+        self.number_of_hours = self.number_of_days * self.employee_id.resource_calendar_id.hours_per_day
+        self.number_of_days = min(self.number_of_days, self.holiday_status_id.balance_limit)
 
     @api.onchange('number_of_hours')
     def _onchange_number_of_hours(self):
-        self.number_of_days_temp = self.number_of_hours / self.employee_id.resource_calendar_id.hours_per_day
+        self.number_of_days = self.number_of_hours / self.employee_id.resource_calendar_id.hours_per_day
 
     @api.onchange('holiday_status_id')
     def _onchange_holiday_status_id(self):
         self.date_to = datetime.combine(self.holiday_status_id.validity_stop, time.max)
-
         if self.accrual:
-            self.number_of_days_temp = 0
+            self.number_of_days = 0
 
             if self.holiday_status_id.request_unit == 'hour':
                 self.unit_per_interval = 'hours'
@@ -271,10 +250,10 @@ class HolidaysAllocation(models.Model):
     def name_get(self):
         res = []
         for leave in self:
-            if leave.type_request_unit == 'hour':
+            if leave.request_unit == 'hour':
                 res.append((leave.id, _("Allocation of %s : %.2f hour(s) To %s") % (leave.holiday_status_id.name, leave.number_of_hours, leave.employee_id.name)))
             else:
-                res.append((leave.id, _("Allocation of %s : %.2f day(s) To %s") % (leave.holiday_status_id.name, leave.number_of_days_temp, leave.employee_id.name)))
+                res.append((leave.id, _("Allocation of %s : %.2f day(s) To %s") % (leave.holiday_status_id.name, leave.number_of_days, leave.employee_id.name)))
         return res
 
     @api.multi
@@ -338,7 +317,7 @@ class HolidaysAllocation(models.Model):
             'holiday_type': 'employee',
             'holiday_status_id': self.holiday_status_id.id,
             'notes': self.notes,
-            'number_of_days_temp': self.number_of_days_temp,
+            'number_of_days': self.number_of_days,
             'parent_id': self.id,
             'employee_id': employee.id
         }

@@ -30,7 +30,7 @@
                             <field name="name"/>
                             <field name="unpaid"/>
                             <field name="limit" attrs="{'invisible': [('accrual', '=', True)]}"/>
-                            <field name="request_unit"/>
+                            <field name="request_unit" widget="radio"/>
                             <field name="sequence" attrs="{'invisible': [('limit', '!=', False)]}" groups="base.group_no_one"/>
                             <field name="time_type" groups="base.group_no_one"/>
                         </group>
