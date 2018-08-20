@@ -11,7 +11,7 @@ maciotbox=$(/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5})
 
 if [ -e /home/pi/odoo-remote-server.conf ]
 	then
-	URL_SERVER=$(grep "" /home/pi/odoo-remote-server.conf)/get_url/${maciotbox}
+	URL_SERVER=$(grep "" /home/pi/odoo-remote-server.conf)/iot/box/${maciotbox}/screen_url
 	var=0
 	while [ ${var} -lt 30 ]; do
 		var=$((var+1))

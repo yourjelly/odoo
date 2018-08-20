@@ -248,7 +248,7 @@ def send_iot_box_device(send_printer):
     f.close()
     server = server.split('\n')[0]
     if server:
-        url = server + "/iotbox_conf/"  # /check_device"
+        url = server + "iot/setup"  # /check_device"
         interfaces = ni.interfaces()
         for iface_id in interfaces:
             iface_obj = ni.ifaddresses(iface_id)
@@ -268,8 +268,8 @@ def send_iot_box_device(send_printer):
                     name = usbpath.split("%04x:%04x" % (device.idVendor, device.idProduct))
                     devicesList["%04x:%04x" % (device.idVendor, device.idProduct)] = {
                                                                                         'name': name[1],
-                                                                                        'device_connection': 'direct',
-                                                                                        'device_type': 'device'
+                                                                                        'connection': 'direct',
+                                                                                        'type': 'device'
                                                                                     }
 
         # Build camera JSON
@@ -281,8 +281,8 @@ def send_iot_box_device(send_printer):
                     serial = re.sub('[^a-zA-Z0-9 ]+', '', camera[0].split(': ')[0]).replace(' ','_')
                     devicesList[serial] = {
                                             'name': camera[0].split(': ')[0],
-                                            'device_connection': 'direct',
-                                            'device_type': 'camera'
+                                            'connection': 'direct',
+                                            'type': 'camera'
                                         }
         except:
             pass
@@ -318,8 +318,8 @@ def send_iot_box_device(send_printer):
                     if identifier and identifier not in printerList:
                         printerList[identifier] = {
                                             'name': model,
-                                            'device_connection': device_connection,
-                                            'device_type': 'printer'
+                                            'connection': device_connection,
+                                            'type': 'printer'
                         }
                         # install these printers
                         try:
@@ -334,9 +334,8 @@ def send_iot_box_device(send_printer):
         #build JSON with all devices
         data = {}
         hostname = subprocess.check_output('hostname').decode('utf-8').split('\n')[0]
-        data['iotbox'] = {'name': hostname,'identifier': maciotbox, 'ip': ips}
-        data['devices'] = devicesList
-        data['printers'] = printerList
+        data = {'name': hostname,'identifier': maciotbox, 'ip': ips}
+        data['devices'] = devicesList.update(printerList)
         data_json = json.dumps(data).encode('utf8')
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
         http = urllib3.PoolManager()
