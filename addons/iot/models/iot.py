@@ -1,35 +1,39 @@
-from odoo import api, fields, models, exceptions
 import base64
+
+from odoo import api, fields, models, exceptions
 
 # ----------------------------------------------------------
 # Models for client
 # ----------------------------------------------------------
+class IotBox(models.Model):
+    _name = 'iot.box'
+
+    name = fields.Char('Name', readonly=True)
+    identifier = fields.Char(string='Identifier (Mac Address)', readonly=True)
+    device_ids = fields.One2many('iot.device', 'iot_id', string="Devices", readonly=True)
+    ip = fields.Char('IP Address', readonly=True)
+    screen_url = fields.Char('Screen URL', help="Url of the page that will be displayed by hdmi port of the box.")
+
+
 class IotDevice(models.Model):
     _name = 'iot.device'
 
     iot_id = fields.Many2one('iot.box', string='IoT Box', required = True)
     name = fields.Char('Name')
-    identifier = fields.Char(string='Serial Number', readonly=True)
-    last_message_date = fields.Datetime('Last Message', compute="_compute_last_message")
-    report_ids = fields.One2many('ir.actions.report', 'device_id', string='Reports')
-    device_type = fields.Selection([
-        ('device', 'Other'),
+    identifier = fields.Char(string='Identifier', readonly=True)
+    type = fields.Selection([
         ('printer', 'Printer'),
         ('camera', 'Camera'),
-        ('trigger', 'Trigger')
+        ('device', 'Device'),
         ], readonly=True, default='device', string='Type',
         help="Type of device.")
-    device_connection = fields.Selection([
+    connection = fields.Selection([
         ('network', 'Network'),
         ('direct', 'USB'),
         ('bluetooth', 'Bluetooth')
         ], readonly=True, string="Connection",
         help="Type of connection.")
-
-    def _compute_last_message(self):
-        for device in self:
-            self.last_message_date = self.env['iot.message'].search([('device_id', '=', device.id)],
-                                                                    order='create_date desc', limit=1).create_date
+    report_ids = fields.One2many('ir.actions.report', 'device_id', string='Reports')
 
     def name_get(self):
         return [(i.id, "[" + i.iot_id.name +"] " + i.name) for i in self]
