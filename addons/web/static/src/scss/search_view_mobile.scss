@@ -54,6 +54,7 @@
             .o_dropdown_toggler_btn {
                 width: 100%;
                 text-align: left;
+                padding: 7px 14px;
             }
 
             // We disable the backdrop in this case because it prevents any
@@ -61,16 +62,17 @@
             .dropdown-backdrop {
                 z-index: -1;
             }
-            ul {
-                position: relative;
+            .dropdown-menu {
+                position: relative !important;;
                 width: 100%;
+                transform: translate3d(0px, 0px, 0px) !important;
                 box-shadow: none;
                 border: none;
                 color: gray('600');
                 .divider {
                     margin: 0px;
                 }
-                > li > a  {
+                > a  {
                     padding: 10px 26px;
                 }
             }
