@@ -381,12 +381,15 @@ class DeviceManager(gatt.DeviceManager):
                     d.connect()
                     print("New Driver", path, drivers)
 
+
 class BtManager(Thread):
-    def init(self, bt):
-        self.bt = bt
+    bt = False
 
     def run(self):
-        self.bt.run()
+        dm = DeviceManager(adapter_name='hci0')
+        self.bt = dm
+        dm.start_discovery()
+        dm.run()
 
 
 
@@ -404,7 +407,7 @@ class BtMetaClass(type):
         return newclass
 
 
-class BtDriver(metaclass=BtMetaClass):
+class BtDriver(Driver, metaclass=BtMetaClass):
 
 
     def __init__(self, device):
@@ -429,12 +432,12 @@ class BtDriver(metaclass=BtMetaClass):
 class SylvacBtDriver(BtDriver):
 
     def supported(self):
-        return self.device.alias() == "SY295"
+        return self.dev.alias() == "SY295"
 
     def connect(self):
-        self.gatt_device = SylvacBluetoothDriver()
+        self.gatt_device = SylvacBluetoothDriver(mac_address=self.dev.mac_address, manager=bm.bt)
+        self.gatt_device.btdriver = self
         self.gatt_device.connect()
-        self.gatt_device.bt_driver = self
 
 
 class SylvacBluetoothDriver(gatt.Device):
@@ -469,12 +472,9 @@ class SylvacBluetoothDriver(gatt.Device):
 
 
 #----------------------------------------------------------
-# Agent ? Push values
+#Bluetooth start
 #----------------------------------------------------------
-# SDQFSQDFQSDF
-dm = DeviceManager(adapter_name='hci0')
-dm.start_discovery()
-bm = BtManager(dm)
+bm = BtManager()
 bm.start()
 
 
