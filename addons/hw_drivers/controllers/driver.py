@@ -248,7 +248,7 @@ def send_iot_box_device(send_printer):
     f.close()
     server = server.split('\n')[0]
     if server:
-        url = server + "iot/setup"  # /check_device"
+        url = server + "/iot/setup"
         interfaces = ni.interfaces()
         for iface_id in interfaces:
             iface_obj = ni.ifaddresses(iface_id)
@@ -335,7 +335,8 @@ def send_iot_box_device(send_printer):
         data = {}
         hostname = subprocess.check_output('hostname').decode('utf-8').split('\n')[0]
         data = {'name': hostname,'identifier': maciotbox, 'ip': ips}
-        data['devices'] = devicesList.update(printerList)
+        devicesList.update(printerList)
+        data['devices'] = devicesList
         data_json = json.dumps(data).encode('utf8')
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
         http = urllib3.PoolManager()
