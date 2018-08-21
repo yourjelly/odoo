@@ -68,7 +68,7 @@ ActionManager.include({
             self.action=action;
             this._rpc({model: 'ir.actions.report',
                        method: 'iot_render',
-                       args: [action.id, action.context.active_ids, action]
+                       args: [action.id, action.context.active_ids, {'device_id': action.device_id}]
                       }).then(function (result) {
                         var data = {action: 'print',
                                     type: result[1],
