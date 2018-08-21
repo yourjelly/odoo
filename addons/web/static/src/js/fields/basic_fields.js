@@ -2055,7 +2055,7 @@ var JournalDashboardGraph = AbstractField.extend({
         return this._super.apply(this, arguments);
     },
     destroy: function () {
-        if ('nv' in window) {
+        if ('nv' in window && typeof window.nv === 'object' && typeof nv.utils === 'object' && typeof nv.utils.offWindowResize === 'function') {
             // if the widget is destroyed before the lazy loaded libs (nv) are
             // actually loaded (i.e. after the widget has actually started),
             // nv is undefined, but the handler isn't bound yet anyway
