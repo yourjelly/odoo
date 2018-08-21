@@ -83,7 +83,7 @@ class Driver(Thread):
     def value(self):
         pass
 
-    def run(self):
+    def get_name(self):
         pass
 
     def action(self, action):
@@ -108,14 +108,17 @@ class USBDriver(Driver,metaclass=UsbMetaClass):
         self.dev = dev
         self.value = ""
 
+    def get_name(self):
+        return str(self.dev.idVendor) + str(self.dev.idProduct)
+
+    def value(self):
+        return self.value
+
 
 class SylvacUSBDriver(USBDriver):
 
     def supported(self):
         return getattr(self.dev, 'idVendor') == 0x0403 and getattr(self.dev, 'idProduct') == 0x6001
-
-    def value(self):
-        return self.value
 
     def run(self):
         connection = serial.Serial('/dev/serial/by-id/usb-Sylvac_Power_USB_A32DV5VM-if00-port0',
@@ -262,6 +265,7 @@ def send_iot_box_device(send_printer):
         devicesList = {}
         for path in drivers:
             lsusb = str(subprocess.check_output('lsusb')).split("\\n")
+            found = False
             for usbpath in lsusb:
                 device = drivers[path].dev
                 if "%04x:%04x" % (device.idVendor, device.idProduct) in usbpath:
@@ -271,6 +275,13 @@ def send_iot_box_device(send_printer):
                                                                                         'connection': 'direct',
                                                                                         'type': 'device'
                                                                                     }
+                    found = True
+            if not found:
+                device_name = drivers[path].get_name()
+                devicesList[path] = {'name': device_name,
+                                     'type': 'device',
+                                     'connection': 'direct'}
+
 
         # Build camera JSON
         try:
@@ -362,26 +373,20 @@ class DeviceManager(gatt.DeviceManager):
     def device_discovered(self, device):
         # TODO: need some kind of updated_devices mechanism or not?
         for driverclass in btdrivers:
-            d = driverclass(mac_address = device.mac_address, manager=self)
+            d = driverclass(device = device)
             path = "bt/%s/%s" % (device.mac_address, device.alias())
             if d.supported():
                 if path not in drivers:
                     drivers[path] = d
                     d.connect()
                     print("New Driver", path, drivers)
-                    #d.daemon=True
-                    #d.run()
-                #Otherwise, we should try to reanimate driver
-                #else:
-                #    print('Weird error with driver')
-                #    drivers[path].run()
-            #else:
-            #    if path in drivers:
-            #        print("Del driver", path)
-            #        del drivers[path]
-            #    del d
-        #print("Discovered [%s] %s" % (device.mac_address, device.alias()))
 
+class BtManager(Thread):
+    def init(self, bt):
+        self.bt = bt
+
+    def run(self):
+        self.bt.run()
 
 
 
@@ -400,29 +405,40 @@ class BtMetaClass(type):
 
 
 class BtDriver(metaclass=BtMetaClass):
-    def __init__(self, mac_address, manager):
-        pass #handled by gatt.Device
 
-    def supported(self):
-        pass
+
+    def __init__(self, device):
+        super(BtDriver, self).__init__()
+        self.dev = device
+        self.value = ''
+        self.gatt_device = False
+
+    def get_name(self):
+        return self.dev.alias()
 
     def value(self):
-        pass
-
-    def run(self):
-        pass
+        return self.value
 
     def action(self, action):
         pass
 
+    def connect(self):
+        pass
 
-class SylvacBluetoothDriver(BtDriver, gatt.Device):
+
+class SylvacBtDriver(BtDriver):
 
     def supported(self):
-        return self.device.alias() =="SY295"
+        return self.device.alias() == "SY295"
 
-    def value(self):
-        return self.value
+    def connect(self):
+        self.gatt_device = SylvacBluetoothDriver()
+        self.gatt_device.connect()
+        self.gatt_device.bt_driver = self
+
+
+class SylvacBluetoothDriver(gatt.Device):
+    btdriver = False
 
     def services_resolved(self):
         super().services_resolved()
@@ -440,6 +456,7 @@ class SylvacBluetoothDriver(BtDriver, gatt.Device):
 
     def characteristic_value_updated(self, characteristic, value):
         total = value[0] + value[1] * 256 + value[2] * 256 * 256 + value[3] * 256 * 256 * 256
+        self.btdriver.value = total
         print('SY295', total / 1000000.0)
 
         # print "Supermeasurement ", characteristic, hex(value[0]), hex(value[1]), hex(value[2]), hex(value[3]), total
@@ -450,19 +467,19 @@ class SylvacBluetoothDriver(BtDriver, gatt.Device):
     def characteristic_enable_notification_failed(self):
         print("Problem connecting")
 
-    def action(self, action):
-        pass
-
 
 #----------------------------------------------------------
 # Agent ? Push values
 #----------------------------------------------------------
 # SDQFSQDFQSDF
-#dm = DeviceManager(adapter_name='hci0')
+dm = DeviceManager(adapter_name='hci0')
+dm.start_discovery()
+bm = BtManager(dm)
+bm.start()
 
-#dm.start_discovery()
-#dm.run()
-#print("AFTER RUN")
+
+
+print("AFTER RUN")
 
 #if __name__ == '__main__':
 #print (usbdrivers)
