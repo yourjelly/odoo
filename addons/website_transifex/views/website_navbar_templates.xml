@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="transifex_translate_button" inherit_id="website.user_navbar">
+
+        <xpath expr="//a[@data-action='translate']" position="after">
+            <a data-action="translate" href="#">Translate on Transifex</a>
+        </xpath>
+    </template>
+</odoo>
