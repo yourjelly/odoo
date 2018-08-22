@@ -434,12 +434,12 @@ class SylvacBtDriver(BtDriver):
         return self.dev.alias() == "SY295"
 
     def connect(self):
-        self.gatt_device = SylvacBluetoothDriver(mac_address=self.dev.mac_address, manager=bm.bt)
+        self.gatt_device = GattSylvacBtDriver(mac_address=self.dev.mac_address, manager=bm.bt)
         self.gatt_device.btdriver = self
         self.gatt_device.connect()
 
 
-class SylvacBluetoothDriver(gatt.Device):
+class GattSylvacBtDriver(gatt.Device):
     btdriver = False
 
     def services_resolved(self):
@@ -456,8 +456,6 @@ class SylvacBluetoothDriver(gatt.Device):
     def characteristic_value_updated(self, characteristic, value):
         total = value[0] + value[1] * 256 + value[2] * 256 * 256 + value[3] * 256 * 256 * 256
         self.btdriver.value = total / 1000000.0
-
-        # print "Supermeasurement ", characteristic, hex(value[0]), hex(value[1]), hex(value[2]), hex(value[3]), total
 
     def characteristic_enable_notification_succeeded(self):
         print("Success pied à coulisse Bluetooth!")
