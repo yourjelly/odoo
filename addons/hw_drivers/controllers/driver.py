@@ -363,7 +363,7 @@ udm.start()
 #----------------------------------------------------------
 # Bluetooth
 #----------------------------------------------------------
-class DeviceManager(gatt.DeviceManager):
+class GattBtManager(gatt.DeviceManager):
 
     def device_discovered(self, device):
         # TODO: need some kind of updated_devices mechanism or not?
@@ -379,11 +379,11 @@ class DeviceManager(gatt.DeviceManager):
 
 
 class BtManager(Thread):
-    bt = False
+    gatt_manager = False
 
     def run(self):
-        dm = DeviceManager(adapter_name='hci0')
-        self.bt = dm
+        dm = GattBtManager(adapter_name='hci0')
+        self.gatt_manager = dm
         dm.start_discovery()
         dm.run()
 
@@ -434,7 +434,7 @@ class SylvacBtDriver(BtDriver):
         return self.dev.alias() == "SY295"
 
     def connect(self):
-        self.gatt_device = GattSylvacBtDriver(mac_address=self.dev.mac_address, manager=bm.bt)
+        self.gatt_device = GattSylvacBtDriver(mac_address=self.dev.mac_address, manager=bm.gatt_manager)
         self.gatt_device.btdriver = self
         self.gatt_device.connect()
 
