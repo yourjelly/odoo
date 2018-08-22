@@ -33,12 +33,9 @@ class StatusController(http.Controller):
 
     @http.route('/driverdetails/<string:identifier>', type='http', auth='none', cors='*')
     def statusdetail(self, identifier):
-        for path in drivers:
-            if identifier in path:
-                return str(drivers[path].value)
-            else:
-                result = 'device not found'
-        return result
+        if drivers.get(identifier):
+            return str(drivers[identifier].value)
+        return 'device not found'
 
     @http.route('/driveraction/<string:identifier>', type='json', auth='none', cors='*', csrf=False)
     def driveraction(self, identifier):
@@ -226,7 +223,7 @@ class USBDeviceManager(Thread):
             devs = usb.core.find(find_all=True)
             updated_devices = {}
             for dev in devs:
-                path =  "usb/%04x:%04x/%03d/%03d/" % (dev.idVendor, dev.idProduct, dev.bus, dev.address)
+                path =  "usb_%04x:%04x_%03d_%03d_" % (dev.idVendor, dev.idProduct, dev.bus, dev.address)
                 updated_devices[path] = self.devices.get(path, dev)
             added = updated_devices.keys() - self.devices.keys()
             removed = self.devices.keys() - updated_devices.keys()
@@ -368,12 +365,11 @@ udm.start()
 #----------------------------------------------------------
 class DeviceManager(gatt.DeviceManager):
 
-
     def device_discovered(self, device):
         # TODO: need some kind of updated_devices mechanism or not?
         for driverclass in btdrivers:
             d = driverclass(device = device)
-            path = "bt/%s/%s" % (device.mac_address, device.alias())
+            path = "bt_%s" % (device.mac_address,)
             if d.supported():
                 if path not in drivers:
                     drivers[path] = d
@@ -462,7 +458,7 @@ class SylvacBluetoothDriver(gatt.Device):
 
     def characteristic_value_updated(self, characteristic, value):
         total = value[0] + value[1] * 256 + value[2] * 256 * 256 + value[3] * 256 * 256 * 256
-        self.btdriver.value = total
+        self.btdriver.value = total / 1000000.0
         print('SY295', total / 1000000.0)
 
         # print "Supermeasurement ", characteristic, hex(value[0]), hex(value[1]), hex(value[2]), hex(value[3]), total
