@@ -455,6 +455,8 @@ class GattSylvacBtDriver(gatt.Device):
 
     def characteristic_value_updated(self, characteristic, value):
         total = value[0] + value[1] * 256 + value[2] * 256 * 256 + value[3] * 256 * 256 * 256
+        if total > 256 ** 4 / 2:
+            total = total - 256 ** 4
         self.btdriver.value = total / 1000000.0
 
     def characteristic_enable_notification_succeeded(self):
