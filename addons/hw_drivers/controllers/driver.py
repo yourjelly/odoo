@@ -86,6 +86,9 @@ class Driver(Thread):
     def get_name(self):
         pass
 
+    def get_connection(self):
+        pass
+
     def action(self, action):
         pass
 
@@ -109,7 +112,15 @@ class USBDriver(Driver,metaclass=UsbMetaClass):
         self.value = ""
 
     def get_name(self):
-        return str(self.dev.idVendor) + str(self.dev.idProduct)
+        lsusb = str(subprocess.check_output('lsusb')).split("\\n")
+        for usbpath in lsusb:  # Should filter on usb devices or inverse loops?
+            device = self.dev
+            if "%04x:%04x" % (device.idVendor, device.idProduct) in usbpath:
+                return usbpath.split("%04x:%04x" % (device.idVendor, device.idProduct))
+        return str(device.idVendor) + ":" + str(device.idProduct)
+
+    def get_connection(self):
+        return 'direct'
 
     def value(self):
         return self.value
@@ -264,23 +275,11 @@ def send_iot_box_device(send_printer):
         # Build device JSON
         devicesList = {}
         for path in drivers:
-            lsusb = str(subprocess.check_output('lsusb')).split("\\n")
-            found = False
-            for usbpath in lsusb:
-                device = drivers[path].dev
-                if "%04x:%04x" % (device.idVendor, device.idProduct) in usbpath:
-                    name = usbpath.split("%04x:%04x" % (device.idVendor, device.idProduct))
-                    devicesList["%04x:%04x" % (device.idVendor, device.idProduct)] = {
-                                                                                        'name': name[1],
-                                                                                        'connection': 'direct',
-                                                                                        'type': 'device'
-                                                                                    }
-                    found = True
-            if not found:
-                device_name = drivers[path].get_name()
-                devicesList[path] = {'name': device_name,
-                                     'type': 'device',
-                                     'connection': 'direct'}
+            device_name = drivers[path].get_name()
+            device_connection = drivers[path].get_connection()
+            devicesList[path] = {'name': device_name,
+                                 'type': 'device',
+                                 'connection': device_connection}
 
 
         # Build camera JSON
@@ -379,6 +378,7 @@ class DeviceManager(gatt.DeviceManager):
                 if path not in drivers:
                     drivers[path] = d
                     d.connect()
+                    send_iot_box_device(False)
                     print("New Driver", path, drivers)
 
 
@@ -424,6 +424,9 @@ class BtDriver(Driver, metaclass=BtMetaClass):
 
     def action(self, action):
         pass
+
+    def get_connection(self):
+        return 'bluetooth'
 
     def connect(self):
         pass
@@ -475,6 +478,7 @@ class SylvacBluetoothDriver(gatt.Device):
 #Bluetooth start
 #----------------------------------------------------------
 bm = BtManager()
+bm.daemon = True
 bm.start()
 
 
