@@ -14,6 +14,17 @@ class TestFillTemporal(common.TransactionCase):
         super(TestFillTemporal, self).setUp()
         self.Model = self.env['test_read_group.fill_temporal']
 
+    def test_read_group_fill_temporal_returns_none_if_data_is_none(self):
+        """Assert 'read_group_fill_temporal' return data if not data."""
+        groups = self.Model._read_group_fill_temporal([], [], [], [])
+        self.assertEqual(groups, [])
+
+        groups = self.Model._read_group_fill_temporal(None, [], [], [])
+        self.assertEqual(groups, None)
+
+        groups = self.Model._read_group_fill_temporal(False, [], [], [])
+        self.assertEqual(groups, False)
+
     def test_date_range_and_flag(self):
         """Simple date range test, the flag is also tested.
 
@@ -557,5 +568,62 @@ class TestFillTemporal(common.TransactionCase):
 
         model_fill = self.Model.with_context(tz='Asia/Hovd', fill_temporal=True)
         groups = model_fill.read_group([], fields=['datetime', 'value'], groupby=['datetime'])
+
+        self.assertEqual(groups, expected)
+
+    def test_with_with_doublons(self):
+        """It is possible to have duplicates when there is multiple groupby.
+
+        This test ensures duplicates are handled correclty by the method
+        _read_group_fill_temporal.
+        """
+        self.Model.create({'datetime': '1915-12-31 22:30:00', 'value': 50})
+        self.Model.create({'datetime': '1916-01-01 03:30:00', 'value': 1})
+        self.Model.create({'datetime': '1916-01-01 03:30:00', 'value': 7})
+        self.Model.create({'datetime': '1917-12-31 22:30:00', 'value': 15})
+
+        groups = self.Model.read_group(
+            domain=[],
+            fields=['datetime', 'value'],
+            groupby=['datetime', 'value'],
+            lazy=False,
+        )
+
+        expected = [{
+            '__count': 1,
+            '__domain': ['&',
+                         '&',
+                         ('datetime', '>=', '1915-12-01 00:00:00'),
+                         ('datetime', '<', '1916-01-01 00:00:00'),
+                         ('value', '=', 50)],
+            'datetime': 'December 1915',
+            'value': 50
+        }, {
+            '__count': 1,
+            '__domain': ['&',
+                         '&',
+                        ('datetime', '>=', '1916-01-01 00:00:00'),
+                        ('datetime', '<', '1916-02-01 00:00:00'),
+                        ('value', '=', 1)],
+            'datetime': 'January 1916',
+            'value': 1
+        }, {
+            '__count': 1,
+            '__domain': ['&',
+                         '&',
+                        ('datetime', '>=', '1916-01-01 00:00:00'),
+                        ('datetime', '<', '1916-02-01 00:00:00'),
+                        ('value', '=', 7)],
+            'datetime': 'January 1916',
+            'value': 7
+        }, {
+            '__count': 1,
+            '__domain': ['&',
+                         '&',
+                         ('datetime', '>=', '1917-12-01 00:00:00'),
+                         ('datetime', '<', '1918-01-01 00:00:00'),
+                         ('value', '=', 15)],
+            'datetime': 'December 1917',
+            'value': 15}]
 
         self.assertEqual(groups, expected)

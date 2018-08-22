@@ -1788,15 +1788,15 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         :param list data: the data containing groups
         :param list groupby: name of the first group by
-        :param aggregated_fields list: list of aggregated fields in the query
+        :param aggregated_fields list: list of aggregated fields by the query
         :param relativedelta interval: interval between to temporal groups
                 expressed as a relativedelta month by default
         :rtype: list
         :return: list
         """
-        first_a_gby = annotated_groupbys[0]
         if not data:
             return data
+        first_a_gby = annotated_groupbys[0]
         if first_a_gby['type'] not in ('date', 'datetime'):
             return data
         interval = first_a_gby['interval']
@@ -1813,24 +1813,38 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         expected = collections.deque(date_utils.date_range(first, last, interval))
 
-        if len(existing) < len(expected):
+        len_existing = len(set(existing))     # duplicates must be filtered
+
+        if len_existing < len(expected):
+            # Create an empty record used to fill the missing dates
             empty_data = dict.fromkeys(aggregated_fields, False)
             empty_data['id'] = False
             empty_data[groupby_name.split(':')[0] + '_count'] = 0
+            empty_data.update({key: False for key in [group['field']
+                               for group in annotated_groupbys[1:]]})
 
             data = collections.deque(data)
 
             new_data = []
-
-            # Note: the list 'expected' contains the the dates that should be
+            dt = None
+            # Note: the list 'expected' contains the dates that should be
             # represented inside data when it is returned. Notice that 'expected'
             # is sorted like data, so what we do is empty data progressivly by
             # popping its elements from first to last. To do this properly, we
             # need to compare dates together.
             while expected or data:
+                # Add the Undefined record in 'new_data' where is has been
+                # found in 'data'.
                 if not data[0][groupby_name]:
                     new_data.append(data.popleft())
                     continue
+
+                # When using multiple groupby, In some case, duplicate dates can
+                # be present in data, we handle that case here.
+                if dt and dt == data[0][groupby_name]:
+                    new_data.append(data.popleft())
+                    continue
+
                 dt = expected.popleft()
                 if data[0][groupby_name] == dt:
                     new_data.append(data.popleft())
