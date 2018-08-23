@@ -113,7 +113,7 @@ class USBDriver(Driver,metaclass=UsbMetaClass):
         for usbpath in lsusb:  # Should filter on usb devices or inverse loops?
             device = self.dev
             if "%04x:%04x" % (device.idVendor, device.idProduct) in usbpath:
-                return usbpath.split("%04x:%04x" % (device.idVendor, device.idProduct))
+                return usbpath.split("%04x:%04x" % (device.idVendor, device.idProduct))[1]
         return str(device.idVendor) + ":" + str(device.idProduct)
 
     def get_connection(self):
@@ -339,7 +339,6 @@ def send_iot_box_device(send_printer):
                             subprocess.call("sudo lpadmin -p '" + identifier + "' -E -v '" + printerTab[0].split('= ')[1] + "'", shell=True)
 
         #build JSON with all devices
-        data = {}
         hostname = subprocess.check_output('hostname').decode('utf-8').split('\n')[0]
         data = {'name': hostname,'identifier': maciotbox, 'ip': ips}
         devicesList.update(printerList)
