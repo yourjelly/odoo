@@ -4,6 +4,8 @@ import time
 
 _logger = logging.getLogger(__name__)
 
+_logger = logging.getLogger(__name__)
+
 
 @odoo.tests.tagged('post_install', '-at_install')
 @odoo.tests.common.at_install(False)
