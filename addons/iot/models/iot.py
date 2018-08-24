@@ -12,8 +12,12 @@ class IotBox(models.Model):
     identifier = fields.Char(string='Identifier (Mac Address)', readonly=True)
     device_ids = fields.One2many('iot.device', 'iot_id', string="Devices", readonly=True)
     ip = fields.Char('IP Address', readonly=True)
+    ip_url = fields.Char('Local Home Page', readonly=True, compute='_compute_ip_url')
     screen_url = fields.Char('Screen URL', help="Url of the page that will be displayed by hdmi port of the box.")
 
+    def _compute_ip_url(self):
+        for box in self:
+            box.ip_url = 'http://' + box.ip + ':8069'
 
 class IotDevice(models.Model):
     _name = 'iot.device'

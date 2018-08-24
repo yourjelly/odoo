@@ -22,6 +22,23 @@ _logger = logging.getLogger('dispatcher')
 
 class StatusController(http.Controller):
 
+    @http.route('/box/connect', type='http', auth='none', cors='*', csrf=False)
+    def connect_box(self, url):
+        server = ""  # read from file
+        try:
+            f = open('/home/pi/odoo-remote-server.conf', 'r')
+            for line in f:
+                server += line
+            f.close()
+            server = server.split('\n')[0]
+        except:
+            server = ''
+        if server:
+            return 'This IoTBox had already been connected'
+        else:
+            subprocess.call("/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/connect_to_server.sh " + url, shell=True)
+            return 'IoTBox connected'
+
     @http.route('/drivers/status', type='http', auth='none', cors='*')
     def status(self):
         result = "<html><head></head><body>List of drivers and values: <br/> <ul>"
@@ -253,10 +270,13 @@ class USBDeviceManager(Thread):
 def send_iot_box_device(send_printer):
     maciotbox = subprocess.check_output("/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5}", shell=True).decode('utf-8').split('\n')[0]
     server = "" # read from file
-    f = open('/home/pi/odoo-remote-server.conf', 'r')
-    for line in f:
-        server += line
-    f.close()
+    try:
+        f = open('/home/pi/odoo-remote-server.conf', 'r')
+        for line in f:
+            server += line
+        f.close()
+    except: #In case the file does not exist
+        server=''
     server = server.split('\n')[0]
     if server:
         url = server + "/iot/setup"

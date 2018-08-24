@@ -4,6 +4,14 @@ from odoo.http import request
 
 class IoTController(http.Controller):
 
+    #get base url (might be used for authentication too)
+    @http.route('/iot/base_url', type='json', auth='user')
+    def get_base_url(self):
+        config = request.env['ir.config_parameter'].search([('key', '=', 'web.base.url')], limit=1)
+        if config:
+            return config.value
+        return 'Not Found'
+
     # Return home screen
     @http.route('/iot/box/<string:identifier>/screen_url', type='http', auth='public')
     def get_url(self, identifier):
