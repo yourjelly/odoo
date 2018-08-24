@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-11-30 14:34+0000\n"
-"PO-Revision-Date: 2017-11-30 14:34+0000\n"
+"POT-Creation-Date: 2018-08-24 09:02+0000\n"
+"PO-Revision-Date: 2018-08-24 09:02+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -1058,6 +1058,11 @@ msgid "Ease the product browsing with:"
 msgstr ""
 
 #. module: website_sale
+#: model:ir.model.fields,help:website_sale.field_website_config_settings_order_mail_template
+msgid "Edit the email templates sent to customer at the end of the checkout process"
+msgstr ""
+
+#. module: website_sale
 #. openerp-web
 #: code:addons/website_sale/static/src/js/website_sale_tour_shop.js:27
 #, python-format
@@ -1115,6 +1120,11 @@ msgstr ""
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_website_config_settings_module_delivery_fedex
 msgid "Fedex integration"
+msgstr ""
+
+#. module: website_sale
+#: model:ir.model,name:website_sale.model_ir_model_fields
+msgid "Fields"
 msgstr ""
 
 #. module: website_sale
@@ -1276,7 +1286,7 @@ msgid "Installs *e-Commerce Optional Products*"
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/controllers/main.py:474
+#: code:addons/website_sale/controllers/main.py:483
 #, python-format
 msgid "Invalid Email! Please enter a valid email address."
 msgstr ""
@@ -1288,7 +1298,7 @@ msgid "Invoices"
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/models/sale_order.py:115
+#: code:addons/website_sale/models/sale_order.py:131
 #, python-format
 msgid "It is forbidden to modify a sale order which is not in draft status"
 msgstr ""
@@ -1432,7 +1442,7 @@ msgstr ""
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/controllers/main.py:967
+#: code:addons/website_sale/controllers/main.py:982
 #: code:addons/website_sale/static/src/js/website_sale.editor.js:18
 #: model:ir.ui.view,arch_db:website_sale.content_new_product
 #, python-format
@@ -1545,8 +1555,8 @@ msgid "Partner"
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/controllers/main.py:727
-#: code:addons/website_sale/controllers/main.py:834
+#: code:addons/website_sale/controllers/main.py:739
+#: code:addons/website_sale/controllers/main.py:849
 #, python-format
 msgid "Pay Now"
 msgstr ""
@@ -1592,19 +1602,19 @@ msgid "Payment must be reconciled manually"
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/controllers/main.py:758
+#: code:addons/website_sale/controllers/main.py:773
 #, python-format
 msgid "Payment transaction (%s) failed : <%s>"
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/controllers/main.py:755
+#: code:addons/website_sale/controllers/main.py:767
 #, python-format
 msgid "Payment transaction failed (%s)"
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/controllers/main.py:759
+#: code:addons/website_sale/controllers/main.py:774
 #, python-format
 msgid "Payment transaction failed (Contact Administrator)"
 msgstr ""
@@ -1646,7 +1656,7 @@ msgid "Prefered by some customers"
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/controllers/backend.py:65
+#: code:addons/website_sale/controllers/backend.py:61
 #, python-format
 msgid "Previous Sales"
 msgstr ""
@@ -1879,7 +1889,7 @@ msgid "Sale"
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/controllers/backend.py:61
+#: code:addons/website_sale/controllers/backend.py:57
 #, python-format
 msgid "Sales"
 msgstr ""
@@ -2169,7 +2179,7 @@ msgid "Some acquirers like Authorize.net and Ingenico can be used as payment gat
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/controllers/main.py:485
+#: code:addons/website_sale/controllers/main.py:496
 #, python-format
 msgid "Some required fields are empty."
 msgstr ""
@@ -2510,38 +2520,38 @@ msgid "Website Shop"
 msgstr ""
 
 #. module: website_sale
-#: model:ir.model.fields,field_description:website_sale.field_delivery_carrier_website_url
 #: model:ir.model.fields,field_description:website_sale.field_product_product_website_url
 msgid "Website URL"
 msgstr ""
 
 #. module: website_sale
-#: model:ir.model.fields,field_description:website_sale.field_delivery_carrier_website_meta_description
 #: model:ir.model.fields,field_description:website_sale.field_product_product_website_meta_description
 msgid "Website meta description"
 msgstr ""
 
 #. module: website_sale
-#: model:ir.model.fields,field_description:website_sale.field_delivery_carrier_website_meta_keywords
 #: model:ir.model.fields,field_description:website_sale.field_product_product_website_meta_keywords
 msgid "Website meta keywords"
 msgstr ""
 
 #. module: website_sale
-#: model:ir.model.fields,field_description:website_sale.field_delivery_carrier_website_meta_title
 #: model:ir.model.fields,field_description:website_sale.field_product_product_website_meta_title
 msgid "Website meta title"
 msgstr ""
 
 #. module: website_sale
-#: model:ir.model.fields,field_description:website_sale.field_delivery_carrier_website_price
 #: model:ir.model.fields,field_description:website_sale.field_product_product_website_price
 #: model:ir.model.fields,field_description:website_sale.field_product_template_website_price
 msgid "Website price"
 msgstr ""
 
 #. module: website_sale
-#: model:ir.model.fields,field_description:website_sale.field_delivery_carrier_website_public_price
+#: model:ir.model.fields,field_description:website_sale.field_product_product_website_price_difference
+#: model:ir.model.fields,field_description:website_sale.field_product_template_website_price_difference
+msgid "Website price difference"
+msgstr ""
+
+#. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_product_website_public_price
 #: model:ir.model.fields,field_description:website_sale.field_product_template_website_public_price
 msgid "Website public price"

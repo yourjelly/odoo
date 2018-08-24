@@ -57,7 +57,9 @@ class WebsiteConfigSettings(models.TransientModel):
         implied_group='product.group_pricelist_item')
     group_product_pricelist = fields.Boolean("Show pricelists On Products",
         implied_group='product.group_product_pricelist')
-    order_mail_template = fields.Many2one('mail.template', string='Order Confirmation Email', readonly=True, default=_default_order_mail_template, help="Email sent to customer at the end of the checkout process")
+    order_mail_template = fields.Many2one('mail.template', string='Order Confirmation Email', readonly=True, default=_default_order_mail_template, help="Edit the email templates sent to customer at the end of the checkout process")
+    # order_mail_template is only for editing the templates
+    # It is not a way to set up which template is sent!
 
     @api.model
     def get_default_sale_delivery_settings(self, fields):
