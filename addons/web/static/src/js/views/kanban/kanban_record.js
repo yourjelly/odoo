@@ -347,7 +347,10 @@ var KanbanRecord = Widget.extend({
 
         // We use boostrap tooltips for better and faster display
         this.$('span.o_tag').tooltip({delay: {'show': 50}});
-
+        // By default, bootstrap use Popper.js for dynamic positioning.
+        // We need to disable this with display=static for removing glich
+        // See: http://getbootstrap.com/docs/4.1/components/dropdowns/#options
+        this.$('[data-toggle="dropdown"]').data("display", "static");
         return $.when.apply(this, this.defs);
     },
     /**
