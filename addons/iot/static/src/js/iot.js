@@ -177,6 +177,16 @@ var IotDetectButton = Widget.extend({
     _onButtonClick: function(ev) {
         var self = this;
         found_url = this.find_proxy({});
+
+        // If url found, then try to connect to this IoT-box
+        found_url.then(function (url) {
+            self._setValue(url);
+            self._render();
+        });
+        found_url.fail(function () {
+            self._setValue("DISCONNECTED");
+            self._render();
+        });
     },
 
 });
