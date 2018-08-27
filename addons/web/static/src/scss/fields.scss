@@ -101,6 +101,7 @@
             font-size: 12px;
             color: white;
             cursor: pointer;
+            user-select: none;
 
             > .o_badge_text {
                 @include o-text-overflow(inline-block);
