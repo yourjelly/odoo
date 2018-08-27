@@ -43,6 +43,16 @@
         > .o_cp_sidebar {
             padding-right: 10px;
 
+            @include media-breakpoint-down(xs) {
+                .dropdown-menu .dropdown-header {
+                    color: $o-brand-odoo;
+                    text-decoration: none;
+                    font-weight: bold;
+                    padding-left: 12px;
+                    font-size: 1rem;
+                }
+            }
+
             .o_hidden_input_file {
                 position: relative;
                 input.o_input_file {
@@ -63,8 +73,10 @@
             .o_sidebar_delete_attachment {
                 padding: 0px;
                 position: absolute;
-                top: 5px;
                 right: 10px;
+                @include media-breakpoint-up(sm) {
+                    top: 5px;
+                }
             }
         }
     }
