@@ -14,5 +14,7 @@ This module provides management of your IoT boxes inside Odoo.
         'views/iot_views.xml',
         'security/ir.model.access.csv',
     ],
+    'installable': True,
+    'application': True,
     'auto_install': False,
 }
