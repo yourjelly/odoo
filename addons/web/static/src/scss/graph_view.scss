@@ -1,4 +1,5 @@
 .o_graph {
+    @include o-iphonex-padding();
     .o_graph_container {
         height: 100%;
         overflow: auto;

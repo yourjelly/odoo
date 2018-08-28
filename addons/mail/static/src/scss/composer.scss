@@ -92,6 +92,7 @@
     &:not(.o_chat_mini_composer) {
         padding:  $o-mail-thread-avatar-size*0.5;
         padding-left: $grid-gutter-width*0.5 + $o-mail-thread-avatar-size + $o-mail-chatter-gap;
+        padding-right: env(safe-area-inset-right);
         border: 1px solid gray('300');
         border-top: none;
 

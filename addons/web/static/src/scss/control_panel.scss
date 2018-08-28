@@ -3,7 +3,7 @@
     display: flex;
     flex-flow: row wrap;
     border-bottom: 1px solid darken($o-control-panel-background-color, 20%);
-    @include o-webclient-padding($top: 10px, $bottom: 10px);
+    @include o-iphonex-padding($top: 10px, $bottom: 10px, $left: $o-horizontal-padding, $right: $o-horizontal-padding);
     background-color: $o-control-panel-background-color;
 
     > .breadcrumb {

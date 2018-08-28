@@ -5,7 +5,7 @@
 
 .o_calendar_container {
     height: 100%;
-    @include o-webclient-padding($top: $o-horizontal-padding/2, $bottom: $o-horizontal-padding/2);
+    @include o-iphonex-padding($top: $o-horizontal-padding/2, $bottom: $o-horizontal-padding/2, $right: $o-horizontal-padding, $left: $o-horizontal-padding);
     display: flex;
 
     @for $index from 1 through $o-nb-calendar-colors {

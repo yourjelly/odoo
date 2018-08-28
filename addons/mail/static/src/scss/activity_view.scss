@@ -1,5 +1,6 @@
 .o_activity_view {
     height: 100%;
+    @include o-iphonex-padding();
     > table {
         background-color: white;
     }

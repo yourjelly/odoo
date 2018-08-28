@@ -369,6 +369,7 @@
         min-height: 100%;
         padding: 0;
         background-color: desaturate($gray-100, 100%);
+        @include o-iphonex-padding();
 
         .o_kanban_record, .o_kanban_quick_create {
             width: 100%;
@@ -535,8 +536,9 @@
     &.o_kanban_ungrouped {
         flex-flow: row wrap;
         justify-content: flex-start;
-
         padding: $o-kanban-record-margin ($o-horizontal-padding - $o-kanban-record-margin);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
 
         .o_kanban_record {
             flex: 1 1 auto;

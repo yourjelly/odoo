@@ -41,7 +41,7 @@
         height: 100%;
         float: left;
         overflow: auto;
-        padding: $o-horizontal-padding 0;
+        @include o-iphonex-padding($top: $o-horizontal-padding, $bottom: $o-horizontal-padding);
 
         @include media-breakpoint-up(xl) {
             width: $o-mail-chat-sidebar-width + 50px;
@@ -129,6 +129,7 @@
             flex: 1 0 0;
             overflow: auto;
             -webkit-overflow-scrolling: touch; // smooth scrolling in iOS app (Safari)
+            padding-right: env(safe-area-inset-right);
         }
 
         .o_mail_snackbar {

@@ -316,3 +316,15 @@
         margin-bottom: 5px;
     }
 }
+
+// iPhoneX inset padding
+@mixin o-iphonex-padding($top: 0px, $right: 0px, $bottom: 0px, $left: 0px) {
+    padding-top: $top;
+    padding-right: $right;
+    padding-bottom: $bottom;
+    padding-left: $left;
+    padding-top: unquote('max(#{$top}, env(safe-area-inset-top))');
+    padding-right: unquote('max(#{$right}, env(safe-area-inset-right))');
+    padding-bottom: unquote('max(#{$bottom}, env(safe-area-inset-bottom))');
+    padding-left: unquote('max(#{$left}, env(safe-area-inset-left))');
+}
