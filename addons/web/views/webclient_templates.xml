@@ -574,6 +574,7 @@
                 <script type="text/javascript" src="/web/static/tests/views/view_dialogs_tests.js"></script>
                 <script type="text/javascript" src="/web/static/tests/views/search_filters_menu_tests.js"></script>
                 <script type="text/javascript" src="/web/static/tests/views/search_groupby_menu_tests.js"></script>
+                <script type="text/javascript" src="/web/static/tests/views/search_time_range_menu_tests.js"></script>
                 <script type="text/javascript" src="/web/static/tests/widgets/dropdown_menu_tests.js"></script>
                 <script type="text/javascript" src="/web/static/tests/views/search_view_tests.js"></script>
                 <script type="text/javascript" src="/web/static/tests/core/ajax_tests.js"></script>
