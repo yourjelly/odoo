@@ -4,11 +4,16 @@
 import logging
 import os
 import subprocess
+import socket
 import werkzeug
 import netifaces as ni
 import odoo
 from odoo import http
 from odoo.tools import misc
+
+from uuid import getnode as get_mac
+from odoo.addons.hw_proxy.controllers import main as hw_proxy
+from odoo.addons.hw_drivers.controllers import driver as hw_drivers
 
 _logger = logging.getLogger(__name__)
 
@@ -26,51 +31,194 @@ index_style = """
             }
         </style>
 """
-index_template = """
-<!DOCTYPE HTML>
-<html>
-    <head>
-        <title>Odoo's PosBox</title>
-""" + index_style + """
-    </head>
-    <body>
-        <h1>Your PosBox is up and running</h1>
-        <p>
-        The PosBox is a hardware adapter that allows you to use
-        receipt printers and barcode scanners with Odoo's Point of
-        Sale, <b>version 8.0 or later</b>. You can start an <a href='https://www.odoo.com/start'>online free trial</a>,
-        or <a href='https://www.odoo.com/page/download'>download and install</a> it yourself.
-        </p>
-        <p>
-        For more information on how to setup the Point of Sale with
-        the PosBox, please refer to
-        <a href='https://www.odoo.com/documentation/user/point_of_sale/posbox/index.html'>the manual</a>.
-        </p>
-        <p>
-        To see the status of the connected hardware, please refer 
-        to the <a href='/hw_proxy/status'>hardware status page</a>.
-        </p>
-        <p>
-        Wi-Fi can be configured by visiting the <a href='/wifi'>Wi-Fi configuration page</a>.
-        </p>
-        <p>
-        Odoo server can be configured by visiting the <a href='/server'>Domain server configuration</a>.
-        </p>
-        <p>
-        If you need to grant remote debugging access to a developer, you can do it <a href='/remote_connect'>here</a>.
-        </p>
-        %s
-        <p>
-        The PosBox software installed on this posbox is <b>version 17 BETA</b>,
-        the posbox version number is independent from Odoo. You can upgrade
-        the software on the <a href='/hw_proxy/upgrade/'>upgrade page</a>.
-        </p>
-        <p>For any other question, please contact the Odoo support at <a href='http://www.odoo.com/help'>www.odoo.com/help</a>
-        </p>
-    </body>
-</html>
 
-"""
+def get_homepage_html(data):
+    home_style = """
+        <style>
+            body {
+                width: 500px;
+                margin: 30px auto;
+                font-family: sans-serif;
+                text-align: justify;
+                color: #6B6B6B;
+                background-color: #f1f1f1;
+            }
+            .text-green {
+                color: #28a745;
+            }
+            .text-red {
+                color: #dc3545;
+            }
+            .text-yellow {
+                color: #ffc107;
+            }
+            .text-center {
+                text-align: center;
+            }
+            .float-right {
+                float: right;
+            }
+            .btn {
+                display: inline-block;
+                padding: 8px 15px;
+                border: 1px solid #dadada;
+                border-radius: 3px;
+                font-weight: bold;
+                font-size: 0.8rem;
+            }
+            .btn:hover {
+                background-color: #f1f1f1;
+            }
+            .container {
+                padding: 10px 10px 20px 10px;
+                background: #ffffff;
+                border-radius: 8px;
+                box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.17);
+            }
+            table {
+                width: 95%;
+                border-collapse: collapse;
+            }
+            table tr {
+                border-bottom: 1px solid #f1f1f1;
+            }
+            table tr:last-child {
+                border-width: 0px;
+            }
+            table td {
+                padding: 8px;
+                border-left: 1px solid #f1f1f1;
+            }
+            table td:first-child {
+                border-left: 0;
+            }
+            .heading {
+                font-weight: bold;
+            }
+            .footer {
+                margin-top: 12px;
+                text-align: right;
+            }
+            .footer a {
+                margin-left: 8px;
+            }
+            a {
+                text-decoration: none;
+                color: #00a09d;
+            }
+            a:hover {
+                color: #006d6b;
+            }
+            .device-status {
+                margin-bottom: 6px;
+            }
+            .device-status .message {
+                font-size: 0.8rem;
+            }
+            .device-status .indicator {
+                margin-left: 4px;
+                font-size: 0.7rem;
+                text-transform: uppercase;
+            }
+            .device-status .device {
+                font-weight: 500;
+            }
+        </style>
+    """
+
+    def get_pos_device_status_html():
+        pos_device = data['pos_device_status']
+        if len(pos_device) == 0:
+            return "No Device Found"
+        status_html = ""
+        for status in pos_device:
+            device = pos_device[status]
+            status_class = "text-red"
+            if device['status'] == 'connected':
+                status_class = "text-green"
+            elif device['status'] == 'connecting':
+                status_class = "text-yellow"
+            status_html += """
+                <div class="device-status">
+                    <span class="device">""" + status + """</span><span class="indicator """ + status_class + """ ">""" + device['status'] + """</span>
+                    <div class="message"> """ + '\n'.join(device['messages']) + """</div>
+                </div>
+            """
+        return status_html
+
+    def get_iot_device_status_html():
+        iot_device = data['iot_device_status']
+        if len(iot_device) == 0:
+            return "No Device Found"
+        status_html = ""
+        for path in iot_device:
+            status_html += """
+                <div class="device-status">
+                    <span class="device">""" + path + """</span>
+                    <div class="message"> """ + str(iot_device[path].value) + """</div>
+                </div>
+            """
+        return status_html
+
+    html = """
+    <!DOCTYPE HTML>
+    <html>
+        <head>
+            <title>Odoo's IoTBox</title>
+    """ + home_style + """
+        </head>
+        <body>
+            <div class="container">
+                <h2 class="text-center text-green">Your IoTBox is up and running</h2>
+                <table align="center" cellpadding="3">
+                    <tr>
+                        <td class="heading">Name</td>
+                        <td> """ + data['hostname'] + """ <a class="float-right" href='/server'>configure</a></td>
+                    </tr>
+                    <tr>
+                        <td class="heading">Version</td>
+                        <td>V18.10 <a class="float-right" href='/hw_proxy/upgrade/'>update</a></td>
+                    </tr>
+                    <tr>
+                        <td class="heading">IP Address</td>
+                        <td> """ + str(data['ip']) + """</td>
+                    </tr>
+                    <tr>
+                        <td class="heading">Mac Address</td>
+                        <td> """ + data['mac'] + """</td>
+                    </tr>
+                    <tr>
+                        <td class="heading">WiFi</td>
+                        <td>""" + data['wifi_status'] + """ <a class="float-right" href='/wifi'>configure</a></td>
+                    </tr>
+                    <tr>
+                        <td class="heading">Server</td>
+                        <td>""" + data['server_status'] + """ <a class="float-right" href='/server'>configure</a></td>
+                    </tr>
+                    <tr>
+                        <td class="heading">POS Device</td>
+                        <td>""" + get_pos_device_status_html() + """</td>
+                    </tr>
+                    <tr>
+                        <td class="heading">IOT Device</td>
+                        <td>""" + get_iot_device_status_html() + """</td>
+                    </tr>
+                </table>
+                <div style="margin-top: 20px;" class="text-center">
+                    <a class="btn" href='/remote_connect'>POS Display</a>
+                    <a class="btn" style="margin-left: 10px;" href='/point_of_sale/display'>Remote Debug</a>
+                </div>
+            </div>
+            <div class="footer">
+                <a href='http://www.odoo.com/help'>Help</a>
+                <a href='https://www.odoo.com/documentation/user/point_of_sale/posbox/index.html'>Manual</a>
+            </div>
+        </body>
+    </html>
+
+    """
+
+    return html
 
 
 class PosboxHomepage(odoo.addons.web.controllers.main.Home):
@@ -85,10 +233,43 @@ class PosboxHomepage(odoo.addons.web.controllers.main.Home):
 </p>
 """
 
+    def get_pos_device_status(self):
+        statuses = {}
+        for driver in hw_proxy.drivers:
+            statuses[driver] = hw_proxy.drivers[driver].get_status()
+        return statuses
+
+    def get_server_status(self):
+        server_template = ""
+        try:
+            f = open('/home/pi/odoo-remote-server.conf', 'r')
+            for line in f:
+                server_template += line
+            f.close()
+        except:
+            return False
+
+        return server_template
+
+    def get_homepage_data(self):
+        hostname = str(socket.gethostname())
+        mac = get_mac()
+        h = iter(hex(mac)[2:].zfill(12))
+        ssid = subprocess.check_output('iwconfig 2>&1 | grep \'ESSID:"\' | sed \'s/.*"\\(.*\\)"/\\1/\'', shell=True).decode('utf-8').rstrip()
+        return {
+            'hostname': hostname,
+            'ip': str(socket.gethostbyname(hostname)),
+            'mac': ":".join(i + next(h) for i in h),
+            'pos_device_status': self.get_pos_device_status(),
+            'iot_device_status': hw_drivers.drivers,
+            'server_status': self.get_server_status() or 'Not Configured',
+            'wifi_status': ssid or 'Not Connected'
+        }
+
     @http.route('/', type='http', auth='none', website=True)
     def index(self):
         #return request.render('hw_posbox_homepage.index',mimetype='text/html')
-        return index_template % self.get_hw_screen_message()
+        return get_homepage_html(self.get_homepage_data())
 
     @http.route('/wifi', type='http', auth='none', website=True)
     def wifi(self):
@@ -248,18 +429,7 @@ class PosboxHomepage(odoo.addons.web.controllers.main.Home):
                     </tr>
                 </table>
                 <p>
-                Your current server is: 
-        """
-
-        try:
-            f = open('/home/pi/odoo-remote-server.conf', 'r')
-            for line in f:
-                server_template += line
-            f.close()
-        except:
-            server_template += "No server configured yet"
-
-        server_template += """
+                Your current server is: """ + (self.get_server_status() or 'No server configured yet') + """
             </p>
             </form>
         </body>
