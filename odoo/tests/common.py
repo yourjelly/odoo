@@ -671,7 +671,7 @@ class ChromeBrowser():
                 if res.get('result', {}).get('result').get('subtype', '') == 'error':
                     self._logger.error("Running code returned an error")
                     return False
-            elif res and res.get('method') == 'Runtime.consoleAPICalled' and res.get('params', {}).get('type') in ('log', 'error'):
+            elif res and res.get('method') == 'Runtime.consoleAPICalled':
                 logs = res.get('params', {}).get('args')
                 log_type = res.get('params', {}).get('type')
                 content = " ".join([str(log.get('value', '')) for log in logs])
@@ -679,7 +679,7 @@ class ChromeBrowser():
                     self._logger.error(content)
                     logged_error = True
                 else:
-                    self._logger.info('console log: %s', content)
+                    self._logger.info('console %s: %s', (log_type, content))
                 for log in logs:
                     if log.get('type', '') == 'string' and log.get('value', '').lower() == 'ok':
                         # it is possible that some tests returns ok while an error was shown in logs.
