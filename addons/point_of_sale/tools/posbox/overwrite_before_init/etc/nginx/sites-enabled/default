@@ -41,17 +41,10 @@ server {
         #server_name _;
 
         location / {
-                # First attempt to serve request as file, then
-                # as directory, then fall back to displaying a 404.
-                #try_files $uri $uri/ =404;
-
-	        proxy_pass http://localhost:8069;
-      		proxy_redirect http://localhost:8069/ $scheme://$host:8069/;
-        	# proxy_http_version 1.1;
-	        # proxy_set_header Upgrade $http_upgrade;
-        	# proxy_set_header Connection 'upgrade';
-	        # proxy_set_header Host $host;
-        	# proxy_cache_bypass $http_upgrade;
+            # Every OS request specific adress and .txt file to test if hotspot are connected to internet however login splash page don't display
+            # this line respond true for every request and send a login splash page to client
+            # it work for every OS
+            return 301 $scheme://10.11.12.1:8069;
         }
 
         # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
