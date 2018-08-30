@@ -221,12 +221,12 @@ def get_homepage_html(data):
     return html
 
 
-class PosboxHomepage(odoo.addons.web.controllers.main.Home):
+class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
     def get_hw_screen_message(self):
         return """
 <p>
-    The activate the customer display feature, you will need to reinstall the PosBox software.
+    The activate the customer display feature, you will need to reinstall the IoTBox software.
     You can find the latest images on the <a href="http://nightly.odoo.com/master/posbox/">Odoo Nightly builds</a> website.
     Make sure to download at least the version 16.<br/>
     Odoo version 11, or above, is required to use the customer display feature.
@@ -284,9 +284,9 @@ class PosboxHomepage(odoo.addons.web.controllers.main.Home):
         <h1>Configure wifi</h1>
         <a href="/">Homepage</a>
         <p>
-        Here you can configure how the posbox should connect to wireless networks.
+        Here you can configure how the iotbox should connect to wireless networks.
         Currently only Open and WPA networks are supported. When enabling the persistent checkbox,
-        the chosen network will be saved and the posbox will attempt to connect to it every time it boots.
+        the chosen network will be saved and the iotbox will attempt to connect to it every time it boots.
         </p>
         <form action='/wifi_connect' method='POST'>
             <table>
@@ -400,7 +400,7 @@ class PosboxHomepage(odoo.addons.web.controllers.main.Home):
             <h1>Configure Odoo server</h1>
             <a href="/">Homepage</a>
             <p>
-            Here you can configure how the still hidden IoT sauce on your IoT infiltrated posbox
+            Here you can configure how the still hidden IoT sauce on your IoT infiltrated iotbox
             can connect with the Odoo server. 
             </p>
             <form action='/server_connect' method='POST'>
@@ -492,7 +492,7 @@ class PosboxHomepage(odoo.addons.web.controllers.main.Home):
     <body>
         <h1>Remote debugging</h1>
         <p class='text-red'>
-        This allows someone to gain remote access to your Posbox, and
+        This allows someone to gain remote access to your IoTbox, and
         thus your entire local network. Only enable this for someone
         you trust.
         </p>

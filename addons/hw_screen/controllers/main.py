@@ -17,7 +17,7 @@ self_port = str(config['http_port'] or 8069)
 
 _logger = logging.getLogger(__name__)
 
-class Homepage(homepage.PosboxHomepage):
+class Homepage(homepage.IoTboxHomepage):
 
     def get_hw_screen_message(self):
         return """
