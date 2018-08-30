@@ -268,6 +268,28 @@ class Registry(Mapping):
         for model in models:
             model._setup_complete()
 
+        inv_models = defaultdict(set)
+        inv_fields = defaultdict(set)
+        for model in models:
+            for field in model._fields.values():
+                if field.type == 'many2one' and field.store and field.ondelete == 'cascade':
+                    inv_models[field.comodel_name].add(field.model_name)
+                elif field.relational:
+                    inv_fields[field.comodel_name].add(str(field))
+
+        def show(names, num=5):
+            if len(names) <= num:
+                return ", ".join(sorted(names))
+            else:
+                return "%s, ... (%d)" % (", ".join(sorted(names)[:num]), len(names))
+
+        logs = []
+        for name, names in sorted(inv_models.items()):
+            logs.append("CASCADE: %s -> %s" % (name, show(names)))
+        for name, names in sorted(inv_fields.items()):
+            logs.append("INVALIDATE: %s -> %s" % (name, show(names)))
+        _logger.info("UPON DELETION\n%s", "\n".join(logs))
+
         self.registry_invalidated = True
 
     def post_init(self, func, *args, **kwargs):
