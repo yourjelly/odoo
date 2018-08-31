@@ -101,6 +101,7 @@ class PosboxHomepage(odoo.addons.web.controllers.main.Home):
     </head>
     <body>
         <h1>Configure wifi</h1>
+        <a href="/">Homepage</a>
         <p>
         Here you can configure how the posbox should connect to wireless networks.
         Currently only Open and WPA networks are supported. When enabling the persistent checkbox,
@@ -207,6 +208,7 @@ class PosboxHomepage(odoo.addons.web.controllers.main.Home):
         </head>
         <body>
             <h1>Configure Odoo server</h1>
+            <a href="/">Homepage</a>
             <p>
             Here you can configure how the still hidden IoT sauce on your IoT infiltrated posbox
             can connect with the Odoo server. 
