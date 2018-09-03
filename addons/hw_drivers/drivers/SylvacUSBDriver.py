@@ -1,5 +1,24 @@
-from ..controllers.driver import USBDriver
 
+class USBDriver(Driver,metaclass=UsbMetaClass):
+    def __init__(self, dev):
+        super(USBDriver, self).__init__()
+        self.dev = dev
+        self.value = ""
+
+    def get_name(self):
+        lsusb = str(subprocess.check_output('lsusb')).split("\\n")
+        for usbpath in lsusb:  # Should filter on usb devices or inverse loops?
+            device = self.dev
+            if "%04x:%04x" % (device.idVendor, device.idProduct) in usbpath:
+                return usbpath.split("%04x:%04x" % (device.idVendor, device.idProduct))[1]
+        return str(device.idVendor) + ":" + str(device.idProduct)
+
+    def get_connection(self):
+        return 'direct'
+
+    def value(self):
+        return self.value
+        
 class SylvacUSBDriver(USBDriver):
 
     def supported(self):
