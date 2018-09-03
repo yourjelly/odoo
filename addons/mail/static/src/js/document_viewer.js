@@ -156,8 +156,20 @@ var DocumentViewer = Widget.extend({
      */
     _onClose: function (e) {
         e.preventDefault();
-        this.$el.modal('hide');
-        this.trigger_up('document_viewer_closed');
+        var self = this;
+        this._rpc({
+            model: 'ir.attachment',
+            method: 'register_as_main_attachment',
+            args: [[this.activeAttachment['id']]],
+        }).then(
+            function() {
+                self.$el.modal('hide');
+                self.trigger_up('document_viewer_closed');
+                self.trigger_up('preview_attachment', {
+                    attachments: [self.activeAttachment],
+                });
+            }
+        );
     },
     /**
      * When popup close complete destroyed modal even DOM footprint too

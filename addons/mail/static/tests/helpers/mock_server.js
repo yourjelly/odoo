@@ -148,6 +148,9 @@ MockServer.include({
         if (route === '/mail/init_messaging') {
             return $.when(this._mockInitMessaging(args));
         }
+        if (route === "/web/dataset/call_kw/ir.attachment/register_as_main_attachment") {
+            return $.when();
+        }
         // methods
         if (args.method === 'channel_fetch_listeners') {
             return $.when([]);

@@ -380,9 +380,11 @@ class Message(models.Model):
             for notification in message.notification_ids.filtered(lambda notif: notif.email_status in ('bounce', 'exception', 'canceled') or (notif.res_partner_id.partner_share and notif.res_partner_id.active)):
                 customer_email_data.append((partner_tree[notification.res_partner_id.id][0], partner_tree[notification.res_partner_id.id][1], notification.email_status))
 
+            main_attachment = message.model and message.res_id and getattr(self.env[message.model].browse(message.res_id), 'main_attachment_id')
             attachment_ids = []
             for attachment in message.attachment_ids:
                 if attachment.id in attachments_tree:
+                    attachments_tree[attachment.id]['is_main'] = main_attachment == attachment
                     attachment_ids.append(attachments_tree[attachment.id])
             tracking_value_ids = []
             for tracking_value_id in message_to_tracking.get(message_id, list()):
@@ -393,7 +395,7 @@ class Message(models.Model):
                 'author_id': author,
                 'partner_ids': partner_ids,
                 'customer_email_status': (all(d[2] == 'sent' for d in customer_email_data) and 'sent') or
-                                        (any(d[2] == 'exception' for d in customer_email_data) and 'exception') or 
+                                        (any(d[2] == 'exception' for d in customer_email_data) and 'exception') or
                                         (any(d[2] == 'bounce' for d in customer_email_data) and 'bounce') or 'ready',
                 'customer_email_data': customer_email_data,
                 'attachment_ids': attachment_ids,

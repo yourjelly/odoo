@@ -1042,6 +1042,9 @@ QUnit.test('chatter: Attachment viewer', function (assert) {
                 var canvas = document.createElement('canvas');
                 return $.when(canvas.toDataURL());
             }
+            if (route === "/web/dataset/call_kw/ir.attachment/register_as_main_attachment") {
+                return $.when();
+            }
             return this._super.apply(this, arguments);
         },
     });
