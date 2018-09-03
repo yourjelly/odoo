@@ -197,6 +197,7 @@ class KeyboardUSBDriver(USBDriver):
     def action(self, action):
         pass
 
+from ..drivers import hello
 
 class BarcodeScannerdUSBDriver(USBDriver):
 
@@ -230,6 +231,7 @@ class BarcodeScannerdUSBDriver(USBDriver):
     def action(self, action):
         pass
 
+import /drivers/hello.py
 
 class USBDeviceManager(Thread):
     devices = {}
