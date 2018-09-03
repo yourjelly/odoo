@@ -1,3 +1,6 @@
+from ..controllers.driver import USBDriver
+import evdev
+
 class KeyboardUSBDriver(USBDriver):
 
     def supported(self):
