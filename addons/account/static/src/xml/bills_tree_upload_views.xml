@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates>
+    <t t-name="UploadView.upload_button">
+        <button type="button" class="btn btn-secondary o_button_upload_bill" t-if="widget.modelName == 'account.invoice' and widget.initialState.context.default_type == 'in_invoice'">
+            Upload
+        </button>
+    </t>
+    <t t-extend="ListView.buttons">
+        <t t-jquery="button.o_list_button_add" t-operation="after">
+           <t t-call="UploadView.upload_button"/>
+        </t>
+    </t>
+</templates>
