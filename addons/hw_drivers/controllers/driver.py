@@ -142,7 +142,20 @@ class USBDriver(Driver,metaclass=UsbMetaClass):
 
 driversList = os.listdir("addons/hw_drivers/drivers")
 for driver in driverList:
-    from ..drivers import driver
+    full_path_to_module = "addons/hw_drivers/drivers" + driver
+    try:
+        module_dir, module_file = os.path.split(full_path_to_module)
+        module_name, module_ext = os.path.splitext(module_file)
+        save_cwd = os.getcwd()
+        os.chdir(module_dir)
+        module_obj = __import__(module_name)
+        module_obj.__file__ = full_path_to_module
+        globals()[module_name] = module_obj
+        os.chdir(save_cwd)
+    except:
+        raise ImportError
+
+    #from ..drivers import driver
 
 
 class BarcodeScannerdUSBDriver(USBDriver):
