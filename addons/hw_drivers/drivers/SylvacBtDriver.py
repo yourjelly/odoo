@@ -1,10 +1,11 @@
 import gatt
 from addons.hw_drivers.controllers.driver import BtDriver
+from addons.hw_drivers.controllers.driver import BtManager
 
 class SylvacBtDriver(BtDriver):
 
     def supported(self):
-        return self.dev.alias() == "SY295"
+        return self.dev.alias() == "SY295" or self.dev.alias() == "SY304" or self.dev.alias() == "SY276"
 
     def connect(self):
         self.gatt_device = GattSylvacBtDriver(mac_address=self.dev.mac_address, manager=bm.gatt_manager)
@@ -37,3 +38,10 @@ class GattSylvacBtDriver(gatt.Device):
 
     def characteristic_enable_notification_failed(self):
         print("Problem connecting")
+
+#----------------------------------------------------------
+#Bluetooth start
+#----------------------------------------------------------
+bm = BtManager()
+bm.daemon = True
+bm.start()
