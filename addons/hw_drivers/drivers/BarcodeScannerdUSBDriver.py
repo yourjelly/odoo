@@ -1,3 +1,6 @@
+import evdev
+from addons.hw_drivers.controllers.driver import USBDriver
+
 class BarcodeScannerdUSBDriver(USBDriver):
 
     def supported(self):
