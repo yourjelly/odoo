@@ -75,7 +75,9 @@ def registry(database_name=None):
     if database_name is None:
         import threading
         database_name = threading.currentThread().dbname
-    return modules.registry.Registry(database_name)
+    registry = modules.registry.Registry(database_name)
+    registry.lock()
+    return registry
 
 #----------------------------------------------------------
 # Imports

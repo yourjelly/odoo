@@ -788,11 +788,12 @@ class HttpCase(TransactionCase):
         self.opener.cookies['session_id'] = self.session_id
 
     def url_open(self, url, data=None, timeout=10):
-        if url.startswith('/'):
-            url = "http://%s:%s%s" % (HOST, PORT, url)
-        if data:
-            return self.opener.post(url, data=data, timeout=timeout)
-        return self.opener.get(url, timeout=timeout)
+        with self.registry.unlock():
+            if url.startswith('/'):
+                url = "http://%s:%s%s" % (HOST, PORT, url)
+            if data:
+                return self.opener.post(url, data=data, timeout=timeout)
+            return self.opener.get(url, timeout=timeout)
 
     def _wait_remaining_requests(self):
         t0 = int(time.time())
@@ -820,27 +821,28 @@ class HttpCase(TransactionCase):
         if user is None:
             return
 
-        db = get_db_name()
-        uid = self.registry['res.users'].authenticate(db, user, password, None)
-        env = api.Environment(self.cr, uid, {})
+        with self.registry.lock():
+            db = get_db_name()
+            uid = self.registry['res.users'].authenticate(db, user, password, None)
+            env = api.Environment(self.cr, uid, {})
 
-        # self.session.authenticate(db, user, password, uid=uid)
-        # OpenERPSession.authenticate accesses the current request, which we
-        # don't have, so reimplement it manually...
-        session = self.session
+            # self.session.authenticate(db, user, password, uid=uid)
+            # OpenERPSession.authenticate accesses the current request, which we
+            # don't have, so reimplement it manually...
+            session = self.session
 
-        session.db = db
-        session.uid = uid
-        session.login = user
-        session.session_token = uid and security.compute_session_token(session, env)
-        session.context = env['res.users'].context_get() or {}
-        session.context['uid'] = uid
-        session._fix_lang(session.context)
+            session.db = db
+            session.uid = uid
+            session.login = user
+            session.session_token = uid and security.compute_session_token(session, env)
+            session.context = env['res.users'].context_get() or {}
+            session.context['uid'] = uid
+            session._fix_lang(session.context)
 
-        odoo.http.root.session_store.save(session)
-        if self.browser:
-            self._logger.info('Setting session cookie in browser')
-            self.browser.set_cookie('session_id', self.session_id, '/', '127.0.0.1')
+            odoo.http.root.session_store.save(session)
+            if self.browser:
+                self._logger.info('Setting session cookie in browser')
+                self.browser.set_cookie('session_id', self.session_id, '/', '127.0.0.1')
 
     def browser_js(self, url_path, code, ready='', login=None, timeout=60, **kw):
         """ Test js code running in the browser
@@ -862,30 +864,31 @@ class HttpCase(TransactionCase):
             timeout = timeout * 1.5
         self.start_browser(self._logger)
 
-        try:
-            self.authenticate(login, login)
-            url = "http://%s:%s%s" % (HOST, PORT, url_path or '/')
-            self._logger.info('Open "%s" in browser', url)
+        with self.registry.unlock():
+            try:
+                self.authenticate(login, login)
+                url = "http://%s:%s%s" % (HOST, PORT, url_path or '/')
+                self._logger.info('Open "%s" in browser', url)
 
-            if odoo.tools.config['logfile']:
-                self._logger.info('Starting screen cast')
-                self.browser.start_screencast()
-            self.browser.navigate_to(url)
+                if odoo.tools.config['logfile']:
+                    self._logger.info('Starting screen cast')
+                    self.browser.start_screencast()
+                self.browser.navigate_to(url)
 
-            # Needed because tests like test01.js (qunit tests) are passing a ready
-            # code = ""
-            ready = ready or "document.readyState === 'complete'"
-            self.assertTrue(self.browser._wait_ready(ready), 'The ready "%s" code was always falsy' % ready)
-            if code:
-                message = 'The test code "%s" failed' % code
-            else:
-                message = "Some js test failed"
-            self.assertTrue(self.browser._wait_code_ok(code, timeout), message)
-        finally:
-            # clear browser to make it stop sending requests, in case we call
-            # the method several times in a test method
-            self.browser.clear()
-            self._wait_remaining_requests()
+                # Needed because tests like test01.js (qunit tests) are passing a ready
+                # code = ""
+                ready = ready or "document.readyState === 'complete'"
+                self.assertTrue(self.browser._wait_ready(ready), 'The ready "%s" code was always falsy' % ready)
+                if code:
+                    message = 'The test code "%s" failed' % code
+                else:
+                    message = "Some js test failed"
+                self.assertTrue(self.browser._wait_code_ok(code, timeout), message)
+            finally:
+                # clear browser to make it stop sending requests, in case we call
+                # the method several times in a test method
+                self.browser.clear()
+                self._wait_remaining_requests()
 
     phantom_js = browser_js
 

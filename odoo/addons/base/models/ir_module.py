@@ -532,6 +532,7 @@ class Module(models.Model):
 
         self._cr.commit()
         api.Environment.reset()
+        self.env.registry.release()
         modules.registry.Registry.new(self._cr.dbname, update_module=True)
 
         self._cr.commit()

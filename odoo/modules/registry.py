@@ -31,6 +31,9 @@ class Registry(Mapping):
     There is one registry instance per database.
 
     """
+
+    # lock for dbname-registry mapping; note that this one is global, and
+    # distinct from the per-registry read-write lock
     _lock = threading.RLock()
     _saved_lock = None
 
@@ -126,6 +129,14 @@ class Registry(Mapping):
         self.loaded = False             # whether all modules are loaded
         self.ready = False              # whether everything is set up
 
+        # registry update management: this implements a read-write lock;
+        self._monitor = threading.Condition(threading.Lock())
+        self._readers = set()           # reader threads
+        self._writers = set()           # writer threads
+        self._waiting = set()           # threads waiting for write
+        # invariant: disjoin(self._readers, self._writers, self._waiting) and
+        #            len(self._writers) <= 1
+
         # Inter-process signaling:
         # The `base_registry_signaling` sequence indicates the whole registry
         # must be reloaded.
@@ -172,6 +183,8 @@ class Registry(Mapping):
 
     def __getitem__(self, model_name):
         """ Return the model with the given name or raise KeyError if it doesn't exist."""
+        this = threading.currentThread()
+        assert this in self._readers or this in self._writers, "Registry not locked"
         return self.models[model_name]
 
     def __call__(self, model_name):
@@ -241,10 +254,91 @@ class Registry(Mapping):
 
         return self.descendants(model_names, '_inherit', '_inherits')
 
+    def log(self, msg):
+        pid = hex(hash(threading.currentThread()) & 0xFFFF)
+        _logger.info("%s %s (%d|%d)", pid, msg, len(self._readers), len(self._writers))
+
+    def lock(self, write=False):
+        """ Lock the registry for reading or writing (depending on the value of
+            parameter ``write``). The method does nothing if the registry was
+            already locked::
+
+                registry.lock()
+                ...
+                registry.release()
+
+            The method returns a context manager to release the registry lock,
+            if granted by the call. This allows to use the method in a ``with``
+            statement::
+
+                with registry.lock():
+                    ...
+
+        """
+        with self._monitor:
+            this = threading.currentThread()
+            if this in self._writers:
+                self.log("already writing")
+                return self.releasing(False)
+
+            if write:
+                self._readers.discard(this)
+                while self._readers or self._writers:
+                    self._waiting.add(this)
+                    self.log("waiting for writing")
+                    self._monitor.wait()
+                    self._waiting.discard(this)
+                self._writers.add(this)
+                self.log("acquired for writing")
+
+            else:
+                if this in self._readers:
+                    self.log("already reading")
+                    return self.releasing(False)
+                while self._writers or self._waiting:
+                    self.log("waiting for reading")
+                    self._monitor.wait()
+                self._readers.add(this)
+                self.log("acquired for reading")
+
+            return self.releasing()
+
+    def release(self):
+        """ Release the registry lock. """
+        with self._monitor:
+            this = threading.currentThread()
+            self._readers.discard(this)
+            self._writers.discard(this)
+            self._monitor.notifyAll()
+            self.log("released")
+
+    @contextmanager
+    def releasing(self, flag=True):
+        """ Context manager to release the registry lock. It actually does
+            nothing if the argument is falsy.
+        """
+        try:
+            yield self
+        finally:
+            if flag:
+                self.release()
+
+    @contextmanager
+    def unlock(self):
+        """ Context manager to temporary unlock the registry. """
+        writing = bool(self._writers)
+        self.release()
+        try:
+            yield self
+        finally:
+            self.lock(write=writing)
+
     def setup_models(self, cr):
         """ Complete the setup of models.
             This must be called after loading modules and before using the ORM.
         """
+        assert self._writers, "Registry must be write-locked."
+
         lazy_property.reset_all(self)
         env = odoo.api.Environment(cr, SUPERUSER_ID, {})
 
@@ -283,6 +377,8 @@ class Registry(Mapping):
              - ``module``: the name of the module being installed/updated, if any;
              - ``update_custom_fields``: whether custom fields should be updated.
         """
+        assert self._writers, "Registry must be write-locked."
+
         if 'module' in context:
             _logger.info('module %s: creating or updating database tables', context['module'])
         elif context.get('models_to_check', False):
@@ -373,6 +469,7 @@ class Registry(Mapping):
         """ Check whether the registry has changed, and performs all necessary
         operations to update the registry. Return an up-to-date registry.
         """
+        self.log("check_signaling")
         if self.in_test_mode():
             return self
 
@@ -386,7 +483,9 @@ class Registry(Mapping):
             # Check if the model registry must be reloaded
             if self.registry_sequence != r:
                 _logger.info("Reloading the model registry after database signaling.")
+                self.release()
                 self = Registry.new(self.db_name)
+                self.lock()
             # Check if the model caches must be invalidated.
             elif self.cache_sequence != c:
                 _logger.info("Invalidating all model caches after database signaling.")
@@ -399,6 +498,7 @@ class Registry(Mapping):
 
     def signal_changes(self):
         """ Notifies other processes if registry or cache has been invalidated. """
+        self.log("signal_changes")
         if self.registry_invalidated and not self.in_test_mode():
             _logger.info("Registry changed, signaling through the database")
             with closing(self.cursor()) as cr:
@@ -418,6 +518,7 @@ class Registry(Mapping):
 
     def reset_changes(self):
         """ Reset the registry and cancel all invalidations. """
+        self.log("reset_changes")
         if self.registry_invalidated:
             with closing(self.cursor()) as cr:
                 self.setup_models(cr)

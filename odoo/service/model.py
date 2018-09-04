@@ -9,6 +9,7 @@ import time
 
 import odoo
 from odoo.exceptions import UserError, ValidationError, QWebException
+from odoo.http import request
 from odoo.models import check_method_name
 from odoo.tools.translate import translate
 from odoo.tools.translate import _
@@ -33,10 +34,8 @@ def dispatch(method, params):
     if method not in ['execute', 'execute_kw']:
         raise NameError("Method not available %s" % method)
     security.check(db,uid,passwd)
-    registry = odoo.registry(db).check_signaling()
     fn = globals()[method]
-    with registry.manage_changes():
-        res = fn(db, uid, *params)
+    res = fn(db, uid, *params)
     return res
 
 def check(f):
@@ -155,9 +154,8 @@ def execute_kw(db, uid, obj, method, args, kw=None):
 @check
 def execute(db, uid, obj, method, *args, **kw):
     threading.currentThread().dbname = db
-    with odoo.registry(db).cursor() as cr:
-        check_method_name(method)
-        res = execute_cr(cr, uid, obj, method, *args, **kw)
-        if res is None:
-            _logger.info('The method %s of the object %s can not return `None` !', method, obj)
-        return res
+    check_method_name(method)
+    res = execute_cr(request.cr, uid, obj, method, *args, **kw)
+    if res is None:
+        _logger.info('The method %s of the object %s can not return `None` !', method, obj)
+    return res

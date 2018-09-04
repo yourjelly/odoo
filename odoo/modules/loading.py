@@ -344,6 +344,7 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
         # This is a brand new registry, just created in
         # odoo.modules.registry.Registry.new().
         registry = odoo.registry(cr.dbname)
+        registry.lock(write=True)
 
         if 'base' in tools.config['update'] or 'all' in tools.config['update']:
             cr.execute("update ir_module_module set state=%s where name=%s and state=%s", ('to upgrade', 'base', 'installed'))
@@ -480,6 +481,7 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
                 cr.commit()
                 _logger.info('Reloading registry once more after uninstalling modules')
                 api.Environment.reset()
+                registry.release()
                 registry = odoo.modules.registry.Registry.new(
                     cr.dbname, force_demo, status, update_module
                 )

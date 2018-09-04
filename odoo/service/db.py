@@ -87,6 +87,9 @@ def _initialize_db(id, db_name, demo, lang, user_password, login='admin', countr
 
             cr.execute('SELECT login, password FROM res_users ORDER BY login')
             cr.commit()
+
+        registry.release()
+
     except Exception as e:
         _logger.exception('CREATE DATABASE failed:')
 
@@ -131,6 +134,7 @@ def exp_duplicate_database(db_original_name, db_name):
         # if it's a copy of a database, force generation of a new dbuuid
         env = odoo.api.Environment(cr, SUPERUSER_ID, {})
         env['ir.config_parameter'].init(force=True)
+    registry.release()
 
     from_fs = odoo.tools.config.filestore(db_original_name)
     to_fs = odoo.tools.config.filestore(db_name)
@@ -305,6 +309,7 @@ def restore_db(db, dump_file, copy=False):
                         cr.execute("CREATE EXTENSION unaccent")
                 except psycopg2.Error:
                     pass
+        registry.release()
 
     _logger.info('RESTORE DB: %s', db)
 
@@ -341,7 +346,8 @@ def exp_migrate_databases(databases):
     for db in databases:
         _logger.info('migrate database %s', db)
         odoo.tools.config['update']['base'] = True
-        odoo.modules.registry.Registry.new(db, force_demo=False, update_module=True)
+        registry = odoo.modules.registry.Registry.new(db, force_demo=False, update_module=True)
+        registry.release()
     return True
 
 #----------------------------------------------------------

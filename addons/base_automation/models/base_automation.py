@@ -127,6 +127,7 @@ class BaseAutomation(models.Model):
             # for the sake of simplicity, simply force the registry to reload
             self._cr.commit()
             self.env.reset()
+            self.env.registry.release()
             registry = Registry.new(self._cr.dbname)
             registry.registry_invalidated = True
 

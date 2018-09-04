@@ -925,31 +925,36 @@ def preload_registries(dbnames):
             update_module = config['init'] or config['update']
             registry = Registry.new(dbname, update_module=update_module)
 
-            # run test_file if provided
-            if config['test_file']:
-                test_file = config['test_file']
-                _logger.info('loading test file %s', test_file)
-                with odoo.api.Environment.manage():
-                    if test_file.endswith('py'):
-                        load_test_file_py(registry, test_file)
+            try:
+                # run test_file if provided
+                if config['test_file']:
+                    test_file = config['test_file']
+                    _logger.info('loading test file %s', test_file)
+                    with odoo.api.Environment.manage():
+                        if test_file.endswith('py'):
+                            load_test_file_py(registry, test_file)
 
-            # run post-install tests
-            if config['test_enable']:
-                t0 = time.time()
-                t0_sql = odoo.sql_db.sql_counter
-                module_names = (registry.updated_modules if update_module else
-                                registry._init_modules)
-                _logger.info("Starting post tests")
-                with odoo.api.Environment.manage():
-                    for module_name in module_names:
-                        result = run_unit_tests(module_name, registry.db_name,
-                                                position='post_install')
-                        registry._assertion_report.record_result(result)
-                _logger.info("All post-tested in %.2fs, %s queries",
-                             time.time() - t0, odoo.sql_db.sql_counter - t0_sql)
+                # run post-install tests
+                if config['test_enable']:
+                    t0 = time.time()
+                    t0_sql = odoo.sql_db.sql_counter
+                    module_names = (registry.updated_modules if update_module else
+                                    registry._init_modules)
+                    _logger.info("Starting post tests")
+                    with odoo.api.Environment.manage():
+                        for module_name in module_names:
+                            result = run_unit_tests(module_name, registry.db_name,
+                                                    position='post_install')
+                            registry._assertion_report.record_result(result)
+                    _logger.info("All post-tested in %.2fs, %s queries",
+                                 time.time() - t0, odoo.sql_db.sql_counter - t0_sql)
 
-            if registry._assertion_report.failures:
-                rc += 1
+                if registry._assertion_report.failures:
+                    rc += 1
+
+            finally:
+                registry.release()
+
         except Exception:
             _logger.critical('Failed to initialize database `%s`.', dbname, exc_info=True)
             return -1

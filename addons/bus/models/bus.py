@@ -126,8 +126,11 @@ class ImDispatch(object):
 
         registry = odoo.registry(dbname)
 
+        # do not keep a lock on registry
+        registry.release()
+
         # immediatly returns if past notifications exist
-        with registry.cursor() as cr:
+        with registry.lock(), registry.cursor() as cr:
             env = api.Environment(cr, SUPERUSER_ID, {})
             notifications = env['bus.bus'].poll(channels, last, options)
 
@@ -146,7 +149,7 @@ class ImDispatch(object):
                 self.channels.setdefault(hashable(channel), []).append(event)
             try:
                 event.wait(timeout=timeout)
-                with registry.cursor() as cr:
+                with registry.lock(), registry.cursor() as cr:
                     env = api.Environment(cr, SUPERUSER_ID, {})
                     notifications = env['bus.bus'].poll(channels, last, options, force_status=True)
             except Exception:

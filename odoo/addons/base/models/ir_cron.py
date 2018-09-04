@@ -89,11 +89,6 @@ class ir_cron(models.Model):
         and exception handling. Note that the user running the server action
         is the user calling this method. """
         try:
-            if self.pool != self.pool.check_signaling():
-                # the registry has changed, reload self in the new registry
-                self.env.reset()
-                self = self.env()[self._name]
-
             log_depth = (None if _logger.isEnabledFor(logging.DEBUG) else 1)
             odoo.netsvc.log(_logger, logging.DEBUG, 'cron.object.execute', (self._cr.dbname, self._uid, '*', cron_name, server_action_id), depth=log_depth)
             start_time = False
@@ -103,9 +98,7 @@ class ir_cron(models.Model):
             if start_time and _logger.isEnabledFor(logging.DEBUG):
                 end_time = time.time()
                 _logger.debug('%.3fs (cron %s, server action %d with uid %d)', end_time - start_time, cron_name, server_action_id, self.env.uid)
-            self.pool.signal_changes()
         except Exception as e:
-            self.pool.reset_changes()
             _logger.exception("Call from cron %s for server action #%s failed in Job #%s",
                               cron_name, server_action_id, job_id)
             self._handle_callback_exception(cron_name, server_action_id, job_id, e)
@@ -219,8 +212,12 @@ class ir_cron(models.Model):
                     _logger.info('Starting job `%s`.', job['cron_name'])
                     job_cr = db.cursor()
                     try:
-                        registry = odoo.registry(db_name)
-                        registry[cls._name]._process_job(job_cr, job, lock_cr)
+                        registry = odoo.registry(db_name).check_signaling()
+                        try:
+                            with registry.manage_changes():
+                                registry[cls._name]._process_job(job_cr, job, lock_cr)
+                        finally:
+                            registry.release()
                     except Exception:
                         _logger.exception('Unexpected exception while processing cron job %r', job)
                     finally:

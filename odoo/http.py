@@ -46,6 +46,7 @@ except ImportError:
 
 import odoo
 from odoo import fields
+from .modules.registry import Registry
 from .service.server import memory_info
 from .service import security, model as service_model
 from .tools.func import lazy_property
@@ -279,14 +280,21 @@ class WebRequest(object):
     def __exit__(self, exc_type, exc_value, traceback):
         _request_stack.pop()
 
-        if self._cr:
+        # commit and close cursor
+        if self._cr is not None:
             if exc_type is None and not self._failed:
                 self._cr.commit()
-                if self.registry:
-                    self.registry.signal_changes()
-            elif self.registry:
-                self.registry.reset_changes()
             self._cr.close()
+
+        # signal registry changes
+        registry = Registry.registries.get(self.db)
+        if registry is not None:
+            if exc_type is None and not self._failed:
+                registry.signal_changes()
+            else:
+                registry.reset_changes()
+            registry.release()
+
         # just to be sure no one tries to re-use the request
         self.disable_db = True
         self.uid = None
@@ -1458,9 +1466,7 @@ class Root(object):
                 db = request.session.db
                 if db:
                     try:
-                        odoo.registry(db).check_signaling()
-                        with odoo.tools.mute_logger('odoo.sql_db'):
-                            ir_http = request.registry['ir.http']
+                        registry = odoo.registry(db).check_signaling()
                     except (AttributeError, psycopg2.OperationalError, psycopg2.ProgrammingError):
                         # psycopg2 error or attribute error while constructing
                         # the registry. That means either
@@ -1475,11 +1481,13 @@ class Root(object):
                         else:
                             result = _dispatch_nodb()
                     else:
-                        result = ir_http._dispatch()
+                        registry.lock()
+                        result = registry['ir.http']._dispatch()
                 else:
                     result = _dispatch_nodb()
 
                 response = self.get_response(httprequest, result, explicit_session)
+
             return response(environ, start_response)
 
         except werkzeug.exceptions.HTTPException as e:

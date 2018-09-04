@@ -161,6 +161,15 @@ class IrModel(models.Model):
         domain = args + ['|', ('model', operator, name), ('name', operator, name)]
         return super(IrModel, self).search(domain, limit=limit).name_get()
 
+    def _update_registry_and_db(self, models=()):
+        """ Setup the registry and update the database schema of the given models. """
+        self.pool.lock(write=True)
+        self.pool.setup_models(self.env.cr)
+        if models:
+            models = self.pool.descendants(models, '_inherits')
+            context = dict(self._context, update_custom_fields=True)
+            self.pool.init_models(self.env.cr, models, context)
+
     def _drop_table(self):
         for model in self:
             table = self.env[model.model]._table
@@ -188,7 +197,7 @@ class IrModel(models.Model):
         # reload is done independently in odoo.modules.loading.
         if not self._context.get(MODULE_UNINSTALL_FLAG):
             # setup models; this automatically removes model from registry
-            self.pool.setup_models(self._cr)
+            self._update_registry_and_db()
 
         return res
 
@@ -212,10 +221,8 @@ class IrModel(models.Model):
     def create(self, vals):
         res = super(IrModel, self).create(vals)
         if vals.get('state', 'manual') == 'manual':
-            # setup models; this automatically adds model in registry
-            self.pool.setup_models(self._cr)
             # update database schema
-            self.pool.init_models(self._cr, [vals['model']], dict(self._context, update_custom_fields=True))
+            self._update_registry_and_db([vals['model']])
         return res
 
     @api.model
@@ -592,6 +599,7 @@ class IrModelFields(models.Model):
             return
 
         # remove fields from registry, and check that views are not broken
+        self.pool.lock(write=True)
         fields = [self.env[record.model]._pop_field(record.name) for record in self]
         domain = expression.OR([('arch_db', 'like', record.name)] for record in self)
         views = self.env['ir.ui.view'].search(domain)
@@ -628,11 +636,8 @@ class IrModelFields(models.Model):
         # The field we just deleted might be inherited, and the registry is
         # inconsistent in this case; therefore we reload the registry.
         if not self._context.get(MODULE_UNINSTALL_FLAG):
-            # setup models; this re-initializes models in registry
-            self.pool.setup_models(self._cr)
-            # update database schema of model and its descendant models
-            models = self.pool.descendants(model_names, '_inherits')
-            self.pool.init_models(self._cr, models, dict(self._context, update_custom_fields=True))
+            # update database schema
+            self.env['ir.model']._update_registry_and_db(model_names)
 
         return res
 
@@ -659,11 +664,8 @@ class IrModelFields(models.Model):
             self.clear_caches()                     # for _existing_field_data()
 
             if vals['model'] in self.pool:
-                # setup models; this re-initializes model in registry
-                self.pool.setup_models(self._cr)
-                # update database schema of model and its descendant models
-                models = self.pool.descendants([vals['model']], '_inherits')
-                self.pool.init_models(self._cr, models, dict(self._context, update_custom_fields=True))
+                # update database schema
+                self.env['ir.model']._update_registry_and_db([vals['model']])
 
         return res
 
@@ -725,13 +727,8 @@ class IrModelFields(models.Model):
                 self._cr.execute('ALTER INDEX "%s_%s_index" RENAME TO "%s_%s_index"' % (table, oldname, table, newname))
 
         if column_rename or patched_models:
-            # setup models, this will reload all manual fields in registry
-            self.pool.setup_models(self._cr)
-
-        if patched_models:
-            # update the database schema of the models to patch
-            models = self.pool.descendants(patched_models, '_inherits')
-            self.pool.init_models(self._cr, models, dict(self._context, update_custom_fields=True))
+            # update the database schema
+            self.env['ir.model']._update_registry_and_db(patched_models)
 
         return res
 
