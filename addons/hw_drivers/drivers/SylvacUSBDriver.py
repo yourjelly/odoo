@@ -1,4 +1,4 @@
-from ..controllers.driver import USBDriver
+from addons.hw_drivers.controllers.driver import USBDriver
 
 class SylvacUSBDriver(USBDriver):
 
