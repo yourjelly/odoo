@@ -1,4 +1,39 @@
 
+from threading import Thread
+
+#from ..controllers.driver import USBDriver
+
+class Driver(Thread):
+#    def __init__(self, path):
+#        pass
+
+    def supported(self):
+        pass
+
+    def value(self):
+        pass
+
+    def get_name(self):
+        pass
+
+    def get_connection(self):
+        pass
+
+    def action(self, action):
+        pass
+
+#----------------------------------------------------------
+# Usb drivers
+#----------------------------------------------------------
+usbdrivers = []
+
+class UsbMetaClass(type):
+    def __new__(cls, clsname, bases, attrs):
+        newclass = super(UsbMetaClass, cls).__new__(cls, clsname, bases, attrs)
+        usbdrivers.append(newclass)
+        return newclass
+
+
 class USBDriver(Driver,metaclass=UsbMetaClass):
     def __init__(self, dev):
         super(USBDriver, self).__init__()
@@ -18,7 +53,7 @@ class USBDriver(Driver,metaclass=UsbMetaClass):
 
     def value(self):
         return self.value
-        
+
 class SylvacUSBDriver(USBDriver):
 
     def supported(self):
