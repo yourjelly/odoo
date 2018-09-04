@@ -19,6 +19,33 @@ class IotBox(models.Model):
         for box in self:
             box.ip_url = 'http://' + box.ip + ':8069'
 
+
+class IotTrigger(models.Model):
+    _name = 'iot.trigger'
+
+    device_id = fields.Many2one('iot.device', 'Device', required=True)
+    key = fields.Char('Key')
+    action = fields.Selection([('pass', 'Pass'),
+                               ('fail', 'Fail'),
+                               ('measure', 'Take Measure'),
+                               ('picture', 'Take Picture'),
+                               ('skip', 'Skip'),
+                               ('pause', 'Pause'),
+                               ('previous', 'Previous'),
+                               ('next', 'Next'),
+                               ('validate', 'Validate'),
+                               ('cloMO', 'Close MO'),
+                               ('cloWO', 'Close WO'),
+                               ('finish', 'Finish'),
+                               ('record', 'Record Production'),
+                               ('cancel', 'Cancel'),
+                               ('print-op', 'Print Operation'),
+                               ('print-slip', 'Print Delivery Slip'),
+                               ('print', 'Print Labels'),
+                               ('pack', 'Pack'),
+                               ('scrap', 'Scrap'),])
+
+
 class IotDevice(models.Model):
     _name = 'iot.device'
 

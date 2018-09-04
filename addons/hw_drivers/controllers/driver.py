@@ -13,14 +13,55 @@ import re
 from odoo import http
 import urllib3
 from odoo.http import request as httprequest
+import datetime
 
 from uuid import getnode as get_mac
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
 _logger = logging.getLogger('dispatcher')
 
+owner_dict = {}
+last_ping = {}
 
 class StatusController(http.Controller):
+
+    @http.route('/owner/check', type='json', auth='none', cors='*', csrf=False)
+    def check_cantakeowner(self): #, devices, tab
+        data = httprequest.jsonrequest
+        for device in data['devices']:
+            if owner_dict.get(device) and owner_dict[device] != data['tab']:
+                before_date = datetime.datetime.now() - datetime.timedelta(seconds=10)
+                if last_ping.get(owner_dict[device]) and last_ping.get(owner_dict[device]) > before_date:
+                    return 'no'
+                else:
+                    old_tab = owner_dict[device]
+                    for dev2 in owner_dict:
+                        if owner_dict[dev2] == old_tab:
+                            owner_dict[dev2] = ''
+        return 'yes'
+
+    @http.route('/owner/take', type='json', auth='none', cors='*', csrf=False)
+    def take_ownership(self): #, devices, tab
+        data = httprequest.jsonrequest
+        for device in data['devices']:
+            owner_dict[device] = data['tab']
+            last_ping[data['tab']] = datetime.datetime.now()
+        print('Took ownership: ', data['tab'])
+        return data['tab']
+
+    @http.route('/owner/ping', type='json', auth='none', cors='*', csrf=False)
+    def ping_trigger(self): #, tab
+        data = httprequest.jsonrequest
+        ping_dict = {}
+        last_ping[data['tab']] = datetime.datetime.now()
+        for dev in data['devices']:
+            if owner_dict.get(dev) and owner_dict[dev] == data['tab']:
+                if drivers[dev].ping_value:
+                    ping_dict[dev] = drivers[dev].ping_value
+                    drivers[dev].ping_value = '' #or set it to nothing
+            else:
+                ping_dict[dev] = 'STOP'
+        return ping_dict
 
     @http.route('/box/connect', type='http', auth='none', cors='*', csrf=False)
     def connect_box(self, url):
@@ -88,8 +129,10 @@ class StatusController(http.Controller):
 # Driver common interface
 #----------------------------------------------------------
 class Driver(Thread):
-#    def __init__(self, path):
-#        pass
+
+    trigger = False
+    def setTrigger(self, trigger):
+        self.trigger = trigger
 
     def supported(self):
         pass
@@ -170,6 +213,7 @@ class SylvacUSBDriver(USBDriver):
 
 class KeyboardUSBDriver(USBDriver):
 
+    ping_value = ''
     def supported(self):
         return getattr(self.dev, 'idVendor') == 0x046d and getattr(self.dev, 'idProduct') == 0xc31c
 
@@ -187,12 +231,15 @@ class KeyboardUSBDriver(USBDriver):
         for event in device.read_loop():
             if event.type == evdev.ecodes.EV_KEY:
                 data = evdev.categorize(event)
+                
                 if data.scancode == 96:
                     return {}
                 elif data.scancode == 28:
                     self.value = ''
                 elif data.keystate:
                     self.value += data.keycode.replace('KEY_','')
+                    self.ping_value = data.keycode.replace('KEY_','')
+
 
     def action(self, action):
         pass
@@ -266,6 +313,10 @@ class USBDeviceManager(Thread):
                 send_iot_box_device(send_printer = first_time)
                 first_time = False
             time.sleep(3)
+            
+
+
+
 
 def send_iot_box_device(send_printer):
     maciotbox = subprocess.check_output("/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5}", shell=True).decode('utf-8').split('\n')[0]
@@ -297,6 +348,7 @@ def send_iot_box_device(send_printer):
             devicesList[path] = {'name': device_name,
                                  'type': 'device',
                                  'connection': device_connection}
+
 
 
         # Build camera JSON
@@ -366,6 +418,7 @@ def send_iot_box_device(send_printer):
         data_json = json.dumps(data).encode('utf8')
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
         http = urllib3.PoolManager()
+        req = False
         try:
             req = http.request('POST',
                                 url,
@@ -373,6 +426,42 @@ def send_iot_box_device(send_printer):
                                 headers=headers)
         except:
             _logger.warning('Could not reach configured server')
+#        if req:
+#            # recuperate json dict
+#            # Could check status 200 also
+#            data_json = json.loads(req.data.decode('utf-8'))
+#            device_dict = data_json['result']
+#            for dev in device_dict:
+#                drivers[dev].setTrigger(device_dict[dev])
+
+
+def check_trigger(device, key):
+    server = ""  # read from file
+    try:
+        f = open('/home/pi/odoo-remote-server.conf', 'r')
+        for line in f:
+            server += line
+        f.close()
+    except:  # In case the file does not exist
+        server = ''
+    server = server.split('\n')[0]
+    if server:
+        url = server + "/iot/check_trigger"
+        data = {'device_id': device, 'key': key}
+        data_json = json.dumps(data).encode('utf8')
+        headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+        http = urllib3.PoolManager()
+        try:
+            req = http.request('POST',
+                                url,
+                                body=data_json,
+                                headers=headers)
+        except:
+            _logger.warning('Could not reach configured server')
+
+
+
+
 
 udm = USBDeviceManager()
 udm.daemon = True
@@ -450,7 +539,7 @@ class BtDriver(Driver, metaclass=BtMetaClass):
 class SylvacBtDriver(BtDriver):
 
     def supported(self):
-        return self.dev.alias() == "SY295"
+        return self.dev.alias() == "SY295" or self.dev.alias() == "SY276"
 
     def connect(self):
         self.gatt_device = GattSylvacBtDriver(mac_address=self.dev.mac_address, manager=bm.gatt_manager)
