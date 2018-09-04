@@ -5,7 +5,7 @@ from odoo.http import request
 
 class IoTController(http.Controller):
 
-    #get base url (might be used for authentication too)
+    #get base url (might be used for authentication feature too)
     @http.route('/iot/base_url', type='json', auth='user')
     def get_base_url(self):
         config = request.env['ir.config_parameter'].search([('key', '=', 'web.base.url')], limit=1)
