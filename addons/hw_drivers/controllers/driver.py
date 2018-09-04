@@ -140,6 +140,81 @@ class USBDriver(Driver,metaclass=UsbMetaClass):
     def value(self):
         return self.value
 
+
+#----------------------------------------------------------
+# Bluetooth
+#----------------------------------------------------------
+class GattBtManager(gatt.DeviceManager):
+
+    def device_discovered(self, device):
+        # TODO: need some kind of updated_devices mechanism or not?
+        for driverclass in btdrivers:
+            d = driverclass(device = device)
+            path = "bt_%s" % (device.mac_address,)
+            if d.supported():
+                if path not in drivers:
+                    drivers[path] = d
+                    d.connect()
+                    send_iot_box_device(False)
+                    print("New Driver", path, drivers)
+
+
+class BtManager(Thread):
+    gatt_manager = False
+
+    def run(self):
+        dm = GattBtManager(adapter_name='hci0')
+        self.gatt_manager = dm
+        dm.start_discovery()
+        dm.run()
+
+
+
+
+#----------------------------------------------------------
+# Bluetooth drivers
+#----------------------------------------------------------
+
+btdrivers = []
+
+class BtMetaClass(type):
+    def __new__(cls, clsname, bases, attrs):
+        newclass = super(BtMetaClass, cls).__new__(cls, clsname, bases, attrs)
+        btdrivers.append(newclass)
+        return newclass
+
+
+class BtDriver(Driver, metaclass=BtMetaClass):
+
+
+    def __init__(self, device):
+        super(BtDriver, self).__init__()
+        self.dev = device
+        self.value = ''
+        self.gatt_device = False
+
+    def get_name(self):
+        return self.dev.alias()
+
+    def value(self):
+        return self.value
+
+    def action(self, action):
+        pass
+
+    def get_connection(self):
+        return 'bluetooth'
+
+    def connect(self):
+        pass
+
+#----------------------------------------------------------
+#Bluetooth start
+#----------------------------------------------------------
+bm = BtManager()
+bm.daemon = True
+bm.start()
+
 import importlib.util
 driversList = os.listdir("/home/pi/odoo/addons/hw_drivers/drivers")
 for driver in driversList:
@@ -296,78 +371,3 @@ def send_iot_box_device(send_printer):
 udm = USBDeviceManager()
 udm.daemon = True
 udm.start()
-
-
-#----------------------------------------------------------
-# Bluetooth
-#----------------------------------------------------------
-class GattBtManager(gatt.DeviceManager):
-
-    def device_discovered(self, device):
-        # TODO: need some kind of updated_devices mechanism or not?
-        for driverclass in btdrivers:
-            d = driverclass(device = device)
-            path = "bt_%s" % (device.mac_address,)
-            if d.supported():
-                if path not in drivers:
-                    drivers[path] = d
-                    d.connect()
-                    send_iot_box_device(False)
-                    print("New Driver", path, drivers)
-
-
-class BtManager(Thread):
-    gatt_manager = False
-
-    def run(self):
-        dm = GattBtManager(adapter_name='hci0')
-        self.gatt_manager = dm
-        dm.start_discovery()
-        dm.run()
-
-
-
-
-#----------------------------------------------------------
-# Bluetooth drivers
-#----------------------------------------------------------
-
-btdrivers = []
-
-class BtMetaClass(type):
-    def __new__(cls, clsname, bases, attrs):
-        newclass = super(BtMetaClass, cls).__new__(cls, clsname, bases, attrs)
-        btdrivers.append(newclass)
-        return newclass
-
-
-class BtDriver(Driver, metaclass=BtMetaClass):
-
-
-    def __init__(self, device):
-        super(BtDriver, self).__init__()
-        self.dev = device
-        self.value = ''
-        self.gatt_device = False
-
-    def get_name(self):
-        return self.dev.alias()
-
-    def value(self):
-        return self.value
-
-    def action(self, action):
-        pass
-
-    def get_connection(self):
-        return 'bluetooth'
-
-    def connect(self):
-        pass
-
-#----------------------------------------------------------
-#Bluetooth start
-#----------------------------------------------------------
-bm = BtManager()
-bm.daemon = True
-bm.start()
