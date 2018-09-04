@@ -54,6 +54,8 @@ class USBDriver(Driver,metaclass=UsbMetaClass):
     def value(self):
         return self.value
 
+
+
 class SylvacUSBDriver(USBDriver):
 
     def supported(self):
