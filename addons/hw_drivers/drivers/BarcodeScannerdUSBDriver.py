@@ -17,14 +17,16 @@ class BarcodeScannerdUSBDriver(USBDriver):
 
         device = evdev.InputDevice(path)
 
+        initialize = False
         for event in device.read_loop():
             if event.type == evdev.ecodes.EV_KEY:
                 data = evdev.categorize(event)
-                if data.scancode == 96:
-                    return {}
-                elif data.scancode == 28:
-                    self.value = ''
+                if data.scancode == 28:
+                    initialize = True
                 elif data.keystate:
+                    if initialize:
+                        self.value = ''
+                        initialize = False
                     self.value += data.keycode.replace('KEY_','')
 
     def action(self, action):
