@@ -149,38 +149,6 @@ for driver in driversList:
     foo = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(foo)
 
-class BarcodeScannerdUSBDriver(USBDriver):
-
-    def supported(self):
-        return getattr(self.dev, 'idVendor') == 0x0c2e and getattr(self.dev, 'idProduct') == 0x0200
-
-    def value(self):
-        return self.value
-
-    def run(self):
-
-        devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
-        for device in devices:
-            if ('Scanner' in device.name) & ('input0' in device.phys):
-                path = device.path
-
-        device = evdev.InputDevice(path)
-
-        for event in device.read_loop():
-            if event.type == evdev.ecodes.EV_KEY:
-                data = evdev.categorize(event)
-                _logger.warning(data)
-                if data.scancode == 96:
-                    return {}
-                elif data.scancode == 28:
-                    _logger.warning(self.value)
-                    self.value = ''
-                elif data.keystate:
-                    self.value += data.keycode.replace('KEY_','')
-
-    def action(self, action):
-        pass
-
 class USBDeviceManager(Thread):
     devices = {}
     def run(self):
