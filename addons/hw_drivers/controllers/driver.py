@@ -51,9 +51,9 @@ class StatusController(http.Controller):
 
     @http.route('/driverdetails/<string:identifier>', type='http', auth='none', cors='*')
     def statusdetail(self, identifier):
-        identifier = identifier.split('_')[0] + '_' + identifier.split('_')[1]
-        if drivers.get(identifier):
-            return str(drivers[identifier].value)
+        for device in drivers:
+            if device.find(identifier):
+                return str(drivers[device].value)
         return 'device not found'
 
     @http.route('/driveraction/<string:identifier>', type='json', auth='none', cors='*', csrf=False)
