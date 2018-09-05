@@ -12,11 +12,58 @@ from odoo.addons.hw_proxy.controllers import main as hw_proxy
 
 _logger = logging.getLogger(__name__)
 
+common_style = """
+    <style>
+        body {
+            width: 500px;
+            margin: 30px auto;
+            font-family: sans-serif;
+            text-align: justify;
+            color: #6B6B6B;
+            background-color: #f1f1f1;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .btn {
+            display: inline-block;
+            padding: 8px 15px;
+            border: 1px solid #dadada;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            background: #fff;
+            color: #00a09d;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #f1f1f1;
+        }
+        a {
+            text-decoration: none;
+            color: #00a09d;
+        }
+        a:hover {
+            color: #006d6b;
+        }
+        .container {
+            padding: 10px 20px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.17);
+        }
+        .breadcrumb {
+            margin-bottom: 10px;
+        }
+    </style>
+"""
+
 upgrade_template = """
 <!DOCTYPE HTML>
 <html>
     <head>
         <title>Odoo's IoTBox - Software Upgrade</title>
+        """ + common_style + """
         <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
         <script>
         $(function(){
@@ -48,58 +95,36 @@ upgrade_template = """
             });
         });
         </script>
-        <style>
-        body {
-            width: 480px;
-            margin: 60px auto;
-            font-family: sans-serif;
-            text-align: justify;
-            color: #6B6B6B;
-        }
-        .centering{
-            text-align: center;
-        }
-        #upgrade {
-            padding: 20px;
-            background: rgb(121, 197, 107);
-            color: white;
-            border-radius: 3px;
-            text-align: center;
-            margin: 30px; 
-            text-decoration: none;
-            display: inline-block;
-        }
         </style>
     </head>
     <body>
-        <div id=page>
-        <h1>IoTBox Software Upgrade</h1>
-        <a href="/">Homepage</a>
-        <p>
-        This tool will help you perform an upgrade of the IoTBox's software over the
-	internet. 
-	<p></p>
-        However the preferred method to upgrade the IoTBox is to flash the sd-card with
-        the <a href='http://nightly.odoo.com/trunk/posbox/'>latest image</a>. The upgrade
-        procedure is explained into to the
-        <a href='https://www.odoo.com/documentation/user/point_of_sale/posbox/index.html'>IoTBox manual</a>
-        </p>
-        <p>
-        To upgrade the IoTBox, click on the upgrade button. The upgrade will take a few minutes. <b>Do not reboot</b> the IoTBox during the upgrade.
-        </p>
-        <p>
-        Latest patch:
-        </p>
-        <pre>
+        <div class="breadcrumb"><a href="/">Home</a> / <span>IoT Box Software Upgrade</span></div>
+        <div class="container" id="page">
+            <h2 class="text-center">IoT Box Software Upgrade</h2>
+            <p>
+                This tool will help you perform an upgrade of the IoTBox's software over the internet.
+                <p></p>
+                However the preferred method to upgrade the IoTBox is to flash the sd-card with
+                the <a href='http://nightly.odoo.com/trunk/posbox/'>latest image</a>. The upgrade
+                procedure is explained into to the
+                <a href='https://www.odoo.com/documentation/user/point_of_sale/posbox/index.html'>IoTBox manual</a>
+            </p>
+            <p>
+                To upgrade the IoTBox, click on the upgrade button. The upgrade will take a few minutes. <b>Do not reboot</b> the IoTBox during the upgrade.
+            </p>
+            <p>
+                Latest patch:
+            </p>
+            <pre style="margin: 0">
 """
 upgrade_template += subprocess.check_output("git --work-tree=/home/pi/odoo/ --git-dir=/home/pi/odoo/.git log -1", shell=True).decode('utf-8').replace("\n", "<br/>")
 upgrade_template += """
-        </pre>
-        <div class='centering'>
-            <a href='#' id='upgrade'>Upgrade</a>
-            <div id='loading'></div>
-        </div>
-        </div>
+            </pre>
+            <div class="text-center" style="margin-bottom: 15px;">
+                <a class="btn" href='#' id='upgrade'>Upgrade</a>
+                <div id='loading'></div>
+            </div>
+        <div>
     </body>
 </html>
 
