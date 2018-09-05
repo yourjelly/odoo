@@ -37,8 +37,8 @@ common_style = """
         .text-red {
             color: #dc3545;
         }
-        .text-yellow {
-            color: #ffc107;
+        .text-blue {
+            color: #007bff;
         }
         .text-center {
             text-align: center;
@@ -56,6 +56,11 @@ common_style = """
             background: #fff;
             color: #00a09d;
             cursor: pointer;
+        }
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            font-weight: normal;
         }
         .btn:hover {
             background-color: #f1f1f1;
@@ -75,6 +80,7 @@ common_style = """
         }
         .breadcrumb {
             margin-bottom: 10px;
+            font-size: 0.9rem;
         }
         input[type="text"], input[type="password"] {
             padding: 6px 12px;
@@ -157,7 +163,7 @@ def get_homepage_html(data):
             if device['status'] == 'connected':
                 status_class = "text-green"
             elif device['status'] == 'connecting':
-                status_class = "text-yellow"
+                status_class = "text-blue"
             status_html += """
                 <div class="device-status">
                     <span class="device">""" + status + """</span><span class="indicator """ + status_class + """ ">""" + device['status'] + """</span>
@@ -195,11 +201,11 @@ def get_homepage_html(data):
                 <table align="center" cellpadding="3">
                     <tr>
                         <td class="heading">Name</td>
-                        <td> """ + data['hostname'] + """ <a class="float-right" href='/server'>configure</a></td>
+                        <td> """ + data['hostname'] + """ <a class="btn btn-sm float-right" href='/server'>configure</a></td>
                     </tr>
                     <tr>
                         <td class="heading">Version</td>
-                        <td>V18.10 <a class="float-right" href='/hw_proxy/upgrade/'>update</a></td>
+                        <td>V18.10 <a class="btn btn-sm float-right" href='/hw_proxy/upgrade/'>update</a></td>
                     </tr>
                     <tr>
                         <td class="heading">IP Address</td>
@@ -211,11 +217,11 @@ def get_homepage_html(data):
                     </tr>
                     <tr>
                         <td class="heading">WiFi</td>
-                        <td>""" + data['wifi_status'] + """ <a class="float-right" href='/wifi'>configure</a></td>
+                        <td>""" + data['wifi_status'] + """ <a class="btn btn-sm float-right" href='/wifi'>configure</a></td>
                     </tr>
                     <tr>
                         <td class="heading">Server</td>
-                        <td><a href='""" + str(data['server_status']) + """' target=_blank>""" + data['server_status'] + """ <a class="float-right" href='/server'>configure</a></td>
+                        <td><a href='""" + str(data['server_status']) + """' target=_blank>""" + data['server_status'] + """ <a class="btn btn-sm float-right" href='/server'>configure</a></td>
                     </tr>
                     <tr>
                         <td class="heading">POS Device</td>
@@ -436,12 +442,12 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                     </tr>
                 </table>
             </form>
-            <p class="text-center" style="margin-bottom: 6px;">
-                You can clear the persistent configuration by clicking below:
-            </p>
-            <form class="text-center" style="margin-bottom: 15px;" action='/wifi_clear'>
-                <input class="btn" type="submit" value="Clear persistent network configuration"/>
-            </form>
+            <div class="text-center font-small" style="margin: 10px auto;">
+                You can clear the persistent configuration
+                <form style="display: inline-block;margin-left: 4px;" action='/wifi_clear'>
+                    <input class="btn btn-sm" type="submit" value="Clear"/>
+                </form>
+            </div>
         </div>
     </body>
 </html>
