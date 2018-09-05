@@ -2044,12 +2044,12 @@ class MailThread(models.AbstractModel):
         #   - HACK TDE FIXME: Chatter: attachments linked to the document (not done JS-side), load the message
         attachment_ids = self._message_post_process_attachments(attachments, kwargs.pop('attachment_ids', []), values)
         values['attachment_ids'] = attachment_ids
-        if attachment_ids and self.ids and not self.main_attachment_id:
+        """if attachment_ids and self.ids and not self.main_attachment_id:
             all_attachments = self.env['ir.attachment'].browse([attachment_tuple[1] for attachment_tuple in attachment_ids])
             prioritary_attachments = all_attachments.filtered(lambda x: x.mimetype.endswith('pdf')) \
                                      or all_attachments.filtered(lambda x: x.mimetype.startswith('image')) \
                                      or all_attachments
-            self.write({'main_attachment_id': prioritary_attachments[0].id})
+            self.write({'main_attachment_id': prioritary_attachments[0].id})"""
 
         # Avoid warnings about non-existing fields
         for x in ('from', 'to', 'cc'):
