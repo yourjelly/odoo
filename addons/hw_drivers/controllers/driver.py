@@ -281,10 +281,10 @@ def send_iot_box_device(send_printer):
         for path in drivers:
             device_name = drivers[path].get_name()
             device_connection = drivers[path].get_connection()
-            devicesList[path] = {'name': device_name,
+            identifier = path.split('_')[0] + '_' + path.split('_')[1]
+            devicesList[identifier] = {'name': device_name,
                                  'type': 'device',
                                  'connection': device_connection}
-
 
         # Build camera JSON
         try:
