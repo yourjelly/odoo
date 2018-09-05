@@ -203,7 +203,7 @@ def get_homepage_html(data):
                     </tr>
                     <tr>
                         <td class="heading">IOT Device</td>
-                        <td>""" + get_iot_device_status_html() + """</td>
+                        <td>""" + get_iot_device_status_html() + """ <a class="float-right" href='/load_drivers'>load drivers</a></td>
                     </tr>
                 </table>
                 <div style="margin-top: 20px;" class="text-center">
@@ -280,6 +280,11 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
     def index(self):
         #return request.render('hw_posbox_homepage.index',mimetype='text/html')
         return get_homepage_html(self.get_homepage_data())
+
+    @http.route('/load_drivers', type='http', auth='none', website=True)
+    def load_drivers(self):
+        from ..hw_drivers.controllers.load_drivers
+        return "Reload"
 
     @http.route('/wifi', type='http', auth='none', website=True)
     def wifi(self):
