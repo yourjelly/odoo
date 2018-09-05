@@ -72,7 +72,7 @@
         </field>
     </record>
     <record id="iot_box_action" model="ir.actions.act_window">
-        <field name="name">Io Boxes</field>
+        <field name="name">IoT Boxes</field>
         <field name="res_model">iot.box</field>
         <field name="view_mode">kanban,list,form</field>
     </record>
