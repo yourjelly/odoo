@@ -164,6 +164,8 @@ def get_homepage_html(data):
     <!DOCTYPE HTML>
     <html>
         <head>
+            <meta http-equiv="cache-control" content="no-cache" />
+            <meta http-equiv="pragma" content="no-cache" />
             <title>Odoo's IoTBox</title>
     """ + home_style + """
         </head>
@@ -181,7 +183,7 @@ def get_homepage_html(data):
                     </tr>
                     <tr>
                         <td class="heading">IP Address</td>
-                        <td> """ + str(data['ip']) + """</td>
+                        <td><a class="btn" href='""" + str(data['ip']) + """'>""" + str(data['ip']) + """</a></td>
                     </tr>
                     <tr>
                         <td class="heading">Mac Address</td>
