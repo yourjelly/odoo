@@ -1,3 +1,4 @@
 #!/usr/bin/python3
 
-import pdb;pdb.set_trace()
+class load_uuid():
+	import pdb;pdb.set_trace()
