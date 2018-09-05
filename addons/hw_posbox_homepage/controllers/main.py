@@ -205,8 +205,8 @@ def get_homepage_html(data):
                     </tr>
                 </table>
                 <div style="margin-top: 20px;" class="text-center">
-                    <a class="btn" href='/remote_connect'>POS Display</a>
-                    <a class="btn" style="margin-left: 10px;" href='/point_of_sale/display'>Remote Debug</a>
+                    <a class="btn" href='/point_of_sale/display'>POS Display</a>
+                    <a class="btn" style="margin-left: 10px;" href='/remote_connect'>Remote Debug</a>
                 </div>
             </div>
             <div class="footer">
