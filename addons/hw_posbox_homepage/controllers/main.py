@@ -21,65 +21,89 @@ from odoo.addons.hw_drivers.controllers import driver as hw_drivers
 
 _logger = logging.getLogger(__name__)
 
-index_style = """
-        <style>
-            body {
-                width: 480px;
-                margin: 60px auto;
-                font-family: sans-serif;
-                text-align: justify;
-                color: #6B6B6B;
-            }
-            .text-red {
-                color: #FF0000;
-            }
-        </style>
+common_style = """
+    <style>
+        body {
+            width: 500px;
+            margin: 30px auto;
+            font-family: sans-serif;
+            text-align: justify;
+            color: #6B6B6B;
+            background-color: #f1f1f1;
+        }
+        .text-green {
+            color: #28a745;
+        }
+        .text-red {
+            color: #dc3545;
+        }
+        .text-yellow {
+            color: #ffc107;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .float-right {
+            float: right;
+        }
+        .btn {
+            display: inline-block;
+            padding: 8px 15px;
+            border: 1px solid #dadada;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            background: #fff;
+            color: #00a09d;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #f1f1f1;
+        }
+        a {
+            text-decoration: none;
+            color: #00a09d;
+        }
+        a:hover {
+            color: #006d6b;
+        }
+        .container {
+            padding: 10px 20px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.17);
+        }
+        .breadcrumb {
+            margin-bottom: 10px;
+        }
+        input[type="text"], input[type="password"] {
+            padding: 6px 12px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            color: inherit;
+        }
+        select {
+            padding: 6px 12px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            color: inherit;
+            background: #ffffff;
+            width: 100%;
+        }
+        .font-small {
+            font-size: 0.8rem;
+        }
+    </style>
 """
 
-home_style = """
+
+def get_homepage_html(data):
+    home_style = common_style + """
         <style>
-            body {
-                width: 500px;
-                margin: 30px auto;
-                font-family: sans-serif;
-                text-align: justify;
-                color: #6B6B6B;
-                background-color: #f1f1f1;
-            }
-            .text-green {
-                color: #28a745;
-            }
-            .text-red {
-                color: #dc3545;
-            }
-            .text-yellow {
-                color: #ffc107;
-            }
-            .text-center {
-                text-align: center;
-            }
-            .float-right {
-                float: right;
-            }
-            .btn {
-                display: inline-block;
-                padding: 8px 15px;
-                border: 1px solid #dadada;
-                border-radius: 3px;
-                font-weight: bold;
-                font-size: 0.8rem;
-            }
-            .btn:hover {
-                background-color: #f1f1f1;
-            }
-            .container {
-                padding: 10px 10px 20px 10px;
-                background: #ffffff;
-                border-radius: 8px;
-                box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.17);
-            }
             table {
-                width: 95%;
+                width: 100%;
                 border-collapse: collapse;
             }
             table tr {
@@ -95,7 +119,7 @@ home_style = """
             table td:first-child {
                 border-left: 0;
             }
-            .heading {
+            td.heading {
                 font-weight: bold;
             }
             .footer {
@@ -104,13 +128,6 @@ home_style = """
             }
             .footer a {
                 margin-left: 8px;
-            }
-            a {
-                text-decoration: none;
-                color: #00a09d;
-            }
-            a:hover {
-                color: #006d6b;
             }
             .device-status {
                 margin-bottom: 6px;
@@ -129,8 +146,6 @@ home_style = """
         </style>
     """
 
-def get_homepage_html(data):
-    
     def get_pos_device_status_html():
         pos_device = data['pos_device_status']
         if len(pos_device) == 0:
@@ -211,7 +226,7 @@ def get_homepage_html(data):
                         <td>""" + get_iot_device_status_html() + """ <a class="float-right" href='/list_drivers'>drivers list</a></td>
                     </tr>
                 </table>
-                <div style="margin-top: 20px;" class="text-center">
+                <div style="margin: 20px auto 10px auto;" class="text-center">
                     <a class="btn" href='/point_of_sale/display'>POS Display</a>
                     <a class="btn" style="margin-left: 10px;" href='/remote_connect'>Remote Debug</a>
                 </div>
@@ -355,78 +370,82 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
     @http.route('/wifi', type='http', auth='none', website=True)
     def wifi(self):
-        wifi_template = """
+
+        def get_wifi_essid_option():
+            wifi_options = ""
+            try:
+                f = open('/tmp/scanned_networks.txt', 'r')
+                for line in f:
+                    line = line.rstrip()
+                    line = misc.html_escape(line)
+                    wifi_options += '<option value="' + line + '">' + line + '</option>\n'
+                f.close()
+            except IOError:
+                _logger.warning("No /tmp/scanned_networks.txt")
+            return wifi_options
+
+        return """
 <!DOCTYPE HTML>
 <html>
     <head>
         <title>Wifi configuration</title>
-""" + index_style + """
+""" + common_style + """
     </head>
     <body>
-        <h1>Configure wifi</h1>
-        <a href="/">Homepage</a>
-        <p>
-        Here you can configure how the iotbox should connect to wireless networks.
-        Currently only Open and WPA networks are supported. When enabling the persistent checkbox,
-        the chosen network will be saved and the iotbox will attempt to connect to it every time it boots.
-        </p>
-        <form action='/wifi_connect' method='POST'>
-            <table>
-                <tr>
-                    <td>
-                        ESSID:
-                    </td>
-                    <td>
-                        <select name="essid">
-"""
-        try:
-            f = open('/tmp/scanned_networks.txt', 'r')
-            for line in f:
-                line = line.rstrip()
-                line = misc.html_escape(line)
-                wifi_template += '<option value="' + line + '">' + line + '</option>\n'
-            f.close()
-        except IOError:
-            _logger.warning("No /tmp/scanned_networks.txt")
-        wifi_template += """
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Password:
-                    </td>
-                    <td>
-                        <input type="password" name="password" placeholder="optional"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Persistent:
-                    </td>
-                    <td>
-                        <input type="checkbox" name="persistent"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td/>
-                    <td>
-                        <input type="submit" value="connect"/>
-                    </td>
-                </tr>
-            </table>
-        </form>
-        <p>
+        <div class="breadcrumb"><a href="/">Home</a> / <span>Configure Wifi</span></div>
+        <div class="container">
+            <h2 class="text-center">Configure Wifi</h2>
+            <p>
+                Here you can configure how the iotbox should connect to wireless networks.
+                Currently only Open and WPA networks are supported. When enabling the persistent checkbox,
+                the chosen network will be saved and the iotbox will attempt to connect to it every time it boots.
+            </p>
+            <form action='/wifi_connect' method='POST'>
+                <table align="center">
+                    <tr>
+                        <td>
+                            ESSID
+                        </td>
+                        <td>
+                            <select name="essid">
+                                """ + get_wifi_essid_option() + """
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Password
+                        </td>
+                        <td>
+                            <input type="password" name="password" placeholder="optional"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Persistent
+                        </td>
+                        <td>
+                            <input type="checkbox" name="persistent"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td/>
+                        <td>
+                            <input class="btn" type="submit" value="Connect"/>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+            <p class="text-center" style="margin-bottom: 6px;">
                 You can clear the persistent configuration by clicking below:
-                <form action='/wifi_clear'>
-                        <input type="submit" value="Clear persistent network configuration"/>
-                </form>
-        </p>
-        <form>
+            </p>
+            <form class="text-center" style="margin-bottom: 15px;" action='/wifi_clear'>
+                <input class="btn" type="submit" value="Clear persistent network configuration"/>
+            </form>
+        </div>
     </body>
 </html>
 """
-        return wifi_template
 
     @http.route('/wifi_connect', type='http', auth='none', cors='*', csrf=False)
     def connect_to_wifi(self, essid, password, persistent=False):
@@ -486,44 +505,46 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
     <html>
         <head>
             <title>IoT -> Odoo server configuration</title>
-        """ + index_style + """
+        """ + common_style + """
         </head>
         <body>
-            <h1>Configure Odoo server</h1>
-            <a href="/">Homepage</a>
-            <p>
-            Here you can configure how the still hidden IoT sauce on your IoT infiltrated iotbox
-            can connect with the Odoo server. 
-            </p>
-            <form action='/server_connect' method='POST'>
-                <table>
-                    <tr>
-                        <td>
-                            IoTBox Name:
-                        </td>
-                        <td>
-                            <input type="text" name="iotname" value=""" + hostname + """>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            Server URL:
-                        </td>
-                        <td>
-                            <input type="text" name="url">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td/>
-                        <td>
-                            <input type="submit" value="connect"/>
-                        </td>
-                    </tr>
-                </table>
+            <div class="breadcrumb"><a href="/">Home</a> / <span>Configure Odoo Server</span></div>
+            <div class="container">
+                <h2 class="text-center">Configure Odoo Server</h2>
                 <p>
-                Your current server is: """ + (self.get_server_status() or 'No server configured yet') + """
-            </p>
-            </form>
+                    Here you can configure how the still hidden IoT sauce on your IoT infiltrated iotbox
+                    can connect with the Odoo server.
+                </p>
+                <form action='/server_connect' method='POST'>
+                    <table align="center">
+                        <tr>
+                            <td>
+                                IoTBox Name
+                            </td>
+                            <td>
+                                <input type="text" name="iotname" value=""" + hostname + """>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Server URL
+                            </td>
+                            <td>
+                                <input type="text" name="url">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td/>
+                            <td>
+                                <input class="btn" type="submit" value="Connect"/>
+                            </td>
+                        </tr>
+                    </table>
+                    <p class="text-center font-small">
+                        Your current server <strong>""" + (self.get_server_status() or 'Not configured yet') + """</strong>
+                    </p>
+                </form>
+            </div>
         </body>
     </html>
         """
@@ -564,33 +585,21 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                });
            });
         </script>
-""" + index_style + """
-        <style>
-            #enable_debug {
-                padding: 10px;
-                background: rgb(121, 197, 107);
-                color: white;
-                border-radius: 3px;
-                text-align: center;
-                margin: 30px;
-                text-decoration: none;
-                display: inline-block;
-            }
-            .centering{
-                text-align: center;
-            }
-        </style>
+""" + common_style + """
     </head>
     <body>
-        <h1>Remote debugging</h1>
-        <p class='text-red'>
-        This allows someone to gain remote access to your IoTbox, and
-        thus your entire local network. Only enable this for someone
-        you trust.
-        </p>
-        <div class='centering'>
-            <input type="text" id="auth_token" size="42" placeholder="Authentication Token"/> <br/>
-            <a id="enable_debug" href="#">Enable remote debugging</a>
+        <div class="breadcrumb"><a href="/">Home</a> / <span>Remote Debugging</span></div>
+        <div class="container">
+            <h2 class="text-center">Remote Debugging</h2>
+            <p class='text-red'>
+                This allows someone to gain remote access to your IoTbox, and
+                thus your entire local network. Only enable this for someone
+                you trust.
+            </p>
+            <div class='text-center'>
+                <input type="text" id="auth_token" size="42" placeholder="Authentication Token"/> <br/>
+                <a class="btn" style="margin: 18px auto;" id="enable_debug" href="#">Enable Remote Debugging</a>
+            </div>
         </div>
     </body>
 </html>
