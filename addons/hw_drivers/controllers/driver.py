@@ -51,6 +51,7 @@ class StatusController(http.Controller):
 
     @http.route('/driverdetails/<string:identifier>', type='http', auth='none', cors='*')
     def statusdetail(self, identifier):
+        identifier = identifier.split('_')[0] + '_' + identifier.split('_')[1]
         if drivers.get(identifier):
             return str(drivers[identifier].value)
         return 'device not found'
@@ -83,7 +84,6 @@ class StatusController(http.Controller):
     def send_iot_box(self):
         send_iot_box_device()
         return 'ok'
-
 
 #----------------------------------------------------------
 # Driver common interface
@@ -118,7 +118,6 @@ class UsbMetaClass(type):
         newclass = super(UsbMetaClass, cls).__new__(cls, clsname, bases, attrs)
         usbdrivers.append(newclass)
         return newclass
-
 
 class USBDriver(Driver,metaclass=UsbMetaClass):
     def __init__(self, dev):
@@ -167,9 +166,6 @@ class BtManager(Thread):
         self.gatt_manager = dm
         dm.start_discovery()
         dm.run()
-
-
-
 
 #----------------------------------------------------------
 # Bluetooth drivers
