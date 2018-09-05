@@ -37,7 +37,7 @@ class IoTController(http.Controller):
         # Update or create devices
         for device_identifier in data['devices']:
             data_device = data['devices'][device_identifier]
-            if device.type == 'printer':
+            if data_device['type'] == 'printer':
                 device = request.env['iot.device'].sudo().search([('identifier', '=', device_identifier)])
             else:
                 device = request.env['iot.device'].sudo().search([('iot_id', '=', box.id), ('identifier', '=', device_identifier)])
