@@ -183,7 +183,7 @@ def get_homepage_html(data):
                     </tr>
                     <tr>
                         <td class="heading">IP Address</td>
-                        <td><a class="btn" href='""" + str(data['ip']) + """'>""" + str(data['ip']) + """</a></td>
+                        <td>""" + str(data['ip']) + """</a></td>
                     </tr>
                     <tr>
                         <td class="heading">Mac Address</td>
@@ -195,7 +195,7 @@ def get_homepage_html(data):
                     </tr>
                     <tr>
                         <td class="heading">Server</td>
-                        <td>""" + data['server_status'] + """ <a class="float-right" href='/server'>configure</a></td>
+                        <td><a href='""" + str(data['server_status']) + """'>""" + data['server_status'] + """ <a class="float-right" href='/server'>configure</a></td>
                     </tr>
                     <tr>
                         <td class="heading">POS Device</td>
@@ -258,9 +258,17 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         mac = get_mac()
         h = iter(hex(mac)[2:].zfill(12))
         ssid = subprocess.check_output('iwconfig 2>&1 | grep \'ESSID:"\' | sed \'s/.*"\\(.*\\)"/\\1/\'', shell=True).decode('utf-8').rstrip()
+        interfaces = ni.interfaces()
+        for iface_id in interfaces:
+            iface_obj = ni.ifaddresses(iface_id)
+            ifconfigs = iface_obj.get(ni.AF_INET, [])
+            for conf in ifconfigs:
+                if conf.get('addr') and conf.get('addr') != '127.0.0.1':
+                    ips = conf.get('addr')
+                    break
         return {
             'hostname': hostname,
-            'ip': str(socket.gethostbyname(hostname)),
+            'ip': ips,
             'mac': ":".join(i + next(h) for i in h),
             'pos_device_status': self.get_pos_device_status(),
             'iot_device_status': hw_drivers.drivers,
