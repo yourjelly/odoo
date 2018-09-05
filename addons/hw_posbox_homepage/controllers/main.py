@@ -195,7 +195,7 @@ def get_homepage_html(data):
                     </tr>
                     <tr>
                         <td class="heading">Server</td>
-                        <td><a href='""" + str(data['server_status']) + """'>""" + data['server_status'] + """ <a class="float-right" href='/server'>configure</a></td>
+                        <td><a href='""" + str(data['server_status']) + """' target=_blank>""" + data['server_status'] + """ <a class="float-right" href='/server'>configure</a></td>
                     </tr>
                     <tr>
                         <td class="heading">POS Device</td>
