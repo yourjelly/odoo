@@ -1182,8 +1182,6 @@ class IrModelAccess(models.Model):
         # TransientModel records have no access rights, only an implicit access rule
         if model not in self.env:
             _logger.error('Missing model %s', model)
-        elif self.env[model].is_transient():
-            return True
 
         # We check if a specific rule exists
         self._cr.execute("""SELECT MAX(CASE WHEN perm_{mode} THEN 1 ELSE 0 END)
