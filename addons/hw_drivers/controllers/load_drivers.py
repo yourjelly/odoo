@@ -14,6 +14,7 @@ class load_uuid():
     except: #In case the file does not exist
         server=''
     if server:
+        data = {}
         server = server.split('\n')[0]
         url = server + '/iot/get_db_uuid'
         data['mac_address'] = maciotbox
