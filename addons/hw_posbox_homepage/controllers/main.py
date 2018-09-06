@@ -284,6 +284,41 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         #return request.render('hw_posbox_homepage.index',mimetype='text/html')
         return get_homepage_html(self.get_homepage_data())
 
+    @http.route('/list_drivers', type='http', auth='none', website=True)
+    def list_drivers(self):
+
+        drivers_list = ''
+        for driver in os.listdir("/home/pi/odoo/addons/hw_drivers/drivers"):
+            driver_list +="""<td>""" + driver + """</td>"""
+
+        html = """
+        <!DOCTYPE HTML>
+        <html>
+            <head>
+                <meta http-equiv="cache-control" content="no-cache" />
+                <meta http-equiv="pragma" content="no-cache" />
+                <title>Odoo's IoTBox - Drivers list</title>
+                """ + home_style + """
+            </head>
+            <body>
+                <div class="container">
+                    <h2 class="text-center text-green">Drivers list</h2>
+                    <table align="center" cellpadding="3">
+                        <tr>
+                            """ + drivers_list + """
+                        </tr>
+                    </table>
+                    <div style="margin-top: 20px;" class="text-center">
+                        <a class="btn" href='/load_drivers'>Load drivers</a>
+                    </div>
+                </div>
+            </body>
+        </html>
+
+        """
+
+        return html
+
     @http.route('/load_drivers', type='http', auth='none', website=True)
     def load_drivers(self):
         #récupérer fichier uuid
@@ -300,7 +335,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         username = subprocess.check_output("/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5}", shell=True).decode('utf-8').split('\n')[0]
         response = requests.get(url, auth=(username, db_uuid.split('\n')[0]), stream=True)
         zip_file = zipfile.ZipFile(io.BytesIO(response.content))
-        zip_file.extractall("/home/pi/")
+        zip_file.extractall("/home/pi/odoo/addons/hw_drivers")
 
         response = 'Granted'
         return response
