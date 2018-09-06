@@ -333,11 +333,15 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         except:
             return False
 
+        subprocess.call("sudo mount -o remount,rw /", shell=True)
+        subprocess.call("sudo mount -o remount,rw /root_bypass_ramdisks", shell=True)
         url = 'https://nightly.odoo.com/trunk/posbox/iotbox_drivers.zip'
         username = subprocess.check_output("/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5}", shell=True).decode('utf-8').split('\n')[0]
         response = requests.get(url, auth=(username, db_uuid.split('\n')[0]), stream=True)
         zip_file = zipfile.ZipFile(io.BytesIO(response.content))
         zip_file.extractall("/home/pi/odoo/addons/hw_drivers")
+        subprocess.call("sudo mount -o remount,ro /", shell=True)
+        subprocess.call("sudo mount -o remount,ro /root_bypass_ramdisks", shell=True)
 
         interfaces = ni.interfaces()
         for iface_id in interfaces:
