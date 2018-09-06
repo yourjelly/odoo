@@ -12,6 +12,7 @@ from odoo import http
 import requests
 import zipfile
 import io
+import os
 from odoo.tools import misc
 
 from uuid import getnode as get_mac
@@ -346,7 +347,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                 if conf.get('addr') and conf.get('addr') != '127.0.0.1':
                     ips = conf.get('addr')
                     break
-        return response + "<meta http-equiv='refresh' content='15; url=http://" + ips + ":8069/list_drivers'>"
+        return "<meta http-equiv='refresh' content='15; url=http://" + ips + ":8069/list_drivers'>Drivers loaded refresh..."
 
     @http.route('/wifi', type='http', auth='none', website=True)
     def wifi(self):
