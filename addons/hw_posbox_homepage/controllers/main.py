@@ -283,8 +283,8 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
     @http.route('/load_drivers', type='http', auth='none', website=True)
     def load_drivers(self):
-        from odoo.addons.hw_drivers.controllers.load_drivers import load_uuid
-        response = load_uuid()
+        #récupérer fichier uuid
+        response = 'Granted'
         return response
 
     @http.route('/wifi', type='http', auth='none', website=True)
@@ -388,6 +388,10 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
     @http.route('/server_connect', type='http', auth='none', cors='*', csrf=False)
     def connect_to_server(self, url, iotname):
+        from odoo.addons.hw_drivers.controllers.load_drivers import load_uuid
+        maciotbox = subprocess.check_output("/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5}", shell=True).decode('utf-8').split('\n')[0]
+        token = 'token'
+        load_uuid(url, maciotbox, token)
         subprocess.call(['/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/connect_to_server.sh', url, iotname])
         interfaces = ni.interfaces()
         for iface_id in interfaces:
