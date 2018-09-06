@@ -308,6 +308,7 @@ return AbstractRenderer.extend({
         this.state.data.forEach(self._sanitizeLabel);
 
         var data = [];
+        var ticksLabels = [];
         var tickValues;
         var tickFormat;
         var measure = this.state.fields[this.state.measure].string;
@@ -345,7 +346,6 @@ return AbstractRenderer.extend({
                 });
             }
 
-            var ticksLabels = [];
             for (i = 0; i < graphData.length; i++) {
                 ticksLabels.push(graphData[i].labels);
             }
@@ -363,22 +363,17 @@ return AbstractRenderer.extend({
                     }
                 }
             }
-
-            tickFormat = function (d) {
-                return ticksLabels[d];
-            };
         } else if (this.state.groupedBy.length > 1) {
             var data_dict = {};
             var tick = 0;
-            var tickLabels = [];
             var serie, tickLabel;
             var identity = function (p) {return p;};
-            tickValues = [];
+
             for (var i = 0; i < this.state.data.length; i++) {
                 if (graphData[i].labels[0] !== tickLabel) {
                     tickLabel = this.state.data[i].labels[0];
                     tickValues.push(tick);
-                    tickLabels.push(tickLabel);
+                    ticksLabels.push(tickLabel);
                     tick++;
                 }
                 serie = graphData[i].labels[1];
@@ -393,8 +388,12 @@ return AbstractRenderer.extend({
                 });
                 data = _.map(data_dict, identity);
             }
-            tickFormat = function (d) {return tickLabels[d];};
         }
+
+        // Delete first and last label
+        ticksLabels[0] = [];
+        ticksLabels[ticksLabels.length - 1] = [];
+
         var $svgContainer = $('<div/>', {class: 'o_graph_svg_container'});
         this.$el.append($svgContainer);
         var svg = d3.select($svgContainer[0]).append('svg');
@@ -404,22 +403,34 @@ return AbstractRenderer.extend({
 
         var chart = nv.models.lineChart();
         chart.options({
-          margin: {left: 80, bottom: 100, top: 80, right: 80},
+          margin: {left: 0, bottom: 20, top: 0, right: 0},
           useInteractiveGuideline: true,
           showLegend: _.size(data) <= MAX_LEGEND_LENGTH,
           showXAxis: true,
           showYAxis: true,
           wrapLabels: true,
         });
-        chart.xAxis.tickValues(tickValues)
-            .tickFormat(tickFormat);
-        chart.yAxis.tickFormat(function (d) {
-            return field_utils.format.float(d, {
-                digits : self.state.fields[self.state.measure] && self.state.fields[self.state.measure].digits || [69, 2],
+        chart.forceY([0]);
+        chart.xAxis
+            .tickValues(tickValues)
+            .tickFormat(function (d) {
+                return ticksLabels[d];
             });
-        });
+        chart.yAxis
+            .showMaxMin(false)
+            .tickFormat(function (d) {
+                return field_utils.format.float(d, {
+                    digits : self.state.fields[self.state.measure] && self.state.fields[self.state.measure].digits || [69, 2],
+                });
+            });
+        chart.yAxis.tickPadding(5);
+        chart.yAxis.orient("right");
 
         chart(svg);
+
+        // Bigger line (stroke-width 1.5 is hardcoded in nv.d3)
+        $svgContainer.find('.nvd3 .nv-groups g.nv-group').css('stroke-width', '3px')
+
         return chart;
     },
     /**
@@ -442,6 +453,13 @@ return AbstractRenderer.extend({
             }
         }
         var chart1 = this['_render' + _.str.capitalize(this.state.mode) + 'Chart'](this.state.data);
+
+        // FIXME: When 'orient' is right for Y axis, horizontal lines aren't displayed correctly
+        chart1.dispatch.on('renderEnd', function () {
+            $('.nv-y .tick > line').attr('x2', function (i, value) {
+                return Math.abs(value);
+            });
+        })
 
         if (title) {
             this._renderTitle(title);
