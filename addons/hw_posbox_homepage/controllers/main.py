@@ -35,8 +35,7 @@ index_style = """
         </style>
 """
 
-def get_homepage_html(data):
-    home_style = """
+home_style = """
         <style>
             body {
                 width: 500px;
@@ -129,6 +128,8 @@ def get_homepage_html(data):
         </style>
     """
 
+def get_homepage_html(data):
+    
     def get_pos_device_status_html():
         pos_device = data['pos_device_status']
         if len(pos_device) == 0:
@@ -206,7 +207,7 @@ def get_homepage_html(data):
                     </tr>
                     <tr>
                         <td class="heading">IOT Device</td>
-                        <td>""" + get_iot_device_status_html() + """ <a class="float-right" href='/list_drivers'>load drivers</a></td>
+                        <td>""" + get_iot_device_status_html() + """ <a class="float-right" href='/list_drivers'>drivers list</a></td>
                     </tr>
                 </table>
                 <div style="margin-top: 20px;" class="text-center">
