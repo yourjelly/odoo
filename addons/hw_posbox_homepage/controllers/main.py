@@ -9,6 +9,7 @@ import werkzeug
 import netifaces as ni
 import odoo
 from odoo import http
+import requests
 from odoo.tools import misc
 
 from uuid import getnode as get_mac
@@ -284,6 +285,19 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
     @http.route('/load_drivers', type='http', auth='none', website=True)
     def load_drivers(self):
         #récupérer fichier uuid
+        db_uuid = ""
+        try:
+            f = open('/home/pi/uuid', 'r')
+            for line in f:
+                db_uuid += line
+            f.close()
+        except:
+            return False
+
+        url = 'https://nightly.odoo.com/trunk/posbox/iotbox_drivers.zip'
+        theurl= 'myLink_queriedResult/result.xls'
+        username = subprocess.check_output("/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5}", shell=True).decode('utf-8').split('\n')[0]
+        requests.get(url, auth=(username, db_uuid))
         response = 'Granted'
         return response
 
