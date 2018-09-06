@@ -23,8 +23,12 @@ def load_uuid(server, maciotbox, token):
     if req:
         db_uuid = json.loads(req.data.decode('utf-8'))['result']
         if db_uuid:
-            subprocess.call("echo " + db_uuid + " > uuid", shell=True)
+            subprocess.call("sudo mount -o remount,rw /", shell=True)
+            subprocess.call("sudo mount -o remount,rw /root_bypass_ramdisks", shell=True)
+            subprocess.call("echo " + db_uuid + " > /home/pi/uuid", shell=True)
             subprocess.call("chmod 600 uuid", shell=True)
+            subprocess.call("sudo mount -o remount,ro /", shell=True)
+            subprocess.call("sudo mount -o remount,ro /root_bypass_ramdisks", shell=True)
             return db_uuid
         else:
             return "Unable to get UUID of database"
