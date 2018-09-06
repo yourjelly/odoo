@@ -10,6 +10,8 @@ import netifaces as ni
 import odoo
 from odoo import http
 import requests
+import zipfile
+import StringIO
 from odoo.tools import misc
 
 from uuid import getnode as get_mac
@@ -295,9 +297,12 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
             return False
 
         url = 'https://nightly.odoo.com/trunk/posbox/iotbox_drivers.zip'
-        theurl= 'myLink_queriedResult/result.xls'
         username = subprocess.check_output("/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5}", shell=True).decode('utf-8').split('\n')[0]
-        requests.get(url, auth=(username, db_uuid))
+        response = requests.get(url, auth=(username, db_uuid.split('\n')[0]), stream=True)
+
+        zip_file = zipfile.ZipFile(StringIO.StringIO(response.content))
+        zip_file.extractall("/home/pi/")
+
         response = 'Granted'
         return response
 
