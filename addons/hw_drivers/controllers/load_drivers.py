@@ -2,7 +2,7 @@ import urllib3
 import subprocess
 import json
 
-class load_uuid():
+def load_uuid():
 
     maciotbox = subprocess.check_output("/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5}", shell=True).decode('utf-8').split('\n')[0]
     server = "" # read from file
@@ -29,3 +29,8 @@ class load_uuid():
                                 headers=headers)
         except:
             logger.warning('Could not reach configured server')
+    if req:
+        return json.loads(req.data.decode('utf-8'))['result']
+    else:
+        return "Server not reachable"
+

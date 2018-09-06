@@ -25,8 +25,8 @@ class IoTController(http.Controller):
     @http.route('/iot/get_db_uuid', type='json', auth='public')
     def get_db_uuid(self):
         data = request.jsonrequest
-        if data['mac_address'] == 'b8:27:eb:61:03:5e' and data['token'] == 'token':
-            db_uuid = self.env['ir.config_parameter'].sudo().get_param('database.uuid')
+        if data['mac_address'] == 'b8:27:eb:34:56:0b' and data['token'] == 'token':
+            db_uuid = request.env['ir.config_parameter'].sudo().get_param('database.uuid')
             return db_uuid
         else:
             return 'Access not granted'
