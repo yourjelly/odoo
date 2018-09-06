@@ -16,7 +16,7 @@ function connect () {
 	then
 		echo "${SERVER}" > ${CURRENT_SERVER_FILE}
 	fi
-	if [ "${IOT_NAME}" -ne "${HOSTNAME}" ]
+	if [ "${IOT_NAME}" != "${HOSTNAME}" ]
 	then
 		sudo sed -i "s/${HOSTNAME}/${IOT_NAME}/g" ${HOSTS}
 		echo "${IOT_NAME}" > /tmp/hostname
