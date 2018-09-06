@@ -413,21 +413,22 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                     break
         return "<meta http-equiv='refresh' content='15; url=http://" + ips + ":8069/list_drivers'>Drivers loaded refresh..."
 
+    def get_wifi_essid_option(self):
+        wifi_options = ""
+        try:
+            f = open('/tmp/scanned_networks.txt', 'r')
+            for line in f:
+                line = line.rstrip()
+                line = misc.html_escape(line)
+                wifi_options += '<option value="' + line + '">' + line + '</option>\n'
+            f.close()
+        except IOError:
+            _logger.warning("No /tmp/scanned_networks.txt")
+        return wifi_options
+
     @http.route('/wifi', type='http', auth='none', website=True)
     def wifi(self):
 
-        def get_wifi_essid_option():
-            wifi_options = ""
-            try:
-                f = open('/tmp/scanned_networks.txt', 'r')
-                for line in f:
-                    line = line.rstrip()
-                    line = misc.html_escape(line)
-                    wifi_options += '<option value="' + line + '">' + line + '</option>\n'
-                f.close()
-            except IOError:
-                _logger.warning("No /tmp/scanned_networks.txt")
-            return wifi_options
 
         return """
 <!DOCTYPE HTML>
@@ -453,7 +454,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                         </td>
                         <td>
                             <select name="essid">
-                                """ + get_wifi_essid_option() + """
+                                """ + self.get_wifi_essid_option() + """
                             </select>
                         </td>
                     </tr>
@@ -564,6 +565,88 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
     </body>
 </html>
     """
+
+    @http.route('/steps', type='http', auth='none', cors='*', csrf=False)
+    def step_by_step_configure_page(self):
+        return """
+<html>
+    <head>
+        <title>Configure IoT Box</title>
+        """ + common_style + """
+        <style>
+            .config-steps {
+                margin-top: 30px;
+            }
+            .config-steps .title {
+                font-weight: bold;
+                margin-bottom: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2 class="text-center">Configure IoT Box</h2>
+            <form action='/step_configure' method='POST'>
+                <div class="config-steps">
+                    <div class="title">Step 1: Configure Server Details</div>
+                    <table align="center">
+                        <tr>
+                            <td>
+                                IoTBox Name
+                            </td>
+                            <td>
+                                <input type="text" name="iotname">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Server URL
+                            </td>
+                            <td>
+                                <input type="text" name="url">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="config-steps">
+                    <div class="title">Step 2: Configure WiFi Connection</div>
+                    <table align="center">
+                        <tr>
+                            <td>
+                                ESSID
+                            </td>
+                            <td>
+                                <select name="essid">
+                                    """ + self.get_wifi_essid_option() + """
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Password
+                            </td>
+                            <td>
+                                <input type="password" name="password" placeholder="optional"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Persistent
+                            </td>
+                            <td>
+                                <input type="checkbox" name="persistent"/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div style="text-align: right">
+                    <input class="btn" type="submit" value="Done"/>
+                </div>
+            </form>
+        </div>
+    </body>
+</html>
+"""
 
     @http.route('/step_configure', type='http', auth='none', cors='*', csrf=False)
     def step_by_step_configure(self, url, iotname, essid, password, persistent=False):
