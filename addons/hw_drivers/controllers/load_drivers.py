@@ -1,6 +1,7 @@
 import urllib3
 import subprocess
 import json
+import logging
 
 def load_uuid(server, maciotbox, token):
 
@@ -11,13 +12,14 @@ def load_uuid(server, maciotbox, token):
     data_json = json.dumps(data).encode('utf8')
     headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
     http = urllib3.PoolManager()
+    req = ''
     try:
         req = http.request('POST',
                                 url,
                                 body=data_json,
                                 headers=headers)
     except:
-        logger.warning('Could not reach configured server')
+        logging.warning('Could not reach configured server')
     if req:
         db_uuid = json.loads(req.data.decode('utf-8'))['result']
         if db_uuid:
