@@ -1183,7 +1183,7 @@ class IrModelAccess(models.Model):
         if model not in self.env:
             _logger.error('Missing model %s', model)
         elif self.env[model].is_transient():
-            if self.env.ref('base.group_user') in self.env['res.users'].browse(self.env.uid).group_ids:
+            if self.env.ref('base.group_user') in self.env['res.users'].browse(self.env.uid).groups_id:
                 return True
 
         # We check if a specific rule exists
