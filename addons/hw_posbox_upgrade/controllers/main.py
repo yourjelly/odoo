@@ -134,6 +134,12 @@ upgrade_template = """
             });
         });
         </script>
+        <style>
+            .commit-details {
+                background: #f1f1f1;
+                padding: 10px 10px 0 10px;
+                border-radius: 5px;
+            }
         </style>
     </head>
     <body>
@@ -142,7 +148,6 @@ upgrade_template = """
             <h2 class="text-center">IoT Box Software Upgrade</h2>
             <p>
                 This tool will help you perform an upgrade of the IoTBox's software over the internet.
-                <p></p>
                 However the preferred method to upgrade the IoTBox is to flash the sd-card with
                 the <a href='http://nightly.odoo.com/trunk/posbox/'>latest image</a>. The upgrade
                 procedure is explained into to the
@@ -151,15 +156,15 @@ upgrade_template = """
             <p>
                 To upgrade the IoTBox, click on the upgrade button. The upgrade will take a few minutes. <b>Do not reboot</b> the IoTBox during the upgrade.
             </p>
-            <p>
-                Latest patch:
-            </p>
-            <pre style="margin: 0">
-"""
-upgrade_template += subprocess.check_output("git --work-tree=/home/pi/odoo/ --git-dir=/home/pi/odoo/.git log -1", shell=True).decode('utf-8').replace("\n", "<br/>")
-upgrade_template += """
-            </pre>
-            <div class="text-center" style="margin-bottom: 15px;">
+            <div class="commit-details">
+                <div style="padding-bottom: 5px; font-weight: bold;">
+                    Latest patch:
+                </div>
+                <pre style="margin: 0">
+""" + subprocess.check_output("git --work-tree=/home/pi/odoo/ --git-dir=/home/pi/odoo/.git log -1", shell=True).decode('utf-8').replace("\n", "<br/>") + """
+                </pre>
+            </div>
+            <div class="text-center" style="margin: 15px auto;">
                 <a class="btn" href='#' id='upgrade'>Upgrade</a>
                 <div id='loading'></div>
             </div>
