@@ -29,7 +29,7 @@ class IoTController(http.Controller):
             db_uuid = request.env['ir.config_parameter'].sudo().get_param('database.uuid')
             return db_uuid
         else:
-            return 'Access not granted'
+            return ''
 
     @http.route('/iot/setup', type='json', auth='public')
     def update_box(self):

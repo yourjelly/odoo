@@ -30,7 +30,9 @@ def load_uuid():
         except:
             logger.warning('Could not reach configured server')
     if req:
-        return json.loads(req.data.decode('utf-8'))['result']
+        db_uuid = json.loads(req.data.decode('utf-8'))['result']
+        #if db_uuid create file with db_uuid and chmod read only root
+        return db_uuid
     else:
         return "Server not reachable"
 
