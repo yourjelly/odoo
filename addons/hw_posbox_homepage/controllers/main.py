@@ -290,7 +290,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
         drivers_list = ''
         for driver in os.listdir("/home/pi/odoo/addons/hw_drivers/drivers"):
-            driver_list +="""<td>""" + driver + """</td>"""
+            drivers_list +="""<td>""" + driver + """</td>"""
 
         html = """
         <!DOCTYPE HTML>
@@ -338,8 +338,15 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         zip_file = zipfile.ZipFile(io.BytesIO(response.content))
         zip_file.extractall("/home/pi/odoo/addons/hw_drivers")
 
-        response = 'Granted'
-        return response
+        interfaces = ni.interfaces()
+        for iface_id in interfaces:
+            iface_obj = ni.ifaddresses(iface_id)
+            ifconfigs = iface_obj.get(ni.AF_INET, [])
+            for conf in ifconfigs:
+                if conf.get('addr') and conf.get('addr') != '127.0.0.1':
+                    ips = conf.get('addr')
+                    break
+        return response + "<meta http-equiv='refresh' content='15; url=http://" + ips + ":8069/list_drivers'>"
 
     @http.route('/wifi', type='http', auth='none', website=True)
     def wifi(self):
