@@ -511,7 +511,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 <html>
     <head> 
         """ + common_style + """
-        <meta http-equiv='refresh' content='15; url=" """ + server + """'>
+        <meta http-equiv='refresh' content='30; url=" """ + server + """'>
     </head>
     <body>
         <div class="container text-center">
@@ -551,7 +551,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 <html>
     <head> 
         """ + common_style + """
-        <meta http-equiv='refresh' content='15; url='http://""" + ips + """:8069'>
+        <meta http-equiv='refresh' content='30; url='http://""" + ips + """:8069'>
     </head>
     <body>
         <div class="container text-center">
