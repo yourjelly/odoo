@@ -291,7 +291,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
         drivers_list = ''
         for driver in os.listdir("/home/pi/odoo/addons/hw_drivers/drivers"):
-            drivers_list +="""<td>""" + driver + """</td>"""
+            drivers_list +="""<tr><td>""" + driver + """</td></tr>"""
 
         html = """
         <!DOCTYPE HTML>
