@@ -283,7 +283,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
     @http.route('/load_drivers', type='http', auth='none', website=True)
     def load_drivers(self):
-        from ..hw_drivers.controllers.load_drivers import load_uuid
+        from odoo.addons.hw_drivers.controllers.load_drivers import load_uuid
         return "Reload"
 
     @http.route('/wifi', type='http', auth='none', website=True)

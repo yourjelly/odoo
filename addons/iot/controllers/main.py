@@ -21,6 +21,16 @@ class IoTController(http.Controller):
         else:
             return 'http://localhost:8069/point_of_sale/display'
 
+    # Return db uuid
+    @http.route('/iot/get_db_uuid', type='json', auth='public')
+    def get_db_uuid(self):
+        data = request.jsonrequest
+        if data['mac_address'] == 'b8:27:eb:61:03:5e' and data['token'] == 'token':
+            db_uuid = self.env['ir.config_parameter'].sudo().get_param('database.uuid')
+            return db_uuid
+        else:
+            return 'Access not granted'
+
     @http.route('/iot/setup', type='json', auth='public')
     def update_box(self):
         data = request.jsonrequest
