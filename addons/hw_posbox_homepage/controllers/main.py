@@ -380,8 +380,8 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                         <a class="btn" href='/load_drivers'>Load drivers</a>
                     </div>
                     <div class="text-center font-small" style="margin: 10px auto;">
-                        You can clear the server configuration
-                        <form style="display: inline-block;margin-left: 4px;" action='/server_clear'>
+                        You can clear the drivers list
+                        <form style="display: inline-block;margin-left: 4px;" action='/drivers_clear'>
                             <input class="btn btn-sm" type="submit" value="Clear"/>
                         </form>
                     </div>
