@@ -39,6 +39,7 @@ server_config_template = env.get_template('server_config.html')
 wifi_config_template = env.get_template('wifi_config.html')
 driver_list_template = env.get_template('driver_list.html')
 remote_connect_template = env.get_template('remote_connect.html')
+configure_wizard_template = env.get_template('configure_wizard.html')
 
 common_style = ""
 
@@ -243,194 +244,12 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
     @http.route('/steps', type='http', auth='none', cors='*', csrf=False)
     def step_by_step_configure_page(self):
-        return """
-        <html>
-            <head>
-                <title>Configure IoT Box</title>
-                """ + common_style + """
-                <style>
-                    .config-steps .title {
-                        font-weight: bold;
-                        margin-bottom: 10px;
-                    }
-                    .progressbar {
-                        counter-reset: step;
-                        z-index: 1;
-                        position: relative;
-                        display: inline-block;
-                        width: 100%;
-                        padding: 0;
-                    }
-                    .progressbar li{
-                        list-style-type: none;
-                        float: left;
-                        width: 33.33%;
-                        position:relative;
-                        text-align: center;
-                        font-size: 0.8rem;
-                    }
-                    .progressbar li:before {
-                        content:counter(step);
-                        counter-increment: step;
-                        height:30px;
-                        width:30px;
-                        line-height: 30px;
-                        border: 2px solid #ddd;
-                        display:block;
-                        text-align: center;
-                        margin: 0 auto 6px auto;
-                        border-radius: 50%;
-                        background-color: white;
-                        color: #ddd;
-                        font-size: 1rem;
-                    }
-                    .progressbar li:after {
-                        content:'';
-                        position: absolute;
-                        width:100%;
-                        height:2px;
-                        background-color: #ddd;
-                        top: 15px;
-                        left: -50%;
-                        z-index: -1;
-                    }
-                    .progressbar li:first-child:after {
-                        content:none;
-                    }
-                    .progressbar li.active, .progressbar li.completed {
-                        color:#875A7B;
-                    }
-                    .progressbar li:last-child:before {
-                        content: '✔';
-                    }
-                    .progressbar li.active:before {
-                        border-color:#875A7B;
-                        color: #875A7B;
-                    }
-                    .progressbar li.completed:before{
-                        border-color:#875A7B;
-                        background-color:#875A7B;
-                        color: #fff;
-                    }
-                    .progressbar li.completed + li:after{
-                        background-color:#875A7B;
-                    }
-                    .footer-buttons {
-                        display: inline-block;
-                        width: 100%;
-                        margin-top: 20px;
-                    }
-                </style>
-                <script type="text/javascript" src="/web/static/lib/jquery/jquery.js"></script>
-                <script>
-                    $(document).ready(function () {
-                        function changePage(key) {
-                            $('.progressbar li[data-key=' + key + ']').prevAll().addClass('completed');
-                            $('.progressbar li[data-key=' + key + ']').nextAll().removeClass('active completed');
-                            $('.progressbar li[data-key=' + key + ']').addClass('active').removeClass('completed');
-                            $('.config-steps.active').removeClass('active').addClass('o_hide');
-                            $('.config-steps[data-key=' + key + ']').removeClass('o_hide').addClass('active');
-                        }
-                        $('.next-btn').on('click', function (ev) {
-                            changePage($(ev.target).data('key'));
-                        });
-                        $('#config-form').submit(function(e){
-                            e.preventDefault();
-                            $('.loading-block').removeClass('o_hide');
-                            $.ajax({
-                                url:'/step_configure',
-                                type:'post',
-                                data:$('#config-form').serialize(),
-                                success:function(){
-                                    $('.loading-block').addClass('o_hide');
-                                    changePage('done');
-                                }
-                            });
-                        });
-                    });
-                </script>
-            </head>
-            <body>
-                <div class="breadcrumb"><a href="/">Home</a> / <span>Configure IoTBox</span></div>
-                <div class="container">
-                    <h2 class="text-center">Configure IoT Box</h2>
-                    <ul class="progressbar">
-                        <li class="active" data-key="server">Configure Server</li>
-                        <li data-key="wifi">Configure Wifi</li>
-                        <li data-key="done">Done</li>
-                    </ul>
-                    <form id="config-form" style="margin-top: 20px;" action='/step_configure' method='POST'>
-                        <div>
-                            <div class="config-steps active" data-key="server">
-                                <table align="center">
-                                    <tr>
-                                        <td>
-                                            IoTBox Name
-                                        </td>
-                                        <td>
-                                            <input type="text" name="iotname">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            Server URL
-                                        </td>
-                                        <td>
-                                            <input type="text" name="url">
-                                        </td>
-                                    </tr>
-                                </table>
-                                <div class="footer-buttons">
-                                    <a class="btn next-btn" style="float: right" data-key="wifi">Next</a>
-                                </div>
-                            </div>
-                            <div class="config-steps wifi-step o_hide" data-key="wifi">
-                                <table align="center">
-                                    <tr>
-                                        <td>
-                                            ESSID
-                                        </td>
-                                        <td>
-                                            <select name="essid">
-                                                """ + self.get_wifi_essid_option() + """
-                                            </select>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            Password
-                                        </td>
-                                        <td>
-                                            <input type="password" name="password" placeholder="optional"/>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            Persistent
-                                        </td>
-                                        <td>
-                                            <input type="checkbox" name="persistent"/>
-                                        </td>
-                                    </tr>
-                                </table>
-                                <div class="footer-buttons">
-                                    <a class="btn next-btn" data-key="server">Previous</a>
-                                    <input class="btn" style="float: right" type="submit" value="Submit"/>
-                                </div>
-                            </div>
-                            <div class="config-steps o_hide" data-key="done">
-                                <h3 class="text-center" style="margin: 0;">✔ Nice! Your configuration is done.</h3>
-                                <div class="footer-buttons">
-                                    <a class="btn" href="/" style="float: right">Done</a>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                    """ + loading_block_ui('Configuring your IoT Box') + """
-                </div>
-            </body>
-        </html>
-        """
+        return configure_wizard_template.render({
+            'title': 'Configure IoT Box',
+            'breadcrumb': 'Configure IoTBox',
+            'loading_message': 'Configuring your IoT Box',
+            'ssid': self.get_wifi_essid(),
+        })
 
     @http.route('/step_configure', type='http', auth='none', cors='*', csrf=False)
     def step_by_step_configure(self, url, iotname, essid, password, persistent=False):
