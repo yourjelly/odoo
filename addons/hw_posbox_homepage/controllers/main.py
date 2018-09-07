@@ -36,6 +36,7 @@ env.filters["json"] = json.dumps
 
 homepage_template = env.get_template('homepage.html')
 server_config_template = env.get_template('server_config.html')
+wifi_config_template = env.get_template('wifi_config.html')
 
 common_style = ""
 
@@ -193,14 +194,14 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
         return "<meta http-equiv='refresh' content='0; url=http://" + self.get_ip_iotbox() + ":8069/list_drivers'>"
 
-    def get_wifi_essid_option(self):
-        wifi_options = ""
+    def get_wifi_essid(self):
+        wifi_options = []
         try:
             f = open('/tmp/scanned_networks.txt', 'r')
             for line in f:
                 line = line.rstrip()
                 line = misc.html_escape(line)
-                wifi_options += '<option value="' + line + '">' + line + '</option>\n'
+                wifi_options.append(line)
             f.close()
         except IOError:
             _logger.warning("No /tmp/scanned_networks.txt")
@@ -208,96 +209,12 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
     @http.route('/wifi', type='http', auth='none', website=True)
     def wifi(self):
-
-
-        return """
-        <!DOCTYPE HTML>
-        <html>
-            <head>
-                <title>Wifi configuration</title>
-        """ + common_style + """
-                <script type="text/javascript" src="/web/static/lib/jquery/jquery.js"></script>
-                <script>
-                $(document).ready(function () {
-                    $('#wifi-config').submit(function(e){
-                        e.preventDefault();
-                        $('.loading-block').removeClass('o_hide');
-                        $.ajax({
-                            url:'/wifi_connect',
-                            type:'post',
-                            data:$('#wifi-config').serialize(),
-                            success:function(message){
-                                var data = JSON.parse(message);
-                                var message = data.message;
-                                if (data.server) {
-                                    message += '<br>'+ data.server.message;
-                                    setTimeout(function () {
-                                        window.location = data.server.url;
-                                    }, 30000);
-                                }
-                                $('.message-status').html(message);
-                            }
-                        });
-                    });
-                });
-                </script>
-            </head>
-            <body>
-                <div class="breadcrumb"><a href="/">Home</a> / <span>Configure Wifi</span></div>
-                <div class="container">
-                    <h2 class="text-center">Configure Wifi</h2>
-                    <p>
-                        Here you can configure how the iotbox should connect to wireless networks.
-                        Currently only Open and WPA networks are supported. When enabling the persistent checkbox,
-                        the chosen network will be saved and the iotbox will attempt to connect to it every time it boots.
-                    </p>
-                    <form id="wifi-config" action='/wifi_connect' method='POST'>
-                        <table align="center">
-                            <tr>
-                                <td>
-                                    ESSID
-                                </td>
-                                <td>
-                                    <select name="essid">
-                                        """ + self.get_wifi_essid_option() + """
-                                    </select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    Password
-                                </td>
-                                <td>
-                                    <input type="password" name="password" placeholder="optional"/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    Persistent
-                                </td>
-                                <td>
-                                    <input type="checkbox" name="persistent"/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td/>
-                                <td>
-                                    <input class="btn" type="submit" value="Connect"/>
-                                </td>
-                            </tr>
-                        </table>
-                    </form>
-                    <div class="text-center font-small" style="margin: 10px auto;">
-                        You can clear the persistent configuration
-                        <form style="display: inline-block;margin-left: 4px;" action='/wifi_clear'>
-                            <input class="btn btn-sm" type="submit" value="Clear"/>
-                        </form>
-                    </div>
-                    """ + loading_block_ui('Connecting to Wifi') + """
-                </div>
-            </body>
-        </html>
-        """
+        return wifi_config_template.render({
+            'title': 'Wifi configuration',
+            'breadcrumb': 'Configure Wifi',
+            'loading_message': 'Connecting to Wifi',
+            'ssid': self.get_wifi_essid(),
+        })
 
     @http.route('/wifi_connect', type='http', auth='none', cors='*', csrf=False)
     def connect_to_wifi(self, essid, password, persistent=False):
@@ -320,7 +237,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
             res_payload['server'] = {
                 'url': server,
                 'message': 'Redirect to Odoo Server'
-            };
+            }
 
         return json.dumps(res_payload)
 
