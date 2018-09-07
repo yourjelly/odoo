@@ -205,12 +205,10 @@ class BtDriver(Driver, metaclass=BtMetaClass):
         pass
 
 import importlib.util
-driversList = os.listdir("/home/odoo/odoo/master/community/addons/hw_drivers/drivers")
+driversList = os.listdir("/home/pi/odoo/addons/hw_drivers/drivers")
 for driver in driversList:
     #from ..drivers import driver
-    if driver == '__pycache__':
-        continue
-    path = "/home/odoo/odoo/master/community/addons/hw_drivers/drivers/" + driver
+    path = "/home/pi/odoo/addons/hw_drivers/drivers/" + driver
     spec = importlib.util.spec_from_file_location(driver, path)
     if spec:
         foo = importlib.util.module_from_spec(spec)
