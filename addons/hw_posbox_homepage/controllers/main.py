@@ -295,7 +295,7 @@ def get_homepage_html(data):
 
 class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
-    def get_ip_iotbox():
+    def get_ip_iotbox(self):
         interfaces = ni.interfaces()
         for iface_id in interfaces:
             iface_obj = ni.ifaddresses(iface_id)
