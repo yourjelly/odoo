@@ -295,15 +295,26 @@ def get_homepage_html(data):
 
 class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
+    def get_ip_iotbox():
+        interfaces = ni.interfaces()
+        for iface_id in interfaces:
+            iface_obj = ni.ifaddresses(iface_id)
+            ifconfigs = iface_obj.get(ni.AF_INET, [])
+            for conf in ifconfigs:
+                if conf.get('addr') and conf.get('addr') != '127.0.0.1':
+                    ips = conf.get('addr')
+                    break
+        return ips
+
     def get_hw_screen_message(self):
         return """
-<p>
-    The activate the customer display feature, you will need to reinstall the IoTBox software.
-    You can find the latest images on the <a href="http://nightly.odoo.com/master/posbox/">Odoo Nightly builds</a> website.
-    Make sure to download at least the version 16.<br/>
-    Odoo version 11, or above, is required to use the customer display feature.
-</p>
-"""
+        <p>
+            The activate the customer display feature, you will need to reinstall the IoTBox software.
+            You can find the latest images on the <a href="http://nightly.odoo.com/master/posbox/">Odoo Nightly builds</a> website.
+            Make sure to download at least the version 16.<br/>
+            Odoo version 11, or above, is required to use the customer display feature.
+        </p>
+        """
 
     def get_pos_device_status(self):
         statuses = {}
@@ -328,17 +339,9 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         mac = get_mac()
         h = iter(hex(mac)[2:].zfill(12))
         ssid = subprocess.check_output('iwconfig 2>&1 | grep \'ESSID:"\' | sed \'s/.*"\\(.*\\)"/\\1/\'', shell=True).decode('utf-8').rstrip()
-        interfaces = ni.interfaces()
-        for iface_id in interfaces:
-            iface_obj = ni.ifaddresses(iface_id)
-            ifconfigs = iface_obj.get(ni.AF_INET, [])
-            for conf in ifconfigs:
-                if conf.get('addr') and conf.get('addr') != '127.0.0.1':
-                    ips = conf.get('addr')
-                    break
         return {
             'hostname': hostname,
-            'ip': ips,
+            'ip': self.get_ip_iotbox(),
             'mac': ":".join(i + next(h) for i in h),
             'pos_device_status': self.get_pos_device_status(),
             'iot_device_status': hw_drivers.drivers,
@@ -415,7 +418,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         subprocess.call("sudo mount -o remount,ro /", shell=True)
         subprocess.call("sudo mount -o remount,ro /root_bypass_ramdisks", shell=True)
 
-        return "<meta http-equiv='refresh' url='/list_drivers' content='0'>"
+        return "<meta http-equiv='refresh' content='0; url=http://" + self.get_ip_iotbox() + ":8069/list_drivers'>"
 
     def get_wifi_essid_option(self):
         wifi_options = ""
@@ -551,17 +554,20 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
     @http.route('/wifi_clear', type='http', auth='none', cors='*', csrf=False)
     def clear_wifi_configuration(self):
         os.system('/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/clear_wifi_configuration.sh')
-        return "<meta http-equiv='refresh' url='/' content='0'>"
+
+        return "<meta http-equiv='refresh' content='0; url=http://" + self.get_ip_iotbox() + ":8069'>"
 
     @http.route('/server_clear', type='http', auth='none', cors='*', csrf=False)
     def clear_server_configuration(self):
         os.system('/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/clear_server_configuration.sh')
-        return "<meta http-equiv='refresh' url='/' content='0'>"
+
+        return "<meta http-equiv='refresh' content='0; url=http://" + self.get_ip_iotbox() + ":8069'>"
 
     @http.route('/drivers_clear', type='http', auth='none', cors='*', csrf=False)
     def clear_drivers_list(self):
         os.system('/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/clear_drivers_list.sh')
-        return "<meta http-equiv='refresh' url='/list_drivers' content='0'>"
+
+        return "<meta http-equiv='refresh' content='0; url=http://" + self.get_ip_iotbox() + ":8069/list_drivers'>"
 
     @http.route('/server_connect', type='http', auth='none', cors='*', csrf=False)
     def connect_to_server(self, url, iotname):
@@ -570,15 +576,8 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         token = 'token'
         load_uuid(url.strip(' '), maciotbox, token)
         subprocess.call(['/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/connect_to_server.sh', url.strip(' '), iotname])
-        interfaces = ni.interfaces()
-        for iface_id in interfaces:
-            iface_obj = ni.ifaddresses(iface_id)
-            ifconfigs = iface_obj.get(ni.AF_INET, [])
-            for conf in ifconfigs:
-                if conf.get('addr') and conf.get('addr') != '127.0.0.1':
-                    ips = conf.get('addr')
-                    break
-        return 'http://' + ips + ':8069'
+
+        return 'http://' + self.get_ip_iotbox() + ':8069'
 
     @http.route('/steps', type='http', auth='none', cors='*', csrf=False)
     def step_by_step_configure_page(self):
