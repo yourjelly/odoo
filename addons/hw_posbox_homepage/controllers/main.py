@@ -60,7 +60,7 @@ common_style = """
         }
         .btn-sm {
             padding: 4px 8px;
-            font-size: 0.7rem;
+            font-size: 0.9rem;
             font-weight: normal;
         }
         .btn:hover {
@@ -187,7 +187,7 @@ def get_homepage_html(data):
             }
             .device-status .indicator {
                 margin-left: 4px;
-                font-size: 0.7rem;
+                font-size: 0.9rem;
                 text-transform: uppercase;
             }
             .device-status .device {
