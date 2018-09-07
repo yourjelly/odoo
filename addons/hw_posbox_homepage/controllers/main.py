@@ -273,7 +273,7 @@ def get_homepage_html(data):
                     </tr>
                     <tr>
                         <td class="heading">IOT Device</td>
-                        <td>""" + get_iot_device_status_html() + """ <a class="float-right" href='/list_drivers'>drivers list</a></td>
+                        <td>""" + get_iot_device_status_html() + """ <a class="btn btn-sm float-right" href='/list_drivers'>drivers list</a></td>
                     </tr>
                 </table>
                 <div style="margin: 20px auto 10px auto;" class="text-center">
