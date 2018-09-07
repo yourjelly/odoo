@@ -99,6 +99,9 @@ echo "disable_overscan=1" >> /boot/config.txt
 # to not have "setting up console font and keymap" during boot take ages
 setupcon
 
+# exclude /drivers folder from git info to be able to load specific drivers
+echo "addons/hw_drivers/drivers/" > /home/pi/odoo/.git/info/exclude
+
 # create dirs for ramdisks
 create_ramdisk_dir () {
     mkdir "${1}_ram"
