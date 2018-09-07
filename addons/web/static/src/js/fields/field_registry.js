@@ -13,6 +13,7 @@ var AbstractField = require('web.AbstractField');
 var basic_fields = require('web.basic_fields');
 var relational_fields = require('web.relational_fields');
 var registry = require('web.field_registry');
+var domain_field = require('web.domain_field');
 var special_fields = require('web.special_fields');
 
 
@@ -24,7 +25,7 @@ registry
     .add('boolean', basic_fields.FieldBoolean)
     .add('date', basic_fields.FieldDate)
     .add('datetime', basic_fields.FieldDateTime)
-    .add('domain', basic_fields.FieldDomain)
+    .add('domain', domain_field)
     .add('text', basic_fields.FieldText)
     .add('html', basic_fields.FieldText)
     .add('float', basic_fields.FieldFloat)

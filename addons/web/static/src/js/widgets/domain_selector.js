@@ -8,6 +8,10 @@ var field_utils = require ("web.field_utils");
 var ModelFieldSelector = require("web.ModelFieldSelector");
 var Widget = require("web.Widget");
 
+var RelationalFields = require('web.relational_fields');
+var BasicModel = require('web.BasicModel');
+var FieldManagerMixin = require('web.StandaloneFieldManagerMixin');
+
 var _t = core._t;
 var _lt = core._lt;
 
@@ -605,6 +609,8 @@ var DomainLeaf = DomainNode.extend({
     }),
     custom_events: {
         "field_chain_changed": "_onFieldChainChange",
+        "field_m2o_changed": '_onFieldM2OChanged',
+        
     },
     /**
      * @see DomainNode.init
@@ -618,6 +624,7 @@ var DomainLeaf = DomainNode.extend({
         this.value = currentDomain[0][2];
 
         this.operator_mapping = operator_mapping;
+        this.basicModel = new BasicModel(parent);
     },
     /**
      * Prepares the information the rendering of the widget will need by
@@ -687,7 +694,10 @@ var DomainLeaf = DomainNode.extend({
                         });
                     }).bind(this)));
                 }
-
+                if (selectedField.type === 'many2one') {
+                    this.valueWidget = new Many2oneLeafValue(this, selectedField.relation, this.value);
+                    wDefs.push(this.valueWidget.appendTo("<div/>"));
+                }
                 return $.when.apply($, wDefs);
             }
         }).bind(this)));
@@ -757,6 +767,11 @@ var DomainLeaf = DomainNode.extend({
 
             if (!silent) this.trigger_up("domain_changed", {child: this});
         }).bind(this));
+    },
+    
+    _onFieldM2OChanged: function (ev){
+        ev.stopPropagation();
+        this._changeValue(ev.data.value);
     },
     /**
      * Handles an operator change in the domain. In that case, the value should
@@ -950,6 +965,72 @@ var DomainLeaf = DomainNode.extend({
     },
 });
 
+var Many2oneLeafValue = Widget.extend(FieldManagerMixin, {
+    className: 'o_domain_leaf_value_input',
+    init: function (parent, model_name, value, options) {
+        this.model_name = model_name;
+        this.value = value;
+        this._super.apply(this, arguments);
+        FieldManagerMixin.init.call(this);
+    },
+    start: function () {
+        var self = this;
+        var def = $.Deferred();
+        var loadDef = $.Deferred();
+        if (this.value) {
+            debugger;
+            this.model.load({
+               fields: ['id', 'display_name'],
+               modelName: this.model_name,
+               res_id: this.value,
+               type: 'record',
+               viewType: 'form'
+           }).then(function (state) {
+               loadDef.resolve(state);
+           }).fail(function () {
+               loadDef.resolve(false);
+           });
+        }
+        loadDef.then(function (state) {
+            var options = {
+                name: 'ds_custom_m2o',
+                relation: self.model_name,
+                type: 'many2one'
+            };
+            if (state) {
+                var record = self.model.get(state);
+                options['value'] = [record.data.id, record.data.display_name];
+            } else if (self.value){
+                // self.do_notify(_t("Warning"), _t("Record selected in domain is deleted"));
+            }
+            self.model.makeRecord(self.model_name, [options]).then(function (recordID) {
+                self.m2oWidget = new RelationalFields.FieldMany2One(self,
+                    'ds_custom_m2o',
+                    self.model.get(recordID), {
+                        mode: 'edit',
+                        can_create: false,
+                        noOpen: true,
+                        attrs: {
+                            'placeholder': _t("Select Record"),
+                        },
+                    });
+                self.m2oWidget.appendTo("<div/>").then(function () {
+                    self._registerWidget(recordID, 'ds_custom_m2o', self.m2oWidget);
+                    def.resolve();
+                });
+            });
+        });
+        return $.when(this._super.apply(this, arguments), def).then(function () {
+            self.$el.append(self.m2oWidget.$el);
+        });
+    },
+    _applyChanges: function () {
+        var self = this;
+        return FieldManagerMixin._applyChanges.apply(this, arguments).then(function () {
+            self.trigger_up('field_m2o_changed', {'value': self.m2oWidget.value.res_id});
+        });
+    }
+});
 /**
  * Instantiates a DomainTree if the given domain contains several parts and a
  * DomainLeaf if it only contains one part. Returns null otherwise.
