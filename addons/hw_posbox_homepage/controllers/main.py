@@ -555,6 +555,11 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         os.system('/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/clear_wifi_configuration.sh')
         return "configuration cleared"
 
+    @http.route('/server_clear', type='http', auth='none', cors='*', csrf=False)
+    def clear_server_configuration(self):
+        os.system('/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/clear_server_configuration.sh')
+        return "configuration cleared"
+
     @http.route('/server_connect', type='http', auth='none', cors='*', csrf=False)
     def connect_to_server(self, url, iotname):
         from odoo.addons.hw_drivers.controllers.load_drivers import load_uuid
@@ -840,6 +845,12 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                     <p class="text-center font-small">
                         Your current server <strong>""" + (self.get_server_status() or 'Not configured yet') + """</strong>
                     </p>
+                    <div class="text-center font-small" style="margin: 10px auto;">
+                        You can clear the server configuration
+                        <form style="display: inline-block;margin-left: 4px;" action='/server_clear'>
+                            <input class="btn btn-sm" type="submit" value="Clear"/>
+                        </form>
+                    </div>
                 </form>
                 """ + loading_block_ui('Configure Domain Server') + """
             </div>
