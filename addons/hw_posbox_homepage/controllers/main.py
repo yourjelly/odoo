@@ -379,6 +379,12 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                     <div style="margin-top: 20px;" class="text-center">
                         <a class="btn" href='/load_drivers'>Load drivers</a>
                     </div>
+                    <div class="text-center font-small" style="margin: 10px auto;">
+                        You can clear the server configuration
+                        <form style="display: inline-block;margin-left: 4px;" action='/server_clear'>
+                            <input class="btn btn-sm" type="submit" value="Clear"/>
+                        </form>
+                    </div>
                 </div>
             </body>
         </html>
@@ -559,6 +565,11 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
     def clear_server_configuration(self):
         os.system('/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/clear_server_configuration.sh')
         return "configuration cleared"
+
+    @http.route('/drivers_clear', type='http', auth='none', cors='*', csrf=False)
+    def clear_drivers_list(self):
+        os.system('/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/clear_drivers_list.sh')
+        return "drivers list cleared"
 
     @http.route('/server_connect', type='http', auth='none', cors='*', csrf=False)
     def connect_to_server(self, url, iotname):
