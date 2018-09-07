@@ -25,7 +25,7 @@ _logger = logging.getLogger(__name__)
 common_style = """
     <style>
         body {
-            width: 500px;
+            width: 600px;
             margin: 30px auto;
             font-family: sans-serif;
             text-align: justify;
@@ -53,7 +53,7 @@ common_style = """
             border: 1px solid #dadada;
             border-radius: 3px;
             font-weight: bold;
-            font-size: 0.8rem;
+            font-size: 1.0rem;
             background: #fff;
             color: #00a09d;
             cursor: pointer;
