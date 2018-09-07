@@ -123,7 +123,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
     @http.route('/', type='http', auth='none')
     def index(self):
-        if os.path.isfile('/home/pi/wifi_network.txt') and os.path.isfile('/home/pi/odoo-remote-server.conf'):
+        if os.path.isfile('/home/pi/wifi_network.txt') or os.path.isfile('/home/pi/odoo-remote-server.conf'):
             return homepage_template.render(self.get_homepage_data())
         else:
             return configure_wizard_template.render({
