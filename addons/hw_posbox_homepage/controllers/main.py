@@ -4,8 +4,10 @@
 import logging
 import os
 import json
+import jinja2
 import subprocess
 import socket
+import sys
 import werkzeug
 import netifaces as ni
 import odoo
@@ -22,116 +24,19 @@ from odoo.addons.hw_drivers.controllers import driver as hw_drivers
 
 _logger = logging.getLogger(__name__)
 
-common_style = """
-    <style>
-        body {
-            width: 600px;
-            margin: 30px auto;
-            font-family: sans-serif;
-            text-align: justify;
-            color: #6B6B6B;
-            background-color: #f1f1f1;
-        }
-        .text-green {
-            color: #28a745;
-        }
-        .text-red {
-            color: #dc3545;
-        }
-        .text-blue {
-            color: #007bff;
-        }
-        .text-center {
-            text-align: center;
-        }
-        .float-right {
-            float: right;
-        }
-        .btn {
-            display: inline-block;
-            padding: 8px 15px;
-            border: 1px solid #dadada;
-            border-radius: 3px;
-            font-weight: bold;
-            font-size: 1.0rem;
-            background: #fff;
-            color: #00a09d;
-            cursor: pointer;
-        }
-        .btn-sm {
-            padding: 4px 8px;
-            font-size: 0.9rem;
-            font-weight: normal;
-        }
-        .btn:hover {
-            background-color: #f1f1f1;
-        }
-        a {
-            text-decoration: none;
-            color: #00a09d;
-        }
-        a:hover {
-            color: #006d6b;
-        }
-        .container {
-            padding: 10px 20px;
-            background: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.17);
-        }
-        .breadcrumb {
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-        }
-        input[type="text"], input[type="password"] {
-            padding: 6px 12px;
-            font-size: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            color: inherit;
-        }
-        select {
-            padding: 6px 12px;
-            font-size: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            color: inherit;
-            background: #ffffff;
-            width: 100%;
-        }
-        .o_hide {
-            display: none;
-        }
-        .font-small {
-            font-size: 0.8rem;
-        }
-        .loading-block {
-            position: absolute;
-            background-color: #0a060661;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 9999;
-        }
-        .loading-message-block {
-            text-align: center;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            margin: -3% 0 0 -3%;
-        }
-        .loading-message {
-            font-size: 14px;
-            line-height: 20px;
-            color:white
-        }
-        @keyframes spin {
-            from {transform:rotate(0deg);}
-            to {transform:rotate(360deg);}
-        }
-    </style>
-"""
+if hasattr(sys, 'frozen'):
+    # When running on compiled windows binary, we don't have access to package loader.
+    path = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'views'))
+    loader = jinja2.FileSystemLoader(path)
+else:
+    loader = jinja2.PackageLoader('odoo.addons.hw_posbox_homepage', "views")
+
+env = jinja2.Environment(loader=loader, autoescape=True)
+env.filters["json"] = json.dumps
+
+homepage_template = env.get_template('homepage.html')
+
+common_style = ""
 
 def loading_block_ui(message):
     return """
@@ -148,150 +53,6 @@ def loading_block_ui(message):
             </div>
         </div>
     """
-
-def get_homepage_html(data):
-    home_style = common_style + """
-        <style>
-            table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-            table tr {
-                border-bottom: 1px solid #f1f1f1;
-            }
-            table tr:last-child {
-                border-width: 0px;
-            }
-            table td {
-                padding: 8px;
-                border-left: 1px solid #f1f1f1;
-            }
-            table td:first-child {
-                border-left: 0;
-            }
-            td.heading {
-                font-weight: bold;
-            }
-            .footer {
-                margin-top: 12px;
-                text-align: right;
-            }
-            .footer a {
-                margin-left: 8px;
-            }
-            .device-status {
-                margin-bottom: 6px;
-            }
-            .device-status .message {
-                font-size: 0.8rem;
-            }
-            .device-status .indicator {
-                margin-left: 4px;
-                font-size: 0.9rem;
-                text-transform: uppercase;
-            }
-            .device-status .device {
-                font-weight: 500;
-            }
-        </style>
-    """
-
-    def get_pos_device_status_html():
-        pos_device = data['pos_device_status']
-        if len(pos_device) == 0:
-            return "No Device Found"
-        status_html = ""
-        for status in pos_device:
-            device = pos_device[status]
-            status_class = "text-red"
-            if device['status'] == 'connected':
-                status_class = "text-green"
-            elif device['status'] == 'connecting':
-                status_class = "text-blue"
-            status_html += """
-                <div class="device-status">
-                    <span class="device">""" + status + """</span><span class="indicator """ + status_class + """ ">""" + device['status'] + """</span>
-                    <div class="message"> """ + '\n'.join(device['messages']) + """</div>
-                </div>
-            """
-        return status_html
-
-    def get_iot_device_status_html():
-        iot_device = data['iot_device_status']
-        if len(iot_device) == 0:
-            return "No Device Found"
-        status_html = ""
-        for path in iot_device:
-            status_html += """
-                <div class="device-status">
-                    <span class="device">""" + path + """</span>
-                    <div class="message"> """ + str(iot_device[path].value) + """</div>
-                </div>
-            """
-        return status_html
-
-    html = """
-    <!DOCTYPE HTML>
-    <html>
-        <head>
-            <meta http-equiv="cache-control" content="no-cache" />
-            <meta http-equiv="pragma" content="no-cache" />
-            <title>Odoo's IoTBox</title>
-    """ + home_style + """
-        </head>
-        <body>
-            <div class="container">
-                <h2 class="text-center text-green">Your IoTBox is up and running</h2>
-                <table align="center" cellpadding="3">
-                    <tr>
-                        <td class="heading">Name</td>
-                        <td> """ + data['hostname'] + """ <a class="btn btn-sm float-right" href='/server'>configure</a></td>
-                    </tr>
-                    <tr>
-                        <td class="heading">Version</td>
-                        <td>V18.10 <a class="btn btn-sm float-right" href='/hw_proxy/upgrade/'>update</a></td>
-                    </tr>
-                    <tr>
-                        <td class="heading">IP Address</td>
-                        <td>""" + str(data['ip']) + """</a></td>
-                    </tr>
-                    <tr>
-                        <td class="heading">Mac Address</td>
-                        <td> """ + data['mac'] + """</td>
-                    </tr>
-                    <tr>
-                        <td class="heading">WiFi</td>
-                        <td>""" + data['wifi_status'] + """ <a class="btn btn-sm float-right" href='/wifi'>configure</a></td>
-                    </tr>
-                    <tr>
-                        <td class="heading">Server</td>
-                        <td><a href='""" + str(data['server_status']) + """' target=_blank>""" + data['server_status'] + """ <a class="btn btn-sm float-right" href='/server'>configure</a></td>
-                    </tr>
-                    <tr>
-                        <td class="heading">POS Device</td>
-                        <td>""" + get_pos_device_status_html() + """</td>
-                    </tr>
-                    <tr>
-                        <td class="heading">IOT Device</td>
-                        <td>""" + get_iot_device_status_html() + """ <a class="btn btn-sm float-right" href='/list_drivers'>drivers list</a></td>
-                    </tr>
-                </table>
-                <div style="margin: 20px auto 10px auto;" class="text-center">
-                    <a class="btn" href='/point_of_sale/display'>POS Display</a>
-                    <a class="btn" style="margin-left: 10px;" href='/remote_connect'>Remote Debug</a>
-                </div>
-            </div>
-            <div class="footer">
-                <a href='http://www.odoo.com/help'>Help</a>
-                <a href='https://www.odoo.com/documentation/user/point_of_sale/posbox/index.html'>Manual</a>
-            </div>
-        </body>
-    </html>
-
-    """
-
-    return html
-
 
 class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
@@ -339,19 +100,43 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         mac = get_mac()
         h = iter(hex(mac)[2:].zfill(12))
         ssid = subprocess.check_output('iwconfig 2>&1 | grep \'ESSID:"\' | sed \'s/.*"\\(.*\\)"/\\1/\'', shell=True).decode('utf-8').rstrip()
+
+        pos_device = self.get_pos_device_status()
+        pos_device_status = []
+        for status in pos_device:
+            device = pos_device[status]
+            status_class = "text-red"
+            if device['status'] == 'connected':
+                status_class = "text-green"
+            elif device['status'] == 'connecting':
+                status_class = "text-blue"
+            pos_device_status.append({
+                'status': device['status'],
+                'status_class': status_class,
+                'name': status,
+                'message': ' '.join(device['messages'])
+            })
+
+        iot_device_status = []
+        for device in hw_drivers.drivers:
+            iot_device_status.append({
+                'name': device,
+                'message': str(hw_drivers.drivers[device].value)
+            })
+
         return {
             'hostname': hostname,
             'ip': self.get_ip_iotbox(),
             'mac': ":".join(i + next(h) for i in h),
-            'pos_device_status': self.get_pos_device_status(),
+            'pos_device_status': pos_device_status,
             'iot_device_status': hw_drivers.drivers,
             'server_status': self.get_server_status() or 'Not Configured',
-            'wifi_status': ssid or 'Not Connected'
-        }
+            'wifi_status': ssid or 'Not Connected',
+            }
 
     @http.route('/', type='http', auth='none')
     def index(self):
-        return get_homepage_html(self.get_homepage_data())
+        return homepage_template.render(self.get_homepage_data())
 
     @http.route('/list_drivers', type='http', auth='none', website=True)
     def list_drivers(self):
