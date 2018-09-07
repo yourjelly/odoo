@@ -31,20 +31,15 @@ if hasattr(sys, 'frozen'):
 else:
     loader = jinja2.PackageLoader('odoo.addons.hw_posbox_homepage', "views")
 
-env = jinja2.Environment(loader=loader, autoescape=True)
-env.filters["json"] = json.dumps
+jinja_env = jinja2.Environment(loader=loader, autoescape=True)
+jinja_env.filters["json"] = json.dumps
 
-homepage_template = env.get_template('homepage.html')
-server_config_template = env.get_template('server_config.html')
-wifi_config_template = env.get_template('wifi_config.html')
-driver_list_template = env.get_template('driver_list.html')
-remote_connect_template = env.get_template('remote_connect.html')
-configure_wizard_template = env.get_template('configure_wizard.html')
-
-common_style = ""
-
-def loading_block_ui(message):
-    return "Loading"
+homepage_template = jinja_env.get_template('homepage.html')
+server_config_template = jinja_env.get_template('server_config.html')
+wifi_config_template = jinja_env.get_template('wifi_config.html')
+driver_list_template = jinja_env.get_template('driver_list.html')
+remote_connect_template = jinja_env.get_template('remote_connect.html')
+configure_wizard_template = jinja_env.get_template('configure_wizard.html')
 
 class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
