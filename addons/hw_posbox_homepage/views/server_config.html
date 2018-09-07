@@ -46,12 +46,12 @@
         <p class="text-center font-small">
             Your current server <strong>{{ server_status }}</strong>
         </p>
-        <div class="text-center font-small" style="margin: 10px auto;">
-            You can clear the server configuration
-            <form style="display: inline-block;margin-left: 4px;" action='/server_clear'>
-                <input class="btn btn-sm" type="submit" value="Clear"/>
-            </form>
-        </div>
         {{ loading_block_ui(loading_message) }}
     </form>
+    <div class="text-center font-small" style="margin: 10px auto;">
+        You can clear the server configuration
+        <form style="display: inline-block;margin-left: 4px;" action='/server_clear'>
+            <input class="btn btn-sm" type="submit" value="Clear"/>
+        </form>
+    </div>
 {% endblock %}
