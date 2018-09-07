@@ -38,6 +38,7 @@ homepage_template = env.get_template('homepage.html')
 server_config_template = env.get_template('server_config.html')
 wifi_config_template = env.get_template('wifi_config.html')
 driver_list_template = env.get_template('driver_list.html')
+remote_connect_template = env.get_template('remote_connect.html')
 
 common_style = ""
 
@@ -452,59 +453,10 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
     @http.route('/remote_connect', type='http', auth='none', cors='*')
     def remote_connect(self):
-        ngrok_template = """
-<!DOCTYPE HTML>
-<html>
-    <head>
-        <title>Remote debugging</title>
-        <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-        <script>
-           $(function () {
-               var upgrading = false;
-               $('#enable_debug').click(function () {
-                   var auth_token = $('#auth_token').val();
-                   if (auth_token == "") {
-                       alert('Please provide an authentication token.');
-                   } else {
-                       $.ajax({
-                           url: '/enable_ngrok',
-                           data: {
-                               'auth_token': auth_token
-                           }
-                       }).always(function (response) {
-                           if (response === 'already running') {
-                               alert('Remote debugging already activated.');
-                           } else {
-                               $('#auth_token').attr('disabled','disabled');
-                               $('#enable_debug').html('Enabled remote debugging');
-                               $('#enable_debug').removeAttr('href', '')
-                               $('#enable_debug').off('click');
-                           }
-                       });
-                   }
-               });
-           });
-        </script>
-""" + common_style + """
-    </head>
-    <body>
-        <div class="breadcrumb"><a href="/">Home</a> / <span>Remote Debugging</span></div>
-        <div class="container">
-            <h2 class="text-center">Remote Debugging</h2>
-            <p class='text-red'>
-                This allows someone to gain remote access to your IoTbox, and
-                thus your entire local network. Only enable this for someone
-                you trust.
-            </p>
-            <div class='text-center'>
-                <input type="text" id="auth_token" size="42" placeholder="Authentication Token"/> <br/>
-                <a class="btn" style="margin: 18px auto;" id="enable_debug" href="#">Enable Remote Debugging</a>
-            </div>
-        </div>
-    </body>
-</html>
-"""
-        return ngrok_template
+        return remote_connect_template.render({
+            'title': 'Remote debugging',
+            'breadcrumb': 'Remote Debugging',
+        })
 
     @http.route('/enable_ngrok', type='http', auth='none', cors='*', csrf=False)
     def enable_ngrok(self, auth_token):
