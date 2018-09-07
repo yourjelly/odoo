@@ -55,47 +55,52 @@ common_style = """
         .breadcrumb {
             margin-bottom: 10px;
         }
-        .loading-circle {
-            display: inline-block;
-            position: relative;
-            width: 110px;
-            height: 110px;
-            margin: 25px;
+        .o_hide {
+            display: none;
         }
-        .color1 {
-            border-color: #875A7B !important;
-        }
-        .color2 {
-            border-color: #006d6b !important;
-        }
-        .loading-circle div {
+        .loading-block {
             position: absolute;
-            border: 4px solid;
-            opacity: 1;
-            border-radius: 50%;
-            animation: loading-circle 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+            background-color: #0a060661;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
         }
-        .loading-circle div:nth-child(2) {
-            animation-delay: -0.5s;
+        .loading-message-block {
+            text-align: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin: -3% 0 0 -3%;
         }
-        @keyframes loading-circle {
-            0% {
-                top: 50px;
-                left: 50px;
-                width: 0;
-                height: 0;
-                opacity: 1;
-            }
-            100% {
-                top: -1px;
-                left: -1px;
-                width: 100px;
-                height: 100px;
-                opacity: 0;
-            }
+        .loading-message {
+            font-size: 14px;
+            line-height: 20px;
+            color:white
+        }
+        @keyframes spin {
+            from {transform:rotate(0deg);}
+            to {transform:rotate(360deg);}
         }
     </style>
 """
+
+def loading_block_ui(message):
+    return """
+        <div class="loading-block o_hide">
+            <div class="loading-message-block">
+                <div style="height: 50px">
+                    <img src="/web/static/src/img/spin.png" style="animation: spin 4s infinite linear;" alt="Loading...">
+                </div>
+                <br>
+                <div class="loading-message">
+                    <span class="message-title">Please wait..</span><br>
+                    <span class="message-status">""" + message + """</span>
+                </div>
+            </div>
+        </div>
+    """
 
 upgrade_template = """
 <!DOCTYPE HTML>
@@ -103,29 +108,25 @@ upgrade_template = """
     <head>
         <title>Odoo's IoTBox - Software Upgrade</title>
         """ + common_style + """
-        <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+        <script type="text/javascript" src="/web/static/lib/jquery/jquery.js"></script>
         <script>
         $(function(){
             var upgrading = false;
             $('#upgrade').click(function(){
-                console.log('click');
                 if(!upgrading){
                     upgrading = true;
-                    $('#upgrade').text('Upgrading, Please Wait');
+                    $('.loading-block').removeClass('o_hide');
                     $.ajax({
                         url:'/hw_proxy/perform_upgrade/'
                     }).then(function(status){
-                        $('#upgrade').html('Upgrade successful');
-                        $('#upgrade').off('click');
-                        $('#loading').html('<h3>Restarting the IoTBox...</h3>');
-                        setTimeout(function(){
-                            var cpt = 110;
-                            setInterval(function(){
-                                --cpt;
-                                if(cpt==0){location.reload();}
-                                $('#count').text(cpt);}
-                                , 1000);
-                            $('#page').html('<center><h3>Restarting the IoTBox...</h3>Time to refresh : <label id=count></label><br><div class="loading-circle"><div class="color1"></div><div class="color2"></div></div></center>');
+                        setTimeout(function () {
+                        $('.message-title').text('Upgrade successful');
+                        var cpt = 110;
+                        setInterval(function(){
+                            --cpt;
+                            if(cpt==0){location.reload();}
+                            $('.message-status').text('Restarting the IoTBox in ' + cpt);
+                        } , 1000);
                         }, 3000);
                     },function(){
                         $('#upgrade').text('Upgrade Failed');
@@ -166,9 +167,9 @@ upgrade_template = """
             </div>
             <div class="text-center" style="margin: 15px auto;">
                 <a class="btn" href='#' id='upgrade'>Upgrade</a>
-                <div id='loading'></div>
             </div>
         <div>
+        """ + loading_block_ui('Updating IoT box') + """
     </body>
 </html>
 
@@ -186,8 +187,8 @@ class PosboxUpgrader(hw_proxy.Proxy):
     @http.route('/hw_proxy/perform_upgrade', type='http', auth='none')
     def perform_upgrade(self):
         self.upgrading.acquire()
-
-        os.system('/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/posbox_update.sh')
         
+        os.system('/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/posbox_update.sh')
+
         self.upgrading.release()
         return 'SUCCESS'

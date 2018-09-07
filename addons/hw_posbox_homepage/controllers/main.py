@@ -98,51 +98,55 @@ common_style = """
             background: #ffffff;
             width: 100%;
         }
+        .o_hide {
+            display: none;
+        }
         .font-small {
             font-size: 0.8rem;
         }
-        .loading-circle {
-            display: inline-block;
-            position: relative;
-            width: 110px;
-            height: 110px;
-            margin: 25px;
-        }
-        .color1 {
-            border-color: #875A7B !important;
-        }
-        .color2 {
-            border-color: #006d6b !important;
-        }
-        .loading-circle div {
+        .loading-block {
             position: absolute;
-            border: 4px solid;
-            opacity: 1;
-            border-radius: 50%;
-            animation: loading-circle 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+            background-color: #0a060661;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
         }
-        .loading-circle div:nth-child(2) {
-            animation-delay: -0.5s;
+        .loading-message-block {
+            text-align: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin: -3% 0 0 -3%;
         }
-        @keyframes loading-circle {
-            0% {
-                top: 50px;
-                left: 50px;
-                width: 0;
-                height: 0;
-                opacity: 1;
-            }
-            100% {
-                top: -1px;
-                left: -1px;
-                width: 100px;
-                height: 100px;
-                opacity: 0;
-            }
+        .loading-message {
+            font-size: 14px;
+            line-height: 20px;
+            color:white
+        }
+        @keyframes spin {
+            from {transform:rotate(0deg);}
+            to {transform:rotate(360deg);}
         }
     </style>
 """
 
+def loading_block_ui(message):
+    return """
+        <div class="loading-block o_hide">
+            <div class="loading-message-block">
+                <div style="height: 50px">
+                    <img src="/web/static/src/img/spin.png" style="animation: spin 4s infinite linear;" alt="Loading...">
+                </div>
+                <br>
+                <div class="loading-message">
+                    <span class="message-title">Please wait..</span><br>
+                    <span class="message-status">""" + message + """</span>
+                </div>
+            </div>
+        </div>
+    """
 
 def get_homepage_html(data):
     home_style = common_style + """
@@ -341,9 +345,8 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
             'wifi_status': ssid or 'Not Connected'
         }
 
-    @http.route('/', type='http', auth='none', website=True)
+    @http.route('/', type='http', auth='none')
     def index(self):
-        #return request.render('hw_posbox_homepage.index',mimetype='text/html')
         return get_homepage_html(self.get_homepage_data())
 
     @http.route('/list_drivers', type='http', auth='none', website=True)
@@ -574,84 +577,195 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         <title>Configure IoT Box</title>
         """ + common_style + """
         <style>
-            .config-steps {
-                margin-top: 30px;
-            }
             .config-steps .title {
                 font-weight: bold;
                 margin-bottom: 10px;
             }
+            .progressbar {
+                counter-reset: step;
+                z-index: 1;
+                position: relative;
+                display: inline-block;
+                width: 100%;
+                padding: 0;
+            }
+            .progressbar li{
+                list-style-type: none;
+                float: left;
+                width: 33.33%;
+                position:relative;
+                text-align: center;
+                font-size: 0.8rem;
+            }
+            .progressbar li:before {
+                content:counter(step);
+                counter-increment: step;
+                height:30px;
+                width:30px;
+                line-height: 30px;
+                border: 2px solid #ddd;
+                display:block;
+                text-align: center;
+                margin: 0 auto 6px auto;
+                border-radius: 50%;
+                background-color: white;
+                color: #ddd;
+                font-size: 1rem;
+            }
+            .progressbar li:after {
+                content:'';
+                position: absolute;
+                width:100%;
+                height:2px;
+                background-color: #ddd;
+                top: 15px;
+                left: -50%;
+                z-index: -1;
+            }
+            .progressbar li:first-child:after {
+                content:none;
+            }
+            .progressbar li.active, .progressbar li.completed {
+                color:#875A7B;
+            }
+            .progressbar li:last-child:before {
+                content: '✔';
+            }
+            .progressbar li.active:before {
+                border-color:#875A7B;
+                color: #875A7B;
+            }
+            .progressbar li.completed:before{
+                border-color:#875A7B;
+                background-color:#875A7B;
+                color: #fff;
+            }
+            .progressbar li.completed + li:after{
+                background-color:#875A7B;
+            }
+            .footer-buttons {
+                display: inline-block;
+                width: 100%;
+                margin-top: 20px;
+            }
         </style>
+        <script type="text/javascript" src="/web/static/lib/jquery/jquery.js"></script>
+        <script>
+            $(document).ready(function () {
+                function changePage(key) {
+                    $('.progressbar li[data-key=' + key + ']').prevAll().addClass('completed');
+                    $('.progressbar li[data-key=' + key + ']').nextAll().removeClass('active completed');
+                    $('.progressbar li[data-key=' + key + ']').addClass('active').removeClass('completed');
+                    $('.config-steps.active').removeClass('active').addClass('o_hide');
+                    $('.config-steps[data-key=' + key + ']').removeClass('o_hide').addClass('active');
+                }
+                $('.next-btn').on('click', function (ev) {
+                    changePage($(ev.target).data('key'));
+                });
+                $('#config-form').submit(function(e){
+                    e.preventDefault();
+                    $('.loading-block').removeClass('o_hide');
+                    $.ajax({
+                        url:'/step_configure',
+                        type:'post',
+                        data:$('#config-form').serialize(),
+                        success:function(){
+                            $('.loading-block').addClass('o_hide');
+                            changePage('done');
+                        }
+                    });
+                });
+            });
+        </script>
     </head>
     <body>
         <div class="container">
             <h2 class="text-center">Configure IoT Box</h2>
-            <form action='/step_configure' method='POST'>
-                <div class="config-steps">
-                    <div class="title">Step 1: Configure Server Details</div>
-                    <table align="center">
-                        <tr>
-                            <td>
-                                IoTBox Name
-                            </td>
-                            <td>
-                                <input type="text" name="iotname">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Server URL
-                            </td>
-                            <td>
-                                <input type="text" name="url">
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-                <div class="config-steps">
-                    <div class="title">Step 2: Configure WiFi Connection</div>
-                    <table align="center">
-                        <tr>
-                            <td>
-                                ESSID
-                            </td>
-                            <td>
-                                <select name="essid">
-                                    """ + self.get_wifi_essid_option() + """
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Password
-                            </td>
-                            <td>
-                                <input type="password" name="password" placeholder="optional"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Persistent
-                            </td>
-                            <td>
-                                <input type="checkbox" name="persistent"/>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-                <div style="text-align: right">
-                    <input class="btn" type="submit" value="Done"/>
+            <ul class="progressbar">
+                <li class="active" data-key="server">Configure Server</li>
+                <li data-key="wifi">Configure Wifi</li>
+                <li data-key="done">Done</li>
+            </ul>
+            <form id="config-form" style="margin-top: 20px;" action='/step_configure' method='POST'>
+                <div>
+                    <div class="config-steps active" data-key="server">
+                        <table align="center">
+                            <tr>
+                                <td>
+                                    IoTBox Name
+                                </td>
+                                <td>
+                                    <input type="text" name="iotname">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Server URL
+                                </td>
+                                <td>
+                                    <input type="text" name="url">
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="footer-buttons">
+                            <a class="btn next-btn" style="float: right" data-key="wifi">Next</a>
+                        </div>
+                    </div>
+                    <div class="config-steps wifi-step o_hide" data-key="wifi">
+                        <table align="center">
+                            <tr>
+                                <td>
+                                    ESSID
+                                </td>
+                                <td>
+                                    <select name="essid">
+                                        """ + self.get_wifi_essid_option() + """
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Password
+                                </td>
+                                <td>
+                                    <input type="password" name="password" placeholder="optional"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Persistent
+                                </td>
+                                <td>
+                                    <input type="checkbox" name="persistent"/>
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="footer-buttons">
+                            <a class="btn next-btn" data-key="server">Previous</a>
+                            <input class="btn" style="float: right" type="submit" value="Submit"/>
+                        </div>
+                    </div>
+                    <div class="config-steps o_hide" data-key="done">
+                        <h3 class="text-center" style="margin: 0;">✔ Nice! Your configuration is done.</h3>
+                        <div class="footer-buttons">
+                            <a class="btn" href="/" style="float: right">Done</a>
+                        </div>
+                    </div>
                 </div>
             </form>
+            """ + loading_block_ui('Configuring your IoT Box') + """
         </div>
     </body>
 </html>
 """
+    # <a class="btn next-btn" style="float: right" data-key="submit">Next</a>
 
     @http.route('/step_configure', type='http', auth='none', cors='*', csrf=False)
-    def step_by_step_configure(self, url, iotname, essid, password, persistent=False):
+    def step_by_step_configure(self, url = "123", iotname = "456", essid = "789", password = "456", persistent=False):
         #call odoo server conf
         #call wifi conf
+        import time
+        time.sleep(3)
         return "Waiting and redirect page"
 
     # Set server address
