@@ -414,8 +414,8 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         zip_file.extractall("/home/pi/odoo/addons/hw_drivers")
         subprocess.call("sudo mount -o remount,ro /", shell=True)
         subprocess.call("sudo mount -o remount,ro /root_bypass_ramdisks", shell=True)
-        
-        return "<meta http-equiv='refresh' url='/list_drivers'>"
+
+        return "<meta http-equiv='refresh' url='/list_drivers' content='0'>"
 
     def get_wifi_essid_option(self):
         wifi_options = ""
@@ -551,17 +551,17 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
     @http.route('/wifi_clear', type='http', auth='none', cors='*', csrf=False)
     def clear_wifi_configuration(self):
         os.system('/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/clear_wifi_configuration.sh')
-        return "<meta http-equiv='refresh' url='/'>"
+        return "<meta http-equiv='refresh' url='/' content='0'>"
 
     @http.route('/server_clear', type='http', auth='none', cors='*', csrf=False)
     def clear_server_configuration(self):
         os.system('/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/clear_server_configuration.sh')
-        return "<meta http-equiv='refresh' url='/'>"
+        return "<meta http-equiv='refresh' url='/' content='0'>"
 
     @http.route('/drivers_clear', type='http', auth='none', cors='*', csrf=False)
     def clear_drivers_list(self):
         os.system('/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/clear_drivers_list.sh')
-        return "<meta http-equiv='refresh' url='/list_drivers'>"
+        return "<meta http-equiv='refresh' url='/list_drivers' content='0'>"
 
     @http.route('/server_connect', type='http', auth='none', cors='*', csrf=False)
     def connect_to_server(self, url, iotname):
