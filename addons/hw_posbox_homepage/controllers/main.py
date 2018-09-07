@@ -37,6 +37,7 @@ env.filters["json"] = json.dumps
 homepage_template = env.get_template('homepage.html')
 server_config_template = env.get_template('server_config.html')
 wifi_config_template = env.get_template('wifi_config.html')
+driver_list_template = env.get_template('driver_list.html')
 
 common_style = ""
 
@@ -129,46 +130,15 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
     @http.route('/list_drivers', type='http', auth='none', website=True)
     def list_drivers(self):
-
-        drivers_list = ''
+        drivers_list = []
         for driver in os.listdir("/home/pi/odoo/addons/hw_drivers/drivers"):
             if driver != '__pycache__':
-                drivers_list +="""<tr><td>""" + driver + """</td></tr>"""
-
-        html = """
-        <!DOCTYPE HTML>
-        <html>
-            <head>
-                <meta http-equiv="cache-control" content="no-cache" />
-                <meta http-equiv="pragma" content="no-cache" />
-                <title>Odoo's IoTBox - Drivers list</title>
-                """ + common_style + """
-            </head>
-            <body>
-                <div class="breadcrumb"><a href="/">Home</a> / <span>Drivers list</span></div>
-                <div class="container">
-                    <h2 class="text-center text-green">Drivers list</h2>
-                    <table align="center" cellpadding="3">
-                        <tr>
-                            """ + drivers_list + """
-                        </tr>
-                    </table>
-                    <div style="margin-top: 20px;" class="text-center">
-                        <a class="btn" href='/load_drivers'>Load drivers</a>
-                    </div>
-                    <div class="text-center font-small" style="margin: 10px auto;">
-                        You can clear the drivers list
-                        <form style="display: inline-block;margin-left: 4px;" action='/drivers_clear'>
-                            <input class="btn btn-sm" type="submit" value="Clear"/>
-                        </form>
-                    </div>
-                </div>
-            </body>
-        </html>
-
-        """
-
-        return html
+                drivers_list.append(driver)
+        return driver_list_template.render({
+            'title': "Odoo's IoTBox - Drivers list",
+            'breadcrumb': 'Drivers list',
+            'drivers_list': drivers_list,
+        })
 
     @http.route('/load_drivers', type='http', auth='none', website=True)
     def load_drivers(self):
