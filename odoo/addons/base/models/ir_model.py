@@ -1179,12 +1179,8 @@ class IrModelAccess(models.Model):
         assert isinstance(model, pycompat.string_types), 'Not a model name: %s' % (model,)
         assert mode in ('read', 'write', 'create', 'unlink'), 'Invalid access mode'
 
-        # TransientModel records have no access rights, only an implicit access rule
         if model not in self.env:
             _logger.error('Missing model %s', model)
-        elif self.env[model].is_transient():
-            if self.env.ref('base.group_user') in self.env['res.users'].browse(self.env.uid).groups_id:
-                return True
 
         # We check if a specific rule exists
         self._cr.execute("""SELECT MAX(CASE WHEN perm_{mode} THEN 1 ELSE 0 END)
@@ -1207,6 +1203,14 @@ class IrModelAccess(models.Model):
                                    AND a.active IS TRUE""".format(mode=mode),
                              (model,))
             r = self._cr.fetchone()[0]
+
+        if self.env[model].is_transient():
+            gid = self.env.ref('base.group_user')
+            if gid in self.env['res.users'].browse(self.env.uid).groups_id and r is None:
+                # r is None therefore no ACL entry defined for this particular TransientModel
+                # in that case we use the implicit rule, allow all for users
+                # otherwise, proceed as for a normal model
+                return True
 
         if not r and raise_exception:
             groups = '\n\t'.join('- %s' % g for g in self.group_names_with_access(model, mode))
