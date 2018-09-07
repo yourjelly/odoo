@@ -258,9 +258,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
     def step_by_step_configure(self, url, iotname, essid, password, persistent=False):
         #call odoo server conf
         #call wifi conf
-        import time
-        time.sleep(3)
-        return "Waiting and redirect page"
+        return url + iotname + essid +password
 
     # Set server address
     @http.route('/server', type='http', auth='none', website=True)
