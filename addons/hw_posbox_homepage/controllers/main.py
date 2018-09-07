@@ -3,6 +3,7 @@
 
 import logging
 import os
+import json
 import subprocess
 import socket
 import werkzeug
@@ -439,6 +440,31 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
     <head>
         <title>Wifi configuration</title>
 """ + common_style + """
+        <script type="text/javascript" src="/web/static/lib/jquery/jquery.js"></script>
+        <script>
+        $(document).ready(function () {
+            $('#wifi-config').submit(function(e){
+                e.preventDefault();
+                $('.loading-block').removeClass('o_hide');
+                $.ajax({
+                    url:'/wifi_connect',
+                    type:'post',
+                    data:$('#wifi-config').serialize(),
+                    success:function(message){
+                        var data = JSON.parse(message);
+                        var message = data.message;
+                        if (data.server) {
+                            message += '<br>'+ data.server.message;
+                            setTimeout(function () {
+                                window.location = data.server.url;
+                            }, 30000);
+                        }
+                        $('.message-status').html(message);
+                    }
+                });
+            });
+        });
+        </script>
     </head>
     <body>
         <div class="breadcrumb"><a href="/">Home</a> / <span>Configure Wifi</span></div>
@@ -449,7 +475,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                 Currently only Open and WPA networks are supported. When enabling the persistent checkbox,
                 the chosen network will be saved and the iotbox will attempt to connect to it every time it boots.
             </p>
-            <form action='/wifi_connect' method='POST'>
+            <form id="wifi-config" action='/wifi_connect' method='POST'>
                 <table align="center">
                     <tr>
                         <td>
@@ -491,6 +517,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                     <input class="btn btn-sm" type="submit" value="Clear"/>
                 </form>
             </div>
+            """ + loading_block_ui('Connecting to Wifi') + """
         </div>
     </body>
 </html>
@@ -510,26 +537,16 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
             server += line
         f.close()
         server = server.split('\n')[0]
+        res_payload = {
+            'message': 'Connecting to ' + essid,
+        }
         if server:
-            return """
-<html>
-    <head> 
-        """ + common_style + """
-        <meta http-equiv='refresh' content='30; url=" """ + server + """'>
-    </head>
-    <body>
-        <div class="container text-center">
-            <h2>Connecting to """ + essid + """"</h2>
-            <p><b>Redirect to Odoo server</b></p>
-            <div class='loading-circle'>
-                <div class='color1'></div><div class='color2'></div>
-            </div>
-        </div>
-    </body>
-</html>
-"""
-        else:
-            return "Connecting to " + essid
+            res_payload['server'] = {
+                'url': server,
+                'message': 'Redirect to Odoo Server'
+            };
+
+        return json.dumps(res_payload)
 
     @http.route('/wifi_clear', type='http', auth='none', cors='*', csrf=False)
     def clear_wifi_configuration(self):
@@ -551,23 +568,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                 if conf.get('addr') and conf.get('addr') != '127.0.0.1':
                     ips = conf.get('addr')
                     break
-        return """
-<html>
-    <head> 
-        """ + common_style + """
-        <meta http-equiv='refresh' content='30; url='http://""" + ips + """:8069'>
-    </head>
-    <body>
-        <div class="container text-center">
-            <h2>Configure Domain Server</h2>
-            <p><b>Please wait...</b></p>
-            <div class='loading-circle'>
-                <div class='color1'></div><div class='color2'></div>
-            </div>
-        </div>
-    </body>
-</html>
-    """
+        return 'http://' + ips + ':8069'
 
     @http.route('/steps', type='http', auth='none', cors='*', csrf=False)
     def step_by_step_configure_page(self):
@@ -758,10 +759,9 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
     </body>
 </html>
 """
-    # <a class="btn next-btn" style="float: right" data-key="submit">Next</a>
 
     @http.route('/step_configure', type='http', auth='none', cors='*', csrf=False)
-    def step_by_step_configure(self, url = "123", iotname = "456", essid = "789", password = "456", persistent=False):
+    def step_by_step_configure(self, url, iotname, essid, password, persistent=False):
         #call odoo server conf
         #call wifi conf
         import time
@@ -780,6 +780,26 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         <head>
             <title>IoT -> Odoo server configuration</title>
         """ + common_style + """
+            <script type="text/javascript" src="/web/static/lib/jquery/jquery.js"></script>
+            <script>
+            $(document).ready(function () {
+                $('#server-config').submit(function(e){
+                    e.preventDefault();
+                    $('.loading-block').removeClass('o_hide');
+                    $.ajax({
+                        url:'/server_connect',
+                        type:'post',
+                        data:$('#server-config').serialize(),
+                        success:function(url){
+                            $('.message-status').html('Configure Domain Server <br> Redirect to Server');
+                            setTimeout(function () {
+                                window.location = url;
+                            }, 30000);
+                        }
+                    });
+                });
+            });
+            </script>
         </head>
         <body>
             <div class="breadcrumb"><a href="/">Home</a> / <span>Configure Odoo Server</span></div>
@@ -789,7 +809,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                     Here you can configure how the still hidden IoT sauce on your IoT infiltrated iotbox
                     can connect with the Odoo server.
                 </p>
-                <form action='/server_connect' method='POST'>
+                <form id="server-config" action='/server_connect' method='POST'>
                     <table align="center">
                         <tr>
                             <td>
@@ -818,6 +838,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                         Your current server <strong>""" + (self.get_server_status() or 'Not configured yet') + """</strong>
                     </p>
                 </form>
+                """ + loading_block_ui('Configure Domain Server') + """
             </div>
         </body>
     </html>
