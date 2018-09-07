@@ -355,7 +355,8 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
         drivers_list = ''
         for driver in os.listdir("/home/pi/odoo/addons/hw_drivers/drivers"):
-            drivers_list +="""<tr><td>""" + driver + """</td></tr>"""
+            if driver != '__pycache__':
+                drivers_list +="""<tr><td>""" + driver + """</td></tr>"""
 
         html = """
         <!DOCTYPE HTML>
@@ -364,9 +365,10 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                 <meta http-equiv="cache-control" content="no-cache" />
                 <meta http-equiv="pragma" content="no-cache" />
                 <title>Odoo's IoTBox - Drivers list</title>
-                """ + home_style + """
+                """ + common_style + """
             </head>
             <body>
+                <div class="breadcrumb"><a href="/">Home</a> / <span>Drivers list</span></div>
                 <div class="container">
                     <h2 class="text-center text-green">Drivers list</h2>
                     <table align="center" cellpadding="3">
