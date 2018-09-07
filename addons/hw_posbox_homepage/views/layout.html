@@ -86,6 +86,13 @@
             .font-small {
                 font-size: 0.8rem;
             }
+            .footer {
+                margin-top: 12px;
+                text-align: right;
+            }
+            .footer a {
+                margin-left: 8px;
+            }
             .loading-block {
                 position: absolute;
                 background-color: #0a060661;
@@ -115,6 +122,9 @@
         {% block head %}{% endblock %}
     </head>
     <body>
+        {%if breadcrumb %}
+            <div class="breadcrumb"><a href="/">Home</a> / <span>{{ breadcrumb }}</span></div>
+        {% endif %}
         <div class="container">
             {% block content %}{% endblock %}
         </div>

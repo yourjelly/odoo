@@ -35,24 +35,12 @@ env = jinja2.Environment(loader=loader, autoescape=True)
 env.filters["json"] = json.dumps
 
 homepage_template = env.get_template('homepage.html')
+server_config_template = env.get_template('server_config.html')
 
 common_style = ""
 
 def loading_block_ui(message):
-    return """
-        <div class="loading-block o_hide">
-            <div class="loading-message-block">
-                <div style="height: 50px">
-                    <img src="/web/static/src/img/spin.png" style="animation: spin 4s infinite linear;" alt="Loading...">
-                </div>
-                <br>
-                <div class="loading-message">
-                    <span class="message-title">Please wait..</span><br>
-                    <span class="message-status">""" + message + """</span>
-                </div>
-            </div>
-        </div>
-    """
+    return "Loading"
 
 class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
@@ -567,85 +555,13 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
     # Set server address
     @http.route('/server', type='http', auth='none', website=True)
     def server(self):
-
-        hostname = subprocess.check_output('hostname').decode('utf-8')
-
-        server_template = """
-    <!DOCTYPE HTML>
-    <html>
-        <head>
-            <title>IoT -> Odoo server configuration</title>
-        """ + common_style + """
-            <script type="text/javascript" src="/web/static/lib/jquery/jquery.js"></script>
-            <script>
-            $(document).ready(function () {
-                $('#server-config').submit(function(e){
-                    e.preventDefault();
-                    $('.loading-block').removeClass('o_hide');
-                    $.ajax({
-                        url:'/server_connect',
-                        type:'post',
-                        data:$('#server-config').serialize(),
-                        success:function(url){
-                            $('.message-status').html('Configure Domain Server <br> Redirect to Server');
-                            setTimeout(function () {
-                                window.location = url;
-                            }, 30000);
-                        }
-                    });
-                });
-            });
-            </script>
-        </head>
-        <body>
-            <div class="breadcrumb"><a href="/">Home</a> / <span>Configure Odoo Server</span></div>
-            <div class="container">
-                <h2 class="text-center">Configure Odoo Server</h2>
-                <p>
-                    Here you can configure how the still hidden IoT sauce on your IoT infiltrated iotbox
-                    can connect with the Odoo server.
-                </p>
-                <form id="server-config" action='/server_connect' method='POST'>
-                    <table align="center">
-                        <tr>
-                            <td>
-                                IoTBox Name
-                            </td>
-                            <td>
-                                <input type="text" name="iotname" value=""" + hostname + """>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Server URL
-                            </td>
-                            <td>
-                                <input type="text" name="url">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td/>
-                            <td>
-                                <input class="btn" type="submit" value="Connect"/>
-                            </td>
-                        </tr>
-                    </table>
-                    <p class="text-center font-small">
-                        Your current server <strong>""" + (self.get_server_status() or 'Not configured yet') + """</strong>
-                    </p>
-                </form>
-                <div class="text-center font-small" style="margin: 10px auto;">
-                    You can clear the server configuration
-                    <form style="display: inline-block;margin-left: 4px;" action='/server_clear'>
-                        <input class="btn btn-sm" type="submit" value="Clear"/>
-                    </form>
-                </div>
-                """ + loading_block_ui('Configure Domain Server') + """
-            </div>
-        </body>
-    </html>
-        """
-        return server_template
+        return server_config_template.render({
+            'title': 'IoT -> Odoo server configuration',
+            'breadcrumb': 'Configure Odoo Server',
+            'hostname': subprocess.check_output('hostname').decode('utf-8'),
+            'server_status': self.get_server_status() or 'Not configured yet',
+            'loading_message': 'Configure Domain Server'
+        })
 
     @http.route('/remote_connect', type='http', auth='none', cors='*')
     def remote_connect(self):
