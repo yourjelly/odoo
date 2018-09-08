@@ -238,8 +238,6 @@ class configmanager(object):
                          help="export all sentences to be translated to a CSV file, a PO file or a TGZ archive and exit")
         group.add_option("--i18n-import", dest="translate_in",
                          help="import a CSV or a PO file with translations and exit. The '-l' option is required.")
-        group.add_option("--i18n-overwrite", dest="overwrite_existing_translations", action="store_true", my_default=False,
-                         help="overwrites existing translation terms on updating a module or importing a CSV or a PO file.")
         group.add_option("--modules", dest="translate_modules",
                          help="specify modules to export. Use in combination with --i18n-export")
         parser.add_option_group(group)
@@ -353,9 +351,6 @@ class configmanager(object):
         die(opt.translate_in and (not opt.language or not opt.db_name),
             "the i18n-import option cannot be used without the language (-l) and the database (-d) options")
 
-        die(opt.overwrite_existing_translations and not (opt.translate_in or opt.update),
-            "the i18n-overwrite option cannot be used without the i18n-import option or without the update option")
-
         die(opt.translate_out and (not opt.db_name),
             "the i18n-export option cannot be used without the database (-d) option")
 
@@ -422,7 +417,7 @@ class configmanager(object):
 
         # if defined but None take the configfile value
         keys = [
-            'language', 'translate_out', 'translate_in', 'overwrite_existing_translations',
+            'language', 'translate_out', 'translate_in', 
             'dev_mode', 'shell_interface', 'smtp_ssl', 'load_language',
             'stop_after_init', 'logrotate', 'without_demo', 'http_enable', 'syslog',
             'list_db', 'proxy_mode',
@@ -553,7 +548,7 @@ class configmanager(object):
         loglevelnames = dict(pycompat.izip(self._LOGLEVELS.values(), self._LOGLEVELS))
         p.add_section('options')
         for opt in sorted(self.options):
-            if opt in ('version', 'language', 'translate_out', 'translate_in', 'overwrite_existing_translations', 'init', 'update'):
+            if opt in ('version', 'language', 'translate_out', 'translate_in', 'init', 'update'):
                 continue
             if opt in self.blacklist_for_save:
                 continue

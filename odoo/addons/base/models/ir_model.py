@@ -259,8 +259,11 @@ class IrModel(models.Model):
                        (xmlid, self._context['module']))
             if not cr.rowcount:
                 cr.execute(""" INSERT INTO ir_model_data (module, name, model, res_id, date_init, date_update)
-                               VALUES (%s, %s, %s, %s, (now() at time zone 'UTC'), (now() at time zone 'UTC')) """,
+                               VALUES (%s, %s, %s, %s, (now() at time zone 'UTC'), (now() at time zone 'UTC')) RETURNING id""",
                            (self._context['module'], xmlid, record._name, record.id))
+                rid = cr.fetchone()
+                if rid:
+                    self.env['ir.model.data']._xmlid_cache[self._context['module']+'.'+xmlid] = (rid[0], record._name, record.id)
 
         return record
 
@@ -816,8 +819,12 @@ class IrModelFields(models.Model):
                 INSERT INTO ir_model_data (module, name, model, res_id, date_init, date_update)
                 SELECT %s, %s, %s, %s, (now() at time zone 'UTC'), (now() at time zone 'UTC')
                 WHERE NOT EXISTS (SELECT id FROM ir_model_data WHERE module=%s AND name=%s)
+                RETURNING ID
                 """, (module, xmlid, record._name, record.id, module, xmlid)
             )
+            rid = cr.fetchone()
+            if rid:
+                self.env['ir.model.data']._xmlid_cache[module+'.'+xmlid] = (rid[0], record._name, record.id)
 
         return record
 
@@ -1306,8 +1313,9 @@ class IrModelData(models.Model):
         # also stored in pool to avoid being discarded along with this osv instance
         if getattr(pool, 'model_data_reference_ids', None) is None:
             self.pool.model_data_reference_ids = {}
-        # put loads on the class, in order to share it among all instances
-        type(self).loads = self.pool.model_data_reference_ids
+        # put cache on the class, in order to share it among all instances
+        type(self)._xmlid_cache = self.pool.model_data_reference_ids
+        type(self)._xmlid_cache_lock = []
 
     @api.model_cr_context
     def _auto_init(self):
@@ -1336,21 +1344,53 @@ class IrModelData(models.Model):
         return [(xid.id, model_id_name[xid.model][xid.res_id] or xid.complete_name)
                 for xid in self]
 
-    # NEW V8 API
     @api.model
-    @tools.ormcache('xmlid')
+    def _cache_clear(self):
+        if (not self._xmlid_cache_lock) and (len(self._xmlid_cache)>10000):
+            self._xmlid_cache.clear()
+
+    @api.model
+    def _cache_unlock(self, modules=[]):
+        # if modules is not specified, unlock all modules
+        if not modules:
+            del self._xmlid_cache_lock[:]
+        else:
+            for m in modules:
+                if m in self._xmlid_cache_lock:
+                    self._xmlid_cache_lock.remove(m)
+        self._xmlid_cache.clear()
+
+    @api.model
+    def _cache_lock(self, module):
+        if module in self._xmlid_cache_lock:
+            return True
+        terms = self.sudo().search_read([('module', '=', module)], ['model', 'res_id', 'name'], limit=None)
+        for t in terms:
+            self._xmlid_cache[module+'.'+t['name']] = (t['id'], t['model'], t['res_id'])
+        self._xmlid_cache_lock.append(module)
+        return False
+
+    @api.model
     def xmlid_lookup(self, xmlid):
         """Low level xmlid lookup
         Return (id, res_model, res_id) or raise ValueError if not found
         """
+        if xmlid in self._xmlid_cache:
+            return self._xmlid_cache[xmlid]
         module, name = xmlid.split('.', 1)
-        xid = self.sudo().search([('module', '=', module), ('name', '=', name)])
+        if module in self._xmlid_cache_lock:
+            raise ValueError('External ID not found in the system: %s' % xmlid)
+
+        xid = self.sudo().search_read([('module', '=', module), ('name', '=', name)], ['model', 'res_id'])
         if not xid:
             raise ValueError('External ID not found in the system: %s' % xmlid)
         # the sql constraints ensure us we have only one result
-        res = xid.read(['model', 'res_id'])[0]
+        res = xid[0]
         if not res['res_id']:
             raise ValueError('External ID not found in the system: %s' % xmlid)
+
+        self._cache_clear()
+        self._xmlid_cache[xmlid] = (res['id'], res['model'], res['res_id'])
         return res['id'], res['model'], res['res_id']
 
     @api.model
@@ -1417,7 +1457,8 @@ class IrModelData(models.Model):
     @api.multi
     def unlink(self):
         """ Regular unlink method, but make sure to clear the caches. """
-        self.clear_caches()
+        for record in self.read(['module','name']):
+            self._xmlid_cache.pop(record['module']+'.'+record['name'], None)
         return super(IrModelData, self).unlink()
 
     def _lookup_xmlids(self, xml_ids, model):
@@ -1483,20 +1524,17 @@ class IrModelData(models.Model):
                 INSERT INTO ir_model_data (module, name, model, res_id, noupdate, date_init, date_update)
                 VALUES {rows}
                 ON CONFLICT (module, name)
-                DO UPDATE SET date_update=(now() at time zone 'UTC') {where}
+                DO UPDATE SET date_update=(now() at time zone 'UTC') RETURNING module || '.' || name, model, res_id, id
             """.format(
-                rows=", ".join([rowf] * len(sub_rows)),
-                where="WHERE NOT ir_model_data.noupdate" if update else "",
+                rows=", ".join([rowf] * len(sub_rows))
             )
             try:
                 self.env.cr.execute(query, [arg for row in sub_rows for arg in row])
+                for xmlid,res_model,res_id,rid in self.env.cr.fetchall():
+                    self._xmlid_cache[xmlid] = (rid, res_model, res_id)
             except Exception:
                 _logger.error("Failed to insert ir_model_data\n%s", "\n".join(str(row) for row in sub_rows))
                 raise
-
-        # update self.loads
-        for prefix, suffix, res_model, res_id, noupdate in rows:
-            self.loads[(prefix, suffix)] = (res_model, res_id)
 
     @api.model
     def _load_xmlid(self, xml_id):
@@ -1504,13 +1542,15 @@ class IrModelData(models.Model):
             corresponding record.
         """
         record = self.xmlid_to_object(xml_id)
-        if record:
-            prefix, suffix = xml_id.split('.', 1)
-            self.loads[(prefix, suffix)] = (record._name, record.id)
-            for parent_model, parent_field in record._inherits.items():
-                parent = record[parent_field]
-                puffix = suffix + '_' + parent_model.replace('.', '_')
-                self.loads[(prefix, puffix)] = (parent._name, parent.id)
+# FP Note: not sure what does this code; no need to fill cache as xmlid_to_object does it
+#         if record:
+#             prefix, suffix = xml_id.split('.', 1)
+#             self._xmlid_cache[prefix+'.'+suffix] = (record._name, record.id)
+#             for parent_model, parent_field in record._inherits.items():
+#                 parent = record[parent_field]
+#                 puffix = suffix + '_' + parent_model.replace('.', '_')
+#                 self.xmlid_lookip(prefix+"."+puffix)
+#                 self._xmlid_cache[prefix+"."+puffix] = (parent._name, parent.id)
         return record
 
     @api.model
@@ -1599,6 +1639,8 @@ class IrModelData(models.Model):
         and a module in ir_model_data and noupdate set to false, but not
         present in self.loads.
         """
+        print("-------------> _process_end START", modules)
+        print(modules)
         if not modules or tools.config.get('import_partial'):
             return True
 
@@ -1610,7 +1652,7 @@ class IrModelData(models.Model):
                 """
         self._cr.execute(query, (tuple(modules), False))
         for (id, name, model, res_id, module) in self._cr.fetchall():
-            if (module, name) not in self.loads:
+            if (module+'.'+name) not in self._xmlid_cache:
                 if model in self.env:
                     _logger.info('Deleting %s@%s (%s.%s)', res_id, model, module, name)
                     record = self.env[model].browse(res_id)
@@ -1620,7 +1662,9 @@ class IrModelData(models.Model):
                         bad_imd_ids.append(id)
         if bad_imd_ids:
             self.browse(bad_imd_ids).unlink()
-        self.loads.clear()
+
+        print("-------------> _process_end END")
+        self._cache_unlock(modules)
 
     @api.model
     def toggle_noupdate(self, model, res_id):

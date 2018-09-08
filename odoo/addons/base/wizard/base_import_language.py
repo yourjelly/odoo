@@ -21,14 +21,10 @@ class BaseLanguageImport(models.TransientModel):
                        help="ISO Language and Country code, e.g. en_US")
     data = fields.Binary('File', required=True)
     filename = fields.Char('File Name', required=True)
-    overwrite = fields.Boolean('Overwrite Existing Terms',
-                               help="If you enable this option, existing translations (including custom ones) "
-                                    "will be overwritten and replaced by those in this file")
 
     @api.multi
     def import_lang(self):
         this = self[0]
-        this = this.with_context(overwrite=this.overwrite)
         with TemporaryFile('wb+') as buf:
             try:
                 buf.write(base64.decodestring(this.data))

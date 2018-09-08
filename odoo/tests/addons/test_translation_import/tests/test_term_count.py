@@ -17,7 +17,7 @@ class TestTermCount(common.TransactionCase):
         """
         Just make sure we have as many translation entries as we wanted.
         """
-        odoo.tools.trans_load(self.cr, 'test_translation_import/i18n/fr.po', 'fr_FR', verbose=False)
+        odoo.tools.trans_load(self.cr, 'test_translation_import/i18n/fr.po', 'fr_FR')
         ids = self.env['ir.translation'].search(
             [('src', '=', '1XBUO5PUYH2RYZSA1FTLRYS8SPCNU1UYXMEYMM25ASV7JC2KTJZQESZYRV9L8CGB')])
         self.assertEqual(len(ids), 2)
@@ -29,10 +29,10 @@ class TestTermCount(common.TransactionCase):
         menu = self.env.ref('test_translation_import.menu_test_translation_import')
         menu.name = "New Name"
         # install french and change translation content
-        odoo.tools.trans_load(self.cr, 'test_translation_import/i18n/fr.po', 'fr_FR', verbose=False)
+        odoo.tools.trans_load(self.cr, 'test_translation_import/i18n/fr.po', 'fr_FR')
         menu.with_context(lang='fr_FR').name = "Nouveau nom"
         # reload with overwrite
-        odoo.tools.trans_load(self.cr, 'test_translation_import/i18n/fr.po', 'fr_FR', verbose=False, context={'overwrite': True})
+        odoo.tools.trans_load(self.cr, 'test_translation_import/i18n/fr.po', 'fr_FR')
 
         # trans_load invalidates ormcache but not record cache
         menu.refresh()
@@ -46,7 +46,7 @@ class TestTermCount(common.TransactionCase):
             with closing(StringIO()) as bufferobj:
                 odoo.tools.trans_export('fr_FR', ['test_translation_import'], bufferobj, 'po', self.cr)
                 bufferobj.name = 'test_translation_import/i18n/fr.po'
-                odoo.tools.trans_load_data(self.cr, bufferobj, 'po', 'fr_FR', verbose=False, context={'overwrite': True})
+                odoo.tools.trans_load_data(self.cr, bufferobj, 'po', 'fr_FR')
 
         # Check if the not translated key is empty string
         update_translations()

@@ -211,6 +211,7 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
 
         if needs_update:
             env = api.Environment(cr, SUPERUSER_ID, {})
+            env['ir.model.data']._cache_lock(module_name)
             # Can't put this line out of the loop: ir.module.module will be
             # registered by init_models() above.
             module = env['ir.module.module'].browse(module_id)
@@ -229,8 +230,7 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
             migrations.migrate_module(package, 'post')
 
             # Update translations for all installed languages
-            overwrite = odoo.tools.config["overwrite_existing_translations"]
-            module.with_context(overwrite=overwrite)._update_translations()
+            module._update_translations()
 
             if package.name is not None:
                 registry._init_modules.add(package.name)

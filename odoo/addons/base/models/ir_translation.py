@@ -24,162 +24,6 @@ TRANSLATION_TYPE = [
     ('sql_constraint', 'SQL Constraint')
 ]
 
-
-class IrTranslationImport(object):
-    """ Temporary cursor for optimizing mass insert into model 'ir.translation'.
-
-    Open it (attached to a sql cursor), feed it with translation data and
-    finish() it in order to insert multiple translations in a batch.
-    """
-    _table = 'tmp_ir_translation_import'
-
-    def __init__(self, model):
-        """ Store some values, and also create a temporary SQL table to accept
-        the data.
-
-        :param model: the model to insert the data into (as a recordset)
-        """
-        self._cr = model._cr
-        self._model_table = model._table
-        self._overwrite = model._context.get('overwrite', False)
-        self._debug = False
-
-        # Note that Postgres will NOT inherit the constraints or indexes
-        # of ir_translation, so this copy will be much faster.
-        query = """ CREATE TEMP TABLE %s (
-                        imd_model VARCHAR(64),
-                        imd_name VARCHAR(128),
-                        noupdate BOOLEAN
-                    ) INHERITS (%s) """ % (self._table, self._model_table)
-        self._cr.execute(query)
-
-    def push(self, trans_dict):
-        """ Feed a translation, as a dictionary, into the cursor """
-        params = dict(trans_dict, state="translated")
-
-        if params['type'] == 'view':
-            # ugly hack for QWeb views - pending refactoring of translations in master
-            if params['imd_model'] == 'website':
-                params['imd_model'] = "ir.ui.view"
-            # non-QWeb views do not need a matching res_id in case they do not
-            # have an xml id -> force to 0 to avoid dropping them
-            elif params['res_id'] is None and not params['imd_name']:
-                # maybe we should insert this translation for all views of the
-                # given model?
-                params['res_id'] = 0
-
-        # backward compatibility: convert 'field', 'help', 'view' into 'model'
-        if params['type'] == 'field':
-            model, field = params['name'].split(',')
-            params['type'] = 'model'
-            params['name'] = 'ir.model.fields,field_description'
-            params['imd_model'] = 'ir.model.fields'
-            params['imd_name'] = 'field_%s__%s' % (model.replace('.', '_'), field)
-
-        elif params['type'] == 'help':
-            model, field = params['name'].split(',')
-            params['type'] = 'model'
-            params['name'] = 'ir.model.fields,help'
-            params['imd_model'] = 'ir.model.fields'
-            params['imd_name'] = 'field_%s__%s' % (model.replace('.', '_'), field)
-
-        elif params['type'] == 'view':
-            params['type'] = 'model'
-            params['name'] = 'ir.ui.view,arch_db'
-            params['imd_model'] = "ir.ui.view"
-
-        query = """ INSERT INTO %s (name, lang, res_id, src, type, imd_model, module, imd_name, value, state, comments)
-                    VALUES (%%(name)s, %%(lang)s, %%(res_id)s, %%(src)s, %%(type)s, %%(imd_model)s, %%(module)s,
-                            %%(imd_name)s, %%(value)s, %%(state)s, %%(comments)s) """ % self._table
-        self._cr.execute(query, params)
-
-    def finish(self):
-        """ Transfer the data from the temp table to ir.translation """
-        cr = self._cr
-        if self._debug:
-            cr.execute("SELECT count(*) FROM %s" % self._table)
-            count = cr.fetchone()[0]
-            _logger.debug("ir.translation.cursor: We have %d entries to process", count)
-
-        # Step 1: resolve ir.model.data references to res_ids
-        cr.execute(""" UPDATE %s AS ti
-                          SET res_id = imd.res_id,
-                              noupdate = imd.noupdate
-                       FROM ir_model_data AS imd
-                       WHERE ti.res_id IS NULL
-                       AND ti.module IS NOT NULL AND ti.imd_name IS NOT NULL
-                       AND ti.module = imd.module AND ti.imd_name = imd.name
-                       AND ti.imd_model = imd.model; """ % self._table)
-
-        if self._debug:
-            cr.execute(""" SELECT module, imd_name, imd_model FROM %s
-                           WHERE res_id IS NULL AND module IS NOT NULL """ % self._table)
-            for row in cr.fetchall():
-                _logger.info("ir.translation.cursor: missing res_id for %s.%s <%s> ", *row)
-
-        # Records w/o res_id must _not_ be inserted into our db, because they are
-        # referencing non-existent data.
-        cr.execute("DELETE FROM %s WHERE res_id IS NULL AND module IS NOT NULL" % self._table)
-
-        # detect the xml_translate fields, where the src must be the same
-        env = api.Environment(cr, SUPERUSER_ID, {})
-        src_relevant_fields = []
-        for model in env:
-            for field_name, field in env[model]._fields.items():
-                if hasattr(field, 'translate') and callable(field.translate):
-                    src_relevant_fields.append("%s,%s" % (model, field_name))
-
-        find_expr = """
-                irt.lang = ti.lang
-            AND irt.type = ti.type
-            AND irt.name = ti.name
-            AND (
-                    (ti.type = 'model' AND ti.res_id = irt.res_id AND ti.name IN %s AND irt.src = ti.src)
-                 OR (ti.type = 'model' AND ti.res_id = irt.res_id AND ti.name NOT IN %s)
-                 OR (ti.type = 'view' AND (irt.res_id IS NULL OR ti.res_id = irt.res_id) AND irt.src = ti.src)
-                 OR (ti.type = 'field')
-                 OR (ti.type = 'help')
-                 OR (ti.type NOT IN ('model', 'view', 'field', 'help') AND irt.src = ti.src)
-            )
-        """
-
-        # Step 2: update existing (matching) translations
-        if self._overwrite:
-            cr.execute(""" UPDATE ONLY %s AS irt
-                           SET value = ti.value,
-                               src = ti.src,
-                               state = 'translated'
-                           FROM %s AS ti
-                          WHERE %s
-                            AND ti.value IS NOT NULL
-                            AND ti.value != ''
-                            AND noupdate IS NOT TRUE
-                       """ % (self._model_table, self._table, find_expr),
-                       (tuple(src_relevant_fields), tuple(src_relevant_fields)))
-
-        # Step 3: insert new translations
-        cr.execute(""" INSERT INTO %s(name, lang, res_id, src, type, value, module, state, comments)
-                       SELECT name, lang, res_id, src, type, value, module, state, comments
-                       FROM %s AS ti
-                       WHERE NOT EXISTS(SELECT 1 FROM ONLY %s AS irt WHERE %s)
-                       ON CONFLICT DO NOTHING;
-                   """ % (self._model_table, self._table, self._model_table, find_expr),
-                   (tuple(src_relevant_fields), tuple(src_relevant_fields)))
-
-        if self._debug:
-            cr.execute("SELECT COUNT(*) FROM ONLY %s" % self._model_table)
-            total = cr.fetchone()[0]
-            cr.execute("SELECT COUNT(*) FROM ONLY %s AS irt, %s AS ti WHERE %s" % \
-                       (self._model_table, self._table, find_expr),
-                       (tuple(src_relevant_fields), tuple(src_relevant_fields)))
-            count = cr.fetchone()[0]
-            _logger.debug("ir.translation.cursor: %d entries now in ir.translation, %d common entries with tmp", total, count)
-
-        # Step 4: cleanup
-        cr.execute("DROP TABLE %s" % self._table)
-        return True
-
-
 class IrTranslation(models.Model):
     _name = "ir.translation"
     _log_access = False
@@ -700,11 +544,6 @@ class IrTranslation(models.Model):
 
         return action
 
-    @api.model
-    def _get_import_cursor(self):
-        """ Return a cursor-like object for fast inserting translations """
-        return IrTranslationImport(self)
-
     @api.model_cr_context
     def load_module_terms(self, modules, langs):
         """ Load PO files of the given modules for the given languages. """
@@ -729,28 +568,26 @@ class IrTranslation(models.Model):
                     base_trans_file = get_module_resource(module_name, 'i18n', base_lang_code + '.po')
                     if base_trans_file:
                         _logger.info('module %s: loading base translation file %s for language %s', module_name, base_lang_code, lang)
-                        tools.trans_load(self._cr, base_trans_file, lang, verbose=False, module_name=module_name, context=context)
-                        context['overwrite'] = True  # make sure the requested translation will override the base terms later
+                        tools.trans_load(self._cr, base_trans_file, lang, module_name=module_name, context=context)
 
                     # i18n_extra folder is for additional translations handle manually (eg: for l10n_be)
                     base_trans_extra_file = get_module_resource(module_name, 'i18n_extra', base_lang_code + '.po')
                     if base_trans_extra_file:
                         _logger.info('module %s: loading extra base translation file %s for language %s', module_name, base_lang_code, lang)
-                        tools.trans_load(self._cr, base_trans_extra_file, lang, verbose=False, module_name=module_name, context=context)
-                        context['overwrite'] = True  # make sure the requested translation will override the base terms later
+                        tools.trans_load(self._cr, base_trans_extra_file, lang, module_name=module_name, context=context)
 
                 # Step 2: then load the main translation file, possibly overriding the terms coming from the base language
                 trans_file = get_module_resource(module_name, 'i18n', lang_code + '.po')
                 if trans_file:
                     _logger.info('module %s: loading translation file (%s) for language %s', module_name, lang_code, lang)
-                    tools.trans_load(self._cr, trans_file, lang, verbose=False, module_name=module_name, context=context)
+                    tools.trans_load(self._cr, trans_file, lang, module_name=module_name, context=context)
                 elif lang_code != 'en_US':
                     _logger.info('module %s: no translation for language %s', module_name, lang_code)
 
                 trans_extra_file = get_module_resource(module_name, 'i18n_extra', lang_code + '.po')
                 if trans_extra_file:
                     _logger.info('module %s: loading extra translation file (%s) for language %s', module_name, lang_code, lang)
-                    tools.trans_load(self._cr, trans_extra_file, lang, verbose=False, module_name=module_name, context=context)
+                    tools.trans_load(self._cr, trans_extra_file, lang, module_name=module_name, context=context)
         return True
 
     @api.model

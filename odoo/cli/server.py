@@ -109,7 +109,7 @@ def export_translation():
 
 def import_translation():
     config = odoo.tools.config
-    context = {'overwrite': config["overwrite_existing_translations"]}
+    context = {}
     dbname = config['db_name']
 
     registry = odoo.modules.registry.Registry.new(dbname)

@@ -6,8 +6,8 @@ import inspect
 import io
 import locale
 import logging
-import os
-import re
+import os, polib
+import re, random
 import tarfile
 import tempfile
 import threading
@@ -1006,155 +1006,81 @@ def trans_generate(lang, modules, cr):
     return out
 
 
-def trans_load(cr, filename, lang, verbose=True, module_name=None, context=None):
-    try:
-        with file_open(filename, mode='rb') as fileobj:
-            _logger.info("loading %s", filename)
-            fileformat = os.path.splitext(filename)[-1][1:].lower()
-            result = trans_load_data(cr, fileobj, fileformat, lang, verbose=verbose, module_name=module_name, context=context)
-            return result
-    except IOError:
-        if verbose:
-            _logger.error("couldn't read translation file %s", filename)
-        return None
+def trans_load(cr, filename, lang, module_name=None, context=None):
+    _logger.info("loading %s", filename)
+    fileformat = os.path.splitext(filename)[-1][1:].lower()
+    return trans_load_data(cr, filename, lang, module_name=module_name, context=context)
 
-
-def trans_load_data(cr, fileobj, fileformat, lang, lang_name=None, verbose=True, module_name=None, context=None):
+def trans_load_data(cr, pofc, lang, lang_name=None, module_name=None, context=None):
     """Populates the ir_translation table."""
-    if verbose:
-        _logger.info('loading translation file for language %s', lang)
-
     env = odoo.api.Environment(cr, odoo.SUPERUSER_ID, context or {})
     Lang = env['res.lang']
     Translation = env['ir.translation']
+    Imd = env['ir.model.data']
 
+    waslocked = module_name and Imd._cache_lock(module_name)
+    # data = io.StringIO()
+    # writer = csv.writer(data,delimiter='\t')
+    dupli = {}
+    rows = []
     try:
         if not Lang.search_count([('code', '=', lang)]):
-            # lets create the language with locale information
             Lang.load_lang(lang=lang, lang_name=lang_name)
 
-        # Parse also the POT: it will possibly provide additional targets.
-        # (Because the POT comments are correct on Launchpad but not the
-        # PO comments due to a Launchpad limitation. See LP bug 933496.)
-        pot_reader = []
+        for entry in polib.pofile(pofc):
+            for occ in entry.occurrences:
+                vals = ':'.join(occ).split(':')
+                res_id = None
+                if len(vals)==1:
+                    continue
+                if len(vals)>2:
+                    if vals[0]=='code':
+                        res_id = vals[2] or None
+                    else:
+                        res_id = Imd.xmlid_to_res_id(vals[2])
+                        if res_id is False: continue
+                        res_id = str(res_id)
+                key = (vals[0], vals[1], lang, res_id, entry.msgid)
+                if key not in dupli:
+                    dupli[key] = 1
+                    rows += [
+                        vals[1],
+                        res_id,
+                        lang,
+                        vals[0],
+                        entry.msgid,
+                        entry.msgstr,
+                        module_name or '',
+                        'translated'
+                    ]
+        # data.seek(0)
+        # if module_name:
+        #    cr.execute('delete from ir_translation where module=%s', (module_name,))
 
-        # now, the serious things: we read the language file
-        fileobj.seek(0)
-        if fileformat == 'csv':
-            reader = pycompat.csv_reader(fileobj, quotechar='"', delimiter=',')
-            # read the first line of the file (it contains columns titles)
-            fields = next(reader)
+        if len(rows):
+            cr.execute("""
+                INSERT INTO ir_translation (name, res_id, lang, type, src, value, module, state)
+                    VALUES {row_fmt}
+                    ON CONFLICT (type, name, lang, res_id, md5(src))
+                    DO UPDATE SET value=EXCLUDED.value
+            """.format(
+                row_fmt=", ".join(['(%s, %s, %s, %s, %s, %s, %s, %s)'] * (len(rows)//8))
+            ), rows)
 
-        elif fileformat == 'po':
-            reader = PoFile(fileobj)
-            fields = ['type', 'name', 'res_id', 'src', 'value', 'comments']
+        # data.seek(0)
+        # result = cr.copy_from(data, 'ir_translation', columns=[
+        #     'name', 'res_id', 'lang', 'type',
+        #     'src', 'value', 'module', 'state',
+        # ])
 
-            # Make a reader for the POT file and be somewhat defensive for the
-            # stable branch.
-
-            # when fileobj is a TemporaryFile, its name is an interget in P3, a string in P2
-            if isinstance(fileobj.name, str) and fileobj.name.endswith('.po'):
-                try:
-                    # Normally the path looks like /path/to/xxx/i18n/lang.po
-                    # and we try to find the corresponding
-                    # /path/to/xxx/i18n/xxx.pot file.
-                    # (Sometimes we have 'i18n_extra' instead of just 'i18n')
-                    addons_module_i18n, _ignored = os.path.split(fileobj.name)
-                    addons_module, i18n_dir = os.path.split(addons_module_i18n)
-                    addons, module = os.path.split(addons_module)
-                    pot_handle = file_open(os.path.join(
-                        addons, module, i18n_dir, module + '.pot'), mode='rb')
-                    pot_reader = PoFile(pot_handle)
-                except:
-                    pass
-
-        else:
-            _logger.info('Bad file format: %s', fileformat)
-            raise Exception(_('Bad file format: %s') % fileformat)
-
-        # Read the POT references, and keep them indexed by source string.
-        class Target(object):
-            def __init__(self):
-                self.value = None
-                self.targets = set()            # set of (type, name, res_id)
-                self.comments = None
-
-        pot_targets = defaultdict(Target)
-        for type, name, res_id, src, _ignored, comments in pot_reader:
-            if type is not None:
-                target = pot_targets[src]
-                target.targets.add((type, name, res_id))
-                target.comments = comments
-
-        # read the rest of the file
-        irt_cursor = Translation._get_import_cursor()
-
-        def process_row(row):
-            """Process a single PO (or POT) entry."""
-            # dictionary which holds values for this line of the csv file
-            # {'lang': ..., 'type': ..., 'name': ..., 'res_id': ...,
-            #  'src': ..., 'value': ..., 'module':...}
-            dic = dict.fromkeys(('type', 'name', 'res_id', 'src', 'value',
-                                 'comments', 'imd_model', 'imd_name', 'module'))
-            dic['lang'] = lang
-            dic.update(pycompat.izip(fields, row))
-
-            # discard the target from the POT targets.
-            src = dic['src']
-            target = pot_targets.get(src)
-            if not target or (dic['type'], dic['name'], dic['res_id']) not in target.targets:
-                _logger.info("Translation '%s' (%s, %s, %s) not found in reference pot, skipping",
-                    src[:60], dic['type'], dic['name'], dic['res_id'])
-                return
-
-            target.value = dic['value']
-            target.targets.discard((dic['type'], dic['name'], dic['res_id']))
-
-            # This would skip terms that fail to specify a res_id
-            res_id = dic['res_id']
-            if not res_id:
-                return
-
-            if isinstance(res_id, pycompat.integer_types) or \
-                    (isinstance(res_id, pycompat.string_types) and res_id.isdigit()):
-                dic['res_id'] = int(res_id)
-                if module_name:
-                    dic['module'] = module_name
-            else:
-                # res_id is an xml id
-                dic['res_id'] = None
-                dic['imd_model'] = dic['name'].split(',')[0]
-                if '.' in res_id:
-                    dic['module'], dic['imd_name'] = res_id.split('.', 1)
-                else:
-                    dic['module'], dic['imd_name'] = module_name, res_id
-
-            irt_cursor.push(dic)
-
-        # First process the entries from the PO file (doing so also fills/removes
-        # the entries from the POT file).
-        for row in reader:
-            process_row(row)
-
-        # Then process the entries implied by the POT file (which is more
-        # correct w.r.t. the targets) if some of them remain.
-        pot_rows = []
-        for src, target in pot_targets.items():
-            if target.value:
-                for type, name, res_id in target.targets:
-                    pot_rows.append((type, name, res_id, src, target.value, target.comments))
-        pot_targets.clear()
-        for row in pot_rows:
-            process_row(row)
-
-        irt_cursor.finish()
         Translation.clear_caches()
-        if verbose:
-            _logger.info("translation file loaded successfully")
+        if waslocked and module_name:
+            Imd._cache_unlock([module_name])
 
     except IOError:
         iso_lang = get_iso_codes(lang)
         filename = '[lang: %s][format: %s]' % (iso_lang or 'new', fileformat)
+        Imd._cache_unlock([module_name])
         _logger.exception("couldn't read translation file %s", filename)
 
 
