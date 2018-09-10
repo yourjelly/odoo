@@ -111,10 +111,10 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         else:
             hdmi_status = 'disconnected'
             hdmi_class = 'text-red'
-        pos_device_status;append({
+        pos_device_status.append({
                 'status': hdmi_status,
                 'status_class': hdmi_class,
-                'name': hdmi_name,
+                'name': 'display' + hdmi_name,
                 'message': hdmi_message
             })
 
