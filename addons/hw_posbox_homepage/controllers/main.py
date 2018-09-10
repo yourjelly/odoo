@@ -263,6 +263,8 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
             'breadcrumb': 'Configure IoTBox',
             'loading_message': 'Configuring your IoT Box',
             'ssid': self.get_wifi_essid(),
+            'server': self.get_server_status(),
+            'hostname': subprocess.check_output('hostname').decode('utf-8'),
         })
 
     @http.route('/step_configure', type='http', auth='none', cors='*', csrf=False)
