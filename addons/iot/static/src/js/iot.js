@@ -1,3 +1,5 @@
+
+
 odoo.define('iot.floatinput', function (require) {
 "use strict";
 
@@ -7,6 +9,7 @@ var registry = require('web.field_registry');
 var widget_registry = require('web.widget_registry');
 var Widget = require('web.Widget');
 var FieldFloat = require('web.basic_fields').InputField;
+var _t = core._t;
 
 
 var IotFieldFloat = FieldFloat.extend({
