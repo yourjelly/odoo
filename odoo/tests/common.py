@@ -152,6 +152,9 @@ class MetaCase(type):
         if cls.__module__.startswith('odoo.addons.'):
             module = cls.__module__.split('.')[2]
             cls.test_tags = {'standard', 'at_install', module}
+            # Add a default test tag for all HttpCase
+            if HttpCase in cls.__bases__:
+                cls.test_tags |= {'http'}
 
 
 class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
