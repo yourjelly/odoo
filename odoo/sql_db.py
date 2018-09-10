@@ -188,12 +188,12 @@ class Cursor(object):
     def __build_dict(self, row):
         return {d.name: row[i] for i, d in enumerate(self._obj.description)}
     def dictfetchone(self):
-        row = self._obj.fetchone()
+        row = self.fetchone()
         return row and self.__build_dict(row)
     def dictfetchmany(self, size):
-        return [self.__build_dict(row) for row in self._obj.fetchmany(size)]
+        return [self.__build_dict(row) for row in self.fetchmany(size)]
     def dictfetchall(self):
-        return [self.__build_dict(row) for row in self._obj.fetchall()]
+        return [self.__build_dict(row) for row in self.fetchall()]
 
     def __del__(self):
         if not self._closed and not self._cnx.closed:
@@ -249,6 +249,27 @@ class Cursor(object):
                 self.sql_into_log.setdefault(res_into.group(1), [0, 0])
                 self.sql_into_log[res_into.group(1)][0] += 1
                 self.sql_into_log[res_into.group(1)][1] += delay
+        return res
+
+    def fetchall(self):
+        t0 = time.time()
+        res = self._obj.fetchall()
+        if hasattr(threading.current_thread(), 'query_count'):
+            threading.current_thread().query_time += (time.time() - t0)
+        return res
+
+    def fetchmany(self, count):
+        t0 = time.time()
+        res = self._obj.fetchmany(count)
+        if hasattr(threading.current_thread(), 'query_count'):
+            threading.current_thread().query_time += (time.time() - t0)
+        return res
+
+    def fetchone(self):
+        t0 = time.time()
+        res = self._obj.fetchone()
+        if hasattr(threading.current_thread(), 'query_count'):
+            threading.current_thread().query_time += (time.time() - t0)
         return res
 
     def split_for_in_conditions(self, ids, size=None):
