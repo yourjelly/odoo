@@ -8,20 +8,22 @@
                 e.preventDefault();
                 $('.loading-block').removeClass('o_hide');
                 $.ajax({
-                    url:'/wifi_connect',
-                    type:'post',
-                    data:$('#wifi-config').serialize(),
-                    success:function(message){
-                        var data = JSON.parse(message);
-                        var message = data.message;
-                        if (data.server) {
-                            message += '<br>'+ data.server.message;
-                            setTimeout(function () {
-                                window.location = data.server.url;
-                            }, 30000);
-                        }
-                        $('.message-status').html(message);
+                    url: '/wifi_connect',
+                    type: 'post',
+                    data: $('#wifi-config').serialize(),
+                }).done(function (message) {
+                    var data = JSON.parse(message);
+                    var message = data.message;
+                    if (data.server) {
+                        message += '<br>'+ data.server.message;
+                        setTimeout(function () {
+                            window.location = data.server.url;
+                        }, 30000);
                     }
+                    $('.message-status').html(message);
+                }).fail(function () {
+                    $('.error-message').text('Error in connecting to wifi');
+                    $('.loading-block').addClass('o_hide');
                 });
             });
         });

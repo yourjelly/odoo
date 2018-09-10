@@ -24,8 +24,7 @@
                     $('.loading-block').removeClass('o_hide');
                     $.ajax({
                         url:'/hw_proxy/perform_upgrade/'
-                    }).then(function(status){
-                        setTimeout(function () {
+                    }).done(function(status){
                         $('.message-title').text('Upgrade successful');
                         var cpt = 110;
                         setInterval(function(){
@@ -33,9 +32,8 @@
                             if(cpt==0){location.reload();}
                             $('.message-status').text('Restarting the IoTBox in ' + cpt);
                         } , 1000);
-                        }, 3000);
-                    },function(){
-                        $('#upgrade').text('Upgrade Failed');
+                    }).fail(function(){
+                        $('.error-message').text('Upgrade Failed');
                     });
                 }
             });

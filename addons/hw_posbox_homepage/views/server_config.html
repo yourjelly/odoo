@@ -8,15 +8,17 @@
                 e.preventDefault();
                 $('.loading-block').removeClass('o_hide');
                 $.ajax({
-                    url:'/server_connect',
-                    type:'post',
-                    data:$('#server-config').serialize(),
-                    success:function(url){
-                        $('.message-status').html('Configure Domain Server <br> Redirect to Server');
-                        setTimeout(function () {
-                            window.location = url;
-                        }, 30000);
-                    }
+                    url: '/server_connect',
+                    type: 'post',
+                    data: $('#server-config').serialize(),
+                }).done(function (url) {
+                    $('.message-status').html('Configure Domain Server <br> Redirect to Server');
+                    setTimeout(function () {
+                        window.location = url;
+                    }, 30000);
+                }).fail(function () {
+                    $('.error-message').text('Error in connecting to server');
+                    $('.loading-block').addClass('o_hide');
                 });
             });
         });

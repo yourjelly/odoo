@@ -18,25 +18,27 @@
                 e.preventDefault();
                 $('.loading-block').removeClass('o_hide');
                 $.ajax({
-                    url:'/step_configure',
-                    type:'post',
-                    data:$('#config-form').serialize(),
-                    success:function(){
-                        $('.loading-block').addClass('o_hide');
-                        changePage('done');
-                        var url = $('input[name="url"]').val();
-                        if(url) {
-                            var cpt = 110;
-                            setInterval(function(){
-                                if(cpt === 0){
-                                    window.location = url
-                                } else {
-                                    $('.redirect-message').html('You will redirect to <a href="'+ url +'">' + url + '</a> in <b>' + cpt + '</b> secounds');
-                                    --cpt;
-                                }
-                            } , 1000);
-                        }
+                    url: '/step_configure',
+                    type: 'post',
+                    data: $('#config-form').serialize(),
+                }).done(function () {
+                    $('.loading-block').addClass('o_hide');
+                    changePage('done');
+                    var url = $('input[name="url"]').val();
+                    if(url) {
+                        var cpt = 110;
+                        setInterval(function(){
+                            if(cpt === 0){
+                                window.location = url
+                            } else {
+                                $('.redirect-message').html('You will redirect to <a href="'+ url +'">' + url + '</a> in <b>' + cpt + '</b> secounds');
+                                --cpt;
+                            }
+                        } , 1000);
                     }
+                }).fail(function () {
+                    $('.error-message').text('Error in submiting data');
+                    $('.loading-block').addClass('o_hide');
                 });
             });
         });
