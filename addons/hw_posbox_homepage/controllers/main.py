@@ -149,9 +149,9 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
     @http.route('/list_drivers', type='http', auth='none', website=True)
     def list_drivers(self):
-        if os.path.isfile('/home/pi/uuid') == False:
+        if os.path.isfile('/home/pi/uuid') == False and self.get_server_status():
             from odoo.addons.hw_drivers.controllers.load_drivers import load_uuid
-            url = self.get_server_status().str()
+            url = self.get_server_status()
             token = 'token'
             maciotbox = 'macaddress'
             load_uuid(url, maciotbox, token)
