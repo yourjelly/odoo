@@ -333,6 +333,37 @@ class Pricelist(models.Model):
 
         return pl
 
+    def _get_partner_pricelist_multi(self, partner_ids, company_id=None):
+        Partner = self.env['res.partner']
+        Property = self.env['ir.property'].with_context(force_company=company_id or self.env.user.company_id.id)
+
+        r = Property.get_multi('property_product_pricelist', Partner._name, partner_ids)
+
+        remaining_partner_ids = set(partner_ids) -  set(r)
+
+        # TODO: use Partner.read_group(['id','in',]) to do batch
+        for p in Partner.browse(remaining_partner_ids):
+            pl = False
+            if p.country_id.code:
+                pls = self.env['product.pricelist'].search([('country_group_ids.country_ids.code', '=', p.country_id.code)], limit=1)
+                pl = pls and pls[0].id
+
+            if not pl:
+                # search pl where no country
+                pls = self.env['product.pricelist'].search([('country_group_ids', '=', False)], limit=1)
+                pl = pls and pls[0].id
+
+            if not pl:
+                prop = Property.get('property_product_pricelist', 'res.partner')
+                pl = prop and prop[0].id
+
+            if not pl:
+                pls = self.env['product.pricelist'].search([], limit=1)
+                pl = pls and pls[0].id
+            r[p.id] = pl
+
+        return r
+
 
 class ResCountryGroup(models.Model):
     _inherit = 'res.country.group'

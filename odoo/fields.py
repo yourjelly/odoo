@@ -622,6 +622,7 @@ class Field(MetaField('DummyField', (object,), {})):
         return model.env['ir.property'].get(self.name, self.model_name)
 
     def _compute_company_dependent(self, records):
+        _logger.info('OKOK')
         Property = records.env['ir.property']
         values = Property.get_multi(self.name, self.model_name, records.ids)
         for record in records:

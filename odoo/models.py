@@ -2,6 +2,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 
+import time
+
+sqltime = 0
+t1 = 0
+
 """
     Object Relational Mapping module:
      * Hierarchical structure
@@ -2704,10 +2709,15 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         result = []
         param_pos = params.index(param_ids)
+        sqltime = 0
         for sub_ids in cr.split_for_in_conditions(self.ids):
             params[param_pos] = tuple(sub_ids)
+            t0 = time.time()
             cr.execute(query_str, params)
+            sqltime +=  time.time()-t0
             result.extend(cr.dictfetchall())
+
+        _logger.info('readfromdatabasae sqlitime %.3fs',sqltime)
 
         ids = [vals['id'] for vals in result]
         fetched = self.browse(ids)
@@ -4242,7 +4252,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         # reorder read
         index = {vals['id']: vals for vals in result}
-        return [index[record.id] for record in records if record.id in index]
+        r = [index[record.id] for record in records if record.id in index]
+        _logger.info("====END SEARCH READ")
+        return r
 
     @api.multi
     def toggle_active(self):

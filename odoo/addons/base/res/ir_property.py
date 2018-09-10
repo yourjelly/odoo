@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import logging
+_logger = logging.getLogger(__name__)
+
+
 from operator import itemgetter
 
 from odoo import api, fields, models, _
@@ -144,8 +148,17 @@ class Property(models.Model):
             the given `ids`, and return a dictionary mapping `ids` to their
             corresponding value.
         """
+
+        _logger.info("-"*60)
+        _logger.info("CACA")
+        _logger.info("-"*60)
+        _logger.info("-"*60)
+        _logger.info("-"*60)
+        _logger.info("-"*60)
+        _logger.info('get_multi_begini len ids= %s', len(ids))
         if not ids:
             return {}
+
 
         domain = self._get_domain(name, model)
         if domain is None:
@@ -170,6 +183,7 @@ class Property(models.Model):
         for id in ids:
             result.setdefault(id, default_value)
 
+        _logger.info('get_multi_end')
         return result
 
     @api.model
