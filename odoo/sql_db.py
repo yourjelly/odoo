@@ -255,21 +255,21 @@ class Cursor(object):
         t0 = time.time()
         res = self._obj.fetchall()
         if hasattr(threading.current_thread(), 'query_count'):
-            threading.current_thread().query_time += (time.time() - t0)
+            threading.current_thread().fetch_time += (time.time() - t0)
         return res
 
     def fetchmany(self, count):
         t0 = time.time()
         res = self._obj.fetchmany(count)
         if hasattr(threading.current_thread(), 'query_count'):
-            threading.current_thread().query_time += (time.time() - t0)
+            threading.current_thread().fetch_time += (time.time() - t0)
         return res
 
     def fetchone(self):
         t0 = time.time()
         res = self._obj.fetchone()
         if hasattr(threading.current_thread(), 'query_count'):
-            threading.current_thread().query_time += (time.time() - t0)
+            threading.current_thread().fetch_time += (time.time() - t0)
         return res
 
     def split_for_in_conditions(self, ids, size=None):

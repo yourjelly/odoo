@@ -71,23 +71,24 @@ LEVEL_COLOR_MAPPING = {
 }
 
 class PerfFilter(logging.Filter):
-    def format_perf(self, query_count, query_time, remaining_time):
-        return ("%d" % query_count, "%.3f" % query_time, "%.3f" % remaining_time)
+    def format_perf(self, query_count, query_time, fetch_time, remaining_time):
+        return ("%d" % query_count, "%.3f" % query_time, "%.3f" % fetch_time, "%.3f" % remaining_time)
 
     def filter(self, record):
         if hasattr(threading.current_thread(), "query_count"):
             query_count = threading.current_thread().query_count
             query_time = threading.current_thread().query_time
+            fetch_time = threading.current_thread().fetch_time
             perf_t0 = threading.current_thread().perf_t0
-            remaining_time = time.time() - perf_t0 - query_time
-            record.perf_info = '%s %s %s' % self.format_perf(query_count, query_time, remaining_time)
+            remaining_time = time.time() - perf_t0 - query_time - fetch_time
+            record.perf_info = '%s %s %s %s' % self.format_perf(query_count, query_time, fetch_time, remaining_time)
             delattr(threading.current_thread(), "query_count")
         else:
-            record.perf_info = "- - -"
+            record.perf_info = "- - - -"
         return True
 
 class ColoredPerfFilter(PerfFilter):
-    def format_perf(self, query_count, query_time, remaining_time):
+    def format_perf(self, query_count, query_time, fetch_time, remaining_time):
         def colorize_time(time, format, low=1, high=5):
             if time > high:
                 return COLOR_PATTERN % (30 + RED, 40 + DEFAULT, format % time)
@@ -97,6 +98,7 @@ class ColoredPerfFilter(PerfFilter):
         return (
             colorize_time(query_count, "%d", 100, 1000),
             colorize_time(query_time, "%.3f", 0.1, 3),
+            colorize_time(fetch_time, "%.3f", 0.1, 3),
             colorize_time(remaining_time, "%.3f", 1, 5)
             )
 
