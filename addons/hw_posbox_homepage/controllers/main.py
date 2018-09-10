@@ -80,7 +80,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         except:
             return False
 
-        return server_template
+        return server_template.split('\n')[0]
 
     def get_homepage_data(self):
         hostname = str(socket.gethostname())
@@ -140,7 +140,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
             url = self.get_server_status()
             token = 'token'
             maciotbox = 'macaddress'
-            load_uuid(url.strip(' '), maciotbox, token)
+            load_uuid(url, maciotbox, token)
 
         drivers_list = []
         for driver in os.listdir("/home/pi/odoo/addons/hw_drivers/drivers"):
