@@ -103,6 +103,20 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                 'name': status,
                 'message': ' '.join(device['messages'])
             })
+        hdmi_message = subprocess.check_output('tvservice -s', shell=True).decode('utf-8')
+        hdmi_name = subprocess.check_output('tvservice -n', shell=True).decode('utf-8').split('=')[1]
+        if hdmi_name:
+            hdmi_status = 'connected'
+            hdmi_class = 'text-green'
+        else:
+            hdmi_status = 'disconnected'
+            hdmi_class = 'text-red'
+        pos_device_status;append({
+                'status': hdmi_status,
+                'status_class': hdmi_class,
+                'name': hdmi_name,
+                'message': hdmi_message
+            })
 
         iot_device_status = []
         for device in hw_drivers.drivers:
