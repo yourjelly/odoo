@@ -137,6 +137,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
     def list_drivers(self):
         if os.path.isfile('/home/pi/uuid') == False:
             from odoo.addons.hw_drivers.controllers.load_drivers import load_uuid
+            server = self.get_server_status()
             token = 'token'
             maciotbox = 'macaddress'
             load_uuid(url.strip(' '), maciotbox, token)
@@ -205,12 +206,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                 persistent = ""
 
         subprocess.call(['/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/connect_to_wifi.sh', essid, password, persistent])
-        f = open('/home/pi/odoo-remote-server.conf', 'r')
-        server = ""
-        for line in f:
-            server += line
-        f.close()
-        server = server.split('\n')[0]
+        server = self.get_server_status()
         res_payload = {
             'message': 'Connecting to ' + essid,
         }
