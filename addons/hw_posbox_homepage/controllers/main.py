@@ -123,7 +123,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
     @http.route('/', type='http', auth='none')
     def index(self):
-        if (os.path.isfile('/home/pi/wifi_network.txt') == False or os.path.isfile('/home/pi/odoo-remote-server.conf') == False) and self.get_ip_iotbox() == '10.11.12.1:
+        if (os.path.isfile('/home/pi/wifi_network.txt') == False or os.path.isfile('/home/pi/odoo-remote-server.conf') == False) and self.get_ip_iotbox() == '10.11.12.1':
             return configure_wizard_template.render({
                 'title': 'Configure IoT Box',
                 'breadcrumb': 'Configure IoTBox',
