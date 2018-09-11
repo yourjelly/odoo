@@ -69,6 +69,7 @@ var SwitchCompanyMenu = Widget.extend({
      * @param {MouseEvent} ev
      */
     _onClick: function (ev) {
+        var self = this;
         ev.preventDefault();
         var companyID = $(ev.currentTarget).data('company-id');
         this._rpc({
@@ -77,7 +78,21 @@ var SwitchCompanyMenu = Widget.extend({
             args: [[session.uid], {'company_id': companyID}],
         })
         .then(function() {
-            location.reload();
+            var domain = [
+                ['res_model', '=', 'ir.ui.view'],
+                ['name', 'like', 'assets_']
+            ];
+            self._rpc({
+                model: 'ir.attachment',
+                method: 'search',
+                args: [domain],
+            }).then(function (ids) {
+                self._rpc({
+                    model: 'ir.attachment',
+                    method: 'unlink',
+                    args: [ids],
+                }).then(self.do_action('reload'));
+            });
         });
     },
 });
