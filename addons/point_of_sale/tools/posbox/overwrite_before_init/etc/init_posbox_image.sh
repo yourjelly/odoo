@@ -105,7 +105,7 @@ chmod 777 /home/pi/odoo/addons/hw_drivers/drivers/
 echo "addons/hw_drivers/drivers/" > /home/pi/odoo/.git/info/exclude
 
 # Modify name's box
-echo hostname "IoTBox"
+hostname "IoTBox"
 
 # create dirs for ramdisks
 create_ramdisk_dir () {

@@ -13,6 +13,10 @@ function connect () {
 	IOT_NAME="${2}"
 	IOT_NAME="${IOT_NAME//[^[:ascii:]]/}"
 	IOT_NAME="${IOT_NAME//[^a-zA-Z0-9-]/}"
+	if [ -z "$IOT_NAME" ]
+	then
+		IOT_NAME="${HOSTNAME}"
+	fi
 	sudo mount -o remount,rw /
 	sudo mount -o remount,rw /root_bypass_ramdisks
 	if [ ! -z "${1}" ]

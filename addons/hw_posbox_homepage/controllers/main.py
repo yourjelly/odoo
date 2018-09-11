@@ -78,7 +78,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                 server_template += line
             f.close()
         except:
-            return False
+            return ''
 
         return server_template.split('\n')[0]
 
@@ -143,6 +143,8 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                 'breadcrumb': 'Configure IoTBox',
                 'loading_message': 'Configuring your IoT Box',
                 'ssid': self.get_wifi_essid(),
+                'server': self.get_server_status(),
+                'hostname': subprocess.check_output('hostname').decode('utf-8'),
                 })
         else:
             return homepage_template.render(self.get_homepage_data())
