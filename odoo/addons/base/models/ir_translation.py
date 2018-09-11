@@ -43,6 +43,7 @@ class IrTranslationImport(object):
         self._model_table = model._table
         self._overwrite = model._context.get('overwrite', False)
         self._debug = False
+        self._rows = []
 
         # Note that Postgres will NOT inherit the constraints or indexes
         # of ir_translation, so this copy will be much faster.
@@ -88,14 +89,23 @@ class IrTranslationImport(object):
             params['name'] = 'ir.ui.view,arch_db'
             params['imd_model'] = "ir.ui.view"
 
-        query = """ INSERT INTO %s (name, lang, res_id, src, type, imd_model, module, imd_name, value, state, comments)
-                    VALUES (%%(name)s, %%(lang)s, %%(res_id)s, %%(src)s, %%(type)s, %%(imd_model)s, %%(module)s,
-                            %%(imd_name)s, %%(value)s, %%(state)s, %%(comments)s) """ % self._table
-        self._cr.execute(query, params)
+        self._rows.append((params['name'], params['lang'], params['res_id'],
+                           params['src'], params['type'], params['imd_model'],
+                           params['module'], params['imd_name'], params['value'],
+                           params['state'], params['comments']))
 
     def finish(self):
         """ Transfer the data from the temp table to ir.translation """
         cr = self._cr
+
+        # Step 0: insert rows in batch
+        query = """ INSERT INTO %s (name, lang, res_id, src, type, imd_model,
+                                    module, imd_name, value, state, comments)
+                    VALUES """ % self._table
+        for rows in cr.split_for_in_conditions(self._rows):
+            cr.execute(query + ", ".join(["%s"] * len(rows)), rows)
+        self._rows.clear()
+
         if self._debug:
             cr.execute("SELECT count(*) FROM %s" % self._table)
             count = cr.fetchone()[0]
