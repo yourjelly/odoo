@@ -135,6 +135,13 @@ class SaleOrder(models.Model):
         super(SaleOrder, self)._get_customer_lead(product_tmpl_id)
         return product_tmpl_id.sale_delay
 
+    @api.multi
+    def _website_product_id_change(self, order_id, product_id, qty=0):
+        res = super(SaleOrder, self)._website_product_id_change(order_id, product_id, qty)
+        product = self.env['product.product'].browse(product_id)
+        res['customer_lead'] = product.product_tmpl_id.sale_delay
+        return res
+
     def _log_decrease_ordered_quantity(self, documents, cancel=False):
 
         def _render_note_exception_quantity_so(rendering_context):
