@@ -191,7 +191,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         subprocess.call("sudo mount -o remount,ro /", shell=True)
         subprocess.call("sudo mount -o remount,ro /root_bypass_ramdisks", shell=True)
 
-        return "<meta http-equiv='refresh' content='0; url=http://" + self.get_ip_iotbox() + ":8069/list_drivers'>"
+        return "<meta http-equiv='refresh' content='20; url=http://" + self.get_ip_iotbox() + ":8069/list_drivers'>"
 
     def get_wifi_essid(self):
         wifi_options = []
