@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="cache-control" content="no-cache" />
+        <meta http-equiv="pragma" content="no-cache" />
+        <title class="origin">{{ title or "Odoo's IoTBox" }}</title>
+        <script class="origin" type="text/javascript" src="/web/static/lib/jquery/jquery.js"></script>
+        <script type="text/javascript" class="origin">
+            {{ cust_js|safe }}
+        </script>
+        <style class="origin">
+            html, body {
+                height: 100%;
+            }
+        </style>
+        <style>
+            body {
+                width: 600px;
+                margin: 30px auto;
+                font-family: sans-serif;
+                text-align: justify;
+                color: #6B6B6B;
+                background-color: #f1f1f1;
+            }
+            .text-green {
+                color: #28a745;
+            }
+            .text-red {
+                color: #dc3545;
+            }
+            .text-blue {
+                color: #007bff;
+            }
+            .text-center {
+                text-align: center;
+            }
+            .float-right {
+                float: right;
+            }
+            .btn {
+                display: inline-block;
+                padding: 8px 15px;
+                border: 1px solid #dadada;
+                border-radius: 3px;
+                font-weight: bold;
+                font-size: 0.8rem;
+                background: #fff;
+                color: #00a09d;
+                cursor: pointer;
+            }
+            .btn-sm {
+                padding: 4px 8px;
+                font-size: 0.7rem;
+                font-weight: normal;
+            }
+            .btn:hover {
+                background-color: #f1f1f1;
+            }
+            a {
+                text-decoration: none;
+                color: #00a09d;
+            }
+            a:hover {
+                color: #006d6b;
+            }
+            .pos-container {
+                padding: 10px 20px;
+                background: #ffffff;
+                border-radius: 8px;
+                box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.17);
+            }
+            .breadcrumb {
+                margin-bottom: 10px;
+                font-size: 0.9rem;
+            }
+            .o_hide {
+                display: none;
+            }
+            .font-small {
+                font-size: 0.8rem;
+            }
+            .footer {
+                margin-top: 12px;
+                text-align: right;
+            }
+            .footer a {
+                margin-left: 8px;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+            }
+            table tr {
+                border-bottom: 1px solid #f1f1f1;
+            }
+            table tr:last-child {
+                border-width: 0px;
+            }
+            table td {
+                padding: 8px;
+                border-left: 1px solid #f1f1f1;
+            }
+            table td:first-child {
+                border-left: 0;
+            }
+            td.heading {
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="breadcrumb"><a href="/">Home</a> / <span>{{ breadcrumb }}</span></div>
+            <div class="pos-container">
+                <h2 class="text-center">POSBox Client display</h2>
+                <table>
+                    <tr>
+                        <td class="heading">Interface</td>
+                        <td class="heading">IP</td>
+                        <td class="heading">Netmask</td>
+                    </tr>
+                    {% for display_iface in display_ifaces -%}
+                        <tr>
+                            <td>{{ display_iface.iface_id }}</td>
+                            <td>{{ display_iface.addr }}</td>
+                            <td>{{ display_iface.netmask }}</td>
+                        </tr>
+                    {%- endfor %}
+                </table>
+                <p>The customer cart will be displayed here once a Point of Sale session is started.</p>
+                <p>Odoo version 11 or above is required.</p>
+                <p class="error-message text-red" />
+            </div>
+            <div class="footer">
+                <a href='http://www.odoo.com/help'>Help</a>
+                <a href='https://www.odoo.com/documentation/user/point_of_sale/posbox/index.html'>Manual</a>
+            </div>
+        </div>
+    </body>
+</html>

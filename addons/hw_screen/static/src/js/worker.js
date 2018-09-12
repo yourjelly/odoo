@@ -18,26 +18,30 @@
                     if (typeof data.result.stop_longpolling !== 'undefined') {
                         stop_longpolling = data.result.stop_longpolling;
                     }
+                    if (data.result.error) {
+                        $('.error-message').text(data.result.error);
+                    }
                     if (data.result.ip_from && data.result.rendered_html) {
                         var trimmed = $.trim(data.result.rendered_html);
                         var $parsedHTML = $('<div>').html($.parseHTML(trimmed,true)); // WARNING: the true here will executes any script present in the string to parse
                         var new_client_url = $parsedHTML.find(".resources > base").attr('href');
-    
+
                         if (!mergedHead || (current_client_url !== new_client_url)) {
-    
+
                             mergedHead = true;
                             current_client_url = new_client_url;
-                            $("body").removeClass('original_body').addClass('ajax_got_body');
                             $("head").children().not('.origin').remove();
                             $("head").append($parsedHTML.find(".resources").html());
-                        } 
-    
+                            $("head").append($('<link>').attr('href', '/web/static/lib/bootstrap/css/bootstrap.css').attr('rel', 'stylesheet'));
+                            $("head").append($('<script>').attr('src', '/web/static/lib/bootstrap/js/bootstrap.min.js').attr('type', 'text/javascript'));
+                        }
+
                         $(".container").html($parsedHTML.find('.pos-customer_facing_display').html());
                         $(".container").attr('class', 'container').addClass($parsedHTML.find('.pos-customer_facing_display').attr('class'));
-    
+
                         var d = $('.pos_orderlines_list');
                         d.scrollTop(d.prop("scrollHeight"));
-                        
+
                         // Here we execute the code coming from the pos, apparently $.parseHTML() executes scripts right away,
                         // Since we modify the dom afterwards, the script might not have any effect
                         if (typeof foreign_js !== 'undefined' && $.isFunction(foreign_js)) {
