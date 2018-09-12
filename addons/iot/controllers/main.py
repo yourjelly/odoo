@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import http
+import logging
 from odoo.http import request
 
 class IoTController(http.Controller):
@@ -34,7 +35,7 @@ class IoTController(http.Controller):
     @http.route('/iot/setup', type='json', auth='public')
     def update_box(self):
         data = request.jsonrequest
-
+        logging.warning(data)
         # Update or create box
         box = request.env['iot.box'].sudo().search([('identifier', '=', data['identifier'])])
         if box:
@@ -42,8 +43,8 @@ class IoTController(http.Controller):
             box.ip = data['ip']
             box.name = data['name']
         else:
-            iot_token = self.env['ir.config_parameter'].search([('key', '=', 'iot_token')], limit=1)
-            if iot_token.value = data['token']:
+            iot_token = request.env['ir.config_parameter'].search([('key', '=', 'iot_token')], limit=1)
+            if iot_token.value == data['token']:
                 box = request.env['iot.box'].sudo().create({'name': data['name'], 'identifier': data['identifier'], 'ip': data['ip'], })
 
         # Update or create devices

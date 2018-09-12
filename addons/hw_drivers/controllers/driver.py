@@ -353,7 +353,7 @@ def send_iot_box_device(send_printer):
         except: #In case the file does not exist
             token=''
         token = token.split('\n')[0]
-        data = {'name': hostname,'identifier': maciotbox, 'ip': ips 'token': token}
+        data = {'name': hostname,'identifier': maciotbox, 'ip': ips, 'token': token}
         devicesList.update(printerList)
         data['devices'] = devicesList
         data_json = json.dumps(data).encode('utf8')
