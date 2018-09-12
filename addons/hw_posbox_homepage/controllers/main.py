@@ -275,9 +275,8 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         })
 
     @http.route('/step_configure', type='http', auth='none', cors='*', csrf=False)
-    def step_by_step_configure(self, url, iotname, essid, password, persistent=False):
-        token = base64.decodestring(url)
-        url = token.split('-/-')[0]
+    def step_by_step_configure(self, token, iotname, essid, password, persistent=False):
+        url = str(base64.decodestring(str(url).encode('utf-8'))).split('-/-')[0].strip("b'")
         subprocess.call(['/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/connect_to_server_wifi.sh',url, iotname, token, essid, password, persistent])
         return "<meta http-equiv='refresh' content='10; url=http://" + url + "'>"
 
