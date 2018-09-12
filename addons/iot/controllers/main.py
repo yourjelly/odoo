@@ -42,22 +42,25 @@ class IoTController(http.Controller):
             box.ip = data['ip']
             box.name = data['name']
         else:
-            box = request.env['iot.box'].sudo().create({'name': data['name'], 'identifier': data['identifier'], 'ip': data['ip'], })
+            iot_token = self.env['ir.config_parameter'].search([('key', '=', 'iot_token')], limit=1)
+            if iot_token.value = data['token']:
+                box = request.env['iot.box'].sudo().create({'name': data['name'], 'identifier': data['identifier'], 'ip': data['ip'], })
 
         # Update or create devices
-        for device_identifier in data['devices']:
-            data_device = data['devices'][device_identifier]
-            if data_device['type'] == 'printer':
-                device = request.env['iot.device'].sudo().search([('identifier', '=', device_identifier)])
-            else:
-                device = request.env['iot.device'].sudo().search([('iot_id', '=', box.id), ('identifier', '=', device_identifier)])
-            if device:
-                device.name = data_device['name']
-            else:
-                device = request.env['iot.device'].sudo().create({
-                    'iot_id': box.id,
-                    'name': data_device['name'],
-                    'identifier': device_identifier,
-                    'type': data_device['type'],
-                    'connection': data_device['connection'],
-                })
+        if box:
+            for device_identifier in data['devices']:
+                data_device = data['devices'][device_identifier]
+                if data_device['type'] == 'printer':
+                    device = request.env['iot.device'].sudo().search([('identifier', '=', device_identifier)])
+                else:
+                    device = request.env['iot.device'].sudo().search([('iot_id', '=', box.id), ('identifier', '=', device_identifier)])
+                if device:
+                    device.name = data_device['name']
+                else:
+                    device = request.env['iot.device'].sudo().create({
+                        'iot_id': box.id,
+                        'name': data_device['name'],
+                        'identifier': device_identifier,
+                        'type': data_device['type'],
+                        'connection': data_device['connection'],
+                    })

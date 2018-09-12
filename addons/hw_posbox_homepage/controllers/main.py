@@ -11,6 +11,7 @@ import sys
 import werkzeug
 import netifaces as ni
 import odoo
+import base64
 from odoo import http
 import requests
 import zipfile
@@ -257,7 +258,9 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
     @http.route('/server_connect', type='http', auth='none', cors='*', csrf=False)
     def connect_to_server(self, url, iotname):
-        subprocess.call(['/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/connect_to_server.sh', url.strip(' '), iotname])
+        token = base64.decodestring(url)
+        url = token.split('-/-')[0]
+        subprocess.call(['/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/connect_to_server.sh', url, iotname, token])
 
         return 'http://' + self.get_ip_iotbox() + ':8069'
 
@@ -274,9 +277,9 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
     @http.route('/step_configure', type='http', auth='none', cors='*', csrf=False)
     def step_by_step_configure(self, url, iotname, essid, password, persistent=False):
-        #call odoo server conf
-        #call wifi conf
-        subprocess.call(['/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/connect_to_server_wifi.sh',url.strip(' '), iotname, essid, password, persistent])
+        token = base64.decodestring(url)
+        url = token.split('-/-')[0]
+        subprocess.call(['/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/connect_to_server_wifi.sh',url, iotname, token, essid, password, persistent])
         return "<meta http-equiv='refresh' content='10; url=http://" + url + "'>"
 
     # Set server address

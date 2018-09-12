@@ -344,7 +344,16 @@ def send_iot_box_device(send_printer):
 
         #build JSON with all devices
         hostname = subprocess.check_output('hostname').decode('utf-8').split('\n')[0]
-        data = {'name': hostname,'identifier': maciotbox, 'ip': ips}
+        token = "" # read from file
+        try:
+            f = open('/home/pi/token', 'r')
+            for line in f:
+                token += line
+            f.close()
+        except: #In case the file does not exist
+            token=''
+        token = token.split('\n')[0]
+        data = {'name': hostname,'identifier': maciotbox, 'ip': ips 'token': token}
         devicesList.update(printerList)
         data['devices'] = devicesList
         data_json = json.dumps(data).encode('utf8')

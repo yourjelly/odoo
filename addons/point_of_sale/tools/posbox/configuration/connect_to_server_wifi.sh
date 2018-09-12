@@ -10,6 +10,8 @@ function connect () {
 	HOSTS=/root_bypass_ramdisks/etc/hosts
 	HOST_FILE=/root_bypass_ramdisks/etc/hostname
 	HOSTNAME="$(hostname)"
+	TOKEN_FILE=/home/pi/token
+	TOKEN="${3}"
 	IOT_NAME="${2}"
 	IOT_NAME="${IOT_NAME//[^[:ascii:]]/}"
 	IOT_NAME="${IOT_NAME//[^a-zA-Z0-9-]/}"
@@ -22,6 +24,7 @@ function connect () {
 	if [ ! -z "${1}" ]
 	then
 		echo "${SERVER}" > ${CURRENT_SERVER_FILE}
+		echo "${TOKEN}" > ${TOKEN_FILE}
 	fi
 	if [ "${IOT_NAME}" != "${HOSTNAME}" ]
 	then
@@ -37,10 +40,10 @@ function connect () {
 	PERSISTENT_WIFI_NETWORK_FILE="/home/pi/wifi_network.txt"
 	CURRENT_WIFI_NETWORK_FILE="/tmp/current_wifi_network.txt" # used to repair connection when we lose it
 	LOST_WIFI_FILE="/tmp/lost_wifi.txt"
-	ESSID="${3}"
-	PASSWORD="${4}"
-	PERSIST="${5}"
-	NO_AP="${6}"
+	ESSID="${4}"
+	PASSWORD="${5}"
+	PERSIST="${6}"
+	NO_AP="${7}"
 
 	sleep 3
 
@@ -122,4 +125,4 @@ function connect () {
 	fi
 }
 
-connect "${1}" "${2}" "${3}" "${4}"  "${5}"  "${6}" &
+connect "${1}" "${2}" "${3}" "${4}" "${5}" "${6}" "${7}" &

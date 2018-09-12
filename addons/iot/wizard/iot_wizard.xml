@@ -11,8 +11,13 @@
                     If it is with the wifi, you can connect to it. <br/>
 
                     If it is in the network, you can try this button: <br/>
-                    <widget name='iot_detect_button' string="Detect and Add IoT devices in the network"/>
+                    <widget name='iot_detect_button' string="Detect and Add IoT devices in the network"/><br/>
+                    Or manually and copy / paste this token to the field odoo server on IoTBox : <br/>
                 </p>
+                <group>
+                    <field name="token"/>
+                    <field name="view_token" invisible="1"/>
+                </group>
             </form>
         </field>
     </record>

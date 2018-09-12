@@ -4,6 +4,8 @@
 function connect () {
 	SERVER="${1}"
 	CURRENT_SERVER_FILE=/home/pi/odoo-remote-server.conf
+	TOKEN_FILE=/home/pi/token
+	TOKEN="${3}"
 	HOSTS=/root_bypass_ramdisks/etc/hosts
 	HOST_FILE=/root_bypass_ramdisks/etc/hostname
 	HOSTNAME="$(hostname)"
@@ -19,6 +21,7 @@ function connect () {
 	if [ ! -z "${1}" ]
 	then
 		echo "${SERVER}" > ${CURRENT_SERVER_FILE}
+		echo "${TOKEN}" > ${TOKEN_FILE}
 	fi
 	if [ "${IOT_NAME}" != "${HOSTNAME}" ]
 	then
@@ -38,4 +41,4 @@ function connect () {
 	sudo service odoo restart
 }
 
-connect "${1}" "${2}" &
+connect "${1}" "${2}" "${3}" &
