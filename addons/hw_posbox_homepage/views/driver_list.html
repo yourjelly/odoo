@@ -1,4 +1,27 @@
 {% extends "layout.html" %}
+{% from "loading.html" import loading_block_ui %}
+{% block head %}
+    <script type="text/javascript" src="/web/static/lib/jquery/jquery.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#load_driver_btn').on('click', function(e){
+                e.preventDefault();
+                $('.loading-block').removeClass('o_hide');
+                $.ajax({
+                    url: '/load_drivers',
+                }).done(function () {
+                    $('.message-status').html('Driver loaded successfully <br> Refreshing page');
+                    setTimeout(function () {
+                        location.reload(true);
+                    }, 20000);
+                }).fail(function () {
+                    $('.error-message').text('Error in loading drivers');
+                    $('.loading-block').addClass('o_hide');
+                });
+            });
+        });
+    </script>
+{% endblock %}
 {% block content %}
     <h2 class="text-center text-green">Drivers list</h2>
     <table align="center" cellpadding="3">
@@ -7,7 +30,7 @@
         {%- endfor %}
     </table>
     <div style="margin-top: 20px;" class="text-center">
-        <a class="btn" href='/load_drivers'>Load drivers</a>
+        <a id="load_driver_btn" class="btn" href='/load_drivers'>Load drivers</a>
     </div>
     <div class="text-center font-small" style="margin: 10px auto;">
         You can clear the drivers configuration
@@ -15,4 +38,5 @@
             <input class="btn btn-sm" type="submit" value="Clear"/>
         </form>
     </div>
+    {{ loading_block_ui('Loading Drivers') }}
 {% endblock %}
