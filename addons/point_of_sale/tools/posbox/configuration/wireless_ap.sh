@@ -42,5 +42,7 @@ if [ -z "${WIRED_IP}" ] ; then
 	fi
 # wired
 else
+	service nginx stop
+	service dnsmasq stop
 	service odoo restart
 fi
