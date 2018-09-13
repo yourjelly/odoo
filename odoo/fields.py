@@ -908,10 +908,10 @@ class Field(MetaField('DummyField', (object,), {})):
         if not column or (self.required and not has_notnull):
             # the column is new or it becomes required; initialize its values
             if model._table_has_rows():
-                model._init_column(self.name)
+                model.pool.post_init(model._init_column, self.name)
 
         if self.required and not has_notnull:
-            sql.set_not_null(model._cr, model._table, self.name)
+            model.pool.post_init(sql.set_not_null, model._cr, model._table, self.name)
         elif not self.required and has_notnull:
             sql.drop_not_null(model._cr, model._table, self.name)
 
@@ -1862,10 +1862,26 @@ class Selection(Field):
     _slots = {
         'selection': None,              # [(value, string), ...], function or method name
         'validate': True,               # whether validating upon write
+        'reflect_db': False,            # store selection tuple in db
+        'module_selection': {}          # store selection_add attr module wise
     }
+
 
     def __init__(self, selection=Default, string=Default, **kwargs):
         super(Selection, self).__init__(selection=selection, string=string, **kwargs)
+
+    def _get_attrs(self, model, name):
+        selection = {}
+        attrs = super(Selection, self)._get_attrs(model, name)
+        if not (self.args.get('automatic') or self.args.get('manual')):
+            for field in reversed(resolve_mro(model, name, self._can_setup_from)):
+                args = field.args
+                if '_module' in args and 'selection_add' in args:
+                    selection[args['_module']] = args['selection_add']
+                elif '_module' in args and 'selection' in args:
+                    selection[args['_module']] = args['selection'] if isinstance(args['selection'], list) else []
+        attrs['module_selection'] = selection
+        return attrs
 
     @property
     def column_type(self):
@@ -1879,6 +1895,8 @@ class Selection(Field):
     def _setup_regular_base(self, model):
         super(Selection, self)._setup_regular_base(model)
         assert self.selection is not None, "Field %s without selection" % self
+        if isinstance(self.selection, list):
+            self.reflect_db = True
 
     def _setup_related_full(self, model):
         super(Selection, self)._setup_related_full(model)
@@ -1900,32 +1918,35 @@ class Selection(Field):
                 self.selection = list(OrderedDict(self.selection + selection_add).items())
 
     def _description_selection(self, env):
-        """ return the selection list (pairs (value, label)); labels are
-            translated according to context language
+        """ return the selection list (pairs (value, label))
         """
+        if self.related_field:
+            return self.related_field._description_selection(env)
+        if self.reflect_db:
+            selections = env['ir.model.fields.selection']._get_values(self, self.model_name, self.name)
+            if env.lang:
+                translate = partial(
+                    env['ir.translation']._get_source, 'ir.model.fields.selection,name', 'model', env.lang)
+                return [(value, translate(label) if label else label) for value, label in selections]
+            else:
+                return selections
         selection = self.selection
         if isinstance(selection, pycompat.string_types):
             return getattr(env[self.model_name], selection)()
         if callable(selection):
             return selection(env[self.model_name])
 
-        # translate selection labels
-        if env.lang:
-            name = "%s,%s" % (self.model_name, self.name)
-            translate = partial(
-                env['ir.translation']._get_source, name, 'selection', env.lang)
-            return [(value, translate(label) if label else label) for value, label in selection]
-        else:
-            return selection
-
     def get_values(self, env):
         """ return a list of the possible values """
-        selection = self.selection
-        if isinstance(selection, pycompat.string_types):
-            selection = getattr(env[self.model_name], selection)()
-        elif callable(selection):
-            selection = selection(env[self.model_name])
-        return [value for value, _ in selection]
+        return [value for value, _ in self._description_selection(env)]
+
+    def convert_from_text(self, text):
+        if self.column_type[0] == 'int4':
+            try:
+                return int(text)
+            except ValueError as e:
+                pass
+        return text
 
     def convert_to_column(self, value, record, values=None, validate=True):
         if validate and self.validate:
@@ -1936,7 +1957,7 @@ class Selection(Field):
         if not validate:
             return value or False
         if value and self.column_type[0] == 'int4':
-            value = int(value)
+            value = self.convert_from_text(value)
         if value in self.get_values(record.env):
             return value
         elif not value:

@@ -75,10 +75,6 @@
                                                     <field name="translate"
                                                         attrs="{'readonly': [('ttype','not in',['char','text','html'])],
                                                                 'invisible': [('ttype','not in',['char','text','html'])]}"/>
-                                                    <field name="selection" placeholder="[('blue', 'Blue'),('yellow', 'Yellow')]"
-                                                        attrs="{'required': [('ttype','in',['selection','reference'])],
-                                                                'readonly': [('ttype','not in',['selection','reference'])],
-                                                                'invisible': [('ttype','not in',['selection','reference'])]}"/>
                                                     <field name="size" groups="base.group_no_one"
                                                         attrs="{'readonly': [('ttype','not in',['char','reference'])],
                                                                 'invisible': [('ttype','not in',['char','reference'])]}"/>
@@ -261,10 +257,6 @@
                                         <field name="translate"
                                             attrs="{'readonly': [('ttype','not in',['char','text','html'])],
                                                     'invisible': [('ttype','not in',['char','text','html'])]}"/>
-                                        <field name="selection" placeholder="[('blue', 'Blue'),('yellow', 'Yellow')]"
-                                            attrs="{'required': [('ttype','in',['selection','reference'])],
-                                                    'readonly': [('ttype','not in',['selection','reference'])],
-                                                    'invisible': [('ttype','not in',['selection','reference'])]}"/>
                                         <field name="size" groups="base.group_no_one"
                                             attrs="{'readonly': [('ttype','not in',['char','reference'])],
                                                     'invisible': [('ttype','not in',['char','reference'])]}"/>
@@ -325,6 +317,9 @@
                                     <p>Other features are accessible through <code>self</code>, like
                                     <code>self.env</code>, etc.</p>
                                 </div>
+                            </page>
+                            <page name="selection" string="Selection Options" attrs="{'invisible': [('ttype','not in',['selection','reference'])]}">
+                                <field name="selection_ids"/>
                             </page>
                             <page name="groups" string="Access Rights">
                                 <field name="groups"/>

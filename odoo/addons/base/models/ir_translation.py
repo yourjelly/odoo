@@ -15,7 +15,6 @@ _logger = logging.getLogger(__name__)
 TRANSLATION_TYPE = [
     ('model', 'Model Field'),
     ('model_terms', 'Structured Model Field'),
-    ('selection', 'Selection'),
     ('code', 'Code'),
     ('constraint', 'Constraint'),
     ('sql_constraint', 'SQL Constraint')
@@ -54,7 +53,6 @@ class IrTranslationImport(object):
     def push(self, trans_dict):
         """ Feed a translation, as a dictionary, into the cursor """
         params = dict(trans_dict, state="translated")
-
         if params['type'] == 'view':
             # ugly hack for QWeb views - pending refactoring of translations in master
             if params['imd_model'] == 'website':
@@ -85,6 +83,13 @@ class IrTranslationImport(object):
             params['type'] = 'model'
             params['name'] = 'ir.ui.view,arch_db'
             params['imd_model'] = "ir.ui.view"
+
+        # elif params['type'] == 'selection':
+        #     model, field = params['name'].split(',')
+        #     params['type'] = 'model'
+        #     params['name'] = 'ir.model.fields.selection,name'
+        #     params['imd_model'] = 'ir.model.fields.selection'
+        #     params['imd_name'] = 'select_%s__%s_%s' % (model.replace('.', '_'), field, )
 
         self._rows.append((params['name'], params['lang'], params['res_id'],
                            params['src'], params['type'], params['imd_model'],

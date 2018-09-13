@@ -278,22 +278,6 @@ class test_selection(CreatorCase):
             self.export(2),
             [[u"Bar"]])
 
-    def test_localized_export(self):
-        self.env['res.lang'].load_lang('fr_FR')
-        Translations = self.env['ir.translation']
-        for source, value in self.translations_fr:
-            Translations.create({
-                'name': 'export.selection,value',
-                'lang': 'fr_FR',
-                'type': 'selection',
-                'src': source,
-                'value': value
-            })
-        self.assertEqual(
-            self.export(2, context={'lang': 'fr_FR'}),
-            [[u'Bar']])
-
-
 class test_selection_function(CreatorCase):
     model_name = 'export.selection.function'
 

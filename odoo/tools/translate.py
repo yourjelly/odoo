@@ -869,7 +869,7 @@ def trans_generate(lang, modules, cr):
             _logger.warning(u"Unable to find object %r with id %d", model, res_id)
             continue
 
-        if model==u'ir.model.fields':
+        if model == u'ir.model.fields':
             try:
                 field_name = record.name
             except AttributeError as exc:
@@ -882,9 +882,9 @@ def trans_generate(lang, modules, cr):
             field = field_model._fields[field_name]
 
             if isinstance(getattr(field, 'selection', None), (list, tuple)):
-                name = "%s,%s" % (record.model, field_name)
-                for dummy, val in field.selection:
-                    push_translation(module, 'selection', name, 0, val)
+                name = "ir.model.fields.selection,name"
+                for key, val in field.module_selection.get(module, []):
+                    push_translation(module, 'model', name, xml_name, val)
 
         for field_name, field in record._fields.items():
             if field.translate:

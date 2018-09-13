@@ -308,6 +308,104 @@ class IrModel(models.Model):
 # retrieve field types defined by the framework only (not extensions)
 FIELD_TYPES = [(key, key) for key in sorted(fields.Field.by_type)]
 
+class IrModelSelection(models.Model):
+    _name = 'ir.model.fields.selection'
+
+    field_id = fields.Many2one('ir.model.fields', required=True, ondelete='cascade')
+    value = fields.Char(required=True)
+    name = fields.Char(translate=True, required=True)
+    model_name = fields.Char(required=True)
+    field_name = fields.Char(required=True)
+    module_name = fields.Char(requested=True)
+
+    def _get_db_values(self, field, module):
+        cr = self.env.cr
+        cr.execute(
+            """
+            SELECT value, name FROM ir_model_fields_selection
+            WHERE model_name=%s AND field_name=%s AND module_name=%s
+            """, (field.model_name, field.name, module))
+        return [
+            (field.convert_from_text(row['value']) or row['value'], row['name'])
+            for row in cr.dictfetchall()
+        ]
+
+    @api.model
+    def _get_values(self, field, model_name, field_name):
+        result = self._get_all_selection_fields()
+        key = '%s-%s' % (model_name, field_name)
+        return [(field.convert_from_text(selection['value']) or selection['value'], selection['name']) for selection in result[key]]
+
+    @tools.ormcache()
+    def _get_all_selection_fields(self):
+        self.env.cr.execute("SELECT name, value, model_name, field_name FROM ir_model_fields_selection")
+        result = defaultdict(list)
+        for row in self.env.cr.dictfetchall():
+            key = '%s-%s' % (row['model_name'], row['field_name'])
+            result[key].append(row)
+        return result
+
+    def _get_selection_values(self, field, module):
+        if field.related_field:
+            return self._get_selection_values(field.related_field, module)
+        return field.module_selection.get(module, [])
+
+    def _delete_rows(self, record):
+        ids = record.selection_ids.ids
+        self.env.cr.execute("DELETE FROM ir_model_fields_selection WHERE id in %s", (tuple(ids),))
+        self.env.cr.execute("DELETE FROM ir_model_data WHERE model='ir.model.fields.selection' AND res_id in %s", (tuple(ids),))
+
+    def _insert_rows(self, values):
+        cr = self.env.cr
+        Query = "INSERT INTO ir_model_fields_selection ({cols}) VALUES {vals} RETURNING id"
+        cols = values[0].keys()
+        query = Query.format(
+            cols=",".join(cols),
+            vals=",".join(['(%s)' % (",".join(["%s"] * len(vals))) for vals in values]),
+        )
+        cr.execute(query, [val for row in values for val in row.values()])
+
+    def _reflect_selection_field(self, record, field):
+        module = self._context.get('module')
+        selection = self._get_selection_values(field, module)
+        rows = self._get_db_values(field, module)
+        res_ids = []
+        values = [{
+            'value': value,
+            'name': label,
+            'field_id': record.id,
+            'model_name': field.model_name,
+            'field_name': field.name,
+            'module_name': module,
+        } for value, label in selection]
+        if not rows and values:
+            self._insert_rows(values)
+            res_ids = [r[0] for r in self._cr.fetchall()]
+        elif rows != selection:
+            # selection update
+            self._delete_rows(record)
+            self._insert_rows(values)
+            res_ids = [r[0] for r in self._cr.fetchall()]
+
+        # generate xmlids if necessary, one per module defining the same field
+        if module and (res_ids or module in field._modules):
+            records = self.browse(res_ids)
+            for index, record in enumerate(records):
+                model_name = field.model_name.replace('.', '_')
+                xmlid = 'select_%s__%s_%s' % (model_name, field.name, index)
+                self.env.cr.execute(
+                    """
+                    INSERT INTO ir_model_data (module, name, model, res_id, date_init, date_update)
+                    SELECT %s, %s, %s, %s, (now() at time zone 'UTC'), (now() at time zone 'UTC')
+                    WHERE NOT EXISTS (SELECT id FROM ir_model_data WHERE module=%s AND name=%s)
+                    """, (module, xmlid, record._name, record.id, module, xmlid)
+                )
+
+    def _reflect_model(self, model):
+        for field in model._fields.values():
+            if field.type in ['selection', 'reference'] and field.reflect_db:
+                record = self.env['ir.model.fields']._get(field.model_name, field.name)
+                self._reflect_selection_field(record, field)
 
 class IrModelFields(models.Model):
     _name = 'ir.model.fields'
@@ -329,10 +427,6 @@ class IrModelFields(models.Model):
     field_description = fields.Char(string='Field Label', default='', required=True, translate=True)
     help = fields.Text(string='Field Help', translate=True)
     ttype = fields.Selection(selection=FIELD_TYPES, string='Field Type', required=True)
-    selection = fields.Char(string='Selection Options', default="",
-                            help="List of options for a selection field, "
-                                 "specified as a Python expression defining a list of (key, label) pairs. "
-                                 "For example: [('blue','Blue'),('yellow','Yellow')]")
     copied = fields.Boolean(string='Copied', oldname='copy',
                             help="Whether the value is copied when duplicating a record.")
     related = fields.Char(string='Related Field', help="The corresponding related field, if any. This must be a dot-separated list of field names.")
@@ -364,6 +458,7 @@ class IrModelFields(models.Model):
                                                       "a list of comma-separated field names, like\n\n"
                                                       "    name, partner_id.name")
     store = fields.Boolean(string='Stored', default=True, help="Whether the value is stored in the database.")
+    selection_ids = fields.One2many('ir.model.fields.selection', 'field_id', 'Selections')
 
     @api.depends('relation', 'relation_field')
     def _compute_relation_field_id(self):
@@ -386,18 +481,6 @@ class IrModelFields(models.Model):
         for field in self:
             module_names = set(xml_id.split('.')[0] for xml_id in xml_ids[field.id])
             field.modules = ", ".join(sorted(installed_names & module_names))
-
-    @api.model
-    def _check_selection(self, selection):
-        try:
-            items = safe_eval(selection)
-            if not (isinstance(items, (tuple, list)) and
-                    all(isinstance(item, (tuple, list)) and len(item) == 2 for item in items)):
-                raise ValueError(selection)
-        except Exception:
-            _logger.info('Invalid selection list definition for fields.selection', exc_info=True)
-            raise UserError(_("The Selection Options expression is not a valid Pythonic expression. "
-                              "Please provide an expression in the [('key','Label'), ...] format."))
 
     @api.constrains('name', 'state')
     def _check_name(self):
@@ -656,10 +739,6 @@ class IrModelFields(models.Model):
         if 'model_id' in vals:
             model_data = self.env['ir.model'].browse(vals['model_id'])
             vals['model'] = model_data.model
-        if vals.get('ttype') == 'selection':
-            if not vals.get('selection'):
-                raise UserError(_('For selection fields, the Selection Options must be given!'))
-            self._check_selection(vals['selection'])
 
         res = super(IrModelFields, self).create(vals)
 
@@ -691,10 +770,6 @@ class IrModelFields(models.Model):
         patched_models = set()
 
         if vals and self:
-            # check selection if given
-            if vals.get('selection'):
-                self._check_selection(vals['selection'])
-
             for item in self:
                 if item.state != 'manual':
                     raise UserError(_('Properties of base fields cannot be altered in this manner! '
