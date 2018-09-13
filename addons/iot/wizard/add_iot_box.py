@@ -3,8 +3,7 @@
 
 import datetime
 from datetime import timedelta
-import base64
-import random
+import secrets
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 
@@ -18,9 +17,9 @@ class AddIotBox(models.TransientModel):
     def _get_token(self):
 
         web_base_url = self.env['ir.config_parameter'].search([('key', '=', 'web.base.url')], limit=1)
-        token = base64.encodestring(random.randint(100000,999999))
+        token = secrets.token_urlsafe(10)
         iot_token = self.env['ir.config_parameter'].search([('key', '=', 'iot_token')], limit=1)
-
+        
         if iot_token:
             # token valable 60 minutes
             if iot_token.write_date + timedelta(minutes=60) > fields.datetime.now():
@@ -31,4 +30,6 @@ class AddIotBox(models.TransientModel):
             iot_token = self.env['ir.config_parameter'].create({'key': 'iot_token',
                                                 'value': token
                                                 })
-        self.token = str(web_base_url.value) + '|' + str(token)
+
+        self.token = web_base_url.value + '|' + token
+
