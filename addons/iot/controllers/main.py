@@ -55,9 +55,7 @@ class IoTController(http.Controller):
                     device = request.env['iot.device'].sudo().search([('identifier', '=', device_identifier)])
                 else:
                     device = request.env['iot.device'].sudo().search([('iot_id', '=', box.id), ('identifier', '=', device_identifier)])
-                if device:
-                    device.name = data_device['name']
-                else:
+                if not device:
                     device = request.env['iot.device'].sudo().create({
                         'iot_id': box.id,
                         'name': data_device['name'],
