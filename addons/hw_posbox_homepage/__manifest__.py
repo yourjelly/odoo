@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'PosBox Homepage',
+    'name': 'IoTBox Homepage',
     'category': 'Point of Sale',
     'sequence': 6,
     'website': 'https://www.odoo.com/page/point-of-sale-hardware',

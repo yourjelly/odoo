@@ -57,7 +57,7 @@ class HardwareScreen(web.Home):
             call(['xdotool', 'key', keystroke])
             return "xdotool succeeded in stroking " + keystroke
         except:
-            return "xdotool threw an error, maybe it is not installed on the posbox"
+            return "xdotool threw an error, maybe it is not installed on the IoTBox"
 
     @http.route('/hw_proxy/display_refresh', type='json', auth='none', cors='*')
     def display_refresh(self):
@@ -147,7 +147,7 @@ class HardwareScreen(web.Home):
 
         return pos_display_template.render({
             'title': "Odoo -- Point of Sale",
-            'breadcrumb': 'POSBox Client display',
+            'breadcrumb': 'POS Client display',
             'cust_js': cust_js,
             'display_ifaces': display_ifaces,
         })
