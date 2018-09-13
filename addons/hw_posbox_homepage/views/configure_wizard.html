@@ -21,17 +21,17 @@
                     url: '/step_configure',
                     type: 'post',
                     data: $('#config-form').serialize(),
-                }).done(function () {
+                }).done(function (url) {
                     $('.loading-block').addClass('o_hide');
                     changePage('done');
-                    var url = $('input[name="url"]').val();
+                    $('.progressbar li[data-key="done"').addClass('completed');
                     if(url) {
                         var cpt = 110;
                         setInterval(function(){
                             if(cpt === 0){
                                 window.location = url
                             } else {
-                                $('.redirect-message').html('You will redirect to <a href="'+ url +'">' + url + '</a> in <b>' + cpt + '</b> secounds');
+                                $('.redirect-message').html('You will be redirected to <a href="'+ url +'">' + url + '</a> in <b>' + cpt + '</b> secounds');
                                 --cpt;
                             }
                         } , 1000);
