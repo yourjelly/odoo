@@ -135,15 +135,16 @@ class HardwareScreen(web.Home):
 
         display_ifaces = []
         for iface_id in interfaces:
-            iface_obj = ni.ifaddresses(iface_id)
-            ifconfigs = iface_obj.get(ni.AF_INET, [])
-            for conf in ifconfigs:
-                if conf.get('addr'):
-                    display_ifaces.append({
-                        'iface_id': iface_id,
-                        'addr': conf.get('addr'),
-                        'netmask': conf.get('netmask'),
-                    })
+            if 'wlan' in iface_id or 'eth' in iface_id:
+                iface_obj = ni.ifaddresses(iface_id)
+                ifconfigs = iface_obj.get(ni.AF_INET, [])
+                for conf in ifconfigs:
+                    if conf.get('addr'):
+                        display_ifaces.append({
+                            'iface_id': iface_id,
+                            'addr': conf.get('addr'),
+                            'icon': 'sitemap' if 'eth' in iface_id else 'wifi',
+                        })
 
         return pos_display_template.render({
             'title': "Odoo -- Point of Sale",

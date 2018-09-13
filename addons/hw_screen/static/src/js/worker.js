@@ -20,6 +20,7 @@
                     }
                     if (data.result.error) {
                         $('.error-message').text(data.result.error);
+                        $('.error-message').removeClass('d-none');
                     }
                     if (data.result.ip_from && data.result.rendered_html) {
                         var trimmed = $.trim(data.result.rendered_html);
@@ -32,8 +33,6 @@
                             current_client_url = new_client_url;
                             $("head").children().not('.origin').remove();
                             $("head").append($parsedHTML.find(".resources").html());
-                            $("head").append($('<link>').attr('href', '/web/static/lib/bootstrap/css/bootstrap.css').attr('rel', 'stylesheet'));
-                            $("head").append($('<script>').attr('src', '/web/static/lib/bootstrap/js/bootstrap.min.js').attr('type', 'text/javascript'));
                         }
 
                         $(".container").html($parsedHTML.find('.pos-customer_facing_display').html());
