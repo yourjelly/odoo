@@ -18,7 +18,7 @@ class AddIotBox(models.TransientModel):
     def _get_token(self):
 
         web_base_url = self.env['ir.config_parameter'].search([('key', '=', 'web.base.url')], limit=1)
-        token = base64.encodestring((str(web_base_url.value) + '-/-' + str(random.randint(100000,999999))).encode('utf-8'))
+        token = base64.encodestring(random.randint(100000,999999))
         iot_token = self.env['ir.config_parameter'].search([('key', '=', 'iot_token')], limit=1)
 
         if iot_token:
@@ -31,4 +31,4 @@ class AddIotBox(models.TransientModel):
             iot_token = self.env['ir.config_parameter'].create({'key': 'iot_token',
                                                 'value': token
                                                 })
-        self.token = token
+        self.token = str(web_base_url.value) + '|' + str(token)
