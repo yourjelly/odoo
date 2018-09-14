@@ -102,11 +102,12 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         pos_device = self.get_pos_device_status()
         pos_device_status = []
         for status in pos_device:
-            device = pos_device[status]
-            pos_device_status.append({
-                'name': status,
-                'message': ' '.join(device['messages'])
-            })
+            if pos_device[status]['status'] == 'connected':
+                pos_device_status.append({
+                    'name': status,
+                    'message': ' '.join(device['messages'])
+                })
+
         hdmi_name = subprocess.check_output('tvservice -n', shell=True).decode('utf-8')
         if hdmi_name.find('=') != -1:
             hdmi_name = hdmi_name.split('=')[1]
