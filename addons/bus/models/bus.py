@@ -39,6 +39,7 @@ class ImBus(models.Model):
 
     @api.model
     def gc(self):
+        _logger.info("Running bus gc")
         timeout_ago = datetime.datetime.utcnow()-datetime.timedelta(seconds=TIMEOUT*2)
         domain = [('create_date', '<', timeout_ago.strftime(DEFAULT_SERVER_DATETIME_FORMAT))]
         return self.sudo().search(domain).unlink()
