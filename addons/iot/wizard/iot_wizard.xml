@@ -18,6 +18,9 @@
                     <field name="token"/>
                     <field name="view_token" invisible="1"/>
                 </group>
+                <footer>
+                    <button name="Ok" string="Ok" special="cancel"/>
+                </footer> 
             </form>
         </field>
     </record>
