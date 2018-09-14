@@ -173,7 +173,7 @@
         <t t-call="website.layout">
             <t t-set="additional_title">Shop</t>
             <div id="wrap" class="js_sale">
-                <div class="oe_structure" />
+                <div class="oe_structure" id="oe_structure_website_sale_products_top"/>
                 <div class="container py-2 oe_website_sale">
                     <div class="products_pager form-inline justify-content-center">
                         <t t-call="website_sale.search">
@@ -227,7 +227,7 @@
                         <t t-call="website.pager"/>
                     </div>
                 </div>
-                <div class="oe_structure mb32" />
+                <div class="oe_structure mb32" id="oe_structure_website_sale_products_bottom"/>
             </div>
         </t>
     </template>
