@@ -88,11 +88,14 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         mac = get_mac()
         h = iter(hex(mac)[2:].zfill(12))
         ssid = subprocess.check_output('iwconfig 2>&1 | grep \'ESSID:"\' | sed \'s/.*"\\(.*\\)"/\\1/\'', shell=True).decode('utf-8').rstrip()
-        wired = subprocess.check_output('cat /sys/class/net/eth0/operstate', shell=True).decode('utf-8')
+        wired = subprocess.check_output('cat /sys/class/net/eth0/operstate', shell=True).decode('utf-8').strip('\n')
         if wired == 'up':
             network = 'Ethernet'
         elif ssid:
-            network = 'Wifi : ' + ssid
+            if self.get_ip_iotbox() == '10.11.12.1':
+                network = 'Wifi access point'
+            elif:
+                network = 'Wifi : ' + ssid
         else:
             network = 'Not Connected'
 
