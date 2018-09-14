@@ -88,6 +88,13 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         mac = get_mac()
         h = iter(hex(mac)[2:].zfill(12))
         ssid = subprocess.check_output('iwconfig 2>&1 | grep \'ESSID:"\' | sed \'s/.*"\\(.*\\)"/\\1/\'', shell=True).decode('utf-8').rstrip()
+        wired = subprocess.check_output('cat /sys/class/net/eth0/operstate', shell=True).decode('utf-8')
+        if wired == 'up':
+            network = 'Ethernet'
+        elif ssid:
+            network = 'Wifi : ' + ssid
+        else:
+            network = 'Not Connected'
 
         pos_device = self.get_pos_device_status()
         pos_device_status = []
@@ -135,7 +142,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
             'pos_device_status': pos_device_status,
             'iot_device_status': hw_drivers.drivers,
             'server_status': self.get_server_status() or 'Not Configured',
-            'wifi_status': ssid or 'Not Connected',
+            'network_status': network,
             }
 
     @http.route('/', type='http', auth='none')
