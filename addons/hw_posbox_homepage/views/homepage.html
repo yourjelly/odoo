@@ -65,35 +65,20 @@
             <td><a href='{{ server_status }}' target=_blank>{{ server_status }}<a class="btn btn-sm float-right" href='/server'>configure</a></td>
         </tr>
         <tr>
-            <td class="heading">POS Device</td>
+            <td class="heading">IOT Device</td>
             <td>
-                {% if pos_device_status|length == 0 %}
+                {% if iot_device_status|length == 0 %}
                     No Device Found
                 {% else %}
-                    {% for device in pos_device_status %}
+                    {% for device in iot_device_status %}
                         <div class="device-status">
-                            <span class="device">{{ device['name'] }}</span><span class="indicator {{ device['status_class'] }}">{{ device['status'] }}</span>
-                            <div class="message"> {{ device['message'] }} </div>
+                            <span class="device">{{ device['name'] }}</span>
+                            <div class="message">{{ device['message'] }}</div>
                         </div>
                     {% endfor %}
                 {% endif %}
+                <a class="btn btn-sm float-right" href='/list_drivers'>drivers list</a>
             </td>
-            <tr>
-                <td class="heading">IOT Device</td>
-                <td>
-                    {% if iot_device_status|length == 0 %}
-                        No Device Found
-                    {% else %}
-                        {% for device in iot_device_status %}
-                            <div class="device-status">
-                                <span class="device">{{ device['name'] }}</span>
-                                <div class="message">{{ device['message'] }}</div>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                    <a class="btn btn-sm float-right" href='/list_drivers'>drivers list</a>
-                </td>
-            </tr>
         </tr>
     </table>
     <div style="margin: 20px auto 10px auto;" class="text-center">

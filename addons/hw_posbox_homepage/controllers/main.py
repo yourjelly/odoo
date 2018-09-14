@@ -94,7 +94,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         elif ssid:
             if self.get_ip_iotbox() == '10.11.12.1':
                 network = 'Wifi access point'
-            elif:
+            else:
                 network = 'Wifi : ' + ssid
         else:
             network = 'Not Connected'
@@ -103,47 +103,24 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         pos_device_status = []
         for status in pos_device:
             device = pos_device[status]
-            status_class = "text-red"
-            if device['status'] == 'connected':
-                status_class = "text-green"
-            elif device['status'] == 'connecting':
-                status_class = "text-blue"
             pos_device_status.append({
-                'status': device['status'],
-                'status_class': status_class,
                 'name': status,
                 'message': ' '.join(device['messages'])
             })
-        hdmi_message = ''
         hdmi_name = subprocess.check_output('tvservice -n', shell=True).decode('utf-8')
         if hdmi_name.find('=') != -1:
-            hdmi_status = 'connected'
-            hdmi_class = 'text-green'
             hdmi_name = hdmi_name.split('=')[1]
             hdmi_message = subprocess.check_output('tvservice -s', shell=True).decode('utf-8')
-        else:
-            hdmi_status = 'disconnected'
-            hdmi_class = 'text-red'
-        pos_device_status.append({
-                'status': hdmi_status,
-                'status_class': hdmi_class,
-                'name': 'display : ' + hdmi_name,
-                'message': hdmi_message
-            })
-
-        iot_device_status = []
-        for device in hw_drivers.drivers:
-            iot_device_status.append({
-                'name': device,
-                'message': str(hw_drivers.drivers[device].value)
-            })
+            pos_device_status.append({
+                    'name': 'display : ' + hdmi_name,
+                    'message': hdmi_message
+                })
 
         return {
             'hostname': hostname,
             'ip': self.get_ip_iotbox(),
             'mac': ":".join(i + next(h) for i in h),
-            'pos_device_status': pos_device_status,
-            'iot_device_status': hw_drivers.drivers,
+            'iot_device_status': pos_device_status,
             'server_status': self.get_server_status() or 'Not Configured',
             'network_status': network,
             }
