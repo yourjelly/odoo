@@ -532,7 +532,7 @@ class TestQWeb(TransactionCase):
         path = cls.qweb_test_file_path()
         return (
             cls("test_qweb_{}".format(cls.matcher.match(f).group(1)))
-            for f in os.listdir(path)
+            for f in sorted(os.listdir(path))
             # js inheritance
             if f != 'qweb-test-extend.xml'
             if cls.matcher.match(f)
