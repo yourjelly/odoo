@@ -341,6 +341,9 @@ def send_iot_box_device(send_printer):
 
         # Build printer JSON
         printerList = {}
+        subprocess.call('sudo mount -o remount,rw /', shell=True)
+        subprocess.call('"' + model + '" >> /home/pi/printers', shell=True)
+        subprocess.call('sudo mount -o remount,ro /', shell=True)
         if send_printer:
             printers = subprocess.check_output("sudo lpinfo -lv", shell=True).decode('utf-8').split('Device')
             for printer in printers:
@@ -373,6 +376,10 @@ def send_iot_box_device(send_printer):
                                             'connection': device_connection,
                                             'type': 'printer'
                         }
+
+                        subprocess.call('sudo mount -o remount,rw /', shell=True)
+                        subprocess.call('"' + model + '" >> /home/pi/printers', shell=True)
+                        subprocess.call('sudo mount -o remount,ro /', shell=True)
                         # install these printers
                         try:
                             ppd = subprocess.check_output("sudo lpinfo -m |grep '" + model + "'", shell=True).decode('utf-8').split('\n')
