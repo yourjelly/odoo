@@ -117,13 +117,16 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                     'message': hdmi_message
                 })
 
-        cameras = subprocess.check_output("v4l2-ctl --list-devices", shell=True).decode('utf-8').split('\n\n')
-        for camera in cameras:
-            if camera:
-                camera = camera.split('\n\t')
-                pos_device_status.append({
-                                        'name': camera[0].split(': ')[0],
-                                    })
+        try:
+            cameras = subprocess.check_output("v4l2-ctl --list-devices", shell=True).decode('utf-8').split('\n\n')
+            for camera in cameras:
+                if camera:
+                    camera = camera.split('\n\t')
+                    pos_device_status.append({
+                                            'name': camera[0].split(': ')[0],
+                                        })
+        except:
+            pass
 
         return {
             'hostname': hostname,
