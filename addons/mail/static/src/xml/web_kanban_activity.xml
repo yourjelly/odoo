@@ -63,9 +63,15 @@
                             </div>
                         </div>
                         <div class="flex-grow-1 text-right">
-                            <span class="o_mark_as_done o_activity_link o_activity_link_kanban fa fa-check-circle" t-att-data-force-next-activity="log.force_next" t-att-data-previous-activity-type-id="log.activity_type_id[0]" t-att-data-activity-id="log.id" title="Mark as done" role="img" aria-label="Mark as done"/>
+                        <a  t-att-data-force-next-activity="log.force_next"
+                            t-att-data-previous-activity-type-id="log.activity_type_id[0]"
+                            t-att-data-activity-id="log.id"
+                            t-attf-href="#o_mark_done_form{{log.id}}"
+                            class="o_mark_as_done o_activity_link o_activity_link_kanban fa fa-check-circle"
+                            data-toggle="collapse" title="Mark as done" role="img" aria-label="Mark as done"/>
                         </div>
                     </li>
+                    <li t-attf-id="o_activity_form_{{log.id}}" class="o_activity_form list-group-item border-top-0 py-0 mb-2 collapse"></li>
                 </t>
             </t>
         </ul>

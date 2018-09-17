@@ -191,6 +191,15 @@
                         @include o-hover-text-color($text-muted, theme-color('success'));
                         @include o-hover-opacity(0.5, 1);
                     }
+
+                    &.o_activity_selected {
+                        border-bottom: 0;
+                    }
+
+                    &.o_activity_form > div {
+                        padding-top: 0.5em;
+                        padding-bottom: 0.7em;
+                    }
                 }
             }
 
