@@ -1,7 +1,7 @@
 
 
 odoo.define('iot.floatinput', function (require) {
-"use strict";
+    "use strict";
 
 var core = require('web.core');
 var Widget = require('web.Widget');
@@ -9,6 +9,7 @@ var registry = require('web.field_registry');
 var widget_registry = require('web.widget_registry');
 var Widget = require('web.Widget');
 var FieldFloat = require('web.basic_fields').InputField;
+var py_eval = require('web.py_utils').py_eval
 var _t = core._t;
 
 
@@ -29,13 +30,13 @@ var IotFieldFloat = FieldFloat.extend({
         }
     },
 
-    _renderEdit: function() {
+    _renderEdit: function () {
         this.$el.empty();
 
         // Prepare and add the input
         this._prepareInput(this.$input).appendTo(this.$el);
 
-        var $button = $('<button>', {class: 'o_button_iot btn-sm btn-primary'}).text('Take measure');
+        var $button = $('<button>', { class: 'o_button_iot btn-sm btn-primary' }).text('Take measure');
         $button.appendTo(this.$el);
     },
 
@@ -47,12 +48,12 @@ var IotFieldFloat = FieldFloat.extend({
         var self = this;
         var ipField = this.nodeOptions.ip_field;
         var ip = this.record.data[ipField];
-        
+
         var identifierField = this.nodeOptions.identifier_field;
         var identifier = this.record.data[identifierField];
-        var composite_url = "http://"+ip+":8069/driverdetails/" + identifier;
+        var composite_url = "http://" + ip + ":8069/driverdetails/" + identifier;
 
-        $.get(composite_url, function(data){
+        $.get(composite_url, function (data) {
             self._setValue(data);
             self._render();
         });
@@ -67,33 +68,36 @@ var ActionManager = require('web.ActionManager');
 ActionManager.include({
     _executeReportAction: function (action, options) {
         if (action.device_id) {
-        // Call new route that sends you report to send to printer
+            // Call new route that sends you report to send to printer
             console.log('Printing to IoT device...');
             var self = this;
-            self.action=action;
-            this._rpc({model: 'ir.actions.report',
-                       method: 'iot_render',
-                       args: [action.id, action.context.active_ids, {'device_id': action.device_id}]
-                      }).then(function (result) {
-                        var data = {action: 'print',
-                                    type: result[1],
-                                    data: result[2]};
-                        $.ajax({ //code from hw_screen pos
-                            type: 'POST',
-                            url: result[0],
-                            dataType: 'json',
-                            beforeSend: function(xhr){xhr.setRequestHeader('Content-Type', 'application/json');},
-                            data: JSON.stringify(data),
-                            success: function(data) {
-                                self.do_notify(_t('Successfully sent to printer!'));
-                                //console.log('Printed successfully!');
-                            },
-                            error: function(data) {
-                                self.do_warn(_t('Connection with the IoTBox failed!'));
-                            },
+            self.action = action;
+            this._rpc({
+                model: 'ir.actions.report',
+                method: 'iot_render',
+                args: [action.id, action.context.active_ids, { 'device_id': action.device_id }]
+            }).then(function (result) {
+                var data = {
+                    action: 'print',
+                    type: result[1],
+                    data: result[2]
+                };
+                $.ajax({ //code from hw_screen pos
+                    type: 'POST',
+                    url: result[0],
+                    dataType: 'json',
+                    beforeSend: function (xhr) { xhr.setRequestHeader('Content-Type', 'application/json'); },
+                    data: JSON.stringify(data),
+                    success: function (data) {
+                        self.do_notify(_t('Successfully sent to printer!'));
+                        //console.log('Printed successfully!');
+                    },
+                    error: function (data) {
+                        self.do_warn(_t('Connection with the IoTBox failed!'));
+                    },
 
-                            });
-                        });
+                });
+            });
             return $.when();
         }
         else {
@@ -111,53 +115,53 @@ var IotDetectButton = Widget.extend({
         'click': '_onButtonClick',
     },
 
-    find_proxy: function(options){
+    find_proxy: function (options) {
         options = options || {};
-        var self  = this;
-        var port  = ':' + (options.port || '8069');
-        var urls  = [];
+        var self = this;
+        var port = ':' + (options.port || '8069');
+        var urls = [];
         var found = false;
         var parallel = 8;
         var done = new $.Deferred(); // will be resolved with the proxies valid urls
-        var threads  = [];
+        var threads = [];
         var progress = 0;
 
-        urls.push('http://localhost'+port);
-        for(var i = 0; i < 256; i++){
-            urls.push('http://192.168.0.'+i+port);
-            urls.push('http://192.168.1.'+i+port);
-            urls.push('http://10.0.0.'+i+port);
+        urls.push('http://localhost' + port);
+        for (var i = 0; i < 256; i++) {
+            urls.push('http://192.168.0.' + i + port);
+            urls.push('http://192.168.1.' + i + port);
+            urls.push('http://10.0.0.' + i + port);
         }
 
-        var prog_inc = 1/urls.length;
+        var prog_inc = 1 / urls.length;
 
-        function update_progress(){
+        function update_progress() {
             progress = found ? 1 : progress + prog_inc;
-            if(options.progress){
+            if (options.progress) {
                 options.progress(progress);
             }
         }
 
-        function thread(done){
+        function thread(done) {
             var url = urls.shift();
 
             done = done || new $.Deferred();
 
-            if( !url || found || !self.searching_for_proxy ){
+            if (!url || found || !self.searching_for_proxy) {
                 done.resolve();
                 return done;
             }
 
             $.ajax({
-                    url: url + '/hw_proxy/hello',
-                    method: 'GET',
-                    timeout: 400,
-                }).done(function(){
-                    //found = true;
-                    update_progress();
-                    done.resolve(url);
-                })
-                .fail(function(){
+                url: url + '/hw_proxy/hello',
+                method: 'GET',
+                timeout: 400,
+            }).done(function () {
+                //found = true;
+                update_progress();
+                done.resolve(url);
+            })
+                .fail(function () {
                     update_progress();
                     thread(done);
                 });
@@ -167,15 +171,15 @@ var IotDetectButton = Widget.extend({
 
         this.searching_for_proxy = true;
 
-        var len  = Math.min(parallel,urls.length);
-        for(i = 0; i < len; i++){
+        var len = Math.min(parallel, urls.length);
+        for (i = 0; i < len; i++) {
             threads.push(thread());
         }
 
-        $.when.apply($,threads).then(function(){
+        $.when.apply($, threads).then(function () {
             var urls = [];
-            for(var i = 0; i < arguments.length; i++){
-                if(arguments[i]){
+            for (var i = 0; i < arguments.length; i++) {
+                if (arguments[i]) {
                     urls.push(arguments[i]);
                 }
             }
@@ -186,7 +190,7 @@ var IotDetectButton = Widget.extend({
         return done;
     },
 
-    _onButtonClick: function(ev) {
+    _onButtonClick: function (ev) {
         var self = this;
 
         var found_url = this.find_proxy({});
@@ -194,7 +198,7 @@ var IotDetectButton = Widget.extend({
         // If url found, then try to connect to this IoT-box
         found_url.then(function (urls) {
             if (urls) {
-                self._rpc({route: '/iot/base_url', params: {}}).then(function (result) {
+                self._rpc({ route: '/iot/base_url', params: {} }).then(function (result) {
                     self.server_url = result
                     for (var i = 0; i < urls.length; i++) {
                         self.url = urls[i];
@@ -203,10 +207,10 @@ var IotDetectButton = Widget.extend({
                         var full_url = self.url + '/box/connect';
                         $.ajax({
                             url: full_url,
-                            data: {url: result},
+                            data: { url: result },
                             method: 'GET',
                             //timeout: 400,
-                        }).done(function (result2){
+                        }).done(function (result2) {
                             //something
                             console.log('Sent IoTBox:' + result2);
                         });
@@ -225,6 +229,61 @@ var IotDetectButton = Widget.extend({
 });
 
 widget_registry.add('iot_detect_button', IotDetectButton);
+
+
+var IotTakeMeasureButton = Widget.extend({
+    tagName: 'button',
+    className: 'o_button_iot btn btn-primary',
+    events: {
+        'click': '_onButtonClick',
+    },
+
+    /**
+     * @override
+     */
+    init: function (parent, record, node) {
+        this.record = record;
+        this.options = py_eval(node.attrs.options);
+        this._super.apply(this, arguments);
+    },
+    /**
+     * @override
+     */
+    start: function () {
+        this.$el.text('Take Measure');
+        return this._super.apply(this, arguments);
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onButtonClick: function (ev) {
+        var self = this;
+        var ip = this.record.data[this.options.ip_field];
+        var identifier = this.record.data[this.options.identifier_field];
+        var composite_url = "http://" + ip + ":8069/driverdetails/" + identifier;
+
+        $.get(composite_url, function (measure) {
+            var measure_field = this.options.measure_field
+            var changes = {}
+            changes[measure_field] = 8
+            self.trigger_up('field_changed', {
+                dataPointID: self.record.id,
+                changes: changes,
+            });
+        })
+    },
+
+});
+
+widget_registry.add('iot_take_measure_button', IotTakeMeasureButton);
+
+
 });
 
 
