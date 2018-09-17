@@ -221,9 +221,9 @@ class Cursor(object):
             encoding = psycopg2.extensions.encodings[self.connection.encoding]
             _logger.debug("query: %s", self._obj.mogrify(query, params).decode(encoding, 'replace'))
 
-        import detcompare
-        encoding = psycopg2.extensions.encodings[self.connection.encoding]
-        detcompare.assertDet(self._obj.mogrify(query, params).decode(encoding, 'replace'))
+        #import detcompare
+        #encoding = psycopg2.extensions.encodings[self.connection.encoding]
+        #detcompare.assertDet(self._obj.mogrify(query, params).decode(encoding, 'replace'))
 
         try:
             params = params or None

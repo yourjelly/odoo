@@ -48,7 +48,7 @@ def query_update(cr, table, values, selectors):
     setters = set(values) - set(selectors)
     query = UPDATE_QUERY.format(
         table=table,
-        assignment=",".join("{0}=%({0})s".format(s) for s in setters),
+        assignment=", ".join("{0}=%({0})s".format(s) for s in setters),
         condition=" AND ".join("{0}=%({0})s".format(s) for s in selectors),
     )
     cr.execute(query, values)

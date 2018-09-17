@@ -167,7 +167,6 @@ def get_module_path(module, downloaded=False, display_warning=True):
                 [opj(adp, module + '.zip')]
         if any(os.path.exists(f) for f in files):
             return opj(adp, module)
-
     if downloaded:
         return opj(tools.config.addons_data_dir, module)
     if display_warning:
@@ -406,7 +405,7 @@ def get_modules():
     initialize_sys_path()
     for ad in ad_paths:
         plist.extend(listdir(ad))
-    return list(set(plist))
+    return sorted(set(plist))
 
 def get_modules_with_version():
     modules = get_modules()

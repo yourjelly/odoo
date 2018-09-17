@@ -32,15 +32,16 @@ def initialize(cr):
         cr.execute(base_sql_file.read())
 
     for i in odoo.modules.get_modules():
-        print(i)
         mod_path = odoo.modules.get_module_path(i)
         if not mod_path:
+            print("skip mod path for %s" % i)
             continue
 
         # This will raise an exception if no/unreadable descriptor file.
         info = odoo.modules.load_information_from_description_file(i)
 
         if not info:
+            print("skip info for %s" % i)
             continue
         categories = info['category'].split('/')
         category_id = create_categories(cr, categories)
