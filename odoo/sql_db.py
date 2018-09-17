@@ -231,6 +231,8 @@ class Cursor(object):
 
         # simple query count is always computed
         self.sql_log_count += 1
+        global sql_counter
+        sql_counter += 1  # global counter
 
         # advanced stats only if sql_log is enabled
         if self.sql_log:
@@ -282,8 +284,6 @@ class Cursor(object):
         return self._close(False)
 
     def _close(self, leak=False):
-        global sql_counter
-
         if not self._obj:
             return
 
@@ -291,9 +291,6 @@ class Cursor(object):
 
         if self.sql_log:
             self.__closer = frame_codeinfo(currentframe(), 3)
-
-        # simple query count is always computed
-        sql_counter += self.sql_log_count
 
         # advanced stats only if sql_log is enabled
         self.print_log()
