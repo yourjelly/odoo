@@ -32,6 +32,7 @@ def initialize(cr):
         cr.execute(base_sql_file.read())
 
     for i in odoo.modules.get_modules():
+        print(i)
         mod_path = odoo.modules.get_module_path(i)
         if not mod_path:
             continue

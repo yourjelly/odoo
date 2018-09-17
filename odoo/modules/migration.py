@@ -86,7 +86,7 @@ class MigrationManager(object):
                 return {}
             return {
                 version: glob.glob1(opj(path, version), '*.py')
-                for version in os.listdir(path)
+                for version in sorted(os.listdir(path))
                 if os.path.isdir(opj(path, version))
             }
 

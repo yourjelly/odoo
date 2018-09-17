@@ -772,7 +772,7 @@ class Module(models.Model):
                 base_path = os.path.dirname(modules.get_module_path('base'))
 
                 # copy all modules in the SERVER/odoo/addons directory to the new "odoo" module (except base itself)
-                for d in os.listdir(base_path):
+                for d in sorted(os.listdir(base_path)):
                     if d != 'base' and os.path.isdir(os.path.join(base_path, d)):
                         destdir = os.path.join(tmp, OPENERP, 'addons', d)    # XXX 'odoo' subdirectory ?
                         shutil.copytree(os.path.join(base_path, d), destdir)
