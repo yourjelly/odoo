@@ -494,7 +494,7 @@ class configmanager(object):
 
     def _is_addons_path(self, path):
         from odoo.modules.module import MANIFEST_NAMES
-        for f in os.listdir(path):
+        for f in sorted(os.listdir(path)):
             modpath = os.path.join(path, f)
             if os.path.isdir(modpath):
                 def hasfile(filename):

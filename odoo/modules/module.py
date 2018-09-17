@@ -398,7 +398,7 @@ def get_modules():
                     return True
         return [
             clean(it)
-            for it in os.listdir(dir)
+            for it in sorted(os.listdir(dir))
             if is_really_module(it)
         ]
 

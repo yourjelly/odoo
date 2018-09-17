@@ -22,7 +22,7 @@ def listdir(dir, recursive=False):
     """Allow to recursively get the file listing"""
     dir = os.path.normpath(dir)
     if not recursive:
-        return os.listdir(dir)
+        return sorted(os.listdir(dir))
 
     res = []
     for root, dirs, files in walksymlinks(dir):

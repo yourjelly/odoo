@@ -40,7 +40,7 @@ class Scaffold(Command):
 
     def epilog(self):
         return "Built-in templates available are: %s" % ', '.join(
-            d for d in os.listdir(builtins())
+            d for d in sorted(os.listdir(builtins()))
             if d != 'base'
         )
 

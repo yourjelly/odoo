@@ -127,7 +127,7 @@ class IrModule(models.Model):
                 try:
                     module.ad_paths.append(module_dir)
                     z.extractall(module_dir)
-                    dirs = [d for d in os.listdir(module_dir) if os.path.isdir(opj(module_dir, d))]
+                    dirs = [d for d in sorted(os.listdir(module_dir)) if os.path.isdir(opj(module_dir, d))]
                     for mod_name in dirs:
                         module_names.append(mod_name)
                         try:
