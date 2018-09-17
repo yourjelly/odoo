@@ -832,7 +832,7 @@ QUnit.module('Views', {
                     assert.strictEqual(event.data.env.ids.length, nbRecords,
                         "should update the env with the records ids");
                 },
-            }
+            },
         });
 
         // click to add an element and cancel the quick creation by pressing ESC
@@ -1792,6 +1792,48 @@ QUnit.module('Views', {
 
         // click on a tag (should trigger switch_view)
         kanban.$('.o_tag:contains(gold):first').click();
+
+        kanban.destroy();
+    });
+
+    QUnit.test('tags loaded in only one batch', function (assert) {
+        assert.expect(1);
+
+        this.data.category.records.push({
+            id: 9,
+            name: "diamond",
+            color: 1,
+        });
+
+        this.data.partner.records[0].category_ids = [6, 7];
+        this.data.partner.records[1].category_ids = [7, 9];
+        var count = 0;
+
+        var kanban = createView({
+            View: KanbanView,
+            model: 'partner',
+            data: this.data,
+            arch: '<kanban class="o_kanban_test">' +
+                        '<field name="product_id"/>' +
+                        '<templates><t t-name="kanban-box">' +
+                            '<div class="oe_kanban_global_click">' +
+                                '<field name="category_ids" widget="many2many_tags" options="{\'color_field\': \'color\'}"/>' +
+                                '<field name="foo"/>' +
+                                '<field name="state" widget="priority"/>' +
+                            '</div>' +
+                        '</t></templates>' +
+                    '</kanban>',
+            groupBy: ['product_id'],
+            mockRPC: function (route) {
+                if (route === "/web/dataset/call_kw/category/read"){
+                    count++;
+                }
+                // assert.step(route);
+                return this._super.apply(this, arguments);
+            },
+        });
+
+        assert.strictEqual(count, 1, 'no more than one request for category');
 
         kanban.destroy();
     });

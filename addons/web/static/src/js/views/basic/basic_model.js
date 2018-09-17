@@ -133,6 +133,8 @@ var x2ManyCommands = {
     }
 };
 
+var testCount = 0;
+
 var BasicModel = AbstractModel.extend({
     // list of models for which the DataManager's cache should be cleared on
     // create, update and delete operations
@@ -2596,7 +2598,7 @@ var BasicModel = AbstractModel.extend({
      * @param {Object} list a valid resource object
      * @returns {Deferred<Object>} resolves to the fecthed list
      */
-    _fetchUngroupedList: function (list) {
+    _fetchUngroupedList: function (list, options) {
         var self = this;
         var def;
         if (list.static) {
@@ -2614,6 +2616,10 @@ var BasicModel = AbstractModel.extend({
             def = this._searchReadUngroupedList(list);
         }
         return def.then(function () {
+            if (options && options.escapeFetchX2Many) {
+                delete self.tempOptions.escapeFetchX2Many;
+                return $.when(self._fetchReferencesBatched(list));
+            }
             return $.when(
                 self._fetchX2ManysBatched(list),
                 self._fetchReferencesBatched(list));
@@ -2775,6 +2781,101 @@ var BasicModel = AbstractModel.extend({
             });
         });
     },
+    _fetchMany2Many: function (list, fieldName) {
+        var parent = this.localData[list.parentID];
+        if (parent.type === 'list'){
+            // if (this.localData._batchedRequestDef){
+            if (false){
+                return;
+            }
+            else {
+                // this.localData._batchedRequestDef = true;
+                var self = this;
+                var field = list.fields[fieldName];
+                var fieldInfo = list.fieldsInfo[list.viewType][fieldName];
+                var view = fieldInfo.views && fieldInfo.views[fieldInfo.mode];
+                var fieldsInfo = view ? view.fieldsInfo : fieldInfo.fieldsInfo;
+                var fields = view ? view.fields : fieldInfo.relatedFields;
+                var viewType = view ? view.type : fieldInfo.viewType;
+                list = this._applyX2ManyOperations(list);
+                this._sortList(list);
+                var x2mRecords = [];
+
+                // step 1: collect ids
+                var ids = [];
+                for (var childIndex of parent.data){
+                    var child = this.localData[childIndex];
+                    if (child.isOpen){
+                        _.each(child.data, function (dataPoint) {
+                            var record = self.localData[dataPoint];
+                            if (typeof record.data[fieldName] === 'string') {
+                                // in this case, the value is a local ID, which means that the
+                                // record has already been processed. It can happen for example
+                                // when a user adds a record in a m2m relation, or loads more
+                                // records in a kanban column
+                                return;
+                            }
+                            x2mRecords.push(record);
+                            ids = _.unique(ids.concat(record.data[fieldName] || []));
+                            var m2mList = self._makeDataPoint({
+                                fieldsInfo: fieldsInfo,
+                                fields: fields,
+                                modelName: field.relation,
+                                parentID: record.id,
+                                res_ids: record.data[fieldName],
+                                static: true,
+                                type: 'list',
+                                viewType: viewType,
+                            });
+                            record.data[fieldName] = m2mList.id;
+                        });
+                    }
+                }
+
+                if (!ids.length || fieldInfo.__no_fetch) {
+                    return $.when();
+                }
+                var def;
+                var fieldNames = _.keys(fieldInfo.relatedFields);
+                // step 2: fetch data from server
+                // if we want specific fields
+                // if not we return an array of objects with the id
+                // to avoid fetching all the relation fields and an useless rpc
+                if (fieldNames.length) {
+                    def = this._rpc({
+                        model: field.relation,
+                        method: 'read',
+                        args: [ids, fieldNames],
+                        context: list.getContext() || {},
+                    });
+                } else {
+                    def = $.when(_.map(ids, function (id) {
+                        return {id:id};
+                    }));
+                }
+
+                return def.then(function (results) {
+                    // step 3: assign values to correct datapoints
+                    _.each(x2mRecords, function (record) {
+                        var m2mList = self.localData[record.data[fieldName]];
+                        m2mList.data = [];
+                        _.each(m2mList.res_ids, function (res_id) {
+                            var dataPoint = self._makeDataPoint({
+                                modelName: field.relation,
+                                data: _.findWhere(results, {id: res_id}),
+                                fields: fields,
+                                fieldsInfo: fieldsInfo,
+                                parentID: m2mList.id,
+                                viewType: viewType,
+                            });
+                            m2mList.data.push(dataPoint.id);
+                            m2mList._cache[res_id] = dataPoint.id;
+                        });
+                    });
+                });
+            }
+        }
+    },
     /**
      * batch request for x2ms for datapoint of type list
      *
@@ -2786,7 +2887,10 @@ var BasicModel = AbstractModel.extend({
         var fieldNames = list.getFieldNames();
         for (var i = 0; i < fieldNames.length; i++) {
             var field = list.fields[fieldNames[i]];
-            if (field.type === 'many2many' || field.type === 'one2many') {
+            if (field.type === 'many2many') {
+                defs.push(this._fetchMany2Many(list, fieldNames[i]));
+            }
+            else if (field.type === 'one2many') {
                 defs.push(this._fetchX2ManyBatched(list, fieldNames[i]));
             }
         }
@@ -3384,7 +3488,9 @@ var BasicModel = AbstractModel.extend({
             return this._readGroup(dataPoint, options);
         }
         if (dataPoint.type === 'list' && !dataPoint.groupedBy.length) {
-            return this._fetchUngroupedList(dataPoint);
+            return this._fetchUngroupedList(dataPoint, {
+                escapeFetchX2Many: this.tempOptions ? this.tempOptions.escapeFetchX2Many : false
+            });
         }
     },
     /**
@@ -3967,6 +4073,7 @@ var BasicModel = AbstractModel.extend({
      * @returns {Deferred<Object>} resolves to the fetched group object
      */
     _readGroup: function (list, options) {
+        this.tempOptions = { escapeFetchX2Many: true };
         var self = this;
         var groupByField = list.groupedBy[0];
         var rawGroupBy = groupByField.split(':')[0];
@@ -4069,6 +4176,13 @@ var BasicModel = AbstractModel.extend({
                     });
                 }
                 return $.when.apply($, defs).then(function () {
+                    var defs = [];
+                    _.each(list.data, function (id){
+                        var sublist = self.localData[id];
+                        defs.push(self._fetchX2ManysBatched(sublist));
+                    });
+                    return $.when.apply($, defs);
+                }).then(function (){
                     if (!options || !options.onlyGroups) {
                         // generate the res_ids of the main list, being the concatenation
                         // of the fetched res_ids in each group
