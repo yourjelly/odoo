@@ -488,6 +488,14 @@ def run_unit_tests(module_name, dbname, position='at_install'):
     config_tags = TagsSelector(tools.config['test_tags'])
     position_tag = TagsSelector(position)
     r = True
+    class TextTestResult(unittest.TextTestResult):
+        def startTest(self, test):
+            self.t0_sql = odoo.sql_db.sql_counter
+            super(TextTestResult, self).startTest(test)
+
+        def stopTest(self, test):
+            super(TextTestResult, self).stopTest(test)
+            self.stream.writeln("End with %s queries (%s total)" % ((odoo.sql_db.sql_counter - self.t0_sql), odoo.sql_db.sql_counter))
     for m in mods:
         tests = unwrap_suite(unittest.TestLoader().loadTestsFromModule(m))
         suite = unittest.TestSuite(t for t in tests if position_tag.check(t) and config_tags.check(t))
@@ -496,7 +504,7 @@ def run_unit_tests(module_name, dbname, position='at_install'):
             t0 = time.time()
             t0_sql = odoo.sql_db.sql_counter
             _logger.info('%s running tests.', m.__name__)
-            result = unittest.TextTestRunner(verbosity=2, stream=TestStream(m.__name__)).run(suite)
+            result = unittest.TextTestRunner(verbosity=2, stream=TestStream(m.__name__), resultclass=TextTestResult).run(suite)
             _logger.log(25, "%s tested in %.2fs, %s queries", m.__name__, time.time() - t0, odoo.sql_db.sql_counter - t0_sql)
             if not result.wasSuccessful():
                 r = False
