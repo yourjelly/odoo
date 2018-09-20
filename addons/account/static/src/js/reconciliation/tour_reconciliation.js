@@ -26,10 +26,6 @@ Tour.register('bank_statement_reconciliation', {
             trigger: '.o_reconciliation_line:last .cell_label:contains("First")'
         },
         {
-            content: "select a line with with a higher amount",
-            trigger: '.o_reconciliation_line:last .match .cell_label:contains("INV/2018/0001")'
-        },
-        {
             content: "click on partial reconcile",
             trigger: '.o_reconciliation_line:last .accounting_view .do_partial_reconcile_true'
         },

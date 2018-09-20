@@ -358,13 +358,13 @@ var StatementModel = BasicModel.extend({
             .then(function (statement) {
                 self.statement = statement;
                 self.bank_statement_id = statement_ids.length === 1 ? {id: statement_ids[0], display_name: statement.statement_name} : false;
-                self.valuenow = 0;
-                self.valuemax = statement.st_lines_ids.length;
+                self.valuenow = statement.value_min;
+                self.valuemax = statement.value_max;
                 self.context.journal_id = statement.journal_id;
-                _.each(statement.st_lines_ids, function (id) {
+                _.each(statement.lines, function (res) {
                     var handle = _.uniqueId('rline');
                     self.lines[handle] = {
-                        id: id,
+                        id: res.st_line.id,
                         handle: handle,
                         reconciled: false,
                         mode: 'inactive',
@@ -412,7 +412,7 @@ var StatementModel = BasicModel.extend({
             var ids = _.pluck(self.lines, 'id');
             ids = ids.splice(0, self.defaultDisplayQty);
             self.pagerIndex = ids.length;
-            return self.loadData(ids, []);
+            return self._formatLine(self.statement.lines);
         });
     },
     /**
@@ -445,7 +445,9 @@ var StatementModel = BasicModel.extend({
             args: [ids, excluded_ids],
             context: self.context,
         })
-        .then(self._formatLine.bind(self));
+        .then(function(res){
+            return self._formatLine(res['lines']);
+        })
     },
     /**
      * Add lines into the propositions from the reconcile model
@@ -465,14 +467,12 @@ var StatementModel = BasicModel.extend({
         var fields = ['account_id', 'amount', 'amount_type', 'analytic_account_id', 'journal_id', 'label', 'force_tax_included', 'tax_id', 'analytic_tag_ids'];
         this._blurProposition(handle);
 
-        var values = _.pick(reconcileModel, fields);
-        values.display_new = true;
-        var focus = this._formatQuickCreate(line, values);
+        var focus = this._formatQuickCreate(line, _.pick(reconcileModel, fields));
         focus.reconcileModelId = reconcileModelId;
         line.reconciliation_proposition.push(focus);
 
         if (reconcileModel.has_second_line) {
-            var second = {display_new: true};
+            var second = {};
             _.each(fields, function (key) {
                 second[key] = ("second_"+key) in reconcileModel ? reconcileModel["second_"+key] : reconcileModel[key];
             });
@@ -606,7 +606,6 @@ var StatementModel = BasicModel.extend({
             prop = this._formatQuickCreate(line);
             line.reconciliation_proposition.push(prop);
         }
-        prop.display_new = true;
         _.each(values, function (value, fieldName) {
             if (fieldName === 'analytic_tag_ids') {
                 switch (value.operation) {
@@ -863,7 +862,6 @@ var StatementModel = BasicModel.extend({
 
                             tax_prop.amount_str = field_utils.format.monetary(Math.abs(tax_prop.amount), {}, formatOptions);
                             tax_prop.invalid = prop.invalid;
-                            tax_prop.display_new = true;
 
                             reconciliation_proposition.push(tax_prop);
                         });
@@ -983,13 +981,6 @@ var StatementModel = BasicModel.extend({
             var line = _.find(self.lines, function (l) {
                 return l.id === data.st_line.id;
             });
-            // Line has been already reconciled by the reconciliation model.
-            if(data.status === 'reconciled'){
-                self.valuenow += 1;
-                line.reconciled = true;
-                line.reconciled_aml_ids = data.reconciled_aml_ids;
-                return;
-            }
             line.visible = true;
             line.limitMoveLines = self.limitMoveLines;
             _.extend(line, data);
@@ -1016,7 +1007,7 @@ var StatementModel = BasicModel.extend({
 
             // No partner set on st_line and all matching amls have the same one: set it on the st_line.
             defs.push(
-                $.when(self._computeLine(line))
+                self._computeLine(line)
                 .then(function(){
                     if(!line.st_line.partner_id && line.reconciliation_proposition.length > 0){
                         var hasDifferentPartners = function(prop){
@@ -1103,7 +1094,6 @@ var StatementModel = BasicModel.extend({
             'percent': values.amount_type === "percentage" ? values.amount : null,
             'link': values.link,
             'display': true,
-            'display_new': values.display_new,
             'invalid': true,
             '__tax_to_recompute': true,
             'is_tax': values.is_tax,
