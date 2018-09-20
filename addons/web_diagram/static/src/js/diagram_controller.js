@@ -15,13 +15,13 @@ var FormViewDialog = view_dialogs.FormViewDialog;
  */
 var DiagramController = AbstractController.extend({
     className: 'o_diagram_view',
-    custom_events: {
+    custom_events: _.extend({}, AbstractController.prototype.custom_events, {
         add_edge: '_onAddEdge',
         edit_edge: '_onEditEdge',
         edit_node: '_onEditNode',
         remove_edge: '_onRemoveEdge',
         remove_node: '_onRemoveNode',
-    },
+    }),
     /**
      * @override
      * @param {Widget} parent
@@ -49,11 +49,11 @@ var DiagramController = AbstractController.extend({
      *   be inserted $node may be undefined, in which case they are inserted
      *   into this.options.$buttons
      */
-    renderButtons: function ($node) {
+    /*renderButtons: function ($node) {
         this.$buttons = $(QWeb.render("DiagramView.buttons", {widget: this}));
         this.$buttons.on('click', '.o_diagram_new_button', this._addNode.bind(this));
         this.$buttons.appendTo($node);
-    },
+    },*/
 
     //--------------------------------------------------------------------------
     // Private
@@ -180,6 +180,32 @@ var DiagramController = AbstractController.extend({
                     .then(self.reload.bind(self));
             },
         });
+    },
+    /**
+     * We just add the res_id in model when reload the view
+     *
+     * @override method from AbstractController
+     * @param {Object} [params] This object will simply be given to the update
+     * @returns {Deferred}
+     */
+    reload: function (params) {
+        if (params && params.currentId){
+            this.model.res_id = params.currentId;
+        }
+        return this._super.apply(this, arguments);
+    },
+    /**
+     * We just add the res_id to the state pushed. This allows the web
+     * client to add it in the url, for example.
+     *
+     * @override method from AbstractController
+     * @private
+     * @param {Object} [state]
+     */
+    _pushState: function (state) {
+        state = state || {};
+        state.id = this.model.res_id;
+        this._super(state);
     },
     /**
      * Custom event handler that removes a node given its id

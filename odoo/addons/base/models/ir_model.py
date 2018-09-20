@@ -310,6 +310,7 @@ class IrModelFields(models.Model):
     relation_field = fields.Char(help="For one2many fields, the field on the target model that implement the opposite many2one relationship")
     relation_field_id = fields.Many2one('ir.model.fields', compute='_compute_relation_field_id',
                                         store=True, ondelete='cascade', string='Relation field')
+    relation_model_id = fields.Many2one('ir.model', compute='_compute_relation_model_id')
     model_id = fields.Many2one('ir.model', string='Model', required=True, index=True, ondelete='cascade',
                                help="The model this field belongs to")
     field_description = fields.Char(string='Field Label', default='', required=True, translate=True)
@@ -356,6 +357,13 @@ class IrModelFields(models.Model):
         for rec in self:
             if rec.state == 'manual' and rec.relation_field:
                 rec.relation_field_id = self._get(rec.relation, rec.relation_field)
+
+    @api.depends('relation')
+    def _compute_relation_model_id(self):
+        for rec in self:
+            if rec.relation:
+                model_id = self.env['ir.model'].search([('model', '=', rec.relation)])
+                rec.relation_model_id = model_id.id
 
     @api.depends('related')
     def _compute_related_field_id(self):

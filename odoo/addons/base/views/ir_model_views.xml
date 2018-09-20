@@ -221,10 +221,32 @@
                 </search>
             </field>
         </record>
+        <record id="view_model_diagram" model="ir.ui.view">
+            <field name="name">ir.model.diagram</field>
+            <field name="model">ir.model</field>
+            <field name="arch" type="xml">
+                <diagram string="ir model Diagram">
+                    <node object="ir.model" shape="circle:state=='base'" bgcolor="gray:transient==True">
+                        <field name="field_id"/>
+                        <field name="model"/>
+                        <field name="state" invisible="1"/>
+                        <field name="transient" invisible="1"/>
+                    </node>
+                    <arrow object="ir.model.fields" source="model_id" destination="relation_model_id" label="['ttype']">
+                        <field name="model_id"/>
+                        <field name="relation_model_id"/>
+                        <field name="ttype"/>
+                        <field name="name"/>
+                        <field name="relation"/>
+                    </arrow>
+                </diagram>
+            </field>
+        </record>
         <record id="action_model_model" model="ir.actions.act_window">
             <field name="name">Models</field>
             <field name="res_model">ir.model</field>
             <field name="view_type">form</field>
+            <field name="view_mode">tree,form,diagram</field>
             <field name="context">{}</field>
             <field name="view_id" ref="view_model_tree"/>
         </record>

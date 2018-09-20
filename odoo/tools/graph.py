@@ -432,7 +432,7 @@ class graph(object):
             if self.transitions.get(child, False):
                 if last:
                     self.result[child]['y'] = last + len(self.transitions[child])/2 + 1
-                last = self.tree_order(child, last)
+                (node, last) = (child, last)
 
         if rest:
             mid_node = l[no // 2]
@@ -668,7 +668,7 @@ class graph(object):
 
             # if graph is disconnected or no start-node is given
             #than to find starting_node for each component of the node
-            if len(self.nodes) > len(self.partial_order):
+            if len(set(self.nodes)) > len(self.partial_order):
                 self.find_starts()
 
             self.max_order = 0

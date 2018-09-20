@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="assets_backend" name="web_diagram assets" inherit_id="web.assets_backend">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/web_diagram_view/static/src/js/web_diagram_model.js"></script>
+                <script type="text/javascript" src="/web_diagram_view/static/src/js/web_diagram_controller.js"></script>
+                <script type="text/javascript" src="/web_diagram_view/static/src/js/web_diagram_view.js"></script>
+                <script type="text/javascript" src="/web_diagram_view/static/src/js/view_registry.js"></script>
+            </xpath>
+        </template>
+    </data>
+</odoo>
