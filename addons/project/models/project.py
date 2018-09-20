@@ -239,10 +239,11 @@ class Project(models.Model):
     def copy(self, default=None):
         if default is None:
             default = {}
-        self = self.with_context(active_test=False)
         if not default.get('name'):
             default['name'] = _("%s (copy)") % (self.name)
-        project = super(Project, self).copy(default)
+        self_active = self.with_context(active_test=False)
+        project_active = super(Project, self_active).copy(default)
+        project = project_active.with_env(self.env)
         for follower in self.message_follower_ids:
             project.message_subscribe(partner_ids=follower.partner_id.ids, subtype_ids=follower.subtype_ids.ids)
         if 'tasks' not in default:
