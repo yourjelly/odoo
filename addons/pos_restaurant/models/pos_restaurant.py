@@ -50,4 +50,4 @@ class RestaurantTable(models.Model):
             self.browse(table_id).write(table)
         else:
             table_id = self.create(table).id
-        return table_id 
+        return table_id
