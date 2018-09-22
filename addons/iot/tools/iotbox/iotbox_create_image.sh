@@ -33,7 +33,7 @@ VERSION=saas-11.5-iot-move
 REPO=https://github.com/odoo-dev/odoo.git
 
 if [ ! -f kernel-qemu ] || ! file_exists *raspbian*.img ; then
-    ./posbox_download_images.sh
+    ./iotbox_download_images.sh
 fi
 
 cp -a *raspbian*.img iotbox.img
