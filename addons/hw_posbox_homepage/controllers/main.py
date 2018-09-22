@@ -241,7 +241,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         else:
                 persistent = ""
 
-        subprocess.call(['/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/connect_to_wifi.sh', essid, password, persistent])
+        subprocess.call(['/home/pi/odoo/addons/iot/tools/iotbox/configuration/connect_to_wifi.sh', essid, password, persistent])
         server = self.get_server_status()
         res_payload = {
             'message': 'Connecting to ' + essid,
@@ -256,19 +256,19 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
     @http.route('/wifi_clear', type='http', auth='none', cors='*', csrf=False)
     def clear_wifi_configuration(self):
-        os.system('/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/clear_wifi_configuration.sh')
+        os.system('/home/pi/odoo/addons/iot/tools/iotbox/configuration/clear_wifi_configuration.sh')
 
         return "<meta http-equiv='refresh' content='0; url=http://" + self.get_ip_iotbox() + ":8069'>"
 
     @http.route('/server_clear', type='http', auth='none', cors='*', csrf=False)
     def clear_server_configuration(self):
-        os.system('/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/clear_server_configuration.sh')
+        os.system('/home/pi/odoo/addons/iot/tools/iotbox/configuration/clear_server_configuration.sh')
 
         return "<meta http-equiv='refresh' content='0; url=http://" + self.get_ip_iotbox() + ":8069'>"
 
     @http.route('/drivers_clear', type='http', auth='none', cors='*', csrf=False)
     def clear_drivers_list(self):
-        os.system('/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/clear_drivers_list.sh')
+        os.system('/home/pi/odoo/addons/iot/tools/iotbox/configuration/clear_drivers_list.sh')
 
         return "<meta http-equiv='refresh' content='0; url=http://" + self.get_ip_iotbox() + ":8069/list_drivers'>"
 
@@ -277,7 +277,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         url = token.split('|')[0]
         token = token.split('|')[1]
         reboot = 'reboot'
-        subprocess.call(['/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/connect_to_server.sh', url, iotname, token, reboot])
+        subprocess.call(['/home/pi/odoo/addons/iot/tools/iotbox/configuration/connect_to_server.sh', url, iotname, token, reboot])
         return 'http://' + self.get_ip_iotbox() + ':8069'
 
     @http.route('/steps', type='http', auth='none', cors='*', csrf=False)
@@ -295,7 +295,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
     def step_by_step_configure(self, token, iotname, essid, password, persistent=False):
         url = token.split('|')[0]
         token = token.split('|')[1]
-        subprocess.call(['/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/connect_to_server_wifi.sh',url, iotname, token, essid, password, persistent])
+        subprocess.call(['/home/pi/odoo/addons/iot/tools/iotbox/configuration/connect_to_server_wifi.sh',url, iotname, token, essid, password, persistent])
         return url
 
     # Set server address

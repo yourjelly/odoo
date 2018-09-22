@@ -45,6 +45,6 @@ class PosboxUpgrader(hw_proxy.Proxy):
     @http.route('/hw_proxy/perform_upgrade', type='http', auth='none')
     def perform_upgrade(self):
         self.upgrading.acquire()
-        os.system('/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/posbox_update.sh')
+        os.system('/home/pi/odoo/addons/iot/tools/iotbox/configuration/posbox_update.sh')
         self.upgrading.release()
         return 'SUCCESS'
