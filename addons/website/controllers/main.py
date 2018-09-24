@@ -277,7 +277,7 @@ class Website(Home):
         return werkzeug.utils.redirect(url + "?enable_editor=1")
 
     @http.route(['/website/snippets'], type='json', auth="user", website=True)
-    def snippets(self):
+    def snippets(self, **kwargs):
         return request.env['ir.ui.view'].render_template('website.snippets')
 
     @http.route("/website/get_switchable_related_views", type="json", auth="user", website=True)
