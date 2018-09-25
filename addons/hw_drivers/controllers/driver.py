@@ -276,7 +276,6 @@ class USBDeviceManager(Thread):
             for path in added:
                 dev = updated_devices[path]
                 for driverclass in usbdrivers:
-                    _logger.info('For device %s checking driver %s', path, driverclass)
                     d = driverclass(updated_devices[path])
                     if d.supported():
                         _logger.info('For device %s will be driven', path)
@@ -295,7 +294,6 @@ class USBDeviceManager(Thread):
 
 
 def send_iot_box_device(send_printer):
-    _logger.info("Sending IoT Box info: %s", send_printer)
     maciotbox = subprocess.check_output("/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5}", shell=True).decode('utf-8').split('\n')[0]
     server = "" # read from file
     try:
