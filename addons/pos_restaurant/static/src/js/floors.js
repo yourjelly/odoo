@@ -315,13 +315,11 @@ var TableWidget = PosBaseWidget.extend({
         var orders = this.pos.get_table_orders(this.table);
         var notifications = {};
         for (var i = 0; i < orders.length; i++) {
-            if (typeof orders[i].hasChangesToPrint() !== "undefined") {
-                if (orders[i].hasChangesToPrint()) {
-                    notifications.printing = true;
-                    break;
-                } else if (orders[i].hasSkippedChanges()) {
-                    notifications.skipped  = true;
-                }
+            if (orders[i].hasChangesToPrint()) {
+                notifications.printing = true;
+                break;
+            } else if (orders[i].hasSkippedChanges()) {
+                notifications.skipped  = true;
             }
         }
         return notifications;
