@@ -44,7 +44,9 @@ rm -rf /usr/share/doc
 pip3 install pyusb==1.0.0b1
 pip3 install evdev
 pip3 install gatt
-
+pip3 install spidev
+pip3 install RPi.GPIO
+pip3 install pi-rc522
 
 groupadd usbusers
 usermod -a -G usbusers pi
@@ -94,6 +96,10 @@ fi
 # This option disables any black strips around the screen
 # cf: https://www.raspberrypi.org/documentation/configuration/raspi-config.md
 echo "disable_overscan=1" >> /boot/config.txt
+
+# Enable SPI interface for GPIO data communication
+echo "dtparam=spi=on" >> /boot/config.txt
+echo "dtoverlay=spi1-3cs" >> /boot/config.txt
 
 # https://www.raspberrypi.org/forums/viewtopic.php?p=79249
 # to not have "setting up console font and keymap" during boot take ages
