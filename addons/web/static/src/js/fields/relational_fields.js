@@ -1630,7 +1630,7 @@ var FieldMany2ManyBinaryMultiFiles = AbstractField.extend({
     },
     events: {
         'click .o_attach': '_onAttach',
-        'click .oe_delete': '_onDelete',
+        'click .o_attachment_delete': '_onDelete',
         'change .o_input_file': '_onFileChanged',
     },
     /**

@@ -1035,10 +1035,57 @@
         </t>
     </div>
 </div>
-<div t-name="FieldBinaryFileUploader.files" class="oe_attachments" aria-atomic="true">
+<div t-name="FieldBinaryFileUploader.files" class="oe_attachments o_attachments o_attachments_list" aria-atomic="true">
+    <t t-foreach="widget.value.data" t-as="file">
+        <t t-set="editable" t-value="widget.mode != 'readonly'"/>
+        <t t-set="attachment" t-value="file.data"/>
+
+        <!-- copied from mail -->
+        <t t-set="type" t-value="attachment.mimetype and attachment.mimetype.split('/').shift()"/>
+        <div t-attf-class="o_attachment #{ editable ? 'o_attachment_editable' : '' } #{attachment.upload ? 'o_attachment_uploading' : ''}" t-att-title="attachment.name">
+            <div class="o_attachment_wrap">
+                <t t-set="has_preview" t-value="type == 'image' or type == 'video' or attachment.mimetype == 'application/pdf'"/>
+                <t t-if="attachment.filename" t-set="ext" t-value="attachment.filename.split('.').pop()"/>
+                <t t-elif="attachment.datas_fname" t-set="ext" t-value="attachment.datas_fname.split('.').pop()"/>
+
+                <div t-attf-class="o_image_box float-left #{has_preview ? 'o_attachment_view' : ''}" t-att-data-id="attachment.id">
+                    <div t-if="has_preview"
+                         class="o_image o_hover"
+                         t-att-style="type == 'image' ? 'background-image:url(/web/image/' + attachment.id + '/38x38/?crop=true' : '' "
+                         t-att-data-mimetype="attachment.mimetype">
+                    </div>
+                    <a t-elif="!editable" t-att-href='attachment.url' t-att-title="'Download ' + attachment.name" aria-label="Download">
+                        <span class="o_image o_hover" t-att-data-mimetype="attachment.mimetype" t-att-data-ext="ext"/>
+                    </a>
+                    <span t-else="" class="o_image" t-att-data-mimetype="attachment.mimetype" t-att-data-ext="ext" role="img" aria-label="Document not downloadable"/>
+                </div>
+
+                <div class="caption">
+                    <span t-if="has_preview or editable" t-attf-class="ml4 #{has_preview? 'o_attachment_view' : ''}" t-att-data-id="attachment.id"><t t-esc='attachment.name'/></span>
+                    <a t-else="" class="ml4" t-att-href="attachment.url" t-att-title="'Download ' + attachment.name"><t t-esc='attachment.name'/></a>
+                </div>
+                <div t-if="editable" class="caption small">
+                    <b t-attf-class="ml4 small text-uppercase #{has_preview? 'o_attachment_view' : ''}" t-att-data-id="attachment.id"><t t-esc="ext"/></b>
+                    <div class="progress o_attachment_progress_bar">
+                        <div class="progress-bar progress-bar-striped active" style="width: 100%">Uploading</div>
+                    </div>
+                </div>
+                <div t-if="!editable" class="caption small">
+                    <b t-if="has_preview" class="ml4 small text-uppercase o_attachment_view" t-att-data-id="attachment.id"><t t-esc="ext"/></b>
+                    <a t-else="" class="ml4 small text-uppercase" t-att-href="attachment.url" t-att-title="'Download ' + attachment.name"><b><t t-esc='ext'/></b></a>
+                    <a class="ml4 o_attachment_download float-right" t-att-title="'Download ' + attachment.name" t-att-href='attachment.url'><i t-attf-class="fa fa-download" role="img" aria-label="Download"/></a>
+                </div>
+                <div t-if="editable" class="o_attachment_uploaded"><i class="text-success fa fa-check" role="img" aria-label="Uploaded" title="Uploaded"/></div>
+                <div t-if="editable" class="o_attachment_delete" t-att-data-id="attachment.id"><span class="text-white" role="img" aria-label="Delete" title="Delete">×</span></div>
+            </div>
+        </div>
+    </t>
+
+
+    <div class="d-none">
     <t t-if="widget.mode === 'readonly'">
         <div t-foreach="widget.value.data" t-as="file">
-            <a target="_blank" t-att-href="widget.metadata[file.id].url" t-attf-title="#{(file.data.name || file.data.filename) + (file.data.date?' \n('+file.data.date+')':'' )}"><t t-raw="file.data.name || file.data.filename"/></a>
+            <a target="_blank" t-att-href="widget.metadata[file.id].url" t-attf-title="#{(file.data.name || file.data.filename) + (file.data.date?' n('+file.data.date+')':'' )}"><t t-raw="file.data.name || file.data.filename"/></a>
         </div>
     </t>
     <t t-else="1">
@@ -1063,6 +1110,7 @@
             <div><t t-esc="file.name"/></div>
         </div>
     </t>
+    </div>
 </div>
 
 <t t-name="DropdownMenu.MenuItems">

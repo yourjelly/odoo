@@ -378,6 +378,15 @@ var BasicComposer = Widget.extend({
      * @private
      */
     _renderAttachments: function () {
+        // ====== Call web tempate instead
+        // this._$attachmentsList.html(QWeb.render('FieldBinaryFileUploader.files', {
+        //     widget: {
+        //         mode: 'edit',
+        //         value: {
+        //             data: this.get('attachment_ids'),
+        //         },
+        //     },
+        // }));
         this._$attachmentsList.html(QWeb.render('mail.composer.Attachments', {
             attachments: this.get('attachment_ids'),
         }));
