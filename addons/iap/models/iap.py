@@ -165,16 +165,17 @@ class IapAccount(models.Model):
             endpoint = get_endpoint(self.env)
             route = '/iap/1/credit'
             base_url = endpoint + route
-        account_token = self.get(service_name).account_token
-        d = {
-            'dbuuid': dbuuid,
-            'service_name': service_name,
-            'account_token': account_token,
-            'credit': credit,
-        }
-        if trial:
-            d.update({'trial': trial})
-        return '%s?%s' % (base_url, werkzeug.urls.url_encode(d))
+        for record in self.get(service_name):
+            account_token = record.account_token
+            d = {
+                'dbuuid': dbuuid,
+                'service_name': service_name,
+                'account_token': account_token,
+                'credit': credit,
+            }
+            if trial:
+                d.update({'trial': trial})
+            return '%s?%s' % (base_url, werkzeug.urls.url_encode(d))
 
     @api.model
     def get_account_url(self):
@@ -187,19 +188,19 @@ class IapAccount(models.Model):
     @api.model
     def get_credits(self, service_name):
         credit = 0
-        account = self.get(service_name)
-        if account:
-            route = '/iap/1/balance'
-            endpoint = get_endpoint(self.env)
-            url = endpoint + route
-            params = {
-                'dbuuid': self.env['ir.config_parameter'].sudo().get_param('database.uuid'),
-                'account_token': account.account_token,
-                'service_name': service_name,
-            }
+        for account in self.get(service_name):
+            if account:
+                route = '/iap/1/balance'
+                endpoint = get_endpoint(self.env)
+                url = endpoint + route
+                params = {
+                    'dbuuid': self.env['ir.config_parameter'].sudo().get_param('database.uuid'),
+                    'account_token': account.account_token,
+                    'service_name': service_name,
+                }
 
-            credit = jsonrpc(url=url, params=params)
-            account.sudo().write({'insufficient_credit': credit == 0})
+                credit = jsonrpc(url=url, params=params)
+                account.sudo().write({'insufficient_credit': credit == 0})
 
-        return credit
+            return credit
 
