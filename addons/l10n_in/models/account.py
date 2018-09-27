@@ -15,34 +15,12 @@ class AccountJournal(models.Model):
 class AccountMove(models.Model):
     _inherit = "account.move"
 
-    # Use for invisible fields in form views.
-    l10n_in_import_export = fields.Boolean(related='journal_id.l10n_in_import_export', readonly=True)
-    # For Export invoice this data is need in GSTR report
-    l10n_in_export_type = fields.Selection([
-        ('regular', 'Regular'), ('deemed', 'Deemed'),
-        ('sale_from_bonded_wh', 'Sale from Bonded WH'),
-        ('export_with_igst', 'Export with IGST'),
-        ('sez_with_igst', 'SEZ with IGST payment'),
-        ('sez_without_igst', 'SEZ without IGST payment')],
-        string='Export Type', default='regular', required=True, states={'posted': [('readonly', True)]})
-    l10n_in_shipping_bill_number = fields.Char('Shipping bill number', states={'posted': [('readonly', True)]})
-    l10n_in_shipping_bill_date = fields.Date('Shipping bill date', states={'posted': [('readonly', True)]})
-    l10n_in_shipping_port_code_id = fields.Many2one('l10n_in.port.code', 'Shipping port code', states={'posted': [('readonly', True)]})
-    l10n_in_reseller_partner_id = fields.Many2one('res.partner', 'Reseller', domain=[('vat', '!=', False)], states={'posted': [('readonly', True)]})
-    l10n_in_reverse_charge = fields.Boolean('Reverse Charge', states={'posted': [('readonly', True)]})
     l10n_in_gstin_partner_id = fields.Many2one(
         'res.partner',
         string="GSTIN",
         required=True,
         default=lambda self: self.env['res.company']._company_default_get('account.move').partner_id,
         domain="[('l10n_in_gstin_company_id', '=', company_id)]")
-    l10n_in_import_type = fields.Selection([
-        ('regular', 'Regular'),
-        ('import_goods', 'Import of Goods'),
-        ('import_goods_sez', 'Import of Goods from SEZ'),
-        ('import_service', 'Import of Service'),
-        ('import_service_sez', 'Import of Service from SEZ')],
-        string='Import Type', default='regular', required=True)
     l10n_in_place_of_supply = fields.Many2one(
         'res.country.state', string="Place Of Supply",
         states={'posted': [('readonly', True)]}, domain=[("country_id.code", "=", "IN")])

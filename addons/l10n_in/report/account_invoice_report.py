@@ -73,12 +73,12 @@ class L10nInAccountInvoiceReport(models.Model):
                 am.state,
                 aml.partner_id,
                 am.date,
-                am.l10n_in_export_type AS l10n_in_export_type,
+                ai.l10n_in_export_type AS l10n_in_export_type,
                 am.l10n_in_gstin_partner_id AS gstin_partner_id,
-                am.l10n_in_reseller_partner_id AS ecommerce_partner_id,
-                am.l10n_in_shipping_bill_number AS shipping_bill_number,
-                am.l10n_in_shipping_bill_date AS shipping_bill_date,
-                am.l10n_in_shipping_port_code_id AS shipping_port_code_id,
+                ai.l10n_in_reseller_partner_id AS ecommerce_partner_id,
+                ai.l10n_in_shipping_bill_number AS shipping_bill_number,
+                ai.l10n_in_shipping_bill_date AS shipping_bill_date,
+                ai.l10n_in_shipping_port_code_id AS shipping_port_code_id,
                 am.amount AS total,
                 am.journal_id,
                 aj.company_id,
@@ -94,7 +94,7 @@ class L10nInAccountInvoiceReport(models.Model):
                 sum(aml.l10n_in_sgst_amount) AS sgst_amount,
                 sum(aml.l10n_in_cess_amount) AS cess_amount,
                 sum(aml.balance) * (CASE WHEN aj.type = 'sale' AND (ai.type IS NULL OR ai.type != 'out_refund') THEN -1 ELSE 1 END) AS price_total,
-                (CASE WHEN am.l10n_in_reverse_charge = True
+                (CASE WHEN ai.l10n_in_reverse_charge = True
                     THEN 'Y'
                     ELSE 'N'
                     END)  AS is_reverse_charge,
@@ -107,15 +107,15 @@ class L10nInAccountInvoiceReport(models.Model):
                     ELSE 'N'
                     END) as is_pre_gst,
 
-                (CASE WHEN am.l10n_in_reseller_partner_id IS NOT NULL
+                (CASE WHEN ai.l10n_in_reseller_partner_id IS NOT NULL
                     THEN 'Y'
                     ELSE 'N'
                     END) as is_ecommerce,
-                (CASE WHEN am.l10n_in_reseller_partner_id IS NOT NULL
+                (CASE WHEN ai.l10n_in_reseller_partner_id IS NOT NULL
                     THEN 'Y'
                     ELSE 'N'
                     END) as b2cl_is_ecommerce,
-                (CASE WHEN am.l10n_in_reseller_partner_id IS NOT NULL
+                (CASE WHEN ai.l10n_in_reseller_partner_id IS NOT NULL
                     THEN 'E'
                     ELSE 'OE'
                     END) as b2cs_is_ecommerce,
@@ -124,9 +124,9 @@ class L10nInAccountInvoiceReport(models.Model):
                     WHEN pos.id != gstin_ps.id
                     THEN 'Inter State'
                     END) AS supply_type,
-                (CASE WHEN am.l10n_in_export_type in ('deemed', 'export_with_igst', 'sez_with_igst')
+                (CASE WHEN ai.l10n_in_export_type in ('deemed', 'export_with_igst', 'sez_with_igst')
                     THEN 'EXPWP'
-                    WHEN am.l10n_in_export_type in ('sale_from_bonded_wh', 'sez_without_igst')
+                    WHEN ai.l10n_in_export_type in ('sale_from_bonded_wh', 'sez_without_igst')
                     THEN 'EXPWOP'
                     ELSE ''
                     END) AS export_type,
@@ -136,17 +136,17 @@ class L10nInAccountInvoiceReport(models.Model):
                     THEN 'EXPWOP'
                     ELSE 'B2CL'
                     END) AS refund_export_type,
-                (CASE WHEN am.l10n_in_export_type = 'regular'
+                (CASE WHEN ai.l10n_in_export_type = 'regular'
                     THEN 'Regular'
-                    WHEN am.l10n_in_export_type = 'deemed'
+                    WHEN ai.l10n_in_export_type = 'deemed'
                     THEN 'Deemed'
-                    WHEN am.l10n_in_export_type = 'sale_from_bonded_wh'
+                    WHEN ai.l10n_in_export_type = 'sale_from_bonded_wh'
                     THEN 'Sale from Bonded WH'
-                    WHEN am.l10n_in_export_type = 'export_with_igst'
+                    WHEN ai.l10n_in_export_type = 'export_with_igst'
                     THEN 'Export with IGST'
-                    WHEN am.l10n_in_export_type = 'sez_with_igst'
+                    WHEN ai.l10n_in_export_type = 'sez_with_igst'
                     THEN 'SEZ with IGST payment'
-                    WHEN am.l10n_in_export_type = 'sez_without_igst'
+                    WHEN ai.l10n_in_export_type = 'sez_without_igst'
                     THEN 'SEZ without IGST payment'
                     END) AS b2b_type,
                 (CASE WHEN ai.type = 'out_refund'
@@ -163,8 +163,8 @@ class L10nInAccountInvoiceReport(models.Model):
                     THEN TO_CHAR(refund_ai.date, 'DD-MON-YYYY')
                     ELSE ''
                     END) as gst_format_refund_date,
-                (CASE WHEN am.l10n_in_shipping_bill_date IS NOT NULL
-                    THEN TO_CHAR(am.l10n_in_shipping_bill_date, 'DD-MON-YYYY')
+                (CASE WHEN ai.l10n_in_shipping_bill_date IS NOT NULL
+                    THEN TO_CHAR(ai.l10n_in_shipping_bill_date, 'DD-MON-YYYY')
                     ELSE ''
                     END) as gst_format_shipping_bill_date
 
@@ -182,7 +182,7 @@ class L10nInAccountInvoiceReport(models.Model):
                 LEFT JOIN res_country_state pos ON pos.id = am.l10n_in_place_of_supply
                 LEFT JOIN res_partner gstin_p ON gstin_p.id = am.l10n_in_gstin_partner_id
                 LEFT JOIN res_country_state gstin_ps ON gstin_ps.id = gstin_p.state_id
-                LEFT JOIN res_partner rp ON rp.id = am.l10n_in_reseller_partner_id
+                LEFT JOIN res_partner rp ON rp.id = ai.l10n_in_reseller_partner_id
                 LEFT JOIN account_tax at ON at.id = aml.l10n_in_tax_id
         """
         return from_str
@@ -204,13 +204,12 @@ class L10nInAccountInvoiceReport(models.Model):
             aml.partner_id,
             aml.l10n_in_tax_id,
             am.date,
-            am.l10n_in_reverse_charge,
-            am.l10n_in_export_type,
+            ai.l10n_in_reverse_charge,
             am.l10n_in_gstin_partner_id,
-            am.l10n_in_reseller_partner_id,
-            am.l10n_in_shipping_bill_number,
-            am.l10n_in_shipping_bill_date,
-            am.l10n_in_shipping_port_code_id,
+            ai.l10n_in_shipping_bill_number,
+            ai.l10n_in_shipping_bill_date,
+            ai.l10n_in_shipping_port_code_id,
+            ai.l10n_in_reseller_partner_id,
             am.amount,
             am.journal_id,
             am.company_id,
