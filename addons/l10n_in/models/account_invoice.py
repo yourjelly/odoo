@@ -98,14 +98,7 @@ class AccountInvoice(models.Model):
         res = super(AccountInvoice, self).action_move_create()
         for inv in self:
             inv.move_id.write({
-                'l10n_in_export_type': inv.l10n_in_export_type,
-                'l10n_in_shipping_bill_number': inv.l10n_in_shipping_bill_number,
-                'l10n_in_shipping_bill_date': inv.l10n_in_shipping_bill_date,
-                'l10n_in_shipping_port_code_id': inv.l10n_in_shipping_port_code_id.id,
-                'l10n_in_reseller_partner_id': inv.l10n_in_reseller_partner_id.id,
-                'l10n_in_reverse_charge': inv.l10n_in_reverse_charge,
                 'l10n_in_gstin_partner_id': inv.l10n_in_gstin_partner_id.id,
-                'l10n_in_import_type': inv.l10n_in_import_type,
                 'l10n_in_place_of_supply': inv.l10n_in_place_of_supply.id
             })
         return res
