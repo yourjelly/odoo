@@ -588,7 +588,3 @@ class IrAttachment(models.Model):
                 raise exceptions.ValidationError(_("ERROR: Invalid list of pages to split. Example: 1,5-9,10"))
             return self._split_pdf_groups(pdf_groups=[[min(x), max(x)] for x in pages], remainder=remainder)
         return self._split_pdf_groups(remainder=remainder)
-
-
-
-
