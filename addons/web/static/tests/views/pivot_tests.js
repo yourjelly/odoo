@@ -358,6 +358,7 @@ QUnit.module('Views', {
 
         // click on the opened header to close it
         pivot.$('.o_pivot_header_cell_opened').click();
+        pivot.$('.o_inline_dropdown').trigger('focusin');
 
         assert.strictEqual(pivot.$('tbody tr').length, 1, "should have 1 row");
 

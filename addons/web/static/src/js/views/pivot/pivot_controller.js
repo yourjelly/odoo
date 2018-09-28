@@ -29,6 +29,9 @@ var PivotController = AbstractController.extend({
         'click .o_pivot_field_menu a': '_onFieldMenuSelection',
         'click td': '_onCellClick',
         'click .o_pivot_measure_row': '_onMeasureRowClick',
+        'mouseover .o_inline_dropdown > a': '_onFieldSubMenuSelection',
+        'mouseover .o_inline_dropdown > .dropdown-menu': '_onFieldSubMenuSelection',
+        'mouseleave .o_inline_dropdown > a': '_onDropdownleave',
     },
     /**
      * @override
@@ -210,6 +213,16 @@ var PivotController = AbstractController.extend({
      * @private
      * @param {MouseEvent} ev
      */
+    _onFieldSubMenuSelection: function(event) {
+        var $submenu = $(event.currentTarget).hasClass("dropdown-menu") ? $(event.currentTarget) : $(event.currentTarget.nextElementSibling);
+        if (($submenu.offset().top + $submenu.height()) > (this.$el.height() + this.$el.offset().top)) {
+            $submenu.addClass("o_dropup");
+        }
+    },
+    _onDropdownleave: function (event) {
+        $(event.currentTarget.nextElementSibling).removeClass("o_dropup");
+    },
+
     _onButtonClick: function (ev) {
         var $target = $(ev.target);
         if ($target.hasClass('o_pivot_flip_button')) {
