@@ -253,6 +253,12 @@ var FormRenderer = BasicRenderer.extend({
         }
         return this._super.apply(this, arguments);
     },
+    //--------------------------------------------------------------------------
+    // @param {event}
+    //--------------------------------------------------------------------------
+    onNavigationMove: function (ev) {
+        this._onNavigationMove(ev);
+    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -288,19 +294,13 @@ var FormRenderer = BasicRenderer.extend({
     _activatePreviousFieldWidget: function (record, currentIndex) {
         //if we are at the first widget, we should give the focus to the first Primary Button in the form
         //else do the default behavior
-        if ( (currentIndex - 1) < 0 ) {
+        var activatedIndex =  this._super.apply(this, arguments);
+        if (activatedIndex === -1 ) { // no widget have been activated, we should go to the edit/save buttons
             this.trigger_up('focus_control_button');
             this.lastActivatedFieldIndex = -1;
         }
         else {
-            var activatedIndex =  this._super.apply(this, arguments);
-            if (activatedIndex === -1 ) { // no widget have been activated, we should go to the edit/save buttons
-                this.trigger_up('focus_control_button');
-                this.lastActivatedFieldIndex = -1;
-            }
-            else {
-                this.lastActivatedFieldIndex = activatedIndex;
-            }
+            this.lastActivatedFieldIndex = activatedIndex;
         }
         return this.lastActivatedFieldIndex;
     },
@@ -1042,6 +1042,7 @@ var FormRenderer = BasicRenderer.extend({
             this._activateNextFieldWidget(this.state, index);
         } else if (ev.data.direction === "previous") {
             index = this.allFieldWidgets[this.state.id].indexOf(ev.data.target);
+            index = (index < 0) ? 0 : index;
             this._activatePreviousFieldWidget(this.state, index);
         }
     },

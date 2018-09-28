@@ -279,9 +279,14 @@ var FormController = BasicController.extend({
                     self._discardChanges();
                     break;
                 case $.ui.keyCode.TAB:
-                    if (!e.shiftKey && e.target.classList.contains('btn-primary')) {
+                    e.preventDefault();
+                    if (!e.shiftKey && e.target.classList.contains("btn-primary")) {
                         $saveCancelButtonContainer.tooltip('show');
                         e.preventDefault();
+                    }
+                    if (e.shiftKey && e.target.classList.contains("btn-primary")) {
+                        e.data = { direction: "previous", }
+                        self.renderer.onNavigationMove(e);
                     }
                     break;
             }
