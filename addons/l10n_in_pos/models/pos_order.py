@@ -19,6 +19,15 @@ class PosOrder(models.Model):
             return res + (values['l10n_in_pos_order_id'],)
         return res
 
+    def _create_account_move(self):
+        move = super(PosOrder, self)._create_account_move()
+        l10n_in_place_of_supply = self.config_id.l10n_in_place_of_supply or self.env.ref('l10n_in.state_in_ot', False)
+        move.write({
+            'l10n_in_gstin_partner_id': self.config_id.l10n_in_gstin_partner_id.id,
+            'l10n_in_place_of_supply': l10n_in_place_of_supply and l10n_in_place_of_supply.id
+        })
+        return move
+
     def _prepare_account_move_line(self, line, partner_id, current_company, currency_id):
         res = super(PosOrder, self)._prepare_account_move_line(line, partner_id, current_company, currency_id)
         for line_values in res:
@@ -28,32 +37,6 @@ class PosOrder(models.Model):
                     'l10n_in_tax_price_unit': price,
                     'l10n_in_pos_order_id': line.order_id.id
                     })
-        return res
-
-    @api.multi
-    def _create_account_move_line(self, session=None, move=None):
-        """When create account move and payment from pos order then update l10n_in_gstin_partner_id value from pos.config"""
-        res = super(PosOrder, self)._create_account_move_line(session=session, move=move)
-        for order in self:
-            l10n_in_gstin_partner_id = order.config_id.l10n_in_gstin_partner_id.id
-            l10n_in_place_of_supply = order.config_id.l10n_in_place_of_supply or self.env.ref('l10n_in.state_in_ot', False)
-            if order.account_move:
-                order.account_move.write({
-                    'l10n_in_gstin_partner_id': l10n_in_gstin_partner_id,
-                    'l10n_in_place_of_supply': l10n_in_place_of_supply and l10n_in_place_of_supply.id})
-            payment = self.env['account.payment']
-            move = self.env['account.move']
-            for journal_entry_id in order.statement_ids.mapped('journal_entry_ids'):
-                if journal_entry_id.move_id not in move:
-                    move += journal_entry_id.move_id
-                if journal_entry_id.payment_id not in payment:
-                    payment += journal_entry_id.payment_id
-            move.write({
-                'l10n_in_gstin_partner_id': l10n_in_gstin_partner_id,
-                'l10n_in_place_of_supply': l10n_in_place_of_supply and l10n_in_place_of_supply.id})
-            payment.write({
-                'l10n_in_gstin_partner_id': l10n_in_gstin_partner_id,
-                'l10n_in_place_of_supply': l10n_in_place_of_supply and l10n_in_place_of_supply.id})
         return res
 
     def _prepare_invoice(self):
