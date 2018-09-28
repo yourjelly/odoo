@@ -66,7 +66,7 @@ function connect () {
 
 
 	if [ ${TIMEOUT_RETURN} -eq 124 ] && [ -z "${NO_AP}" ] ; then
-		logger -t posbox_connect_to_wifi "Failed to connect, forcing Posbox AP"
+		logger -t posbox_connect_to_wifi "Failed to connect, forcing IoT Box AP"
 		sudo /home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/wireless_ap.sh "force" &
 	else
 		if [ ${TIMEOUT_RETURN} -ne 124 ] ; then

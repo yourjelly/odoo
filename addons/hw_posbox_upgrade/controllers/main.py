@@ -38,7 +38,7 @@ class PosboxUpgrader(hw_proxy.Proxy):
         return upgrade_page_template.render({
             'title': "Odoo's IoTBox - Software Upgrade",
             'breadcrumb': 'IoT Box Software Upgrade',
-            'loading_message': 'Updating IoT box',
+            'loading_message': 'Updating IoT Box',
             'commit': commit,
         })
 

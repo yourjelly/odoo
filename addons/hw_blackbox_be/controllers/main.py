@@ -99,7 +99,7 @@ class Blackbox(Thread):
             ack = serial.read(1)
 
             # This violates the principle that we do high level
-            # client-side and low level posbox-side but the retry
+            # client-side and low level IoT Box-side but the retry
             # counter is always in a fixed position in the high level
             # message so it's safe to do it. Also it would be a pain
             # to have to throw this all the way back to js just so it

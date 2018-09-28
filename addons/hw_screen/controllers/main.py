@@ -77,7 +77,7 @@ class HardwareScreen(web.Home):
 
     @http.route('/hw_proxy/take_control', type='json', auth='none', cors='*')
     def take_control(self, html=None):
-        # ALLOW A CASHIER TO TAKE CONTROL OVER THE POSBOX, IN CASE OF MULTIPLE CASHIER PER POSBOX
+        # ALLOW A CASHIER TO TAKE CONTROL OVER THE IOT BOX, IN CASE OF MULTIPLE CASHIER PER IOT BOX
         HardwareScreen.pos_client_data['rendered_html'] = html
         HardwareScreen.pos_client_data['ip_from'] = http.request.httprequest.remote_addr
         HardwareScreen.event_data.set()
@@ -92,7 +92,7 @@ class HardwareScreen(web.Home):
         else:
             return {'status': 'NOWNER'}
 
-    # POSBOX ROUTES (SELF)
+    # IOT BOX ROUTES (SELF)
     @http.route('/point_of_sale/display', type='http', auth='none')
     def render_main_display(self):
         return self._get_html()
