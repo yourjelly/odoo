@@ -36,7 +36,6 @@
         width: 18px;
         height: 200px;
         cursor: pointer;
-        background-image: url('/web_editor/static/src/img/transparent.png');
 
         .o_opacity_pointer {
             @include o-position-absolute($left: -4px);
@@ -46,9 +45,11 @@
             box-shadow: 0px 0px 2px 1px gray('600');
         }
 
-        .o_opacity_transparent {
-            height: 100%;
-            width: 100%;
+        &::before {
+            content: "";
+            @include o-position-absolute(0, 0, 0, 0);
+            z-index: -1;
+            background-image: url('/web_editor/static/src/img/transparent.png');
         }
     }
     .o_color_picker_inputs {

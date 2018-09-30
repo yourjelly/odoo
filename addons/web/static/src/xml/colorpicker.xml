@@ -12,7 +12,6 @@
                     </div>
                     <div class="o_opacity_slider d-inline-block ml-2 border">
                         <div class="o_opacity_pointer"/>
-                        <div class="o_opacity_transparent"/>
                     </div>
                 </div>
                 <form class="col o_color_picker_inputs">
