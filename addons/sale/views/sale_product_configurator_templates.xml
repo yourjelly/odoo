@@ -208,8 +208,8 @@
               <ul t-att-data-attribute_id="variant_id.attribute_id.id" class="list-unstyled">
                   <t t-set="inc" t-value="0"/>
                   <t t-foreach="variant_id.product_template_value_ids" t-as="value_id">
-                      <li class="form-group js_attribute_value" style="margin: 0;">
-                          <label class="col-form-label" style="margin: 0 20px;">
+                      <li class="form-group js_attribute_value">
+                          <label class="col-form-label">
                               <input type="radio"
                                 t-attf-class="js_variant_change  #{variant_id.attribute_id.create_variant}"
                                 t-att-checked="'checked' if not inc else None"
@@ -219,7 +219,7 @@
                                 t-att-data-value_name="value_id.name"
                                 t-att-data-attribute_name="value_id.attribute_id.name"
                                 t-att-data-is_custom="value_id.is_custom"
-                                style="vertical-align: top; margin-right: 10px;"/>
+                                style="margin-right: 10px;"/>
                               <span t-field="value_id.name"/>
                               <span class="badge badge-pill" t-if="value_id.price_extra">
                                 <t t-esc="value_id.price_extra > 0 and '+' or ''"/><span t-field="value_id.price_extra" class="variant_price_extra" style="white-space: nowrap;" t-options='{
