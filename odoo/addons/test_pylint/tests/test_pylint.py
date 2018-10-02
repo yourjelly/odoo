@@ -62,6 +62,7 @@ class TestPyLint(TransactionCase):
         'unpacking-in-except',
 
         'no-comma-exception',
+        'bad-super-call',
     ]
 
     BAD_FUNCTIONS = [

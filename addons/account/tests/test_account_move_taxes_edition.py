@@ -8,7 +8,7 @@ from odoo.tests.common import Form
 class TestAccountMoveTaxesEdition(AccountingTestCase):
 
     def setUp(self):
-        super(AccountingTestCase, self).setUp()
+        super(TestAccountMoveTaxesEdition, self).setUp()
         self.percent_tax = self.env['account.tax'].create({
             'name': 'tax_line',
             'amount_type': 'percent',

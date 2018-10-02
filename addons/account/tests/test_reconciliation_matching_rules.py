@@ -32,7 +32,7 @@ class TestReconciliationMatchingRules(AccountingTestCase):
             self.assertDictEqual(values, expected_values[st_line_id])
 
     def setUp(self):
-        super(AccountingTestCase, self).setUp()
+        super(TestReconciliationMatchingRules, self).setUp()
 
         self.partner_1 = self.env['res.partner'].create({'name': 'partner_1'})
         self.partner_2 = self.env['res.partner'].create({'name': 'partner_2'})
