@@ -364,6 +364,8 @@ class Scale(Thread):
                         time.sleep(10)
                     else: 
                         self.disabled = self.protocol.disable
+            else:
+                time.sleep(10)
 
 
 scale_thread = None
