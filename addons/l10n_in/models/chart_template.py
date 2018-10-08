@@ -32,12 +32,12 @@ class AccountTaxTemplate(models.Model):
     _inherit = 'account.tax.template'
 
     #use in GSTR export report as Rate of tax.
-    l10n_in_description = fields.Char(string='Label GST Report')
+    l10n_in_product_wise_line = fields.Boolean('Product Wise Line')
 
     def _get_tax_vals(self, company, tax_template_to_tax):
         val = super(AccountTaxTemplate, self)._get_tax_vals(company, tax_template_to_tax)
         if self.tax_group_id:
-            val['l10n_in_description'] = self.l10n_in_description
+            val['l10n_in_product_wise_line'] = self.l10n_in_product_wise_line
         return val
 
 

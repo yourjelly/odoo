@@ -1227,9 +1227,7 @@ class AccountInvoice(models.Model):
             part = self.env['res.partner']._find_accounting_partner(inv.partner_id)
             line = [(0, 0, self.line_get_convert(l, part.id)) for l in iml]
             line = inv.group_lines(iml, line)
-
             line = inv.finalize_invoice_move_lines(line)
-
             date = inv.date or inv.date_invoice
             move_vals = {
                 'ref': inv.reference,
@@ -1846,12 +1844,7 @@ class AccountInvoiceTax(models.Model):
         for tax in self:
             tax.base = 0.0
             if tax.tax_id:
-                key = tax.tax_id.get_grouping_key({
-                    'tax_id': tax.tax_id.id,
-                    'account_id': tax.account_id.id,
-                    'account_analytic_id': tax.account_analytic_id.id,
-                    'analytic_tag_ids': tax.analytic_tag_ids.ids or False,
-                })
+                key = tax.tax_id.get_grouping_key(tax._prepare_invoice_tax_val())
                 if tax.invoice_id and key in tax_grouped[tax.invoice_id.id]:
                     tax.base = tax_grouped[tax.invoice_id.id][key]['base']
                 else:

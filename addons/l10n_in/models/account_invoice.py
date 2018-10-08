@@ -100,7 +100,6 @@ class AccountInvoice(models.Model):
         """Update account move line convert vals for new field value pass to account move line"""
         vals = super(AccountInvoice, self).line_get_convert(line, part)
         vals.update({
-            'l10n_in_tax_price_unit': line.get('l10n_in_tax_price_unit', 0),
             'l10n_in_is_eligible_for_itc': line.get('l10n_in_is_eligible_for_itc', False),
             'l10n_in_itc_percentage': line.get('l10n_in_itc_percentage', 0)
             })
@@ -153,6 +152,31 @@ class AccountInvoice(models.Model):
                 self.l10n_in_place_of_supply = self.env.ref('l10n_in.state_in_ot')
         return super(AccountInvoice, self.with_context(l10n_in_gstin_partner_id=self.l10n_in_gstin_partner_id.id))._onchange_partner_id()
 
+    def inv_line_characteristic_hashcode(self, invoice_line):
+        res = super(AccountInvoice, self).inv_line_characteristic_hashcode(invoice_line)
+        return res + "-%s-%s-%s"(invoice_line.get('product_uom_id', 'False'),
+            invoice_line.get('l10n_in_is_eligible_for_itc', 'False'),
+            invoice_line.get('l10n_in_itc_percentage', 'False'))
+
+    @api.model
+    def tax_line_move_line_get(self):
+        res = super(AccountInvoice, self).tax_line_move_line_get()
+        for vals in res:
+            invoice_tax_line = self.env['account.invoice.tax'].browse(vals.get('invoice_tax_line_id'))
+            vals['product_id'] = invoice_tax_line.l10n_in_product_id.id
+            vals['uom_id'] = invoice_tax_line.l10n_in_uom_id.id
+            vals['l10n_in_is_eligible_for_itc'] = invoice_tax_line.l10n_in_is_eligible_for_itc
+            vals['l10n_in_itc_percentage'] = invoice_tax_line.l10n_in_itc_percentage
+        return res
+
+    def _prepare_tax_line_vals(self, line, tax):
+        vals = super(AccountInvoice, self)._prepare_tax_line_vals(line, tax)
+        vals['l10n_in_product_id'] = line.product_id.id
+        vals['l10n_in_uom_id'] = line.uom_id.id
+        vals['l10n_in_is_eligible_for_itc'] = line.l10n_in_is_eligible_for_itc
+        vals['l10n_in_itc_percentage'] = line.l10n_in_itc_percentage
+        return vals
+
 
 class AccountInvoiceLine(models.Model):
     _inherit = "account.invoice.line"
@@ -170,4 +194,22 @@ class AccountInvoiceLine(models.Model):
     def _onchange_product_id(self):
         res = super(AccountInvoiceLine, self)._onchange_product_id()
         self.l10n_in_is_eligible_for_itc = self.product_id.l10n_in_is_eligible_for_itc
+        return res
+
+
+class AccountInvoiceTax(models.Model):
+    _inherit = "account.invoice.tax"
+
+    l10n_in_product_id = fields.Many2one('product.product', string='Product')
+    l10n_in_uom_id = fields.Many2one('uom.uom', string='Unit of Measure')
+    l10n_in_is_eligible_for_itc = fields.Boolean(string="Is eligible for ITC", help="Check this box if this product is eligible for ITC(Input Tax Credit) under GST")
+    l10n_in_itc_percentage = fields.Float(string="ITC percentage", help="Enter percentage in case of partly eligible for ITC(Input Tax Credit) under GST.")
+
+    @api.multi
+    def _prepare_invoice_tax_val(self):
+        res = super(AccountInvoiceTax, self)._prepare_invoice_tax_val()
+        res['l10n_in_product_id'] = self.l10n_in_product_id.id
+        res['l10n_in_uom_id'] = self.l10n_in_uom_id.id
+        res['l10n_in_is_eligible_for_itc'] = self.l10n_in_is_eligible_for_itc
+        res['l10n_in_itc_percentage'] = self.l10n_in_itc_percentage
         return res

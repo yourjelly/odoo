@@ -13,7 +13,7 @@
                 <field name="partner_vat"/>
                 <field name="place_of_supply"/>
                 <field name="supply_type"/>
-                <field name="l10n_in_description"/>
+                <field name="tax_rate_tag"/>
                 <field name="igst_amount"/>
                 <field name="cgst_amount"/>
                 <field name="sgst_amount"/>

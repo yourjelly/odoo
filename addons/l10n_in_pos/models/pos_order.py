@@ -15,8 +15,9 @@ class PosOrder(models.Model):
     @api.model
     def _get_account_move_line_group_data_type_key(self, data_type, values, options={}):
         res = super(PosOrder, self)._get_account_move_line_group_data_type_key(data_type, values, options)
-        if data_type == 'product' and res:
-            return res + (values['l10n_in_pos_order_id'],)
+        if data_type == 'tax' and res:
+            if self.env['account.tax'].browse(values['tax_line_id']).l10n_in_product_wise_line:
+                return res + (values['product_uom_id'], values['product_id'])
         return res
 
     def _create_account_move(self):
@@ -31,11 +32,9 @@ class PosOrder(models.Model):
     def _prepare_account_move_line(self, line, partner_id, current_company, currency_id):
         res = super(PosOrder, self)._prepare_account_move_line(line, partner_id, current_company, currency_id)
         for line_values in res:
-            if line_values.get('data_type') == 'product':
-                price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+            if line_values.get('data_type') in ['tax','product']:
                 line_values['values'].update({
-                    'l10n_in_tax_price_unit': price,
-                    'l10n_in_pos_order_id': line.order_id.id
+                    'product_uom_id': line.product_id.uom_id.id,
                     })
         return res
 

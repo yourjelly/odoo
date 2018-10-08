@@ -17,7 +17,6 @@ class L10nInAccountInvoiceReport(models.Model):
     date = fields.Date(string="Accounting Date")
     name = fields.Char(string="Invoice Number")
     partner_id = fields.Many2one('res.partner', string="Customer")
-    l10n_in_tax_id = fields.Many2one('account.tax', string="GST Tax")
     is_reverse_charge = fields.Char("Reverse Charge")
     l10n_in_export_type = fields.Selection([
         ('regular', 'Regular'), ('deemed', 'Deemed'),
@@ -48,7 +47,7 @@ class L10nInAccountInvoiceReport(models.Model):
     l10n_in_place_of_supply = fields.Many2one("res.country.state", String="Customer State")
     partner_vat = fields.Char(string="Customer GSTIN")
     ecommerce_vat = fields.Char(string="E-commerce GSTIN")
-    l10n_in_description = fields.Char(string="Rate")
+    tax_rate_tag = fields.Char(string="Rate")
     place_of_supply = fields.Char(string="Place of Supply")
     is_pre_gst = fields.Char(string="Is Pre GST")
     is_ecommerce = fields.Char(string="Is E-commerce")
@@ -65,16 +64,63 @@ class L10nInAccountInvoiceReport(models.Model):
 
     def _select(self):
         select_str = """
-            SELECT min(aml.id) AS id,
+            SELECT min(sub.id) as id,
+            sub.invoice_id,
+            sub.account_move_id,
+            sub.name,
+            sub.state,
+            sub.partner_id,
+            sub.date,
+            sub.l10n_in_export_type,
+            sub.gstin_partner_id,
+            sub.ecommerce_partner_id,
+            sub.shipping_bill_number,
+            sub.shipping_bill_date,
+            sub.shipping_port_code_id,
+            sub.total,
+            sub.journal_id,
+            sub.company_id,
+            sub.invoice_type,
+            sub.refund_invoice_id,
+            sub.refund_reason_id,
+            sub.l10n_in_place_of_supply,
+            sub.partner_vat,
+            sub.ecommerce_vat,
+            sub.tax_rate_tag,
+            sub.is_reverse_charge,
+            sub.place_of_supply,
+            sub.is_pre_gst,
+            sub.is_ecommerce,
+            sub.b2cl_is_ecommerce,
+            sub.b2cs_is_ecommerce,
+            sub.supply_type,
+            sub.export_type,
+            sub.refund_export_type,
+            sub.b2b_type,
+            sub.refund_invoice_type,
+            sub.gst_format_date,
+            sub.gst_format_refund_date,
+            sub.gst_format_shipping_bill_date,
+            sum(sub.igst_amount) * sub.amount_sign AS igst_amount,
+            sum(sub.cgst_amount) * sub.amount_sign AS cgst_amount,
+            sum(sub.sgst_amount) * sub.amount_sign AS sgst_amount,
+            sub.cess_amount * sub.amount_sign AS cess_amount,
+            sum(sub.price_total) AS price_total
+        """
+        return select_str
+
+    def _sub_select(self):
+        sub_select_str = """
+            SELECT aml.id AS id,
                 aml.invoice_id,
-                aml.l10n_in_tax_id,
+                aml.partner_id,
+                aml.tax_base_amount AS price_total,
                 am.id AS account_move_id,
                 am.name,
                 am.state,
-                aml.partner_id,
                 am.date,
                 ai.l10n_in_export_type AS l10n_in_export_type,
-                am.l10n_in_gstin_partner_id AS gstin_partner_id,
+                ai.l10n_in_gstin_partner_id AS gstin_partner_id,
                 ai.l10n_in_reseller_partner_id AS ecommerce_partner_id,
                 ai.l10n_in_shipping_bill_number AS shipping_bill_number,
                 ai.l10n_in_shipping_bill_date AS shipping_bill_date,
@@ -88,12 +134,7 @@ class L10nInAccountInvoiceReport(models.Model):
                 am.l10n_in_place_of_supply,
                 p.vat AS partner_vat,
                 CASE WHEN rp.vat IS NULL THEN '' ELSE rp.vat END AS ecommerce_vat,
-                CASE WHEN at.l10n_in_description IS NULL THEN '' ELSE at.l10n_in_description END AS l10n_in_description,
-                sum(aml.l10n_in_igst_amount) AS igst_amount,
-                sum(aml.l10n_in_cgst_amount) AS cgst_amount,
-                sum(aml.l10n_in_sgst_amount) AS sgst_amount,
-                sum(aml.l10n_in_cess_amount) AS cess_amount,
-                sum(aml.balance) * (CASE WHEN aj.type = 'sale' AND (ai.type IS NULL OR ai.type != 'out_refund') THEN -1 ELSE 1 END) AS price_total,
+                tt.name AS tax_rate_tag,
                 (CASE WHEN ai.l10n_in_reverse_charge = True
                     THEN 'Y'
                     ELSE 'N'
@@ -166,16 +207,37 @@ class L10nInAccountInvoiceReport(models.Model):
                 (CASE WHEN ai.l10n_in_shipping_bill_date IS NOT NULL
                     THEN TO_CHAR(ai.l10n_in_shipping_bill_date, 'DD-MON-YYYY')
                     ELSE ''
-                    END) as gst_format_shipping_bill_date
-
+                    END) as gst_format_shipping_bill_date,
+                CASE WHEN at.tax_group_id IN
+                    (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='igst_group')
+                    THEN aml.balance
+                    ELSE 0
+                    END AS igst_amount,
+                CASE WHEN at.tax_group_id IN
+                    (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='cgst_group')
+                    THEN aml.balance
+                    ELSE 0
+                    END AS cgst_amount,
+                CASE WHEN at.tax_group_id IN
+                    (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='sgst_group')
+                    THEN aml.balance
+                    ELSE 0
+                    END AS sgst_amount,
+                (SELECT COALESCE(sum(temp_aml.balance),0) from account_move_line temp_aml JOIN account_tax temp_at ON temp_at.id = temp_aml.tax_line_id where temp_aml.move_id = aml.move_id and temp_aml.product_id = aml.product_id
+                    and temp_at.tax_group_id IN (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='cess_group')
+                    ) AS cess_amount,
+                (CASE WHEN aj.type = 'sale' AND (ai.type IS NULL OR ai.type != 'out_refund') THEN -1 ELSE 1 END) AS amount_sign
         """
-        return select_str
+        return sub_select_str
 
     def _from(self):
         from_str = """
             FROM account_move_line aml
                 JOIN account_move am ON am.id = aml.move_id
                 JOIN account_journal aj ON aj.id = am.journal_id
+                JOIN account_tax at ON at.id = aml.tax_line_id
+                JOIN account_tax_account_tag ttr ON ttr.account_tax_id = at.id
+                JOIN account_account_tag tt ON tt.id = ttr.account_account_tag_id
                 LEFT JOIN account_invoice ai ON ai.id = aml.invoice_id
                 LEFT JOIN account_invoice refund_ai ON refund_ai.id = ai.refund_invoice_id
                 LEFT JOIN res_partner p ON p.id = aml.partner_id
@@ -183,54 +245,55 @@ class L10nInAccountInvoiceReport(models.Model):
                 LEFT JOIN res_partner gstin_p ON gstin_p.id = am.l10n_in_gstin_partner_id
                 LEFT JOIN res_country_state gstin_ps ON gstin_ps.id = gstin_p.state_id
                 LEFT JOIN res_partner rp ON rp.id = ai.l10n_in_reseller_partner_id
-                LEFT JOIN account_tax at ON at.id = aml.l10n_in_tax_id
-        """
+                """
         return from_str
 
     def _where(self):
         return """
-                WHERE am.state = 'posted' AND aml.l10n_in_tax_id IS NOT NULL
+                WHERE am.state = 'posted' AND tt.l10n_in_use_in_report = True
                     AND at.tax_group_id not in (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name in ('exempt_group','nil_rated_group'))
         """
 
     def _group_by(self):
         group_by_str = """
-        GROUP BY
-            am.id,
-            aj.company_id,
-            aml.invoice_id,
-            am.name,
-            am.state,
-            aml.partner_id,
-            aml.l10n_in_tax_id,
-            am.date,
-            ai.l10n_in_reverse_charge,
-            am.l10n_in_gstin_partner_id,
-            ai.l10n_in_shipping_bill_number,
-            ai.l10n_in_shipping_bill_date,
-            ai.l10n_in_shipping_port_code_id,
-            ai.l10n_in_reseller_partner_id,
-            am.amount,
-            am.journal_id,
-            am.company_id,
-            ai.type,
-            ai.refund_invoice_id,
-            ai.l10n_in_refund_reason_id,
-            am.l10n_in_place_of_supply,
-            p.vat,
-            rp.vat,
-            at.l10n_in_description,
-            pos.l10n_in_tin,
-            pos.name,
-            p.id,
-            gstin_ps.l10n_in_tin,
-            gstin_ps.name,
-            refund_ai.date,
-            pos.id,
-            gstin_ps.id,
-            refund_ai.l10n_in_export_type,
-            ai.l10n_in_export_type,
-            aj.type
+        GROUP BY sub.invoice_id,
+            sub.account_move_id,
+            sub.name,
+            sub.state,
+            sub.partner_id,
+            sub.date,
+            sub.l10n_in_export_type,
+            sub.gstin_partner_id,
+            sub.ecommerce_partner_id,
+            sub.shipping_bill_number,
+            sub.shipping_bill_date,
+            sub.shipping_port_code_id,
+            sub.total,
+            sub.journal_id,
+            sub.company_id,
+            sub.invoice_type,
+            sub.refund_invoice_id,
+            sub.refund_reason_id,
+            sub.l10n_in_place_of_supply,
+            sub.partner_vat,
+            sub.ecommerce_vat,
+            sub.tax_rate_tag,
+            sub.is_reverse_charge,
+            sub.place_of_supply,
+            sub.is_pre_gst,
+            sub.is_ecommerce,
+            sub.b2cl_is_ecommerce,
+            sub.b2cs_is_ecommerce,
+            sub.supply_type,
+            sub.export_type,
+            sub.refund_export_type,
+            sub.b2b_type,
+            sub.refund_invoice_type,
+            sub.gst_format_date,
+            sub.gst_format_refund_date,
+            sub.gst_format_shipping_bill_date,
+            sub.amount_sign,
+            sub.cess_amount
         """
         return group_by_str
 
@@ -238,4 +301,8 @@ class L10nInAccountInvoiceReport(models.Model):
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
         self.env.cr.execute("""CREATE or REPLACE VIEW %s AS (
-            %s %s %s %s)""" % (self._table, self._select(), self._from(), self._where(), self._group_by()))
+            %s
+            FROM (
+                %s %s %s
+            ) AS sub %s)""" % (self._table, self._select(), self._sub_select(),
+                self._from(), self._where(), self._group_by()))

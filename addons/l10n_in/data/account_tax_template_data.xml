@@ -18,6 +18,38 @@
         <field name="applicability">taxes</field>
     </record>
 
+    <!-- Tax tag use in GSTR report -->
+    <record id="1_percentage_tag_tax" model="account.account.tag">
+        <field name="name">1</field>
+        <field name="applicability">taxes</field>
+        <field name="l10n_in_use_in_report" eval="True"/>
+    </record>
+    <record id="2_percentage_tag_tax" model="account.account.tag">
+        <field name="name">2</field>
+        <field name="applicability">taxes</field>
+        <field name="l10n_in_use_in_report" eval="True"/>
+    </record>
+    <record id="5_percentage_tag_tax" model="account.account.tag">
+        <field name="name">5</field>
+        <field name="applicability">taxes</field>
+        <field name="l10n_in_use_in_report" eval="True"/>
+    </record>
+    <record id="12_percentage_tag_tax" model="account.account.tag">
+        <field name="name">12</field>
+        <field name="applicability">taxes</field>
+        <field name="l10n_in_use_in_report" eval="True"/>
+    </record>
+    <record id="18_percentage_tag_tax" model="account.account.tag">
+        <field name="name">18</field>
+        <field name="applicability">taxes</field>
+        <field name="l10n_in_use_in_report" eval="True"/>
+    </record>
+    <record id="28_percentage_tag_tax" model="account.account.tag">
+        <field name="name">28</field>
+        <field name="applicability">taxes</field>
+        <field name="l10n_in_use_in_report" eval="True"/>
+    </record>
+
     <!-- GST TAXES-->
 
     <!-- CESS Tax -->
@@ -33,6 +65,7 @@
         <field name="tax_group_id" ref="cess_group"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tag_ids" eval="[(6,0,[ref('cess_tag_tax'),])]"/>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="cess_sale_1591" model="account.tax.template">
@@ -46,6 +79,7 @@
         <field name="tax_group_id" ref="cess_group"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tag_ids" eval="[(6,0,[ref('cess_tag_tax'),])]"/>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="cess_5_plus_1591_sale" model="account.tax.template">
@@ -58,6 +92,7 @@
         <field name="children_tax_ids" eval="[(6, 0, [ref('cess_sale_5'),ref('cess_sale_1591'),])]"/>
         <field name="tag_ids" eval="[(6,0,[ref('cess_tag_tax'),])]"/>
         <field name="tax_group_id" ref="cess_group"/>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="cess_21_4170_higer_sale" model="account.tax.template">
@@ -74,6 +109,7 @@ if tax > result:result=tax</field>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tag_ids" eval="[(6,0,[ref('cess_tag_tax'),])]"/>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <!-- Exempt -->
@@ -88,7 +124,7 @@ if tax > result:result=tax</field>
         <field name="refund_account_id" ref="p10056"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="exempt_group"/>
-        <field name="l10n_in_description">0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <!-- Nil Rated -->
@@ -103,7 +139,7 @@ if tax > result:result=tax</field>
         <field name="refund_account_id" ref="p10056"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="nil_rated_group"/>
-        <field name="l10n_in_description">0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <!-- IGST -->
@@ -117,9 +153,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p11234"/>
         <field name="refund_account_id" ref="p10053"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),ref('1_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="l10n_in_description">1</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="igst_sale_2" model="account.tax.template">
@@ -131,9 +167,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p11234"/>
         <field name="refund_account_id" ref="p10053"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),ref('2_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="l10n_in_description">2.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="igst_sale_28" model="account.tax.template">
@@ -145,9 +181,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p11234"/>
         <field name="refund_account_id" ref="p10053"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),ref('28_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="l10n_in_description">28.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="igst_sale_18" model="account.tax.template">
@@ -159,9 +195,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p11234"/>
         <field name="refund_account_id" ref="p10053"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),ref('18_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="l10n_in_description">18.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="igst_sale_12" model="account.tax.template">
@@ -173,9 +209,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p11234"/>
         <field name="refund_account_id" ref="p10053"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),ref('12_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="l10n_in_description">12.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="igst_sale_5" model="account.tax.template">
@@ -187,9 +223,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p11234"/>
         <field name="refund_account_id" ref="p10053"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),ref('5_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="l10n_in_description">5.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <!-- SGST & CGST Sales Group Tax -->
@@ -203,9 +239,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p11232"/>
         <field name="refund_account_id" ref="p10051"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),ref('1_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="l10n_in_description">0.5</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="cgst_sale_0_5" model="account.tax.template">
@@ -217,9 +253,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p11233"/>
         <field name="refund_account_id" ref="p10052"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),ref('1_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="l10n_in_description">0.5</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="sgst_sale_1" model="account.tax.template">
@@ -229,9 +265,9 @@ if tax > result:result=tax</field>
         <field name="amount_type">group</field>
         <field name="amount">0</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="tag_ids" eval="[(6,0,[ref('1_percentage_tag_tax')])]"/>
         <field name="children_tax_ids" eval="[(6, 0, [ref('sgst_sale_0_5'), ref('cgst_sale_0_5'),])]"/>
-        <field name="tax_group_id" ref="gst_group"/>
-        <field name="l10n_in_description">1.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="sgst_sale_1_2" model="account.tax.template">
@@ -243,9 +279,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p11232"/>
         <field name="refund_account_id" ref="p10051"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),ref('2_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="l10n_in_description">1.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="cgst_sale_1_2" model="account.tax.template">
@@ -257,8 +293,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p11233"/>
         <field name="refund_account_id" ref="p10052"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),ref('2_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="cgst_group"/>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="sgst_sale_2" model="account.tax.template">
@@ -268,9 +305,9 @@ if tax > result:result=tax</field>
         <field name="amount_type">group</field>
         <field name="amount">0</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="tag_ids" eval="[(6,0,[ref('2_percentage_tag_tax')])]"/>
         <field name="children_tax_ids" eval="[(6, 0, [ref('sgst_sale_1_2'), ref('cgst_sale_1_2'),])]"/>
-        <field name="tax_group_id" ref="gst_group"/>
-        <field name="l10n_in_description">2.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="sgst_sale_14" model="account.tax.template">
@@ -282,9 +319,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p11232"/>
         <field name="refund_account_id" ref="p10051"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),ref('28_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="l10n_in_description">14.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="cgst_sale_14" model="account.tax.template">
@@ -296,9 +333,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p11233"/>
         <field name="refund_account_id" ref="p10052"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),ref('28_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="l10n_in_description">14.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="sgst_sale_28" model="account.tax.template">
@@ -308,9 +345,9 @@ if tax > result:result=tax</field>
         <field name="amount_type">group</field>
         <field name="amount">0</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="tag_ids" eval="[(6,0,[ref('28_percentage_tag_tax')])]"/>
         <field name="children_tax_ids" eval="[(6, 0, [ref('sgst_sale_14'),ref('cgst_sale_14'),])]"/>
-        <field name="tax_group_id" ref="gst_group"/>
-        <field name="l10n_in_description">28.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
         <record id="sgst_sale_9" model="account.tax.template">
@@ -322,9 +359,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p11232"/>
         <field name="refund_account_id" ref="p10051"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),ref('18_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="l10n_in_description">9.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="cgst_sale_9" model="account.tax.template">
@@ -336,9 +373,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p11233"/>
         <field name="refund_account_id" ref="p10052"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),ref('18_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="l10n_in_description">9.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="sgst_sale_18" model="account.tax.template">
@@ -348,9 +385,9 @@ if tax > result:result=tax</field>
         <field name="amount_type">group</field>
         <field name="amount">0</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="tag_ids" eval="[(6,0,[ref('18_percentage_tag_tax')])]"/>
         <field name="children_tax_ids" eval="[(6, 0, [ref('sgst_sale_9'),ref('cgst_sale_9'),])]"/>
-        <field name="tax_group_id" ref="gst_group"/>
-        <field name="l10n_in_description">18.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="sgst_sale_6" model="account.tax.template">
@@ -362,9 +399,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p11232"/>
         <field name="refund_account_id" ref="p10051"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),ref('12_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="l10n_in_description">6.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="cgst_sale_6" model="account.tax.template">
@@ -376,9 +413,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p11233"/>
         <field name="refund_account_id" ref="p10052"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),ref('12_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="l10n_in_description">6.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="sgst_sale_12" model="account.tax.template">
@@ -388,9 +425,9 @@ if tax > result:result=tax</field>
         <field name="amount_type">group</field>
         <field name="amount">0</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="tag_ids" eval="[(6,0,[ref('12_percentage_tag_tax')])]"/>
         <field name="children_tax_ids" eval="[(6, 0, [ref('sgst_sale_6'),ref('cgst_sale_6'),])]"/>
-        <field name="tax_group_id" ref="gst_group"/>
-        <field name="l10n_in_description">12.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
         <record id="sgst_sale_2_5" model="account.tax.template">
@@ -402,9 +439,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p11232"/>
         <field name="refund_account_id" ref="p10051"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),ref('5_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="l10n_in_description">2.5</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="cgst_sale_2_5" model="account.tax.template">
@@ -416,9 +453,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p11233"/>
         <field name="refund_account_id" ref="p10052"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),ref('5_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="l10n_in_description">2.5</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="sgst_sale_5" model="account.tax.template">
@@ -428,10 +465,10 @@ if tax > result:result=tax</field>
         <field name="amount_type">group</field>
         <field name="amount">0</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="tag_ids" eval="[(6,0,[ref('5_percentage_tag_tax')])]"/>
         <field name="children_tax_ids" eval="[(6, 0, [ref('sgst_sale_2_5'), ref('cgst_sale_2_5'),])]"/>
-        <field name="tax_group_id" ref="gst_group"/>
-        <field name="l10n_in_description">5.0</field>
         <field name="sequence">0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <!-- Purchase Taxes-->
@@ -449,6 +486,7 @@ if tax > result:result=tax</field>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tag_ids" eval="[(6,0,[ref('cess_tag_tax'),])]"/>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="cess_purchase_1591" model="account.tax.template">
@@ -462,6 +500,7 @@ if tax > result:result=tax</field>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tag_ids" eval="[(6,0,[ref('cess_tag_tax'),])]"/>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="cess_5_plus_1591_purchase" model="account.tax.template">
@@ -473,6 +512,7 @@ if tax > result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="children_tax_ids" eval="[(6, 0, [ref('cess_purchase_5'),ref('cess_purchase_1591'),])]"/>
         <field name="tax_group_id" ref="cess_group"/>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="cess_21_4170_higer_purchase" model="account.tax.template">
@@ -489,6 +529,7 @@ if tax > result:result=tax</field>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tag_ids" eval="[(6,0,[ref('cess_tag_tax'),])]"/>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <!-- Exempt -->
@@ -503,7 +544,7 @@ if tax > result:result=tax</field>
         <field name="refund_account_id" ref="p11236"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="exempt_group"/>
-        <field name="l10n_in_description">0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <!-- Nil Rated -->
@@ -518,7 +559,7 @@ if tax > result:result=tax</field>
         <field name="refund_account_id" ref="p11236"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="nil_rated_group"/>
-        <field name="l10n_in_description">0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <!-- IGST -->
@@ -532,9 +573,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p10053"/>
         <field name="refund_account_id" ref="p11234"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),ref('1_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="l10n_in_description">1.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="igst_purchase_2" model="account.tax.template">
@@ -548,7 +589,7 @@ if tax > result:result=tax</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),])]"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="l10n_in_description">2.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="igst_purchase_28" model="account.tax.template">
@@ -560,9 +601,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p10053"/>
         <field name="refund_account_id" ref="p11234"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),ref('28_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="l10n_in_description">28.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="igst_purchase_18" model="account.tax.template">
@@ -574,9 +615,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p10053"/>
         <field name="refund_account_id" ref="p11234"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),ref('18_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="l10n_in_description">18.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="igst_purchase_12" model="account.tax.template">
@@ -588,9 +629,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p10053"/>
         <field name="refund_account_id" ref="p11234"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),ref('12_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="l10n_in_description">12.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="igst_purchase_5" model="account.tax.template">
@@ -602,9 +643,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p10053"/>
         <field name="refund_account_id" ref="p11234"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('igst_tag_tax'),ref('5_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="igst_group"/>
-        <field name="l10n_in_description">5.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <!-- SGST & CGST -->
@@ -618,9 +659,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p10051"/>
         <field name="refund_account_id" ref="p11232"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),ref('1_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="l10n_in_description">0.5</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="cgst_purchase_0_5" model="account.tax.template">
@@ -632,9 +673,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p10052"/>
         <field name="refund_account_id" ref="p11233"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),ref('1_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="l10n_in_description">0.5</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="sgst_purchase_1" model="account.tax.template">
@@ -644,9 +685,9 @@ if tax > result:result=tax</field>
         <field name="amount_type">group</field>
         <field name="amount">0</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="tag_ids" eval="[(6,0,[ref('1_percentage_tag_tax')])]"/>
         <field name="children_tax_ids" eval="[(6, 0, [ref('sgst_purchase_0_5'),ref('cgst_purchase_0_5'),])]"/>
-        <field name="tax_group_id" ref="gst_group"/>
-        <field name="l10n_in_description">1.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="sgst_purchase_1_2" model="account.tax.template">
@@ -658,9 +699,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p10051"/>
         <field name="refund_account_id" ref="p11232"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),ref('2_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="l10n_in_description">1.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="cgst_purchase_1_2" model="account.tax.template">
@@ -672,9 +713,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p10052"/>
         <field name="refund_account_id" ref="p11233"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),ref('2_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="l10n_in_description">1.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="sgst_purchase_2" model="account.tax.template">
@@ -684,9 +725,9 @@ if tax > result:result=tax</field>
         <field name="amount_type">group</field>
         <field name="amount">0</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="tag_ids" eval="[(6,0,[ref('2_percentage_tag_tax')])]"/>
         <field name="children_tax_ids" eval="[(6, 0, [ref('sgst_purchase_1_2'),ref('cgst_purchase_1_2'),])]"/>
-        <field name="tax_group_id" ref="gst_group"/>
-        <field name="l10n_in_description">2.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="sgst_purchase_14" model="account.tax.template">
@@ -698,9 +739,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p10051"/>
         <field name="refund_account_id" ref="p11232"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),ref('28_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="l10n_in_description">14.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="cgst_purchase_14" model="account.tax.template">
@@ -712,9 +753,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p10052"/>
         <field name="refund_account_id" ref="p11233"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),ref('28_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="l10n_in_description">14.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="sgst_purchase_28" model="account.tax.template">
@@ -724,9 +765,9 @@ if tax > result:result=tax</field>
         <field name="amount_type">group</field>
         <field name="amount">0</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="tag_ids" eval="[(6,0,[ref('28_percentage_tag_tax')])]"/>
         <field name="children_tax_ids" eval="[(6, 0, [ref('sgst_purchase_14'),ref('cgst_purchase_14'),])]"/>
-        <field name="tax_group_id" ref="gst_group"/>
-        <field name="l10n_in_description">28.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
         <record id="sgst_purchase_9" model="account.tax.template">
@@ -738,9 +779,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p10051"/>
         <field name="refund_account_id" ref="p11232"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),ref('18_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="l10n_in_description">9.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="cgst_purchase_9" model="account.tax.template">
@@ -752,9 +793,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p10052"/>
         <field name="refund_account_id" ref="p11233"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),ref('18_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="l10n_in_description">9.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="sgst_purchase_18" model="account.tax.template">
@@ -764,9 +805,9 @@ if tax > result:result=tax</field>
         <field name="amount_type">group</field>
         <field name="amount">0</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="tag_ids" eval="[(6,0,[ref('18_percentage_tag_tax')])]"/>
         <field name="children_tax_ids" eval="[(6, 0, [ref('sgst_purchase_9'),ref('cgst_purchase_9'),])]"/>
-        <field name="tax_group_id" ref="gst_group"/>
-        <field name="l10n_in_description">18.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="sgst_purchase_6" model="account.tax.template">
@@ -778,9 +819,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p10051"/>
         <field name="refund_account_id" ref="p11232"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),ref('12_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="l10n_in_description">6.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="cgst_purchase_6" model="account.tax.template">
@@ -792,9 +833,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p10052"/>
         <field name="refund_account_id" ref="p11233"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),ref('12_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="l10n_in_description">6.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="sgst_purchase_12" model="account.tax.template">
@@ -804,9 +845,9 @@ if tax > result:result=tax</field>
         <field name="amount_type">group</field>
         <field name="amount">0</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="tag_ids" eval="[(6,0,[ref('12_percentage_tag_tax')])]"/>
         <field name="children_tax_ids" eval="[(6, 0, [ref('sgst_purchase_6'),ref('cgst_purchase_6'),])]"/>
-        <field name="tax_group_id" ref="gst_group"/>
-        <field name="l10n_in_description">12.0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="sgst_purchase_2_5" model="account.tax.template">
@@ -818,9 +859,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p10051"/>
         <field name="refund_account_id" ref="p11232"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('sgst_tag_tax'),ref('5_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="sgst_group"/>
-        <field name="l10n_in_description">2.5</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="cgst_purchase_2_5" model="account.tax.template">
@@ -832,9 +873,9 @@ if tax > result:result=tax</field>
         <field name="account_id" ref="p10052"/>
         <field name="refund_account_id" ref="p11233"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
-        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),])]"/>
+        <field name="tag_ids" eval="[(6,0,[ref('cgst_tag_tax'),ref('5_percentage_tag_tax')])]"/>
         <field name="tax_group_id" ref="cgst_group"/>
-        <field name="l10n_in_description">2.5</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
     <record id="sgst_purchase_5" model="account.tax.template">
@@ -844,10 +885,10 @@ if tax > result:result=tax</field>
         <field name="amount_type">group</field>
         <field name="amount">0</field>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
+        <field name="tag_ids" eval="[(6,0,[ref('5_percentage_tag_tax')])]"/>
         <field name="children_tax_ids" eval="[(6, 0, [ref('sgst_purchase_2_5'),ref('cgst_purchase_2_5'),])]"/>
-        <field name="tax_group_id" ref="gst_group"/>
-        <field name="l10n_in_description">5.0</field>
         <field name="sequence">0</field>
+        <field name="l10n_in_product_wise_line" eval="True"/>
     </record>
 
 </odoo>

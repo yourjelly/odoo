@@ -15,7 +15,7 @@
                 <field name="supply_type"/>
                 <field name="payment_type"/>
                 <field name="l10n_in_tax_id" groups="base.group_no_one"/>
-                <field name="l10n_in_description"/>
+                <field name="tax_rate_tag"/>
                 <field name="cess_amount"/>
                 <field name="place_of_supply"/>
             </tree>
@@ -64,7 +64,7 @@
                 <field name="supply_type"/>
                 <field name="payment_type"/>
                 <field name="l10n_in_tax_id" groups="base.group_no_one"/>
-                <field name="l10n_in_description"/>
+                <field name="tax_rate_tag"/>
                 <field name="cess_amount"/>
                 <field name="place_of_supply"/>
             </tree>

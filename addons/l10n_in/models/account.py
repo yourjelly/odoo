@@ -29,13 +29,8 @@ class AccountMove(models.Model):
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
-    # For use in GSTR report.
-    l10n_in_igst_amount = fields.Float(string="IGST Amount", compute='_compute_l10n_in_taxes_amount', store=True, readonly=True)
-    l10n_in_cgst_amount = fields.Float(string="CGST Amount", compute='_compute_l10n_in_taxes_amount', store=True, readonly=True)
-    l10n_in_sgst_amount = fields.Float(string="SGST Amount", compute='_compute_l10n_in_taxes_amount', store=True, readonly=True)
-    l10n_in_cess_amount = fields.Float(string="CESS Amount", compute='_compute_l10n_in_taxes_amount', store=True, readonly=True)
-    l10n_in_tax_price_unit = fields.Float(string="Tax Base Amount")
-    l10n_in_tax_id = fields.Many2one('account.tax', compute="_compute_l10n_in_tax_id", store=True, readonly=True)
+    l10n_in_cess_line_ids = fields.Many2many('account.move.line', 'account_move_line_l10n_in_cess_rel', 'account_move_line_id', 'account_move_line_cess_id',
+        string="Cess Line", compute="_compute_cess_line", store=True)
     l10n_in_is_eligible_for_itc = fields.Boolean(string="Is eligible for ITC", help="Check this box if this product is eligible for ITC(Input Tax Credit) under GST")
     l10n_in_itc_percentage = fields.Float(string="ITC percentage", help="Enter percentage in case of partly eligible for ITC(Input Tax Credit) under GST.")
 
@@ -45,59 +40,36 @@ class AccountMoveLine(models.Model):
             if record.l10n_in_itc_percentage < 0 or record.l10n_in_itc_percentage > 100:
                 ValidationError(_("ITC percentage between 0 to 100"))
 
-    @api.depends('l10n_in_tax_price_unit', 'tax_ids', 'quantity', 'product_id', 'partner_id', 'company_currency_id')
-    def _compute_l10n_in_taxes_amount(self):
-        for line in self:
-            taxes_data = line._compute_l10n_in_tax(
-                taxes=line.tax_ids,
-                price_unit=line.l10n_in_tax_price_unit,
-                currency=line.company_currency_id,
-                quantity=line.quantity,
-                product=line.product_id,
-                partner=line.partner_id)
-            line.l10n_in_igst_amount = taxes_data['igst_amount']
-            line.l10n_in_cgst_amount = taxes_data['cgst_amount']
-            line.l10n_in_sgst_amount = taxes_data['sgst_amount']
-            line.l10n_in_cess_amount = taxes_data['cess_amount']
-
-    def _compute_l10n_in_tax(self, taxes, price_unit, currency=None, quantity=1.0, product=None, partner=None):
-        """common method to compute gst tax amount base on tax group"""
-        res = {'igst_amount': 0.0, 'sgst_amount': 0.0, 'cgst_amount': 0.0, 'cess_amount': 0.0}
-        AccountTax = self.env['account.tax']
-        igst_group = self.env.ref('l10n_in.igst_group', False)
-        cgst_group = self.env.ref('l10n_in.cgst_group', False)
-        sgst_group = self.env.ref('l10n_in.sgst_group', False)
-        cess_group = self.env.ref('l10n_in.cess_group', False)
-        filter_tax = taxes.filtered(lambda t: t.type_tax_use != 'none')
-        tax_compute = filter_tax.compute_all(price_unit, currency=currency, quantity=quantity, product=product, partner=partner)
-        for tax_data in tax_compute['taxes']:
-            tax_group = AccountTax.browse(tax_data['id']).tax_group_id
-            if tax_group == sgst_group:
-                res['sgst_amount'] += tax_data['amount']
-            elif tax_group == cgst_group:
-                res['cgst_amount'] += tax_data['amount']
-            elif tax_group == igst_group:
-                res['igst_amount'] += tax_data['amount']
-            elif tax_group == cess_group:
-                res['cess_amount'] += tax_data['amount']
-        res.update(tax_compute)
-        return res
-
-    @api.depends('tax_ids')
-    def _compute_l10n_in_tax_id(self):
-        """Find GST tax from tax_ids and set in l10n_in_tax_id"""
-        igst_group = self.env.ref('l10n_in.igst_group', False)
-        gst_group = self.env.ref('l10n_in.gst_group', False)
-        exempt_group = self.env.ref('l10n_in.exempt_group', False)
-        nil_rated_group = self.env.ref('l10n_in.nil_rated_group', False)
-        gst_groups = [gst_group, igst_group, exempt_group, nil_rated_group]
-        for line in self:
-            tax = line.tax_ids.filtered(lambda tax: tax.tax_group_id in gst_groups)
-            line.l10n_in_tax_id = tax and tax[-1] or False
+    @api.depends('tax_line_id.tax_group_id')
+    def _compute_cess_line(self):
+        group_cess = self.env.ref('l10n_in.cess_group')
+        for line in self.filtered(lambda l: l.tax_line_id and l.tax_line_id.tax_group_id != group_cess):
+            is_cess_domain = [
+                ('move_id', '=', line.move_id.id),
+                ('product_id','=', line.product_id.id),
+                ('tax_ids.tax_group_id', '=', group_cess.id),
+                '|', ('tax_ids', '=', line.tax_line_id.id), ('tax_ids.children_tax_ids', '=', line.tax_line_id.id)]
+            if self.search(is_cess_domain, limit=1):
+                line.l10n_in_cess_line_ids = line.move_id.line_ids.filtered(lambda l: l.product_id == line.product_id and l.tax_line_id.tax_group_id == group_cess)
 
 
 class AccountTax(models.Model):
     _inherit = 'account.tax'
 
-    # use in GSTR export report as Rate of tax.
-    l10n_in_description = fields.Char(string='Label on GST Report', help="Tax rate show in Indian GSTR report.")
+    l10n_in_product_wise_line = fields.Boolean('Product Wise Line')
+
+    def get_grouping_key(self, invoice_tax_val):
+        """ Returns a string that will be used to group account.invoice.tax sharing the same properties"""
+        key = super(AccountTax, self).get_grouping_key(invoice_tax_val)
+        if self.browse(invoice_tax_val['tax_id']).l10n_in_product_wise_line:
+            key += "-%s-%s-%s-%s"% (invoice_tax_val.get('l10n_in_product_id', False),
+                invoice_tax_val.get('l10n_in_uom_id', False),
+                invoice_tax_val.get('l10n_in_is_eligible_for_itc', False),
+                invoice_tax_val.get('l10n_in_itc_percentage', False))
+        return key
+
+
+class AccountAccountTag(models.Model):
+    _inherit = 'account.account.tag'
+
+    l10n_in_use_in_report = fields.Boolean(string="Use in Report", help="Use in Indian GSTR report")
