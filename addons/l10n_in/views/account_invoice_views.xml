@@ -23,6 +23,10 @@
             <xpath expr="//page[@name='other_info']//field[@name='name']" position="after">
                 <field name="l10n_in_refund_reason_id" attrs="{'invisible': [('type', 'not in', ('in_refund','out_refund'))], 'readonly': [('state','!=','draft')]}"/>
             </xpath>
+            <xpath expr="//field[@name='tax_line_ids']/tree/field[@name='tax_id']" position="after">
+                <field name="l10n_in_product_id"/>
+                <field name="l10n_in_uom_id"/>
+            </xpath>
         </field>
     </record>
 
