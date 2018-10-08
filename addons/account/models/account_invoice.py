@@ -1829,6 +1829,15 @@ class AccountInvoiceTax(models.Model):
     _description = "Invoice Tax"
     _order = 'sequence'
 
+    @api.multi
+    def _prepare_invoice_tax_val(self):
+        self.ensure_one()
+        return {
+            'tax_id': self.tax_id.id,
+            'account_id': self.account_id.id,
+            'account_analytic_id': self.account_analytic_id.id,
+            'analytic_tag_ids': self.analytic_tag_ids.ids or False}
+
     @api.depends('invoice_id.invoice_line_ids')
     def _compute_base_amount(self):
         tax_grouped = {}
