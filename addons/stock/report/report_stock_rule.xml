@@ -108,25 +108,25 @@
                             </tbody>
                         </table>
                         <h3>Legend</h3>
-                        <div class="o_report_stock_rule_legend">
+                        <div class="row o_report_stock_rule_legend ml8">
                             <t t-set="color" t-value="'black'"/>
-                            <div class="o_report_stock_rule_legend_line">
-                                <div class="o_report_stock_rule_legend_label">Push Rule</div>
-                                <div class="o_report_stock_rule_rule o_report_stock_rule_legend_symbol">
+                            <div class="col-sm">
+                                <div>Push Rule</div>
+                                <div class="o_report_stock_rule_rule">
                                     <t t-call="stock.report_stock_rule_right_arrow"/>
                                     <t t-call="stock.report_stock_rule_line"/>
                                 </div>
                             </div>
-                            <div class="o_report_stock_rule_legend_line">
-                                <div class="o_report_stock_rule_legend_label">Pull Rule</div>
-                                <div class="o_report_stock_rule_rule o_report_stock_rule_legend_symbol">
+                            <div class="col-sm">
+                                <div>Pull Rule</div>
+                                <div class="o_report_stock_rule_rule">
                                     <t t-call="stock.report_stock_rule_line"/>
                                     <t t-call="stock.report_stock_rule_right_arrow"/>
                                 </div>
                             </div>
-                            <div class="o_report_stock_rule_legend_line">
-                                <div class="o_report_stock_rule_legend_label">Trigger Another Rule</div>
-                                <div class="o_report_stock_rule_rule o_report_stock_rule_legend_symbol">
+                            <div class="col-sm">
+                                <div>Trigger Another Rule</div>
+                                <div class="o_report_stock_rule_rule">
                                     <t t-call="stock.report_stock_rule_suspension_points"/>
                                     <t t-call="stock.report_stock_rule_line"/>
                                 </div>
@@ -138,7 +138,7 @@
         </t>
     </template>
     <template id="report_stock_rule_line">
-        <div class="o_report_stock_rule_line">
+        <div class="o_report_stock_rule_line ml4 mr4">
             <svg width="100%" height="100%" viewBox="0 0 100 10" preserveAspectRatio="none">
                 <line x1="0" y1="5" x2="100" y2="5" t-attf-style="stroke: #{color};"/>
             </svg>
