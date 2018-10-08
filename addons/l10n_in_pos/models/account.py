@@ -4,12 +4,6 @@
 from odoo import fields, models
 
 
-class AccountMoveLine(models.Model):
-    _inherit = "account.move.line"
-
-    l10n_in_pos_order_id = fields.Many2one('pos.order', string="POS order")
-
-
 class AccountBankStatementLine(models.Model):
     _inherit = "account.bank.statement.line"
 

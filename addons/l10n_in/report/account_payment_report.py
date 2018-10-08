@@ -23,12 +23,35 @@ class L10nInPaymentReport(models.AbstractModel):
     supply_type = fields.Char(string="Supply Type")
 
     l10n_in_tax_id = fields.Many2one('account.tax', string="Tax")
-    l10n_in_description = fields.Char(string="Rate")
+    tax_rate_tag = fields.Char(string="Rate")
     igst_amount = fields.Float(compute="_compute_tax_amount", string="IGST amount")
     cgst_amount = fields.Float(compute="_compute_tax_amount", string="CGST amount")
     sgst_amount = fields.Float(compute="_compute_tax_amount", string="SGST amount")
     cess_amount = fields.Float(compute="_compute_tax_amount", string="CESS amount")
     gross_amount = fields.Float(compute="_compute_tax_amount", string="Gross advance")
+
+    def _compute_l10n_in_tax(self, taxes, price_unit, currency=None, quantity=1.0, product=None, partner=None):
+        """common method to compute gst tax amount base on tax group"""
+        res = {'igst_amount': 0.0, 'sgst_amount': 0.0, 'cgst_amount': 0.0, 'cess_amount': 0.0}
+        AccountTax = self.env['account.tax']
+        igst_group = self.env.ref('l10n_in.igst_group', False)
+        cgst_group = self.env.ref('l10n_in.cgst_group', False)
+        sgst_group = self.env.ref('l10n_in.sgst_group', False)
+        cess_group = self.env.ref('l10n_in.cess_group', False)
+        filter_tax = taxes.filtered(lambda t: t.type_tax_use != 'none')
+        tax_compute = filter_tax.compute_all(price_unit, currency=currency, quantity=quantity, product=product, partner=partner)
+        for tax_data in tax_compute['taxes']:
+            tax_group = AccountTax.browse(tax_data['id']).tax_group_id
+            if tax_group == sgst_group:
+                res['sgst_amount'] += tax_data['amount']
+            elif tax_group == cgst_group:
+                res['cgst_amount'] += tax_data['amount']
+            elif tax_group == igst_group:
+                res['igst_amount'] += tax_data['amount']
+            elif tax_group == cess_group:
+                res['cess_amount'] += tax_data['amount']
+        res.update(tax_compute)
+        return res
 
     #TO BE OVERWRITTEN
     @api.depends('currency_id')
@@ -42,7 +65,7 @@ class L10nInPaymentReport(models.AbstractModel):
             ap.l10n_in_gstin_partner_id AS gstin_partner_id,
             ap.payment_type,
             ap.l10n_in_tax_id as l10n_in_tax_id,
-            CASE WHEN tax.l10n_in_description IS NULL THEN '' ELSE tax.l10n_in_description END AS l10n_in_description,
+            tt.name AS tax_rate_tag,
             am.partner_id,
             am.amount AS payment_amount,
             ap.journal_id,
@@ -64,6 +87,8 @@ class L10nInPaymentReport(models.AbstractModel):
             JOIN account_payment ap ON ap.id = aml.payment_id
             JOIN account_account AS ac ON ac.id = aml.account_id
             JOIN account_tax AS tax ON tax.id = ap.l10n_in_tax_id
+            JOIN account_tax_account_tag ttr ON ttr.account_tax_id = tax.id
+            JOIN account_account_tag tt ON tt.id = ttr.account_account_tag_id
             JOIN res_partner p ON p.id = aml.partner_id
             LEFT JOIN res_country_state pos ON pos.id = am.l10n_in_place_of_supply
             LEFT JOIN res_partner gstin_p ON gstin_p.id = ap.l10n_in_gstin_partner_id
@@ -71,7 +96,7 @@ class L10nInPaymentReport(models.AbstractModel):
             """
 
     def _where(self):
-        return """WHERE aml.payment_id IS NOT NULL
+        return """WHERE aml.payment_id IS NOT NULL AND tt.l10n_in_use_in_report = True
             AND ac.internal_type IN ('receivable', 'payable') AND am.state = 'posted'"""
 
     @api.model_cr
@@ -96,7 +121,7 @@ class AdvancesPaymentReport(models.Model):
         account_move_line = self.env['account.move.line']
         for record in self:
             base_amount = record.payment_amount - record.reconcile_amount
-            taxes_data = account_move_line._compute_l10n_in_tax(
+            taxes_data = self._compute_l10n_in_tax(
                 taxes=record.l10n_in_tax_id,
                 price_unit=base_amount,
                 currency=record.currency_id or None,
@@ -135,7 +160,7 @@ class L10nInAdvancesPaymentAdjustmentReport(models.Model):
     def _compute_tax_amount(self):
         account_move_line = self.env['account.move.line']
         for record in self:
-            taxes_data = account_move_line._compute_l10n_in_tax(
+            taxes_data = self._compute_l10n_in_tax(
                 taxes=record.l10n_in_tax_id,
                 price_unit=record.amount,
                 currency=record.currency_id or None,

@@ -39,18 +39,34 @@ class L10nInProductHsnReport(models.Model):
             aml.product_uom_id AS uom_id,
             aml.quantity,
             aml.date_maturity AS date,
-            aml.balance * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END) As price_total,
-            aml.l10n_in_igst_amount AS igst_amount,
-            aml.l10n_in_cgst_amount AS cgst_amount,
-            aml.l10n_in_sgst_amount AS sgst_amount,
-            aml.l10n_in_cess_amount AS cess_amount,
+            (CASE WHEN aml.tax_line_id IS NOT NULL THEN aml.tax_base_amount ELSE aml.balance END) * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END) As price_total,
             am.l10n_in_gstin_partner_id AS gstin_partner_id,
             am.journal_id,
-            (ABS(aml.balance) + ABS(aml.l10n_in_igst_amount) + ABS(aml.l10n_in_cgst_amount) + ABS(aml.l10n_in_sgst_amount) + ABS(aml.l10n_in_cess_amount)) * sign(aml.balance) * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END)  AS total,
+            (ABS(aml.balance) + avg(aml.tax_base_amount)) * sign(aml.balance) * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END)  AS total,
             aj.company_id,
             CASE WHEN pt.l10n_in_hsn_code IS NULL THEN '' ELSE pt.l10n_in_hsn_code END AS hsn_code,
             CASE WHEN pt.l10n_in_hsn_description IS NULL THEN '' ELSE pt.l10n_in_hsn_description END AS hsn_description,
-            CASE WHEN uom.l10n_in_code IS NULL THEN '' ELSE uom.l10n_in_code END AS l10n_in_uom_code
+            CASE WHEN uom.l10n_in_code IS NULL THEN '' ELSE uom.l10n_in_code END AS l10n_in_uom_code,
+            CASE WHEN at.tax_group_id IN
+                (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='igst_group')
+                THEN aml.balance
+                ELSE 0
+                END AS igst_amount,
+            CASE WHEN at.tax_group_id IN
+                (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='cgst_group')
+                THEN aml.balance
+                ELSE 0
+                END AS cgst_amount,
+            CASE WHEN at.tax_group_id IN
+                (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='sgst_group')
+                THEN aml.balance
+                ELSE 0
+                END AS sgst_amount,
+            CASE WHEN at.tax_group_id IN
+                (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='cess_group')
+                THEN aml.balance
+                ELSE 0
+                END AS cess_amount
         """
         return select_str
 
@@ -61,14 +77,41 @@ class L10nInProductHsnReport(models.Model):
             JOIN account_journal aj ON aj.id = am.journal_id
             JOIN product_product pp ON pp.id = aml.product_id
             JOIN product_template pt ON pt.id = pp.product_tmpl_id
+            LEFT JOIN account_tax at ON at.id = aml.tax_line_id
+            LEFT JOIN account_tax_account_tag ttr ON ttr.account_tax_id = at.id
+            LEFT JOIN account_account_tag tt ON tt.id = ttr.account_account_tag_id
+            LEFT JOIN account_move_line_account_tax_rel mt ON mt.account_move_line_id = aml.id
             LEFT JOIN uom_uom uom ON uom.id = aml.product_uom_id
             LEFT JOIN account_invoice ai ON ai.id = aml.invoice_id
-            WHERE aa.internal_type = 'other' AND aml.tax_line_id IS NULL AND (ai.type IS NULL OR ai.type not in ('out_refund', 'in_refund'))
+            WHERE aa.internal_type = 'other' AND (aml.tax_line_id IS NOT NULL OR mt.account_tax_id IS NULL) AND (ai.type IS NULL OR ai.type not in ('out_refund', 'in_refund'))
         """
         return from_str
+
+    def _group_by(self):
+        group_by = """ GROUP BY
+            aml.id,
+            aml.move_id,
+            aml.partner_id,
+            aml.product_id,
+            aml.product_uom_id,
+            aml.quantity,
+            aml.date_maturity,
+            aml.tax_line_id,
+            aml.tax_base_amount,
+            aml.balance,
+            am.l10n_in_gstin_partner_id,
+            am.journal_id,
+            aj.type,
+            aj.company_id,
+            pt.l10n_in_hsn_code,
+            pt.l10n_in_hsn_description,
+            uom.l10n_in_code,
+            at.tax_group_id
+        """
+        return group_by
 
     @api.model_cr
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
-        self.env.cr.execute("""CREATE OR REPLACE VIEW %s AS (%s %s)""" % (
-            self._table, self._select(), self._from()))
+        self.env.cr.execute("""CREATE OR REPLACE VIEW %s AS (%s %s %s)""" % (
+            self._table, self._select(), self._from(), self._group_by()))
