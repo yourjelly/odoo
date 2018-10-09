@@ -1,0 +1,9 @@
+<odoo>
+    <data>
+        <template id="assets_backend" name="product_funnel_chart" inherit_id="web.assets_backend">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/product_funnel/static/src/js/funnel_chart.js"></script>
+            </xpath>
+        </template>
+    </data>
+</odoo>

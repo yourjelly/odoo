@@ -1,0 +1,23 @@
+<odoo>
+    <data>
+        <record id="product_template_view_form_product_funnel" model="ir.ui.view">
+            <field name="name">product.template.form</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='product_variant_id']" position="after">
+                    <field name="location_name"/>
+                </xpath>
+            </field>
+        </record>
+        <!--Client action for funnel chart-->
+        <record id="product_funnel_client_action" model="ir.actions.client">
+            <field name="name">Chart Action</field>
+            <field name="tag">funnelchart</field>
+        </record>
+        <!--menu item-->
+        <menuitem name="Funnel Chart Generator" id="product_funnel_menu_root" sequence="1" web_icon="product_funnel,static/description/app_icon.png"/>
+
+        <menuitem name="Funnel Chart" id="product_funnel_menu_chart" parent="product_funnel.product_funnel_menu_root"   sequence="2" action="product_funnel.product_funnel_client_action"/>
+    </data>
+</odoo>

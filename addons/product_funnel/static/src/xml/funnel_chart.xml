@@ -1,0 +1,33 @@
+<templates>
+    <!--template for generate funnel chart-->
+    <t t-name="chart_template">
+        <div>
+            <center><div class="funnelchart" style="margin-top:70px;"></div></center>
+        </div>
+    </t>
+
+    <t t-name="selection_template">
+        <div style="font-family:'Comic Sans MS', cursive, sans-serif;">
+            <p style='font-size:25px;'>
+                Choose type of Search....
+            </p>
+            <div class="form-check-inline">
+                <label class="form-check-label">
+                    <input type="radio" name="selection" value="product" class="form-check-input product" checked="true">Product</input>
+                </label>
+            </div>
+            <div class="form-check-inline">
+                <label class="form-check-label">
+                    <input type="radio" name="selection" value="location" class="form-check-input">Location</input>
+                </label>
+            </div>
+            <div class="selection"></div>
+        </div>
+    </t>
+
+    <t t-name="search_template">
+        <select class="form-control col-md-3">
+            <option t-foreach="values" t-as="s"><t t-esc="s"/></option>
+        </select>
+    </t>
+</templates>
