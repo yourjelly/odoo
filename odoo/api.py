@@ -1036,17 +1036,28 @@ class Cache(object):
 
     def invalidate(self, spec=None):
         """ Invalidate the cache, partially or totally depending on ``spec``. """
+        envs = Environment.envs
         if spec is None:
+            for env in envs:
+                for field, ids in env._protected.items():
+                    if ids:
+                        raise Exception("Invalidate field being computed: %s" % field)
             self._data.clear()
         elif spec:
             data = self._data
             for field, ids in spec:
                 if ids is None:
+                    ids = set(data[field])
                     data.pop(field, None)
                 else:
+                    ids = set(ids)
                     field_cache = data[field]
                     for id in ids:
                         field_cache.pop(id, None)
+                if ids:
+                    for env in envs:
+                        if not ids.isdisjoint(env._protected.get(field, ())):
+                            raise Exception("Invalidate field being computed: %s" % field)
 
     def check(self, env):
         """ Check the consistency of the cache for the given environment. """
