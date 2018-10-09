@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="graph_whisker_action_graphwidget" model="ir.actions.client">
+        <field name="name">InputTag</field>
+        <field name="tag">inputgraphtag</field>
+    </record>
+
+    <menuitem id="root_menu" name="Whisker" sequence="3"/> <!-- menuforroot -->
+
+    <menuitem
+        id="graph_whisker_menu" name="Graph" parent="root_menu" sequence="2"
+        action="graph_whisker_action_graphwidget"/><!--graphmenu-->
+
+</odoo>

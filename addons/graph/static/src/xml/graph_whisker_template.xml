@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+    <t t-name="graph.whisker_template">
+        <div>
+            <div align="center" class="form-group">
+                <select class="form-control" id="users" style="width:400px; display:initial; margin-top:5px; -webkit-appearance: none; height:35px; border: inset;">
+                    <option t-foreach="widget.leaderlist" t-as="l"><t t-esc="l"/></option>
+                </select>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="graph.whisker_graph_template">
+        <div class="gallery" id="chart" style="height:95%">
+            <svg class="graphsvg" style="display: block; margin: 0px; padding: 0px; height: 100%; width: 100%;"/>
+        </div>
+    </t>
+</templates>
