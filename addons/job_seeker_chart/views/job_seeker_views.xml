@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="crm_case_form_view_job_inherit_job_seeker_chart" model="ir.ui.view">
+        <field name="name">hr.applicant.inherit.view.form</field>
+        <field name="model">hr.applicant</field>
+        <field name="inherit_id" ref="hr_recruitment.crm_case_form_view_job"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="replace">
+                <field name="partner_id" context="{'search_default_customer':1, 'show_address': 1}" options='{"always_reload": True}'/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="crm_case_tree_view_job_inherit_job_seeker_chart" model="ir.ui.view">
+        <field name="name">hr.applicant.inherit.view.tree</field>
+        <field name="model">hr.applicant</field>
+        <field name="inherit_id" ref="hr_recruitment.crm_case_tree_view_job"></field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='job_id']" position="after">
+                <field name="partner_id" />
+            </xpath>
+        </field>
+    </record>
+
+    <record id="job_seeker_widget_action" model="ir.actions.client">
+        <field name="name">Job Seeker Graph Widget</field>
+        <field name="tag">job_seeker_widget</field>
+    </record>
+
+    <menuitem id="root_menu" name="Job Seeker Graph" sequence="9" />
+
+    <menuitem id="job_seeker_widget_menu" name="Job Seeker Chart" parent="root_menu" action="job_seeker_widget_action" />
+</odoo>

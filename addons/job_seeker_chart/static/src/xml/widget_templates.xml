@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="job_seeker_widget_template">
+        <div class="col-xs-5">
+            <span class="text-dark">Search by:</span>
+
+            <div class="custom-control custom-radio custom-control-inline">
+                <input type="radio" class="choice_radio custom-control-input" id="location" name="search_by" value="location" checked="checked" />
+                <label class="custom-control-label cur_pointer" for="location">Location</label>
+            </div>
+            <div class="custom-control custom-radio custom-control-inline">
+                <input type="radio" class="choice_radio custom-control-input" id="job_profile" name="search_by" value="job_profile" />
+                <label class="custom-control-label cur_pointer" for="job_profile">Job Profile</label>
+            </div>
+
+            <div class="form-group mt8" id="choose_one"/>
+        </div>
+    </t>
+    <t t-name="job_seeker_graph_template">
+        <div class="container">
+            <div class="row mt16" id="prependTo">
+                <div class="col-xs-7" id="pieChart"/>
+            </div>
+        </div>
+    </t>
+    <t t-name="job_seeker_dropdown_data">
+        <select class="custom-select" id="choice_select">
+            <t t-foreach="widget.choice" t-as="l">
+                <option t-att-value="l"><t t-esc="l"/></option>
+            </t>
+        </select>
+    </t>
+</templates>

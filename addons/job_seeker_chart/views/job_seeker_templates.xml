@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="job_seeker_chart_template" name="job seeker chart assets backend" inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/job_seeker_chart/static/src/js/job_seeker.js"></script>
+        </xpath>
+    </template>
+</odoo>
