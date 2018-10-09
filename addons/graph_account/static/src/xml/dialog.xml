@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="inputTemplate">
+        <div class="row mt8 container">
+            <div class="col-md-3">
+                <input type="radio" id="partner" value="partner" class="partner" name="search" />
+                <label for="partner">Partner</label>
+                <input type="radio" id="journal" value="journal" class="journal" name="search" />
+                <label for="journal">Journal</label>
+                <div class="dataTemplate">
+                </div>
+            </div>
+        </div>
+    </t>
+    <t t-name="line_chart_template">
+        <div>
+            <div id="line_chart"><svg></svg></div>
+        </div>
+    </t>
+    <t t-name="dataof_dropdown">
+        <select class="form-control selected" t-if="values">
+            <t t-foreach="values" t-as="selectedvalue">
+                <option t-att-value="selectedvalue.name" t-att-data-id="selectedvalue.id"><t t-esc="selectedvalue.name"/></option>
+            </t>
+        </select>
+    </t>
+</templates>
