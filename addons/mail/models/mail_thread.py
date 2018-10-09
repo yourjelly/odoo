@@ -1050,6 +1050,14 @@ class MailThread(models.AbstractModel):
             self._routing_warn(_('model %s does not accept document creation') % model, _('skipping'), message_id, route, assert_model)
             return False
 
+        # Detect and Update if message is forwarded
+        if not thread_id:  # only for new messages
+            forward_vals = self._message_extract_forwarded(message_dict['body'])
+            if message_dict.get('from'):
+                message_dict['body'] = "<b>Actual mail forwarded by:</b> %s <br/> %s" % (message_dict['from'], message_dict['body'])
+                message_dict.update(forward_vals)
+                email_from = message_dict['from']
+
         # Update message author if asked. We do it now because we need it for aliases (contact settings)
         if not author_id and update_author:
             author_ids = self.env['mail.thread']._find_partner_from_emails([email_from], res_model=model, res_id=thread_id)
@@ -1593,6 +1601,24 @@ class MailThread(models.AbstractModel):
 
         body, attachments = self._message_extract_payload_postprocess(message, body, attachments)
         return body, attachments
+
+    @api.model
+    def _message_extract_forwarded(self, message_body):
+        data = {}
+        # For Gmail Forward Format
+        re_gmail_forward = "-+ ?Forwarded message ?-+"
+        re_gmail_from = "From: ?<strong.*?>(.*?)</strong> ?<span.*?>&lt;<a.*?>(.*?)</a>"
+        re_gmail_subject = "Subject: ?(.*?)<br>"
+        forward_match = re.findall(re_gmail_forward, message_body)
+        if forward_match:
+            from_match = re.findall(re_gmail_from, message_body)
+            if from_match:
+                data['email_from'] = data['from'] = "%s <%s>" % (from_match[-1][0], from_match[-1][-1])
+            subject_match = re.findall(re_gmail_subject, message_body)
+            if subject_match:
+                data['subject'] = subject_match[0]
+
+        return data
 
     @api.model
     def message_parse(self, message, save_original=False):
