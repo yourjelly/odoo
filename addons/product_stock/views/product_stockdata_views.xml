@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="product_stock_view_form" model="ir.ui.view">
+        <field name="name">product.stock.view.form</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/> 
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='categ_id']" position="after">
+                <field name="city"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="product_stock_graph" model="ir.actions.client">
+        <field name="name">Graph</field>
+        <field name="tag">graph</field>
+    </record>
+
+    <record id="product_stock_view_tree" model="ir.ui.view">
+        <field name="name">product.stock.view.tree</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="city"/>
+                <field name="qty_available"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="product_stock_action_tree" model="ir.actions.act_window">
+        <field name="name">Product Records</field>
+        <field name="res_model">product.template</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="product_stock_menu_root" name="Graph Data"/>
+    <menuitem id="product_stock_menu_graph" name="Graph" action="product_stock_graph" parent="product_stock_menu_root"/>
+    <menuitem id="product_stock_menu_tree" name="Data" action="product_stock_action_tree" parent="product_stock_menu_root"/>
+</odoo>

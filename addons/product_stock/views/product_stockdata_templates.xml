@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="product_stockdata_graph" name="graph" inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/product_stock/static/libs/d3.v3.min.js"></script>
+            <script type="text/javascript" src="/product_stock/static/src/js/graph.js"></script>
+        </xpath>
+    </template>
+</odoo>

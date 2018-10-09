@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="product_graph">
+        <div class="container">
+            <div class="">
+                <center><h3>Bubble Chart</h3></center>
+            </div>
+            <div>
+                <h5>Search by Product or City</h5>
+                <label><input class="product_radio radio-inline mt8" type="radio" checked="checked" name="select_type" value="Product"/>Product</label>
+                <label><input class="city_radio radio-inline ml8" type="radio" name="select_type" value="City"/>City</label>
+            </div>
+            <div class="dropdown">
+                
+            </div>
+            <div>
+                <input type="submit" class="btn btn-primary mt16" id="graphbtn" value="Graph" hidden="hidden"/>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="dropdown_temp">
+        <select class="select_dropdown form-control">
+            <option t-att-data-id="data" t-foreach="values" t-as="data">
+                <t t-esc="data"/>
+            </option>
+        </select>   
+    </t>
+
+    <t t-name="product_showGraph">
+        <div class="graph container">
+            <center><svg/></center>
+        </div>
+    </t>
+
+</templates>

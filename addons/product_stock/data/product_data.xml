@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- BUbble chart/graph Products -->
+
+        <record id="graph_product_product_5" model="product.product">
+            <field name="name">Chart Corner Desk Right Sit</field>
+            <field name="city">3</field>
+            <field name="type">product</field>
+            <field name="image" type="base64" file="product/static/img/product_product_5-image.png"/>
+        </record>
+
+        <record id="graph_product_product_5" model="product.product">
+            <field name="name">Chart Large Cabinet</field>
+            <field name="city">1</field>
+            <field name="type">product</field>
+            <field name="image" type="base64" file="product/static/img/product_product_6-image.png"/>
+        </record>
+
+        <record id="graph_product_7" model="product.product">
+            <field name="name">Chart Storage Box</field>
+            <field name="city">2</field>
+            <field name="type">product</field>
+            <field name="image" type="base64" file="product/static/img/product_product_7-image.png"/>
+        </record>
+
+        <record id="graph_product_8" model="product.product">
+            <field name="name">Chart Large Desk</field>
+            <field name="city">5</field>
+            <field name="type">product</field>
+            <field name="image" type="base64" file="product/static/img/product_product_8-image.png"/>
+        </record>
+
+        <record id="graph_product_9" model="product.product">
+            <field name="name">Chart Pedal Bin</field>
+            <field name="city">2</field>
+            <field name="type">product</field>
+            <field name="image" type="base64" file="product/static/img/product_product_9-image.png"/>
+        </record>
+
+        <record id="graph_product_10" model="product.product">
+            <field name="name">Chart Cabinet with Doors</field>
+            <field name="city">3</field>
+            <field name="type">product</field>
+            <field name="image" type="base64" file="product/static/img/product_product_10-image.png"/>
+        </record>
+
+        <record id="graph_product_11" model="product.product">
+            <field name="name">Chart Conference Chair</field>
+            <field name="city">4</field>
+            <field name="type">product</field>
+            <field name="image" type="base64" file="product/static/img/product_product_11-image.png"/>
+        </record>
+
+    </data>
+</odoo>
