@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--  ********************Activity model form view**************  -->
+    <record id="mail_activity_view_form" model="ir.ui.view">
+        <field name="name">mail.activity.form.view</field>
+        <field name="model">mail.activity</field>
+        <field name="inherit_id" ref="mail.mail_activity_view_form_popup"></field>
+        <field name="arch" type="xml">
+                <xpath expr="//field[@name='summary']" position="after">
+                    <field name="startdate"/>
+                </xpath>
+        </field>
+    </record>
+
+
+    <!--  ********************Display Activity model tree form**************  -->
+    <record id="activity_view_tree" model="ir.ui.view">
+        <field name="name">activity.tree.view</field>
+        <field name="model">mail.activity</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="activity_type_id"/>
+                <field name="user_id"/>
+                <field name="startdate"/>
+                <field name="date_deadline"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!--  ********************Display Activity model window form**************  -->
+    <record id="activity_action" model="ir.actions.act_window">
+        <field name="name">Activity</field>
+        <field name="res_model">mail.activity</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!--  ********************Display widget**************  -->
+    <record id="activity_action_graph" model="ir.actions.client">
+        <field name="name">Graph</field>
+        <field name="tag">author_graph</field>
+    </record>
+
+    <menuitem id="activity_graph_root" name="MyApp"/>
+
+    <menuitem id="activity_menu" name="Activities" parent="activity_graph_root" action="activity_action"/>
+
+    <menuitem id="activity_menu_widget" name="Graph" parent="activity_graph_root" action="activity_action_graph"/>
+
+</odoo>

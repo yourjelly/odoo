@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+    <t t-name="getinput_template">
+        <div class="mt32 ml32">
+            <div class="row">
+                <h5>Search by :</h5> 
+                <div class="container mt 8">
+                    <input type="radio" class="radio-inline author" name="search_type" value="Author" checked="checked">Author</input>
+                    <input type="radio" class="radio-inline ml16 type" name="search_type" value="Type">Activity Type</input>
+    
+                    <div class="dropdown">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </t>
+    <t t-name="dropdown_template">
+        <select class="form-control mt8 dropdown_menu" style="width:60%;">
+            <option value="">Please select option</option>
+            <option t-foreach="values" t-as="d">
+                <t t-esc="d"/>
+            </option>
+        </select>
+    </t>
+    <t t-name="graph_template">
+        <div class="ml64 disp-graph"><svg/></div>
+    </t>
+</templates>
