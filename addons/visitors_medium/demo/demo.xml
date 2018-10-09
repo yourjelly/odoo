@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Past Year -->
+        <record id="user1" model="visitors_medium.graph">
+            <field name="user_id" ref="base.user_demo"/>
+            <field name="date">2017-08-2</field>
+            <field name="source_id" ref="utm.utm_medium_website"/>
+            <field name="target_id" ref="utm.utm_medium_banner"/>
+        </record>
+        <record id="user2" model="visitors_medium.graph">
+            <field name="user_id" ref="base.user_demo"/>
+            <field name="date">2017-08-2</field>
+            <field name="source_id" ref="utm.utm_medium_facebook"/>
+            <field name="target_id" ref="utm.utm_medium_banner"/>
+        </record>
+        <record id="user3" model="visitors_medium.graph">
+            <field name="user_id" ref="base.user_demo"/>
+            <field name="date">2017-08-2</field>
+            <field name="source_id" ref="utm.utm_medium_direct"/>
+            <field name="target_id" ref="utm.utm_medium_facebook"/>
+        </record>
+        <record id="user4" model="visitors_medium.graph">
+            <field name="user_id" ref="base.user_demo"/>
+            <field name="date">2017-08-2</field>
+            <field name="source_id" ref="utm.utm_medium_direct"/>
+            <field name="target_id" ref="utm.utm_medium_twitter"/>
+        </record>
+        <record id="user5" model="visitors_medium.graph">
+            <field name="user_id" ref="base.user_demo"/>
+            <field name="date">2017-08-2</field>
+            <field name="source_id" ref="utm.utm_medium_twitter"/>
+            <field name="target_id" ref="utm.utm_medium_facebook"/>
+        </record>
+        <!-- Past Month -->
+        <record id="user6" model="visitors_medium.graph">
+            <field name="user_id" ref="base.user_demo"/>
+            <field name="date">2018-07-3</field>
+            <field name="source_id" ref="utm.utm_medium_website"/>
+            <field name="target_id" ref="utm.utm_medium_banner"/>
+        </record>
+        <record id="user7" model="visitors_medium.graph">
+            <field name="user_id" ref="base.user_demo"/>
+            <field name="date">2018-07-3</field>
+            <field name="source_id" ref="utm.utm_medium_facebook"/>
+            <field name="target_id" ref="utm.utm_medium_banner"/>
+        </record>
+        <record id="user8" model="visitors_medium.graph">
+            <field name="user_id" ref="base.user_demo"/>
+            <field name="date">2018-07-3</field>
+            <field name="source_id" ref="utm.utm_medium_website"/>
+            <field name="target_id" ref="utm.utm_medium_direct"/>
+        </record>
+        <record id="user9" model="visitors_medium.graph">
+            <field name="user_id" ref="base.user_demo"/>
+            <field name="date">2018-07-3</field>
+            <field name="source_id" ref="utm.utm_medium_direct"/>
+            <field name="target_id" ref="utm.utm_medium_twitter"/>
+        </record>
+        <record id="user10" model="visitors_medium.graph">
+            <field name="user_id" ref="base.user_demo"/>
+            <field name="date">2018-07-3</field>
+            <field name="source_id" ref="utm.utm_medium_twitter"/>
+            <field name="target_id" ref="utm.utm_medium_banner"/>
+        </record>
+        <!-- Past Week -->
+        <record id="user11" model="visitors_medium.graph">
+            <field name="user_id" ref="base.user_demo"/>
+            <field name="date">2018-07-26</field>
+            <field name="source_id" ref="utm.utm_medium_website"/>
+            <field name="target_id" ref="utm.utm_medium_facebook"/>
+        </record>
+        <record id="user12" model="visitors_medium.graph">
+            <field name="user_id" ref="base.user_demo"/>
+            <field name="date">2018-07-26</field>
+            <field name="source_id" ref="utm.utm_medium_facebook"/>
+            <field name="target_id" ref="utm.utm_medium_banner"/>
+        </record>
+        <record id="user13" model="visitors_medium.graph">
+            <field name="user_id" ref="base.user_demo"/>
+            <field name="date">2018-07-26</field>
+            <field name="source_id" ref="utm.utm_medium_website"/>
+            <field name="target_id" ref="utm.utm_medium_facebook"/>
+        </record>
+        <record id="user14" model="visitors_medium.graph">
+            <field name="user_id" ref="base.user_demo"/>
+            <field name="date">2018-07-26</field>
+            <field name="source_id" ref="utm.utm_medium_direct"/>
+            <field name="target_id" ref="utm.utm_medium_twitter"/>
+        </record>
+        <record id="user15" model="visitors_medium.graph">
+            <field name="user_id" ref="base.user_demo"/>
+            <field name="date">2018-07-26</field>
+            <field name="source_id" ref="utm.utm_medium_twitter"/>
+            <field name="target_id" ref="utm.utm_medium_banner"/>
+        </record>
+    </data>
+</odoo>

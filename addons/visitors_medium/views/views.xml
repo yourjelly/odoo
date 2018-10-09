@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="visitors_medium_graph_view_form">
+            <field name="name">Visitors Medium Form View</field>
+            <field name="model">visitors_medium.graph</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="user_id"/>
+                            <field name="date"/>
+                            <field name="source_id"/>
+                            <field name="target_id"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="visitors_medium_graph_view_tree">
+            <field name="name">visitors_medium Tree View</field>
+            <field name="model">visitors_medium.graph</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="user_id"/>
+                    <field name="date"/>
+                    <field name="source_id"/>
+                    <field name="target_id"/>
+                </tree>
+            </field>
+        </record>
+    
+        <record model="ir.actions.act_window" id="visitors_medium_graph_action">
+            <field name="name">Graph Action</field>
+            <field name="res_model">visitors_medium.graph</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <record id="sankey_graph_action" model="ir.actions.client">
+            <field name="name">Sankey Graph</field>
+            <field name="tag">visitor_medium_graph</field>
+        </record>
+
+        <!-- Top menu item -->
+    
+        <menuitem name="visitors Medium" id="visitors_medium_graph_menu_root"/>
+    
+        <!-- actions -->
+    
+        <menuitem name="Visitors" id="visitors_medium_graph_menu_tree" parent="visitors_medium_graph_menu_root" action="visitors_medium_graph_action"/>
+
+        <menuitem name="Medium" id="widget_visitors_medium" parent="visitors_medium_graph_menu_root" action="sankey_graph_action"/>
+    </data>
+</odoo>

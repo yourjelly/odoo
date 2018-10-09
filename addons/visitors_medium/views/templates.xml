@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <template id="assets_graph" name="Visitor's Medium" inherit_id="web.assets_backend">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/visitors_medium/static/src/js/visitor_sankey_widget.js"/>
+            </xpath>
+        </template>
+    </data>
+</odoo>
