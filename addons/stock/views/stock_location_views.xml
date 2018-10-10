@@ -97,6 +97,15 @@
         </field>
     </record>
 
+    <record id="view_location_hierarchical" model="ir.ui.view">
+        <field name="name">stock.location.hierarchical</field>
+        <field name="model">stock.location</field>
+        <field name="arch" type="xml">
+            <hierarchical string="Stock Location" parent_field="location_id">
+            </hierarchical>
+        </field>
+    </record>
+
     <record id="stock_location_view_tree2_editable" model="ir.ui.view">
         <field name="name">stock.location.tree2.editable</field>
         <field name="model">stock.location</field>
@@ -114,6 +123,7 @@
         <field name="res_model">stock.location</field>
         <field name="type">ir.actions.act_window</field>
         <field name="view_type">form</field>
+        <field name="view_mode">tree,form,hierarchical</field>
         <field name="view_id" ref="view_location_tree2"/>
         <field name="search_view_id" ref="view_location_search"/>
         <field name="context">{'search_default_in_location':1}</field>
