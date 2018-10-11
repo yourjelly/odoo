@@ -3792,7 +3792,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                     imd.browse(d_id).unlink()
 
         # create records
-        records = self.create([data['values'] for data in to_create])
+        records = self.with_context(mail_auto_subscribe_no_notify=0).create([data['values'] for data in to_create])
         for data, record in pycompat.izip(to_create, records):
             data['record'] = record
 

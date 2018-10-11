@@ -230,6 +230,9 @@ class MailMail(models.Model):
                 email sending process has failed
             :return: True
         """
+        print("SENDING MAIL")
+        import traceback
+        traceback.print_stack()
         for server_id, batch_ids in self._split_by_server():
             smtp_session = None
             try:
