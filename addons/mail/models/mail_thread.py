@@ -376,7 +376,7 @@ class MailThread(models.AbstractModel):
                 alias = aliases[0]
 
         if alias:
-            email_link = "<a href='mailto:%(email)s'>%(email)s</a>" % {'email': alias.name_get()[0][1]}
+            email_link = "<a href='mailto:%(email)s'>%(email)s</a>" % {'email': alias.display_name}
             if nothing_here:
                 return "<p class='o_view_nocontent_smiling_face'>%(dyn_help)s</p>" % {
                     'dyn_help': _("Add a new %(document)s or send an email to %(email_link)s") % {
@@ -2338,6 +2338,8 @@ class MailThread(models.AbstractModel):
         :param template: XML ID of template used for the notification;
         """
         if not self or self.env.context.get('mail_auto_subscribe_no_notify'):
+            return
+        if not self.env.registry.ready:  # Don't send notification during install
             return
 
         view = self.env['ir.ui.view'].browse(self.env['ir.model.data'].xmlid_to_res_id(template))
