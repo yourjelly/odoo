@@ -86,7 +86,7 @@ class StatusController(http.Controller):
     def status(self):
         result = "<html><head></head><body>List of drivers and values: <br/> <ul>"
         for path in drivers:
-            result += "<li>" + path + ":" + str(drivers[path].value) + "</li>"
+            result += "<li>" + path + ":" + str(drivers[path].get_value()) + "</li>"
         result += "</ul>"
         result +=" </body></html>"
         return result
@@ -95,7 +95,7 @@ class StatusController(http.Controller):
     def statusdetail(self, identifier):
         for device in drivers:
             if device.find(identifier) != -1:
-                return str(drivers[device].value)
+                return str(drivers[device].get_value())
         return ''
 
     @http.route('/hw_drivers/driveraction/<string:identifier>', type='json', auth='none', cors='*', csrf=False)
@@ -136,7 +136,7 @@ class Driver(Thread):
     def supported(self):
         pass
 
-    def value(self):
+    def get_value(self):
         pass
 
     def get_name(self):
@@ -177,7 +177,7 @@ class USBDriver(Driver,metaclass=UsbMetaClass):
     def get_connection(self):
         return 'direct'
 
-    def value(self):
+    def get_value(self):
         return self.value
 
 
@@ -236,7 +236,7 @@ class BtDriver(Driver, metaclass=BtMetaClass):
     def get_name(self):
         return self.dev.alias()
 
-    def value(self):
+    def get_value(self):
         return self.value
 
     def action(self, action):
@@ -288,8 +288,6 @@ class USBDeviceManager(Thread):
                 send_iot_box_device(send_printer = first_time)
                 first_time = False
             time.sleep(3)
-            
-
 
 
 
@@ -418,5 +416,3 @@ def send_iot_box_device(send_printer):
                                 headers=headers)
         except:
             _logger.warning('Could not reach configured server')
-
-
