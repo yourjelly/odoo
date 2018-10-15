@@ -1034,7 +1034,10 @@ class AccountInvoice(models.Model):
         return vals
 
     @api.multi
-    def get_taxes_values(self):
+    def get_taxes_values(self, tax_group_fields=False):
+        default_tax_group_fields = set(['amount', 'base'])
+        if tax_group_fields:
+            default_tax_group_fields |= set(tax_group_fields)
         tax_grouped = {}
         round_curr = self.currency_id.round
         for line in self.invoice_line_ids:
@@ -1050,8 +1053,8 @@ class AccountInvoice(models.Model):
                     tax_grouped[key] = val
                     tax_grouped[key]['base'] = round_curr(val['base'])
                 else:
-                    tax_grouped[key]['amount'] += val['amount']
-                    tax_grouped[key]['base'] += round_curr(val['base'])
+                    for field in default_tax_group_fields:
+                        tax_grouped[key][field] += val.get(field) or 0
         return tax_grouped
 
     @api.multi
