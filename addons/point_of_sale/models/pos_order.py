@@ -158,21 +158,15 @@ class PosOrder(models.Model):
         '''This method is designed to be inherited in a custom module'''
         return False
 
-    def _create_account_move_hook(self):
-        """
-        Creating hook method so that we can use any field value of the record using self
-        while overriding this method in another modules
-        """
+    def _create_account_move(self):
         self.ensure_one()
-        journal_id = self.env['ir.config_parameter'].sudo().get_param(
-                    'pos.closing.journal_id_%s' % self.sale_journal.company_id.id, default=self.sale_journal.id)
-        return self._create_account_move(self.session_id.start_at, self.name, journal_id, self.company_id.id)
-
-    def _create_account_move(self, dt, ref, journal_id, company_id):
-        date_tz_user = fields.Datetime.context_timestamp(self, fields.Datetime.from_string(dt))
+        date_tz_user = fields.Datetime.context_timestamp(self, fields.Datetime.from_string(self.session_id.start_at))
         date_tz_user = fields.Date.to_string(date_tz_user)
-        return self.env['account.move'].sudo().create({'ref': self.name, 'journal_id': journal_id, 'date': date_tz_user})
-
+        return self.env['account.move'].sudo().create({
+            'ref': self.name,
+            'journal_id': self.sale_journal.id,
+            'date': date_tz_user
+        })
 
     def _prepare_invoice(self):
         """
@@ -371,7 +365,8 @@ class PosOrder(models.Model):
             order_account = order.partner_id.property_account_receivable_id.id or account_def and account_def.id
             partner_id = ResPartner._find_accounting_partner(order.partner_id).id or False
             if move is None:
-                move = order._create_account_move_hook()
+                # Create an entry for the sale
+                move = order._create_account_move()
 
             def insert_data(data_type, values):
                 # if have_to_group_by:
