@@ -28,7 +28,6 @@ class AccountInvoice(models.Model):
     l10n_in_shipping_bill_date = fields.Date('Shipping bill date', readonly=True, states={'draft': [('readonly', False)]})
     l10n_in_shipping_port_code_id = fields.Many2one('l10n_in.port.code', 'Shipping port code', states={'draft': [('readonly', False)]})
     l10n_in_reseller_partner_id = fields.Many2one('res.partner', 'Reseller', domain=[('vat', '!=', False)], help="Only Registered Reseller", readonly=True, states={'draft': [('readonly', False)]})
-    l10n_in_reverse_charge = fields.Boolean('Reverse Charge', readonly=True, states={'draft': [('readonly', False)]})
     l10n_in_gstin_partner_id = fields.Many2one(
         'res.partner',
         string="GSTIN",
@@ -37,13 +36,6 @@ class AccountInvoice(models.Model):
         readonly=True, states={'draft': [('readonly', False)]}
         )
     l10n_in_refund_reason_id = fields.Many2one('l10n_in.refund.reason', string="Refund Reason")
-    l10n_in_import_type = fields.Selection([
-        ('regular', 'Regular'),
-        ('import_goods', 'Import of Goods'),
-        ('import_goods_sez', 'Import of Goods from SEZ'),
-        ('import_service', 'Import of Service'),
-        ('import_service_sez', 'Import of Service from SEZ')],
-        string='Import Type', default='regular', required=True)
     l10n_in_partner_vat = fields.Char(related="partner_id.vat", readonly=True)
     l10n_in_place_of_supply = fields.Many2one(
         'res.country.state', string="Place Of Supply",readonly=True,
@@ -53,7 +45,6 @@ class AccountInvoice(models.Model):
     def _get_refund_common_fields(self):
         """This list of fields value pass to refund invoice."""
         return super(AccountInvoice, self)._get_refund_common_fields() + [
-            'l10n_in_reverse_charge',
             'l10n_in_gstin_partner_id',
             'l10n_in_place_of_supply']
 
@@ -83,28 +74,6 @@ class AccountInvoice(models.Model):
             tax_datas[line.id] = tax_lines
         return tax_datas
 
-    @api.model
-    def invoice_line_move_line_get(self):
-        lines_res = super(AccountInvoice, self).invoice_line_move_line_get()
-        for line_res in lines_res:
-            line = self.env['account.invoice.line'].browse(line_res.get('invl_id'))
-            line_res.update({
-                'l10n_in_tax_price_unit': (line.price_unit * (1 - (line.discount or 0.0) / 100.0)),
-                'l10n_in_is_eligible_for_itc': line.l10n_in_is_eligible_for_itc,
-                'l10n_in_itc_percentage': line.l10n_in_itc_percentage
-                })
-        return lines_res
-
-    @api.model
-    def line_get_convert(self, line, part):
-        """Update account move line convert vals for new field value pass to account move line"""
-        vals = super(AccountInvoice, self).line_get_convert(line, part)
-        vals.update({
-            'l10n_in_is_eligible_for_itc': line.get('l10n_in_is_eligible_for_itc', False),
-            'l10n_in_itc_percentage': line.get('l10n_in_itc_percentage', 0)
-            })
-        return vals
-
     @api.multi
     def action_move_create(self):
         res = super(AccountInvoice, self).action_move_create()
@@ -114,25 +83,6 @@ class AccountInvoice(models.Model):
                 'l10n_in_place_of_supply': inv.l10n_in_place_of_supply.id
             })
         return res
-
-    @api.multi
-    def get_taxes_values(self):
-        """Update tax when Reverse charge under GST.
-        reverse charge rule is GST will have to be paid directly by the receiver to the Government instead of the supplier."""
-        tax_grouped = super(AccountInvoice, self).get_taxes_values()
-        if self.l10n_in_reverse_charge:
-            reverse_charge_tax = {}
-            for val in tax_grouped.values():
-                new_val = val.copy()
-                tax = self.env['account.tax'].browse(val['tax_id'])
-                if not tax.refund_account_id or not tax.account_id:
-                    raise ValidationError(_('Cannot find a accounts for %s tax, You should configure it. \nPlease go to Account Tax under Configuration.') % tax.name)
-                new_val['account_id'] = self.type in ('out_invoice', 'in_invoice') and tax.refund_account_id.id or tax.account_id.id
-                key = tax.get_grouping_key(new_val)
-                reverse_charge_tax[key] = new_val
-                reverse_charge_tax[key]['amount'] = new_val['amount'] * -1
-            tax_grouped.update(reverse_charge_tax)
-        return tax_grouped
 
     @api.onchange('l10n_in_reverse_charge')
     def _onchange_l10n_in_reverse_charge(self):
@@ -145,18 +95,15 @@ class AccountInvoice(models.Model):
 
     @api.onchange('partner_id', 'company_id', 'l10n_in_gstin_partner_id')
     def _onchange_partner_id(self):
-        if not self.env.context.get('from_purchase_order_change'):
-            if self.partner_id.state_id.country_id.code == 'IN':
-                self.l10n_in_place_of_supply = self.partner_id.state_id
-            else:
-                self.l10n_in_place_of_supply = self.env.ref('l10n_in.state_in_ot')
+        if self.partner_id.state_id.country_id.code == 'IN':
+            self.l10n_in_place_of_supply = self.partner_id.state_id
+        else:
+            self.l10n_in_place_of_supply = self.env.ref('l10n_in.state_in_ot')
         return super(AccountInvoice, self.with_context(l10n_in_gstin_partner_id=self.l10n_in_gstin_partner_id.id))._onchange_partner_id()
 
     def inv_line_characteristic_hashcode(self, invoice_line):
         res = super(AccountInvoice, self).inv_line_characteristic_hashcode(invoice_line)
-        return res + "-%s-%s-%s"(invoice_line.get('product_uom_id', 'False'),
-            invoice_line.get('l10n_in_is_eligible_for_itc', 'False'),
-            invoice_line.get('l10n_in_itc_percentage', 'False'))
+        return res + "-%s-%s-%s"(invoice_line.get('product_uom_id', 'False'))
 
     @api.model
     def tax_line_move_line_get(self):
@@ -178,38 +125,15 @@ class AccountInvoice(models.Model):
         return vals
 
 
-class AccountInvoiceLine(models.Model):
-    _inherit = "account.invoice.line"
-
-    l10n_in_is_eligible_for_itc = fields.Boolean(string="Is eligible for ITC", help="Check this box if this product is eligible for ITC(Input Tax Credit) under GST")
-    l10n_in_itc_percentage = fields.Float(string="ITC percentage", help="Enter percentage in case of partly eligible for ITC(Input Tax Credit) under GST.")
-
-    @api.constrains('l10n_in_itc_percentage')
-    def _check_l10n_in_itc_percentage(self):
-        for record in self:
-            if record.l10n_in_itc_percentage < 0 or record.l10n_in_itc_percentage > 100:
-                ValidationError(_("ITC percentage between 0 to 100"))
-
-    @api.onchange('product_id')
-    def _onchange_product_id(self):
-        res = super(AccountInvoiceLine, self)._onchange_product_id()
-        self.l10n_in_is_eligible_for_itc = self.product_id.l10n_in_is_eligible_for_itc
-        return res
-
-
 class AccountInvoiceTax(models.Model):
     _inherit = "account.invoice.tax"
 
     l10n_in_product_id = fields.Many2one('product.product', string='Product')
     l10n_in_uom_id = fields.Many2one('uom.uom', string='Unit of Measure')
-    l10n_in_is_eligible_for_itc = fields.Boolean(string="Is eligible for ITC", help="Check this box if this product is eligible for ITC(Input Tax Credit) under GST")
-    l10n_in_itc_percentage = fields.Float(string="ITC percentage", help="Enter percentage in case of partly eligible for ITC(Input Tax Credit) under GST.")
 
     @api.multi
     def _prepare_invoice_tax_val(self):
         res = super(AccountInvoiceTax, self)._prepare_invoice_tax_val()
         res['l10n_in_product_id'] = self.l10n_in_product_id.id
         res['l10n_in_uom_id'] = self.l10n_in_uom_id.id
-        res['l10n_in_is_eligible_for_itc'] = self.l10n_in_is_eligible_for_itc
-        res['l10n_in_itc_percentage'] = self.l10n_in_itc_percentage
         return res

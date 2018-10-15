@@ -87,7 +87,10 @@ class L10nInAccountInvoiceReport(models.Model):
             sub.partner_vat,
             sub.ecommerce_vat,
             sub.tax_rate_tag,
-            sub.is_reverse_charge,
+            (CASE count(sub.is_reverse_charge) > 0
+                THEN 'Y'
+                ELSE 'N'
+                END) AS is_reverse_charge,
             sub.place_of_supply,
             sub.is_pre_gst,
             sub.is_ecommerce,
@@ -104,7 +107,7 @@ class L10nInAccountInvoiceReport(models.Model):
             sum(sub.igst_amount) * sub.amount_sign AS igst_amount,
             sum(sub.cgst_amount) * sub.amount_sign AS cgst_amount,
             sum(sub.sgst_amount) * sub.amount_sign AS sgst_amount,
-            avg((CASE WHEN sub.cess_amount <> 0 THEN sub.cess_amount ELSE NULL END)) * sub.amount_sign  AS cess_amount,
+            avg(sub.cess_amount) * sub.amount_sign AS cess_amount,
             sum(sub.price_total) AS price_total
         """
         return select_str
@@ -114,7 +117,6 @@ class L10nInAccountInvoiceReport(models.Model):
             SELECT aml.id AS id,
                 aml.invoice_id,
                 aml.partner_id,
-                aml.tax_base_amount AS price_total,
                 am.id AS account_move_id,
                 am.name,
                 am.state,
@@ -135,9 +137,9 @@ class L10nInAccountInvoiceReport(models.Model):
                 p.vat AS partner_vat,
                 CASE WHEN rp.vat IS NULL THEN '' ELSE rp.vat END AS ecommerce_vat,
                 tt.name AS tax_rate_tag,
-                (CASE WHEN ai.l10n_in_reverse_charge = True
-                    THEN 'Y'
-                    ELSE 'N'
+                (CASE at.l10n_in_reverse_charge = True
+                    THEN True
+                    ELSE NULL
                     END)  AS is_reverse_charge,
                 (CASE WHEN pos.l10n_in_tin IS NOT NULL
                     THEN concat(pos.l10n_in_tin,'-',pos.name)
@@ -223,9 +225,14 @@ class L10nInAccountInvoiceReport(models.Model):
                     THEN aml.balance
                     ELSE 0
                     END AS sgst_amount,
-                (SELECT COALESCE(sum(temp_aml.balance),0) from account_move_line temp_aml JOIN account_tax temp_at ON temp_at.id = temp_aml.tax_line_id where temp_aml.move_id = aml.move_id and temp_aml.product_id = aml.product_id
+                (SELECT sum(temp_aml.balance) from account_move_line temp_aml JOIN account_tax temp_at ON temp_at.id = temp_aml.tax_line_id where temp_aml.move_id = aml.move_id and temp_aml.product_id = aml.product_id
                     and temp_at.tax_group_id IN (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='cess_group')
                     ) AS cess_amount,
+                CASE WHEN at.tax_group_id IN
+                    (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='sgst_group') OR at.l10n_in_reverse_charge = True
+                    THEN NULL
+                    ELSE (CASE WHEN aml.tax_base_amount <> 0 THEN aml.tax_base_amount ELSE NULL END)
+                    END AS price_total,
                 (CASE WHEN aj.type = 'sale' AND (ai.type IS NULL OR ai.type != 'out_refund') THEN -1 ELSE 1 END) AS amount_sign
         """
         return sub_select_str
@@ -278,7 +285,6 @@ class L10nInAccountInvoiceReport(models.Model):
             sub.partner_vat,
             sub.ecommerce_vat,
             sub.tax_rate_tag,
-            sub.is_reverse_charge,
             sub.place_of_supply,
             sub.is_pre_gst,
             sub.is_ecommerce,

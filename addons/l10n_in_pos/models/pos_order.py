@@ -7,11 +7,6 @@ from odoo import api, fields, models
 class PosOrder(models.Model):
     _inherit = 'pos.order'
 
-    amount_tax = fields.Float(compute='_compute_amount_all', string='Taxes', digits=0, store=True)
-    amount_total = fields.Float(compute='_compute_amount_all', string='Total', digits=0, store=True)
-    amount_paid = fields.Float(compute='_compute_amount_all', string='Paid', digits=0, store=True)
-    amount_return = fields.Float(compute='_compute_amount_all', string='Returned', digits=0, store=True)
-
     @api.model
     def _get_account_move_line_group_data_type_key(self, data_type, values, options={}):
         res = super(PosOrder, self)._get_account_move_line_group_data_type_key(data_type, values, options)
