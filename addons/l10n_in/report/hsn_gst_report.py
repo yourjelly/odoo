@@ -49,22 +49,22 @@ class L10nInProductHsnReport(models.Model):
             CASE WHEN uom.l10n_in_code IS NULL THEN '' ELSE uom.l10n_in_code END AS l10n_in_uom_code,
             CASE WHEN at.tax_group_id IN
                 (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='igst_group')
-                THEN aml.balance
+                THEN aml.balance * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END)
                 ELSE 0
                 END AS igst_amount,
             CASE WHEN at.tax_group_id IN
                 (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='cgst_group')
-                THEN aml.balance
+                THEN aml.balance * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END)
                 ELSE 0
                 END AS cgst_amount,
             CASE WHEN at.tax_group_id IN
                 (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='sgst_group')
-                THEN aml.balance
+                THEN aml.balance * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END)
                 ELSE 0
                 END AS sgst_amount,
             CASE WHEN at.tax_group_id IN
                 (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='cess_group')
-                THEN aml.balance
+                THEN aml.balance * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END)
                 ELSE 0
                 END AS cess_amount
         """

@@ -31,15 +31,13 @@ class AccountChartTemplate(models.Model):
 class AccountTaxTemplate(models.Model):
     _inherit = 'account.tax.template'
 
-    #use in GSTR export report as Rate of tax.
-    l10n_in_product_wise_line = fields.Boolean('Product Wise Line')
-
+    l10n_in_reverse_charge = fields.Boolean('Product Wise Line')
+    
     def _get_tax_vals(self, company, tax_template_to_tax):
         val = super(AccountTaxTemplate, self)._get_tax_vals(company, tax_template_to_tax)
         if self.tax_group_id:
-            val['l10n_in_product_wise_line'] = self.l10n_in_product_wise_line
+            val['l10n_in_reverse_charge'] = self.l10n_in_reverse_charge
         return val
-
 
 class AccountFiscalPositionTemplate(models.Model):
     _inherit = 'account.fiscal.position.template'
