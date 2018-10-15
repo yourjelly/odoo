@@ -79,15 +79,6 @@ class AccountPayment(models.Model):
     l10n_in_place_of_supply = fields.Many2one('res.country.state',
         string="Place Of Supply", readonly=True, states={'draft': [('readonly', False)]},
         domain=[("country_id.code", "=", "IN")])
-    l10n_in_tax_id = fields.Many2one('account.tax', string="Tax", compute="_compute_l10n_in_tax_id", store=True)
-
-    @api.depends('journal_id', 'payment_type')
-    def _compute_l10n_in_tax_id(self):
-        for record in self:
-            if record.payment_type == 'inbound':
-                record.l10n_in_tax_id = record.journal_id.company_id.account_sale_tax_id
-            if record.payment_type == 'outbound':
-                record.l10n_in_tax_id = record.journal_id.company_id.account_purchase_tax_id
 
     @api.onchange('journal_id')
     def _onchange_l10n_in_journal(self):

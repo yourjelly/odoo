@@ -64,7 +64,7 @@ class L10nInPaymentReport(models.AbstractModel):
             ap.id AS payment_id,
             ap.l10n_in_gstin_partner_id AS gstin_partner_id,
             ap.payment_type,
-            ap.l10n_in_tax_id as l10n_in_tax_id,
+            tax.id as l10n_in_tax_id,
             tt.name AS tax_rate_tag,
             am.partner_id,
             am.amount AS payment_amount,
@@ -86,7 +86,12 @@ class L10nInPaymentReport(models.AbstractModel):
             JOIN account_move am ON am.id = aml.move_id
             JOIN account_payment ap ON ap.id = aml.payment_id
             JOIN account_account AS ac ON ac.id = aml.account_id
-            JOIN account_tax AS tax ON tax.id = ap.l10n_in_tax_id
+            JOIN account_journal AS aj ON aj.id = am.journal_id
+            JOIN res_company AS c ON c.id = aj.company_id
+            JOIN account_tax AS tax ON tax.id = (
+                CASE WHEN ap.payment_type = 'inbound'
+                    THEN c.account_sale_tax_id
+                    ELSE c.account_purchase_tax_id END)
             JOIN account_tax_account_tag ttr ON ttr.account_tax_id = tax.id
             JOIN account_account_tag tt ON tt.id = ttr.account_account_tag_id
             JOIN res_partner p ON p.id = aml.partner_id

@@ -87,7 +87,7 @@ class L10nInAccountInvoiceReport(models.Model):
             sub.partner_vat,
             sub.ecommerce_vat,
             sub.tax_rate_tag,
-            (CASE count(sub.is_reverse_charge) > 0
+            (CASE WHEN count(sub.is_reverse_charge) > 0
                 THEN 'Y'
                 ELSE 'N'
                 END) AS is_reverse_charge,
@@ -137,7 +137,7 @@ class L10nInAccountInvoiceReport(models.Model):
                 p.vat AS partner_vat,
                 CASE WHEN rp.vat IS NULL THEN '' ELSE rp.vat END AS ecommerce_vat,
                 tt.name AS tax_rate_tag,
-                (CASE at.l10n_in_reverse_charge = True
+                (CASE WHEN at.l10n_in_reverse_charge = True
                     THEN True
                     ELSE NULL
                     END)  AS is_reverse_charge,

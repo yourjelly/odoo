@@ -84,11 +84,6 @@ class AccountInvoice(models.Model):
             })
         return res
 
-    @api.onchange('l10n_in_reverse_charge')
-    def _onchange_l10n_in_reverse_charge(self):
-        """For update tax_lines."""
-        return self._onchange_invoice_line_ids()
-
     @api.onchange('company_id')
     def _onchange_l10n_in_company(self):
         self.l10n_in_gstin_partner_id = self.company_id.partner_id
@@ -112,17 +107,23 @@ class AccountInvoice(models.Model):
             invoice_tax_line = self.env['account.invoice.tax'].browse(vals.get('invoice_tax_line_id'))
             vals['product_id'] = invoice_tax_line.l10n_in_product_id.id
             vals['uom_id'] = invoice_tax_line.l10n_in_uom_id.id
-            vals['l10n_in_is_eligible_for_itc'] = invoice_tax_line.l10n_in_is_eligible_for_itc
-            vals['l10n_in_itc_percentage'] = invoice_tax_line.l10n_in_itc_percentage
+            vals['quantity'] = invoice_tax_line.l10n_in_quantity
         return res
 
     def _prepare_tax_line_vals(self, line, tax):
         vals = super(AccountInvoice, self)._prepare_tax_line_vals(line, tax)
         vals['l10n_in_product_id'] = line.product_id.id
         vals['l10n_in_uom_id'] = line.uom_id.id
-        vals['l10n_in_is_eligible_for_itc'] = line.l10n_in_is_eligible_for_itc
-        vals['l10n_in_itc_percentage'] = line.l10n_in_itc_percentage
+        vals['l10n_in_quantity'] = line.quantity
         return vals
+
+    @api.multi
+    def get_taxes_values(self, tax_group_fields=False):
+        if tax_group_fields:
+            tax_group_fields |= set(['l10n_in_quantity'])
+        else:
+            tax_group_fields = set(['l10n_in_quantity'])
+        return super(AccountInvoice, self).get_taxes_values(tax_group_fields)
 
 
 class AccountInvoiceTax(models.Model):
@@ -130,6 +131,7 @@ class AccountInvoiceTax(models.Model):
 
     l10n_in_product_id = fields.Many2one('product.product', string='Product')
     l10n_in_uom_id = fields.Many2one('uom.uom', string='Unit of Measure')
+    l10n_in_quantity = fields.Float(string='Quantity')
 
     @api.multi
     def _prepare_invoice_tax_val(self):

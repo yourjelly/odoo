@@ -12,7 +12,6 @@
     ],
     'data': [
         'views/report_purchase_order.xml',
-        'views/purchase_order_views.xml',
     ],
     'installable': True,
     'application': False,
