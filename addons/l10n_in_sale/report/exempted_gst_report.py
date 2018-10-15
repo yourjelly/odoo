@@ -9,8 +9,7 @@ class L10nInExemptedReport(models.Model):
 
     def _from(self):
         from_str = super(L10nInExemptedReport, self)._from()
-        from_str += """AND aml.product_id::text != (
-            CASE WHEN (SELECT value from ir_config_parameter where key = 'sale.default_deposit_product_id') 
-            IS NULL Then '0'
-            ELSE (SELECT value from ir_config_parameter where key = 'sale.default_deposit_product_id') END)"""
+        from_str += """ AND aml.product_id != COALESCE(
+            (SELECT value from ir_config_parameter where key = 'sale.default_deposit_product_id'), '0')::int
+            """
         return from_str
