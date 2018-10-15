@@ -2,9 +2,17 @@
 <odoo>
     <!-- External layouts styles -->
 
-    <template id="l10n_in_external_layout_background" inherit_id="web.external_layout_background"  primary="True">
+    <template id="l10n_in_external_layout_background" inherit_id="web.external_layout_background" primary="True">
+        <xpath expr="//div[hasclass('header')]" position="before">
+            <t name="gstin_parnter" t-if="o and 'l10n_in_gstin_partner_id' in o">
+                <t t-set="l10n_in_gstin_partner" t-value="o.l10n_in_gstin_partner_id.sudo()"/>
+            </t>
+            <t name="company_partner" t-if="not o or not 'l10n_in_gstin_partner_id' in o">
+                <t t-set="l10n_in_gstin_partner" t-value="company.partner_id"/>
+            </t>
+        </xpath>
         <xpath expr="//img[@t-if='company.logo']" position="replace">
-                <img t-if="l10n_in_gstin_partner.image" t-att-src="'data:image/png;base64,%s' % to_text(l10n_in_gstin_partner.image)" class="pull-left"/>
+            <img t-if="l10n_in_gstin_partner.image" t-att-src="'data:image/png;base64,%s' % to_text(l10n_in_gstin_partner.image)" class="pull-left"/>
         </xpath>
         <xpath expr="//strong[@t-field='company.partner_id.name']" position="replace">
             <strong t-field="l10n_in_gstin_partner.name"/>
@@ -27,6 +35,14 @@
     </template>
 
     <template id="l10n_in_external_layout_boxed" inherit_id="web.external_layout_boxed"  primary="True">
+        <xpath expr="//div[hasclass('header')]" position="before">
+            <t name="gstin_parnter" t-if="o and 'l10n_in_gstin_partner_id' in o">
+                <t t-set="l10n_in_gstin_partner" t-value="o.l10n_in_gstin_partner_id.sudo()"/>
+            </t>
+            <t name="company_partner" t-if="not o or not 'l10n_in_gstin_partner_id' in o">
+                <t t-set="l10n_in_gstin_partner" t-value="company.partner_id"/>
+            </t>
+        </xpath>
         <xpath expr="//img[@t-if='company.logo']" position="replace">
             <img t-if="l10n_in_gstin_partner.image" t-att-src="'data:image/png;base64,%s' % to_text(l10n_in_gstin_partner.image)" alt="Logo"/>
         </xpath>
@@ -48,6 +64,14 @@
     </template>
 
     <template id="l10n_in_external_layout_clean" inherit_id="web.external_layout_clean"  primary="True">
+        <xpath expr="//div[hasclass('header')]" position="before">
+            <t name="gstin_parnter" t-if="o and 'l10n_in_gstin_partner_id' in o">
+                <t t-set="l10n_in_gstin_partner" t-value="o.l10n_in_gstin_partner_id.sudo()"/>
+            </t>
+            <t name="company_partner" t-if="not o or not 'l10n_in_gstin_partner_id' in o">
+                <t t-set="l10n_in_gstin_partner" t-value="company.partner_id"/>
+            </t>
+        </xpath>
         <xpath expr="//img[@t-if='company.logo']" position="replace">
             <img t-if="l10n_in_gstin_partner.image" t-att-src="'data:image/png;base64,%s' % to_text(l10n_in_gstin_partner.image)" alt="Logo"/>
         </xpath>
@@ -72,6 +96,14 @@
     </template>
 
     <template id="l10n_in_external_layout_standard" inherit_id="web.external_layout_standard"  primary="True">
+        <xpath expr="//div[hasclass('header')]" position="before">
+            <t name="gstin_parnter" t-if="o and 'l10n_in_gstin_partner_id' in o">
+                <t t-set="l10n_in_gstin_partner" t-value="o.l10n_in_gstin_partner_id.sudo()"/>
+            </t>
+            <t name="company_partner" t-if="not o or not 'l10n_in_gstin_partner_id' in o">
+                <t t-set="l10n_in_gstin_partner" t-value="company.partner_id"/>
+            </t>
+        </xpath>
         <xpath expr="//img[@t-if='company.logo']" position="replace">
             <img t-if="l10n_in_gstin_partner.image" t-att-src="'data:image/png;base64,%s' % to_text(l10n_in_gstin_partner.image)" style="max-height: 45px;" alt="Logo"/>
         </xpath>
@@ -93,29 +125,5 @@
         <xpath expr="//li[@t-if='company.vat']" position="replace">
              <li t-if="l10n_in_gstin_partner.vat"><t t-esc="l10n_in_gstin_partner.country_id.vat_label or 'TIN'"/>: <span t-field="l10n_in_gstin_partner.vat"/></li>
         </xpath>
-    </template>
-
-    <template id="l10n_in_external_layout">
-
-        <!-- Multicompany -->
-        <t t-if="not o and doc">
-            <t t-set="o" t-value="doc"/>
-        </t>
-
-        <t t-if="o and 'company_id' in o">
-            <t t-set="company" t-value="o.company_id.sudo()"/>
-        </t>
-        <t t-if="not o or not 'company_id' in o">
-            <t t-set="company" t-value="res_company"/>
-        </t>
-
-        <t name="gstin_parnter" t-if="o and 'l10n_in_gstin_partner_id' in o">
-            <t t-set="l10n_in_gstin_partner" t-value="o.l10n_in_gstin_partner_id.sudo()"/>
-        </t>
-        <t name="company_partner" t-if="not o or not 'l10n_in_gstin_partner_id' in o">
-            <t t-set="l10n_in_gstin_partner" t-value="company.partner_id"/>
-        </t>
-
-        <t t-call="{{'web.' in company.external_report_layout_id.key and company.external_report_layout_id.key.replace('web.', 'l10n_in.l10n_in_') or company.external_report_layout_id.key}}"><t t-raw="0"/></t>
     </template>
 </odoo>

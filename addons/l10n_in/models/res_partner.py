@@ -50,9 +50,7 @@ class ResPartner(models.Model):
     # Use for Multi GSTIN
     l10n_in_gstin_company_id = fields.Many2one('res.company', string="GSTIN Company")
     # Use in view attrs. Need to required state_id if Country is India.
-    country_code = fields.Char(related="country_id.code", string="Country code")
-    # In GSTR-2 report We need to specify that vendor is under composition scheme or not.
-    l10n_in_composition = fields.Boolean(string="Is Composition", help="Check this box if this vendor is under composition scheme")
+    l10n_in_country_code = fields.Char(related="country_id.code", string="Country code")
 
     @api.constrains('vat', 'country_id')
     def l10n_in_check_vat(self):

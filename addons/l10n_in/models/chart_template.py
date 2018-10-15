@@ -26,6 +26,14 @@ class AccountChartTemplate(models.Model):
         res = super(AccountChartTemplate, self)._get_fp_vals(company=company, position=position)
         res.update({'l10n_in_supply_type': position.l10n_in_supply_type})
         return res
+    
+    # Write report template used on company
+    def load_for_current_company(self, sale_tax_rate, purchase_tax_rate):
+        res = super(AccountChartTemplate, self).load_for_current_company(sale_tax_rate, purchase_tax_rate)
+        if self == self.env.ref('l10n_in.indian_chart_template_standard'):
+            company = self.env.user.company_id
+            company.write({'external_report_layout_id': self.env.ref('l10n_in.l10n_in_external_layout_boxed').id})
+        return res
 
 
 class AccountTaxTemplate(models.Model):

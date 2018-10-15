@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="l10n_in_stock_external_layout" inherit_id="l10n_in.l10n_in_external_layout">
-        <xpath expr="//t[@name='company_partner']" position="after">
+
+    <template id="l10n_in_stock_external_layout_background" inherit_id="l10n_in.l10n_in_external_layout_background">
+        <xpath expr="//div[hasclass('header')]" position="before">
             <t t-if="'picking_type_id' in o">
                 <t t-if="o.picking_type_id.warehouse_id.l10n_in_gstin_partner_id">
                     <t t-set="l10n_in_gstin_partner" t-value="o.sudo().picking_type_id.warehouse_id.l10n_in_gstin_partner_id"/>
@@ -9,4 +10,35 @@
             </t>
         </xpath>
     </template>
+
+    <template id="l10n_in_stock_external_layout_boxed" inherit_id="l10n_in.l10n_in_external_layout_boxed">
+        <xpath expr="//div[hasclass('header')]" position="before">
+            <t t-if="'picking_type_id' in o">
+                <t t-if="o.picking_type_id.warehouse_id.l10n_in_gstin_partner_id">
+                    <t t-set="l10n_in_gstin_partner" t-value="o.sudo().picking_type_id.warehouse_id.l10n_in_gstin_partner_id"/>
+                </t>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="l10n_in_stock_external_layout_clean" inherit_id="l10n_in.l10n_in_external_layout_clean">
+        <xpath expr="//div[hasclass('header')]" position="before">
+            <t t-if="'picking_type_id' in o">
+                <t t-if="o.picking_type_id.warehouse_id.l10n_in_gstin_partner_id">
+                    <t t-set="l10n_in_gstin_partner" t-value="o.sudo().picking_type_id.warehouse_id.l10n_in_gstin_partner_id"/>
+                </t>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="l10n_in_stock_external_layout_standard" inherit_id="l10n_in.l10n_in_external_layout_standard">
+        <xpath expr="//div[hasclass('header')]" position="before">
+            <t t-if="'picking_type_id' in o">
+                <t t-if="o.picking_type_id.warehouse_id.l10n_in_gstin_partner_id">
+                    <t t-set="l10n_in_gstin_partner" t-value="o.sudo().picking_type_id.warehouse_id.l10n_in_gstin_partner_id"/>
+                </t>
+            </t>
+        </xpath>
+    </template>
+
 </odoo>

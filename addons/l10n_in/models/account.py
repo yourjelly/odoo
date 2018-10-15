@@ -29,7 +29,7 @@ class AccountMove(models.Model):
 class AccountTax(models.Model):
     _inherit = 'account.tax'
 
-    l10n_in_reverse_charge = fields.Boolean("Reverse charge Tax")
+    l10n_in_reverse_charge = fields.Boolean("Reverse charge", help="Tick this if this tax is reverse charge.")
 
     def get_grouping_key(self, invoice_tax_val):
         """ Returns a string that will be used to group account.invoice.tax sharing the same properties"""
