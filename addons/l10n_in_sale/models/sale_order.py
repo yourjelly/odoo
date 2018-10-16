@@ -30,4 +30,4 @@ class SaleOrder(models.Model):
             self.l10n_in_place_of_supply = self.partner_id.state_id
         else:
             self.l10n_in_place_of_supply = self.env.ref('l10n_in.state_in_ot')
-        return super(SaleOrder, self.with_context(l10n_in_gstin_partner_id=self.l10n_in_gstin_partner_id.id)).onchange_partner_shipping_id()
+        return super(SaleOrder, self).onchange_partner_shipping_id()

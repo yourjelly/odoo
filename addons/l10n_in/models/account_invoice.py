@@ -94,7 +94,7 @@ class AccountInvoice(models.Model):
             self.l10n_in_place_of_supply = self.partner_id.state_id
         else:
             self.l10n_in_place_of_supply = self.env.ref('l10n_in.state_in_ot')
-        return super(AccountInvoice, self.with_context(l10n_in_gstin_partner_id=self.l10n_in_gstin_partner_id.id))._onchange_partner_id()
+        return super(AccountInvoice, self)._onchange_partner_id()
 
     def inv_line_characteristic_hashcode(self, invoice_line):
         res = super(AccountInvoice, self).inv_line_characteristic_hashcode(invoice_line)
