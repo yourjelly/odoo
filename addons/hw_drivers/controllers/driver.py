@@ -113,7 +113,7 @@ class StatusController(http.Controller):
             for camera in cameras:
                 if camera:
                     camera = camera.split('\n\t')
-                    serial = re.sub('[^a-zA-Z0-9 ]+', '', camera[0].split(': ')[0]).replace(' ','_')
+                    serial = re.sub('[^a-zA-Z0-9 ]+', '', camera[0].split('): ')[0]).replace(' ','_')
                     if serial == data.get('identifier'):
                         adrress = camera[1]
             picture = subprocess.check_output("v4l2-ctl --list-formats-ext|grep 'Size'|awk '{print $3}'|sort -rn|awk NR==1", shell=True).decode('utf-8')
@@ -331,9 +331,9 @@ def send_iot_box_device(send_printer):
             for camera in cameras:
                 if camera:
                     camera = camera.split('\n\t')
-                    serial = re.sub('[^a-zA-Z0-9 ]+', '', camera[0].split(': ')[0]).replace(' ','_')
+                    serial = re.sub('[^a-zA-Z0-9 ]+', '', camera[0].split('): ')[0]).replace(' ','_')
                     devicesList[serial] = {
-                                            'name': camera[0].split(': ')[0],
+                                            'name': camera[0].split(' (')[0],
                                             'connection': 'direct',
                                             'type': 'camera'
                                         }
