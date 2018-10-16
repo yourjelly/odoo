@@ -25,6 +25,21 @@ class AccountMove(models.Model):
         'res.country.state', string="Place Of Supply",
         states={'posted': [('readonly', True)]}, domain=[("country_id.code", "=", "IN")])
 
+class AccountMoveLine(models.Model):
+    _inherit = "account.move.line"
+
+    @api.depends('move_id.line_ids', 'move_id.line_ids.tax_line_id', 'move_id.line_ids.debit', 'move_id.line_ids.credit')
+    def _compute_tax_base_amount(self):
+        for move_line in self:
+            if move_line.tax_line_id:
+                if move_line.product_id:
+                    base_lines = move_line.move_id.line_ids.filtered(lambda line: move_line.tax_line_id in line.tax_ids and move_line.product_id == line.product_id)
+                else:
+                    base_lines = move_line.move_id.line_ids.filtered(lambda line: move_line.tax_line_id in line.tax_ids)
+                move_line.tax_base_amount = abs(sum(base_lines.mapped('balance')))
+            else:
+                move_line.tax_base_amount = 0
+
 
 class AccountTax(models.Model):
     _inherit = 'account.tax'
