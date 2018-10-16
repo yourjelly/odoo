@@ -180,7 +180,6 @@ class USBDriver(Driver,metaclass=UsbMetaClass):
     def value(self):
         return self.value
 
-
 #----------------------------------------------------------
 # Bluetooth
 #----------------------------------------------------------
@@ -196,7 +195,6 @@ class GattBtManager(gatt.DeviceManager):
                     drivers[path] = d
                     d.connect()
                     send_iot_box_device(False)
-
 
 class BtManager(Thread):
     gatt_manager = False
@@ -218,9 +216,7 @@ class BtMetaClass(type):
         btdrivers.append(newclass)
         return newclass
 
-
 class BtDriver(Driver, metaclass=BtMetaClass):
-
 
     def __init__(self, device, manager):
         super(BtDriver, self).__init__()
@@ -247,11 +243,6 @@ class BtDriver(Driver, metaclass=BtMetaClass):
 
     def connect(self):
         pass
-
-
-
-
-
 
 class USBDeviceManager(Thread):
     devices = {}
@@ -289,9 +280,6 @@ class USBDeviceManager(Thread):
                 first_time = False
             time.sleep(3)
             
-
-
-
 
 def send_iot_box_device(send_printer):
     maciotbox = subprocess.check_output("/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5}", shell=True).decode('utf-8').split('\n')[0]
@@ -418,5 +406,3 @@ def send_iot_box_device(send_printer):
                                 headers=headers)
         except:
             _logger.warning('Could not reach configured server')
-
-
