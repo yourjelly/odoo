@@ -1862,10 +1862,24 @@ class Selection(Field):
     _slots = {
         'selection': None,              # [(value, string), ...], function or method name
         'validate': True,               # whether validating upon write
+        'module_selection': {}          # store selection_add attr module wise
     }
 
     def __init__(self, selection=Default, string=Default, **kwargs):
         super(Selection, self).__init__(selection=selection, string=string, **kwargs)
+
+    def _get_attrs(self, model, name):
+        selection = defaultdict(list)
+        attrs = super(Selection, self)._get_attrs(model, name)
+        if not self.args.get('manual'):
+            for field in reversed(resolve_mro(model, name, self._can_setup_from)):
+                args = field.args
+                if '_module' in args and args.get('selection_add'):
+                    selection[args['_module']].extend(args['selection_add'])
+                elif '_module' in args and args.get('selection'):
+                    selection[args['_module']] = args['selection'] if isinstance(args['selection'], list) else []
+        attrs['module_selection'] = selection
+        return attrs
 
     @property
     def column_type(self):
