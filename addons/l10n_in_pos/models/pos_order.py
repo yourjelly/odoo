@@ -40,10 +40,3 @@ class PosOrder(models.Model):
         res['l10n_in_gstin_partner_id'] = self.config_id.l10n_in_gstin_partner_id.id
         res['l10n_in_place_of_supply'] = l10n_in_place_of_supply and l10n_in_place_of_supply.id
         return res
-
-
-class PosOrderLine(models.Model):
-    _inherit = "pos.order.line"
-
-    price_subtotal = fields.Float(compute='_compute_amount_line_all', digits=0, string='Subtotal w/o Tax', store=True)
-    price_subtotal_incl = fields.Float(compute='_compute_amount_line_all', digits=0, string='Subtotal', store=True)
