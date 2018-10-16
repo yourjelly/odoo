@@ -180,7 +180,6 @@ class USBDriver(Driver,metaclass=UsbMetaClass):
     def value(self):
         return self.value
 
-
 #----------------------------------------------------------
 # Bluetooth
 #----------------------------------------------------------
@@ -196,7 +195,6 @@ class GattBtManager(gatt.DeviceManager):
                     drivers[path] = d
                     d.connect()
                     send_iot_box_device(False)
-
 
 class BtManager(Thread):
     gatt_manager = False
@@ -248,16 +246,10 @@ class BtDriver(Driver, metaclass=BtMetaClass):
     def connect(self):
         pass
 
-
-
-
-
-
 class USBDeviceManager(Thread):
     devices = {}
     def run(self):
-        first_time = True
-        send_iot_box_device(False)
+        run_loop()
         while 1:
             sendJSON = False
             devs = usb.core.find(find_all=True)
@@ -285,13 +277,15 @@ class USBDeviceManager(Thread):
                         d.start()
                         sendJSON = True
             if sendJSON or first_time:
-                send_iot_box_device(send_printer = first_time)
-                first_time = False
+                send_iot_box_device(False)
             time.sleep(3)
-            
 
-
-
+def run_loop():    # Send iot device every 900 seconds 
+    first_time = True
+    while 1:
+        send_iot_box_device(first_time)
+        first_time = False
+        time.sleep(300)
 
 def send_iot_box_device(send_printer):
     maciotbox = subprocess.check_output("/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5}", shell=True).decode('utf-8').split('\n')[0]
