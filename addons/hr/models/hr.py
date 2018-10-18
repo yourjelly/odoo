@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from string import digits
 import base64
 import logging
 
-from odoo import api, fields, models
+from odoo import api, fields, models, SUPERUSER_ID
 from odoo import tools, _
 from odoo.exceptions import ValidationError, AccessError
 from odoo.modules.module import get_module_resource
@@ -198,6 +199,16 @@ class Employee(models.Model):
     # misc
     notes = fields.Text('Notes')
     color = fields.Integer('Color Index', default=0)
+    barcode = fields.Char(string="Badge ID", help="ID used for employee identification.", copy=False)
+    pin = fields.Char(string="PIN", help="PIN used to Check In/Out in Kiosk Mode (if enabled in Configuration).", copy=False)
+
+    _sql_constraints = [('barcode_uniq', 'unique (barcode)', "The Badge ID must be unique, this one is already assigned to another employee.")]
+
+    @api.constrains('pin')
+    def _verify_pin(self):
+        for employee in self:
+            if employee.pin and not employee.pin.isdigit():
+                raise ValidationError(_("The PIN must be a sequence of digits."))
 
     @api.constrains('parent_id')
     def _check_parent_id(self):
@@ -243,6 +254,7 @@ class Employee(models.Model):
         if user.tz:
             vals['tz'] = user.tz
         return vals
+
 
     @api.model
     def create(self, vals):

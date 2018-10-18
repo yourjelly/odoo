@@ -98,13 +98,14 @@ var UsernameWidget = PosBaseWidget.extend({
         });
     },
     click_username: function(){
+        if(!this.pos.config.module_pos_hr) { return; }
         var self = this;
-        this.gui.select_user({
+        this.gui.select_employee({
             'security':     true,
-            'current_user': this.pos.get_cashier(),
+            'current_employee': this.pos.get_cashier(),
             'title':      _t('Change Cashier'),
-        }).then(function(user){
-            self.pos.set_cashier(user);
+        }).then(function(employee){
+            self.pos.set_cashier(employee);
             self.renderElement();
         });
     },
@@ -130,7 +131,9 @@ var HeaderButtonWidget = PosBaseWidget.extend({
         options = options || {};
         this._super(parent, options);
         this.action = options.action;
-        this.label   = options.label;
+        this.label  = options.label;
+        this.button_class = options.button_class;
+
     },
     renderElement: function(){
         var self = this;
@@ -141,8 +144,57 @@ var HeaderButtonWidget = PosBaseWidget.extend({
             });
         }
     },
-    show: function(){ this.$el.removeClass('oe_hidden'); },
-    hide: function(){ this.$el.addClass('oe_hidden'); },
+    show: function() { this.$el.removeClass('oe_hidden'); },
+    hide: function() { this.$el.addClass('oe_hidden'); },
+});
+
+var HeaderLockButtonWidget = HeaderButtonWidget.extend({
+
+    init: function(parent, options) {
+        this._super(parent,options);
+        this.icon = options.icon[0];
+        this.color = options.icon[1];
+        this.icon_mouseover = options.icon_mouseover[0];
+        this.color_mouseover = options.icon_mouseover[1];
+    },
+
+    start: function(){
+        if (this.pos.config.module_pos_hr) {
+            this.show();
+        } else {
+            this.hide();
+        }
+    },
+
+    renderElement: function() {
+        var self = this;
+        this._super();
+        this.iconElement = this.$el.find("i");
+        this.$el.css('font-size','20px');
+        this.iconElement.addClass(this.icon);
+        this.$el.css('color',this.color);
+        this.$el.mouseover(function(){
+            self.iconElement.addClass(self.icon_mouseover).removeClass(self.icon);
+            $(this).css('color', self.color_mouseover);
+        }).mouseleave(function(){
+            self.iconElement.addClass(self.icon).removeClass(self.icon_mouseover);
+            $(this).css('color', self.color);
+        });
+    },
+});
+
+var HeaderCloseButtonWidget = HeaderButtonWidget.extend({
+    start: function(){
+        var self = this;
+        var show_hide_close_button = function() {
+            if ((self.pos.get('cashier') || self.pos.get_cashier()).role == 'manager') {
+                self.show();
+            } else {
+                self.hide();
+            }
+        this.pos.bind('change:cashier', show_hide_close_button , this);
+        };
+    }
 });
 
 /* --------- The Debug Widget --------- */
@@ -510,7 +562,7 @@ var ClientScreenWidget = PosBaseWidget.extend({
                 this.$el.click(function(){
                     self.pos.render_html_for_customer_facing_display().then(function(rendered_html) {
                         self.pos.proxy.take_ownership_over_client_screen(rendered_html).then(
-       
+        
                         function(data) {
                             if (typeof data === 'string') {
                                 data = JSON.parse(data);
@@ -587,7 +639,6 @@ var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
         this.widget = {};   // contains references to subwidgets instances
 
         this.cleanup_dom();
-
         this.pos.ready.done(function(){
             self.build_chrome();
             self.build_widgets();
@@ -801,6 +852,18 @@ var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
             'widget': OrderSelectorWidget,
             'replace':  '.placeholder-OrderSelectorWidget',
         },{
+            'name':   'lock_button',
+            'widget': HeaderLockButtonWidget,
+            'append': '.pos-rightheader',
+            'args': {
+                label: _lt('Lock'),
+                icon: ['fa-unlock', 'green'],
+                icon_mouseover: ['fa-lock', 'red'],
+                action: function() {
+                    this.gui.show_screen('login');
+                }
+            }
+        },{
             'name':   'sale_details',
             'widget': SaleDetailsButton,
             'append':  '.pos-rightheader',
@@ -821,7 +884,7 @@ var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
             'append':  '.pos-rightheader',
         },{
             'name':   'close_button',
-            'widget': HeaderButtonWidget,
+            'widget': HeaderCloseButtonWidget,
             'append':  '.pos-rightheader',
             'args': {
                 label: _lt('Close'),
@@ -915,6 +978,8 @@ return {
     Chrome: Chrome,
     DebugWidget: DebugWidget,
     HeaderButtonWidget: HeaderButtonWidget,
+    HeaderLockButtonWidget: HeaderLockButtonWidget,
+    HeaderCloseButtonWidget: HeaderCloseButtonWidget,
     OrderSelectorWidget: OrderSelectorWidget,
     ProxyStatusWidget: ProxyStatusWidget,
     SaleDetailsButton: SaleDetailsButton,

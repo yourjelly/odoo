@@ -6,11 +6,13 @@
             <div class="pos-topheader">
                 <div class="pos-branding">
                     <img class="pos-logo" src="/point_of_sale/static/src/img/logo.png" alt="Logo"/>
-                    <span class="placeholder-UsernameWidget"></span>
                 </div>
                 <div class="pos-rightheader">
                     <span class="placeholder-OrderSelectorWidget"></span>
                     <!-- here goes header buttons -->
+                    <div class="oe_status">
+                        <span class="placeholder-UsernameWidget"></span>
+                    </div>
                 </div>
             </div>
 
@@ -109,7 +111,12 @@
 
     <t t-name="HeaderButtonWidget">
         <div class="header-button">
-            <t t-esc="widget.label" />
+            <t t-if="!widget.icon">
+                <t t-esc="widget.label" />
+            </t>
+            <t t-if="widget.icon">
+                <i class='fa fa-fw' role="img"/>
+            </t>
         </div>
     </t>
 
@@ -1742,5 +1749,23 @@
                 <span class="pos-change_amount"><t t-esc="widget.format_currency(order.get_change())"/></span>
             </div>
         </t>
+    </t>
+
+    <t t-name="LoginScreenWidget">
+        <div class="login-overlay">
+            <div class="screen-login">
+                <div class="login-title"><small>Log in to </small><t t-esc="widget.pos.config.name"/></div>
+                <div class="login-body">
+                    <span class="login-element">
+                        <img class="login-barcode-img" src="/point_of_sale/static/img/barcode.png"/>
+                        <div class="login-barcode-text">Scan your badge</div>
+                    </span>
+                    <span class="login-or">or</span>
+                    <span class="login-element">
+                        <button class="login-button select-employee">Select Cashier</button>
+                    </span>
+                </div>
+            </div>
+        </div>
     </t>
 </templates>

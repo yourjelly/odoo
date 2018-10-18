@@ -139,6 +139,10 @@
                                         <field name="company_id" groups="base.group_multi_company"/>
                                         <field name="user_id" string="Related User"/>
                                     </group>
+                                    <group string="Login Information" name="identification_group">
+                                        <field name="barcode"/>
+                                        <field name="pin"/>
+                                    </group>
                                 </group>
                             </page>
                         </notebook>
