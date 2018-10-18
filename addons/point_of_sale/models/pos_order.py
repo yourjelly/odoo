@@ -47,6 +47,7 @@ class PosOrder(models.Model):
             'amount_total':  ui_order['amount_total'],
             'amount_tax':  ui_order['amount_tax'],
             'amount_return':  ui_order['amount_return'],
+            'employee_id':  ui_order['employee_id'] or False,
         }
 
     def _payment_fields(self, ui_paymentline):
@@ -483,9 +484,13 @@ class PosOrder(models.Model):
     company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True, default=lambda self: self.env.user.company_id)
     date_order = fields.Datetime(string='Order Date', readonly=True, index=True, default=fields.Datetime.now)
     user_id = fields.Many2one(
-        comodel_name='res.users', string='Salesperson',
-        help="Person who uses the cash register. It can be a reliever, a student or an interim employee.",
+        comodel_name='res.users',
         default=lambda self: self.env.uid,
+        states={'done': [('readonly', True)], 'invoiced': [('readonly', True)]},
+    )
+    employee_id = fields.Many2one(
+        comodel_name='hr.employee', string='Salesperson',
+        help="Person who uses the cash register. It can be a reliever, a student or an interim employee.",
         states={'done': [('readonly', True)], 'invoiced': [('readonly', True)]},
     )
     amount_tax = fields.Float(string='Taxes', digits=0, readonly=True, required=True)

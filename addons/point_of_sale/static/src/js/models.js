@@ -55,6 +55,8 @@ exports.PosModel = Backbone.Model.extend({
         this.company = null;
         this.user = null;
         this.users = [];
+        this.employee = null;
+        this.employees = [];
         this.partners = [];
         this.cashregisters = [];
         this.taxes = [];
@@ -154,10 +156,17 @@ exports.PosModel = Backbone.Model.extend({
 
     },{
         model:  'res.users',
-        fields: ['name','company_id'],
+        fields: ['name','company_id', 'id'],
         ids:    function(self){ return [session.uid]; },
-        loaded: function(self,users){ self.user = users[0]; },
+        loaded: function(self,users){ self.user = users[0];},
     },{
+        model:  'hr.employee',
+        fields: ['name', 'id', 'barcode', 'pos_security_pin', 'user_id'],
+        loaded: function(self, employees) {
+            self.employees = employees.filter(function(employee) { return employee.pos_security_pin || employee.barcode; });
+            self.employee = employees.find(function(employee) { return employee.user_id[0] === self.user.id; });
+            },
+        },{
         model:  'res.company',
         fields: [ 'currency_id', 'email', 'website', 'company_registry', 'vat', 'name', 'phone', 'partner_id' , 'country_id', 'tax_calculation_rounding_method'],
         ids:    function(self){ return [self.user.company_id[0]]; },
@@ -256,13 +265,13 @@ exports.PosModel = Backbone.Model.extend({
        },
     },{
         model:  'res.users',
-        fields: ['name','pos_security_pin','groups_id','barcode'],
+        fields: ['name','groups_id'],
         domain: function(self){ return [['company_id','=',self.user.company_id[0]],'|', ['groups_id','=', self.config.group_pos_manager_id[0]],['groups_id','=', self.config.group_pos_user_id[0]]]; },
         loaded: function(self,users){
             // we attribute a role to the user, 'cashier' or 'manager', depending
             // on the group the user belongs.
             var pos_users = [];
-            var current_cashier = self.get_cashier();
+            //var current_cashier = self.get_cashier();
             for (var i = 0; i < users.length; i++) {
                 var user = users[i];
                 for (var j = 0; j < user.groups_id.length; j++) {
@@ -280,9 +289,6 @@ exports.PosModel = Backbone.Model.extend({
                 // replace the current user with its updated version
                 if (user.id === self.user.id) {
                     self.user = user;
-                }
-                if (user.id === current_cashier.id) {
-                    self.set_cashier(user);
                 }
             }
             self.users = pos_users;
@@ -637,14 +643,16 @@ exports.PosModel = Backbone.Model.extend({
     get_cashier: function(){
         // reset the cashier to the current user if session is new
         if (this.db.load('pos_session_id') !== this.pos_session.id) {
-            this.set_cashier(this.user);
+            this.set_cashier(this.employee);
         }
-        return this.db.get_cashier() || this.get('cashier') || this.user;
+        var self = this;
+        var user_employee = this.employees.find(function(employee) { return employee.user_id[0] === self.user.id; });
+        return this.db.get_cashier() || this.get('cashier') || user_employee;
     },
     // changes the current cashier
-    set_cashier: function(user){
-        this.set('cashier', user);
-        this.db.set_cashier(this.get('cashier'));
+    set_cashier: function(employee){
+        this.set('cashier', employee);
+        this.db.set_cashier(this.get('cashier'));var self = this;
     },
     //creates a new empty order and sets it as the current order
     add_new_order: function(){
@@ -1955,6 +1963,7 @@ exports.Order = Backbone.Model.extend({
         this.orderlines     = new OrderlineCollection();
         this.paymentlines   = new PaymentlineCollection();
         this.pos_session_id = this.pos.pos_session.id;
+        this.employee       = this.pos.employee;
         this.finalized      = false; // if true, cannot be modified.
         this.set_pricelist(this.pos.default_pricelist);
 
@@ -2079,7 +2088,8 @@ exports.Order = Backbone.Model.extend({
             pos_session_id: this.pos_session_id,
             pricelist_id: this.pricelist ? this.pricelist.id : false,
             partner_id: this.get_client() ? this.get_client().id : false,
-            user_id: this.pos.get_cashier().id,
+            user_id: this.pos.user.id,
+            employee_id: this.pos.get_cashier().id,
             uid: this.uid,
             sequence_number: this.sequence_number,
             creation_date: this.validation_date || this.creation_date, // todo: rename creation_date in master

@@ -8,7 +8,7 @@
     'sequence': 20,
     'summary': 'Tablet POS: shops and restaurants',
     'description': "",
-    'depends': ['stock_account', 'barcodes', 'web_editor', 'digest'],
+    'depends': ['stock_account', 'barcodes', 'web_editor', 'digest', 'hr'],
     'data': [
         'security/point_of_sale_security.xml',
         'security/ir.model.access.csv',
@@ -37,7 +37,7 @@
         'views/res_config_settings_views.xml',
         'views/digest_views.xml',
         'views/res_partner_view.xml',
-        'views/res_users_views.xml',
+        'views/hr_employee_view.xml',
         'views/report_statement.xml',
         'views/report_userlabel.xml',
         'views/report_saledetails.xml',

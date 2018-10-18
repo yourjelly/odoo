@@ -227,37 +227,41 @@ var Gui = core.Class.extend({
     // - current_user: password will not be asked if this 
     //                 user is selected.
     // - title: The title of the user selection list. 
-    select_user: function(options){
+    select_employee: function(options){
         options = options || {};
         var self = this;
         var def  = new $.Deferred();
 
         var list = [];
-        for (var i = 0; i < this.pos.users.length; i++) {
-            var user = this.pos.users[i];
-            if (!options.only_managers || user.role === 'manager') {
-                list.push({
-                    'label': user.name,
-                    'item':  user,
-                });
+        for (var i = 0; i < this.pos.employees.length; i++) {
+            var employee = this.pos.employees[i];
+            var employee_user = this.pos.users.find(function(user) { return user.id === employee.user_id[0]; });
+            
+            if (employee.pos_security_pin) {
+                if (!options.only_managers || employee_user.role === 'manager') {
+                    list.push({
+                    'label': employee.name,
+                    'item':  employee,
+                    });
+                }
             }
         }
 
         this.show_popup('selection',{
             title: options.title || _t('Select User'),
             list: list,
-            confirm: function(user){ def.resolve(user); },
+            confirm: function(employee){ def.resolve(employee); },
             cancel: function(){ def.reject(); },
-            is_selected: function(user){ return user === self.pos.get_cashier(); },
+            is_selected: function(employee){ return employee === self.pos.get_cashier(); },
         });
 
-        return def.then(function(user){
-            if (options.security && user !== options.current_user && user.pos_security_pin) {
-                return self.ask_password(user.pos_security_pin).then(function(){
-                    return user;
+        return def.then(function(employee){
+            if (options.security && employee !== options.current_employee && employee.pos_security_pin) {
+                return self.ask_password(employee.pos_security_pin).then(function(){
+                    return employee;
                 });
             } else {
-                return user;
+                return employee;
             }
         });
     },
@@ -293,12 +297,12 @@ var Gui = core.Class.extend({
     // This method returns a deferred, that succeeds with the 
     // manager user when the login is successfull.
     sudo: function(user){
-        user = user || this.pos.get_cashier();
+        user = this.user;
 
         if (user.role === 'manager') {
             return new $.Deferred().resolve(user);
         } else {
-            return this.select_user({
+            return this.select_employee({
                 security:       true, 
                 only_managers:  true,
                 title:       _t('Login as a Manager'),
