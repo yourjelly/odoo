@@ -74,17 +74,17 @@ var ScreenWidget = PosBaseWidget.extend({
     // - else : do nothing and return false. You probably want to extend this to show and appropriate error popup... 
     barcode_cashier_action: function(code){
         var self = this;
-        var users = this.pos.users;
-        for(var i = 0, len = users.length; i < len; i++){
-            if(users[i].barcode === code.code){
-                if (users[i].id !== this.pos.get_cashier().id && users[i].pos_security_pin) {
-                    return this.gui.ask_password(users[i].pos_security_pin).then(function(){
-                        self.pos.set_cashier(users[i]);
+        var employees = this.pos.employees;
+        for(var i = 0, len = employees.length; i < len; i++){
+            if(employees[i].barcode === code.code){
+                if (employees[i].id !== this.pos.get_cashier().id && employees[i].pos_security_pin) {
+                    return this.gui.ask_password(employees[i].pos_security_pin).then(function(){
+                        self.pos.set_cashier(employees[i]);
                         self.chrome.widget.username.renderElement();
                         return true;
                     });
                 } else {
-                    this.pos.set_cashier(users[i]);
+                    this.pos.set_cashier(employees[i]);
                     this.chrome.widget.username.renderElement();
                     return true;
                 }

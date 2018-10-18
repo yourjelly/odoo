@@ -55,6 +55,13 @@ class PosSession(models.Model):
         readonly=True,
         states={'opening_control': [('readonly', False)]},
         default=lambda self: self.env.uid)
+    employee_id = fields.Many2one(
+        'hr.employee', string='Sales Personn',
+        required=False,
+        index=True,
+        readonly=True,
+        default=lambda self: self.env.user.employee_ids.id
+    )
     currency_id = fields.Many2one('res.currency', related='config_id.currency_id', string="Currency", readonly=False)
     start_at = fields.Datetime(string='Opening Date', readonly=True)
     stop_at = fields.Datetime(string='Closing Date', readonly=True, copy=False)

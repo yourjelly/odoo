@@ -99,9 +99,9 @@ var UsernameWidget = PosBaseWidget.extend({
     },
     click_username: function(){
         var self = this;
-        this.gui.select_user({
+        this.gui.select_employee({
             'security':     true,
-            'current_user': this.pos.get_cashier(),
+            'current_employee': this.pos.get_cashier(),
             'title':      _t('Change Cashier'),
         }).then(function(user){
             self.pos.set_cashier(user);

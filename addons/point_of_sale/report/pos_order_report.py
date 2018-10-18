@@ -19,7 +19,7 @@ class PosOrderReport(models.Model):
         [('draft', 'New'), ('paid', 'Paid'), ('done', 'Posted'),
          ('invoiced', 'Invoiced'), ('cancel', 'Cancelled')],
         string='Status')
-    user_id = fields.Many2one('res.users', string='Salesperson', readonly=True)
+    employee_id = fields.Many2one('hr.employee', string='Salesperson', readonly=True)
     price_total = fields.Float(string='Total Price', readonly=True)
     price_sub_total = fields.Float(string='Subtotal w/o discount', readonly=True)
     total_discount = fields.Float(string='Total Discount', readonly=True)
@@ -52,7 +52,7 @@ class PosOrderReport(models.Model):
                 s.id as order_id,
                 s.partner_id AS partner_id,
                 s.state AS state,
-                s.user_id AS user_id,
+                s.employee_id AS employee_id,
                 s.location_id AS location_id,
                 s.company_id AS company_id,
                 s.sale_journal AS journal_id,
@@ -80,7 +80,7 @@ class PosOrderReport(models.Model):
         return """
             GROUP BY
                 s.id, s.date_order, s.partner_id,s.state, pt.categ_id,
-                s.user_id, s.location_id, s.company_id, s.sale_journal,
+                s.employee_id, s.location_id, s.company_id, s.sale_journal,
                 s.pricelist_id, s.invoice_id, s.create_date, s.session_id,
                 l.product_id,
                 pt.categ_id, pt.pos_categ_id,

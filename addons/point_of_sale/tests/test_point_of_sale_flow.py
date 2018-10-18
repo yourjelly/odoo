@@ -445,6 +445,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
               'name': fields.Datetime.now(),
               'statement_id': current_session.statement_ids[0].id}]],
            'uid': '00042-003-0014',
+           'employee_id':current_session.employee.id,
            'user_id': self.env.uid},
           'id': '00042-003-0014',
           'to_invoice': False}
@@ -481,6 +482,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
               'name': fields.Datetime.now(),
               'statement_id': current_session.statement_ids[0].id}]],
            'uid': '00043-003-0014',
+           'employee_id':current_session.employee.id,
            'user_id': self.env.uid},
           'id': '00043-003-0014',
           'to_invoice': False}
@@ -517,6 +519,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
               'name': fields.Datetime.now(),
               'statement_id': current_session.statement_ids[0].id}]],
            'uid': '00044-003-0014',
+           'employee_id':current_session.employee.id,
            'user_id': self.env.uid},
           'id': '00044-003-0014',
           'to_invoice': False}
