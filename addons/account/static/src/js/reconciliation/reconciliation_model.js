@@ -124,7 +124,7 @@ var StatementModel = BasicModel.extend({
      *
      * @param {string} handle
      * @param {number} mv_line_id
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     addProposition: function (handle, mv_line_id) {
         var self = this;
@@ -138,18 +138,18 @@ var StatementModel = BasicModel.extend({
             && line.reconciliation_proposition.length == 1 && prop.partner_id && line.type === undefined){
             return this.changePartner(handle, {'id': prop.partner_id, 'display_name': prop.partner_name}, true)
                 .then(function (result) {
-                    return $.when(self._computeLine(line), self._performMoveLine(handle));
+                    return Promise.all([self._computeLine(line), self._performMoveLine(handle)]);
                 });
         }
 
-        return $.when(this._computeLine(line), this._performMoveLine(handle));
+        return Promise.all([this._computeLine(line), this._performMoveLine(handle)]);
     },
     /**
      * change the filter for the target line and fetch the new matched lines
      *
      * @param {string} handle
      * @param {string} filter
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     changeFilter: function (handle, filter) {
         var line = this.getLine(handle);
@@ -170,7 +170,7 @@ var StatementModel = BasicModel.extend({
      *
      * @param {string} handle
      * @param {'inactive' | 'match' | 'create'} mode
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     changeMode: function (handle, mode) {
         var line = this.getLine(handle);
@@ -188,13 +188,13 @@ var StatementModel = BasicModel.extend({
         if (line.mode === 'create') {
             return this.createProposition(handle);
         }
-        return $.when();
+        return Promise.resolve();
     },
     /**
      * call 'write' method on the 'account.bank.statement'
      *
      * @param {string} name
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     changeName: function (name) {
         return this._rpc({
@@ -208,7 +208,7 @@ var StatementModel = BasicModel.extend({
      *
      * @param {string} handle
      * @param {number} offset
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     changeOffset: function (handle, offset) {
         this.getLine(handle).offset += (offset > 0 ? 1 : -1) * this.limitMoveLines;
@@ -222,14 +222,14 @@ var StatementModel = BasicModel.extend({
      * @param {Object} partner
      * @param {string} partner.display_name
      * @param {number} partner.id
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     changePartner: function (handle, partner, preserveMode) {
         var self = this;
         var line = this.getLine(handle);
         line.st_line.partner_id = partner && partner.id;
         line.st_line.partner_name = partner && partner.display_name || '';
-        return $.when(partner && this._changePartner(handle, partner.id))
+        return Promise.resolve(partner && this._changePartner(handle, partner.id))
                 .then(function() {
                     if(line.st_line.partner_id){
                         _.each(line.reconciliation_proposition, function(prop){
@@ -253,7 +253,7 @@ var StatementModel = BasicModel.extend({
     },
     /**
      * close the statement
-     * @returns {Deferred<number>} resolves to the res_id of the closed statements
+     * @returns {Promise<number>} resolves to the res_id of the closed statements
      */
     closeStatement: function () {
         var self = this;
@@ -271,14 +271,14 @@ var StatementModel = BasicModel.extend({
      * then open the first available line
      *
      * @param {string} handle
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     createProposition: function (handle) {
         var line = this.getLine(handle);
         var prop = _.filter(line.reconciliation_proposition, '__focus');
         var last = prop[prop.length-1];
         if (last && !this._isValid(last)) {
-            return $.Deferred().resolve(false);
+            return Promise.resolve(false);
         }
 
         prop = this._formatQuickCreate(line);
@@ -300,7 +300,7 @@ var StatementModel = BasicModel.extend({
      */
     getStatementLines: function () {
         var self = this;
-        var linesToDisplay = _.pick(this.lines, function(value, key, object) { 
+        var linesToDisplay = _.pick(this.lines, function(value, key, object) {
             if (value.visible === true && self.alreadyDisplayed.indexOf(key) === -1) {
                 self.alreadyDisplayed.push(key);
                 return object;
@@ -340,18 +340,18 @@ var StatementModel = BasicModel.extend({
      *
      * @param {Object} context
      * @param {number[]} context.statement_ids
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     load: function (context) {
         var self = this;
         // var statement_ids = context.statement_ids;
         this.statement_ids = context.statement_ids;
         if (!this.statement_ids) {
-            return $.when();
+            return Promise.resolve();
         }
         this.context = context;
         return self.reload();
-        
+
     },
     /**
      * Load more bank statement line
@@ -370,7 +370,7 @@ var StatementModel = BasicModel.extend({
     },
     /**
      * RPC method to load informations on lines
-     * 
+     *
      * @param {Array} ids ids of bank statement line passed to rpc call
      * @param {Array} excluded_ids list of move_line ids that needs to be excluded from search
      * @returns {Deferred}
@@ -444,7 +444,7 @@ var StatementModel = BasicModel.extend({
                 self.accounts = _.object(_.pluck(accounts, 'id'), _.pluck(accounts, 'code'));
             });
         var def_taxes = self._loadTaxes();
-        return $.when(def_statement, def_reconcileModel, def_account, def_taxes).then(function () {
+        return Promise.all([def_statement, def_reconcileModel, def_account, def_taxes]).then(function () {
             _.each(self.lines, function (line) {
                 line.reconcileModels = self.reconcileModels;
             });
@@ -475,13 +475,13 @@ var StatementModel = BasicModel.extend({
      * Add lines into the propositions from the reconcile model
      * Can add 2 lines, and each with its taxes. The second line become editable
      * in the create mode.
-     * 
+     *
      * @see 'updateProposition' method for more informations about the
      * 'amount_type'
      *
      * @param {string} handle
      * @param {integer} reconcileModelId
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     quickCreateProposition: function (handle, reconcileModelId) {
         var line = this.getLine(handle);
@@ -511,7 +511,7 @@ var StatementModel = BasicModel.extend({
      *
      * @param {string} handle
      * @param {number} id (move line id)
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     removeProposition: function (handle, id) {
         var self = this;
@@ -532,15 +532,15 @@ var StatementModel = BasicModel.extend({
         line.mode = (id || line.mode !== "create") && isNaN(id) && !this.avoidCreate ? 'create' : 'match';
         defs.push(this._computeLine(line));
         if (line.mode === 'create') {
-            return $.when.apply($, defs).then(function () {
+            return Promise.all(defs).then(function () {
                 return self.createProposition(handle);
             });
         } else if (line.mode === 'match') {
-            return $.when.apply($, defs).then(function () {
+            return Promise.all(defs).then(function () {
                 return self._performMoveLine(handle);
             });
         }
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
     getPartialReconcileAmount: function(handle, data) {
         var line = this.getLine(handle);
@@ -553,7 +553,7 @@ var StatementModel = BasicModel.extend({
                 return Math.abs(amount);
             }
             if (partial <= Math.abs(prop.amount) && partial >= 0) {
-                return partial
+                return partial;
             }
             return Math.abs(amount);
         }
@@ -562,7 +562,7 @@ var StatementModel = BasicModel.extend({
      * Force the partial reconciliation to display the reconciliate button.
      *
      * @param {string} handle
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     partialReconcile: function(handle, data) {
         var line = this.getLine(handle);
@@ -598,14 +598,14 @@ var StatementModel = BasicModel.extend({
      * Change the value of the editable proposition line or create a new one.
      *
      * If the editable line comes from a reconcile model with 2 lines
-     * and their 'amount_type' is "percent" 
+     * and their 'amount_type' is "percent"
      * and their total equals 100% (this doesn't take into account the taxes
      * who can be included or not)
      * Then the total is recomputed to have 100%.
      *
      * @param {string} handle
      * @param {*} values
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     updateProposition: function (handle, values) {
         var self = this;
@@ -665,7 +665,7 @@ var StatementModel = BasicModel.extend({
      * Update the number of validated lines
      *
      * @param {(string|string[])} handle
-     * @returns {Deferred<Object>} resolved with an object who contains
+     * @returns {Promise<Object>} resolved with an object who contains
      *   'handles' key
      */
     validate: function (handle) {
@@ -682,9 +682,11 @@ var StatementModel = BasicModel.extend({
         }
         var ids = [];
         var values = [];
+        var handlesPromises = [];
         _.each(handles, function (handle) {
             var line = self.getLine(handle);
             var props = _.filter(line.reconciliation_proposition, function (prop) {return !prop.invalid;});
+            var computeLinePromise;
             if (props.length === 0) {
                 // Usability: if user has not choosen any lines and click validate, it has the same behavior
                 // as creating a write-off of the same amount.
@@ -693,49 +695,52 @@ var StatementModel = BasicModel.extend({
                 }));
                 // update balance of line otherwise it won't be to zero and another line will be added
                 line.reconciliation_proposition.push(props[0]);
-                self._computeLine(line);
+                computeLinePromise = self._computeLine(line);
             }
-            ids.push(line.id);
-            var values_dict = {
-                "partner_id": line.st_line.partner_id,
-                "counterpart_aml_dicts": _.map(_.filter(props, function (prop) {
-                    return !isNaN(prop.id) && !prop.already_paid;
-                }), self._formatToProcessReconciliation.bind(self, line)),
-                "payment_aml_ids": _.pluck(_.filter(props, function (prop) {
-                    return !isNaN(prop.id) && prop.already_paid;
-                }), 'id'),
-                "new_aml_dicts": _.map(_.filter(props, function (prop) {
-                    return isNaN(prop.id) && prop.display;
-                }), self._formatToProcessReconciliation.bind(self, line)),
-            };
-
-            // If the lines are not fully balanced, create an unreconciled amount.
-            // line.st_line.currency_id is never false here because its equivalent to
-            // statement_line.currency_id or statement_line.journal_id.currency_id or statement_line.journal_id.company_id.currency_id (Python-side).
-            // see: get_statement_line_for_reconciliation_widget method in account/models/account_bank_statement.py for more details
-            var currency = session.get_currency(line.st_line.currency_id);
-            var balance = line.balance.amount;
-            if (!utils.float_is_zero(balance, currency.digits[1])) {
-                var unreconciled_amount_dict = {
-                    'account_id': line.st_line.open_balance_account_id,
-                    'credit': balance > 0 ? balance : 0,
-                    'debit': balance < 0 ? -balance : 0,
-                    'name': line.st_line.name + ' : ' + _t("Open balance"),
+            handlesPromises.push(Promise.resolve(computeLinePromise).then(function() {
+                ids.push(line.id);
+                var values_dict = {
+                    "partner_id": line.st_line.partner_id,
+                    "counterpart_aml_dicts": _.map(_.filter(props, function (prop) {
+                        return !isNaN(prop.id) && !prop.already_paid;
+                    }), self._formatToProcessReconciliation.bind(self, line)),
+                    "payment_aml_ids": _.pluck(_.filter(props, function (prop) {
+                        return !isNaN(prop.id) && prop.already_paid;
+                    }), 'id'),
+                    "new_aml_dicts": _.map(_.filter(props, function (prop) {
+                        return isNaN(prop.id) && prop.display;
+                    }), self._formatToProcessReconciliation.bind(self, line)),
                 };
-                values_dict['new_aml_dicts'].push(unreconciled_amount_dict);
-            }
-            values.push(values_dict);
-            line.reconciled = true;
-            self.valuenow++;
-        });
 
-        return this._rpc({
-                model: 'account.reconciliation.widget',
-                method: 'process_bank_statement_line',
-                args: [ids, values],
-            })
-            .then(function () {
-                return {handles: handles};
+                // If the lines are not fully balanced, create an unreconciled amount.
+                // line.st_line.currency_id is never false here because its equivalent to
+                // statement_line.currency_id or statement_line.journal_id.currency_id or statement_line.journal_id.company_id.currency_id (Python-side).
+                // see: get_statement_line_for_reconciliation_widget method in account/models/account_bank_statement.py for more details
+                var currency = session.get_currency(line.st_line.currency_id);
+                var balance = line.balance.amount;
+                if (!utils.float_is_zero(balance, currency.digits[1])) {
+                    var unreconciled_amount_dict = {
+                        'account_id': line.st_line.open_balance_account_id,
+                        'credit': balance > 0 ? balance : 0,
+                        'debit': balance < 0 ? -balance : 0,
+                        'name': line.st_line.name + ' : ' + _t("Open balance"),
+                    };
+                    values_dict['new_aml_dicts'].push(unreconciled_amount_dict);
+                }
+                values.push(values_dict);
+                line.reconciled = true;
+                self.valuenow++;
+            }));
+        });
+        return Promise.all(handlesPromises).then(function() {
+            return self._rpc({
+                    model: 'account.reconciliation.widget',
+                    method: 'process_bank_statement_line',
+                    args: [ids, values],
+                })
+                .then(function () {
+                    return {handles: handles};
+                });
             });
     },
 
@@ -759,7 +764,7 @@ var StatementModel = BasicModel.extend({
                 exception_type: _t("Incorrect Operation"),
                 message: _t("You cannot mix items from receivable and payable accounts.")
             }});
-            return $.when();
+            return Promise.resolve();
         }
 
         line.reconciliation_proposition.push(prop);
@@ -772,7 +777,7 @@ var StatementModel = BasicModel.extend({
      *
      * @private
      * @param {string} handle
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _blurProposition: function (handle) {
         var line = this.getLine(handle);
@@ -790,7 +795,7 @@ var StatementModel = BasicModel.extend({
      * @private
      * @param {string} handle
      * @param {integer} partner_id
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _changePartner: function (handle, partner_id) {
         var self = this;
@@ -812,7 +817,7 @@ var StatementModel = BasicModel.extend({
      *
      * @private
      * @param {Object} line
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _computeLine: function (line) {
         //balance_type
@@ -882,7 +887,7 @@ var StatementModel = BasicModel.extend({
             }
         });
 
-        return $.when.apply($, tax_defs).then(function () {
+        return Promise.all(tax_defs).then(function () {
             _.each(reconciliation_proposition, function (prop) {
                 prop.__tax_to_recompute = false;
             });
@@ -924,7 +929,7 @@ var StatementModel = BasicModel.extend({
         });
     },
     /**
-     * 
+     *
      *
      * @private
      * @param {string} handle
@@ -982,7 +987,7 @@ var StatementModel = BasicModel.extend({
      *
      * @private
      * @param {Object[]} lines
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _formatLine: function (lines) {
         var self = this;
@@ -1027,7 +1032,7 @@ var StatementModel = BasicModel.extend({
                 })
             );
         });
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
     /**
      * Format the server value then compute the line
@@ -1037,7 +1042,7 @@ var StatementModel = BasicModel.extend({
      * @private
      * @param {string} handle
      * @param {Object[]} mv_lines
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _formatMoveLine: function (handle, mv_lines) {
         var self = this;
@@ -1167,7 +1172,7 @@ var StatementModel = BasicModel.extend({
      *
      * @private
      * @param {string} handle
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _performMoveLine: function (handle) {
         var line = this.getLine(handle);
@@ -1265,7 +1270,7 @@ var ManualModel = StatementModel.extend({
      * @param {integer[]} [context.company_ids]
      * @param {integer[]} [context.partner_ids] used for 'customers' and
      *   'suppliers' mode
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     load: function (context) {
         var self = this;
@@ -1303,7 +1308,7 @@ var ManualModel = StatementModel.extend({
 
         var def_taxes = this._loadTaxes();
 
-        return $.when(def_reconcileModel, def_account, def_taxes).then(function () {
+        return Promise.all([def_reconcileModel, def_account, def_taxes]).then(function () {
             switch(context.mode) {
                 case 'customers':
                 case 'suppliers':
@@ -1396,7 +1401,7 @@ var ManualModel = StatementModel.extend({
      * Mark the account or the partner as reconciled
      *
      * @param {(string|string[])} handle
-     * @returns {Deferred<Array>} resolved with the handle array
+     * @returns {Promise<Array>} resolved with the handle array
      */
     validate: function (handle) {
         var self = this;
@@ -1411,7 +1416,7 @@ var ManualModel = StatementModel.extend({
             });
         }
 
-        var def = $.when();
+        var def = Promise.resolve();
         var process_reconciliations = [];
         var reconciled = [];
         _.each(handles, function (handle) {
@@ -1474,7 +1479,7 @@ var ManualModel = StatementModel.extend({
                     }
                 }));
             });
-            return $.when.apply($, defs).then(function() {
+            return Promise.all(defs).then(function() {
                 if (account_ids.length) {
                     self._rpc({
                             model: 'account.account',
@@ -1500,11 +1505,11 @@ var ManualModel = StatementModel.extend({
 
     /**
      * override change the balance type to display or not the reconcile button
-     * 
+     *
      * @override
      * @private
      * @param {Object} line
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _computeLine: function (line) {
         return this._super(line).then(function () {
@@ -1529,7 +1534,7 @@ var ManualModel = StatementModel.extend({
      * @private
      * @param {'customers' | 'suppliers' | 'accounts'} type
      * @param {Object} data
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _formatLine: function (type, data) {
         var line = this.lines[_.uniqueId('rline')] = _.extend(data, {
@@ -1552,7 +1557,7 @@ var ManualModel = StatementModel.extend({
     },
     /**
      * override to add journal_id
-     * 
+     *
      * @override
      * @private
      * @param {Object} line
@@ -1611,7 +1616,7 @@ var ManualModel = StatementModel.extend({
      * @override
      * @private
      * @param {string} handle
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _performMoveLine: function (handle) {
         var line = this.getLine(handle);

@@ -79,10 +79,10 @@ var Thread = AbstractThread.extend(ServicesMixin, {
      * `this.LIMIT` number of messages at a time.
      *
      * @abstract
-     * @returns {$.Promise<mail.model.Message[]>}
+     * @returns {Promise<mail.model.Message[]>}
      */
     fetchMessages: function () {
-        return $.when([]);
+        return Promise.resolve([]);
     },
     /**
      * Updates the folded state of the thread. Must be overriden to reflect
@@ -110,10 +110,10 @@ var Thread = AbstractThread.extend(ServicesMixin, {
      * By default, a thread has not listener.
      *
      * @abstract
-     * @returns {$.Promise<Array<Object[]>>}
+     * @returns {Promise<Array<Object[]>>}
      */
     getMentionPartnerSuggestions: function () {
-        return $.when([]);
+        return Promise.resolve([]);
     },
     /**
      * Returns the information required to render the preview of this channel.
@@ -287,10 +287,10 @@ var Thread = AbstractThread.extend(ServicesMixin, {
     /**
      * @abstract
      * @private
-     * @return {$.Promise}
+     * @return {Promise}
      */
     _fetchMessages: function () {
-        return $.when();
+        return Promise.resolve();
     },
     /**
      * Replace character representations of emojis by their unicode
@@ -330,7 +330,7 @@ var Thread = AbstractThread.extend(ServicesMixin, {
      * @abstract
      * @private
      * @param {Object} data
-     * @returns {$.Promise<Object>} resolved with the message object to be sent
+     * @returns {Promise<Object>} resolved with the message object to be sent
      *   to the server
      */
     _postMessage: function (data) {
@@ -352,7 +352,7 @@ var Thread = AbstractThread.extend(ServicesMixin, {
             messageData.subject = data.subject;
         }
         return this._super.apply(this, arguments).then(function () {
-            return $.when(messageData);
+            return messageData;
         });
     },
     /**

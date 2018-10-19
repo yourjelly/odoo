@@ -274,7 +274,7 @@ var LivechatButton = Widget.extend({
     /**
      * @private
      * @param {Object} message
-     * @return {$.Deferred}
+     * @return {Promise}
      */
     _sendMessage: function (message) {
         var self = this;

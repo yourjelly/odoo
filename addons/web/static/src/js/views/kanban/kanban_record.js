@@ -63,7 +63,7 @@ var KanbanRecord = Widget.extend({
      * @override
      */
     start: function () {
-        return $.when(this._super.apply(this, arguments), this._render());
+        return Promise.all([this._super.apply(this, arguments), this._render()]);
     },
     /**
      * Called each time the record is attached to the DOM.
@@ -86,7 +86,7 @@ var KanbanRecord = Widget.extend({
      * Re-renders the record with a new state
      *
      * @param {Object} state
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     update: function (state) {
         // detach the widgets because the record will empty its $el, which will
@@ -148,7 +148,7 @@ var KanbanRecord = Widget.extend({
         }
         if (typeof variable === 'string') {
             var index = 0;
-            for (var i = 0 ; i < variable.length ; i++) {
+            for (var i = 0; i < variable.length; i++) {
                 index += variable.charCodeAt(i);
             }
             return index % NB_KANBAN_RECORD_COLORS;
@@ -187,7 +187,7 @@ var KanbanRecord = Widget.extend({
         if (this.record[field] && this.record[field].value && !utils.is_bin_size(this.record[field].value)) {
             // Use magic-word technique for detecting image type
             url = 'data:image/' + this.file_type_magic_word[this.record[field].value[0]] + ';base64,' + this.record[field].value;
-        } else if (this.record[field] && ! this.record[field].value) {
+        } else if (this.record[field] && !this.record[field].value) {
             url = "/web/static/src/img/placeholder.png";
         } else {
             if (_.isArray(id)) { id = id[0]; }
@@ -196,7 +196,7 @@ var KanbanRecord = Widget.extend({
                 field = options.preview_image;
             var unique = this.record.__last_update && this.record.__last_update.value.replace(/[^0-9]/g, '');
             var session = this.getSession();
-            url = session.url('/web/image', {model: model, field: field, id: id, unique: unique});
+            url = session.url('/web/image', { model: model, field: field, id: id, unique: unique });
             if (cache !== undefined) {
                 // Set the cache duration in seconds.
                 url += '&cache=' + parseInt(cache, 10);
@@ -296,6 +296,7 @@ var KanbanRecord = Widget.extend({
         // field's widgets point of view
         // that dict being shared between records, we don't modify it
         // in place
+        var self = this;
         var attrs = Object.create(null);
         _.each(this.fieldsInfo[field_name], function (value, key) {
             if (_.str.startsWith(key, 't-att-')) {
@@ -304,13 +305,13 @@ var KanbanRecord = Widget.extend({
             }
             attrs[key] = value;
         });
-        var options = _.extend({}, this.options, {attrs: attrs});
+        var options = _.extend({}, this.options, { attrs: attrs });
         var widget = new Widget(this, field_name, this.state, options);
-        var def = widget.replace($field);
-        if (def.state() === 'pending') {
-            this.defs.push(def);
-        }
-        this._setFieldDisplay(widget.$el, field_name);
+        var def = widget.replace($field)
+        this.defs.push(def);
+        def.then(function () {
+            self._setFieldDisplay(widget.$el, field_name);
+        });
         return widget;
     },
     _processWidgets: function () {
@@ -320,23 +321,23 @@ var KanbanRecord = Widget.extend({
             var Widget = widgetRegistry.get($field.attr('name'));
             var widget = new Widget(self, self.state);
 
-            var def = widget._widgetRenderAndInsert(function () {});
-            if (def.state() === 'pending') {
-                self.defs.push(def);
-            }
-            widget.$el.addClass('o_widget');
+            var def = widget._widgetRenderAndInsert(function () { })
+            self.defs.push(def);
+            def.then(function () {
+                widget.$el.addClass('o_widget');
+            });
             $field.replaceWith(widget.$el);
         });
     },
     /**
      * Renders the record
      *
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _render: function () {
         this.defs = [];
         this._replaceElement(this.qweb.render('kanban-box', this.qweb_context));
-        this.$el.addClass('o_kanban_record').attr("tabindex",0);
+        this.$el.addClass('o_kanban_record').attr("tabindex", 0);
         this.$el.attr('role', 'article');
         this.$el.data('record', this);
         if (this.$el.hasClass('oe_kanban_global_click') ||
@@ -353,9 +354,9 @@ var KanbanRecord = Widget.extend({
         this._attachTooltip();
 
         // We use boostrap tooltips for better and faster display
-        this.$('span.o_tag').tooltip({delay: {'show': 50}});
+        this.$('span.o_tag').tooltip({ delay: { 'show': 50 } });
 
-        return $.when.apply(this, this.defs);
+        return Promise.all(this.defs);
     },
     /**
      * Sets particular classnames on a field $el according to the
@@ -414,7 +415,7 @@ var KanbanRecord = Widget.extend({
             var colorHelp = _.str.sprintf(_t("Card color: %s"), this._getColorname(this.recordData[color_field]));
             var colorClass = this._getColorClassname(this.recordData[color_field]);
             this.$el.addClass(colorClass);
-            this.$el.prepend('<span title="' + colorHelp + '" aria-label="' + colorHelp +'" role="img" class="oe_kanban_color_help"/>');
+            this.$el.prepend('<span title="' + colorHelp + '" aria-label="' + colorHelp + '" role="img" class="oe_kanban_color_help"/>');
         }
     },
     /**
@@ -449,7 +450,7 @@ var KanbanRecord = Widget.extend({
                 r.raw_value = value.toDate();
             } else if (r.type === 'one2many' || r.type === 'many2many') {
                 r.raw_value = value.count ? value.res_ids : [];
-            } else if (r.type === 'many2one' ) {
+            } else if (r.type === 'many2one') {
                 r.raw_value = value && value.res_id || false;
             } else {
                 r.raw_value = value;
@@ -549,13 +550,13 @@ var KanbanRecord = Widget.extend({
 
         switch (type) {
             case 'edit':
-                this.trigger_up('open_record', {id: this.db_id, mode: 'edit'});
+                this.trigger_up('open_record', { id: this.db_id, mode: 'edit' });
                 break;
             case 'open':
-                this.trigger_up('open_record', {id: this.db_id});
+                this.trigger_up('open_record', { id: this.db_id });
                 break;
             case 'delete':
-                this.trigger_up('kanban_record_delete', {id: this.db_id, record: this});
+                this.trigger_up('kanban_record_delete', { id: this.db_id, record: this });
                 break;
             case 'action':
             case 'object':

@@ -36,23 +36,26 @@ var AttachmentBox = Widget.extend({
             ['res_id', '=', this.currentResID],
             ['res_model', '=', this.currentResModel],
         ];
-        return $.when(this._super.apply(this, arguments), this._rpc({
+
+        var rpc = this._rpc({
             model: 'ir.attachment',
             method: 'search_read',
             domain: domain,
-        }).then(function (result) {
-            self.attachmentIDs = result;
-            _.each(result, function (attachment) {
+        });
+
+        return Promise.all([this._super.apply(this, arguments), rpc]).then(function (result) {
+            self.attachmentIDs = result[1];
+            _.each(result[1], function (attachment) {
                 attachment.url = '/web/content/' + attachment.id + '?download=true';
                 // required for compatibility with the chatter templates.
                 attachment.filename = attachment.datas_fname || 'unnamed';
             });
-            var sortedAttachments = _.partition(result, function (att) {
+            var sortedAttachments = _.partition(result[1], function (att) {
                 return att.mimetype && att.mimetype.split('/')[0] === 'image';
             });
             self.imageList = sortedAttachments[0];
             self.otherList = sortedAttachments[1];
-        }));
+        });
     },
 
     //--------------------------------------------------------------------------

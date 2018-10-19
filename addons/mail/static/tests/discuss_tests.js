@@ -135,7 +135,7 @@ QUnit.test('searchview options visibility', function (assert) {
     });
 });
 
-QUnit.test('searchview filter messages', function (assert) {
+QUnit.test('searchview filter messages', async function (assert) {
     assert.expect(10);
     var done = assert.async();
 
@@ -153,7 +153,7 @@ QUnit.test('searchview filter messages', function (assert) {
         needaction_partner_ids: [3],
     }];
 
-    createDiscuss({
+    var discuss = createDiscuss({
         id: 1,
         context: {},
         params: {},
@@ -206,6 +206,38 @@ QUnit.test('searchview filter messages', function (assert) {
         discuss.destroy();
         done();
     });
+    assert.containsN(discuss, '.o_thread_message', 2,
+        "there should be two messages in the inbox mailbox");
+    assert.strictEqual($('.o_searchview_input').length, 1,
+        "there should be a searchview on discuss");
+    assert.strictEqual($('.o_searchview_input').val(), '',
+        "the searchview should be empty initially");
+    // interact with searchview so that there is only once message
+    await testUtils.fields.editAndTrigger($('.o_searchview_input'), "ab", ["keyup"]);
+    await testUtils.fields.triggerKeydown($('.o_searchview'), $.ui.keyCode.ENTER);
+    assert.strictEqual($('.o_searchview_facet').length, 1,
+        "the searchview should have a facet");
+    assert.strictEqual($('.o_facet_values').text().trim(), 'ab',
+        "the facet should be a search on 'ab'");
+    assert.containsOnce(discuss, '.o_thread_message',
+        "there should be a single message after filter");
+
+    // interact with search view so that there are no matching messages
+    await testUtils.dom.click($('.o_facet_remove'));
+    await testUtils.fields.editAndTrigger($('.o_searchview_input'), "abcd", ["keyup"]);
+    await testUtils.fields.triggerKeydown($('.o_searchview'), $.ui.keyCode.ENTER);
+
+    assert.strictEqual($('.o_searchview_facet').length, 1,
+        "the searchview should have a facet");
+    assert.strictEqual($('.o_facet_values').text().trim(), 'abcd',
+        "the facet should be a search on 'abcd'");
+    assert.containsNone(discuss, '.o_thread_message',
+        "there should be no message after 2nd filter");
+    assert.strictEqual(discuss.$('.o_thread_title').text().trim(),
+        "No matches found",
+        "should display that there are no matching messages");
+
+    discuss.destroy();
 });
 
 QUnit.test('unescape channel name in the sidebar', function (assert) {
@@ -248,12 +280,11 @@ QUnit.test('unescape channel name in the sidebar', function (assert) {
     });
 });
 
-QUnit.test('@ mention in channel', function (assert) {
+QUnit.test('@ mention in channel', async function (assert) {
     assert.expect(34);
-    var done = assert.async();
 
-    var fetchListenersDef = $.Deferred();
-    var receiveMessageDef = $.Deferred();
+    var fetchListenersDef = testUtils.makeTestPromise();
+    var receiveMessageDef = testUtils.makeTestPromise();
 
     this.data.initMessaging = {
         channel_slots: {
@@ -264,9 +295,8 @@ QUnit.test('@ mention in channel', function (assert) {
             }],
         },
     };
-
     var objectDiscuss;
-    createDiscuss({
+    var discuss = await createDiscuss({
         id: 1,
         context: {},
         params: {},
@@ -275,7 +305,7 @@ QUnit.test('@ mention in channel', function (assert) {
         mockRPC: function (route, args) {
             if (args.method === 'channel_fetch_listeners') {
                 fetchListenersDef.resolve();
-                return $.when([
+                return Promise.resolve([
                     {id: 1, name: 'Admin'},
                     {id: 2, name: 'TestUser'},
                     {id: 3, name: 'DemoUser'}
@@ -290,142 +320,134 @@ QUnit.test('@ mention in channel', function (assert) {
                 var notification = [[false, 'mail.channel', 1], data];
                 objectDiscuss.call('bus_service', 'trigger', 'notification', [notification]);
                 receiveMessageDef.resolve();
-                return $.when(42);
+                return Promise.resolve(42);
             }
             return this._super.apply(this, arguments);
         },
-    })
-    .then(function (discuss) {
-        objectDiscuss = discuss;
+    });
+    objectDiscuss = discuss;
+    var $general = discuss.$('.o_mail_discuss_sidebar')
+                    .find('.o_mail_discuss_item[data-thread-id=1]');
+    assert.strictEqual($general.length, 1,
+        "should have the channel item with id 1");
+    assert.hasAttrValue($general, 'title', 'general',
+        "should have the title 'general'");
 
-        var $general = discuss.$('.o_mail_discuss_sidebar')
-                        .find('.o_mail_discuss_item[data-thread-id=1]');
-        assert.strictEqual($general.length, 1,
-            "should have the channel item with id 1");
-        assert.hasAttrValue($general, 'title', 'general',
-            "should have the title 'general'");
+    // click on general
+    await testUtils.dom.click($general);
+    var $input = discuss.$('textarea.o_composer_text_field').first();
+    assert.ok($input.length, "should display a composer input");
 
-        // click on general
-        testUtils.dom.click($general);
-        var $input = discuss.$('textarea.o_composer_text_field').first();
-        assert.ok($input.length, "should display a composer input");
+    // Note: focus is needed in order to trigger rpc 'channel_fetch_listeners'
+    $input.focus();
+    $input.val("@");
+    $input.trigger('keyup');
 
-        // Note: focus is needed in order to trigger rpc 'channel_fetch_listeners'
-        $input.focus();
-        $input.val("@");
-        $input.trigger('keyup');
+    await fetchListenersDef;
+    await testUtils.nextTick();
+    assert.containsOnce(discuss, '.dropup.o_composer_mention_dropdown.show',
+    "dropup menu for partner mentions should be open");
 
-        fetchListenersDef
-            .then(concurrency.delay.bind(concurrency, 0))
-            .then(function () {
-                assert.containsOnce(discuss, '.dropup.o_composer_mention_dropdown.show',
-                "dropup menu for partner mentions should be open");
+    var $mentionPropositions = discuss.$('.o_mention_proposition');
+    assert.strictEqual($mentionPropositions.length, 3,
+        "should display 3 partner mention propositions");
 
-                var $mentionPropositions = discuss.$('.o_mention_proposition');
-                assert.strictEqual($mentionPropositions.length, 3,
-                    "should display 3 partner mention propositions");
+    var $mention1 = $mentionPropositions.first();
+    var $mention2 = $mentionPropositions.first().next();
+    var $mention3 = $mentionPropositions.first().next().next();
 
-                var $mention1 = $mentionPropositions.first();
-                var $mention2 = $mentionPropositions.first().next();
-                var $mention3 = $mentionPropositions.first().next().next();
+    // correct 1st mention proposition
+    assert.hasClass($mention1,'active',
+        "first partner mention should be active");
+    assert.strictEqual($mention1.data('id'), 1,
+        "first partner mention should link to the correct partner id");
+    assert.strictEqual($mention1.find('.o_mention_name').text(), "Admin",
+        "first partner mention should display the correct partner name");
+    // correct 2nd mention proposition
+    assert.doesNotHaveClass($mention2, 'active',
+        "second partner mention should not be active");
+    assert.strictEqual($mention2.data('id'), 2,
+        "second partner mention should link to the correct partner id");
+    assert.strictEqual($mention2.find('.o_mention_name').text(), "TestUser",
+        "second partner mention should display the correct partner name");
+    // correct 3rd mention proposition
+    assert.doesNotHaveClass($mention3, 'active',
+        "third partner mention should not be active");
+    assert.strictEqual($mention3.data('id'), 3,
+        "third partner mention should link to the correct partner id");
+    assert.strictEqual($mention3.find('.o_mention_name').text(), "DemoUser",
+        "third partner mention should display the correct partner name");
 
-                // correct 1st mention proposition
-                assert.hasClass($mention1,'active',
-                    "first partner mention should be active");
-                assert.strictEqual($mention1.data('id'), 1,
-                    "first partner mention should link to the correct partner id");
-                assert.strictEqual($mention1.find('.o_mention_name').text(), "Admin",
-                    "first partner mention should display the correct partner name");
-                // correct 2nd mention proposition
-                assert.doesNotHaveClass($mention2, 'active',
-                    "second partner mention should not be active");
-                assert.strictEqual($mention2.data('id'), 2,
-                    "second partner mention should link to the correct partner id");
-                assert.strictEqual($mention2.find('.o_mention_name').text(), "TestUser",
-                    "second partner mention should display the correct partner name");
-                // correct 3rd mention proposition
-                assert.doesNotHaveClass($mention3, 'active',
-                    "third partner mention should not be active");
-                assert.strictEqual($mention3.data('id'), 3,
-                    "third partner mention should link to the correct partner id");
-                assert.strictEqual($mention3.find('.o_mention_name').text(), "DemoUser",
-                    "third partner mention should display the correct partner name");
+    // check DOWN event
+    $input.trigger($.Event('keyup', {which: $.ui.keyCode.DOWN}));
+    assert.doesNotHaveClass($mention1, 'active',
+        "first partner mention should not be active");
+    assert.hasClass($mention2,'active',
+        "second partner mention should be active");
+    assert.doesNotHaveClass($mention3, 'active',
+        "third partner mention should not be active");
 
-                // check DOWN event
-                $input.trigger($.Event('keyup', {which: $.ui.keyCode.DOWN}));
-                assert.doesNotHaveClass($mention1, 'active',
-                    "first partner mention should not be active");
-                assert.hasClass($mention2,'active',
-                    "second partner mention should be active");
-                assert.doesNotHaveClass($mention3, 'active',
-                    "third partner mention should not be active");
+    // check UP event
+    $input.trigger($.Event('keyup', {which: $.ui.keyCode.UP}));
+    assert.hasClass($mention1,'active',
+        "first partner mention should be active");
+    assert.doesNotHaveClass($mention2, 'active',
+        "second partner mention should not be active");
+    assert.doesNotHaveClass($mention3, 'active',
+        "third partner mention should not be active");
 
-                // check UP event
-                $input.trigger($.Event('keyup', {which: $.ui.keyCode.UP}));
-                assert.hasClass($mention1,'active',
-                    "first partner mention should be active");
-                assert.doesNotHaveClass($mention2, 'active',
-                    "second partner mention should not be active");
-                assert.doesNotHaveClass($mention3, 'active',
-                    "third partner mention should not be active");
+    // check TAB event (full cycle, hence 3 TABs)
+    $input.trigger($.Event('keyup', {which: $.ui.keyCode.TAB}));
+    assert.doesNotHaveClass($mention1, 'active',
+        "first partner mention should not be active");
+    assert.hasClass($mention2,'active',
+        "second partner mention should be active");
+    assert.doesNotHaveClass($mention3, 'active',
+        "third partner mention should not be active");
 
-                // check TAB event (full cycle, hence 3 TABs)
-                $input.trigger($.Event('keyup', {which: $.ui.keyCode.TAB}));
-                assert.doesNotHaveClass($mention1, 'active',
-                    "first partner mention should not be active");
-                assert.hasClass($mention2,'active',
-                    "second partner mention should be active");
-                assert.doesNotHaveClass($mention3, 'active',
-                    "third partner mention should not be active");
+    $input.trigger($.Event('keyup', {which: $.ui.keyCode.TAB}));
+    assert.doesNotHaveClass($mention1, 'active',
+        "first partner mention should not be active");
+    assert.doesNotHaveClass($mention2, 'active',
+        "second partner mention should not be active");
+    assert.hasClass($mention3,'active',
+        "third partner mention should be active");
 
-                $input.trigger($.Event('keyup', {which: $.ui.keyCode.TAB}));
-                assert.doesNotHaveClass($mention1, 'active',
-                    "first partner mention should not be active");
-                assert.doesNotHaveClass($mention2, 'active',
-                    "second partner mention should not be active");
-                assert.hasClass($mention3,'active',
-                    "third partner mention should be active");
-
-                $input.trigger($.Event('keyup', {which: $.ui.keyCode.TAB}));
-                assert.hasClass($mention1,'active',
-                    "first partner mention should be active");
-                assert.doesNotHaveClass($mention2, 'active',
-                    "second partner mention should not be active");
-                assert.doesNotHaveClass($mention3, 'active',
-                    "third partner mention should not be active");
+    $input.trigger($.Event('keyup', {which: $.ui.keyCode.TAB}));
+    assert.hasClass($mention1,'active',
+        "first partner mention should be active");
+    assert.doesNotHaveClass($mention2, 'active',
+        "second partner mention should not be active");
+    assert.doesNotHaveClass($mention3, 'active',
+        "third partner mention should not be active");
 
 //                testUtils.dom.click( equivalent to $mentionPropositions.find('active'));
-                $input.trigger($.Event('keyup', {which: $.ui.keyCode.ENTER}));
-                assert.containsNone(discuss, '.o_mention_proposition',
-                    "should not have any partner mention proposition after ENTER");
-                assert.strictEqual($input.val().trim() , "@Admin",
-                    "should have the correct mention link in the composer input");
+    $input.trigger($.Event('keyup', {which: $.ui.keyCode.ENTER}));
+    assert.containsNone(discuss, '.o_mention_proposition',
+        "should not have any partner mention proposition after ENTER");
+    assert.strictEqual($input.val().trim() , "@Admin",
+        "should have the correct mention link in the composer input");
 
-                // send message
-                $input.trigger($.Event('keydown', {which: $.ui.keyCode.ENTER}));
+    // send message
+    $input.trigger($.Event('keydown', {which: $.ui.keyCode.ENTER}));
 
-                receiveMessageDef
-                    .then(concurrency.delay.bind(concurrency, 0))
-                    .then(function () {
-                        assert.containsOnce(discuss, '.o_thread_message_content',
-                            "should display one message with some content");
-                        assert.containsOnce(discuss, '.o_thread_message_content a',
-                            "should contain a link in the message content");
-                        assert.strictEqual(discuss.$('.o_thread_message_content a').text(),
-                            "@Admin", "should have correct mention link in the message content");
+    await receiveMessageDef;
+    await testUtils.nextTick();
 
-                        discuss.destroy();
-                        done();
-                });
-        });
-    });
+    assert.containsOnce(discuss, '.o_thread_message_content',
+        "should display one message with some content");
+    assert.containsOnce(discuss, '.o_thread_message_content a',
+        "should contain a link in the message content");
+    assert.strictEqual(discuss.$('.o_thread_message_content a').text(),
+        "@Admin", "should have correct mention link in the message content");
+
+    discuss.destroy();
 });
 
-QUnit.test('@ mention with special chars', function (assert) {
+QUnit.test('@ mention with special chars', async function (assert) {
     assert.expect(10);
-    var done = assert.async();
-    var fetchListenersDef = $.Deferred();
-    var receiveMessageDef = $.Deferred();
+    var fetchListenersDef = testUtils.makeTestPromise();
+    var receiveMessageDef = testUtils.makeTestPromise();
     this.data.initMessaging = {
         channel_slots: {
             channel_channel: [{
@@ -436,7 +458,7 @@ QUnit.test('@ mention with special chars', function (assert) {
         },
     };
     var objectDiscuss;
-    createDiscuss({
+    var discuss = await createDiscuss({
         id: 1,
         context: {},
         params: {},
@@ -445,7 +467,7 @@ QUnit.test('@ mention with special chars', function (assert) {
         mockRPC: function (route, args) {
             if (args.method === 'channel_fetch_listeners') {
                 fetchListenersDef.resolve();
-                return $.when([
+                return Promise.resolve([
                     {id: 1, name: '\u0405pëciãlUser<&>"`\' \u30C4'},
                 ]);
             }
@@ -458,70 +480,64 @@ QUnit.test('@ mention with special chars', function (assert) {
                 var notification = [[false, 'mail.channel', 1], data];
                 objectDiscuss.call('bus_service', 'trigger', 'notification', [notification]);
                 receiveMessageDef.resolve();
-                return $.when(42);
+                return Promise.resolve(42);
             }
             return this._super.apply(this, arguments);
         },
-    })
-    .then(function (discuss) {
-        objectDiscuss = discuss;
-        var $general = discuss.$('.o_mail_discuss_sidebar')
-                        .find('.o_mail_discuss_item[data-thread-id=1]');
-        // click on general
-        $general.click();
-        var $input = discuss.$('textarea.o_composer_text_field').first();
-        assert.ok($input.length, "should display a composer input");
-        // Note: focus is needed in order to trigger rpc 'channel_fetch_listeners'
-        $input.focus();
-        $input.val("@");
-        $input.trigger('keyup');
-        fetchListenersDef
-            .then(concurrency.delay.bind(concurrency, 0))
-            .then(function () {
-                var $mention = discuss.$('.o_mention_proposition');
-                // correct mention proposition
-                assert.ok($mention.hasClass('active'),
-                    "first partner mention should be active");
-                assert.strictEqual($mention.data('id'), 1,
-                    "first partner mention should link to the correct partner id");
-                assert.strictEqual($mention.find('.o_mention_name').text(), '\u0405pëciãlUser<&>"`\' \u30C4',
-                    "first partner mention should display the correct partner name");
-                // equivalent to $mentionPropositions.find('active').click();
-                $input.trigger($.Event('keyup', {which: $.ui.keyCode.ENTER}));
-                assert.strictEqual(discuss.$('.o_mention_proposition').length, 0,
-                    "should not have any partner mention proposition after ENTER");
-                assert.strictEqual($input.val().trim() , "@\u0405pëciãlUser<&>\"`'\u00A0\u30C4",
-                    "should have the correct mention link in the composer input");
-                // send message
-                $input.trigger($.Event('keydown', {which: $.ui.keyCode.ENTER}));
-                receiveMessageDef
-                    .then(concurrency.delay.bind(concurrency, 0))
-                    .then(function () {
-                        assert.strictEqual(discuss.$('.o_thread_message_content').length, 1,
-                            "should display one message with some content");
-                        assert.strictEqual(discuss.$('.o_thread_message_content a').length, 1,
-                            "should contain a link in the message content");
-                        assert.strictEqual(discuss.$('.o_thread_message_content a').text(),
-                            "@\u0405pëciãlUser<&>\"`' \u30C4",
-                            "should have correct mention link in the message content");
-                        $input.val("@");
-                        $input.trigger('keyup');
-                        var $mention = discuss.$('.o_mention_proposition');
-                        assert.strictEqual($mention.find('.o_mention_name').text(),
-                            '\u0405pëciãlUser<&>"`\' \u30C4',
-                            "first partner mention should still display the correct partner name");
-                        discuss.destroy();
-                        done();
-                });
-        });
     });
+    objectDiscuss = discuss;
+    var $general = discuss.$('.o_mail_discuss_sidebar')
+                    .find('.o_mail_discuss_item[data-thread-id=1]');
+    // click on general
+    $general.click();
+    await testUtils.nextTick();
+    var $input = discuss.$('textarea.o_composer_text_field').first();
+    assert.ok($input.length, "should display a composer input");
+    // Note: focus is needed in order to trigger rpc 'channel_fetch_listeners'
+    $input.focus();
+    $input.val("@");
+    $input.trigger('keyup');
+    await fetchListenersDef;
+    await testUtils.nextTick();
+    var $mention = discuss.$('.o_mention_proposition');
+    // correct mention proposition
+    assert.ok($mention.hasClass('active'),
+        "first partner mention should be active");
+    assert.strictEqual($mention.data('id'), 1,
+        "first partner mention should link to the correct partner id");
+    assert.strictEqual($mention.find('.o_mention_name').text(), '\u0405pëciãlUser<&>"`\' \u30C4',
+        "first partner mention should display the correct partner name");
+    // equivalent to $mentionPropositions.find('active').click();
+    $input.trigger($.Event('keyup', {which: $.ui.keyCode.ENTER}));
+    assert.strictEqual(discuss.$('.o_mention_proposition').length, 0,
+        "should not have any partner mention proposition after ENTER");
+    assert.strictEqual($input.val().trim() , "@\u0405pëciãlUser<&>\"`'\u00A0\u30C4",
+        "should have the correct mention link in the composer input");
+    // send message
+    $input.trigger($.Event('keydown', {which: $.ui.keyCode.ENTER}));
+    await receiveMessageDef;
+    await testUtils.nextTick();
+    assert.strictEqual(discuss.$('.o_thread_message_content').length, 1,
+        "should display one message with some content");
+    assert.strictEqual(discuss.$('.o_thread_message_content a').length, 1,
+        "should contain a link in the message content");
+    assert.strictEqual(discuss.$('.o_thread_message_content a').text(),
+        "@\u0405pëciãlUser<&>\"`' \u30C4",
+        "should have correct mention link in the message content");
+    $input.val("@");
+    $input.trigger('keyup');
+    await testUtils.nextTick();
+    var $mention = discuss.$('.o_mention_proposition');
+    assert.strictEqual($mention.find('.o_mention_name').text(),
+        '\u0405pëciãlUser<&>"`\' \u30C4',
+        "first partner mention should still display the correct partner name");
+    discuss.destroy();
 });
 
-QUnit.test('@ mention in mailing channel', function (assert) {
+QUnit.test('@ mention in mailing channel', async function (assert) {
     assert.expect(8);
-    var done = assert.async();
 
-    var fetchListenersDef = $.Deferred();
+    var fetchListenersDef = testUtils.makeTestPromise();
 
     this.data.initMessaging = {
         channel_slots: {
@@ -534,7 +550,7 @@ QUnit.test('@ mention in mailing channel', function (assert) {
         },
     };
 
-    createDiscuss({
+    var discuss = await createDiscuss({
         id: 1,
         context: {},
         params: {},
@@ -543,57 +559,54 @@ QUnit.test('@ mention in mailing channel', function (assert) {
         mockRPC: function (route, args) {
             if (args.method === 'channel_fetch_listeners') {
                 fetchListenersDef.resolve();
-                return $.when([
+                return Promise.resolve([
                     {id: 1, name: 'Admin'},
                 ]);
             }
             return this._super.apply(this, arguments);
         },
-    })
-    .then(function (discuss) {
-        var $general = discuss.$('.o_mail_discuss_sidebar')
-                        .find('.o_mail_discuss_item[data-thread-id=1]');
-
-        // click on general
-        $general.click();
-        // 1st composer: basic composer (hidden), 2nd composer: extended (shown)
-        var $input = discuss.$('textarea.o_composer_text_field').eq(1);
-        assert.ok($input.length, "should display a composer input");
-
-        // Simulate '@' typed by user with mocked Window.getSelection
-        // Note: focus is needed in order to trigger rpc 'channel_fetch_listeners'
-        $input.focus();
-        $input.val("@");
-        $input.trigger('keyup');
-
-        fetchListenersDef
-            .then(concurrency.delay.bind(concurrency, 0))
-            .then(function () {
-                assert.strictEqual(discuss.$('.dropup.o_composer_mention_dropdown.show').length, 1,
-                "dropup menu for partner mentions should be open");
-
-                var $mention = discuss.$('.o_mention_proposition');
-                assert.strictEqual($mention.length, 1,
-                    "should display 1 partner mention proposition");
-
-                // correct mention proposition
-                assert.ok($mention.hasClass('active'),
-                    "partner mention should be active");
-                assert.strictEqual($mention.data('id'), 1,
-                    "partner mention should link to the correct partner id");
-                assert.strictEqual($mention.find('.o_mention_name').text(), "Admin",
-                    "partner mention should display the correct partner name");
-
-                // equivalent to $mentionPropositions.find('active').click();
-                $input.trigger($.Event('keyup', {which: $.ui.keyCode.ENTER}));
-
-                assert.ok($input.is(':focus'), "composer body should have focus");
-                assert.notOk(discuss.$('.o_composer_subject').is(':focus'));
-
-                discuss.destroy();
-                done();
-        });
     });
+    var $general = discuss.$('.o_mail_discuss_sidebar')
+                    .find('.o_mail_discuss_item[data-thread-id=1]');
+
+    // click on general
+    $general.click();
+    await testUtils.nextTick();
+    // 1st composer: basic composer (hidden), 2nd composer: extended (shown)
+    var $input = discuss.$('textarea.o_composer_text_field').eq(1);
+    assert.ok($input.length, "should display a composer input");
+
+    // Simulate '@' typed by user with mocked Window.getSelection
+    // Note: focus is needed in order to trigger rpc 'channel_fetch_listeners'
+    $input.focus();
+    $input.val("@");
+    $input.trigger('keyup');
+
+    await fetchListenersDef;
+    await testUtils.nextTick();
+
+    assert.strictEqual(discuss.$('.dropup.o_composer_mention_dropdown.show').length, 1,
+    "dropup menu for partner mentions should be open");
+
+    var $mention = discuss.$('.o_mention_proposition');
+    assert.strictEqual($mention.length, 1,
+        "should display 1 partner mention proposition");
+
+    // correct mention proposition
+    assert.ok($mention.hasClass('active'),
+        "partner mention should be active");
+    assert.strictEqual($mention.data('id'), 1,
+        "partner mention should link to the correct partner id");
+    assert.strictEqual($mention.find('.o_mention_name').text(), "Admin",
+        "partner mention should display the correct partner name");
+
+    // equivalent to $mentionPropositions.find('active').click();
+    $input.trigger($.Event('keyup', {which: $.ui.keyCode.ENTER}));
+
+    assert.ok($input.is(':focus'), "composer body should have focus");
+    assert.notOk(discuss.$('.o_composer_subject').is(':focus'));
+
+    discuss.destroy();
 });
 
 QUnit.test('no crash focusout emoji button', function (assert) {
@@ -638,12 +651,11 @@ QUnit.test('no crash focusout emoji button', function (assert) {
     });
 });
 
-QUnit.test('older messages are loaded on scroll', function (assert) {
+QUnit.test('older messages are loaded on scroll', async function (assert) {
     assert.expect(10);
-    var done = assert.async();
 
     var fetchCount = 0;
-    var loadMoreDef = $.Deferred();
+    var loadMoreDef = testUtils.makeTestPromise();
     var messageData = [];
     for (var i = 0; i < 35; i++) {
         messageData.push({
@@ -666,7 +678,7 @@ QUnit.test('older messages are loaded on scroll', function (assert) {
     };
     this.data['mail.message'].records = messageData;
 
-    createDiscuss({
+    var discuss = await createDiscuss({
         context: {},
         data: this.data,
         params: {},
@@ -688,39 +700,35 @@ QUnit.test('older messages are loaded on scroll', function (assert) {
             }
             return this._super.apply(this, arguments);
         },
-    }).then(function (discuss) {
-
-        assert.verifySteps(['message_fetch'],
-            "should fetch messages once for needaction messages (Inbox)");
-
-        var $general = discuss.$('.o_mail_discuss_item[data-thread-id=1]');
-        assert.strictEqual($general.length, 1,
-            "should have a channel item with id 1");
-
-        // switch to 'general'
-        testUtils.dom.click($general);
-
-        assert.verifySteps(['message_fetch', 'message_fetch'],
-            "should fetch a second time for general channel messages (30 last messages)");
-
-        assert.containsN(discuss, '.o_thread_message', 30,
-            "should display the 30 messages");
-
-        // simulate a scroll to top to load more messages
-        discuss.$('.o_mail_thread').scrollTop(0);
-
-        loadMoreDef
-            .then(concurrency.delay.bind(concurrency, 0))
-            .then(function () {
-                assert.verifySteps(['message_fetch', 'message_fetch', 'message_fetch'],
-                    "should fetch a third time for general channel messages (5 remaining messages)");
-                assert.containsN(discuss, '.o_thread_message', 35,
-                    "all messages should now be loaded");
-
-                discuss.destroy();
-                done();
-            });
     });
+
+    assert.verifySteps(['message_fetch'],
+        "should fetch messages once for needaction messages (Inbox)");
+
+    var $general = discuss.$('.o_mail_discuss_item[data-thread-id=1]');
+    assert.strictEqual($general.length, 1,
+        "should have a channel item with id 1");
+
+    // switch to 'general'
+    await testUtils.dom.click($general);
+
+    assert.verifySteps(['message_fetch', 'message_fetch'],
+        "should fetch a second time for general channel messages (30 last messages)");
+
+    assert.containsN(discuss, '.o_thread_message', 30,
+        "should display the 30 messages");
+
+    // simulate a scroll to top to load more messages
+    discuss.$('.o_mail_thread').scrollTop(0);
+
+    await loadMoreDef;
+    await testUtils.nextTick();
+    assert.verifySteps(['message_fetch', 'message_fetch', 'message_fetch'],
+        "should fetch a third time for general channel messages (5 remaining messages)");
+    assert.containsN(discuss, '.o_thread_message', 35,
+        "all messages should now be loaded");
+
+    discuss.destroy();
 });
 
 QUnit.test('"Unstar all" button should reset the starred counter', function (assert) {
@@ -768,20 +776,20 @@ QUnit.test('"Unstar all" button should reset the starred counter', function (ass
                 };
                 var notification = [[false, 'res.partner'], data];
                 objectDiscuss.call('bus_service', 'trigger', 'notification', [notification]);
-                return $.when(42);
+                return Promise.resolve(42);
             }
             return this._super.apply(this, arguments);
         },
         session: {partner_id: 1},
     })
-    .then(function (discuss) {
+    .then(async function (discuss) {
         objectDiscuss = discuss;
 
         var $starred = discuss.$('.o_mail_discuss_sidebar').find('.o_mail_mailbox_title_starred');
         var $starredCounter = $('.o_mail_mailbox_title_starred > .o_mail_sidebar_needaction');
 
         // Go to Starred channel
-        testUtils.dom.click($starred);
+        await testUtils.dom.click($starred);
         // Test Initial Value
         assert.strictEqual($starredCounter.text().trim(), "40", "40 messages should be starred");
 
@@ -821,7 +829,7 @@ QUnit.test('confirm dialog when administrator leave (not chat) channel', functio
             uid: 3,
         },
     })
-    .then(function (discuss) {
+    .then(async function (discuss) {
         // Unsubscribe on MyChannel as administrator
         // The unpin icon is only shown when hovering on sidebar item.
         // helpter dom.click needs the element to be visible, hence the
@@ -843,7 +851,7 @@ QUnit.test('convert emoji sources to unicodes on message_post', function (assert
     assert.expect(2);
     var done = assert.async();
 
-    var receiveMessageDef = $.Deferred();
+    var receiveMessageDef = testUtils.makeTestPromise();
 
     this.data.initMessaging = {
         channel_slots: {
@@ -875,7 +883,7 @@ QUnit.test('convert emoji sources to unicodes on message_post', function (assert
                 var notification = [[false, 'mail.channel', 1], data];
                 objectDiscuss.call('bus_service', 'trigger', 'notification', [notification]);
                 receiveMessageDef.resolve();
-                return $.when(42);
+                return Promise.resolve(42);
             }
             return this._super.apply(this, arguments);
         },
@@ -929,7 +937,7 @@ QUnit.test('mark all messages as read from Inbox', function (assert) {
         needaction_inbox_counter: 2,
     };
 
-    var markAllReadDef = $.Deferred();
+    var markAllReadDef = testUtils.makeTestPromise();
     var objectDiscuss;
 
     createDiscuss({
@@ -951,7 +959,7 @@ QUnit.test('mark all messages as read from Inbox', function (assert) {
                 var notification = [[false, 'res.partner', 3], notificationData];
                 objectDiscuss.call('bus_service', 'trigger', 'notification', [notification]);
                 markAllReadDef.resolve();
-                return $.when();
+                return Promise.resolve();
             }
             return this._super.apply(this, arguments);
         },
@@ -1061,8 +1069,7 @@ QUnit.test('drag and drop file in composer', function (assert) {
     });
 });
 
-QUnit.test('reply to message from inbox', function (assert) {
-    var done = assert.async();
+QUnit.test('reply to message from inbox', async function (assert) {
     assert.expect(11);
 
     var self = this;
@@ -1080,7 +1087,7 @@ QUnit.test('reply to message from inbox', function (assert) {
         needaction_inbox_counter: 1,
     };
 
-    createDiscuss({
+    var discuss = await createDiscuss({
         id: 1,
         context: {},
         params: {},
@@ -1103,12 +1110,11 @@ QUnit.test('reply to message from inbox', function (assert) {
                     model: 'some.document',
                     record_name: 'SomeDocument',
                 });
-                return $.when(2);
+                return Promise.resolve(2);
             }
             return this._super.apply(this, arguments);
         },
     })
-    .then(function (discuss) {
         assert.strictEqual(discuss.$('.o_mail_discuss_item.o_active').data('thread-id'),
             'mailbox_inbox',
             "Inbox should be selected by default");
@@ -1119,7 +1125,7 @@ QUnit.test('reply to message from inbox', function (assert) {
         assert.containsOnce(discuss.$('.o_thread_message'), '.o_thread_message_reply',
             "should display the reply icon for message linked to a document");
 
-        testUtils.dom.click(discuss.$('.o_thread_message_reply'));
+        await testUtils.dom.click(discuss.$('.o_thread_message_reply'));
         var $composer = discuss.$('.o_thread_composer_extended');
         assert.isVisible($composer,
             "extended composer should become visible");
@@ -1128,16 +1134,14 @@ QUnit.test('reply to message from inbox', function (assert) {
             "composer should have copied document name as subject of message");
 
         var $textarea = $composer.find('.o_composer_input textarea').first();
-        testUtils.fields.editInput($textarea, 'someContent');
+        await testUtils.fields.editInput($textarea, 'someContent');
         assert.containsOnce($composer, '.o_composer_button_send',
             "should have button to send reply message");
-        testUtils.dom.click($composer.find('.o_composer_button_send'));
+        await testUtils.dom.click($composer.find('.o_composer_button_send'));
 
         assert.verifySteps(['message_post']);
 
         discuss.destroy();
-        done();
-    });
 });
 
 QUnit.test('discard replying to message from inbox', function (assert) {

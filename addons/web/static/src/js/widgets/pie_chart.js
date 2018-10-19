@@ -66,7 +66,7 @@ var PieChart = Widget.extend({
             self.controller = controller;
             return self.controller.appendTo(document.createDocumentFragment());
         });
-        return $.when(def1, def2);
+        return Promise.all([def1, def2]);
     },
     /**
      * @override

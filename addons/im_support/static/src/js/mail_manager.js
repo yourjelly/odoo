@@ -62,7 +62,7 @@ MailManager.include({
      * Overrides to filter out the Support channel from the previews.
      *
      * @override
-     * @returns {$.Promise<Object[]>} list of valid objects for mail.Preview
+     * @returns {Promise<Object[]>} list of valid objects for mail.Preview
      *   template
      */
     getChannelPreviews: function () {

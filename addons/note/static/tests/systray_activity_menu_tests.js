@@ -66,7 +66,7 @@ QUnit.test('note activity menu widget: create note from activity menu', function
                     self.data['mail.activity.menu'].records[0].today_count++;
                     self.data['mail.activity.menu'].records[0].total_count++;
                 }
-                return $.when();
+                return Promise.resolve();
             }
             return this._super(route, args);
         },

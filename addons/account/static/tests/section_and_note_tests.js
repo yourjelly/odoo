@@ -46,7 +46,7 @@ QUnit.module('section_and_note', {
         };
     },
 }, function () {
-    QUnit.test('correct display of section and note fields', function (assert) {
+    QUnit.test('correct display of section and note fields', async function (assert) {
         assert.expect(4);
         var form = createView({
             View: FormView,
@@ -76,7 +76,7 @@ QUnit.module('section_and_note', {
             "should have a section class");
 
         // enter edit mode
-        testUtils.form.clickEdit(form);
+        await testUtils.form.clickEdit(form);
 
         // editing line should be textarea
         $tr0 = form.$('tr.o_data_row:eq(0)');

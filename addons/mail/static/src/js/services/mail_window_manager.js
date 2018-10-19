@@ -101,11 +101,12 @@ MailManager.include({
         // valid threadID, therefore no check
         var thread = this.getThread(threadID);
         var threadWindow = this._getThreadWindow(threadID);
+        var prom = Promise.resolve();
         if (!threadWindow) {
             threadWindow = this._makeNewThreadWindow(thread, options);
             this._placeNewThreadWindow(threadWindow, options.passively);
 
-            threadWindow.appendTo($(this.THREAD_WINDOW_APPENDTO))
+            prom = threadWindow.appendTo($(this.THREAD_WINDOW_APPENDTO))
                 .then(function () {
                     self._repositionThreadWindows();
                     return thread.fetchMessages();
@@ -125,7 +126,9 @@ MailManager.include({
                 this._makeThreadWindowVisible(threadWindow);
             }
         }
-        threadWindow.updateVisualFoldState();
+        prom.then(function () {
+            threadWindow.updateVisualFoldState();
+        });
     },
     /**
      * Called when a thread has its window state that has been changed, so its
@@ -413,7 +416,7 @@ MailManager.include({
      *
      * @private
      * @param {integer} partnerID
-     * @returns {$.Promise<integer>} resolved with ID of the DM chat
+     * @returns {Promise<integer>} resolved with ID of the DM chat
      */
     _openAndDetachDMChat: function (partnerID) {
         return this._rpc({

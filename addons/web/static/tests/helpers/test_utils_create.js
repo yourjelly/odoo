@@ -30,7 +30,7 @@ var Widget = require('web.Widget');
  * @param {function} [params.mockRPC]
  * @returns {ActionManager}
  */
-function createActionManager (params) {
+var createActionManager = async function (params) {
     params = params || {};
     var $target = $('#qunit-fixture');
     if (params.debug) {
@@ -47,7 +47,7 @@ function createActionManager (params) {
     _.extend(params, {
         mockRPC: function (route, args) {
             if (args.model === 'ir.attachment') {
-                return $.when([]);
+                return Promise.resolve([]);
             }
             if (mockRPC) {
                 return mockRPC.apply(this, arguments);
@@ -56,7 +56,7 @@ function createActionManager (params) {
         },
     });
     testUtilsMock.addMockEnvironment(widget, _.defaults(params, { debounce: false }));
-    widget.prependTo($target);
+    await widget.prependTo($target);
     widget.$el.addClass('o_web_client');
     if (config.device.isMobile) {
         widget.$el.addClass('o_touch_device');
@@ -71,13 +71,13 @@ function createActionManager (params) {
         widget.destroy();
     };
     var fragment = document.createDocumentFragment();
-    actionManager.appendTo(fragment).then(function () {
+    return actionManager.appendTo(fragment).then(function () {
         dom.append(widget.$el, fragment, {
             callbacks: [{ widget: actionManager }],
             in_DOM: true,
         });
+        return actionManager;
     });
-    return actionManager;
 }
 
 /**
@@ -88,10 +88,6 @@ function createActionManager (params) {
  * It returns the instance of the view, properly created, with all rpcs going
  * through a mock method using the data object as source, and already loaded/
  * started.
- *
- * Most views can be tested synchronously (@see createView), but some view have
- * external dependencies (like lazy loaded libraries). In that case, it is
- * necessary to use this method.
  *
  * @param {Object} params
  * @param {string} params.arch the xml (arch) of the view to be instantiated
@@ -109,9 +105,9 @@ function createActionManager (params) {
  *   Note that this is particularly useful if you want to intercept events going
  *   up in the init process of the view, because there are no other way to do it
  *   after this method returns
- * @returns {Deferred<AbstractView>} resolves with the instance of the view
+ * @returns {Promise<AbstractView>} resolves with the instance of the view
  */
-function createAsyncView(params) {
+async function createAsyncView(params) {
     var $target = $('#qunit-fixture');
     var widget = new Widget();
     if (params.debug) {
@@ -165,7 +161,9 @@ function createAsyncView(params) {
         });
     }
 
-    return view.getController(widget).then(function (view) {
+    /*var view =*/ /*await*/
+    return view.getController(widget).then(async function(view){
+
         // override the view's 'destroy' so that it calls 'destroy' on the widget
         // instead, as the widget is the parent of the view and the mockServer.
         view.__destroy = view.destroy;
@@ -186,10 +184,10 @@ function createAsyncView(params) {
                 callbacks: [{ widget: view }],
                 in_DOM: true,
             });
+
             view.$el.on('click', 'a', function (ev) {
                 ev.preventDefault();
             });
-
             return view;
         });
     });
@@ -289,16 +287,16 @@ function createControlPanel(params) {
  *
  * @param {Object} [params={}]
  */
-function createDebugManager (params) {
+var createDebugManager = function (params) {
     params = params || {};
     var mockRPC = params.mockRPC;
     _.extend(params, {
         mockRPC: function (route, args) {
             if (args.method === 'check_access_rights') {
-                return $.when(true);
+                return Promise.resolve(true);
             }
             if (args.method === 'xmlid_to_res_id') {
-                return $.when(true);
+                return Promise.resolve(true);
             }
             if (mockRPC) {
                 return mockRPC.apply(this, arguments);
@@ -308,7 +306,7 @@ function createDebugManager (params) {
         session: {
             user_has_group: function (group) {
                 if (group === 'base.group_no_one') {
-                    return $.when(true);
+                    return Promise.resolve(true);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -317,7 +315,7 @@ function createDebugManager (params) {
     var debugManager = new DebugManager();
     testUtilsMock.addMockEnvironment(debugManager, params);
     return debugManager;
-}
+};
 
 /**
  * create a model from given parameters.
@@ -359,29 +357,6 @@ function createParent(params) {
     return widget;
 }
 
-/**
- * create a view synchronously.  This method uses the createAsyncView method.
- * Most views are synchronous, so the deferred can be resolved immediately and
- * this method will work.
- *
- * Be careful, if for some reason a view is async, this method will crash.
- * @see createAsyncView
- *
- * @param {Object} params will be given to createAsyncView
- * @returns {AbstractView}
- */
-function createView(params) {
-    var view;
-    createAsyncView(params).then(function (result) {
-        view = result;
-    });
-    if (!view) {
-        throw "The view that you are trying to create is async. Please use createAsyncView instead";
-    }
-    return view;
-}
-
-
 return {
     createActionManager: createActionManager,
     createAsyncView: createAsyncView,
@@ -389,7 +364,7 @@ return {
     createDebugManager: createDebugManager,
     createModel: createModel,
     createParent: createParent,
-    createView: createView,
+    createView: createAsyncView,
 };
 
 });

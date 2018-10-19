@@ -367,7 +367,7 @@ var DataSet =  Class.extend(mixins.PropertiesMixin, {
      * @param {Array} ids identifiers of the records to read
      * @param {Array} [fields] fields to read and return, by default all fields are returned
      * @param {Object} [options]
-     * @returns {$.Deferred}
+     * @returns {Promise}
      */
     read_ids: function (ids, fields, options) {
         if (_.isEmpty(ids))
@@ -405,7 +405,7 @@ var DataSet =  Class.extend(mixins.PropertiesMixin, {
      * @params {Object} [options]
      * @param {Number} [options.offset=0] The index from which selected records should be returned
      * @param {Number} [options.limit=null] The maximum number of records to return
-     * @returns {$.Deferred}
+     * @returns {Promise}
      */
     read_slice: function (fields, options) {
         var self = this;
@@ -423,7 +423,7 @@ var DataSet =  Class.extend(mixins.PropertiesMixin, {
      *
      * @params {Array} [fields] fields to read and return, by default all fields are returned
      * @param {Object} [options.context] context data to add to the request payload, on top of the DataSet's own context
-     * @returns {$.Deferred}
+     * @returns {Promise}
      */
     read_index: function (fields, options) {
         options = options || {};
@@ -437,7 +437,7 @@ var DataSet =  Class.extend(mixins.PropertiesMixin, {
      *
      * @param {Array} [fields] fields to get default values for, by default all defaults are read
      * @param {Object} [options.context] context data to add to the request payload, on top of the DataSet's own context
-     * @returns {$.Deferred}
+     * @returns {Promise}
      */
     default_get: function (fields, options) {
         options = options || {};
@@ -451,7 +451,7 @@ var DataSet =  Class.extend(mixins.PropertiesMixin, {
      * @param {Object} options Dictionary that can contain the following keys:
      *   - readonly_fields: Values from readonly fields that were updated by
      *     on_changes. Only used by the BufferedDataSet to make the o2m work correctly.
-     * @returns {$.Deferred}
+     * @returns {Promise}
      */
     create: function (data, options) {
         var self = this;
@@ -470,7 +470,7 @@ var DataSet =  Class.extend(mixins.PropertiesMixin, {
      *   - context: The context to use in the server-side call.
      *   - readonly_fields: Values from readonly fields that were updated by
      *     on_changes. Only used by the BufferedDataSet to make the o2m work correctly.
-     * @returns {$.Deferred}
+     * @returns {Promise}
      */
     write: function (id, data, options) {
         options = options || {};
@@ -501,7 +501,7 @@ var DataSet =  Class.extend(mixins.PropertiesMixin, {
      * @param {Array} [args] arguments to pass to the method
      * @param {Function} callback
      * @param {Function} error_callback
-     * @returns {$.Deferred}
+     * @returns {Promise}
      */
     call: function (method, args) {
         return this._model.call(method, args);
@@ -511,7 +511,7 @@ var DataSet =  Class.extend(mixins.PropertiesMixin, {
      *
      * @param {String} method
      * @param {Array} [args]
-     * @returns {$.Deferred}
+     * @returns {Promise}
      */
     call_button: function (method, args) {
         return this._model.call_button(method, args);
@@ -520,7 +520,7 @@ var DataSet =  Class.extend(mixins.PropertiesMixin, {
      * Fetches the "readable name" for records, based on intrinsic rules
      *
      * @param {Array} ids
-     * @returns {$.Deferred}
+     * @returns {Promise}
      */
     name_get: function (ids) {
         return this._model.call('name_get', [ids], {context: this.get_context()});
@@ -532,7 +532,7 @@ var DataSet =  Class.extend(mixins.PropertiesMixin, {
      * @param {String} [operator='ilike'] matching operator to use with the provided name value
      * @param {Number} [limit=0] maximum number of matches to return
      * @param {Function} callback function to call with name_search result
-     * @returns {$.Deferred}
+     * @returns {Promise}
      */
     name_search: function (name, domain, operator, limit) {
         return this._model.call('name_search', {
@@ -603,7 +603,7 @@ var DataSet =  Class.extend(mixins.PropertiesMixin, {
      * Resequence records.
      *
      * @param {Array} ids identifiers of the records to resequence
-     * @returns {$.Deferred}
+     * @returns {Promise}
      */
     resequence: function (ids, options) {
         options = options || {};
@@ -674,7 +674,7 @@ var DataSetSearch = DataSet.extend({
      * @param {Array} [options.domain] domain data to add to the request payload, ANDed with the dataset's domain
      * @param {Number} [options.offset=0] The index from which selected records should be returned
      * @param {Number} [options.limit=null] The maximum number of records to return
-     * @returns {$.Deferred}
+     * @returns {Promise}
      */
     read_slice: function (fields, options) {
         options = options || {};

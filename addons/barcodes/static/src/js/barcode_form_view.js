@@ -421,12 +421,12 @@ FormRenderer.include({
      */
     _barcodeButtonHandler: function ($button, node) {
         var commands = {};
-        commands.barcode = function () {return $.when();};
+        commands.barcode = function () {return Promise.resolve();};
         commands['O-BTN.' + node.attrs.barcode_trigger] = function () {
             if (!$button.hasClass('o_invisible_modifier')) {
                 $button.click();
             }
-            return $.when();
+            return Promise.resolve();
         };
         var name = node.attrs.name;
         if (node.attrs.string) {

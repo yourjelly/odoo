@@ -15,7 +15,7 @@ var createView = testUtils.createView;
 var _addGoogleDocItemsOriginal = GoogleDriveSideBar.prototype._addGoogleDocItems;
 
 var _addGoogleDocItemsMocked = function (model, resID) {
-    return $.when();
+    return Promise.resolve();
 };
 
 GoogleDriveSideBar.prototype._addGoogleDocItems = _addGoogleDocItemsMocked;
@@ -94,7 +94,7 @@ QUnit.module('gdrive_integration', {
                     assert.deepEqual(args.args, [27, 1, 'T1000'],
                         'The route to get the Google url should have been called');
                     // We don't return anything useful, otherwise it will open a new tab
-                    return $.when();
+                    return Promise.resolve();
                 }
                 return this._super.apply(this, arguments);
             },
@@ -145,7 +145,7 @@ QUnit.module('gdrive_integration', {
                     assert.deepEqual(args.args, [27, currentID, 'T1000'],
                         'The route to get the Google url should have been called');
                     // We don't return anything useful, otherwise it will open a new tab
-                    return $.when();
+                    return Promise.resolve();
                 }
                 return this._super.apply(this, arguments);
             },

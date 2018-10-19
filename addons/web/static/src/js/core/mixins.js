@@ -62,37 +62,27 @@ var ParentedMixin = {
      * Utility method to only execute asynchronous actions if the current
      * object has not been destroyed.
      *
-     * @param {$.Deferred} promise The promise representing the asynchronous
+     * @param {Promise} promise The promise representing the asynchronous
      *                             action.
-     * @param {bool} [reject=false] If true, the returned promise will be
-     *                              rejected with no arguments if the current
-     *                              object is destroyed. If false, the
-     *                              returned promise will never be resolved
-     *                              or rejected.
-     * @returns {$.Deferred} A promise that will mirror the given promise if
+     * @returns {Promise} A promise that will mirror the given promise if
      *                       everything goes fine but will either be rejected
      *                       with no arguments or never resolved if the
      *                       current object is destroyed.
      */
-    alive: function (promise, reject) {
+    alive: function (promise) {
         var self = this;
-        return $.Deferred(function (def) {
-            promise.then(function () {
+
+        return new Promise(function(resolve, reject) {
+            promise.then(function (result) {
                 if (!self.isDestroyed()) {
-                    def.resolve.apply(def, arguments);
+                    resolve(result);
                 }
-            }, function () {
+            }).catch(function (reason) {
                 if (!self.isDestroyed()) {
-                    def.reject.apply(def, arguments);
+                    reject(reason);
                 }
-            }).always(function () {
-                if (reject) {
-                    // noop if def already resolved or rejected
-                    def.reject();
-                }
-                // otherwise leave promise in limbo
             });
-        }).promise();
+        });
     },
     /**
      * Inform the object it should destroy itself, releasing any

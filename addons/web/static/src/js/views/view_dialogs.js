@@ -170,7 +170,7 @@ var FormViewDialog = ViewDialog.extend({
         var FormView = view_registry.get('form');
         var fields_view_def;
         if (this.options.fields_view) {
-            fields_view_def = $.when(this.options.fields_view);
+            fields_view_def = Promise.resolve(this.options.fields_view);
         } else {
             fields_view_def = this.loadFieldView(this.res_model, this.context, this.options.view_id, 'form');
         }
@@ -200,9 +200,9 @@ var FormViewDialog = ViewDialog.extend({
             if (self.recordID && self.shouldSaveLocally) {
                 self.model.save(self.recordID, {savePoint: true});
             }
-            self.form_view.appendTo(fragment)
+            return self.form_view.appendTo(fragment)
                 .then(function () {
-                    self.opened().always(function () {
+                    self.opened().then(function () {
                         var $buttons = $('<div>');
                         self.form_view.renderButtons($buttons);
                         if ($buttons.children().length) {
@@ -213,7 +213,7 @@ var FormViewDialog = ViewDialog.extend({
                             in_DOM: true,
                         });
                     });
-                    _super();
+                    return _super();
                 });
         });
 
@@ -242,7 +242,7 @@ var FormViewDialog = ViewDialog.extend({
 
     /**
      * @private
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _save: function () {
         var self = this;
@@ -328,7 +328,7 @@ var SelectCreateDialog = ViewDialog.extend({
                     });
                     self.set_buttons(self.__buttons);
                 });
-                _super();
+                return _super();
             });
         return this;
     },

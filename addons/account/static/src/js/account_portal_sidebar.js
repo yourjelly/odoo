@@ -5,7 +5,7 @@ require('web.dom_ready');
 var AccountPortalSidebar = require('account.AccountPortalSidebar');
 
 if (!$('.o_portal_invoice_sidebar').length) {
-    return $.Deferred().reject("DOM doesn't contain '.o_portal_invoice_sidebar'");
+    return Promise.reject("DOM doesn't contain '.o_portal_invoice_sidebar'");
 }
 
 var account_portal_sidebar = new AccountPortalSidebar();

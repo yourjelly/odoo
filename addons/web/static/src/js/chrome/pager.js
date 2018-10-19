@@ -28,7 +28,7 @@ var Pager = Widget.extend({
      * @param {boolean} [options.can_edit] editable feature of the pager
      * @param {boolean} [options.single_page_hidden] (not) to display the pager
      *   if only one page
-     * @param {function} [options.validate] callback returning a Deferred to
+     * @param {function} [options.validate] callback returning a Promise to
      *   validate changes
      */
     init: function (parent, size, current_min, limit, options) {
@@ -46,7 +46,7 @@ var Pager = Widget.extend({
             can_edit: true, // editable
             single_page_hidden: false, // displayed even if there is a single page
             validate: function() {
-                return $.Deferred().resolve();
+                return Promise.resolve();
             },
             withAccessKey: true,  // can be disabled, for example, for x2m widgets
         });
@@ -55,7 +55,7 @@ var Pager = Widget.extend({
     /**
      * Renders the pager
      *
-     * @returns {jQuery.Deferred}
+     * @returns {Promise}
      */
     start: function () {
         this.$value = this.$('.o_pager_value');
@@ -159,7 +159,7 @@ var Pager = Widget.extend({
             $input.click(function(ev) {
                 ev.stopPropagation(); // ignore clicks on the input
             });
-            $input.blur(function(ev) {
+            $input.change(function(ev) {
                 self._save($(ev.target)); // save the state when leaving the input
             });
             $input.on('keydown', function (ev) {
@@ -216,9 +216,10 @@ var Pager = Widget.extend({
                 }
                 self.trigger('pager_changed', _.clone(self.state));
             }
-        }).always(function() {
             // Render the pager's new state (removes the input)
             self._render();
+        }).catch(function() {
+            throw new Error("Something bad happened after the validation of the pager.");
         });
     },
     /**

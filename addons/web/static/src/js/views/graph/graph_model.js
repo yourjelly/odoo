@@ -50,7 +50,7 @@ return AbstractModel.extend({
      * @param {string[]} params.domain
      * @param {Object} params.intervalMapping object linking fieldNames with intervals.
      *   this could be useful to simplify the code. For now this parameter is not used.
-     * @returns {Deferred} The deferred does not return a handle, we don't need
+     * @returns {Promise} The promise does not return a handle, we don't need
      *   to keep track of various entities.
      */
     load: function (params) {
@@ -90,7 +90,7 @@ return AbstractModel.extend({
      * @param {string[]} [params.groupBy]
      * @param {string} [params.mode] one of 'bar', 'pie', 'line'
      * @param {string} [params.measure] a valid field name
-     * @returns {Deferred}
+     * @returns {Promse}
      */
     reload: function (handle, params) {
         if ('context' in params) {
@@ -124,7 +124,7 @@ return AbstractModel.extend({
         }
         if ('mode' in params) {
             this.chart.mode = params.mode;
-            return $.when();
+            return Promise.resolve();
         }
         return this._loadGraph();
     },
@@ -139,7 +139,7 @@ return AbstractModel.extend({
      * in the field list, because they can be defined with an aggregation
      * function, such as my_date:week
      *
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _loadGraph: function () {
         var groupedBy = this.chart.groupedBy;
@@ -180,7 +180,7 @@ return AbstractModel.extend({
             }).then(this._processData.bind(this, 'comparisonData')));
         }
 
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
     /**
      * Since read_group is insane and returns its result on different keys

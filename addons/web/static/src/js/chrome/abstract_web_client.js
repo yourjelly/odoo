@@ -78,7 +78,7 @@ var AbstractWebClient = Widget.extend(ServiceProviderMixin, KeyboardNavigationMi
                 if (event.data.on_success) {
                     event.data.on_success(result);
                 }
-            }).fail(function (result) {
+            }).catch(function (result) {
                 if (event.data.on_fail) {
                     event.data.on_fail(result);
                 }
@@ -116,17 +116,17 @@ var AbstractWebClient = Widget.extend(ServiceProviderMixin, KeyboardNavigationMi
             .then(function () {
                 self.$el.toggleClass('o_rtl', _t.database.parameters.direction === "rtl");
                 self.bind_events();
-                return $.when(
+                return Promise.all([
                     self.set_action_manager(),
                     self.set_loading()
-                );
+                ]);
             }).then(function () {
                 if (session.session_is_valid()) {
                     return self.show_application();
                 } else {
                     // database manager needs the webclient to keep going even
                     // though it has no valid session
-                    return $.when();
+                    return Promise.resolve();
                 }
             }).then(function () {
                 // Listen to 'scroll' event and propagate it on main bus

@@ -69,7 +69,7 @@ var CustomizeMenu = Widget.extend({
      */
     _loadCustomizeOptions: function () {
         if (this.__customizeOptionsLoaded) {
-            return $.when();
+            return Promise.resolve();
         }
         this.__customizeOptionsLoaded = true;
 

@@ -1,11 +1,10 @@
 odoo.define('web.dom_ready', function (require) {
 'use strict';
 
-var def = $.Deferred();
-$(def.resolve.bind(def));
-return def;
+    return new Promise(function(resolve, reject) {
+        $(resolve);
+    });
 });
-
 //==============================================================================
 
 odoo.define('web.dom', function (require) {

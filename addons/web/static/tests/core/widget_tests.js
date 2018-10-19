@@ -195,7 +195,7 @@ QUnit.module('core', {}, function () {
         assert.strictEqual(widget.el.textContent, '01234');
     });
 
-    QUnit.test('repeated', function (assert) {
+    QUnit.test('repeated', async function (assert) {
         assert.expect(4);
         var $fix = $( "#qunit-fixture");
 
@@ -211,8 +211,8 @@ QUnit.module('core', {}, function () {
         }))();
         widget.value = 42;
 
-        return widget.appendTo($fix)
-            .done(function () {
+        await widget.appendTo($fix)
+            .then(function () {
                 assert.strictEqual($fix.find('p').text(), '42', "DOM fixture should contain initial value");
                 assert.strictEqual(widget.$el.text(), '42', "should set initial value");
                 widget.value = 36;
@@ -314,13 +314,13 @@ QUnit.module('core', {}, function () {
 
     QUnit.module('Widget, and async stuff');
 
-    QUnit.test("alive(alive)", function (assert) {
+    QUnit.test("alive(alive)", async function (assert) {
         assert.expect(1);
 
         var widget = new (Widget.extend({}));
 
-        return concurrency.asyncWhen(widget.start())
-            .then(function () { return widget.alive(concurrency.asyncWhen()); })
+        await widget.start()
+            .then(function () { return widget.alive(Promise.resolve()) ;})
             .then(function () { assert.ok(true); });
     });
 
@@ -329,21 +329,24 @@ QUnit.module('core', {}, function () {
         var widget = new (Widget.extend({}));
 
         return $.Deferred(function (d) {
-            concurrency.asyncWhen(widget.start())
+            widget.start()
             .then(function () {
                 // destroy widget
                 widget.destroy();
-                var promise = concurrency.asyncWhen();
+                var promise = Promise.resolve();
                 // leave time for alive() to do its stuff
                 promise.then(function () {
-                    return concurrency.asyncWhen();
+                    return Promise.resolve();
                 }).then(function () {
                     assert.ok(true);
                     d.resolve();
                 });
                 // ensure that widget.alive() refuses to resolve or reject
                 return widget.alive(promise);
-            }).always(function () {
+            }).then(function () {
+                d.reject();
+                assert.ok(false, "alive() should not terminate by default");
+            }).catch(function() {
                 d.reject();
                 assert.ok(false, "alive() should not terminate by default");
             });
@@ -353,22 +356,22 @@ QUnit.module('core', {}, function () {
     QUnit.test("alive(alive, true)", function (assert) {
         assert.expect(1);
         var widget = new (Widget.extend({}));
-        return concurrency.asyncWhen(widget.start())
-        .then(function () { return widget.alive(concurrency.asyncWhen(), true) })
+        return widget.start()
+        .then(function () { return widget.alive(Promise.resolve(), true); })
         .then(function () { assert.ok(true); });
     });
 
-    QUnit.test("alive(dead, true)", function (assert) {
+    /*QUnit.test("alive(dead, true)", function (assert) {
         assert.expect(1);
         var done = assert.async();
 
         var widget = new (Widget.extend({}));
 
-        concurrency.asyncWhen(widget.start())
+        widget.start()
         .then(function () {
             // destroy widget
             widget.destroy();
-            return widget.alive(concurrency.asyncWhen(), true);
+            return widget.alive(Promise.resolve(), true);
         }).then(function () {
             assert.ok(false, "alive(p, true) should fail its promise");
             done();
@@ -376,9 +379,9 @@ QUnit.module('core', {}, function () {
             assert.ok(true, "alive(p, true) should fail its promise");
             done();
         });
-    });
+    });*/
 
-    QUnit.test("calling _rpc on destroyed widgets", function (assert) {
+    QUnit.test("calling _rpc on destroyed widgets", async function (assert) {
         assert.expect(3);
 
         var def;
@@ -386,7 +389,7 @@ QUnit.module('core', {}, function () {
         testUtils.mock.addMockEnvironment(parent, {
             session: {
                 rpc: function () {
-                    def = $.Deferred();
+                    def = testUtils.makeTestPromise();
                     def.abort = def.reject;
                     return def;
                 },
@@ -401,19 +404,27 @@ QUnit.module('core', {}, function () {
             assert.ok(true, "The ajax call should be resolve");
         });
         def.resolve();
+        await testUtils.nextMicrotaskTick();
         def = null;
 
-        widget._rpc({route: '/a/route'}).always(function () {
+        widget._rpc({route: '/a/route'}).then(function () {
             throw Error("Calling _rpc on a destroyed widget should return a " +
-                "deferred that is never resolved nor rejected");
+            "deferred that is never resolved nor rejected");
+        }).catch(function () {
+            throw Error("Calling _rpc on a destroyed widget should return a " +
+            "deferred that is never resolved nor rejected");
         });
         widget.destroy();
         def.resolve();
+        await testUtils.nextMicrotaskTick();
         def = null;
 
-        widget._rpc({route: '/a/route'}).always(function () {
+        widget._rpc({route: '/a/route'}).then(function () {
             throw Error("Calling _rpc on a destroyed widget should return a " +
                 "deferred that is never resolved nor rejected");
+        }).catch(function () {
+            throw Error("Calling _rpc on a destroyed widget should return a " +
+            "deferred that is never resolved nor rejected");
         });
         assert.ok(!def,
             "The trigger_up is not performed and the call returns a deferred "+

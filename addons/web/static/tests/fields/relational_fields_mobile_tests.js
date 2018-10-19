@@ -94,7 +94,7 @@ QUnit.module('relational_fields', {
         assert.containsNone(form, '.o_field_one2many .o-kanban-button-new',
             '"Create" button should not be visible in readonly');
 
-        testUtils.form.clickEdit(form);
+        await testUtils.form.clickEdit(form);
 
         assert.containsOnce(form, '.o_field_one2many .o-kanban-button-new',
             '"Create" button should be visible in edit');
@@ -111,7 +111,7 @@ QUnit.module('relational_fields', {
             'should contain 1 records');
 
         // save and check that the correct command has been generated
-        testUtils.form.clickSave(form);
+        await testUtils.form.clickSave(form);
         form.destroy();
     });
 });

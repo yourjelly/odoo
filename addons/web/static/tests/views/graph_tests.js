@@ -5,7 +5,7 @@ var concurrency = require('web.concurrency');
 var GraphView = require('web.GraphView');
 var testUtils = require('web.test_utils');
 
-var createView = testUtils.createView;
+var createView = testUtils.createAsyncView;
 
 QUnit.module('Views', {
     beforeEach: function () {
@@ -59,10 +59,10 @@ QUnit.module('Views', {
 
     QUnit.module('GraphView');
 
-    QUnit.test('simple graph rendering', function (assert) {
+    QUnit.test('simple graph rendering', async function (assert) {
         assert.expect(4);
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: this.data,
@@ -92,10 +92,10 @@ QUnit.module('Views', {
         });
     });
 
-    QUnit.test('default type attribute', function (assert) {
+    QUnit.test('default type attribute', async function (assert) {
         assert.expect(1);
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: this.data,
@@ -107,10 +107,10 @@ QUnit.module('Views', {
         graph.destroy();
     });
 
-    QUnit.test('title attribute', function (assert) {
+    QUnit.test('title attribute', async function (assert) {
         assert.expect(1);
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: this.data,
@@ -123,10 +123,10 @@ QUnit.module('Views', {
         graph.destroy();
     });
 
-    QUnit.test('switching mode', function (assert) {
+    QUnit.test('switching mode', async function (assert) {
         assert.expect(6);
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: this.data,
@@ -139,7 +139,7 @@ QUnit.module('Views', {
             'bar type button should not be active');
         assert.hasClass(graph.$buttons.find('button[data-mode="line"]'),'active',
             'line type button should be active');
-        testUtils.dom.click(graph.$buttons.find('button[data-mode="bar"]'));
+        await testUtils.dom.click(graph.$buttons.find('button[data-mode="bar"]'));
         assert.strictEqual(graph.renderer.state.mode, "bar", "should be in bar chart mode by default");
         assert.doesNotHaveClass(graph.$buttons.find('button[data-mode="line"]'), 'active',
             'line type button should not be active');
@@ -148,13 +148,13 @@ QUnit.module('Views', {
         graph.destroy();
     });
 
-    QUnit.test('displaying line chart with only 1 data point', function (assert) {
+    QUnit.test('displaying line chart with only 1 data point', async function (assert) {
         assert.expect(1);
          // this test makes sure the line chart does not crash when only one data
         // point is displayed.
         var done = assert.async();
         this.data.foo.records = this.data.foo.records.slice(0,1);
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: this.data,
@@ -169,12 +169,12 @@ QUnit.module('Views', {
         });
     });
 
-    QUnit.test('displaying line chart data with multiple groupbys', function (assert) {
+    QUnit.test('displaying line chart data with multiple groupbys', async function (assert) {
         // this test makes sure the line chart shows all data labels (X axis) when
         // it is grouped by several fields
         assert.expect(3);
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: 'foo',
             data: this.data,
@@ -192,13 +192,13 @@ QUnit.module('Views', {
         graph.destroy();
     });
 
-    QUnit.test('switching measures', function (assert) {
+    QUnit.test('switching measures', async function (assert) {
         var done = assert.async();
         assert.expect(4);
 
         var rpcCount = 0;
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: this.data,
@@ -228,11 +228,11 @@ QUnit.module('Views', {
         });
     });
 
-    QUnit.test('no content helper (bar chart)', function (assert) {
+    QUnit.test('no content helper (bar chart)', async function (assert) {
         assert.expect(2);
         this.data.foo.records = [];
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: this.data,
@@ -247,11 +247,11 @@ QUnit.module('Views', {
         graph.destroy();
     });
 
-    QUnit.test('no content helper (pie chart)', function (assert) {
+    QUnit.test('no content helper (pie chart)', async function (assert) {
         assert.expect(2);
         this.data.foo.records =  []
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: this.data,
@@ -266,10 +266,10 @@ QUnit.module('Views', {
         graph.destroy();
     });
 
-    QUnit.test('render pie chart in comparison mode', function (assert) {
+    QUnit.test('render pie chart in comparison mode', async function (assert) {
         assert.expect(2);
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: this.data,
@@ -295,11 +295,10 @@ QUnit.module('Views', {
         graph.destroy();
     });
 
-    QUnit.test('no content helper after update', function (assert) {
-        var done = assert.async();
+    QUnit.test('no content helper after update', async function (assert) {
         assert.expect(4);
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: this.data,
@@ -307,27 +306,26 @@ QUnit.module('Views', {
                         '<field name="product_id"/>' +
                 '</graph>',
         });
-        return concurrency.delay(0).then(function () {
-            assert.ok(graph.$('div.o_graph_svg_container svg.nvd3-svg').length,
-                        "should contain a div with a svg element");
-            assert.notOk(graph.$('div.o_view_nocontent').length,
-                "should not display the no content helper");
-            testUtils.graph.reload(graph, {domain: [['product_id', '=', 4]]});
 
-            assert.notOk(graph.$('div.o_graph_svg_container svg.nvd3-svg').length,
-                        "should not contain a div with a svg element");
-            assert.ok(graph.$('div.o_view_nocontent').length,
-                "should display the no content helper");
-            graph.destroy();
-            done();
-        });
+        await testUtils.nextTick();
+        assert.ok(graph.$('div.o_graph_svg_container svg.nvd3-svg').length,
+                    "should contain a div with a svg element");
+        assert.notOk(graph.$('div.o_view_nocontent').length,
+            "should not display the no content helper");
+        testUtils.graph.reload(graph, {domain: [['product_id', '=', 4]]});
+        await testUtils.nextTick();
+        assert.notOk(graph.$('div.o_graph_svg_container svg.nvd3-svg').length,
+                    "should not contain a div with a svg element");
+        assert.ok(graph.$('div.o_view_nocontent').length,
+            "should display the no content helper");
+        graph.destroy();
     });
 
-    QUnit.test('can reload with other group by', function (assert) {
+    QUnit.test('can reload with other group by', async function (assert) {
         var done = assert.async();
         assert.expect(4);
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: this.data,
@@ -354,11 +352,11 @@ QUnit.module('Views', {
         });
     });
 
-    QUnit.test('getOwnedQueryParams correctly returns mode, measure, groupbys and interval mapping', function (assert) {
+    QUnit.test('getOwnedQueryParams correctly returns mode, measure, groupbys and interval mapping', async function (assert) {
         var done = assert.async();
         assert.expect(4);
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: this.data,
@@ -421,14 +419,14 @@ QUnit.module('Views', {
         });
     });
 
-    QUnit.test('correctly uses graph_ keys from the context', function (assert) {
+    QUnit.test('correctly uses graph_ keys from the context', async function (assert) {
         var done = assert.async();
         assert.expect(6);
 
         var lastOne = _.last(this.data.foo.records);
         lastOne.color_id = 14;
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: this.data,
@@ -464,14 +462,14 @@ QUnit.module('Views', {
         });
     });
 
-    QUnit.test('correctly use group_by key from the context', function (assert) {
+    QUnit.test('correctly use group_by key from the context', async function (assert) {
         var done = assert.async();
         assert.expect(2);
 
         var lastOne = _.last(this.data.foo.records);
         lastOne.color_id = 14;
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: 'foo',
             data: this.data,
@@ -494,14 +492,14 @@ QUnit.module('Views', {
         });
     });
 
-    QUnit.test('correctly uses graph_ keys from the context (at reload)', function (assert) {
+    QUnit.test('correctly uses graph_ keys from the context (at reload)', async function (assert) {
         var done = assert.async();
         assert.expect(8);
 
         var lastOne = _.last(this.data.foo.records);
         lastOne.color_id = 14;
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: this.data,
@@ -543,10 +541,10 @@ QUnit.module('Views', {
         });
     });
 
-    QUnit.test('reload graph with correct fields', function (assert) {
+    QUnit.test('reload graph with correct fields', async function (assert) {
         assert.expect(2);
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: 'foo',
             data: this.data,
@@ -568,11 +566,11 @@ QUnit.module('Views', {
         graph.destroy();
     });
 
-    QUnit.test('initial groupby is kept when reloading', function (assert) {
+    QUnit.test('initial groupby is kept when reloading', async function (assert) {
         var done = assert.async();
         assert.expect(4);
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: 'foo',
             data: this.data,
@@ -605,10 +603,10 @@ QUnit.module('Views', {
         });
     });
 
-    QUnit.test('use a many2one as a measure should work (without groupBy)', function (assert) {
+    QUnit.test('use a many2one as a measure should work (without groupBy)', async function (assert) {
         assert.expect(3);
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: this.data,
@@ -630,10 +628,10 @@ QUnit.module('Views', {
         });
     });
 
-    QUnit.test('use a many2one as a measure should work (with groupBy)', function (assert) {
+    QUnit.test('use a many2one as a measure should work (with groupBy)', async function (assert) {
         assert.expect(4);
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: this.data,
@@ -658,10 +656,10 @@ QUnit.module('Views', {
         });
     });
 
-    QUnit.test('use a many2one as a measure and as a groupby should work', function (assert) {
+    QUnit.test('use a many2one as a measure and as a groupby should work', async function (assert) {
         assert.expect(2);
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: this.data,
@@ -672,27 +670,24 @@ QUnit.module('Views', {
                 additionalMeasures: ['product_id'],
             },
         });
-        var done = assert.async();
-        return concurrency.delay(0).then(function () {
-            // need to set the measure this way because it cannot be set in the
-            // arch.
-            testUtils.dom.click(graph.$buttons.find('.dropdown-toggle:contains(Measures)'));
-            testUtils.dom.click(graph.$buttons.find('.dropdown-item[data-field="product_id"]'));
+        await testUtils.nextTick();
+        // need to set the measure this way because it cannot be set in the
+        // arch.
+        await testUtils.dom.click(graph.$buttons.find('.dropdown-toggle:contains(Measures)'));
+        await testUtils.dom.click(graph.$buttons.find('.dropdown-item[data-field="product_id"]'));
 
-            assert.strictEqual(graph.model.chart.data[0].value, 1,
-                "should have first datapoint with value 1");
-            assert.strictEqual(graph.model.chart.data[1].value, 1,
-                "should have second datapoint with value 1");
+        assert.strictEqual(graph.model.chart.data[0].value, 1,
+            "should have first datapoint with value 1");
+        assert.strictEqual(graph.model.chart.data[1].value, 1,
+            "should have second datapoint with value 1");
 
-            graph.destroy();
-            done();
-        });
+        graph.destroy();
     });
 
-    QUnit.test('not use a many2one as a measure by default', function (assert) {
+    QUnit.test('not use a many2one as a measure by default', async function (assert) {
         assert.expect(1);
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: this.data,
@@ -709,10 +704,10 @@ QUnit.module('Views', {
         });
     });
 
-    QUnit.test('use a many2one as a measure if set as additional fields', function (assert) {
+    QUnit.test('use a many2one as a measure if set as additional fields', async function (assert) {
         assert.expect(1);
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: this.data,
@@ -732,10 +727,10 @@ QUnit.module('Views', {
         });
     });
 
-    QUnit.test('graph view crash when moving from search view using Down key', function (assert) {
+    QUnit.test('graph view crash when moving from search view using Down key', async function (assert) {
         assert.expect(1);
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: this.data,
@@ -748,13 +743,13 @@ QUnit.module('Views', {
         graph.destroy();
     });
 
-    QUnit.test('graph measures should be alphabetically sorted', function (assert) {
+    QUnit.test('graph measures should be alphabetically sorted', async function (assert) {
         assert.expect(2);
 
         var data = this.data;
         data.foo.fields.bouh = {string: "bouh", type: "integer"};
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             data: data,
@@ -772,10 +767,10 @@ QUnit.module('Views', {
         graph.destroy();
     });
 
-    QUnit.test('Undefined should appear in bar, pie graph but not in line graph', function (assert) {
+    QUnit.test('Undefined should appear in bar, pie graph but not in line graph', async function (assert) {
         assert.expect(4);
 
-        var graph = createView({
+        var graph = await createView({
             View: GraphView,
             model: "foo",
             groupBy:['date'],
@@ -788,7 +783,7 @@ QUnit.module('Views', {
         assert.strictEqual(graph.$("svg.nvd3-svg:contains('Undefined')").length, 0);
         assert.strictEqual(graph.$("svg.nvd3-svg:contains('March')").length, 1);
 
-        testUtils.dom.click(graph.$buttons.find('.o_graph_button[data-mode=bar]'));
+        await testUtils.dom.click(graph.$buttons.find('.o_graph_button[data-mode=bar]'));
         assert.strictEqual(graph.$("svg.nvd3-svg:contains('Undefined')").length, 1);
         assert.strictEqual(graph.$("svg.nvd3-svg:contains('January')").length, 1);
 

@@ -65,6 +65,13 @@ function _checkVisible(w, shouldBeVisible, msg) {
     } else {
         msg = msg || `target ${$el.selector} should ${shouldBeVisible ? '' : 'not'} be visible`;
         var isVisible = $el.is(':visible');
+        if (isVisible) {
+            // Additional test to see if $el is really visible, since jQuery
+            // considers an element visible if it has a DOWRect, even if its
+            // width and height are equal to zero.
+            var boundingClientRect = $el[0].getBoundingClientRect();
+            isVisible = boundingClientRect.width + boundingClientRect.height;
+        }
         var condition = shouldBeVisible ? isVisible : !isVisible;
         QUnit.assert.ok(condition, msg);
     }

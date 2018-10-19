@@ -205,7 +205,7 @@ QUnit.module('settings_dashboard', function () {
             dashboards: ['translations'],
             mockRPC: function (route, args) {
                 if (route === '/web_settings_dashboard/data') {
-                    return $.when();
+                    return Promise.resolve();
                 }
                 return this._super.apply(this, arguments);
             },

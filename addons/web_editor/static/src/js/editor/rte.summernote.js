@@ -18,7 +18,7 @@ ajax.jsonRpc('/web/dataset/call', 'call', {
     'model': 'ir.ui.view',
     'method': 'read_template',
     'args': ['web_editor.colorpicker', weContext.get()]
-}).done(function (data) {
+}).then(function (data) {
     QWeb.add_template(data);
 });
 

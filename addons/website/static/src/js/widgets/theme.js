@@ -264,7 +264,7 @@ var ThemeCustomizeDialog = Dialog.extend({
         var bodyCustomImageXMLID = 'option_custom_body_image';
         var $inputBodyCustomImage = $inputs.filter('[data-xmlid*="website.' + bodyCustomImageXMLID + '"]:checked');
         if (!$inputBodyCustomImage.length) {
-            return $.when();
+            return Promise.resolve();
         }
 
         var def = $.Deferred();

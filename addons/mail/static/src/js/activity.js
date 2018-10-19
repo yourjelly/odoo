@@ -27,7 +27,7 @@ var _t = core._t;
  */
 function _readActivities(self, ids) {
     if (!ids.length) {
-        return $.when([]);
+        return Promise.resolve([]);
     }
     return self._rpc({
         model: 'mail.activity',
@@ -121,7 +121,7 @@ var BasicActivity = AbstractField.extend({
 
     /**
      * @param {integer} previousActivityTypeID
-     * @return {$.Promise}
+     * @return {Promise}
      */
     scheduleActivity: function () {
         var callback = this._reload.bind(this, { activity: true, thread: true });
@@ -186,7 +186,7 @@ var BasicActivity = AbstractField.extend({
      * @param {integer} id
      * @param {integer} previousActivityTypeID
      * @param {function} callback
-     * @return {$.Deferred}
+     * @return {Promise}
      */
     _openActivityForm: function (id, callback) {
         var action = {
@@ -208,7 +208,7 @@ var BasicActivity = AbstractField.extend({
      * @private
      * @param {integer} activityID
      * @param {string} feedback
-     * @return {$.Promise}
+     * @return {Promise}
      */
     _sendActivityFeedback: function (activityID, feedback) {
         return this._rpc({
@@ -249,7 +249,7 @@ var BasicActivity = AbstractField.extend({
     /**
      * @private
      * @param {MouseEvent} ev
-     * @returns {$.Promise}
+     * @returns {Promise}
      */
     _onEditActivity: function (ev) {
         ev.preventDefault();
@@ -367,7 +367,7 @@ var BasicActivity = AbstractField.extend({
     /**
      * @private
      * @param {MouseEvent} ev
-     * @returns {$.Deferred}
+     * @returns {Promise}
      */
     _onPreviewMailTemplate: function (ev) {
         ev.stopPropagation();
@@ -395,7 +395,7 @@ var BasicActivity = AbstractField.extend({
     /**
      * @private
      * @param {MouseEvent} ev
-     * @returns {$.Promise}
+     * @returns {Promise}
      */
     _onSendMailTemplate: function (ev) {
         ev.stopPropagation();
@@ -411,7 +411,7 @@ var BasicActivity = AbstractField.extend({
     /**
      * @private
      * @param {MouseEvent} ev
-     * @returns {$.Deferred}
+     * @returns {Promise}
      */
     _onScheduleActivity: function (ev) {
         ev.preventDefault();
@@ -422,7 +422,7 @@ var BasicActivity = AbstractField.extend({
      * @private
      * @param {MouseEvent} ev
      * @param {Object} options
-     * @returns {$.Promise}
+     * @returns {Promise}
      */
     _onUnlinkActivity: function (ev, options) {
         ev.preventDefault();

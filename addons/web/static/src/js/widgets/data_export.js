@@ -236,42 +236,43 @@ var DataExport = Dialog.extend({
 
         waitFor.push(this._rpc({route: '/web/export/formats'}).then(do_setup_export_formats));
 
-        var got_fields = new $.Deferred();
-        this.$import_compat_radios.change(function(e) {
-            self.isCompatibleMode = !!$(e.target).val();
-            self.$('.o_field_tree_structure').remove();
+        var got_fields = new Promise(function (resolve, reject) {
+            self.$import_compat_radios.change(function(e) {
+                self.isCompatibleMode = !!$(e.target).val();
+                self.$('.o_field_tree_structure').remove();
 
-            self._rpc({
-                    route: '/web/export/get_fields',
-                    params: {
-                        model: self.record.model,
-                        import_compat: self.isCompatibleMode,
-                    },
-                })
-                .done(function (records) {
-                    var compatible_fields = _.map(records, function (record) {return record.id; });
-                    self.$fields_list
-                        .find('option')
-                        .filter(function () {
-                            var option_field = $(this).attr('value');
-                            if (compatible_fields.indexOf(option_field) === -1) {
-                                return true;
-                            }
-                        })
-                        .remove();
-                    got_fields.resolve();
-                    self.on_show_data(records);
-                    // In compatible mode add ID field as first field to export
-                    if (self.isCompatibleMode) {
-                        self.$('.o_fields_list').prepend(new Option(_('External ID'), 'id'));
-                    }
-                    _.each(records, function (record) {
-                        if (_.contains(self.defaultExportFields, record.id)) {
-                            self.add_field(record.id, record.string);
+                self._rpc({
+                        route: '/web/export/get_fields',
+                        params: {
+                            model: self.record.model,
+                            import_compat: self.isCompatibleMode,
+                        },
+                    })
+                    .then(function (records) {
+                        var compatible_fields = _.map(records, function (record) {return record.id; });
+                        self.$fields_list
+                            .find('option')
+                            .filter(function () {
+                                var option_field = $(this).attr('value');
+                                if (compatible_fields.indexOf(option_field) === -1) {
+                                    return true;
+                                }
+                            })
+                            .remove();
+                        resolve();
+                        self.on_show_data(records);
+                        // In compatible mode add ID field as first field to export
+                        if (self.isCompatibleMode) {
+                            self.$('.o_fields_list').prepend(new Option(_('External ID'), 'id'));
                         }
-                    });
-                });
-        }).eq(0).change();
+                        _.each(records, function (record) {
+                            if (_.contains(self.defaultExportFields, record.id)) {
+                                self.add_field(record.id, record.string);
+                            }
+                        });
+                    }).catch(function() { reject();});
+            }).eq(0).change();
+        });
         waitFor.push(got_fields);
 
         waitFor.push(this.getParent().getActiveDomain().then(function (domain) {
@@ -292,7 +293,7 @@ var DataExport = Dialog.extend({
             });
         }));
 
-        return $.when.apply($, waitFor);
+        return Promise.all(waitFor);
 
         function do_setup_export_formats(formats) {
             var $fmts = self.$('.o_export_format');
@@ -317,7 +318,7 @@ var DataExport = Dialog.extend({
     show_exports_list: function() {
         if (this.$('.o_exported_lists_select').is(':hidden')) {
             this.$('.o_exported_lists').show();
-            return $.when();
+            return Promise.resolve();
         }
 
         var self = this;
@@ -396,7 +397,7 @@ var DataExport = Dialog.extend({
                         exclude: exclude_fields,
                     },
                 })
-                .done(function(results) {
+                .then(function(results) {
                     record.loaded = true;
                     self.on_show_data(results, record.id);
                 });

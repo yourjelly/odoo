@@ -93,7 +93,7 @@ ListRenderer.include({
     },
     /**
      * @override
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     start: function () {
         // deliberately use the 'editable' attribute instead of '_isEditable'
@@ -171,7 +171,7 @@ ListRenderer.include({
      * @param {string} id
      * @param {string[]} fields
      * @param {OdooEvent} ev
-     * @returns {Deferred<AbstractField[]>} resolved with the list of widgets
+     * @returns {Promise<AbstractField[]>} resolved with the list of widgets
      *                                      that have been reset
      */
     confirmUpdate: function (state, id, fields, ev) {
@@ -212,18 +212,21 @@ ListRenderer.include({
             });
             var newRowIndex = _.findIndex(state.data, {id: id});
             var $lastRow = $row;
-            _.each(state.data, function (record, index) {
+            state.data.forEach(function (record, index) {
                 if (index === newRowIndex) {
                     return;
                 }
                 var $newRow = self._renderRow(record);
-                if (index < newRowIndex) {
-                    $newRow.insertBefore($row);
-                } else {
-                    $newRow.insertAfter($lastRow);
-                    $lastRow = $newRow;
-                }
+                // return .then(function($newRow) {
+                    if (index < newRowIndex) {
+                        $newRow.insertBefore($row);
+                    } else {
+                        $newRow.insertAfter($lastRow);
+                        $lastRow = $newRow;
+                    }
+                // });
             });
+            // return Promise.all(proms).then(function() {
             if (self.currentRow !== null) {
                 self.currentRow = newRowIndex;
                 return self._selectCell(newRowIndex, self.currentFieldIndex, {force: true}).then(function () {
@@ -238,6 +241,7 @@ ListRenderer.include({
                     }
                 });
             }
+            // });
         });
     },
     /**
@@ -294,7 +298,7 @@ ListRenderer.include({
      *
      * @param {string} recordID
      * @param {string} mode
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     setRowMode: function (recordID, mode) {
         var self = this;
@@ -321,7 +325,7 @@ ListRenderer.include({
         }
 
         if (rowIndex < 0) {
-            return $.when();
+            return Promise.resolve();
         }
         var editMode = (mode === 'edit');
 
@@ -350,33 +354,33 @@ ListRenderer.include({
         options.mode = editMode ? 'edit' : 'readonly';
 
         // Switch each cell to the new mode; note: the '_renderBodyCell'
-        // function might fill the 'this.defs' variables with multiple deferred
+        // function might fill the 'this.defs' variables with multiple promise
         // so we create the array and delete it after the rendering.
-        var defs = [];
-        this.defs = defs;
         _.each(this.columns, function (node, colIndex) {
             var $td = $tds.eq(colIndex);
+            // var renderBodyCellResult =
             var $newTd = self._renderBodyCell(record, node, colIndex, options);
+            // self.defs.push(renderBodyCellResult);
+            // renderBodyCellResult.then(function($newTd){
+                // Widgets are unregistered of modifiers data when they are
+                // destroyed. This is not the case for simple buttons so we have to
+                // do it here.
+                if ($td.hasClass('o_list_button')) {
+                    self._unregisterModifiersElement(node, recordID, $td.children());
+                }
 
-            // Widgets are unregistered of modifiers data when they are
-            // destroyed. This is not the case for simple buttons so we have to
-            // do it here.
-            if ($td.hasClass('o_list_button')) {
-                self._unregisterModifiersElement(node, recordID, $td.children());
-            }
-
-            // For edit mode we only replace the content of the cell with its
-            // new content (invisible fields, editable fields, ...).
-            // For readonly mode, we replace the whole cell so that the
-            // dimensions of the cell are not forced anymore.
-            if (editMode) {
-                $td.empty().append($newTd.contents());
-            } else {
-                self._unregisterModifiersElement(node, recordID, $td);
-                $td.replaceWith($newTd);
-            }
+                // For edit mode we only replace the content of the cell with its
+                // new content (invisible fields, editable fields, ...).
+                // For readonly mode, we replace the whole cell so that the
+                // dimensions of the cell are not forced anymore.
+                if (editMode) {
+                    $td.empty().append($newTd.contents());
+                } else {
+                    self._unregisterModifiersElement(node, recordID, $td);
+                    $td.replaceWith($newTd);
+                }
+            // });
         });
-        delete this.defs;
 
         // Destroy old field widgets
         _.each(oldWidgets, this._destroyFieldWidget.bind(this, recordID));
@@ -385,7 +389,7 @@ ListRenderer.include({
         $row.toggleClass('o_selected_row', editMode);
         $row.find('.o_list_record_selector input').prop('disabled', !record.res_id);
 
-        return $.when.apply($, defs).then(function () {
+        return Promise.all(this.defs || []).then(function () {
             // necessary to trigger resize on fieldtexts
             core.bus.trigger('DOM_updated');
         });
@@ -399,27 +403,32 @@ ListRenderer.include({
      * prevent subsequent editions. These edits would be lost, because the list
      * view only saves records when unselecting a row.
      *
-     * @returns {Deferred} The deferred resolves if the row was unselected (and
+     * @returns {Promise} The promise resolves if the row was unselected (and
      *   possibly removed). If may be rejected, when the row is dirty and the
      *   user refuses to discard its changes.
      */
     unselectRow: function () {
+        var self = this;
         // Protect against calling this method when no row is selected
         if (this.currentRow === null) {
-            return $.when();
+            return Promise.resolve();
         }
 
         var record = this.state.data[this.currentRow];
         var recordWidgets = this.allFieldWidgets[record.id];
         toggleWidgets(true);
 
-        var def = $.Deferred();
-        this.trigger_up('save_line', {
-            recordID: record.id,
-            onSuccess: def.resolve.bind(def),
-            onFailure: def.reject.bind(def),
+        var prom = new Promise(function (resolve, reject) {
+            self.trigger_up('save_line', {
+                recordID: record.id,
+                onSuccess: resolve,
+                onFailure: reject,
+            });
         });
-        return def.fail(toggleWidgets.bind(null, false));
+        prom.catch(function() {
+            toggleWidgets(false);
+        });
+        return prom;
 
         function toggleWidgets(disabled) {
             _.each(recordWidgets, function (widget) {
@@ -511,7 +520,7 @@ ListRenderer.include({
     },
     /**
      * @override
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _render: function () {
         this.currentRow = null;
@@ -524,20 +533,23 @@ ListRenderer.include({
      * widget.
      *
      * @override
-     * @returns {jQueryElement}
+     * @returns {Promise<jQueryElement>}
      */
     _renderBody: function () {
+        var self = this;
         var $body = this._super();
-        if (this.hasHandle) {
-            $body.sortable({
-                axis: 'y',
-                items: '> tr.o_data_row',
-                helper: 'clone',
-                handle: '.o_row_handle',
-                stop: this._resequence.bind(this),
-            });
-        }
-        return $body;
+//         return .then(function($body) {
+            if (self.hasHandle) {
+                $body.sortable({
+                    axis: 'y',
+                    items: '> tr.o_data_row',
+                    helper: 'clone',
+                    handle: '.o_row_handle',
+                    stop: self._resequence.bind(self),
+                });
+            }
+            return $body;
+//         });
     },
     /**
      * Editable rows are possibly extended with a trash icon on their right, to
@@ -550,15 +562,18 @@ ListRenderer.include({
      * @returns {jQueryElement}
      */
     _renderRow: function (record, index) {
-        var $row = this._super.apply(this, arguments);
-        if (this.addTrashIcon) {
-            var $icon = this.isMany2Many ?
-                            $('<button>', {class: 'fa fa-times', name: 'unlink', 'aria-label': _t('Unlink row ') + (index+1)}) :
-                            $('<button>', {class: 'fa fa-trash-o', name: 'delete', 'aria-label': _t('Delete row ') + (index+1)});
-            var $td = $('<td>', {class: 'o_list_record_remove'}).append($icon);
-            $row.append($td);
-        }
-        return $row;
+        var self = this;
+        var $row = this._super.apply(this, arguments)
+        // return .then(function($row) {
+            if (self.addTrashIcon) {
+                var $icon = self.isMany2Many ?
+                                $('<button>', {class: 'fa fa-times', name: 'unlink', 'aria-label': _t('Unlink row ') + (index+1)}) :
+                                $('<button>', {class: 'fa fa-trash-o', name: 'delete', 'aria-label': _t('Delete row ') + (index+1)});
+                var $td = $('<td>', {class: 'o_list_record_remove'}).append($icon);
+                $row.append($td);
+            }
+            return $row;
+        // });
     },
     /**
      * If the editable list view has the parameter addCreateLine, we need to
@@ -568,17 +583,16 @@ ListRenderer.include({
      * on the first real column.
      *
      * @override
-     * @returns {jQueryElement}
+     * @returns {jQueryElement[]}
      */
     _renderRows: function () {
         var self = this;
         var $rows = this._super();
-
-        if (this.addCreateLine) {
+        if (self.addCreateLine) {
             var $tr = $('<tr>');
             var colspan = self._getNumberOfCols();
 
-            if (this.handleField) {
+            if (self.handleField) {
                 colspan = colspan - 1;
                 $tr.append('<td>');
             }
@@ -604,7 +618,7 @@ ListRenderer.include({
     /**
      * @override
      * @private
-     * @returns {Deferred} this deferred is resolved immediately
+     * @returns {Promise} this promise is resolved immediately
      */
     _renderView: function () {
         var self = this;
@@ -692,13 +706,13 @@ ListRenderer.include({
      * @param {boolean} [options.force=false] if true, force selecting the cell
      *   even if seems to be already the selected one (useful after a re-
      *   rendering, to reset the focus on the correct field)
-     * @return {Deferred} fails if no cell could be selected
+     * @return {Promise} fails if no cell could be selected
      */
     _selectCell: function (rowIndex, fieldIndex, options) {
         options = options || {};
         // Do nothing if the user tries to select current cell
         if (!options.force && rowIndex === this.currentRow && fieldIndex === this.currentFieldIndex) {
-            return $.when();
+            return Promise.resolve();
         }
         var wrap = options.wrap === undefined ? true : options.wrap;
 
@@ -707,7 +721,7 @@ ListRenderer.include({
         return this._selectRow(rowIndex).then(function () {
             var record = self.state.data[rowIndex];
             if (fieldIndex >= (self.allFieldWidgets[record.id] || []).length) {
-                return $.Deferred().reject();
+                return Promise.reject();
             }
             // _activateFieldWidget might trigger an onchange,
             // which requires currentFieldIndex to be set
@@ -721,7 +735,7 @@ ListRenderer.include({
             });
             if (fieldIndex < 0) {
                 self.currentFieldIndex = oldFieldIndex;
-                return $.Deferred().reject();
+                return Promise.reject();
             }
             self.currentFieldIndex = fieldIndex;
         });
@@ -730,12 +744,12 @@ ListRenderer.include({
      * Activates the row at the given row index.
      *
      * @param {integer} rowIndex
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _selectRow: function (rowIndex) {
         // Do nothing if already selected
         if (rowIndex === this.currentRow) {
-            return $.when();
+            return Promise.resolve();
         }
 
         // To select a row, the currently selected one must be unselected first
@@ -745,15 +759,15 @@ ListRenderer.include({
                 // The row to selected doesn't exist anymore (probably because
                 // an onchange triggered when unselecting the previous one
                 // removes rows)
-                return $.Deferred().reject();
+                return Promise.reject();
             }
             // Notify the controller we want to make a record editable
-            var def = $.Deferred();
-            self.trigger_up('edit_line', {
-                index: rowIndex,
-                onSuccess: def.resolve.bind(def),
+            return new Promise(function (resolve, reject) {
+                self.trigger_up('edit_line', {
+                    index: rowIndex,
+                    onSuccess: resolve,
+                });
             });
-            return def;
         });
     },
 
@@ -778,7 +792,7 @@ ListRenderer.include({
         // but we do want to unselect current row
         var self = this;
         this.unselectRow().then(function () {
-            self.trigger_up('add_record', {context: ev.currentTarget.dataset.context && [ev.currentTarget.dataset.context]}); // TODO write a test, the deferred was not considered
+            self.trigger_up('add_record', {context: ev.currentTarget.dataset.context && [ev.currentTarget.dataset.context]}); // TODO write a test, the promise was not considered
         });
     },
     /**
@@ -864,12 +878,13 @@ ListRenderer.include({
      * @param {OdooEvent} ev
      */
     _onNavigationMove: function (ev) {
+        var self = this;
         ev.stopPropagation(); // stop the event, the action is done by this renderer
         switch (ev.data.direction) {
             case 'previous':
                 if (this.currentFieldIndex > 0) {
                     this._selectCell(this.currentRow, this.currentFieldIndex - 1, {wrap: false})
-                        .fail(this._moveToPreviousLine.bind(this));
+                        .catch(this._moveToPreviousLine.bind(this));
                 } else {
                     this._moveToPreviousLine();
                 }
@@ -882,7 +897,7 @@ ListRenderer.include({
                 if (column.attrs.name === lastWidget.name) {
                     if (this.currentRow + 1 < this.state.data.length) {
                         this._selectCell(this.currentRow+1, 0, {wrap:false})
-                            .fail(this._moveToNextLine.bind(this));
+                            .catch(this._moveToNextLine.bind(this));
                     } else {
                         var currentRowData = this.state.data[this.currentRow];
                         if (currentRowData.isDirty(currentRowData.id)) {
@@ -895,7 +910,7 @@ ListRenderer.include({
                 } else {
                     if (this.currentFieldIndex + 1 < this.columns.length) {
                         this._selectCell(this.currentRow, this.currentFieldIndex + 1, {wrap: false})
-                            .fail(this._moveToNextLine.bind(this));
+                            .catch(this._moveToNextLine.bind(this));
                     } else {
                         this._moveToNextLine();
                     }
@@ -911,8 +926,10 @@ ListRenderer.include({
                 ev.data.originalEvent.stopPropagation();
                 this.trigger_up('discard_changes', {
                     recordID: ev.target.dataPointID,
+                    onSuccess: function () {
+                        self.$('.o_field_x2many_list_row_add a:first').focus();
+                    }
                 });
-                this.$('.o_field_x2many_list_row_add a:first').focus();
                 break;
         }
     },

@@ -28,7 +28,7 @@ var FieldPad = AbstractField.extend({
                 FieldPad.prototype.isPadConfigured = result;
             });
         }
-        return $.when();
+        return Promise.resolve();
     },
     /**
      * @override

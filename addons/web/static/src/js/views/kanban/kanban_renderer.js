@@ -148,7 +148,7 @@ var KanbanRenderer = BasicRenderer.extend({
     /**
      * Displays the quick create record in the first column.
      *
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     addQuickCreate: function () {
         return this.widgets[0].addQuickCreate();
@@ -185,7 +185,7 @@ var KanbanRenderer = BasicRenderer.extend({
      * @param {boolean} [options.openQuickCreate] if true, directly opens the
      *   QuickCreate widget in the updated column
      *
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     updateColumn: function (localID, columnState, options) {
         var self = this;
@@ -202,7 +202,7 @@ var KanbanRenderer = BasicRenderer.extend({
             if (options && options.openQuickCreate) {
                 def = newColumn.addQuickCreate();
             }
-            return $.when(def).then(function () {
+            return Promise.resolve(def).then(function () {
                 newColumn.$el.insertAfter(column.$el);
                 self._toggleNoContentHelper();
                 // When a record has been quick created, the new column directly
@@ -219,7 +219,7 @@ var KanbanRenderer = BasicRenderer.extend({
      * Updates a given record with its new state.
      *
      * @param {Object} recordState
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     updateRecord: function (recordState) {
         var isGrouped = !!this.state.groupedBy.length;
@@ -240,7 +240,7 @@ var KanbanRenderer = BasicRenderer.extend({
         if (record) {
             return record.update(recordState);
         }
-        return $.when();
+        return Promise.resolve();
     },
     /**
      * @override
@@ -283,10 +283,13 @@ var KanbanRenderer = BasicRenderer.extend({
      * @param {integer} nbDivs the number of divs to append
      */
     _renderGhostDivs: function (fragment, nbDivs) {
+        var ghostDefs = [];
         for (var $ghost, i = 0; i < nbDivs; i++) {
             $ghost = $('<div>').addClass('o_kanban_record o_kanban_ghost');
-            $ghost.appendTo(fragment);
+            var def = $ghost.appendTo(fragment);
+            ghostDefs.push(def);
         }
+        return Promise.all(ghostDefs);
     },
     /**
      * Renders an grouped kanban view in a fragment.
@@ -309,10 +312,7 @@ var KanbanRenderer = BasicRenderer.extend({
                 def = column.appendTo(fragment);
                 self.widgets.push(column);
             }
-            if (def.state() === 'pending') {
-                self.defs.push(def);
-            }
-
+            self.defs.push(def);
         });
 
         // remove previous sorting
@@ -347,12 +347,12 @@ var KanbanRenderer = BasicRenderer.extend({
                 this.quickCreate = new ColumnQuickCreate(this, {
                     examples: this.examples,
                 });
-                this.quickCreate.appendTo(fragment).then(function () {
+                this.defs.push(this.quickCreate.appendTo(fragment).then(function () {
                     // Open it directly if there is no column yet
                     if (!self.state.data.length) {
                         self.quickCreate.toggleFold();
                     }
-                });
+                }));
 
             }
         }
@@ -370,13 +370,16 @@ var KanbanRenderer = BasicRenderer.extend({
             var kanbanRecord = new KanbanRecord(self, record, self.recordOptions);
             self.widgets.push(kanbanRecord);
             var def = kanbanRecord.appendTo(fragment);
-            if (def.state() === 'pending') {
-                self.defs.push(def);
-            }
+            self.defs.push(def);
         });
 
         // append ghost divs to ensure that all kanban records are left aligned
-        this._renderGhostDivs(fragment, 6);
+        var prom = new Promise(function(resolve, reject) {
+            Promise.all(self.defs).then(function () {
+                self._renderGhostDivs(fragment, 6).then(resolve).catch(reject);
+            });
+        })
+        this.defs.push(prom);
     },
     /**
      * @override
@@ -399,15 +402,15 @@ var KanbanRenderer = BasicRenderer.extend({
         } else {
             this._renderUngrouped(fragment);
         }
-        this.$el.append(fragment);
-        this._toggleNoContentHelper();
-        var defs = this.defs;
         return this._super.apply(this, arguments).then(function () {
-            _.invoke(oldWidgets, 'destroy');
-            if (self._isInDom) {
-                _.invoke(self.widgets, 'on_attach_callback');
-            }
-            return $.when.apply(null, defs);
+            return Promise.all(self.defs).then(function() {
+                self.$el.append(fragment);
+                self._toggleNoContentHelper();
+                _.invoke(oldWidgets, 'destroy');
+                if (self._isInDom) {
+                    _.invoke(self.widgets, 'on_attach_callback');
+                }
+            });
         });
     },
     /**

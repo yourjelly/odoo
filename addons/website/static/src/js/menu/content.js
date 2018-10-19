@@ -841,7 +841,7 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         // If simulate is true, it means we want the option to be toggled but
         // not saved on the server yet
         if (!forceSave) {
-            return $.when();
+            return Promise.resolve();
         }
 
         // If not, write on the server page and reload the current location

@@ -99,7 +99,7 @@ MailManager.include({
             channelAlreadyInCache = !!this.getChannel(messageData.channel_ids[0]);
             def = this.joinChannel(messageData.channel_ids[0], { autoswitch: false });
         } else {
-            def = $.when();
+            def = Promise.resolve();
         }
         def.then(function () {
             // don't increment unread if channel wasn't in cache yet as

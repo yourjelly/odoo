@@ -84,7 +84,7 @@ QUnit.test('dashboard set a new target', function (assert) {
             if (args.method === 'modify_target_sales_dashboard') {
                 assert.ok(true, "should call /modify_target_sales_dashboard");
                 dashboard_data[args.args[0]].target = args.args[1];
-                return $.when();
+                return Promise.resolve();
             }
             return this._super(route, args);
         },

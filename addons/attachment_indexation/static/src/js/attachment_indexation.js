@@ -111,12 +111,12 @@ Sidebar.include({
      */
     _updateAttachments: function () {
         if (this.items.files === undefined) {
-            return $.when();
+            return Promise.resolve();
         }
         var activeId = this.env.activeIds[0];
         if (!activeId) {
             this.items.files = [];
-            return $.when();
+            return Promise.resolve();
         } else {
             var domain = [
                 ['res_model', '=', this.env.model],

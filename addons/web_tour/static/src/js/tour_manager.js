@@ -88,7 +88,7 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
         _.each(this.tours, this._register.bind(this, do_update));
     },
     _register: function (do_update, tour, name) {
-        if (tour.ready) return $.when();
+        if (tour.ready) return Promise.resolve();
 
         var tour_is_consumed = _.contains(this.consumed_tours, name);
 

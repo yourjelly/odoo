@@ -191,7 +191,7 @@ var AbstractView = Factory.extend({
             def = this._createControlPanel(parent);
         }
         var _super = this._super.bind(this);
-        return $.when(def).then(function (controlPanel) {
+        return Promise.resolve(def).then(function (controlPanel) {
             if (controlPanel) {
                 var searchQuery = controlPanel.getSearchQuery();
                 self._updateMVCParams(searchQuery);

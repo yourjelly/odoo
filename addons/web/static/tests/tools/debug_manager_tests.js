@@ -128,7 +128,7 @@ QUnit.module('DebugManager', {}, function () {
                 if (route == "/web/dataset/call_kw/ir.default/set") {
                     assert.deepEqual(args.args, ["partner", "foo", "yop", true, true, false],
                         'Model, field, value and booleans for current user/company should have been passed');
-                    return $.when();
+                    return Promise.resolve();
                 }
                 return this._super.apply(this, arguments);
             }

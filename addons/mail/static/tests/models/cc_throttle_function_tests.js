@@ -10,7 +10,7 @@ QUnit.module('mail', {
     beforeEach: function () {
 
         var self = this;
-        this.timeoutCDDef = $.Deferred();
+        this.timeoutCDDef = testUtils.makeTestPromise();
 
         this.patch = function () {
             self.ORIGINAL_CCTFO_ON_CD_TIMEOUT = CCThrottleFunctionObject.prototype._onCooldownTimeout;
@@ -36,7 +36,7 @@ QUnit.test('cancel()', function (assert) {
     assert.expect(3);
 
     var self = this;
-    var def = $.Deferred();
+    var def = testUtils.makeTestPromise();
     var step = 1;
 
     var widget = testUtils.createParent({
@@ -52,7 +52,7 @@ QUnit.test('cancel()', function (assert) {
                 }
                 step++;
 
-                return $.when();
+                return Promise.resolve();
             }
             return this._super.apply(this, arguments);
         },
@@ -92,8 +92,8 @@ QUnit.test('clear()', function (assert) {
     assert.expect(5);
 
     var self = this;
-    var def1 = $.Deferred();
-    var def2 = $.Deferred();
+    var def1 = testUtils.makeTestPromise();
+    var def2 = testUtils.makeTestPromise();
     var step = 1;
 
     var widget = testUtils.createParent({
@@ -110,7 +110,7 @@ QUnit.test('clear()', function (assert) {
                 }
                 step++;
 
-                return $.when();
+                return Promise.resolve();
             }
             return this._super.apply(this, arguments);
         },
@@ -141,7 +141,7 @@ QUnit.test('clear()', function (assert) {
         self.timeoutCDDef.resolve();
         def2.resolve();
     });
-    $.when(self.timeoutCDDef, def2).then(function () {
+    Promise.all([self.timeoutCDDef, def2]).then(function () {
         assert.verifySteps(['__rpc__1', '__rpc__2'],
             "function should have been called twice after 'clear' (buffered 2nd function call)");
         widget.destroy();

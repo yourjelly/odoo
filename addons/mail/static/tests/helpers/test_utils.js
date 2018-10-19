@@ -25,9 +25,9 @@ var Widget = require('web.Widget');
  * This is async due to mail_manager/mail_service that needs to be ready.
  *
  * @param {Object} params
- * @return {$.Promise} resolved with the discuss widget
+ * @return {Promise} resolved with the discuss widget
  */
-function createDiscuss(params) {
+async function createDiscuss(params) {
     var Parent = Widget.extend({
         do_push_state: function () {},
     });

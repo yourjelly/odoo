@@ -536,6 +536,28 @@ function unpatch(target) {
     delete target.__patchID;
 }
 
+window.originalSetTimeout = window.setTimeout;
+
+//VSC: I keep it for now for reference, eventually it will need to be removed
+function patchSetTimeout() {
+    var original = window.setTimeout;
+    var self = this;
+    window.setTimeout = function(handler, delay) {
+        console.log("calling setTimeout on " + (handler.name || "some function") + "with delay of " + delay);
+        console.trace();
+        var handlerArguments = Array.prototype.slice.call(arguments, 1);
+        return original(function() {
+            handler.bind(self, handlerArguments)();
+            console.log('after doing the action of the setTimeout');
+        }, delay);
+        // return Promise.resolve(handler.bind(self, handlerArguments));
+    };
+
+    return function() {
+        window.setTimeout = original;
+    };
+}
+
 
 return {
     addMockEnvironment: addMockEnvironment,
@@ -544,6 +566,7 @@ return {
     patchDate: patchDate,
     patch: patch,
     unpatch: unpatch,
+    patchSetTimeout: patchSetTimeout,
 };
 
 });

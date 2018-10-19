@@ -143,7 +143,7 @@ var Channel = SearchableThread.extend(ChannelSeenMixin, ThreadTypingMixin, {
     /**
      * Force fetch members of the channel
      *
-     * @returns {$.Promise<Object[]>} resolved with list of channel listeners
+     * @returns {Promise<Object[]>} resolved with list of channel listeners
      */
     forceFetchMembers: function () {
         this._membersDef = undefined;
@@ -188,7 +188,7 @@ var Channel = SearchableThread.extend(ChannelSeenMixin, ThreadTypingMixin, {
     /**
      * Get listeners of a channel
      *
-     * @returns {$.Promise<Array<Object[]>>} resolved with list of list of
+     * @returns {Promise<Object[]>} resolved with list of list of
      *   channel listeners.
      */
     getMentionPartnerSuggestions: function () {
@@ -304,7 +304,7 @@ var Channel = SearchableThread.extend(ChannelSeenMixin, ThreadTypingMixin, {
      * Unsubscribes from channel
      *
      * @abstract
-     * @returns {$.Promise} resolve when unsubscribed
+     * @returns {Promise} resolve when unsubscribed
      */
     unsubscribe: function () {},
     /**
@@ -383,12 +383,12 @@ var Channel = SearchableThread.extend(ChannelSeenMixin, ThreadTypingMixin, {
      *
      * @override
      * @private
-     * @returns {$.Promise} resolved when message has been marked as read
+     * @returns {Promise} resolved when message has been marked as read
      */
     _markAsRead: function () {
         var superDef = this._super.apply(this, arguments);
         var seenDef = this._throttleNotifySeen();
-        return $.when(superDef, seenDef);
+        return Promise.all([superDef, seenDef]);
     },
     /**
      * @override {mail.model.ThreadSeenMixin}
@@ -409,7 +409,7 @@ var Channel = SearchableThread.extend(ChannelSeenMixin, ThreadTypingMixin, {
      * @private
      * @param {Object} params
      * @param {boolean} params.typing
-     * @returns {$.Promise}
+     * @returns {Promise}
      */
     _notifyMyselfTyping: function (params) {
         return this._rpc({
@@ -444,7 +444,7 @@ var Channel = SearchableThread.extend(ChannelSeenMixin, ThreadTypingMixin, {
      * @override
      * @private
      * @param {Object} data data related to the new message
-     * @returns {$.Promise<Object>} resolved when the message has been sent to
+     * @returns {Promise<Object>} resolved when the message has been sent to
      *   the server, with the object message that has been sent to the server.
      */
     _postMessage: function (data) {

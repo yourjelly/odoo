@@ -86,7 +86,7 @@ var FormView = BasicView.extend({
      *
      * @private
      * @param {Widget} parent the parent of the model, if it has to be created
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _loadSubviews: function (parent) {
         var self = this;
@@ -133,7 +133,7 @@ var FormView = BasicView.extend({
                 }
             });
         }
-        return $.when.apply($, defs);
+        return Promise.all(defs);
     },
     /**
      * We set here the limit for the number of records fetched (in one page).

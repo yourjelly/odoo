@@ -15,7 +15,7 @@ var trusted_origin = utils.build_origin(trusted_protocol, trusted_host);
 // Patch the editor's behavior when it is launched inside an iframe.
 if (window.self !== window.top) {
 
-    // And now we chain some deferred to `save` and `cancel` in order to inform
+    // And now we chain some promise to `save` and `cancel` in order to inform
     // the report's client action that the actions are done.
     editor.Class.include({
         save: function () {

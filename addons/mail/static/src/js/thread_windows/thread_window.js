@@ -81,7 +81,7 @@ var ThreadWindow = AbstractThreadWindow.extend({
             });
         }
 
-        return $.when(superDef, composerDef);
+        return Promise.all([superDef, composerDef]);
     },
 
     //--------------------------------------------------------------------------
@@ -238,7 +238,7 @@ var ThreadWindow = AbstractThreadWindow.extend({
             .autocomplete({
                 source: function (request, response) {
                     self.call('mail_service', 'searchPartner', request.term, 10)
-                        .done(response);
+                        .then(response);
                 },
                 select: function (event, ui) {
                     // remember partner ID so that we can replace this window

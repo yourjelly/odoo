@@ -90,27 +90,27 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
      */
     session_init: function () {
         var self = this;
-        var def = this.session_reload();
+        var prom = this.session_reload();
 
         if (this.is_frontend) {
-            return def.then(function () {
+            return prom.then(function () {
                 return self.load_translations();
             });
         }
 
-        return def.then(function () {
+        return prom.then(function () {
             var modules = self.module_list.join(',');
-            var deferred = self.load_qweb(modules);
+            var promise = self.load_qweb(modules);
             if (self.session_is_valid()) {
-                return deferred.then(function () { return self.load_modules(); });
+                return promise.then(function () { return self.load_modules(); });
             }
-            return $.when(
-                    deferred,
+            return Promise.all([
+                    promise,
                     self.rpc('/web/webclient/bootstrap_translations', {mods: self.module_list})
                         .then(function (trans) {
                             _t.database.set_bundle(trans);
                         })
-            );
+                    ]);
         });
     },
     session_is_valid: function () {
@@ -125,7 +125,7 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
      */
     session_authenticate: function () {
         var self = this;
-        return $.when(this._session_authenticate.apply(this, arguments)).then(function () {
+        return Promise.resolve(this._session_authenticate.apply(this, arguments)).then(function () {
             return self.load_modules();
         });
     },
@@ -137,7 +137,7 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
         var params = {db: db, login: login, password: password};
         return this.rpc("/web/session/authenticate", params).then(function (result) {
             if (!result.uid) {
-                return $.Deferred().reject();
+                return Promise.reject();
             }
             delete result.session_id;
             _.extend(self, result);
@@ -149,7 +149,7 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
     },
     user_has_group: function (group) {
         if (!this.uid) {
-            return $.when(false);
+            return Promise.resolve(false);
         }
         var def = this._groups_def[group];
         if (!def) {
@@ -203,22 +203,24 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
         var to_load = _.difference(modules, self.module_list).join(',');
         this.module_list = all_modules;
 
-        var loaded = $.when(self.load_translations());
+        var loaded = Promise.resolve(self.load_translations());
         var locale = "/web/webclient/locale/" + self.user_context.lang || 'en_US';
         var file_list = [ locale ];
         if(to_load.length) {
-            loaded = $.when(
+            loaded = Promise.all([
                 loaded,
-                self.rpc('/web/webclient/csslist', {mods: to_load}).done(self.load_css.bind(self)),
+                self.rpc('/web/webclient/csslist', {mods: to_load})
+                    .then(self.load_css.bind(self)),
                 self.load_qweb(to_load),
-                self.rpc('/web/webclient/jslist', {mods: to_load}).done(function (files) {
-                    file_list = file_list.concat(files);
-                })
-            );
+                self.rpc('/web/webclient/jslist', {mods: to_load})
+                    .then(function (files) {
+                        file_list = file_list.concat(files);
+                    })
+            ]);
         }
         return loaded.then(function () {
             return self.load_js(file_list);
-        }).done(function () {
+        }).then(function () {
             self.on_modules_loaded();
             self.trigger('module_loaded');
        });
@@ -234,24 +236,24 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
     },
     load_js: function (files) {
         var self = this;
-        var d = $.Deferred();
-        if (files.length !== 0) {
-            var file = files.shift();
-            var url = self.url(file, null);
-            ajax.loadJS(url).done(d.resolve);
-        } else {
-            d.resolve();
-        }
-        return d;
+        return new Promise(function(resolve, reject) {
+            if (files.length !== 0) {
+                var file = files.shift();
+                var url = self.url(file, null);
+                ajax.loadJS(url).then(resolve);
+            } else {
+                resolve();
+            }
+        });
     },
     load_qweb: function (mods) {
-        this.qweb_mutex.exec(function () {
+        var lock = this.qweb_mutex.exec(function () {
             return $.get('/web/webclient/qweb?mods=' + mods).then(function (doc) {
                 if (!doc) { return; }
                 qweb.add_template(doc);
             });
         });
-        return this.qweb_mutex.def;
+        return lock;
     },
     on_modules_loaded: function () {
         var openerp = window.openerp;
@@ -286,20 +288,23 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
      * (re)loads the content of a session: db name, username, user id, session
      * context and status of the support contract
      *
-     * @returns {$.Deferred} deferred indicating the session is done reloading
+     * @returns {Promise} promise indicating the session is done reloading
      */
     session_reload: function () {
         var result = _.extend({}, window.odoo.session_info);
         delete result.session_id;
         _.extend(this, result);
-        return $.when();
+        return Promise.resolve();
     },
+    /**
+     * @returns {Promise}
+     */
     check_session_id: function () {
         var self = this;
         if (this.avoid_recursion)
-            return $.when();
+            return Promise.resolve();
         if (this.session_id)
-            return $.when(); // we already have the session id
+            return Promise.resolve(); // we already have the session id
         if (!this.use_cors && (this.override_session || ! this.origin_server)) {
             // If we don't use the origin server we consider we should always create a new session.
             // Even if some browsers could support cookies when using jsonp that behavior is
@@ -307,11 +312,13 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
             this.avoid_recursion = true;
             return this.rpc("/gen_session_id", {}).then(function (result) {
                 self.session_id = result;
-            }).always(function () {
+            }).then(function () {
+                self.avoid_recursion = false;
+            }).catch(function() {
                 self.avoid_recursion = false;
             });
         }
-        return $.when();
+        return Promise.resolve();
     },
     /**
      * Executes an RPC call, registering the provided callbacks.
@@ -323,7 +330,7 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
      * @param {String} url RPC endpoint
      * @param {Object} params call parameters
      * @param {Object} options additional options for rpc call
-     * @returns {jQuery.Deferred} jquery-provided ajax deferred
+     * @returns {Promise}
      */
     rpc: function (url, params, options) {
         var self = this;
@@ -333,10 +340,10 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
             options.headers["X-Debug-Mode"] = $.deparam($.param.querystring()).debug;
         }
 
-        var deferred = self.check_session_id();
+        var prom = self.check_session_id();
         var aborted = false;
         var xhrDef;
-        deferred.abort = function () {
+        prom.abort = function () {
             if (xhrDef) {
                 xhrDef.abort();
             } else {
@@ -344,9 +351,12 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
             }
         };
 
-        var promise = deferred.then(function () {
+        var promise = prom.then(function () {
             if (aborted) {
-                var def = $.Deferred().reject({message: "XmlHttpRequestError abort"}, $.Event('abort'));
+                var def = Promise.reject({
+                    message: "XmlHttpRequestError abort",
+                    event: $.Event('abort')
+                });
                 def.abort = function () {};
                 return def;
             }
@@ -377,7 +387,7 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
             return xhrDef;
         });
 
-        promise.abort = deferred.abort;
+        promise.abort = prom.abort;
         return promise;
     },
     url: function (path, params) {

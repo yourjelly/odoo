@@ -79,7 +79,7 @@ var PartnerInviteDialog = Dialog.extend({
 
     /**
      * @private
-     * @returns {$.Promise}
+     * @returns {Promise}
      */
     _addChannel: function () {
         var self = this;
@@ -294,7 +294,7 @@ var Discuss = AbstractAction.extend({
      * @override
      */
     willStart: function () {
-        return $.when(this._super(), this.call('mail_service', 'isReady'));
+        return Promise.all([this._super(), this.call('mail_service', 'isReady')]);
     },
     /**
      * @override
@@ -328,7 +328,7 @@ var Discuss = AbstractAction.extend({
             this._extendedComposer.appendTo(this.$('.o_mail_discuss_content')));
         defs.push(this._super.apply(this, arguments));
 
-        return $.when.apply($, defs)
+        return Promise.all(defs)
             .then(function () {
                 return self._setThread(self._defaultThreadID);
             })
@@ -471,7 +471,7 @@ var Discuss = AbstractAction.extend({
     },
     /**
      * @private
-     * @returns {$.Promise}
+     * @returns {Promise}
      */
     _fetchAndRenderThread: function () {
         var self = this;
@@ -564,7 +564,7 @@ var Discuss = AbstractAction.extend({
      * loaded when scrolling to the top, so they can't be loaded if there is no
      * scrollbar)
      *
-     * @returns {Deferred} resolved when there are enough messages to fill the
+     * @returns {Promise} resolved when there are enough messages to fill the
      *   screen, or when there is no more message to fetch
      */
     _loadEnoughMessages: function () {
@@ -580,7 +580,7 @@ var Discuss = AbstractAction.extend({
      * Load more messages for the current thread
      *
      * @private
-     * @returns {$.Promise}
+     * @returns {Promise}
      */
     _loadMoreMessages: function () {
         var self = this;
@@ -643,7 +643,7 @@ var Discuss = AbstractAction.extend({
             $input.autocomplete({
                 source: function (request, response) {
                     self._lastSearchVal = _.escape(request.term);
-                    self._searchChannel(self._lastSearchVal).done(function (result){
+                    self._searchChannel(self._lastSearchVal).then(function (result){
                         result.push({
                             label:  _.str.sprintf(
                                         '<strong>' + _t("Create %s (Public)") + '</strong>',
@@ -684,7 +684,7 @@ var Discuss = AbstractAction.extend({
             $input.autocomplete({
                 source: function (request, response) {
                     self._lastSearchVal = _.escape(request.term);
-                    self.call('mail_service', 'searchPartner', self._lastSearchVal, 10).done(response);
+                    self.call('mail_service', 'searchPartner', self._lastSearchVal, 10).then(response);
                 },
                 select: function (ev, ui) {
                     var partnerID = ui.item.id;
@@ -814,7 +814,7 @@ var Discuss = AbstractAction.extend({
      * Renders, binds events and appends a thread widget.
      *
      * @private
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _renderThread: function () {
         this._threadWidget = new ThreadWidget(this, {
@@ -872,7 +872,7 @@ var Discuss = AbstractAction.extend({
     /**
      * @private
      * @param {string} searchVal
-     * @returns {$.Promise<Array>}
+     * @returns {Promise<Array>}
      */
     _searchChannel: function (searchVal){
         return this._rpc({
@@ -910,7 +910,7 @@ var Discuss = AbstractAction.extend({
         this._extendedComposer.do_show();
 
         this._threadWidget.scrollToMessage({
-            msgID: messageID,
+            messageID: messageID,
             duration: 200,
             onlyIfNecessary: true
         });
@@ -922,7 +922,7 @@ var Discuss = AbstractAction.extend({
      *
      * @private
      * @param {integer} threadID a thread with such ID
-     * @returns {$.Promise}
+     * @returns {Promise}
      */
     _setThread: function (threadID) {
         var self = this;
@@ -1479,7 +1479,7 @@ var Discuss = AbstractAction.extend({
                     self._threadWidget.scrollToBottom();
                 }
             })
-            .fail(function () {
+            .catch(function () {
                 // todo: display notifications
             });
     },

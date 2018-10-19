@@ -288,7 +288,7 @@ var ProductConfiguratorMixin = {
      * @param {integer} productId the product id
      * @param {integer} productTemplateId the corresponding product template id
      * @param {boolean} useAjax wether the rpc call should be done using ajax.jsonRpc or using _rpc
-     * @returns {$.Deferred} the deferred that will be resolved with a {integer} productId
+     * @returns {Promise} the deferred that will be resolved with a {integer} productId
      */
     selectOrCreateProduct: function ($container, productId, productTemplateId, useAjax) {
         var self = this;

@@ -215,7 +215,7 @@ QUnit.test('do no update form twice after a command barcode scanned', function (
     testUtils.mock.unpatch(FormController);
 });
 
-QUnit.test('widget field_float_scannable', function (assert) {
+QUnit.test('widget field_float_scannable', async function (assert) {
     var done = assert.async();
     assert.expect(11);
 
@@ -227,7 +227,7 @@ QUnit.test('widget field_float_scannable', function (assert) {
         int_field: function () {},
     };
 
-    var form = createView({
+    var form = await createAsyncView({
         View: FormView,
         model: 'product',
         data: this.data,
@@ -250,7 +250,7 @@ QUnit.test('widget field_float_scannable', function (assert) {
     assert.strictEqual(form.$('.o_field_widget[name=int_field]').text(), '4',
         "should display the correct value in readonly");
 
-    testUtils.form.clickEdit(form);
+    await testUtils.form.clickEdit(form);
 
     assert.strictEqual(form.$('.o_field_widget[name=int_field]').val(), '4',
         "should display the correct value in edit");
@@ -333,7 +333,7 @@ QUnit.test('widget barcode_handler', function (assert) {
     barcodeEvents.BarcodeEvents.max_time_between_keys_in_ms = delay;
 });
 
-QUnit.test('specification of widget barcode_handler', function (assert) {
+QUnit.test('specification of widget barcode_handler', async function (assert) {
     assert.expect(5);
 
     var delay = barcodeEvents.BarcodeEvents.max_time_between_keys_in_ms;
@@ -356,7 +356,7 @@ QUnit.test('specification of widget barcode_handler', function (assert) {
     });
     fieldRegistry.add('test_barcode_handler', TestBarcodeHandler);
 
-    var form = createView({
+    var form = await createAsyncView({
         View: FormView,
         model: 'order',
         data: this.data,
@@ -403,7 +403,7 @@ QUnit.test('specification of widget barcode_handler', function (assert) {
     assert.strictEqual(form.$('.o_data_row:nth(1) .o_data_cell:nth(1)').text(), '1',
         "quantity of line one should have been incremented");
 
-    testUtils.form.clickSave(form);
+    await testUtils.form.clickSave(form);
 
     form.destroy();
     barcodeEvents.BarcodeEvents.max_time_between_keys_in_ms = delay;

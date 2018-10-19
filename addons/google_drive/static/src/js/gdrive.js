@@ -35,7 +35,7 @@ Sidebar.include({
     _addGoogleDocItems: function (model, resID) {
         var self = this;
         if (!resID) {
-            return $.when();
+            return Promise.resolve();
         }
         var gdoc_item = _.indexOf(_.pluck(self.items.other, 'classname'), 'oe_share_gdoc');
         if (gdoc_item !== -1) {

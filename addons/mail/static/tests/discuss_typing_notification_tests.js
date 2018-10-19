@@ -221,7 +221,7 @@ QUnit.test('notify is typing', function (assert) {
     });
 });
 
-QUnit.test('receive is typing notification', function (assert) {
+QUnit.test('receive is typing notification', async function (assert) {
     assert.expect(10);
 
     var self = this;
@@ -235,7 +235,7 @@ QUnit.test('receive is typing notification', function (assert) {
             // when receiving an 'is typing' notification, fetch the list of
             // members of this channel if we haven't done yet.
             if (args.method === 'channel_fetch_listeners') {
-                return $.when([
+                return Promise.resolve([
                     { id: self.myPartnerID, name: self.myName },
                     { id: 42, name: "Someone" },
                 ]);
@@ -297,9 +297,14 @@ QUnit.test('receive is typing notification', function (assert) {
 
         discuss.destroy();
     });
+    await testUtils.nextMicrotaskTick();
+    assert.isNotVisible(discuss.$('.o_thread_typing_notification_bar'),
+        "the typing notification bar should be hidden when someone stops typing something");
+
+    discuss.destroy();
 });
 
-QUnit.test('receive message of someone that was typing something', function (assert) {
+QUnit.test('receive message of someone that was typing something', async function (assert) {
     assert.expect(6);
 
     var self = this;
@@ -313,7 +318,7 @@ QUnit.test('receive message of someone that was typing something', function (ass
             // when receiving an 'is typing' notification, fetch the list of
             // members of this channel if we haven't done yet.
             if (args.method === 'channel_fetch_listeners') {
-                return $.when([
+                return Promise.resolve([
                     { id: self.myPartnerID, name: self.myName },
                     { id: 42, name: "Someone" },
                 ]);
@@ -370,6 +375,41 @@ QUnit.test('receive message of someone that was typing something', function (ass
 
         discuss.destroy();
     });
+    // click on general channel
+    var $general = discuss.$('.o_mail_discuss_sidebar .o_mail_discuss_item[data-thread-id=1]');
+    await testUtils.dom.click($general);
+
+    assert.isNotVisible(discuss.$('.o_thread_typing_notification_bar'),
+            "the typing notification bar should be hidden by default");
+
+    self.simulateIsTyping({
+        channelID: self.generalChannelID,
+        isTyping: true,
+        partnerID: 42,
+        widget: discuss,
+    });
+
+    await fetchListenersDef;
+    assert.isVisible(discuss.$('.o_thread_typing_notification_bar'),
+        "the typing notification bar should be visible when someone is typing something");
+    assert.strictEqual(discuss.$('.o_thread_typing_notification_bar').text(),
+        "Someone is typing...",
+        "It should display that the other user is typing something");
+
+    // Simulate receive message from the person typing something
+    var messageData = {
+        author_id: [42, 'Someone'],
+        body: "<p>test</p>",
+        channel_ids: [self.generalChannelID],
+        id: 101,
+        model: 'mail.channel',
+        res_id: self.generalChannelID,
+    };
+    var notification = [[false, 'mail.channel', self.generalChannelID], messageData];
+    discuss.call('bus_service', 'trigger', 'notification', [notification]);
+    await testUtils.nextTick();
+    assert.isNotVisible(discuss.$('.o_thread_typing_notification_bar'),
+        "the typing notification bar should be hidden when receiving message from someone that was typing some text");
 });
 
 QUnit.test('do not display myself as typing', function (assert) {
@@ -386,7 +426,7 @@ QUnit.test('do not display myself as typing', function (assert) {
             // when receiving an 'is typing' notification, fetch the list of
             // members of this channel if we haven't done yet.
             if (args.method === 'channel_fetch_listeners') {
-                return $.when([
+                return Promise.resolve([
                     { id: self.myPartnerID, name: self.myName },
                 ]);
             }
@@ -397,7 +437,7 @@ QUnit.test('do not display myself as typing', function (assert) {
         // click on general channel
         var $general = discuss.$('.o_mail_discuss_sidebar')
                         .find('.o_mail_discuss_item[data-thread-id=1]');
-        testUtils.dom.click($general);
+        await testUtils.dom.click($general);
         // pick 1st composer (basic), not 2nd composer (extended, hidden)
         var $composer = discuss.$('.o_thread_composer').first();
 
@@ -438,7 +478,7 @@ QUnit.test('several users typing something at the same time', function (assert) 
             // when receiving an 'is typing' notification, fetch the list of
             // members of this channel if we haven't done yet.
             if (args.method === 'channel_fetch_listeners') {
-                return $.when([
+                return Promise.resolve([
                     { id: self.myPartnerID, name: self.myName },
                     { id: 42, name: "Someone" },
                     { id: 43, name: "Anonymous" },
@@ -448,13 +488,13 @@ QUnit.test('several users typing something at the same time', function (assert) 
             return this._super.apply(this, arguments);
         },
         session: { partner_id: this.myPartnerID },
-    }).then(function (discuss) {
+    }).then(async function (discuss) {
         // click on general channel
         var $general = discuss.$('.o_mail_discuss_sidebar')
                         .find('.o_mail_discuss_item[data-thread-id=1]');
 
         // click on general
-        testUtils.dom.click($general);
+        await testUtils.dom.click($general);
 
         // pick 1st composer (basic), not 2nd composer (extended, hidden)
         var $composer = discuss.$('.o_thread_composer').first();
@@ -549,7 +589,7 @@ QUnit.test('long typing partner A and in-between short typing partner B', functi
             // when receiving an 'is typing' notification, fetch the list of
             // members of this channel if we haven't done yet.
             if (args.method === 'channel_fetch_listeners') {
-                return $.when([
+                return Promise.resolve([
                     { id: self.myPartnerID, name: self.myName },
                     { id: 42, name: "A" },
                     { id: 43, name: "B" },
@@ -558,10 +598,10 @@ QUnit.test('long typing partner A and in-between short typing partner B', functi
             return this._super.apply(this, arguments);
         },
         session: { partner_id: this.myPartnerID },
-    }).then(function (discuss) {
+    }).then(async function (discuss) {
         // click on general channel
         var $general = discuss.$('.o_mail_discuss_sidebar .o_mail_discuss_item[data-thread-id=1]');
-        testUtils.dom.click($general);
+        await testUtils.dom.click($general);
         // pick 1st composer (basic), not 2nd composer (extended, hidden)
         var $composer = discuss.$('.o_thread_composer').first();
 

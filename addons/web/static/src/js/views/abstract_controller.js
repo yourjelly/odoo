@@ -62,7 +62,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
     /**
      * Simply renders and updates the url.
      *
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     start: function () {
         var self = this;
@@ -116,7 +116,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      */
     canBeRemoved: function () {
         // AAB: get rid of this option when on_hashchange mechanism is improved
-        return this.discardChanges(undefined, {readonlyIfRealDiscard: true});
+        return this.discardChanges(undefined, { readonlyIfRealDiscard: true });
     },
     /**
      * Discards the changes made on the record associated to the given ID, or
@@ -125,15 +125,15 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      * this method on the active view to make sure it is ok to open the home
      * screen (and lose all current state).
      *
-     * Note that it returns a deferred, because the view could choose to ask the
+     * Note that it returns a Promise, because the view could choose to ask the
      * user if he agrees to discard.
      *
      * @param {string} [recordID]
      *        if not given, we consider all the changes made by the controller
-     * @returns {Deferred} resolved if properly discarded, rejected otherwise
+     * @returns {Promise} resolved if properly discarded, rejected otherwise
      */
     discardChanges: function (recordID) {
-        return $.when();
+        return Promise.resolve();
     },
     /**
      * Export the state of the controller containing information that is shared
@@ -152,7 +152,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
     /**
      * Gives the focus to the renderer
      */
-    giveFocus: function() {
+    giveFocus: function () {
         this.renderer.giveFocus();
     },
     /**
@@ -171,7 +171,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      * Short helper method to reload the view
      *
      * @param {Object} [params] This object will simply be given to the update
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     reload: function (params) {
         params = params || {};
@@ -192,16 +192,20 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      * your view does not want a pager, just let this method empty.
      *
      * @param {jQuery Node} $node
+     * @return {Promise}
      */
     renderPager: function ($node) {
+        return Promise.resolve();
     },
     /**
      * Same as renderPager, but for the 'sidebar' zone (the zone with the menu
      * dropdown in the control panel next to the buttons)
      *
      * @param {jQuery Node} $node
+     * @return {Promise}
      */
     renderSidebar: function ($node) {
+        return Promise.resolve();
     },
     /**
      * This is the main entry point for the controller.  Changes from the search
@@ -216,12 +220,12 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      * @param {Object} [options]
      * @param {boolean} [options.reload=true] if true, the model will reload data
      *
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     update: function (params, options) {
         var self = this;
         var shouldReload = (options && 'reload' in options) ? options.reload : true;
-        var def = shouldReload ? this.model.reload(this.handle, params) : $.when();
+        var def = shouldReload ? this.model.reload(this.handle, params) : Promise.resolve();
         // we check here that the updateIndex of the control panel hasn't changed
         // between the start of the update request and the moment the controller
         // asks the control panel to update itself ; indeed, it could happen that
@@ -282,17 +286,17 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      *     return {'html': '<h1>hello, world</h1>'}
      *
      * @private
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _renderBanner: function () {
         if (this.bannerRoute !== undefined) {
             var self = this;
             return this.dp
-                .add(this._rpc({route: this.bannerRoute}))
+                .add(this._rpc({ route: this.bannerRoute }))
                 .then(function (response) {
                     if (!response.html) {
                         self.$el.removeClass('o_has_banner');
-                        return $.when();
+                        return Promise.resolve();
                     }
                     self.$el.addClass('o_has_banner');
                     var $banner = $(response.html);
@@ -310,13 +314,14 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
                         defs.push(ajax.loadJS(js.src));
                         js.remove();
                     });
-                    return $.when.apply($, defs).then(function () {
+                    return Promise.all(defs).then(function () {
                         $banner.prependTo(self.$('> .o_content'));
                         self._$banner = $banner;
+                        return prom;
                     });
                 });
         }
-        return $.when();
+        return Promise.resolve();
     },
     /**
      * Renders the control elements (buttons, pager and sidebar) of the current
@@ -351,7 +356,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      */
     _renderSwitchButtons: function () {
         var self = this;
-        var views = _.filter(this.actionViews, {multiRecord: this.isMultiRecord});
+        var views = _.filter(this.actionViews, { multiRecord: this.isMultiRecord });
 
         if (views.length <= 1) {
             return $();
@@ -370,7 +375,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
         var $switchButtonsFiltered = config.device.isMobile ? $switchButtons.find('button') : $switchButtons.filter('button');
         $switchButtonsFiltered.click(_.debounce(function (event) {
             var viewType = $(event.target).data('view-type');
-            self.trigger_up('switch_view', {view_type: viewType});
+            self.trigger_up('switch_view', { view_type: viewType });
         }, 200, true));
 
         // set active view's icon as view switcher button's icon in mobile
@@ -399,7 +404,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      *
      * @private
      * @param {Object} state the state given by the model
-     * @returns {Deferred}
+     * @returns {Promise}
      */
     _update: function () {
         // AAB: update the control panel -> this will be moved elsewhere at some point
@@ -501,7 +506,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      */
     _onOpenRecord: function (ev) {
         ev.stopPropagation();
-        var record = this.model.get(ev.data.id, {raw: true});
+        var record = this.model.get(ev.data.id, { raw: true });
         this.trigger_up('switch_view', {
             view_type: 'form',
             res_id: record.res_id,

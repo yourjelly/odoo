@@ -2,7 +2,7 @@ odoo.define("base.abstract_controller_tests", function(require) {
     "use strict";
 
     var testUtils = require("web.test_utils");
-    var createView = testUtils.createView;
+    var createView = testUtils.createAsyncView;
     var BasicView = require("web.BasicView");
     var BasicRenderer = require("web.BasicRenderer");
 
@@ -42,7 +42,7 @@ odoo.define("base.abstract_controller_tests", function(require) {
 
             QUnit.test(
                 'click on a a[type="action"] child triggers the correct action',
-                function(assert) {
+                async function(assert) {
                     assert.expect(3);
 
                     var html =
@@ -53,7 +53,7 @@ odoo.define("base.abstract_controller_tests", function(require) {
                             "</a>" +
                         "</div>";
 
-                    var view = createView({
+                    var view = await createView({
                         View: getHtmlView(html, "test"),
                         data: this.data,
                         model: "test_model",
@@ -64,8 +64,8 @@ odoo.define("base.abstract_controller_tests", function(require) {
                             }
                         }
                     });
-                    testUtils.dom.click(view.$(".simple"));
-                    testUtils.dom.click(view.$(".with-child span"));
+                    await testUtils.dom.click(view.$(".simple"));
+                    await testUtils.dom.click(view.$(".with-child span"));
                     assert.verifySteps(["a1", "a2"]);
                 }
             );

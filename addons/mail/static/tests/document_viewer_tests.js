@@ -20,16 +20,16 @@ var createViewer = function (params) {
 
     var mockRPC = function (route) {
         if (route === '/web/static/lib/pdfjs/web/viewer.html?file=/web/content/1?model%3Dir.attachment') {
-            return $.when();
+            return Promise.resolve();
         }
         if (route === 'https://www.youtube.com/embed/FYqW0Gdwbzk') {
-            return $.when();
+            return Promise.resolve();
         }
         if (route === '/web/content/4?model%3Dir.attachment') {
-            return $.when();
+            return Promise.resolve();
         }
         if (route === '/web/image/6?unique=1&signature=999&model=ir.attachment') {
-            return $.when();
+            return Promise.resolve();
         }
     };
     testUtils.mock.addMockEnvironment(parent, {

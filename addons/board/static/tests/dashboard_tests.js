@@ -255,7 +255,7 @@ QUnit.test('can render an action without view_mode attribute', function (assert)
         },
         mockRPC: function (route, args) {
             if (route === '/board/static/src/img/layout_1-1-1.png') {
-                return $.when();
+                return Promise.resolve();
             }
             if (route === '/web/action/load') {
                 return $.when({
@@ -527,7 +527,7 @@ QUnit.test('non-existing action in a dashboard', function (assert) {
         },
         mockRPC: function (route) {
             if (route === '/board/static/src/img/layout_1-1-1.png') {
-                return $.when();
+                return Promise.resolve();
             }
             if (route === '/web/action/load') {
                 // server answer if the action doesn't exist anymore
@@ -578,7 +578,7 @@ QUnit.test('clicking on a kanban\'s button should trigger the action', function 
 
         mockRPC: function (route) {
             if (route === '/board/static/src/img/layout_1-1-1.png') {
-                return $.when();
+                return Promise.resolve();
             }
             if (route === '/web/action/load') {
                 return $.when({res_model: 'partner', view_mode: 'kanban', views: [[false, 'kanban']]});

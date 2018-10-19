@@ -244,7 +244,7 @@ var BoardRenderer = FormRenderer.extend({
             .then(function (action) {
                 if (!action) {
                     // the action does not exist anymore
-                    return $.when();
+                    return Promise.resolve();
                 }
                 var evalContext = new Context(params.context).eval();
                 if (evalContext.group_by && evalContext.group_by.length === 0) {

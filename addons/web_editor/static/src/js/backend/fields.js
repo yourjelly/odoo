@@ -82,7 +82,7 @@ var FieldTextHtmlSimple = basic_fields.DebouncedField.extend(TranslatableFieldMi
                 this._renderReadonly();
             }
         }
-        return $.when();
+        return Promise.resolve();
     },
 
     //--------------------------------------------------------------------------

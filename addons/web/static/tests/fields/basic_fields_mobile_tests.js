@@ -79,7 +79,7 @@ QUnit.module('basic_fields', {
             "should have proper tel prefix");
 
         // switch to edit mode and check the result
-        testUtils.form.clickEdit(form);
+        await testUtils.form.clickEdit(form);
         assert.containsOnce(form, 'input[type="text"].o_field_widget',
             "should have an int for the phone field");
         assert.strictEqual(form.$('input[type="text"].o_field_widget').val(), 'yop',
@@ -89,7 +89,7 @@ QUnit.module('basic_fields', {
         testUtils.fields.editInput(form.$('input[type="text"].o_field_widget'), 'new');
 
         // save
-        testUtils.form.clickSave(form);
+        await testUtils.form.clickSave(form);
         $phoneLink = form.$('a.o_form_uri.o_field_widget');
         assert.strictEqual($phoneLink.text(), 'new',
             "new value should be displayed properly");
@@ -167,7 +167,7 @@ QUnit.module('basic_fields', {
         testUtils.fields.editInput(form.$('input.o_field_widget[name="foo"]'), val);
 
         // save
-        testUtils.form.clickSave(form);
+        await testUtils.form.clickSave(form);
         assert.strictEqual(form.$('.o_field_widget').text(), val,
             "value should have been correctly escaped");
 
