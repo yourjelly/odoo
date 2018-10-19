@@ -546,6 +546,16 @@ class IrModelFields(models.Model):
         return result and result[0]
 
     @api.multi
+    def _set_selection_col_null(self, module):
+        for rec in self:
+            model = self.env[rec.model]
+            field = model._fields[rec.name]
+            if field.type == 'selection' and field.module_selection.get(module):
+                keys = [k for k, v in field.module_selection[module]]
+                self._cr.execute("""UPDATE %s SET %s = Null WHERE %s IN %s""" %
+                    (model._table, field.name, field.name, tuple(keys)))
+
+    @api.multi
     def _drop_column(self):
         tables_to_drop = set()
 
@@ -1534,13 +1544,20 @@ class IrModelData(models.Model):
         for data in datas.sorted(key='id', reverse=True):
             model = data.model
             res_id = data.res_id
-            to_unlink.add((model, res_id))
+            module = data.module
+            to_unlink.add((model, res_id, module))
 
         def unlink_if_refcount(to_unlink):
             undeletable = self.browse()
-            for model, res_id in to_unlink:
+            for model, res_id, module in to_unlink:
                 external_ids = self.search([('model', '=', model), ('res_id', '=', res_id)])
-                if external_ids - datas:
+                has_reference = external_ids - datas
+                if has_reference and model == 'ir.model.fields':
+                    field = self.env[model].browse(res_id).with_context(
+                        prefetch_fields=False,
+                    )
+                    field._set_selection_col_null(module)
+                if has_reference:
                     # if other modules have defined this record, we must not delete it
                     continue
                 if model == 'ir.model.fields':
