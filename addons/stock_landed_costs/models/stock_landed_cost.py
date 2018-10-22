@@ -103,10 +103,7 @@ class LandedCost(models.Model):
             }
             for line in cost.valuation_adjustment_lines.filtered(lambda line: line.move_id):
 
-                # Prorate the value at what's still in stock for FIFO
-                cost_to_add = line.additional_landed_cost
-                if (line.product_id.cost_method == 'fifo'):
-                    cost_to_add = (line.move_id.remaining_qty / line.move_id.product_qty) * line.additional_landed_cost
+                cost_to_add = (line.move_id.remaining_qty / line.move_id.product_qty) * line.additional_landed_cost
 
                 new_landed_cost_value = line.move_id.landed_cost_value + line.additional_landed_cost
                 line.move_id.write({
@@ -118,13 +115,13 @@ class LandedCost(models.Model):
                 # `remaining_qty` is negative if the move is out and delivered proudcts that were not
                 # in stock.
                 qty_out = 0
-                if line.move_id._is_in() and (line.product_id.cost_method == 'fifo'):
+                if line.move_id._is_in():
                     qty_out = line.move_id.product_qty - line.move_id.remaining_qty
                 elif line.move_id._is_out():
                     qty_out = line.move_id.product_qty
                 move_vals['line_ids'] += line._create_accounting_entries(move, qty_out)
                 if (line.product_id.cost_method == 'average') and (line.product_id.qty_available>0.01):
-                    line.product_id.standard_price += line.additional_landed_cost / line.product_id.qty_available
+                    line.product_id.standard_price += cost_to_add / line.product_id.qty_available
 
             move = move.create(move_vals)
             cost.write({'state': 'done', 'account_move_id': move.id})
