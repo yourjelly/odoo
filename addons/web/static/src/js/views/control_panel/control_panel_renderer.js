@@ -106,6 +106,7 @@ var ControlPanelRenderer = AbstractRenderer.extend({
                 new_cp_content = _.omit(new_cp_content, '$searchview');
             }
             if (options.clear) {
+                toDetach = _.omit(toDetach, '$searchview_buttons');
                 this._detachContent(toDetach);
                 // Show the searchview buttons area, which might have been hidden by
                 // the searchview, as client actions may insert elements into it
@@ -237,17 +238,17 @@ var ControlPanelRenderer = AbstractRenderer.extend({
      *   (only relevant if searchview is visible)
      */
     _updateSearchView: function (searchview, isHidden, groupable, enableTimeRangeMenu) {
-        if (searchview) {
-            searchview.toggle_visibility(!isHidden);
-            if (groupable !== undefined){
-                searchview.groupby_menu.do_toggle(groupable);
-            }
-            if (enableTimeRangeMenu !== undefined){
-                searchview.displayTimeRangeMenu(enableTimeRangeMenu);
-            }
-        }
-        this.nodes.$searchview.toggle(!isHidden);
-        this.$el.toggleClass('o_breadcrumb_full', !!isHidden);
+        // if (searchview) {
+        //     searchview.toggle_visibility(!isHidden);
+        //     if (groupable !== undefined){
+        //         searchview.groupby_menu.do_toggle(groupable);
+        //     }
+        //     if (enableTimeRangeMenu !== undefined){
+        //         searchview.displayTimeRangeMenu(enableTimeRangeMenu);
+        //     }
+        // }
+        // this.nodes.$searchview.toggle(!isHidden);
+        // this.$el.toggleClass('o_breadcrumb_full', !!isHidden);
     },
     /**
      * Removes active class on all switch-buttons and adds it to the one of the
