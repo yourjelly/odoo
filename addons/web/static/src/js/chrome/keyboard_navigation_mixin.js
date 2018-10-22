@@ -96,6 +96,18 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
             });
         },
 
+        _removeAccessKeys: function() {
+            var $modal = $(document).find('.modal-dialog');
+            var modalButtons = $($modal[$modal.length - 1]).find('[accesskey]').filter(':visible');
+            var accesslist = _.filter(this.$el.find('button.btn:visible'), function(el) {
+                return !_.contains(modalButtons, el);
+            });
+            _.each(accesslist, function (el) {
+                    el.removeAttribute("accesskey");
+                    el.removeAttribute("aria-keyshortcuts");
+                });
+        },
+
         //--------------------------------------------------------------------------
         // Handlers
         //--------------------------------------------------------------------------
@@ -129,7 +141,8 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
 
                 var usedAccessKey = this._getAllUsedAccessKeys();
 
-                var buttonsWithoutAccessKey = this.$el.find('button.btn:visible')
+                var buttonsWithoutAccessKey = this.$el.find('button.btn:visible');
+                this._removeAccessKeys()
                     .not('[accesskey]')
                     .not('[disabled]')
                     .not('[tabindex="-1"]');
