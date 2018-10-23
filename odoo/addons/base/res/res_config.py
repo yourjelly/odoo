@@ -389,20 +389,40 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
             view_id=view_id, view_type=view_type,
             toolbar=toolbar, submenu=submenu)
 
-        can_install_modules = self.env['ir.module.module'].check_access_rights(
-                                    'write', raise_exception=False)
-
+        IrModule = self.env['ir.module.module']
+        can_install_modules = IrModule.check_access_rights('write', raise_exception=False)
         doc = etree.XML(ret_val['arch'])
 
         for field in ret_val['fields']:
             if not field.startswith("module_"):
                 continue
             for node in doc.xpath("//field[@name='%s']" % field):
+                module = IrModule.sudo().search([("name", "=", field[7:])], limit=1)
+                is_module_installed = module.state  == "installed"
+                is_readonly = not can_install_modules or is_module_installed
+                
+                # field is readonly if module is installed or user has no access rights
+                modifiers = json.loads(node.get("modifiers"))
+                modifiers["readonly"] = is_readonly
+                node.set("modifiers", json.dumps(modifiers))
+                
+                # tooltip message depending on the user access and state 
+                # (installed or uninstalled) of the module
                 if not can_install_modules:
-                    node.set("readonly", "1")
-                    modifiers = json.loads(node.get("modifiers"))
-                    modifiers['readonly'] = True
-                    node.set("modifiers", json.dumps(modifiers))
+                    checkbox_tooltip_msg = "Please contact your administrator to change this option because this is associated to the following module: \n{display_name} ({name}).".format(display_name=module.display_name, name=module.name)
+                else:
+                    if is_module_installed:
+                        checkbox_tooltip_msg = "To deactivate this option, you need to manually uninstall the following module: \n{display_name} ({name}).".format(display_name=module.display_name, name=module.name)
+                    else:
+                        checkbox_tooltip_msg = "Activating this option will install the following module: \n{display_name} ({name}).".format(display_name=module.display_name, name=module.name)
+
+                # set/modify the title in the parent node because it is where 
+                # the tooltip msg is based
+                parent = node.getparent()
+                current_title = parent.get("title")
+                new_title = current_title + "\n\n" + checkbox_tooltip_msg if current_title else checkbox_tooltip_msg
+                parent.set("title", new_title)
+
                 if 'on_change' not in node.attrib:
                     node.set("on_change",
                     "onchange_module(%s, '%s')" % (field, field))
