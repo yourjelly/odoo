@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="sale_crm_survey_page" inherit_id="survey.page">
+            <xpath expr="//button[@value='finish']" position="replace">
+            	<input type="hidden" name="template_id" t-att-value="template_id"/>
+                <t t-if="last and template_id">
+              		<button t-if="last and not request.env.user.has_group('base.group_public')" type="submit" class="btn btn-primary" name="button_submit" value="quotation">view Quotation</button>
+              	</t>
+
+              	<t t-if="last and not template_id">
+              		<button type="submit" class="btn btn-primary" name="button_submit" value="finish">Submit Survey</button>
+              	</t>
+              
+                <t t-if="last and request.env.user.has_group('base.group_public') and template_id">
+                    <button type="submit" class="btn btn-primary" name="button_submit" value="finish">Next Page</button>
+                </t>
+            </xpath>
+        </template>
+
+	    <template id="sfinished" name="Survey Finished">
+           <t t-call="survey.layout">
+                <div id="wrap">
+                	<form t-att-action="'/survey/finish/%s/%s' % (slug(survey), token)" method="post">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="token" t-att-value="token" />
+                        <t t-esc="template_id"></t>
+                        <input type="hidden" name="template_id" t-att-value="template_id"/>
+                        <t t-set="title">User Information</t>
+                	    <div class="oe_structure"> 
+                	    	<div class="container">
+                	    		<div class="form-group field-name">
+                	    			<b><label class="control-label">Name</label></b>
+    					            <input type="text" name="name" id="name" class="form-control"/><br/>
+    					            <b><label class="control-label">Email</label></b>
+    					            <input type="text" name="email" id="email" class="form-control"/><br/>
+    					            <button type="submit" class="btn btn-primary" name="button_submit" value="finish">Finish</button>
+                	    		</div>
+                	    	</div>
+                	    </div>
+                	</form>
+                </div>
+            </t>
+	    </template>
+    </data>
+</odoo>

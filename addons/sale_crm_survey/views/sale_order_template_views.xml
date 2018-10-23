@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="sale_crm_survey_order_template_view_form" model="ir.ui.view">
+        		<field name="name">sale.order.template.form</field>
+                <field name="model">sale.order.template</field>
+                <field name="inherit_id" ref="sale_management.sale_order_template_view_form"/>
+                <field name="type">form</field>
+                <field name="arch" type="xml">
+                    <notebook name="main_book" position="inside">
+                        <page string="SELF MODE">
+                            <group>
+
+                            </group>
+                        </page>
+                    </notebook>
+        		</field>
+        </record>
+    </data>
+</odoo>

@@ -119,7 +119,6 @@ class Lead2OpportunityPartner(models.TransientModel):
         values = {
             'team_id': self.team_id.id,
         }
-
         if self.partner_id:
             values['partner_id'] = self.partner_id.id
 

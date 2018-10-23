@@ -89,7 +89,7 @@ class Survey(http.Controller):
 
         # Select the right page
         if user_input.state == 'new':  # Intro page
-            data = {'survey': survey, 'page': None, 'token': user_input.token}
+            data = {'survey': survey, 'page': None, 'token': user_input.token, 'user_input': user_input}
             return request.render('survey.survey_init', data)
         else:
             return request.redirect('/survey/fill/%s/%s' % (survey.id, user_input.token))
