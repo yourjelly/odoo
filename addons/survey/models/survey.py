@@ -46,6 +46,7 @@ class Survey(models.Model):
         Each survey can have one or more attached pages, and each page can display
         one or more questions.
     """
+    
 
     _name = 'survey.survey'
     _description = 'Survey'
