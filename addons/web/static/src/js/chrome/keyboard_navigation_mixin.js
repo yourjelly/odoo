@@ -131,39 +131,63 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
                 if (keyDownEvent.cancelBubble) keyDownEvent.cancelBubble = true;
                 return false;
             }
-            if (!this._areAccessKeyVisible &&
-                (keyDownEvent.altKey || keyDownEvent.key === 'Alt') &&
-                !keyDownEvent.ctrlKey) {
-
-                this._areAccessKeyVisible = true;
-
-                this._setAccessKeyOnTopNavigation();
-
+            var $modal = $(document).find('.modal-dialog');
+            if ($modal.length) {
                 var usedAccessKey = this._getAllUsedAccessKeys();
-
-                var buttonsWithoutAccessKey = this.$el.find('button.btn:visible');
-                this._removeAccessKeys()
-                    .not('[accesskey]')
-                    .not('[disabled]')
-                    .not('[tabindex="-1"]');
-                _.each(buttonsWithoutAccessKey, function (elem) {
-                    var buttonString = [elem.innerText, elem.title, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"].join('');
-                    for (var letterIndex = 0; letterIndex < buttonString.length; letterIndex++) {
-                        var candidateAccessKey = buttonString[letterIndex].toUpperCase();
-                        if (candidateAccessKey >= 'A' && candidateAccessKey <= 'Z' &&
-                            !_.includes(usedAccessKey, candidateAccessKey)) {
-                            elem.accessKey = candidateAccessKey;
-                            usedAccessKey.push(candidateAccessKey);
-                            break;
+                var accesskeyElements = $($modal[$modal.length - 1]).find('button.btn:visible')
+                this._areAccessKeyVisible = true;
+                _.each(accesskeyElements, function (elem) {
+                        var buttonString = [elem.innerText, elem.title, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"].join('');
+                        for (var letterIndex = 0; letterIndex < buttonString.length; letterIndex++) {
+                            var candidateAccessKey = buttonString[letterIndex].toUpperCase();
+                            if (candidateAccessKey >= 'A' && candidateAccessKey <= 'Z' &&
+                                !_.includes(usedAccessKey, candidateAccessKey)) {
+                                elem.accessKey = candidateAccessKey;
+                                usedAccessKey.push(candidateAccessKey);
+                                break;
+                            }
                         }
-                    }
-                });
-
+                    });
                 var elementsWithoutAriaKeyshortcut = this.$el.find('[accesskey]').not('[aria-keyshortcuts]');
                 _.each(elementsWithoutAriaKeyshortcut, function (elem) {
                     elem.setAttribute('aria-keyshortcuts', 'Alt+Shift+' + elem.accessKey);
                 });
                 this._addAccessKeyOverlays();
+            }
+            else {
+                if (!this._areAccessKeyVisible &&
+                    (keyDownEvent.altKey || keyDownEvent.key === 'Alt') &&
+                    !keyDownEvent.ctrlKey) {
+
+                    this._areAccessKeyVisible = true;
+
+                    this._setAccessKeyOnTopNavigation();
+
+                    var usedAccessKey = this._getAllUsedAccessKeys();
+
+                    var buttonsWithoutAccessKey = this.$el.find('button.btn:visible')
+                        .not('[accesskey]')
+                        .not('[disabled]')
+                        .not('[tabindex="-1"]');
+                    _.each(buttonsWithoutAccessKey, function (elem) {
+                        var buttonString = [elem.innerText, elem.title, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"].join('');
+                        for (var letterIndex = 0; letterIndex < buttonString.length; letterIndex++) {
+                            var candidateAccessKey = buttonString[letterIndex].toUpperCase();
+                            if (candidateAccessKey >= 'A' && candidateAccessKey <= 'Z' &&
+                                !_.includes(usedAccessKey, candidateAccessKey)) {
+                                elem.accessKey = candidateAccessKey;
+                                usedAccessKey.push(candidateAccessKey);
+                                break;
+                            }
+                        }
+                    });
+
+                    var elementsWithoutAriaKeyshortcut = this.$el.find('[accesskey]').not('[aria-keyshortcuts]');
+                    _.each(elementsWithoutAriaKeyshortcut, function (elem) {
+                        elem.setAttribute('aria-keyshortcuts', 'Alt+Shift+' + elem.accessKey);
+                    });
+                    this._addAccessKeyOverlays();
+                }
             }
             // on mac, there are a number of keys that are only accessible though the usage of
             // the ALT key (like the @ sign in most keyboards)
