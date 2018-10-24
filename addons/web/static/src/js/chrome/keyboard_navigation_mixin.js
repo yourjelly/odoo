@@ -96,15 +96,20 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
             });
         },
 
-        _removeAccessKeys: function() {
-            var $modal = $(document).find('.modal-dialog');
-            var modalButtons = $($modal[$modal.length - 1]).find('[accesskey]').filter(':visible');
+        _toggleDisabled: function() {
+            _.each(this.$el.find('[accesskey]'), function(el) {
+                        el.setAttribute("disabled", "1");
+        },
+
+        _resetDisabled: function() {
+            // var $modal = $(document).find('.modal-dialog');
+            // var modalButtons = $($modal[$modal.length - 1]).find('[accesskey]').filter(':visible');
+            // remove disabled attribute on keyUp which was added for disabling keyboard navigation
             var accesslist = _.filter(this.$el.find('button.btn:visible'), function(el) {
                 return !_.contains(modalButtons, el);
             });
             _.each(accesslist, function (el) {
-                    el.removeAttribute("accesskey");
-                    el.removeAttribute("aria-keyshortcuts");
+                    el.removeAttribute("disabled","1");
                 });
         },
 
@@ -133,26 +138,21 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
             }
             var $modal = $(document).find('.modal-dialog');
             if ($modal.length) {
-                var usedAccessKey = this._getAllUsedAccessKeys();
-                var accesskeyElements = $($modal[$modal.length - 1]).find('button.btn:visible')
                 this._areAccessKeyVisible = true;
-                _.each(accesskeyElements, function (elem) {
-                        var buttonString = [elem.innerText, elem.title, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"].join('');
-                        for (var letterIndex = 0; letterIndex < buttonString.length; letterIndex++) {
-                            var candidateAccessKey = buttonString[letterIndex].toUpperCase();
-                            if (candidateAccessKey >= 'A' && candidateAccessKey <= 'Z' &&
-                                !_.includes(usedAccessKey, candidateAccessKey)) {
-                                elem.accessKey = candidateAccessKey;
-                                usedAccessKey.push(candidateAccessKey);
-                                break;
-                            }
-                        }
-                    });
-                var elementsWithoutAriaKeyshortcut = this.$el.find('[accesskey]').not('[aria-keyshortcuts]');
-                _.each(elementsWithoutAriaKeyshortcut, function (elem) {
-                    elem.setAttribute('aria-keyshortcuts', 'Alt+Shift+' + elem.accessKey);
-                });
-                this._addAccessKeyOverlays();
+
+                var usedAccessKey = this._getAllUsedAccessKeys();
+
+                var accesskeyElements = $($modal[$modal.length - 1]).find('button.btn:visible')
+
+                var buttonsWithoutAccessKey = this.$el.find('button.btn:visible')
+                        .not('[accesskey]')
+                        .not('[disabled]')
+                        .not('[tabindex="-1"]');
+
+                var modalButtons = ($($modal[$modal.length - 1]).find('button.btn:visible'))
+
+                // after filtering call _setDisable method to add attribute
+
             }
             else {
                 if (!this._areAccessKeyVisible &&
