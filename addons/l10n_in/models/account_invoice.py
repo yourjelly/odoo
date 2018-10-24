@@ -35,7 +35,6 @@ class AccountInvoice(models.Model):
         default=lambda self: self.env['res.company']._company_default_get('account.invoice').partner_id,
         readonly=True, states={'draft': [('readonly', False)]}
         )
-    l10n_in_refund_reason_id = fields.Many2one('l10n_in.refund.reason', string="Refund Reason")
     l10n_in_partner_vat = fields.Char(related="partner_id.vat", readonly=True)
     l10n_in_place_of_supply = fields.Many2one(
         'res.country.state', string="Place Of Supply",readonly=True,

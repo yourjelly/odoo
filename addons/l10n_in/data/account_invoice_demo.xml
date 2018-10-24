@@ -279,7 +279,6 @@
         <field name="type">out_refund</field>
         <field name="date_invoice" eval="time.strftime('%Y-%m')+'-02'"/>
         <field name="refund_invoice_id" ref="l10n_in.demo_invoice_b2b"/>
-        <field name="l10n_in_refund_reason_id" ref="l10n_in.refund_reason_01"/>
         <field name="l10n_in_place_of_supply" ref="base.state_in_gj"/>
     </record>
 
@@ -348,7 +347,6 @@
         <field name="type">out_refund</field>
         <field name="date_invoice" eval="time.strftime('%Y-%m')+'-02'"/>
         <field name="refund_invoice_id" ref="l10n_in.demo_invoice_b2cl"/>
-        <field name="l10n_in_refund_reason_id" ref="l10n_in.refund_reason_01"/>
         <field name="l10n_in_place_of_supply" ref="base.state_in_gj"/>
     </record>
 

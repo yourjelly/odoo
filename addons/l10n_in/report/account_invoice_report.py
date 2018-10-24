@@ -32,7 +32,6 @@ class L10nInAccountInvoiceReport(models.Model):
     cess_amount = fields.Float(string="Cess Amount")
     price_total = fields.Float(string='Total Without Tax')
     total = fields.Float(string="Invoice Total")
-    refund_reason_id = fields.Many2one('l10n_in.refund.reason', string="Refund Reason")
     refund_invoice_id = fields.Many2one('account.invoice', string="Refund Invoice", help="From where this Refund is created")
     shipping_bill_number = fields.Char(string="Shipping Bill Number")
     shipping_bill_date = fields.Date(string="Shipping Bill Date")
@@ -82,7 +81,6 @@ class L10nInAccountInvoiceReport(models.Model):
             sub.company_id,
             sub.invoice_type,
             sub.refund_invoice_id,
-            sub.refund_reason_id,
             sub.l10n_in_place_of_supply,
             sub.partner_vat,
             sub.ecommerce_vat,
@@ -132,7 +130,6 @@ class L10nInAccountInvoiceReport(models.Model):
                 aj.company_id,
                 ai.type AS invoice_type,
                 ai.refund_invoice_id AS refund_invoice_id,
-                ai.l10n_in_refund_reason_id AS refund_reason_id,
                 am.l10n_in_place_of_supply,
                 p.vat AS partner_vat,
                 CASE WHEN rp.vat IS NULL THEN '' ELSE rp.vat END AS ecommerce_vat,
@@ -280,7 +277,6 @@ class L10nInAccountInvoiceReport(models.Model):
             sub.company_id,
             sub.invoice_type,
             sub.refund_invoice_id,
-            sub.refund_reason_id,
             sub.l10n_in_place_of_supply,
             sub.partner_vat,
             sub.ecommerce_vat,
