@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from random import choice
+from string import digits
 import base64
 import logging
 
@@ -101,6 +103,17 @@ class Employee(models.Model):
     _mail_post_access = 'read'
 
     @api.model
+    def _default_random_pin(self):
+        return ("".join(choice(digits) for i in range(4)))
+
+    @api.model
+    def _default_random_barcode(self):
+        barcode = None
+        while not barcode or self.env['hr.employee'].search([('barcode', '=', barcode)]):
+            barcode = "".join(choice(digits) for i in range(8))
+        return barcode
+
+    @api.model
     def _default_image(self):
         image_path = get_module_resource('hr', 'static/src/img', 'default_image.png')
         return tools.image_resize_image_big(base64.b64encode(open(image_path, 'rb').read()))
@@ -198,6 +211,16 @@ class Employee(models.Model):
     # misc
     notes = fields.Text('Notes')
     color = fields.Integer('Color Index', default=0)
+    barcode = fields.Char(string="Badge ID", help="ID used for employee identification.", default=_default_random_barcode, copy=False)
+    pin = fields.Char(string="PIN", default=_default_random_pin, help="PIN used to Check In/Out in Kiosk Mode (if enabled in Configuration).", copy=False)
+
+    _sql_constraints = [('barcode_uniq', 'unique (barcode)', "The Badge ID must be unique, this one is already assigned to another employee.")]
+
+    @api.constrains('pin')
+    def _verify_pin(self):
+        for employee in self:
+            if employee.pin and not employee.pin.isdigit():
+                raise exceptions.ValidationError(_("The PIN must be a sequence of digits."))
 
     @api.constrains('parent_id')
     def _check_parent_id(self):
@@ -243,6 +266,14 @@ class Employee(models.Model):
         if user.tz:
             vals['tz'] = user.tz
         return vals
+
+    @api.multi
+    def attendance_manual(self, next_action, entered_pin=None):
+        self.ensure_one()
+        if not (entered_pin is None) or self.env['res.users'].browse(SUPERUSER_ID).has_group('hr_attendance.group_hr_attendance_use_pin') and (self.user_id and self.user_id.id != self._uid or not self.user_id):
+            if entered_pin != self.pin:
+                return {'warning': _('Wrong PIN')}
+        return self.attendance_action(next_action)
 
     @api.model
     def create(self, vals):
@@ -369,3 +400,26 @@ class Department(models.Model):
                 ('parent_id', '=', department.manager_id.id)
             ])
         employees.write({'parent_id': manager_id})
+
+    @api.model_cr_context
+    def _init_column(self, column_name):
+        """ Initialize the value of the given column for existing rows.
+            Overridden here because we need to have different default values
+            for barcode and pin for every employee.
+        """
+        if column_name not in ["barcode", "pin"]:
+            super(HrEmployee, self)._init_column(column_name)
+        else:
+            default_compute = self._fields[column_name].default
+
+            query = 'SELECT id FROM "%s" WHERE "%s" is NULL' % (
+                self._table, column_name)
+            self.env.cr.execute(query)
+            employee_ids = self.env.cr.fetchall()
+
+            for employee_id in employee_ids:
+                default_value = default_compute(self)
+
+                query = 'UPDATE "%s" SET "%s"=%%s WHERE id = %s' % (
+                    self._table, column_name, employee_id[0])
+                self.env.cr.execute(query, (default_value,))

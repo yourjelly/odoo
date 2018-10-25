@@ -22,32 +22,32 @@
         <!-- Employees with barcodes and security pins-->
         <record id='hr.employee_admin'  model='hr.employee'>
           <field name='barcode'>0410100000005</field>
-          <field name='pos_security_pin'>03401</field>
+          <field name='pin'>03401</field>
         </record>
 
         <record id='hr.employee_mit'  model='hr.employee'>
           <field name='barcode'>0410300000008</field>
-          <field name='pos_security_pin'>04201</field>
+          <field name='pin'>04201</field>
         </record>
 
         <record id='hr.employee_stw'  model='hr.employee'>
           <field name='barcode'>0410300000001</field>
-          <field name='pos_security_pin'>04203</field>
+          <field name='pin'>04203</field>
         </record>
 
         <record id='hr.employee_chs'  model='hr.employee'>
           <field name='barcode'>0410900000004</field>
-          <field name='pos_security_pin'>07209</field>
+          <field name='pin'>07209</field>
         </record>
 
         <record id='hr.employee_qdp'  model='hr.employee'>
           <field name='barcode'>0417000000003</field>
-          <field name='pos_security_pin'>01070</field>
+          <field name='pin'>01070</field>
         </record>
 
         <record id='hr.employee_niv'  model='hr.employee'>
           <field name='barcode'>0410700000007</field>
-          <field name='pos_security_pin'>02307</field>
+          <field name='pin'>02307</field>
         </record>
 
         <!-- Resource: pos.category -->

@@ -237,7 +237,7 @@ var Gui = core.Class.extend({
             var employee = this.pos.employees[i];
             var employee_user = this.pos.users.find(function(user) { return user.id === employee.user_id[0]; });
             
-            if (employee.pos_security_pin) {
+            if (employee.pin) {
                 if (!options.only_managers || employee_user.role === 'manager') {
                     list.push({
                     'label': employee.name,
@@ -256,8 +256,8 @@ var Gui = core.Class.extend({
         });
 
         return def.then(function(employee){
-            if (options.security && employee !== options.current_employee && employee.pos_security_pin) {
-                return self.ask_password(employee.pos_security_pin).then(function(){
+            if (options.security && employee !== options.current_employee && employee.pin) {
+                return self.ask_password(employee.pin).then(function(){
                     return employee;
                 });
             } else {

@@ -160,13 +160,6 @@ exports.PosModel = Backbone.Model.extend({
         ids:    function(self){ return [session.uid]; },
         loaded: function(self,users){ self.user = users[0];},
     },{
-        model:  'hr.employee',
-        fields: ['name', 'id', 'barcode', 'pos_security_pin', 'user_id'],
-        loaded: function(self, employees) {
-            self.employees = employees.filter(function(employee) { return employee.pos_security_pin || employee.barcode; });
-            self.employee = employees.find(function(employee) { return employee.user_id[0] === self.user.id; });
-            },
-        },{
         model:  'res.company',
         fields: [ 'currency_id', 'email', 'website', 'company_registry', 'vat', 'name', 'phone', 'partner_id' , 'country_id', 'tax_calculation_rounding_method'],
         ids:    function(self){ return [self.user.company_id[0]]; },
@@ -292,6 +285,27 @@ exports.PosModel = Backbone.Model.extend({
                 }
             }
             self.users = pos_users;
+        },
+    },{
+        model:  'hr.employee',
+        fields: ['name', 'id', 'barcode', 'pin', 'user_id'],
+        loaded: function(self, employees) {
+            if (self.config.use_employees) {
+                if (self.config.employees.length > 0) {
+                    self.employees = employees.filter(function(employee) { 
+                        return self.config.employees.includes(employee.id) || employee.user_id[0] === self.user.id;
+                    });
+                } else {
+                    self.employees = employees;
+                }
+            } else {
+                self.employees = employees.filter(function(employee) { 
+                    return self.users.some(function(user) {
+                        return user.id === employee.user_id[0];
+                    });
+                });
+            }
+            self.employee = employees.find(function(employee) { return employee.user_id[0] === self.user.id; });
         },
     },{
         model: 'stock.location',

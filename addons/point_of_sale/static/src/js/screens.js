@@ -77,8 +77,8 @@ var ScreenWidget = PosBaseWidget.extend({
         var employees = this.pos.employees;
         for(var i = 0, len = employees.length; i < len; i++){
             if(employees[i].barcode === code.code){
-                if (employees[i].id !== this.pos.get_cashier().id && employees[i].pos_security_pin) {
-                    return this.gui.ask_password(employees[i].pos_security_pin).then(function(){
+                if (employees[i].id !== this.pos.get_cashier().id && employees[i].pin) {
+                    return this.gui.ask_password(employees[i].pin).then(function(){
                         self.pos.set_cashier(employees[i]);
                         self.chrome.widget.username.renderElement();
                         return true;
