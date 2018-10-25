@@ -96,21 +96,26 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
             });
         },
 
-        _toggleDisabled: function() {
-            _.each(this.$el.find('[accesskey]'), function(el) {
-                        el.setAttribute("disabled", "1");
+        _filterAccessButtons: function (buttonsWithoutAccessKey, accesskeyElements) {
+            this.reusableKeys = [];
+            var accessButtons = _.filter(buttonsWithoutAccessKey, function(el) {
+                if (!_.contains(accesskeyElements, el)) {
+                    return el;
+                }
+            });
+            return accessButtons;
         },
 
-        _resetDisabled: function() {
-            // var $modal = $(document).find('.modal-dialog');
-            // var modalButtons = $($modal[$modal.length - 1]).find('[accesskey]').filter(':visible');
-            // remove disabled attribute on keyUp which was added for disabling keyboard navigation
-            var accesslist = _.filter(this.$el.find('button.btn:visible'), function(el) {
-                return !_.contains(modalButtons, el);
-            });
-            _.each(accesslist, function (el) {
-                    el.removeAttribute("disabled","1");
+        _toggleDisabled: function (accessButtons, disabled) {
+            if (disabled) {
+                _.each(accessButtons, function (el) {
+                    el.setAttribute("disabled", "1");
                 });
+            } else {
+                _.each(accessButtons, function (el) {
+                    el.removeAttribute("disabled");
+                });
+            }
         },
 
         //--------------------------------------------------------------------------
@@ -142,16 +147,35 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
 
                 var usedAccessKey = this._getAllUsedAccessKeys();
 
-                var accesskeyElements = $($modal[$modal.length - 1]).find('button.btn:visible')
-
                 var buttonsWithoutAccessKey = this.$el.find('button.btn:visible')
                         .not('[accesskey]')
                         .not('[disabled]')
                         .not('[tabindex="-1"]');
 
-                var modalButtons = ($($modal[$modal.length - 1]).find('button.btn:visible'))
+                var accesskeyElements = $($modal[$modal.length - 1]).find('button.btn:visible')
 
-                // after filtering call _setDisable method to add attribute
+                var filteredButtons = this._filterAccessButtons(buttonsWithoutAccessKey, accesskeyElements);
+
+                var assignAccesskey = this._toggleDisabled(filteredButtons, false);
+
+                _.each(buttonsWithoutAccessKey, function (elem) {
+                    var buttonString = [elem.innerText, elem.title, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"].join('');
+                    for (var letterIndex = 0; letterIndex < buttonString.length; letterIndex++) {
+                        var candidateAccessKey = buttonString[letterIndex].toUpperCase();
+                        if (candidateAccessKey >= 'A' && candidateAccessKey <= 'Z' &&
+                            !_.includes(usedAccessKey, candidateAccessKey)) {
+                            elem.accessKey = candidateAccessKey;
+                            usedAccessKey.push(candidateAccessKey);
+                            break;
+                        }
+                    }
+                });
+
+                var elementsWithoutAriaKeyshortcut = this.$el.find('[accesskey]').not('[aria-keyshortcuts]');
+                    _.each(elementsWithoutAriaKeyshortcut, function (elem) {
+                        elem.setAttribute('aria-keyshortcuts', 'Alt+Shift+' + elem.accessKey);
+                    });
+                    this._addAccessKeyOverlays();
 
             }
             else {
@@ -254,11 +278,17 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
          */
         _onKeyUp: function (keyUpEvent) {
             if ((keyUpEvent.altKey || keyUpEvent.key === 'Alt') && !keyUpEvent.ctrlKey) {
-                this._hideAccessKeyOverlay();
-                if (keyUpEvent.preventDefault) keyUpEvent.preventDefault(); else keyUpEvent.returnValue = false;
-                if (keyUpEvent.stopPropagation) keyUpEvent.stopPropagation();
-                if (keyUpEvent.cancelBubble) keyUpEvent.cancelBubble = true;
-                return false;
+                var $modal = $(document).find('.modal-dialog');
+                if ($modal.length) {
+                    this._toggleDisabled(filteredButtons, true)
+                }
+                else {
+                    this._hideAccessKeyOverlay();
+                    if (keyUpEvent.preventDefault) keyUpEvent.preventDefault(); else keyUpEvent.returnValue = false;
+                    if (keyUpEvent.stopPropagation) keyUpEvent.stopPropagation();
+                    if (keyUpEvent.cancelBubble) keyUpEvent.cancelBubble = true;
+                    return false;
+                }
             }
         },
     };
