@@ -175,7 +175,6 @@ class BtMetaClass(type):
 
 class BtDriver(Driver, metaclass=BtMetaClass):
 
-
     def __init__(self, device, manager):
         super(BtDriver, self).__init__()
         self.dev = device
@@ -203,9 +202,10 @@ class BtDriver(Driver, metaclass=BtMetaClass):
         pass
 
 #----------------------------------------------------------
-# Camerdai driver
+# Camera driver
 #----------------------------------------------------------
-class Cemra driver(Thread):
+class CameraDriver(Thread):
+
     data = httprequest.jsonrequest
     result = 'device not found'
     if data.get('action') == 'print':
@@ -278,7 +278,7 @@ class DeviceManager(Thread):
                 first_time = False
             time.sleep(3)
 
-    def loop_prtiner(self):
+    def loop_printer(self):
 
 
         pass
@@ -331,7 +331,7 @@ class DeviceManager(Thread):
                 for printer in printerList:
                     subprocess.call('echo "' + printerList[printer]['name'] + '" >> /tmp/printers', shell=True)
 
-    def loop_video(self):
+    def loop_camera(self):
             # Build camera JSON
             try:
                 cameras = subprocess.check_output("v4l2-ctl --list-devices", shell=True).decode('utf-8').split('\n\n')
@@ -340,10 +340,10 @@ class DeviceManager(Thread):
                         camera = camera.split('\n\t')
                         serial = re.sub('[^a-zA-Z0-9 ]+', '', camera[0].split(': ')[0]).replace(' ','_')
                         devicesList[serial] = {
-                                                'name': camera[0].split(': ')[0],
-                                                'connection': 'direct',
-                                                'type': 'camera'
-                                            }
+                            'name': camera[0].split(': ')[0],
+                            'connection': 'direct',
+                            'type': 'camera'
+                        }
             except:
                 pass
 
@@ -385,9 +385,11 @@ class DeviceManager(Thread):
                 device_name = drivers[path].get_name()
                 device_connection = drivers[path].get_connection()
                 identifier = path.split('_')[0] + '_' + path.split('_')[1]
-                devicesList[identifier] = {'name': device_name,
-                                     'type': 'device',
-                                     'connection': device_connection}
+                devicesList[identifier] = {
+                    'name': device_name,
+                    'type': 'device',
+                    'connection': device_connection
+                }
 
             #build JSON with all devices
             hostname = subprocess.check_output('hostname').decode('utf-8').split('\n')[0]
@@ -408,23 +410,17 @@ class DeviceManager(Thread):
             http = urllib3.PoolManager()
             req = False
             try:
-                req = http.request('POST',
-                                    url,
-                                    body=data_json,
-                                    headers=headers)
+                req = http.request('POST', url, body=data_json, headers=headers)
             except:
                 _logger.warning('Could not reach configured server')
 
-    def lop(self):
+    def loop(self):
         first_time = True
         send_iot_box_device(False)
         while 1:
             sendJSON = False
-            sendJSON = False and  self.loop_usb()
+            sendJSON = False and self.loop_usb()
             sendJSON = False and self.loop_printer()
             sendJSON = False and self.loop_camera()
             sendJSON = False and self.loop_bt()
             self.send()
-
-
-#
