@@ -258,33 +258,25 @@ exports.PosModel = Backbone.Model.extend({
        },
     },{
         model:  'res.users',
-        fields: ['name','groups_id'],
+        fields: ['name','groups_id', 'barcode', 'pin'],
         domain: function(self){ return [['company_id','=',self.user.company_id[0]],'|', ['groups_id','=', self.config.group_pos_manager_id[0]],['groups_id','=', self.config.group_pos_user_id[0]]]; },
         loaded: function(self,users){
             // we attribute a role to the user, 'cashier' or 'manager', depending
             // on the group the user belongs.
-            var pos_users = [];
-            //var current_cashier = self.get_cashier();
-            for (var i = 0; i < users.length; i++) {
-                var user = users[i];
-                for (var j = 0; j < user.groups_id.length; j++) {
-                    var group_id = user.groups_id[j];
+            self.users = users;
+            self.users.forEach(function(user) {
+                user.role = 'cashier';
+                user.groups_id.some(function(group_id) {
                     if (group_id === self.config.group_pos_manager_id[0]) {
                         user.role = 'manager';
-                        break;
-                    } else if (group_id === self.config.group_pos_user_id[0]) {
-                        user.role = 'cashier';
+                        return true
                     }
-                }
-                if (user.role) {
-                    pos_users.push(user);
-                }
+                });
                 // replace the current user with its updated version
                 if (user.id === self.user.id) {
                     self.user = user;
                 }
-            }
-            self.users = pos_users;
+            });
         },
     },{
         model:  'hr.employee',
@@ -298,14 +290,27 @@ exports.PosModel = Backbone.Model.extend({
                 } else {
                     self.employees = employees;
                 }
-            } else {
-                self.employees = employees.filter(function(employee) { 
-                    return self.users.some(function(user) {
-                        return user.id === employee.user_id[0];
+                self.employees.forEach(function(employee) {
+                    var hasUser = self.users.some(function(user) {
+                        if (user.id === employee.user_id[0]) {
+                            employee.role = user.role;
+                            return true;
+                        } 
+                        return false;
                     });
+                    if (!hasUser) {
+                        employee.role = 'cashier';
+                    }
+                });
+            } else {
+                self.employees = self.users;
+                self.employees.forEach(function(employee) { 
+                    employee.user_id = [employee.id, employee.name]; 
                 });
             }
-            self.employee = employees.find(function(employee) { return employee.user_id[0] === self.user.id; });
+            self.employee = employees.find(function(employee) { 
+                return employee.user_id[0] === self.user.id; 
+            });
         },
     },{
         model: 'stock.location',
@@ -396,7 +401,6 @@ exports.PosModel = Backbone.Model.extend({
         domain: function(self){ return [['state', '=', 'open'],['pos_session_id', '=', self.pos_session.id]]; },
         loaded: function(self, cashregisters, tmp){
             self.cashregisters = cashregisters;
-
             tmp.journals = [];
             _.each(cashregisters,function(statement){
                 tmp.journals.push(statement.journal_id[0]);
