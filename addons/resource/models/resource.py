@@ -174,9 +174,9 @@ class ResourceCalendar(models.Model):
         'resource.calendar.attendance', 'calendar_id', 'Working Time',
         copy=True, default=_get_default_attendance_ids)
     leave_ids = fields.One2many(
-        'resource.calendar.leaves', 'calendar_id', 'Leaves')
+        'resource.time', 'calendar_id', 'Leaves')
     global_leave_ids = fields.One2many(
-        'resource.calendar.leaves', 'calendar_id', 'Global Leaves',
+        'resource.time', 'calendar_id', 'Global Leaves',
         domain=[('resource_id', '=', False)]
         )
     hours_per_day = fields.Float("Average hour per day", default=HOURS_PER_DAY,
@@ -251,7 +251,7 @@ class ResourceCalendar(models.Model):
         start_dt = start_dt.astimezone(tz)
         end_dt = end_dt.astimezone(tz)
         result = []
-        for leave in self.env['resource.calendar.leaves'].search(domain):
+        for leave in self.env['resource.time'].search(domain):
             dt0 = string_to_datetime(leave.date_from).astimezone(tz)
             dt1 = string_to_datetime(leave.date_to).astimezone(tz)
             result.append((max(start_dt, dt0), min(end_dt, dt1), leave))
@@ -497,7 +497,7 @@ class ResourceResource(models.Model):
 
 
 class ResourceCalendarLeaves(models.Model):
-    _name = "resource.calendar.leaves"
+    _name = 'resource.time'
     _description = "Resource Leaves Detail"
 
     name = fields.Char('Reason')

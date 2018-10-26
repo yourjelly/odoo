@@ -81,10 +81,10 @@
         <field name="help">Resources allow you to create and manage resources that should be involved in a specific project phase. You can also set their efficiency level and workload based on their weekly working hours.</field>
     </record>
 
-    <!-- RESOURCE.CALENDAR.LEAVES -->
+    <!-- resource.time -->
     <record id="view_resource_calendar_leaves_search" model="ir.ui.view">
-        <field name="name">resource.calendar.leaves.search</field>
-        <field name="model">resource.calendar.leaves</field>
+        <field name="name">resource.time.search</field>
+        <field name="model">resource.time</field>
         <field name="arch" type="xml">
             <search string="Search Working Period Leaves">
                 <field name="name"/>
@@ -101,8 +101,8 @@
     </record>
 
     <record id="view_resource_calendar" model="ir.ui.view">
-        <field name="name">resource.calendar.leaves.calendar</field>
-        <field name="model">resource.calendar.leaves</field>
+        <field name="name">resource.time.calendar</field>
+        <field name="model">resource.time</field>
         <field name="arch" type="xml">
             <calendar date_start="date_from" date_stop="date_to" string="Resource" color="resource_id">
                 <field name="name"/>
@@ -111,8 +111,8 @@
     </record>
 
     <record id="resource_calendar_leave_form" model="ir.ui.view">
-        <field name="name">resource.calendar.leaves.form</field>
-        <field name="model">resource.calendar.leaves</field>
+        <field name="name">resource.time.form</field>
+        <field name="model">resource.time</field>
         <field name="arch" type="xml">
             <form string="Leave Detail">
                 <group>
@@ -132,8 +132,8 @@
     </record>
 
     <record id="resource_calendar_leave_tree" model="ir.ui.view">
-        <field name="name">resource.calendar.leaves.tree</field>
-        <field name="model">resource.calendar.leaves</field>
+        <field name="name">resource.time.tree</field>
+        <field name="model">resource.time</field>
         <field name="arch" type="xml">
             <tree string="Leave Detail">
                 <field name="name" string="Reason"/>
@@ -148,14 +148,14 @@
 
     <record id="action_resource_calendar_leave_tree" model="ir.actions.act_window">
         <field name="name">Resource Leaves</field>
-        <field name="res_model">resource.calendar.leaves</field>
+        <field name="res_model">resource.time</field>
         <field name="view_mode">tree,form,calendar</field>
         <field name="search_view_id" ref="view_resource_calendar_leaves_search"/>
     </record>
 
     <record id="resource_calendar_leaves_action_from_calendar" model="ir.actions.act_window">
         <field name="name">Resource Leaves</field>
-        <field name="res_model">resource.calendar.leaves</field>
+        <field name="res_model">resource.time</field>
         <field name="view_mode">tree,form,calendar</field>
         <field name="context">{
             'default_calendar_id': active_id,
@@ -166,7 +166,7 @@
     <act_window
         id="resource_calendar_closing_days"
         name="Closing Days"
-        res_model="resource.calendar.leaves"
+        res_model="resource.time"
         src_model="resource.calendar"
         view_mode="calendar,tree,form"
         context="{'default_calendar_id': active_id}"
@@ -175,7 +175,7 @@
     <act_window
         id="resource_calendar_resources_leaves"
         name="Resources Leaves"
-        res_model="resource.calendar.leaves"
+        res_model="resource.time"
         src_model="resource.calendar"
         view_mode="calendar,tree,form"
         context="{'default_calendar_id': active_id}"

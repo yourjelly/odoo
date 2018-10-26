@@ -99,7 +99,7 @@ class TestErrors(TestResourceCommon):
     def test_create_negative_leave(self):
         # from > to
         with self.assertRaises(ValidationError):
-            self.env['resource.calendar.leaves'].create({
+            self.env['resource.time'].create({
                 'name': 'error cannot return in the past',
                 'resource_id': False,
                 'calendar_id': self.calendar_jean.id,
@@ -108,7 +108,7 @@ class TestErrors(TestResourceCommon):
             })
 
         with self.assertRaises(ValidationError):
-            self.env['resource.calendar.leaves'].create({
+            self.env['resource.time'].create({
                 'name': 'error caused by timezones',
                 'resource_id': False,
                 'calendar_id': self.calendar_jean.id,
@@ -122,7 +122,7 @@ class TestCalendar(TestResourceCommon):
         super(TestCalendar, self).setUp()
 
     def test_get_work_hours_count(self):
-        self.env['resource.calendar.leaves'].create({
+        self.env['resource.time'].create({
             'name': 'Global Leave',
             'resource_id': False,
             'calendar_id': self.calendar_jean.id,
@@ -130,7 +130,7 @@ class TestCalendar(TestResourceCommon):
             'date_to': datetime_str(2018, 4, 3, 23, 59, 59, tzinfo=self.jean.tz),
         })
 
-        self.env['resource.calendar.leaves'].create({
+        self.env['resource.time'].create({
             'name': 'leave for Jean',
             'calendar_id': self.calendar_jean.id,
             'resource_id': self.jean.resource_id.id,
@@ -152,7 +152,7 @@ class TestCalendar(TestResourceCommon):
         self.assertEqual(hours, 40)
 
         # leave of size 0
-        self.env['resource.calendar.leaves'].create({
+        self.env['resource.time'].create({
             'name': 'zero_length',
             'calendar_id': self.calendar_patel.id,
             'resource_id': False,
@@ -167,7 +167,7 @@ class TestCalendar(TestResourceCommon):
         self.assertEqual(hours, 35)
 
         # leave of medium size
-        leave = self.env['resource.calendar.leaves'].create({
+        leave = self.env['resource.time'].create({
             'name': 'zero_length',
             'calendar_id': self.calendar_patel.id,
             'resource_id': False,
@@ -184,7 +184,7 @@ class TestCalendar(TestResourceCommon):
         leave.unlink()
 
         # leave of very small size
-        leave = self.env['resource.calendar.leaves'].create({
+        leave = self.env['resource.time'].create({
             'name': 'zero_length',
             'calendar_id': self.calendar_patel.id,
             'resource_id': False,
@@ -202,7 +202,7 @@ class TestCalendar(TestResourceCommon):
 
         # no timezone given should be converted to UTC
         # Should equal to a leave between 2018/04/03 10:00:00 and 2018/04/04 10:00:00
-        self.env['resource.calendar.leaves'].create({
+        self.env['resource.time'].create({
             'name': 'no timezone',
             'calendar_id': self.calendar_patel.id,
             'resource_id': False,
@@ -239,7 +239,7 @@ class TestCalendar(TestResourceCommon):
         self.assertAlmostEqual(res, 24.0)
 
     def test_plan_hours(self):
-        self.env['resource.calendar.leaves'].create({
+        self.env['resource.time'].create({
             'name': 'global',
             'calendar_id': self.calendar_jean.id,
             'resource_id': False,
@@ -275,7 +275,7 @@ class TestCalendar(TestResourceCommon):
         self.assertEqual(time, datetime_tz(2019, 9, 16, 16, 0, 0, tzinfo=self.jean.tz))
 
     def test_plan_days(self):
-        self.env['resource.calendar.leaves'].create({
+        self.env['resource.time'].create({
             'name': 'global',
             'calendar_id': self.calendar_jean.id,
             'resource_id': False,
@@ -377,7 +377,7 @@ class TestResMixin(TestResourceCommon):
         self.assertEqual(data, {'days': 5, 'hours': 40})
 
         # half days
-        leave = self.env['resource.calendar.leaves'].create({
+        leave = self.env['resource.time'].create({
             'name': 'half',
             'calendar_id': self.calendar_jean.id,
             'resource_id': self.jean.resource_id.id,
@@ -402,7 +402,7 @@ class TestResMixin(TestResourceCommon):
         leave.unlink()
 
         # leave size 0
-        leave = self.env['resource.calendar.leaves'].create({
+        leave = self.env['resource.time'].create({
             'name': 'zero',
             'calendar_id': self.calendar_jean.id,
             'resource_id': False,
@@ -419,7 +419,7 @@ class TestResMixin(TestResourceCommon):
         leave.unlink()
 
         # leave very small size
-        leave = self.env['resource.calendar.leaves'].create({
+        leave = self.env['resource.time'].create({
             'name': 'small',
             'calendar_id': self.calendar_jean.id,
             'resource_id': False,
@@ -436,7 +436,7 @@ class TestResMixin(TestResourceCommon):
 
     def test_leaves_days_data(self):
         # Jean takes a leave
-        self.env['resource.calendar.leaves'].create({
+        self.env['resource.time'].create({
             'name': 'Jean is visiting India',
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': self.jean.resource_id.id,
@@ -445,7 +445,7 @@ class TestResMixin(TestResourceCommon):
         })
 
         # John takes a leave for Jean
-        self.env['resource.calendar.leaves'].create({
+        self.env['resource.time'].create({
             'name': 'Jean is comming in USA',
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': self.jean.resource_id.id,
@@ -481,7 +481,7 @@ class TestResMixin(TestResourceCommon):
 
         # Jean takes a leave for John
         # Gives 3 hours (3/8 of a day)
-        self.env['resource.calendar.leaves'].create({
+        self.env['resource.time'].create({
             'name': 'John is sick',
             'calendar_id': self.john.resource_calendar_id.id,
             'resource_id': self.john.resource_id.id,
@@ -491,7 +491,7 @@ class TestResMixin(TestResourceCommon):
 
         # John takes a leave
         # Gives all day (12 hours)
-        self.env['resource.calendar.leaves'].create({
+        self.env['resource.time'].create({
             'name': 'John goes to holywood',
             'calendar_id': self.john.resource_calendar_id.id,
             'resource_id': self.john.resource_id.id,
@@ -508,7 +508,7 @@ class TestResMixin(TestResourceCommon):
         self.assertEqual(data, {'days': 1, 'hours': 10})
 
         # half days
-        leave = self.env['resource.calendar.leaves'].create({
+        leave = self.env['resource.time'].create({
             'name': 'half',
             'calendar_id': self.calendar_jean.id,
             'resource_id': self.jean.resource_id.id,
@@ -525,7 +525,7 @@ class TestResMixin(TestResourceCommon):
         leave.unlink()
 
         # leave size 0
-        leave = self.env['resource.calendar.leaves'].create({
+        leave = self.env['resource.time'].create({
             'name': 'zero',
             'calendar_id': self.calendar_jean.id,
             'resource_id': False,
@@ -542,7 +542,7 @@ class TestResMixin(TestResourceCommon):
         leave.unlink()
 
         # leave very small size
-        leave = self.env['resource.calendar.leaves'].create({
+        leave = self.env['resource.time'].create({
             'name': 'small',
             'calendar_id': self.calendar_jean.id,
             'resource_id': False,
@@ -560,7 +560,7 @@ class TestResMixin(TestResourceCommon):
         leave.unlink()
 
     def test_list_leaves(self):
-        jean_leave = self.env['resource.calendar.leaves'].create({
+        jean_leave = self.env['resource.time'].create({
             'name': "Jean's son is sick",
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': False,
@@ -575,7 +575,7 @@ class TestResMixin(TestResourceCommon):
         self.assertEqual(leaves, [(date(2018, 4, 10), 8, jean_leave)])
 
         # half days
-        leave = self.env['resource.calendar.leaves'].create({
+        leave = self.env['resource.time'].create({
             'name': 'half',
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': self.jean.resource_id.id,
@@ -592,7 +592,7 @@ class TestResMixin(TestResourceCommon):
         leave.unlink()
 
         # very small size
-        leave = self.env['resource.calendar.leaves'].create({
+        leave = self.env['resource.time'].create({
             'name': 'small',
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': self.jean.resource_id.id,
@@ -612,7 +612,7 @@ class TestResMixin(TestResourceCommon):
         leave.unlink()
 
         # size 0
-        leave = self.env['resource.calendar.leaves'].create({
+        leave = self.env['resource.time'].create({
             'name': 'zero',
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': self.jean.resource_id.id,
@@ -652,7 +652,7 @@ class TestResMixin(TestResourceCommon):
         ])
 
         # half days
-        leave = self.env['resource.calendar.leaves'].create({
+        leave = self.env['resource.time'].create({
             'name': 'small',
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': self.jean.resource_id.id,
@@ -675,7 +675,7 @@ class TestResMixin(TestResourceCommon):
         leave.unlink()
 
         # very small size
-        leave = self.env['resource.calendar.leaves'].create({
+        leave = self.env['resource.time'].create({
             'name': 'small',
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': self.jean.resource_id.id,
@@ -694,7 +694,7 @@ class TestResMixin(TestResourceCommon):
         leave.unlink()
 
         # size 0
-        leave = self.env['resource.calendar.leaves'].create({
+        leave = self.env['resource.time'].create({
             'name': 'zero',
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': self.jean.resource_id.id,
@@ -795,7 +795,7 @@ class TestTimezones(TestResourceCommon):
         self.assertEqual(data, {'days': 5, 'hours': 40})
 
     def test_leave_data(self):
-        self.env['resource.calendar.leaves'].create({
+        self.env['resource.time'].create({
             'name': '',
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': self.jean.resource_id.id,
@@ -825,7 +825,7 @@ class TestTimezones(TestResourceCommon):
         self.assertEqual(data, {'days': 0.75, 'hours': 6})
 
     def test_leaves(self):
-        leave = self.env['resource.calendar.leaves'].create({
+        leave = self.env['resource.time'].create({
             'name': '',
             'calendar_id': self.jean.resource_calendar_id.id,
             'resource_id': self.jean.resource_id.id,

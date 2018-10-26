@@ -5,6 +5,6 @@ from odoo import fields, models
 
 
 class CalendarLeaves(models.Model):
-    _inherit = "resource.calendar.leaves"
+    _inherit = "resource.time"
 
     holiday_id = fields.Many2one("hr.leave", string='Leave Request')

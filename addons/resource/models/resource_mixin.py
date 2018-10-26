@@ -181,7 +181,7 @@ class ResourceMixin(models.AbstractModel):
             `domain` is used in order to recognise the leaves to take,
             None means default value ('time_type', '=', 'leave')
 
-            Returns a list of tuples (day, hours, resource.calendar.leaves)
+            Returns a list of tuples (day, hours, resource.time)
             for each leave in the calendar.
         """
         resource = self.resource_id

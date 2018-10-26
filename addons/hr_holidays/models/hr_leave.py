@@ -142,7 +142,7 @@ class HolidaysRequest(models.Model):
         'Duration in days', compute='_compute_number_of_days_display', copy=False, readonly=True,
         help='Number of days of the leave request. Used for interface.')
     number_of_hours_display = fields.Float(
-        'Duration in hours', compute='_compute_number_of_hours_display', copy=False, readonly=True, 
+        'Duration in hours', compute='_compute_number_of_hours_display', copy=False, readonly=True,
         help='Number of hours of the leave request according to your working schedule. Used for interface.')
     # details
     meeting_id = fields.Many2one('calendar.event', string='Meeting')
@@ -526,7 +526,7 @@ class HolidaysRequest(models.Model):
             date_from = fields.Datetime.from_string(leave.date_from)
             date_to = fields.Datetime.from_string(leave.date_to)
 
-            self.env['resource.calendar.leaves'].create({
+            self.env['resource.time'].create({
                 'name': leave.name,
                 'date_from': fields.Datetime.to_string(date_from),
                 'holiday_id': leave.id,
@@ -540,7 +540,7 @@ class HolidaysRequest(models.Model):
     @api.multi
     def _remove_resource_leave(self):
         """ This method will create entry in resource calendar leave object at the time of holidays cancel/removed """
-        return self.env['resource.calendar.leaves'].search([('holiday_id', 'in', self.ids)]).unlink()
+        return self.env['resource.time'].search([('holiday_id', 'in', self.ids)]).unlink()
 
     def _validate_leave_request(self):
         """ Validate leave requests (holiday_type='employee')
