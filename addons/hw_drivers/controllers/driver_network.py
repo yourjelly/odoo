@@ -4,14 +4,12 @@ import subprocess
 import re
 
 from . import manager, driver
+from . import iot_config
+_server = iot_config.Server()
 
 
 class NetworkManager(manager.MetaManager):
     _type = 'network'
-
-    def __init__(self):
-        self.maciotbox = subprocess.check_output("/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5}", shell=True).decode('utf-8').split('\n')[0]
-        super(NetworkManager, self).__init__()
 
     def scan(self):
         self._find_printers()
@@ -52,7 +50,7 @@ class NetworkManager(manager.MetaManager):
                 }
 
                 if device_connection == 'direct':
-                    identifier = serial + '_' + self.maciotbox  # name + macIOTBOX
+                    identifier = serial + '_' + _server.get_mac_address()
                 elif device_connection == 'network' and 'socket' in printerTab[0]:
                     socketIP = printerTab[0].split('://')[1]
                     macprinter = subprocess.check_output("arp -a " + socketIP + " |awk NR==1'{print $4}'", shell=True).decode('utf-8').split('\n')[0]

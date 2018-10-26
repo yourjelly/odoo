@@ -1,10 +1,13 @@
 #!/usr/bin/python3
 
+import datetime
+import subprocess
+
 from odoo import http
 from odoo.http import request as httprequest
 
-import datetime
-import subprocess
+from . import iot_config
+_server = iot_config.Server()
 
 owner_dict = {}
 last_ping = {}
@@ -53,25 +56,25 @@ class IoTDriversController(http.Controller):
     @http.route('/hw_drivers/box/connect', type='json', auth='none', cors='*', csrf=False)
     def connect_box(self):
         data = httprequest.jsonrequest
-        server = ""  # read from file
-        try:
-            f = open('/home/pi/odoo-remote-server.conf', 'r')
-            for line in f:
-                server += line
-            f.close()
-            server = server.split('\n')[0]
-        except:
-            server = ''
+        server = _server.get_odoo_server_url()
         if server:
-            return 'This IoTBox has already been connected'
+            return {
+                'success': False,
+                'message': 'This IoTBox has already been connected',
+                'data': {}
+            }
         else:
             iotname = ''
             token = data['token'].split('|')[1]
             url = data['token'].split('|')[0]
             reboot = 'noreboot'
             subprocess.call(['/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/connect_to_server.sh', url, iotname, token, reboot])
-            send_iot_box_device()
-            return 'IoTBox connected'
+            DMM.send_to_odoo_server()
+            return {
+                'success': True,
+                'message': 'IoTBox connected',
+                'data': {}
+            }
 
     @http.route('/hw_drivers/drivers/status', type='http', auth='none', cors='*')
     def status(self):
@@ -85,35 +88,44 @@ class IoTDriversController(http.Controller):
         return result
 
     @http.route('/hw_drivers/scan', type='json', auth='none', cors='*')
-    def statusdetail(self, identifier):
-        # TODO : MainManager.scan()
-
-        return ''
-
-    @http.route('/hw_drivers/device/value/<string:identifier>', type='json', auth='none', cors='*')
-    def statusdetail(self, identifier):
-        # TODO : MainManager.get_device(identifier).get_value()
-        return ''
-
-    @http.route('/hw_drivers/device/connect/<string:identifier>', type='json', auth='none', cors='*')
-    def statusdetail(self, identifier):
-        # TODO : MainManager.get_device(identifier).connect()
-        return ''
-
-    @http.route('/hw_drivers/device/disconnect/<string:identifier>', type='json', auth='none', cors='*')
-    def statusdetail(self, identifier):
-        # TODO : MainManager.get_device(identifier).disconnect()
-        return ''
-
-    @http.route('/hw_drivers/device/action/<string:identifier>', type='json', auth='none', cors='*', csrf=False)
-    def driveraction(self, identifier):
-        # TODO : MainManager.get_device(identifier).action(action, data)
+    def scan(self):
         return {
             'success': True,
             'message': '',
-            'data': ''
+            'data': DMM.scan()
         }
 
+    @http.route('/hw_drivers/device/value/<string:identifier>', type='json', auth='none', cors='*')
+    def device_value(self, identifier):
+        return {
+            'success': True,
+            'message': '',
+            'data': DMM.get_device(identifier).get_value()
+        }
 
-def send_iot_box_device():
-    pass
+    @http.route('/hw_drivers/device/connect/<string:identifier>', type='json', auth='none', cors='*')
+    def device_connect(self, identifier):
+        return {
+            'success': True,
+            'message': '',
+            'data': DMM.get_device(identifier).connect()
+        }
+
+    @http.route('/hw_drivers/device/disconnect/<string:identifier>', type='json', auth='none', cors='*')
+    def device_disconnect(self, identifier):
+        return {
+            'success': True,
+            'message': '',
+            'data': DMM.get_device(identifier).disconnect()
+        }
+
+    @http.route('/hw_drivers/device/action/<string:identifier>', type='json', auth='none', cors='*', csrf=False)
+    def driveraction(self, identifier):
+        action = httprequest.jsonrequest.get('action')
+        params = httprequest.jsonrequest.get('data')
+        return {
+            'success': True,
+            'message': '',
+            'data': DMM.get_device(identifier).action(action, params)
+        }
+

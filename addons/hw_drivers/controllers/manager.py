@@ -1,7 +1,14 @@
 #!/usr/bin/python3
 
+import json
+import urllib3
+import logging
 from threading import Thread
-from . import driver
+
+from . import driver, iot_config
+
+_logger = logging.getLogger(__name__)
+_server = iot_config.Server()
 
 
 class MainManager(Thread):
@@ -34,31 +41,45 @@ class MainManager(Thread):
             for type, manager in self._managers.items():
                 for key in manager.devices:
                     if key == identifier:
-                        device = manager.devices[identifier]
+                        device = manager.devices.get(identifier)
                         break
+        if not device:
+            device = driver.DeviceNotFound(type)
 
         return device
 
-    def ping_device(self, identifier, type=False):
-        device = self.get_device(identifier, type)
-        if device:
-            return device.ping()
-        else:
-            return False
+    def get_devices_list(self):
+        devices = {}
+        for type, manager in self._managers.items():
+            devices.update(manager.devices)
 
-    def connect_device(self, identifier, type=False):
-        device = self.get_device(identifier, type)
-        if device:
-            return device.connect()
-        else:
-            return False
+        return devices
 
-    def disconnect_device(self, identifier, type=False):
-        device = self.get_device(identifier, type)
-        if device:
-            return device.disconnect()
+    def send_to_odoo_server(self):
+        server = _server.get_odoo_server_url()
+        if server:
+            url = server + "/iot/setup"
+
+            data = {
+                'name': _server.get_hostname(),
+                'identifier': _server.get_mac_address(),
+                'ip': _server.get_local_ip(),
+                'token': _server.get_token(),
+                'devices': self.get_devices_list(),
+            }
+
+            http = urllib3.PoolManager()
+            try:
+                http.request(
+                    'POST',
+                    url,
+                    body=json.dumps(data).encode('utf8'),
+                    headers={'Content-type': 'application/json', 'Accept': 'text/plain'}
+                )
+            except:
+                _logger.warning('Could not reach configured server')
         else:
-            return False
+            _logger.warning('Odoo server not set')
 
 
 class MetaManager:
@@ -95,19 +116,7 @@ class MetaManager:
         return self._type
 
     def get_device(self, identifier):
-        return self._devices.get(identifier)
-
-    def connect_device(self, identifier):
-        device = self.get_device(identifier)
-        if device:
-            device = device.connect()
-        return device
-
-    def disconnect_device(self, identifier):
-        device = self.get_device(identifier)
-        if device:
-            device = device.disconnect()
-        return device
+        return self._devices.get(identifier, driver.DeviceNotFound(self._type))
 
     def connect_all_devices(self):
         for identifier, device in self._devices.items():

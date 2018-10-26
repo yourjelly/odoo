@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+
 from threading import Thread
 
 
@@ -36,7 +37,7 @@ class MetaDriver(Thread):
 
     def get_connection_type(self):
         return self._connection_type
-    
+
     def get_type(self):
         return self._type
 
@@ -57,3 +58,20 @@ class MetaDriver(Thread):
             return getattr(self, action)(params)
         except AttributeError:
             raise
+
+
+class DeviceNotFound(MetaDriver):
+    def __init__(self, connection_type):
+        super(MetaDriver, self).__init__('not_found', connection_type, False)
+
+    def connect(self):
+        pass
+
+    def disconnect(self):
+        pass
+
+    def action(self, action, params):
+        pass
+
+    def get_value(self):
+        return 'Device not found'

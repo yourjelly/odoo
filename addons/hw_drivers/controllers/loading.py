@@ -1,8 +1,8 @@
 import importlib.util
 import os
-from .driver import BtManager
-from .driver import USBDeviceManager
+
 from odoo import modules
+from . import manager, driver_network, driver_bluetooth, driver_usb
 
 driversList = os.listdir("/home/pi/odoo/addons/hw_drivers/drivers")
 for driver in driversList:
@@ -14,20 +14,14 @@ for driver in driversList:
 
 
 if not getattr(modules, '_iot_daemon_started', False):
-    # ----------------------------------------------------------
-    # Bluetooth start
-    # ----------------------------------------------------------
-    bm = BtManager()
-    bm.daemon = True
-    bm.start()
+    # DMM for Devices Main Manager
+    DMM = manager.MainManager()
 
-    #----------------------------------------------------------
-    #USB start
-    #----------------------------------------------------------
+    DMM.add_manager(driver_network.NetworkManager)
+    DMM.add_manager(driver_bluetooth.BTManager)
+    DMM.add_manager(driver_usb.USBManager)
 
-    udm = USBDeviceManager()
-    udm.daemon = True
-    udm.start()
+    DMM.start()
 
     # Did this because of the
     modules._iot_daemon_started = True
