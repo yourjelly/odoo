@@ -199,12 +199,6 @@ Discuss.include({
             self.$buttons.find('.o_mail_discuss_button_' + type)
                          .removeClass('d-none')
                          .addClass('d-block');
-            self.$buttons.find('.o_mail_discuss_button_mark_all_read')
-                         .toggleClass('d-none', type !== 'mailbox_inbox')
-                         .toggleClass('d-block', type === 'mailbox_inbox');
-            self.$buttons.find('.o_mail_discuss_button_unstar_all')
-                         .toggleClass('d-none', type !== 'mailbox_starred')
-                         .toggleClass('d-block', type === 'mailbox_starred');
 
             // update Mailbox page buttons
             if (inMailbox) {
