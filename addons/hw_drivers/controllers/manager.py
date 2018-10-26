@@ -5,10 +5,9 @@ import urllib3
 import logging
 from threading import Thread
 
-from . import driver, iot_config
+from . import driver, iot_config as _server
 
 _logger = logging.getLogger(__name__)
-_server = iot_config.Server()
 
 
 class MainManager(Thread):

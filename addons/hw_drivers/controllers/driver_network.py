@@ -4,8 +4,7 @@ import subprocess
 import re
 
 from . import manager, driver
-from . import iot_config
-_server = iot_config.Server()
+from . import iot_config as _server
 
 
 class NetworkManager(manager.MetaManager):
@@ -93,6 +92,7 @@ class NetworkPrinterDriver(driver.MetaDriver):
             else:
                 subprocess.call(cmd + " -m '" + ppd[0].split(' ')[0] + "'", shell=True)
         except:
+            # TODO: WTF ? It crashes so we just retry ???
             subprocess.call(cmd, shell=True)
 
     def print(self, data):

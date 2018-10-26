@@ -5,13 +5,16 @@ import netifaces as ni
 
 
 class Server:
-    def get_hostname(self):
+    @classmethod
+    def get_hostname(cls):
         return subprocess.check_output('hostname').decode('utf-8').split('\n')[0]
 
-    def get_mac_address(self):
+    @classmethod
+    def get_mac_address(cls):
         return subprocess.check_output("/sbin/ifconfig eth0 |grep -Eo ..\(\:..\){5}", shell=True).decode('utf-8').split('\n')[0]
 
-    def read_file_first_line(self, filename):
+    @classmethod
+    def read_file_first_line(cls, filename):
         content = ""
         try:
             f = open('/home/pi/' + filename, 'r')
@@ -23,13 +26,16 @@ class Server:
             # content = content.split('\n')[0]
             return content
 
-    def get_odoo_server_url(self):
-        return self.read_file_first_line('odoo-remote-server.conf')
+    @classmethod
+    def get_odoo_server_url(cls):
+        return cls.read_file_first_line('odoo-remote-server.conf')
 
-    def get_token(self):
-        return self.read_file_first_line('token')
+    @classmethod
+    def get_token(cls):
+        return cls.read_file_first_line('token')
 
-    def get_local_ip(self):
+    @classmethod
+    def get_local_ip(cls):
         ip = ''
         for iface_id in ni.interfaces():
             iface_obj = ni.ifaddresses(iface_id)

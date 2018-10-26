@@ -6,8 +6,7 @@ import subprocess
 from odoo import http
 from odoo.http import request as httprequest
 
-from . import iot_config
-_server = iot_config.Server()
+from . import iot_config as _server
 
 owner_dict = {}
 last_ping = {}
@@ -121,8 +120,9 @@ class IoTDriversController(http.Controller):
 
     @http.route('/hw_drivers/device/action/<string:identifier>', type='json', auth='none', cors='*', csrf=False)
     def driveraction(self, identifier):
-        action = httprequest.jsonrequest.get('action')
-        params = httprequest.jsonrequest.get('data')
+        data = httprequest.jsonrequest
+        action = data.get('action')
+        params = data.get('data')
         return {
             'success': True,
             'message': '',
