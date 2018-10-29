@@ -61,19 +61,7 @@ var Chatter = Widget.extend({
         this._mentionSuggestions = this._mentionPartnerSuggestions;
 
         this.fields = {};
-        if (mailFields.mail_activity) {
-            this.fields.activity = new Activity(this, mailFields.mail_activity, record, options);
-        }
-        if (mailFields.mail_followers) {
-            this.fields.followers = new Followers(this, mailFields.mail_followers, record, options);
-        }
-        if (mailFields.mail_thread) {
-            this.fields.thread = new ThreadField(this, mailFields.mail_thread, record, options);
-            var fieldsInfo = record.fieldsInfo[options.viewType || record.viewType];
-            var nodeOptions = fieldsInfo[mailFields.mail_thread].options || {};
-            this.hasLogButton = options.display_log_button || nodeOptions.display_log_button;
-            this.postRefresh = nodeOptions.post_refresh || 'never';
-        }
+        this.initMailFields(record, mailFields, options);
         this.attachmentBoxOpened = false;
     },
     /**
@@ -103,6 +91,21 @@ var Chatter = Widget.extend({
     // Public
     //--------------------------------------------------------------------------
 
+    initMailFields: function (record, mailFields, options) {
+        if (mailFields.mail_activity) {
+            this.fields.activity = new Activity(this, mailFields.mail_activity, record, options);
+        }
+        if (mailFields.mail_followers) {
+            this.fields.followers = new Followers(this, mailFields.mail_followers, record, options);
+        }
+        if (mailFields.mail_thread) {
+            this.fields.thread = new ThreadField(this, mailFields.mail_thread, record, options);
+            var fieldsInfo = record.fieldsInfo[options.viewType || record.viewType];
+            var nodeOptions = fieldsInfo[mailFields.mail_thread].options || {};
+            this.hasLogButton = options.display_log_button || nodeOptions.display_log_button;
+            this.postRefresh = nodeOptions.post_refresh || 'never';
+        }
+    },
     /**
      * @param {Object} record
      * @param {integer} [record.res_id=undefined]
