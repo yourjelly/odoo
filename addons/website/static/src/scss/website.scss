@@ -1,3 +1,62 @@
+.o_doc_assets_page {
+    .page {
+        &, div {
+            clear: both;
+            background-color: lightgray;
+
+            padding: 8px 8px;
+            + div {
+                margin-top: 8px;
+            }
+        }
+        .asset {
+            background-color: theme-color('alpha');
+
+            .template {
+                position: relative;
+                padding-top: 0;
+
+                &::before {
+                    content: attr(data-name);
+                    float: left;
+                    display: block;
+                    margin-left: -8px;
+                    margin-bottom: 4px;
+                    padding: 2px;
+                    border-right: 1px solid black;
+                    border-bottom: 1px solid black;
+                    background-color: gray;
+                    color: white;
+                    font-size: 10px;
+                    font-weight: bold;
+                }
+
+                &.assets_helpers {
+                    background-color: theme-color('beta');
+                }
+                &.assets_specific_helpers {
+                    background-color: theme-color('delta');
+                }
+                &.assets_bootstrap {
+                    background-color: theme-color('epsilon');
+                }
+
+                .file {
+                    background-color: white;
+                }
+            }
+
+            &, .template:not(.assets_bootstrap):not(.assets_helpers) {
+                &::after {
+                    content: "...";
+                    display: block;
+                    clear: both;
+                }
+            }
+        }
+    }
+}
+
 ///
 /// This file regroups the website design rules.
 ///

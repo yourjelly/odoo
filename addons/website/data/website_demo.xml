@@ -6,6 +6,98 @@
             <field name="domain"></field>
         </record>
 
+        <record id="doc_assets_page" model="website.page">
+            <field name="name">doc_assets_page</field>
+            <field name="url">/doc/assets</field>
+            <field name="website_published">False</field>
+            <field name="type">qweb</field>
+            <field name="key">website.doc_assets_page_view</field>
+            <field name="arch" type="xml">
+                <t name="Debug" t-name="website.doc_assets_page_view">
+                    <t t-call="website.layout">
+                        <div id="wrap" class="o_doc_assets_page oe_structure">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <h1>Since saas-11.4 (less to scss)</h1>
+                                        <div class="page">
+                                            <div class="asset">
+                                                <div class="template assets_helpers" data-name="web._assets_helpers">
+                                                    <div class="template" data-name="web._assets_utils">
+                                                        <div class="file">bootstrap_functions</div>
+                                                        <div class="file">bootstrap_mixins</div>
+                                                        <div class="file">bootstrap_mixins_overridde</div>
+                                                    </div>
+                                                    <div class="template" data-name="web._assets_primary_variables"/>
+                                                    <div class="template" data-name="web._assets_secondary_variables"/>
+                                                    <div class="file">bootstrap_variables</div>
+                                                </div>
+                                            </div>
+                                            <div class="asset">
+                                                <div class="template assets_specific_helpers" data-name="web._assets_specific_helpers">
+                                                    <div class="template assets_helpers" data-name="web._assets_helpers">
+                                                        <div class="template" data-name="web._assets_utils">
+                                                            <div class="file">bootstrap_functions</div>
+                                                            <div class="file">bootstrap_mixins</div>
+                                                            <div class="file">bootstrap_mixins_overridde</div>
+                                                        </div>
+                                                        <div class="template" data-name="web._assets_primary_variables"/>
+                                                        <div class="template" data-name="web._assets_secondary_variables"/>
+                                                    </div>
+                                                </div>
+                                                <div class="template assets_bootstrap" data-name="web._assets_bootstrap">
+                                                    <div class="file">bootstrap_functions</div>
+                                                    <div class="file">bootstrap_mixins</div>
+                                                    <div class="file">bootstrap_variables</div>
+                                                    <div class="file">bootstrap_mixins_overridde</div>
+                                                    <div class="file">bootstrap_rules</div>
+                                                    <div class="file">bootstrap_rules_overridde</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <h1>Since saas-12.1</h1>
+                                        <div class="page">
+                                            <div class="asset">
+                                                <div class="template assets_helpers" data-name="web._assets_helpers">
+                                                    <div class="template" data-name="web._assets_utils">
+                                                        <div class="file">bootstrap_functions</div>
+                                                        <div class="file">bootstrap_mixins</div>
+                                                        <div class="file">bootstrap_mixins_overridde</div>
+                                                    </div>
+                                                    <div class="template" data-name="web._assets_primary_variables"/>
+                                                    <div class="template" data-name="web._assets_secondary_variables"/>
+                                                    <div class="file">bootstrap_variables</div>
+                                                </div>
+                                            </div>
+                                            <div class="asset">
+                                                <div class="template assets_helpers" data-name="web._assets_helpers">
+                                                    <div class="template" data-name="web._assets_utils">
+                                                        <div class="file">bootstrap_functions</div>
+                                                        <div class="file">bootstrap_mixins</div>
+                                                        <div class="file">bootstrap_mixins_overridde</div>
+                                                    </div>
+                                                    <div class="template" data-name="web._assets_primary_variables"/>
+                                                    <div class="template" data-name="web._assets_secondary_variables"/>
+                                                    <div class="template assets_specific_helpers" data-name="web._assets_specific_helpers"/>
+                                                    <div class="file">bootstrap_variables</div>
+                                                </div>
+                                                <div class="template assets_bootstrap" data-name="web._assets_bootstrap">
+                                                    <div class="file">bootstrap_rules</div>
+                                                    <div class="file">bootstrap_rules_overridde</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </field>
+        </record>
+
         <!-- BS Debug Page -->
         <!-- Showcase all (most?) BS components and utilities -->
         <record id="bs_debug_page" model="website.page">
