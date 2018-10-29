@@ -1,7 +1,3 @@
-:root {
-    font-size: $o-root-font-size;
-}
-
 // ------------------------------------------------------------------
 //  General
 // ------------------------------------------------------------------
@@ -96,8 +92,8 @@ div.o_boolean_toggle.custom-control.custom-checkbox {
         }
         &::after {
             transform: translate($line-height-computed * 0.2, $line-height-computed * 0.2);
-            width: ceil($circle-width / 1rem * $o-root-font-size);
-            height: ceil($circle-width / 1rem * $o-root-font-size);
+            width: ceil($circle-width / 1rem * 16px);
+            height: ceil($circle-width / 1rem * 16px);
             border-radius: 100px;
             background-color: $white;
             cursor: pointer;

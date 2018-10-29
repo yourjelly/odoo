@@ -137,12 +137,19 @@
         <script type="text/javascript" src="/web/static/src/js/widgets/colorpicker.js"/>
     </template>
 
-    <template id="assets_backend" name="Backend Assets (used in backend interface)">
+    <template id="assets_odoo">
         <t t-call="web._assets_helpers">
             <t t-call="web._assets_backend_helpers"/>
         </t>
 
         <t t-call="web._assets_bootstrap"/>
+    </template>
+
+    <template id="assets_backend" name="Backend Assets (used in backend interface)">
+        <t t-call="web._assets_helpers">
+            <t t-call="web._assets_backend_helpers"/>
+        </t>
+
         <link rel="stylesheet" type="text/scss" href="/web/static/lib/tempusdominus/tempusdominus.scss"/>
 
         <link rel="stylesheet" type="text/css" href="/base/static/src/css/modules.css"/>
@@ -313,12 +320,18 @@
         <link rel="stylesheet" type="text/scss" href="/web/static/src/scss/report_backend.scss"/>
     </template>
 
+    <template id="_assets_bootstrap_frontend" inherit_id="web._assets_bootstrap" primary="True">
+        <xpath expr="//link[@href='/web/static/src/scss/import_bootstrap.scss']" position="replace">
+            <link rel="stylesheet" type="text/scss" href="/web/static/src/scss/import_bootstrap_frontend.scss"/>
+        </xpath>
+    </template>
+
     <template id="web.assets_frontend" name="Website Assets">
         <t t-call="web._assets_helpers">
             <t t-call="web._assets_frontend_helpers"/>
         </t>
 
-        <t t-call="web._assets_bootstrap"/>
+        <t t-call="web._assets_bootstrap_frontend"/>
         <link rel="stylesheet" type="text/scss" href="/web/static/lib/tempusdominus/tempusdominus.scss"/>
         <link rel="stylesheet" type="text/scss" href="/web/static/src/scss/navbar_mobile.scss"/>
 
@@ -689,8 +702,10 @@
                 </script>
 
                 <t t-call-assets="web.assets_common" t-js="false"/>
+                <t t-call-assets="web.assets_odoo" t-js="false"/>
                 <t t-call-assets="web.assets_backend" t-js="false"/>
                 <t t-call-assets="web.assets_common" t-css="false"/>
+                <t t-call-assets="web.assets_odoo" t-css="false"/>
                 <t t-call-assets="web.assets_backend" t-css="false"/>
 
                 <![CDATA[

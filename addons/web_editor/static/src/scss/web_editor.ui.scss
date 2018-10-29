@@ -94,8 +94,6 @@ html[lang] > body.editor_enable [data-oe-translation-state] {
 
 // SNIPPET PANEL
 #oe_snippets {
-    @include o-w-preserve-btn;
-
     display: flex;
     flex-flow: column nowrap;
     @include o-position-absolute(0, auto, 0, -$o-we-sidebar-width);

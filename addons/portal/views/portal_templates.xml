@@ -15,9 +15,11 @@
                 </script>
 
                 <t t-call-assets="web.assets_common" t-js="false"/>
+                <t t-call-assets="web.assets_odoo" t-js="false"/>
                 <t t-call-assets="web.assets_frontend" t-js="false"/>
 
                 <t t-call-assets="web.assets_common" t-css="false"/>
+                <t t-call-assets="web.assets_odoo" t-css="false"/>
                 <t t-call-assets="web.assets_frontend" t-css="false"/>
             </t>
             <t t-set="head" t-value="head_website + (head or '')"/>

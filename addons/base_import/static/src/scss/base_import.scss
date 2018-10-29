@@ -89,10 +89,10 @@
             list-style: none;
             border-radius: $border-radius;
             &.bg-error {
-                @extend .bg-danger;
+                background-color: theme-color('danger');
             }
             &.text-error {
-                @extend .text-danger;
+                color: theme-color('danger');
             }
         }
     }

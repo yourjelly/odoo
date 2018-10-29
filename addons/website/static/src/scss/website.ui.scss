@@ -101,17 +101,6 @@ body.o_connected_user {
 
 // MODALS
 body .modal {
-    &.o_technical_modal {
-        @include o-w-preserve-base;
-        @include o-w-preserve-headings;
-        @include o-w-preserve-forms;
-        @include o-w-preserve-links;
-        @include o-w-preserve-btn;
-        @include o-w-preserve-cards;
-        @include o-w-preserve-modals;
-        @include o-w-preserve-tabs;
-    }
-
     // MOBILE PREVIEW
     &.oe_mobile_preview {
         text-align: center;
@@ -360,10 +349,6 @@ body .modal {
 
 // ACE EDITOR
 .o_ace_view_editor {
-    @include o-w-preserve-base;
-    @include o-w-preserve-btn;
-    @include o-w-preserve-forms;
-
     @include o-position-absolute($o-navbar-height, 0, 0);
     position: fixed;
     z-index: 1001;
