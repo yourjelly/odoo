@@ -24,13 +24,15 @@ odoo.define('web.AbstractView', function (require) {
  */
 
 var ajax = require('web.ajax');
-var Class = require('web.Class');
 var AbstractModel = require('web.AbstractModel');
 var AbstractRenderer = require('web.AbstractRenderer');
 var AbstractController = require('web.AbstractController');
-var utils = require('web.utils');
+var mvc = require('web.mvc');
+var viewUtils = require('web.viewUtils');
 
-var AbstractView = Class.extend({
+var Factory = mvc.Factory;
+
+var AbstractView = Factory.extend({
     // name displayed in view switchers
     display_name: '',
     // indicates whether or not the view is mobile-friendly
@@ -51,11 +53,11 @@ var AbstractView = Class.extend({
     // grouping data.
     groupable: true,
     enableTimeRangeMenu: false,
-    config: {
+    config: _.extend({}, Factory.prototype.config, {
         Model: AbstractModel,
         Renderer: AbstractRenderer,
         Controller: AbstractController,
-    },
+    }),
 
     /**
      * The constructor function is supposed to set 3 variables: rendererParams,
@@ -206,69 +208,34 @@ var AbstractView = Class.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * Main method of the view class. Create a controller, and make sure that
-     * data and libraries are loaded.
-     *
-     * There is a unusual thing going in this method with parents: we create
-     * renderer/model with parent as parent, then we have to reassign them at
-     * the end to make sure that we have the proper relationships.  This is
-     * necessary to solve the problem that the controller need the model and the
-     * renderer to be instantiated, but the model need a parent to be able to
-     * load itself, and the renderer needs the data in its constructor.
-     *
-     * @param {Widget} parent The parent of the resulting Controller (most
-     *      likely an action manager)
-     * @returns {Deferred} The deferred resolves to a controller
+     * @override
      */
     getController: function (parent) {
         var self = this;
         // check if a model already exists, as if not, one will be created and
         // we'll have to set the controller as its parent
         var alreadyHasModel = !!this.model;
-        return $.when(this._loadData(parent), ajax.loadLibs(this)).then(function () {
-            var state = self.model.get(arguments[0]);
-            var renderer = self.getRenderer(parent, state);
-            var Controller = self.Controller || self.config.Controller;
-            var controllerParams = _.extend({
-                initialState: state,
-            }, self.controllerParams);
-            var controller = new Controller(parent, self.model, renderer, controllerParams);
-            renderer.setParent(controller);
-
+        return this._super.apply(this, arguments).done(function (controller) {
             if (!alreadyHasModel) {
                 // if we have a model, it already has a parent. Otherwise, we
                 // set the controller, so the rpcs from the model actually work
                 self.model.setParent(controller);
             }
-            return controller;
         });
     },
     /**
-     * Returns the view model or create an instance of it if none
+     * Ensures that only one instance of AbstractModel is created
      *
-     * @param {Widget} parent the parent of the model, if it has to be created
-     * @return {Object} instance of the view model
+     * @override
      */
-    getModel: function (parent) {
+    getModel: function () {
         if (!this.model) {
-            var Model = this.config.Model;
-            this.model = new Model(parent);
+            this.model = this._super.apply(this, arguments);
         }
         return this.model;
     },
     /**
-     * Returns the a new view renderer instance
-     *
-     * @param {Widget} parent the parent of the model, if it has to be created
-     * @param {Object} state the information related to the rendered view
-     * @return {Object} instance of the view renderer
-     */
-    getRenderer: function (parent, state) {
-        var Renderer = this.config.Renderer;
-        return new Renderer(parent, state, this.rendererParams);
-    },
-    /**
-     * this is useful to customize the actual class to use before calling
+     * This is useful to customize the actual class to use before calling
      * createView.
      *
      * @param {Controller} Controller
@@ -282,18 +249,6 @@ var AbstractView = Class.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * Load initial data from the model
-     *
-     * @private
-     * @param {Widget} parent the parent of the model
-     * @returns {Deferred<*>} a deferred that resolves to whatever the model
-     *   decide to return
-     */
-    _loadData: function (parent) {
-        var model = this.getModel(parent);
-        return model.load(this.loadParams);
-    },
-    /**
      * Processes a fieldsView. In particular, parses its arch.
      *
      * @private
@@ -303,9 +258,7 @@ var AbstractView = Class.extend({
      */
     _processFieldsView: function (fieldsView) {
         var fv = _.extend({}, fieldsView);
-        var doc = $.parseXML(fv.arch).documentElement;
-        var stripWhitespaces = doc.nodeName.toLowerCase() !== 'kanban';
-        fv.arch = utils.xml_to_json(doc, stripWhitespaces);
+        fv.arch = viewUtils.parseArch(fv.arch);
         fv.viewFields = _.defaults({}, fv.viewFields, fv.fields);
         return fv;
     },
