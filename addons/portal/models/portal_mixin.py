@@ -33,7 +33,9 @@ class PortalMixin(models.AbstractModel):
         """ Get the current record access token """
         if not self.access_token:
             self.sudo().access_token = str(uuid.uuid4())
-        return self.access_token
+        if hasattr(self, 'is_public') and not self.is_public:
+            self.sudo().access_token = False
+        return self.sudo().access_token
 
     def _get_share_url(self, redirect=False, signup_partner=False, pid=None):
         """

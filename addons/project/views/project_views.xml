@@ -135,7 +135,7 @@
                                 <field name="privacy_visibility" widget="radio"/>
                                 <field name="is_public" invisible="1"/>
                                 <field name="public_link" string="Public Link" widget="CopyClipboardChar" options="{'string': 'Copy Link'}"
-                                       attrs="{'invisible':[('is_public','=',False)]}"/>
+                                       attrs="{'invisible': [('is_public','=',False)]}"/>
                                 <field name="partner_id" string="Customer"/>
                                 <label for="rating_status" groups="project.group_project_rating"/>
                                 <div groups="project.group_project_rating">

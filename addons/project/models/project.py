@@ -107,7 +107,8 @@ class Project(models.Model):
     def _get_public_link(self):
         for project in self:
             base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
-            project.public_link = base_url + project._get_share_url(redirect=True)
+            public_link = base_url + project._get_share_url(redirect=True)
+            project.public_link = public_link if project.sudo().access_token else "No public link available."
 
     @api.multi
     def attachment_tree_view(self):
