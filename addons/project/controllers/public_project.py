@@ -258,11 +258,10 @@ class PublicProject(http.Controller):
         if not access_token:
             return False
         rec_sudo = request.env[model].sudo().browse(document_id)
+        rec_token = rec_sudo.access_token or None
         if action == 'read':
-            rec_token = rec_sudo.access_token or rec_sudo.edit_token or None
-            return (rec_token and consteq(access_token, rec_token))
+            return (rec_token and consteq(access_token, rec_token) and rec_sudo.is_public)
         if action == 'edit':
-            rec_token = rec_sudo.edit_token or None
             return (rec_token and consteq(access_token, rec_token) and rec_sudo.privacy_visibility == 'portaledit')
         return False
 

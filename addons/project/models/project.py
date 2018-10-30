@@ -187,7 +187,6 @@ class Project(models.Model):
         return [(6, 0, [self.env.uid])]
 
     name = fields.Char("Name", index=True, required=True, track_visibility='onchange')
-    access_token = fields.Char('Security Token (readonly)', copy=False, default=lambda self: str(uuid.uuid4()))
     active = fields.Boolean(default=True,
         help="If the active field is set to False, it will allow you to hide the project without removing it.")
     sequence = fields.Integer(default=10, help="Gives the sequence order when displaying a list of Projects.")
