@@ -3724,6 +3724,11 @@ Record ids: %(records)s
             It is treated as a singleton list ``[vals]``, and a single record
             is returned.
 
+            field key may have field_name:language_code, this will add translation entry
+            in ir.translation with given value for that field, for that source field is needed::
+
+                [{'field_name': field_value, 'field_name': field_value_translated, ...}, ...]
+
             see :meth:`~.write` for details
 
         :return: the created records
