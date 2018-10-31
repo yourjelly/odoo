@@ -332,9 +332,7 @@ return AbstractRenderer.extend({
         var self = this;
 
         // Remove Undefined of first GroupBy
-        var graphData = _.filter(this.state.data, function(elem){
-            return elem.labels[0] !== undefined;
-        });
+        var graphData = _.filter(this.state.data, this._sanitizeData);
 
         // undefined label value becomes a string 'Undefined' translated
         this.state.data.forEach(self._sanitizeLabel);
@@ -354,7 +352,8 @@ return AbstractRenderer.extend({
                     key: measure,
                 });
             if (this.state.comparisonData && this.state.comparisonData.length > 0) {
-                values = this.state.comparisonData.map(function (datapt, index) {
+                var graphComparisonData = _.filter(this.state.comparisonData, this._sanitizeData);
+                values = graphComparisonData.map(function (datapt, index) {
                     return {x: index, y: datapt.value};
                 });
                 data.push({
@@ -519,6 +518,17 @@ return AbstractRenderer.extend({
             if (label === undefined) return _t("Undefined");
             return label;
         });
+    },
+
+    /**
+     * Helper function, removes undefined values
+     *
+     * @param {Array} datapt an array that contains groupby labels of the graph
+     *     received by the read_group rpc.
+     * @returns {boolean}
+     */
+    _sanitizeData: function (datapt) {
+        return datapt.labels[0] !== undefined;
     },
 });
 
