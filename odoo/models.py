@@ -3697,7 +3697,7 @@ Record ids: %(records)s
                     val = vals[name]
                     Translations._set_ids(tname, 'model', splitted_name[1], self.ids, val)
                 else:
-                    raise MissingError(_('Missing source value for the field %s') % splitted_name[0])
+                    raise UserError(_('Missing source value for the field %s') % splitted_name[0])
 
         # update parent_path
         if parent_records:
@@ -3995,7 +3995,7 @@ Record ids: %(records)s
                     val = data['stored'][name]
                     Translations._set_ids(tname, 'model', splitted_name[1], record.ids, val)
                 else:
-                    raise MissingError(_('Missing source value for the field %s') % splitted_name[0])
+                    raise UserError(_('Missing source value for the field %s') % splitted_name[0])
 
         return records
 
