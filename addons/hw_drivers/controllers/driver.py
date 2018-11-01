@@ -3,6 +3,7 @@ import logging
 import time
 from threading import Thread
 import usb
+import bluetooth
 import gatt
 import subprocess
 import netifaces as ni
@@ -192,16 +193,44 @@ class GattBtManager(gatt.DeviceManager):
         if path not in drivers:
             for driverclass in btdrivers:
                 d = driverclass(device = device, manager=self)
-                if d.supported():
+                if d.bt_type == "LE" and d.supported():
                     drivers[path] = d
                     d.connect()
                     send_iot_box_device(False)
 
+# Blutooth RFCOMM port
+port = 1
+
+class PyBluezBtManager(Thread):
+    def start_discovery(self):
+        nearby_devices = bluetooth.discover_devices(lookup_names=True)
+        for addr, name in nearby_devices:
+            path = "bt_%s" % (addr,)
+            if path not in drivers:
+                for driverclass in btdrivers:
+                    device = { 'name': name, 'addr': addr, 'port': port}
+                    d = driverclass(device=device, manager=self)
+                    if d.bt_type == "CLASSIC" and d.supported():
+                        drivers[path] = d
+                        d.connect()
+                        d.start()
+                        port += 1
+                        send_iot_box_device(False)
+
+    def run(self):
+        while True:
+            self.start_discovery()
+            time.sleep(3 * 60)
 
 class BtManager(Thread):
     gatt_manager = False
+    classic_manager = False
 
     def run(self):
+        cm = PyBluezBtManager()
+        self.classic_manager = cm
+        cm.start()
+
         dm = GattBtManager(adapter_name='hci0')
         self.gatt_manager = dm
         dm.start_discovery()
@@ -228,6 +257,7 @@ class BtDriver(Driver, metaclass=BtMetaClass):
         self.manager = manager
         self.value = ''
         self.gatt_device = False
+        self.bt_type = 'LE'
 
     def disconnect(self):
         path = "bt_%s" % (self.dev.mac_address,)
@@ -248,9 +278,27 @@ class BtDriver(Driver, metaclass=BtMetaClass):
     def connect(self):
         pass
 
+class BtClassicDriver(Driver, metaclass=BtMetaClass):
+    def __init__(self, device, manager):
+        super(BtClassicDriver, self).__init__()
+        self.device = device
+        self.manager = manager
+        self.value = ''
+        self.classic_device = False
+        self.bt_type = 'CLASSIC'
 
+    def disconnect(self):
+        path = "bt_%s" % (self.device['addr'],)
+        del drivers[path]
 
+    def get_name(self):
+        return self.device['name']
 
+    def get_connection(self):
+        return 'bluetooth'
+
+    def connect(self):
+        pass
 
 
 class USBDeviceManager(Thread):
