@@ -48,6 +48,9 @@ var ModelFieldSelector = Widget.extend({
         // Handle keyboard and mouse navigation to build the field chain
         "mouseover li.o_field_selector_item": "_onItemHover",
         "keydown": "_onKeydown",
+
+        // Handle load more fields
+        "click .load_more": "_onLoadMoreClick",
     },
     /**
      * @constructor
@@ -224,7 +227,7 @@ var ModelFieldSelector = Widget.extend({
                     method: 'fields_get',
                     args: [
                         false,
-                        ["store", "searchable", "type", "string", "relation", "selection", "related"]
+                        ["store", "searchable", "type", "string", "relation", "selection", "related", "is_business_field"]
                     ],
                     context: this.getSession().user_context,
                 })
@@ -381,6 +384,7 @@ var ModelFieldSelector = Widget.extend({
         this.$(".o_field_selector_page").replaceWith(core.qweb.render(this.template + ".page", {
             lines: lines,
             followRelations: this.options.followRelations,
+            showAllFields: this.showAllFields || !!this.searchValue,
             debug: this.options.debugMode,
         }));
         this.$input.val(this.chain.join("."));
@@ -454,10 +458,18 @@ var ModelFieldSelector = Widget.extend({
         this._hidePopover();
     },
     /**
+     * Called when the load more is clicked -> load non business fields
+     */
+    _onLoadMoreClick: function () {
+        this.showAllFields = true;
+        this._render();
+    },
+    /**
      * Called when the popover "previous" icon is clicked -> removes last chain
      * node
      */
     _onPrevPageClick: function () {
+        this.showAllFields = false;
         this._goToPrevPage();
     },
     /**
@@ -468,6 +480,7 @@ var ModelFieldSelector = Widget.extend({
      */
     _onNextPageClick: function (e) {
         e.stopPropagation();
+        this.showAllFields = false;
         this._goToNextPage(this._getLastPageField($(e.currentTarget).data("name")));
     },
     /**
@@ -567,6 +580,10 @@ var ModelFieldSelector = Widget.extend({
             case $.ui.keyCode.ENTER:
                 if (inputHasFocus || searchInputHasFocus) break;
                 e.preventDefault();
+                if (this.$('.load_more.active').length) {
+                    this._onLoadMoreClick();
+                    break;
+                }
                 this._selectField(this._getLastPageField(this.$("li.o_field_selector_item.active").data("name")));
                 break;
         }

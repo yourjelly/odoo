@@ -765,6 +765,10 @@
     </t>
 </t>
 <ul t-name="ModelFieldSelector.page" class="o_field_selector_page">
+    <t t-set="business" t-value="_.filter(lines, { 'is_business_field': true })" />
+    <t t-if="!showAllFields and business.length">
+        <t t-set="lines" t-value="business" />
+    </t>
     <t t-foreach="lines" t-as="line">
         <t t-set="relationToFollow" t-value="followRelations(line) &amp;&amp; line.relation"/>
         <li t-attf-class="o_field_selector_item #{relationToFollow and 'o_field_selector_next_page' or 'o_field_selector_select_button'}#{line_index == 0 and ' active' or ''}"
@@ -774,6 +778,9 @@
             <i t-if="relationToFollow" class="fa fa-chevron-right o_field_selector_relation_icon" role="img" aria-label="Relation to follow" title="Relation to follow"/>
         </li>
     </t>
+    <li t-if="!showAllFields and business.length" class="o_field_selector_item load_more text-center">
+        Load More
+    </li>
 </ul>
 <t t-name="web.datepicker">
     <t t-set="placeholder" t-value="widget.getParent().node and widget.getParent().node.attrs.placeholder"/>
