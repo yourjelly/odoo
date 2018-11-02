@@ -62,7 +62,7 @@ class MainManager(Thread):
             data = {
                 'name': _server.get_hostname(),
                 'identifier': _server.get_mac_address(),
-                'ip': _server.get_local_ip(),
+                'ip': _server.get_ip(),
                 'token': _server.get_token(),
                 'devices': self.get_devices_list(),
             }
