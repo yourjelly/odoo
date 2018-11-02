@@ -13,18 +13,6 @@ class NetworkManager(manager.MetaManager):
     def scan(self):
         self._find_printers()
 
-    def _get_driver(self, device_name, raw_data):
-        driver_by_type = {
-            'printer': NetworkPrinterDriver,
-            'camera': CameraPrinterDriver,
-        }
-
-        type = raw_data.get('type')
-        if type:
-            return driver_by_type.get('type')
-        else:
-            return False
-
     def _find_printers(self):
         printers = subprocess.check_output("sudo lpinfo -lv", shell=True).decode('utf-8').split('Device')
         for printer in printers:
@@ -80,6 +68,9 @@ class NetworkPrinterDriver(driver.MetaDriver):
         self._model = raw_data.get('model')
         self._connection_type = raw_data.get('connection_type')
 
+    def is_compatible(self, identifier, raw_data):
+        return raw_data.get('type') == 'printer'
+
     def connect(self):
         self._install_driver()
 
@@ -103,6 +94,9 @@ class NetworkPrinterDriver(driver.MetaDriver):
 
 class CameraPrinterDriver(driver.MetaDriver):
     _type = 'camera'
+
+    def is_compatible(self, identifier, raw_data):
+        return raw_data.get('type') == 'camera'
 
     def connect(self):
         self._install_driver()

@@ -12,6 +12,7 @@ owner_dict = {}
 last_ping = {}
 drivers = {}
 
+print('MAIIIIIIIIIN ==============================')
 class IoTDriversController(http.Controller):
 
     @http.route('/hw_drivers/owner/check', type='json', auth='none', cors='*', csrf=False)

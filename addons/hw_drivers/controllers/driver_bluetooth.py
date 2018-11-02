@@ -19,8 +19,6 @@ class BTManager(manager.MetaManager, gatt.DeviceManager):
         identifier = "bt_%s" % (device.mac_address)
         self._add_device(identifier, device, mac_address=device.mac_address, manager=self)
 
-    def _get_driver(self, device_name, raw_data):
-        return BTDriver
 
 class BTDriver(driver.MetaDriver, gatt.Device):
     def set_name(self):

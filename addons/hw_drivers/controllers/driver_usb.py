@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import usb
+import evdev
 import subprocess
 import re
 
@@ -16,17 +17,12 @@ class USBManager(manager.MetaManager):
     def scan(self):
         self._clear_devices()
 
-        # self._find_cameras()
-
-        devices = usb.core.find(find_all=True)
-        for device in devices:
-            identifier = "usb_%04x:%04x_%03d_%03d_" % (device.idVendor, device.idProduct, device.bus, device.address)
+        for path in evdev.list_devices():
+            device = evdev.InputDevice(path)
+            identifier = "usb_%04x:%04x_%s_" % (device.info.vendor, device.info.product, path)
             self._add_device(identifier, device)
 
         self.connect_all_devices()
-
-    def _get_driver(self, device_name, raw_data):
-        return USBDriver
 
     def _find_cameras(self):
         try:
@@ -47,6 +43,10 @@ class USBManager(manager.MetaManager):
 
 class USBDriver(driver.MetaDriver):
     _type = 'misc'
+
+    def ping(self):
+        """USB Devices are always connected"""
+        return True
 
 class USBCameraDriver(driver.MetaDriver):
     _type = 'camera'

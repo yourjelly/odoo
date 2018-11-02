@@ -3,6 +3,8 @@
 import json
 import urllib3
 import logging
+import importlib.util
+import os
 from threading import Thread
 
 from . import driver, iot_config as _server
@@ -13,12 +15,23 @@ _logger = logging.getLogger(__name__)
 class MainManager(Thread):
     _managers = {}
 
+    def import_drivers(self):
+        driversList = os.listdir("/home/pi/odoo/addons/hw_drivers/drivers")
+        for driver in driversList:
+            path = "/home/pi/odoo/addons/hw_drivers/drivers/" + driver
+            spec = importlib.util.spec_from_file_location(driver, path)
+            if spec:
+                foo = importlib.util.module_from_spec(spec)
+                print(spec)
+                print(foo)
+                spec.loader.exec_module(foo)
+
     def start(self):
-        for manager in self._managers:
+        for type, manager in self._managers.items():
             manager.start()
 
     def scan(self):
-        for manager in self._managers:
+        for type, manager in self._managers.items():
             manager.scan()
 
     def add_manager(self, manager_class):
@@ -29,6 +42,11 @@ class MainManager(Thread):
 
     def get_manager(self, type):
         return self._managers.get(type)
+
+    def add_driver(self, type, driverClass):
+        manager = self.get_manager(type)
+        if manager:
+            manager.add_driver(driverClass)
 
     def get_device(self, identifier, type=False):
         device = False
@@ -84,6 +102,7 @@ class MainManager(Thread):
 class MetaManager:
     _type = False
     _devices = {}
+    _drivers = []
 
     def start(self):
         pass
@@ -94,19 +113,23 @@ class MetaManager:
     def _clear_devices(self):
         self._devices = {}
 
+    def _add_driver(self, driver):
+        self._drivers.append(driver)
+
     def _get_driver(self, identifier, raw_data):
-        return driver.MetaDriver
+        selected_driver = False
+        for _driver in self._drivers:
+            if _driver.supported(identifier, raw_data):
+                selected_driver = _driver
+                break
+        return selected_driver
 
     def _add_device(self, identifier, raw_data, **kwargs):
-        device = False
-
         driver = self._get_driver(identifier, raw_data)
         if driver:
-            device = driver(identifier, self._type, raw_data, **kwargs)
-            if device.is_supported():
-                self._devices[identifier] = device
+            self._devices[identifier] = driver(identifier, self._type, raw_data, **kwargs)
 
-        return device
+        return self._devices.get(identifier)
 
     def _remove_device(self, identifier):
         return self._devices.pop(identifier)

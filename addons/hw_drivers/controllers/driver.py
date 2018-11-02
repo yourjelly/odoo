@@ -19,7 +19,7 @@ class MetaDriver(Thread):
         self.set_name()
         super(MetaDriver, self).__init__()
 
-    def is_supported(self):
+    def is_compatible(self, identifier, raw_data):
         return True
 
     def ping(self):
