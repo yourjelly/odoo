@@ -116,6 +116,7 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
                     el.removeAttribute("disabled");
                 });
             }
+            return accessButtons;
         },
 
         //--------------------------------------------------------------------------
@@ -145,7 +146,7 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
             if ($modal.length) {
                 this._areAccessKeyVisible = true;
 
-                var usedAccessKey = this._getAllUsedAccessKeys();
+                var usedAccessKey = [];
 
                 var buttonsWithoutAccessKey = this.$el.find('button.btn:visible')
                         .not('[accesskey]')
@@ -156,9 +157,9 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
 
                 var filteredButtons = this._filterAccessButtons(buttonsWithoutAccessKey, accesskeyElements);
 
-                var assignAccesskey = this._toggleDisabled(filteredButtons, false);
+                var assignAccesskey = this._toggleDisabled(filteredButtons, true);
 
-                _.each(buttonsWithoutAccessKey, function (elem) {
+                _.each(accesskeyElements, function (elem) {
                     var buttonString = [elem.innerText, elem.title, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"].join('');
                     for (var letterIndex = 0; letterIndex < buttonString.length; letterIndex++) {
                         var candidateAccessKey = buttonString[letterIndex].toUpperCase();
@@ -170,13 +171,10 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
                         }
                     }
                 });
-
-                var elementsWithoutAriaKeyshortcut = this.$el.find('[accesskey]').not('[aria-keyshortcuts]');
-                    _.each(elementsWithoutAriaKeyshortcut, function (elem) {
-                        elem.setAttribute('aria-keyshortcuts', 'Alt+Shift+' + elem.accessKey);
-                    });
-                    this._addAccessKeyOverlays();
-
+                _.each(accesskeyElements, function (elem) {
+                    elem.setAttribute('aria-keyshortcuts', 'Alt+Shift+' + elem.accessKey);
+                });
+                this._addAccessKeyOverlays();
             }
             else {
                 if (!this._areAccessKeyVisible &&
@@ -280,15 +278,22 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
             if ((keyUpEvent.altKey || keyUpEvent.key === 'Alt') && !keyUpEvent.ctrlKey) {
                 var $modal = $(document).find('.modal-dialog');
                 if ($modal.length) {
-                    this._toggleDisabled(filteredButtons, true)
+                    var buttonsWithoutAccessKey = this.$el.find('button.btn:visible')
+                        .not('[accesskey]')
+                        .not('[disabled]')
+                        .not('[tabindex="-1"]');
+
+                    var accesskeyElements = $($modal[$modal.length - 1]).find('button.btn:visible')
+
+                    var filteredButtons = this._filterAccessButtons(buttonsWithoutAccessKey, accesskeyElements);
+
+                    var assignAccesskey = this._toggleDisabled(filteredButtons, false);
                 }
-                else {
-                    this._hideAccessKeyOverlay();
-                    if (keyUpEvent.preventDefault) keyUpEvent.preventDefault(); else keyUpEvent.returnValue = false;
-                    if (keyUpEvent.stopPropagation) keyUpEvent.stopPropagation();
-                    if (keyUpEvent.cancelBubble) keyUpEvent.cancelBubble = true;
-                    return false;
-                }
+                this._hideAccessKeyOverlay();
+                if (keyUpEvent.preventDefault) keyUpEvent.preventDefault(); else keyUpEvent.returnValue = false;
+                if (keyUpEvent.stopPropagation) keyUpEvent.stopPropagation();
+                if (keyUpEvent.cancelBubble) keyUpEvent.cancelBubble = true;
+                return false;
             }
         },
     };
