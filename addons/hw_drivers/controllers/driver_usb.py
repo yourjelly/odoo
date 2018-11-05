@@ -11,18 +11,31 @@ from . import manager, driver
 class USBManager(manager.MetaManager):
     _type = 'usb'
 
-    def start(self):
+    def init(self):
         self.scan()
 
     def scan(self):
         self._clear_devices()
 
-        for path in evdev.list_devices():
-            device = evdev.InputDevice(path)
-            identifier = "usb_%04x:%04x_%s_" % (device.info.vendor, device.info.product, path)
+        devices = usb.core.find(find_all=True)
+        for device in devices:
+            identifier = "usb_%04x:%04x_%03d_%03d_" % (device.idVendor, device.idProduct, device.bus, device.address)
             self._add_device(identifier, device)
 
+
         self.connect_all_devices()
+
+    def _add_device(self, identifier, raw_data, **kwargs):
+        for device in [evdev.InputDevice(path) for path in evdev.list_devices()]:
+            if (raw_data.get('idVendor') == device.info.vendor) and (raw_data.get('idProduct') == device.info.product):
+                raw_data.update(device)
+                break
+
+        driver = self._get_driver(identifier, raw_data)
+        if driver:
+            self._devices[identifier] = driver(identifier, self._type, raw_data, **kwargs)
+
+        return self._devices.get(identifier)
 
     def _find_cameras(self):
         try:

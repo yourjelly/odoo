@@ -7,13 +7,29 @@ import importlib.util
 import os
 from threading import Thread
 
-from . import driver, iot_config as _server
+from . import iot_config as _server
+from . import driver
+from . import driver_network
+from . import driver_bluetooth
+from . import driver_usb
 
 _logger = logging.getLogger(__name__)
 
 
 class MainManager(Thread):
     _managers = {}
+
+    def init(self):
+        self.import_managers()
+        self.import_drivers()
+
+        for type, manager in self._managers.items():
+            manager.init()
+
+    def import_managers(self):
+        self.add_manager(driver_network.NetworkManager)
+        self.add_manager(driver_bluetooth.BTManager)
+        self.add_manager(driver_usb.USBManager)
 
     def import_drivers(self):
         driversList = os.listdir("/home/pi/odoo/addons/hw_drivers/drivers")
@@ -25,10 +41,6 @@ class MainManager(Thread):
                 print(spec)
                 print(foo)
                 spec.loader.exec_module(foo)
-
-    def start(self):
-        for type, manager in self._managers.items():
-            manager.start()
 
     def scan(self):
         for type, manager in self._managers.items():
@@ -104,7 +116,7 @@ class MetaManager:
     _devices = {}
     _drivers = []
 
-    def start(self):
+    def init(self):
         pass
 
     def scan(self):

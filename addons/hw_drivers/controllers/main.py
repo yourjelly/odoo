@@ -7,12 +7,17 @@ from odoo import http
 from odoo.http import request as httprequest
 
 from . import iot_config as _server
+from . import manager
+
+"""Initialize the main manager"""
+DMM = manager.MainManager()
+DMM.init()
 
 owner_dict = {}
 last_ping = {}
 drivers = {}
 
-print('MAIIIIIIIIIN ==============================')
+
 class IoTDriversController(http.Controller):
 
     @http.route('/hw_drivers/owner/check', type='json', auth='none', cors='*', csrf=False)
@@ -76,17 +81,6 @@ class IoTDriversController(http.Controller):
                 'data': {}
             }
 
-    @http.route('/hw_drivers/drivers/status', type='http', auth='none', cors='*')
-    def status(self):
-        # TODO : WTF is this shit ?
-
-        result = "<html><head></head><body>List of drivers and values: <br/> <ul>"
-        for path in drivers:
-            result += "<li>" + path + ":" + str(drivers[path].value) + "</li>"
-        result += "</ul>"
-        result += " </body></html>"
-        return result
-
     @http.route('/hw_drivers/scan', type='json', auth='none', cors='*')
     def scan(self):
         return {
@@ -129,4 +123,3 @@ class IoTDriversController(http.Controller):
             'message': '',
             'data': DMM.get_device(identifier).action(action, params)
         }
-
