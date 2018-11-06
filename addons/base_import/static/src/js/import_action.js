@@ -2,7 +2,6 @@ odoo.define('base_import.import', function (require) {
 "use strict";
 
 var AbstractAction = require('web.AbstractAction');
-var ControlPanelMixin = require('web.ControlPanelMixin');
 var core = require('web.core');
 var session = require('web.session');
 var time = require('web.time');
@@ -72,7 +71,7 @@ function dataFilteredQuery(q) {
     q.callback({results: suggestions});
 }
 
-var DataImport = AbstractAction.extend(ControlPanelMixin, {
+var DataImport = AbstractAction.extend({
     template: 'ImportView',
     opts: [
         {name: 'encoding', label: _lt("Encoding:"), value: ''},
@@ -170,7 +169,7 @@ var DataImport = AbstractAction.extend(ControlPanelMixin, {
                 var status = {
                     cp_content: {$buttons: self.$buttons},
                 };
-                self.update_control_panel(status);
+                self.updateControlPanel(status);
             })
         );
     },

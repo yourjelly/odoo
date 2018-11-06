@@ -23,10 +23,10 @@ odoo.define('web.AbstractView', function (require) {
  * in most case discarded.
  */
 
-var ajax = require('web.ajax');
 var AbstractModel = require('web.AbstractModel');
 var AbstractRenderer = require('web.AbstractRenderer');
 var AbstractController = require('web.AbstractController');
+var ControlPanelView = require('web.ControlPanelView');
 var mvc = require('web.mvc');
 var viewUtils = require('web.viewUtils');
 
@@ -58,6 +58,7 @@ var AbstractView = Factory.extend({
         Renderer: AbstractRenderer,
         Controller: AbstractController,
     }),
+    withControlPanel: true,
 
     /**
      * The constructor function is supposed to set 3 variables: rendererParams,
@@ -148,6 +149,7 @@ var AbstractView = Factory.extend({
             controllerID: params.controllerID,
             bannerRoute: this.arch.attrs.banner_route,
         };
+
         // AAB: these params won't be necessary as soon as the ControlPanel will
         // be instantiated by the View
         this.controllerParams.displayName = params.action && (params.action.display_name || params.action.name);
@@ -157,12 +159,6 @@ var AbstractView = Factory.extend({
         this.controllerParams.searchViewHidden = this.searchview_hidden; // AAB: use searchable instead where it is used?
         this.controllerParams.actionViews = params.action ? params.action.views : [];
         this.controllerParams.viewType = this.viewType;
-        this.controllerParams.withControlPanel = true;
-        if (params.action && params.action.flags) {
-            this.controllerParams.withControlPanel = !params.action.flags.headless;
-        } else if ('withControlPanel' in params) {
-            this.controllerParams.withControlPanel = params.withControlPanel;
-        }
 
         var groupBy = params.groupBy;
         if (typeof groupBy === 'string') {
@@ -200,6 +196,24 @@ var AbstractView = Factory.extend({
             });
         }
 
+        var action = params.action || {};
+        if (action.flags) {
+            this.withControlPanel = !action.flags.headless;
+        } else if ('withControlPanel' in params) {
+            this.withControlPanel = params.withControlPanel;
+        }
+        this.controlPanelParams = {
+            actionId: action.id || false,
+            actionName: action.name,
+            actionType: action.type,
+            breadcrumbs: params.breadcrumbs,
+            context: params.context,
+            domain: params.domain,
+            hasSearchView: action.flags && action.flags.hasSearchView,
+            modelName: action.res_model,
+            viewInfo: action.controlPanelFieldsView,
+        };
+
         this.userContext = params.userContext;
     },
 
@@ -212,15 +226,34 @@ var AbstractView = Factory.extend({
      */
     getController: function (parent) {
         var self = this;
-        // check if a model already exists, as if not, one will be created and
-        // we'll have to set the controller as its parent
-        var alreadyHasModel = !!this.model;
-        return this._super.apply(this, arguments).done(function (controller) {
-            if (!alreadyHasModel) {
-                // if we have a model, it already has a parent. Otherwise, we
-                // set the controller, so the rpcs from the model actually work
-                self.model.setParent(controller);
-            }
+
+        var def;
+        if (this.withControlPanel) {
+            var controlPanelView = new ControlPanelView(this.controlPanelParams);
+            def = controlPanelView.getController(parent).then(function (controlPanel) {
+                self.controllerParams.controlPanel = controlPanel;
+                return controlPanel.appendTo(document.createDocumentFragment()).then(function () {
+                    return controlPanel;
+                });
+            });
+        }
+
+        var _super = this._super.bind(this);
+        return $.when(def).then(function (controlPanel) {
+            // check if a model already exists, as if not, one will be created and
+            // we'll have to set the controller as its parent
+            var alreadyHasModel = !!self.model;
+            return _super(parent).done(function (controller) {
+                if (controlPanel) {
+                    controlPanel.setParent(controller);
+                }
+                if (!alreadyHasModel) {
+                    // if we have a model, it already has a parent. Otherwise, we
+                    // set the controller, so the rpcs from the model actually work
+                    self.model.setParent(controller);
+                }
+            });
+
         });
     },
     /**

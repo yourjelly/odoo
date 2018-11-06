@@ -6,7 +6,6 @@ var NotificationService = require('web.NotificationService');
 var AbstractAction = require('web.AbstractAction');
 var AbstractStorageService = require('web.AbstractStorageService');
 var BasicFields = require('web.basic_fields');
-var ControlPanelMixin = require('web.ControlPanelMixin');
 var core = require('web.core');
 var ListController = require('web.ListController');
 var StandaloneFieldManagerMixin = require('web.StandaloneFieldManagerMixin');
@@ -647,9 +646,9 @@ QUnit.module('ActionManager', {
         assert.expect(2);
 
         var ClientAction = AbstractAction.extend({
-            className: 'o_client_action_test',
             start: function () {
                 this.$el.text('Hello World');
+                this.$el.addClass('o_client_action_test');
             },
         });
         core.action_registry.add('HelloWorldTest', ClientAction);
@@ -983,7 +982,7 @@ QUnit.module('ActionManager', {
     QUnit.test('should not push a loaded state of a client action', function (assert) {
         assert.expect(4);
 
-        var ClientAction = Widget.extend({
+        var ClientAction = AbstractAction.extend({
             init: function (parent, action, options) {
                 this._super.apply(this, arguments);
                 this.controllerID = options.controllerID;
@@ -1033,8 +1032,8 @@ QUnit.module('ActionManager', {
     QUnit.test('change a param of an ir.actions.client in the url', function (assert) {
         assert.expect(7);
 
-        var ClientAction = AbstractAction.extend(ControlPanelMixin, {
-            className: 'o_client_action',
+        var ClientAction = AbstractAction.extend({
+            hasControlPanel: true,
             init: function (parent, action) {
                 this._super.apply(this, arguments);
                 var context = action.context;
@@ -1042,11 +1041,13 @@ QUnit.module('ActionManager', {
             },
             start: function () {
                 assert.step('start');
-                this.$el.text(this.a);
+                this.$('.o_content').text(this.a);
+                this.$el.addClass('o_client_action');
                 this.trigger_up('push_state', {
                     controllerID: this.controllerID,
                     state: {a: this.a},
                 });
+                return this._super.apply(this, arguments);
             },
         });
         core.action_registry.add('ClientAction', ClientAction);
@@ -1060,7 +1061,7 @@ QUnit.module('ActionManager', {
         // execute the client action
         actionManager.doAction(9);
 
-        assert.strictEqual(actionManager.$('.o_client_action').text(), 'default value',
+        assert.strictEqual(actionManager.$('.o_client_action .o_content').text(), 'default value',
             "should have rendered the client action");
         assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 1,
             "there should be one controller in the breadcrumbs");
@@ -1071,7 +1072,7 @@ QUnit.module('ActionManager', {
             a: 'new value',
         });
 
-        assert.strictEqual(actionManager.$('.o_client_action').text(), 'new value',
+        assert.strictEqual(actionManager.$('.o_client_action .o_content').text(), 'new value',
             "should have rerendered the client action with the correct param");
         assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 1,
             "there should still be one controller in the breadcrumbs");
@@ -1672,9 +1673,9 @@ QUnit.module('ActionManager', {
         assert.expect(3);
 
         var ClientAction = AbstractAction.extend({
-            className: 'o_client_action_test',
             start: function () {
                 this.$el.text('Hello World');
+                this.$el.addClass('o_client_action_test');
             },
         });
         core.action_registry.add('HelloWorldTest', ClientAction);
@@ -1700,11 +1701,13 @@ QUnit.module('ActionManager', {
     QUnit.test('client action with control panel', function (assert) {
         assert.expect(4);
 
-        var ClientAction = AbstractAction.extend(ControlPanelMixin, {
-            className: 'o_client_action_test',
+        var ClientAction = AbstractAction.extend({
+            hasControlPanel: true,
             start: function () {
-                this.$el.text('Hello World');
-                this.set('title', 'Hello'); // AAB: drop this and replace by getTitle()
+                this.$('.o_content').text('Hello World');
+                this.$el.addClass('o_client_action_test');
+                this._setTitle('Hello');
+                return this._super.apply(this, arguments);
             },
         });
         core.action_registry.add('HelloWorldTest', ClientAction);
@@ -1718,7 +1721,7 @@ QUnit.module('ActionManager', {
             "there should be one controller in the breadcrumbs");
         assert.strictEqual($('.o_control_panel .breadcrumb-item').text(), 'Hello',
             "breadcrumbs should still display the title of the controller");
-        assert.strictEqual(actionManager.$('.o_client_action_test').text(),
+        assert.strictEqual(actionManager.$('.o_client_action_test .o_content').text(),
             'Hello World', "should have correctly rendered the client action");
 
         actionManager.destroy();
@@ -1728,12 +1731,7 @@ QUnit.module('ActionManager', {
     QUnit.test('state is pushed for client actions', function (assert) {
         assert.expect(2);
 
-        var ClientAction = AbstractAction.extend(ControlPanelMixin, {
-            className: 'o_client_action_test',
-            start: function () {
-                this.$el.text('Hello World');
-            },
-        });
+        var ClientAction = AbstractAction.extend({});
         var actionManager = createActionManager({
             intercepts: {
                 push_state: function () {
@@ -1754,16 +1752,18 @@ QUnit.module('ActionManager', {
     QUnit.test('breadcrumb is updated on title change', function (assert) {
         assert.expect(2);
 
-        var ClientAction = Widget.extend(ControlPanelMixin, {
-            className: 'o_client_action_test',
+        var ClientAction = AbstractAction.extend({
+            hasControlPanel: true,
             events: {
                 click: function () {
-                    this.set("title", 'new title');
+                    this._setTitle('new title');
                 },
             },
             start: function () {
-                this.set("title", 'initial title');
-                this.$el.text('Hello World');
+                this._setTitle('initial title');
+                this.$('.o_content').text('Hello World');
+                this.$el.addClass('o_client_action_test');
+                return this._super.apply(this, arguments);
             },
         });
         var actionManager = createActionManager();
@@ -3259,11 +3259,13 @@ QUnit.module('ActionManager', {
         assert.expect(4);
 
         var ClientAction = AbstractAction.extend({
-            className: 'o_test',
             on_attach_callback: function () {
                 assert.step('on_attach_callback');
                 assert.ok(actionManager.currentDialogController,
                     "the currentDialogController should have been set already");
+            },
+            start: function () {
+                this.$el.addClass('o_test');
             },
         });
         core.action_registry.add('test', ClientAction);

@@ -7,13 +7,11 @@ var ThreadWidget = require('mail.widget.Thread');
 
 var AbstractAction = require('web.AbstractAction');
 var config = require('web.config');
-var ControlPanelMixin = require('web.ControlPanelMixin');
 var core = require('web.core');
 var data = require('web.data');
 var Dialog = require('web.Dialog');
 var dom = require('web.dom');
 var pyUtils = require('web.py_utils');
-var SearchView = require('web.OldSearchView');
 var session = require('web.session');
 
 var QWeb = core.qweb;
@@ -174,8 +172,9 @@ var ModeratorRejectMessageDialog = Dialog.extend({
     },
 });
 
-var Discuss = AbstractAction.extend(ControlPanelMixin, {
-    template: 'mail.discuss',
+var Discuss = AbstractAction.extend({
+    hasControlPanel: true,
+    contentTemplate: 'mail.discuss',
     custom_events: {
         message_moderation: '_onMessageModeration',
         search: '_onSearch',
@@ -257,7 +256,7 @@ var Discuss = AbstractAction.extend(ControlPanelMixin, {
             this._basicComposer.appendTo(this.$('.o_mail_discuss_content')));
         defs.push(
             this._extendedComposer.appendTo(this.$('.o_mail_discuss_content')));
-        defs.push(this._renderSearchView());
+        defs.push(this._super.apply(this, arguments));
 
         return this.alive($.when.apply($, defs))
             .then(function () {
@@ -648,26 +647,26 @@ var Discuss = AbstractAction.extend(ControlPanelMixin, {
             .on('click', '.o_mail_discuss_button_select_all', this._onSelectAllClicked.bind(this))
             .on('click', '.o_mail_discuss_button_unselect_all', this._onUnselectAllClicked.bind(this));
     },
-    /**
-     * @private
-     * @returns {Deferred}
-     */
-    _renderSearchView: function () {
-        var self = this;
-        var options = {
-            $buttons: $('<div>'),
-            action: this.action,
-            disable_groupby: true,
-        };
-        this.searchview = new SearchView(this, this.dataset, this.fields_view, options);
-        return this.alive(this.searchview.appendTo($('<div>')))
-            .then(function () {
-                self.$searchview_buttons = self.searchview.$buttons;
-                // manually call do_search to generate the initial domain and filter
-                // the messages in the default thread
-                self.searchview.do_search();
-            });
-    },
+    // /**
+    //  * @private
+    //  * @returns {Deferred}
+    //  */
+    // _renderSearchView: function () {
+    //     var self = this;
+    //     var options = {
+    //         $buttons: $('<div>'),
+    //         action: this.action,
+    //         disable_groupby: true,
+    //     };
+    //     this.searchview = new SearchView(this, this.dataset, this.fields_view, options);
+    //     return this.alive(this.searchview.appendTo($('<div>')))
+    //         .then(function () {
+    //             self.$searchview_buttons = self.searchview.$buttons;
+    //             // manually call do_search to generate the initial domain and filter
+    //             // the messages in the default thread
+    //             self.searchview.do_search();
+    //         });
+    // },
     /**
      * Render the sidebar of discuss app
      *
@@ -852,7 +851,7 @@ var Discuss = AbstractAction.extend(ControlPanelMixin, {
 
             // Update control panel before focusing the composer, otherwise
             // focus is on the searchview
-            self.set("title", self._thread.getTitle());
+            self._setTitle('#' + self._thread.getName());
             self._updateControlPanel();
             self._updateControlPanelButtons(self._thread);
 
@@ -966,13 +965,11 @@ var Discuss = AbstractAction.extend(ControlPanelMixin, {
      * @private
      */
     _updateControlPanel: function () {
-        this.update_control_panel({
+        this.updateControlPanel({
+            title: this._title,
             cp_content: {
                 $buttons: this.$buttons,
-                $searchview: this.searchview.$el,
-                $searchview_buttons: this.$searchview_buttons,
             },
-            searchview: this.searchview,
         });
     },
     /**

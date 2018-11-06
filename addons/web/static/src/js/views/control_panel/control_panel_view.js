@@ -1,64 +1,3 @@
-odoo.define('web.ControlPanelMixin', function (require) {
-"use strict";
-
-/**
- * Mixin allowing widgets to communicate with the ControlPanel. Widgets needing a
- * ControlPanel should use this mixin and call update_control_panel(cp_status) where
- * cp_status contains information for the ControlPanel to update itself.
- *
- * Note that the API is slightly awkward.  Hopefully we will improve this when
- * we get the time to refactor the control panel.
- *
- * For example, here is what a typical client action would need to do to add
- * support for a control panel with some buttons::
- *
- *     var ControlPanelMixin = require('web.ControlPanelMixin');
- *
- *     var SomeClientAction = Widget.extend(ControlPanelMixin, {
- *         ...
- *         start: function () {
- *             this._renderButtons();
- *             this._updateControlPanel();
- *             ...
- *         },
- *         do_show: function () {
- *              ...
- *              this._updateControlPanel();
- *         },
- *         _renderButtons: function () {
- *             this.$buttons = $(QWeb.render('SomeTemplate.Buttons'));
- *             this.$buttons.on('click', ...);
- *         },
- *         _updateControlPanel: function () {
- *             this.update_control_panel({
- *                 cp_content: {
- *                    $buttons: this.$buttons,
- *                 },
- *          });
- */
-var ControlPanelMixin = {
-    need_control_panel: true,
-    /**
-     * @param {web.ControlPanel} [cp]
-     */
-    set_cp: function (cp) {
-        this._controlPanel = cp;
-    },
-    /**
-     * @param {Object} [cp_status] see web.ControlPanel.updateContents() for a description
-     * @param {Object} [options] see web.ControlPanel.updateContents() for a description
-     */
-    update_control_panel: function (cp_status, options) {
-        if (this._controlPanel) {
-            this._controlPanel.updateContents(cp_status || {}, options || {});
-        }
-    },
-};
-
-return ControlPanelMixin;
-
-});
-
 odoo.define('web.ControlPanelView', function (require) {
 "use strict";
 
@@ -91,6 +30,9 @@ var ControlPanelView = Factory.extend({
      * @param {Object} [params.viewInfo] a controlpanel (or search) fieldsview
      * @param {string} [params.viewInfo.arch]
      * @param {string} [params.context={}]
+     * @param {boolean} [params.context.no_breadcrumbs=false] if set to true,
+     *   breadcrumbs won't be rendered
+     * @param {string} [params.domain=[]]
      * @param {string} [params.template] the QWeb template to render
      */
     init: function (params) {
@@ -98,6 +40,7 @@ var ControlPanelView = Factory.extend({
         this._super();
         params = params || {};
         var viewInfo = params.viewInfo || {arch: '<controlpanel/>', fields: {}};
+        var context = params.context || {};
 
         var context = params.context || {};
         this.searchDefaults = {};
@@ -109,16 +52,27 @@ var ControlPanelView = Factory.extend({
         });
 
         // TODO: use this where necessary
+        // var searchDefaults = {};
+        // for (var key in context) {
+        //     var match = /^search_default_(.*)$/.exec(key);
+        //     if (match) {
+        //         searchDefaults[match[1]] = context[key];
+        //     }
+        // }
         // var disableCustomFilters = context.search_disable_custom_filters;
         // var hasSearchView = params.hasSearchView;
 
 
         this.arch = viewUtils.parseArch(viewInfo.arch);
         this.fields = viewInfo.fields;
-        this.controllerParams.controllerID = params.controllerID;
+
         this.controllerParams.modelName = params.modelName;
 
-        this.rendererParams.context = params.context;
+        this.rendererParams.context = context;
+
+        this.modelParams.context = context;
+        this.modelParams.domain = params.domain || [];
+
         this.rendererParams.template = params.template;
         this.rendererParams.actionInfo = {
             actionId: params.actionId,
@@ -128,6 +82,8 @@ var ControlPanelView = Factory.extend({
             actionName: params.actionName,
             modelName: params.modelName
         };
+        this.rendererParams.breadcrumbs = params.breadcrumbs;
+        this.rendererParams.withBreadcrumbs = !context.no_breadcrumbs;
 
         this.loadParams.actionId = params.actionId;
         this.loadParams.fields = this.fields;

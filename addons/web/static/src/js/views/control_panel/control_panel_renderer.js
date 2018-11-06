@@ -26,12 +26,17 @@ var ControlPanelRenderer = Renderer.extend({
      * @override
      * @param {Object[]} [params.controls=[]] list of nodes to render in the
      *   buttons area.
+     * @param {Object[]} [params.breadcrumbs=[]] list of breadcrumbs elements
+     * @param {boolean} [params.withBreadcrumbs=false] if false, breadcrumbs
+     *   won't be rendered
      * @param {String} [params.template] the QWeb template to render the
      *   ControlPanel. By default, the template 'ControlPanel' will be used.
      */
     init: function (parent, state, params) {
         this._super.apply(this, arguments);
         this.controls = params.controls || [];
+        this._breadcrumbs = params.breadcrumbs || [];
+        this.withBreadcrumbs = params.withBreadcrumbs;
         if (params.template) {
             this.template = params.template;
         }
@@ -91,7 +96,6 @@ var ControlPanelRenderer = Renderer.extend({
      * @param {Array} [status.breadcrumbs] the breadcrumbs to display (see _render_breadcrumbs() for
      * precise description)
      * @param {Object} [status.cp_content] dictionnary containing the new ControlPanel jQuery elements
-     * @param {Boolean} [status.hidden] true if the ControlPanel should be hidden
      * @param {Boolean} [status.search_view_hidden] true if the searchview is hidden, false otherwise
      * @param {Boolean} [options.clear] set to true to clear from control panel
      * elements that are not in status.cp_content
@@ -99,48 +103,43 @@ var ControlPanelRenderer = Renderer.extend({
     render: function (status, options) {
         this._toggleVisibility(!status.hidden);
 
-        // Don't update the ControlPanel in headless mode as the views have
-        // inserted themselves the buttons where they want, so inserting them
-        // again in the ControlPanel will remove them from where they should be
-        if (!status.hidden) {
-            options = _.defaults({}, options, {
-                clear: true, // clear control panel by default
-            });
-            var new_cp_content = status.cp_content || {};
+        options = _.defaults({}, options, {
+            clear: true, // clear control panel by default
+        });
+        var new_cp_content = status.cp_content || {};
 
-            // Detach special controls
-            this.$controls.detach();
+        // Detach special controls
+        this.$controls.detach();
 
-            // Render the breadcrumbs
-            if (status.breadcrumbs) {
-                this.$('.breadcrumb').html(this._renderBreadcrumbs(status.breadcrumbs));
-            }
-
-            if ('search_view_hidden' in status) {
-                if (status.search_view_hidden) {
-                    this.$('.o_searchview').hide();
-                    this.$('.o_search_options').hide();
-                } else {
-                    this.$('.o_searchview').show();
-                    this.$('.o_search_options').show();
-                }
-            }
-
-            // Detach control_panel old content and attach new elements
-            var toDetach = this.nodes;
-            if (options.clear) {
-                this._detachContent(toDetach);
-            } else {
-                this._detachContent(_.pick(toDetach, _.keys(new_cp_content)));
-            }
-            this._attachContent(new_cp_content);
-            if (status.active_view_selector) {
-                this._updateSwitchButtons(status.active_view_selector);
-            }
-
-            // Attach special controls
-            this.$controls.prependTo(this.nodes.$buttons);
+        // Render the breadcrumbs
+        if (this.withBreadcrumbs) {
+            this._renderBreadcrumbs(status.title);
         }
+
+        if ('search_view_hidden' in status) {
+            if (status.search_view_hidden) {
+                this.$('.o_searchview').hide();
+                this.$('.o_search_options').hide();
+            } else {
+                this.$('.o_searchview').show();
+                this.$('.o_search_options').show();
+            }
+        }
+
+        // Detach control_panel old content and attach new elements
+        var toDetach = this.nodes;
+        if (options.clear) {
+            this._detachContent(toDetach);
+        } else {
+            this._detachContent(_.pick(toDetach, _.keys(new_cp_content)));
+        }
+        this._attachContent(new_cp_content);
+        if (status.active_view_selector) {
+            this._updateSwitchButtons(status.active_view_selector);
+        }
+
+        // Attach special controls
+        this.$controls.prependTo(this.nodes.$buttons);
     },
     updateState: function (state) {
         this.state = state;
@@ -175,18 +174,17 @@ var ControlPanelRenderer = Renderer.extend({
     },
     /**
      * @private
-     * @param {Array} breadcrumbs list of objects containing the following keys:
-     *   - action: the action to execute when clicking on this part of the
-     *       breadcrumbs
-     *   - index: the index in the breadcrumbs (starting at 0)
-     *   - title: what to display in the breadcrumbs
-     * @return {Array} list of breadcrumbs' li jQuery elements
+     * @param {string} title
      */
-    _renderBreadcrumbs: function (breadcrumbs) {
+    _renderBreadcrumbs: function (title) {
         var self = this;
-        return breadcrumbs.map(function (bc, index) {
-            return self._renderBreadcrumbsItem(bc, index, breadcrumbs.length);
+        var breadcrumbsDescriptors = this._breadcrumbs.concat({
+            title: title,
         });
+        var breadcrumbs = breadcrumbsDescriptors.map(function (bc, index) {
+            return self._renderBreadcrumbsItem(bc, index, breadcrumbsDescriptors.length);
+        });
+        this.$('.breadcrumb').html(breadcrumbs);
     },
     /**
      * Renders a button to display in the buttons area, given an arch's node.

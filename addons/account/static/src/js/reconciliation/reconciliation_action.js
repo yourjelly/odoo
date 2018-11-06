@@ -4,7 +4,6 @@ odoo.define('account.ReconciliationClientAction', function (require) {
 var AbstractAction = require('web.AbstractAction');
 var ReconciliationModel = require('account.ReconciliationModel');
 var ReconciliationRenderer = require('account.ReconciliationRenderer');
-var ControlPanelMixin = require('web.ControlPanelMixin');
 var Widget = require('web.Widget');
 var core = require('web.core');
 var _t = core._t;
@@ -13,7 +12,7 @@ var _t = core._t;
 /**
  * Widget used as action for 'account.bank.statement' reconciliation
  */
-var StatementAction = AbstractAction.extend(ControlPanelMixin, {
+var StatementAction = AbstractAction.extend({
     title: core._t('Bank Reconciliation'),
     template: 'reconciliation',
     custom_events: {
@@ -103,7 +102,7 @@ var StatementAction = AbstractAction.extend(ControlPanelMixin, {
         var self = this;
 
         this.set("title", this.title);
-        this.update_control_panel({search_view_hidden: true}, {clear: true});
+        this.updateControlPanel({search_view_hidden: true}, {clear: true});
 
         this.renderer.prependTo(self.$('.o_form_sheet'));
         this._renderLines();
@@ -129,7 +128,7 @@ var StatementAction = AbstractAction.extend(ControlPanelMixin, {
     do_show: function () {
         this._super.apply(this, arguments);
         if (this.action_manager) {
-            this.update_control_panel({search_view_hidden: true}, {clear: true});
+            this.updateControlPanel({search_view_hidden: true}, {clear: true});
             this.action_manager.do_push_state({
                 action: this.params.tag,
                 active_id: this.params.res_id,

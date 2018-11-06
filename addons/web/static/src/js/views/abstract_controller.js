@@ -16,15 +16,17 @@ var ActionMixin = require('web.ActionMixin');
 var ajax = require('web.ajax');
 var concurrency = require('web.concurrency');
 var config = require('web.config');
-var ControlPanelMixin = require('web.ControlPanelMixin');
 var core = require('web.core');
 var mvc = require('web.mvc');
 
 var QWeb = core.qweb;
 
-var AbstractController = mvc.Controller.extend(ActionMixin, ControlPanelMixin, {
+var AbstractController = mvc.Controller.extend(ActionMixin, {
     custom_events: {
+        get_controller_context: '_onGetControllerContext',
+        navigation_move: '_onNavigationMove',
         open_record: '_onOpenRecord',
+        search: '_onSearch',
         switch_view: '_onSwitchView',
     },
     events: {
@@ -36,15 +38,16 @@ var AbstractController = mvc.Controller.extend(ActionMixin, ControlPanelMixin, {
      * @param {string} params.modelName
      * @param {string} [params.controllerID] an id to ease the communication
      *   with upstream components
+     * @param {ControlPanelController} [params.controlPanel]
      * @param {any} [params.handle] a handle that will be given to the model (some id)
      * @param {boolean} params.isMultiRecord
      * @param {Object[]} params.actionViews
      * @param {string} params.viewType
-     * @param {boolean} params.withControlPanel set to false to hide the
-     *   ControlPanel
      */
     init: function (parent, model, renderer, params) {
         this._super.apply(this, arguments);
+        this._controlPanel = params.controlPanel;
+        this._title = params.displayName;
         this.modelName = params.modelName;
         this.activeActions = params.activeActions;
         this.controllerID = params.controllerID;
@@ -54,7 +57,6 @@ var AbstractController = mvc.Controller.extend(ActionMixin, ControlPanelMixin, {
         this.dp = new concurrency.DropPrevious();
         // those arguments are temporary, they won't be necessary as soon as the
         // ControlPanel will be handled by the View
-        this.displayName = params.displayName;
         this.isMultiRecord = params.isMultiRecord;
         this.searchable = params.searchable;
         this.searchView = params.searchView;
@@ -63,11 +65,6 @@ var AbstractController = mvc.Controller.extend(ActionMixin, ControlPanelMixin, {
         this.enableTimeRangeMenu = params.enableTimeRangeMenu;
         this.actionViews = params.actionViews;
         this.viewType = params.viewType;
-        this.withControlPanel = params.withControlPanel !== false;
-        // override this.need_control_panel so that the ActionManager doesn't
-        // update the control panel when it isn't visible (this is a temporary
-        // hack that can be removed as soon as the CP'll be handled by the view)
-        this.need_control_panel = this.withControlPanel;
     },
     /**
      * Simply renders and updates the url.
@@ -79,10 +76,13 @@ var AbstractController = mvc.Controller.extend(ActionMixin, ControlPanelMixin, {
 
         this.$el.addClass('o_view_controller');
 
-        // render the ControlPanel elements (buttons, pager, sidebar...)
-        this.controlPanelElements = this._renderControlPanelElements();
-
         return this._super.apply(this, arguments).then(function () {
+            if (self._controlPanel) {
+                // render the ControlPanel elements (buttons, pager, sidebar...)
+                self.controlPanelElements = self._renderControlPanelElements();
+                self._controlPanel.$el.prependTo(self.$el);
+            }
+
             return self._update(self.initialState);
         });
     },
@@ -152,17 +152,6 @@ var AbstractController = mvc.Controller.extend(ActionMixin, ControlPanelMixin, {
      */
     getContext: function () {
         return {};
-    },
-    /**
-     * Returns a title that may be displayed in the breadcrumb area.  For
-     * example, the name of the record.
-     *
-     * note: this will be moved to AbstractAction
-     *
-     * @returns {string}
-     */
-    getTitle: function () {
-        return this.displayName;
     },
     /**
      * Gives the focus to the renderer
@@ -317,7 +306,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, ControlPanelMixin, {
                         js.remove();
                     });
                     return $.when.apply($, defs).then(function () {
-                        $banner.prependTo(self.$el);
+                        $banner.prependTo(self.$('.o_content'));
                         self._$banner = $banner;
                     });
                 });
@@ -332,24 +321,20 @@ var AbstractController = mvc.Controller.extend(ActionMixin, ControlPanelMixin, {
      * @returns {Object} an object containing the control panel jQuery elements
      */
     _renderControlPanelElements: function () {
-        var elements = {};
+        var elements = {
+            $buttons: $('<div>'),
+            $sidebar: $('<div>'),
+            $pager: $('<div>'),
+        };
 
-        if (this.withControlPanel) {
-            elements = {
-                $buttons: $('<div>'),
-                $sidebar: $('<div>'),
-                $pager: $('<div>'),
-            };
-
-            this.renderButtons(elements.$buttons);
-            this.renderSidebar(elements.$sidebar);
-            this.renderPager(elements.$pager);
-            // remove the unnecessary outer div
-            elements = _.mapObject(elements, function($node) {
-                return $node && $node.contents();
-            });
-            elements.$switch_buttons = this._renderSwitchButtons();
-        }
+        this.renderButtons(elements.$buttons);
+        this.renderSidebar(elements.$sidebar);
+        this.renderPager(elements.$pager);
+        // remove the unnecessary outer div
+        elements = _.mapObject(elements, function($node) {
+            return $node && $node.contents();
+        });
+        elements.$switch_buttons = this._renderSwitchButtons();
 
         return elements;
     },
@@ -391,6 +376,13 @@ var AbstractController = mvc.Controller.extend(ActionMixin, ControlPanelMixin, {
         return $switchButtons;
     },
     /**
+     * @override
+     * @private
+     */
+    _startRenderer: function () {
+        return this.renderer.appendTo(this.$('.o_content'));
+    },
+    /**
      * This method is called after each update or when the start method is
      * completed.
      *
@@ -406,10 +398,10 @@ var AbstractController = mvc.Controller.extend(ActionMixin, ControlPanelMixin, {
     _update: function (state) {
         // AAB: update the control panel -> this will be moved elsewhere at some point
         var cpContent = _.extend({}, this.controlPanelElements);
-        this.update_control_panel({
+        this.updateControlPanel({
             active_view_selector: '.o_cp_switch_' + this.viewType,
             cp_content: cpContent,
-            hidden: !this.withControlPanel,
+            title: this.getTitle(),
             search_view_hidden: !this.searchable || this.searchviewHidden,
         });
 
@@ -460,6 +452,36 @@ var AbstractController = mvc.Controller.extend(ActionMixin, ControlPanelMixin, {
         }
     },
     /**
+     * FIXME: this logic should be rethought
+     *
+     * Handles a context request: provides to the caller the context of the
+     * current controller.
+     *
+     * @private
+     * @param {OdooEvent} ev
+     * @param {function} ev.data.callback used to send the requested context
+     */
+    _onGetControllerContext: function (ev) {
+        ev.stopPropagation();
+        var context = this.getContext();
+        ev.data.callback(context || {});
+    },
+    /**
+     * Called mainly from the control panel when the focus should be given to
+     * the controller
+     *
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onNavigationMove : function (ev) {
+        switch(ev.data.direction) {
+            case 'down' :
+                ev.stopPropagation();
+                this.giveFocus();
+                break;
+        }
+    },
+    /**
      * When an Odoo event arrives requesting a record to be opened, this method
      * gets the res_id, and request a switch view in the appropriate mode
      *
@@ -482,6 +504,42 @@ var AbstractController = mvc.Controller.extend(ActionMixin, ControlPanelMixin, {
             mode: ev.data.mode || 'readonly',
             model: this.modelName,
         });
+    },
+    /**
+     * FIXME: move this to dashboard_controller?
+     *
+     * Handles a request to add/remove search view filters.
+     *
+     * @param {OdooEvent} ev
+     * @param {string} ev.data.controllerID
+     * @param {Array[Object]} [ev.data.newFilters]
+     * @param {Array[Object]} [ev.data.filtersToRemove]
+     * @param {function} ev.data.callback called with the added filters as arg
+     */
+    // _onUpdateFilters: function (ev) {
+    //     var controller = this.controllers[ev.data.controllerID];
+    //     var action = this.actions[controller.actionID];
+    //     var data = ev.data;
+    //     var addedFilters = action.searchView.updateFilters(data.newFilters, data.filtersToRemove);
+    //     data.callback(addedFilters);
+    // },
+    /**
+     * Called when there is a change in the search view, so the current action's
+     * environment needs to be updated with the new domain, context and groupby.
+     *
+     * @private
+     * @param {OdooEvent} ev
+     * @param {Array[]} ev.data.domain
+     * @param {Object} ev.data.context
+     * @param {string[]} ev.data.groupby
+     */
+    _onSearch: function (ev) {
+        ev.stopPropagation();
+        this.trigger_up('env_updated', {
+            controllerID: this.controllerID,
+            data: ev.data,
+        });
+        this.reload(_.extend({offset: 0}, ev.data));
     },
     /**
      * Intercepts the 'switch_view' event to add the controllerID into the data,

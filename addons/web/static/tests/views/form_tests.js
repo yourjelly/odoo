@@ -159,8 +159,7 @@ QUnit.module('Views', {
         assert.containsOnce(form, 'label:contains(f3_description)');
         assert.containsOnce(form, 'div.o_field_one2many table');
         assert.containsOnce(form, 'tbody td:not(.o_list_record_selector) .custom-checkbox input:checked');
-        assert.strictEqual(form.get('title'), 'second record',
-            "title should be display_name of record");
+        assert.containsOnce(form, '.o_control_panel .breadcrumb:contains(second record)');
         assert.containsNone(form, 'label.o_form_label_empty:contains(timmy)');
 
         form.destroy();
@@ -1683,11 +1682,13 @@ QUnit.module('Views', {
             res_id: 1,
         });
 
-        assert.strictEqual(form.get('title'), 'first record',
+        assert.strictEqual(form.$('.o_control_panel .breadcrumb').text(), 'first record',
             "should have the display name of the record as  title");
+
         testUtils.form.clickCreate(form);
-        assert.strictEqual(form.get('title'), _t("New"),
-            "should have the display name of the record as  title");
+        assert.strictEqual(form.$('.o_control_panel .breadcrumb').text(), _t("New"),
+            "should have the display name of the record as title");
+
         form.destroy();
     });
 
@@ -1705,13 +1706,13 @@ QUnit.module('Views', {
             viewOptions: {hasSidebar: true},
         });
 
-        assert.strictEqual(form.get('title'), 'first record',
+        assert.strictEqual(form.$('.o_control_panel .breadcrumb').text(), 'first record',
             "should have the display name of the record as  title");
 
         testUtils.dom.click(form.sidebar.$('.o_dropdown_toggler_btn:contains(Action)'));
         testUtils.dom.click(form.sidebar.$('a:contains(Duplicate)'));
 
-        assert.strictEqual(form.get('title'), 'first record (copy)',
+        assert.strictEqual(form.$('.o_control_panel .breadcrumb').text(), 'first record (copy)',
             "should have duplicated the record");
 
         assert.strictEqual(form.mode, "edit", 'should be in edit mode');
@@ -1761,7 +1762,7 @@ QUnit.module('Views', {
             viewOptions: {hasSidebar: true},
         });
 
-        assert.strictEqual(form.get('title'), 'first record',
+        assert.strictEqual(form.$('.o_control_panel .breadcrumb').text(), 'first record',
             "should have the display name of the record as  title");
         assert.containsNone(form.sidebar, 'a:contains(Duplicate)',
             "should not contains a 'Duplicate' action");
@@ -1870,13 +1871,13 @@ QUnit.module('Views', {
             },
         });
 
-        assert.strictEqual(form.getTitle(), 'second record',
+        assert.strictEqual(form.$('.o_control_panel .breadcrumb').text(), 'second record',
             "should have correct display_name");
         testUtils.form.clickEdit(form);
         testUtils.fields.editInput(form.$('input[name=name]'), 'some other name');
 
         testUtils.dom.click('.oe_stat_button');
-        assert.strictEqual(form.getTitle(), 'GOLDORAK',
+        assert.strictEqual(form.$('.o_control_panel .breadcrumb').text(), 'GOLDORAK',
             "should have correct display_name");
 
         form.destroy();

@@ -4,7 +4,6 @@ odoo.define('report.client_action', function (require) {
 var AbstractAction = require('web.AbstractAction');
 var config = require('web.config');
 var core = require('web.core');
-var ControlPanelMixin = require('web.ControlPanelMixin');
 var session = require('web.session');
 var utils = require('report.utils');
 
@@ -17,7 +16,7 @@ var AUTHORIZED_MESSAGES = [
     'report:do_action',
 ];
 
-var ReportAction = AbstractAction.extend(ControlPanelMixin, {
+var ReportAction = AbstractAction.extend({
 
     template: 'report.client_action',
 
@@ -93,7 +92,7 @@ var ReportAction = AbstractAction.extend(ControlPanelMixin, {
     },
 
     _update_control_panel: function () {
-        this.update_control_panel({
+        this.updateControlPanel({
             cp_content: {
                 $buttons: this.$buttons,
             },

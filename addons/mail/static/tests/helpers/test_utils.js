@@ -38,12 +38,6 @@ function createDiscuss(params) {
     testUtils.mock.addMockEnvironment(parent, params);
     var discuss = new Discuss(parent, params);
     var selector = params.debug ? 'body' : '#qunit-fixture';
-    var controlPanelView = new ControlPanelView();
-    controlPanelView.getController(parent).then(function (controlPanel) {
-        // link the view to the control panel
-        discuss.set_cp(controlPanel);
-        controlPanel.appendTo($(selector));
-    });
 
     // override 'destroy' of discuss so that it calls 'destroy' on the parent
     // instead, which is the parent of discuss and the mockServer.

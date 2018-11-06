@@ -796,8 +796,7 @@ QUnit.test('save to dashboard actions with flag keepSearchView', function (asser
         views: [[false, 'graph']],
     }, options);
 
-    assert.containsOnce(actionManager, '.o_graph',
-        "should display the graph view");
+    assert.containsOnce(actionManager, '.o_graph_controller');
 
     // add this action to dashboard
     testUtils.dom.click($('.o_search_options .o_dropdown button:contains(Favorites)'));

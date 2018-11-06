@@ -2,7 +2,6 @@ odoo.define('sale_timesheet.ProjectPlan', function (require) {
 'use strict';
 
 var AbstractAction = require('web.AbstractAction');
-var ControlPanelMixin = require('web.ControlPanelMixin');
 var core = require('web.core');
 var data = require('web.data');
 var pyUtils = require('web.py_utils');
@@ -11,7 +10,7 @@ var SearchView = require('web.OldSearchView');
 var _t = core._t;
 var QWeb = core.qweb;
 
-var ProjectPlan = AbstractAction.extend(ControlPanelMixin, {
+var ProjectPlan = AbstractAction.extend({
     events: {
         "click a[type='action']": "_onClickAction",
         "click .o_timesheet_plan_redirect": '_onRedirect',
@@ -140,7 +139,7 @@ var ProjectPlan = AbstractAction.extend(ControlPanelMixin, {
         this.$buttons = $(QWeb.render("project.plan.ControlButtons", {'buttons': buttons}));
         this.$buttons.on('click', '.o_timesheet_plan_btn_action', this._onClickControlButton.bind(this));
         // refresh control panel
-        this.update_control_panel({
+        this.updateControlPanel({
             cp_content: {
                 $buttons: this.$buttons,
                 $searchview: this.searchview.$el,

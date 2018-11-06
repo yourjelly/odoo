@@ -3,7 +3,6 @@ odoo.define('website.backend.dashboard', function (require) {
 
 var AbstractAction = require('web.AbstractAction');
 var ajax = require('web.ajax');
-var ControlPanelMixin = require('web.ControlPanelMixin');
 var core = require('web.core');
 var Dialog = require('web.Dialog');
 var field_utils = require('web.field_utils');
@@ -13,7 +12,7 @@ var web_client = require('web.web_client');
 var _t = core._t;
 var QWeb = core.qweb;
 
-var Dashboard = AbstractAction.extend(ControlPanelMixin, {
+var Dashboard = AbstractAction.extend({
     template: 'website.WebsiteDashboardMain',
     cssLibs: [
         '/web/static/lib/nvd3/nv.d3.css'
@@ -320,7 +319,7 @@ var Dashboard = AbstractAction.extend(ControlPanelMixin, {
                 self.on_website_button($(ev.target).data('website-id'));
             });
         }
-        this.update_control_panel({
+        this.updateControlPanel({
             cp_content: {
                 $searchview: this.$searchview,
                 $buttons: QWeb.render("website.GoToButtons"),
