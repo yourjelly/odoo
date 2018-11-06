@@ -103,7 +103,7 @@ def force_demo(cr):
     Forces the `demo` flag on all modules, and installs demo data for all installed modules.
     """
     graph = odoo.modules.graph.Graph()
-    cr.execute('UPDATE ir_module_module SET demo=True')
+    cr.execute("UPDATE ir_module_module SET demo=True, write_uid=1, write_date=now() at time zone 'UTC")
     cr.execute(
         "SELECT name FROM ir_module_module WHERE state IN ('installed', 'to upgrade', 'to remove')"
     )
@@ -223,7 +223,11 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
                 module.write(module.get_values_from_terp(package.data))
             load_data(cr, idref, mode, kind='data', package=package, report=report)
             demo_loaded = package.dbdemo = load_demo(cr, package, idref, mode, report)
-            cr.execute('update ir_module_module set demo=%s where id=%s', (demo_loaded, module_id))
+            cr.execute("""
+                UPDATE ir_module_module
+                SET demo=%s, write_uid=1, write_date=now() at time zone 'UTC'
+                WHERE id=%s
+            """, (demo_loaded, module_id))
             module.invalidate_cache(['demo'])
 
             migrations.migrate_module(package, 'post')
@@ -350,7 +354,11 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
         registry = odoo.registry(cr.dbname)
 
         if 'base' in tools.config['update'] or 'all' in tools.config['update']:
-            cr.execute("update ir_module_module set state=%s where name=%s and state=%s", ('to upgrade', 'base', 'installed'))
+            cr.execute("""
+                UPDATE ir_module_module
+                SET state=%s, write_uid=1, write_date=now() at time zone 'UTC'
+                WHERE name=%s AND state=%s
+            """, ('to upgrade', 'base', 'installed'))
 
         # STEP 1: LOAD BASE (must be done before module dependencies can be computed for later steps)
         graph = odoo.modules.graph.Graph()
@@ -396,9 +404,12 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
                 if modules:
                     modules.button_upgrade()
 
-            cr.execute("update ir_module_module set state=%s where name=%s", ('installed', 'base'))
+            cr.execute("""
+                UPDATE ir_module_module
+                SET state=%s, write_uid=1, write_date=now() at time zone 'UTC'
+                WHERE name=%s
+            """, ('installed', 'base'))
             Module.invalidate_cache(['state'])
-
 
         # STEP 3: Load marked modules (skipping base which was done in STEP 1)
         # IMPORTANT: this is done in two parts, first loading all installed or
@@ -536,10 +547,14 @@ def reset_modules_state(db_name):
     # of time
     db = odoo.sql_db.db_connect(db_name)
     with db.cursor() as cr:
-        cr.execute(
-            "UPDATE ir_module_module SET state='installed' WHERE state IN ('to remove', 'to upgrade')"
-        )
-        cr.execute(
-            "UPDATE ir_module_module SET state='uninstalled' WHERE state='to install'"
-        )
+        cr.execute("""
+            UPDATE ir_module_module
+            SET state='installed', write_uid=1, write_date=now() at time zone 'UTC'
+            WHERE state IN ('to remove', 'to upgrade')
+        """)
+        cr.execute("""
+            UPDATE ir_module_module
+            SET state='uninstalled', write_uid=1, write_date=now() at time zone 'UTC'
+            WHERE state='to install'
+        """)
         _logger.warning("Transient module states were reset")

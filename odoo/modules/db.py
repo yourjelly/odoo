@@ -78,8 +78,14 @@ def initialize(cr):
                                    WHERE d.module_id = m.id AND mdep.state != 'to install'
                       )""")
         to_auto_install = [x[0] for x in cr.fetchall()]
-        if not to_auto_install: break
-        cr.execute("""UPDATE ir_module_module SET state='to install' WHERE name in %s""", (tuple(to_auto_install),))
+        if not to_auto_install:
+            break
+        cr.execute(
+            """ UPDATE ir_module_module
+                SET state='to install', write_uid=1, write_date=now() at time zone 'UTC'
+                WHERE name IN %s """,
+            [tuple(to_auto_install)],
+        )
 
 def create_categories(cr, categories):
     """ Create the ir_module_category entries for some categories.
