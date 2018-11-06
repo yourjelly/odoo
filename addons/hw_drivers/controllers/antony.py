@@ -347,6 +347,11 @@ class KeyboardUSBDriver(USBDriver):
         # on s'en fou only one per device
         self.conn = serial.Serial('/dev/input/by-path/', baudrate=4800, bytesize=7, stopbits=2, parity=serial.PARITY_EVEN)
 
+    def action(self, request_id, body):
+        Thread
+            self.dm.send(requesrt)
+
+
     def run(self):
         while 1:
             # blcoking
@@ -557,7 +562,8 @@ def send_iot_box_device(send_printer):
         except:
             _logger.warning('Could not reach configured server')
 
-
+queue = [{''}]
+queue_event = Event
 
 class StatusController(http.Controller):
 
@@ -662,8 +668,18 @@ class StatusController(http.Controller):
             result = {'image': image_bytes}
         return result
 
-    @http.route('/hw_drivers/send_iot_box', type='http', auth='none', cors='*')
+
+    @http.route('/hw_drivers/discover', type='http', auth='none', cors='*')
+
+    @http.route('/hw_drivers/write', type='http', auth='none', cors='*')
+    def send_iot_box(self, device, request_id, message):
+        Driver[device].action(request_id, message={})
+        return request_id
+
+    @http.route('/hw_drivers/event', type='http', auth='none', cors='*')
     def send_iot_box(self):
         send_iot_box_device(False)
+        wait event:
+            return queue
         return 'ok'
 
