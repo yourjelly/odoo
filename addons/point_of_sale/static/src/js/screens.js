@@ -70,7 +70,7 @@ var ScreenWidget = PosBaseWidget.extend({
 
     // what happens when a cashier id barcode is scanned.
     // the default behavior is the following : 
-    // - if there's a user with a matching barcode, put it as the active 'cashier', go to cashier mode, and return true
+    // - if there's an employee with a matching barcode, put it as the active 'cashier', go to cashier mode, and return true
     // - else : do nothing and return false. You probably want to extend this to show and appropriate error popup... 
     barcode_cashier_action: function(code){
         var self = this;
@@ -2236,11 +2236,53 @@ define_action_button({
     },
 });
 
+
+/*--------------------------------------*\
+ |         THE LOGIN SCREEN           |
+\*======================================*/
+
+// The login screen is the screen that enables employees to log into the PoS
+// both at startup and after it was locked.
+
+var LoginScreenWidget = ScreenWidget.extend({
+    template: 'LoginScreenWidget',
+
+    /**
+     * @override
+     */
+    show: function() {
+        var self = this;
+        this.$('.select-employee').click(function() { 
+            self.gui.select_employee({
+                'security': true,
+                'current_employee': self.pos.get_cashier(),
+                'title':_t('Change Cashier'),})
+            .then(function(employee){
+                self.pos.set_cashier(employee);
+                self.gui.show_screen(self.gui.startup_screen);
+            });
+        });
+        this._super();
+    },
+    
+    /**
+     * @override
+     */
+    barcode_cashier_action: function(code) {
+        this._super(code);
+        this.gui.show_screen(this.gui.startup_screen);
+    },
+});
+
+gui.define_screen({name:'login', widget: LoginScreenWidget});    
+
+
 return {
     ReceiptScreenWidget: ReceiptScreenWidget,
     ActionButtonWidget: ActionButtonWidget,
     define_action_button: define_action_button,
     ScreenWidget: ScreenWidget,
+    LoginScreenWidget: LoginScreenWidget,
     PaymentScreenWidget: PaymentScreenWidget,
     OrderWidget: OrderWidget,
     NumpadWidget: NumpadWidget,

@@ -103,15 +103,15 @@ var UsernameWidget = PosBaseWidget.extend({
             'security':     true,
             'current_employee': this.pos.get_cashier(),
             'title':      _t('Change Cashier'),
-        }).then(function(user){
-            self.pos.set_cashier(user);
+        }).then(function(employee){
+            self.pos.set_cashier(employee);
             self.renderElement();
         });
     },
     get_name: function(){
-        var user = this.pos.get_cashier();
-        if(user){
-            return user.name;
+        var employee = this.pos.get_cashier();
+        if(employee){
+            return employee.name;
         }else{
             return "";
         }
@@ -444,7 +444,7 @@ var ClientScreenWidget = PosBaseWidget.extend({
     template: 'ClientScreenWidget',
 
     change_status_display: function(status) {
-        var msg = ''
+        var msg = '';
         if (status === 'success') {
             this.$('.js_warning').addClass('oe_hidden');
             this.$('.js_disconnected').addClass('oe_hidden');
@@ -458,9 +458,9 @@ var ClientScreenWidget = PosBaseWidget.extend({
             this.$('.js_warning').addClass('oe_hidden');
             this.$('.js_connected').addClass('oe_hidden');
             this.$('.js_disconnected').removeClass('oe_hidden');
-            msg = _t('Disconnected')
+            msg = _t('Disconnected');
             if (status === 'not_found') {
-                msg = _t('Client Screen Unsupported. Please upgrade the IoT Box')
+                msg = _t('Client Screen Unsupported. Please upgrade the IoT Box');
             }
         }
 
@@ -600,6 +600,11 @@ var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
         }).fail(function(err){   // error when loading models data from the backend
             self.loading_error(err);
         });
+        //.then(function() {
+            //if (self.pos.config.use_employees) {
+                //self.gui.show_popup('login', {test: 'TEST'});
+            //}
+        //});
     },
 
     cleanup_dom:  function() {
@@ -817,6 +822,16 @@ var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
             'widget': SynchNotificationWidget,
             'append':  '.pos-rightheader',
         },{
+            'name':  'lock_screen',
+            'widget': HeaderButtonWidget,
+            'append': '.pos-rightheader',
+            'args': {
+                label: _lt('Lock Screen'),
+                action: function() {
+                    this.gui.show_screen('login');
+                }
+            }
+        },{
             'name':   'close_button',
             'widget': HeaderButtonWidget,
             'append':  '.pos-rightheader',
@@ -898,7 +913,7 @@ var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
         }
 
         this.gui.set_startup_screen('products');
-        this.gui.set_default_screen('products');
+        this.gui.set_default_screen(this.pos.config.use_employees ? 'login' : 'products');
 
     },
 

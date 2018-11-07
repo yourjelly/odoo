@@ -226,7 +226,7 @@ var Gui = core.Class.extend({
     // - only_managers: restricts the list to managers
     // - current_user: password will not be asked if this 
     //                 user is selected.
-    // - title: The title of the user selection list. 
+    // - title: The title of the employee selection list. 
     select_employee: function(options){
         options = options || {};
         var self = this;

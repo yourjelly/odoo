@@ -8,7 +8,7 @@
                     <img class="pos-logo" src="/point_of_sale/static/src/img/logo.png" alt="Logo"/>
                     <span class="placeholder-UsernameWidget"></span>
                 </div>
-                <div class="pos-rightheader">
+                <div class="pos-rightheader">   
                     <span class="placeholder-OrderSelectorWidget"></span>
                     <!-- here goes header buttons -->
                 </div>
@@ -1699,5 +1699,21 @@
                 <span class="pos-change_amount"><t t-esc="widget.format_currency(order.get_change())"/></span>
             </div>
         </t>
+    </t>
+    
+    <t t-name="LoginScreenWidget">
+        <div class="login-overlay">
+            <div class="screen-login">
+                <h1><small>Please login to enter PoS</small></h1>
+                <div class="login-barcode">
+                    <img class="login-barcode-img" src="/hr_attendance/static/src/img/barcode.png"/>
+                    <p class="text-muted">Scan your badge</p>
+                </div>
+                <div class="login-or"><i>or</i></div>
+                <div class="login-select-employee">
+                    <button class="login-button select-employee">Select Employee</button>
+                </div>
+            </div>
+        </div>
     </t>
 </templates>
