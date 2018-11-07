@@ -378,10 +378,10 @@ class TransactionCase(BaseCase):
         @self.addCleanup
         def reset():
             # rollback and close the cursor, and reset the environments
-            self.registry.clear_caches()
-            self.registry.reset_changes()
-            self.env.reset()
-            self.cr.rollback()
+            #self.registry.clear_caches()
+            #self.registry.reset_changes()
+            #self.env.reset()
+            #self.cr.rollback()
             self.cr.close()
 
         self.patch(type(self.env['res.partner']), '_get_gravatar_image', lambda *a: False)
