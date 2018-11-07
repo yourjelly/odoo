@@ -94,19 +94,21 @@ var ControlPanelView = Factory.extend({
      * @param {string} [params.template] the QWeb template to render
      */
     init: function (params) {
+        var self = this;
         this._super();
         params = params || {};
         var viewInfo = params.viewInfo || {arch: '<controlpanel/>', fields: {}};
 
+        var context = params.context || {};
+        this.searchDefaults = {};
+        Object.keys(context).forEach(function (key) {
+            var match = /^search_default_(.*)$/.exec(key);
+            if (match) {
+                self.searchDefaults[match[1]] = context[key];
+            }
+        });
+
         // TODO: use this where necessary
-        // var context = params.context || {};
-        // var searchDefaults = {};
-        // for (var key in context) {
-        //     var match = /^search_default_(.*)$/.exec(key);
-        //     if (match) {
-        //         searchDefaults[match[1]] = context[key];
-        //     }
-        // }
         // var disableCustomFilters = context.search_disable_custom_filters;
         // var hasSearchView = params.hasSearchView;
 
@@ -123,6 +125,7 @@ var ControlPanelView = Factory.extend({
         this.loadParams.fields = this.fields;
         this.loadParams.groups = [];
         this.loadParams.modelName = params.modelName;
+        this.loadParams.timeRanges = context.time_ranges;
         if (this.arch.tag === 'controlpanel') {
             this._parseControlPanelArch();
         } else {
@@ -202,6 +205,7 @@ var ControlPanelView = Factory.extend({
                 attrs.string = field.string;
             }
         }
+        filter.isDefault = this.searchDefaults[attrs.name] ? true : false;
     },
     /**
      * Executed when the given arch has root node <controlpanel>.

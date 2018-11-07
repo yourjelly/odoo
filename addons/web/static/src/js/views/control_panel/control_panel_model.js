@@ -44,7 +44,12 @@ var ControlPanelModel = mvc.Model.extend({
             this._createEmptyGroup('groupBy');
         }
         this._createGroupOfTimeRanges();
-        return this._loadFavorites();
+        return this._loadFavorites().then(function () {
+            if (self.query.length === 0) {
+                self._activateDefaultFilters();
+                self._activateDefaultTimeRanges(params.timeRanges);
+            }
+        });
     },
 
     reload: function (params) {
@@ -194,6 +199,37 @@ var ControlPanelModel = mvc.Model.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    _activateDefaultFilters: function () {
+        var self = this;
+        Object.keys(this.filters).forEach(
+            function (filterId) {
+                var filter = self.filters[filterId];
+                // if we are here, this means there is no favorite with isDefault set to true
+                if (filter.isDefault) {
+                    if (filter.hasOptions) {
+                        self._toggleFilterWithOptions(filter.id);
+                    } else {
+                        self._toggleFilter(filter.id);
+                    }
+                }
+        });
+    },
+    _activateDefaultTimeRanges: function (defaultTimeRanges) {
+        var self = this;
+        if (defaultTimeRanges) {
+            var filterId = Object.keys(this.filters).find(function (filterId) {
+                var filter = self.filters[filterId];
+                return filter.type === 'timeRange' && filter.fieldName === defaultTimeRanges.field;
+            });
+            if (filterId) {
+                this._activateTimeRange(
+                    filterId,
+                    defaultTimeRanges.range,
+                    defaultTimeRanges.comparisonRange
+                );
+            }
+        }
+    },
     _activateTimeRange: function (filterId, timeRangeId, comparisonTimeRangeId) {
         var filter = this.filters[filterId];
         filter.timeRangeId = timeRangeId || filter.defaultTimeRangeId;
@@ -243,6 +279,7 @@ var ControlPanelModel = mvc.Model.extend({
         };
         this._memorizeGroupId(groupId, type);
     },
+
     _createGroupOfTimeRanges: function () {
         var self = this;
         var timeRanges = [];
@@ -346,8 +383,6 @@ var ControlPanelModel = mvc.Model.extend({
         }
         return groupBys;
     },
-
-// Group "method"
 
     _getGroupBys: function () {
         var self = this;
