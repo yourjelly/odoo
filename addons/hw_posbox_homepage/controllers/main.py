@@ -18,6 +18,7 @@ import urllib3
 
 from uuid import getnode as get_mac
 from odoo.addons.hw_proxy.controllers import main as hw_proxy
+from odoo.addons.hw_drivers.controllers.driver import all_devices
 
 _logger = logging.getLogger(__name__)
 
@@ -41,15 +42,10 @@ configure_wizard_template = jinja_env.get_template('configure_wizard.html')
 class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
 
     def get_ip_iotbox(self):
-        interfaces = ni.interfaces()
-        for iface_id in interfaces:
-            iface_obj = ni.ifaddresses(iface_id)
-            ifconfigs = iface_obj.get(ni.AF_INET, [])
-            for conf in ifconfigs:
-                if conf.get('addr') and conf.get('addr') != '127.0.0.1':
-                    ips = conf.get('addr')
-                    break
-        return ips
+        try:
+            return ni.ifaddresses('eth0')[ni.AF_INET][0]['addr']
+        except:
+            return ni.ifaddresses('wlan0')[ni.AF_INET][0]['addr']
 
     def get_hw_screen_message(self):
         return """
@@ -71,8 +67,7 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
         server_template = ""
         try:
             f = open('/home/pi/odoo-remote-server.conf', 'r')
-            for line in f:
-                server_template += line
+            server_template = f.readline().strip('\n')
             f.close()
         except:
             return ''
@@ -105,48 +100,12 @@ class IoTboxHomepage(odoo.addons.web.controllers.main.Home):
                     'message': ' '.join(pos_device[status]['messages'])
                 })
 
-        hdmi_name = subprocess.check_output('tvservice -n', shell=True).decode('utf-8')
-        if hdmi_name.find('=') != -1:
-            hdmi_name = hdmi_name.split('=')[1]
-            hdmi_message = subprocess.check_output('tvservice -s', shell=True).decode('utf-8')
+        for device in all_devices:
             iot_device.append({
-                    'name': 'display : ' + hdmi_name,
-                    'type': 'device',
-                    'message': hdmi_message
-                })
-
-        try:
-            f = open('/tmp/devices', 'r')
-            for line in f:
-                url = 'http://' + self.get_ip_iotbox() + ':8069/hw_drivers/driverdetails/' + line.split('|')[0]
-                http = urllib3.PoolManager()
-                value = ''
-                try:
-                    req = http.request('GET', url)
-                except:
-                    req = ''
-
-                if req:
-                    value = req.data.decode('utf-8')
-                iot_device.append({
-                                    'name': line.split('|')[1],
-                                    'message': line.split('|')[0] + ' : ' + value,
-                                    'type': 'device',
-                                    })
-            f.close()
-        except:
-            pass
-
-        try:
-            f = open('/tmp/printers', 'r')
-            for line in f:
-                iot_device.append({
-                                    'name': line,
-                                    'type': 'printer',
-                                    })
-            f.close()
-        except:
-            pass
+                                'name': all_devices[device].get_name() + ' : ' + str(all_devices[device].value),
+                                'type': all_devices[device].get_type(),
+                                'message': all_devices[device].get_identifier() + all_devices[device].get_message()
+                                })
 
         return {
             'hostname': hostname,

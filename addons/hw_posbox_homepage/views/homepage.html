@@ -28,6 +28,7 @@
     }
     .device-status .message {
         font-size: 0.8rem;
+        max-width: 350px;
     }
     .device-status .indicator {
         margin-left: 4px;
@@ -136,5 +137,6 @@
     <div style="margin: 20px auto 10px auto;" class="text-center">
         <a class="btn" href='/point_of_sale/display'>POS Display</a>
         <a class="btn" style="margin-left: 10px;" href='/remote_connect'>Remote Debug</a>
+        <a target="_blank" class="btn" style="margin-left: 10px;" href="http://{{ ip }}:631">Printers server</a>
     </div>
 {% endblock %}

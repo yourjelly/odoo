@@ -52,7 +52,7 @@ ScaleProtocol = namedtuple(
     'ScaleProtocol',
     "name baudrate bytesize stopbits parity timeout writeTimeout weightRegexp statusRegexp "
     "statusParse commandTerminator commandDelay weightDelay newWeightDelay disable "
-    "weightCommand zeroCommand tareCommand clearCommand emptyAnswerValid autoResetWeight")
+    "weightCommand zeroCommand tareCommand clearCommand emptyAnswerValid autoResetWeight disable")
 
 # 8217 Mettler-Toledo (Weight-only) Protocol, as described in the scale's Service Manual.
 #    e.g. here: https://www.manualslib.com/manual/861274/Mettler-Toledo-Viva.html?page=51#manual
