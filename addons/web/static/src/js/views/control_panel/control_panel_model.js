@@ -37,9 +37,6 @@ var ControlPanelModel = mvc.Model.extend({
         params.groups.forEach(function (group) {
             self._createGroupOfFilters(group);
         });
-        if (this.groupOfFiltersIds.length === 0) {
-            this._createEmptyGroup('filter');
-        }
         if (this.groupOfGroupBysId === null) {
             this._createEmptyGroup('groupBy');
         }
