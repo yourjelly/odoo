@@ -116,6 +116,7 @@ var ControlPanelView = Factory.extend({
         this.controllerParams.controllerID = params.controllerID;
         this.controllerParams.modelName = params.modelName;
 
+        this.rendererParams.context = params.context;
         this.rendererParams.template = params.template;
 
         this.loadParams.actionId = params.actionId;
@@ -165,12 +166,12 @@ var ControlPanelView = Factory.extend({
      * @param {Object} attrs
      */
     _extractAttributes: function (filter, attrs) {
+        filter.description = attrs.string ||
+                                attrs.help ||
+                                attrs.name ||
+                                attrs.domain ||
+                                'Ω';
         if (filter.type === 'filter') {
-            filter.description = attrs.string ||
-                                    attrs.help ||
-                                    attrs.name ||
-                                    attrs.domain ||
-                                    'Ω';
             filter.domain = attrs.domain;
             if (attrs.date) {
                 filter.fieldName = attrs.date;
@@ -183,13 +184,7 @@ var ControlPanelView = Factory.extend({
                                             DEFAULT_PERIOD;
                 filter.currentOptionId = false;
             }
-        }
-        if (filter.type === 'groupBy') {
-            filter.description = attrs.string ||
-                                    attrs.help ||
-                                    attrs.name ||
-                                    attrs.fieldName ||
-                                    'Ω';
+        } else if (filter.type === 'groupBy') {
             filter.fieldName = attrs.fieldName;
             filter.fieldType = this.fields[attrs.fieldName].type;
             if (_.contains(['date', 'datetime'], filter.fieldType)) {
@@ -198,6 +193,13 @@ var ControlPanelView = Factory.extend({
                 filter.defaultOptionId = attrs.defaultInterval ||
                                             DEFAULT_INTERVAL;
                 filter.currentOptionId = false;
+            }
+        } else if (filter.type === 'field') {
+            filter.attrs = attrs;
+            filter.autoCompleteValues = [];
+            var field = this.fields[attrs.name];
+            if (!attrs.string) {
+                attrs.string = field.string;
             }
         }
     },

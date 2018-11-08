@@ -14,6 +14,7 @@ var ControlPanelController = mvc.Controller.extend({
         new_filters: '_onNewFilters',
         new_groupBy: '_onNewGroupBy',
         activate_time_range: '_onActivateTimeRange',
+        autocompletion_filter: '_onAutoCompletionFilter',
     },
 
     /**
@@ -128,7 +129,10 @@ var ControlPanelController = mvc.Controller.extend({
     },
     _onActivateTimeRange: function (event) {
         return this.update({activateTimeRange: event.data});
-    }
+    },
+    _onAutoCompletionFilter: function (ev) {
+        return this.update({toggleAutoCompletionFilter: ev.data});
+    },
 });
 
 return ControlPanelController;

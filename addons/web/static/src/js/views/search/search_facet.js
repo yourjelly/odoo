@@ -47,12 +47,18 @@ var SearchFacet = Widget.extend({
         var separator;
         if (this.facet.type === 'filter') {
             separator = _t('or');
+        } else if (this.facet.type === 'field') {
+            separator = _t('or');
         } else if (this.facet.type === 'groupBy') {
             separator = '>';
         }
         return separator;
     },
     _getFilterDescription: function (filter) {
+        if (filter.type === 'field') {
+            var values = _.pluck(filter.autoCompleteValues, 'label');
+            return values.join(_t(' or '));
+        }
         var description = filter.description;
         if (filter.hasOptions) {
             var optionValue =_.findWhere(filter.options, {

@@ -32,6 +32,7 @@ var ControlPanelRenderer = Renderer.extend({
         if (params.template) {
             this.template = params.template;
         }
+        this.context = params.context;
 
         // TODO
         this.displayMore = false;
@@ -302,7 +303,14 @@ var ControlPanelRenderer = Renderer.extend({
     _renderSearchBar: function () {
         // TODO: might need a reload instead of a destroy/instatiate
         var oldSearchBar = this.searchBar;
-        this.searchBar = new SearchBar(this, this.state.facets);
+        this.searchBar = new SearchBar(this, {
+            context: this.context,
+            facets: this.state.facets,
+            fields: this.state.fields,
+            filters: this.state.filters,
+            filterFields: this.state.filterFields,
+            groupBys: this.state.groupBys,
+        });
         return this.searchBar.appendTo(this.$('.o_searchview')).then(function () {
             if (oldSearchBar) {
                 oldSearchBar.destroy();

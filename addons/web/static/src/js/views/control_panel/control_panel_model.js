@@ -57,6 +57,9 @@ var ControlPanelModel = mvc.Model.extend({
         if (params.deactivateGroup) {
             this._deactivateGroup(params.deactivateGroup.id);
         }
+        if (params.toggleAutoCompletionFilter) {
+            this._toggleAutoCompletionFilter(params.toggleAutoCompletionFilter);
+        }
         if (params.toggleOption) {
             this._toggleFilterWithOptions(
                 // id is a filter id
@@ -117,6 +120,7 @@ var ControlPanelModel = mvc.Model.extend({
         // copy this.filters;
         // we want to give a different structure to renderer.
         // filters are filters of filter type only, groupbys are groupbys,...!
+        var filterFields = [];
         var filters = [];
         var groupBys = [];
         var timeRanges = [];
@@ -125,6 +129,9 @@ var ControlPanelModel = mvc.Model.extend({
             var filter = _.extend({}, self.filters[filterId]);
             var group = self.groups[filter.groupId];
             filter.isActive = group.activeFilterIds.indexOf(filterId) !== -1;
+            if (filter.type === 'field') {
+                filterFields.push(filter);
+            }
             if (filter.type === 'filter') {
                 filters.push(filter);
             }
@@ -138,7 +145,7 @@ var ControlPanelModel = mvc.Model.extend({
                 timeRanges.push(filter);
             }
         });
-        var facets = {};
+        var facets = [];
         // resolve active filters for facets
         this.query.forEach(function (groupID) {
             var group = self.groups[groupID];
@@ -146,11 +153,12 @@ var ControlPanelModel = mvc.Model.extend({
             facet.filters = facet.activeFilterIds.map(function (filterID) {
                 return self.filters[filterID];
             });
-            facets[groupID] = facet;
+            facets.push(facet);
         });
         favorites = _.sortBy(favorites, 'groupNumber');
         return {
             facets: facets,
+            filterFields: filterFields,
             filters: filters,
             groupBys: groupBys,
             timeRanges: timeRanges,
@@ -316,6 +324,9 @@ var ControlPanelModel = mvc.Model.extend({
             }
         }
         if (filter.type === 'favorite') {
+            domain = filter.domain;
+        }
+        if (filter.type === 'field') {
             domain = filter.domain;
         }
         return domain;
@@ -532,6 +543,28 @@ var ControlPanelModel = mvc.Model.extend({
             this.groupOfFiltersIds.push(groupId);
         }
     },
+    _toggleAutoCompletionFilter: function (params) {
+        var filter = this.filters[params.filterId];
+
+        if (filter.type === 'field') {
+            // update domain & autoCompleteValues
+            // the autocompletion filter is dynamic
+            filter.domain = params.domain;
+            filter.autoCompleteValues = params.autoCompleteValues;
+            // active the filter
+            var group = this.groups[filter.groupId];
+            if (!group.activeFilterIds.includes(filter.id)) {
+                group.activeFilterIds.push(filter.id);
+                this.query.push(group.id);
+            }
+        } else {
+            if (filter.hasOptions) {
+                this._toggleFilterWithOptions(filter.id);
+            } else {
+                this._toggleFilter(filter.id);
+            }
+        }
+    },
     // This method could work in batch and take a list of ids as args.
     // (it would be useful for initialization and deletion of a facet/group)
     _toggleFilter: function (filterId) {
@@ -568,7 +601,14 @@ var ControlPanelModel = mvc.Model.extend({
      * @param {string} groupId
      */
     _deactivateGroup: function (groupId) {
+        var self = this;
         var group = this.groups[groupId];
+        _.each(group.activeFilterIds, function (filterId) {
+            var filter = self.filters[filterId];
+            if (filter.autoCompleteValues) {
+                filter.autoCompleteValues = [];
+            }
+        });
         group.activeFilterIds = [];
         this.query.splice(this.query.indexOf(groupId), 1);
     },

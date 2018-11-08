@@ -239,6 +239,7 @@
         <script type="text/javascript" src="/web/static/src/js/chrome/user_menu.js"></script>
         <script type="text/javascript" src="/web/static/src/js/chrome/menu.js"></script>
         <script type="text/javascript" src="/web/static/src/js/chrome/apps_menu.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/search/search_bar_autocomplete_widgets.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/search/search_bar_input.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/search/search_facet.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/search/search_bar.js"></script>

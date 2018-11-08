@@ -1378,11 +1378,11 @@
 
 <!-- TODO -->
 <div t-name="SearchView.SearchFacet" tabindex="0" class="o_searchview_facet" role="img" aria-label="search">
-    <span t-if="widget.icon" t-att-class="'fa ' + widget.icon + ' o_searchview_facet_label'"/>
-    <!-- TODO: unknown icon? -->
-    <!-- <span t-if="!widget.icon" class="o_searchview_facet_label">
-        <t t-esc="widget.model.get('category')"/>
-    </span> -->
+
+    <span t-if="widget.facet.type === 'field'" class="o_searchview_facet_label">
+        <t t-esc="widget.facet.filters[0].attrs.string"/>
+    </span>
+    <span t-else="1" t-att-class="'fa ' + widget.icon + ' o_searchview_facet_label'"/>
     <div class="o_facet_values">
         <t t-foreach="widget.facetValues" t-as="facetValue">
             <span t-if="facetValue_index > 0" class="o_facet_values_sep" t-esc="widget.separator"/> <span t-esc="facetValue"/>
