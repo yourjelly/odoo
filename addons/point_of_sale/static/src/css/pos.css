@@ -2440,10 +2440,9 @@ td {
 .pos .not-supported-browser img{
     border-collapse: separate;
 }
-.pos .login-barcode-img{
-    height: 50px;
-    background: white;
-}
+
+/*  ********* Login Screen ********* */
+
 .pos .login-overlay{
     position: fixed;
     left: 0;
@@ -2452,8 +2451,19 @@ td {
     right: 0;
     width: 100%;
     height:100%;
-    background-color: rgba(0,0,0,0.5);
     z-index:1000;
+    background: linear-gradient(to right bottom, #77717e, #c9a8a9);
+}
+.pos .login-overlay:before {
+    content: '';
+    background-image: url(../../img/login-bg-overlay.svg);
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height:100%;
 }
 .pos .screen-login{
     position: absolute;
@@ -2466,24 +2476,45 @@ td {
     font-weight:bold;
     background-color: #F0EEEE;
     border-radius: 3px;
-    box-shadow: 0px 10px 20px rgba(0,0,0,0.4);
     z-index:1200;
     font-family: 'Lato';
-    font-family: Lato;
 }
-.pos .login-barcode{
-    float:left;
-    width:45%;
+.pos .login-title{
+    height: 50%;
+    vertical-align: middle;
+    line-height: 4;
+    font-size: larger;
+}
+.pos .login-body{
+    height:50%;
+}
+.pos .login-element{
+    float: left;
+    width: 45%;
+    height: 50%;
+}
+.pos .login-barcode-img{
+    height: 50px;
+    background: white;
+    margin: 0;
+    padding: 0;
+}
+.pos .login-barcode-text{
+    color: #999999;
+    font-size: 13px;
+    padding: 0.2em;
 }
 .pos .login-or{
-    float:left;
-    width:10%;
-}
-.pos .login-select-employee{
-    float:left;
-    width:45%;
+    font-size: 15px;
+    font-style: italic;
+    float: left;
+    width: 10%;
+    height: 50px;
+    line-height: 50px;
 }
 .pos .login-button{
-    height: 50px;
-    border-radius: 0px;
+    font-size: initial;
+    height: -webkit-fill-available;
+    color: #555555;
+    border-radius: 5px;
 }

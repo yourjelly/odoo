@@ -1704,14 +1704,16 @@
     <t t-name="LoginScreenWidget">
         <div class="login-overlay">
             <div class="screen-login">
-                <h1><small>Please login to enter PoS</small></h1>
-                <div class="login-barcode">
-                    <img class="login-barcode-img" src="/hr_attendance/static/src/img/barcode.png"/>
-                    <p class="text-muted">Scan your badge</p>
-                </div>
-                <div class="login-or"><i>or</i></div>
-                <div class="login-select-employee">
-                    <button class="login-button select-employee">Select Employee</button>
+                <div class="login-title">Log in to PoS</div>
+                <div class="login-body">
+                    <span class="login-element">
+                        <img class="login-barcode-img" src="/point_of_sale/static/img/barcode.png"/>
+                        <div class="login-barcode-text">Scan your badge</div>
+                    </span>
+                    <span class="login-or">or</span>
+                    <span class="login-element">
+                        <button class="login-button select-employee">Select Employee</button>
+                    </span>
                 </div>
             </div>
         </div>

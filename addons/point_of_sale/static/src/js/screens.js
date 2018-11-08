@@ -2241,8 +2241,8 @@ define_action_button({
  |         THE LOGIN SCREEN           |
 \*======================================*/
 
-// The login screen is the screen that enables employees to log into the PoS
-// both at startup and after it was locked.
+// The login screen enables employees to log in to the PoS
+// at startup or after it was locked, with either barcode, pin, or both.
 
 var LoginScreenWidget = ScreenWidget.extend({
     template: 'LoginScreenWidget',

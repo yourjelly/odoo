@@ -256,13 +256,9 @@ var Gui = core.Class.extend({
         });
 
         return def.then(function(employee){
-            if (options.security && employee !== options.current_employee && employee.pin) {
-                return self.ask_password(employee.pin).then(function(){
-                    return employee;
-                });
-            } else {
+            return self.ask_password(employee.pin).then(function(){
                 return employee;
-            }
+            });
         });
     },
 

@@ -34,20 +34,20 @@ class PosOrder(models.Model):
     def _order_fields(self, ui_order):
         process_line = partial(self.env['pos.order.line']._order_line_fields, session_id=ui_order['pos_session_id'])
         return {
-            'name':         ui_order['name'],
-            'user_id':      ui_order['user_id'] or False,
-            'session_id':   ui_order['pos_session_id'],
+            'name':         ui_order.get('name', False),
+            'user_id':      ui_order.get('user_id', False),
+            'session_id':   ui_order.get('pos_session_id', False),
             'lines':        [process_line(l) for l in ui_order['lines']] if ui_order['lines'] else False,
-            'pos_reference': ui_order['name'],
-            'partner_id':   ui_order['partner_id'] or False,
-            'date_order':   ui_order['creation_date'],
-            'fiscal_position_id': ui_order['fiscal_position_id'],
-            'pricelist_id': ui_order['pricelist_id'],
-            'amount_paid':  ui_order['amount_paid'],
-            'amount_total':  ui_order['amount_total'],
-            'amount_tax':  ui_order['amount_tax'],
-            'amount_return':  ui_order['amount_return'],
-            'employee_id':  ui_order['employee_id'] or False,
+            'pos_reference': ui_order.get('name', False),
+            'partner_id':   ui_order.get('partner_id', False),
+            'date_order':   ui_order.get('creation_date', False),
+            'fiscal_position_id': ui_order.get('fiscal_position_id', False),
+            'pricelist_id': ui_order.get('pricelist_id', False),
+            'amount_paid':  ui_order.get('amount_paid', False),
+            'amount_total':  ui_order.get('amount_total', False),
+            'amount_tax':  ui_order.get('amount_tax', False),
+            'amount_return':  ui_order.get('amount_return', False),
+            'employee_id':  ui_order.get('employee_id', False),
         }
 
     def _payment_fields(self, ui_paymentline):

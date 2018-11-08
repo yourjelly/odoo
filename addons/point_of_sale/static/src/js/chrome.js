@@ -600,11 +600,6 @@ var Chrome = PosBaseWidget.extend(AbstractAction.prototype, {
         }).fail(function(err){   // error when loading models data from the backend
             self.loading_error(err);
         });
-        //.then(function() {
-            //if (self.pos.config.use_employees) {
-                //self.gui.show_popup('login', {test: 'TEST'});
-            //}
-        //});
     },
 
     cleanup_dom:  function() {
