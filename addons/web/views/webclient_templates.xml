@@ -120,6 +120,7 @@
         <script type="text/javascript" src="/web/static/src/js/core/rpc.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/widget.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/registry.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/core/sorted_registry.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/session.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/dom.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/concurrency.js"></script>
@@ -247,7 +248,9 @@
         <script type="text/javascript" src="/web/static/src/js/views/search/groupby_menu.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/search/time_range_menu.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/search/favorites_menu.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/search/add_new_favorite_menu.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/search/control_panel_view_parameters.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/search/favorites_submenus_registry.js"></script>
 
         <script type="text/javascript" src="/web/static/src/js/views/search/old/search_view.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/search/old/search_view_mobile.js"></script>

@@ -4,17 +4,11 @@ odoo.define('web.FavoritesMenu', function (require) {
 var config = require('web.config');
 var core = require('web.core');
 var DropdownMenu = require('web.DropdownMenu');
+var favorites_submenus_registry = require('web.favorites_submenus_registry');
 
 var _t = core._t;
-var QWeb = core.qweb;
 
 var FavoritesMenu = DropdownMenu.extend({
-    events: _.extend({}, DropdownMenu.prototype.events,
-    {
-        'click .o_add_favorite': '_onAddFavoriteClick',
-        'click .o_save_favorite': '_onSaveFavoriteClick',
-        'keyup .o_save_name input': '_onKeyUp',
-    }),
     /*
      * override
      *
@@ -22,8 +16,7 @@ var FavoritesMenu = DropdownMenu.extend({
      * @param {Object[]} favorites
      */
     init: function (parent, favorites) {
-        this._super(parent, favorites || []);
-        this.generatorMenuIsOpen = false;
+        this._super(parent, favorites);
         this.isMobile = config.device.isMobile;
         this.dropdownCategory = 'favorite';
         this.dropdownTitle = _t('Favorites');
@@ -31,6 +24,7 @@ var FavoritesMenu = DropdownMenu.extend({
         this.dropdownSymbol = this.isMobile ? 'fa fa-chevron-right float-right mt4' : false;
         this.dropdownStyle.mainButton.class = 'o_favorites_menu_button ' +
                                                 this.dropdownStyle.mainButton.class;
+
     },
     /**
      * render the template used to register a new favorite and append it
@@ -39,24 +33,18 @@ var FavoritesMenu = DropdownMenu.extend({
      * @private
      */
     start: function () {
+        var self = this;
+        var params = {
+            favorites: this.items,
+        };
         this.$menu = this.$('.o_dropdown_menu');
         this.$menu.addClass('o_favorites_menu');
-        var generatorMenu = QWeb.render('FavoritesMenuGenerator', {widget: this});
-        this.$menu.append(generatorMenu);
-        this.$favoriteName = this.$('.o_favorite_name');
-    },
-
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     * @param {Object[]} items, new list of favorites
-     */
-    update: function (favorites) {
-        this._super.apply(this, arguments);
-        this._renderGeneratorMenu();
+        this.subMenus = [];
+        favorites_submenus_registry.values().forEach(function (SubMenu) {
+            var subMenu = new SubMenu(self, params);
+            subMenu.appendTo(self.$menu);
+            self.subMenus.push(subMenu);
+        });
     },
 
     //--------------------------------------------------------------------------
@@ -66,66 +54,16 @@ var FavoritesMenu = DropdownMenu.extend({
     /**
      * @private
      */
-    _renderGeneratorMenu: function () {
-        this.$el.find('.o_generator_menu').remove();
-        var $generatorMenu = QWeb.render('FavoritesMenuGenerator', {widget: this});
-        this.$menu.append($generatorMenu);
-        this.$favoriteName = this.$('.o_favorite_name');
-    },
-    /**
-     * @private
-     */
-    _saveFavorite: function () {
-        var self = this;
-        var $inputs = this.$('input');
-        var description = $inputs[0].value;
-        var isDefault = $inputs[1].checked;
-        var isShared = $inputs[2].checked;
-        if (!description.length){
-            this.do_warn(_t("Error"), _t("A name for your favorite is required."));
-            $inputs[0].focus();
-            return;
-        }
-        var descriptionAlreadyExists = !!this.items.find(function (favorite) {
-            return favorite.description === description;
+     _closeSubMenus: function () {
+        this.subMenus.forEach(function (subMenu) {
+            subMenu.closeMenu();
         });
-        if (descriptionAlreadyExists) {
-            this.do_warn(_t("Error"), _t("Filter with same name already exists."));
-            $inputs[0].focus();
-            return;
-        }
-
-        this.trigger_up('new_favorite', {
-            type: 'favorite',
-            description: description,
-            isDefault: isDefault,
-            isShared: isShared,
-            on_success: function () {self.generatorMenuIsOpen = false;},
-        });
-    },
-    /**
-     * @private
-     */
-    _toggleAddFavoriteMenu: function () {
-        this.generatorMenuIsOpen = !this.generatorMenuIsOpen;
-        this._renderGeneratorMenu();
-        if (this.generatorMenuIsOpen) {
-            this.$favoriteName.focus();
-        }
-    },
+     },
 
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
-    /**
-     * @private
-     * @param {jQueryEvent} event
-     */
-    _onAddFavoriteClick: function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        this._toggleAddFavoriteMenu();
-    },
+
     /*
      * override
      *
@@ -134,25 +72,7 @@ var FavoritesMenu = DropdownMenu.extend({
      */
     _onBootstrapClose: function () {
         this._super.apply(this, arguments);
-        this.generatorMenuIsOpen = false;
-        this._renderGeneratorMenu();
-    },
-    /**
-     * @private
-     * @param {jQueryEvent} event
-     */
-    _onKeyUp: function (event) {
-        if (event.which === $.ui.keyCode.ENTER) {
-            this.saveFavorite();
-        }
-    },
-    /**
-     * @private
-     * @param {jQueryEvent} event
-     */
-    _onSaveFavoriteClick: function (event) {
-        event.stopPropagation();
-        this._saveFavorite();
+        this._closeSubMenus();
     },
     /*
      * override

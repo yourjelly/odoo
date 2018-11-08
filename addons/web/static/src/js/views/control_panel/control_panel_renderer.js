@@ -14,6 +14,9 @@ var Renderer = mvc.Renderer;
 
 var ControlPanelRenderer = Renderer.extend({
     template: 'ControlPanel',
+    custom_events: {
+        get_action_info: '_onGetActionInfo',
+    },
     events: _.extend({}, Renderer.prototype.events, {
         'click.bs.dropdown .o_search_options .dropdown-menu': '_onDropdownClicked',
         'click .o_searchview_more': '_onMore',
@@ -36,6 +39,7 @@ var ControlPanelRenderer = Renderer.extend({
 
         // TODO
         this.displayMore = false;
+        this.actionInfo = params.actionInfo;
     },
     /**
      * Renders the control panel and creates a dictionnary of its exposed
@@ -337,6 +341,10 @@ var ControlPanelRenderer = Renderer.extend({
      */
     _onDropdownClicked: function (ev) {
         ev.stopPropagation();
+    },
+    _onGetActionInfo: function (ev) {
+        ev.stopPropagation();
+        ev.data.callback(this.actionInfo);
     },
     _onMore: function () {
         // TODO

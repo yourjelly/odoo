@@ -58,6 +58,14 @@ var Registry = Class.extend({
         return (key in this.map);
     },
     /**
+     * Returns the content of the map object
+     *
+     * @returns {Object}
+     */
+    entries: function () {
+        return Object.create(this.map);
+    },
+    /**
      * Creates and returns a copy of the current mapping, with the provided
      * mapping argument added in (replacing existing keys if needed)
      *
@@ -96,12 +104,31 @@ var Registry = Class.extend({
         return null;
     },
     /**
+     * Return the list of keys in map object
+     *
+     * @returns {string[]}
+     */
+    keys: function () {
+        return Object.keys(this.map);
+    },
+    /**
      * Register a callback to execute when items are added to the registry.
      *
      * @param {function} callback function with parameters (key, value).
      */
     onAdd: function (callback) {
         this.listeners.push(callback);
+    },
+    /**
+     * Return the list of values in map object
+     *
+     * @returns {string[]}
+     */
+    values: function () {
+        var self = this;
+        return this.keys().map(function (key) {
+            return self.map[key];
+        });
     },
 });
 

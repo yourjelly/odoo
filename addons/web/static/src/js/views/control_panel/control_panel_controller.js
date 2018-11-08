@@ -7,6 +7,7 @@ var ControlPanelController = mvc.Controller.extend({
     custom_events: {
         button_clicked: '_onButtonClicked',
         facet_removed: '_onFacetRemoved',
+        get_non_evaluated_query: '_onGetNonEvaluatedQuery',
         item_option_clicked: '_onItemOptionClicked',
         item_trashed: '_onItemTrashed',
         menu_item_clicked: '_onMenuItemClicked',
@@ -108,6 +109,10 @@ var ControlPanelController = mvc.Controller.extend({
             group = this.renderer.getLastFacet();
         }
         this.update({deactivateGroup: group});
+    },
+    _onGetNonEvaluatedQuery: function (event) {
+        var query = this.getSearchState();
+        event.data.callback(query);
     },
     _onItemOptionClicked: function (event) {
         return this.update({toggleOption: event.data});

@@ -669,6 +669,8 @@ var ActionManager = Widget.extend({
     _getControlPanelParams: function (action) {
         return {
             actionId: action.id,
+            actionName: action.name,
+            actionType: action.type,
             context: action.context,
         };
     },

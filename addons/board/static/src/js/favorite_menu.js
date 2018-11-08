@@ -1,4 +1,4 @@
-odoo.define('board.favorite_menu', function (require) {
+odoo.define('board.Oldfavorite_menu', function (require) {
 "use strict";
 
 var ActionManager = require('web.ActionManager');

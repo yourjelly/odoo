@@ -1504,10 +1504,9 @@
     </select>
 </t>
 
-<t t-name="FavoritesMenuGenerator">
-    <div t-if="widget.items.length !== 0" class="dropdown-divider o_generator_menu"/>
-    <button type="button" class="dropdown-item o_generator_menu o_add_favorite">Save Current Search</button>
-    <div t-if="widget.generatorMenuIsOpen" class="dropdown-item-text o_generator_menu">
+<div t-name="AddNewFavoriteMenu">
+    <button type="button" class="dropdown-item o_generator_menu o_add_favorite o_menu_header">Save Current Search</button>
+    <div t-if="widget.isOpen" class="dropdown-item-text o_generator_menu">
         <div role="menuitem" class="dropdown-item-text o_favorite_name">
             <input type="text" class="o_input"></input>
         </div>
@@ -1523,7 +1522,7 @@
             <button role="menuitem" type="button" class="btn btn-primary">Save</button>
         </div>
     </div>
-</t>
+</div>
 
 <div t-name="SearchView.OldFavoritesMenu" class="btn-group o_dropdown">
     <button t-attf-class="o_dropdown_toggler_btn btn btn-secondary dropdown-toggle#{widget.isMobile ? ' o-no-caret' : ''}" data-toggle="dropdown" aria-expanded="false" tabindex="-1" aria-label="Favorites" title="Favorites">
