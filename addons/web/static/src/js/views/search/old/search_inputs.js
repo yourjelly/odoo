@@ -813,21 +813,21 @@ var Filter = Input.extend(/** @lends instance.web.search.Filter# */{
  * find and instantiate its field widgets.
  */
 
-core.search_widgets_registry
-    .add('char', CharField)
-    .add('text', CharField)
-    .add('html', CharField)
-    .add('boolean', BooleanField)
-    .add('integer', IntegerField)
-    .add('id', IntegerField)
-    .add('float', FloatField)
-    .add('monetary', FloatField)
-    .add('selection', SelectionField)
-    .add('datetime', DateTimeField)
-    .add('date', DateField)
-    .add('many2one', ManyToOneField)
-    .add('many2many', CharField)
-    .add('one2many', CharField);
+// core.search_widgets_registry
+//     .add('char', CharField)
+//     .add('text', CharField)
+//     .add('html', CharField)
+//     .add('boolean', BooleanField)
+//     .add('integer', IntegerField)
+//     .add('id', IntegerField)
+//     .add('float', FloatField)
+//     .add('monetary', FloatField)
+//     .add('selection', SelectionField)
+//     .add('datetime', DateTimeField)
+//     .add('date', DateField)
+//     .add('many2one', ManyToOneField)
+//     .add('many2many', CharField)
+//     .add('one2many', CharField);
 
 
 return {
