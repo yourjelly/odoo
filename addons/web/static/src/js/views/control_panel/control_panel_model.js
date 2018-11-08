@@ -4,11 +4,11 @@ odoo.define('web.ControlPanelModel', function (require) {
 var Domain = require('web.Domain');
 var mvc = require('web.mvc');
 var pyUtils = require('web.py_utils');
-var searchViewParameters = require('web.searchViewParameters');
+var controlPanelViewParameters = require('web.controlPanelViewParameters');
 
-var DEFAULT_TIMERANGE = searchViewParameters.DEFAULT_TIMERANGE;
-var TIME_RANGE_OPTIONS = searchViewParameters.TIME_RANGE_OPTIONS;
-var COMPARISON_TIME_RANGE_OPTIONS = searchViewParameters.COMPARISON_TIME_RANGE_OPTIONS;
+var DEFAULT_TIMERANGE = controlPanelViewParameters.DEFAULT_TIMERANGE;
+var TIME_RANGE_OPTIONS = controlPanelViewParameters.TIME_RANGE_OPTIONS;
+var COMPARISON_TIME_RANGE_OPTIONS = controlPanelViewParameters.COMPARISON_TIME_RANGE_OPTIONS;
 
 var ControlPanelModel = mvc.Model.extend({
     init: function (parent) {

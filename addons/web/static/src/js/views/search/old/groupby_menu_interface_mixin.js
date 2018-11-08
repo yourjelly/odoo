@@ -2,7 +2,7 @@ odoo.define('web.GroupByMenuInterfaceMixin', function (require) {
 "use strict";
 
 var GroupByMenu = require('web.GroupByMenu');
-var searchViewParameters = require('web.searchViewParameters');
+var controlPanelViewParameters = require('web.controlPanelViewParameters');
 
 /**
  * The aim of this mixin is to facilitate the interaction between
@@ -93,7 +93,7 @@ var GroupByMenuInterfaceMixin = {
             };
             if (_.contains(['date', 'datetime'], field.type)) {
                 groupBy.hasOptions = true;
-                groupBy.options = searchViewParameters.INTERVAL_OPTIONS;
+                groupBy.options = controlPanelViewParameters.INTERVAL_OPTIONS;
                 groupBy.currentOptionId = groupByActivity && groupByActivity.interval ?
                                             groupByActivity.interval :
                                             false;
@@ -119,7 +119,7 @@ var GroupByMenuInterfaceMixin = {
         var currentOptionId = activeGroupBys.reduce(
             function (optionId, groupby) {
                 if (groupby.split(':')[0] === fieldName){
-                    optionId = groupby.split(':')[1] || searchViewParameters.DEFAULT_INTERVAL;
+                    optionId = groupby.split(':')[1] || controlPanelViewParameters.DEFAULT_INTERVAL;
                 }
                 return optionId;
             },

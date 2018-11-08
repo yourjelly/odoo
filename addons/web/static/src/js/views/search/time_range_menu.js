@@ -6,11 +6,11 @@ var config = require('web.config');
 // var Domain = require('web.Domain');
 // var oldTimeRangeMenuOptions = require('web.oldTimeRangeMenuOptions');
 var Widget = require('web.Widget');
-var searchViewParameters = require('web.searchViewParameters');
+var controlPanelViewParameters = require('web.controlPanelViewParameters');
 
-var DEFAULT_CONFIGURATION = searchViewParameters.DEFAULT_CONFIGURATION;
-var PERIOD_OPTIONS = searchViewParameters.PERIOD_OPTIONS;
-var COMPARISON_TIME_RANGE_OPTIONS = searchViewParameters.COMPARISON_TIME_RANGE_OPTIONS;
+var DEFAULT_CONFIGURATION = controlPanelViewParameters.DEFAULT_CONFIGURATION;
+var PERIOD_OPTIONS = controlPanelViewParameters.PERIOD_OPTIONS;
+var COMPARISON_TIME_RANGE_OPTIONS = controlPanelViewParameters.COMPARISON_TIME_RANGE_OPTIONS;
 
 // var _t = core._t;
 // var ComparisonOptions = oldTimeRangeMenuOptions.ComparisonOptions;

@@ -4,13 +4,13 @@ odoo.define('web.GroupByMenu', function (require) {
 var config = require('web.config');
 var core = require('web.core');
 var DropdownMenu = require('web.DropdownMenu');
-var searchViewParameters = require('web.searchViewParameters');
+var controlPanelViewParameters = require('web.controlPanelViewParameters');
 
 var QWeb = core.qweb;
 var _t = core._t;
 
-var DEFAULT_INTERVAL =searchViewParameters.DEFAULT_INTERVAL;
-var GROUPABLE_TYPES = searchViewParameters.GROUPABLE_TYPES;
+var DEFAULT_INTERVAL =controlPanelViewParameters.DEFAULT_INTERVAL;
+var GROUPABLE_TYPES = controlPanelViewParameters.GROUPABLE_TYPES;
 
 var GroupByMenu = DropdownMenu.extend({
     events: _.extend({}, DropdownMenu.prototype.events,
@@ -124,7 +124,7 @@ var GroupByMenu = DropdownMenu.extend({
         };
         if (_.contains(['date', 'datetime'], field.type)) {
             groupBy.hasOptions = true;
-            groupBy.options = searchViewParameters.INTERVAL_OPTIONS;
+            groupBy.options = controlPanelViewParameters.INTERVAL_OPTIONS;
             groupBy.defaultOptionId = DEFAULT_INTERVAL;
             groupBy.currentOptionId = false;
         }

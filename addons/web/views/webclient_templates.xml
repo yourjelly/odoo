@@ -247,7 +247,7 @@
         <script type="text/javascript" src="/web/static/src/js/views/search/groupby_menu.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/search/time_range_menu.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/search/favorites_menu.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/search/search_view_parameters.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/search/control_panel_view_parameters.js"></script>
 
         <script type="text/javascript" src="/web/static/src/js/views/search/old/search_view.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/search/old/search_view_mobile.js"></script>

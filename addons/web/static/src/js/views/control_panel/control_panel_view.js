@@ -67,13 +67,13 @@ var ControlPanelModel = require('web.ControlPanelModel');
 var ControlPanelRenderer = require('web.ControlPanelRenderer');
 var mvc = require('web.mvc');
 var pyUtils = require('web.py_utils');
-var searchViewParameters = require('web.searchViewParameters');
+var controlPanelViewParameters = require('web.controlPanelViewParameters');
 var viewUtils = require('web.viewUtils');
 
-var DEFAULT_INTERVAL = searchViewParameters.DEFAULT_INTERVAL;
-var DEFAULT_PERIOD = searchViewParameters.DEFAULT_PERIOD;
-var INTERVAL_OPTIONS = searchViewParameters.INTERVAL_OPTIONS;
-var PERIOD_OPTIONS = searchViewParameters.PERIOD_OPTIONS;
+var DEFAULT_INTERVAL = controlPanelViewParameters.DEFAULT_INTERVAL;
+var DEFAULT_PERIOD = controlPanelViewParameters.DEFAULT_PERIOD;
+var INTERVAL_OPTIONS = controlPanelViewParameters.INTERVAL_OPTIONS;
+var PERIOD_OPTIONS = controlPanelViewParameters.PERIOD_OPTIONS;
 
 var Factory = mvc.Factory;
 

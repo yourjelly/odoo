@@ -9,8 +9,8 @@ var createActionManager = testUtils.createActionManager;
 var patchDate = testUtils.mock.patchDate;
 var createView = testUtils.createView;
 
-var searchViewParameters = require('web.searchViewParameters');
-var PERIOD_OPTIONS = searchViewParameters.PERIOD_OPTIONS;
+var controlPanelViewParameters = require('web.controlPanelViewParameters');
+var PERIOD_OPTIONS = controlPanelViewParameters.PERIOD_OPTIONS;
 
 QUnit.module('Search View', {
     beforeEach: function () {

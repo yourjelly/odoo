@@ -3,9 +3,7 @@ odoo.define('web.search_groupby_menu_tests', function (require) {
 
 var GroupByMenu = require('web.GroupByMenu');
 var testUtils = require('web.test_utils');
-var searchViewParameters = require('web.searchViewParameters');
-
-
+var controlPanelViewParameters = require('web.controlPanelViewParameters');
 
 function createGroupByMenu(groupBys, fields, params) {
     params = params || {};
@@ -134,16 +132,16 @@ QUnit.module('GroupByMenu', {
                         assert.strictEqual(groupBy.fieldType, 'date');
                         assert.strictEqual(groupBy.type, 'groupBy');
                         assert.strictEqual(groupBy.hasOptions, true);
-                        assert.strictEqual(groupBy.options, searchViewParameters.INTERVAL_OPTIONS);
-                        assert.strictEqual(groupBy.defaultOptionId, searchViewParameters.DEFAULT_INTERVAL);
+                        assert.strictEqual(groupBy.options, controlPanelViewParameters.INTERVAL_OPTIONS);
+                        assert.strictEqual(groupBy.defaultOptionId, controlPanelViewParameters.DEFAULT_INTERVAL);
                         assert.strictEqual(groupBy.currentOptionId, false);
                         groupByMenu.update([{
                             description: 'Super Date',
                             groupNumber: 1,
                             isActive: true,
                             hasOptions: true,
-                            options: searchViewParameters.INTERVAL_OPTIONS,
-                            currentOptionId: searchViewParameters.DEFAULT_INTERVAL,
+                            options: controlPanelViewParameters.INTERVAL_OPTIONS,
+                            currentOptionId: controlPanelViewParameters.DEFAULT_INTERVAL,
                         }]);
                     },
                 },
