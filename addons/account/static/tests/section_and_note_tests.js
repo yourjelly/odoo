@@ -76,7 +76,7 @@ QUnit.module('section_and_note', {
             "should have a section class");
 
         // enter edit mode
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         // editing line should be textarea
         $tr0 = form.$('tr.o_data_row:eq(0)');

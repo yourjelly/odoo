@@ -304,7 +304,7 @@ QUnit.module('relational_fields', {
             config: {device: {isMobile: false}},
         });
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         var $buttons = form.$('.o_statusbar_status button:not(.dropdown-toggle)');
         assert.strictEqual($buttons.length, 3, "there should be 3 status");
@@ -333,7 +333,7 @@ QUnit.module('relational_fields', {
             config: {device: {isMobile: false}},
         });
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         assert.strictEqual(form.$('.o_statusbar_status:first .dropdown-menu button.disabled').length, 1, "should have 1 folded status");
         assert.strictEqual(form.$('.o_statusbar_status:last button.disabled').length, 1, "should have 1 status (other discarded)");
@@ -368,7 +368,7 @@ QUnit.module('relational_fields', {
             config: {device: {isMobile: false}},
         });
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         assert.strictEqual(form.$('.o_statusbar_status button.disabled').length, 3, "should have 3 status");
         assert.strictEqual(rpcCount, 1, "should have done 1 search_read rpc");
@@ -443,7 +443,7 @@ QUnit.module('relational_fields', {
         assert.strictEqual(form.$('.o_field_widget[name=color]').text(), 'Red',
             "should have rendered the selection field correctly");
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         assert.strictEqual(form.$('select').length, 3,
             "should have 3 select tag in dom");
@@ -648,7 +648,7 @@ QUnit.module('relational_fields', {
             res_id: 1
         });
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_field_widget[name=color]')[0].options.length, 3,
             "non required selection field must have 3 options 1 blank option and 2 value options");
         assert.strictEqual(form.$('.o_field_widget[name=feedback_value]')[0].options.length, 2,
@@ -741,7 +741,7 @@ QUnit.module('relational_fields', {
         assert.strictEqual(form.$('.badge:first()').data('color'), 2,
             'should have correctly fetched the color');
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         assert.strictEqual(form.$('.o_field_many2manytags .badge .dropdown-toggle').length, 2,
             "should still contain 2 tags in edit mode");
@@ -833,7 +833,7 @@ QUnit.module('relational_fields', {
         assert.ok(form.$('.badge:contains(gold)').length,
             'should have fetched and rendered gold partner tag');
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         // add an other existing tag
         var $input = form.$('.o_field_many2manytags input');
@@ -925,7 +925,7 @@ QUnit.module('relational_fields', {
 
         // Update the color in edit
         color = 6;
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         form.$('.badge:first() .dropdown-toggle').click();
         $('.o_colorpicker a[data-color="' + color + '"]').trigger('mousedown'); // choose color 6
         assert.strictEqual(form.$('.badge:first()').data('color'), color,
@@ -1091,7 +1091,7 @@ QUnit.module('relational_fields', {
             res_id: 1,
         });
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_field_many2manytags .badge').length, 1,
             "should contain one tag");
 
@@ -1355,7 +1355,7 @@ QUnit.module('relational_fields', {
         assert.strictEqual(form.$('.o_field_widget').text(), '',
             "field should be unset");
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         assert.strictEqual(form.$('.o_radio_input:checked').length, 0,
             "no value should be checked");
@@ -1367,7 +1367,7 @@ QUnit.module('relational_fields', {
         assert.strictEqual(form.$('.o_field_widget').text(), 'Black',
             "value should be 'Black'");
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         assert.strictEqual(form.$('.o_radio_input[data-index=1]:checked').length, 1,
             "'Black' should be checked");
@@ -1527,7 +1527,7 @@ QUnit.module('relational_fields', {
         assert.ok(form.$('div.o_field_widget div.custom-checkbox input').prop('disabled'),
             "the checkboxes should be disabled");
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         assert.notOk(form.$('div.o_field_widget div.custom-checkbox input').prop('disabled'),
             "the checkboxes should not be disabled");
@@ -1541,7 +1541,7 @@ QUnit.module('relational_fields', {
             "both checkboxes should be checked");
 
         // remove a m2m value by clinking on label
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         form.$('div.o_field_widget div.custom-checkbox > label').eq(0).click();
         form.$buttons.find('.o_form_button_save').click();
         assert.deepEqual(this.data.partner.records[0].timmy, [14],
@@ -1632,7 +1632,7 @@ QUnit.module('relational_fields', {
             "there should not be a Delete button (readonly)");
 
         // to edit mode
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('div.o_field_widget.oe_fileupload .o_attach').length, 1,
             "there should be an Add button");
         assert.strictEqual(form.$('div.o_field_widget.oe_fileupload .o_attach').text().trim(), "Pictures",
@@ -1691,7 +1691,7 @@ QUnit.module('relational_fields', {
             },
         });
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         form.$('.o_field_x2many_list_row_add a').click();
         var $dropdown = $('.modal .o_field_many2one input').autocomplete('widget');
         $('.modal input').val('new record').trigger('keydown');
@@ -1775,7 +1775,7 @@ QUnit.module('relational_fields', {
         });
 
         // current form
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         var $fieldRef = form.$('.o_field_widget.o_field_many2one[name=reference]');
         assert.equal($fieldRef.find('option:selected').text(), 'Product',
@@ -1855,7 +1855,7 @@ QUnit.module('relational_fields', {
                         "should contain a link");
         form.$('a.o_form_uri').click(); // click on the link in readonly mode (should trigger do_action)
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         assert.strictEqual(form.$('.o_field_widget').length, 2,
             "should contain two field widgets (selection and many2one)");
@@ -2082,7 +2082,7 @@ QUnit.module('relational_fields', {
             }
         });
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         var x2mList = form.$('.o_field_x2many_list[name=p]');
 
@@ -2156,7 +2156,7 @@ QUnit.module('relational_fields', {
         });
         assert.strictEqual(form.$('th').length, 2,
             "should be 2 columns in the one2many");
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         form.$('.o_field_many2one[name="product_id"] input').click();
         $('li.ui-menu-item a:contains(xpad)').trigger('mouseenter').click();
         assert.strictEqual(form.$('th').length, 1,
@@ -2204,7 +2204,7 @@ QUnit.module('relational_fields', {
             "should be only 1 column ('foo') in the one2many");
         assert.strictEqual(form.$('.o_list_view .o_data_row').length, 1, "should contain one row");
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         // add a new o2m record
         form.$('.o_field_x2many_list_row_add a').click();
@@ -2248,7 +2248,7 @@ QUnit.module('relational_fields', {
         });
         assert.strictEqual(form.$('th').length, 2,
             "should be 2 columns in the one2many");
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         form.$('.o_field_many2one[name="product_id"] input').click();
         $('li.ui-menu-item a:contains(xpad)').trigger('mouseenter').click();
         assert.strictEqual(form.$('th').length, 1,

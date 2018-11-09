@@ -46,7 +46,7 @@ QUnit.test('field html widget', function (assert) {
     assert.strictEqual(form.$('div[name=body]').attr('style'), 'height: 100px',
         "should have applied the style correctly");
 
-    form.$buttons.find('.o_form_button_edit').click();
+    testUtils.form.clickEdit(form);
 
     assert.strictEqual(form.$('.note-editable').html(), '<div class="field_body">yep</div>',
             "should have rendered the field correctly in edit");
@@ -78,7 +78,7 @@ QUnit.test('field html widget (with options inline-style)', function (assert) {
     assert.strictEqual(form.$('div[name=body]').attr('style'), 'height: 100px',
         "should have applied the style correctly");
 
-    form.$buttons.find('.o_form_button_edit').click();
+    testUtils.form.clickEdit(form);
 
     assert.strictEqual(form.$('.note-editable').html(), '<div class="field_body">yep</div>',
             "should have rendered the field correctly in edit");
@@ -119,7 +119,7 @@ QUnit.test('field html translatable', function (assert) {
     assert.strictEqual(form.$('.oe_form_field_html_text .o_field_translate').length, 0,
         "should not have a translate button in readonly mode");
 
-    form.$buttons.find('.o_form_button_edit').click();
+    testUtils.form.clickEdit(form);
     var $button = form.$('.oe_form_field_html_text .o_field_translate');
     assert.strictEqual($button.length, 1, "should have a translate button");
     $button.click();
@@ -155,7 +155,7 @@ QUnit.test('field html_frame widget', function (assert) {
 
     assert.strictEqual(form.$('iframe').length, 1, "should have rendered an iframe without crashing");
 
-    form.$buttons.find('.o_form_button_edit').click();
+    testUtils.form.clickEdit(form);
 
     assert.strictEqual(form.$('iframe').length, 1, "should have rendered an iframe without crashing");
 
@@ -255,7 +255,7 @@ QUnit.test('html_frame does not crash when saving in edit mode (editor not loade
         },
     });
 
-    form.$buttons.find('.o_form_button_edit').click();
+    testUtils.form.clickEdit(form);
     form.$('input').val('trululu').trigger('input');
     form.$buttons.find('.o_form_button_save').click(); // crash without editor fully loaded
 
@@ -307,7 +307,7 @@ QUnit.test('html_frame saving in edit mode (editor and content fully loaded)', f
         },
     });
 
-    form.$buttons.find('.o_form_button_edit').click();
+    testUtils.form.clickEdit(form);
     form.$('input').val('trululu').trigger('input');
     form.$buttons.find('.o_form_button_save').click();
 

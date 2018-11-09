@@ -933,6 +933,25 @@ function openDatepicker($datepickerEl) {
     $datepickerEl.find('.o_datepicker_input').trigger('focus.datetimepicker');
 }
 
+function clickEdit(form) {
+    form.$buttons.find('.o_form_button_edit').click();
+}
+
+/**
+ * @param {string} fieldName
+ * @param {string|number} value
+ * @param {string} [selector] css selector to restrict the search of the input
+ */
+function editInput(fieldName, value, selector) {
+    selector = `${selector || ''} input[name=${fieldName}]`;
+    var matches = document.querySelectorAll(selector);
+    if (matches.length != 1) {
+        throw new Error(`${selector} has been found ${matches.length} instead of 1`);
+    }
+    matches[0].value = value;
+    matches[0].dispatchEvent(new Event('input'));
+}
+
 // Loading static files cannot be properly simulated when their real content is
 // really needed. This is the case for static XML files so we load them here,
 // before starting the qunit test suite.
@@ -966,10 +985,10 @@ return $.when(
             // input(el/selector),
             // focusOut(el/selector),
         },
-        // form: {
-        //     clickEdit(form),
+        form: {
+            clickEdit: clickEdit,
         //     clickSave(form),
-        // },
+        },
         // modal: {
         //     clickPrimaryAction(),
         //     clickSave(),
@@ -978,15 +997,15 @@ return $.when(
         //     clickNext(widget, selector),
         //     clickPrevious(widget, selector),
         // },
-        // fields: {
+        fields: {
         //     many2one: {
         //         clickOpenRecord([fieldName]),
         //         clickOpenDropdown([fieldName]),
         //         clickMenuItem(text, [fieldname])
         //     },
-        //     editInput(fieldName, value, [cssselector]),
+            editInput: editInput,
         //     focusOut(fieldName),
-        // },
+        },
 
         createActionManager: createActionManager,
         createDebugManager: createDebugManager,

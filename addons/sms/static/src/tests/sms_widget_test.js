@@ -32,7 +32,7 @@ QUnit.module('fields', {
             data: this.data,
             arch: '<form><sheet><field name="message" widget="sms_widget"/></sheet></form>',
         });
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.ok(form.$('.o_sms_count').length, "Should have a sms counter");
         assert.strictEqual(form.$('.o_sms_count').text(), '0 chars, fits in 0 SMS (GSM7) ', 'Should be "0 chars, fits in 0 SMS (GSM7) " by default');
         // GSM-7

@@ -1223,7 +1223,7 @@ QUnit.module('Views', {
             res_id: 1,
         });
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.ok(form.$('tbody tr:first td:contains(Value 1)').length,
             "Value 1 should be first");
         assert.ok(form.$('tbody tr:eq(1) td:contains(Value 3)').length,
@@ -1274,7 +1274,7 @@ QUnit.module('Views', {
             res_id: 1,
         });
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.ok(form.$('tbody tr:first td:contains(Value 1)').length,
             "Value 1 should be first");
         assert.ok(form.$('tbody tr:eq(1) td:contains(Value 3)').length,

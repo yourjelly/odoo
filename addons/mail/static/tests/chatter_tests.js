@@ -217,7 +217,7 @@ QUnit.test('basic rendering', function (assert) {
     assert.ok(!form.$('.o_chatter_topbar .o_chatter_button_log_note').length,
         "log note button should not be available");
 
-    form.$buttons.find('.o_form_button_edit').click();
+    testUtils.form.clickEdit(form);
     assert.strictEqual(count, 0, "should have done no read_followers rpc as there are no followers");
     assert.strictEqual(unwanted_read_count, 0, "followers should only be fetched with read_followers route");
     form.destroy();
@@ -1030,7 +1030,7 @@ QUnit.test('chatter: post a message and switch in edit mode', function (assert) 
         "the message's body should be correct");
 
     // switch in edit mode
-    form.$buttons.find('.o_form_button_edit').click();
+    testUtils.form.clickEdit(form);
     assert.strictEqual(form.$('.o_thread_message').length, 1, "thread should contain a message");
     assert.ok(form.$('.o_thread_message:first() .o_thread_message_core').text().indexOf('My first message') >= 0,
         "the message's body should be correct");
@@ -1496,7 +1496,7 @@ QUnit.test('form activity widget: read RPCs', function (assert) {
     assert.strictEqual(form.$('.o_mail_activity .o_thread_message .o_activity_date').text(),
         'Today', "the activity should be today");
 
-    form.$buttons.find('.o_form_button_edit').click();
+    testUtils.form.clickEdit(form);
     form.$buttons.find('.o_form_button_save').click();
 
     assert.strictEqual(nbReads, 1, "should not have re-read the activities");

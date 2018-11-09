@@ -79,7 +79,7 @@ QUnit.module('basic_fields', {
             "should have proper tel prefix");
 
         // switch to edit mode and check the result
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('input[type="text"].o_field_widget').length, 1,
             "should have an int for the phone field");
         assert.strictEqual(form.$('input[type="text"].o_field_widget').val(), 'yop',

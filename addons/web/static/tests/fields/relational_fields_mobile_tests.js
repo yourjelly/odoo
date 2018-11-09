@@ -94,7 +94,7 @@ QUnit.module('relational_fields', {
         assert.strictEqual(form.$('.o_field_one2many .o-kanban-button-new').length, 0,
             '"Create" button should not be visible in readonly');
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         assert.strictEqual(form.$('.o_field_one2many .o-kanban-button-new').length, 1,
             '"Create" button should be visible in edit');

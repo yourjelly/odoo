@@ -206,7 +206,7 @@ QUnit.module('basic_fields', {
             "checkbox should be checked");
 
         // switch to edit mode and check the result
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_field_boolean input:checked').length, 1,
             "checkbox should still be checked");
 
@@ -221,7 +221,7 @@ QUnit.module('basic_fields', {
             "checkbox should still no longer be checked");
 
         // switch to edit mode and test the opposite change
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_field_boolean input:checked').length, 0,
             "checkbox should still be unchecked");
 
@@ -554,7 +554,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('.o_field_widget').first().text(), '0.000',
             'The value should be displayed properly.');
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('input').val(), '0.000',
             'The value should be rendered with correct precision.');
 
@@ -627,7 +627,7 @@ QUnit.module('basic_fields', {
             }
         });
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         form.$buttons.find('.o_form_button_save').click();
 
         assert.verifySteps(['read']); // should not have save as nothing changed
@@ -692,7 +692,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('.o_field_widget').first().text(), '$\u00a0-8.9',
             'The value should be displayed properly.');
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('input').val(), '-8.9',
             'The input should be rendered without the currency symbol.');
         assert.strictEqual(form.$('input').parent().children().first().text(), '$',
@@ -727,14 +727,14 @@ QUnit.module('basic_fields', {
             },
         });
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.ok(form.$('.o_field_widget')[0].hasAttribute('type'),
             'Float field with option type must have a type attribute.');
         assert.strictEqual(form.$('.o_field_widget').attr('type'), 'number',
             'Float field with option type must have a type attribute equals to "number".');
         form.$('input').val('123456.7890').trigger('input');
         form.$buttons.find('.o_form_button_save').click();
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_field_widget').val(), '123456.789',
             'Float value must be not formatted if input type is number.');
         form.$buttons.find('.o_form_button_save').click();
@@ -761,13 +761,13 @@ QUnit.module('basic_fields', {
             },
         });
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_field_widget').attr('type'), 'text',
             'Float field with option type must have a text type (default type).');
 
         form.$('input').val('123456.7890').trigger('input');
         form.$buttons.find('.o_form_button_save').click();
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_field_widget').val(), '123,456.8',
             'Float value must be formatted if input type isn\'t number.');
 
@@ -803,7 +803,7 @@ QUnit.module('basic_fields', {
             "should have proper mailto prefix");
 
         // switch to edit mode and check the result
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('input[type="text"].o_field_widget').length, 1,
             "should have an input for the email field");
         assert.strictEqual(form.$('input[type="text"].o_field_widget').val(), 'yop',
@@ -910,7 +910,7 @@ QUnit.module('basic_fields', {
             "the value should be displayed properly");
 
         // switch to edit mode and check the result
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('input[type="text"].o_field_widget').length, 1,
             "should have an input for the char field");
         assert.strictEqual(form.$('input[type="text"].o_field_widget').val(), 'yop',
@@ -1043,7 +1043,7 @@ QUnit.module('basic_fields', {
                 return this._super.apply(this, arguments);
             },
         });
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         var $button = form.$('input[type="text"].o_field_char + .o_field_translate');
         assert.strictEqual($button.length, 1, "should have a translate button");
         $button.click();
@@ -1125,7 +1125,7 @@ QUnit.module('basic_fields', {
         form.$buttons.find('.o_form_button_save').click();
 
         // edit mode
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         assert.strictEqual(form.$('input[name="foo"]').val(), 'abc', 'Foo value should have been trimmed');
         assert.strictEqual(form.$('input[name="foo2"]').val(), '  def  ', 'Foo2 value should not have been trimmed');
@@ -1270,7 +1270,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('.o_field_char').text(), "***",
             "password field value should be hidden with '*' in read mode");
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         assert.strictEqual(form.$('input.o_field_char').attr('type'), 'password',
             "password field input should be with type 'password' in edit mode");
@@ -1298,7 +1298,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('.o_field_char').text(), "",
             "password field value should be empty in read mode");
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         assert.strictEqual(form.$('input.o_field_char').attr('type'), 'password',
             "password field input should be with type 'password' in edit mode");
@@ -1337,7 +1337,7 @@ QUnit.module('basic_fields', {
             "the value should be displayed properly");
 
         // switch to edit mode and check the result
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('input[type="text"].o_field_widget').length, 1,
             "should have an input for the char field");
         assert.strictEqual(form.$('input[type="text"].o_field_widget').val(), 'yop',
@@ -1478,7 +1478,7 @@ QUnit.module('basic_fields', {
         assert.ok(form.$('.o_field_text').length, "should have a text area");
         assert.strictEqual(form.$('.o_field_text').text(), 'yop', 'should be "yop" in readonly');
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         var $textarea = form.$('textarea.o_field_text');
         assert.ok($textarea.length, "should have a text area");
@@ -1517,7 +1517,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual($field.outerHeight(), $field[0].scrollHeight,
             "text field should not have a scroll bar");
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         var $textarea = form.$('textarea:first');
 
@@ -1540,7 +1540,7 @@ QUnit.module('basic_fields', {
             res_id: 1,
         });
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         var $textarea = form.$('textarea:first');
 
@@ -1607,7 +1607,7 @@ QUnit.module('basic_fields', {
         // edit the form
         // trigger a textarea reset (through onchange) by clicking the box
         // then check there is no scroll bar
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         form.$('div[name="bar"] input').click();
 
@@ -1646,7 +1646,7 @@ QUnit.module('basic_fields', {
                 return this._super.apply(this, arguments);
             },
         });
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         var $button = form.$('textarea + .o_field_translate');
         assert.strictEqual($button.length, 1, "should have a translate button");
         $button.click();
@@ -1769,7 +1769,7 @@ QUnit.module('basic_fields', {
 
         form.$('a.o_field_widget[name="document"]').click();
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         assert.strictEqual(form.$('a.o_field_widget[name="document"] > .fa-download').length, 0,
             "the binary field should not be rendered as a downloadable link in edit");
@@ -2021,7 +2021,7 @@ QUnit.module('basic_fields', {
             def.resolve();
         };
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         form.$('textarea').val("1").trigger('input');
         assert.strictEqual(nbNotifyChanges, 0,
@@ -2557,7 +2557,7 @@ QUnit.module('basic_fields', {
 
         assert.strictEqual(form.$('span.o_row_handle').length, 2, "should have 2 handles");
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         assert.ok(form.$('td:first').hasClass('o_handle_cell'),
             "column widget should be displayed in css class");
@@ -2649,7 +2649,7 @@ QUnit.module('basic_fields', {
             res_id: 4,
         });
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         // open datepicker and select a date
         testUtils.dom.openDatepicker(form.$('.o_datepicker'));
@@ -2693,7 +2693,7 @@ QUnit.module('basic_fields', {
             'the date should be correctly displayed in readonly');
 
         // switch to edit mode
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_datepicker_input').val(), '02/03/2017',
             'the date should be correct in edit mode');
 
@@ -2740,7 +2740,7 @@ QUnit.module('basic_fields', {
             'the date should be correctly displayed in readonly');
 
         // switch to edit mode
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_datepicker_input').val(), '02/03/2017',
             'the date should be correct in edit mode');
 
@@ -2761,7 +2761,7 @@ QUnit.module('basic_fields', {
         });
 
         // switch to edit mode
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         // open datepicker and select another value
         testUtils.dom.openDatepicker(form.$('.o_datepicker'));
         $('.bootstrap-datetimepicker-widget .picker-switch').first().click();  // Month selection
@@ -2856,7 +2856,7 @@ QUnit.module('basic_fields', {
         });
 
         // switch to edit mode
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_datepicker_input').val(), '02/03/2017',
             'the date should be correct in edit mode');
 
@@ -2933,7 +2933,7 @@ QUnit.module('basic_fields', {
             'the datetime should be correctly displayed in readonly');
 
         // switch to edit mode
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_datepicker_input').val(), expectedDateString,
             'the datetime should be correct in edit mode');
         // select 22 February at 8:23:33
@@ -3112,7 +3112,7 @@ QUnit.module('basic_fields', {
         });
 
         // switch to edit mode
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_datepicker_input').val(), '02/08/2017 12:00:00',
             'the date time should be correct in edit mode');
 
@@ -3267,7 +3267,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('.o_field_widget').first().text(), '$\u00a09.10',
             'The value should be displayed properly.');
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('input').val(), '9.10',
             'The input should be rendered without the currency symbol.');
         assert.strictEqual(form.$('input').parent().children().first().text(), '$',
@@ -3308,7 +3308,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('.o_field_widget').first().text(), '0.00\u00a0€',
             'The value should be displayed properly.');
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('input').first().val(), '0.00',
             'The input should be rendered without the currency symbol.');
         assert.strictEqual(form.$('input').parent().children().eq(1).text(), '€',
@@ -3365,7 +3365,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('.o_field_widget').first().text(), '99.1234\u00a0Bs.F',
             'The value should be displayed properly.');
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('input').first().val(), '99.1234',
             'The input should be rendered without the currency symbol.');
         assert.strictEqual(form.$('input').parent().children().eq(1).text(), 'Bs.F',
@@ -3474,7 +3474,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('.o_field_monetary').first().next().html(), "$&nbsp;4.20",
             "readonly value should contain the currency");
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         assert.strictEqual(form.$('.o_field_monetary > input').val(), "9.10",
             "input value in edition should only contain the value, without the currency");
@@ -3680,7 +3680,7 @@ QUnit.module('basic_fields', {
         assert.ok(!form.$('.o_field_widget').hasClass('o_field_empty'),
             'Integer field should be considered set for value 0.');
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('input').val(), '0',
             'The value should be rendered correctly in edit mode.');
 
@@ -3763,7 +3763,7 @@ QUnit.module('basic_fields', {
             },
         });
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.ok(form.$('.o_field_widget')[0].hasAttribute('type'),
             'Integer field with option type must have a type attribute.');
         assert.strictEqual(form.$('.o_field_widget').attr('type'), 'number',
@@ -3771,7 +3771,7 @@ QUnit.module('basic_fields', {
 
         form.$('input').val('1234567890').trigger('input');
         form.$buttons.find('.o_form_button_save').click();
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_field_widget').val(), '1234567890',
             'Integer value must be not formatted if input type is number.');
         form.$buttons.find('.o_form_button_save').click();
@@ -3798,13 +3798,13 @@ QUnit.module('basic_fields', {
             },
         });
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_field_widget').attr('type'), 'text',
             'Integer field without option type must have a text type (default type).');
 
         form.$('input').val('1234567890').trigger('input');
         form.$buttons.find('.o_form_button_save').click();
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_field_widget').val(), '1,234,567,890',
             'Integer value must be formatted if input type isn\'t number.');
 
@@ -3840,7 +3840,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('.o_field_widget').first().text(), '09:06',
             'The formatted time value should be displayed properly.');
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('input').val(), '09:06',
             'The value should be rendered correctly in the input.');
 
@@ -3882,7 +3882,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('.o_field_widget').first().text(), '4.55', // 9.1 / 0.5
             'The formatted value should be displayed properly.');
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('input').val(), '4.55',
             'The value should be rendered correctly in the input.');
 
@@ -3921,7 +3921,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('.o_field_widget').first().text(), '0.056',
             'The formatted time value should be displayed properly.');
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         assert.strictEqual(form.$('button.o_field_float_toggle').text(), '0.056',
             'The value should be rendered correctly on the button.');
@@ -3971,7 +3971,7 @@ QUnit.module('basic_fields', {
             "value should be displayed properly");
 
         // switch to edit mode and check the result
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('input[type="text"].o_field_widget').length, 1,
             "should have an input for the phone field");
         assert.strictEqual(form.$('input[type="text"].o_field_widget').val(), 'yop',
@@ -4128,7 +4128,7 @@ QUnit.module('basic_fields', {
         // occurs in a setTimeout after 200ms so it's not trivial to test it here.
 
         // switch to edit mode and check the result
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star').length, 2,
             "should still have two stars");
         assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.fa-star').length, 1,
@@ -4146,7 +4146,7 @@ QUnit.module('basic_fields', {
             "should still have one empty star since the value is the second value");
 
         // switch to edit mode to check that the new value was properly written
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star').length, 2,
             "should still have two stars");
         assert.strictEqual(form.$('.o_field_widget.o_priority').find('a.o_priority_star.fa-star').length, 1,
@@ -4318,7 +4318,7 @@ QUnit.module('basic_fields', {
             "should have one grey status since selection is the first, normal state");
 
         // switch to edit mode and check the result
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.dropdown-menu.state:visible').length, 0,
             "there should still not be a dropdown");
         assert.strictEqual(form.$('.o_field_widget.o_selection > a span.o_status.o_status_red').length, 0,
@@ -4532,7 +4532,7 @@ QUnit.module('basic_fields', {
             'the label should say "Add to Favorites"');
 
         // switch to edit mode
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_field_widget.o_favorite > a i.fa.fa-star-o').length, 1,
             'should not be favorite');
         assert.strictEqual(form.$('.o_field_widget.o_favorite > a').text(), ' Add to Favorites',
@@ -4619,7 +4619,7 @@ QUnit.module('basic_fields', {
             "the label should say 'Blocked' since this is the label value for that state");
 
         // // switch to edit mode and check the result
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_field_widget.badge.badge-warning').length, 1,
             "should have a warning status label since selection is the second, blocked state");
         assert.strictEqual(form.$('.o_field_widget.badge.badge-secondary').length, 0,
@@ -4776,7 +4776,7 @@ QUnit.module('basic_fields', {
             'int_field', "should have 'int_field' as text");
 
         // switch to edit mode and check the result
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.oe_stat_button .o_field_widget.o_stat_info').length, 1,
             "should still have one stat button");
         assert.strictEqual(form.$('.oe_stat_button .o_field_widget.o_stat_info .o_stat_value').text(),
@@ -4828,7 +4828,7 @@ QUnit.module('basic_fields', {
             'yop', "should have 'yop' as text, since it is the value of field foo");
 
         // switch to edit mode and check the result
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.oe_stat_button .o_field_widget.o_stat_info').length, 1,
             "should still have one stat button");
         assert.strictEqual(form.$('.oe_stat_button .o_field_widget.o_stat_info .o_stat_value').text(),
@@ -4879,7 +4879,7 @@ QUnit.module('basic_fields', {
             '', "should not have any label");
 
         // switch to edit mode and check the result
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.oe_stat_button .o_field_widget.o_stat_info').length, 1,
             "should still have one stat button");
         assert.strictEqual(form.$('.oe_stat_button .o_field_widget.o_stat_info .o_stat_value').text(),
@@ -4929,7 +4929,7 @@ QUnit.module('basic_fields', {
             'transform: rotate(36deg);'), "right mask should be rotated from 360*(10/100) = 36 degrees");
 
         // switch to edit mode and check the result
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_field_percent_pie.o_field_widget .o_pie').length, 1,
             "should have a pie chart");
         assert.strictEqual(form.$('.o_field_percent_pie.o_field_widget .o_pie .o_pie_value').text(),
@@ -4980,7 +4980,7 @@ QUnit.module('basic_fields', {
             "right mask should be hidden since the value > 50%");
 
         // switch to edit mode and check the result
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         assert.strictEqual(form.$('.o_field_percent_pie.o_field_widget .o_pie').length, 1,
             "should have a pie chart");
         assert.strictEqual(form.$('.o_field_percent_pie.o_field_widget .o_pie .o_pie_value').text(),
@@ -5102,7 +5102,7 @@ QUnit.module('basic_fields', {
                 '</form>',
             res_id: 1,
         });
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         // As the domain is empty, there should be a button to add the first
         // domain part
@@ -5176,7 +5176,7 @@ QUnit.module('basic_fields', {
                 '</form>',
             res_id: 1,
         });
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         // As the domain is equal to [["id", "=", 1]] there should be a field
         // selector to change this
@@ -5301,7 +5301,7 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('.o_field_widget[name=foo]:not(.o_field_empty)').length, 1,
             "there should be a domain field, not considered empty");
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
 
         var $warning = form.$('.o_field_widget[name=foo] .text-warning');
         assert.strictEqual($warning.length, 0, "should not display that the domain is invalid");

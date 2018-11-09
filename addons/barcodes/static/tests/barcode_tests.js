@@ -250,7 +250,7 @@ QUnit.test('widget field_float_scannable', function (assert) {
     assert.strictEqual(form.$('.o_field_widget[name=int_field]').text(), '4',
         "should display the correct value in readonly");
 
-    form.$buttons.find('.o_form_button_edit').click();
+    testUtils.form.clickEdit(form);
 
     assert.strictEqual(form.$('.o_field_widget[name=int_field]').val(), '4',
         "should display the correct value in edit");

@@ -329,7 +329,7 @@ QUnit.module('Views', {
             },
         });
 
-        form.$buttons.find('.o_form_button_edit').click();
+        testUtils.form.clickEdit(form);
         form.$('.o_field_x2many_list_row_add a').click();
         form.$('.o_field_widget .o_field_many2one[name=instrument] input').click();
         $('ul.ui-autocomplete.ui-front.ui-menu.ui-widget.ui-widget-content li.o_m2o_dropdown_option').first().click();
