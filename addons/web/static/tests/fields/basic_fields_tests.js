@@ -18,6 +18,9 @@ var DebouncedField = basicFields.DebouncedField;
 var JournalDashboardGraph = basicFields.JournalDashboardGraph;
 var _t = core._t;
 
+var DOM = testUtils.DOM;
+var mock = testUtils.mock;
+
 QUnit.module('fields', {}, function () {
 
 QUnit.module('basic_fields', {
@@ -328,7 +331,6 @@ QUnit.module('basic_fields', {
 
     QUnit.test('use custom terminology in form view', function (assert) {
         assert.expect(2);
-
         var terminology = {
             string_true: "Production Environment",
             hover_true: "Switch to test environment",
@@ -336,7 +338,7 @@ QUnit.module('basic_fields', {
             hover_false: "Switch to production environment"
         };
         var form = createView({
-            View: FormView,
+            view: 'form',
             model: 'partner',
             data: this.data,
             arch: '<form>' +
@@ -350,9 +352,9 @@ QUnit.module('basic_fields', {
             res_id: 2,
         });
 
-        assert.strictEqual(form.$('.o_stat_text.o_not_hover:contains(Production Environment)').length, 1,
+        assert.containsOnce(form, '.o_stat_text.o_not_hover:contains(Production Environment)',
             "button should contain correct string");
-        assert.strictEqual(form.$('.o_stat_text.o_hover:contains(Switch to test environment)').length, 1,
+        assert.containsOnce(form, '.o_stat_text.o_hover:contains(Switch to test environment)',
             "button should display correct string when hovering");
         form.destroy();
     });

@@ -948,26 +948,68 @@ return $.when(
         QUnit.start();
     }, 0);
     return {
-        addMockEnvironment: addMockEnvironment,
+        mock: {
+            addMockEnvironment: addMockEnvironment,
+            intercept: intercept,
+            patch: patch,
+            patchDate: patchDate,
+            unpatch: unpatch,
+            fieldsViewGet: fieldsViewGet,
+
+        },
+        DOM: {
+            removeSrcAttribute: removeSrcAttribute,
+            triggerKeypressEvent: triggerKeypressEvent,
+            triggerMouseEvent: triggerMouseEvent,
+            triggerPositionalMouseEvent: triggerPositionalMouseEvent,
+            dragAndDrop: dragAndDrop,
+            openDatepicker: openDatepicker,
+            click(el/selector),
+            input(el/selector),
+            focusOut(el/selector),
+        },
+        form: {
+            clickEdit(form),
+            clickSave(form),
+        },
+        modal: {
+            clickPrimaryAction(),
+            clickSave(),
+        },
+        pager: {
+            clickNext(widget, selector),
+            clickPrevious(widget, selector),
+        },
+        fields: {
+            many2one: {
+                clickOpenRecord([fieldName]),
+                clickOpenDropdown([fieldName]),
+                clickMenuItem(text, [fieldname])
+            },
+            editInput(fieldName, value, [cssselector]),
+            focusOut(fieldName),
+        },
+
         createActionManager: createActionManager,
         createDebugManager: createDebugManager,
         createAsyncView: createAsyncView,
+        createView: createView,
         createModel: createModel,
         createParent: createParent,
-        createView: createView,
-        dragAndDrop: dragAndDrop,
-        fieldsViewGet: fieldsViewGet,
-        intercept: intercept,
-        observe: observe,
-        openDatepicker: openDatepicker,
-        patch: patch,
-        patchDate: patchDate,
-        removeSrcAttribute: removeSrcAttribute,
-        triggerKeypressEvent: triggerKeypressEvent,
-        triggerMouseEvent: triggerMouseEvent,
-        triggerPositionalMouseEvent: triggerPositionalMouseEvent,
-        unpatch: unpatch,
     };
 });
 
 });
+
+//
+
+assert.containsOnce(widget, selector, [msg]) // priority...
+assert.containsOnce($el, selector, [msg])
+assert.containsOnce(el, selector, [msg])
+assert.containsOnce(selector, [msg])
+
+assert.containsN(widget, selector, n, [msg]) // priority...
+assert.containsN($el, selector, n, [msg])
+assert.containsN(el, selector, n, [msg])
+assert.containsN(selector, n, [msg])
+
