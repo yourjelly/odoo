@@ -1,26 +1,46 @@
 odoo.define('web.qunit_asserts', function (require) {
-    "use strict"
+    "use strict";
 
     var Widget = require('web.Widget');
 
-    assert.containsOnce(widget, selector, [msg]) // priority...
-    assert.containsOnce($el, selector, [msg])
-    assert.containsOnce(el, selector, [msg])
-    assert.containsOnce(selector, [msg])
-
-
     /**
-     * [containsOnce description]
-     * @param {[type]} widget [description]
-     * @param {[type]} selector [description]
-     * @param {[type]} msg [description]
-     * @returns {[type]} [description]
+     *
+     * assert.containsOnce(selector, widget, [msg]) // priority...
+     * assert.containsOnce(selector, $el, [msg])
+     * assert.containsOnce(selector, el, [msg])
+     * assert.containsOnce(selector, [msg])
      */
-    assert.containsOnce = function (w, s, m) {
-        var widget = w instanceof Widget ? w : null;
-        var selector = (!w && typeof w == 'string') ? w : null;
-    }
+    QUnit.assert.containsN = function (selector, n, w, message) {
+        var widget, $el, el;
 
+        if (w instanceof Widget) {
+            widget = w;
+        } else if (typeof w === 'string') {
+            message = w;
+        } else if (typeof w === Array) {
+            $el = w;
+        } else {
+            el = w;
+        }
+
+        var matches;
+        if (widget) {
+            matches = widget.$(selector);
+        } else if ($el) {
+            matches = $el.find(selector);
+        } else if (el) {
+            matches = el.querySelectorAll(selector);
+        }
+        message = message || `selector ${selector} should have exactly 1 match`;
+        QUnit.assert.strictEqual(matches.length, n, message);
+    };
+    QUnit.assert.containsOnce = function (selector, w, message) {
+        QUnit.assert.containsN(selector, 1, w, message);
+    };
+
+    QUnit.assert.containsNone = function (selector, w, message) {
+        QUnit.assert.containsN(selector, 0, w, message);
+    };
 
 
 

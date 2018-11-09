@@ -109,7 +109,7 @@ QUnit.module('Views', {
 
     QUnit.module('FormView');
 
-    QUnit.test('simple form rendering', function (assert) {
+    QUnit.only('simple form rendering', function (assert) {
         assert.expect(12);
 
         var form = createView({
@@ -144,34 +144,29 @@ QUnit.module('Views', {
                 '</form>',
             res_id: 2,
         });
-        assert.strictEqual(form.$('div.test').length, 1,
-                        "should contain a div with some html");
+
+
+        assert.containsOnce('div.test', form);
         assert.strictEqual(form.$('div.test').css('opacity'), "0.5",
                         "should keep the inline style on html elements");
-        assert.strictEqual(form.$('label:contains(Foo)').length, 1,
-                        "should contain label Foo");
-        assert.strictEqual(form.$('span:contains(blip)').length, 1,
-                        "should contain span with field value");
+        assert.containsOnce('label:contains(Foo)', form);
+        assert.containsOnce('span:contains(blip)', form);
+
 
         assert.strictEqual(form.$('.o_group .o_group:first').attr('style'), 'background-color: red',
-                        "should apply style attribute on groups");
+        "should apply style attribute on groups");
         assert.strictEqual(form.$('.o_field_widget[name=foo]').attr('style'), 'color: blue',
-                        "should apply style attribute on fields");
+        "should apply style attribute on fields");
 
-        assert.strictEqual(form.$('label:contains(something_id)').length, 0,
-                        "should not contain f3 string description");
-        assert.strictEqual(form.$('label:contains(f3_description)').length, 1,
-                        "should contain custom f3 string description");
-        assert.strictEqual(form.$('div.o_field_one2many table').length, 1,
-                        "should render a one2many relation");
-
-        assert.strictEqual(form.$('tbody td:not(.o_list_record_selector) .custom-checkbox input:checked').length, 1,
-                        "1 checkboxes should be checked");
+        assert.containsNone('label:contains(something_id)', form);
+        assert.containsOnce('label:contains(f3_description)', form);
+        assert.containsOnce('div.o_field_one2many table', form);
+        assert.containsOnce('tbody td:not(.o_list_record_selector) .custom-checkbox input:checked', form);
 
         assert.strictEqual(form.get('title'), "second record",
-                        "title should be display_name of record");
-        assert.strictEqual(form.$('label.o_form_label_empty:contains(timmy)').length, 0,
-                        "the many2many label shouldn't be marked as empty");
+        "title should be display_name of record");
+
+        assert.containsNone('label.o_form_label_empty:contains(timmy)', form);
         form.destroy();
     });
 
